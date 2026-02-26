@@ -34,6 +34,7 @@ public class SetEmbeddingConfigRequestDto
     /// <summary>
     /// The embedding provider configuration parameters.
     /// </summary>
+    /// <example>{"type": 1, "key": "sk-example-key-123"}</example>
     [FromBody]
     public required SetEmbeddingConfigRequestBody Body { get; init; }
 }

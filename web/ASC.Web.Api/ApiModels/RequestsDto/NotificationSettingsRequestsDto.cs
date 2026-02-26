@@ -39,6 +39,7 @@ public class NotificationSettingsRequestsDto
     /// <summary>
     /// The notification to be configured.
     /// </summary>
+    /// <example>0</example>
     public required NotificationType Type { get; set; }
 
     /// <summary>
@@ -57,6 +58,7 @@ public class NotificationTypeRequestsDto
     /// <summary>
     /// The type of notification to query, specified in the route.
     /// </summary>
+    /// <example>0</example>
     [FromRoute(Name = "type")]
     public required NotificationType Type { get; set; }
 }

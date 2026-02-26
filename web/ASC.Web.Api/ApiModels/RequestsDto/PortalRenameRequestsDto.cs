@@ -39,5 +39,6 @@ public class PortalRenameRequestsDto
     /// <summary>
     /// The portal name or identifier.
     /// </summary>
+    /// <example>my-portal</example>
     public required string Alias { get; set; }
 }

@@ -34,6 +34,7 @@ public class DeleteServersRequestDto
     /// <summary>
     /// Server identifiers to delete.
     /// </summary>
+    /// <example>{"servers": ["00000000-0000-0000-0000-000000000000"]}</example>
     [FromBody]
     public required DeleteServersRequestBody Body { get; init; }
 }

@@ -42,10 +42,7 @@ public class ExportMessageRequestDto<T>
     /// <summary>
     /// The export parameters including destination folder and file title.
     /// </summary>
-
-    /// <summary>
-    /// Represents the body of the request for exporting a message.
-    /// </summary>
+    /// <example>{"folderId": 123, "title": "Message Export"}</example>
     [FromBody]
     public required ExportMessageRequestBody<T> Body { get; init; }
 }

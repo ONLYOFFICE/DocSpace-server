@@ -41,6 +41,7 @@ public class UpdateProviderRequestDto
     /// <summary>
     /// The AI provider configuration parameters to update.
     /// </summary>
+    /// <example>{"title": "Updated Provider", "url": "https://api.openai.com/v1", "key": "sk-example-key-123"}</example>
     [FromBody]
     public required UpdateProviderBody Body { get; set; }
 }

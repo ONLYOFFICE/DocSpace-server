@@ -41,6 +41,7 @@ public class AddRoomServersRequestDto
     /// <summary>
     /// Server identifiers to assign.
     /// </summary>
+    /// <example>{"servers": ["00000000-0000-0000-0000-000000000000"]}</example>
     [FromBody]
     public required AddRoomServersRequestBody Body { get; init; }
 }

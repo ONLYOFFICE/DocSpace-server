@@ -51,36 +51,43 @@ public class QuotaDto
     /// <summary>
     /// The quota ID.
     /// </summary>
+    /// <example>1</example>
     public required int Id { get; set; }
 
     /// <summary>
     /// The quota title.
     /// </summary>
+    /// <example>Basic Plan</example>
     public required string Title { get; set; }
 
     /// <summary>
     /// The price parameters.
     /// </summary>
+    /// <example>{"value": 99.99, "currencySymbol": "$", "iSOCurrencySymbol": "USD"}</example>
     public required PriceDto Price { get; set; }
 
     /// <summary>
     /// Specifies if the quota is nonprofit or not.
     /// </summary>
+    /// <example>false</example>
     public required bool NonProfit { get; set; }
 
     /// <summary>
     /// Specifies if the quota is free or not.
     /// </summary>
+    /// <example>true</example>
     public required bool Free { get; set; }
 
     /// <summary>
     /// Specifies if the quota is trial or not.
     /// </summary>
+    /// <example>false</example>
     public required bool Trial { get; set; }
 
     /// <summary>
     /// The list of tenant quota features.
     /// </summary>
+    /// <example>[{"id": "00000000-0000-0000-0000-000000000001", "title": "Premium Storage"}]</example>
     public required IEnumerable<TenantQuotaFeatureDto> Features { get; set; }
 
     /// <summary>
@@ -207,6 +214,7 @@ public class FeatureUsedDto
     /// <summary>
     /// The used space value.
     /// </summary>
+    /// <example>{}</example>
     public required object Value { get; set; }
 
     /// <summary>

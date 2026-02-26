@@ -40,6 +40,7 @@ public class WebItemSecurityRequestsDto
     /// <summary>
     /// The module ID.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     public required string Id { get; set; }
 
     /// <summary>

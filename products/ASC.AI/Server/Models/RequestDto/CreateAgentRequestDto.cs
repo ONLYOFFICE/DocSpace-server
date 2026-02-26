@@ -61,16 +61,19 @@ public class CreateAgentRequestDto
     /// <summary>
     /// The room data lifetime information.
     /// </summary>
+    /// <example>{"days": 30, "deleteAfter": true}</example>
     public RoomDataLifetimeDto? Lifetime { get; set; }
 
     /// <summary>
     /// The watermark settings.
     /// </summary>
+    /// <example>{"enabled": true, "text": "Confidential"}</example>
     public WatermarkRequestDto? Watermark { get; set; }
 
     /// <summary>
     /// The room logo.
     /// </summary>
+    /// <example>{"tmpFile": "logo.png", "x": 0, "y": 0, "width": 100, "height": 100}</example>
     public LogoRequest? Logo { get; set; }
 
     /// <summary>
@@ -102,12 +105,14 @@ public class CreateAgentRequestDto
     /// <summary>
     /// The collection of sharing parameters.
     /// </summary>
+    /// <example>[{"shareId": "user@example.com", "access": 1}]</example>
     [MaxEmailInvitations]
     public IEnumerable<FileShareParams>? Share { get; set; }
         
     /// <summary>
     /// The chat settings.
     /// </summary>
+    /// <example>{"model": "gpt-4", "temperature": 0.7}</example>
     public required ChatSettings ChatSettings { get; set; }
 
     /// <summary>

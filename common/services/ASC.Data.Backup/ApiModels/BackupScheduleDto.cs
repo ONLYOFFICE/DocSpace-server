@@ -43,6 +43,7 @@ public class BackupScheduleDto
     /// <summary>
     /// The backup storage parameters.
     /// </summary>
+    /// <example>[{"key": "path", "value": "/backup"}]</example>
     public IEnumerable<ItemKeyValuePair<object, object>> StorageParams { get; set; }
 
     /// <summary>
@@ -54,6 +55,7 @@ public class BackupScheduleDto
     /// <summary>
     /// The backup cron parameters.
     /// </summary>
+    /// <example>{"period": "EveryDay", "hour": 2, "day": 0}</example>
     public Cron CronParams { get; set; }
 
     /// <summary>

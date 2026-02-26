@@ -42,12 +42,14 @@ public class WizardRequestsDto
     /// <summary>
     /// The user's email address for authentication and communication.
     /// </summary>
+    /// <example>user@example.com</example>
     [EmailAddress]
     public required string Email { get; set; }
 
     /// <summary>
     /// The hashed representation of the user's password.
     /// </summary>
+    /// <example>2DYmIoA/aYKEksFocEf6uw==</example>
     public required string PasswordHash { get; set; }
 
     /// <summary>

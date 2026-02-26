@@ -41,6 +41,7 @@ public class SetServerStatusRequestDto
     /// <summary>
     /// New status value.
     /// </summary>
+    /// <example>{"enabled": true}</example>
     [FromBody]
     public required SetServerStatusRequestBody Body { get; set; }
 }

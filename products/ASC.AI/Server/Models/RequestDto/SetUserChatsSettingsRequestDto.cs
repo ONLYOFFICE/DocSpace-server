@@ -41,6 +41,7 @@ public class SetUserChatsSettingsRequestDto
     /// <summary>
     /// The chat settings to apply.
     /// </summary>
+    /// <example>{"webSearchEnabled": true}</example>
     [FromBody]
     public required SetUserChatSettingsRequestBody Body { get; init; }
 }

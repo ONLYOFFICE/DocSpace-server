@@ -60,6 +60,7 @@ public class WebPluginRequestsDto
     /// <summary>
     /// The configuration settings for the web plugin instance.
     /// </summary>
+    /// <example>{"enabled": true, "settings": "{\"theme\":\"dark\"}"}</example>
     [FromBody]
     public required WebPluginRequests WebPlugin { get; set; }
 }

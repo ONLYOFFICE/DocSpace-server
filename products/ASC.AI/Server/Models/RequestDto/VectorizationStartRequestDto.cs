@@ -37,6 +37,7 @@ public class VectorizationStartRequestDto
     /// <remarks>
     /// The body contains data required to initiate a vectorization task, including a collection of file IDs.
     /// </remarks>
+    /// <example>{"files": [101, 102, 103]}</example>
     [FromBody]
     public required VectorizationStartRequestBody Body { get; init; }
 }

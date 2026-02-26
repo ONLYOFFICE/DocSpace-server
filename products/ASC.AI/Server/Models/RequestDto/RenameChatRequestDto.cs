@@ -41,6 +41,7 @@ public class RenameChatRequestDto
     /// <summary>
     /// The new chat name.
     /// </summary>
+    /// <example>{"name": "Project Discussion"}</example>
     [FromBody]
     public required RenameChatBody Body { get; set; }
 }

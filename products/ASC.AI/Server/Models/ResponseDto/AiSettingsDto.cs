@@ -100,16 +100,19 @@ public class AiSettingsDto
     /// <summary>
     /// The tool name used by the AI to launch docx creation in the editor.
     /// </summary>
+    /// <example>generate_docx</example>
     public required string GenerateDocxToolName { get; init; }
     
     /// <summary>
     /// The tool name used by the AI assistant to launch form creation in the editor.
     /// </summary>
+    /// <example>generate_form</example>
     public required string GenerateFormToolName { get; init; }
     
     /// <summary>
     /// The tool name used by the AI assistant to launch presentation creation in the editor.
     /// </summary>
+    /// <example>generate_presentation</example>
     public required string GeneratePresentationToolName { get; init; }
 }
 

@@ -134,6 +134,7 @@ public class ChangeWalletServiceStateRequestDto
     /// <summary>
     /// The wallet service type.
     /// </summary>
+    /// <example>Storage</example>
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public TenantWalletService Service { get; set; }
 

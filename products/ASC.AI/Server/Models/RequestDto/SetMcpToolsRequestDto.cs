@@ -42,8 +42,6 @@ public class SetMcpToolsRequestDto
     /// <summary>
     /// Unique identifier of the MCP server whose tools are being configured.
     /// </summary>
-
-    /// <summary>The MCP server ID.</summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "serverId")]
     public Guid ServerId { get; init; }
@@ -51,6 +49,7 @@ public class SetMcpToolsRequestDto
     /// <summary>
     /// Tool configuration parameters.
     /// </summary>
+    /// <example>{"disabledTools": ["tool1", "tool2"]}</example>
     [FromBody]
     public required SetMcpToolsRequestBody Body { get; init; }
 }

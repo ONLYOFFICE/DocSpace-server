@@ -42,6 +42,7 @@ public class InvitationLinkDto
     /// <summary>
     /// The type of employee role for the invitation link.
     /// </summary>
+    /// <example>0</example>
     [JsonConverter(typeof(JsonNumberEnumConverter<EmployeeType>))]
     public required EmployeeType EmployeeType { get; set; }
 

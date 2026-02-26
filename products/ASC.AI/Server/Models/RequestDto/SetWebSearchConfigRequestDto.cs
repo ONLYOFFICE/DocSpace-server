@@ -34,6 +34,7 @@ public class SetWebSearchConfigRequestDto
     /// <summary>
     /// The web search configuration parameters.
     /// </summary>
+    /// <example>{"enabled": true, "type": 1, "key": "search-api-key-123"}</example>
     [FromBody]
     public required SetWebSearchSettingsRequestBody Body { get; init; }
 }

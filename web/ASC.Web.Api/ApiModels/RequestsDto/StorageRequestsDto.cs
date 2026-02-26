@@ -39,6 +39,7 @@ public class StorageRequestsDto
     /// <summary>
     /// The name for the storage module to be configured.
     /// </summary>
+    /// <example>default</example>
     public required string Module { get; set; }
 
     /// <summary>

@@ -34,6 +34,7 @@ public class ConfirmDto
     /// <summary>
     /// The confirmation result.
     /// </summary>
+    /// <example>0</example>
     public required ValidationResult Result { get; set; }
 
     /// <summary>

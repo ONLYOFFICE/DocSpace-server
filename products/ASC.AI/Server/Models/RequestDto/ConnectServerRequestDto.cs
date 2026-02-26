@@ -41,7 +41,6 @@ public class ConnectServerRequestDto
     /// <summary>
     /// Unique identifier of the MCP server to connect.
     /// </summary>
-
     /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "serverId")]
     public Guid ServerId { get; init; }
@@ -50,6 +49,7 @@ public class ConnectServerRequestDto
     /// The request body containing additional data necessary for connecting to the server,
     /// such as authentication or operation-specific information.
     /// </summary>
+    /// <example>{"code": "abc123def456"}</example>
     [FromBody]
     public required ConnectServerRequestBody Body { get; init; }
 }

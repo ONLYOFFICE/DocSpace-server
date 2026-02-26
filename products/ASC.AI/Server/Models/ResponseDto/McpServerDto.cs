@@ -46,7 +46,6 @@ public class McpServerDto
     /// <summary>
     /// Human-readable description of the server's purpose and capabilities.
     /// </summary>
-
     /// <example>Provides document management tools</example>
     public string? Description { get; init; }
 
@@ -65,6 +64,7 @@ public class McpServerDto
     /// <summary>
     /// HTTP headers sent with every request to the server (e.g., authentication tokens).
     /// </summary>
+    /// <example>{"Authorization": "Bearer token123"}</example>
     public IDictionary<string, string>? Headers { get; init; }
 
     /// <summary>
@@ -76,6 +76,7 @@ public class McpServerDto
     /// <summary>
     /// Server icon in multiple resolutions for UI display.
     /// </summary>
+    /// <example>{"icon48": "/img/icon48.png", "icon32": "/img/icon32.png", "icon24": "/img/icon24.png", "icon16": "/img/icon16.png"}</example>
     public Icon? Icon { get; init; }
 
     /// <summary>

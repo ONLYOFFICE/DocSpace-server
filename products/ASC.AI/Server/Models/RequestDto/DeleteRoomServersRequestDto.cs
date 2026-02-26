@@ -41,6 +41,7 @@ public class DeleteRoomServersRequestDto
     /// <summary>
     /// Server identifiers to remove.
     /// </summary>
+    /// <example>{"servers": ["00000000-0000-0000-0000-000000000000"]}</example>
     [FromBody]
     public required DeleteRoomServersRequestBody Body { get; init; }
 }

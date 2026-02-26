@@ -89,6 +89,7 @@ public class AuthRequestsDto
     /// <summary>
     /// The additional confirmation data required for authentication.
     /// </summary>
+    /// <example>{"email": "user@example.com", "key": "abc123def456", "first": true}</example>
     public ConfirmData ConfirmData { get; set; }
 
     /// <summary>

@@ -54,6 +54,7 @@ public class SecurityDto
     /// <summary>
     /// The list of groups with the access to the module.
     /// </summary>
+    /// <example>[{"id": "00000000-0000-0000-0000-000000000000", "name": "Administrators"}]</example>
     public List<GroupSummaryDto> Groups { get; init; }
 
     /// <summary>

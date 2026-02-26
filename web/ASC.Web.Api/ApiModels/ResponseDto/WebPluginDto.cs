@@ -96,6 +96,7 @@ public class WebPluginDto
     /// <summary>
     /// The user who created the web plugin.
     /// </summary>
+    /// <example>{"displayName": "John Doe", "email": "john.doe@example.com"}</example>
     public required EmployeeDto CreateBy { get; set; }
 
     /// <summary>

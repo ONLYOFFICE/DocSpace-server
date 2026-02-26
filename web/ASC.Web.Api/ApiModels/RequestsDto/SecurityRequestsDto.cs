@@ -39,11 +39,13 @@ public class SecurityRequestsDto
     /// <summary>
     /// The product ID for which permissions are being set.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     public required Guid ProductId { get; set; }
 
     /// <summary>
     /// The ID of the user whose permissions are being configured.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     public required Guid UserId { get; set; }
 
     /// <summary>

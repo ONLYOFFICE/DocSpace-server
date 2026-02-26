@@ -58,6 +58,7 @@ public class McpServerStatusDto
     /// <summary>
     /// Server icon in multiple resolutions for UI display.
     /// </summary>
+    /// <example>{"icon48": "/img/icon48.png", "icon32": "/img/icon32.png", "icon24": "/img/icon24.png", "icon16": "/img/icon16.png"}</example>
     public Icon? Icon { get; init; }
 
     /// <summary>

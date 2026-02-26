@@ -51,6 +51,7 @@ public class WebhooksConfigDto
     /// <summary>
     /// The webhook ID.
     /// </summary>
+    /// <example>1</example>
     public required int Id { get; set; }
 
     /// <summary>

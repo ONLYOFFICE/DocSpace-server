@@ -95,5 +95,6 @@ public class TfaValidateRequestsDto
     /// <summary>
     /// The verification code provided by the user.
     /// </summary>
+    /// <example>123456</example>
     public required string Code { get; set; }
 }

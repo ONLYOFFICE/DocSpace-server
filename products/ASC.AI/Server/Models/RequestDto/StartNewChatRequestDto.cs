@@ -41,6 +41,7 @@ public class StartNewChatRequestDto
     /// <summary>
     /// The initial message and optional file attachments.
     /// </summary>
+    /// <example>{"message": "Hello, can you help me with this document?", "contextFolderId": 123}</example>
     [FromBody]
     public required StartNewChatBody Body { get; set; }
 }

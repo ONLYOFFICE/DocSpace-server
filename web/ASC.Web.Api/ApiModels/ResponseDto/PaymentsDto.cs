@@ -208,20 +208,24 @@ public class CustomerInfoDto(CustomerInfo customerInfo, EmployeeDto employeeDto)
     /// <summary>
     /// The portal ID.
     /// </summary>
+    /// <example>portal-001</example>
     public string PortalId { get; private set; } = customerInfo.PortalId;
 
     /// <summary>
     /// The customer's payment method.
     /// </summary>
+    /// <example>0</example>
     public PaymentMethodStatus PaymentMethodStatus { get; private set; } = customerInfo.PaymentMethodStatus;
 
     /// <summary>
     /// The customer email address.
     /// </summary>
+    /// <example>user@example.com</example>
     public string Email { get; private set; } = customerInfo.Email;
 
     /// <summary>
     /// The paying user.
     /// </summary>
+    /// <example>{"displayName": "John Doe", "email": "john.doe@example.com"}</example>
     public EmployeeDto Payer { get; private set; } = employeeDto;
 }

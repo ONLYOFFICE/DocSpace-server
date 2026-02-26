@@ -45,5 +45,6 @@ public class QuotaSettingsRequestsDto
     /// <summary>
     /// The default storage quota value applied to new users.
     /// </summary>
+    /// <example>1073741824</example>
     public required JsonElement DefaultQuota { get; set; }
 }

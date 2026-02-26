@@ -39,6 +39,7 @@ public class TenantQuotaSettingsRequestsDto
     /// <summary>
     /// The ID of the tenant whose quota is being configured.
     /// </summary>
+    /// <example>1</example>
     public required int TenantId { get; set; }
 
     /// <summary>

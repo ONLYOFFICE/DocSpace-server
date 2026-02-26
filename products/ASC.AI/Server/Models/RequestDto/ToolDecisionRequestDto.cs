@@ -43,6 +43,7 @@ public class ToolDecisionRequestDto
     /// <summary>
     /// The permission decision parameters.
     /// </summary>
+    /// <example>{"decision": 1}</example>
     [FromBody]
     public required ToolDecisionRequestBody Body { get; init; }
 }

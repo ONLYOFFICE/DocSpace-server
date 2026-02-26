@@ -41,6 +41,7 @@ public class ContinueChatRequestDto
     /// <summary>
     /// The message and optional file attachments.
     /// </summary>
+    /// <example>{"message": "Summarize this document for me", "contextFolderId": 123}</example>
     [FromBody]
     public required ContinueChatBody Body { get; set; }
 }

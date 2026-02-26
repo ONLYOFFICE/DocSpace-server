@@ -35,6 +35,7 @@ public class ActiveConnectionsDto
     /// <summary>
     /// The login event.
     /// </summary>
+    /// <example>1</example>
     public required int LoginEvent { get; set; }
 
     /// <summary>
@@ -52,16 +53,19 @@ public class ActiveConnectionsItemDto
     /// <summary>
     /// The active connection ID.
     /// </summary>
+    /// <example>1</example>
     public required int Id { get; set; }
 
     /// <summary>
     /// The tenant ID.
     /// </summary>
+    /// <example>1</example>
     public required int TenantId { get; set; }
 
     /// <summary>
     /// The user ID.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     public required Guid UserId { get; set; }
 
     /// <summary>

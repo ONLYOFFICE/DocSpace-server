@@ -142,10 +142,12 @@ public class ChunkedUploadSessionResponseWrapper<T>
     /// <summary>
     /// Gets or sets a value indicating whether the operation was successful.
     /// </summary>
+    /// <example>true</example>
     public bool Success { get; set; }
 
     /// <summary>
     /// Gets or sets the data of the chunked upload session response.
     /// </summary>
+    /// <example>{"id": "00000000-0000-0000-0000-000000000000", "location": "https://example.com/upload"}</example>
     public ChunkedUploadSessionResponse<T> Data { get; set; }
 }

@@ -34,6 +34,7 @@ public class AddServerRequestDto
     /// <summary>
     /// MCP server registration parameters.
     /// </summary>
+    /// <example>{"name": "my-custom-server", "description": "Custom MCP server for project management tools", "endpoint": "https://mcp.example.com/sse"}</example>
     [FromBody]
     public required AddMcpServerRequestBody Body { get; init; }
 }

@@ -42,6 +42,7 @@ public class UpdateServerRequestDto
     /// Updated server configuration fields.
     /// </summary>
     /// <remarks>This property encapsulates server-related details, such as endpoint, name, headers, and other optional metadata.</remarks>
+    /// <example>{"name": "Updated MCP Server", "description": "Updated server description", "endpoint": "https://mcp.example.com/sse"}</example>
     [FromBody]
     public required UpdateServerRequestBody Body { get; init; }
 }

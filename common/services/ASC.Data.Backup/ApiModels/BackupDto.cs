@@ -41,6 +41,7 @@ public class BackupDto
     /// <summary>
     /// The backup storage parameters.
     /// </summary>
+    /// <example>[{"key": "path", "value": "/backup"}]</example>
     public IEnumerable<ItemKeyValuePair<object, object>> StorageParams { get; set; }
 
     /// <summary>

@@ -41,6 +41,7 @@ public class ExportChatRequestDto<T>
     /// <summary>
     /// The export parameters including destination folder and file title.
     /// </summary>
+    /// <example>{"folderId": 123, "title": "Chat Export"}</example>
     [FromBody]
     public required ExportChatRequestBody<T> Body { get; init; }
 }

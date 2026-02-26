@@ -34,6 +34,7 @@ public class PasswordSettingsRequestsDto
     /// <summary>
     /// The minimum number of characters required for valid passwords.
     /// </summary>
+    /// <example>8</example>
     public required int MinLength { get; set; }
 
     /// <summary>
