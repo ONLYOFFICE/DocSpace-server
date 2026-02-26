@@ -35,6 +35,9 @@ public class AttachmentResult
 
 [Scope]
 public class AttachmentHandler(
+    IEventBus eventBus,
+    AuthContext authContext,
+    TenantManager tenantManager,
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
     ITextExtractor textExtractor,
@@ -69,24 +72,11 @@ public class AttachmentHandler(
             return;
         }
 
-        var internalDao = daoFactory.GetFileDao<int>();
+        var fileIds = attachments
+            .OfType<DataMessageContent>()
+            .Select(attachment => attachment.Id);
 
-        foreach (var attachment in attachments)
-        {
-            if (attachment is not DataMessageContent dataContent)
-            {
-                continue;
-            }
-
-            try
-            {
-                await internalDao.DeleteFileAsync(dataContent.Id);
-            }
-            catch (Exception e)
-            {
-                logger.ErrorWithException(e);
-            }
-        }
+        await DeleteInBackgroundAsync(fileIds);
     }
 
     private async IAsyncEnumerable<AttachmentResult> HandleAsync<T>(
@@ -96,7 +86,6 @@ public class AttachmentHandler(
         int agentId)
     {
         var fileDao = daoFactory.GetFileDao<T>();
-        var internalDao = daoFactory.GetFileDao<int>();
 
         var textFiles = new List<(File<T> File, string Extension)>();
         var mediaFiles = new List<(File<T> File, FileType FileType, string Extension)>();
@@ -137,7 +126,7 @@ public class AttachmentHandler(
             }
         }
 
-        var copiedFiles = await CopyMediaFilesAsync(fileDao, internalDao, mediaFiles, chatId, agentId);
+        var copiedFiles = await CopyMediaFilesAsync(fileDao, mediaFiles, chatId, agentId);
 
         foreach (var (copiedFile, fileType, extension) in copiedFiles)
         {
@@ -152,7 +141,6 @@ public class AttachmentHandler(
 
     private async Task<List<(File<int> CopiedFile, FileType FileType, string Extension)>> CopyMediaFilesAsync<T>(
         IFileDao<T> fileDao,
-        IFileDao<int> internalDao,
         List<(File<T> File, FileType FileType, string Extension)> mediaFiles,
         Guid chatId,
         int agentId)
@@ -173,12 +161,35 @@ public class AttachmentHandler(
         {
             logger.ErrorWithException(e);
 
-            foreach (var (copiedFile, _, _) in copiedFiles)
-            {
-                await internalDao.DeleteFileAsync(copiedFile.Id);
-            }
+            await DeleteInBackgroundAsync(copiedFiles.Select(item => item.CopiedFile.Id));
 
             throw;
+        }
+    }
+
+    private async Task DeleteInBackgroundAsync(IEnumerable<int> fileIds)
+    {
+        var ids = fileIds
+            .Distinct()
+            .ToList();
+
+        if (ids.Count == 0)
+        {
+            return;
+        }
+
+        try
+        {
+            await eventBus.PublishAsync(new ChatDeletionIntegrationEvent(
+                authContext.IsAuthenticated ? authContext.CurrentAccount.ID : Guid.Empty,
+                tenantManager.GetCurrentTenantId())
+            {
+                FileIds = ids
+            });
+        }
+        catch (Exception e)
+        {
+            logger.ErrorWithException(e);
         }
     }
 

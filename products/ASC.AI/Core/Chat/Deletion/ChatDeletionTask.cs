@@ -33,6 +33,7 @@ public class ChatDeletionTask : DistributedTaskProgress
     private int _tenantId;
     private Guid _userId;
     private Guid _chatId;
+    private IReadOnlyCollection<int> _fileIds = [];
 
     public ChatDeletionTask() { }
 
@@ -41,11 +42,12 @@ public class ChatDeletionTask : DistributedTaskProgress
         _serviceScopeFactory = serviceScopeFactory;
     }
 
-    public void Init(int tenantId, Guid userId, Guid chatId)
+    public void Init(int tenantId, Guid userId, Guid chatId, IReadOnlyCollection<int>? fileIds = null)
     {
         _tenantId = tenantId;
         _userId = userId;
         _chatId = chatId;
+        _fileIds = fileIds ?? [];
     }
 
     protected override async Task DoJob()
@@ -62,7 +64,18 @@ public class ChatDeletionTask : DistributedTaskProgress
             var fileDao = daoFactory.GetFileDao<int>();
             var chatDao = scope.ServiceProvider.GetRequiredService<ChatDao>();
 
-            await foreach (var fileId in chatDao.GetAttachmentFileIdsAsync(_tenantId, _chatId))
+            var fileIds = new HashSet<int>(_fileIds.Where(id => id > 0));
+            var chatDeletionFlow = _chatId != Guid.Empty;
+
+            if (chatDeletionFlow)
+            {
+                await foreach (var fileId in chatDao.GetAttachmentFileIdsAsync(_tenantId, _chatId))
+                {
+                    fileIds.Add(fileId);
+                }
+            }
+
+            foreach (var fileId in fileIds)
             {
                 try
                 {
@@ -74,7 +87,10 @@ public class ChatDeletionTask : DistributedTaskProgress
                 }
             }
 
-            await chatDao.HardDeleteChatAsync(_tenantId, _chatId, _userId);
+            if (chatDeletionFlow)
+            {
+                await chatDao.HardDeleteChatAsync(_tenantId, _chatId, _userId);
+            }
         }
         catch (Exception e)
         {

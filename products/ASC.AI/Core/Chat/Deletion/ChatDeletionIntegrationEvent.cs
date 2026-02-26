@@ -35,4 +35,7 @@ public record ChatDeletionIntegrationEvent : IntegrationEvent
 
     [ProtoMember(1)]
     public Guid ChatId { get; set; }
+
+    [ProtoMember(2)]
+    public List<int> FileIds { get; set; } = [];
 }

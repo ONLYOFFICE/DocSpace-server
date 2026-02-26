@@ -44,7 +44,7 @@ public class ChatDeletionIntegrationEventHandler(
             await tenantManager.SetCurrentTenantAsync(@event.TenantId);
 
             var task = serviceProvider.GetRequiredService<ChatDeletionTask>();
-            task.Init(@event.TenantId, @event.CreateBy, @event.ChatId);
+            task.Init(@event.TenantId, @event.CreateBy, @event.ChatId, @event.FileIds);
 
             await chatDeletionTaskQueue.PushAsync(task);
         }
