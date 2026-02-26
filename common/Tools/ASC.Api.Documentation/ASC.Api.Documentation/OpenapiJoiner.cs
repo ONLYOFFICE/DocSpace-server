@@ -88,6 +88,8 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
         SortTagGroups(result);
         EnumCleaner.Clean(result);
 
+        ApplyDeepObjectStyle(result);
+
         var options = new JsonSerializerOptions
         {
             WriteIndented = true,
@@ -324,6 +326,16 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
                 continue;
             }
 
+            foreach (var tag in tagsNode!.AsArray())
+            {
+                var t = tag!.ToString();
+
+                if (!string.IsNullOrEmpty(t) && char.IsLower(t[0]))
+                {
+                    throw new Exception($"Tag starts with lowercase: '{t}'");
+                }
+            }
+
             var sorted = tagsNode!.AsArray().Select(t => t!.ToString()).OrderBy(t => t, StringComparer.OrdinalIgnoreCase).ToArray();
 
             var newArr = new JsonArray();
@@ -418,6 +430,87 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
             trgArr.Add(server.DeepClone());
             existingUrls.Add(url);
         }
+    }
+
+    static void ApplyDeepObjectStyle(JsonObject root)
+    {
+        if (!root.TryGetPropertyValue("paths", out var pathsNode))
+        {
+            return;
+        }
+
+        var components = root["components"]?["schemas"] as JsonObject;
+
+        foreach (var path in pathsNode!.AsObject())
+        {
+            var methods = path.Value!.AsObject();
+
+            foreach (var method in methods)
+            {
+                if (method.Value is not JsonObject methodObj)
+                {
+                    continue;
+                }
+
+                if (!methodObj.TryGetPropertyValue("parameters", out var paramsNode))
+                {
+                    continue;
+                }
+
+                foreach (var paramNode in paramsNode!.AsArray())
+                {
+                    if (paramNode is not JsonObject param)
+                    {
+                        continue;
+                    }
+
+                    if (param["in"]?.ToString() != "query")
+                    {
+                        continue;
+                    }
+
+                    if (!param.TryGetPropertyValue("schema", out var schemaNode))
+                    {
+                        continue;
+                    }
+
+                    if (IsObjectSchema(schemaNode!, components))
+                    {
+                        param["style"] = "deepObject";
+                    }
+                }
+            }
+        }
+    }
+
+    static bool IsObjectSchema(JsonNode schemaNode, JsonObject? components)
+    {
+        if (schemaNode is not JsonObject schemaObj)
+        {
+            return false;
+        }
+
+        if (schemaObj.TryGetPropertyValue("$ref", out var refNode))
+        {
+            var refValue = refNode!.ToString();
+
+            const string prefix = "#/components/schemas/";
+            if (refValue.StartsWith(prefix) && components != null)
+            {
+                var name = refValue.Substring(prefix.Length);
+
+                if (components.TryGetPropertyValue(name, out var compSchema))
+                {
+                    var compObj = compSchema as JsonObject;
+                    if (compObj?["type"]?.ToString() == "object")
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 
     static bool JsonDeepEquals(JsonNode a, JsonNode b)

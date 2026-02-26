@@ -14,11 +14,11 @@ import java.util.stream.Collectors;
 import java.util.Map.Entry;
 import java.util.*;
 
-public class MyCSharpCodegen extends CSharpClientCodegen {
+public class MyCSharpClientCodegen extends CSharpClientCodegen {
     
     protected String apiNamePrefix = "", apiNameSuffix = "Api";
 
-    public MyCSharpCodegen() {
+    public MyCSharpClientCodegen() {
         super();
         this.templateDir = "templates/csharp";
         this.embeddedTemplateDir = "csharp";
