@@ -31,7 +31,11 @@ namespace ASC.Web.Api.ApiModel.ResponseDto;
 /// </summary>
 /// <example>
 /// {
-///   "properties": [{"name": "key1", "value": "value1"}]
+///   "id": "storage_001",
+///   "title": "Main Storage",
+///   "properties": [ { "name": "ApiKey", "value": "12345" } ],
+///   "current": true,
+///   "isSet": true
 /// }
 /// </example>
 public class StorageDto
@@ -39,27 +43,31 @@ public class StorageDto
     /// <summary>
     /// The storage ID.
     /// </summary>
+    /// <example>storage_001</example>
     public required string Id { get; set; }
 
     /// <summary>
     /// The storage title.
     /// </summary>
+    /// <example>Main Storage</example>
     public required string Title { get; set; }
 
     /// <summary>
     /// The list of storage authentication keys.
     /// </summary>
-    /// <example>[{"name": "key1", "value": "value1"}]</example>
+    /// <example>[{"name": "ApiKey", "value": "12345"}]</example>
     public List<AuthKey> Properties { get; set; }
 
     /// <summary>
     /// Specifies if this is the current portal storage or not.
     /// </summary>
+    /// <example>true</example>
     public required bool Current { get; set; }
 
     /// <summary>
     /// Specifies if this storage can be set or not.
     /// </summary>
+    /// <example>true</example>
     public required bool IsSet { get; set; }
 
     public static async Task<StorageDto> StorageWrapperInit<T>(DataStoreConsumer consumer, BaseStorageSettings<T> current) where T : class, ISettings<T>, new()

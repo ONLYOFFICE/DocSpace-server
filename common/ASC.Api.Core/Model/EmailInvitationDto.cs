@@ -34,6 +34,7 @@ public class EmailInvitationsDto
     /// <summary>
     /// The list of email invitations.
     /// </summary>
+    /// <example>[{"email": user1@example.com}, {"email": user2@example.com}]</example>
     public List<EmailInvitationDto> Invitations { get; set; }
 }
 
@@ -45,6 +46,7 @@ public class EmailInvitationDto
     /// <summary>
     /// The email address.
     /// </summary>
+    /// <example>user@example.com</example>
     [EmailAddress]
     [MaxLength(255)]
     public string Email { get; set; }

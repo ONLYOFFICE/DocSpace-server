@@ -204,11 +204,13 @@ public class EditHistoryAuthor(UserManager userManager, DisplayUserSettingsHelpe
     /// <summary>
     /// The author ID.
     /// </summary>
+    /// <example>author_123</example>
     public required string Id { get; init; }
 
     /// <summary>
     /// The author name.
     /// </summary>
+    /// <example>John Doe</example>
     public string Name
     {
         get
@@ -314,16 +316,19 @@ public class EditHistoryUrl
     /// <summary>
     /// The document identifier of the previous version of the document.
     /// </summary>
+    /// <example>doc_v2_20260101</example>
     public string Key { get; init; }
 
     /// <summary>
     /// The url address of the previous version of the document.
     /// </summary>
+    /// <example>https://files.example.com/history/doc_v2_20260101.docx</example>
     [Url]
     public string Url { get; init; }
 
     /// <summary>
     /// The document extension.
     /// </summary>
+    /// <example>.docx</example>
     public string FileType { get; set; }
 }

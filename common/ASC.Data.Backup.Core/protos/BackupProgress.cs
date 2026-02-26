@@ -49,45 +49,54 @@ public record BackupProgress
     /// <summary>
     /// Specifies if the backup is completed or not.
     /// </summary>
+    /// <example>false</example>
     public bool IsCompleted { get; set; }
 
     /// <summary>
     /// The backup progress in percentage.
     /// </summary>
+    /// <example>50</example>
     public int Progress { get; set; }
 
     /// <summary>
     /// The backup error message.
     /// </summary>
+    /// <example>null</example>
     public string Error { get; set; }
 
     /// <summary>
     /// The backup warning message.
     /// </summary>
+    /// <example>null</example>
     public string Warning { get; set; }
 
     /// <summary>
     /// The backup link.
     /// </summary>
+    /// <example>https://example.com/backup/task_123</example>
     public string Link { get; set; }
 
     /// <summary>
     /// The tenant ID.
     /// </summary>
+    /// <example>1</example>
     public int TenantId { get; set; }
 
     /// <summary>
     /// The backup progress type.
     /// </summary>
+    /// <example>Backup</example>
     public BackupProgressEnum BackupProgressEnum { get; set; }
-    
+
     /// <summary>
     /// The backup progress status.
     /// </summary>
+    /// <example>Running</example>
     public DistributedTaskStatus Status { get; set; }
 
     /// <summary>
     /// The task ID.
     /// </summary>
+    /// <example>task_123</example>
     public string TaskId { get; set; }
 }

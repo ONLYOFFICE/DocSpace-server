@@ -213,12 +213,14 @@ public abstract class FileEntryDto<T> : FileEntryBaseDto
     /// <summary>
     /// The origin ID of the file entry.
     /// </summary>
+    /// <example>12</example>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public T OriginId { get; set; }
 
     /// <summary>
     /// The origin room ID of the file entry.
     /// </summary>
+    /// <example>22</example>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public T OriginRoomId { get; set; }
 

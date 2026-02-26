@@ -668,26 +668,31 @@ public class ScheduleDto
     /// <summary>
     /// The backup storage type.
     /// </summary>
+    /// <example>0</example>
     public required BackupStorageType StorageType { get; set; }
 
     /// <summary>
     /// The backup storage parameters.
     /// </summary>
+    /// <example>{}</example>
     public required Dictionary<string, string> StorageParams { get; set; }
 
     /// <summary>
     /// The backup cron parameters.
     /// </summary>
+    /// <example>{ "period": 0, "hour": 0, "day": 0}</example>
     public required CronParams CronParams { get; init; }
 
     /// <summary>
     /// The maximum number of the stored backup copies.
     /// </summary>
+    /// <example>5</example>
     public int? BackupsStored { get; init; }
 
     /// <summary>
     /// The date and time when the last backup was reated.
     /// </summary>
+    /// <example>2026-01-01T00:00:00Z</example>
     public required DateTime LastBackupTime { get; set; }
 
     /// <summary>
@@ -705,16 +710,19 @@ public class CronParams
     /// <summary>
     /// The backup period type.
     /// </summary>
+    /// <example>0</example>
     public BackupPeriod Period { get; init; }
 
     /// <summary>
     /// The time of the day to start the backup process.
     /// </summary>
+    /// <example>0</example>
     public int Hour { get; init; }
 
     /// <summary>
     /// The day of the week to start the backup process.
     /// </summary>
+    /// <example>0</example>
     public int Day { get; init; }
 
     public CronParams() { }

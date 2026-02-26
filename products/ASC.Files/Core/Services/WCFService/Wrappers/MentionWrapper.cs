@@ -36,32 +36,38 @@ public class MentionWrapper
     /// <summary>
     /// The user information.
     /// </summary>
+    /// <example>{"id": "00000000-0000-0000-0000-000000000000", "firstName": "John", "lastName": "Doe"}</example>
     public UserInfo User { get; internal set; }
 
     /// <summary>
     /// The user email address.
     /// </summary>
+    /// <example>user@example.com</example>
     [EmailAddress]
     public string Email { get; internal set; }
 
     /// <summary>
     /// The user unique identification.
     /// </summary>
+    /// <example>user_0001</example>
     public string Id { get; internal set; }
 
     /// <summary>
     /// The path to the user's avatar.
     /// </summary>
+    /// <example>https://portal.example.com/avatar/user_0001.png</example>
     public string Image { get; internal set; }
 
     /// <summary>
     /// Specifies whether the user has the access to the file where they are mentioned.
     /// </summary>
+    /// <example>true</example>
     public bool HasAccess { get; internal set; }
 
     /// <summary>
     /// The user full name.
     /// </summary>
+    /// <example>John Doe</example>
     public string Name { get; internal set; }
 }
 

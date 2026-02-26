@@ -133,11 +133,13 @@ public abstract record HistoryData
     /// <summary>
     /// The history data ID.
     /// </summary>
+    /// <example>0</example>
     public virtual int GetId() => 0;
 
     /// <summary>
     /// The name of the action initiator.
     /// </summary>
+    /// <example>John Doe</example>
     public virtual string InitiatorName => null;
 }
 

@@ -57,7 +57,7 @@ public class WebhooksConfigDto
     /// <summary>
     /// The webhook name.
     /// </summary>
-    /// <example>Jhon</example>
+    /// <example>John</example>
     public string Name { get; set; }
 
     /// <summary>
@@ -141,7 +141,7 @@ public class WebhooksConfigWithStatusDto
     /// <summary>
     /// The webhook configuration.
     /// </summary>
-    /// <example>{ "id": 1, "name": "Jhon" }</example>
+    /// <example>{ "id": 1, "name": "John" }</example>
     public WebhooksConfigDto Configs { get; set; }
 
     /// <summary>

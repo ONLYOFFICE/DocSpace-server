@@ -818,11 +818,13 @@ public class EditorToolCallStateDto
     /// <summary>
     /// The tool name.
     /// </summary>
+    /// <example>GenerateDocx</example>
     public required string ToolName { get; init; }
 
     /// <summary>
     /// The tool call parameters.
     /// </summary>
+    /// <example>{}</example>
     public required EditorToolCallParametersDto Parameters { get; init; }
 }
 
