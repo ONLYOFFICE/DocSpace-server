@@ -24,47 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Core.ApiModels.RequestDto
+namespace ASC.FederatedLogin.LoginProviders
 {
-    /// <summary>
-    /// Default templates settings request parameters.
-    /// </summary>
-    public class DefaultTemplateSettingsRequestDto
+    public interface IDummyEmailProvider
     {
-        /// <summary>
-        /// File id to replace template with
-        /// </summary>
-        public required JsonElement SelectedFile { get; set; }
-        /// <summary>
-        /// File extension of a template to replace
-        /// </summary>
-        public required string FileExtension { get; set; }
-    }
-
-    /// <summary>
-    /// Default templates settings reset request parameters.
-    /// </summary>
-    public class DefaultTemplateSettingsResetRequestDto
-    {
-        /// <summary>
-        /// File extension of a template to reset
-        /// </summary>
-        public required string FileExtension { get; set; }
-    }
-
-    /// <summary>
-    /// Default templates settings upload request parameters.
-    /// </summary>
-    public class DefaultTemplateSettingsUploadRequestDto
-    {
-        /// <summary>
-        /// File extension of a template to replace
-        /// </summary>
-        public required string FileExtension { get; set; }
-
-        /// <summary>
-        /// File to replace template with
-        /// </summary>
-        public required IFormFile File { get; set; }
+        public string GenerateEmail(LoginProfile loginProfile);
     }
 }

@@ -1,6 +1,6 @@
 {{>licenseInfo}}
 
-package {{apiPackage}}
+package {{apiPackage}}{{#operations}}.{{x-folder}}{{/operations}}
 
 import {{packageName}}.infrastructure.CollectionFormats.*
 import retrofit2.http.*
@@ -79,7 +79,7 @@ import okhttp3.MultipartBody
     /**
     * enum for parameter {{paramName}}
     */
-    {{#nonPublicApi}}internal {{/nonPublicApi}}{{^nonPublicApi}}{{#explicitApi}}public {{/explicitApi}}{{/nonPublicApi}}enum class {{enumName}}{{operationIdCamelCase}}({{^nonPublicApi}}{{#explicitApi}}public {{/explicitApi}}{{/nonPublicApi}}val value: {{^isContainer}}{{dataType}}{{/isContainer}}{{#isContainer}}kotlin.String{{/isContainer}}) {
+    {{#nonPublicApi}}internal {{/nonPublicApi}}{{^nonPublicApi}}{{#explicitApi}}public {{/explicitApi}}{{/nonPublicApi}}enum class {{enumName}}{{operationIdCamelCase}}({{^nonPublicApi}}{{#explicitApi}}public {{/explicitApi}}{{/nonPublicApi}}val value: {{^isContainer}}{{dataType}}{{/isContainer}}{{#isContainer}}kotlin.Int{{/isContainer}}) {
     {{^enumUnknownDefaultCase}}
         {{#allowableValues}}
             {{#enumVars}}

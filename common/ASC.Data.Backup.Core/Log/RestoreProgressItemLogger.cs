@@ -44,4 +44,7 @@ internal static partial class RestoreProgressItemLogger
 
     [LoggerMessage(LogLevel.Error, "Clear2faSettings")]
     public static partial void ErrorClear2faSettings(this ILogger<RestoreProgressItem> logger, Exception exception);
+
+    [LoggerMessage(LogLevel.Error, "UpdateDefaultTemplateSettings")]
+    public static partial void ErrorUpdateDefaultTemplateSettings(this ILogger<RestoreProgressItem> logger, Exception exception);
 }

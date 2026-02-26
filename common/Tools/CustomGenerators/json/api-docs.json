@@ -5041,7 +5041,8 @@
             "description": "The start date of the history.",
             "schema": {
               "$ref": "#/components/schemas/ApiDateTime"
-            }
+            },
+            "style": "deepObject"
           },
           {
             "name": "toDate",
@@ -5049,7 +5050,8 @@
             "description": "The end date of the history.",
             "schema": {
               "$ref": "#/components/schemas/ApiDateTime"
-            }
+            },
+            "style": "deepObject"
           },
           {
             "name": "count",
@@ -7888,7 +7890,8 @@
             "description": "The start date of the history request.",
             "schema": {
               "$ref": "#/components/schemas/ApiDateTime"
-            }
+            },
+            "style": "deepObject"
           },
           {
             "name": "toDate",
@@ -7896,7 +7899,8 @@
             "description": "The end date of the history request.",
             "schema": {
               "$ref": "#/components/schemas/ApiDateTime"
-            }
+            },
+            "style": "deepObject"
           },
           {
             "name": "count",
@@ -10339,7 +10343,8 @@
             "description": "The request parameters for uploading a file.",
             "schema": {
               "$ref": "#/components/schemas/UploadRequestDto"
-            }
+            },
+            "style": "deepObject"
           }
         ],
         "responses": {
@@ -31018,7 +31023,8 @@
             "description": "The starting date and time for filtering audit events.",
             "schema": {
               "$ref": "#/components/schemas/ApiDateTime"
-            }
+            },
+            "style": "deepObject"
           },
           {
             "name": "to",
@@ -31026,7 +31032,8 @@
             "description": "The ending date and time for filtering audit events.",
             "schema": {
               "$ref": "#/components/schemas/ApiDateTime"
-            }
+            },
+            "style": "deepObject"
           },
           {
             "name": "count",
@@ -31763,7 +31770,8 @@
             "description": "The starting date and time for filtering login events.",
             "schema": {
               "$ref": "#/components/schemas/ApiDateTime"
-            }
+            },
+            "style": "deepObject"
           },
           {
             "name": "to",
@@ -31771,7 +31779,8 @@
             "description": "The ending date and time for filtering login events.",
             "schema": {
               "$ref": "#/components/schemas/ApiDateTime"
-            }
+            },
+            "style": "deepObject"
           },
           {
             "name": "count",

@@ -1120,6 +1120,19 @@ public class FileSecurity(
             return false;
         }
 
+        if (folder is { FolderType: FolderType.DefaultTemplates } &&
+            action is FilesSecurityActions.Create or
+                FilesSecurityActions.Copy or
+                FilesSecurityActions.CopyTo or
+                FilesSecurityActions.Move or
+                FilesSecurityActions.MoveTo or
+                FilesSecurityActions.Duplicate or
+                FilesSecurityActions.Delete
+            )
+        {
+            return false;
+        }
+
         if (action is FilesSecurityActions.UseChat && folder is not { FolderType: FolderType.AiRoom })
         {
             return false;
@@ -1730,6 +1743,12 @@ public class FileSecurity(
                 if (isDocSpaceAdmin)
                 {
                     return true;
+                }
+                break;
+            case FolderType.DefaultTemplates:
+                if (action is not (FilesSecurityActions.Read or FilesSecurityActions.Rename))
+                {
+                    return false;
                 }
                 break;
         }
