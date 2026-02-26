@@ -40,7 +40,7 @@ public class FormFillingReportCreator(
 
     public async Task UpdateFormFillingReport<T>(int originalFormId, int originalFormVersion, int roomId, int resultFormNumber, string formsDataUrl, File<T> formsDataFile, bool sendFormToExternalDB, bool settingsSaveFormAsXLSX)
     {
-        var (formData, metaData) = await GetSubmitFormsData(formsDataFile, originalFormId, roomId, resultFormNumber, formsDataUrl);
+        var (formData, metaData) = await GetSubmitFormsData(formsDataFile, originalFormId, originalFormVersion, roomId, resultFormNumber, formsDataUrl);
 
         if (sendFormToExternalDB && externalDatabaseClient.IsEnabled())
         {
@@ -71,7 +71,7 @@ public class FormFillingReportCreator(
         }
         if (settingsSaveFormAsXLSX)
         {
-            await exportToXLSX.UpdateXlsxReport(roomId, originalFormId);
+            await exportToXLSX.UpdateXlsxReport(roomId, originalFormId, originalFormVersion);
         }
     }
 
@@ -96,10 +96,10 @@ public class FormFillingReportCreator(
         return [];
     }
 
-    public async Task<IEnumerable<DbFormsItemDataSearch>> GetFormFillingResults(int roomId, int originalFormId)
+    public async Task<IEnumerable<DbFormsItemDataSearch>> GetFormFillingResults(int roomId, int originalFormId, int originalFormVersion)
     {
         factoryIndexerForm.Refresh();
-        var (success, result) = await factoryIndexerForm.TrySelectAsync(r => r.Where(s => s.RoomId, roomId).Where(s => s.OriginalFormId, originalFormId));
+        var (success, result) = await factoryIndexerForm.TrySelectAsync(r => r.Where(s => s.RoomId, roomId).Where(s => s.OriginalFormId, originalFormId).Where(s => s.OriginalFormVersion, originalFormVersion));
 
         if (success)
         {
@@ -122,6 +122,7 @@ public class FormFillingReportCreator(
     private async Task<(SubmitFormsData fromData, List<FormMetadata> fromMetaData)> GetSubmitFormsData<T>(
         File<T> formsDataFile,
         int originalFormId,
+        int originalFormVersion,
         int roomId,
         int resultFormNumber,
         string url)
@@ -165,6 +166,7 @@ public class FormFillingReportCreator(
                 TenantId = tenantId,
                 ParentId = parentId,
                 OriginalFormId = originalFormId,
+                OriginalFormVersion = originalFormVersion,
                 RoomId = roomId,
                 CreateOn = now,
                 FormsData = formNumber.Concat(fromData.FormsData)

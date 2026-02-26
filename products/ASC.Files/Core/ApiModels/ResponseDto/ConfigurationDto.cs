@@ -116,16 +116,19 @@ public enum QuotaScope
     /// <summary>
     /// The user-level quota.
     /// </summary>
+    [Description("User")]
     User,
 
     /// <summary>
     /// The room-level quota.
     /// </summary>
+    [Description("Room")]
     Room,
 
     /// <summary>
     /// The tenant-level quota.
     /// </summary>
+    [Description("Tenant")]
     Tenant
 }
 
@@ -141,7 +144,10 @@ public enum StartFillingMode
     ShareToFillOut,
 
     [Description("Start filling")]
-    StartFilling
+    StartFilling,
+
+    [Description("Start filling form room")]
+    StartFillingFormRoom
 }
 
 /// <summary>

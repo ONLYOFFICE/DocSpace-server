@@ -191,6 +191,11 @@ public abstract class EditorController<T>(
             };
 
             formOpenSetup.RootFolder = rootFolder;
+
+            if (inDto.Edit && rootFolder.FolderType == FolderType.FillingFormsRoom)
+            {
+                await fileStorageService.ManageFormFilling(file.Id, FormFillingManageAction.Edit);
+            }
         }
         var quotaExceededScope = await documentServiceHelper.CheckCustomQuotaAsync(rootFolder);
 
@@ -263,9 +268,9 @@ public abstract class EditorController<T>(
             {
                 if (result.Document.Permissions.Copy && !securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))
                 {
-                    result.StartFillingMode = StartFillingMode.ShareToFillOut;
+                    result.StartFillingMode = rootFolder.FolderType == FolderType.FillingFormsRoom ? StartFillingMode.StartFillingFormRoom : StartFillingMode.ShareToFillOut;
                     result.StartFilling = formOpenSetup.CanStartFilling;
-                    result.EditorConfig.Customization.StartFillingForm = new StartFillingForm { Text = FilesCommonResource.StartFillingModeEnum_ShareToFillOut };
+                    result.EditorConfig.Customization.StartFillingForm = new StartFillingForm { Text = rootFolder.FolderType == FolderType.FillingFormsRoom ? FilesCommonResource.StartFillingModeEnum_StartFilling : FilesCommonResource.StartFillingModeEnum_ShareToFillOut };
                 }
             }
 

@@ -529,7 +529,15 @@ public class DocumentServiceTrackerHelper(
             }
         }
 
-        await filesMessageService.SendAsync(forceSave && fileData.ForceSaveType == TrackerData.ForceSaveInitiator.UserSubmit ? MessageAction.FormSubmit : MessageAction.UserFileUpdated, file, MessageInitiator.DocsService, userName, file.Title);
+        var isFormSubmit = forceSave && fileData.ForceSaveType == TrackerData.ForceSaveInitiator.UserSubmit;
+
+        await filesMessageService.SendAsync(
+            isFormSubmit ? MessageAction.FormSubmit : MessageAction.UserFileUpdated,
+            file,
+            MessageInitiator.DocsService,
+            userName,
+            file.Title
+        );
 
         await webhookManager.PublishAsync(WebhookTrigger.FileUpdated, file);
 

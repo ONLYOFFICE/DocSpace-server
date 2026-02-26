@@ -321,7 +321,8 @@ public class EntryManager(IDaoFactory daoFactory,
     NotifyClient notifyClient,
     ExternalShare externalShare,
     FileSharingAceHelper fileSharingAceHelper,
-    DisplayUserSettingsHelper displayUserSettingsHelper)
+    DisplayUserSettingsHelper displayUserSettingsHelper,
+    WebhookManager webhookManager)
 {
     private const string UpdateList = "filesUpdateList";
 
@@ -1508,7 +1509,29 @@ public class EntryManager(IDaoFactory daoFactory,
         await fileMarker.MarkAsNewAsync(file);
         await fileMarker.RemoveMarkAsNewAsync(file);
 
+        if (file.IsForm)
+        {
+            await OnFormVersionChangedAsync(file);
+        }
+
         return file;
+    }
+
+    private async Task OnFormVersionChangedAsync<T>(File<T> file)
+    {
+        var fileDao = daoFactory.GetFileDao<T>();
+        var properties = await fileDao.GetProperties(file.Id);
+        if (properties?.FormFilling == null
+            || properties.FormFilling.OriginalFormVersion == 0
+            || properties.FormFilling.OriginalFormVersion == file.Version)
+        {
+            return;
+        }
+
+        await daoFactory.GetLinkDao<T>().DeleteAllLinkAsync(file.Id);
+        properties.FormFilling.OriginalFormVersion = file.Version;
+        properties.FormFilling.IsVersionChanged = true;
+        await fileDao.SaveProperties(file.Id, properties);
     }
 
     public async Task<File<T>> TrackEditingAsync<T>(T fileId, Guid tabId, Guid userId, Tenant tenant, bool editingAlone = false, string fillingSessionId = null)
@@ -2161,7 +2184,7 @@ public class EntryManager(IDaoFactory daoFactory,
                 {
                     await formFillingReportCreator.UpdateFormFillingReport(
                        origFormId,
-                       originalForm.Version,
+                       origProperties.FormFilling.OriginalFormVersion,
                        rId,
                        resProp.FormFilling.ResultFormNumber,
                        formsDataUrl,

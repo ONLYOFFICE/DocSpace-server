@@ -1570,6 +1570,37 @@ public class FileSecurity(
                             _ => false
                         };
                     }
+                    if (fileFolder is { FolderType: FolderType.FillingFormsRoom } && !userId.Equals(ASC.Core.Configuration.Constants.Guest.ID))
+                    {
+                        if (action is FilesSecurityActions.StartFilling or FilesSecurityActions.StopFilling)
+                        {
+                            var fileParentFolder = parentFolders.LastOrDefault();
+                            if (fileParentFolder?.FolderType is FolderType.FormFillingFolderInProgress or FolderType.FormFillingFolderDone)
+                            {
+                                return false;
+                            }
+                        }
+
+                        var properties = await cacheFileDao.GetProperties(file.Id);
+                        var formFilling = properties?.FormFilling;
+
+                        var userHasFullAccess = await HasFullAccessAsync(e, userId, isGuest, isRoom, isUser);
+                        var shareRecord = await GetShareRecordAsync(room, userId, isDocSpaceAdmin, shares);
+                        var formShareRecord = await GetCurrentShareAsync(file, userId, isDocSpaceAdmin, shares);
+
+                        var hasFullAccessToForm = userHasFullAccess || shareRecord is { Share: FileShare.ContentCreator or FileShare.RoomManager };
+
+                        if (action == FilesSecurityActions.StopFilling)
+                        {
+                            return (userHasFullAccess || shareRecord is { Share: FileShare.RoomManager } || shareRecord is { Share: FileShare.ContentCreator } && file.CreateBy.Equals(userId));
+                        }
+
+                        if (action == FilesSecurityActions.StartFilling)
+                        {
+                            return hasFullAccessToForm;
+                        }
+
+                    }
 
                     switch (action)
                     {

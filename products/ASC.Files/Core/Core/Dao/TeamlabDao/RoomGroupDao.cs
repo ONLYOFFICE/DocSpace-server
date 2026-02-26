@@ -75,7 +75,7 @@ internal class RoomGroupDao<T>(
         var tenantId = _tenantManager.GetCurrentTenantId();
         var group = await GetGroupQuery(dbContext, tenantId)
             .Where(r => r.Id == roomGroupId)
-            .Where(r => r.UserId == authContext.CurrentAccount.ID)
+            .Where(r => r.UserId == _authContext.CurrentAccount.ID)
             .FirstOrDefaultAsync();
 
         return group.MapToRoomGroup();
@@ -87,7 +87,7 @@ internal class RoomGroupDao<T>(
 
         var group = await GetGroupQuery(dbContext, tenantId)
             .Where(r => r.Id == groupId)
-            .Where(r => r.UserId == authContext.CurrentAccount.ID)
+            .Where(r => r.UserId == _authContext.CurrentAccount.ID)
             .FirstOrDefaultAsync();
 
         if (group == null)
@@ -104,7 +104,7 @@ internal class RoomGroupDao<T>(
         var tenantId = _tenantManager.GetCurrentTenantId();
 
         var query = GetGroupQuery(dbContext, tenantId)
-            .Where(r => r.UserId == authContext.CurrentAccount.ID)
+            .Where(r => r.UserId == _authContext.CurrentAccount.ID)
             .AsAsyncEnumerable();
 
         await foreach (var item in query)
