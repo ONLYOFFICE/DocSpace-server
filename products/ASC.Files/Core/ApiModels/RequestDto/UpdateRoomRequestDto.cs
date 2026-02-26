@@ -83,7 +83,7 @@ public class UpdateRoomRequest
     /// <summary>
     /// The room color.
     /// </summary>
-    /// <example>FF5733</example>
+    /// <example>#FF5733</example>
     [StringLength(6)]
     public string Color { get; set; }
 

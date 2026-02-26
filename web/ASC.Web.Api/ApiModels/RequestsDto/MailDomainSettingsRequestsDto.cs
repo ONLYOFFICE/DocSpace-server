@@ -99,7 +99,7 @@ public class AdminMessageSettingsRequestsDto
     /// <summary>
     /// The type of CAPTCHA validation used.
     /// </summary>
-    /// <example>EnumValue</example>
+    /// <example>Default</example>
     public RecaptchaType RecaptchaType { get; set; }
 
     /// <summary>

@@ -130,7 +130,7 @@ public class CreateRoomRequestDto
     /// <summary>
     /// The room color.
     /// </summary>
-    /// <example>FF0000</example>
+    /// <example>#FF0000</example>
     [StringLength(6)]
     public string Color { get; set; }
 

@@ -64,7 +64,7 @@ public class CreateRoomFromTemplateDto
     /// <summary>
     /// The color of the room to be created.
     /// </summary>
-    /// <example>FF0000</example>
+    /// <example>#FF0000</example>
     [StringLength(6)]
     public string Color { get; set; }
 

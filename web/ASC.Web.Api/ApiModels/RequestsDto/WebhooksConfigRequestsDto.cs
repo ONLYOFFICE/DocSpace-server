@@ -79,7 +79,7 @@ public class CreateWebhooksConfigRequestsDto
     /// <summary>
     /// Defines which events will trigger webhook notifications.
     /// </summary>
-    /// <example>{}</example>
+    /// <example>0</example>
     public WebhookTrigger Triggers { get; set; }
 
     /// <summary>

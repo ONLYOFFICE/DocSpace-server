@@ -32,7 +32,7 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 /// <example>
 /// {
 ///   "configName": "example value",
-///   "trigger": {},
+///   "trigger": 0,
 ///   "creationTime": "2024-01-15T10:30:00Z",
 ///   "method": "example value",
 ///   "route": "example value",
@@ -61,7 +61,7 @@ public class WebhooksLogDto
     /// <summary>
     /// The webhook trigger type.
     /// </summary>
-    /// <example>{}</example>
+    /// <example>0</example>
     public WebhookTrigger Trigger { get; set; }
 
     /// <summary>

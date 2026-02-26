@@ -369,10 +369,11 @@ public class Balance
     /// </summary>
     /// <example>12345</example>
     public int AccountNumber { get; init; }
+
     /// <summary>
     /// A list of sub-accounts.
     /// </summary>
-    /// <example>[{"id": "sub1", "name": "Sub Account"}]</example>
+    /// <example>[{"currency": "USD", "amount": 1500.75}]</example>
     public List<SubAccount> SubAccounts { get; init; }
 
     public bool IsDefault()
@@ -390,6 +391,7 @@ public class SubAccount
     /// The three-character ISO 4217 currency symbol of the sub-account.
     /// </summary>
     public string Currency { get; init; }
+
     /// <summary>
     /// The balance of the sub-account in the specified currency.
     /// </summary>
@@ -462,22 +464,27 @@ public class Report
     /// Collection of operations.
     /// </summary>
     public List<Operation> Collection { get; set; }
+
     /// <summary>
     /// Offset of the report data.
     /// </summary>
     public int Offset { get; set; }
+
     /// <summary>
     /// Limit of the report data.
     /// </summary>
     public int Limit { get; set; }
+
     /// <summary>
     /// Total quantity of operations in the report.
     /// </summary>
     public int TotalQuantity { get; set; }
+
     /// <summary>
     /// Total number of pages in the report.
     /// </summary>
     public int TotalPage { get; set; }
+
     /// <summary>
     /// Current page number of the report.
     /// </summary>
@@ -514,46 +521,57 @@ public class Operation
     /// Date of the operation.
     /// </summary>
     public DateTime Date { get; set; }
+
     /// <summary>
     /// Service related to the operation.
     /// </summary>
     public string Service { get; set; }
+
     /// <summary>
     /// Brief description of the operation.
     /// </summary>
     public string Description { get; set; }
+
     /// <summary>
     /// Brief details of the operation.
     /// </summary>
     public string Details { get; set; }
+
     /// <summary>
     /// Unit of the service.
     /// </summary>
     public string ServiceUnit { get; set; }
+
     /// <summary>
     /// Quantity of the service used.
     /// </summary>
     public int Quantity { get; set; }
+
     /// <summary>
     /// The three-character ISO 4217 currency symbol of the operation.
     /// </summary>
     public string Currency { get; set; }
+
     /// <summary>
     /// Credit amount of the operation.
     /// </summary>
     public decimal Credit { get; set; }
+
     /// <summary>
     /// Debit amount of the operation.
     /// </summary>
     public decimal Debit { get; set; }
+
     /// <summary>
     /// Original name of the participant.
     /// </summary>
     public string ParticipantName { get; set; }
+
     /// <summary>
     /// Display name of the participant.
     /// </summary>
     public string ParticipantDisplayName { get; set; }
+
     /// <summary>
     /// Metadata of the operation.
     /// </summary>

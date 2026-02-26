@@ -49,19 +49,19 @@ public class SmtpOperationStatusRequestsDto
     /// <summary>
     /// The unique identifier for tracking the SMTP operation.
     /// </summary>
-    /// <example>example value</example>
+    /// <example>smtp-op-123</example>
     public string Id { get; set; }
 
     /// <summary>
     /// The error message if the SMTP operation encountered issues.
     /// </summary>
-    /// <example>example value</example>
+    /// <example>SMTP connection failed.</example>
     public string Error { get; set; }
 
     /// <summary>
     /// The current state of the SMTP operation.
     /// </summary>
-    /// <example>example value</example>
+    /// <example>Completed</example>
     public string Status { get; set; }
 
     /// <summary>

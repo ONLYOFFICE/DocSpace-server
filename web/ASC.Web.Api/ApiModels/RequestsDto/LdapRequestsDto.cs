@@ -100,6 +100,7 @@ public class LdapRequestsDto
     /// <summary>
     /// The group access rights.
     /// </summary>
+    /// <example>{ "Admin": "FullAccess", "User": "ReadOnly" }</example>
     //ToDo: use SId instead of group name
     public Dictionary<AccessRight, string> AccessRights { get; set; }
 

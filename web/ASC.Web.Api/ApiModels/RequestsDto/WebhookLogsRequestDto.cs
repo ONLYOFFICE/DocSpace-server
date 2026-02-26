@@ -83,7 +83,7 @@ public class WebhookLogsRequestDto
     /// <summary>
     /// The status of the webhook delivery group.
     /// </summary>
-    /// <example>EnumValue</example>
+    /// <example>NotSent</example>
     [FromQuery(Name = "groupStatus")]
     public WebhookGroupStatus? GroupStatus { get; set; }
 
@@ -97,7 +97,7 @@ public class WebhookLogsRequestDto
     /// <summary>
     /// The type of event that triggered the webhook.
     /// </summary>
-    /// <example>{}</example>
+    /// <example>0</example>
     [FromQuery(Name = "trigger")]
     public WebhookTrigger? Trigger { get; set; }
 

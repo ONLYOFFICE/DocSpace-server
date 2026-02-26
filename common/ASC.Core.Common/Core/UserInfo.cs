@@ -179,10 +179,10 @@ public sealed class UserInfo : IDirectRecipient, ICloneable
     public MobilePhoneActivationStatus MobilePhoneActivationStatus { get; set; }
 
     /// <summary>
-    /// The LDAP user identificator.
+    /// The LDAP user identifier.
     /// </summary>
     /// <example>S-1-5-21-3623811015-3361044348-30300820-1013</example>
-    public string Sid { get; set; } // LDAP user identificator
+    public string Sid { get; set; } // LDAP user identifier
 
     /// <summary>
     /// The LDAP user quota attribute.
@@ -191,16 +191,16 @@ public sealed class UserInfo : IDirectRecipient, ICloneable
     public long LdapQouta { get; init; } // LDAP user quota attribute
 
     /// <summary>
-    /// The SSO SAML user identificator.
+    /// The SSO SAML user identifier.
     /// </summary>
     /// <example>johndoe@example.com</example>
-    public string SsoNameId { get; set; } // SSO SAML user identificator
+    public string SsoNameId { get; set; } // SSO SAML user identifier
 
     /// <summary>
-    /// The SSO SAML user session identificator.
+    /// The SSO SAML user session identifier.
     /// </summary>
     /// <example>_1a2b3c4d5e6f7g8h9i0j</example>
-    public string SsoSessionId { get; set; } // SSO SAML user session identificator
+    public string SsoSessionId { get; set; } // SSO SAML user session identifier
 
     /// <summary>
     /// The date and time when the user account was created.

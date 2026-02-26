@@ -33,7 +33,7 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 /// </summary>
 /// <example>
 /// {
-///   "type": "EnumValue",
+///   "type": 1,
 ///   "name": "example value",
 ///   "size": {},
 ///   "path": {}
@@ -44,7 +44,7 @@ public class WhiteLabelItemDto
     /// <summary>
     /// The white label logo type.
     /// </summary>
-    /// <example>EnumValue</example>
+    /// <example>1</example>
     public WhiteLabelLogoType Type { get; set; }
 
     /// <summary>

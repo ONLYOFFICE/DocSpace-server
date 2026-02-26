@@ -53,7 +53,7 @@ public class FileOperationDto
     /// <summary>
     /// The file operation error message.
     /// </summary>
-    /// <example></example>
+    /// <example>File not found.</example>
     public required string Error { get; set; }
 
     /// <summary>

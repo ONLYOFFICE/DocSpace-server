@@ -81,6 +81,6 @@ public class WebhooksLogRequest
     /// <summary>
     /// The status of the webhook delivery group.
     /// </summary>
-    /// <example>EnumValue</example>
+    /// <example>0</example>
     public WebhookGroupStatus? GroupStatus { get; set; }
 }

@@ -33,7 +33,10 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 /// {
 ///   "progress": 99.99,
 ///   "error": "Connection failed",
-///   "parseResult": {},
+///   "parseResult": {
+///     "migratorName": "Nextcloud",
+///     "operation": "parse"
+///   },
 ///   "isCompleted": true
 /// }
 /// </example>
@@ -54,7 +57,12 @@ public class MigrationStatusDto
     /// <summary>
     /// The migration API information.
     /// </summary>
-    /// <example>{}</example>
+    /// <example>
+    /// {
+    ///   "migratorName": "Nextcloud",
+    ///   "operation": "parse"
+    /// }
+    /// </example>
     public MigrationApiInfo ParseResult { get; set; }
 
     /// <summary>

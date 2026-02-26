@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.ComponentModel;
+
 namespace ASC.AI.Models.ResponseDto;
 
 /// <summary>
@@ -35,16 +37,19 @@ public enum MessageContentType
     /// <summary>
     /// A plain text content block.
     /// </summary>
+    [Description("Text")]
     Text,
 
     /// <summary>
     /// A tool invocation and its result.
     /// </summary>
+    [Description("Tool")]
     Tool,
 
     /// <summary>
     /// A file attachment reference.
     /// </summary>
+    [Description("Attachment")]
     Attachment
 }
 

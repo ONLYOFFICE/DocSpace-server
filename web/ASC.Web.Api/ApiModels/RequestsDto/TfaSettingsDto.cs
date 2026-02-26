@@ -31,6 +31,10 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 /// </summary>
 /// <example>
 /// {
+///   "id": "tfa-default",
+///   "title": "Default TFA policy",
+///   "enabled": true,
+///   "avaliable": true,
 ///   "trustedIps": ["item1", "item2"],
 ///   "mandatoryUsers": [],
 ///   "mandatoryGroups": []
@@ -41,21 +45,25 @@ public class TfaSettingsDto
     /// <summary>
     /// The ID of the TFA configuration.
     /// </summary>
+    /// <example>tfa-default</example>
     public required string Id { get; set; }
 
     /// <summary>
     /// The display name or description of the TFA configuration.
     /// </summary>
+    /// <example>Default TFA policy</example>
     public required string Title { get; set; }
 
     /// <summary>
     /// Indicates whether the TFA configuration is currently active.
     /// </summary>
+    /// <example>true</example>
     public required bool Enabled { get; set; }
 
     /// <summary>
     /// Indicates whether the TFA configuration can be used.
     /// </summary>
+    /// <example>true</example>
     public required bool Avaliable { get; set; }
 
     /// <summary>

@@ -45,6 +45,6 @@ public class TenantQuotaSettingsRequestsDto
     /// <summary>
     /// The storage quota limit in bytes allocated to the tenant.
     /// </summary>
-    /// <example>1</example>
+    /// <example>1048576</example>
     public long Quota { get; set; }
 }

@@ -78,7 +78,7 @@ public class PortalMobileAppRequestDto
     /// <summary>
     /// The target mobile platform or application type.
     /// </summary>
-    /// <example>EnumValue</example>
+    /// <example>IosProjects</example>
     [FromQuery(Name = "type")]
     public MobileAppType Type { get; set; }
 }

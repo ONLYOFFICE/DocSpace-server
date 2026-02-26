@@ -43,7 +43,7 @@ public class TfaRequestsDto
     /// <summary>
     /// The two-factor authentication type.
     /// </summary>
-    /// <example>EnumValue</example>
+    /// <example>None</example>
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public TfaRequestsDtoType Type { get; set; }
 

@@ -73,7 +73,7 @@ public class MentionMessageWrapper
     /// <summary>
     /// The config parameter which contains the information about the action in the document that will be scrolled to.
     /// </summary>
-    /// <example>https://example.com</example>
+    /// <example>{"action": {"data": "section-42", "type": "scroll"}}</example>
     public ActionLinkConfig ActionLink { get; set; }
 
     /// <summary>

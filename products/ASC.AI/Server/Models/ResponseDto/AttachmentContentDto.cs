@@ -34,7 +34,7 @@ public class AttachmentContentDto : MessageContentDto
     /// <summary>
     /// The content block type. Always equals "Attachment".
     /// </summary>
-    /// <example>2</example>
+    /// <example>Attachment</example>
     public override MessageContentType Type => MessageContentType.Attachment;
 
     /// <summary>
@@ -45,7 +45,7 @@ public class AttachmentContentDto : MessageContentDto
     /// <summary>
     /// The display title of the attached file.
     /// </summary>
-    /// <example>Report.docx</example>
+    /// <example>Report</example>
     public required string Title { get; init; }
 
     /// <summary>

@@ -35,7 +35,7 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 ///   "uri": "example value",
 ///   "enabled": true,
 ///   "sSL": true,
-///   "triggers": {},
+///   "triggers": 0,
 ///   "targetId": "example value",
 ///   "createdBy": {},
 ///   "createdOn": "2024-01-15T10:30:00Z",
@@ -57,7 +57,7 @@ public class WebhooksConfigDto
     /// <summary>
     /// The webhook name.
     /// </summary>
-    /// <example>Example Name</example>
+    /// <example>Jhon</example>
     public string Name { get; set; }
 
     /// <summary>
@@ -81,7 +81,7 @@ public class WebhooksConfigDto
     /// <summary>
     /// The webhook trigger type.
     /// </summary>
-    /// <example>{}</example>
+    /// <example>All</example>
     public WebhookTrigger Triggers { get; set; }
 
     /// <summary>
@@ -93,7 +93,7 @@ public class WebhooksConfigDto
     /// <summary>
     /// The user who created the webhook.
     /// </summary>
-    /// <example>{}</example>
+    /// <example>{ "displayName": "Mike Zanyatski" }</example>
     public EmployeeDto CreatedBy { get; set; }
 
     /// <summary>
@@ -105,7 +105,7 @@ public class WebhooksConfigDto
     /// <summary>
     /// The user who modified the webhook.
     /// </summary>
-    /// <example>{}</example>
+    /// <example>{ "displayName": "Mike Zanyatski" }</example>
     public EmployeeDto ModifiedBy { get; set; }
 
     /// <summary>
@@ -141,7 +141,7 @@ public class WebhooksConfigWithStatusDto
     /// <summary>
     /// The webhook configuration.
     /// </summary>
-    /// <example>{}</example>
+    /// <example>{ "id": 1, "name": "Jhon" }</example>
     public WebhooksConfigDto Configs { get; set; }
 
     /// <summary>

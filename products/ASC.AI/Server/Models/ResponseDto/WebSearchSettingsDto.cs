@@ -40,7 +40,8 @@ public class WebSearchSettingsDto
     /// <summary>
     /// The type of web search engine configured.
     /// </summary>
-    /// <example>0</example>    public EngineType Type { get; init; }
+    /// <example>0</example>    
+    public EngineType Type { get; init; }
 
     /// <summary>
     /// Indicates whether the web search API key needs to be reconfigured.

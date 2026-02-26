@@ -70,7 +70,7 @@ public class CreateThirdPartyRoom
     /// <summary>
     /// The color of the third-party room.
     /// </summary>
-    /// <example>FF0000</example>
+    /// <example>#FF0000</example>
     public string Color { get; set; }
 
     /// <summary>

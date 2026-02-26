@@ -213,7 +213,7 @@ public class FileDto<T> : FileEntryDto<T>
     /// <summary>
     /// The date when the file will be expired.
     /// </summary>
-    /// <example>false</example>
+    /// <example>2025-12-31T23:59:59Z</example>
     public ApiDateTime Expired { get; set; }
 
     /// <summary>

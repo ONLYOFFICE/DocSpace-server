@@ -64,7 +64,7 @@ public class AuditEventDto
     /// <summary>
     /// The specific action that occurred within the audit event.
     /// </summary>
-    /// <example>EnumValue</example>
+    /// <example>None</example>
     public MessageAction ActionId { get; set; }
 
     /// <summary>

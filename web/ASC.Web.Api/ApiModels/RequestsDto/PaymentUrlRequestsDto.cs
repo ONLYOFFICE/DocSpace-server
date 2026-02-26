@@ -76,7 +76,7 @@ public class WalletQuantityRequestDto
     /// <summary>
     /// The type of action performed on a product's quantity.
     /// </summary>
-    /// <example>EnumValue</example>
+    /// <example>0</example>
     public ProductQuantityType ProductQuantityType { get; set; }
 }
 

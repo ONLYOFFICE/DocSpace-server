@@ -193,7 +193,7 @@ public class EmployeeFullDto : EmployeeDto
     /// <summary>
     /// The user theme settings.
     /// </summary>
-    /// <example>0</example>
+    /// <example>Base</example>
     public DarkThemeSettingsType? Theme { get; set; }
 
     /// <summary>

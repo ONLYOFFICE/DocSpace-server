@@ -72,7 +72,7 @@ public class FireBaseUser : BaseEntity
     /// <summary>
     /// The database tenant parameters.
     /// </summary>
-    /// <example>1</example>
+    /// <example>{"id": 1, "name": "Main Tenant", "alias": "main", "mappedDomain": "example.com", "version": 5 }</example>
     public DbTenant Tenant { get; set; }
 
     public override object[] GetKeys()
