@@ -69,6 +69,7 @@ public class ActionLinkConfig
         /// </summary>
         /// <example>section</example>
         [JsonPropertyName("data")]
+        [StringLength(256)]
         public string Data { get; set; }
 
         /// <summary>
@@ -76,6 +77,7 @@ public class ActionLinkConfig
         /// </summary>
         /// <example>scroll</example>
         [JsonPropertyName("type")]
+        [StringLength(128)]
         public string Type { get; set; }
     }
 }

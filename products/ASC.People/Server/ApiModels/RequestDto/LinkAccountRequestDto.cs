@@ -50,31 +50,6 @@ public class SignupAccountRequestDto
     public EmployeeType? EmployeeType { get; set; }
 
     /// <summary>
-    /// The user first name.
-    /// </summary>
-    /// <example>John</example>
-    public string FirstName { get; set; }
-
-    /// <summary>
-    /// The user last name.
-    /// </summary>
-    /// <example>Doe</example>
-    public string LastName { get; set; }
-
-    /// <summary>
-    /// The user email address.
-    /// </summary>
-    /// <example>john.doe@example.com</example>
-    [EmailAddress]
-    public string Email { get; set; }
-
-    /// <summary>
-    /// The user password hash.
-    /// </summary>
-    /// <example>$2a$10$abcdefghijklmnopqrstuv</example>
-    public string PasswordHash { get; set; }
-
-    /// <summary>
     /// The user link key.
     /// </summary>
     /// <example>invite_key_123456</example>

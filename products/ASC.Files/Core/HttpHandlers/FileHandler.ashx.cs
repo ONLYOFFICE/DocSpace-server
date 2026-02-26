@@ -793,7 +793,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             var fileExtension = fileUtility.GetInternalExtension(toExtension);
 
             var storeTemplate = await globalStore.GetStoreTemplateAsync();
-            var docTemplate = await globalStore.GetNewDocTemplate(serviceProvider, storeTemplate, fileExtension);
+            var docTemplate = await globalStore.GetNewDocTemplate(serviceProvider, storeTemplate, fileExtension, ignoreTemplates: true);
 
             if (docTemplate == null)
             {

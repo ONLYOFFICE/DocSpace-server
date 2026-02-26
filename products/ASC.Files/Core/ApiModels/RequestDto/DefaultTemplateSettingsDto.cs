@@ -32,14 +32,24 @@ namespace ASC.Files.Core.ApiModels.RequestDto
     public class DefaultTemplateSettingsRequestDto
     {
         /// <summary>
-        /// File id to replace template with (or null to use default template)
+        /// File id to replace template with
         /// </summary>
-        /// <example>1</example>
-        public int? SelectedFile { get; set; }
+        public required JsonElement SelectedFile { get; set; }
         /// <summary>
         /// File extension of a template to replace
         /// </summary>
         /// <example>.docx</example>
+        public required string FileExtension { get; set; }
+    }
+
+    /// <summary>
+    /// Default templates settings reset request parameters.
+    /// </summary>
+    public class DefaultTemplateSettingsResetRequestDto
+    {
+        /// <summary>
+        /// File extension of a template to reset
+        /// </summary>
         public required string FileExtension { get; set; }
     }
 

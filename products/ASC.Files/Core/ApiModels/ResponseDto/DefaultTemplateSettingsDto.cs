@@ -67,6 +67,12 @@ namespace ASC.Files.Core.ApiModels.ResponseDto
         public DateTime? LastModified { get; set; }
 
         /// <summary>
+        /// Filesize (in bytes) of a default template
+        /// </summary>
+        /// <example>1024</example>
+        public long? FileSize { get; set; }
+
+        /// <summary>
         /// View url of a default template
         /// </summary>
         /// <example>http://localhost/template/view</example>

@@ -345,24 +345,27 @@ public class GlobalStore(StorageFactory storageFactory, TenantManager tenantMana
         public string FileName => Title + FileExtension;
     }
 
-    public async Task<DocTemplate> GetNewDocTemplate(IServiceProvider serviceProvider, IDataStore storeTemplate, string extension, CultureInfo culture = null)
+    public async Task<DocTemplate> GetNewDocTemplate(IServiceProvider serviceProvider, IDataStore storeTemplate, string extension, CultureInfo culture = null, bool ignoreTemplates = false)
     {
-        var templateSettingsHelper = serviceProvider.GetRequiredService<DefaultTemplateSettingsHelper>();
-        var templateSettings = await templateSettingsHelper.GetSettingsAsync();
-
-        var templateSetting = templateSettings.Items.FirstOrDefault(t => t.FileExtension == extension);
-        if (templateSetting?.SelectedFile != null)
+        if (!ignoreTemplates)
         {
-            var fileDao = serviceProvider.GetRequiredService<IFileDao<int>>();
-            var file = await fileDao.GetFileAsync(templateSetting.SelectedFile.Value);
+            var templateSettingsHelper = serviceProvider.GetRequiredService<DefaultTemplateSettingsHelper>();
+            var templateSettings = await templateSettingsHelper.GetSettingsAsync();
 
-            return new DocTemplate()
+            var templateSetting = templateSettings.Items.FirstOrDefault(t => t.FileExtension == extension);
+            if (templateSetting?.SelectedFile != null)
             {
-                Title = file.Title,
-                FileExtension = extension,
-                FileSize = file.ContentLength,
-                GetStreamAsync = () => fileDao.GetFileStreamAsync(file)
-            };
+                var fileDao = serviceProvider.GetRequiredService<IFileDao<int>>();
+                var file = await fileDao.GetFileAsync(templateSetting.SelectedFile.Value);
+
+                return new DocTemplate()
+                {
+                    Title = file.Title,
+                    FileExtension = extension,
+                    FileSize = file.ContentLength,
+                    GetStreamAsync = () => fileDao.GetFileStreamAsync(file)
+                };
+            }
         }
 
         var defaultPath = coreBaseSettings.CustomMode
