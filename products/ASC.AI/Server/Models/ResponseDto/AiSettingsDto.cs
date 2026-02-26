@@ -67,6 +67,11 @@ public class AiSettingsDto
     /// The name of the embedding model used for document vectorization.
     /// </summary>
     public required string EmbeddingModel { get; init; }
+    
+    /// <summary>
+    /// Mapping of model identifiers to human-readable aliases.
+    /// </summary>
+    public required IReadOnlyDictionary<string, string> ModelAliases { get; init; }
 
     /// <summary>
     /// The tool name used by the AI assistant for knowledge base search.

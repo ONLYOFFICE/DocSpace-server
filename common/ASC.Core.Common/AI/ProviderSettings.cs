@@ -107,4 +107,9 @@ public class ProviderSettings
     {
         return _aliasByModelId.GetValueOrDefault(modelId);
     }
+
+    public IReadOnlyDictionary<string, string> GetModelAliases()
+    {
+        return _aliasByModelId;
+    }
 }
