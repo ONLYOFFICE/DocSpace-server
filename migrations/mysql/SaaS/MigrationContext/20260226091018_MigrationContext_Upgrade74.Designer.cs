@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     [DbContext(typeof(MigrationContext))]
-    [Migration("20260221124044_MigrationContext_Upgrade73")]
-    partial class MigrationContext_Upgrade73
+    [Migration("20260226091018_MigrationContext_Upgrade74")]
+    partial class MigrationContext_Upgrade74
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -4095,8 +4095,17 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
+                    b.Property<bool?>("StartFilling")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("start_filling")
+                        .HasComputedColumnSql("IF(JSON_EXTRACT(`data`, '$.FormFilling.StartFilling') IS NULL, NULL, JSON_EXTRACT(`data`, '$.FormFilling.StartFilling'))", true);
+
                     b.HasKey("TenantId", "EntryId")
                         .HasName("PRIMARY");
+
+                    b.HasIndex("TenantId", "StartFilling", "EntryId")
+                        .HasDatabaseName("idx_tenant_start_entry");
 
                     b.ToTable("files_properties", (string)null);
                 });
