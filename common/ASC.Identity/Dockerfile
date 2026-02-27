@@ -52,7 +52,7 @@ RUN mvn clean package -DskipTests -Dfmt.skip=true -T1 -pl ${MODULE} -am -B
 FROM eclipse-temurin:21-jdk-alpine AS jre-builder
 
 RUN $JAVA_HOME/bin/jlink \
-    --add-modules java.base,java.logging,java.sql,java.naming,java.management,java.instrument,java.security.jgss,java.desktop,jdk.unsupported,java.compiler,jdk.crypto.ec \
+    --add-modules java.base,java.logging,java.sql,java.naming,java.management,jdk.management,java.instrument,java.security.jgss,java.desktop,jdk.unsupported,java.compiler,jdk.crypto.ec \
     --strip-debug \
     --no-man-pages \
     --no-header-files \
