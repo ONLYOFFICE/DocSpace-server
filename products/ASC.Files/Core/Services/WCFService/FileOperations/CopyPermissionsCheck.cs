@@ -391,7 +391,7 @@ public class CopyPermissionsCheck(FileSecurity security, LockerManager lockerMan
 
         var files = await fileDao.GetFilesAsync(folder.Id, new OrderBy(SortedByType.AZ, true), FilterType.FilesOnly, false, Guid.Empty, string.Empty, null, false, withSubfolders: true).ToListAsync();
 
-        errorMsg = await WithErrorAsync(files, checkPermissions);
+        errorMsg = await CheckFilesSecurityPermissionsAsync(files, checkPermissions);
         if (errorMsg != null)
         {
             throw new SecurityException(errorMsg);
@@ -416,7 +416,7 @@ public class CopyPermissionsCheck(FileSecurity security, LockerManager lockerMan
     {
         string errorMsg = null;
 
-        errorMsg = await WithErrorAsync([file], checkPermissions);
+        errorMsg = await CheckFilesSecurityPermissionsAsync([file], checkPermissions);
 
         if (file == null)
         {
@@ -541,7 +541,7 @@ public class CopyPermissionsCheck(FileSecurity security, LockerManager lockerMan
                     ? null
                     : await ttoFileDao.GetFileAsync(toFolderId, file.Title);
 
-        errorMsg = await WithErrorAsync([file], checkPermissions);
+        errorMsg = await CheckFilesSecurityPermissionsAsync([file], checkPermissions);
 
         if (conflict == null || conflict.Category != file.Category)
         {
@@ -573,7 +573,7 @@ public class CopyPermissionsCheck(FileSecurity security, LockerManager lockerMan
         return null;
     }
 
-    public async Task<string> WithErrorAsync<T>(IEnumerable<File<T>> files, bool checkPermissions = true)
+    public async Task<string> CheckFilesSecurityPermissionsAsync<T>(IEnumerable<File<T>> files, bool checkPermissions = true)
     {
         foreach (var file in files)
         {

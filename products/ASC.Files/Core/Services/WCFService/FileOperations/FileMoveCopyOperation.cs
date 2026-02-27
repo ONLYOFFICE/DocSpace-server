@@ -339,7 +339,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                 if (!Equals(folder.ParentId ?? default, toFolderId) || _resolveType == FileConflictResolveType.Duplicate)
                 {
                     var files = await FileDao.GetFilesAsync(folder.Id, new OrderBy(SortedByType.AZ, true), FilterType.FilesOnly, false, Guid.Empty, string.Empty, null, false, withSubfolders: true).ToListAsync();
-                    var errorMsg = await permissionsManager.WithErrorAsync(files, checkPermissions);
+                    var errorMsg = await permissionsManager.CheckFilesSecurityPermissionsAsync(files, checkPermissions);
 
                     try
                     {
@@ -767,7 +767,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
             CancellationToken.ThrowIfCancellationRequested();
 
             var file = await FileDao.GetFileAsync(fileId);
-            var errorMsg = await permissionsManager.WithErrorAsync([file], checkPermissions);
+            var errorMsg = await permissionsManager.CheckFilesSecurityPermissionsAsync([file], checkPermissions);
 
             Err = await permissionsManager.CheckFilesPermissionsAsync(
                 file, 
