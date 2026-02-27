@@ -36,7 +36,7 @@ COPY registration/registration-core/registration-domain/pom.xml registration/reg
 COPY registration/registration-core/registration-service/pom.xml registration/registration-core/registration-service/
 
 # Download the project dependencies without running tests
-RUN mvn dependency:go-offline -B
+RUN mvn dependency:go-offline -B -Dfmt.skip=true
 
 # Copy the source code
 COPY authorization authorization/
@@ -46,10 +46,31 @@ COPY registration registration/
 
 # Build the project based on the specified module
 ARG MODULE
-RUN mvn clean package -DskipTests -pl ${MODULE} -am -B
+RUN mvn clean package -DskipTests -Dfmt.skip=true -T1 -pl ${MODULE} -am -B
 
-# Stage 2: Create the runtime image
-FROM eclipse-temurin:21-jre-alpine
+# Stage 2: Create custom JRE with jlink
+FROM eclipse-temurin:21-jdk-alpine AS jre-builder
+
+RUN $JAVA_HOME/bin/jlink \
+    --add-modules java.base,java.logging,java.sql,java.naming,java.management,java.instrument,java.security.jgss,java.desktop,jdk.unsupported,java.compiler,jdk.crypto.ec \
+    --strip-debug \
+    --no-man-pages \
+    --no-header-files \
+    --compress=zip-6 \
+    --output /custom-jre
+
+# Stage 3: Create the minimal runtime image
+FROM alpine:latest
+
+# Install required runtime dependencies
+RUN apk add --no-cache ca-certificates tzdata
+
+# Copy custom JRE from jre-builder stage
+COPY --from=jre-builder /custom-jre /opt/java
+
+# Set environment variables
+ENV JAVA_HOME=/opt/java
+ENV PATH="${JAVA_HOME}/bin:${PATH}"
 
 # Set the working directory inside the container
 WORKDIR /app

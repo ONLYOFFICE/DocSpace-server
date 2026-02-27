@@ -29,12 +29,6 @@
             <artifactId>spring-boot-starter-amqp</artifactId>
         </dependency>
 
-        <!-- Spring IoC Dependency -->
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
-        </dependency>
-
         <!-- Spring JSON Dependency -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
