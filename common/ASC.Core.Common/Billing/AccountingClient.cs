@@ -562,18 +562,20 @@ public class Balance
     /// </summary>
     /// <example>12345</example>
     public int AccountNumber { get; init; }
-
     /// <summary>
     /// The sub-account number.
     /// </summary>
+    /// <example>12345</example>
     public int SubAccountNumber { get; init; }
     /// <summary>
     /// The account name.
     /// </summary>
+    /// <example>aitools</example>
     public string AccountName { get; init; }
     /// <summary>
     /// The account currency.
     /// </summary>
+    /// <example>"USD"</example>
     public string AccountCurrency { get; init; }
     /// <summary>
     /// A list of sub-accounts.
@@ -583,6 +585,12 @@ public class Balance
     /// <summary>
     /// The most recent credit transaction applied to the account.
     /// </summary>
+    /// <example>{"Date": "2024-01-15T10:30:00Z", "currency": "USD", "amount": 1500.75}</example>
+    /// {
+    ///   "date": "2024-01-01T00:00:00Z",
+    ///   "currency": "USD",
+    ///   "amount": 1500.75
+    /// }
     public TransactionInfo LastCredit { get; init; }
     
     public bool IsDefault()
@@ -599,16 +607,19 @@ public class TransactionInfo
     /// <summary>
     /// The date and time when the credit transaction occurred.
     /// </summary>
+    /// <example>2024-01-15T10:30:00Z</example>
     public DateTime Date { get; init; }
 
     /// <summary>
     /// The three-character ISO 4217 currency symbol of the transaction.
     /// </summary>
+    /// <example>"USD"</example>
     public string Currency { get; init; }
 
     /// <summary>
     /// Amount of the transaction.
     /// </summary>
+    /// <example>1500.75</example>
     public decimal Amount { get; init; }
 }
 
@@ -752,61 +763,73 @@ public class Operation
     /// <summary>
     /// Date of the operation.
     /// </summary>
+    /// <example>2024-01-15T10:30:00Z</example>
     public DateTime Date { get; set; }
 
     /// <summary>
     /// Service related to the operation.
     /// </summary>
+    /// <example>backup</example>
     public string Service { get; set; }
 
     /// <summary>
     /// Brief description of the operation.
     /// </summary>
+    /// <example>Backup</example>
     public string Description { get; set; }
 
     /// <summary>
     /// Brief details of the operation.
     /// </summary>
+    /// <example>Automatic backup</example>
     public string Details { get; set; }
 
     /// <summary>
     /// Unit of the service.
     /// </summary>
+    /// <example>GB</example>
     public string ServiceUnit { get; set; }
 
     /// <summary>
     /// Quantity of the service used.
     /// </summary>
+    /// <example>1</example>
     public int Quantity { get; set; }
 
     /// <summary>
     /// The three-character ISO 4217 currency symbol of the operation.
     /// </summary>
+    /// <example>USD</example>
     public string Currency { get; set; }
 
     /// <summary>
     /// Credit amount of the operation.
     /// </summary>
+    /// <example>1500.75</example>
     public decimal Credit { get; set; }
 
     /// <summary>
     /// Debit amount of the operation.
     /// </summary>
+    /// <example>1500.75</example>
     public decimal Debit { get; set; }
 
     /// <summary>
     /// Original name of the participant.
     /// </summary>
+    /// <example>ACME Corp</example>
     public string ParticipantName { get; set; }
 
     /// <summary>
     /// Display name of the participant.
     /// </summary>
+    /// <example>ACME Corp</example>
     public string ParticipantDisplayName { get; set; }
 
     /// <summary>
     /// Metadata of the operation.
     /// </summary>
+    /// <example>{}</example>
     public Dictionary<string, string> Metadata { get; set; }
 }
 
@@ -818,11 +841,13 @@ public class Currency
     /// <summary>
     /// The currency unique identifier.
     /// </summary>
+    /// <example>12345</example>
     public int Id { get; init; }
 
     /// <summary>
     /// The three-character ISO 4217 currency symbol.
     /// </summary>
+    /// <example>USD</example>
     public string Code { get; init; }
 }
 
@@ -834,30 +859,37 @@ public class ServicePayment
     /// <summary>
     /// The payment operation ID.
     /// </summary>
+    /// <example>12345</example>
     public int OperationId { get; init; }
     /// <summary>
     /// The balance of the sub-account in the specified currency.
     /// </summary>
+    /// <example>1500.75</example>
     public decimal Amount { get; init; }
     /// <summary>
     /// The three-character ISO 4217 currency symbol.
     /// </summary>
+    /// <example>USD</example>
     public string Currency { get; init; }
     /// <summary>
     /// Total quantity of operations.
     /// </summary>
+    /// <example>10</example>
     public int Quantity { get; init; }
     /// <summary>
     /// The subscription ID
     /// </summary>
+    /// <example>12345</example>
     public int? SubscriptionId { get; init; }
     /// <summary>
     /// The subscription start date.
     /// </summary>
+    /// <example>2024-01-15T10:30:00Z</example>
     public DateTime? StartDate { get; init; }
     /// <summary>
     /// The subscription end date.
     /// </summary>
+    /// <example>2024-01-15T10:30:00Z</example>
     public DateTime? EndDate { get; init; }
 }
 

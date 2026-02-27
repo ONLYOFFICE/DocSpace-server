@@ -63,6 +63,7 @@ public class CustomerOperationsReportRequestDto
     /// <summary>
     /// The service name.
     /// </summary>
+    /// <example>aitools</example>
     public string ServiceName { get; set; }
 
     /// <summary>
@@ -98,20 +99,24 @@ public class CustomerOperationsReportRequestDto
     /// <summary>
     /// List of operation types to filter by.
     /// </summary>
+    /// <example>Any</example>
     public ASC.Core.Billing.OperationType? Types { get; init; }
 
     /// <summary>
     /// List of operation status to filter by.
     /// </summary>
+    /// <example>Any</example>
     public OperationStatus? Status { get; init; }
 
     /// <summary>
     /// The field to order by.
     /// </summary>
+    /// <example>StartDate</example>
     public string OrderBy { get; init; }
 
     /// <summary>
-    /// Order direction: ASC or DESC.
+    /// Order direction: Ascending or Descending.
     /// </summary>
+    /// <example>Descending</example>
     public OperationOrderType? OrderType  { get; init; }
 }

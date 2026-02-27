@@ -58,6 +58,7 @@ public class PaymentAccountRequestDto
     /// <summary>
     /// The URL where the user will be redirected after payment processing.
     /// </summary>
+    /// <example>https://example.com</example>
     [FromQuery(Name = "backUrl")]
     public string BackUrl { get; set; }
 }
@@ -70,6 +71,7 @@ public class PaymentInformationRequestDto
     /// <summary>
     /// Specifies whether to refresh the payment information cache or not.
     /// </summary>
+    /// <example>true</example>
     [FromQuery(Name = "refresh")]
     public bool Refresh { get; set; }
 }
@@ -82,6 +84,7 @@ public class QuotasRequestDto
     /// <summary>
     /// Specifies whether to return the wallet quotas only.
     /// </summary>
+    /// <example>true</example>
     [FromQuery(Name = "wallet")]
     public bool Wallet { get; set; }
 }
@@ -94,6 +97,7 @@ public class CustomerServiceQuotaRequestDto: PaymentInformationRequestDto
     /// <summary>
     /// The service name.
     /// </summary>
+    /// <example>aitools</example>
     [FromQuery(Name = "serviceName")]
     public string ServiceName { get; set; }
 }
@@ -168,12 +172,14 @@ public class BuyWalletServiceRequestDto
     /// <summary>
     /// Number of services provided.
     /// </summary>
+    /// <example>1</example>
     [Range(1, 999999)]
     public int Quantity { get; set; }
 
     /// <summary>
     /// The service name.
     /// </summary>
+    /// <example>aitools</example>
     public string ServiceName { get; set; }
 }
 
@@ -218,6 +224,7 @@ public class SetRestrictedAiModelsRequestDto
     /// <summary>
     /// The set of restricted AI model IDs.
     /// </summary>
+    /// <example>["model1", "model2"]</example>
     [Required]
     public HashSet<string> Models { get; set; }
 }
