@@ -144,7 +144,10 @@ public enum StartFillingMode
     ShareToFillOut,
 
     [Description("Start filling")]
-    StartFilling
+    StartFilling,
+
+    [Description("Start filling form room")]
+    StartFillingFormRoom
 }
 
 /// <summary>

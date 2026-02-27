@@ -34,6 +34,7 @@ public class DbFilesProperties : BaseEntity
 
     public DbTenant Tenant { get; set; }
 
+    public bool? StartFilling { get; private set; }
     public override object[] GetKeys()
     {
         return [TenantId, EntryId];
@@ -79,6 +80,16 @@ public static class DbFilesPropertiesExtension
                     .HasCharSet("utf8")
                     .UseCollation("utf8_general_ci");
 
+                entity.Property(e => e.StartFilling)
+                    .HasColumnName("start_filling")
+                    .HasColumnType("tinyint(1)")
+                    .HasComputedColumnSql(
+                        "IF(JSON_EXTRACT(`data`, '$.FormFilling.StartFilling') IS NULL, NULL, JSON_EXTRACT(`data`, '$.FormFilling.StartFilling'))",
+                        stored: true);
+
+                entity.HasIndex(e => new { e.TenantId, e.StartFilling, e.EntryId })
+                    .HasDatabaseName("idx_tenant_start_entry");
+
             });
         }
 
@@ -101,6 +112,15 @@ public static class DbFilesPropertiesExtension
                 entity.Property(e => e.Data)
                     .HasColumnName("data")
                     .HasColumnType("text");
+
+                entity.Property(e => e.StartFilling)
+                    .HasColumnName("start_filling")
+                    .HasComputedColumnSql(
+                        "CASE WHEN data->'FormFilling'->>'StartFilling' IS NULL THEN NULL ELSE (data->'FormFilling'->>'StartFilling')::boolean END",
+                        stored: true);
+
+                entity.HasIndex(e => new { e.TenantId, e.StartFilling, e.EntryId })
+                    .HasDatabaseName("idx_tenant_start_entry");
             });
         }
     }

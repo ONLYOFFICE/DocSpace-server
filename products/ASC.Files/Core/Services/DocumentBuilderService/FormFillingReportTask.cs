@@ -45,7 +45,7 @@ public class FormFillingReportTask : DocumentBuilderTask<int, FormFillingReportT
         var script = await DocumentBuilderScriptHelper.ReadTemplateFromEmbeddedResource(ScriptName) ?? throw new Exception("Template not found");
         var tempFileName = DocumentBuilderScriptHelper.GetTempFileName(".xlsx");
 
-        var data = await GetFormFillingReportData(serviceProvider, _userId, _data.RoomId, _data.OriginalFormId);
+        var data = await GetFormFillingReportData(serviceProvider, _userId, _data.RoomId, _data.OriginalFormId, _data.OriginalFormVersion);
 
         script = script
             .Replace("${tempFileName}", tempFileName)
@@ -71,10 +71,23 @@ public class FormFillingReportTask : DocumentBuilderTask<int, FormFillingReportT
         using var response = await httpClient.SendAsync(request);
         await using var stream = await response.Content.ReadAsStreamAsync();
 
-        resultFile.CreateOn = tenantUtil.DateTimeNow();
-        resultFile.ContentLength = stream.Length;
+        if (origProperties.FormFilling.IsVersionChanged)
+        {
+            resultFile.Version++;
+            resultFile.VersionGroup++;
+            resultFile.ContentLength = stream.Length;
 
-        resultFile = await fileDao.ReplaceFileVersionAsync(resultFile, stream);
+            resultFile = await fileDao.SaveFileAsync(resultFile, stream, false);
+            origProperties.FormFilling.IsVersionChanged = false;
+            await fileDao.SaveProperties(_data.OriginalFormId, origProperties);
+        }
+        else
+        {
+            resultFile.CreateOn = tenantUtil.DateTimeNow();
+            resultFile.ContentLength = stream.Length;
+
+            resultFile = await fileDao.ReplaceFileVersionAsync(resultFile, stream);
+        }
 
         if (resultFile.Id != origProperties.FormFilling.ResultsFileID)
         {
@@ -85,7 +98,7 @@ public class FormFillingReportTask : DocumentBuilderTask<int, FormFillingReportT
         return resultFile;
     }
 
-    private static async Task<object> GetFormFillingReportData(IServiceProvider serviceProvider, Guid userId, int roomId, int originalFormId)
+    private static async Task<object> GetFormFillingReportData(IServiceProvider serviceProvider, Guid userId, int roomId, int originalFormId, int originalFormVersion)
     {
         var userManager = serviceProvider.GetService<UserManager>();
         var daoFactory = serviceProvider.GetService<IDaoFactory>();
@@ -104,7 +117,7 @@ public class FormFillingReportTask : DocumentBuilderTask<int, FormFillingReportT
         CultureInfo.CurrentCulture = userCulture;
         CultureInfo.CurrentUICulture = userCulture;
 
-        var formFillingResults = await formFillingReportCreator.GetFormFillingResults(roomId, originalFormId);
+        var formFillingResults = await formFillingReportCreator.GetFormFillingResults(roomId, originalFormId, originalFormVersion);
         var tenantCulture = tenantManager.GetCurrentTenant().GetCulture();
 
         var keys = new List<string>();
@@ -186,4 +199,4 @@ public class FormFillingReportTask : DocumentBuilderTask<int, FormFillingReportT
     }
 }
 
-public record FormFillingReportTaskData(int RoomId, int OriginalFormId, IDictionary<string, string> Headers);
+public record FormFillingReportTaskData(int RoomId, int OriginalFormId, int OriginalFormVersion, IDictionary<string, string> Headers);
