@@ -67,12 +67,14 @@ public class ActionLinkConfig
         /// The action data that will be scrolled to.
         /// </summary>
         [JsonPropertyName("data")]
+        [StringLength(256)]
         public string Data { get; set; }
 
         /// <summary>
         /// The action type.
         /// </summary>
         [JsonPropertyName("type")]
+        [StringLength(128)]
         public string Type { get; set; }
     }
 }

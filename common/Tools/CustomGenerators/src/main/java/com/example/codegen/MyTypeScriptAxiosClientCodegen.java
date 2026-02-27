@@ -1,28 +1,50 @@
+/*
+ * (c) Copyright Ascensio System SIA 2026
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.example.codegen;
 
-import org.openapitools.codegen.model.*;
-import org.openapitools.codegen.languages.PythonClientCodegen;
-import io.swagger.v3.oas.models.servers.*;
-import static org.openapitools.codegen.utils.StringUtils.underscore;
-import static org.openapitools.codegen.utils.StringUtils.camelize;
-import io.swagger.v3.oas.models.media.Schema;
-import org.openapitools.codegen.utils.*;
-import org.openapitools.codegen.*;
-
-import java.util.*;
 import java.io.File;
-import java.util.Map.Entry;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.Map.Entry;
 
-public class MyPythonCodegen extends PythonClientCodegen {
+import org.openapitools.codegen.model.*;
+import org.openapitools.codegen.languages.TypeScriptAxiosClientCodegen;
+import static org.openapitools.codegen.utils.StringUtils.camelize;
+import org.openapitools.codegen.*;
+import org.openapitools.codegen.utils.ModelUtils;
+import io.swagger.v3.oas.models.servers.*;
+import io.swagger.v3.oas.models.media.Schema;
 
-    public MyPythonCodegen() {
+public class MyTypeScriptAxiosClientCodegen extends TypeScriptAxiosClientCodegen {
+
+    protected String apiDocPath = "docs/";
+    protected String modelDocPath = "docs/";
+    public static final String BASE_URL = "baseURL";
+
+    public MyTypeScriptAxiosClientCodegen() {
         super();
-        this.templateDir = "templates/python";
-        this.embeddedTemplateDir = "python";
+        this.templateDir = "templates/typescript-axios";
+        this.embeddedTemplateDir = "typescript-axios";
 
-        supportingFiles.add(new SupportingFile("main.mustache", "samples", "main.py"));
-        
+        additionalProperties.put("apiDocPath", apiDocPath);
+        additionalProperties.put("modelDocPath", modelDocPath);
+        modelDocTemplateFiles.put("model_doc.mustache", ".md");
+        apiDocTemplateFiles.put("api_doc.mustache", ".md");
+
         supportingFiles.add(new SupportingFile(
             "AUTHORS.mustache", "", "AUTHORS.md"
         ));
@@ -35,11 +57,11 @@ public class MyPythonCodegen extends PythonClientCodegen {
             "CHANGELOG.mustache", "", "CHANGELOG.md"
         ));
     }
-
+    
     @Override
     public void processOpts() {
         super.processOpts();
-        this.outputFolder = "../../../sdk/docspace-api-sdk-python";
+        this.outputFolder = "../../../sdk/docspace-api-sdk-typescript";
 
         if (openAPI.getServers() != null && !openAPI.getServers().isEmpty()) {
             Server server = openAPI.getServers().get(0);
@@ -47,70 +69,25 @@ public class MyPythonCodegen extends PythonClientCodegen {
             if (serverVars != null){
                 ServerVariable baseUrlVar = serverVars.get("baseUrl");
                 if(baseUrlVar != null && "".equals(baseUrlVar.getDefault())){
-                    baseUrlVar.setDefault("http://localhost:8092");
+                    baseUrlVar.setDefault("http://localhost:8092/");
                 }
             }
         }
 
         supportingFiles.removeIf(f -> f.getTemplateFile().equals("git_push.sh.mustache") || 
-            f.getDestinationFilename().equals(".openapi-generator-ignore") || 
-            f.getTemplateFile().equals("setup.mustache") ||
-            f.getTemplateFile().equals("setup_cfg.mustache")
+            f.getDestinationFilename().equals(".openapi-generator-ignore")
         );
 
-        if(Boolean.TRUE.equals(additionalProperties.get("excludeTests")))
-        {
-            modelTestTemplateFiles.clear();
-            apiTestTemplateFiles.clear();
-        }
-    }
-
-    @Override
-    public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List<ModelMap> allModels) {
-        super.postProcessOperationsWithModels(objs, allModels);
-
-        if (objs != null && objs.getOperations() != null) {
-            OperationMap operationMap = objs.getOperations();
-            List<CodegenOperation> operationList = operationMap.getOperation();
-
-            String className = operationMap.getClassname();
-            if (className != null && className.endsWith(apiNameSuffix)) {
-                className = className.substring(0, className.length() - 3);
-            }
-            TagParts tagParts = tagMapSanitize.get(className);
-            operationMap.put("x-folder", underscore(tagParts.folderPart));
-            operationMap.put("x-classname", tagParts.classPart + apiNameSuffix);
-            boolean shouldSupportFields = false;
-            boolean supportUseAt = false;
-
-            if (operationList != null) {
-                for (CodegenOperation op : operationList) { 
-
-                    if ("GET".equalsIgnoreCase(op.httpMethod)) {
-                        boolean allAreQueryParams = op.allParams.stream()
-                            .allMatch(p -> Boolean.TRUE.equals(p.isQueryParam));
-
-                        boolean hasCountParam = op.allParams.stream()
-                            .anyMatch(p -> "count".equals(p.baseName));
-
-                        if (allAreQueryParams && hasCountParam) {
-                            op.vendorExtensions.put("x-hasFieldsParam", true);
-                            shouldSupportFields = true;
-                        }
-                    }
-                    if ("GET".equalsIgnoreCase(op.httpMethod)
-                        && "/api/2.0/files/recent".equals(op.path)) {
-
-                        op.vendorExtensions.put("x-supportsUseAtMethod", true);
-                        supportUseAt = true;
-                    }
-                }
-            }
-            operationMap.put("x-supportsFields", shouldSupportFields);
-            operationMap.put("x-supportsUseAt", supportUseAt);
+        if (additionalProperties.containsKey(NPM_REPOSITORY)) {
+            this.setNpmRepository(additionalProperties.get(NPM_REPOSITORY).toString());
         }
 
-        return objs;
+        supportingFiles.add(new SupportingFile("README.mustache", "", "README.md"));
+        supportingFiles.add(new SupportingFile("package.mustache", "", "package.json"));
+        supportingFiles.add(new SupportingFile("tsconfig.mustache", "", "tsconfig.json"));
+        if (supportsES6) {
+            supportingFiles.add(new SupportingFile("tsconfig.esm.mustache", "", "tsconfig.esm.json"));
+        }
     }
 
     @Override
@@ -119,9 +96,6 @@ public class MyPythonCodegen extends PythonClientCodegen {
 
         for (ModelMap mo : objs.getModels()) {
             CodegenModel model = mo.getModel();
-            if ("ApiDateTime".equals(model.classname)) {
-                model.vendorExtensions.put("isApiDateTime", true);
-            }
 
             if (model.getComposedSchemas() != null && model.getComposedSchemas().getAllOf() != null) {
                 model.getVendorExtensions().put("x-uses-allOf", true);
@@ -149,10 +123,60 @@ public class MyPythonCodegen extends PythonClientCodegen {
                 model.getVendorExtensions().put("x-localVars", localVars);
             }
         }
+        
         return objs;
     }
-    
+
     @Override
+    public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List<ModelMap> allModels) {
+        objs = super.postProcessOperationsWithModels(objs, allModels);
+        OperationMap operationMap = objs.getOperations();
+        List<CodegenOperation> operations = operationMap.getOperation();
+        String className = operationMap.getClassname();
+        if (className != null && className.endsWith(apiNameSuffix)) {
+            className = className.substring(0, className.length() - 3);
+        }
+        TagParts tagParts = tagMap.get(className);
+        operationMap.put("x-folder", (tagParts.folderPart).replaceAll("([a-z0-9])([A-Z])", "$1-$2").toLowerCase(Locale.ROOT));
+        operationMap.put("x-file", (tagParts.classPart + apiNameSuffix).replaceAll("([a-z0-9])([A-Z])", "$1-$2").toLowerCase(Locale.ROOT));
+        operationMap.put("x-classname", tagParts.classPart + apiNameSuffix);
+        boolean shouldSupportFields = false;
+        boolean supportUseAt = false;
+        if (operations != null) {
+            for (CodegenOperation op : operations) {
+                if (op.operationId != null) {
+                    String dashedId = toDashCase(op.operationId);
+                    String seealsoUrl = "https://api.onlyoffice.com/docspace/api-backend/usage-api/" + dashedId + "/";
+                    op.vendorExtensions.put("x-seealsoUrl", seealsoUrl);
+                }
+
+                if ("GET".equalsIgnoreCase(op.httpMethod)) {
+                    boolean allAreQueryParams = op.allParams.stream()
+                        .allMatch(p -> Boolean.TRUE.equals(p.isQueryParam));
+
+                    boolean hasCountParam = op.allParams.stream()
+                        .anyMatch(p -> "count".equals(p.baseName));
+
+                    if (allAreQueryParams && hasCountParam) {
+                        op.vendorExtensions.put("x-hasFieldsParam", true);
+                        shouldSupportFields = true;
+                    }
+                }
+                if ("GET".equalsIgnoreCase(op.httpMethod)
+                        && "/api/2.0/files/recent".equals(op.path)) {
+
+                        op.vendorExtensions.put("x-supportsUseAtMethod", true);
+                        supportUseAt = true;
+                    }
+            }
+        }
+        operationMap.put("x-supportsFields", shouldSupportFields);
+        operationMap.put("x-supportsUseAt", supportUseAt);
+
+        return objs;
+    }
+
+    
     public Map<String, Object> postProcessSupportingFileData(Map<String, Object> objs) {
         super.postProcessSupportingFileData(objs);
 
@@ -165,13 +189,11 @@ public class MyPythonCodegen extends PythonClientCodegen {
             if (className != null && className.endsWith(apiNameSuffix)) {
                 className = className.substring(0, className.length() - 3);
             }
-            TagParts tagParts = tagMapSanitize.get(className);
-
+            TagParts tagParts = tagMap.get(camelize(className));
             String folder = tagParts.folderPart;
             String classname = tagParts.classPart + apiNameSuffix;
 
-            api.put("x-folder", underscore(folder));
-            api.put("x-folder-api", underscore(tagParts.classPart + apiNameSuffix));
+            api.put("x-folder", folder);
             api.put("x-classname", classname);
 
             folderToApis.computeIfAbsent(folder, k -> new ArrayList<>()).add(api);
@@ -194,63 +216,49 @@ public class MyPythonCodegen extends PythonClientCodegen {
         return objs;
     }
 
+    private String toDashCase(String input) {
+        return input.replaceAll("([a-z0-9])([A-Z])", "$1-$2")
+                    .toLowerCase();
+    }
+
     @Override
-    public Map<String, ModelsMap> postProcessAllModels(Map<String, ModelsMap> objs) {
-        final Map<String, ModelsMap> processed = super.postProcessAllModels(objs);
+    public String apiDocFileFolder() {
+        return (outputFolder + "/" + apiDocPath).replace('/', File.separatorChar);
+    }
 
-        for (Map.Entry<String, ModelsMap> entry : processed.entrySet()) {
-            ModelsMap modelsMap = entry.getValue();
-
-            for (ModelMap m : modelsMap.getModels()) {
-                CodegenModel model = m.getModel();
-
-                if (model.isEnum && model.getAllowableValues() != null) {
-                    
-                    List<Map<String, Object>> enumVars = (List<Map<String, Object>>) model.getAllowableValues().get("enumVars");
-
-                    if (enumVars != null) {
-                        for (Map<String, Object> ev : enumVars) {
-                            String name = (String) ev.get("name");
-
-                            if ("None".equals(name)) {
-                                ev.put("name", "None_");
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        return processed;
+    @Override
+    public String modelDocFileFolder() {
+        return (outputFolder + "/" + modelDocPath).replace('/', File.separatorChar);
     }
 
     @Override
     public String getName() {
-        return "my-python";
+        return "my-typescript-axios";
     }
 
     @Override
     public String getHelp() {
-        return "Generates a custom Python client with example main.py.";
+        return "Generates a TypeScript client library using axios.";
     }
-
+    
     @Override
     public String apiFilename(String templateName, String tag) {
+
         String uniqueTag = uniqueCaseInsensitiveString(tag, seenApiFilenames);
         String suffix = apiTemplateFiles().get(templateName);
-        TagParts tagParts = tagMap.get(tag);
+
+        TagParts tagParts = tagMap.get(camelize(uniqueTag));
         if (tagParts == null) {
             return apiFileFolder() + File.separator + toApiFilename(uniqueTag) + suffix;
         }
 
-        String folderPath = apiFileFolder() + File.separator + underscore(tagParts.folderPart);
+        String folderPath = apiFileFolder() + File.separator + tagParts.folderPart.replaceAll("([a-z0-9])([A-Z])", "$1-$2").toLowerCase(Locale.ROOT);
         String filename = toApiFilename(tagParts.classPart) + suffix;
 
         return folderPath + File.separator + filename;
     }
 
     private final Map<String, TagParts> tagMap = new HashMap<>();
-    private final Map<String, TagParts> tagMapSanitize = new HashMap<>();
 
     @Override
     public String sanitizeTag(String tag) {
@@ -260,14 +268,23 @@ public class MyPythonCodegen extends PythonClientCodegen {
             String folderPart = parts[0];
             String classPart = (parts.length > 1) ? parts[1] : parts[0];
 
+            String folderPartSanitized = camelize(sanitizeName(folderPart));
+            final String classPartSanitized = camelize(sanitizeName(classPart));
+
+            boolean duplicate = tagMap.values().stream()
+                .anyMatch(tp -> tp.classPart.equals(classPartSanitized));
+
+            String finalClassPartSanitized = duplicate
+                ? folderPartSanitized + classPartSanitized
+                : classPartSanitized;
+
             TagParts info = new TagParts(
                 tag,
-                camelize(sanitizeName(folderPart)),
-                camelize(sanitizeName(classPart))
+                folderPartSanitized,
+                finalClassPartSanitized
             );
 
             tagMap.put(sanitized, info);
-            tagMapSanitize.put(camelize(sanitizeName(tag)), info);
         }
         return sanitized;
     }
@@ -296,5 +313,4 @@ public class MyPythonCodegen extends PythonClientCodegen {
         seenValues.put(value, value);
         return value;
     }
-
 }

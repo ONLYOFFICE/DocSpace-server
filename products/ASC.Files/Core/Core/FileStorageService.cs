@@ -4021,7 +4021,10 @@ public class FileStorageService //: IFileStorageService
                                                 break;
                                             }
                                             await filesMessageService.SendAsync(MessageAction.RoomCreateUser, entry, user.Id, ace.Access, null, true, name);
-                                            await notifyClient.SendInvitedToRoom(folder, user);
+                                            if (notify)
+                                            {
+                                                await notifyClient.SendInvitedToRoom(folder, user);
+                                            }
                                             break;
                                         case EventType.Remove:
                                             if (beforeOwnerChange)
@@ -4032,11 +4035,14 @@ public class FileStorageService //: IFileStorageService
                                             break;
                                         case EventType.Update:
                                             await filesMessageService.SendAsync(MessageAction.RoomUpdateAccessForUser, entry, user.Id, ace.Access, pastRecord.Share, true, name);
-                                            await notifyClient.SendRoomUpdateAccessForUser(folder, user, ace.Access);
+                                            if (notify)
+                                            {
+                                                await notifyClient.SendRoomUpdateAccessForUser(folder, user, ace.Access);
 
-                                            var role = FileShareExtensions.GetAccessString(ace.Access, true, folder.FolderType == FolderType.AiRoom);
-                                            var url = commonLinkUtility.GetFullAbsolutePath($"rooms/shared/{folder.Id}");
-                                            await studioNotifyService.SendMsgUserRoleChangedAsync(user, folder.Title, url, role, folder.FolderType == FolderType.AiRoom);
+                                                var role = FileShareExtensions.GetAccessString(ace.Access, true, folder.FolderType == FolderType.AiRoom);
+                                                var url = commonLinkUtility.GetFullAbsolutePath($"rooms/shared/{folder.Id}");
+                                                await studioNotifyService.SendMsgUserRoleChangedAsync(user, folder.Title, url, role, folder.FolderType == FolderType.AiRoom);
+                                            }
                                             break;
                                     }
                                 }
@@ -4660,6 +4666,8 @@ public class FileStorageService //: IFileStorageService
 
     public async Task<List<AceShortWrapper>> SendEditorNotifyAsync<T>(T fileId, MentionMessageWrapper mentionMessage)
     {
+        ArgumentNullException.ThrowIfNull(mentionMessage?.Emails);
+
         if (!authContext.IsAuthenticated)
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
@@ -4670,19 +4678,14 @@ public class FileStorageService //: IFileStorageService
 
         if (file == null)
         {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
+            throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
-        var canRead = await fileSecurity.CanReadAsync(file);
+        var canComment = await fileSecurity.CanCommentAsync(file);
 
-        if (!canRead)
+        if (!canComment)
         {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
-        }
-
-        if (mentionMessage?.Emails == null)
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_BadRequest);
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
         }
 
         var showSharingSettings = false;

@@ -24,7 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Common.Settings;
 using ASC.EventBus.Abstractions;
+using ASC.Files.Core.Configuration;
 using ASC.Web.Core.RemovePortal;
 
 namespace ASC.Data.Backup.Services;
@@ -233,6 +235,22 @@ public class RestoreProgressItem : BaseBackupProgressItem
             catch (Exception error)
             {
                 _logger.ErrorClear2faSettings(error);
+            }
+
+            try
+            {
+                var settingsManager = scope.ServiceProvider.GetRequiredService<SettingsManager>();
+                var defaultTemplateSettings = await settingsManager.LoadAsync<DefaultTemplateSettings>();
+                if (defaultTemplateSettings.Items.Any(i => i.SelectedFile != null))
+                {
+                    var helper = scope.ServiceProvider.GetRequiredService<DefaultTemplateSettingsHelper>();
+                    var settings = await helper.RestoreSettingsAsync();
+                    _ = await settingsManager.SaveAsync(settings);
+                }
+            }
+            catch (Exception error)
+            {
+                _logger.ErrorUpdateDefaultTemplateSettings(error);
             }
 
             try
