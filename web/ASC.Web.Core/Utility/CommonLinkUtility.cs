@@ -91,9 +91,9 @@ public class CommonLinkUtility(
         return ToAbsolute("~/profile/notifications");
     }
 
-    public string GetEmployees(EmployeeStatus empStatus = EmployeeStatus.Active)
+    public string GetEmployees(EmployeeType employeeType = EmployeeType.User, EmployeeStatus empStatus = EmployeeStatus.Active)
     {
-        return ToAbsolute("~/accounts/people/filter") +
+        return ToAbsolute(employeeType == EmployeeType.Guest ? "~/accounts/guests/filter" : "~/accounts/people/filter") +
                (empStatus == EmployeeStatus.Terminated ? $"?employeestatus={(int)EmployeeStatus.Terminated}" : string.Empty);
     }
 
@@ -106,16 +106,16 @@ public class CommonLinkUtility(
 
     public async Task<string> GetUserProfileAsync(Guid userId)
     {
-        var path = GetEmployees();
-
-        if (!userManager.IsSystemUser(userId))
+        if (userManager.IsSystemUser(userId))
         {
-            var user = await userManager.GetUsersAsync(userId);
-
-            path += $"?search={HttpUtility.UrlEncode(user.Email?.ToLowerInvariant())}";
+            return GetEmployees();
         }
 
-        return path;
+        var user = await userManager.GetUsersAsync(userId);
+        var employeeType = await userManager.GetUserTypeAsync(userId);
+        var path = GetEmployees(employeeType);
+
+        return $"{path}?search={HttpUtility.UrlEncode(user.Email?.ToLowerInvariant())}";
     }
 
     #endregion

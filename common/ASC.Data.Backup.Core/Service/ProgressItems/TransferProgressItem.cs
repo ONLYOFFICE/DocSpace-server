@@ -84,7 +84,7 @@ public class TransferProgressItem : BaseBackupProgressItem
         {
             await using var scope = _serviceScopeProvider.CreateAsyncScope();
             _tenantManager = scope.ServiceProvider.GetService<TenantManager>();
-            var transferProgressItem = scope.ServiceProvider.GetService<TransferPortalTask>();
+            using var transferProgressItem = scope.ServiceProvider.GetService<TransferPortalTask>();
 
 
             await _notifyHelper.SendAboutTransferStartAsync(tenant, TargetRegion, Notify);

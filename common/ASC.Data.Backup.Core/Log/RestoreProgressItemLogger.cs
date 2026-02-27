@@ -27,6 +27,9 @@
 namespace ASC.Data.Backup.Core.Log;
 internal static partial class RestoreProgressItemLogger
 {
+    [LoggerMessage(LogLevel.Information, "RestoreCancelled")]
+    public static partial void InfoRestoreCancelled(this ILogger<RestoreProgressItem> logger);
+
     [LoggerMessage(LogLevel.Error, "RestoreProgressItem")]
     public static partial void ErrorRestoreProgressItem(this ILogger<RestoreProgressItem> logger, Exception exception);
 
@@ -41,4 +44,7 @@ internal static partial class RestoreProgressItemLogger
 
     [LoggerMessage(LogLevel.Error, "Clear2faSettings")]
     public static partial void ErrorClear2faSettings(this ILogger<RestoreProgressItem> logger, Exception exception);
+
+    [LoggerMessage(LogLevel.Error, "UpdateDefaultTemplateSettings")]
+    public static partial void ErrorUpdateDefaultTemplateSettings(this ILogger<RestoreProgressItem> logger, Exception exception);
 }

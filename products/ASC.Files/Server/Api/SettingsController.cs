@@ -413,6 +413,7 @@ public class SettingsController(
     /// <path>api/2.0/files/settings/defaulttemplate</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "New default template settings", typeof(DefaultTemplateSettingsDto))]
+    [SwaggerResponse(400, "Incorrect or missing file")]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [HttpPut("settings/defaulttemplate")]
     public async Task<DefaultTemplateSettingsDto> SetDefaultTemplate(DefaultTemplateSettingsRequestDto inDto)
@@ -423,12 +424,29 @@ public class SettingsController(
     }
 
     /// <remarks>
+    /// Resets the default template setting.
+    /// </remarks>
+    /// <summary>Reset the default template setting</summary>
+    /// <path>api/2.0/files/settings/defaulttemplate</path>
+    [Tags("Files / Settings")]
+    [SwaggerResponse(200, "New default template settings", typeof(DefaultTemplateSettingsDto))]
+    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
+    [HttpDelete("settings/defaulttemplate")]
+    public async Task<DefaultTemplateSettingsDto> ResetDefaultTemplate(DefaultTemplateSettingsResetRequestDto inDto)
+    {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        var settings = await defaultTemplateSettingsHelper.SetTemplateAsync(inDto.FileExtension, null);
+        return await defaultTemplateSettingsHelper.ConvertToDtoAsync(settings);
+    }
+
+    /// <remarks>
     /// Uploads a file to use as the default template setting.
     /// </remarks>
     /// <summary>Upload a file as the default template setting</summary>
     /// <path>api/2.0/files/settings/defaulttemplate</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "New default template settings", typeof(DefaultTemplateSettingsDto))]
+    [SwaggerResponse(400, "Incorrect or missing file")]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [HttpPost("settings/defaulttemplate")]
     public async Task<DefaultTemplateSettingsDto> UploadDefaultTemplate(DefaultTemplateSettingsUploadRequestDto inDto)
@@ -436,5 +454,19 @@ public class SettingsController(
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         var settings = await defaultTemplateSettingsHelper.SetTemplateAsync(inDto.FileExtension, inDto.File.FileName, inDto?.File.OpenReadStream());
         return await defaultTemplateSettingsHelper.ConvertToDtoAsync(settings);
+    }
+
+    /// <remarks>
+    /// Changes the setting that allows the user to organize the grouping of rooms.
+    /// </remarks>
+    /// <summary>Organize rooms grouping</summary>
+    /// <path>api/2.0/settings/organizegrouping</path>
+    [Tags("Files / Settings")]
+    [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]
+    [HttpPut("settings/organizegrouping")]
+    public async Task<bool> SetOrganizeRoomsGrouping(SettingsRequestDto inDto)
+    {
+        await filesSettingsHelper.SetOrganizeRoomsGroupingAsync(inDto.Set);
+        return await filesSettingsHelper.GetOrganizeRoomsGroupingAsync();
     }
 }

@@ -48,7 +48,7 @@ public class License
     public bool Customization { get; set; }
 
     /// <summary>
-    /// Specifies if the license is time limited or not.
+    /// Specifies if the license is time-limited or not.
     /// </summary>
     public bool TimeLimited { get; set; }
 
@@ -104,6 +104,12 @@ public class License
     /// </summary>
     [JsonPropertyName("docspace_dev")]
     public bool Developer { get; set; }
+
+    /// <summary>
+    /// Specifies if the license supports Automation API or not.
+    /// </summary>
+    [JsonPropertyName("advanced_api")]
+    public bool AutomationApi { get; set; }
 
     public static License Parse(string licenseString)
     {

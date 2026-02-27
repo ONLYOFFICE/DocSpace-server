@@ -141,8 +141,13 @@ public class QuotaSocketManager(
 
     private enum QuotaScope
     {
+        [Description("User")]
         User,
+
+        [Description("Room")]
         Room,
+
+        [Description("Tenant")]
         Tenant
     }
 }

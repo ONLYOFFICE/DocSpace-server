@@ -51,10 +51,13 @@ namespace ASC.Files.Core.Configuration
                                                SettingsManager settingsManager,
                                                GlobalStore globalStore,
                                                IFileDao<int> fileDao,
+                                               IFileDao<string> fileThirdPartyDao,
                                                IFolderDao<int> folderDao,
                                                ExternalShare externalShare,
                                                CommonLinkUtility commonLinkUtility,
-                                               FilesLinkUtility filesLinkUtility)
+                                               FilesLinkUtility filesLinkUtility,
+                                               FilesMessageService fileMessageService,
+                                               FileChecker fileChecker)
     {
         public async Task<DefaultTemplateSettingsDto> ConvertToDtoAsync(DefaultTemplateSettings settings)
         {
@@ -87,6 +90,7 @@ namespace ASC.Files.Core.Configuration
                     result.FileTitle = file.Title;
                     result.LastModified = file.ModifiedOn;
                     result.ViewUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileDownloadUrl(file.Id)));
+                    result.FileSize = file.ContentLength;
                 }
 
                 return result;
@@ -113,7 +117,7 @@ namespace ASC.Files.Core.Configuration
             return result;
         }
 
-        public async Task<DefaultTemplateSettings> SetTemplateAsync(string extension, int? fileId)
+        public async Task<DefaultTemplateSettings> SetTemplateAsync(string extension, JsonElement? fileId)
         {
             var settings = await GetSettingsAsync();
             var setting = settings.Items.FirstOrDefault(item => item.FileExtension.Equals(extension, StringComparison.OrdinalIgnoreCase));
@@ -126,7 +130,7 @@ namespace ASC.Files.Core.Configuration
 
             if (fileId != null)
             {
-                var template = await fileDao.CopyFileAsync(fileId.Value, await folderDao.GetFolderIDDefaultTemplatesAsync(true));
+                var template = await checkAndCopyFile();
                 setting.SelectedFile = template.Id;
             }
             else
@@ -140,13 +144,47 @@ namespace ASC.Files.Core.Configuration
             }
 
             _ = await settingsManager.SaveAsync(settings);
+
+            fileMessageService.Send(MessageAction.DocumentsDefaultTemplatesSettingsUpdated, setting.FileExtension, fileId?.ToString());
+
             return settings;
+
+            async Task<File<int>> checkAndCopyFile()
+            {
+                FileEntry file = fileId.Value.ValueKind switch
+                {
+                    JsonValueKind.String => await fileThirdPartyDao.GetFileAsync(fileId.Value.GetString()),
+                    JsonValueKind.Number => await fileDao.GetFileAsync(fileId.Value.GetInt32()),
+                    _ => throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound),
+                };
+
+                if (file == null)
+                {
+                    throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
+                }
+                else if (Path.GetExtension(file.Title) != extension)
+                {
+                    throw new InvalidOperationException(FilesCommonResource.ErrorMessage_NotSupportedFormat);
+                }
+
+                return fileId.Value.ValueKind switch
+                {
+                    JsonValueKind.String => await fileThirdPartyDao.CopyFileAsync(fileId.Value.GetString(), await folderDao.GetFolderIDDefaultTemplatesAsync(true)),
+                    JsonValueKind.Number => await fileDao.CopyFileAsync(fileId.Value.GetInt32(), await folderDao.GetFolderIDDefaultTemplatesAsync(true)),
+                    _ => throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound),
+                };
+            }
         }
 
         public async Task<DefaultTemplateSettings> SetTemplateAsync(string extension, string title, Stream stream)
         {
             try
             {
+                if (Path.GetExtension(title) != extension)
+                {
+                    throw new InvalidOperationException(FilesCommonResource.ErrorMessage_NotSupportedFormat);
+                }
+
                 var settings = await GetSettingsAsync();
                 var setting = settings.Items.FirstOrDefault(item => item.FileExtension.Equals(extension, StringComparison.OrdinalIgnoreCase));
                 if (setting == null)
@@ -154,9 +192,23 @@ namespace ASC.Files.Core.Configuration
                     return settings;
                 }
 
+                if (FileUtility.GetFileTypeByExtention(setting.FileExtension) == FileType.Pdf)
+                {
+                    using var checkStream = new MemoryStream();
+                    await stream.CopyToAsync(checkStream);
+                    stream.Seek(0, SeekOrigin.Begin);
+                    checkStream.Seek(0, SeekOrigin.Begin);
+                    var result = await fileChecker.CheckExtendedPDFstream(checkStream);
+                    if (!result)
+                    {
+                        throw new InvalidOperationException(FilesCommonResource.ErrorMessage_UploadToFormRoom);
+                    }
+                }
+
                 var file = serviceProvider.GetService<File<int>>();
                 file.ParentId = await folderDao.GetFolderIDDefaultTemplatesAsync(true);
                 file.Title = title;
+                file.ContentLength = stream.Length;
                 file = await fileDao.SaveFileAsync(file, stream);
 
                 var currentFileId = setting.SelectedFile;
@@ -168,6 +220,9 @@ namespace ASC.Files.Core.Configuration
                 }
 
                 _ = await settingsManager.SaveAsync(settings);
+
+                fileMessageService.Send(MessageAction.DocumentsDefaultTemplatesSettingsUpdated, setting.FileExtension, file.Id.ToString());
+
                 return settings;
             }
             catch
@@ -178,6 +233,16 @@ namespace ASC.Files.Core.Configuration
             {
                 stream?.Dispose();
             }
+        }
+
+        public async Task<DefaultTemplateSettings> RestoreSettingsAsync()
+        {
+            var parentId = await folderDao.GetFolderIDDefaultTemplatesAsync(true);
+            var defaultTemplates = await fileDao.GetFilesAsync(parentId).ToListAsync();
+            var templates = await fileDao.GetFilesAsync(defaultTemplates).ToListAsync();
+            return new DefaultTemplateSettings() {
+                Items = [.. templates.Select(f => new DefaultTempalteItem() { FileExtension = Path.GetExtension(f.Title), SelectedFile = f.Id })]
+            };
         }
 
         private async Task<IEnumerable<string>> GetSampleDocumentsExtensionsListAsync()

@@ -72,13 +72,21 @@ public class ProjectConfigurator(
         var isStandalone = String.Compare(builder.Configuration["APP_HOSTING_STANDALONE"], "true", StringComparison.OrdinalIgnoreCase) == 0;
 
         project.WithEnvironment("core:base-domain", isStandalone ? "localhost" : "")
-               .WithEnvironment("DOTNET_ENVIRONMENT", builder.Environment.EnvironmentName);
+            .WithEnvironment("ai:mcp:0:endpoint",
+                new UriBuilder(Uri.UriSchemeHttp, Constants.DocSpaceMcpContainer, Constants.DocSpaceMcpPort)
+                    .ToString() + "mcp");
+
                
-        switch (builder.Environment.EnvironmentName)
+        switch (builder.Configuration["APP_EDITION"])
         {
             case "enterprise":
             case "developer":
-                project.WithEnvironment("license:file:path", Path.Combine(basePath, "Data", "license.lic"));
+                project.WithEnvironment("license:file:path", Path.Combine(basePath, "Data", "license.lic"))
+                       .WithEnvironment("DOTNET_ENVIRONMENT", builder.Configuration["APP_EDITION"]);
+                break;
+            default:
+                project.WithEnvironment("DOTNET_ENVIRONMENT", builder.Environment.EnvironmentName);
+
                 break;
         }
 
@@ -110,17 +118,23 @@ public class ProjectConfigurator(
             .WithEnvironment("web:hub:internal", new UriBuilder(Uri.UriSchemeHttp, Constants.SocketIoContainer, Constants.SocketIoPort).ToString())
             .WithEnvironment("core:hosting:singletonMode", true.ToString())
             .WithEnvironment("pathToConf", "/buildtools/config/")
-            .WithEnvironment("DOTNET_ENVIRONMENT", builder.Environment.EnvironmentName)
+            .WithEnvironment("ai:mcp:0:endpoint",new UriBuilder(Uri.UriSchemeHttp, Constants.DocSpaceMcpContainer, Constants.DocSpaceMcpPort).ToString() + "mcp")
             .WithArgs($"{dllPath}{name.Replace('_', '.')}.dll")
             .WithEntrypoint("dotnet");
-        
-        switch (builder.Environment.EnvironmentName)
+       
+        switch (builder.Configuration["APP_EDITION"])
         {
             case "enterprise":
             case "developer":
-                resourceBuilder.WithEnvironment("license:file:path", "/data/license.lic");
+                resourceBuilder.WithEnvironment("license:file:path", "/data/license.lic")
+                               .WithEnvironment("DOTNET_ENVIRONMENT", builder.Configuration["APP_EDITION"]);
+                break;
+            default:
+                resourceBuilder.WithEnvironment("DOTNET_ENVIRONMENT", builder.Environment.EnvironmentName);
+
                 break;
         }
+
 
         var isStandalone = String.Compare(builder.Configuration["APP_HOSTING_STANDALONE"], "true", StringComparison.OrdinalIgnoreCase) == 0;
 
@@ -185,7 +199,8 @@ public class ProjectConfigurator(
         }
         else
         {
-            var resourceBuilder = builder.AddNpmApp(name, path, "start:build")
+            var resourceBuilder = builder.AddJavaScriptApp(name, path, "start")
+                .WithYarn()
                 .WithEnvironment("NODE_ENV", "development")
                 .WithEnvironment("Redis:Hosts:0:Host", () => connectionManager.Redis?.Host ?? string.Empty)
                 .WithEnvironment("Redis:Hosts:0:Port", () => connectionManager.Redis?.Port ?? string.Empty)
@@ -222,7 +237,8 @@ public class ProjectConfigurator(
         }
         else
         {
-            builder.AddNpmApp(name, path, "start:build")
+            builder.AddJavaScriptApp(name, path, "start")
+                .WithYarn()
                 .WithEnvironment("NODE_ENV", "development")
                 .WithHttpEndpoint(targetPort: port)
                 .WithHttpHealthCheck("/health")
@@ -253,7 +269,8 @@ public class ProjectConfigurator(
         }
         else
         {
-            builder.AddNpmApp(name, path, "start:build")
+            builder.AddJavaScriptApp(name, path, "start")
+                .WithYarn()
                 .WithEnvironment("NODE_ENV", "development")
                 .WithHttpEndpoint(targetPort: port)
                 .WithHttpHealthCheck("/health")

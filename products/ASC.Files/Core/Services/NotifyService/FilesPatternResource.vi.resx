@@ -222,14 +222,14 @@ $__AuthorName đã xóa phòng: $RoomTitle</value>
   <data name="pattern_ShareDocument" xml:space="preserve">
     <value>h1. Đã cấp quyền truy cập cho tài liệu: "$DocumentTitle":"$DocumentURL"
 
-$__DateTime "$__AuthorName":"$__AuthorUrl" đã cấp cho bạn quyền truy cập tài liệu "$DocumentTitle":"$DocumentURL" với quyền truy cập là: "$AccessRights".
+$__DateTime $__AuthorName đã cấp cho bạn quyền truy cập tài liệu "$DocumentTitle":"$DocumentURL" với quyền truy cập là: "$AccessRights".
 
 $Message</value>
   </data>
   <data name="pattern_ShareFolder" xml:space="preserve">
     <value>h1. Đã cấp quyền truy cập cho thư mục: "$DocumentTitle":"$DocumentURL"
 
-$__DateTime "$__AuthorName":"$__AuthorUrl" đã cấp cho bạn quyền truy cập vào thư mục "$DocumentTitle":"$DocumentURL" với quyền truy cập là: "$AccessRights".
+$__DateTime $__AuthorName đã cấp cho bạn quyền truy cập vào thư mục "$DocumentTitle":"$DocumentURL" với quyền truy cập là: "$AccessRights".
 
 $Message</value>
   </data>

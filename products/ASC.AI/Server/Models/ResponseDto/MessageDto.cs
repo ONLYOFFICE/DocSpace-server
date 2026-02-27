@@ -26,11 +26,26 @@
 
 namespace ASC.AI.Models.ResponseDto;
 
-public class MessageDto(long id,Role role, IEnumerable<MessageContentDto> contents, ApiDateTime createdOn)
+public class MessageDto(long id, Role role, IEnumerable<MessageContentDto> contents, ApiDateTime createdOn)
 {
+    /// <summary>
+    /// The unique identifier of the message.
+    /// </summary>
     public long Id { get; } = id;
+
+    /// <summary>
+    /// The role of the message author: User or Assistant.
+    /// </summary>
     public Role Role { get; } = role;
+
+    /// <summary>
+    /// The ordered collection of content blocks that make up the message body (text, tool calls, or attachments).
+    /// </summary>
     public IEnumerable<MessageContentDto> Contents { get; } = contents;
+
+    /// <summary>
+    /// The date and time when the message was created.
+    /// </summary>
     public ApiDateTime CreatedOn { get; } = createdOn;
 }
 

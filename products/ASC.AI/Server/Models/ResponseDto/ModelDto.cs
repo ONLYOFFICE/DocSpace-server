@@ -28,8 +28,19 @@ namespace ASC.AI.Models.ResponseDto;
 
 public class ModelDto
 {
+    /// <summary>
+    /// The unique identifier of the AI provider that offers this model.
+    /// </summary>
     public int ProviderId { get; init; }
+
+    /// <summary>
+    /// The human-readable display name of the AI provider (e.g., "OpenAI", "Anthropic").
+    /// </summary>
     public required string ProviderTitle { get; init; }
+
+    /// <summary>
+    /// The model identifier as recognized by the AI provider (e.g., "gpt-4o", "claude-sonnet-4-20250514").
+    /// </summary>
     public required string ModelId { get; init; }
 }
 

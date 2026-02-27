@@ -220,16 +220,16 @@ $__AuthorName şu odayı sildi: $RoomTitle</value>
     <value>"$RoomTitle" odasındaki rolünüz "$RoomRole" olarak değiştirildi</value>
   </data>
   <data name="pattern_ShareDocument" xml:space="preserve">
-    <value>h1. $__DateTime, "$__AuthorName":"$__AuthorUrl" kullanıcısı "$DocumentTitle":"$DocumentURL" dosyasına erişiminize şu erişim haklarıyla: "$AccessRights" izin verdi.
+    <value>h1. Belgeler. Şu belgeye erişim izni verildi: $DocumentTitle
 
-Portal adresiniz: "$__VirtualRootPath":"$__VirtualRootPath"
+$__DateTime, $__AuthorName kullanıcısı "$DocumentTitle":"$DocumentURL" dosyasına erişiminize şu erişim haklarıyla izin verdi: "$AccessRights".
 
 $Message</value>
   </data>
   <data name="pattern_ShareFolder" xml:space="preserve">
-    <value>h1. $__DateTime, "$__AuthorName":"$__AuthorUrl" kullanıcısı
+    <value>h1. Belgeler. Şu klasöre erişim izni verildi: $DocumentTitle
 
-"$DocumentTitle":"$DocumentURL" klasörüne erişiminize şu erişim haklarıyla izin verdi: "$AccessRights".
+$__DateTime, $__AuthorName kullanıcısı "$DocumentTitle":"$DocumentURL" klasörüne erişiminize şu erişim haklarıyla izin verdi: "$AccessRights".
 
 $Message</value>
   </data>

@@ -52,6 +52,7 @@ public class PortalController(
     CookiesManager cookiesManager,
     SecurityContext securityContext,
     SettingsManager settingsManager,
+    IDistributedLockProvider distributedLockProvider,
     IMobileAppInstallRegistrator mobileAppInstallRegistrator,
     TenantExtra tenantExtra,
     IConfiguration configuration,
@@ -207,17 +208,20 @@ public class PortalController(
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
-        var existedInvitationLink = await userManager.GetInvitationLinkAsync(inDto.EmployeeType);
-        if (existedInvitationLink != null)
+        await using (await distributedLockProvider.TryAcquireFairLockAsync($"invitationlink_{tenant.Id}"))
         {
-            throw new ArgumentException("link with the same EmployeeType already exists");
+            var existedInvitationLink = await userManager.GetInvitationLinkAsync(inDto.EmployeeType);
+            if (existedInvitationLink != null)
+            {
+                throw new ArgumentException("link with the same EmployeeType already exists");
+            }
+
+            var invitationLink = await userManager.CreateInvitationLinkAsync(inDto.EmployeeType, expiration, inDto.MaxUseCount);
+
+            var result = await invitationLinkDtoHelper.GetAsync(invitationLink, tenant.Alias, currentUserId);
+
+            return result;
         }
-
-        var invitationLink = await userManager.CreateInvitationLinkAsync(inDto.EmployeeType, expiration, inDto.MaxUseCount);
-
-        var result = await invitationLinkDtoHelper.GetAsync(invitationLink, tenant.Alias, currentUserId);
-
-        return result;
     }
 
     /// <remarks>

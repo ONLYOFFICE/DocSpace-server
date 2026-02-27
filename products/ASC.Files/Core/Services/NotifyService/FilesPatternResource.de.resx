@@ -211,14 +211,14 @@ $__AuthorName hat den Raum gelöscht: $RoomTitle</value>
   <data name="pattern_ShareDocument" xml:space="preserve">
     <value>h1.Zugriff auf das Dokument "$DocumentTitle":"$DocumentURL" erteilt
 
-$__DateTime "$__AuthorName":"$__AuthorUrl" hat Ihnen den Zugriff auf das Dokument "$DocumentTitle":"$DocumentURL" mit der Berechtigung "$AccessRights" gewährt.
+$__DateTime $__AuthorName hat Ihnen den Zugriff auf das Dokument "$DocumentTitle":"$DocumentURL" mit der Berechtigung "$AccessRights" gewährt.
 
 $Message</value>
   </data>
   <data name="pattern_ShareFolder" xml:space="preserve">
     <value>h1.Zugriff auf den Ordner "$DocumentTitle":"$DocumentURL" erteilt
 
-$__DateTime "$__AuthorName":"$__AuthorUrl" hat Ihnen den Zugriff auf den Ordner "$DocumentTitle":"$DocumentURL" mit der Zugriffsberechtigung "$AccessRights" gewährt.
+$__DateTime $__AuthorName hat Ihnen den Zugriff auf den Ordner "$DocumentTitle":"$DocumentURL" mit der Zugriffsberechtigung "$AccessRights" gewährt.
 
 $Message</value>
   </data>

@@ -64,6 +64,7 @@ public abstract class BaseBackupProgressItem : DistributedTaskProgress
             Error = Exception != null ? Exception.Message : "",
             TenantId = TenantId,
             BackupProgressEnum = BackupProgressItemType.Convert(),
+            Status = Status,
             TaskId = Id
         };
         if (BackupProgressItemType is BackupProgressItemType.Backup or BackupProgressItemType.Transfer && Link != null)

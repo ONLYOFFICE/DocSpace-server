@@ -1,3 +1,19 @@
+/*
+ * (c) Copyright Ascensio System SIA 2026
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.example.codegen;
 
 import org.openapitools.codegen.languages.KotlinClientCodegen;
@@ -18,7 +34,7 @@ public class MyKotlinClientCodegen extends KotlinClientCodegen {
     public MyKotlinClientCodegen() {
         super();
         this.templateDir = "templates/kotlin";
-        this.embeddedTemplateDir = "kotlin";
+        this.embeddedTemplateDir = "kotlin-client";
     }
 
     @Override
@@ -113,6 +129,32 @@ public class MyKotlinClientCodegen extends KotlinClientCodegen {
 
         return objs;
     }
+
+    @Override
+    public ModelsMap postProcessModels(ModelsMap objs) {
+        super.postProcessModels(objs);
+
+        for (ModelMap mo : objs.getModels()) {
+            CodegenModel model = mo.getModel();
+
+            for (CodegenProperty prop : model.vars) {
+                if ("version_Changed".equalsIgnoreCase(prop.baseName)) {
+                    prop.name = "versionChangedField";
+                    prop.baseName = "versionChangedField";
+                    prop.getter = "getVersionChangedField";
+                    prop.setter = "setVersionChangedField";
+                    prop.nameInCamelCase = "versionChangedField";
+                    prop.nameInPascalCase = "VersionChangedField";
+                    prop.nameInSnakeCase = "VERSION_CHANGED_FIELD";
+                }
+            }
+            model.readWriteVars = model.vars.stream().filter(v -> !v.isReadOnly).collect(Collectors.toList());
+
+            model.allVars = new ArrayList<>(model.vars);
+        }
+        return objs;
+    }
+
 
     public Map<String, Object> postProcessSupportingFileData(Map<String, Object> objs) {
         super.postProcessSupportingFileData(objs);

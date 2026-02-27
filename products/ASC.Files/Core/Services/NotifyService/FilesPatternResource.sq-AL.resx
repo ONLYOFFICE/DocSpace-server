@@ -211,14 +211,14 @@ $__AuthorName fshiu një dhomë: $RoomTitle"</value>
   <data name="pattern_ShareDocument" xml:space="preserve">
     <value>h1. Lejohet aksesi në dokument: "$DocumentTitle":"$DocumentURL"
 
-$__DateTime "$__AuthorName":"$__AuthorUrl" ju dha akses në dokumentin "$DocumentTitle":"$DocumentURL" me të drejtat e mëposhtme të hyrjes: "$AccessRights". 
+$__DateTime $__AuthorName ju dha akses në dokumentin "$DocumentTitle":"$DocumentURL" me të drejtat e mëposhtme të hyrjes: "$AccessRights". 
 
 $Message</value>
   </data>
   <data name="pattern_ShareFolder" xml:space="preserve">
     <value>h1. Lejohet aksesi në dosje: "$DocumentTitle":"$DocumentURL"
 
-$__DateTime "$__AuthorName":"$__AuthorUrl" ju dha akses në dosjen "$DocumentTitle":"$DocumentURL" me të drejtat e mëposhtme të hyrjes: "$AccessRights".
+$__DateTime $__AuthorName ju dha akses në dosjen "$DocumentTitle":"$DocumentURL" me të drejtat e mëposhtme të hyrjes: "$AccessRights".
 
 $Message</value>
   </data>

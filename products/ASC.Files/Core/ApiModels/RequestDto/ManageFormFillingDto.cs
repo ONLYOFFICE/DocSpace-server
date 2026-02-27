@@ -51,5 +51,11 @@ public enum FormFillingManageAction
     Stop,
 
     [Description("Resume")]
-    Resume
+    Resume,
+
+    [Description("Start")]
+    Start,
+
+    [Description("Edit")]
+    Edit
 }

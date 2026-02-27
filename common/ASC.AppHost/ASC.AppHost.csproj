@@ -1,4 +1,4 @@
-<Project Sdk="Aspire.AppHost.Sdk/13.1.0">
+<Project Sdk="Aspire.AppHost.Sdk/13.1.1">
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
@@ -8,12 +8,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Aspire.Hosting.AppHost" />
+        <PackageReference Include="Aspire.Hosting.JavaScript" />
         <PackageReference Include="Aspire.Hosting.MySql" />
-        <PackageReference Include="Aspire.Hosting.NodeJs" />
         <PackageReference Include="Aspire.Hosting.RabbitMQ" />
         <PackageReference Include="Aspire.Hosting.Redis" />
         <PackageReference Include="CommunityToolkit.Aspire.Hosting.MailPit" />
+        <PackageReference Include="CommunityToolkit.Aspire.Hosting.McpInspector" />
         <PackageReference Include="CommunityToolkit.Aspire.Hosting.MySql.Extensions" />
     </ItemGroup>
 

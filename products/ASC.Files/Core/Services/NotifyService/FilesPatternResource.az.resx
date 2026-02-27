@@ -211,14 +211,14 @@ $__AuthorName otağı sildi: $RoomTitle</value>
   <data name="pattern_ShareDocument" xml:space="preserve">
     <value>h1. Sənədə giriş icazəsi verildi: "$DocumentTitle":"$DocumentURL"
 
-$__DateTime, "$__AuthorName":"$__AuthorUrl" istifadəçisi "$DocumentTitle":"$DocumentURL" sənədinə girişinizə bu giriş hüquqları ilə: "$AccessRights" icazə verdi.
+$__DateTime, $__AuthorName istifadəçisi "$DocumentTitle":"$DocumentURL" sənədinə girişinizə bu giriş hüquqları ilə: "$AccessRights" icazə verdi.
 
 $Message</value>
   </data>
   <data name="pattern_ShareFolder" xml:space="preserve">
     <value>h1. Qovluğa girişicazəsi verildi: "$DocumentTitle":"$DocumentURL"
 
-$__DateTime, "$__AuthorName":"$__AuthorUrl" istifadəçisi "$DocumentTitle":"$DocumentURL" qovluğuna girişinizə bu giriş hüququları ilə icazə verdi: "$AccessRights".
+$__DateTime, $__AuthorName istifadəçisi "$DocumentTitle":"$DocumentURL" qovluğuna girişinizə bu giriş hüququları ilə icazə verdi: "$AccessRights".
 
 $Message</value>
   </data>

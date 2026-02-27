@@ -18,7 +18,9 @@ import {{packageName}}.auth.HttpBearerAuth
 {{/isBasicBearer}}
 {{/isBasic}}
 {{#isApiKey}}
+{{#-first}}
 import {{packageName}}.auth.ApiKeyAuth
+{{/-first}}
 {{/isApiKey}}
 {{/authMethods}}
 {{/hasAuthMethods}}
@@ -231,7 +233,7 @@ import okhttp3.MediaType.Companion.toMediaType
     {{/isBasicBasic}}
     {{^isBasicBasic}}
     {{#hasOAuthMethods}}
-    {{^nonPublicApi}}{{#explicitApi}}public {{/explicitApi}}{{/nonPublicApi}}fun setCredentials(username: String, password: String): ApiClient {
+    {{^nonPublicApi}}{{#explicitApi}}public {{/explicitApi}}{{/nonPublicApi}}fun setOAuthCredentials(username: String, password: String): ApiClient {
         apiAuthorizations.values.runOnFirst<Interceptor, OAuth> {
             tokenRequestBuilder.setUsername(username).setPassword(password)
         }

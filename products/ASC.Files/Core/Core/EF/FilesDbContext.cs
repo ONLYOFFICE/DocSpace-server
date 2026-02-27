@@ -51,6 +51,8 @@ public partial class FilesDbContext(DbContextOptions<FilesDbContext> dbContextOp
     public DbSet<DbFilesAuditReference> FilesAuditReference { get; set; }
     public DbSet<DbUserRelation> UserRelations { get; set; }
     public DbSet<DbFilesFormRoleMapping> FilesFormRoleMapping { get; set; }
+    public DbSet<DbFilesGroup> RoomGroup { get; set; }
+    public DbSet<DbFilesRoomGroup> RoomGroupRef { get; set; }
     public DbSet<DbChat> Chats { get; set; }
     public DbSet<DbChatMessage> ChatMessages { get; set; }
     public DbSet<DbFileVectorization> FileVectorization { get; set; }
@@ -72,6 +74,8 @@ public partial class FilesDbContext(DbContextOptions<FilesDbContext> dbContextOp
             .AddDbFilesFormRoleMapping()
             .AddDbFilesTagLink()
             .AddDbFilesTag()
+            .AddDbFilesGroup()
+            .AddDbFilesRoomGroup()
             .AddDbDbFilesThirdpartyApp()
             .AddDbFilesLink()
             .AddDbFilesProperties()

@@ -29,8 +29,13 @@ namespace ASC.Files.Core.Vectorization.Settings;
 [EnumExtensions]
 public enum EmbeddingProviderType
 {
+    [Description("None")]
     None,
+
+    [Description("OpenAi")]
     OpenAi,
+
+    [Description("OpenRouter")]
     OpenRouter
 }
 

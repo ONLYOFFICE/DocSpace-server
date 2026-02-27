@@ -28,6 +28,7 @@ using System.Text.Json;
 
 using ASC.Core.Common;
 using ASC.FederatedLogin;
+using ASC.FederatedLogin.LoginProviders;
 using ASC.FederatedLogin.Profile;
 using ASC.Files.Core.Helpers;
 using ASC.Files.Core.Utils;
@@ -59,6 +60,7 @@ public class PortalController(
         QuotaUsageManager quotaUsageManager,
         PasswordSettingsManager passwordSettingsManager,
         LoginProfileTransport loginProfileTransport,
+        ProviderManager providerManager,
         AccountLinker accountLinker,
         DocumentServiceLicense documentServiceLicense,
         CsvFileHelper csvFileHelper,
@@ -157,21 +159,19 @@ public class PortalController(
             return BadRequest(error);
         }
 
-        model.PortalName = (model.PortalName ?? "").Trim();
-        (var exists, error) = await CheckExistingNamePortalAsync(model.PortalName);
-
-        if (!exists)
+        (var portalName, error) = await GetRandomPortalName();
+        if (string.IsNullOrEmpty(portalName))
         {
-            sw.Stop();
-
-            return BadRequest(error);
+            return BadRequest(error ?? "PortalName is required");
         }
+
+        model.PortalName = portalName;
 
         option.LogDebug("PortalName = {0}; Elapsed ms. CheckExistingNamePortal: {1}", model.PortalName, sw.ElapsedMilliseconds);
 
-        var clientIP = commonMethods.GetClientIp();
+        var clientIp = commonMethods.GetClientIp();
 
-        if (commonMethods.CheckMuchRegistration(model, clientIP, sw))
+        if (commonMethods.CheckMuchRegistration(model, clientIp, sw))
         {
             return BadRequest(new
             {
@@ -180,7 +180,7 @@ public class PortalController(
             });
         }
 
-        error = await GetRecaptchaError(model, clientIP, sw);
+        error = await GetRecaptchaError(model, clientIp, sw);
 
         if (error != null)
         {
@@ -377,18 +377,26 @@ public class PortalController(
         }
 
         LoginProfile loginProfile = null;
+        var autoGenaratedEmail = false;
         if (!string.IsNullOrEmpty(model.ThirdPartyProfile))
         {
             try
             {
                 var profile = await loginProfileTransport.FromPureTransport(model.ThirdPartyProfile);
-                if (profile != null && string.IsNullOrEmpty(profile.AuthorizationError))
+                if (profile != null && string.IsNullOrWhiteSpace(profile.AuthorizationError))
                 {
                     loginProfile = profile;
-                    if (!string.IsNullOrEmpty(loginProfile.EMail))
+
+                    model.Email = loginProfile.EMail;
+
+                    if (string.IsNullOrWhiteSpace(model.Email) &&
+                        ProviderManager.DummyEmailProviders.Contains(loginProfile.Provider) &&
+                        providerManager.GetLoginProvider(loginProfile.Provider) is IDummyEmailProvider provider)
                     {
-                        model.Email = loginProfile.EMail;
+                        model.Email = provider.GenerateEmail(loginProfile);
+                        autoGenaratedEmail = true;
                     }
+
                     if (!string.IsNullOrEmpty(loginProfile.FirstName))
                     {
                         model.FirstName = loginProfile.FirstName;
@@ -405,7 +413,7 @@ public class PortalController(
             }
         }
 
-        if (string.IsNullOrEmpty(model.Email))
+        if (string.IsNullOrWhiteSpace(model.Email))
         {
             return BadRequest(new
             {
@@ -451,48 +459,19 @@ public class PortalController(
             }
         }
 
-        var prefix = configuration["web:alias:prefix"] ?? DefaultPrefix;
-        var randomLength = int.Parse(configuration["web:alias:random-length"] ?? DefaultRandomLength.ToString());
-
-        if (prefix.Length + randomLength > tenantDomainValidator.MaxLength || prefix.Length + randomLength < tenantDomainValidator.MinLength)
+        (var portalName, error) = await GetRandomPortalName();
+        if (string.IsNullOrEmpty(portalName))
         {
-            prefix = DefaultPrefix;
-            randomLength = DefaultRandomLength;
+            return BadRequest(error ?? "PortalName is required");
         }
-
-        var random = new Random();
-        random.Shuffle(_alphabetArray);
-
-        var alphabet = new string(_alphabetArray);
-        var portalName = (model.PortalName ?? $"{prefix}-{shortUrl.GenerateRandomKey(randomLength, alphabet)}").Trim();
 
         model.PortalName = portalName;
 
-        while (true)
-        {
-            (var success, error) = await CheckExistingNamePortalAsync(model.PortalName);
-
-            if (success)
-            {
-                break;
-            }
-
-            if (error.GetType().GetProperty("error")?.GetValue(error).ToString() == "portalNameExist")
-            {
-                model.PortalName = $"{prefix}-{shortUrl.GenerateRandomKey(randomLength, alphabet)}";
-            }
-            else
-            {
-                sw.Stop();
-                return BadRequest(error);
-            }
-        }
-
         option.LogDebug("PortalName = {0}; Elapsed ms. CheckExistingNamePortal: {1}", model.PortalName, sw.ElapsedMilliseconds);
 
-        var clientIP = commonMethods.GetClientIp();
+        var clientIp = commonMethods.GetClientIp();
 
-        if (commonMethods.CheckMuchRegistration(model, clientIP, sw))
+        if (commonMethods.CheckMuchRegistration(model, clientIp, sw))
         {
             return BadRequest(new
             {
@@ -534,7 +513,7 @@ public class PortalController(
             Calls = model.Calls,
             HostedRegion = model.Region,
             LimitedAccessSpace = model.LimitedAccessSpace,
-            ActivationStatus = EmployeeActivationStatus.Activated // register as activated !!!
+            ActivationStatus = autoGenaratedEmail ? EmployeeActivationStatus.AutoGenerated : EmployeeActivationStatus.Activated // register as activated !!!
         };
 
         if (!string.IsNullOrEmpty(model.AffiliateId))
@@ -622,7 +601,7 @@ public class PortalController(
 
         if (!string.IsNullOrEmpty(model.PasswordHash))
         {
-            sendCongratulationsAddress = await commonMethods.SendCongratulations(scheme, t, model.SkipWelcome);
+            sendCongratulationsAddress = autoGenaratedEmail ? null : await commonMethods.SendCongratulations(scheme, t, model.SkipWelcome);
             isFirst = sendCongratulationsAddress != null;
         }
         else if (coreBaseSettings.Standalone)
@@ -1017,12 +996,21 @@ public class PortalController(
         }
 
         var linkedProfiles = await accountLinker.GetLinkedObjectsByHashIdAsync(profile.HashId);
-        var userIds = new List<Guid>();
+        var userIds = new HashSet<Guid>();
         foreach (var profileId in linkedProfiles)
         {
             if (Guid.TryParse(profileId, out var userId))
             {
                 userIds.Add(userId);
+            }
+        }
+
+        if (!string.IsNullOrEmpty(profile.EMail))
+        {
+            var byEmail = await hostedSolution.FindUsersAsync(profile.EMail, EmployeeActivationStatus.Activated);
+            foreach (var userInfo in byEmail)
+            {
+                userIds.Add(userInfo.Id);
             }
         }
 
@@ -1177,6 +1165,44 @@ public class PortalController(
 
     #region Validate Method
 
+    private async Task<(string, object)> GetRandomPortalName()
+    {
+        var prefix = configuration["web:alias:prefix"] ?? DefaultPrefix;
+        var randomLength = int.Parse(configuration["web:alias:random-length"] ?? DefaultRandomLength.ToString());
+
+        if (prefix.Length + randomLength > tenantDomainValidator.MaxLength || prefix.Length + randomLength < tenantDomainValidator.MinLength)
+        {
+            prefix = DefaultPrefix;
+            randomLength = DefaultRandomLength;
+        }
+
+        var random = new Random();
+        random.Shuffle(_alphabetArray);
+
+        var alphabet = new string(_alphabetArray);
+        var portalName = $"{prefix}-{shortUrl.GenerateRandomKey(randomLength, alphabet)}";
+
+        while (true)
+        {
+            var (success, error) = await CheckExistingNamePortalAsync(portalName);
+            if (success)
+            {
+                break;
+            }
+
+            if (error.GetType().GetProperty("error")?.GetValue(error)?.ToString() == "portalNameExist")
+            {
+                portalName = $"{prefix}-{shortUrl.GenerateRandomKey(randomLength, alphabet)}";
+            }
+            else
+            {
+                return (null, error);
+            }
+        }
+
+        return (portalName, null);
+    }
+    
     private async Task ValidateTenantAliasAsync(string alias)
     {
         // size

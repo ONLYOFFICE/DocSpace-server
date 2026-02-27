@@ -33,7 +33,8 @@ public class CustomTagsService(
     AuthContext authContext,
     FilesMessageService filesMessageService,
     UserManager userManager,
-    FileSecurityCommon fileSecurityCommon)
+    FileSecurityCommon fileSecurityCommon,
+    SocketManager socketManager)
 {
     public async Task<TagInfo> CreateTagAsync(string name)
     {
@@ -67,9 +68,40 @@ public class CustomTagsService(
         return savedTag;
     }
 
+    public async Task<TagInfo> UpdateTagAsync(string oldName, string newName)
+    {
+        var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
+        if (userType is not EmployeeType.DocSpaceAdmin)
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
+        ArgumentException.ThrowIfNullOrEmpty(oldName);
+        ArgumentException.ThrowIfNullOrEmpty(newName);
+
+        var tagDao = daoFactory.GetTagDao<int>();
+        var existedTag = await tagDao.GetTagsInfoAsync(oldName, TagType.Custom, true).FirstOrDefaultAsync();
+
+        if (existedTag == null)
+        {
+            throw new ItemNotFoundException();
+        }
+        var tag = await tagDao.GetTagsInfoAsync(newName, TagType.Custom, true).FirstOrDefaultAsync();
+        if (tag != null)
+        {
+            throw new ArgumentException($"Tag with name '{newName}' already exists");
+        }
+        existedTag.Name = newName;
+
+        var savedTag = await tagDao.UpdateTagInfoAsync(existedTag);
+
+        return savedTag;
+    }
+
     public async Task DeleteTagsAsync<T>(List<string> names)
     {
-        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
+        var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
+        if (userType is not EmployeeType.DocSpaceAdmin)
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
@@ -98,7 +130,7 @@ public class CustomTagsService(
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);
         }
 
-        if (names.Count == 0)
+        if (names == null || names.Count == 0)
         {
             return folder;
         }
@@ -106,6 +138,12 @@ public class CustomTagsService(
         var tagDao = daoFactory.GetTagDao<T>();
 
         var tagsInfos = await tagDao.GetTagsInfoAsync(names, TagType.Custom).ToListAsync();
+        var notFoundTags = names.Where(x => tagsInfos.All(r => r.Name != x)).Distinct().ToList();
+
+        foreach (var tagInfo in notFoundTags)
+        {
+            tagsInfos.Add(await CreateTagAsync(tagInfo));
+        }
 
         if (tagsInfos.Count == 0)
         {
@@ -117,6 +155,7 @@ public class CustomTagsService(
         await tagDao.SaveTagsAsync(tags);
 
         await filesMessageService.SendAsync(MessageAction.AddedRoomTags, folder, folder.Title, string.Join(',', tagsInfos.Select(t => t.Name)));
+        await socketManager.UpdateFolderAsync(folder);
 
         return folder;
     }
@@ -142,6 +181,7 @@ public class CustomTagsService(
         await tagDao.RemoveTagsAsync(folder, tagsInfos.Select(t => t.Id).ToList());
 
         await filesMessageService.SendAsync(MessageAction.DeletedRoomTags, folder, folder.Title, string.Join(',', tagsInfos.Select(t => t.Name)));
+        await socketManager.UpdateFolderAsync(folder);
 
         return folder;
     }
@@ -173,5 +213,25 @@ public class CustomTagsService(
         {
             yield return tagInfo.Name;
         }
+    }
+
+    public async Task<bool> HasTagLinks(string name)
+    {
+        var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
+        if (userType is not EmployeeType.DocSpaceAdmin)
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+        var tagDao = daoFactory.GetTagDao<int>();
+        var existedTag = await tagDao.GetTagsInfoAsync(name, TagType.Custom, true).FirstOrDefaultAsync();
+
+        if (existedTag == null)
+        {
+            throw new ItemNotFoundException();
+        }
+
+        var hasTagLiks = await tagDao.HasTagLinksAsync(existedTag);
+
+        return hasTagLiks;
     }
 }

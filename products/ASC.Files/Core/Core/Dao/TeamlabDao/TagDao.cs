@@ -37,7 +37,9 @@ internal abstract class BaseTagDao<T>(
     SettingsManager settingsManager,
     AuthContext authContext,
     IServiceProvider serviceProvider,
-    IDistributedLockProvider distributedLockProvider)
+    IDistributedLockProvider distributedLockProvider,
+    GlobalFolder globalFolder,
+    SocketManager socketManager)
     : AbstractDao(dbContextManager,
         userManager,
         tenantManager,
@@ -139,6 +141,8 @@ internal abstract class BaseTagDao<T>(
             q = q.Where(r => r.Name.ToLower().Contains(lowerText));
         }
 
+        q = q.OrderByDescending(r => r.Id);
+
         if (count != 0)
         {
             q = q.Take(count);
@@ -175,6 +179,45 @@ internal abstract class BaseTagDao<T>(
         await filesDbContext.SaveChangesAsync();
 
         return tag.Entity.MapToTagInfo();
+    }
+
+    public async Task<TagInfo> UpdateTagInfoAsync(TagInfo tagInfo)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var existingTag = await filesDbContext.Tag
+            .FirstOrDefaultAsync(t => t.Id == tagInfo.Id && t.TenantId == tenantId);
+
+        if (existingTag == null)
+        {
+            throw new ItemNotFoundException($"Tag with id {tagInfo.Id} not found");
+        }
+
+        existingTag.Name = tagInfo.Name;
+        existingTag.Owner = tagInfo.Owner;
+        existingTag.Type = tagInfo.Type;
+
+        filesDbContext.Tag.Update(existingTag);
+        await filesDbContext.SaveChangesAsync();
+
+        var folderDao = daoFactory.GetFolderDao<int>();
+        var folderThirdPartyDao = daoFactory.GetFolderDao<string>();
+
+        var rooms = await folderDao.GetRoomsAsync([await globalFolder.GetFolderVirtualRoomsAsync(daoFactory)], null, new List<string> { tagInfo.Name }, Guid.Empty, null, false, false, false, ProviderFilter.None, SubjectFilter.Owner, null, QuotaFilter.All).ToListAsync();
+        var thirdPartyRooms = await folderThirdPartyDao.GetProviderBasedRoomsAsync(SearchArea.Active, null, new List<string> { tagInfo.Name }, Guid.Empty, null, false, false, ProviderFilter.None, SubjectFilter.Owner, null).ToListAsync();
+
+        var tasks = rooms.Select(room => socketManager.UpdateFolderAsync(room))
+             .Concat(thirdPartyRooms.Select(room => socketManager.UpdateFolderAsync(room)));
+        await Task.WhenAll(tasks);
+
+        return existingTag.MapToTagInfo();
+    }
+    public async Task<bool> HasTagLinksAsync(TagInfo tag)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        return await filesDbContext.AnyTagLinkByIdsAsync(tenantId, new List<int> { tag.Id });
     }
 
     public async Task<IEnumerable<Tag>> SaveTagsAsync(IEnumerable<Tag> tags, Guid createdBy = default)
@@ -496,12 +539,6 @@ internal abstract class BaseTagDao<T>(
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         await filesDbContext.DeleteTagLinksAsync(tenantId, tagsIds, entryId, entry.FileEntryType);
-
-        var any = await filesDbContext.AnyTagLinkByIdsAsync(tenantId, tagsIds);
-        if (!any)
-        {
-            await filesDbContext.DeleteTagsByIdsAsync(tenantId, tagsIds);
-        }
     }
 
     public async Task RemoveTagsAsync(IEnumerable<Tag> tags)
@@ -557,15 +594,18 @@ internal abstract class BaseTagDao<T>(
 
         if (id != 0)
         {
-            var entryId = (tag.EntryId is int fid ? fid : await MappingIdAsync(filesDbContext, tenantId, tag.EntryId))?.ToString();
+            var folderDao = daoFactory.GetFolderDao<int>();
+            var folderThirdPartyDao = daoFactory.GetFolderDao<string>();
 
-            await filesDbContext.DeleteTagLinksByTagIdAsync(tenantId, id, entryId, tag.EntryType);
+            var rooms = await folderDao.GetRoomsAsync([await globalFolder.GetFolderVirtualRoomsAsync(daoFactory)], null, new List<string> { tag.Name }, Guid.Empty, null, false, false, false, ProviderFilter.None, SubjectFilter.Owner, null, QuotaFilter.All).ToListAsync();
+            var thirdPartyRooms = await folderThirdPartyDao.GetProviderBasedRoomsAsync(SearchArea.Active, null, new List<string> { tag.Name }, Guid.Empty, null, false, false, ProviderFilter.None, SubjectFilter.Owner, null).ToListAsync();
 
-            var any = await filesDbContext.AnyTagLinkByIdAsync(tenantId, id);
-            if (!any)
-            {
-                await filesDbContext.DeleteTagByIdAsync(tenantId, id);
-            }
+            await filesDbContext.DeleteTagLinksByTagIdAsync(tenantId, id);
+            await filesDbContext.DeleteTagByIdAsync(tenantId, id);
+
+            var tasks = rooms.Select(room => socketManager.UpdateFolderAsync(room))
+                 .Concat(thirdPartyRooms.Select(room => socketManager.UpdateFolderAsync(room)));
+            await Task.WhenAll(tasks);
         }
     }
 
@@ -702,7 +742,9 @@ internal class TagDao(
     SettingsManager settingsManager,
     AuthContext authContext,
     IServiceProvider serviceProvider,
-    IDistributedLockProvider distributedLockProvider)
+    IDistributedLockProvider distributedLockProvider,
+    GlobalFolder globalFolder,
+    SocketManager socketManager)
     : BaseTagDao<int>(
         daoFactory,
         userManager,
@@ -714,7 +756,9 @@ internal class TagDao(
           settingsManager,
           authContext,
           serviceProvider,
-          distributedLockProvider)
+          distributedLockProvider,
+          globalFolder,
+          socketManager)
 {
     public override IAsyncEnumerable<Tag> GetNewTagsAsync(Guid subject, Folder<int> parentFolder, bool deepSearch)
     {
@@ -834,7 +878,9 @@ internal class ThirdPartyTagDao(
         AuthContext authContext,
         IServiceProvider serviceProvider,
         IThirdPartyTagDao thirdPartyTagDao,
-        IDistributedLockProvider distributedLockProvider)
+        IDistributedLockProvider distributedLockProvider,
+        GlobalFolder globalFolder,
+        SocketManager socketManager)
     : BaseTagDao<string>(
         daoFactory,
         userManager,
@@ -846,7 +892,9 @@ internal class ThirdPartyTagDao(
           settingsManager,
           authContext,
           serviceProvider,
-          distributedLockProvider)
+          distributedLockProvider,
+          globalFolder,
+          socketManager)
 {
     public override IAsyncEnumerable<Tag> GetNewTagsAsync(Guid subject, Folder<string> parentFolder, bool deepSearch)
     {

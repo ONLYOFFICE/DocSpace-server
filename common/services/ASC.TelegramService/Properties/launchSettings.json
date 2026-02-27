@@ -5,9 +5,9 @@
       "launchBrowser": false,
       "applicationUrl": "http://localhost:5050",
       "environmentVariables": {
-        "$STORAGE_ROOT": "../../../Data",
+        "$STORAGE_ROOT": "../../../../Data",
         "log__name": "telegram",
-        "log__dir": "../../../Logs",
+        "log__dir": "../../../../Logs",
         "core__products__folder": "../../../products",
         "core__eventBus__subscriptionClientName": "asc_event_bus_telegram_queue",
         "ASPNETCORE_URLS": "http://localhost:51702",

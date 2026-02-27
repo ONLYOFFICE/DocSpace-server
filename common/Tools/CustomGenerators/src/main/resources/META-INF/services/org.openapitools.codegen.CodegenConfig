@@ -1,10 +1,9 @@
-com.example.codegen.MyTypeScriptAxiosCodegen
-com.example.codegen.MyTypeScriptK6Codegen
-com.example.codegen.MyPythonCodegen
-com.example.codegen.MyPostmanCollectionCodegen
-com.example.codegen.MyCSharpCodegen
+com.example.codegen.MyTypeScriptAxiosClientCodegen
+com.example.codegen.MyTypeScriptK6ClientCodegen
+com.example.codegen.MyPythonClientCodegen
+com.example.codegen.MyPostmanCollectionClientCodegen
+com.example.codegen.MyCSharpClientCodegen
 com.example.codegen.MyJavaClientCodegen
-com.example.codegen.MyK6Codegen
 com.example.codegen.MyPHPClientCodegen
 com.example.codegen.MySwift6ClientCodegen
 com.example.codegen.MyKotlinClientCodegen
