@@ -98,9 +98,14 @@ public class InvitationService(
 
                 async Task<bool> ResolveAccessAsync<T>(Folder<T> folder)
                 {
+                    var accountId = authContext.CurrentAccount.ID;
+                    if (folder.CreateBy == accountId)
+                    {
+                        return true;
+                    }
+
                     if (await fileSecurity.CanReadAsync(folder))
                     {
-                        var accountId = authContext.CurrentAccount.ID;
                         if (!await userManager.IsDocSpaceAdminAsync(accountId))
                         {
                             return true;

@@ -51,7 +51,7 @@ public class AiProviderService(
 
         url = string.IsNullOrEmpty(url) ? settings.Url : new Uri(url).ToString();
 
-        var defaultModel = await ExecuteProviderRequestAsync(async () =>
+        var defaultModel = await ExecuteProviderRequestAsync(type, async () =>
         {
             var client = modelClientFactory.Create(type, url, key);
             var models = await GetFilteredModelsAsync(client, type);
@@ -90,7 +90,7 @@ public class AiProviderService(
 
         if (needCheck)
         {
-            await ExecuteProviderRequestAsync(async () =>
+            await ExecuteProviderRequestAsync(provider.Type, async () =>
             {
                 var client = modelClientFactory.Create(provider.Type, provider.Url, provider.Key);
                 await client.PingAsync();
@@ -153,7 +153,7 @@ public class AiProviderService(
             return [];
         }
 
-        return await ExecuteProviderRequestAsync(async () => 
+        return await ExecuteProviderRequestAsync(provider.Type, async () => 
         { 
             var client = modelClientFactory.Create(provider.Type, provider.Url, provider.Key);
             var models = await GetFilteredModelsAsync(client, provider.Type, scope);
@@ -261,7 +261,7 @@ public class AiProviderService(
         }
     }
 
-    private static async Task<T> ExecuteProviderRequestAsync<T>(Func<Task<T>> request)
+    private static async Task<T> ExecuteProviderRequestAsync<T>(ProviderType providerType, Func<Task<T>> request)
     {
         try
         {
@@ -269,12 +269,17 @@ public class AiProviderService(
         }
         catch (HttpRequestException httpException)
         {
-            if (httpException.StatusCode is HttpStatusCode.Unauthorized)
+            if (providerType is ProviderType.XAi && httpException.StatusCode is HttpStatusCode.BadRequest 
+                || httpException.StatusCode is HttpStatusCode.Unauthorized)
             {
                 throw new ArgumentException(ErrorMessages.InvalidKey);
             }
 
             throw new ArgumentException(ErrorMessages.InvalidUrl);
+        }
+        catch (Exception)
+        {
+            throw new ArgumentException(ErrorMessages.InvalidKey);
         }
     }
 }

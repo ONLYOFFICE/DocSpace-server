@@ -48,27 +48,6 @@ public class SignupAccountRequestDto
     public EmployeeType? EmployeeType { get; set; }
 
     /// <summary>
-    /// The user first name.
-    /// </summary>
-    public string FirstName { get; set; }
-
-    /// <summary>
-    /// The user last name.
-    /// </summary>
-    public string LastName { get; set; }
-
-    /// <summary>
-    /// The user email address.
-    /// </summary>
-    [EmailAddress]
-    public string Email { get; set; }
-
-    /// <summary>
-    /// The user password hash.
-    /// </summary>
-    public string PasswordHash { get; set; }
-
-    /// <summary>
     /// The user link key.
     /// </summary>
     public required string Key { get; set; }

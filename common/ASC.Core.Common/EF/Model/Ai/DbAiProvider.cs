@@ -28,14 +28,31 @@ namespace ASC.Core.Common.EF.Model.Ai;
 
 public enum ProviderType
 {
+    [Description("PortalAi")]
     PortalAi = 0,
+
+    [Description("OpenAi")]
     OpenAi = 1,
+
+    [Description("TogetherAi")]
     TogetherAi = 2,
+
+    [Description("OpenAiCompatible")]
     OpenAiCompatible = 3,
+
+    [Description("Anthropic")]
     Anthropic = 4,
+
+    [Description("OpenRouter")]
     OpenRouter = 5,
+
+    [Description("DeepSeek")]
     DeepSeek = 6,
+
+    [Description("XAi")]
     XAi = 7,
+
+    [Description("GoogleAi")]
     GoogleAi = 8
 }
 

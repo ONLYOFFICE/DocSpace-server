@@ -322,26 +322,63 @@ public class RoomLogoManager(
     }
 
     private static readonly ConcurrentDictionary<string, string> _covers = new();
+    private static readonly ConcurrentDictionary<string, ConcurrentDictionary<string, string>> _coversBySize = new();
     public static async Task<ConcurrentDictionary<string, string>> GetCoversAsync()
+    {
+        var coversBySize = await GetCoversBySizeAsync();
+
+        foreach (var (icon, sizes) in coversBySize)
+        {
+            if (sizes.TryGetValue("default", out var svg))
+            {
+                _covers.TryAdd(icon, svg);
+            }
+        }
+
+        return _covers;
+    }
+
+    public static async Task<ConcurrentDictionary<string, ConcurrentDictionary<string, string>>> GetCoversBySizeAsync()
     {
         try
         {
             await _semaphore.WaitAsync();
-            if (_covers.IsEmpty)
+
+            if (_coversBySize.IsEmpty)
             {
                 var assembly = Assembly.GetExecutingAssembly();
                 var assemblyName = assembly.GetName().Name;
-                var coverNameSpace = $"{assemblyName}.Covers.";
-                foreach (var f in assembly.GetManifestResourceNames().Where(r => r.StartsWith(coverNameSpace)))
+                var coversRoot = $"{assemblyName}.Covers.";
+
+                foreach (var res in assembly.GetManifestResourceNames()
+                             .Where(r => r.StartsWith(coversRoot)))
                 {
-                    var img = assembly.GetManifestResourceStream(f);
-                    if (img != null)
+                    var relative = res.Substring(coversRoot.Length);
+                    var parts = relative.Split('.');
+
+                    if (parts.Length < 3)
                     {
-                        using var memoryStream = new MemoryStream();
-                        await img.CopyToAsync(memoryStream);
-                        var r = (Path.GetFileNameWithoutExtension(f).Substring(coverNameSpace.Length), Encoding.UTF8.GetString(memoryStream.ToArray()));
-                        _covers.TryAdd(r.Item1, r.Item2);
+                        continue;
                     }
+                    var size = parts[0];
+                    var iconName = parts[1];
+
+                    using var stream = assembly.GetManifestResourceStream(res);
+                    if (stream == null)
+                    {
+                        continue;
+                    }
+
+                    using var ms = new MemoryStream();
+                    await stream.CopyToAsync(ms);
+                    var svg = Encoding.UTF8.GetString(ms.ToArray());
+
+                    var sizes = _coversBySize.GetOrAdd(
+                        iconName,
+                        _ => new ConcurrentDictionary<string, string>()
+                    );
+
+                    sizes[size] = svg;
                 }
             }
         }
@@ -350,7 +387,7 @@ public class RoomLogoManager(
             _semaphore.Release();
         }
 
-        return _covers;
+        return _coversBySize;
     }
 
     public async Task<Folder<T>> ChangeCoverAsync<T>(T id, string color, string cover)

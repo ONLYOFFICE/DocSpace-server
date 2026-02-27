@@ -517,7 +517,7 @@ public class UserController(
     [AllowNotPayment]
     [HttpPut("{userid:guid}/password")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
-    [Authorize(AuthenticationSchemes = "confirm", Roles = "PasswordChange")]
+    [Authorize(AuthenticationSchemes = "confirm", Roles = "PasswordChange,Activation")]
     public async Task<EmployeeFullDto> ChangeUserPassword(ChangePasswordByIdRequestDto inDto)
     {
         await securityContext.AuthByClaimAsync();
@@ -1683,10 +1683,29 @@ public class UserController(
     {
         if (authContext.IsAuthenticated)
         {
-            var currentUser = await _userManager.GetUserByEmailAsync(inDto.Email);
-            if (currentUser.Id != authContext.CurrentAccount.ID && !await _userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))
+            var targetUser = await _userManager.GetUserByEmailAsync(inDto.Email);
+            var self = securityContext.CurrentAccount.ID.Equals(targetUser.Id);
+            if (!self)
             {
-                throw new InvalidOperationException(Resource.ErrorAccessDenied);
+                var currentUserIsDocSpaceAdmin = await _userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID);
+                if (!currentUserIsDocSpaceAdmin)
+                {
+                    throw new SecurityException(Resource.ErrorAccessDenied);
+                }
+
+                var tenant = tenantManager.GetCurrentTenant();
+                var targetUserIsOwner = targetUser.IsOwner(tenant);
+                if (targetUserIsOwner)
+                {
+                    throw new SecurityException(Resource.ErrorAccessDenied);
+                }
+
+                var targetUserIsDocSpaceAdmin = await _userManager.IsDocSpaceAdminAsync(targetUser.Id);
+                var currentUserIsOwner = securityContext.CurrentAccount.ID.IsOwner(tenant);
+                if (targetUserIsDocSpaceAdmin && !currentUserIsOwner)
+                {
+                    throw new SecurityException(Resource.ErrorAccessDenied);
+                }
             }
         }
         else if (!string.IsNullOrEmpty(setupInfo.HcaptchaPublicKey) || !string.IsNullOrEmpty(setupInfo.RecaptchaPublicKey))
@@ -1706,6 +1725,10 @@ public class UserController(
         if (!string.IsNullOrEmpty(error))
         {
             logger.ErrorPasswordRecovery(inDto.Email, error);
+            if (authContext.IsAuthenticated)
+            {
+                throw new InvalidOperationException(error);
+            }
         }
 
         var pattern = authContext.IsAuthenticated ? Resource.MessagePasswordSendedToEmail : Resource.MessageYourPasswordSendedToEmail;
@@ -2312,13 +2335,14 @@ public class UserController(
     /// <collection>list</collection>
     [Tags("People / Quota")]
     [SwaggerResponse(200, "List of users with the detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
-    [SwaggerResponse(402, "Failed to set quota per user. The entered value is greater than the total DocSpace storage")]
+    [SwaggerResponse(400, "The entered quota value is invalid or greater than the total storage size")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPut("userquota")]
     public async IAsyncEnumerable<EmployeeFullDto> UpdateUserQuota(UpdateMembersQuotaRequestDto inDto)
     {
         if (!inDto.Quota.TryGetInt64(out var quota))
         {
-            throw new Exception(Resource.UserQuotaGreaterPortalError);
+            throw new ArgumentException(Resource.UserQuotaGreaterPortalError);
         }
 
         await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
@@ -2334,7 +2358,7 @@ public class UserController(
 
         if (maxTotalSize < quota)
         {
-            throw new Exception(Resource.UserQuotaGreaterPortalError);
+            throw new ArgumentException(Resource.UserQuotaGreaterPortalError);
         }
         if (coreBaseSettings.Standalone)
         {
@@ -2343,7 +2367,7 @@ public class UserController(
             {
                 if (tenantQuotaSetting.Quota < quota)
                 {
-                    throw new Exception(Resource.UserQuotaGreaterPortalError);
+                    throw new ArgumentException(Resource.UserQuotaGreaterPortalError);
                 }
             }
         }

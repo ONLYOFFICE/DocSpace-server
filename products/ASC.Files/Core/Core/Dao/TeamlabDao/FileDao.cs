@@ -676,15 +676,10 @@ internal class FileDao(
                                         }
                                     }
 
-                                    properties.FormFilling.StartFilling = true;
+                                    properties.FormFilling.StartFilling = false;
                                     properties.FormFilling.OriginalFormId = file.Id;
                                     await fileDao.SaveProperties(file.Id, properties);
 
-                                    var count = await fileStorageService.GetPureSharesCountAsync(currentRoom.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, "");
-                                    if (file.IsForm)
-                                    {
-                                        await socketManager.CreateFormAsync(file, securityContext.CurrentAccount.ID, count <= 1);
-                                    }
                                 }
                             }
                             else
@@ -2362,6 +2357,14 @@ internal class FileDao(
                              file.CreateBy == currentUserId &&
                              file.CreateBy != guestUserId) ||
                             defaultFolderIds.Contains(file.ParentId));
+
+                        q = q.Where(file =>
+                            filesDbContext.FilesProperties.Any(p =>
+                                p.TenantId == tenantId &&
+                                p.StartFilling == true &&
+                                p.TenantId == file.TenantId &&
+                                p.EntryId == file.Id.ToString()
+                            ));
                         break;
 
                     default:

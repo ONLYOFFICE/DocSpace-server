@@ -78,6 +78,7 @@ switch (builder.Configuration["DOTNET_LAUNCH_PROFILE"])
     default:
         connectionManager.AddMySql(withDbGate: true)
             .AddRedis(withRedisInsight: true)
+            .AddMcpServer()
             .AddOpensearch()
             .AddMailPit();
         
@@ -109,12 +110,7 @@ var clientBasePath = Path.Combine(basePath, "client");
 
 if (!skipClient)
 {
-    var installPackages = builder.AddExecutable("onlyoffice-install-packages", "pnpm", clientBasePath, "install");
-    var buildPackages = builder.AddExecutable("onlyoffice-build-packages", "pnpm", clientBasePath, "build").WaitForCompletion(installPackages);
-
-    startPackages = builder.AddExecutable("onlyoffice-start-packages", "pnpm", clientBasePath, "start").WaitForCompletion(buildPackages);
-    installPackages.WithChildRelationship(buildPackages);
-    buildPackages.WithChildRelationship(startPackages);
+    startPackages = builder.AddJavaScriptApp("onlyoffice-client", clientBasePath, "start").WithPnpm();
 }
 
 NginxConfiguration.ConfigureOpenResty(builder, basePath, clientBasePath, startPackages, isDocker);

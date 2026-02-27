@@ -228,6 +228,17 @@ public class EFUserService(
         return await q.Project().ToListAsync();
     }
 
+    public async Task<IEnumerable<UserInfo>> GetUsersAllTenantsAsync(string email, EmployeeActivationStatus? status)
+    {
+        email = email.ToLowerInvariant();
+
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
+        var q = userDbContext.Users
+            .Where(r => r.Email == email && (!status.HasValue || r.ActivationStatus == status.Value));
+
+        return await q.Project().ToListAsync();
+    }
+
     public async Task<UserGroupRef> GetUserGroupRefAsync(int tenant, Guid groupId, UserGroupRefType refType)
     {
         await using var userDbContext = await dbContextFactory.CreateDbContextAsync();

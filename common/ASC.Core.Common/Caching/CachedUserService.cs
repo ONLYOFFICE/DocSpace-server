@@ -144,6 +144,10 @@ public class CachedUserService : IUserService
     {
         return await _service.GetUsersAllTenantsAsync(userIds);
     }
+    public async Task<IEnumerable<UserInfo>> GetUsersAllTenantsAsync(string email, EmployeeActivationStatus? status)
+    {
+        return await _service.GetUsersAllTenantsAsync(email, status);
+    }
 
     public async Task<UserInfo> SaveUserAsync(int tenant, UserInfo user)
     {
