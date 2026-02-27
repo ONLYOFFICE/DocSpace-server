@@ -360,19 +360,19 @@ public class CopyPermissionsCheck(FileSecurity security, LockerManager lockerMan
             return errorMsg;
         }
 
-        if (!check || (Equals(folder.ParentId ?? default, toFolder.Id) && resolveType != FileConflictResolveType.Duplicate))
+        if (!check || (Equals(folder.ParentId ?? default, toFolderId) && resolveType != FileConflictResolveType.Duplicate))
         {
             return null;
         }
 
         var conflictFolder = folder.RootFolderType == FolderType.Privacy || isRoom ||
-                                     (!Equals(folder.ParentId ?? default, toFolder.Id) && resolveType == FileConflictResolveType.Duplicate)
+                                     (!Equals(folder.ParentId ?? default, toFolderId) && resolveType == FileConflictResolveType.Duplicate)
                     ? null
-                    : await ttoFolderDao.GetFolderAsync(folder.Title, toFolder.Id);
+                    : await ttoFolderDao.GetFolderAsync(folder.Title, toFolderId);
 
         if (copy || conflictFolder != null)
         {
-            if (toFolder.ProviderId == folder.ProviderId && folderDao.UseRecursiveOperation(folder.Id, toFolder.Id))
+            if (toFolder.ProviderId == folder.ProviderId && folderDao.UseRecursiveOperation(folder.Id, toFolderId))
             {
                 if (!copy && checkPermissions && !await security.CanMoveAsync(folder))
                 {
@@ -391,7 +391,7 @@ public class CopyPermissionsCheck(FileSecurity security, LockerManager lockerMan
 
         var files = await fileDao.GetFilesAsync(folder.Id, new OrderBy(SortedByType.AZ, true), FilterType.FilesOnly, false, Guid.Empty, string.Empty, null, false, withSubfolders: true).ToListAsync();
 
-        errorMsg = await CheckFileSecurityAsync(files, checkPermissions);
+        errorMsg = await WithErrorAsync(files, checkPermissions);
         if (errorMsg != null)
         {
             throw new SecurityException(errorMsg);
@@ -416,7 +416,7 @@ public class CopyPermissionsCheck(FileSecurity security, LockerManager lockerMan
     {
         string errorMsg = null;
 
-        errorMsg = await CheckFileSecurityAsync([file], checkPermissions);
+        errorMsg = await WithErrorAsync([file], checkPermissions);
 
         if (file == null)
         {
@@ -539,9 +539,9 @@ public class CopyPermissionsCheck(FileSecurity security, LockerManager lockerMan
                                file.Encrypted ||
                                toFolder.FolderType == FolderType.Knowledge
                     ? null
-                    : await ttoFileDao.GetFileAsync(toFolder.Id, file.Title);
+                    : await ttoFileDao.GetFileAsync(toFolderId, file.Title);
 
-        errorMsg = await CheckFileSecurityAsync([file], checkPermissions);
+        errorMsg = await WithErrorAsync([file], checkPermissions);
 
         if (conflict == null || conflict.Category != file.Category)
         {
@@ -564,16 +564,16 @@ public class CopyPermissionsCheck(FileSecurity security, LockerManager lockerMan
             {
                 throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_UpdateEditingFile);
             }
-            else if (!copy && !Equals(file.ParentId.ToString(), toFolder.Id.ToString()) && errorMsg != null)
+            else if (!copy && !Equals(file.ParentId.ToString(), toFolderId.ToString()) && errorMsg != null)
             {
                 throw new SecurityException(errorMsg);
             }
         }
 
-        return errorMsg;
+        return null;
     }
 
-    public async Task<string> CheckFileSecurityAsync<T>(IEnumerable<File<T>> files, bool checkPermissions = true)
+    public async Task<string> WithErrorAsync<T>(IEnumerable<File<T>> files, bool checkPermissions = true)
     {
         foreach (var file in files)
         {
