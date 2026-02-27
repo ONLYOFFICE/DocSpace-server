@@ -34,26 +34,31 @@ public class ThumbnailsRequest
     /// <summary>
     /// The path to the temporary thumbnail file.
     /// </summary>
+    /// <example>/tmp/photo_temp_123.jpg</example>
     public string TmpFile { get; set; }
 
     /// <summary>
     /// The thumbnail horizontal coordinate.
     /// </summary>
+    /// <example>100</example>
     public int X { get; set; }
 
     /// <summary>
     /// The thumbnail vertical coordinate.
     /// </summary>
+    /// <example>50</example>
     public int Y { get; set; }
 
     /// <summary>
     /// The thumbnail width.
     /// </summary>
+    /// <example>200</example>
     public uint Width { get; set; }
 
     /// <summary>
     /// The thumbnail height.
     /// </summary>
+    /// <example>200</example>
     public uint Height { get; set; }
 }
 
@@ -65,12 +70,14 @@ public class ThumbnailsRequestDto
     /// <summary>
     /// The user ID.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "userid")]
     public required string UserId { get; set; }
 
     /// <summary>
     /// The thumbnail request.
     /// </summary>
+    /// <example>{"tmpFile":"/tmp/photo.jpg","x":0,"y":0,"width":200,"height":200}</example>
     [FromBody]
     public required ThumbnailsRequest Thumbnails { get; set; }
 }

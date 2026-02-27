@@ -34,31 +34,37 @@ public class SessionRequest
     /// <summary>
     /// The file name.
     /// </summary>
+    /// <example>My Document.docx</example>
     public required string FileName { get; set; }
 
     /// <summary>
     /// The file size.
     /// </summary>
+    /// <example>10485760</example>
     public long FileSize { get; set; }
 
     /// <summary>
     /// The relative path to the file.
     /// </summary>
+    /// <example>subfolder/documents</example>
     public string RelativePath { get; set; }
 
     /// <summary>
     /// The date and time when the file was created.
     /// </summary>
+    /// <example>2025-01-01T00:00:00Z</example>
     public ApiDateTime CreateOn { get; set; }
 
     /// <summary>
     /// Specifies whether the file is encrypted or not.
     /// </summary>
+    /// <example>false</example>
     public bool Encrypted { get; set; }
 
     /// <summary>
     /// Specifies whether to create a new file if it already exists.
     /// </summary>
+    /// <example>true</example>
     public bool CreateNewIfExist { get; set; }
 }
 
@@ -70,6 +76,7 @@ public class SessionRequestDto<T>
     /// <summary>
     /// The session folder ID.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "folderId")]
     public required T FolderId { get; set; }
 

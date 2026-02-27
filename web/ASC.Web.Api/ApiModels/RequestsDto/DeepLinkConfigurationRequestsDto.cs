@@ -29,10 +29,16 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 /// <summary>
 /// The request parameters for managing the deep link configuration.
 /// </summary>
+/// <example>
+/// {
+///   "deepLinkSettings": {}
+/// }
+/// </example>
 public class DeepLinkConfigurationRequestsDto
 {
     /// <summary>
     /// The deep link settings for the specified tenant.
     /// </summary>
+    /// <example>{ "handlingMode": "ProvideChoice" }</example>
     public TenantDeepLinkSettings DeepLinkSettings { get; set; }
 }

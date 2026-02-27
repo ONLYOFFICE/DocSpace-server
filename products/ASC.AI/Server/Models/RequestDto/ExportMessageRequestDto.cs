@@ -34,12 +34,15 @@ public class ExportMessageRequestDto<T>
     /// <summary>
     /// The unique identifier of the AI chat message to export.
     /// </summary>
+    /// <summary>The message ID.</summary>
+    /// <example>1</example>
     [FromRoute(Name = "messageId")]
     public int MessageId { get; init; }
 
     /// <summary>
     /// The export parameters including destination folder and file title.
     /// </summary>
+    /// <example>{"folderId": 123, "title": "Message Export"}</example>
     [FromBody]
     public required ExportMessageRequestBody<T> Body { get; init; }
 }
@@ -52,10 +55,13 @@ public class ExportMessageRequestBody<T>
     /// <summary>
     /// The identifier of the destination folder where the exported document will be saved.
     /// </summary>
+    /// <summary>The destination folder ID.</summary>
+    /// <example>123</example>
     public required T FolderId { get; init; }
 
     /// <summary>
     /// The file name (without extension) to use for the exported document.
     /// </summary>
+    /// <example>Message Export</example>
     public required string Title { get; init; }
 }

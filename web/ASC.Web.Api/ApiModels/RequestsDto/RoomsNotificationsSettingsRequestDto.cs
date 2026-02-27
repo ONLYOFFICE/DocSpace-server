@@ -29,15 +29,23 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 /// <summary>
 /// The request parameters for configuring notification settings for the chat or collaboration rooms.
 /// </summary>
+/// <example>
+/// {
+///   "roomsId": {},
+///   "mute": true
+/// }
+/// </example>
 public class RoomsNotificationsSettingsRequestDto
 {
     /// <summary>
     /// The target room identifier.
     /// </summary>
+    /// <example>{}</example>
     public object RoomsId { get; set; }
 
     /// <summary>
     /// Specifies whether the notifications will be delivered to the specified room or not.
     /// </summary>
+    /// <example>true</example>
     public bool Mute { get; set; }
 }

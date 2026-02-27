@@ -29,23 +29,33 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 /// <summary>
 /// The request parameters for configuring login security and performance settings.
 /// </summary>
+/// <example>
+/// {
+///   "attemptCount": 1,
+///   "blockTime": 1,
+///   "checkPeriod": 1
+/// }
+/// </example>
 public class LoginSettingsRequestDto
 {
     /// <summary>
     /// The maximum number of consecutive failed login attempts allowed before triggering account suspension.
     /// </summary>
+    /// <example>1</example>
     [Range(1, 9999)]
     public int AttemptCount { get; set; }
 
     /// <summary>
     /// The duration (in minutes) for which an account remains suspended after exceeding maximum login attempts.
     /// </summary>
+    /// <example>1</example>
     [Range(1, 9999)]
     public int BlockTime { get; set; }
 
     /// <summary>
     /// The maximum time (in seconds) allowed for server to process and respond to login requests.
     /// </summary>
+    /// <example>1</example>
     [Range(1, 9999)]
     public int CheckPeriod { get; set; }
 }

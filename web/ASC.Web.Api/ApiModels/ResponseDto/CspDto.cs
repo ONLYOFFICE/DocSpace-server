@@ -34,10 +34,12 @@ public class CspDto
     /// <summary>
     /// The list of CSP domains.
     /// </summary>
+    /// <example>["https://example.com", "https://cdn.example.com"]</example>
     public required IEnumerable<string> Domains { get; set; }
 
     /// <summary>
     /// The CSP header.
     /// </summary>
+    /// <example>default-src 'self'; script-src 'self' https://example.com</example>
     public required string Header { get; set; }
 }

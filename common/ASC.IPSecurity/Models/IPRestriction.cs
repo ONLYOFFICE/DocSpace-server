@@ -34,11 +34,13 @@ public class IPRestriction : IpRestrictionBase
     /// <summary>
     /// The IP restiction ID.
     /// </summary>
+    /// <example>1</example>
     public int Id { get; set; }
 
     /// <summary>
     /// The tenant ID.
     /// </summary>
+    /// <example>1</example>
     public int TenantId { get; set; }
 }
 
@@ -50,11 +52,13 @@ public class IpRestrictionBase
     /// <summary>
     /// The IP address.
     /// </summary>
+    /// <example>192.0.2.1</example>
     public required string Ip { get; set; }
 
     /// <summary>
     /// Specifies if the IP address is for administrator users only or not.
     /// </summary>
+    /// <example>false</example>
     public bool ForAdmin { get; set; }
 }
 

@@ -34,60 +34,70 @@ public class AccountsEntriesRequestDto<T>
     /// <summary>
     /// The user ID.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "id")]
     public required T Id { get; set; }
 
     /// <summary>
     /// The user status.
     /// </summary>
+    /// <example>1</example>
     [FromQuery(Name = "employeeStatus")]
     public EmployeeStatus? EmployeeStatus { get; set; }
 
     /// <summary>
     /// The user activation status.
     /// </summary>
+    /// <example>1</example>
     [FromQuery(Name = "activationStatus")]
     public EmployeeActivationStatus? ActivationStatus { get; set; }
 
     /// <summary>
     /// Specifies whether to exclude the account sharing settings from the response.
     /// </summary>
+    /// <example>false</example>
     [FromQuery(Name = "excludeShared")]
     public bool? ExcludeShared { get; set; }
 
     /// <summary>
     /// Specifies whether to include the account sharing settings in the response.
     /// </summary>
+    /// <example>false</example>
     [FromQuery(Name = "includeShared")]
     public bool? IncludeShared { get; set; }
 
     /// <summary>
     /// Specifies whether the user is invited by the current user or not.
     /// </summary>
+    /// <example>false</example>
     [FromQuery(Name = "invitedByMe")]
     public bool? InvitedByMe { get; set; }
 
     /// <summary>
     /// The inviter ID.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromQuery(Name = "inviterId")]
     public Guid? InviterId { get; set; }
 
     /// <summary>
     /// The area of the account entries.
     /// </summary>
+    /// <example>0</example>
     [FromQuery(Name = "area")]
     public Area Area { get; set; } = Area.All;
 
     /// <summary>
     /// The list of the user types.
     /// </summary>
+    /// <example>[1, 2]</example>
     [FromQuery(Name = "employeeTypes")]
     public IEnumerable<EmployeeType> EmployeeTypes { get; set; } = new List<EmployeeType>();
 
     /// <summary>
     /// The number of items to retrieve in a request.
     /// </summary>
+    /// <example>25</example>
     [FromQuery(Name = "count")]
     [Range(1, ApiContext.MaxCount)]
     public int Count { get; set; } = ApiContext.DefaultCount;
@@ -95,18 +105,21 @@ public class AccountsEntriesRequestDto<T>
     /// <summary>
     /// The starting index for the query results.
     /// </summary>
+    /// <example>0</example>
     [FromQuery(Name = "startIndex")]
     public int StartIndex { get; set; }
 
     /// <summary>
     /// Specifies the separator used in filter expressions.
     /// </summary>
+    /// <example>,</example>
     [FromQuery(Name = "filterSeparator")]
     public string FilterSeparator { get; set; }
 
     /// <summary>
     /// The text filter applied to the accounts search query.
     /// </summary>
+    /// <example>John</example>
     [FromQuery(Name = "filterValue")]
     public string Text { get; set; }
 }

@@ -34,6 +34,7 @@ public class GetChatModelsRequestDto
     /// <summary>
     /// The optional AI provider identifier to filter models by. When set to 0, models from all providers are returned.
     /// </summary>
+    /// <example>1</example>
     [FromQuery(Name = "provider")]
     public int ProviderId { get; set; }
 }

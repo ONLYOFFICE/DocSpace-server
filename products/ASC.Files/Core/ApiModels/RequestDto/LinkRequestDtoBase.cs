@@ -34,15 +34,18 @@ public abstract class LinkRequestDtoBase
     /// <summary>
     /// The Link ID.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     public Guid LinkId { get; set; }
 
     /// <summary>
     /// The sharing access rights.
     /// </summary>
+    /// <example>1</example>
     public FileShare Access { get; set; }
 
     /// <summary>
     /// The link expiration date.
     /// </summary>
+    /// <example>2025-12-31T23:59:59.0000000Z</example>
     public ApiDateTime ExpirationDate { get; set; }
 }

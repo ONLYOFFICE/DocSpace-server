@@ -34,30 +34,36 @@ public class GroupMemberSecurityRequestDto
     /// <summary>
     /// The group member parameters.
     /// </summary>
+    /// <example>{"displayName": "John Doe"}</example>
     public required EmployeeFullDto User { get; init; }
 
     /// <summary>
     /// The group access rights to the files.
     /// </summary>
+    /// <example>1</example>
     public required FileShare GroupAccess { get; init; }
 
     /// <summary>
     /// The group member access rights to the files.
     /// </summary>
+    /// <example>2</example>
     public FileShare? UserAccess { get; init; }
 
     /// <summary>
     /// Specifies if the group access rights are overridden or not.
     /// </summary>
+    /// <example>false</example>
     public required bool Overridden { get; init; }
 
     /// <summary>
     /// Specifies if the group member can edit the group access rights or not.
     /// </summary>
+    /// <example>true</example>
     public required bool CanEditAccess { get; init; }
 
     /// <summary>
     /// Specifies if the group member is a group owner or not.
     /// </summary>
+    /// <example>false</example>
     public required bool Owner { get; init; }
 }

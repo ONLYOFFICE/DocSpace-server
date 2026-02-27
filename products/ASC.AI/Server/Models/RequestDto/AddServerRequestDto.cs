@@ -34,6 +34,7 @@ public class AddServerRequestDto
     /// <summary>
     /// MCP server registration parameters.
     /// </summary>
+    /// <example>{"name": "my-custom-server", "description": "Custom MCP server for project management tools", "endpoint": "https://mcp.example.com/sse"}</example>
     [FromBody]
     public required AddMcpServerRequestBody Body { get; init; }
 }
@@ -67,10 +68,12 @@ public class AddMcpServerRequestBody
     /// <summary>
     /// Optional HTTP headers to include with every request to the MCP server (e.g., authentication tokens or API keys).
     /// </summary>
+    /// <example>{"Authorization": "Bearer token123"}</example>
     public Dictionary<string, string>? Headers { get; init; }
 
     /// <summary>
     /// Optional Base64-encoded icon image for the server. Used as the visual identifier in the UI.
     /// </summary>
+    /// <example>https://example.com/icon.png</example>
     public string? Icon { get; init; }
 }

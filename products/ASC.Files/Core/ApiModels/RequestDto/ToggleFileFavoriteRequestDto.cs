@@ -34,12 +34,14 @@ public class ToggleFileFavoriteRequestDto<T>
     /// <summary>
     /// The file ID.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "fileId")]
     public required T FileId { get; set; }
 
     /// <summary>
     /// Specifies if the file is marked as favorite or not.
     /// </summary>
+    /// <example>true</example>
     [FromQuery(Name = "favorite")]
     public bool Favorite { get; set; }
 }

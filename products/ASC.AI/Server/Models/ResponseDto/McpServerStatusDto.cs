@@ -34,31 +34,37 @@ public class McpServerStatusDto
     /// <summary>
     /// Unique identifier of the MCP server.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     public Guid Id { get; init; }
 
     /// <summary>
     /// Display name of the MCP server.
     /// </summary>
+    /// <example>DocSpace Tools</example>
     public required string Name { get; init; }
 
     /// <summary>
     /// Type of the MCP server (Custom, DocSpace).
     /// </summary>
+    /// <example>0</example>
     public ServerType ServerType { get; init; }
 
     /// <summary>
     /// Indicates whether the current user has an active connection to this server. For direct-connection servers this is always true; for OAuth-based servers it reflects whether the user has completed authorization.
     /// </summary>
+    /// <example>true</example>
     public bool Connected { get; init; }
 
     /// <summary>
     /// Server icon in multiple resolutions for UI display.
     /// </summary>
+    /// <example>{"icon48": "/img/icon48.png", "icon32": "/img/icon32.png", "icon24": "/img/icon24.png", "icon16": "/img/icon16.png"}</example>
     public Icon? Icon { get; init; }
 
     /// <summary>
     /// Indicates whether the server requires a configuration reset due to connectivity or credential issues.
     /// </summary>
+    /// <example>false</example>
     public bool NeedReset { get; init; }
 }
 

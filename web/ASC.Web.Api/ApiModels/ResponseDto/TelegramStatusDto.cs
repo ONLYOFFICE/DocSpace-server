@@ -26,9 +26,21 @@
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
+/// <summary>
+/// The Telegram connection status parameters.
+/// </summary>
 public class TelegramStatusDto
 {
+    /// <summary>
+    /// The Telegram registration status.
+    /// </summary>
+    /// <example>Connected</example>
     [JsonConverter(typeof(JsonStringEnumConverter<RegStatus>))]
     public required RegStatus Status { get; set; }
+
+    /// <summary>
+    /// The Telegram username.
+    /// </summary>
+    /// <example>john_doe</example>
     public string Username { get; set; }
 }

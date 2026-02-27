@@ -89,62 +89,77 @@ public class SsoSettingsV2 : ISettings<SsoSettingsV2>
             DisableEmailVerification = false
         };
     }
-
+    
+    /// <summary>
+    /// The timestamp indicating when the settings were last modified.
+    /// </summary>
+    /// <example>1990-01-01T00:00:00Z</example>
     public DateTime LastModified { get; set; }
 
     /// <summary>
     /// Specifies if the SSO settings are enabled or not.
     /// </summary>
+    /// <example>false</example>
     public bool? EnableSso { get; set; }
 
     /// <summary>
     /// The SSO IdP settings.
     /// </summary>
+    /// <example>{"entityId": "", "ssoUrl": "", "ssoBinding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST", "sloUrl": "", "sloBinding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST", "nameIdFormat": "urn:oasis:names:tc:SAML:2.0:nameid-format:transient"}</example>
     public SsoIdpSettings IdpSettings { get; set; }
 
     /// <summary>
     /// The list of the IdP certificates.
     /// </summary>
+    /// <example>[{"crt": "base64-cert-data", "key": "base64-key-data"}]</example>
     public List<SsoCertificate> IdpCertificates { get; set; }
 
     /// <summary>
     /// The IdP advanced certificate.
     /// </summary>
+    /// <example>{"verifyAlgorithm": "RSA_SHA1", "verifyAuthResponsesSign": false, "verifyLogoutRequestsSign": false, "verifyLogoutResponsesSign": false, "decryptAlgorithm": "AES_128", "decryptAssertions": false}</example>
     public SsoIdpCertificateAdvanced IdpCertificateAdvanced { get; set; }
 
     /// <summary>
     /// The SP login label.
     /// </summary>
+    /// <example>Single Sign-on</example>
     public string SpLoginLabel { get; set; }
 
     /// <summary>
     /// The list of the SP certificates.
     /// </summary>
+    /// <example>[{"crt": "base64-cert-data", "key": "base64-key-data"}]</example>
     public List<SsoCertificate> SpCertificates { get; set; }
 
     /// <summary>
     /// The SP advanced certificate.
     /// </summary>
+    /// <example>{"signingAlgorithm": "RSA_SHA1", "signAuthRequests": false, "signLogoutRequests": false, "signLogoutResponses": false, "encryptAlgorithm": "AES_128", "encryptAssertions": false, "decryptAlgorithm": "AES_128"}</example>
     public SsoSpCertificateAdvanced SpCertificateAdvanced { get; set; }
 
     /// <summary>
     /// The SSO field mapping.
     /// </summary>
+    /// <example>{"firstName": "givenName", "lastName": "sn", "email": "mail", "title": "title", "location": "l", "phone": "mobile"}</example>
     public SsoFieldMapping FieldMapping { get; set; }
 
     /// <summary>
     /// Specifies if the authentication page will be hidden or not.
     /// </summary>
+    /// <example>false</example>
     public bool HideAuthPage { get; set; }
 
     /// <summary>
     /// The user type.
     /// </summary>
+    /// <example>1</example>
     public int UsersType { get; set; }
 
     /// <summary>
     /// Specifies if the email verification is disabled or not.
     /// </summary>
+    /// <example>false</example>
     public bool DisableEmailVerification { get; set; }
 }
 
@@ -159,31 +174,37 @@ public class SsoIdpSettings
     /// <summary>
     /// The entity ID.
     /// </summary>
+    /// <example>https://idp.company.com/saml</example>
     public string EntityId { get; init; }
 
     /// <summary>
     /// The SSO URL.
     /// </summary>
+    /// <example>https://idp.example.com/sso</example>
     public string SsoUrl { get; init; }
 
     /// <summary>
     /// The SSO binding.
     /// </summary>
+    /// <example>urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect</example>
     public string SsoBinding { get; init; }
 
     /// <summary>
     /// The SLO URL.
     /// </summary>
+    /// <example>https://idp.example.com/slo</example>
     public string SloUrl { get; init; }
 
     /// <summary>
     /// The SLO binding.
     /// </summary>
+    /// <example>urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect</example>
     public string SloBinding { get; init; }
 
     /// <summary>
     /// The name ID format.
     /// </summary>
+    /// <example>urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress</example>
     public string NameIdFormat { get; set; }
 }
 
@@ -195,37 +216,53 @@ public class SsoIdpSettings
 /// <summary>
 /// The SSO field mapping.
 /// </summary>
+/// <example>
+/// {
+///   "firstName": "givenName",
+///   "lastName": "sn",
+///   "email": "sn@example.com",
+///   "title": "SN",
+///   "location": "Location",
+///   "phone": "+14155552671"
+/// }
+/// </example>
 public class SsoFieldMapping
 {
     /// <summary>
     /// The first name.
     /// </summary>
+    /// <example>givenName</example>
     public string FirstName { get; init; }
 
     /// <summary>
     /// The last name.
     /// </summary>
+    /// <example>sn</example>
     public string LastName { get; init; }
 
     /// <summary>
     /// The email address.
     /// </summary>
+    /// <example>sn@example.com</example>
     [EmailAddress]
     public string Email { get; init; }
 
     /// <summary>
     /// The title.
     /// </summary>
+    /// <example>SN</example>
     public string Title { get; set; }
 
     /// <summary>
     /// The location.
     /// </summary>
+    /// <example>Location</example>
     public string Location { get; set; }
 
     /// <summary>
     /// The phone number.
     /// </summary>
+    /// <example>+14155552671</example>
     public string Phone { get; set; }
 }
 
@@ -243,36 +280,43 @@ public class SsoCertificate
     /// <summary>
     /// Specifies if a certificate is self-signed or not.
     /// </summary>
+    /// <example>false</example>
     public bool SelfSigned { get; set; }
 
     /// <summary>
     /// The CRT certificate file.
     /// </summary>
+    /// <example>crt file</example>
     public string Crt { get; set; }
 
     /// <summary>
     /// The certificate key.
     /// </summary>
+    /// <example>key</example>
     public string Key { get; set; }
 
     /// <summary>
     /// The certificate action.
     /// </summary>
+    /// <example>validate</example>
     public string Action { get; set; }
 
     /// <summary>
     /// The certificate domain name.
     /// </summary>
+    /// <example>example.com</example>
     public string DomainName { get; set; }
 
     /// <summary>
     /// The certificate start date.
     /// </summary>
+    /// <example>2024-01-01T00:00:00Z</example>
     public DateTime StartDate { get; set; }
 
     /// <summary>
     /// The certificate expiration date.
     /// </summary>
+    /// <example>2024-01-01T00:00:00Z</example>
     public DateTime ExpiredDate { get; set; }
 }
 
@@ -284,31 +328,37 @@ public class SsoIdpCertificateAdvanced
     /// <summary>
     /// The certificate verification algorithm.
     /// </summary>
+    /// <example>rsa-sha256</example>
     public string VerifyAlgorithm { get; set; }
 
     /// <summary>
     /// Specifies if the signatures of the SAML authentication responses sent to SP will be verified or not.
     /// </summary>
+    /// <example>true</example>
     public bool VerifyAuthResponsesSign { get; set; }
 
     /// <summary>
     /// Specifies if the signatures of the SAML logout requests sent to SP will be verified or not.
     /// </summary>
+    /// <example>true</example>
     public bool VerifyLogoutRequestsSign { get; set; }
 
     /// <summary>
     /// Specifies if the signatures of the SAML logout responses sent to SP will be verified or not.
     /// </summary>
+    /// <example>true</example>
     public bool VerifyLogoutResponsesSign { get; set; }
 
     /// <summary>
     /// The certificate decryption algorithm.
     /// </summary>
+    /// <example>aes256-cbc</example>
     public string DecryptAlgorithm { get; set; }
 
     /// <summary>
     /// Specifies if the assertions will be decrypted or not.
     /// </summary>
+    /// <example>true</example>
     public bool DecryptAssertions { get; set; }
 }
 
@@ -320,36 +370,43 @@ public class SsoSpCertificateAdvanced
     /// <summary>
     /// The certificate signing algorithm.
     /// </summary>
+    /// <example>rsa-sha256</example>
     public string SigningAlgorithm { get; set; }
 
     /// <summary>
     /// Specifies if SP will sign the SAML authentication requests sent to IdP or not.
     /// </summary>
+    /// <example>true</example>
     public bool SignAuthRequests { get; set; }
 
     /// <summary>
     /// Specifies if SP will sign the SAML logout requests sent to IdP or not.
     /// </summary>
+    /// <example>true</example>
     public bool SignLogoutRequests { get; set; }
 
     /// <summary>
     /// Specifies if SP will sign the SAML logout responses sent to IdP or not.
     /// </summary>
+    /// <example>true</example>
     public bool SignLogoutResponses { get; set; }
 
     /// <summary>
     /// The certificate encryption algorithm.
     /// </summary>
+    /// <example>aes256-cbc</example>
     public string EncryptAlgorithm { get; set; }
 
     /// <summary>
     /// The certificate decryption algorithm.
     /// </summary>
+    /// <example>aes256-cbc</example>
     public string DecryptAlgorithm { get; set; }
 
     /// <summary>
     /// Specifies if the assertions will be encrypted or not.
     /// </summary>
+    /// <example>true</example>
     public bool EncryptAssertions { get; set; }
 }
 

@@ -34,11 +34,12 @@ public class TaskProgressDto
     /// <summary>
     /// Specifies if the operation is completed or not.
     /// </summary>
+    /// <example>true</example>
     public bool IsCompleted { get; set; }
 
     /// <summary>
     /// The task progress percentage.
     /// </summary>
-    [SwaggerSchemaCustom(Example = 0)]
+    /// <example>50</example>
     public int Progress { get; set; }
 }

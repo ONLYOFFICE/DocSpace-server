@@ -34,6 +34,7 @@ public class CreateFolder
     /// <summary>
     /// The folder title to create.
     /// </summary>
+    /// <example>New Folder</example>
     [StringLength(165)]
     public required string Title { get; set; }
 }
@@ -46,12 +47,14 @@ public class CreateFolderRequestDto<T>
     /// <summary>
     /// The folder ID for the folder creation.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "folderId")]
     public required T FolderId { get; set; }
 
     /// <summary>
     /// The parameters for creating a folder.
     /// </summary>
+    /// <example>{"title": "New Folder"}</example>
     [FromBody]
     public required CreateFolder Folder { get; set; }
 }

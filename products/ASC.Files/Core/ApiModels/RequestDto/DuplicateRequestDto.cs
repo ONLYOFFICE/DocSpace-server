@@ -34,10 +34,12 @@ public class DuplicateRequestDto : FileOperationRequestBaseDto
     /// <summary>
     /// The list of folder IDs.
     /// </summary>
+    /// <example>[1, 2, 3]</example>
     public List<JsonElement> FolderIds { get; set; } = [];
 
     /// <summary>
     /// The list of file IDs.
     /// </summary>
+    /// <example>[1, 2, 3]</example>
     public List<JsonElement> FileIds { get; set; } = [];
 }

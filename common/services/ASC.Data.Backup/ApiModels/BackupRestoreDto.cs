@@ -34,26 +34,31 @@ public class BackupRestoreDto
     /// <summary>
     /// The backup ID.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     public required string BackupId { get; set; }
 
     /// <summary>
     /// The backup storage type.
     /// </summary>
+    /// <example>Documents</example>
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public BackupStorageType? StorageType { get; set; }
 
     /// <summary>
     /// The backup storage parameters.
     /// </summary>
+    /// <example>[{"key": "path", "value": "/backup"}]</example>
     public IEnumerable<ItemKeyValuePair<object, object>> StorageParams { get; set; }
 
     /// <summary>
     /// Notifies users about the portal restoring process or not.
     /// </summary>
+    /// <example>true</example>
     public bool Notify { get; set; }
 
     /// <summary>
     /// Specifies if a dump will be created or not.
     /// </summary>
+    /// <example>false</example>
     public bool Dump { get; set; }
 }

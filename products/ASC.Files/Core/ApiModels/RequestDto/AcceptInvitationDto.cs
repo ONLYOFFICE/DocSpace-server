@@ -34,5 +34,6 @@ public class AcceptInvitationDto
     /// <summary>
     /// The link key.
     /// </summary>
+    /// <example>invitation-key-123</example>
     public string Key { get; set; }
 }

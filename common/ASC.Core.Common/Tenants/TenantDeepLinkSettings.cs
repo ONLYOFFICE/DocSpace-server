@@ -40,13 +40,18 @@ public class TenantDeepLinkSettings : ISettings<TenantDeepLinkSettings>
     /// <summary>
     /// The deep link handling mode.
     /// </summary>
+    /// <example>ProvideChoice</example>
     public DeepLinkHandlingMode HandlingMode { get; set; }
 
     public TenantDeepLinkSettings GetDefault()
     {
         return new TenantDeepLinkSettings();
     }
-
+    
+    /// <summary>
+    /// The timestamp indicating when the settings were last modified.
+    /// </summary>
+    /// <example>1990-01-01T00:00:00Z</example>
     public DateTime LastModified { get; set; }
 }
 

@@ -35,16 +35,19 @@ public class PasswordHasher
     /// <summary>
     /// The password hash size.
     /// </summary>
+    /// <example>32</example>
     public int Size { get; private set; }
 
     /// <summary>
     /// The number of iterations to generate the ppassword hash.
     /// </summary>
+    /// <example>1000</example>
     public int Iterations { get; private set; }
 
     /// <summary>
     /// The salt to generate the ppassword hash.
     /// </summary>
+    /// <example>random_salt_value</example>
     public string Salt { get; private set; }
 
     public PasswordHasher()

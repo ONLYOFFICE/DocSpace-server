@@ -34,54 +34,64 @@ public class RoomLinkRequest
     /// <summary>
     /// The room link ID.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     public Guid LinkId { get; set; }
 
     /// <summary>
     /// The link sharing rights.
     /// </summary>
+    /// <example>1</example>
     public FileShare Access { get; set; }
 
     /// <summary>
     /// The link expiration date.
     /// </summary>
+    /// <example>2026-12-31T23:59:59.0000000+00:00</example>
     public ApiDateTime ExpirationDate { get; set; }
 
     /// <summary>
     /// The link scope, whether it is internal or not.
     /// </summary>
+    /// <example>false</example>
     public bool Internal { get; set; }
 
     /// <summary>
     /// The link name.
     /// </summary>
+    /// <example>My Document</example>
     [StringLength(255)]
     public string Title { get; set; }
 
     /// <summary>
     /// The link type.
     /// </summary>
+    /// <example>1</example>
     public LinkType LinkType { get; set; }
 
     /// <summary>
     /// The link password.
     /// </summary>
+    /// <example>doc_key_123</example>
     [StringLength(255)]
     public string Password { get; set; }
 
     /// <summary>
     /// Specifies if downloading the file from the link is disabled or not.
     /// </summary>
+    /// <example>false</example>
     public bool DenyDownload { get; set; }
 
     /// <summary>
     /// The maximum number of times the invitation link can be used.
     /// </summary>
+    /// <example>25</example>
     [Range(1, 1000)]
     public int? MaxUseCount { get; set; }
 
     /// <summary>
     /// The current number of times the invitation link has been used.
     /// </summary>
+    /// <example>0</example>
     public int CurrentUseCount { get; set; }
 }
 
@@ -93,6 +103,7 @@ public class RoomLinkRequestDto<T>
     /// <summary>
     /// The room ID.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "id")]
     public required T Id { get; set; }
 

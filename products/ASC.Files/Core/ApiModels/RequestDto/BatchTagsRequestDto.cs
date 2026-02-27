@@ -34,6 +34,7 @@ public class BatchTagsRequestDto
     /// <summary>
     /// The list of tag names.
     /// </summary>
+    /// <example>["tag1", "tag2", "tag3"]</example>
     public List<string> Names { get; set; }
 }
 
@@ -46,12 +47,14 @@ public class BatchTagsRequestDto<T>
     /// <summary>
     /// The room Id.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "id")]
     public required T Id { get; set; }
 
     /// <summary>
     /// The parameters for managing tags.
     /// </summary>
+    /// <example>{"names": ["tag1", "tag2", "tag3"]}</example>
     [FromBody]
     public BatchTagsRequestDto BatchTags { get; set; }
 }

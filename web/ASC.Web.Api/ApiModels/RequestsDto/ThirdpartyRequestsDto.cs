@@ -29,16 +29,24 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 /// <summary>
 /// The request parameters for handling third-party OAuth authentication requests.
 /// </summary>
+/// <example>
+/// {
+///   "code": "4/0AY0e-g7X...",
+///   "redirect": "https://example.com/oauth/callback"
+/// }
+/// </example>
 public class ThirdpartyRequestsDto
 {
     /// <summary>
     /// The authorization code received from the third-party OAuth provider.
     /// </summary>
+    /// <example>4/0AY0e-g7X...</example>
     public string Code { get; set; }
 
     /// <summary>
     /// The callback URL where the user should be redirected after authentication.
     /// </summary>
+    /// <example>https://example.com/oauth/callback</example>
     public string Redirect { get; set; }
 }
 
@@ -50,18 +58,21 @@ public class ConfirmationCodeRequestDto
     /// <summary>
     /// The callback URL for redirecting the user after successful authentication.
     /// </summary>
+    /// <example>https://example.com/oauth/callback</example>
     [FromQuery(Name = "redirect")]
     public string Redirect { get; set; }
 
     /// <summary>
     /// The OAuth authorization code received from the identity provider.
     /// </summary>
+    /// <example>4/0AY0e-g7X...</example>
     [FromQuery(Name = "code")]
     public string Code { get; set; }
 
     /// <summary>
     /// The error message or code returned by the OAuth provider if authentication fails.
     /// </summary>
+    /// <example>access_denied</example>
     [FromQuery(Name = "error")]
     public string Error { get; set; }
 }
@@ -74,6 +85,7 @@ public class ConfirmationCodeUrlRequestDto
     /// <summary>
     /// The identity provider used for authentication.
     /// </summary>
+    /// <example>{}</example>
     [FromRoute(Name = "provider")]
     public LoginProvider Provider { get; set; }
 }

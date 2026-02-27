@@ -34,23 +34,27 @@ public class SettingsModel : IModel
     /// <summary>
     /// The portal name.
     /// </summary>
+    /// <example>myportal</example>
     [StringLength(255)]
     public string PortalName { get; set; }
 
     /// <summary>
     /// The tenant ID.
     /// </summary>
+    /// <example>1</example>
     public int? TenantId { get; set; }
 
     /// <summary>
     /// The settings parameter key.
     /// </summary>
+    /// <example>SmtpSettings</example>
     [StringLength(255)]
     public string Key { get; set; }
 
     /// <summary>
     /// The settings parameter value.
     /// </summary>
+    /// <example>sample value</example>
     public string Value { get; set; }
 }
 
@@ -62,6 +66,7 @@ public class DomainModel
     /// <summary>
     /// The host name.
     /// </summary>
+    /// <example>example.com</example>
     [StringLength(255)]
     public string HostName { get; set; }
 }
