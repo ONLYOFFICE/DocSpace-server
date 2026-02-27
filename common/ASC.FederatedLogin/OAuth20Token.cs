@@ -32,18 +32,21 @@ public class OAuth20Token
     /// <summary>
     /// Access token
     /// </summary>
+    /// <example>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</example>
     [JsonPropertyName("access_token")]
     public string AccessToken { get; set; }
 
     /// <summary>
     /// Refresh token
     /// </summary>
+    /// <example>def50200a1b2c3d4e5f6...</example>
     [JsonPropertyName("refresh_token")]
     public string RefreshToken { get; set; }
 
     /// <summary>
     /// Expires in
     /// </summary>
+    /// <example>3600</example>
     [JsonPropertyName("expires_in")]
     [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
     public long ExpiresIn { get; set; }
@@ -51,18 +54,21 @@ public class OAuth20Token
     /// <summary>
     /// Client id
     /// </summary>
+    /// <example>my-client-id</example>
     [JsonPropertyName("client_id")]
     public string ClientID { get; set; }
 
     /// <summary>
     /// Client secret
     /// </summary>
+    /// <example>my-client-secret</example>
     [JsonPropertyName("client_secret")]
     public string ClientSecret { get; set; }
 
     /// <summary>
     /// Redirect uri
     /// </summary>
+    /// <example>https://app.example.com/callback</example>
     [Url]
     [JsonPropertyName("redirect_uri")]
     public string RedirectUri { get; set; }
@@ -70,6 +76,7 @@ public class OAuth20Token
     /// <summary>
     /// Timestamp
     /// </summary>
+    /// <example>2026-01-01T00:00:00Z</example>
     [JsonPropertyName("timestamp")]
     public DateTime Timestamp { get; set; }
 
@@ -82,6 +89,7 @@ public class OAuth20Token
     /// <summary>
     /// Is expired
     /// </summary>
+    /// <example>false</example>
     public bool IsExpired
     {
         get

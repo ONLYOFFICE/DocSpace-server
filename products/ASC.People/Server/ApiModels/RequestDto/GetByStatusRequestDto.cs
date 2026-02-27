@@ -34,18 +34,21 @@ public class GetByStatusRequestDto
     /// <summary>
     /// The user status.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "status")]
     public required EmployeeStatus Status { get; set; }
 
     /// <summary>
     /// Specifies the criteria used to filter the profiles in the request.
     /// </summary>
+    /// <example>displayName</example>
     [FromQuery(Name = "filterBy")]
     public string FilterBy { get; set; }
 
     /// <summary>
     /// The maximum number of user profiles to retrieve.
     /// </summary>
+    /// <example>25</example>
     [FromQuery(Name = "count")]
     [Range(1, ApiContext.MaxCount)]
     public int Count { get; set; } = ApiContext.DefaultCount;
@@ -53,30 +56,35 @@ public class GetByStatusRequestDto
     /// <summary>
     /// The starting index for retrieving data in a paginated request.
     /// </summary>
+    /// <example>0</example>
     [FromQuery(Name = "startIndex")]
     public int StartIndex { get; set; }
 
     /// <summary>
     /// Specifies the property or field name by which the results should be sorted.
     /// </summary>
+    /// <example>displayName</example>
     [FromQuery(Name = "sortBy")]
     public string SortBy { get; set; }
 
     /// <summary>
     /// The order in which the results are sorted.
     /// </summary>
+    /// <example>0</example>
     [FromQuery(Name = "sortOrder")]
     public SortOrder SortOrder { get; set; }
 
     /// <summary>
     /// Represents the separator used to split multiple filter criteria in a query string.
     /// </summary>
+    /// <example>,</example>
     [FromQuery(Name = "filterSeparator")]
     public string FilterSeparator { get; set; }
 
     /// <summary>
     /// A string value representing additional filter criteria used in query parameters.
     /// </summary>
+    /// <example>John</example>
     [FromQuery(Name = "filterValue")]
     public string Text { get; set; }
 }

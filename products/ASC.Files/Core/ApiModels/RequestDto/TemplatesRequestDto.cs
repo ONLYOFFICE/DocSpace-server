@@ -34,5 +34,6 @@ public class TemplatesRequestDto
     /// <summary>
     /// The list of file IDs.
     /// </summary>
+    /// <example>[1, 2, 3]</example>
     public IEnumerable<int> FileIds { get; set; }
 }

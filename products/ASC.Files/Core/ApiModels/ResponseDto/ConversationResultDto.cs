@@ -34,38 +34,44 @@ public class ConversationResultDto
     /// <summary>
     /// The conversion operation ID.
     /// </summary>
+    /// <example>12345</example>
     public required string Id { get; set; }
 
     /// <summary>
     /// The conversion operation type.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "Move")]
+    /// <example>0</example>
     [JsonPropertyName("Operation")]
     public required FileOperationType OperationType { get; set; }
 
     /// <summary>
     /// The conversion operation progress.
     /// </summary>
+    /// <example>50</example>
     public required int Progress { get; set; }
 
     /// <summary>
     /// The source file for the conversion.
     /// </summary>
+    /// <example>document.docx</example>
     public string Source { get; set; }
 
     /// <summary>
     /// The resulting file after the conversion.
     /// </summary>
+    /// <example>{"id": 10, "title": "converted_file.pdf"}</example>
     [JsonPropertyName("result")]
     public object File { get; set; }
 
     /// <summary>
     /// The conversion operation error message.
     /// </summary>
+    /// <example>Conversion failed</example>
     public string Error { get; set; }
 
     /// <summary>
     /// Specifies if the conversion operation is processed or not.
     /// </summary>
+    /// <example>true</example>
     public string Processed { get; set; }
 }

@@ -29,66 +29,93 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 /// <summary>
 /// The webhook log parameters.
 /// </summary>
+/// <example>
+/// {
+///   "configName": "example value",
+///   "trigger": 0,
+///   "creationTime": "2024-01-15T10:30:00Z",
+///   "method": "example value",
+///   "route": "example value",
+///   "requestHeaders": "example value",
+///   "requestPayload": "example value",
+///   "responseHeaders": "example value",
+///   "responsePayload": "example value",
+///   "status": 1,
+///   "delivery": "2024-01-15T10:30:00Z"
+/// }
+/// </example>
 public class WebhooksLogDto
 {
     /// <summary>
     /// The webhook log ID.
     /// </summary>
+    /// <example>1</example>
     public required int Id { get; set; }
 
     /// <summary>
     /// The webhook configuration name.
     /// </summary>
+    /// <example>Example Name</example>
     public string ConfigName { get; set; }
 
     /// <summary>
     /// The webhook trigger type.
     /// </summary>
+    /// <example>0</example>
     public WebhookTrigger Trigger { get; set; }
 
     /// <summary>
     /// The webhook creation time.
     /// </summary>
+    /// <example>2024-01-15T10:30:00Z</example>
     public DateTime CreationTime { get; set; }
 
     /// <summary>
     /// The webhook method.
     /// </summary>
+    /// <example>example value</example>
     public string Method { get; set; }
 
     /// <summary>
     /// The webhook route.
     /// </summary>
+    /// <example>example value</example>
     public string Route { get; set; }
 
     /// <summary>
     /// The webhook request headers.
     /// </summary>
+    /// <example>example value</example>
     public string RequestHeaders { get; set; }
 
     /// <summary>
     /// The webhook request payload.
     /// </summary>
+    /// <example>example value</example>
     public string RequestPayload { get; set; }
 
     /// <summary>
     /// The webhook response headers.
     /// </summary>
+    /// <example>example value</example>
     public string ResponseHeaders { get; set; }
 
     /// <summary>
     /// The webhook response payload.
     /// </summary>
+    /// <example>example value</example>
     public string ResponsePayload { get; set; }
 
     /// <summary>
     /// The webhook status.
     /// </summary>
+    /// <example>1</example>
     public int Status { get; set; }
 
     /// <summary>
     /// The webhook delivery time.
     /// </summary>
+    /// <example>2024-01-15T10:30:00Z</example>
     public DateTime? Delivery { get; set; }
 }
 

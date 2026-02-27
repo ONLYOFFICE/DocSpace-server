@@ -43,6 +43,7 @@ public class SettingsController(CommonMethods commonMethods,
     /// <remarks>
     /// Test API.
     /// </remarks>
+    /// <summary>Test API.</summary>
     /// <path>apisystem/settings/test</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [SwaggerResponse(200, "Settings api works")]

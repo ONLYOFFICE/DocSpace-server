@@ -34,5 +34,6 @@ public class MobileAppRequestsDto
     /// <summary>
     /// The type of mobile application being configured.
     /// </summary>
+    /// <example>IosProjects</example>
     public MobileAppType Type { get; set; }
 }

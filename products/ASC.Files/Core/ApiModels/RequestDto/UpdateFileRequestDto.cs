@@ -34,12 +34,14 @@ public class UpdateFile
     /// <summary>
     /// The file title to update.
     /// </summary>
+    /// <example>My Document</example>
     [StringLength(165)]
     public string Title { get; set; }
 
     /// <summary>
     /// The number of the latest file version.
     /// </summary>
+    /// <example>1</example>
     public int LastVersion { get; set; }
 }
 
@@ -51,6 +53,7 @@ public class UpdateFileRequestDto<T>
     /// <summary>
     /// The file ID to update.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "fileId")]
     public required T FileId { get; set; }
 

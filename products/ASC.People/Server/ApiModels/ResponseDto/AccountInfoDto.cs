@@ -34,16 +34,19 @@ public class AccountInfoDto
     /// <summary>
     /// The account provider.
     /// </summary>
+    /// <example>Google</example>
     public required string Provider { get; set; }
 
     /// <summary>
     /// The account URL.
     /// </summary>
+    /// <example>https://example.com/account</example>
     [Url]
     public required string Url { get; set; }
 
     /// <summary>
     /// Specifies if an account is linked with other profiles or not.
     /// </summary>
+    /// <example>true</example>
     public required bool Linked { get; set; }
 }

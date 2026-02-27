@@ -29,15 +29,23 @@ namespace ASC.Web.Api.Models;
 /// <summary>
 /// The request parameters for managing the DNS (Domain Name System) settings.
 /// </summary>
+/// <example>
+/// {
+///   "dnsName": "example.com",
+///   "enable": true
+/// }
+/// </example>
 public class DnsSettingsRequestsDto
 {
     /// <summary>
     /// The DNS (Domain Name System) configuration name.
     /// </summary>
+    /// <example>example.com</example>
     public string DnsName { get; set; }
 
     /// <summary>
     /// Specifies whether the DNS settings are enabled.
     /// </summary>
+    /// <example>true</example>
     public bool Enable { get; set; }
 }

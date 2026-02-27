@@ -35,39 +35,61 @@ namespace ASC.AI.Api
     [ControllerName("ai")]
     public class OpenAiController(
         IHttpClientFactory httpClientFactory,
-        AiProviderService aiProviderService
+        AiProviderService service
         ) : ControllerBase
     {
         [HttpGet, HttpPost, HttpPut, HttpDelete]
-        public async Task<IActionResult> ProxyRequest([FromRoute] int providerId, [FromRoute] string path)
+        public async Task<IActionResult> ProxyRequest([FromRoute] int providerId, [FromRoute] string? path)
         {
-            var provider = await aiProviderService.GetProviderAsync(providerId);
-
-            var client = httpClientFactory.CreateClient();
-            client.BaseAddress = new Uri(provider.Url.EndsWith('/') ? provider.Url : provider.Url + '/');
-
-            var uri = path ?? "";
+            var provider = await service.GetProviderAsync(providerId);
+            
+            var uri = path ?? string.Empty;
             if (!string.IsNullOrEmpty(Request.QueryString.Value))
             {
                 uri += Request.QueryString.Value;
             }
-
+            
             var request = new HttpRequestMessage(new HttpMethod(Request.Method), uri);
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", provider.Key);
+            switch (provider.Type)
+            {
+                case ProviderType.Anthropic:
+                    provider.Url = "https://api.anthropic.com/v1/";
+                    request.Headers.Add("x-api-key", provider.Key);
+                    break;
+                case ProviderType.GoogleAi:
+                    provider.Url = "https://generativelanguage.googleapis.com/v1beta/openai/";
+                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", provider.Key);
+                    break;
+                default:
+                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", provider.Key);
+                    break;
+            }
 
-            if (Request.ContentLength.HasValue && Request.ContentLength > 0)
+            var client = httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(provider.Url.EndsWith('/') ? provider.Url : provider.Url + '/');
+
+            if (Request.ContentLength is > 0)
             {
                 request.Content = new StreamContent(Request.Body);
                 request.Content.Headers.ContentType = new MediaTypeHeaderValue(Request.Headers.ContentType.FirstOrDefault() ?? "application/json");
             }
 
-            using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+            var upstreamResponse = await client.SendAsync(
+                request, 
+                HttpCompletionOption.ResponseHeadersRead, 
+                Request.HttpContext.RequestAborted);
+            
+            HttpContext.Response.RegisterForDispose(upstreamResponse);
 
-            Response.StatusCode = (int)response.StatusCode;
-            Response.Headers.ContentType = response.Content.Headers.ContentType?.ToString() ?? "application/octet-stream";
-            Response.Headers.ContentLength = response.Content.Headers.ContentLength;
-            using var stream = await response.Content.ReadAsStreamAsync();
-            await stream.CopyToAsync(Response.Body);
+            Response.StatusCode = (int)upstreamResponse.StatusCode;
+            Response.Headers.ContentType = upstreamResponse.Content.Headers.ContentType?.ToString() ?? "application/octet-stream";
+            Response.Headers.ContentLength = upstreamResponse.Content.Headers.ContentLength;
+            
+            await using var upstream = await upstreamResponse.Content.ReadAsStreamAsync(Request.HttpContext.RequestAborted);
+            await upstream.CopyToAsync(Response.Body, Request.HttpContext.RequestAborted);
+            await Response.Body.FlushAsync(HttpContext.RequestAborted);
+            await Response.CompleteAsync();
+            
             return new EmptyResult();
         }
     }

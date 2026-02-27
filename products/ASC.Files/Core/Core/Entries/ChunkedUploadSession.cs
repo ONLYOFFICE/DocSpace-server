@@ -71,14 +71,45 @@ public class ChunkedUploadSession<T>(File<T> file, long bytesTotal) : CommonChun
     }
 }
 
+/// <summary>
+/// Represents the response returned from a chunked upload session.
+/// </summary>
 public class ChunkedUploadSessionResponse<T>
 {
+    /// <summary>
+    /// The unique identifier for the entity.
+    /// </summary>
+    /// <example>0af4bc0d-9a9d-450c-a72b-f14d9ac55c89</example>
     public string Id { get; init; }
+
+    /// <summary>
+    /// Represents the hierarchical path of folders associated with a chunked upload session.
+    /// </summary>
+    /// <example>["123", "456", "789"]</example>
     public IEnumerable<T> Path { get; init; }
+
+    /// <summary>
+    /// The timestamp indicating when the chunked upload session was created.
+    /// </summary>
+    /// <example>2024-01-15T10:30:00Z</example>
     public DateTime Created { get; init; }
+
+    /// <summary>
+    /// The date and time when the chunked upload session is set to expire.
+    /// </summary>
+    /// <example>2024-01-15T11:30:00Z</example>
     public DateTime Expired { get; init; }
+
+    /// <summary>
+    /// Represents the URI or path of the chunked upload session's current location.
+    /// </summary>
+    /// <example>https://example.com/products/files/httphandlers/filehandler.ashx?action=upload</example>
     public string Location { get; init; }
-    
+
+    /// <summary>
+    /// The total size, in bytes, of the file being uploaded in the chunked upload session.
+    /// </summary>
+    /// <example>10485760</example>
     [JsonPropertyName("bytes_total")]
     public long BytesTotal { get; init; }
 }

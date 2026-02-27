@@ -34,12 +34,14 @@ public class ContinueChatRequestDto
     /// <summary>
     /// The unique identifier of the existing AI chat session to continue.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "chatId")]
     public required Guid ChatId { get; set; }
 
     /// <summary>
     /// The message and optional file attachments.
     /// </summary>
+    /// <example>{"message": "Summarize this document for me", "contextFolderId": 123}</example>
     [FromBody]
     public required ContinueChatBody Body { get; set; }
 }
@@ -52,10 +54,15 @@ public class ContinueChatBody
     /// <summary>
     /// The user message to append to the conversation.
     /// </summary>
+    /// <example>Summarize this document for me</example>
     public required string Message { get; set; }
 
     /// <summary>
     /// The optional collection of file identifiers to attach as context for the AI model.
     /// </summary>
+    /// <example>123</example>
+    public int ContextFolderId { get; set; }
+    /// <summary>The list of attached files.</summary>
+    /// <example>[{"id": 1, "type": "file"}]</example>
     public IEnumerable<JsonElement>? Files { get; set; }
 }

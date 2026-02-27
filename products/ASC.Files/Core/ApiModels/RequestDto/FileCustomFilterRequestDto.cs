@@ -34,6 +34,7 @@ public class CustomFilterParameters
     /// <summary>
     /// Specifies whether the Custom Filter editing mode is enabled or not.
     /// </summary>
+    /// <example>true</example>
     public bool Enabled { get; set; }
 }
 
@@ -45,6 +46,7 @@ public class FileCustomFilterRequestDto<T>
     /// <summary>
     /// The file ID.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "fileId")]
     public T FileId { get; set; }
 

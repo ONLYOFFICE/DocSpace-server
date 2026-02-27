@@ -34,11 +34,13 @@ public class CoverRequestDto
     /// <summary>
     /// The cover color.
     /// </summary>
+    /// <example>#FF0000</example>
     public string Color { get; set; }
 
     /// <summary>
     /// The cover name.
     /// </summary>
+    /// <example>cover1.jpg</example>
     public string Cover { get; set; }
 }
 
@@ -50,12 +52,14 @@ public class CoverRequestDto<T>
     /// <summary>
     /// The room ID.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "id")]
     public required T Id { get; set; }
 
     /// <summary>
     /// The request parameters to change the room cover.
     /// </summary>
+    /// <example>{"color": "#FF0000", "cover": "cover1.jpg"}</example>
     [FromBody]
     public required CoverRequestDto Cover { get; set; } = null;
 }

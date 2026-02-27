@@ -34,26 +34,31 @@ public class CopyAs<T>
     /// <summary>
     /// The copied file name.
     /// </summary>
+    /// <example>Document Copy.docx</example>
     public required string DestTitle { get; set; }
 
     /// <summary>
     /// The destination folder ID of the copied file.
     /// </summary>
+    /// <example>1</example>
     public required T DestFolderId { get; set; }
 
     /// <summary>
     /// Specifies whether to allow creating the copied file of an external extension or not.
     /// </summary>
+    /// <example>false</example>
     public bool EnableExternalExt { get; set; }
 
     /// <summary>
     /// The copied file password.
     /// </summary>
+    /// <example>password123</example>
     public string Password { get; set; }
 
     /// <summary>
     /// Specifies whether to convert the file to form or not.
     /// </summary>
+    /// <example>false</example>
     public bool ToForm { get; set; }
 }
 
@@ -65,12 +70,14 @@ public class CopyAsRequestDto<T>
     /// <summary>
     /// The file ID to copy.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "fileId")]
     public required T FileId { get; set; }
 
     /// <summary>
     /// The parameters for copying a file.
     /// </summary>
+    /// <example>{"destTitle": "Document Copy.docx", "destFolderId": "1", "enableExternalExt": false, "password": "password123", "toForm": false}</example>
     [FromBody]
     public required CopyAs<JsonElement> File { get; set; }
 }

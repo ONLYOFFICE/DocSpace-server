@@ -34,12 +34,14 @@ public class DisconnectServerRequestDto
     /// <summary>
     /// Identifier of the room containing the MCP server.
     /// </summary>
+    /// <example>42</example>
     [FromRoute(Name = "roomId")]
     public int RoomId { get; init; }
 
     /// <summary>
     /// Unique identifier of the MCP server to disconnect from.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "serverId")]
     public Guid ServerId { get; init; }
 }

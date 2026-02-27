@@ -34,18 +34,21 @@ public class GeneralInformationRequestDto
     /// <summary>
     /// The user ID.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromQuery(Name = "userId")]
     public Guid? UserId { get; set; }
 
     /// <summary>
     /// Specifies if the user is a manager or not.
     /// </summary>
+    /// <example>false</example>
     [FromQuery(Name = "manager")]
     public bool? Manager { get; set; }
 
     /// <summary>
     /// The number of records to retrieve.
     /// </summary>
+    /// <example>25</example>
     [FromQuery(Name = "count")]
     [Range(1, ApiContext.MaxCount)]
     public int Count { get; set; } = ApiContext.DefaultCount;
@@ -53,24 +56,28 @@ public class GeneralInformationRequestDto
     /// <summary>
     /// The starting index for paginated results.
     /// </summary>
+    /// <example>0</example>
     [FromQuery(Name = "startIndex")]
     public int StartIndex { get; set; }
 
     /// <summary>
     /// Specifies the property used to sort the query results.
     /// </summary>
+    /// <example>displayName</example>
     [FromQuery(Name = "sortBy")]
     public string SortBy { get; set; }
 
     /// <summary>
     /// The order in which the results are sorted.
     /// </summary>
+    /// <example>0</example>
     [FromQuery(Name = "sortOrder")]
     public SortOrder SortOrder { get; set; }
 
     /// <summary>
     /// The text used for filtering or searching group data.
     /// </summary>
+    /// <example>John</example>
     [FromQuery(Name = "filterValue")]
     public string Text { get; set; }
 }

@@ -34,24 +34,25 @@ public class LoginSettingsDto
     /// <summary>
     /// The maximum number of consecutive failed login attempts allowed before triggering account suspension.
     /// </summary>
+    /// <example>5</example>
     public required int AttemptCount { get; set; }
 
     /// <summary>
     /// The duration (in minutes) for which an account remains suspended after exceeding maximum login attempts.
     /// </summary>
+    /// <example>15</example>
     public required int BlockTime { get; set; }
 
     /// <summary>
     /// The maximum time (in seconds) allowed for server to process and respond to login requests.
     /// </summary>
+    /// <example>60</example>
     public required int CheckPeriod { get; set; }
 
     /// <summary>
-    /// Specifies if these settings are default or not
-    /// </summary>
-    /// <summary>
     /// Specifies whether the login settings are default or not.
     /// </summary>
+    /// <example>false</example>
     public required bool IsDefault { get; set; }
 }
 

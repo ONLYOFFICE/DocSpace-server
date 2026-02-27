@@ -34,36 +34,43 @@ public class UploadRequestDto : IModelWithFile, IDisposable
     /// <summary>
     /// The file to be uploaded.
     /// </summary>
+    /// <example>binary file data</example>
     public IFormFile File { get; set; }
 
     /// <summary>
     /// The content-type header.
     /// </summary>
+    /// <example>application/vnd.openxmlformats-officedocument.wordprocessingml.document</example>
     public ContentType ContentType { get; set; }
 
     /// <summary>
     /// The content-disposition header.
     /// </summary>
+    /// <example>attachment; filename=file.docx</example>
     public ContentDisposition ContentDisposition { get; set; }
 
     /// <summary>
     /// The list of files when specified as multipart/form-data.
     /// </summary>
+    /// <example>["file1.docx", "file2.xlsx"]</example>
     public IEnumerable<IFormFile> Files { get; set; }
 
     /// <summary>
     /// Specifies whether to create the new file if it already exists or not.
     /// </summary>
+    /// <example>true</example>
     public bool CreateNewIfExist { get; set; }
 
     /// <summary>
     /// Specifies whether to upload documents in the original formats as well or not.
     /// </summary>
+    /// <example>true</example>
     public bool? StoreOriginalFileFlag { get; set; }
 
     /// <summary>
     /// Specifies whether to keep the file converting status or not.
     /// </summary>
+    /// <example>false</example>
     public bool KeepConvertStatus { get; set; }
 
     private Stream _stream;
@@ -72,6 +79,7 @@ public class UploadRequestDto : IModelWithFile, IDisposable
     /// <summary>
     /// The request input stream.
     /// </summary>
+    /// <example>binary stream data</example>
     public Stream Stream
     {
         get => File?.OpenReadStream() ?? _stream;
@@ -113,6 +121,7 @@ public class UploadWithFolderRequestDto<T>
     /// <summary>
     /// The folder ID to upload a file.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "folderId")]
     public required T FolderId { get; set; }
 

@@ -4092,8 +4092,17 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
+                    b.Property<bool?>("StartFilling")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("start_filling")
+                        .HasComputedColumnSql("IF(JSON_EXTRACT(`data`, '$.FormFilling.StartFilling') IS NULL, NULL, JSON_EXTRACT(`data`, '$.FormFilling.StartFilling'))", true);
+
                     b.HasKey("TenantId", "EntryId")
                         .HasName("PRIMARY");
+
+                    b.HasIndex("TenantId", "StartFilling", "EntryId")
+                        .HasDatabaseName("idx_tenant_start_entry");
 
                     b.ToTable("files_properties", (string)null);
                 });

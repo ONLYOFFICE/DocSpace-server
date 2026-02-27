@@ -35,18 +35,21 @@ public class GetGroupsWithSharedRequestDto<T>
     /// <summary>
     /// The group ID.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "id")]
     public required T Id { get; set; }
 
     /// <summary>
     /// Specifies whether to exclude the group sharing settings from the response.
     /// </summary>
+    /// <example>false</example>
     [FromQuery(Name = "excludeShared")]
     public bool? ExcludeShared { get; set; }
 
     /// <summary>
     /// The number of groups to retrieve in the request.
     /// </summary>
+    /// <example>25</example>
     [FromQuery(Name = "count")]
     [Range(1, ApiContext.MaxCount)]
     public int Count { get; set; } = ApiContext.DefaultCount;
@@ -54,12 +57,14 @@ public class GetGroupsWithSharedRequestDto<T>
     /// <summary>
     /// The starting index from which to begin retrieving groups with their sharing settings.
     /// </summary>
+    /// <example>0</example>
     [FromQuery(Name = "startIndex")]
     public int StartIndex { get; set; }
 
     /// <summary>
     /// The text used as a filter for retrieving groups with their sharing settings.
     /// </summary>
+    /// <example>John</example>
     [FromQuery(Name = "filterValue")]
     public string Text { get; set; }
 }

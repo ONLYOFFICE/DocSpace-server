@@ -35,6 +35,7 @@ public class GetTagsInfoRequestDto
     /// Gets or sets the number of tag results to retrieve.
     /// This property specifies the maximum amount of tag data to be included in the result set.
     /// </summary>
+    /// <example>25</example>
     [FromQuery(Name = "count")]
     [Range(1, ApiContext.MaxCount)]
     public int Count { get; set; } = ApiContext.DefaultCount;
@@ -44,6 +45,7 @@ public class GetTagsInfoRequestDto
     /// This property is used to define the offset for pagination when retrieving a list of tags. It determines
     /// the point in the data set from which the retrieval begins.
     /// </summary>
+    /// <example>0</example>
     [FromQuery(Name = "startIndex")]
     public int StartIndex { get; set; }
 
@@ -51,6 +53,7 @@ public class GetTagsInfoRequestDto
     /// Gets or sets the text value used for searching tags.
     /// This property is typically used as a filter value when retrieving tag information.
     /// </summary>
+    /// <example>My Document</example>
     [FromQuery(Name = "filterValue")]
     public string Text { get; set; }
 }

@@ -34,36 +34,42 @@ public class OpenEditRequestDto<T>
     /// <summary>
     /// The file ID to open.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "fileId")]
     public required T FileId { get; set; }
 
     /// <summary>
     /// The file version to open.
     /// </summary>
+    /// <example>1</example>
     [FromQuery(Name = "version")]
     public int Version { get; set; }
 
     /// <summary>
     /// Specifies if the document will be opened for viewing only or not.
     /// </summary>
+    /// <example>false</example>
     [FromQuery(Name = "view")]
     public bool View { get; set; }
 
     /// <summary>
     /// The editor type to open the file.
     /// </summary>
+    /// <example>1</example>
     [FromQuery(Name = "editorType")]
     public EditorType EditorType { get; set; }
 
     /// <summary>
     /// Specifies if the document is opened in the editing mode or not.
     /// </summary>
+    /// <example>false</example>
     [FromQuery(Name = "edit")]
     public bool Edit { get; set; }
 
     /// <summary>
     /// Specifies if the document is opened in the form-filling mode or not.
     /// </summary>
+    /// <example>false</example>
     [FromQuery(Name = "fill")]
     public bool Fill { get; set; }
 }

@@ -34,6 +34,7 @@ public class RoomGroupRequestDto
     /// <summary>
     /// Group name
     /// </summary>
+    /// <example>My Group</example>
     [Required]
     [StringLength(128)]
     public string Name { get; set; }
@@ -41,6 +42,7 @@ public class RoomGroupRequestDto
     /// <summary>
     /// Group icon
     /// </summary>
+    /// <example>cover1</example>
     [Required]
     [StringLength(50)]
     public string Icon { get; set; }
@@ -48,6 +50,7 @@ public class RoomGroupRequestDto
     /// <summary>
     /// The list of room IDs.
     /// </summary>
+    /// <example>[1, 2, 3]</example>
     [Required]
     public List<JsonElement> Rooms { get; set; } = [];
 }

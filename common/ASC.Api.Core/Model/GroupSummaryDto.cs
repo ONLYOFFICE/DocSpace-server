@@ -36,24 +36,25 @@ public class GroupSummaryDto
     /// <summary>
     /// The group ID.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "{00000000-0000-0000-0000-000000000000}")]
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     public required Guid Id { get; set; }
 
     /// <summary>
     /// The group name.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "Group Name")]
+    /// <example>Group Name</example>
     public required string Name { get; init; }
 
     /// <summary>
     /// The group manager.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "Jake.Zazhitski")]
+    /// <example>Jake.Zazhitski</example>
     public string Manager { get; set; }
 
     /// <summary>
     /// Indicates whether the group is a system group.
     /// </summary>
+    /// <example>false</example>
     public bool? IsSystem { get; set; }
 }
 

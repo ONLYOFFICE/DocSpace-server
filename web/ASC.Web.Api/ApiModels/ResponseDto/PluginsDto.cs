@@ -29,20 +29,30 @@ namespace ASC.Web.Api.ApiModel.ResponseDto;
 /// <summary>
 /// The plugins parameters.
 /// </summary>
+/// <example>
+/// {
+///   "enabled": true,
+///   "upload": true,
+///   "delete": true
+/// }
+/// </example>
 public class PluginsDto
 {
     /// <summary>
     /// Specifies if the plugins are enabled or not.
     /// </summary>
+    /// <example>true</example>
     public bool Enabled { get; set; }
 
     /// <summary>
     /// Specifies if the plugins can be uploaded or not.
     /// </summary>
+    /// <example>true</example>
     public bool Upload { get; set; }
 
     /// <summary>
     /// Specifies if the plugins can be deleted or not.
     /// </summary>
+    /// <example>true</example>
     public bool Delete { get; set; }
 }

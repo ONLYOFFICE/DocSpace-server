@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2026
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,35 +29,44 @@ namespace ASC.Api.Settings.Smtp;
 /// <summary>
 /// The request parameters for tracking SMTP (Simple Mail Transfer Protocol) operation status.
 /// </summary>
+/// <example>
+/// {
+///   "completed": true,
+///   "id": "00000000-0000-0000-0000-000000000001",
+///   "error": "Connection timeout",
+///   "status": "InProgress",
+///   "percents": 1
+/// }
+/// </example>
 public class SmtpOperationStatusRequestsDto
 {
     /// <summary>
     /// Specifies whether the SMTP operation has finished processing.
     /// </summary>
-    [SwaggerSchemaCustom(Example = true)]
+    /// <example>true</example>
     public bool Completed { get; set; }
 
     /// <summary>
     /// The unique identifier for tracking the SMTP operation.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "{some-random-guid}")]
+    /// <example>smtp-op-123</example>
     public string Id { get; set; }
 
     /// <summary>
     /// The error message if the SMTP operation encountered issues.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "")]
+    /// <example>SMTP connection failed.</example>
     public string Error { get; set; }
 
     /// <summary>
     /// The current state of the SMTP operation.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "")]
+    /// <example>Completed</example>
     public string Status { get; set; }
 
     /// <summary>
     /// The progress indicator showing completion percentage of the operation.
     /// </summary>
-    [SwaggerSchemaCustom(Example = 0)]
+    /// <example>1</example>
     public int Percents { get; set; }
 }

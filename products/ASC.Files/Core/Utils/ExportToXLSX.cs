@@ -39,7 +39,7 @@ public class ExportToXLSX(
     AuthContext authContext)
 {
 
-    public async Task UpdateXlsxReport(int roomId, int originalFormId)
+    public async Task UpdateXlsxReport(int roomId, int originalFormId, int originalFormVersion)
     {
         try
         {
@@ -55,7 +55,7 @@ public class ExportToXLSX(
             _ = await documentBuilderTaskManager.StartTask(task, false);
 
             var headers = MessageSettings.GetHttpHeaders(httpContextAccessor?.HttpContext?.Request);
-            var evt = new FormFillingReportIntegrationEvent(userId, tenantId, roomId, originalFormId, baseUri, headers: headers != null
+            var evt = new FormFillingReportIntegrationEvent(userId, tenantId, roomId, originalFormId, originalFormVersion, baseUri, headers: headers != null
                 ? headers.ToDictionary(x => x.Key, x => x.Value.ToString())
                 : []);
 

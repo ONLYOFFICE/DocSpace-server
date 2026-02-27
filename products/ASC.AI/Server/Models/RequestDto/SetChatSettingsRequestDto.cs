@@ -34,10 +34,12 @@ public class SetChatSettingsRequestDto
     /// <summary>
     /// The identifier of the AI provider to use.
     /// </summary>
+    /// <example>1</example>
     public int ProviderId { get; set; }
 
     /// <summary>
     /// The identifier of the AI model to use.
     /// </summary>
+    /// <example>gpt-4</example>
     public required string ModelId { get; set; }
 }

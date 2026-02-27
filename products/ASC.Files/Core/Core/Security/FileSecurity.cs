@@ -1120,6 +1120,19 @@ public class FileSecurity(
             return false;
         }
 
+        if (folder is { FolderType: FolderType.DefaultTemplates } &&
+            action is FilesSecurityActions.Create or
+                FilesSecurityActions.Copy or
+                FilesSecurityActions.CopyTo or
+                FilesSecurityActions.Move or
+                FilesSecurityActions.MoveTo or
+                FilesSecurityActions.Duplicate or
+                FilesSecurityActions.Delete
+            )
+        {
+            return false;
+        }
+
         if (action is FilesSecurityActions.UseChat && folder is not { FolderType: FolderType.AiRoom })
         {
             return false;
@@ -1570,6 +1583,37 @@ public class FileSecurity(
                             _ => false
                         };
                     }
+                    if (fileFolder is { FolderType: FolderType.FillingFormsRoom } && !userId.Equals(ASC.Core.Configuration.Constants.Guest.ID))
+                    {
+                        if (action is FilesSecurityActions.StartFilling or FilesSecurityActions.StopFilling)
+                        {
+                            var fileParentFolder = parentFolders.LastOrDefault();
+                            if (fileParentFolder?.FolderType is FolderType.FormFillingFolderInProgress or FolderType.FormFillingFolderDone)
+                            {
+                                return false;
+                            }
+                        }
+
+                        var properties = await cacheFileDao.GetProperties(file.Id);
+                        var formFilling = properties?.FormFilling;
+
+                        var userHasFullAccess = await HasFullAccessAsync(e, userId, isGuest, isRoom, isUser);
+                        var shareRecord = await GetShareRecordAsync(room, userId, isDocSpaceAdmin, shares);
+                        var formShareRecord = await GetCurrentShareAsync(file, userId, isDocSpaceAdmin, shares);
+
+                        var hasFullAccessToForm = userHasFullAccess || shareRecord is { Share: FileShare.ContentCreator or FileShare.RoomManager };
+
+                        if (action == FilesSecurityActions.StopFilling)
+                        {
+                            return (userHasFullAccess || shareRecord is { Share: FileShare.RoomManager } || shareRecord is { Share: FileShare.ContentCreator } && file.CreateBy.Equals(userId));
+                        }
+
+                        if (action == FilesSecurityActions.StartFilling)
+                        {
+                            return hasFullAccessToForm;
+                        }
+
+                    }
 
                     switch (action)
                     {
@@ -1699,6 +1743,12 @@ public class FileSecurity(
                 if (isDocSpaceAdmin)
                 {
                     return true;
+                }
+                break;
+            case FolderType.DefaultTemplates:
+                if (action is not (FilesSecurityActions.Read or FilesSecurityActions.Rename))
+                {
+                    return false;
                 }
                 break;
         }

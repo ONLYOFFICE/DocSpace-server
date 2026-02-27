@@ -234,4 +234,9 @@ public class HostedSolution(ITenantService tenantService,
     {
         return await userService.GetUsersAllTenantsAsync(userIds);
     }
+
+    public async Task<IEnumerable<UserInfo>> FindUsersAsync(string email, EmployeeActivationStatus? status)
+    {
+        return await userService.GetUsersAllTenantsAsync(email, status);
+    }
 }
