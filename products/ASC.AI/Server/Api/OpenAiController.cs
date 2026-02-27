@@ -74,13 +74,22 @@ namespace ASC.AI.Api
                 request.Content.Headers.ContentType = new MediaTypeHeaderValue(Request.Headers.ContentType.FirstOrDefault() ?? "application/json");
             }
 
-            using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+            var upstreamResponse = await client.SendAsync(
+                request, 
+                HttpCompletionOption.ResponseHeadersRead, 
+                Request.HttpContext.RequestAborted);
+            
+            HttpContext.Response.RegisterForDispose(upstreamResponse);
 
-            Response.StatusCode = (int)response.StatusCode;
-            Response.Headers.ContentType = response.Content.Headers.ContentType?.ToString() ?? "application/octet-stream";
-            Response.Headers.ContentLength = response.Content.Headers.ContentLength;
-            await using var stream = await response.Content.ReadAsStreamAsync();
-            await stream.CopyToAsync(Response.Body);
+            Response.StatusCode = (int)upstreamResponse.StatusCode;
+            Response.Headers.ContentType = upstreamResponse.Content.Headers.ContentType?.ToString() ?? "application/octet-stream";
+            Response.Headers.ContentLength = upstreamResponse.Content.Headers.ContentLength;
+            
+            await using var upstream = await upstreamResponse.Content.ReadAsStreamAsync(Request.HttpContext.RequestAborted);
+            await upstream.CopyToAsync(Response.Body, Request.HttpContext.RequestAborted);
+            await Response.Body.FlushAsync(HttpContext.RequestAborted);
+            await Response.CompleteAsync();
+            
             return new EmptyResult();
         }
     }

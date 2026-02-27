@@ -503,9 +503,23 @@ public class FileDtoHelper(
                 currentRoom = currentFolder;
             }
 
-            if (currentRoom is { FolderType: FolderType.FillingFormsRoom } && properties != null && properties.FormFilling.StartFilling)
+            if (currentRoom is { FolderType: FolderType.FillingFormsRoom }
+                && properties != null && properties.FormFilling != null
+                && currentFolder.FolderType is not (FolderType.FormFillingFolderInProgress or FolderType.FormFillingFolderDone))
             {
-                result.Security[FileSecurity.FilesSecurityActions.Lock] = false;
+                if (properties.FormFilling.StartFilling)
+                {
+                    result.Security[FileSecurity.FilesSecurityActions.FillForms] = true;
+                    result.Security[FileSecurity.FilesSecurityActions.StopFilling] = true;
+                    result.Security[FileSecurity.FilesSecurityActions.StartFilling] = false;
+                    result.Security[FileSecurity.FilesSecurityActions.Lock] = false;
+                }
+                else
+                {
+                    result.Security[FileSecurity.FilesSecurityActions.StartFilling] = true;
+                    result.Security[FileSecurity.FilesSecurityActions.FillForms] = false;
+                    result.Security[FileSecurity.FilesSecurityActions.StopFilling] = false;
+                }
             }
 
             if (currentRoom.Security == null)
@@ -519,7 +533,7 @@ public class FileDtoHelper(
                 result.IsForm = await fileChecker.IsFormPDFFile(file);
             }
 
-            if (DocSpaceHelper.IsFormsFillingSystemFolder(currentFolder.FolderType) || currentFolder.FolderType == FolderType.FillingFormsRoom)
+            if (DocSpaceHelper.IsFormsFillingSystemFolder(currentFolder.FolderType))
             {
                 result.Security[FileSecurity.FilesSecurityActions.Edit] = false;
             }

@@ -39,6 +39,7 @@ public class ThirdpartyController(
     ILogger<ThirdpartyController> logger,
     AccountLinker accountLinker,
     CoreBaseSettings coreBaseSettings,
+    CustomNamingPeople customNamingPeople,
     DisplayUserSettingsHelper displayUserSettingsHelper,
     IHttpClientFactory httpClientFactory,
     MobileDetector mobileDetector,
@@ -294,8 +295,14 @@ public class ThirdpartyController(
         if (!string.IsNullOrEmpty(profile.EMail))
         {
             var user = await userManager.GetUserByEmailAsync(profile.EMail);
-            if (user.Id != Core.Users.Constants.LostUser.Id)
+            if (user.Id != Core.Users.Constants.LostUser.Id && user.Status != EmployeeStatus.Terminated)
             {
+                if (user.ActivationStatus != EmployeeActivationStatus.Activated)
+                {
+                    var msg = await customNamingPeople.Substitute<Resource>("ErrorEmailAlreadyExists");
+                    throw new InvalidOperationException(msg);
+                }
+
                 var linkedProfiles = await accountLinker.GetLinkedProfilesAsync(user.Id.ToString(), profile.Provider);
                 if (!linkedProfiles.Any())
                 {

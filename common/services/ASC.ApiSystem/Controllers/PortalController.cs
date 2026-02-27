@@ -997,12 +997,21 @@ public class PortalController(
         }
 
         var linkedProfiles = await accountLinker.GetLinkedObjectsByHashIdAsync(profile.HashId);
-        var userIds = new List<Guid>();
+        var userIds = new HashSet<Guid>();
         foreach (var profileId in linkedProfiles)
         {
             if (Guid.TryParse(profileId, out var userId))
             {
                 userIds.Add(userId);
+            }
+        }
+
+        if (!string.IsNullOrEmpty(profile.EMail))
+        {
+            var byEmail = await hostedSolution.FindUsersAsync(profile.EMail, EmployeeActivationStatus.Activated);
+            foreach (var userInfo in byEmail)
+            {
+                userIds.Add(userInfo.Id);
             }
         }
 
