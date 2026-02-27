@@ -363,20 +363,18 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
     }
     
     private static readonly ConcurrentDictionary<string, XDocument?> _xmlDocCache = new();
+    private static readonly ConcurrentBag<string> _typeCache = new();
 
     private static void CheckPropertiesFromMetadata(SyntaxNodeAnalysisContext context, MethodDeclarationSyntax methodDeclaration, ITypeSymbol typeSymbol)
-    {
+    {            
+        if (!IsSystemNamespace(typeSymbol) && !_typeCache.Contains(typeSymbol.ToDisplayString()))
+        {
+            _typeCache.Add(typeSymbol.ToDisplayString());
+        }
+        
         var members = typeSymbol.GetMembers();
         foreach (var member in members)
         {
-            if (member.ContainingType.Name.Contains("GetChatModelsRequestDto") && member.Name == "ProviderId")
-            {
-                if (!System.Diagnostics.Debugger.IsAttached)
-                {
-                    System.Diagnostics.Debugger.Launch();
-                }    
-            }
-            
             if (member is not IPropertySymbol propertySymbol || 
                 propertySymbol.IsStatic || 
                 propertySymbol.GetAttributes().Any(attr => attr.AttributeClass?.Name is "JsonIgnoreAttribute") ||
@@ -385,14 +383,15 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
             {
                 continue;
             }
-
-            if (propertySymbol.GetAttributes().Any(attr => attr.AttributeClass?.Name is "FromBodyAttribute"))
+           
+            if (propertySymbol.GetAttributes().Any(attr => attr.AttributeClass?.Name is "FromBodyAttribute") || 
+                !IsSystemNamespace(propertySymbol.Type))
             {
-                if (!IsList(propertySymbol.Type))
-                {
+                if (!IsList(propertySymbol.Type) && !_typeCache.Contains(propertySymbol.Type.ToDisplayString()))
+                {            
                     CheckPropertiesFromMetadata(context, methodDeclaration, propertySymbol.Type);
                 }
-
+                
                 continue;
             }
             
