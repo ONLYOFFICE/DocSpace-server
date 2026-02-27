@@ -34,25 +34,30 @@ public class GetReferenceDataDto<T>
     /// <summary>
     /// The unique document identifier used by the service to get a link to the file.
     /// </summary>
+    /// <example>doc_key_123</example>
     public required string FileKey { get; set; }
 
     /// <summary>
     /// The unique system identifier.
     /// </summary>
+    /// <example>doc_key_123</example>
     public required string InstanceId { get; set; }
 
     /// <summary>
     /// The source file ID.
     /// </summary>
+    /// <example>1</example>
     public T SourceFileId { get; set; }
 
     /// <summary>
     /// The file name or relative path for the formula editor.
     /// </summary>
+    /// <example>My Document</example>
     public string Path { get; set; }
 
     /// <summary>
     /// The file link.
     /// </summary>
+    /// <example>https://example.com</example>
     public string Link { get; set; }
 }

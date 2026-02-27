@@ -34,51 +34,61 @@ public class ApiKeyResponseDto
     /// <summary>
     /// The API key unique identifier.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     public required Guid Id { get; set; }
 
     /// <summary>
     /// The API key name.
     /// </summary>
+    /// <example>My API Key</example>
     public required string Name { get; set; }
 
     /// <summary>
     /// The full API key value (only returned when creating a new key).
     /// </summary>
+    /// <example>api_key_1234567890abcdef</example>
     public required string Key { get; set; }
 
     /// <summary>
     /// The API key postfix (used for identification).
     /// </summary>
+    /// <example>...cdef</example>
     public string KeyPostfix { get; set; }
 
     /// <summary>
     /// The list of permissions granted to the API key.
     /// </summary>
+    /// <example>["read", "write", "delete"]</example>
     public required List<string> Permissions { get; set; }
 
     /// <summary>
     /// The date and time when the API key was last used.
     /// </summary>
+    /// <example>2025-06-15T10:30:00.0000000Z</example>
     public ApiDateTime LastUsed { get; set; }
 
     /// <summary>
     /// The date and time when the API key was created.
     /// </summary>
+    /// <example>2025-06-15T10:30:00.0000000Z</example>
     public ApiDateTime CreateOn { get; set; }
 
     /// <summary>
     /// The identifier of the user who created the API key.
     /// </summary>
+    /// <example>{"id": "00000000-0000-0000-0000-000000000000", "displayName": "Mike Zanyatski"}</example>
     public EmployeeDto CreateBy { get; set; }
 
     /// <summary>
     /// The date and time when the API key expires.
     /// </summary>
+    /// <example>2025-06-15T10:30:00.0000000Z</example>
     public ApiDateTime ExpiresAt { get; set; }
 
     /// <summary>
     /// Indicates whether the API key is active or not.
     /// </summary>
+    /// <example>true</example>
     public required bool IsActive { get; set; } = true;
 }
 

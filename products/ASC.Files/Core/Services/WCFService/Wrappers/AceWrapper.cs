@@ -175,17 +175,21 @@ public class AceShortWrapper(string subjectName, string permission, bool isLink)
     /// <summary>
     /// The name of the user the document will be shared with.
     /// </summary>
+    /// <example>John Doe</example>
     public string User { get; init; } = subjectName;
 
     /// <summary>
     /// The access rights for the user with the name above.
     /// Can be "Full Access", "Read Only", or "Deny Access".
     /// </summary>
+    /// <example>Full Access</example>
+    /// 
     public string Permissions { get; init; } = permission;
 
     /// <summary>
     /// Specifies whether to change the user icon to the link icon.
     /// </summary>
+    /// <example>false</example>
     public bool isLink { get; init; } = isLink;
 }
 

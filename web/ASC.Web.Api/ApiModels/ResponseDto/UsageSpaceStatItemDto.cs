@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2026
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,36 +29,45 @@ namespace ASC.Web.Api.ApiModel.ResponseDto;
 /// <summary>
 /// The parameters of the usage space statistics item.
 /// </summary>
+/// <example>
+/// {
+///   "name": "example value",
+///   "icon": "example value",
+///   "disabled": true,
+///   "size": "example value",
+///   "url": "example value"
+/// }
+/// </example>
 public class UsageSpaceStatItemDto
 {
     /// <summary>
     /// The item name.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "Item name")]
+    /// <example>Item name</example>
     public string Name { get; set; }
 
     /// <summary>
     /// The item icon path.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "Item icon path")]
+    /// <example>Item icon path</example>
     public string Icon { get; set; }
 
     /// <summary>
     /// Specifies if the item is disabled or not.
     /// </summary>
-    [SwaggerSchemaCustom(Example = false)]
+    /// <example>true</example>
     public bool Disabled { get; set; }
 
     /// <summary>
     /// The item used space.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "0 Byte")]
+    /// <example>0 Byte</example>
     public string Size { get; set; }
 
     /// <summary>
     /// The item URL.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "Item url")]
+    /// <example>Item url</example>
     public string Url { get; set; }
 }
 
@@ -70,23 +79,24 @@ public class ChartPointDto
     /// <summary>
     /// The display date.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "6/1/2024")]
+    /// <example>example value</example>
     public string DisplayDate { get; set; }
 
     /// <summary>
     /// The chart point date.
     /// </summary>
+    /// <example>example value</example>
     public DateTime Date { get; init; }
 
     /// <summary>
     /// The number of hosts.
     /// </summary>
-    [SwaggerSchemaCustom(Example = 0)]
+    /// <example>1</example>
     public int Hosts { get; set; }
 
     /// <summary>
     /// The number of hits.
     /// </summary>
-    [SwaggerSchemaCustom(Example = 0)]
+    /// <example>1</example>
     public int Hits { get; set; }
 }

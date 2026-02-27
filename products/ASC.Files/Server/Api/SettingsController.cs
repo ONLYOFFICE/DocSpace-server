@@ -26,8 +26,6 @@
 
 using ASC.Files.Core.Configuration;
 
-using Module = ASC.Api.Core.Module;
-
 namespace ASC.Files.Api;
 
 public class SettingsController(
@@ -207,12 +205,12 @@ public class SettingsController(
     /// <summary>Get the "Documents" information</summary>
     /// <path>api/2.0/files/info</path>
     [Tags("Files / Settings")]
-    [SwaggerResponse(200, "Module information: ID, product class name, title, description, icon URL, large icon URL, start URL, primary or nor, help URL", typeof(Module))]
+    [SwaggerResponse(200, "Module information: ID, product class name, title, description, icon URL, large icon URL, start URL, primary or nor, help URL", typeof(bool))]
     [HttpGet("info")]
-    public Module GetFilesModule()
+    public ASC.Api.Core.Module GetFilesModule()
     {
         productEntryPoint.Init();
-        return new Module(productEntryPoint);
+        return new ASC.Api.Core.Module(productEntryPoint);
     }
 
     /// <remarks>
@@ -234,7 +232,7 @@ public class SettingsController(
     /// <summary>Hide the confirmation dialog when converting</summary>
     /// <path>api/2.0/files/hideconfirmconvert</path>
     [Tags("Files / Settings")]
-    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(Module))]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpPut("hideconfirmconvert")]
     public async Task<bool> HideConfirmConvert(HideConfirmConvertRequestDto inDto)
     {

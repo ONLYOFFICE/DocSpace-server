@@ -34,11 +34,13 @@ public class UserInvitation
     /// <summary>
     /// The list of user IDs.
     /// </summary>
+    /// <example>["00000000-0000-0000-0000-000000000000"]</example>
     public IEnumerable<Guid> UsersIds { get; set; }
 
     /// <summary>
     /// Specifies whether to resend all user invitations or not.
     /// </summary>
+    /// <example>false</example>
     public bool ResendAll { get; set; }
 }
 
@@ -50,6 +52,7 @@ public class UserInvitationRequestDto<T>
     /// <summary>
     /// The room ID.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "id")]
     public required T Id { get; set; }
 

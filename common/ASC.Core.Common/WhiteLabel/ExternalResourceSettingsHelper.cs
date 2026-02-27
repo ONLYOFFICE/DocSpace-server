@@ -151,10 +151,17 @@ public class CultureSpecificExternalResource
     /// <summary>
     /// The external resource domain.
     /// </summary>
+    /// <example>example.com</example>
     public string Domain { get; set; }
 
     /// <summary>
     /// The external resource entries.
     /// </summary>
+    /// <example>
+    /// {
+    ///   "welcomeMessage": "Welcome",
+    ///   "logoutButton": "Log out"
+    /// }
+    /// </example>
     public Dictionary<string, string> Entries { get; set; }
 }

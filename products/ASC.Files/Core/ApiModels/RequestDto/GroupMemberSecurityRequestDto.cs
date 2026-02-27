@@ -34,18 +34,21 @@ public class GroupMemberSecurityFolderRequestDto<T>
     /// <summary>
     /// The folder ID.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "folderId")]
     public required T FolderId { get; set; }
 
     /// <summary>
     /// The group ID.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "groupId")]
     public required Guid GroupId { get; set; }
 
     /// <summary>
     /// The number of items to be retrieved in the current query.
     /// </summary>
+    /// <example>25</example>
     [FromQuery(Name = "count")]
     [Range(1, ApiContext.MaxCount)]
     public int Count { get; set; } = ApiContext.DefaultCount;
@@ -53,12 +56,14 @@ public class GroupMemberSecurityFolderRequestDto<T>
     /// <summary>
     /// The starting index for the query result set.
     /// </summary>
+    /// <example>0</example>
     [FromQuery(Name = "startIndex")]
     public int StartIndex { get; set; }
 
     /// <summary>
     /// The filter value used for searching or querying group members based on text input.
     /// </summary>
+    /// <example>My Document</example>
     [FromQuery(Name = "filterValue")]
     public string Text { get; set; }
 }
@@ -70,18 +75,21 @@ public class GroupMemberSecurityFileRequestDto<T>
     /// <summary>
     /// The file ID.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "fileId")]
     public required T FileId { get; set; }
 
     /// <summary>
     /// The group ID.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "groupId")]
     public required Guid GroupId { get; set; }
 
     /// <summary>
     /// The number of items to be retrieved in the current query.
     /// </summary>
+    /// <example>25</example>
     [FromQuery(Name = "count")]
     [Range(1, ApiContext.MaxCount)]
     public int Count { get; set; } = ApiContext.DefaultCount;
@@ -89,12 +97,14 @@ public class GroupMemberSecurityFileRequestDto<T>
     /// <summary>
     /// The starting index for the query result set.
     /// </summary>
+    /// <example>0</example>
     [FromQuery(Name = "startIndex")]
     public int StartIndex { get; set; }
 
     /// <summary>
     /// The filter value used for searching or querying group members based on text input.
     /// </summary>
+    /// <example>My Document</example>
     [FromQuery(Name = "filterValue")]
     public string Text { get; set; }
 }

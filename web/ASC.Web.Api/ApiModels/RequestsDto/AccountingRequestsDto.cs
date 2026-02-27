@@ -34,42 +34,49 @@ public class CustomerOperationsRequestDto
     /// <summary>
     /// The report start date.
     /// </summary>
+    /// <example>2024-01-01T00:00:00Z</example>
     [FromQuery(Name = "startDate")]
     public DateTime StartDate { get; set; }
 
     /// <summary>
     /// The report end date.
     /// </summary>
+    /// <example>2024-01-31T23:59:59Z</example>
     [FromQuery(Name = "endDate")]
     public DateTime EndDate { get; set; }
 
     /// <summary>
     /// The participant name.
     /// </summary>
+    /// <example>ACME Corp</example>
     [FromQuery(Name = "participantName")]
     public string ParticipantName { get; set; }
 
     /// <summary>
     /// Specifies whether to include credit operations in the report. The default value is true.
     /// </summary>
+    /// <example>true</example>
     [FromQuery(Name = "credit")]
     public bool? Credit { get; set; }
 
     /// <summary>
     /// Specifies whether to include debit operations in the report. The default value is true.
     /// </summary>
+    /// <example>true</example>
     [FromQuery(Name = "debit")]
     public bool? Debit { get; set; }
 
     /// <summary>
     /// The number of items to skip for pagination. The default value is 0.
     /// </summary>
+    /// <example>0</example>
     [FromQuery(Name = "offset")]
     public int? Offset { get; set; }
 
     /// <summary>
     /// The maximum number of items to return for pagination. The default value is 25.
     /// </summary>
+    /// <example>25</example>
     [FromQuery(Name = "limit")]
     public int? Limit { get; set; }
 
@@ -78,30 +85,44 @@ public class CustomerOperationsRequestDto
 /// <summary>
 /// The request parameters for generating a report on client operations.
 /// </summary>
+/// <example>
+/// {
+///   "startDate": "2024-01-01T00:00:00Z",
+///   "endDate": "2024-01-31T23:59:59Z",
+///   "participantName": "ACME Corp",
+///   "credit": true,
+///   "debit": false
+/// }
+/// </example>
 public class CustomerOperationsReportRequestDto
 {
     /// <summary>
     /// The report start date.
     /// </summary>
+    /// <example>2024-01-01T00:00:00Z</example>
     public DateTime? StartDate { get; set; }
 
     /// <summary>
     /// The report end date.
     /// </summary>
+    /// <example>2024-01-31T23:59:59Z</example>
     public DateTime? EndDate { get; set; }
 
     /// <summary>
     /// The participant name.
     /// </summary>
+    /// <example>ACME Corp</example>
     public string ParticipantName { get; set; }
 
     /// <summary>
     /// Specifies whether to include credit operations in the report.
     /// </summary>
+    /// <example>true</example>
     public bool? Credit { get; set; }
 
     /// <summary>
     /// Specifies whether to include debit operations in the report.
     /// </summary>
+    /// <example>false</example>
     public bool? Debit { get; set; }
 }

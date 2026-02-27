@@ -34,15 +34,18 @@ public class InviteResultDto
     /// <summary>
     /// The email address that is used to send an invitation.
     /// </summary>
+    /// <example>user@example.com</example>
     public string Email { get; set; }
 
     /// <summary>
     /// Specifies if the invitation process is successfully or not.
     /// </summary>
+    /// <example>true</example>
     public bool Success { get; set; }
 
     /// <summary>
     /// The message sent after the successful invitation process.
     /// </summary>
+    /// <example>Invitation sent successfully</example>
     public string Message { get; set; }
 }

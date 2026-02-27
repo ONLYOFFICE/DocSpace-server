@@ -45,58 +45,67 @@ public class TenantQuota
     /// <summary>
     /// The tenant ID.
     /// </summary>
+    /// <example>1</example>
     public int TenantId { get; set; }
 
     /// <summary>
     /// The tenant name.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "Default")]
+    /// <example>Default</example>
     public string Name { get; set; }
 
     /// <summary>
     /// The tenant price.
     /// </summary>
-    [SwaggerSchemaCustom(Example = 10.0)]
+    /// <example>10.0</example>
     public decimal Price { get; set; }
 
     /// <summary>
     /// The tenant price currency symbol.
     /// </summary>
+    /// <example>$</example>
     public string PriceCurrencySymbol { get; set; }
 
     /// <summary>
     /// The tenant price three-character ISO 4217 currency symbol.
     /// </summary>
+    /// <example>USD</example>
     public string PriceISOCurrencySymbol { get; set; }
 
     /// <summary>
     /// The tenant product ID.
     /// </summary>
+    /// <example>64</example>
     public string ProductId { get; set; }
 
     /// <summary>
     /// The service name.
     /// </summary>
+    /// <example>space</example>
     public string ServiceName { get; set; }
 
     /// <summary>
     /// The service group.
     /// </summary>
+    /// <example>ai</example>
     public string ServiceGroup { get; set; }
 
     /// <summary>
     /// Specifies if the tenant quota is visible or not.
     /// </summary>
+    /// <example>true</example>
     public bool Visible { get; set; }
 
     /// <summary>
     /// Specifies if the tenant quota applies to the wallet or not
     /// </summary>
+    /// <example>true</example>
     public bool Wallet { get; set; }
 
     /// <summary>
     /// The quota due date.
     /// </summary>
+    /// <example>2021-01-01T00:00:00</example>
     public DateTime? DueDate { get; set; }
 
     [JsonIgnore]
@@ -107,6 +116,7 @@ public class TenantQuota
     /// <summary>
     /// The tenant quota features.
     /// </summary>
+    /// <example>audit,ldap,sso</example>
     public string Features
     {
         get => string.Join(",", _featuresList);
@@ -118,7 +128,7 @@ public class TenantQuota
     /// <summary>
     /// The tenant maximum file size.
     /// </summary>
-    [SwaggerSchemaCustom(Example = 25 * 1024 * 1024)]
+    /// <example>25000000</example>
     public long MaxFileSize
     {
         get => _maxFileSizeFeature.Value;
@@ -130,7 +140,7 @@ public class TenantQuota
     /// <summary>
     /// The tenant maximum total size.
     /// </summary>
-    [SwaggerSchemaCustom(Example = long.MaxValue)]
+    /// <example>25000000000</example>
     public long MaxTotalSize
     {
         get => _maxTotalSizeFeature.Value;
@@ -142,6 +152,7 @@ public class TenantQuota
     /// <summary>
     /// The number of portal users.
     /// </summary>
+    /// <example>100</example>
     public int CountUser
     {
         get => _countUserFeature.Value;
@@ -153,6 +164,7 @@ public class TenantQuota
     /// <summary>
     /// The number of portal room administrators.
     /// </summary>
+    /// <example>10</example>
     public int CountRoomAdmin
     {
         get => _countPaidUserFeature.Value;
@@ -164,6 +176,7 @@ public class TenantQuota
     /// <summary>
     /// The number of room users.
     /// </summary>
+    /// <example>50</example>
     public int UsersInRoom
     {
         get => _usersInRoomFeature.Value;
@@ -175,6 +188,7 @@ public class TenantQuota
     /// <summary>
     /// The number of rooms.
     /// </summary>
+    /// <example>500</example>
     public int CountRoom
     {
         get => _countRoomFeature.Value;
@@ -186,6 +200,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies if the tenant quota is nonprofit or not.
     /// </summary>
+    /// <example>false</example>
     public bool NonProfit
     {
         get => _nonProfitFeature.Value;
@@ -197,6 +212,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies if the tenant quota is trial or not.
     /// </summary>
+    /// <example>false</example>
     public bool Trial
     {
         get => _trialFeature.Value;
@@ -208,6 +224,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies if the tenant quota is free or not.
     /// </summary>
+    /// <example>false</example>
     public bool Free
     {
         get => _freeFeature.Value;
@@ -219,6 +236,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies if the tenant quota is updated or not.
     /// </summary>
+    /// <example>false</example>
     public bool Update
     {
         get => _updateFeature.Value;
@@ -230,6 +248,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies if the audit trail is available or not.
     /// </summary>
+    /// <example>true</example>
     public bool Audit
     {
         get => _auditFeature.Value;
@@ -241,6 +260,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies if ONLYOFFICE Docs is included in the tenant quota or not.
     /// </summary>
+    /// <example>true</example>
     public bool DocsEdition
     {
         get => _docsEditionFeature.Value;
@@ -252,6 +272,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies if the LDAP settings are available or not.
     /// </summary>
+    /// <example>true</example>
     public bool Ldap
     {
         get => _ldapFeature.Value;
@@ -263,6 +284,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies if the SSO settings are available or not.
     /// </summary>
+    /// <example>true</example>
     public bool Sso
     {
         get => _ssoFeature.Value;
@@ -274,6 +296,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies if the statistics settings are available or not.
     /// </summary>
+    /// <example>true</example>
     public bool Statistic
     {
         get => _statisticFeature.Value;
@@ -285,6 +308,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies if the branding settings are available or not.
     /// </summary>
+    /// <example>true</example>
     public bool Branding
     {
         get => _brandingFeature.Value;
@@ -296,6 +320,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies if the customization settings are available or not.
     /// </summary>
+    /// <example>true</example>
     public bool Customization
     {
         get => _customizationFeature.Value;
@@ -307,6 +332,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies if the license has the lifetime settings or not.
     /// </summary>
+    /// <example>false</example>
     public bool Lifetime
     {
         get => _lifetimeFeature.Value;
@@ -318,6 +344,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies if the Automation API is available or not.
     /// </summary>
+    /// <example>true</example>
     public bool AutomationApi
     {
         get => _automationApiFeature.Value;
@@ -329,6 +356,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies if the custom domain URL is available or not.
     /// </summary>
+    /// <example>false</example>
     public bool Custom
     {
         get => _customFeature.Value;
@@ -340,6 +368,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies if the restore is enabled or not.
     /// </summary>
+    /// <example>true</example>
     public bool Restore
     {
         get => _restoreFeature.Value;
@@ -351,6 +380,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies if Oauth is available or not.
     /// </summary>
+    /// <example>true</example>
     public bool Oauth
     {
         get => _oauthFeature.Value;
@@ -362,6 +392,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies if the content search is available or not.
     /// </summary>
+    /// <example>true</example>
     public bool ContentSearch
     {
         get => _contentSearchFeature.Value;
@@ -373,6 +404,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies if the third-party accounts linking is available or not.
     /// </summary>
+    /// <example>true</example>
     public bool ThirdParty
     {
         get => _thirdPartyFeature.Value;
@@ -384,6 +416,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies if the tenant quota is yearly subscription or not.
     /// </summary>
+    /// <example>true</example>
     public bool Year
     {
         get => _yearFeature.Value;
@@ -395,6 +428,7 @@ public class TenantQuota
     /// <summary>
     /// The number of free backups within a month.
     /// </summary>
+    /// <example>1</example>
     public int CountFreeBackup
     {
         get => _countFreeBackup.Value;
@@ -406,6 +440,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies if the backup anabled as a wallet service or not.
     /// </summary>
+    /// <example>true</example>
     public bool Backup
     {
         get => _backup.Value;
@@ -417,6 +452,7 @@ public class TenantQuota
     /// <summary>
     /// The number of AI agents.
     /// </summary>
+    /// <example>5</example>
     public int CountAIAgent
     {
         get => _countAIAgentFeature.Value;
@@ -428,6 +464,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies if the AI tools anabled as a wallet service or not.
     /// </summary>
+    /// <example>true</example>
     public bool AITools
     {
         get => _aiTools.Value;
@@ -439,6 +476,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies whether the web search is enabled as a subservice of AI tools.
     /// </summary>
+    /// <example>true</example>
     public bool AIToolsWebSearch
     {
         get => _aiToolsWebSearch.Value;
@@ -450,6 +488,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies whether the web fetch is enabled as a subservice of AI tools
     /// </summary>
+    /// <example>true</example>
     public bool AIToolsWebFetch
     {
         get => _aiToolsWebFetch.Value;
@@ -461,6 +500,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies whether the embedding is enabled as a subservice of AI tools
     /// </summary>
+    /// <example>true</example>
     public bool AIToolsEmbedding
     {
         get => _aiToolsEmbedding.Value;
@@ -472,6 +512,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies whether the Deepseek 3.1 input tokens is enabled as a subservice of AI tools
     /// </summary>
+    /// <example>true</example>
     public bool AIToolsDeepseek31Input
     {
         get => _aiToolsDeepseek31Input.Value;
@@ -483,6 +524,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies whether the Deepseek 3.1 output tokens is enabled as a subservice of AI tools
     /// </summary>
+    /// <example>true</example>
     public bool AIToolsDeepseek31Output
     {
         get => _aiToolsDeepseek31Output.Value;
@@ -494,6 +536,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies whether the Claude 4.5 input tokens is enabled as a subservice of AI tools
     /// </summary>
+    /// <example>true</example>
     public bool AIToolsClaude45Input
     {
         get => _aiToolsClaude45Input.Value;
@@ -505,6 +548,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies whether the Claude 4.5 output tokens is enabled as a subservice of AI tools
     /// </summary>
+    /// <example>true</example>
     public bool AIToolsClaude45Output
     {
         get => _aiToolsClaude45Output.Value;
@@ -516,6 +560,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies whether the GPT 5 input tokens is enabled as a subservice of AI tools
     /// </summary>
+    /// <example>true</example>
     public bool AIToolsGPT5Input
     {
         get => _aiToolsGPT5Input.Value;
@@ -527,6 +572,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies whether the GPT 5 output tokens is enabled as a subservice of AI tools
     /// </summary>
+    /// <example>true</example>
     public bool AIToolsGPT5Output
     {
         get => _aiToolsGPT5Output.Value;
@@ -538,6 +584,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies whether the Deepseek 3.2 input tokens is enabled as a subservice of AI tools
     /// </summary>
+    /// <example>true</example>
     public bool AIToolsDeepseek32Input
     {
         get => _aiToolsDeepseek32Input.Value;
@@ -549,6 +596,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies whether the Deepseek 3.2 output tokens is enabled as a subservice of AI tools
     /// </summary>
+    /// <example>true</example>
     public bool AIToolsDeepseek32Output
     {
         get => _aiToolsDeepseek32Output.Value;
@@ -560,6 +608,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies whether the GPT 5.2 input tokens is enabled as a subservice of AI tools
     /// </summary>
+    /// <example>true</example>
     public bool AIToolsGPT52Input
     {
         get => _aiToolsGPT52Input.Value;
@@ -571,6 +620,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies whether the GPT 5.2 output tokens is enabled as a subservice of AI tools
     /// </summary>
+    /// <example>true</example>
     public bool AIToolsGPT52Output
     {
         get => _aiToolsGPT52Output.Value;
@@ -582,6 +632,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies whether the Gemini 3 Pro input tokens is enabled as a subservice of AI tools
     /// </summary>
+    /// <example>true</example>
     public bool AIToolsGemini3ProInput
     {
         get => _aiToolsGemini3ProInput.Value;
@@ -593,6 +644,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies whether the Gemini 3 Pro output tokens is enabled as a subservice of AI tools
     /// </summary>
+    /// <example>true</example>
     public bool AIToolsGemini3ProOutput
     {
         get => _aiToolsGemini3ProOutput.Value;
@@ -604,6 +656,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies whether the Gemini 3 Flash input tokens is enabled as a subservice of AI tools
     /// </summary>
+    /// <example>true</example>
     public bool AIToolsGemini3FlashInput
     {
         get => _aiToolsGemini3FlashInput.Value;
@@ -615,6 +668,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies whether the Gemini 3 Flash output tokens is enabled as a subservice of AI tools
     /// </summary>
+    /// <example>true</example>
     public bool AIToolsGemini3FlashOutput
     {
         get => _aiToolsGemini3FlashOutput.Value;

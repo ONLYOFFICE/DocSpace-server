@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2026
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,11 +34,13 @@ public class TenantUserInvitationSettingsDto
     /// <summary>
     /// Specifies whether to allow inviting new DocSpace members through the Contacts section.
     /// </summary>
+    /// <example>true</example>
     public required bool AllowInvitingMembers { get; init; }
 
     /// <summary>
     /// Specifies whether to allow all DocSpace members to invite external guests to the rooms.
     /// </summary>
+    /// <example>false</example>
     public required bool AllowInvitingGuests { get; init; }
 }
 

@@ -29,35 +29,50 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 /// <summary>
 /// The request parameters for querying user login events within the specified time range.
 /// </summary>
+/// <example>
+/// {
+///   "userId": {},
+///   "action": "EnumValue",
+///   "from": "2024-01-15T10:30:00Z",
+///   "to": "2024-01-15T10:30:00Z",
+///   "count": 1,
+///   "startIndex": 1
+/// }
+/// </example>
 public class LoginEventRequestDto
 {
     /// <summary>
     /// The ID of the user whose login events are being queried.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromQuery(Name = "userId")]
     public Guid UserId { get; set; }
 
     /// <summary>
     /// The login-related action to filter events by.
     /// </summary>
+    /// <example>FileCreated</example>
     [FromQuery(Name = "action")]
     public MessageAction Action { get; set; }
 
     /// <summary>
     /// The starting date and time for filtering login events.
     /// </summary>
+    /// <example>2024-01-15T10:30:00Z</example>
     [FromQuery(Name = "from")]
     public ApiDateTime From { get; set; }
 
     /// <summary>
     /// The ending date and time for filtering login events.
     /// </summary>
+    /// <example>2024-01-15T10:30:00Z</example>
     [FromQuery(Name = "to")]
     public ApiDateTime To { get; set; }
 
     /// <summary>
     /// The number of login events to retrieve in the query.
     /// </summary>
+    /// <example>1</example>
     [FromQuery(Name = "count")]
     [Range(1, ApiContext.MaxCount)]
     public int Count { get; set; } = ApiContext.DefaultCount;
@@ -65,6 +80,7 @@ public class LoginEventRequestDto
     /// <summary>
     /// The starting index for fetching a subset of login events from the query results.
     /// </summary>
+    /// <example>1</example>
     [FromQuery(Name = "startIndex")]
     public int StartIndex { get; set; }
 }

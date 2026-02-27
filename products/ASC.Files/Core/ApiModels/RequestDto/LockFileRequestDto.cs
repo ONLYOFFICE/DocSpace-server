@@ -34,6 +34,7 @@ public class LockFileParameters
     /// <summary>
     /// Specifies whether to lock a file or not.
     /// </summary>
+    /// <example>true</example>
     public bool LockFile { get; set; }
 }
 
@@ -45,6 +46,7 @@ public class LockFileRequestDto<T>
     /// <summary>
     /// The file ID for locking.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "fileId")]
     public required T FileId { get; set; }
 

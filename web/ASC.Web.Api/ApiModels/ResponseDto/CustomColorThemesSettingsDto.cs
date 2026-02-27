@@ -29,21 +29,31 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 /// <summary>
 /// The custom color themes settings.
 /// </summary>
+/// <example>
+/// {
+///   "themes": [{"id": 1, "name": "Custom Theme"}],
+///   "selected": 1,
+///   "limit": 1
+/// }
+/// </example>
 public class CustomColorThemesSettingsDto
 {
     /// <summary>
     /// The list of the custom color themes.
     /// </summary>
+    /// <example>[{"id": 1, "name": "Custom Theme"}]</example>
     public IEnumerable<CustomColorThemesSettingsItem> Themes { get; set; }
 
     /// <summary>
     /// Specifies whether the custom color theme is selected.
     /// </summary>
+    /// <example>1</example>
     public int Selected { get; set; }
 
     /// <summary>
     /// The maximum number of the custom color themes.
     /// </summary>
+    /// <example>1</example>
     public int Limit { get; set; }
 
     public CustomColorThemesSettingsDto(CustomColorThemesSettings customColorThemesSettings, int limit)

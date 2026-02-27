@@ -34,39 +34,46 @@ public class DbTenant
     /// <summary>
     /// The tenant ID.
     /// </summary>
+    /// <example>1</example>
     public int Id { get; set; }
 
     /// <summary>
     /// The tenant name.
     /// </summary>
+    /// <example>Tenant</example>
     [MaxLength(255)]
     public string Name { get; set; }
 
     /// <summary>
     /// The tenant alias.
     /// </summary>
+    /// <example>tenant</example>
     [MaxLength(100)]
     public string Alias { get; set; }
 
     /// <summary>
     /// Mapped domain
     /// </summary>
+    /// <example>tenant.example.com</example>
     [MaxLength(100)]
     public string MappedDomain { get; set; }
 
     /// <summary>
     /// The tenant version.
     /// </summary>
+    /// <example>5</example>
     public int Version { get; set; }
 
     /// <summary>
     /// The Version_changed field.
     /// </summary>
+    /// <example>2025-01-01T10:00:00Z</example>
     public DateTime? Version_Changed { get; set; }
 
     /// <summary>
     /// The date and time when the version was changed.
     /// </summary>
+    /// <example>2025-01-01T10:00:00Z</example>
     public DateTime VersionChanged
     {
         get => Version_Changed ?? DateTime.MinValue;
@@ -76,40 +83,47 @@ public class DbTenant
     /// <summary>
     /// The tenant language.
     /// </summary>
+    /// <example>en-US</example>
     [MaxLength(10)]
     public string Language { get; set; }
 
     /// <summary>
     /// The tenant time zone.
     /// </summary>
+    /// <example>UTC</example>
     [MaxLength(50)]
     public string TimeZone { get; set; }
 
     /// <summary>
     /// The tenant trusted domains raw.
     /// </summary>
+    /// <example>tenant.exapmle.com, example.com</example>
     [MaxLength(1024)]
     public string TrustedDomainsRaw { get; set; }
 
     /// <summary>
     /// The type of the tenant trusted domains.
     /// </summary>
+    /// <example>None</example>
     public TenantTrustedDomainsType TrustedDomainsEnabled { get; set; }
 
     /// <summary>
     /// The tenant status.
     /// </summary>
+    /// <example>Active</example>
     public TenantStatus Status { get; set; }
 
     /// <summary>
     /// The date and time when the tenant status was changed.
     /// </summary>
+    /// <example>2025-01-01T12:00:00Z</example>
     public DateTime? StatusChanged { get; set; }
     //hack for DateTime?
 
     /// <summary>
     /// The hacked date and time when the tenant status was changed.
     /// </summary>
+    /// <example>2025-01-01T12:00:00Z</example>
     public DateTime StatusChangedHack
     {
         get => StatusChanged ?? DateTime.MinValue;
@@ -119,37 +133,44 @@ public class DbTenant
     /// <summary>
     /// The tenant creation date.
     /// </summary>
+    /// <example>2025-01-01T12:00:00Z</example>
     public DateTime CreationDateTime { get; set; }
 
     /// <summary>
     /// The tenant owner ID.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     public Guid? OwnerId { get; set; }
 
     /// <summary>
     /// The tenant payment ID.
     /// </summary>
+    /// <example>pay_1234567890</example>
     [MaxLength(38)]
     public string PaymentId { get; set; }
 
     /// <summary>
     /// The tenant industry.
     /// </summary>
+    /// <example>Other</example>
     public TenantIndustry Industry { get; set; }
 
     /// <summary>
     /// The date and time when the tenant was last modified.
     /// </summary>
+    /// <example>2025-02-01T08:30:00Z</example>
     public DateTime LastModified { get; set; }
 
     /// <summary>
     /// Specifies if the calls are available for the current tenant or not.
     /// </summary>
+    /// <example>true</example>
     public bool Calls { get; set; }
 
     /// <summary>
     /// The database tenant partner parameters.
     /// </summary>
+    /// <example>{ "tenantId": 1, "partnerId": "partner_123"}</example>
     public DbTenantPartner Partner { get; set; }
 }
 

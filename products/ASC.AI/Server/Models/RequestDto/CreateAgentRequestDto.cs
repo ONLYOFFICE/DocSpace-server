@@ -36,74 +36,88 @@ public class CreateAgentRequestDto
     /// <summary>
     /// The room name.
     /// </summary>
+    /// <example>My AI Agent Room</example>
     [StringLength(170)]
     public required string Title { get; set; }
 
     /// <summary>
     /// The room quota.
     /// </summary>
+    /// <example>10485760</example>
     public long? Quota { get; set; }
 
     /// <summary>
     /// Specifies whether to create a room with indexing.
     /// </summary>
+    /// <example>true</example>
     public bool? Indexing { get; set; }
 
     /// <summary>
     /// Specifies whether to deny downloads from the room.
     /// </summary>
+    /// <example>false</example>
     public bool? DenyDownload { get; set; }
 
     /// <summary>
     /// The room data lifetime information.
     /// </summary>
+    /// <example>{"days": 30, "deleteAfter": true}</example>
     public RoomDataLifetimeDto? Lifetime { get; set; }
 
     /// <summary>
     /// The watermark settings.
     /// </summary>
+    /// <example>{"enabled": true, "text": "Confidential"}</example>
     public WatermarkRequestDto? Watermark { get; set; }
 
     /// <summary>
     /// The room logo.
     /// </summary>
+    /// <example>{"tmpFile": "logo.png", "x": 0, "y": 0, "width": 100, "height": 100}</example>
     public LogoRequest? Logo { get; set; }
 
     /// <summary>
     /// The list of tags.
     /// </summary>
+    /// <example>["ai", "assistant"]</example>
     public IEnumerable<string>? Tags { get; set; }
 
     /// <summary>
     /// The room color.
     /// </summary>
+    /// <example>FF6600</example>
     [StringLength(6)]
     public string? Color { get; set; }
 
     /// <summary>
     /// The room cover.
     /// </summary>
+    /// <example>cover1.jpg</example>
     [StringLength(50)]
     public string? Cover { get; set; }
 
     /// <summary>
     /// Specifies whether the room to be created is private or not.
     /// </summary>
+    /// <example>false</example>
     public bool Private { get; set; }
 
     /// <summary>
     /// The collection of sharing parameters.
     /// </summary>
+    /// <example>[{"shareId": "user@example.com", "access": 1}]</example>
     [MaxEmailInvitations]
     public IEnumerable<FileShareParams>? Share { get; set; }
         
     /// <summary>
     /// The chat settings.
     /// </summary>
+    /// <example>{"model": "gpt-4", "temperature": 0.7}</example>
     public required ChatSettings ChatSettings { get; set; }
 
     /// <summary>
     /// Specifies whether to attach default tools to the agent or not.
     /// </summary>
+    /// <example>true</example>
     public bool AttachDefaultTools { get; set; } = true;
 }

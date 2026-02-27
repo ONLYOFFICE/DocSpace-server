@@ -50,6 +50,7 @@ public class ActionLinkConfig
     /// <summary>
     /// The information about the action in the document that will be scrolled to.
     /// </summary>
+    /// <example>{"data": "section", "type": "scroll"}</example>
     [JsonPropertyName("action")]
     public ActionConfig Action { get; set; }
 
@@ -66,6 +67,7 @@ public class ActionLinkConfig
         /// <summary>
         /// The action data that will be scrolled to.
         /// </summary>
+        /// <example>section</example>
         [JsonPropertyName("data")]
         [StringLength(256)]
         public string Data { get; set; }
@@ -73,6 +75,7 @@ public class ActionLinkConfig
         /// <summary>
         /// The action type.
         /// </summary>
+        /// <example>scroll</example>
         [JsonPropertyName("type")]
         [StringLength(128)]
         public string Type { get; set; }
@@ -87,16 +90,19 @@ public class CoEditingConfig
     /// <summary>
     /// Specifies if the co-editing mode can be changed in the editor interface or not. 
     /// </summary>
+    /// <example>true</example>
     public bool Change { get; set; }
 
     /// <summary>
     /// Specifies if the co-editing mode is fast.
     /// </summary>
+    /// <example>false</example>
     public bool Fast { get; init; }
 
     /// <summary>
     /// The co-editing mode (fast or strict).
     /// </summary>
+    /// <example>Strict</example>
     public CoEditingConfigMode Mode => Fast ? CoEditingConfigMode.Fast : CoEditingConfigMode.Strict;
 }
 
@@ -564,52 +570,62 @@ public class PermissionsConfig
     /// <summary>
     /// Defines if the document can be commented or not.
     /// </summary>
+    /// <example>true</example>
     public bool Comment { get; set; } = true;
 
     /// <summary>
     /// Defines if the chat functionality is enabled in the document or not.
     /// </summary>
+    /// <example>true</example>
     public bool Chat { get; set; } = true;
 
     /// <summary>
     /// Defines if the document can be downloaded or only viewed or edited online.
     /// </summary>
+    /// <example>true</example>
     public bool Download { get; set; } = true;
 
     /// <summary>
     /// Defines if the document can be edited or only viewed.
     /// </summary>
+    /// <example>true</example>
     public bool Edit { get; set; } = true;
 
     /// <summary>
     /// Defines if the forms can be filled.
     /// </summary>
+    /// <example>true</example>
     public bool FillForms { get; set; } = true;
 
     /// <summary>
     /// Defines if the filter can be applied globally (true) affecting all the other users,
     /// or locally (false), i.e. for the current user only. 
     /// </summary>
+    /// <example>true</example>
     public bool ModifyFilter { get; set; } = true;
 
     /// <summary>
     /// Defines if the "Protection" tab on the toolbar and the "Protect" button in the left menu are displayedor hidden.
     /// </summary>
+    /// <example>true</example>
     public bool Protect { get; set; } = true;
 
     /// <summary>
     /// Defines if the document can be printed or not.
     /// </summary>
+    /// <example>true</example>
     public bool Print { get; set; } = true;
 
     /// <summary>
     /// Defines if the document can be reviewed or not.
     /// </summary>
+    /// <example>true</example>
     public bool Review { get; set; } = true;
 
     /// <summary>
     /// Defines if the content can be copied to the clipboard or not.
     /// </summary>
+    /// <example>true</example>
     public bool Copy { get; set; } = true;
 }
 
@@ -674,42 +690,49 @@ public class WatermarkOnDraw(double widthInPixels, double heightInPixels, string
     /// <summary>
     /// Defines the watermark width measured in millimeters.
     /// </summary>
+    /// <example>150</example>
     [JsonPropertyName("width")]
     public double Width { get; init; } = widthInPixels == 0 ? 100 : widthInPixels / DotsPerMm;
 
     /// <summary>
     /// Defines the watermark height measured in millimeters.
     /// </summary>
+    /// <example>100</example>
     [JsonPropertyName("height")]
     public double Height { get; init; } = heightInPixels == 0 ? 100 : heightInPixels / DotsPerMm;
 
     /// <summary>
     /// Defines the watermark margins measured in millimeters.
     /// </summary>
+    /// <example>[10, 10, 10, 10]</example>
     [JsonPropertyName("margins")]
     public int[] Margins { get; init; } = [0, 0, 0, 0];
 
     /// <summary>
     /// Defines the watermark fill color.
     /// </summary>
+    /// <example>#FF0000</example>
     [JsonPropertyName("fill")]
     public string Fill { get; init; } = fill;
 
     /// <summary>
     /// Defines the watermark rotation angle.
     /// </summary>
+    /// <example>45</example>
     [JsonPropertyName("rotate")]
     public int Rotate { get; init; } = rotate;
 
     /// <summary>
     /// Defines the watermark transparency percentage.
     /// </summary>
+    /// <example>0.4</example>
     [JsonPropertyName("transparent")]
     public double Transparent { get; init; } = 0.4;
 
     /// <summary>
     /// The list of paragraphs of the watermark.
     /// </summary>
+    /// <example>[ { "align": 2, "runs": [{"fill": [124, 124, 124], "text": "CONFIDENTIAL", "fontSize": 26}] } ]</example>
     [JsonPropertyName("paragraphs")]
     public List<Paragraph> Paragraphs { get; init; } = paragraphs;
 }
@@ -728,12 +751,14 @@ public class Paragraph
     /// <summary>
     /// The paragraph align.
     /// </summary>
+    /// <example>2</example>
     [JsonPropertyName("align")]
     public int Align { get; set; }
 
     /// <summary>
     /// The list of text runs from the paragraph.
     /// </summary>
+    /// <example>[{"fill": [124, 124, 124], "text": "CONFIDENTIAL", "fontSize": 26}]</example>
     [JsonPropertyName("runs")]
     public List<Run> Runs { get; set; }
 }
@@ -747,18 +772,21 @@ public class Run(string text, bool usedInHash = true)
     /// <summary>
     /// The fill color of the text run in RGB format.
     /// </summary>
+    /// <example>[124, 124, 124]</example>
     [JsonPropertyName("fill")]
     public int[] Fill { get; set; } = [124, 124, 124];
 
     /// <summary>
     /// The run text.
     /// </summary>
+    /// <example>CONFIDENTIAL</example>
     [JsonPropertyName("text")]
     public string Text { get; set; } = text;
 
     /// <summary>
     /// The font size of the text run in points.
     /// </summary>
+    /// <example>26</example>
     [JsonPropertyName("font-size")]
     public string FontSize { get; set; } = "26";
 }
@@ -771,42 +799,50 @@ public class FileReference
     /// <summary>
     /// An object that is generated by the integrator to uniquely identify a file in its system.
     /// </summary>
+    /// <example>{"fileKey": "file-key-123", "instanceId": "instance-1"}</example>
     public FileReferenceData ReferenceData { get; set; }
 
     /// <summary>
     /// The error message text.
     /// </summary>
+    /// <example>Error message</example>
     public string Error { get; set; }
 
     /// <summary>
     /// The file name or relative path for the formula editor.
     /// </summary>
+    /// <example>/path/file.docx</example>
     public string Path { get; set; }
 
     /// <summary>
     /// The URL address to download the current file.
     /// </summary>
+    /// <example>https://example.com/file.docx</example>
     [Url]
     public string Url { get; set; }
 
     /// <summary>
     /// An extension of the document specified with the url parameter.
     /// </summary>
+    /// <example>docx</example>
     public string FileType { get; set; }
 
     /// <summary>
     /// The unique document identifier used by the service to take the data from the co-editing session.
     /// </summary>
+    /// <example>doc1</example>
     public string Key { get; set; }
 
     /// <summary>
     /// The file URL.
     /// </summary>
+    /// <example>https://example.com/file.docx</example>
     public string Link { get; set; }
 
     /// <summary>
     /// The encrypted signature added to the parameter in the form of a token.
     /// </summary>
+    /// <example>token</example>
     public string Token { get; set; }
 }
 
@@ -818,21 +854,25 @@ public class FileReferenceData
     /// <summary>
     /// The unique document identifier used by the service to get a link to the file.
     /// </summary>
+    /// <example>doc_2026_02_001</example>
     public string FileKey { get; set; }
 
     /// <summary>
     /// The unique system identifier.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     public string InstanceId { get; set; }
 
     /// <summary>
     /// Room ID
     /// </summary>
+    /// <example>1</example>
     public string RoomId { get; set; }
 
     /// <summary>
     /// Specifies if the room can be edited out or not.
     /// </summary>
+    /// <example>true</example>
     public bool CanEditRoom { get; set; }
 }
 
@@ -1075,6 +1115,7 @@ public class EmbeddedConfig(BaseCommonLinkUtility baseCommonLinkUtility, FilesLi
     /// <summary>
     /// The absolute URL to the document serving as a source file for the document embedded into the web page.
     /// </summary>
+    /// <example>https://portal.example.com/files/editor?action=embedded&amp;share=abc123</example>
     public string EmbedUrl
     {
         get => field ?? (ShareLinkParam != null && ShareLinkParam.Contains(FilesLinkUtility.ShareKey, StringComparison.Ordinal) ? baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=embedded" + ShareLinkParam) : null);
@@ -1084,16 +1125,19 @@ public class EmbeddedConfig(BaseCommonLinkUtility baseCommonLinkUtility, FilesLi
     /// <summary>
     /// The absolute URL that will allow the document to be saved onto the user personal computer.
     /// </summary>
+    /// <example>https://portal.example.com/files/filehandler?action=download&amp;share=abc123</example>
     public string SaveUrl => baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FileHandlerPath + "?" + FilesLinkUtility.Action + "=download" + ShareLinkParam);
 
     /// <summary>
     /// The shared URL parameter.
     /// </summary>
+    /// <example>&amp;share=abc123</example>
     public string ShareLinkParam { get; set; }
 
     /// <summary>
     /// The absolute URL that will allow other users to share this document.
     /// </summary>
+    /// <example>https://portal.example.com/files/editor?action=view&amp;share=abc123</example>
     public string ShareUrl
     {
         get => field ?? (ShareLinkParam != null && ShareLinkParam.Contains(FilesLinkUtility.ShareKey) ? baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=view" + ShareLinkParam) : null);
@@ -1103,6 +1147,7 @@ public class EmbeddedConfig(BaseCommonLinkUtility baseCommonLinkUtility, FilesLi
     /// <summary>
     /// The place for the embedded viewer toolbar, can be either "top" or "bottom".
     /// </summary>
+    /// <example>top</example>
     public string ToolbarDocked => "top";
 }
 
@@ -1114,16 +1159,19 @@ public class EncryptionKeysConfig
     /// <summary>
     /// The crypto engine ID of the encryption key.
     /// </summary>
+    /// <example>{FFF0E1EB-13DB-4678-B67D-FF0A41DBBCEF}</example>
     public string CryptoEngineId => "{FFF0E1EB-13DB-4678-B67D-FF0A41DBBCEF}";
 
     /// <summary>
     /// The private key.
     /// </summary>
+    /// <example>MIIEvQIBADANBgkqhkiG9w0BAQEFAASC...</example>
     public string PrivateKeyEnc { get; set; }
 
     /// <summary>
     /// The public key.
     /// </summary>
+    /// <example>MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8A...</example>
     public string PublicKey { get; set; }
 }
 
@@ -1135,11 +1183,13 @@ public class FeedbackConfig
     /// <summary>
     /// The absolute URL to the website address which will be opened when clicking the "Feedback &amp; Support" menu button.
     /// </summary>
+    /// <example>https://portal.example.com/support</example>
     public string Url { get; set; }
 
     /// <summary>
     /// Shows or hides the "Feedback &amp; Support" menu button.
     /// </summary>
+    /// <example>true</example>
     public bool Visible => true;
 }
 
@@ -1151,13 +1201,25 @@ public class GobackConfig
     /// <summary>
     /// The absolute URL to the website address which will be opened when clicking the "Open file location" menu button.
     /// </summary>
+    /// <example>https://portal.example.com/files/location</example>
     public string Url { get; set; }
 }
 
+/// <summary>
+/// Configuration for review display settings.
+/// </summary>
 public class ReviewConfig
 {
+    /// <summary>
+    /// The review display string representation.
+    /// </summary>
+    /// <example>full</example>
     public string ReviewDisplay { get; private set; }
 
+    /// <summary>
+    /// Sets the review display value using enum representation.
+    /// This property is ignored during JSON serialization.
+    /// </summary>
     [JsonIgnore]
     public ReviewDisplayEnum ReviewDisplayEnum { set => ReviewDisplay = value.ToStringLowerFast(); }
 }
@@ -1238,6 +1300,12 @@ public class PluginsConfig
     /// <summary>
     /// The array of absolute URLs to the plugin configuration files.
     /// </summary>
+    /// <example>
+    /// [
+    ///   "https://portal.example.com/ThirdParty/plugin/easybib/config.json",
+    ///   "https://portal.example.com/ThirdParty/plugin/wordpress/config.json"
+    /// ]
+    /// </example>
     public string[] PluginsData =>
         //var plugins = new List<string>();
         //if (_coreBaseSettings.Standalone || !_tenantManager.GetCurrentTenantQuota().Free)
@@ -1267,16 +1335,19 @@ public class RecentConfig
     /// <summary>
     /// The folder where the document is stored.
     /// </summary>
+    /// <example>folder_123</example>
     public string Folder { get; set; }
 
     /// <summary>
     /// The document title that will be displayed in the Open Recent... menu option.
     /// </summary>
+    /// <example>Report 2026</example>
     public string Title { get; set; }
 
     /// <summary>
     /// The absolute URL to the document where it is stored.
     /// </summary>
+    /// <example>https://portal.example.com/files/recent/report2026.docx</example>
     [Url]
     public string Url { get; set; }
 }
@@ -1289,16 +1360,19 @@ public class TemplatesConfig
     /// <summary>
     /// The absolute URL to the image for template.
     /// </summary>
+    /// <example>https://portal.example.com/templates/template1.png</example>
     public string Image { get; set; }
 
     /// <summary>
     /// The template title that will be displayed in the "Create New..." menu option.
     /// </summary>
+    /// <example>Blank Document</example>
     public string Title { get; set; }
 
     /// <summary>
     /// The absolute URL to the document where it will be created and available after creation.
     /// </summary>
+    /// <example>https://portal.example.com/editor/new?template=blank</example>
     [Url]
     public string Url { get; set; }
 }
@@ -1311,22 +1385,30 @@ public class UserConfig
     /// <summary>
     /// The user ID.
     /// </summary>
+    /// <example>user_0001</example>
     public string Id { get; set; }
 
     /// <summary>
     /// The full name of the user.
     /// </summary>
+    /// <example>John Doe</example>
     public string Name { get; set; }
 
     /// <summary>
     /// The path to the user's avatar.
     /// </summary>
+    /// <example>https://portal.example.com/avatar/user_0001.png</example>
     public string Image { get; set; }
 
     /// <summary>
     /// Roles
     /// </summary>
+    /// <example>["admin","editor"]</example>
     public List<string> Roles { get; set; }
-    
+
+    /// <summary>
+    /// Customer identifier associated with the user.
+    /// </summary>
+    /// <example>cust_001</example>
     public string CustomerId { get; set; }
 }

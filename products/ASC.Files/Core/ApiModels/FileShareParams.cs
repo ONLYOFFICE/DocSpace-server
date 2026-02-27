@@ -34,11 +34,13 @@ public class FileShareParams : EmailInvitationDto
     /// <summary>
     /// The ID of the user to whom the file will be shared.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     public Guid ShareTo { get; set; }
-    
+
     /// <summary>
     /// The sharing access rights.
     /// </summary>
+    /// <example>None</example>
     public FileShare Access { get; set; }
 }
 

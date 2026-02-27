@@ -34,21 +34,25 @@ public class RoomTemplateStatusDto
     /// <summary>
     /// The room template ID.
     /// </summary>
+    /// <example>123</example>
     public required int TemplateId { get; set; }
 
     /// <summary>
     /// The progress of the room template creation process.
     /// </summary>
+    /// <example>75.5</example>
     public required double Progress { get; set; }
 
     /// <summary>
     /// The error message that is sent when the room template is not created successfully.
     /// </summary>
+    /// <example>Template creation failed</example>
     public string Error { get; set; }
 
     /// <summary>
     /// Specifies whether the process of creating the room template is completed.
     /// </summary>
+    /// <example>false</example>
     public required bool IsCompleted { get; set; }
 }
 
@@ -60,20 +64,24 @@ public class RoomFromTemplateStatusDto
     /// <summary>
     /// The room ID.
     /// </summary>
+    /// <example>456</example>
     public required int RoomId { get; set; }
 
     /// <summary>
     /// The progress of creating a room from the template.
     /// </summary>
+    /// <example>50.0</example>
     public required double Progress { get; set; }
 
     /// <summary>
     /// The error message that is sent when a room is not created successfully from the template.
     /// </summary>
+    /// <example>Room creation failed</example>
     public required string Error { get; set; }
 
     /// <summary>
     /// Specifies whether the process of creating a room from the template is completed.
     /// </summary>
+    /// <example>false</example>
     public required bool IsCompleted { get; set; }
 }

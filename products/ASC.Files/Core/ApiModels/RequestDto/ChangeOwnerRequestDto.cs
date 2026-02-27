@@ -34,15 +34,18 @@ public class ChangeOwnerRequestDto
     /// <summary>
     /// The list of folder IDs to change the owner.
     /// </summary>
+    /// <example>[1, 2, 3]</example>
     public IEnumerable<JsonElement> FolderIds { get; set; } = new List<JsonElement>();
 
     /// <summary>
     /// The list of file IDs to change the owner.
     /// </summary>
+    /// <example>[1, 2, 3]</example>
     public IEnumerable<JsonElement> FileIds { get; set; } = new List<JsonElement>();
 
     /// <summary>
     /// The new file owner ID.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     public required Guid UserId { get; set; }
 }

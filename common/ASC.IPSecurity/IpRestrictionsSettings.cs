@@ -34,6 +34,7 @@ public class IPRestrictionsSettings : ISettings<IPRestrictionsSettings>
     /// <summary>
     /// Specifies if the IP restrictions are enabled or not.
     /// </summary>
+    /// <example>true</example>
     public bool Enable { get; init; }
 
     public static Guid ID => new("{2EDDDF64-F792-4498-A638-2E3E6EBB13C9}");
@@ -43,5 +44,9 @@ public class IPRestrictionsSettings : ISettings<IPRestrictionsSettings>
         return new IPRestrictionsSettings { Enable = false };
     }
 
+    /// <summary>
+    /// The date and time when the settings were last modified.
+    /// </summary>
+    /// <example>2024-01-01T00:00:00Z</example>
     public DateTime LastModified { get; set; }
 }

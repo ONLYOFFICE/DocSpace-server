@@ -29,6 +29,24 @@ namespace ASC.Core.Billing;
 /// <summary>
 /// The tariff parameters.
 /// </summary>
+/// <example>
+/// {
+///   "id": 1,
+///   "state": "Trial",
+///   "dueDate": "2026-03-31T00:00:00Z",
+///   "delayDueDate": "2026-04-07T00:00:00Z",
+///   "licenseDate": "2026-03-01T00:00:00Z",
+///   "customerId": "cus_123",
+///   "quotas": [
+///     {
+///       "id": 1,
+///       "quantity": 50,
+///       "wallet": false
+///     }
+///   ],
+///   "overdueQuotas": []
+/// }
+/// </example>
 [DebuggerDisplay("{State} before {DueDate}")]
 [ProtoContract]
 public class Tariff
@@ -36,48 +54,66 @@ public class Tariff
     /// <summary>
     /// The tariff ID.
     /// </summary>
+    /// <example>1</example>
     [ProtoMember(1)]
     public int Id { get; set; }
 
     /// <summary>
     /// The tariff state.
     /// </summary>
+    /// <example>Trial</example>
     [ProtoMember(2)]
     public TariffState State { get; set; }
 
     /// <summary>
     /// The tariff due date.
     /// </summary>
+    /// <example>2026-03-31T00:00:00Z</example>
     [ProtoMember(3)]
     public required DateTime DueDate { get; set; }
 
     /// <summary>
     /// The tariff delay due date.
     /// </summary>
+    /// <example>2026-04-07T00:00:00Z</example>
     [ProtoMember(4)]
     public DateTime DelayDueDate { get; set; }
 
     /// <summary>
     /// The tariff license date.
     /// </summary>
+    /// <example>2026-03-01T00:00:00Z</example>
     [ProtoMember(5)]
     public DateTime LicenseDate { get; set; }
 
     /// <summary>
     /// The tariff customer ID.
     /// </summary>
+    /// <example>cus_123</example>
     [ProtoMember(6)]
     public string CustomerId { get; set; }
 
     /// <summary>
     /// The list of tariff quotas.
     /// </summary>
+    /// <example>
+    /// {
+    ///   "quotas": [
+    ///     {
+    ///       "id": 1,
+    ///       "quantity": 50,
+    ///       "wallet": false
+    ///     }
+    ///   ]
+    /// }
+    /// </example>
     [ProtoMember(7)]
     public required List<Quota> Quotas { get; set; }
 
     /// <summary>
     /// The list of overdue tariff quotas.
     /// </summary>
+    /// <example>[]</example>
     [ProtoMember(8)]
     public List<Quota> OverdueQuotas { get; set; }
 
@@ -103,6 +139,16 @@ public class Tariff
 
 /// <summary>
 /// The quota parameters.
+/// <example>
+/// {
+///   "id": 1,
+///   "quantity": 50,
+///   "wallet": false,
+///   "dueDate": "2026-03-31T00:00:00Z",
+///   "nextQuantity": 100,
+///   "state": "Active"
+/// }
+/// </example>
 /// </summary>
 [ProtoContract]
 public class Quota : IEquatable<Quota>
@@ -110,36 +156,42 @@ public class Quota : IEquatable<Quota>
     /// <summary>
     /// The quota ID.
     /// </summary>
+    /// <example></example>
     [ProtoMember(1)]
     public int Id { get; set; }
 
     /// <summary>
     /// The quota quantity.
     /// </summary>
+    /// <example>50</example>
     [ProtoMember(2)]
     public int Quantity { get; set; }
 
     /// <summary>
     /// The quota applies to the wallet or not
     /// </summary>
+    /// <example>false</example>
     [ProtoMember(3)]
     public bool Wallet { get; set; }
 
     /// <summary>
     /// The quota due date.
     /// </summary>
+    /// <example>2026-03-31T00:00:00Z</example>
     [ProtoMember(4)]
     public DateTime? DueDate { get; set; }
 
     /// <summary>
     /// The quota next quantity.
     /// </summary>
+    /// <example>100</example>
     [ProtoMember(5)]
     public int? NextQuantity { get; set; }
 
     /// <summary>
     /// The quota state.
     /// </summary>
+    /// <example>Active</example>
     public QuotaState? State => DueDate.HasValue ? DueDate.Value < DateTime.UtcNow ? QuotaState.Overdue : QuotaState.Active : null;
 
     public Quota()

@@ -35,6 +35,7 @@ public abstract class ImportableApiEntity
     /// <summary>
     /// Specifies whether the API entity should be imported.
     /// </summary>
+    /// <example>true</example>
     [ProtoMember(1)]
     public bool ShouldImport { get; set; }
 }

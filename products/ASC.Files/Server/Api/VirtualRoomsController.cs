@@ -964,9 +964,9 @@ public class VirtualRoomsCommonController(
     [SwaggerResponse(200, "True if tag has links, false otherwise", typeof(bool))]
     [SwaggerResponse(404, "Tag not found")]
     [HttpGet("tags/{tagName}/haslinks")]
-    public async Task<bool> HasTagLinks(string tagName)
+    public async Task<bool> HasTagLinks(HasTagLinksRequestDto requestDto)
     {
-        var hasTagLinks = await customTagsService.HasTagLinks(tagName);
+        var hasTagLinks = await customTagsService.HasTagLinks(requestDto.TagName);
         return hasTagLinks;
     }
 

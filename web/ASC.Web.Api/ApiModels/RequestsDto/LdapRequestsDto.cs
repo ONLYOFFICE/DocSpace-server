@@ -34,118 +34,141 @@ public class LdapRequestsDto
     /// <summary>
     /// Specifies whether the LDAP authentication is active in the system.
     /// </summary>
+    /// <example>true</example>
     public bool EnableLdapAuthentication { get; set; }
 
     /// <summary>
     /// Specifies whether the StartTLS (Transport Layer Security) protocol for secure LDAP communication is enabled or not.
     /// </summary>
+    /// <example>true</example>
     public bool StartTls { get; set; }
 
     /// <summary>
     /// Specifies whether the SSL (Secure Sockets Layer) encryption is enabled for the LDAP communication or not.
     /// </summary>
+    /// <example>true</example>
     public bool Ssl { get; set; }
 
     /// <summary>
     /// Specifies whether the automatic welcome email dispatch to the new LDAP users is enabled or not.
     /// </summary>
+    /// <example>true</example>
     public bool SendWelcomeEmail { get; set; }
 
     /// <summary>
     /// Specifies if the email verification requirement is enabled for the LDAP users or not.
     /// </summary>
+    /// <example>true</example>
     public bool DisableEmailVerification { get; set; }
 
     /// <summary>
     /// The LDAP server's hostname or IP address.
     /// </summary>
+    /// <example>ldap.example.com</example>
     public string Server { get; set; }
 
     /// <summary>
     /// The absolute path to the top level directory containing users for the import.
     /// </summary>
+    /// <example>ou=users,dc=example,dc=com</example>
     public string UserDN { get; set; }
 
     /// <summary>
     /// The network port number for the LDAP server connection.
     /// </summary>
+    /// <example>389</example>
     public int PortNumber { get; set; }
 
     /// <summary>
     /// The user filter value to import the users who correspond to the specified search criteria. The default filter value (uid=*) allows importing all users.
     /// </summary>
+    /// <example>uid=*</example>
     public string UserFilter { get; set; }
 
     /// <summary>
     /// The attribute in a user record that corresponds to the login that LDAP server users will use to log in to ONLYOFFICE.
     /// </summary>
+    /// <example>uid</example>
     public string LoginAttribute { get; set; }
 
     /// <summary>
     /// The correspondence between the user data fields on the portal and the attributes in the LDAP server user record.
     /// </summary>
+    /// <example>{ "FirstName": "givenName", "SecondName": "sn", "Mail": "mail" }</example>
     public Dictionary<MappingFields, string> LdapMapping { get; set; }
 
     /// <summary>
     /// The group access rights.
     /// </summary>
+    /// <example>{ "Admin": "FullAccess", "User": "ReadOnly" }</example>
     //ToDo: use SId instead of group name
     public Dictionary<AccessRight, string> AccessRights { get; set; }
 
     /// <summary>
     /// Specifies if the groups from the LDAP server are added to the portal or not.
     /// </summary>
+    /// <example>true</example>
     public bool GroupMembership { get; set; }
 
     /// <summary>
     /// The absolute path to the top level directory containing groups for the import.
     /// </summary>
+    /// <example>ou=groups,dc=example,dc=com</example>
     // ReSharper disable once InconsistentNaming
     public string GroupDN { get; set; }
 
     /// <summary>
     /// The attribute that determines whether the user is a member of the groups.
     /// </summary>
+    /// <example>memberOf</example>
     public string UserAttribute { get; set; }
 
     /// <summary>
     /// The group filter value to import the groups who correspond to the specified search criteria. The default filter value (objectClass=posixGroup) allows importing all groups.
     /// </summary>
+    /// <example>objectClass=posixGroup</example>
     public string GroupFilter { get; set; }
 
     /// <summary>
     /// The attribute that specifies the users that the group includes.
     /// </summary>
+    /// <example>member</example>
     public string GroupAttribute { get; set; }
 
     /// <summary>
     /// The attribute that corresponds to a name of the group where the user is included.
     /// </summary>
+    /// <example>cn</example>
     public string GroupNameAttribute { get; set; }
 
     /// <summary>
     /// Specifies if the user has rights to read data from the LDAP server or not.
     /// </summary>
+    /// <example>true</example>
     public bool Authentication { get; set; }
 
     /// <summary>
     /// The username for the LDAP server authentication.
     /// </summary>
+    /// <example>cn=admin,dc=example,dc=com</example>
     public string Login { get; set; }
 
     /// <summary>
     /// The password for the LDAP server authentication.
     /// </summary>
+    /// <example>password123</example>
     public string Password { get; set; }
 
     /// <summary>
     /// Specifies whether the SSL certificate is accepted or not.
     /// </summary>
+    /// <example>true</example>
     public bool AcceptCertificate { get; set; }
 
     /// <summary>
     /// The default user type assigned to the imported LDAP users.
     /// </summary>
+    /// <example>User</example>
     public EmployeeType UsersType { get; set; }
 }
 

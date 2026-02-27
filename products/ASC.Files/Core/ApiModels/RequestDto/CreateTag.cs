@@ -34,6 +34,7 @@ public class CreateTagRequestDto
     /// <summary>
     /// The tag name.
     /// </summary>
+    /// <example>Important</example>
     [StringLength(255)]
     public required string Name { get; set; }
 }
