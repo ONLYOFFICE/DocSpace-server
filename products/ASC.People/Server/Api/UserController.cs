@@ -1725,6 +1725,10 @@ public class UserController(
         if (!string.IsNullOrEmpty(error))
         {
             logger.ErrorPasswordRecovery(inDto.Email, error);
+            if (authContext.IsAuthenticated)
+            {
+                throw new InvalidOperationException(error);
+            }
         }
 
         var pattern = authContext.IsAuthenticated ? Resource.MessagePasswordSendedToEmail : Resource.MessageYourPasswordSendedToEmail;
