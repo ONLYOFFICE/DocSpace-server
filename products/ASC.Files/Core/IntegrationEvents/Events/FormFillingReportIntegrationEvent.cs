@@ -52,14 +52,14 @@ public record FormFillingReportIntegrationEvent : IntegrationEvent
     public int OriginalFormId { get; set; }
 
     [ProtoMember(3)]
-    public int OriginalFormVersion { get; set; }
-
-    [ProtoMember(4)]
     public string BaseUri { get; set; }
 
-    [ProtoMember(5)]
+    [ProtoMember(4)]
     public bool Terminate { get; set; }
 
-    [ProtoMember(6)]
+    [ProtoMember(5)]
     public IDictionary<string, string> Headers { get; set; }
+
+    [ProtoMember(6)]
+    public int OriginalFormVersion { get; set; }
 }
