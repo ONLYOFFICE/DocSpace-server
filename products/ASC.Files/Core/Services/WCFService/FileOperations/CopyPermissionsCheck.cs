@@ -360,84 +360,44 @@ public class CopyPermissionsCheck(FileSecurity security, LockerManager lockerMan
             return errorMsg;
         }
 
-        if (check)
+        if (!check || (Equals(folder.ParentId ?? default, toFolder.Id) && resolveType != FileConflictResolveType.Duplicate))
         {
-            if (!Equals(folder.ParentId ?? default, toFolderId) || resolveType == FileConflictResolveType.Duplicate)
-            {
-                var files = await fileDao.GetFilesAsync(folder.Id, new OrderBy(SortedByType.AZ, true), FilterType.FilesOnly, false, Guid.Empty, string.Empty, null, false, withSubfolders: true).ToListAsync();
-
-                errorMsg = await WithErrorAsync(files, checkPermissions);
-
-                var conflictFolder = folder.RootFolderType == FolderType.Privacy || isRoom ||
-                                             (!Equals(folder.ParentId ?? default, toFolderId) && resolveType == FileConflictResolveType.Duplicate)
-                            ? null
-                            : await ttoFolderDao.GetFolderAsync(folder.Title, toFolderId);
-
-
-
-                if (copy || conflictFolder != null)
-                {
-                    if (toFolder.ProviderId == folder.ProviderId && folderDao.UseRecursiveOperation(folder.Id, toFolderId))
-                    {
-                        if (!copy)
-                        {
-                            if (checkPermissions && !await security.CanMoveAsync(folder))
-                            {
-                                errorMsg = FilesCommonResource.ErrorMessage_SecurityException_MoveFolder;
-                                if (check)
-                                {
-                                    throw new SecurityException(errorMsg);
-                                }
-
-                                return errorMsg;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (conflictFolder != null)
-                        {
-                            if (resolveType != FileConflictResolveType.Overwrite && !copy)
-                            {
-                                if (checkPermissions && !await security.CanMoveAsync(folder))
-                                {
-                                    errorMsg = FilesCommonResource.ErrorMessage_SecurityException_MoveFolder;
-                                    if (check)
-                                    {
-                                        throw new SecurityException(errorMsg);
-                                    }
-
-                                    return errorMsg;
-                                }
-                                else if (errorMsg != null)
-                                {
-                                    return errorMsg;
-                                }
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    if (checkPermissions && !await security.CanMoveAsync(folder))
-                    {
-                        errorMsg = FilesCommonResource.ErrorMessage_SecurityException_MoveFolder;
-                        if (check)
-                        {
-                            throw new SecurityException(errorMsg);
-                        }
-
-                        return errorMsg;
-                    }
-                    else if (errorMsg != null)
-                    {
-                        return errorMsg;
-                    }
-                }
-            }
+            return null;
         }
 
-        return errorMsg;
+        var conflictFolder = folder.RootFolderType == FolderType.Privacy || isRoom ||
+                                     (!Equals(folder.ParentId ?? default, toFolder.Id) && resolveType == FileConflictResolveType.Duplicate)
+                    ? null
+                    : await ttoFolderDao.GetFolderAsync(folder.Title, toFolder.Id);
+
+        if (copy || conflictFolder != null)
+        {
+            if (toFolder.ProviderId == folder.ProviderId && folderDao.UseRecursiveOperation(folder.Id, toFolder.Id))
+            {
+                if (!copy && checkPermissions && !await security.CanMoveAsync(folder))
+                {
+                    throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_MoveFolder);
+                }
+            }
+            else if (conflictFolder != null && resolveType != FileConflictResolveType.Overwrite && !copy && checkPermissions && !await security.CanMoveAsync(folder))
+            {
+                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_MoveFolder);
+            }
+        }
+        else if (checkPermissions && !await security.CanMoveAsync(folder))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_MoveFolder);
+        }
+
+        var files = await fileDao.GetFilesAsync(folder.Id, new OrderBy(SortedByType.AZ, true), FilterType.FilesOnly, false, Guid.Empty, string.Empty, null, false, withSubfolders: true).ToListAsync();
+
+        errorMsg = await CheckFileSecurityAsync(files, checkPermissions);
+        if (errorMsg != null)
+        {
+            throw new SecurityException(errorMsg);
+        }
+
+        return null;
     }
         
     public async Task<string> CheckFilesPermissionsAsync<T, TTo>(
@@ -456,7 +416,7 @@ public class CopyPermissionsCheck(FileSecurity security, LockerManager lockerMan
     {
         string errorMsg = null;
 
-        errorMsg = await WithErrorAsync([file], checkPermissions);
+        errorMsg = await CheckFileSecurityAsync([file], checkPermissions);
 
         if (file == null)
         {
@@ -562,104 +522,58 @@ public class CopyPermissionsCheck(FileSecurity security, LockerManager lockerMan
             return errorMsg;
         }
 
-        if (check)
+        if (!check)
         {
-            if (toFolder.RootFolderType == FolderType.VirtualRooms)
-            {
-                if (toParentFolders.Any(folder => folder.FolderType == FolderType.FillingFormsRoom) && !file.IsForm)
-                {
-                    errorMsg = copy ? FilesCommonResource.ErrorMessage_UploadToFormRoom : FilesCommonResource.ErrorMessage_MoveToFormRoom;
-                    if (check)
-                    {
-                        throw new InvalidOperationException(errorMsg);
-                    }
+            return errorMsg;
+        }
 
-                    return errorMsg;
-                }
+        if (toFolder.RootFolderType == FolderType.VirtualRooms &&
+            toParentFolders.Any(folder => folder.FolderType == FolderType.FillingFormsRoom) &&
+            !file.IsForm)
+        {
+            throw new InvalidOperationException(copy ? FilesCommonResource.ErrorMessage_UploadToFormRoom : FilesCommonResource.ErrorMessage_MoveToFormRoom);
+        }
+
+        var conflict = resolveType == FileConflictResolveType.Duplicate ||
+                               file.RootFolderType == FolderType.Privacy ||
+                               file.Encrypted ||
+                               toFolder.FolderType == FolderType.Knowledge
+                    ? null
+                    : await ttoFileDao.GetFileAsync(toFolder.Id, file.Title);
+
+        errorMsg = await CheckFileSecurityAsync([file], checkPermissions);
+
+        if (conflict == null || conflict.Category != file.Category)
+        {
+            if (!copy && errorMsg != null)
+            {
+                throw new SecurityException(errorMsg);
             }
-
-            var conflict = resolveType == FileConflictResolveType.Duplicate ||
-                                   file.RootFolderType == FolderType.Privacy ||
-                                   file.Encrypted ||
-                                   toFolder.FolderType == FolderType.Knowledge
-                        ? null
-                        : await ttoFileDao.GetFileAsync(toFolderId, file.Title);
-
-            if (conflict == null || conflict.Category != file.Category)
+        }
+        else if (resolveType == FileConflictResolveType.Overwrite)
+        {
+            if (checkPermissions && !await security.CanEditAsync(conflict) && !await security.CanFillFormsAsync(conflict))
             {
-                if (!copy)
-                {
-                    if (errorMsg != null)
-                    {
-                        if (check)
-                        {
-                            throw new InvalidOperationException(errorMsg);
-                        }
-
-                        return errorMsg;
-                    }
-                }
+                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
             }
-            else
+            else if (await lockerManager.FileLockedForMeAsync(conflict.Id))
             {
-                if (resolveType == FileConflictResolveType.Overwrite)
-                {
-                    if (checkPermissions && !await security.CanEditAsync(conflict) && !await security.CanFillFormsAsync(conflict))
-                    {
-                        errorMsg = FilesCommonResource.ErrorMessage_SecurityException;
-                        if (check)
-                        {
-                            throw new InvalidOperationException(errorMsg);
-                        }
-
-                        return errorMsg;
-                    }
-                    else if (await lockerManager.FileLockedForMeAsync(conflict.Id))
-                    {
-                        errorMsg = FilesCommonResource.ErrorMessage_LockedFile;
-                        if (check)
-                        {
-                            throw new InvalidOperationException(errorMsg);
-                        }
-
-                        return errorMsg;
-                    }
-                    else if (await fileTracker.IsEditingAsync(conflict.Id, false))
-                    {
-                        errorMsg = FilesCommonResource.ErrorMessage_SecurityException_UpdateEditingFile;
-                        if (check)
-                        {
-                            throw new SecurityException(errorMsg);
-                        }
-
-                        return errorMsg;
-                    }
-                    else
-                    {
-                        if (!copy)
-                        {
-                            if (!Equals(file.ParentId.ToString(), toFolderId.ToString()))
-                            {
-                                if (errorMsg != null)
-                                {
-                                    if (check)
-                                    {
-                                        throw new InvalidOperationException(errorMsg);
-                                    }
-
-                                    return errorMsg;
-                                }
-                            }
-                        }
-                    }
-                }
+                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_LockedFile);
+            }
+            else if (await fileTracker.IsEditingAsync(conflict.Id, false))
+            {
+                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_UpdateEditingFile);
+            }
+            else if (!copy && !Equals(file.ParentId.ToString(), toFolder.Id.ToString()) && errorMsg != null)
+            {
+                throw new SecurityException(errorMsg);
             }
         }
 
         return errorMsg;
     }
 
-    public async Task<string> WithErrorAsync<T>(IEnumerable<File<T>> files, bool checkPermissions = true)
+    public async Task<string> CheckFileSecurityAsync<T>(IEnumerable<File<T>> files, bool checkPermissions = true)
     {
         foreach (var file in files)
         {
