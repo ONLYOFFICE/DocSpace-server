@@ -34,6 +34,7 @@ namespace ASC.Files.Core.ApiModels.RequestDto
         /// <summary>
         /// File id to replace template with
         /// </summary>
+        /// <example>1</example>
         public required JsonElement SelectedFile { get; set; }
         /// <summary>
         /// File extension of a template to replace
@@ -50,6 +51,7 @@ namespace ASC.Files.Core.ApiModels.RequestDto
         /// <summary>
         /// File extension of a template to reset
         /// </summary>
+        /// <example>.docx</example>
         public required string FileExtension { get; set; }
     }
 

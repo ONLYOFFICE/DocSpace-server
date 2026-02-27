@@ -390,11 +390,13 @@ public class SubAccount
     /// <summary>
     /// The three-character ISO 4217 currency symbol of the sub-account.
     /// </summary>
+    /// <example>"USD"</example>
     public string Currency { get; init; }
 
     /// <summary>
     /// The balance of the sub-account in the specified currency.
     /// </summary>
+    /// <example>1500.75</example>
     public decimal Amount { get; init; }
 }
 

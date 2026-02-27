@@ -383,7 +383,17 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
             {
                 continue;
             }
-           
+
+            if (propertySymbol.Type is INamedTypeSymbol { IsGenericType: true } namedTypeSymbol && IsSystemNamespace(namedTypeSymbol))
+            {
+                var typeArgument = namedTypeSymbol.TypeArguments.FirstOrDefault();
+                if (typeArgument != null && !IsSystemNamespace(typeArgument) && !_typeCache.Contains(typeArgument.ToDisplayString()))
+                {
+                    CheckPropertiesFromMetadata(context, methodDeclaration, typeArgument);
+                }
+                continue;
+            }
+            
             if (propertySymbol.GetAttributes().Any(attr => attr.AttributeClass?.Name is "FromBodyAttribute") || 
                 !IsSystemNamespace(propertySymbol.Type))
             {

@@ -570,52 +570,62 @@ public class PermissionsConfig
     /// <summary>
     /// Defines if the document can be commented or not.
     /// </summary>
+    /// <example>true</example>
     public bool Comment { get; set; } = true;
 
     /// <summary>
     /// Defines if the chat functionality is enabled in the document or not.
     /// </summary>
+    /// <example>true</example>
     public bool Chat { get; set; } = true;
 
     /// <summary>
     /// Defines if the document can be downloaded or only viewed or edited online.
     /// </summary>
+    /// <example>true</example>
     public bool Download { get; set; } = true;
 
     /// <summary>
     /// Defines if the document can be edited or only viewed.
     /// </summary>
+    /// <example>true</example>
     public bool Edit { get; set; } = true;
 
     /// <summary>
     /// Defines if the forms can be filled.
     /// </summary>
+    /// <example>true</example>
     public bool FillForms { get; set; } = true;
 
     /// <summary>
     /// Defines if the filter can be applied globally (true) affecting all the other users,
     /// or locally (false), i.e. for the current user only. 
     /// </summary>
+    /// <example>true</example>
     public bool ModifyFilter { get; set; } = true;
 
     /// <summary>
     /// Defines if the "Protection" tab on the toolbar and the "Protect" button in the left menu are displayedor hidden.
     /// </summary>
+    /// <example>true</example>
     public bool Protect { get; set; } = true;
 
     /// <summary>
     /// Defines if the document can be printed or not.
     /// </summary>
+    /// <example>true</example>
     public bool Print { get; set; } = true;
 
     /// <summary>
     /// Defines if the document can be reviewed or not.
     /// </summary>
+    /// <example>true</example>
     public bool Review { get; set; } = true;
 
     /// <summary>
     /// Defines if the content can be copied to the clipboard or not.
     /// </summary>
+    /// <example>true</example>
     public bool Copy { get; set; } = true;
 }
 

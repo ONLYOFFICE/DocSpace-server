@@ -146,4 +146,18 @@ public abstract record HistoryData
 /// <summary>
 /// The action performed on the file.
 /// </summary>
-public record HistoryAction(MessageAction Id, string Key);
+public record HistoryAction(MessageAction Id, string Key)
+{
+    /// <summary>
+    /// The action performed on the file.
+    /// </summary>
+    /// <example>FileUploaded</example>
+    public MessageAction Id { get; init; } = Id;
+    
+    
+    /// <summary>
+    /// The action performed on the file.
+    /// </summary>
+    /// <example>fileUploaded</example>   
+    public string Key { get; init; } = Key;
+}
