@@ -72,7 +72,7 @@ public class ReportDto
     /// <example>1</example>
     public int CurrentPage { get; set; }
 
-    public ReportDto(Report report, ApiDateTimeHelper apiDateTimeHelper, Dictionary<string, string> participantDisplayNames)
+    public ReportDto(Report report, ApiDateTimeHelper apiDateTimeHelper, Dictionary<string, string> participantDisplayNames, string filterServiceName)
     {
         Offset = report.Offset;
         Limit = report.Limit;
@@ -86,7 +86,7 @@ public class ReportDto
         {
             foreach (var operation in report.Collection)
             {
-                Collection.Add(new OperationDto(operation, apiDateTimeHelper, participantDisplayNames));
+                Collection.Add(new OperationDto(operation, apiDateTimeHelper, participantDisplayNames, filterServiceName));
             }
         }
     }
@@ -153,16 +153,16 @@ public class OperationDto
     /// <example>Example Name</example>
     public string ParticipantDisplayName { get; set; }
 
-    public OperationDto(Operation operation, ApiDateTimeHelper apiDateTimeHelper, Dictionary<string, string> participantDisplayNames)
+    public OperationDto(Operation operation, ApiDateTimeHelper apiDateTimeHelper, Dictionary<string, string> participantDisplayNames, string filterServiceName)
     {
-        var (description, unitOfMeasurement) = GetServiceDescAndUOM(operation.Service);
+        var (description, unitOfMeasurement, quantity) = WalletServiceDescriptionManager.GetServiceDescriptionAndUom(operation, filterServiceName, operation.Metadata);
 
         Date = apiDateTimeHelper.Get(operation.Date);
         Service = operation.Service;
         Description = description;
-        Details = GetDetails(operation.Metadata);
+        Details = WalletServiceDescriptionManager.GetServiceDetails(operation.Metadata);
         ServiceUnit = unitOfMeasurement;
-        Quantity = operation.Quantity;
+        Quantity = quantity;
         Currency = operation.Currency;
         Credit = operation.Credit;
         Debit = operation.Debit;
@@ -170,33 +170,6 @@ public class OperationDto
         ParticipantDisplayName = operation.ParticipantName != null && participantDisplayNames.TryGetValue(operation.ParticipantName, out var value)
             ? value
             : operation.ParticipantName;
-    }
-
-    private static (string, string) GetServiceDescAndUOM(string serviceName)
-    {
-        // for testing purposes
-        if (serviceName != null && serviceName.StartsWith("disk-storage"))
-        {
-            serviceName = "disk-storage";
-        }
-
-        if (string.IsNullOrEmpty(serviceName))
-        {
-            serviceName = "top-up";
-        }
-
-        return (Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceDesc_{serviceName}"),
-            Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceUOM_{serviceName}"));
-    }
-
-    private static string GetDetails(Dictionary<string, string> metadata)
-    {
-        if (metadata == null)
-        {
-            return string.Empty;
-        }
-        
-        return metadata.TryGetValue(BillingClient.MetadataDetails, out var details) ? details : string.Empty;
     }
 }
 

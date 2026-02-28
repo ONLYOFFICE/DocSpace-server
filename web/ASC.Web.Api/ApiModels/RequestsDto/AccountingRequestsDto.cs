@@ -29,43 +29,8 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 /// <summary>
 /// The request parameters for receiving a report on client operations.
 /// </summary>
-public class CustomerOperationsRequestDto
+public class CustomerOperationsRequestDto : CustomerOperationsReportRequestDto
 {
-    /// <summary>
-    /// The report start date.
-    /// </summary>
-    /// <example>2024-01-01T00:00:00Z</example>
-    [FromQuery(Name = "startDate")]
-    public DateTime StartDate { get; set; }
-
-    /// <summary>
-    /// The report end date.
-    /// </summary>
-    /// <example>2024-01-31T23:59:59Z</example>
-    [FromQuery(Name = "endDate")]
-    public DateTime EndDate { get; set; }
-
-    /// <summary>
-    /// The participant name.
-    /// </summary>
-    /// <example>ACME Corp</example>
-    [FromQuery(Name = "participantName")]
-    public string ParticipantName { get; set; }
-
-    /// <summary>
-    /// Specifies whether to include credit operations in the report. The default value is true.
-    /// </summary>
-    /// <example>true</example>
-    [FromQuery(Name = "credit")]
-    public bool? Credit { get; set; }
-
-    /// <summary>
-    /// Specifies whether to include debit operations in the report. The default value is true.
-    /// </summary>
-    /// <example>true</example>
-    [FromQuery(Name = "debit")]
-    public bool? Debit { get; set; }
-
     /// <summary>
     /// The number of items to skip for pagination. The default value is 0.
     /// </summary>
@@ -79,7 +44,6 @@ public class CustomerOperationsRequestDto
     /// <example>25</example>
     [FromQuery(Name = "limit")]
     public int? Limit { get; set; }
-
 }
 
 /// <summary>
@@ -96,6 +60,12 @@ public class CustomerOperationsRequestDto
 /// </example>
 public class CustomerOperationsReportRequestDto
 {
+    /// <summary>
+    /// The service name.
+    /// </summary>
+    /// <example>aitools</example>
+    public string ServiceName { get; set; }
+
     /// <summary>
     /// The report start date.
     /// </summary>
@@ -125,4 +95,28 @@ public class CustomerOperationsReportRequestDto
     /// </summary>
     /// <example>false</example>
     public bool? Debit { get; set; }
+
+    /// <summary>
+    /// List of operation types to filter by.
+    /// </summary>
+    /// <example>Any</example>
+    public ASC.Core.Billing.OperationType? Types { get; init; }
+
+    /// <summary>
+    /// List of operation status to filter by.
+    /// </summary>
+    /// <example>Any</example>
+    public OperationStatus? Status { get; init; }
+
+    /// <summary>
+    /// The field to order by.
+    /// </summary>
+    /// <example>StartDate</example>
+    public string OrderBy { get; init; }
+
+    /// <summary>
+    /// Order direction: Ascending or Descending.
+    /// </summary>
+    /// <example>Descending</example>
+    public OperationOrderType? OrderType  { get; init; }
 }

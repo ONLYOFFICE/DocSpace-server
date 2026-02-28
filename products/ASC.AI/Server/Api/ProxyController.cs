@@ -29,17 +29,21 @@ using System.Net.Http.Headers;
 namespace ASC.AI.Api
 {
     [Scope]
-    [DefaultRoute("openai/{providerId}/v1/{*path}")]
+    [DefaultRoute]
     [ApiController]
     [ApiExplorerSettings(IgnoreApi = true)]
     [ControllerName("ai")]
-    public class OpenAiController(
+    public class ProxyController(
         IHttpClientFactory httpClientFactory,
-        AiProviderService service
+        AiProviderService service,
+        AiGateway aiGateway
         ) : ControllerBase
     {
-        [HttpGet, HttpPost, HttpPut, HttpDelete]
-        public async Task<IActionResult> ProxyRequest([FromRoute] int providerId, [FromRoute] string? path)
+        [HttpGet("openai/{providerId}/v1/{*path}")]
+        [HttpPost("openai/{providerId}/v1/{*path}")]
+        [HttpPut("openai/{providerId}/v1/{*path}")]
+        [HttpDelete("openai/{providerId}/v1/{*path}")]
+        public async Task<IActionResult> OpenAiProxyRequest([FromRoute] int providerId, [FromRoute] string path)
         {
             var provider = await service.GetProviderAsync(providerId);
             
@@ -87,6 +91,48 @@ namespace ASC.AI.Api
             
             await using var upstream = await upstreamResponse.Content.ReadAsStreamAsync(Request.HttpContext.RequestAborted);
             await upstream.CopyToAsync(Response.Body, Request.HttpContext.RequestAborted);
+            await Response.Body.FlushAsync(HttpContext.RequestAborted);
+            await Response.CompleteAsync();
+            
+            return new EmptyResult();
+        }
+        
+        [HttpPost("web-search/v1/{*path}")]
+        public async Task<IActionResult> SearchProxyRequest([FromRoute] string path)
+        {
+            var key = await aiGateway.GetKeyAsync();
+
+            var client = httpClientFactory.CreateClient();
+            var baseUrl = aiGateway.Url;
+            client.BaseAddress = new Uri(baseUrl.EndsWith('/') ? baseUrl : baseUrl + '/');
+
+            var uri = path;
+            if (!string.IsNullOrEmpty(Request.QueryString.Value))
+            {
+                uri += Request.QueryString.Value;
+            }
+
+            var request = new HttpRequestMessage(new HttpMethod(Request.Method), uri);
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", key);
+
+            if (Request.ContentLength is > 0)
+            {
+                request.Content = new StreamContent(Request.Body);
+                request.Content.Headers.ContentType = new MediaTypeHeaderValue(Request.Headers.ContentType.FirstOrDefault() ?? "application/json");
+            }
+
+            var response = await client.SendAsync(request, 
+                HttpCompletionOption.ResponseHeadersRead, 
+                Request.HttpContext.RequestAborted);
+            
+            HttpContext.Response.RegisterForDispose(response);
+
+            Response.StatusCode = (int)response.StatusCode;
+            Response.Headers.ContentType = response.Content.Headers.ContentType?.ToString() ?? "application/json";
+            Response.Headers.ContentLength = response.Content.Headers.ContentLength;
+            
+            await using var stream = await response.Content.ReadAsStreamAsync();
+            await stream.CopyToAsync(Response.Body);
             await Response.Body.FlushAsync(HttpContext.RequestAborted);
             await Response.CompleteAsync();
             
