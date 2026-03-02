@@ -44,6 +44,8 @@ public interface IAiProviderDao
 
     Task<int> GetProvidersTotalCountAsync(int tenantId);
 
+    Task<bool> IsProviderNameExistsAsync(int tenantId, string title, int excludedProviderId = 0);
+
     Task<AiProvider> UpdateProviderAsync(int tenantId, AiProvider provider);
 
     Task DeleteProviders(int tenantId, HashSet<int> ids);

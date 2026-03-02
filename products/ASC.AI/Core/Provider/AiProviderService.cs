@@ -33,6 +33,7 @@ public class AiProviderService(
     AuthContext authContext,
     ProviderSettings providerSettings,
     UserManager userManager,
+    IDistributedLockProvider distributedLockProvider,
     ModelClientFactory modelClientFactory,
     MessageService messageService)
 {
@@ -59,8 +60,12 @@ public class AiProviderService(
         });
 
         var tenantId = tenantManager.GetCurrentTenantId();
-        
-        return await providerDao.AddProviderAsync(tenantId, title, url, key, type, defaultModel);
+
+        await using (await distributedLockProvider.TryAcquireFairLockAsync(GetProviderNameLockKey(tenantId)))
+        {
+            await ThrowIfProviderNameExistsAsync(tenantId, title);
+            return await providerDao.AddProviderAsync(tenantId, title, url, key, type, defaultModel);
+        }
     }
     
     public async Task<AiProvider> UpdateProviderAsync(int id, string? title, string? url, string? key)
@@ -68,10 +73,12 @@ public class AiProviderService(
         await ThrowIfNotAccessAsync();
 
         var provider = await GetProviderAsync(id);
+        var titleChanged = false;
 
-        if (!string.IsNullOrEmpty(title))
+        if (!string.IsNullOrEmpty(title) && !string.Equals(title, provider.Title, StringComparison.Ordinal))
         {
             provider.Title = title;
+            titleChanged = true;
         }
 
         var needCheck = false;
@@ -99,8 +106,17 @@ public class AiProviderService(
         }
 
         var tenantId = tenantManager.GetCurrentTenantId();
-        
-        return await providerDao.UpdateProviderAsync(tenantId, provider);
+
+        if (!titleChanged)
+        {
+            return await providerDao.UpdateProviderAsync(tenantId, provider);
+        }
+
+        await using (await distributedLockProvider.TryAcquireFairLockAsync(GetProviderNameLockKey(tenantId)))
+        {
+            await ThrowIfProviderNameExistsAsync(tenantId, provider.Title, provider.Id);
+            return await providerDao.UpdateProviderAsync(tenantId, provider);
+        }
     }
 
     public async IAsyncEnumerable<AiProvider> GetProvidersAsync(int offset, int limit)
@@ -259,6 +275,19 @@ public class AiProviderService(
         {
             throw new SecurityException(ErrorMessages.ManageProviders);       
         }
+    }
+
+    private async Task ThrowIfProviderNameExistsAsync(int tenantId, string title, int excludedProviderId = 0)
+    {
+        if (await providerDao.IsProviderNameExistsAsync(tenantId, title, excludedProviderId))
+        {
+            throw new ArgumentException(ErrorMessages.ProviderNameExists);
+        }
+    }
+
+    private static string GetProviderNameLockKey(int tenantId)
+    {
+        return $"ai_provider_name_{tenantId}";
     }
 
     private static async Task<T> ExecuteProviderRequestAsync<T>(ProviderType providerType, Func<Task<T>> request)
