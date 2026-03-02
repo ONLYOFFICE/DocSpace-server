@@ -26,21 +26,66 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
+/// <summary>
+/// The chat settings parameters.
+/// </summary>
 public class ChatSettingsDto
 {
+    /// <summary>
+    /// The AI provider ID.
+    /// </summary>
+    /// <example>1</example>
     public int ProviderId { get; set; }
+
+    /// <summary>
+    /// The AI model ID used for chat completions.
+    /// </summary>
+    /// <example>gpt-5.2</example>
     public string ModelId { get; init; }
+
+    /// <summary>
+    /// The AI model display alias.
+    /// </summary>
+    /// <example>GPT-5.2</example>
     public string ModelAlias { get; init; }
+
+    /// <summary>
+    /// The system prompt for the chat.
+    /// </summary>
+    /// <example>You are a helpful assistant.</example>
     public string Prompt { get; init; }
+
+    /// <summary>
+    /// The multimodal settings for the chat model.
+    /// </summary>
     public ChatMultimodalSettingsDto Multimodal { get; init; }
+
+    /// <summary>
+    /// Indicates whether this is an internal AI gateway provider.
+    /// </summary>
+    /// <example>false</example>
+    public bool Internal => ProviderId == AiGateway.ProviderId;
 }
 
+/// <summary>
+/// The multimodal settings for the chat model.
+/// </summary>
 public class ChatMultimodalSettingsDto
 {
+    /// <summary>
+    /// The image multimodal settings.
+    /// </summary>
     public ChatImageMultimodalSettingsDto Image { get; init; }
 }
 
+/// <summary>
+/// The image multimodal settings for the chat model.
+/// </summary>
 public class ChatImageMultimodalSettingsDto
 {
+    /// <summary>
+    /// The supported image formats.
+    /// </summary>
+    /// <example>[".jpeg", ".gif"]</example>
     public IEnumerable<string> Formats { get; init; }
 }
