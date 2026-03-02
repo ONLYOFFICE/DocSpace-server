@@ -1,3 +1,5 @@
+ARG BASE_IMAGE
+
 # Stage 1: Build the application
 FROM maven:3.9.12-eclipse-temurin-21 AS builder
 WORKDIR /app
@@ -35,49 +37,38 @@ COPY registration/registration-core/pom.xml registration/registration-core/
 COPY registration/registration-core/registration-domain/pom.xml registration/registration-core/registration-domain/
 COPY registration/registration-core/registration-service/pom.xml registration/registration-core/registration-service/
 
-# Download the project dependencies without running tests
+# Download dependencies
 RUN mvn dependency:go-offline -B -Dfmt.skip=true
 
-# Copy the source code
+# Copy source code
 COPY authorization authorization/
 COPY common common/
 COPY infrastructure infrastructure/
 COPY registration registration/
 
-# Build the project based on the specified module
+# Build the specified module
 ARG MODULE
 RUN mvn clean package -DskipTests -Dfmt.skip=true -T1 -pl ${MODULE} -am -B
 
-# Stage 2: Create custom JRE with jlink
-FROM eclipse-temurin:21-jdk-alpine AS jre-builder
-
-RUN $JAVA_HOME/bin/jlink \
-    --add-modules java.base,java.logging,java.sql,java.naming,java.management,jdk.management,java.instrument,java.security.jgss,java.desktop,jdk.unsupported,java.compiler,jdk.crypto.ec \
-    --strip-debug \
-    --no-man-pages \
-    --no-header-files \
-    --compress=zip-6 \
-    --output /custom-jre
-
-# Stage 3: Create the minimal runtime image
-FROM alpine:latest
-
-# Install required runtime dependencies
-RUN apk add --no-cache ca-certificates tzdata
-
-# Copy custom JRE from jre-builder stage
-COPY --from=jre-builder /custom-jre /opt/java
-
-# Set environment variables
-ENV JAVA_HOME=/opt/java
-ENV PATH="${JAVA_HOME}/bin:${PATH}"
-
-# Set the working directory inside the container
-WORKDIR /app
-
-# Copy the jar file from the builder stage
+# Stage 2: Extract application layer only
+FROM eclipse-temurin:21-jdk-alpine AS extractor
 ARG MODULE
-COPY --from=builder /app/${MODULE}/target/*.jar app.jar
+WORKDIR /extract
 
-# Define the entry point
-ENTRYPOINT ["java", "-jar", "app.jar"]
+COPY --from=builder /app/${MODULE}/target/*.jar app.jar
+# Use --launcher to get the same structure as base image
+RUN java -Djarmode=tools -jar app.jar extract --launcher --destination extracted
+
+# Stage 3: Create final image from shared base + application layer
+FROM ${BASE_IMAGE}
+
+# Copy the service-specific META-INF (contains MANIFEST.MF with correct Main-Class)
+COPY --from=extractor /extract/extracted/META-INF/ ./META-INF/
+
+# Copy the application classes. Base image already has all libs from both services merged
+COPY --from=extractor /extract/extracted/BOOT-INF/classes/ ./BOOT-INF/classes/
+
+COPY --from=extractor /extract/extracted/BOOT-INF/classpath.idx ./BOOT-INF/
+COPY --from=extractor /extract/extracted/BOOT-INF/layers.idx ./BOOT-INF/
+
+ENTRYPOINT ["java", "org.springframework.boot.loader.launch.JarLauncher"]
