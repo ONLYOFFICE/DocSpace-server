@@ -106,6 +106,11 @@ public class FormFillingProperties<T>
     public T OriginalFormId { get; set; }
 
     /// <summary>
+    /// The original form version.
+    /// </summary>
+    public int OriginalFormVersion { get; set; }
+
+    /// <summary>
     /// The ID of the folder where the form filling results are saved.
     /// </summary>
     public T ResultsFolderId { get; set; }
@@ -114,6 +119,11 @@ public class FormFillingProperties<T>
     /// The ID of the file with form filling results.
     /// </summary>
     public T ResultsFileID { get; set; }
+
+    /// <summary>
+    /// Indicates whether the original form version has changed.
+    /// </summary>
+    public bool IsVersionChanged { get; set; }
 
     /// <summary>
     /// The result form number.

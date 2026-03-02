@@ -918,4 +918,98 @@ public class RoomShareTests(
         response = await _roomsApi.GetRoomSecurityInfoAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken);
         response.Response.Should().Contain(r=> r.SharedToUser.Id == myguest.Id && r.Access == FileShare.Read);
     }
+    
+    [Theory]
+    [MemberData(nameof(ValidRoomTypesForShare))]
+    public async Task CreateInviteLinkInRoom_UseLinkByOwner_ReturnsOnlyOwner(RoomType roomType)
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var customRoom =  (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("room with multiple links", roomType: roomType), TestContext.Current.CancellationToken)).Response;
+
+        // Act - Get a primary external link
+        await _roomsApi.GetRoomsPrimaryExternalLinkAsync(customRoom.Id, cancellationToken: TestContext.Current.CancellationToken);
+
+        // Create additional links
+        var additionalLink1 = new RoomLinkRequest(
+            access: FileShare.Read,
+            title: "Additional Link 1");
+        
+        var response = (await _roomsApi.SetRoomLinkAsync(customRoom.Id, additionalLink1, TestContext.Current.CancellationToken)).Response;
+        var shortLink = response.SharedLink.ShareLink;
+        
+        await apiFactory.HttpClient.Authenticate(Initializer.Owner);
+        var fullLink = await apiFactory.HttpClient.GetAsync(shortLink, TestContext.Current.CancellationToken);
+        var key = HttpUtility.ParseQueryString(fullLink.RequestMessage?.RequestUri?.Query!)["key"];
+        await apiFactory.AuthenticationApi.CheckConfirmAsync(new EmailValidationKeyModel(key!, uiD: Initializer.Owner.Id, type: ConfirmType.LinkInvite), TestContext.Current.CancellationToken);
+        
+        var info = (await _roomsApi.GetRoomSecurityInfoAsync(customRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        
+        // Assert
+        info.Should().NotBeNull();
+        info.Should().HaveCount(1);
+        info[0].Access.Should().Be(FileShare.ReadWrite);
+    }
+
+    [Theory]
+    [MemberData(nameof(ValidRoomTypesForShare))]
+    public async Task UpdateInvitationLinkAccess_AfterUserVisitedReadLink_UserRightsStayRead(RoomType roomType)
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var owner = Initializer.Owner;
+        var user = await Initializer.InviteContact(EmployeeType.User);
+
+        var room = (await _roomsApi.CreateRoomAsync(
+            new CreateRoomRequestDto("room with invitation link", roomType: roomType),
+            TestContext.Current.CancellationToken)).Response;
+
+        // Act - Owner creates invitation link with Read access
+        var invitationReadLinkRequest = new RoomLinkRequest(
+            access: FileShare.Read,
+            title: "Read Link",
+            linkType: LinkType.Invitation);
+
+        var invitationReadLinkResponse = (await _roomsApi.SetRoomLinkAsync(room.Id, invitationReadLinkRequest, TestContext.Current.CancellationToken)).Response;
+        var shortInvitationLink = invitationReadLinkResponse.SharedLink.ShareLink;
+
+        // User visits the Read link
+        await apiFactory.HttpClient.Authenticate(user);
+        var fullInvitationLink = await apiFactory.HttpClient.GetAsync(shortInvitationLink, TestContext.Current.CancellationToken);
+        var fullInvitationLinkKey = HttpUtility.ParseQueryString(fullInvitationLink.RequestMessage?.RequestUri?.Query!)["key"];
+        await apiFactory.AuthenticationApi.CheckConfirmAsync(new EmailValidationKeyModel(fullInvitationLinkKey!, uiD: owner.Id, type: ConfirmType.LinkInvite), TestContext.Current.CancellationToken);
+
+        var info = (await _roomsApi.GetRoomSecurityInfoAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        info.Should().NotBeNull();
+        info.Should().HaveCount(2);
+        info.Should().Contain(x=> x.SubjectType == SubjectType.User && x.Access == FileShare.Read);
+
+        // Act - Owner updates the SAME link access to ContentCreator
+        await _filesClient.Authenticate(owner);
+
+        var updateLinkToContentCreatorRequest = new RoomLinkRequest(
+            linkId: invitationReadLinkResponse.SharedLink.Id,
+            access: FileShare.ContentCreator,
+            title: "Content Creator Link",
+            linkType: LinkType.Invitation);
+
+        var updatedLinkResponse = (await _roomsApi.SetRoomLinkAsync(room.Id, updateLinkToContentCreatorRequest, TestContext.Current.CancellationToken)).Response;
+        var shortUpdatedInvitationLink = updatedLinkResponse.SharedLink.ShareLink;
+
+        // User visits the updated link again, but personal rights must remain Read (because the user already exists in the room)
+        await apiFactory.HttpClient.Authenticate(user);
+        var fullUpdatedInvitationLink = await apiFactory.HttpClient.GetAsync(shortUpdatedInvitationLink, TestContext.Current.CancellationToken);
+        var fullUpdatedInvitationLinkKey = HttpUtility.ParseQueryString(fullUpdatedInvitationLink.RequestMessage?.RequestUri?.Query!)["key"];
+        await apiFactory.AuthenticationApi.CheckConfirmAsync(new EmailValidationKeyModel(fullUpdatedInvitationLinkKey!, uiD: owner.Id, type: ConfirmType.LinkInvite), TestContext.Current.CancellationToken);
+
+        var updatedInfo = (await _roomsApi.GetRoomSecurityInfoAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        updatedInfo.Should().NotBeNull();
+        updatedInfo.Should().HaveCount(2);
+        updatedInfo.Should().Contain(x=> x.SubjectType == SubjectType.User && x.Access == FileShare.Read);
+    }
+
 }

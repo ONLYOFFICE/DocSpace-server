@@ -34,5 +34,6 @@ public class EasyBibCitationBookRequestDto
     /// <summary>
     /// The EasyBib citation data.
     /// </summary>
+    /// <example>Sample citation data</example>
     public string CitationData { get; set; }
 }

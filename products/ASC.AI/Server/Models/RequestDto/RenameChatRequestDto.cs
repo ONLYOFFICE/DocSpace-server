@@ -34,12 +34,14 @@ public class RenameChatRequestDto
     /// <summary>
     /// The unique identifier of the AI chat session to rename.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "chatId")]
     public required Guid ChatId { get; set; }
 
     /// <summary>
     /// The new chat name.
     /// </summary>
+    /// <example>{"name": "Project Discussion"}</example>
     [FromBody]
     public required RenameChatBody Body { get; set; }
 }
@@ -52,6 +54,7 @@ public class RenameChatBody
     /// <summary>
     /// The new display name for the chat session (maximum 255 characters).
     /// </summary>
+    /// <example>Project Discussion</example>
     [MaxLength(255)]
     public required string Name { get; set; }
 }

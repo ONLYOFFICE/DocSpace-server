@@ -34,11 +34,13 @@ public class CheckDestFolderDto
     /// <summary>
     /// The result of the validation operation.
     /// </summary>
+    /// <example>0</example>
     public CheckDestFolderResult Result { get; set; }
 
     /// <summary>
     /// The list of files in the destination folder.
     /// </summary>
+    /// <example>[{"id": 10, "title": "document.docx"}]</example>
     public List<FileEntryBaseDto> Files { get; set; }
 }
 

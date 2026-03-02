@@ -36,6 +36,7 @@ global using System.Globalization;
 global using System.Linq.Expressions;
 global using System.Net;
 global using System.Net.Http.Headers;
+global using System.Net.Http.Json;
 global using System.Reflection;
 global using System.Runtime.Serialization;
 global using System.Security;
@@ -127,6 +128,7 @@ global using ASC.Notify.Recipients;
 global using ASC.Notify.Sinks;
 global using ASC.Security.Cryptography;
 global using ASC.Web.Core.WhiteLabel;
+global using ASC.Web.Core.Files;
 global using ASC.Web.Studio.Utility;
 
 global using Autofac;

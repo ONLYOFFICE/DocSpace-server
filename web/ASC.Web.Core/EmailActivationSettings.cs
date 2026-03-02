@@ -34,6 +34,7 @@ public class EmailActivationSettings : ISettings<EmailActivationSettings>
     /// <summary>
     /// Specifies whether the email activation settings are shown or hidden.
     /// </summary>
+    /// <example>true</example>
     public bool Show { get; set; }
 
     /// <summary>
@@ -45,6 +46,10 @@ public class EmailActivationSettings : ISettings<EmailActivationSettings>
     {
         return new EmailActivationSettings { Show = true };
     }
-
+    
+    /// <summary>
+    /// The timestamp indicating when the settings were last modified.
+    /// </summary>
+    /// <example>1990-01-01T00:00:00Z</example>
     public DateTime LastModified { get; set; }
 }

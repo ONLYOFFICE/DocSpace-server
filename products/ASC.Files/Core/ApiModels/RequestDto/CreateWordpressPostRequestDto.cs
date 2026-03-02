@@ -34,15 +34,18 @@ public class CreateWordpressPostRequestDto
     /// <summary>
     /// The WordPress post title.
     /// </summary>
+    /// <example>My WordPress Post</example>
     public required string Title { get; set; }
 
     /// <summary>
     /// The WordPress post contents.
     /// </summary>
+    /// <example>This is the post content</example>
     public string Content { get; set; }
 
     /// <summary>
     /// The WordPress operation status.
     /// </summary>
+    /// <example>1</example>
     public int Status { get; set; }
 }

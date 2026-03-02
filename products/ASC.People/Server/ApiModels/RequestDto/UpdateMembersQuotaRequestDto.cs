@@ -34,10 +34,12 @@ public class UpdateMembersQuotaRequestDto
     /// <summary>
     /// The list of user IDs.
     /// </summary>
+    /// <example>["00000000-0000-0000-0000-000000000000", "11111111-1111-1111-1111-111111111111"]</example>
     public IEnumerable<Guid> UserIds { get; set; }
 
     /// <summary>
     /// The quota in JSON format.
     /// </summary>
+    /// <example>{"maxSize": 1073741824}</example>
     public JsonElement Quota { get; set; }
 }

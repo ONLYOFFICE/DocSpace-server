@@ -1118,8 +1118,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                         properties.FormFilling.OriginalFormId = newFile.Id;
 
                                         await Task.WhenAll(
-                                            fileDao.SaveProperties(newFile.Id, properties),
-                                            socketManager.CreateFormAsync(newFile, securityContext.CurrentAccount.ID, numberRoomMembers <= 1)
+                                            fileDao.SaveProperties(newFile.Id, properties)
                                         );
                                     }
                                 }

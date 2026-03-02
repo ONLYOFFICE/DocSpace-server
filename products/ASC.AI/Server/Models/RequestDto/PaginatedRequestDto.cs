@@ -34,12 +34,14 @@ public class PaginatedRequestDto
     /// <summary>
     /// The number of items to skip before returning results (zero-based offset). Defaults to 0.
     /// </summary>
+    /// <example>0</example>
     [FromQuery(Name = "startIndex")]
     public int StartIndex { get; set; } = 0;
 
     /// <summary>
     /// The maximum number of items to return per page. Defaults to 100.
     /// </summary>
+    /// <example>100</example>
     [FromQuery(Name = "count")]
     public int Count { get; set; } = 100;
 }

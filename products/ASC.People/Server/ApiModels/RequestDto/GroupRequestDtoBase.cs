@@ -34,11 +34,13 @@ public abstract class GroupRequestDtoBase
     /// <summary>
     /// The group manager ID.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     public Guid GroupManager { get; set; }
 
     /// <summary>
     /// The group name.
     /// </summary>
+    /// <example>Marketing Team</example>
     [StringLength(128)]
     public string GroupName { get; set; }
 }

@@ -34,26 +34,31 @@ public class FilesStatisticsResultDto
     /// <summary>
     /// The used space of files in the \"My Documents\" section.
     /// </summary>
+    /// <example>{"title": "My Documents", "usedSpace": 10240}</example>
     public FilesStatisticsFolder MyDocumentsUsedSpace { get; set; }
 
     /// <summary>
     /// The used space of files in the \"Trash\" section.
     /// </summary>
+    /// <example>{"title": "My Documents", "usedSpace": 512}</example>
     public FilesStatisticsFolder TrashUsedSpace { get; set; }
 
     /// <summary>
     /// The used space of files in the \"Archive\" section.
     /// </summary>
+    /// <example>{"title": "My Documents", "usedSpace": 2048}</example>
     public FilesStatisticsFolder ArchiveUsedSpace { get; set; }
 
     /// <summary>
     /// The used space of files in the \"Rooms\" section.
     /// </summary>
+    /// <example>{"title": "My Documents", "usedSpace": 5120}</example>
     public FilesStatisticsFolder RoomsUsedSpace { get; set; }
 
     /// <summary>
     /// The used space of files in the \"AI agents\" section.
     /// </summary>
+    /// <example>{"title": "My Documents", "usedSpace": 1024}</example>
     public FilesStatisticsFolder AiAgentsUsedSpace { get; set; }
 }
 
@@ -65,10 +70,12 @@ public class FilesStatisticsFolder
     /// <summary>
     /// The folder title.
     /// </summary>
+    /// <example>My Documents</example>
     public string Title { get; set; }
 
     /// <summary>
     /// The used space in the folder.
     /// </summary>
+    /// <example>1048576</example>
     public long UsedSpace { get; set; }
 }

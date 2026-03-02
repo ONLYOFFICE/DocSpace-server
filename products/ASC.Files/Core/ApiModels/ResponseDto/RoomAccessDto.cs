@@ -34,16 +34,19 @@ public class RoomSecurityDto
     /// <summary>
     /// The list of room members.
     /// </summary>
+    /// <example>[{"access": 1, "isOwner": false}]</example>
     public IEnumerable<FileShareDto> Members { get; set; }
 
     /// <summary>
     /// The warning message.
     /// </summary>
+    /// <example>Warning message</example>
     public string Warning { get; set; }
 
     /// <summary>
     /// The error type.
     /// </summary>
+    /// <example>0</example>
     public RoomSecurityError Error { get; set; }
 }
 

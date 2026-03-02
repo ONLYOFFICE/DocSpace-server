@@ -34,36 +34,43 @@ public class WatermarkDto
     /// <summary>
     /// Specifies whether to display in the watermark: username, user email, user ip-adress, current date, and room name.
     /// </summary>
+    /// <example>0</example>
     public required WatermarkAdditions Additions { get; set; }
 
     /// <summary>
     /// The watermark text.
     /// </summary>
+    /// <example>Confidential</example>
     public string Text { get; set; }
 
     /// <summary>
     /// The watermark text and image rotate.
     /// </summary>
+    /// <example>45</example>
     public required int Rotate { get; set; }
 
     /// <summary>
     /// The watermark image scale.
     /// </summary>
+    /// <example>100</example>
     public required int ImageScale { get; set; }
 
     /// <summary>
     /// The watermark image url.
     /// </summary>
+    /// <example>http://localhost/watermark.png</example>
     public string ImageUrl { get; set; }
 
     /// <summary>
     /// The watermark image height.
     /// </summary>
+    /// <example>100.0</example>
     public required double ImageHeight { get; set; }
 
     /// <summary>
     /// The watermark image width.
     /// </summary>
+    /// <example>200.0</example>
     public required double ImageWidth { get; set; }
 }
 [Scope]

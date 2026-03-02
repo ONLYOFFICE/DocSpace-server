@@ -58,11 +58,13 @@ public class AutoCleanUpData
     /// <summary>
     /// Specifies whether to permanently delete files in the Trash folder.
     /// </summary>
+    /// <example>false</example>
     public bool IsAutoCleanUp { get; init; }
 
     /// <summary>
     /// The period when the trash bin will be cleared.
     /// </summary>
+    /// <example>0</example>
     public DateToAutoCleanUp Gap { get; init; }
 
     public static AutoCleanUpData GetDefault()

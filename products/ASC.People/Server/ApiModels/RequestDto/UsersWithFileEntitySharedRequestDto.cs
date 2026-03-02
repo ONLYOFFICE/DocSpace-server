@@ -34,60 +34,70 @@ public class UsersWithFileEntitySharedRequestDto<T>
     /// <summary>
     /// The user ID.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "id")]
     public required T Id { get; set; }
 
     /// <summary>
     /// The user status.
     /// </summary>
+    /// <example>1</example>
     [FromQuery(Name = "employeeStatus")]
     public EmployeeStatus? EmployeeStatus { get; set; }
 
     /// <summary>
     /// The user activation status.
     /// </summary>
+    /// <example>1</example>
     [FromQuery(Name = "activationStatus")]
     public EmployeeActivationStatus? ActivationStatus { get; set; }
 
     /// <summary>
     /// Specifies whether to exclude the user sharing settings or not.
     /// </summary>
+    /// <example>false</example>
     [FromQuery(Name = "excludeShared")]
     public bool? ExcludeShared { get; set; }
 
     /// <summary>
     /// Specifies whether to include the user sharing settings or not.
     /// </summary>
+    /// <example>false</example>
     [FromQuery(Name = "includeShared")]
     public bool? IncludeShared { get; set; }
 
     /// <summary>
     /// Specifies whether the user was invited by the current user or not.
     /// </summary>
+    /// <example>false</example>
     [FromQuery(Name = "invitedByMe")]
     public bool? InvitedByMe { get; set; }
 
     /// <summary>
     /// The inviter ID.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromQuery(Name = "inviterId")]
     public Guid? InviterId { get; set; }
 
     /// <summary>
     /// The user area.
     /// </summary>
+    /// <example>0</example>
     [FromQuery(Name = "area")]
     public Area Area { get; set; } = Area.All;
 
     /// <summary>
     /// The list of user types.
     /// </summary>
+    /// <example>[1, 2]</example>
     [FromQuery(Name = "employeeTypes")]
     public IEnumerable<EmployeeType> EmployeeTypes { get; set; } = new List<EmployeeType>();
 
     /// <summary>
     /// The maximum number of users to be retrieved in the request.
     /// </summary>
+    /// <example>25</example>
     [FromQuery(Name = "count")]
     [Range(1, ApiContext.MaxCount)]
     public int Count { get; set; } = ApiContext.DefaultCount;
@@ -95,12 +105,14 @@ public class UsersWithFileEntitySharedRequestDto<T>
     /// <summary>
     /// The zero-based index of the first record to retrieve in a paged query.
     /// </summary>
+    /// <example>0</example>
     [FromQuery(Name = "startIndex")]
     public int StartIndex { get; set; }
 
     /// <summary>
     /// The character or string used to separate multiple filter values in a filtering query.
     /// </summary>
+    /// <example>,</example>
     /// <remarks>
     /// This property defines the delimiter applied when multiple filter criteria are provided.
     /// It allows the request to parse and handle multiple filtering values effectively.
@@ -111,6 +123,7 @@ public class UsersWithFileEntitySharedRequestDto<T>
     /// <summary>
     /// The filter text value used for searching or filtering user results.
     /// </summary>
+    /// <example>John</example>
     [FromQuery(Name = "filterValue")]
     public string Text { get; set; }
 }

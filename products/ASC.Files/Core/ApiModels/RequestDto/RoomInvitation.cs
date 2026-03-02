@@ -34,10 +34,12 @@ public class RoomInvitation : EmailInvitationDto
     /// <summary>
     /// The ID of the user to share a room with.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     public Guid Id { get; set; }
 
     /// <summary>
     /// The room sharing rights.
     /// </summary>
+    /// <example>1</example>
     public FileShare Access { get; set; }
 }

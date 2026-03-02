@@ -34,6 +34,7 @@ public class GetFillResultRequestDto
     /// <summary>
     /// The form-filling session ID.
     /// </summary>
+    /// <example>doc_key_123</example>
     [FromQuery(Name = "fillingSessionId")]
     public string FillingSessionId { get; set; }
 }

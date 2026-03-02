@@ -34,31 +34,37 @@ public record HistoryDto
     /// <summary>
     /// The unique identifier for the file history entry.
     /// </summary>
+    /// <example>123</example>
     public required int Id { get; init; }
-    
+
     /// <summary>
     /// The action performed on the file.
     /// </summary>
+    /// <example>0</example>
     public required HistoryAction Action { get; init; }
 
     /// <summary>
     /// The action initiator.
     /// </summary>
+    /// <example>{"displayName": "John Doe"}</example>
     public required EmployeeDto Initiator { get; init; }
 
     /// <summary>
     /// The date and time when an action on the file was performed.
     /// </summary>
+    /// <example>2021-01-01T00:00:00Z</example>
     public required ApiDateTime Date { get; init; }
 
     /// <summary>
     /// The history data.
     /// </summary>
+    /// <example>{"fileId": 123, "title": "document.docx"}</example>
     public required HistoryData Data { get; init; }
 
     /// <summary>
     /// The list of related history.
     /// </summary>
+    /// <example>[{"id": 124, "action": 0}]</example>
     public List<HistoryDto> Related { get; set; }
 }
 

@@ -34,11 +34,13 @@ public class ChangeHistory
     /// <summary>
     /// The file version of the change history.
     /// </summary>
+    /// <example>1</example>
     public required int Version { get; set; }
 
     /// <summary>
     /// Specifies whether to start a new version or continue revision of the change history.
     /// </summary>
+    /// <example>false</example>
     public bool ContinueVersion { get; set; }
 }
 
@@ -50,12 +52,14 @@ public class ChangeHistoryRequestDto<T>
     /// <summary>
     /// The file Id to change its version history.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "fileId")]
     public required T FileId { get; set; }
 
     /// <summary>
     /// The parameters for changing version history.
     /// </summary>
+    /// <example>{"version": 1, "continueVersion": false}</example>
     [FromBody]
     public required ChangeHistory File { get; set; }
 }

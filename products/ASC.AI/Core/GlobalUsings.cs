@@ -101,6 +101,7 @@ global using Anthropic.SDK;
 
 global using ModelContextProtocol.Client;
 
+global using Microsoft.AspNetCore.Http;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.AI;

@@ -26,16 +26,21 @@
 
 namespace ASC.AI.Models.ResponseDto;
 
+/// <summary>
+/// The chat message information.
+/// </summary>
 public class MessageDto(long id, Role role, IEnumerable<MessageContentDto> contents, ApiDateTime createdOn)
 {
     /// <summary>
     /// The unique identifier of the message.
     /// </summary>
+    /// <example>42</example>
     public long Id { get; } = id;
 
     /// <summary>
     /// The role of the message author: User or Assistant.
     /// </summary>
+    /// <example>0</example>
     public Role Role { get; } = role;
 
     /// <summary>
@@ -46,6 +51,8 @@ public class MessageDto(long id, Role role, IEnumerable<MessageContentDto> conte
     /// <summary>
     /// The date and time when the message was created.
     /// </summary>
+
+    /// <example>2025-06-15T10:30:00.0000000Z</example>
     public ApiDateTime CreatedOn { get; } = createdOn;
 }
 

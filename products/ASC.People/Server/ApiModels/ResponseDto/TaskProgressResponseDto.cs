@@ -34,26 +34,31 @@ public class TaskProgressResponseDto
     /// <summary>
     /// The task progress ID.
     /// </summary>
+    /// <example>task-123456</example>
     public required string Id { get; set; }
 
     /// <summary>
     /// The task progress error message.
     /// </summary>
+    /// <example>An error occurred during processing</example>
     public string Error { get; set; }
 
     /// <summary>
     /// The percentage of the task progress.
     /// </summary>
+    /// <example>75</example>
     public required int Percentage { get; set; }
 
     /// <summary>
     /// Specifies if the task peogress is completed or not.
     /// </summary>
+    /// <example>false</example>
     public required bool IsCompleted { get; set; }
 
     /// <summary>
     /// The status of the distributed task.
     /// </summary>
+    /// <example>1</example>
     public required DistributedTaskStatus Status { get; set; }
 
     public static TaskProgressResponseDto Get(DistributedTaskProgress progressItem)

@@ -34,45 +34,54 @@ public class Module(Product product)
     /// <summary>
     /// The module ID.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     public Guid Id { get; set; } = product.ProductID;
 
     /// <summary>
     /// The module product class name.
     /// </summary>
+    /// <example>files</example>
     public string AppName { get; set; } = product.ProductClassName;
 
     /// <summary>
     /// The module product class name.
     /// </summary>
+    /// <example>Documents</example>
     public string Title { get; set; } = product.Name;
 
     /// <summary>
     /// The URL to the module start page.
     /// </summary>
+    /// <example>https://example.com</example>
     public string Link { get; set; } = product.StartURL;
 
     /// <summary>
     /// The module icon URL.
     /// </summary>
+    /// <example>https://example.com/icon.svg</example>
     public string IconUrl { get; set; } = product.Context.IconFileName;
 
     /// <summary>
     /// The module large image URL.
     /// </summary>
+    /// <example>https://example.com/image.png</example>
     public string ImageUrl { get; set; } = product.Context.LargeIconFileName;
 
     /// <summary>
     /// The module help URL.
     /// </summary>
+    /// <example>https://example.com/help</example>
     public string HelpUrl { get; set; } = product.HelpURL;
 
     /// <summary>
     /// The module description.
     /// </summary>
+    /// <example>File management</example>
     public string Description { get; set; } = product.Description;
 
     /// <summary>
     /// Specifies if the module is primary or not.
     /// </summary>
+    /// <example>true</example>
     public bool IsPrimary { get; set; } = product.IsPrimary;
 }

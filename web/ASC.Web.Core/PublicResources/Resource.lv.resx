@@ -117,9 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AccountingCustomerOperationServiceDesc_embedding" xml:space="preserve">
-    <value>Vektorizācija</value>
-  </data>
   <data name="AccountingCustomerOperationContact" xml:space="preserve">
     <value>Kontaktinformācija</value>
   </data>
@@ -141,7 +138,7 @@
   <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
     <value>Daudzums</value>
   </data>
-  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
+  <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
     <value>MI rīki</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
@@ -150,20 +147,26 @@
   <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
     <value>Diska vieta</value>
   </data>
+  <data name="AccountingCustomerOperationServiceDesc_embedding" xml:space="preserve">
+    <value>Vektorizācija</value>
+  </data>
   <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
     <value>Atlikuma papildināšana</value>
   </data>
   <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
     <value>Mērvienība</value>
   </data>
-  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
-    <value>Pilnvaras</value>
-  </data>
   <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
     <value>Dublējums</value>
   </data>
+  <data name="AccountingCustomerOperationServiceUOM_chat" xml:space="preserve">
+    <value>Pilnvaras</value>
+  </data>
   <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
     <value>GB</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_embedding" xml:space="preserve">
+    <value>Pilnvaras</value>
   </data>
   <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
     <value>Klienta darbību ziņojums ({0}-{1})</value>
@@ -1247,12 +1250,6 @@
   </data>
   <data name="TariffsFeature_users_exception" xml:space="preserve">
     <value>Lietotāju skaits nedrīkst pārsniegt {0}</value>
-  </data>
-  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
-    <value>Meklēšana tīmeklī ar MI</value>
-  </data>
-  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
-    <value>Papildiniet maku, lai aktivizētu meklēšanu tīmeklī ar MI.</value>
   </data>
   <data name="Tariffs_admin" xml:space="preserve">
     <value>Business</value>

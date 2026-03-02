@@ -34,6 +34,7 @@ public class FileIdRequestDto<T>
     /// <summary>
     /// The file unique identifier.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "fileId")]
     public required T FileId { get; set; }
 }
@@ -46,12 +47,14 @@ public class FilePrimaryIdRequestDto<T>
     /// <summary>
     /// The file unique identifier.
     /// </summary>
+    /// <example>10</example>
     [FromRoute(Name = "id")]
     public required T Id { get; set; }
 
     /// <summary>
     /// The number of items to retrieve in the request.
     /// </summary>
+    /// <example>25</example>
     [FromQuery(Name = "count")]
     [Range(1, ApiContext.MaxCount)]
     public int Count { get; set; } = ApiContext.DefaultCount;
@@ -59,6 +62,7 @@ public class FilePrimaryIdRequestDto<T>
     /// <summary>
     /// The starting index for the query results.
     /// </summary>
+    /// <example>0</example>
     [FromQuery(Name = "startIndex")]
     public int StartIndex { get; set; }
 }
@@ -71,6 +75,7 @@ public class OperationIdRequestDto
     /// <summary>
     /// The operation unique identifier.
     /// </summary>
+    /// <example>some-operation-id</example>
     [FromRoute(Name = "id")]
     public required string Id { get; set; } = null;
 }

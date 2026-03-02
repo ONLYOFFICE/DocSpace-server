@@ -69,23 +69,6 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
 
         UpdateSchema(propertyInfo.PropertyType, openApiSchema);
 
-        var swaggerSchemaCustomAttribute = propertyInfo.GetCustomAttributes(true).OfType<SwaggerSchemaCustomAttribute>().FirstOrDefault();
-
-        if (swaggerSchemaCustomAttribute != null)
-        {
-            if (swaggerSchemaCustomAttribute.Example != null)
-            {
-                openApiSchema.Example = GetExample(swaggerSchemaCustomAttribute.Example);
-            }
-        }
-        else
-        {
-            var example = GenerateFakeData(propertyInfo);
-            if (example != null)
-            {
-                openApiSchema.Example = example;
-            }
-        }
     }
 
     private IOpenApiSchema UpdateSchema(Type checkType, OpenApiSchema result)
@@ -96,55 +79,7 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
             checkType = nullableType;
         }
 
-        if (checkType == typeof(int))
-        {
-            result.Example = SwaggerSchemaCustomAttribute.DefaultIntExample;
-        }
-        else if (checkType == typeof(long) || checkType == typeof(ulong))
-        {
-            result.Example = 1234;
-        }
-        else if (checkType == typeof(string))
-        {
-            result.Example = SwaggerSchemaCustomAttribute.DefaultStringExample;
-        }
-        else if (checkType == typeof(bool))
-        {
-            result.Example = true;
-        }
-        else if (checkType == typeof(double))
-        {
-            result.Example = -8.5;
-        }
-        else if (checkType == typeof(DateTime))
-        {
-            result.Example = new DateTimeOffset(2008, 4, 10, 06, 30, 00, TimeSpan.FromHours(4));
-        }
-        else if (checkType == typeof(Guid))
-        {
-            result.Example = "75a5f745-f697-4418-b38d-0fe0d277e258";
-        }
-        else if (checkType.IsClosedTypeOf(typeof(IDictionary<,>)))
-        {
-            var array = new JsonArray();
-            if (checkType.IsGenericType)
-            {
-                var dictSchema = new JsonObject();
-                for (var index = 0; index < checkType.GenericTypeArguments.Length; index++)
-                {
-                    var t = checkType.GenericTypeArguments[index];
-                    var arraySchema = UpdateSchema(t, new OpenApiSchema());
-                    if (arraySchema is { Example: not null })
-                    {
-                        dictSchema.Add(index == 0 ? "key" : "value", arraySchema.Example);
-                    }
-                }
-
-                array.Add(dictSchema);
-            }
-            result.Example = array;
-        }
-        else if (typeof(IEnumerable).IsAssignableFrom(checkType))
+        if (typeof(IEnumerable).IsAssignableFrom(checkType))
         {
             var array = new JsonArray();
 
@@ -275,15 +210,6 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
                 result.Extensions["x-enum-type"] = new JsonNodeExtension(enumType);
             }
         }
-        else if (checkType == typeof(object))
-        {
-            // result.Example = new JsonArray
-            // {
-            //     ["int"] = SwaggerSchemaCustomAttribute.DefaultIntExample,
-            //     ["string"] = SwaggerSchemaCustomAttribute.DefaultStringExample,
-            //     ["boolean"] = true
-            // };
-        }
         else if (checkType == typeof(TimeSpan))
         {
             var timeSpan = TimeSpan.Zero.ToString();
@@ -292,64 +218,7 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
 
         return result;
     }
-    private JsonNode GetExample(object exampleValue)
-    {
-        return exampleValue switch
-        {
-            string str => str,
-            int _int => _int,
-            long _long => _long,
-            bool _bool => _bool,
-            double _double => _double,
-            DateTime _dateTime => _dateTime,
-            Guid _guid => _guid,
-            _ => null
-        };
-    }
-    private JsonNode GenerateFakeData(PropertyInfo propertyInfo)
-    {
-        switch (propertyInfo.Name)
-        {
-            case "Name":
-                return "John Doe";
-            case "Email":
-                return "example@onlyoffice.com";
-            case "FirstName":
-                return "John";
-            case "LastName":
-                return "Doe";
-            case "Location":
-                return "001 Schroeder Run, New Tabithaport, Colombia";
-            case "Password":
-                return "P@ssw0rd123";
-            case "Extension":
-            case "Ext":
-            case "FileExtension":
-                return ".txt";
-            case "Title":
-                return "SampleFile";
-            case "Id":
-            case "FileId":
-            case "FolderId":
-            case "RoomId":
-            case "InstanceId":
-            case "UserId":
-            case "ProductId":
-                if (propertyInfo.PropertyType == typeof(string))
-                {
-                    return "1";
-                }
 
-                if (propertyInfo.PropertyType == typeof(int))
-                {
-                    return 1;
-                }
-
-                return "00000000-0000-0000-0000-000000000000";
-            default:
-                return null;
-        }
-    }
     private static bool IsSimpleType(Type type)
     {
         return type.IsPrimitive ||

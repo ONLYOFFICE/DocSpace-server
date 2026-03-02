@@ -24,41 +24,29 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Web.Api.ApiModels.RequestsDto;
+namespace ASC.Core.Tenants;
 
 /// <summary>
-/// The request parameters for handling the payment redirect URL.
+/// The AI models availability settings.
 /// </summary>
-public class PaymentUrlRequestDto
+[Scope]
+[Serializable]
+public class TenantAiModelsAvailabilitySettings : ISettings<TenantAiModelsAvailabilitySettings>
 {
     /// <summary>
-    /// The URL where the user will be redirected after payment processing.
+    /// The list of disabled AI model IDs.
     /// </summary>
-    [FromQuery(Name = "backUrl")]
-    public string BackUrl { get; set; }
-}
+    public List<string> DisabledModels { get; set; }
 
+    public static Guid ID => new("{0882E21C-0779-42DB-92BF-328AB1745BCC}");
 
-/// <summary>
-/// The request parameters for managing the payment information.
-/// </summary>
-public class PaymentInformationRequestDto
-{
+    public TenantAiModelsAvailabilitySettings GetDefault()
+    {
+        return new TenantAiModelsAvailabilitySettings();
+    }
+
     /// <summary>
-    /// Specifies whether to refresh the payment information cache or not.
+    /// The date and time when the AI models availability settings were last modified.
     /// </summary>
-    [FromQuery(Name = "refresh")]
-    public bool Refresh { get; set; }
-}
-
-/// <summary>
-/// The request parameters for getting the quotas.
-/// </summary>
-public class QuotasRequestDto
-{
-    /// <summary>
-    /// Specifies whether to return the wallet quotas only.
-    /// </summary>
-    [FromQuery(Name = "wallet")]
-    public bool Wallet { get; set; }
+    public DateTime LastModified { get; set; }
 }

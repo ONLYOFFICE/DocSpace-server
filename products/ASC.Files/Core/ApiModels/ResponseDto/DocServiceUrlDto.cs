@@ -34,46 +34,55 @@ public class DocServiceUrlDto
     /// <summary>
     /// The version of the document service.
     /// </summary>
+    /// <example>8.0.1</example>
     public required string Version { get; set; }
 
     /// <summary>
     /// The document service URL API.
     /// </summary>
+    /// <example>http://localhost/api</example>
     public required string DocServiceUrlApi { get; set; }
 
     /// <summary>
     /// The document service URL.
     /// </summary>
+    /// <example>http://localhost/docservice</example>
     public required string DocServiceUrl { get; set; }
 
 
     /// <summary>
     /// The URL used to preload the document service scripts.
     /// </summary>
+    /// <example>http://localhost/preload</example>
     public required string DocServicePreloadUrl { get; set; }
 
     /// <summary>
     /// The internal document service URL.
     /// </summary>
+    /// <example>http://localhost/internal</example>
     public required string DocServiceUrlInternal { get; set; }
 
     /// <summary>
     /// The document service portal URL.
     /// </summary>
+    /// <example>http://localhost/portal</example>
     public required string DocServicePortalUrl { get; set; }
 
     /// <summary>
     /// The document service signature header.
     /// </summary>
+    /// <example>Authorization</example>
     public required string DocServiceSignatureHeader { get; set; }
 
     /// <summary>
     /// Specifies if the document service SSL verification is enabled.
     /// </summary>
+    /// <example>true</example>
     public required bool DocServiceSslVerification { get; set; }
 
     /// <summary>
     /// Specifies if the document service is default.
     /// </summary>
+    /// <example>true</example>
     public required bool IsDefault { get; set; }
 }

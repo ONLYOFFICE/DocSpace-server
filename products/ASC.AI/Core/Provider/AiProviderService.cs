@@ -33,6 +33,7 @@ public class AiProviderService(
     AuthContext authContext,
     ProviderSettings providerSettings,
     UserManager userManager,
+    IDistributedLockProvider distributedLockProvider,
     ModelClientFactory modelClientFactory,
     MessageService messageService)
 {
@@ -53,7 +54,7 @@ public class AiProviderService(
         
         ArgumentException.ThrowIfNullOrEmpty(url);
 
-        var defaultModel = await ExecuteProviderRequestAsync(async () =>
+        var defaultModel = await ExecuteProviderRequestAsync(type, async () =>
         {
             var client = modelClientFactory.Create(type, url, key);
             var models = await GetFilteredModelsAsync(client, type);
@@ -61,8 +62,12 @@ public class AiProviderService(
         });
 
         var tenantId = tenantManager.GetCurrentTenantId();
-        
-        return await providerDao.AddProviderAsync(tenantId, title, url, key, type, defaultModel);
+
+        await using (await distributedLockProvider.TryAcquireFairLockAsync(GetProviderNameLockKey(tenantId)))
+        {
+            await ThrowIfProviderNameExistsAsync(tenantId, title);
+            return await providerDao.AddProviderAsync(tenantId, title, url, key, type, defaultModel);
+        }
     }
     
     public async Task<AiProvider> UpdateProviderAsync(int id, string? title, string? url, string? key)
@@ -70,10 +75,12 @@ public class AiProviderService(
         await ThrowIfNotAccessAsync();
 
         var provider = await GetProviderAsync(id);
+        var titleChanged = false;
 
-        if (!string.IsNullOrEmpty(title))
+        if (!string.IsNullOrEmpty(title) && !string.Equals(title, provider.Title, StringComparison.Ordinal))
         {
             provider.Title = title;
+            titleChanged = true;
         }
 
         var needCheck = false;
@@ -92,7 +99,7 @@ public class AiProviderService(
 
         if (needCheck)
         {
-            await ExecuteProviderRequestAsync(async () =>
+            await ExecuteProviderRequestAsync(provider.Type, async () =>
             {
                 var client = modelClientFactory.Create(provider.Type, provider.Url, provider.Key);
                 await client.PingAsync();
@@ -101,8 +108,17 @@ public class AiProviderService(
         }
 
         var tenantId = tenantManager.GetCurrentTenantId();
-        
-        return await providerDao.UpdateProviderAsync(tenantId, provider);
+
+        if (!titleChanged)
+        {
+            return await providerDao.UpdateProviderAsync(tenantId, provider);
+        }
+
+        await using (await distributedLockProvider.TryAcquireFairLockAsync(GetProviderNameLockKey(tenantId)))
+        {
+            await ThrowIfProviderNameExistsAsync(tenantId, provider.Title, provider.Id);
+            return await providerDao.UpdateProviderAsync(tenantId, provider);
+        }
     }
 
     public async IAsyncEnumerable<AiProvider> GetProvidersAsync(int offset, int limit)
@@ -155,7 +171,7 @@ public class AiProviderService(
             return [];
         }
 
-        return await ExecuteProviderRequestAsync(async () => 
+        return await ExecuteProviderRequestAsync(provider.Type, async () => 
         { 
             var client = modelClientFactory.Create(provider.Type, provider.Url, provider.Key);
             var models = await GetFilteredModelsAsync(client, provider.Type, scope);
@@ -263,7 +279,20 @@ public class AiProviderService(
         }
     }
 
-    private static async Task<T> ExecuteProviderRequestAsync<T>(Func<Task<T>> request)
+    private async Task ThrowIfProviderNameExistsAsync(int tenantId, string title, int excludedProviderId = 0)
+    {
+        if (await providerDao.IsProviderNameExistsAsync(tenantId, title, excludedProviderId))
+        {
+            throw new ArgumentException(ErrorMessages.ProviderNameExists);
+        }
+    }
+
+    private static string GetProviderNameLockKey(int tenantId)
+    {
+        return $"ai_provider_name_{tenantId}";
+    }
+
+    private static async Task<T> ExecuteProviderRequestAsync<T>(ProviderType providerType, Func<Task<T>> request)
     {
         try
         {
@@ -271,12 +300,17 @@ public class AiProviderService(
         }
         catch (HttpRequestException httpException)
         {
-            if (httpException.StatusCode is HttpStatusCode.Unauthorized)
+            if (providerType is ProviderType.XAi && httpException.StatusCode is HttpStatusCode.BadRequest 
+                || httpException.StatusCode is HttpStatusCode.Unauthorized)
             {
                 throw new ArgumentException(ErrorMessages.InvalidKey);
             }
 
             throw new ArgumentException(ErrorMessages.InvalidUrl);
+        }
+        catch (Exception)
+        {
+            throw new ArgumentException(ErrorMessages.InvalidKey);
         }
     }
 }

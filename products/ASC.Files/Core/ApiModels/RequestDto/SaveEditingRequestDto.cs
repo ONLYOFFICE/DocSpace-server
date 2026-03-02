@@ -34,31 +34,61 @@ public class SaveEditingRequestDto<T> : IModelWithFile
     /// <summary>
     /// The editing file ID from the request.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "fileId")]
     public required T FileId { get; set; }
 
     /// <summary>
     /// The editing file extension from the request.
     /// </summary>
+    /// <example>.txt</example>
     [FromForm(Name = "FileExtension")]
-    [SwaggerSchemaCustom(Example = ".txt")]
     public string FileExtension { get; set; }
 
     /// <summary>
     /// The URI to download the editing file.
     /// </summary>
-    [FromForm(Name = "DownloadUri")]
+    /// <example>https://example.com/file.txt</example>
     public string DownloadUri { get; set; }
 
     /// <summary>
-    /// The request file stream.
+    /// The edited file to be saved, uploaded as part of the multipart/form-data request.
+    /// This property represents the modified file content from the HTTP request form after editing operations.
+    /// The file is accessed via the IFormFile interface which provides access to the file name, content type, length, and stream.
     /// </summary>
+    /// <remarks>
+    /// When making a request, the edited file should be sent as form data with the field name "File" and content type set to multipart/form-data.
+    /// This is typically used in scenarios where a file has been edited (e.g., in an online editor) and needs to be saved back to the server.
+    /// Either this property or DownloadUri should be provided to save the edited file.
+    /// </remarks>
+    /// <example>
+    /// Example of saving an edited file using curl:
+    /// <code>
+    /// curl -X PUT "https://api.example.com/api/2.0/files/file/123/saveediting" \
+    ///   -H "Authorization: Bearer your_token" \
+    ///   -F "File=@/path/to/edited_document.docx" \
+    ///   -F "FileExtension=.docx" \
+    ///   -F "Forcesave=false"
+    /// </code>
+    ///
+    /// Example of saving an edited file using C# HttpClient:
+    /// <code>
+    /// using var content = new MultipartFormDataContent();
+    /// using var fileStream = File.OpenRead("edited_document.docx");
+    /// content.Add(new StreamContent(fileStream), "File", "edited_document.docx");
+    /// content.Add(new StringContent(".docx"), "FileExtension");
+    /// content.Add(new StringContent("false"), "Forcesave");
+    ///
+    /// var response = await httpClient.PutAsync(url, content);
+    /// </code>
+    /// </example>
     [FromForm(Name = "File")]
     public IFormFile File { get; set; }
 
     /// <summary>
     /// Specifies whether to force save the file or not.
     /// </summary>
+    /// <example>false</example>
     [FromForm(Name = "Forcesave")]
     public bool Forcesave { get; set; }
 }

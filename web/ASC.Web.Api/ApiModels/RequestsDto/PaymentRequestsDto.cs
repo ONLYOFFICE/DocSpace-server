@@ -29,17 +29,77 @@ namespace ASC.Web.Api.Models;
 /// <summary>
 /// The request parameters for the payment URL configuration with quantity information.
 /// </summary>
-public class PaymentUrlRequestsDto
+/// <example>
+/// {
+///   "backUrl": "https://example.com/payment/success",
+///   "quantity": {}
+/// }
+/// </example>
+public class PaymentUrlRequestDto
 {
     /// <summary>
     /// The URL where the user will be redirected after payment processing.
     /// </summary>
+    /// <example>https://example.com</example>
     public string BackUrl { get; set; }
 
     /// <summary>
     /// The payment quantity.
     /// </summary>
+    /// <example>{}</example>
     public Dictionary<string, int> Quantity { get; set; }
+}
+
+/// <summary>
+/// The request parameters for handling the payment redirect URL.
+/// </summary>
+public class PaymentAccountRequestDto
+{
+    /// <summary>
+    /// The URL where the user will be redirected after payment processing.
+    /// </summary>
+    /// <example>https://example.com</example>
+    [FromQuery(Name = "backUrl")]
+    public string BackUrl { get; set; }
+}
+
+/// <summary>
+/// The request parameters for managing the payment information.
+/// </summary>
+public class PaymentInformationRequestDto
+{
+    /// <summary>
+    /// Specifies whether to refresh the payment information cache or not.
+    /// </summary>
+    /// <example>true</example>
+    [FromQuery(Name = "refresh")]
+    public bool Refresh { get; set; }
+}
+
+/// <summary>
+/// The request parameters for getting the quotas.
+/// </summary>
+public class QuotasRequestDto
+{
+    /// <summary>
+    /// Specifies whether to return the wallet quotas only.
+    /// </summary>
+    /// <example>true</example>
+    [FromQuery(Name = "wallet")]
+    public bool Wallet { get; set; }
+}
+
+/// <summary>
+/// The request parameters for getting service quota.
+/// </summary>
+public class CustomerServiceQuotaRequestDto: PaymentInformationRequestDto
+{
+    /// <summary>
+    /// The service name.
+    /// </summary>
+    /// <example>aitools</example>
+    [FromQuery(Name = "serviceName")]
+    public string ServiceName { get; set; }
 }
 
 /// <summary>
@@ -50,6 +110,7 @@ public class QuantityRequestDto
     /// <summary>
     /// The mapping of item identifiers to their respective quantities in the payment.
     /// </summary>
+    /// <example>{}</example>
     public Dictionary<string, int> Quantity { get; set; }
 }
 
@@ -61,11 +122,13 @@ public class WalletQuantityRequestDto
     /// <summary>
     /// The mapping of item identifiers to their respective quantities in the payment.
     /// </summary>
+    /// <example>{}</example>
     public Dictionary<string, int?> Quantity { get; set; }
 
     /// <summary>
     /// The type of action performed on a product's quantity.
     /// </summary>
+    /// <example>0</example>
     public ProductQuantityType ProductQuantityType { get; set; }
 }
 
@@ -77,6 +140,7 @@ public class CheckoutSetupUrlRequestsDto
     /// <summary>
     /// The URL where the user will be redirected after completing the setup.
     /// </summary>
+    /// <example>https://example.com/setup/complete</example>
     [FromQuery]
     public string BackUrl { get; set; }
 }
@@ -89,13 +153,34 @@ public class TopUpDepositRequestDto
     /// <summary>
     /// The amount of money for the operation.
     /// </summary>
+    /// <example>1</example>
     [Range(1, 999999)]
     public int Amount { get; set; }
 
     /// <summary>
     /// The three-character ISO 4217 currency symbol.
     /// </summary>
+    /// <example>USD</example>
     public string Currency { get; set; }
+}
+
+/// <summary>
+/// The request parameters for buying wallet service.
+/// </summary>
+public class BuyWalletServiceRequestDto
+{
+    /// <summary>
+    /// Number of services provided.
+    /// </summary>
+    /// <example>1</example>
+    [Range(1, 999999)]
+    public int Quantity { get; set; }
+
+    /// <summary>
+    /// The service name.
+    /// </summary>
+    /// <example>aitools</example>
+    public string ServiceName { get; set; }
 }
 
 /// <summary>
@@ -106,6 +191,7 @@ public class GetWalletServiceRequestDto
     /// <summary>
     /// The wallet service type.
     /// </summary>
+    /// <example>Storage</example>
     [JsonConverter(typeof(JsonStringEnumConverter))]
     [FromQuery(Name = "service")]
     public required TenantWalletService Service { get; set; }
@@ -119,11 +205,26 @@ public class ChangeWalletServiceStateRequestDto
     /// <summary>
     /// The wallet service type.
     /// </summary>
+    /// <example>Storage</example>
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public TenantWalletService Service { get; set; }
 
     /// <summary>
     /// Specifies whether the wallet service is enabled.
     /// </summary>
+    /// <example>true</example>
     public bool Enabled { get; set; }
+}
+
+/// <summary>
+/// The request parameters for setting restricted AI models.
+/// </summary>
+public class SetRestrictedAiModelsRequestDto
+{
+    /// <summary>
+    /// The set of restricted AI model IDs.
+    /// </summary>
+    /// <example>["model1", "model2"]</example>
+    [Required]
+    public HashSet<string> Models { get; set; }
 }

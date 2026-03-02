@@ -34,11 +34,13 @@ public class NotificationSettingsDto
     /// <summary>
     /// The notification type.
     /// </summary>
+    /// <example>Badges</example>
     public NotificationType Type { get; set; }
 
     /// <summary>
     /// Specifies if the notification type is enabled or not.
     /// </summary>
+    /// <example>true</example>
     public bool IsEnabled { get; set; }
 }
 

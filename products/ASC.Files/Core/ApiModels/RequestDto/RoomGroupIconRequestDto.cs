@@ -34,12 +34,14 @@ public class RoomGroupIconRequestDto
     /// <summary>
     /// Group id
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "id")]
     public required int Id { get; set; }
 
     /// <summary>
     /// Icon update data.
     /// </summary>
+    /// <example>{"icon": "https://example.com/image.png"}</example>
     [FromBody]
     public IconRequest Update { get; set; }
 }
@@ -49,5 +51,6 @@ public class IconRequest
     /// <summary>
     /// Group icon
     /// </summary>
+    /// <example>https://example.com/image.png</example>
     public string Icon { get; set; }
 }

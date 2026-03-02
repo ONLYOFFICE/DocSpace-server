@@ -34,6 +34,7 @@ public class GetMessagesRequestDto : PaginatedRequestDto
     /// <summary>
     /// The unique identifier of the AI chat session whose messages are to be listed.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "chatId")]
     public Guid ChatId { get; set; }
 }

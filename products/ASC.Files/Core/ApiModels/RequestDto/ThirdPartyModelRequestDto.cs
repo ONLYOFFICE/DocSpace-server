@@ -34,36 +34,43 @@ public class ThirdPartyRequestDto
     /// <summary>
     /// The connection URL for the sharepoint.
     /// </summary>
+    /// <example>https://example.com</example>
     public string Url { get; set; }
 
     /// <summary>
     /// The third-party request login.
     /// </summary>
+    /// <example>admin</example>
     public string Login { get; set; }
 
     /// <summary>
     /// The third-party request password.
     /// </summary>
+    /// <example>password123</example>
     public string Password { get; set; }
 
     /// <summary>
     /// The authentication token.
     /// </summary>
+    /// <example>abc123</example>
     public string Token { get; set; }
 
     /// <summary>
-    /// The customer title. 
+    /// The customer title.
     /// </summary>
+    /// <example>My Document</example>
     public required string CustomerTitle { get; set; }
 
     /// <summary>
     /// The provider key.
     /// </summary>
+    /// <example>abc123</example>
     public required string ProviderKey { get; set; }
 
     /// <summary>
     /// The provider ID.
     /// </summary>
+    /// <example>1</example>
     [JsonConverter(typeof(ProviderIdConverter))]
     public int? ProviderId { get; set; }
 }

@@ -34,6 +34,7 @@ public class LinkAccountRequestDto
     /// <summary>
     /// The third-party profile in the serialized format.
     /// </summary>
+    /// <example>{"provider":"Google","id":"123456"}</example>
     public string SerializedProfile { get; set; }
 }
 
@@ -45,41 +46,24 @@ public class SignupAccountRequestDto
     /// <summary>
     /// The user type.
     /// </summary>
+    /// <example>1</example>
     public EmployeeType? EmployeeType { get; set; }
-
-    /// <summary>
-    /// The user first name.
-    /// </summary>
-    public string FirstName { get; set; }
-
-    /// <summary>
-    /// The user last name.
-    /// </summary>
-    public string LastName { get; set; }
-
-    /// <summary>
-    /// The user email address.
-    /// </summary>
-    [EmailAddress]
-    public string Email { get; set; }
-
-    /// <summary>
-    /// The user password hash.
-    /// </summary>
-    public string PasswordHash { get; set; }
 
     /// <summary>
     /// The user link key.
     /// </summary>
+    /// <example>invite_key_123456</example>
     public required string Key { get; set; }
 
     /// <summary>
     /// The user culture code.
     /// </summary>
+    /// <example>en-US</example>
     public string Culture { get; set; }
 
     /// <summary>
     /// The third-party profile in the serialized format
     /// </summary>
+    /// <example>{"provider":"Google","id":"123456"}</example>
     public required string SerializedProfile { get; set; }
 }

@@ -38,12 +38,13 @@ public sealed class ApiDateTime : IComparable<ApiDateTime>, IComparable
     /// <summary>
     /// The time in UTC format.
     /// </summary>
+    /// <example>2018-01-01T00:00:00.0000000Z</example>
     public DateTime UtcTime { get; private set; }
 
     /// <summary>
     /// The time zone offset.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "00:00:00")]
+    /// <example>00:00:00</example>
     public TimeSpan TimeZoneOffset { get; private set; }
 
     internal static readonly string[] Formats =

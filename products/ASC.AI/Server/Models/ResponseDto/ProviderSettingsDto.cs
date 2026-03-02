@@ -36,11 +36,13 @@ public class ProviderSettingsDto
     /// <summary>
     /// AI provider type identifier.
     /// </summary>
+    /// <example>0</example>
     public ProviderType Type { get; init; }
 
     /// <summary>
     /// Default API endpoint URL for the provider type.
     /// </summary>
+    /// <example>https://api.openai.com/v1</example>
     public required string Url { get; init; }
 }
 

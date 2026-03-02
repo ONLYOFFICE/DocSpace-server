@@ -34,10 +34,12 @@ public class UploadPhotoRequestDto
     /// <summary>
     /// The list of the files.
     /// </summary>
+    /// <example>[{"fileName": "photo.jpg"}]</example>
     public List<IFormFile> Files { get; set; }
 
     /// <summary>
     /// Specifies whether to autosave a photo or not.
     /// </summary>
+    /// <example>true</example>
     public bool Autosave { get; set; }
 }

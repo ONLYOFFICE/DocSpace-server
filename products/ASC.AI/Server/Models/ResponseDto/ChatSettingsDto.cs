@@ -26,8 +26,20 @@
 
 namespace ASC.AI.Models.ResponseDto;
 
+/// <summary>
+/// The chat settings parameters.
+/// </summary>
 public class ChatSettingsDto
 {
+    /// <summary>
+    /// The AI provider ID.
+    /// </summary>
+    /// <example>1</example>
     public int ProviderId { get; set; }
+
+    /// <summary>
+    /// The AI model ID used for chat completions.
+    /// </summary>
+    /// <example>gpt-4o</example>
     public required string ModelId { get; set; }
 }

@@ -34,12 +34,14 @@ public class StartNewChatRequestDto
     /// <summary>
     /// The identifier of the room in which to create the new AI chat session.
     /// </summary>
+    /// <example>42</example>
     [FromRoute(Name = "roomId")]
     public required int RoomId { get; set; }
 
     /// <summary>
     /// The initial message and optional file attachments.
     /// </summary>
+    /// <example>{"message": "Hello, can you help me with this document?", "contextFolderId": 123}</example>
     [FromBody]
     public required StartNewChatBody Body { get; set; }
 }
@@ -52,10 +54,16 @@ public class StartNewChatBody
     /// <summary>
     /// The initial user message to send to the AI assistant.
     /// </summary>
+    /// <example>Hello, can you help me with this document?</example>
     public required string Message { get; set; }
 
     /// <summary>
     /// The optional collection of file identifiers to attach as context for the AI model.
     /// </summary>
+    /// <example>123</example>
+    public int? ContextFolderId { get; set; }
+
+    /// <summary>The list of attached files.</summary>
+    /// <example>[{"id": 1, "type": "file"}]</example>
     public IEnumerable<JsonElement>? Files { get; set; }
 }

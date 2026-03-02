@@ -34,6 +34,7 @@ public class GetChatRequestDto
     /// <summary>
     /// The unique identifier of the AI chat session to retrieve.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "chatId")]
     public Guid ChatId { get; init; }
 }

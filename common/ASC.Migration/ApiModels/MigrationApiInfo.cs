@@ -35,18 +35,21 @@ public class MigrationApiInfo
     /// <summary>
     /// The migrator name.
     /// </summary>
+    /// <example>Nextcloud</example>
     [ProtoMember(1)]
     public string MigratorName { get; set; }
 
     /// <summary>
     /// The migration operation.
     /// </summary>
+    /// <example>parse</example>
     [ProtoMember(2)]
     public string Operation { get; set; }
 
     /// <summary>
     /// The list of failed archives.
     /// </summary>
+    /// <example>["archive1.zip", "archive2.zip"]</example>
     [ProtoMember(3)]
     public List<string> FailedArchives { get; set; } = [];
 
@@ -77,60 +80,70 @@ public class MigrationApiInfo
     /// <summary>
     /// Specifies whether to import personal files or not.
     /// </summary>
+    /// <example>true</example>
     [ProtoMember(8)]
     public bool ImportPersonalFiles { get; set; }
 
     /// <summary>
     /// Specifies whether to import shared files or not.
     /// </summary>
+    /// <example>true</example>
     [ProtoMember(9)]
     public bool ImportSharedFiles { get; set; }
 
     /// <summary>
     /// Specifies whether to import shared folders or not.
     /// </summary>
+    /// <example>true</example>
     [ProtoMember(10)]
     public bool ImportSharedFolders { get; set; }
 
     /// <summary>
     /// Specifies whether to import common files or not.
     /// </summary>
+    /// <example>true</example>
     [ProtoMember(11)]
     public bool ImportCommonFiles { get; set; }
 
     /// <summary>
     /// Specifies whether to import project files or not.
     /// </summary>
+    /// <example>false</example>
     [ProtoMember(12)]
     public bool ImportProjectFiles { get; set; }
 
     /// <summary>
     /// Specifies whether to import groups or not.
     /// </summary>
+    /// <example>true</example>
     [ProtoMember(13)]
     public bool ImportGroups { get; set; }
 
     /// <summary>
     /// The number of successfully migrated users.
     /// </summary>
+    /// <example>50</example>
     [ProtoMember(14)]
     public int SuccessedUsers { get; set; }
 
     /// <summary>
     /// The number of unsuccessfully migrated users.
     /// </summary>
+    /// <example>2</example>
     [ProtoMember(15)]
     public int FailedUsers { get; set; }
 
     /// <summary>
     /// The list of migrated files.
     /// </summary>
+    /// <example>["document.docx", "spreadsheet.xlsx"]</example>
     [ProtoMember(16)]
     public List<string> Files { get; set; }
 
     /// <summary>
     /// The list of migration errors.
     /// </summary>
+    /// <example>["User not found", "File access denied"]</example>
     [ProtoMember(17)]
     public List<string> Errors { get; set; }
 }

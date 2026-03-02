@@ -29,17 +29,25 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 /// <summary>
 /// The visit statistics request parameters.
 /// </summary>
+/// <example>
+/// {
+///   "fromDate": "2024-01-15T10:30:00Z",
+///   "toDate": "2024-01-15T10:30:00Z"
+/// }
+/// </example>
 public class VisitStatisticsRequestDto
 {
     /// <summary>
     /// The start date of the statistics period (inclusive).
     /// </summary>
+    /// <example>2024-01-15T10:30:00Z</example>
     [FromQuery(Name = "fromDate")]
     public ApiDateTime FromDate { get; set; }
 
     /// <summary>
     /// The end date of the statistics period (inclusive).
     /// </summary>
+    /// <example>2024-01-15T10:30:00Z</example>
     [FromQuery(Name = "toDate")]
     public ApiDateTime ToDate { get; set; }
 }

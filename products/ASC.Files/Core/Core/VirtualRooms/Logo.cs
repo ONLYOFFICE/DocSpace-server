@@ -34,31 +34,37 @@ public class Logo
     /// <summary>
     /// The original logo.
     /// </summary>
+    /// <example>https://portal.example.com/logo/original.png</example>
     public required string Original { get; set; }
 
     /// <summary>
     /// The large logo.
     /// </summary>
+    /// <example>https://portal.example.com/logo/large.png</example>
     public required string Large { get; set; }
 
     /// <summary>
     /// The medium logo.
     /// </summary>
+    /// <example>https://portal.example.com/logo/medium.png</example>
     public required string Medium { get; set; }
 
     /// <summary>
     /// The small logo.
     /// </summary>
+    /// <example>https://portal.example.com/logo/small.png</example>
     public required string Small { get; set; }
 
     /// <summary>
     /// The logo color.
     /// </summary>
+    /// <example>#4781D1</example>
     public string Color { get; set; }
 
     /// <summary>
     /// The logo cover.
     /// </summary>
+    /// <example>{"id": "default_cover", "data": "base64-image-data..."}</example>
     public LogoCover Cover { get; set; }
 
     public bool IsDefault()
@@ -75,11 +81,13 @@ public class LogoCover
     /// <summary>
     /// The logo cover ID.
     /// </summary>
+    /// <example>default_cover</example>
     public required string Id { get; set; }
 
     /// <summary>
     /// The logo cover data.
     /// </summary>
+    /// <example>base64-image-data...</example>
     public required string Data { get; set; }
 }
 
@@ -88,10 +96,18 @@ public class MultiSizeLogoCover
     /// <summary>
     /// The logo cover ID.
     /// </summary>
+    /// <example>default_cover</example>
     public required string Id { get; set; }
 
     /// <summary>
     /// The logo cover data.
     /// </summary>
+    /// <example>
+    /// {
+    ///   "small": "base64...",
+    ///   "medium": "base64...",
+    ///   "large": "base64..."
+    /// }
+    /// </example>
     public required IReadOnlyDictionary<string, string> Data { get; init; }
 }

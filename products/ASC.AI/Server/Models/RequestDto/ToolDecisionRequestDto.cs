@@ -36,12 +36,14 @@ public class ToolDecisionRequestDto
     /// <summary>
     /// The unique identifier of the pending tool execution call awaiting a permission decision.
     /// </summary>
+    /// <example>call_abc123</example>
     [FromRoute(Name = "callId")]
     public required string CallId { get; init; }
 
     /// <summary>
     /// The permission decision parameters.
     /// </summary>
+    /// <example>{"decision": 1}</example>
     [FromBody]
     public required ToolDecisionRequestBody Body { get; init; }
 }
@@ -54,5 +56,6 @@ public class ToolDecisionRequestBody
     /// <summary>
     /// The user's permission decision for the tool execution request: Allow, AlwaysAllow, or Deny.
     /// </summary>
+    /// <example>1</example>
     public ToolExecutionDecision Decision { get; init; }
 }

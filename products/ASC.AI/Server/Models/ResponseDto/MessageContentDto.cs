@@ -24,30 +24,39 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.ComponentModel;
+
 namespace ASC.AI.Models.ResponseDto;
 
 /// <summary>
 /// The type of content block within a chat message.
 /// </summary>
+
 public enum MessageContentType
 {
     /// <summary>
     /// A plain text content block.
     /// </summary>
+    [Description("Text")]
     Text,
 
     /// <summary>
     /// A tool invocation and its result.
     /// </summary>
+    [Description("Tool")]
     Tool,
 
     /// <summary>
     /// A file attachment reference.
     /// </summary>
+    [Description("Attachment")]
     Attachment,
     Data
 }
 
+/// <summary>
+/// The base class for message content blocks.
+/// </summary>
 [JsonDerivedType(typeof(TextContentDto))]
 [JsonDerivedType(typeof(ToolContentDto))]
 [JsonDerivedType(typeof(AttachmentContentDto))]
@@ -57,5 +66,6 @@ public abstract class MessageContentDto
     /// <summary>
     /// The discriminator that indicates the kind of content block: Text, Tool, or Attachment.
     /// </summary>
+    /// <example>0</example>
     public abstract MessageContentType Type { get; }
 }
