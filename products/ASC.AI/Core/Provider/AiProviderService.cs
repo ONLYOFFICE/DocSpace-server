@@ -31,7 +31,7 @@ public class AiProviderService(
     IAiProviderDao providerDao,
     TenantManager tenantManager,
     AuthContext authContext,
-    ProviderSettings providerSettings,
+    AiConfiguration aiConfiguration,
     UserManager userManager,
     IDistributedLockProvider distributedLockProvider,
     ModelClientFactory modelClientFactory,
@@ -41,7 +41,7 @@ public class AiProviderService(
     {
         await ThrowIfNotAccessAsync();
 
-        var settings = providerSettings.Get(type);
+        var settings = aiConfiguration.Get(type);
         if (settings == null)
         {
             throw new ArgumentException(ErrorMessages.IncorrectProvider);
@@ -153,7 +153,7 @@ public class AiProviderService(
     {
         await ThrowIfNotAccessAsync();
         
-        return providerSettings.GetAvailableProviders()
+        return aiConfiguration.GetAvailableProviders()
             .Where(x => x.Type != ProviderType.PortalAi)
             .ToList();
     }
@@ -241,7 +241,7 @@ public class AiProviderService(
 
         async Task<string?> GetFirstAvailableModelAsync(AiProvider provider)
         {
-            var supportedModels = providerSettings.GetSupportedModels(provider.Type);
+            var supportedModels = aiConfiguration.GetSupportedModels(provider.Type);
             if (supportedModels is { Count: > 0 })
             {
                 return supportedModels.First();
@@ -264,7 +264,7 @@ public class AiProviderService(
     {
         var models = await client.ListModelsAsync(scope);
 
-        var supported = providerSettings.GetSupportedModels(type);
+        var supported = aiConfiguration.GetSupportedModels(type);
         if (supported != null)
         {
             models = models.Where(m => supported.Contains(m.Id));

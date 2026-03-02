@@ -53,7 +53,8 @@ public class FileSecurity(
     VectorizationGlobalSettings vectorizationGlobalSettings,
     VectorizationHelper vectorizationHelper,
     AiAccessibility aiAccessibility,
-    IServiceProvider serviceProvider)
+    IServiceProvider serviceProvider,
+    AiConfiguration aiConfiguration)
     : IFileSecurity
 {
     public readonly FileShare DefaultMyShare = FileShare.Restrict;
@@ -1145,11 +1146,22 @@ public class FileSecurity(
                 return false;
             }
 
-            if (file.FilterType != FilterType.ImagesOnly &&
-                (file.ContentLength > vectorizationGlobalSettings.MaxContentLength ||
-                 !vectorizationGlobalSettings.IsSupportedContentExtraction(file.Title)))
+            if (file.FilterType == FilterType.ImagesOnly && file.ContentLength > aiConfiguration.MaxImageSize)
             {
                 return false;
+            }
+
+            if (file.FilterType != FilterType.ImagesOnly)
+            {
+                if (file.ContentLength > vectorizationGlobalSettings.MaxContentLength)
+                {
+                    return false;
+                }
+
+                if (!vectorizationGlobalSettings.IsSupportedContentExtraction(file.Title))
+                {
+                    return false;
+                }
             }
         }
 

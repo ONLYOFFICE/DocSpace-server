@@ -42,7 +42,7 @@ public class AttachmentHandler(
     FileSecurity fileSecurity,
     ITextExtractor textExtractor,
     VectorizationGlobalSettings vectorizationGlobalSettings,
-    ProviderSettings providerSettings,
+    AiConfiguration aiConfiguration,
     DataContentLoader dataContentLoader,
     IConfiguration configuration,
     ILogger<AttachmentHandler> logger)
@@ -55,7 +55,7 @@ public class AttachmentHandler(
         IEnumerable<int> filesIds,
         IEnumerable<string> thirdPartyFilesIds)
     {
-        var modelSettings = providerSettings.GetModel(context.ClientOptions.Provider, context.ClientOptions.ModelId);
+        var modelSettings = aiConfiguration.GetModel(context.ClientOptions.Provider, context.ClientOptions.ModelId);
         ArgumentNullException.ThrowIfNull(modelSettings);
 
         var count = 0;
@@ -130,7 +130,7 @@ public class AttachmentHandler(
                     continue;
                 }
 
-                if (multimodal.Image.MaxSize > 0 && file.ContentLength > multimodal.Image.MaxSize)
+                if (aiConfiguration.MaxImageSize > 0 && file.ContentLength > aiConfiguration.MaxImageSize)
                 {
                     continue;
                 }

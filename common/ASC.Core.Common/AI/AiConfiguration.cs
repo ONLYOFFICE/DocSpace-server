@@ -30,17 +30,22 @@ using ASC.Core.Common.EF.Model.Ai;
 namespace ASC.Core.Common.AI;
 
 [Singleton]
-public class ProviderSettings
+public class AiConfiguration
 {
+    public int MaxImageSize { get; private set; }
+    
     private readonly FrozenDictionary<ProviderType, ProviderSettingsData> _settings;
     private readonly FrozenDictionary<(ProviderType, string), ModelSettings> _modelsByProvider;
     private readonly FrozenDictionary<string, MultimodalSettings> _multimodalByModelId;
     private readonly FrozenDictionary<string, string> _aliasByModelId;
 
-    public ProviderSettings(IConfiguration configuration, CoreBaseSettings coreBaseSettings)
+    public AiConfiguration(IConfiguration configuration, CoreBaseSettings coreBaseSettings)
     {
-        var section = configuration.GetSection("ai:providers");
-        var providers = section.Get<List<ProviderSettingsData>>() ?? [];
+        var section = configuration.GetSection("ai");
+        var providers = section.GetSection("providers").Get<List<ProviderSettingsData>>() ?? [];
+        var maxImgSize = section.GetSection("maxImageSize").Get<int>();
+        
+        MaxImageSize = maxImgSize > 0 ? maxImgSize : 0;
 
         _settings = coreBaseSettings.Standalone
             ? providers.ToFrozenDictionary(p => p.Type)

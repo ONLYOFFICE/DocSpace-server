@@ -239,7 +239,7 @@ public class FolderDtoHelper(
     IUrlShortener urlShortener,
     EntryStatusManager entryStatusManager,
     AiAccessibility accessibility,
-    ProviderSettings providerSettings)
+    AiConfiguration aiConfiguration)
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, urlShortener)
 {
     private readonly EmployeeDtoHelper _employeeWrapperHelper = employeeWrapperHelper;
@@ -395,16 +395,15 @@ public class FolderDtoHelper(
 
             if (modelId != null)
             {
-                modelAlias = providerSettings.GetModelAlias(modelId);
-                var multimodalSettings = providerSettings.GetMultimodalSettings(modelId);
+                modelAlias = aiConfiguration.GetModelAlias(modelId);
+                var multimodalSettings = aiConfiguration.GetMultimodalSettings(modelId);
                 if (multimodalSettings?.Image != null)
                 {
                     multimodal = new ChatMultimodalSettingsDto
                     {
                         Image = new ChatImageMultimodalSettingsDto
                         {
-                            Formats = multimodalSettings.Image.Formats,
-                            MaxSize = multimodalSettings.Image.MaxSize
+                            Formats = multimodalSettings.Image.Formats
                         }
                     };
                 }

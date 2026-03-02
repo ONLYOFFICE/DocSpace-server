@@ -31,7 +31,7 @@ public class AiSettingsStore(
     SettingsManager settingsManager,
     InstanceCrypto instanceCrypto,
     TenantManager tenantManager,
-    ProviderSettings providerSettings)
+    AiConfiguration aiConfiguration)
 {
     public async Task SetWebSearchSettingsAsync(WebSearchSettings webSearchSettings)
     {
@@ -147,6 +147,6 @@ public class AiSettingsStore(
 
     public IReadOnlyDictionary<string, string> GetModelAliases()
     {
-        return providerSettings.GetModelAliases();
+        return aiConfiguration.GetModelAliases();
     }
 }
