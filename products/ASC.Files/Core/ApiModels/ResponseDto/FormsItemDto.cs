@@ -29,4 +29,8 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 /// <summary>
 /// The forms item information.
 /// </summary>
+/// <param name="Key">The form item key.
+/// <example>field_name</example></param>
+/// <param name="Type">The form item type.
+/// <example>text</example></param>
 public record FormsItemDto(string Key, string Type);

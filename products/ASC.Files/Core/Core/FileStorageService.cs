@@ -1643,7 +1643,7 @@ public class FileStorageService //: IFileStorageService
 
                 var counter = 0;
 
-                if (!string.IsNullOrWhiteSpace(docTemplate.ThumbnailPath))
+                if (!string.IsNullOrWhiteSpace(docTemplate?.ThumbnailPath))
                 {
                     foreach (var size in thumbnailSettings.Sizes)
                     {

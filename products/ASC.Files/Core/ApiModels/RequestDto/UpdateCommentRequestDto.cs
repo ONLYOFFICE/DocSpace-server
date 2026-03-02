@@ -34,11 +34,13 @@ public class UpdateComment
     /// <summary>
     /// The comment version.
     /// </summary>
+    /// <example>1</example>
     public required int Version { get; set; }
 
     /// <summary>
     /// The comment text.
     /// </summary>
+    /// <example>This is a comment</example>
     public string Comment { get; set; }
 }
 
@@ -50,6 +52,7 @@ public class UpdateCommentRequestDto<T>
     /// <summary>
     /// The file ID where the comment is located.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "fileId")]
     public required T FileId { get; set; }
 

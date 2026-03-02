@@ -34,6 +34,7 @@ public class GetVectorizationTaskRequestDto
     /// <summary>
     /// The unique identifier of the vectorization task to retrieve.
     /// </summary>
+    /// <example>task_abc123</example>
     [FromRoute(Name = "id")]
     public required string Id { get; init; }
 }

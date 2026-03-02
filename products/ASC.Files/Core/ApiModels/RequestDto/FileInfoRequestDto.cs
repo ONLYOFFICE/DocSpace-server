@@ -34,12 +34,14 @@ public class FileInfoRequestDto<T>
     /// <summary>
     /// The file ID.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "fileId")]
     public required T FileId { get; set; }
 
     /// <summary>
     /// The file version.
     /// </summary>
+    /// <example>1</example>
     [FromQuery(Name = "version")]
     public int Version { get; set; } = -1;
 }

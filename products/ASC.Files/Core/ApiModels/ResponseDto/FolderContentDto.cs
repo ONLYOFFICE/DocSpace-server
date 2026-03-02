@@ -34,45 +34,49 @@ public class FolderContentDto<T>
     /// <summary>
     /// The list of files in the folder.
     /// </summary>
+    /// <example>[{"id": 10, "title": "document.docx"}]</example>
     public List<FileEntryBaseDto> Files { get; set; }
 
     /// <summary>
-    /// The list of folders in the folder. 
+    /// The list of folders in the folder.
     /// </summary>
+    /// <example>[{"id": 20, "title": "My Folder"}]</example>
     public List<FileEntryBaseDto> Folders { get; set; }
 
     /// <summary>
     /// The current folder information.
     /// </summary>
+    /// <example>{"id": 10, "title": "My Documents"}</example>
     public FolderDto<T> Current { get; set; }
 
     /// <summary>
     /// The folder path.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "{key = \"Key\", path = \"//path//to//folder\"}")]
+    /// <example>{key = "Key", path = "//path//to//folder"}</example>
     public required object PathParts { get; set; }
 
     /// <summary>
     /// The folder start index.
     /// </summary>
-    [SwaggerSchemaCustom(Example = 0)]
+    /// <example>0</example>
     public int StartIndex { get; set; }
 
     /// <summary>
     /// The number of folder elements.
     /// </summary>
-    [SwaggerSchemaCustom(Example = 4)]
+    /// <example>4</example>
     public int Count { get; set; }
 
     /// <summary>
     /// The total number of elements in the folder.
     /// </summary>
-    [SwaggerSchemaCustom(Example = 4)]
+    /// <example>4</example>
     public required int Total { get; set; }
 
     /// <summary>
     /// The new element index in the folder.
     /// </summary>
+    /// <example>0</example>
     public int New { get; set; }
 }
 

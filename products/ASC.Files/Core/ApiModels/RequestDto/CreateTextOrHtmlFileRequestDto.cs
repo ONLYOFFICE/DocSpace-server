@@ -34,17 +34,20 @@ public class CreateTextOrHtmlFile
     /// <summary>
     /// The file title for text or HTML file.
     /// </summary>
+    /// <example>Document.txt</example>
     [StringLength(165)]
     public required string Title { get; set; }
 
     /// <summary>
     /// The text or HTML file contents.
     /// </summary>
+    /// <example>This is the file content</example>
     public string Content { get; set; }
 
     /// <summary>
     /// Specifies whether to create a new text or HTML file if it exists or not.
     /// </summary>
+    /// <example>false</example>
     public bool CreateNewIfExist { get; set; }
 }
 
@@ -56,12 +59,14 @@ public class CreateTextOrHtmlFileRequestDto<T>
     /// <summary>
     /// The folder ID to create the text or HTML file.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "folderId")]
     public required T FolderId { get; set; }
 
     /// <summary>
     /// The parameters for creating an HTML or text file.
     /// </summary>
+    /// <example>{"title": "Document.txt", "content": "This is the file content", "createNewIfExist": false}</example>
     [FromBody]
     public required CreateTextOrHtmlFile File { get; set; }
 }

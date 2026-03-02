@@ -34,6 +34,7 @@ namespace ASC.Files.Core.ApiModels.ResponseDto
         /// <summary>
         /// Default templates list.
         /// </summary>
+        /// <example>[{"extension": ".docx", "title": "Blank Document"}]</example>
         public required IEnumerable<DefaultTemplateItemDto> Items { get; set; }
     }
 
@@ -45,30 +46,36 @@ namespace ASC.Files.Core.ApiModels.ResponseDto
         /// <summary>
         /// File id to use as a default template
         /// </summary>
+        /// <example>123</example>
         public int? SelectedFile { get; set; }
         /// <summary>
         /// Extension of a default template
         /// </summary>
+        /// <example>.docx</example>
         public required string FileExtension { get; set; }
 
         /// <summary>
         /// Title of a default template
         /// </summary>
+        /// <example>Default Template</example>
         public string FileTitle { get; set; }
 
         /// <summary>
         /// Last modified date of a default template
         /// </summary>
+        /// <example>2025-01-01T00:00:00</example>
         public DateTime? LastModified { get; set; }
 
         /// <summary>
         /// Filesize (in bytes) of a default template
         /// </summary>
+        /// <example>1024</example>
         public long? FileSize { get; set; }
 
         /// <summary>
         /// View url of a default template
         /// </summary>
+        /// <example>http://localhost/template/view</example>
         public string ViewUrl { get; set; }
     }
 }

@@ -34,20 +34,24 @@ public class CreateProviderRequestDto
     /// <summary>
     /// The AI provider type (e.g., OpenAi, Anthropic, GoogleAi, DeepSeek, OpenRouter, TogetherAi, XAi, OpenAiCompatible).
     /// </summary>
+    /// <example>1</example>
     public ProviderType Type { get; set; }
 
     /// <summary>
     /// The display title for the AI provider.
     /// </summary>
+    /// <example>OpenAI Provider</example>
     public required string Title { get; set; }
 
     /// <summary>
     /// The API endpoint URL for the AI provider. Required for OpenAiCompatible type; optional for other types that have default URLs.
     /// </summary>
+    /// <example>https://api.openai.com/v1</example>
     public string? Url { get; set; }
 
     /// <summary>
     /// The authentication API key for the AI provider.
     /// </summary>
+    /// <example>sk-example-key-123</example>
     public required string Key { get; set; }
 }

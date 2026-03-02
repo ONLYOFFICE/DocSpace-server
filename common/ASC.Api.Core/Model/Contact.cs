@@ -34,13 +34,13 @@ public class Contact
     /// <summary>
     /// The contact type.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "GTalk")]
+    /// <example>GTalk</example>
     public string Type { get; set; }
 
     /// <summary>
     /// The contact value.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "my@gmail.com")]
+    /// <example>my@gmail.com</example>
     public string Value { get; set; }
 
     //For binder

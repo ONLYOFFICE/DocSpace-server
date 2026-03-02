@@ -34,31 +34,37 @@ public class RoomGroupDto
     /// <summary>
     /// The group ID.
     /// </summary>
+    /// <example>1</example>
     public int Id { get; set; }
 
     /// <summary>
     /// Group name
     /// </summary>
+    /// <example>My Group</example>
     public string Name { get; set; }
 
     /// <summary>
     /// Group icon
     /// </summary>
+    /// <example>{"id":"1","data":{"url":"/temp/logo.png","width":100,"height":100}}</example>
     public MultiSizeLogoCover Icon { get; set; }
 
     /// <summary>
     /// The user ID.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     public Guid UserId { get; set; }
 
     /// <summary>
     /// The list of rooms in the group. 
     /// </summary>
+    /// <example>[{"id":1,"title":"Room 1"},{"id":2,"title":"Room 2"}]</example>
     public List<FileEntryBaseDto> Rooms { get; set; }
 
     /// <summary>
     /// Total number of rooms in the group.
     /// </summary>
+    /// <example>2</example>
     public int TotalRooms { get; set; }
 }
 

@@ -34,6 +34,7 @@ public abstract class FileOperationRequestBaseDto
     /// <summary>
     /// Specifies whether to return only the current operation
     /// </summary>
+    /// <example>false</example>
     public bool ReturnSingleOperation { get; set; }
 }
 
@@ -45,11 +46,13 @@ public class BaseBatchRequestDto : FileOperationRequestBaseDto
     /// <summary>
     /// The list of folder IDs of the base batch request.
     /// </summary>
+    /// <example>[1, 2, 3]</example>
     public List<JsonElement> FolderIds { get; set; } = [];
 
     /// <summary>
     /// The list of file IDs of the base batch request.
     /// </summary>
+    /// <example>[1, 2, 3]</example>
     public List<JsonElement> FileIds { get; set; } = [];
 }
 
@@ -61,16 +64,19 @@ public class DownloadRequestDto : FileOperationRequestBaseDto
     /// <summary>
     /// The list of folder IDs to be downloaded.
     /// </summary>
+    /// <example>[1, 2, 3]</example>
     public List<JsonElement> FolderIds { get; set; } = [];
 
     /// <summary>
     /// The list of file IDs to be downloaded.
     /// </summary>
+    /// <example>[1, 2, 3]</example>
     public List<JsonElement> FileIds { get; set; } = [];
 
     /// <summary>
     /// The list of file IDs which will be converted.
     /// </summary>
+    /// <example>[{"key": "1", "value": "pdf", "password": "password123"}]</example>
     public List<DownloadRequestItemDto> FileConvertIds { get; set; } = [];
 }
 
@@ -82,16 +88,19 @@ public class DownloadRequestItemDto
     /// <summary>
     /// The unique identifier or reference key for the file to be downloaded.
     /// </summary>
+    /// <example>1</example>
     public required JsonElement Key { get; init; }
 
     /// <summary>
     /// The target format or conversion type for the file download.
     /// </summary>
+    /// <example>pdf</example>
     public required string Value { get; init; }
 
     /// <summary>
     /// The optional password for accessing protected files.
     /// </summary>
+    /// <example>password123</example>
     public string Password { get; init; }
 }
 
@@ -103,21 +112,25 @@ public class DeleteBatchRequestDto : FileOperationRequestBaseDto
     /// <summary>
     /// The list of folder IDs to be deleted.
     /// </summary>
+    /// <example>[1, 2, 3]</example>
     public List<JsonElement> FolderIds { get; set; } = [];
 
     /// <summary>
     /// The list of file IDs to be deleted.
     /// </summary>
+    /// <example>[1, 2, 3]</example>
     public List<JsonElement> FileIds { get; set; } = [];
 
     /// <summary>
     /// Specifies whether to delete a file after the editing session is finished or not
     /// </summary>
+    /// <example>false</example>
     public bool DeleteAfter { get; set; }
 
     /// <summary>
     /// Specifies whether to move a file to the \"Trash\" folder or delete it immediately.
     /// </summary>
+    /// <example>false</example>
     public bool Immediately { get; set; }
 }
 
@@ -129,16 +142,19 @@ public class DeleteVersionBatchRequestDto : FileOperationRequestBaseDto
     /// <summary>
     /// Specifies whether to delete a file after the editing session is finished or not.
     /// </summary>
+    /// <example>false</example>
     public bool DeleteAfter { get; set; }
 
     /// <summary>
     /// The file ID to delete.
     /// </summary>
+    /// <example>1</example>
     public required int FileId { get; set; }
 
     /// <summary>
     /// The collection of file versions to be deleted.
     /// </summary>
+    /// <example>[1, 2, 3]</example>
     public required List<int> Versions { get; set; } = [];
 }
 
@@ -150,11 +166,13 @@ public class Delete
     /// <summary>
     /// Specifies whether to delete a file after the editing session is finished or not.
     /// </summary>
+    /// <example>false</example>
     public bool DeleteAfter { get; set; }
 
     /// <summary>
     /// Specifies whether to move a file to the \"Trash\" folder or delete it immediately.
     /// </summary>
+    /// <example>false</example>
     public bool Immediately { get; set; }
 }
 
@@ -166,12 +184,14 @@ public class DeleteRequestDto<T>
     /// <summary>
     /// The file ID to delete.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "fileId")]
     public required T FileId { get; set; }
 
     /// <summary>
     /// The parameters for deleting a file.
     /// </summary>
+    /// <example>{"deleteAfter": false, "immediately": false}</example>
     [FromBody]
     public required Delete File { get; set; }
 }
@@ -184,36 +204,43 @@ public class BatchRequestDto : FileOperationRequestBaseDto
     /// <summary>
     /// The list of folder IDs to be copied/moved.
     /// </summary>
+    /// <example>[1, 2, 3]</example>
     public List<JsonElement> FolderIds { get; set; } = [];
 
     /// <summary>
     /// The list of file IDs to be copied/moved.
     /// </summary>
+    /// <example>[1, 2, 3]</example>
     public List<JsonElement> FileIds { get; set; } = [];
 
     /// <summary>
     /// The destination folder ID.
     /// </summary>
+    /// <example>1</example>
     public JsonElement DestFolderId { get; set; }
 
     /// <summary>
     /// The overwriting behavior of the file copying or moving.
     /// </summary>
+    /// <example>0</example>
     public FileConflictResolveType ConflictResolveType { get; set; }
 
     /// <summary>
     /// Specifies whether to delete the source files/folders after they are moved or copied to the destination folder.
     /// </summary>
+    /// <example>false</example>
     public bool DeleteAfter { get; set; }
 
     /// <summary>
     ///  Specifies whether to copy or move the folder content or not.
     /// </summary>
+    /// <example>false</example>
     public bool Content { get; set; }
 
     /// <summary>
     /// Specifies whether the file is copied for filling out
     /// </summary>
+    /// <example>false</example>
     public bool ToFillOut { get; set; }
 }
 
@@ -225,6 +252,7 @@ public class EmptyTrashRequestDto
     /// <summary>
     /// Specifies whether to return only the current operation
     /// </summary>
+    /// <example>false</example>
     [FromQuery]
     public bool Single { get; set; }
 }
@@ -237,6 +265,7 @@ public class FileOperationResultRequestBaseDto
     /// <summary>
     /// The ID of the file operation.
     /// </summary>
+    /// <example>operation-123-abc</example>
     [FromQuery(Name = "id")]
     public string Id { get; set; }
 }
@@ -249,6 +278,7 @@ public class FileOperationResultRequestDto : FileOperationResultRequestBaseDto
     /// <summary>
     /// Specifies the type of file operation to be retrieved.
     /// </summary>
+    /// <example>0</example>
     [FromRoute(Name = "operationType")]
     public required FileOperationType OperationType { get; set; }
 }

@@ -34,5 +34,6 @@ public class ShortenLinkRequestsDto
     /// <summary>
     /// The shortened URL.
     /// </summary>
+    /// <example>https://example.com</example>
     public string Link { get; set; }
 }

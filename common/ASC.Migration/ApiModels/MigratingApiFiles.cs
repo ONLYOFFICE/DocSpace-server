@@ -35,18 +35,21 @@ public class MigratingApiFiles
     /// <summary>
     /// The number of folders.
     /// </summary>
+    /// <example>12</example>
     [ProtoMember(1)]
     public int FoldersCount { get; set; }
 
     /// <summary>
     /// The number of files.
     /// </summary>
+    /// <example>48</example>
     [ProtoMember(2)]
     public int FilesCount { get; set; }
 
     /// <summary>
     /// The total number of bytes.
     /// </summary>
+    /// <example>104857600</example>
     [ProtoMember(3)]
     public long BytesTotal { get; set; }
 }

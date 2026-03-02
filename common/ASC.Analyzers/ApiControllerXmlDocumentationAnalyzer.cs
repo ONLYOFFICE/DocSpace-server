@@ -1,9 +1,4 @@
-using System.Collections.Immutable;
-
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Diagnostics;
+using System.Text.Json;
 
 namespace ASC.Analyzers;
 
@@ -14,19 +9,22 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
     public const string ActionDiagnosticId = "API002";
     public const string SummaryDiagnosticId = "API003";
     public const string RemarksDiagnosticId = "API004";
-    public const string ModelDtoDiagnosticId = "API005";
+    public const string ModelDtoSummaryDiagnosticId = "API005";
+    public const string ModelDtoExampleDiagnosticId = "API006";
 
     private static readonly LocalizableString _modelTitle = "API DTO model missing XML documentation";
     private static readonly LocalizableString _actionTitle = "API Action method missing XML documentation";
     private static readonly LocalizableString _summaryTitle = "API Action method missing summary";
     private static readonly LocalizableString _remarksTitle = "API Action method missing remarks";
-    private static readonly LocalizableString _modelDtoTitle = "API DTO model's property missing XML documentation";
+    private static readonly LocalizableString _modelDtoSummaryTitle = "API DTO model's property missing summary";
+    private static readonly LocalizableString _modelDtoExampleTitle = "API DTO model's property missing example";
     
     private static readonly LocalizableString _modelMessageFormat = "API DTO model '{0}' should have XML documentation";
     private static readonly LocalizableString _actionMessageFormat = "API Action method '{0}' should have XML documentation";
     private static readonly LocalizableString _summaryMessageFormat = "API Action method '{0}' should have summary";
     private static readonly LocalizableString _remarksMessageFormat = "API Action method '{0}' should have remarks";
-    private static readonly LocalizableString _modelDtoMessageFormat = "API DTO model's '{0}' property '{1}' should have XML documentation";
+    private static readonly LocalizableString _modelDtoSummaryMessageFormat = "API DTO model's '{0}' property '{1}' should have summary";
+    private static readonly LocalizableString _modelDtoExampleMessageFormat = "API DTO model's '{0}' property '{1}' should have example";
 
     private static readonly LocalizableString _description = "API controllers and their methods should have XML documentation for Swagger/OpenAPI generation.";
 
@@ -68,29 +66,41 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
         isEnabledByDefault: true, 
         description: _description);
     
-    private static readonly DiagnosticDescriptor _modelDtoRule = new(
-        ModelDtoDiagnosticId, 
-        _modelDtoTitle, 
-        _modelDtoMessageFormat, 
+    private static readonly DiagnosticDescriptor _modelDtoSummaryRule = new(
+        ModelDtoSummaryDiagnosticId, 
+        _modelDtoSummaryTitle, 
+        _modelDtoSummaryMessageFormat, 
+        Category, 
+        DiagnosticSeverity.Warning, 
+        isEnabledByDefault: true, 
+        description: _description);
+    
+    private static readonly DiagnosticDescriptor _modelDtoExampleRule = new(
+        ModelDtoExampleDiagnosticId, 
+        _modelDtoExampleTitle, 
+        _modelDtoExampleMessageFormat, 
         Category, 
         DiagnosticSeverity.Warning, 
         isEnabledByDefault: true, 
         description: _description);
 
-    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [_modelRule, _actionRule, _remarksRule, _summaryRule, _modelDtoRule];
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [_modelRule, _actionRule, _remarksRule, _summaryRule, _modelDtoSummaryRule, _modelDtoExampleRule];
 
     public override void Initialize(AnalysisContext context)
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
-        context.RegisterSyntaxNodeAction(AnalyzeMethod, SyntaxKind.MethodDeclaration);
+        context.RegisterCompilationStartAction(compilationContext =>
+        {
+            var reportedTypes = new ConcurrentDictionary<string, bool>();
+            compilationContext.RegisterSyntaxNodeAction(ctx => AnalyzeMethod(ctx, reportedTypes), SyntaxKind.MethodDeclaration);
+        });
     }
     
-
-    private static void AnalyzeMethod(SyntaxNodeAnalysisContext context)
-    {    
+    private static void AnalyzeMethod(SyntaxNodeAnalysisContext context, ConcurrentDictionary<string, bool> reportedTypes)
+    {
         var methodDeclaration = (MethodDeclarationSyntax)context.Node;
-            
+
         if (!IsApiActionMethod(context, methodDeclaration))
         {
             return;
@@ -99,15 +109,15 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
         if (!HasXmlDocumentation(methodDeclaration))
         {
             var diagnostic = Diagnostic.Create(
-                _actionRule, 
-                methodDeclaration.Identifier.GetLocation(), 
+                _actionRule,
+                methodDeclaration.Identifier.GetLocation(),
                 methodDeclaration.Identifier.Text);
-                
+
             context.ReportDiagnostic(diagnostic);
             return;
         }
-            
-        CheckDocumentation(context, methodDeclaration);
+
+        CheckDocumentation(context, methodDeclaration, reportedTypes);
     }
     
 
@@ -183,17 +193,27 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
     private static bool HasXmlDocumentation(SyntaxNode node)
     {
         var trivia = node.GetLeadingTrivia();
+        
         return trivia.Any(t => t.IsKind(SyntaxKind.SingleLineDocumentationCommentTrivia) ||
                                t.IsKind(SyntaxKind.MultiLineDocumentationCommentTrivia));
     }
 
-    private static void CheckDocumentation(SyntaxNodeAnalysisContext context, MethodDeclarationSyntax methodDeclaration)
+    private static bool IsSystemNamespace(ITypeSymbol typeSymbol)
     {
-        if (methodDeclaration.ParameterList.Parameters.Count == 0)
+        var ns = typeSymbol.ContainingNamespace;
+        while (ns is { IsGlobalNamespace: false })
         {
-            return;
+            if (ns.Name.StartsWith("System") || ns.Name.StartsWith("Microsoft"))
+            {
+                return true;
+            }
+            ns = ns.ContainingNamespace;
         }
+        return false;
+    }
 
+    private static void CheckDocumentation(SyntaxNodeAnalysisContext context, MethodDeclarationSyntax methodDeclaration, ConcurrentDictionary<string, bool> reportedTypes)
+    {
         var xmlTrivia = methodDeclaration.GetLeadingTrivia()
             .FirstOrDefault(t => t.IsKind(SyntaxKind.SingleLineDocumentationCommentTrivia) ||
                                  t.IsKind(SyntaxKind.MultiLineDocumentationCommentTrivia));
@@ -209,7 +229,7 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
         }
 
         var xmlElementSyntaxes = xmlStructure.Content.OfType<XmlElementSyntax>().ToList();
-        
+
         var remarkExists = xmlElementSyntaxes
             .Any(e => e.StartTag.Name.ToString() == "remarks");
 
@@ -217,56 +237,245 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
         {
             context.ReportDiagnostic(Diagnostic.Create(
                 _remarksRule,
-                methodDeclaration.Identifier.GetLocation(), 
+                methodDeclaration.Identifier.GetLocation(),
                 methodDeclaration.Identifier.Text));
         }
 
         var summaryExists = xmlElementSyntaxes
             .Any(e => e.StartTag.Name.ToString() == "summary");
-        
+
         if (!summaryExists)
         {
             context.ReportDiagnostic(Diagnostic.Create(
-                _remarksRule,
-                methodDeclaration.Identifier.GetLocation(), 
+                _summaryRule,
+                methodDeclaration.Identifier.GetLocation(),
                 methodDeclaration.Identifier.Text));
         }
-        
+        var returnTypeToCheck = methodDeclaration.ReturnType;
+
+        if (context.SemanticModel.GetTypeInfo(returnTypeToCheck).Type is { } returnTypeSymbol)
+        {
+            if (returnTypeSymbol is INamedTypeSymbol { IsGenericType: true } namedTypeSymbol && IsSystemNamespace(namedTypeSymbol))
+            {
+                var typeArgument = namedTypeSymbol.TypeArguments.FirstOrDefault();
+                if (typeArgument != null && !IsSystemNamespace(typeArgument))
+                {
+                    ReportMissingXmlDocumentation(context, methodDeclaration, typeArgument, reportedTypes);
+                }
+            }
+            else if (!IsSystemNamespace(returnTypeSymbol))
+            {
+                ReportMissingXmlDocumentation(context, methodDeclaration, returnTypeSymbol, reportedTypes);
+            }
+        }
+
         foreach (var parameter in methodDeclaration.ParameterList.Parameters)
         {
             var parameterType = parameter.Type;
 
-            if (parameterType != null && context.SemanticModel.GetSymbolInfo(parameterType).Symbol is ITypeSymbol typeSymbol)
+            if (parameterType == null || context.SemanticModel.GetSymbolInfo(parameterType).Symbol is not ITypeSymbol typeSymbol)
             {
-                var syntaxReferences = typeSymbol.DeclaringSyntaxReferences;
-        
-                foreach (var syntaxReference in syntaxReferences)
-                {
-                    var syntaxNode = syntaxReference.GetSyntax();
-                    if (syntaxNode is ClassDeclarationSyntax modelDeclaration)
-                    {
-                        if (!HasXmlDocumentation(modelDeclaration))
-                        {
-                            context.ReportDiagnostic(Diagnostic.Create(
-                                _modelRule,
-                                modelDeclaration.Identifier.GetLocation(),
-                                modelDeclaration.Identifier.Text));
-                        }
+                continue;
+            }
 
-                        foreach (var prop in modelDeclaration.ChildNodes().OfType<PropertyDeclarationSyntax>())
-                        {
-                            if (!HasXmlDocumentation(prop))
-                            {
-                                context.ReportDiagnostic(Diagnostic.Create(
-                                    _modelDtoRule,
-                                    prop.Identifier.GetLocation(),
-                                    modelDeclaration.Identifier.Text,
-                                    prop.Identifier.Text));
-                            }
-                        }
-                    }
-                }
+            ReportMissingXmlDocumentation(context, methodDeclaration, typeSymbol, reportedTypes);
+        }
+    }
+
+    private static void ReportMissingXmlDocumentation(SyntaxNodeAnalysisContext context, MethodDeclarationSyntax methodDeclaration, ITypeSymbol returnTypeSymbol, ConcurrentDictionary<string, bool> reportedTypes)
+    {            
+        var typeKey = returnTypeSymbol.ToDisplayString();
+
+        // Skip if already reported
+        if (!reportedTypes.TryAdd(typeKey, true))
+        {
+            return;
+        }
+
+        var syntaxReferences = returnTypeSymbol.DeclaringSyntaxReferences;
+        if (syntaxReferences.Length > 0)
+        {
+            CheckPropertiesFromSyntax(context, syntaxReferences);
+        }
+        else
+        {
+            if (!IsList(returnTypeSymbol))
+            {
+                CheckPropertiesFromMetadata(context, methodDeclaration, returnTypeSymbol);
             }
         }
+    }
+
+    private static void CheckPropertiesFromSyntax(SyntaxNodeAnalysisContext context, ImmutableArray<SyntaxReference> syntaxReferences)
+    {
+        foreach (var syntaxReference in syntaxReferences)
+        {
+            var syntaxNode = syntaxReference.GetSyntax();
+
+            if (syntaxNode is not ClassDeclarationSyntax modelDeclaration)
+            {
+                continue;
+            }
+
+            foreach (var prop in modelDeclaration.ChildNodes().OfType<PropertyDeclarationSyntax>())
+            {
+                if (!HasXmlDocumentation(prop))
+                {
+                    context.ReportDiagnostic(Diagnostic.Create(
+                        _modelDtoSummaryRule,
+                        prop.Identifier.GetLocation(),
+                        modelDeclaration.Identifier.Text,
+                        prop.Identifier.Text));
+                }
+                var xmlTrivia = prop.GetLeadingTrivia()
+                    .FirstOrDefault(t => t.IsKind(SyntaxKind.SingleLineDocumentationCommentTrivia) ||
+                                         t.IsKind(SyntaxKind.MultiLineDocumentationCommentTrivia));
+
+                if (xmlTrivia == default || xmlTrivia.GetStructure() is not DocumentationCommentTriviaSyntax xmlStructure)
+                {
+                    continue;
+                }
+
+                var xmlElementSyntaxes = xmlStructure.Content.OfType<XmlElementSyntax>().ToList();
+
+                var summaryExists = xmlElementSyntaxes.Any(e => e.StartTag.Name.ToString() == "summary");
+                if (!summaryExists)
+                {
+                    context.ReportDiagnostic(Diagnostic.Create(
+                        _modelDtoSummaryRule,
+                        prop.Identifier.GetLocation(),
+                        modelDeclaration.Identifier.Text,
+                        prop.Identifier.Text));
+                }
+
+                var exampleExists = xmlElementSyntaxes.Any(e => e.StartTag.Name.ToString() == "example");
+                if (!exampleExists)
+                {
+                    context.ReportDiagnostic(Diagnostic.Create(
+                        _modelDtoExampleRule,
+                        prop.Identifier.GetLocation(),
+                        modelDeclaration.Identifier.Text,
+                        prop.Identifier.Text));
+                }
+                
+            }
+        }
+    }
+    
+    private static readonly ConcurrentDictionary<string, XDocument?> _xmlDocCache = new();
+    private static readonly ConcurrentBag<string> _typeCache = new();
+
+    private static void CheckPropertiesFromMetadata(SyntaxNodeAnalysisContext context, MethodDeclarationSyntax methodDeclaration, ITypeSymbol typeSymbol)
+    {            
+        if (!IsSystemNamespace(typeSymbol) && !_typeCache.Contains(typeSymbol.ToDisplayString()))
+        {
+            _typeCache.Add(typeSymbol.ToDisplayString());
+        }
+        
+        var members = typeSymbol.GetMembers();
+        foreach (var member in members)
+        {
+            if (member is not IPropertySymbol propertySymbol || 
+                propertySymbol.IsStatic || 
+                propertySymbol.GetAttributes().Any(attr => attr.AttributeClass?.Name is "JsonIgnoreAttribute") ||
+                propertySymbol.IsImplicitlyDeclared ||
+                propertySymbol.DeclaredAccessibility != Accessibility.Public)
+            {
+                continue;
+            }
+
+            if (propertySymbol.Type is INamedTypeSymbol { IsGenericType: true } namedTypeSymbol && IsSystemNamespace(namedTypeSymbol))
+            {
+                var typeArgument = namedTypeSymbol.TypeArguments.FirstOrDefault();
+                if (typeArgument != null && !IsSystemNamespace(typeArgument) && !_typeCache.Contains(typeArgument.ToDisplayString()))
+                {
+                    CheckPropertiesFromMetadata(context, methodDeclaration, typeArgument);
+                }
+                continue;
+            }
+            
+            if (propertySymbol.GetAttributes().Any(attr => attr.AttributeClass?.Name is "FromBodyAttribute") || 
+                !IsSystemNamespace(propertySymbol.Type))
+            {
+                if (!IsList(propertySymbol.Type) && !_typeCache.Contains(propertySymbol.Type.ToDisplayString()))
+                {            
+                    CheckPropertiesFromMetadata(context, methodDeclaration, propertySymbol.Type);
+                }
+                
+                continue;
+            }
+            
+            var xmlDoc = propertySymbol.GetDocumentationCommentXml();
+
+            if (string.IsNullOrWhiteSpace(xmlDoc))
+            {
+                var reference = context.Compilation.GetMetadataReference(propertySymbol.ContainingAssembly);
+                if (reference is PortableExecutableReference peRef)
+                {
+                    var xmlPath = Path.ChangeExtension(peRef.FilePath, ".xml");
+
+                    if (string.IsNullOrEmpty(xmlPath))
+                    {
+                        return;
+                    }
+
+                    var doc = _xmlDocCache.GetOrAdd(xmlPath, path =>
+                    {
+                        try { return XDocument.Load(path); }
+                        catch { return null; }
+                    });
+                    
+                    if (doc is null)
+                    {
+                        return;
+                    }
+                    
+                    var docId = propertySymbol.GetDocumentationCommentId();
+                    if (docId is null)
+                    {
+                        continue;
+                    }
+                    
+                    xmlDoc = doc.Descendants("member").FirstOrDefault(e =>
+                    {
+                        var name = e.Attribute("name")?.Value;
+                        return name == docId.Replace("{`0}", "`1") ||
+                               name == docId.Replace($"{{{typeof(int).FullName!}}}", "`1") ||
+                               name == docId.Replace($"{{{typeof(string).FullName!}}}", "`1") ||
+                               name == docId.Replace($"{{{typeof(JsonElement).FullName!}}}", "`1")
+                               ;
+                    })?.ToString();
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(xmlDoc) || !xmlDoc.Contains("<summary>"))
+            {
+                context.ReportDiagnostic(Diagnostic.Create(
+                    _modelDtoSummaryRule,
+                    methodDeclaration.Identifier.GetLocation(),
+                    typeSymbol.Name,
+                    propertySymbol.Name));
+            }
+            
+            if (string.IsNullOrWhiteSpace(xmlDoc) || !xmlDoc.Contains("<example>"))
+            {
+                context.ReportDiagnostic(Diagnostic.Create(
+                    _modelDtoExampleRule,
+                    methodDeclaration.Identifier.GetLocation(),
+                    typeSymbol.Name,
+                    propertySymbol.Name));
+            }
+        }
+    }
+    
+    private static bool IsList(ITypeSymbol typeSymbol)
+    {
+        if (typeSymbol is not INamedTypeSymbol namedType)
+        {
+            return false;
+        }
+
+        return namedType.IsGenericType 
+               && namedType.ConstructedFrom.ToString() == "System.Collections.Generic.List<T>";
     }
 }

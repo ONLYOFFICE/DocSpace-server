@@ -34,6 +34,7 @@ public class MailWhiteLabelSettingsWrapper
     /// <summary>
     /// The mail white label settings.
     /// </summary>
+    /// <example>{"footerEnabled": true, "footerSocialEnabled": true}</example>
     public MailWhiteLabelSettings Settings { get; set; }
 }
 
@@ -45,11 +46,13 @@ public class MailWhiteLabelSettings : ISettings<MailWhiteLabelSettings>
     /// <summary>
     /// Specifies if the mail footer is enabled or not.
     /// </summary>
+    /// <example>true</example>
     public bool FooterEnabled { get; set; }
 
     /// <summary>
     /// Specifies if the footer with social media contacts is enabled or not.
     /// </summary>
+    /// <example>true</example>
     public bool FooterSocialEnabled { get; set; }
 
 
@@ -68,7 +71,11 @@ public class MailWhiteLabelSettings : ISettings<MailWhiteLabelSettings>
             FooterSocialEnabled = true
         };
     }
-
+    
+    /// <summary>
+    /// The timestamp indicating when the settings were last modified.
+    /// </summary>
+    /// <example>1990-01-01T00:00:00Z</example>
     public DateTime LastModified { get; set; }
 
     public bool IsDefault()

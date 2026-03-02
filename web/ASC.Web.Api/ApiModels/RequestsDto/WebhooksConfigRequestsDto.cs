@@ -29,11 +29,23 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 /// <summary>
 /// The request parameters for creating the webhook configuration.
 /// </summary>
+/// <example>
+/// {
+///   "name": "Production Webhook",
+///   "uri": "https://example.com/webhook",
+///   "secretKey": "my-secret-key-123",
+///   "enabled": true,
+///   "sSL": true,
+///   "triggers": {},
+///   "targetId": "00000000-0000-0000-0000-000000000001"
+/// }
+/// </example>
 public class CreateWebhooksConfigRequestsDto
 {
     /// <summary>
     /// The human-readable name of the webhook configuration.
     /// </summary>
+    /// <example>Production Webhook</example>
     [StringLength(50)]
     [Required]
     public string Name { get; set; }
@@ -41,33 +53,39 @@ public class CreateWebhooksConfigRequestsDto
     /// <summary>
     /// The destination URL where the webhook events will be sent.
     /// </summary>
+    /// <example>https://example.com/webhook</example>
     [Required]
     public string Uri { get; set; }
 
     /// <summary>
     /// The webhook secret key used to sign the webhook payloads for the security verification.
     /// </summary>
+    /// <example>my-secret-key-123</example>
     [StringLength(50)]
     public string SecretKey { get; set; }
 
     /// <summary>
     /// Specifies whether the webhook configuration is active or not.
     /// </summary>
+    /// <example>true</example>
     public bool Enabled { get; set; }
 
     /// <summary>
     /// Specifies whether the SSL certificate verification is required or not.
     /// </summary>
+    /// <example>true</example>
     public bool SSL { get; set; }
 
     /// <summary>
     /// Defines which events will trigger webhook notifications.
     /// </summary>
+    /// <example>0</example>
     public WebhookTrigger Triggers { get; set; }
 
     /// <summary>
     /// Target ID
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000001</example>
     public string TargetId { get; set; }
 }
 
@@ -79,5 +97,6 @@ public class UpdateWebhooksConfigRequestsDto : CreateWebhooksConfigRequestsDto
     /// <summary>
     /// The webhook configuration ID.
     /// </summary>
+    /// <example>1</example>
     public required int Id { get; set; }
 }

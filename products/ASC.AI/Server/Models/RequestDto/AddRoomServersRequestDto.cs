@@ -34,12 +34,14 @@ public class AddRoomServersRequestDto
     /// <summary>
     /// Identifier of the room to which MCP servers will be assigned.
     /// </summary>
+    /// <example>42</example>
     [FromRoute(Name = "roomId")]
     public int RoomId { get; init; }
 
     /// <summary>
     /// Server identifiers to assign.
     /// </summary>
+    /// <example>{"servers": ["00000000-0000-0000-0000-000000000000"]}</example>
     [FromBody]
     public required AddRoomServersRequestBody Body { get; init; }
 }
@@ -52,5 +54,6 @@ public class AddRoomServersRequestBody
     /// <summary>
     /// Set of unique identifiers of MCP servers to associate with the room. A maximum of 5 servers can be assigned per room.
     /// </summary>
+    /// <example>["00000000-0000-0000-0000-000000000000"]</example>
     public required HashSet<Guid> Servers { get; init; }
 }

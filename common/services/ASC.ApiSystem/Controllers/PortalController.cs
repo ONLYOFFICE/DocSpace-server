@@ -77,6 +77,7 @@ public class PortalController(
     /// <remarks>
     /// Test API.
     /// </remarks>
+    /// <summary>Test API.</summary>
     /// <path>apisystem/portal/test</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [SwaggerResponse(200, "Portal api works")]

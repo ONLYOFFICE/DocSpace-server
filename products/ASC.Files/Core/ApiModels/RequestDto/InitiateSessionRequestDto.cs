@@ -26,12 +26,39 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// The request parameters for initiating an upload session.
+/// </summary>
 public class InitiateSessionRequestDto<T>
 {
-    public T FolderId { get; set; } 
-    public T FileId { get; set; } 
-    public string FileName { get; set; } 
-    public long FileSize { get; set; } 
-    public bool Encrypted { get; set; } 
+    /// <summary>
+    /// The folder ID.
+    /// </summary>
+    /// <example>1</example>
+    public T FolderId { get; set; }
+
+    /// <summary>
+    /// The file ID.
+    /// </summary>
+    /// <example>1</example>
+    public T FileId { get; set; }
+
+    /// <summary>
+    /// The file name.
+    /// </summary>
+    /// <example>My Document.docx</example>
+    public string FileName { get; set; }
+
+    /// <summary>
+    /// The file size in bytes.
+    /// </summary>
+    /// <example>10485760</example>
+    public long FileSize { get; set; }
+
+    /// <summary>
+    /// Specifies whether the file is encrypted.
+    /// </summary>
+    /// <example>false</example>
+    public bool Encrypted { get; set; }
 
 }

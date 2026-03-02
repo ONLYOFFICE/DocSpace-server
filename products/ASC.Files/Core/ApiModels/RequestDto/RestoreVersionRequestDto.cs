@@ -34,18 +34,21 @@ public class RestoreVersionRequestDto<T>
     /// <summary>
     /// The file ID of the restore version.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "fileId")]
     public required T FileId { get; set; }
 
     /// <summary>
     /// The file version of the restore.
     /// </summary>
+    /// <example>1</example>
     [FromQuery(Name = "version")]
     public int Version { get; set; } = 0;
 
     /// <summary>
     /// The file version URL of the restore.
     /// </summary>
+    /// <example>https://example.com</example>
     [FromQuery(Name = "url")]
     public string Url { get; set; } = null;
 }

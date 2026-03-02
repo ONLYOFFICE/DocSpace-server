@@ -34,12 +34,14 @@ public class SetUserChatsSettingsRequestDto
     /// <summary>
     /// The identifier of the room whose chat settings are to be updated.
     /// </summary>
+    /// <example>42</example>
     [FromRoute(Name = "roomId")]
     public int RoomId { get; init; }
 
     /// <summary>
     /// The chat settings to apply.
     /// </summary>
+    /// <example>{"webSearchEnabled": true}</example>
     [FromBody]
     public required SetUserChatSettingsRequestBody Body { get; init; }
 }
@@ -52,5 +54,6 @@ public class SetUserChatSettingsRequestBody
     /// <summary>
     /// Indicates whether the AI assistant is allowed to perform web searches when generating responses.
     /// </summary>
+    /// <example>true</example>
     public bool? WebSearchEnabled { get; init; }
 }

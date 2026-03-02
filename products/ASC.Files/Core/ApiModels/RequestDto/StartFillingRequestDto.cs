@@ -34,6 +34,7 @@ public class StartFillingRequestDto<T>
     /// <summary>
     /// The file ID to start filling.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "fileId")]
     public required T FileId { get; set; }
 }

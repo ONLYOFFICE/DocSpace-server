@@ -45,58 +45,67 @@ public class TenantQuota
     /// <summary>
     /// The tenant ID.
     /// </summary>
+    /// <example>1</example>
     public int TenantId { get; set; }
 
     /// <summary>
     /// The tenant name.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "Default")]
+    /// <example>Default</example>
     public string Name { get; set; }
 
     /// <summary>
     /// The tenant price.
     /// </summary>
-    [SwaggerSchemaCustom(Example = 10.0)]
+    /// <example>10.0</example>
     public decimal Price { get; set; }
 
     /// <summary>
     /// The tenant price currency symbol.
     /// </summary>
+    /// <example>$</example>
     public string PriceCurrencySymbol { get; set; }
 
     /// <summary>
     /// The tenant price three-character ISO 4217 currency symbol.
     /// </summary>
+    /// <example>USD</example>
     public string PriceISOCurrencySymbol { get; set; }
 
     /// <summary>
     /// The tenant product ID.
     /// </summary>
+    /// <example>64</example>
     public string ProductId { get; set; }
 
     /// <summary>
     /// The service name.
     /// </summary>
+    /// <example>space</example>
     public string ServiceName { get; set; }
 
     /// <summary>
     /// The service group.
     /// </summary>
+    /// <example>ai</example>
     public string ServiceGroup { get; set; }
 
     /// <summary>
     /// Specifies if the tenant quota is visible or not.
     /// </summary>
+    /// <example>true</example>
     public bool Visible { get; set; }
 
     /// <summary>
     /// Specifies if the tenant quota applies to the wallet or not
     /// </summary>
+    /// <example>true</example>
     public bool Wallet { get; set; }
 
     /// <summary>
     /// The quota due date.
     /// </summary>
+    /// <example>2021-01-01T00:00:00</example>
     public DateTime? DueDate { get; set; }
 
     [JsonIgnore]
@@ -107,6 +116,7 @@ public class TenantQuota
     /// <summary>
     /// The tenant quota features.
     /// </summary>
+    /// <example>audit,ldap,sso</example>
     public string Features
     {
         get => string.Join(",", _featuresList);
@@ -118,7 +128,7 @@ public class TenantQuota
     /// <summary>
     /// The tenant maximum file size.
     /// </summary>
-    [SwaggerSchemaCustom(Example = 25 * 1024 * 1024)]
+    /// <example>25000000</example>
     public long MaxFileSize
     {
         get => _maxFileSizeFeature.Value;
@@ -130,7 +140,7 @@ public class TenantQuota
     /// <summary>
     /// The tenant maximum total size.
     /// </summary>
-    [SwaggerSchemaCustom(Example = long.MaxValue)]
+    /// <example>25000000000</example>
     public long MaxTotalSize
     {
         get => _maxTotalSizeFeature.Value;
@@ -142,6 +152,7 @@ public class TenantQuota
     /// <summary>
     /// The number of portal users.
     /// </summary>
+    /// <example>100</example>
     public int CountUser
     {
         get => _countUserFeature.Value;
@@ -153,6 +164,7 @@ public class TenantQuota
     /// <summary>
     /// The number of portal room administrators.
     /// </summary>
+    /// <example>10</example>
     public int CountRoomAdmin
     {
         get => _countPaidUserFeature.Value;
@@ -164,6 +176,7 @@ public class TenantQuota
     /// <summary>
     /// The number of room users.
     /// </summary>
+    /// <example>50</example>
     public int UsersInRoom
     {
         get => _usersInRoomFeature.Value;
@@ -175,6 +188,7 @@ public class TenantQuota
     /// <summary>
     /// The number of rooms.
     /// </summary>
+    /// <example>500</example>
     public int CountRoom
     {
         get => _countRoomFeature.Value;
@@ -186,6 +200,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies if the tenant quota is nonprofit or not.
     /// </summary>
+    /// <example>false</example>
     public bool NonProfit
     {
         get => _nonProfitFeature.Value;
@@ -197,6 +212,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies if the tenant quota is trial or not.
     /// </summary>
+    /// <example>false</example>
     public bool Trial
     {
         get => _trialFeature.Value;
@@ -208,6 +224,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies if the tenant quota is free or not.
     /// </summary>
+    /// <example>false</example>
     public bool Free
     {
         get => _freeFeature.Value;
@@ -219,6 +236,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies if the tenant quota is updated or not.
     /// </summary>
+    /// <example>false</example>
     public bool Update
     {
         get => _updateFeature.Value;
@@ -230,6 +248,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies if the audit trail is available or not.
     /// </summary>
+    /// <example>true</example>
     public bool Audit
     {
         get => _auditFeature.Value;
@@ -241,6 +260,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies if ONLYOFFICE Docs is included in the tenant quota or not.
     /// </summary>
+    /// <example>true</example>
     public bool DocsEdition
     {
         get => _docsEditionFeature.Value;
@@ -252,6 +272,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies if the LDAP settings are available or not.
     /// </summary>
+    /// <example>true</example>
     public bool Ldap
     {
         get => _ldapFeature.Value;
@@ -263,6 +284,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies if the SSO settings are available or not.
     /// </summary>
+    /// <example>true</example>
     public bool Sso
     {
         get => _ssoFeature.Value;
@@ -274,6 +296,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies if the statistics settings are available or not.
     /// </summary>
+    /// <example>true</example>
     public bool Statistic
     {
         get => _statisticFeature.Value;
@@ -285,6 +308,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies if the branding settings are available or not.
     /// </summary>
+    /// <example>true</example>
     public bool Branding
     {
         get => _brandingFeature.Value;
@@ -296,6 +320,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies if the customization settings are available or not.
     /// </summary>
+    /// <example>true</example>
     public bool Customization
     {
         get => _customizationFeature.Value;
@@ -307,6 +332,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies if the license has the lifetime settings or not.
     /// </summary>
+    /// <example>false</example>
     public bool Lifetime
     {
         get => _lifetimeFeature.Value;
@@ -318,6 +344,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies if the Automation API is available or not.
     /// </summary>
+    /// <example>true</example>
     public bool AutomationApi
     {
         get => _automationApiFeature.Value;
@@ -329,6 +356,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies if the custom domain URL is available or not.
     /// </summary>
+    /// <example>false</example>
     public bool Custom
     {
         get => _customFeature.Value;
@@ -340,6 +368,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies if the restore is enabled or not.
     /// </summary>
+    /// <example>true</example>
     public bool Restore
     {
         get => _restoreFeature.Value;
@@ -351,6 +380,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies if Oauth is available or not.
     /// </summary>
+    /// <example>true</example>
     public bool Oauth
     {
         get => _oauthFeature.Value;
@@ -362,6 +392,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies if the content search is available or not.
     /// </summary>
+    /// <example>true</example>
     public bool ContentSearch
     {
         get => _contentSearchFeature.Value;
@@ -373,6 +404,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies if the third-party accounts linking is available or not.
     /// </summary>
+    /// <example>true</example>
     public bool ThirdParty
     {
         get => _thirdPartyFeature.Value;
@@ -384,6 +416,7 @@ public class TenantQuota
     /// <summary>
     /// Specifies if the tenant quota is yearly subscription or not.
     /// </summary>
+    /// <example>true</example>
     public bool Year
     {
         get => _yearFeature.Value;
@@ -395,6 +428,7 @@ public class TenantQuota
     /// <summary>
     /// The number of free backups within a month.
     /// </summary>
+    /// <example>1</example>
     public int CountFreeBackup
     {
         get => _countFreeBackup.Value;
@@ -404,8 +438,9 @@ public class TenantQuota
     private readonly WalletFeatureFlag _backup;
 
     /// <summary>
-    /// Specifies if the backup anabled as a wallet service or not.
+    /// Specifies if the backup enabled as a wallet service or not.
     /// </summary>
+    /// <example>true</example>
     public bool Backup
     {
         get => _backup.Value;
@@ -417,6 +452,7 @@ public class TenantQuota
     /// <summary>
     /// The number of AI agents.
     /// </summary>
+    /// <example>5</example>
     public int CountAIAgent
     {
         get => _countAIAgentFeature.Value;
@@ -426,199 +462,13 @@ public class TenantQuota
     private readonly WalletFeatureFlag _aiTools;
 
     /// <summary>
-    /// Specifies if the AI tools anabled as a wallet service or not.
+    /// Specifies if the AI tools enabled as a wallet service or not.
     /// </summary>
+    /// <example>true</example>
     public bool AITools
     {
         get => _aiTools.Value;
         set => _aiTools.Value = value;
-    }
-
-    private readonly WalletFeatureFlag _aiToolsWebSearch;
-
-    /// <summary>
-    /// Specifies whether the web search is enabled as a subservice of AI tools.
-    /// </summary>
-    public bool AIToolsWebSearch
-    {
-        get => _aiToolsWebSearch.Value;
-        set => _aiToolsWebSearch.Value = value;
-    }
-
-    private readonly WalletFeatureFlag _aiToolsWebFetch;
-
-    /// <summary>
-    /// Specifies whether the web fetch is enabled as a subservice of AI tools
-    /// </summary>
-    public bool AIToolsWebFetch
-    {
-        get => _aiToolsWebFetch.Value;
-        set => _aiToolsWebFetch.Value = value;
-    }
-
-    private readonly WalletFeatureFlag _aiToolsEmbedding;
-
-    /// <summary>
-    /// Specifies whether the embedding is enabled as a subservice of AI tools
-    /// </summary>
-    public bool AIToolsEmbedding
-    {
-        get => _aiToolsEmbedding.Value;
-        set => _aiToolsEmbedding.Value = value;
-    }
-
-    private readonly WalletFeatureFlag _aiToolsDeepseek31Input;
-
-    /// <summary>
-    /// Specifies whether the Deepseek 3.1 input tokens is enabled as a subservice of AI tools
-    /// </summary>
-    public bool AIToolsDeepseek31Input
-    {
-        get => _aiToolsDeepseek31Input.Value;
-        set => _aiToolsDeepseek31Input.Value = value;
-    }
-
-    private readonly WalletFeatureFlag _aiToolsDeepseek31Output;
-
-    /// <summary>
-    /// Specifies whether the Deepseek 3.1 output tokens is enabled as a subservice of AI tools
-    /// </summary>
-    public bool AIToolsDeepseek31Output
-    {
-        get => _aiToolsDeepseek31Output.Value;
-        set => _aiToolsDeepseek31Output.Value = value;
-    }
-
-    private readonly WalletFeatureFlag _aiToolsClaude45Input;
-
-    /// <summary>
-    /// Specifies whether the Claude 4.5 input tokens is enabled as a subservice of AI tools
-    /// </summary>
-    public bool AIToolsClaude45Input
-    {
-        get => _aiToolsClaude45Input.Value;
-        set => _aiToolsClaude45Input.Value = value;
-    }
-
-    private readonly WalletFeatureFlag _aiToolsClaude45Output;
-
-    /// <summary>
-    /// Specifies whether the Claude 4.5 output tokens is enabled as a subservice of AI tools
-    /// </summary>
-    public bool AIToolsClaude45Output
-    {
-        get => _aiToolsClaude45Output.Value;
-        set => _aiToolsClaude45Output.Value = value;
-    }
-
-    private readonly WalletFeatureFlag _aiToolsGPT5Input;
-
-    /// <summary>
-    /// Specifies whether the GPT 5 input tokens is enabled as a subservice of AI tools
-    /// </summary>
-    public bool AIToolsGPT5Input
-    {
-        get => _aiToolsGPT5Input.Value;
-        set => _aiToolsGPT5Input.Value = value;
-    }
-
-    private readonly WalletFeatureFlag _aiToolsGPT5Output;
-
-    /// <summary>
-    /// Specifies whether the GPT 5 output tokens is enabled as a subservice of AI tools
-    /// </summary>
-    public bool AIToolsGPT5Output
-    {
-        get => _aiToolsGPT5Output.Value;
-        set => _aiToolsGPT5Output.Value = value;
-    }
-
-    private readonly WalletFeatureFlag _aiToolsDeepseek32Input;
-
-    /// <summary>
-    /// Specifies whether the Deepseek 3.2 input tokens is enabled as a subservice of AI tools
-    /// </summary>
-    public bool AIToolsDeepseek32Input
-    {
-        get => _aiToolsDeepseek32Input.Value;
-        set => _aiToolsDeepseek32Input.Value = value;
-    }
-
-    private readonly WalletFeatureFlag _aiToolsDeepseek32Output;
-
-    /// <summary>
-    /// Specifies whether the Deepseek 3.2 output tokens is enabled as a subservice of AI tools
-    /// </summary>
-    public bool AIToolsDeepseek32Output
-    {
-        get => _aiToolsDeepseek32Output.Value;
-        set => _aiToolsDeepseek32Output.Value = value;
-    }
-
-    private readonly WalletFeatureFlag _aiToolsGPT52Input;
-
-    /// <summary>
-    /// Specifies whether the GPT 5.2 input tokens is enabled as a subservice of AI tools
-    /// </summary>
-    public bool AIToolsGPT52Input
-    {
-        get => _aiToolsGPT52Input.Value;
-        set => _aiToolsGPT52Input.Value = value;
-    }
-
-    private readonly WalletFeatureFlag _aiToolsGPT52Output;
-
-    /// <summary>
-    /// Specifies whether the GPT 5.2 output tokens is enabled as a subservice of AI tools
-    /// </summary>
-    public bool AIToolsGPT52Output
-    {
-        get => _aiToolsGPT52Output.Value;
-        set => _aiToolsGPT52Output.Value = value;
-    }
-
-    private readonly WalletFeatureFlag _aiToolsGemini3ProInput;
-
-    /// <summary>
-    /// Specifies whether the Gemini 3 Pro input tokens is enabled as a subservice of AI tools
-    /// </summary>
-    public bool AIToolsGemini3ProInput
-    {
-        get => _aiToolsGemini3ProInput.Value;
-        set => _aiToolsGemini3ProInput.Value = value;
-    }
-
-    private readonly WalletFeatureFlag _aiToolsGemini3ProOutput;
-
-    /// <summary>
-    /// Specifies whether the Gemini 3 Pro output tokens is enabled as a subservice of AI tools
-    /// </summary>
-    public bool AIToolsGemini3ProOutput
-    {
-        get => _aiToolsGemini3ProOutput.Value;
-        set => _aiToolsGemini3ProOutput.Value = value;
-    }
-
-    private readonly WalletFeatureFlag _aiToolsGemini3FlashInput;
-
-    /// <summary>
-    /// Specifies whether the Gemini 3 Flash input tokens is enabled as a subservice of AI tools
-    /// </summary>
-    public bool AIToolsGemini3FlashInput
-    {
-        get => _aiToolsGemini3FlashInput.Value;
-        set => _aiToolsGemini3FlashInput.Value = value;
-    }
-
-    private readonly WalletFeatureFlag _aiToolsGemini3FlashOutput;
-
-    /// <summary>
-    /// Specifies whether the Gemini 3 Flash output tokens is enabled as a subservice of AI tools
-    /// </summary>
-    public bool AIToolsGemini3FlashOutput
-    {
-        get => _aiToolsGemini3FlashOutput.Value;
-        set => _aiToolsGemini3FlashOutput.Value = value;
     }
 
     public TenantQuota()
@@ -654,23 +504,6 @@ public class TenantQuota
         _backup = new WalletFeatureFlag(this, "backup") { EmployeeType = EmployeeType.DocSpaceAdmin };
         _countAIAgentFeature = new CountAIAgentFeature(this) { Order = 11 };
         _aiTools = new WalletFeatureFlag(this, "aitools") { EmployeeType = EmployeeType.DocSpaceAdmin };
-        _aiToolsWebSearch = new WalletFeatureFlag(this, "websearch") { EmployeeType = EmployeeType.DocSpaceAdmin };
-        _aiToolsWebFetch = new WalletFeatureFlag(this, "webfetch") { EmployeeType = EmployeeType.DocSpaceAdmin };
-        _aiToolsEmbedding = new WalletFeatureFlag(this, "embedding") { EmployeeType = EmployeeType.DocSpaceAdmin };
-        _aiToolsDeepseek31Input = new WalletFeatureFlag(this, "deepseek31input") { EmployeeType = EmployeeType.DocSpaceAdmin };
-        _aiToolsDeepseek31Output = new WalletFeatureFlag(this, "deepseek31output") { EmployeeType = EmployeeType.DocSpaceAdmin };
-        _aiToolsClaude45Input = new WalletFeatureFlag(this, "claude45input") { EmployeeType = EmployeeType.DocSpaceAdmin };
-        _aiToolsClaude45Output = new WalletFeatureFlag(this, "claude45output") { EmployeeType = EmployeeType.DocSpaceAdmin };
-        _aiToolsGPT5Input = new WalletFeatureFlag(this, "gpt5input") { EmployeeType = EmployeeType.DocSpaceAdmin };
-        _aiToolsGPT5Output = new WalletFeatureFlag(this, "gpt5output") { EmployeeType = EmployeeType.DocSpaceAdmin };
-        _aiToolsDeepseek32Input = new WalletFeatureFlag(this, "deepseek32input") { EmployeeType = EmployeeType.DocSpaceAdmin };
-        _aiToolsDeepseek32Output = new WalletFeatureFlag(this, "deepseek32output") { EmployeeType = EmployeeType.DocSpaceAdmin };
-        _aiToolsGPT52Input = new WalletFeatureFlag(this, "gpt52input") { EmployeeType = EmployeeType.DocSpaceAdmin };
-        _aiToolsGPT52Output = new WalletFeatureFlag(this, "gpt52output") { EmployeeType = EmployeeType.DocSpaceAdmin };
-        _aiToolsGemini3ProInput = new WalletFeatureFlag(this, "gemini3proinput") { EmployeeType = EmployeeType.DocSpaceAdmin };
-        _aiToolsGemini3ProOutput = new WalletFeatureFlag(this, "gemini3prooutput") { EmployeeType = EmployeeType.DocSpaceAdmin };
-        _aiToolsGemini3FlashInput = new WalletFeatureFlag(this, "gemini3flashinput") { EmployeeType = EmployeeType.DocSpaceAdmin };
-        _aiToolsGemini3FlashOutput = new WalletFeatureFlag(this, "gemini3flashoutput") { EmployeeType = EmployeeType.DocSpaceAdmin };
 
         TenantQuotaFeatures = new List<TenantQuotaFeature>
         {
@@ -702,24 +535,7 @@ public class TenantQuota
             _countFreeBackup,
             _backup,
             _countAIAgentFeature,
-            _aiTools,
-            _aiToolsWebSearch,
-            _aiToolsWebFetch,
-            _aiToolsEmbedding,
-            _aiToolsDeepseek31Input,
-            _aiToolsDeepseek31Output,
-            _aiToolsClaude45Input,
-            _aiToolsClaude45Output,
-            _aiToolsGPT5Input,
-            _aiToolsGPT5Output,
-            _aiToolsDeepseek32Input,
-            _aiToolsDeepseek32Output,
-            _aiToolsGPT52Input,
-            _aiToolsGPT52Output,
-            _aiToolsGemini3ProInput,
-            _aiToolsGemini3ProOutput,
-            _aiToolsGemini3FlashInput,
-            _aiToolsGemini3FlashOutput
+            _aiTools
         };
     }
 

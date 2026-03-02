@@ -34,15 +34,18 @@ public class InviteUsersByEmailRequestDto
     /// <summary>
     /// The user's email addressess.
     /// </summary>
+    /// <example>["john.doe@example.com"]</example>
     public IEnumerable<string> Emails { get; set; }
 
     /// <summary>
     /// The employee type.
     /// </summary>
+    /// <example>1</example>
     public EmployeeType EmployeeType { get; set; }
 
     /// <summary>
     /// The access rights.
     /// </summary>
+    /// <example>1</example>
     public FileShare Access { get; set; }
 }

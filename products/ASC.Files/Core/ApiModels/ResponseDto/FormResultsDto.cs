@@ -31,11 +31,13 @@ public class FormResultsDto
     /// <summary>
     /// The date and time when the form was created.
     /// </summary>
+    /// <example>2025-01-01T00:00:00</example>
     public DateTime CreateOn { get; set; }
 
     /// <summary>
     /// The list of forms data.
     /// </summary>
+    /// <example>[{"key": "field1", "value": "Answer"}]</example>
     public IEnumerable<FormsItemData> FormsData { get; set; }
 }
 

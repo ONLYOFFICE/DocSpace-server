@@ -34,26 +34,31 @@ public class LogoRequest
     /// <summary>
     /// The path to the temporary image file.
     /// </summary>
+    /// <example>/tmp/logo.png</example>
     public string TmpFile { get; set; }
 
     /// <summary>
     /// The X coordinate of the rectangle starting point.
     /// </summary>
+    /// <example>0</example>
     public int X { get; set; }
 
     /// <summary>
     /// The Y coordinate of the rectangle starting point.
     /// </summary>
+    /// <example>0</example>
     public int Y { get; set; }
 
     /// <summary>
     /// The rectangle width.
     /// </summary>
+    /// <example>100</example>
     public uint Width { get; set; }
 
     /// <summary>
     /// The rectangle height.
     /// </summary>
+    /// <example>100</example>
     public uint Height { get; set; }
 }
 
@@ -65,6 +70,7 @@ public class LogoRequest<T>
     /// <summary>
     /// The room ID.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "id")]
     public required T Id { get; set; }
 

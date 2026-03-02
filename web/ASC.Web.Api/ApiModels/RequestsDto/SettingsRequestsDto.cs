@@ -31,81 +31,125 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 /// <summary>
 /// The request parameters for managing the owner-specific settings.
 /// </summary>
+/// <example>
+/// {
+///   "ownerId": "00000000-0000-0000-0000-000000000001"
+/// }
+/// </example>
 public class OwnerIdSettingsRequestDto
 {
     /// <summary>
     /// The ID of the owner whose settings are being managed.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000001</example>
     public required Guid OwnerId { get; set; }
 }
 
 /// <summary>
 /// The request parameters for managing the version-specific settings.
 /// </summary>
+/// <example>
+/// {
+///   "versionId": 2
+/// }
+/// </example>
 public class SettingsRequestsDto
 {
     /// <summary>
     /// The version ID.
     /// </summary>
+    /// <example>2</example>
     public required int VersionId { get; set; }
 }
 
 /// <summary>
 /// The request parameters for managing the user interface tips visibility.
 /// </summary>
+/// <example>
+/// {
+///   "show": true
+/// }
+/// </example>
 public class TipsRequestDto
 {
     /// <summary>
     /// Controls the visibility of the user interface tips (displayed or hidden).
     /// </summary>
+    /// <example>true</example>
     public bool Show { get; set; } //tips
 }
 
 /// <summary>
 /// The request parameters for setting the default product configuration.
 /// </summary>
+/// <example>
+/// {
+///   "defaultFolderType": 1
+/// }
+/// </example>
 public class DefaultProductRequestDto
 {
     /// <summary>
     /// The ID of the product to be set as default.
     /// </summary>
+    /// <example>1</example>
     public required FolderType DefaultFolderType { get; set; }
 }
 
 /// <summary>
 /// The request parameters for configuring the time zone settings.
 /// </summary>
+/// <example>
+/// {
+///   "lng": "en",
+///   "timeZoneID": "America/New_York"
+/// }
+/// </example>
 public class TimeZoneRequestDto
 {
     /// <summary>
     /// The language code for the time zone localization.
     /// </summary>
+    /// <example>en</example>
     public required string Lng { get; set; }
 
     /// <summary>
     /// The IANA time zone identifier.
     /// </summary>
+    /// <example>America/New_York</example>
     public string TimeZoneID { get; set; }
 }
 
 /// <summary>
 /// The request parameters for managing the Developer Tools access settings for the current tenant.
 /// </summary>
+/// <example>
+/// {
+///   "limitedAccessForUsers": false
+/// }
+/// </example>
 public class TenantDevToolsAccessSettingsDto
 {
     /// <summary>
     /// Determines if users have restricted access to the Developer Tools.
     /// </summary>
+    /// <example>false</example>
     public bool LimitedAccessForUsers { get; set; }
 }
 
 /// <summary>
 /// The request parameters for managing the visibility settings of the promotional banners for the current tenant.
 /// </summary>
+/// <example>
+/// {
+///   "hidden": true
+/// }
+/// </example>
 public class TenantBannerSettingsDto
 {
     /// <summary>
     /// The banners visibility flag.
     /// </summary>
+    /// <example>true</example>
     public bool Hidden { get; set; }
 }

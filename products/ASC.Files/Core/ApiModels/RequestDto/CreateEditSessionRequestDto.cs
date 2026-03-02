@@ -34,12 +34,14 @@ public class CreateEditSessionRequestDto<T>
     /// <summary>
     /// The file ID.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "fileId")]
     public required T FileId { get; set; }
 
     /// <summary>
     /// The file size in bytes.
     /// </summary>
+    /// <example>1024</example>
     [FromQuery(Name = "fileSize")]
     public long FileSize { get; set; }
 }

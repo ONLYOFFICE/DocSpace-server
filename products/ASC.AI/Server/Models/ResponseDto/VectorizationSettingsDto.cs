@@ -26,16 +26,21 @@
 
 namespace ASC.AI.Models.ResponseDto;
 
+/// <summary>
+/// The vectorization settings.
+/// </summary>
 public class VectorizationSettingsDto
 {
     /// <summary>
     /// The type of embedding provider configured for document vectorization.
     /// </summary>
+    /// <example>0</example>    
     public EmbeddingProviderType Type { get; init; }
 
     /// <summary>
     /// Indicates whether the embedding provider API key needs to be reconfigured.
     /// </summary>
+    /// <example>false</example>
     public bool NeedReset { get; init; }
 }
 

@@ -204,11 +204,13 @@ public class EditHistoryAuthor(UserManager userManager, DisplayUserSettingsHelpe
     /// <summary>
     /// The author ID.
     /// </summary>
+    /// <example>author_123</example>
     public required string Id { get; init; }
 
     /// <summary>
     /// The author name.
     /// </summary>
+    /// <example>John Doe</example>
     public string Name
     {
         get
@@ -263,38 +265,45 @@ public class EditHistoryDataDto
     /// <summary>
     /// The URL address of the file with the document changes data.
     /// </summary>
+    /// <example>https://example.com/changes</example>
     [Url]
     public string ChangesUrl { get; set; }
 
     /// <summary>
     /// The document identifier used to unambiguously identify the document file.
     /// </summary>
+    /// <example>doc1</example>
     public required string Key { get; set; }
 
     /// <summary>
     /// The object of the previous version of the document.
     /// </summary>
+    /// <example>{"url": "https://example.com/prev.docx", "key": "prev-doc-key"}</example>
     public EditHistoryUrl Previous { get; set; }
 
     /// <summary>
     /// The encrypted signature added to the parameter in the form of a token.
     /// </summary>
+    /// <example>token</example>
     public string Token { get; set; }
 
     /// <summary>
     /// The URL address of the current document version.
     /// </summary>
+    /// <example>https://example.com/file.docx</example>
     [Url]
     public required string Url { get; set; }
 
     /// <summary>
     /// The document version number.
     /// </summary>
+    /// <example>1</example>
     public required int Version { get; init; }
 
     /// <summary>
     /// The document extension.
     /// </summary>
+    /// <example>docx</example>
     public required string FileType { get; set; }
 }
 
@@ -307,16 +316,19 @@ public class EditHistoryUrl
     /// <summary>
     /// The document identifier of the previous version of the document.
     /// </summary>
+    /// <example>doc_v2_20260101</example>
     public string Key { get; init; }
 
     /// <summary>
     /// The url address of the previous version of the document.
     /// </summary>
+    /// <example>https://files.example.com/history/doc_v2_20260101.docx</example>
     [Url]
     public string Url { get; init; }
 
     /// <summary>
     /// The document extension.
     /// </summary>
+    /// <example>.docx</example>
     public string FileType { get; set; }
 }

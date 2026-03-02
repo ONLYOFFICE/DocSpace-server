@@ -29,32 +29,46 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 /// <summary>
 /// The request parameters for configuring the Two-Factor Authentication (TFA) settings.
 /// </summary>
+/// <example>
+/// {
+///   "type": "EnumValue",
+///   "id": {},
+///   "trustedIps": ["item1", "item2"],
+///   "mandatoryUsers": [],
+///   "mandatoryGroups": []
+/// }
+/// </example>
 public class TfaRequestsDto
 {
     /// <summary>
     /// The two-factor authentication type.
     /// </summary>
+    /// <example>None</example>
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public TfaRequestsDtoType Type { get; set; }
 
     /// <summary>
     /// The ID of the user for whom the TFA settings are being configured.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     public Guid Id { get; set; }
 
     /// <summary>
     /// The list of IP addresses that bypass TFA verification.
     /// </summary>
+    /// <example>["item1", "item2"]</example>
     public List<string> TrustedIps { get; set; }
 
     /// <summary>
     /// The list of user IDs for whom TFA is mandatory.
     /// </summary>
+    /// <example>["00000000-0000-0000-0000-000000000000"]</example>
     public List<Guid> MandatoryUsers { get; set; }
 
     /// <summary>
     /// The list group IDs whose members must use TFA.
     /// </summary>
+    /// <example>["00000000-0000-0000-0000-000000000000"]</example>
     public List<Guid> MandatoryGroups { get; set; }
 }
 
@@ -81,5 +95,6 @@ public class TfaValidateRequestsDto
     /// <summary>
     /// The verification code provided by the user.
     /// </summary>
+    /// <example>123456</example>
     public required string Code { get; set; }
 }

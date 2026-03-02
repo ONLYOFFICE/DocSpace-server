@@ -34,6 +34,7 @@ public class SetEmbeddingConfigRequestDto
     /// <summary>
     /// The embedding provider configuration parameters.
     /// </summary>
+    /// <example>{"type": 1, "key": "sk-example-key-123"}</example>
     [FromBody]
     public required SetEmbeddingConfigRequestBody Body { get; init; }
 }
@@ -46,10 +47,12 @@ public class SetEmbeddingConfigRequestBody
     /// <summary>
     /// The type of embedding provider to use for document vectorization.
     /// </summary>
+    /// <example>1</example>
     public EmbeddingProviderType Type { get; init; }
 
     /// <summary>
     /// The API key for the selected embedding provider. Pass null to keep the existing key unchanged.
     /// </summary>
+    /// <example>sk-example-key-123</example>
     public string? Key { get; init; }
 }

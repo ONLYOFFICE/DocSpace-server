@@ -34,17 +34,20 @@ public class GroupRequestDto
     /// <summary>
     /// The list of group member IDs.
     /// </summary>
+    /// <example>["00000000-0000-0000-0000-000000000000", "11111111-1111-1111-1111-111111111111"]</example>
     public IEnumerable<Guid> Members { get; init; }
 
     /// <summary>
     /// The group manager ID.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     [Required]
     public Guid GroupManager { get; set; }
 
     /// <summary>
     /// The group name.
     /// </summary>
+    /// <example>Marketing Team</example>
     [StringLength(128)]
     public string GroupName { get; set; }
 }
@@ -57,6 +60,7 @@ public class MembersRequest
     /// <summary>
     /// The list of group member IDs.
     /// </summary>
+    /// <example>["00000000-0000-0000-0000-000000000000", "11111111-1111-1111-1111-111111111111"]</example>
     public IEnumerable<Guid> Members { get; init; }
 }
 
@@ -68,12 +72,14 @@ public class MembersRequestDto
     /// <summary>
     /// The group ID.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "id")]
     public required Guid Id { get; set; }
 
     /// <summary>
     /// The member request.
     /// </summary>
+    /// <example>{"members":["00000000-0000-0000-0000-000000000000"]}</example>
     [FromBody]
     public required MembersRequest Members { get; set; }
 }

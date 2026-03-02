@@ -34,15 +34,18 @@ public class UploadResultDto
     /// <summary>
     /// Specifies if the upload operation is successful or not.
     /// </summary>
+    /// <example>true</example>
     public bool Success { get; set; }
 
     /// <summary>
     /// The uploaded data.
     /// </summary>
+    /// <example>{"id": 10, "title": "document.docx"}</example>
     public object Data { get; set; }
 
     /// <summary>
     /// The message sent after the successful upload operation.
     /// </summary>
+    /// <example>File uploaded successfully</example>
     public string Message { get; set; }
 }

@@ -39,6 +39,7 @@ public class DarkThemeSettings : ISettings<DarkThemeSettings>
     /// <summary>
     /// The theme type.
     /// </summary>
+    /// <example>Dark</example>
     public DarkThemeSettingsType Theme { get; init; }
 
     public DarkThemeSettings GetDefault()
@@ -52,6 +53,7 @@ public class DarkThemeSettings : ISettings<DarkThemeSettings>
     /// <summary>
     /// The last modified date.
     /// </summary>
+    /// <example>2020-01-15T00:00:00Z</example>
     public DateTime LastModified { get; set; }
 }
 
