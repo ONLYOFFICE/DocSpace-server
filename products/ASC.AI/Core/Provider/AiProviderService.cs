@@ -153,7 +153,9 @@ public class AiProviderService(
     {
         await ThrowIfNotAccessAsync();
         
-        return providerSettings.GetAvailableProviders().ToList();
+        return providerSettings.GetAvailableProviders()
+            .Where(x => x.Type != ProviderType.PortalAi)
+            .ToList();
     }
 
     public async Task DeleteProvidersAsync(HashSet<int> ids)

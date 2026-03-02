@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Core.Common.AI;
-
 namespace ASC.AI.Models.ResponseDto;
 
 /// <summary>
@@ -43,7 +41,7 @@ public class ProviderSettingsDto
     /// Default API endpoint URL for the provider type.
     /// </summary>
     /// <example>https://api.openai.com/v1</example>
-    public required string Url { get; init; }
+    public string? Url { get; init; }
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
