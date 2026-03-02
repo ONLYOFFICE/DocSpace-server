@@ -375,7 +375,8 @@ public class FileMoveCopyOperationsManager(
     TenantManager tenantManager,
     FileOperationsManagerHolder<FileMoveCopyOperation> fileOperationsManagerHolder,
     ExternalShare externalShare,
-    IServiceProvider serviceProvider) : FileOperationsManager<FileMoveCopyOperation>(httpContextAccessor, eventBus, authContext, fileOperationsManagerHolder, externalShare, serviceProvider)
+    IServiceProvider serviceProvider, 
+    CopyPermissionsCheck permissionsManager) : FileOperationsManager<FileMoveCopyOperation>(httpContextAccessor, eventBus, authContext, fileOperationsManagerHolder, externalShare, serviceProvider)
 {
     public async Task<string> Publish(
         List<JsonElement> folderIds,
@@ -417,8 +418,9 @@ public class FileMoveCopyOperationsManager(
         var data = new FileMoveCopyOperationData<int>(folderIntIds, fileIntIds, tenantId, userId, destFolderId, copy, resolveType, toFillOut, holdResult, GetHttpHeaders(), sessionSnapshot);
         var thirdPartyData = new FileMoveCopyOperationData<string>(folderStringIds, fileStringIds, tenantId, userId, destFolderId, copy, resolveType, toFillOut, holdResult, GetHttpHeaders(), sessionSnapshot);
 
-        await RunCopyPermissionCheckAsync(data);
-        await RunCopyPermissionCheckAsync(thirdPartyData);
+        var dataTask = permissionsManager.RunCopyPermissionCheckAsync(data);
+        var thirdPartyDataTask = permissionsManager.RunCopyPermissionCheckAsync(thirdPartyData);
+        await Task.WhenAll(dataTask, thirdPartyDataTask);
 
         await _eventBus.PublishAsync(new MoveOrCopyIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
         {
@@ -449,149 +451,6 @@ public class FileMoveCopyOperationsManager(
             }
         }
     }
-
-    private async Task RunCopyPermissionCheckAsync<T>(FileMoveCopyOperationData<T> data)
-    {
-        if (!int.TryParse(data.DestFolderId, out var i))
-        {
-            await CheckCopyDataAsync(data, data.DestFolderId);
-        }
-        else
-        {
-            await CheckCopyDataAsync(data, i);
-        }
-    }
-
-    private async Task CheckCopyDataAsync<T, TTo>(FileMoveCopyOperationData<T> data, TTo tto)
-    {
-        var doCheck = true;
-
-        var folderDao = _serviceProvider.GetService<IFolderDao<T>>();
-        var fileDao = _serviceProvider.GetService<IFileDao<T>>();
-        var ttoFolderDao = _serviceProvider.GetService<IFolderDao<TTo>>();
-        var ttoFileDao = _serviceProvider.GetService<IFileDao<TTo>>();
-        var security = _serviceProvider.GetService<FileSecurity>();
-        var settingsManager = _serviceProvider.GetService<ASC.Core.Common.Settings.SettingsManager>();
-        var userManager = _serviceProvider.GetService<UserManager>();
-        var tenantManager = _serviceProvider.GetService<TenantManager>();
-        var quotaService = _serviceProvider.GetService<IQuotaService>();
-        var permissionsManager = _serviceProvider.GetService<CopyPermissionsCheck>();
-        var global = _serviceProvider.GetRequiredService<Global>();
-        var vectorizationSettings = _serviceProvider.GetService<VectorizationGlobalSettings>();
-
-        var toFolder = await ttoFolderDao.GetFolderAsync(tto);
-        var fileIds = data.Files?.ToList() ?? [];
-        var folderIds = data.Folders?.ToList() ?? [];
-        var copy = data.Copy;
-        var parentFolders = await ttoFolderDao.GetParentFoldersAsync(toFolder.Id).ToListAsync();
-        var checkPermissions = true;
-
-        await permissionsManager.CheckJobPermissionsAsync(fileDao, folderDao, parentFolders, toFolder, fileIds, folderIds, copy, doCheck);
-
-        var toFolderId = toFolder.Id;
-        var resolveType = data.ResolveType;
-
-        foreach (var folderId in folderIds)
-        {
-            var folder = await folderDao.GetFolderAsync(folderId);
-
-            var (rId, _, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(folder);
-            var parentRoomId = rId.ToString();
-
-            var isRoom = folder.IsRoom;
-            var canMoveOrCopy = (copy && await security.CanCopyAsync(folder)) || (!copy && await security.CanMoveAsync(folder));
-            checkPermissions = isRoom ? !canMoveOrCopy : checkPermissions;
-
-            var canUseRoomQuota = true;
-            var canUseUserQuota = true;
-            long roomQuotaLimit = 0;
-            long userQuotaLimit = 0;
-
-            var toFolderRoom = parentFolders.FirstOrDefault(f => f.IsRoom);
-
-            if (!isRoom &&
-                toFolderRoom != null &&
-                !string.Equals(parentRoomId, toFolderRoom.Id.ToString()))
-            {
-                TenantEntityQuotaSettings quotaSettings = toFolderRoom.FolderType is FolderType.AiRoom
-                   ? await settingsManager.LoadAsync<TenantAiAgentQuotaSettings>()
-                   : await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
-                if (quotaSettings.EnableQuota)
-                {
-                    roomQuotaLimit = toFolderRoom.SettingsQuota == TenantEntityQuotaSettings.DefaultQuotaValue ? quotaSettings.DefaultQuota : toFolderRoom.SettingsQuota;
-                    if (roomQuotaLimit != TenantEntityQuotaSettings.NoQuota)
-                    {
-                        if (roomQuotaLimit - toFolderRoom.Counter < folder.Counter)
-                        {
-                            canUseRoomQuota = false;
-                        }
-                    }
-                }
-            }
-
-            if (!isRoom &&
-                toFolderRoom == null &&
-                int.TryParse(parentRoomId, out var curRId) && curRId != -1 &&
-                toFolder.FolderType is FolderType.USER or FolderType.DEFAULT)
-            {
-                var tenantId = tenantManager.GetCurrentTenantId();
-                var quotaUserSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
-                if (quotaUserSettings.EnableQuota)
-                {
-                    var user = await userManager.GetUsersAsync(toFolder.RootCreateBy);
-                    var userQuotaData = await settingsManager.LoadAsync<UserQuotaSettings>(user);
-                    userQuotaLimit = userQuotaData.UserQuota == userQuotaData.GetDefault().UserQuota ? quotaUserSettings.DefaultQuota : userQuotaData.UserQuota;
-                    var userUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenantId, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
-                    if (userQuotaLimit != TenantEntityQuotaSettings.NoQuota)
-                    {
-                        if (userQuotaLimit - userUsedSpace < folder.Counter)
-                        {
-                            canUseUserQuota = false;
-                        }
-                    }
-                }
-            }
-
-            await permissionsManager.CheckFoldersPermissionsAsync(
-                folder,
-                copy,
-                checkPermissions,
-                canMoveOrCopy,
-                isRoom,
-                toFolder,
-                parentFolders,
-                canUseRoomQuota,
-                canUseUserQuota,
-                roomQuotaLimit,
-                userQuotaLimit,
-                toFolderId,
-                toFolderRoom,
-                resolveType,
-                fileDao,
-                ttoFolderDao,
-                folderDao,
-                doCheck);
-        }
-
-        foreach(var fileId in fileIds)
-        {
-            var file = await fileDao.GetFileAsync(fileId);
-
-            await permissionsManager.CheckFilesPermissionsAsync(
-                file,
-                checkPermissions,
-                toFolder,
-                copy,
-                global.EnableUploadFilter,
-                folderDao,
-                vectorizationSettings,
-                parentFolders,
-                resolveType,
-                ttoFileDao,
-                toFolderId,
-                doCheck);
-        }
-    }
 }
 
 
@@ -603,7 +462,8 @@ public class FileDuplicateOperationsManager(
     TenantManager tenantManager,
     FileOperationsManagerHolder<FileDuplicateOperation> fileOperationsManagerHolder,
     ExternalShare externalShare,
-    IServiceProvider serviceProvider) : FileOperationsManager<FileDuplicateOperation>(httpContextAccessor, eventBus, authContext, fileOperationsManagerHolder, externalShare, serviceProvider)
+    IServiceProvider serviceProvider,
+    CopyPermissionsCheck permissionsManager) : FileOperationsManager<FileDuplicateOperation>(httpContextAccessor, eventBus, authContext, fileOperationsManagerHolder, externalShare, serviceProvider)
 {
     public async Task<string> Publish(
         List<JsonElement> folderIds,
@@ -632,8 +492,8 @@ public class FileDuplicateOperationsManager(
         var data = new FileOperationData<int>(folderIntIds, fileIntIds, tenantId, userId, GetHttpHeaders(), sessionSnapshot);
         var thirdPartyData = new FileOperationData<string>(folderStringIds, fileStringIds, tenantId, userId, GetHttpHeaders(), sessionSnapshot);
 
-        await RunDuplicatePermissionCheckAsync(data);
-        await RunDuplicatePermissionCheckAsync(thirdPartyData);
+        await permissionsManager.RunDuplicatePermissionCheckAsync(data);
+        await permissionsManager.RunDuplicatePermissionCheckAsync(thirdPartyData);
 
         await _eventBus.PublishAsync(new DuplicateIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
         {
@@ -643,158 +503,6 @@ public class FileDuplicateOperationsManager(
         });
 
         return taskId;
-    }
-
-    private async Task RunDuplicatePermissionCheckAsync<T>(FileOperationData<T> data)
-    {
-        var fileDao = _serviceProvider.GetService<IFileDao<T>>();
-        var files = data.Files?.ToList() ?? [];
-        foreach (var id in files)
-        {
-            var file = await fileDao.GetFilesAsync([id]).FirstOrDefaultAsync();
-
-            var copyOperationData = new FileMoveCopyOperationData<T>([], [id], data.TenantId, data.UserId, JsonSerializer.SerializeToElement(file.ParentId), true, FileConflictResolveType.Duplicate, false, true, data.Headers, data.SessionSnapshot);
-            
-            if (!int.TryParse(copyOperationData.DestFolderId, out var i))
-            {
-                await CheckCopyDataAsync(copyOperationData, copyOperationData.DestFolderId);
-            }
-            else
-            {
-                await CheckCopyDataAsync(copyOperationData, i);
-            }
-        }
-    }
-
-    private async Task CheckCopyDataAsync<T, TTo>(FileMoveCopyOperationData<T> data, TTo tto)
-    {
-        var doCheck = true;
-
-        var folderDao = _serviceProvider.GetService<IFolderDao<T>>();
-        var fileDao = _serviceProvider.GetService<IFileDao<T>>();
-        var ttoFolderDao = _serviceProvider.GetService<IFolderDao<TTo>>();
-        var ttoFileDao = _serviceProvider.GetService<IFileDao<TTo>>();
-        var security = _serviceProvider.GetService<FileSecurity>();
-        var settingsManager = _serviceProvider.GetService<ASC.Core.Common.Settings.SettingsManager>();
-        var userManager = _serviceProvider.GetService<UserManager>();
-        var tenantManager = _serviceProvider.GetService<TenantManager>();
-        var quotaService = _serviceProvider.GetService<IQuotaService>();
-        var permissionsManager = _serviceProvider.GetService<CopyPermissionsCheck>();
-        var global = _serviceProvider.GetRequiredService<Global>();
-        var vectorizationSettings = _serviceProvider.GetService<VectorizationGlobalSettings>();
-
-        var toFolder = await ttoFolderDao.GetFolderAsync(tto);
-        var fileIds = data.Files?.ToList() ?? [];
-        var folderIds = data.Folders?.ToList() ?? [];
-        var copy = data.Copy;
-        var parentFolders = await ttoFolderDao.GetParentFoldersAsync(toFolder.Id).ToListAsync();
-        var checkPermissions = true;
-
-        await permissionsManager.CheckJobPermissionsAsync(fileDao, folderDao, parentFolders, toFolder, fileIds, folderIds, copy, doCheck);
-
-        var toFolderId = toFolder.Id;
-        var resolveType = data.ResolveType;
-
-        foreach (var folderId in folderIds)
-        {
-            var folder = await folderDao.GetFolderAsync(folderId);
-
-            var (rId, _, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(folder);
-            var parentRoomId = rId.ToString();
-
-            var isRoom = folder.IsRoom;
-            var canMoveOrCopy = (copy && await security.CanCopyAsync(folder)) || (!copy && await security.CanMoveAsync(folder));
-            checkPermissions = isRoom ? !canMoveOrCopy : checkPermissions;
-
-            var canUseRoomQuota = true;
-            var canUseUserQuota = true;
-            long roomQuotaLimit = 0;
-            long userQuotaLimit = 0;
-
-            var toFolderRoom = parentFolders.FirstOrDefault(f => f.IsRoom);
-
-            if (!isRoom &&
-                toFolderRoom != null &&
-                !string.Equals(parentRoomId, toFolderRoom.Id.ToString()))
-            {
-                TenantEntityQuotaSettings quotaSettings = toFolderRoom.FolderType is FolderType.AiRoom
-                   ? await settingsManager.LoadAsync<TenantAiAgentQuotaSettings>()
-                   : await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
-                if (quotaSettings.EnableQuota)
-                {
-                    roomQuotaLimit = toFolderRoom.SettingsQuota == TenantEntityQuotaSettings.DefaultQuotaValue ? quotaSettings.DefaultQuota : toFolderRoom.SettingsQuota;
-                    if (roomQuotaLimit != TenantEntityQuotaSettings.NoQuota)
-                    {
-                        if (roomQuotaLimit - toFolderRoom.Counter < folder.Counter)
-                        {
-                            canUseRoomQuota = false;
-                        }
-                    }
-                }
-            }
-
-            if (!isRoom &&
-                toFolderRoom == null &&
-                int.TryParse(parentRoomId, out var curRId) && curRId != -1 &&
-                toFolder.FolderType is FolderType.USER or FolderType.DEFAULT)
-            {
-                var tenantId = tenantManager.GetCurrentTenantId();
-                var quotaUserSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
-                if (quotaUserSettings.EnableQuota)
-                {
-                    var user = await userManager.GetUsersAsync(toFolder.RootCreateBy);
-                    var userQuotaData = await settingsManager.LoadAsync<UserQuotaSettings>(user);
-                    userQuotaLimit = userQuotaData.UserQuota == userQuotaData.GetDefault().UserQuota ? quotaUserSettings.DefaultQuota : userQuotaData.UserQuota;
-                    var userUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenantId, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
-                    if (userQuotaLimit != TenantEntityQuotaSettings.NoQuota)
-                    {
-                        if (userQuotaLimit - userUsedSpace < folder.Counter)
-                        {
-                            canUseUserQuota = false;
-                        }
-                    }
-                }
-            }
-
-            await permissionsManager.CheckFoldersPermissionsAsync(
-                folder,
-                copy,
-                checkPermissions,
-                canMoveOrCopy,
-                isRoom,
-                toFolder,
-                parentFolders,
-                canUseRoomQuota,
-                canUseUserQuota,
-                roomQuotaLimit,
-                userQuotaLimit,
-                toFolderId,
-                toFolderRoom,
-                resolveType,
-                fileDao,
-                ttoFolderDao,
-                folderDao,
-                doCheck);
-        }
-
-        foreach(var fileId in fileIds)
-        {
-            var file = await fileDao.GetFileAsync(fileId);
-
-            await permissionsManager.CheckFilesPermissionsAsync(
-                file,
-                checkPermissions,
-                toFolder,
-                copy,
-                global.EnableUploadFilter,
-                folderDao,
-                vectorizationSettings,
-                parentFolders,
-                resolveType,
-                ttoFileDao,
-                toFolderId,
-                doCheck);
-        }
     }
 }
 

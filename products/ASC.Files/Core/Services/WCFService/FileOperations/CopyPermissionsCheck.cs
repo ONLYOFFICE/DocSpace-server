@@ -27,18 +27,87 @@
 namespace ASC.Files.Core.Services.WCFService.FileOperations;
 
 [Scope]
-public class CopyPermissionsCheck(FileSecurity security, LockerManager lockerManager, FileTrackerHelper fileTracker, FileUtility fileUtility)
+public class CopyPermissionsCheck(
+    FileSecurity security, 
+    LockerManager lockerManager, 
+    FileTrackerHelper fileTracker, 
+    FileUtility fileUtility, 
+    IServiceProvider serviceProvider, 
+    SettingsManager settingsManager,
+    UserManager userManager,
+    TenantManager tenantManager,
+    IQuotaService quotaService,
+    Global global,
+    VectorizationGlobalSettings vectorizationSettings)
 {
+    public async Task RunDuplicatePermissionCheckAsync<T>(FileOperationData<T> data)
+    {
+        var fileDao = serviceProvider.GetRequiredService<IFileDao<T>>();
+
+        var files = data.Files?.ToList() ?? [];
+        foreach (var id in files)
+        {
+            var file = await fileDao.GetFilesAsync([id]).FirstOrDefaultAsync();
+            var copyOperationData = new FileMoveCopyOperationData<T>([], [id], data.TenantId, data.UserId, JsonSerializer.SerializeToElement(file.ParentId), true, FileConflictResolveType.Duplicate, false, true, data.Headers, data.SessionSnapshot);
+
+            await RunCopyPermissionCheckAsync(copyOperationData);
+        }
+    }
+
+    public async Task RunCopyPermissionCheckAsync<T>(FileMoveCopyOperationData<T> data)
+    {
+        if (!int.TryParse(data.DestFolderId, out var i))
+        {
+            await CheckCopyDataAsync(data, data.DestFolderId);
+        }
+        else
+        {
+            await CheckCopyDataAsync(data, i);
+        }
+    }
+
+    private async Task CheckCopyDataAsync<T, TTo>(FileMoveCopyOperationData<T> data, TTo tto)
+    {
+        var needToCheck = true;
+
+        var ttoFolderDao = serviceProvider.GetRequiredService<IFolderDao<TTo>>();
+        var folderDao = serviceProvider.GetRequiredService<IFolderDao<T>>();
+        var fileDao = serviceProvider.GetRequiredService<IFileDao<T>>();
+
+        var copy = data.Copy;
+        var fileIds = data.Files?.ToList() ?? [];
+        var folderIds = data.Folders?.ToList() ?? [];
+
+        var toFolder = await ttoFolderDao.GetFolderAsync(tto);
+
+        await CheckJobPermissionsAsync(fileIds, folderIds, toFolder, copy, needToCheck);
+
+        var resolveType = data.ResolveType;
+
+        foreach (var folderId in folderIds)
+        {
+            var folder = await folderDao.GetFolderAsync(folderId);
+            await CheckFoldersPermissionsAsync(folder, toFolder, copy, resolveType, needToCheck);
+        }
+
+        foreach (var fileId in fileIds)
+        { 
+            var file = await fileDao.GetFileAsync(fileId);
+            await CheckFilesPermissionsAsync(file, toFolder, copy, resolveType, needToCheck);
+        }
+    }
+
     public async Task<string> CheckJobPermissionsAsync<T, TTo>(
-        IFileDao<T> fileDao, 
-        IFolderDao<T> folderDao,
-        List<Folder<TTo>> parentFolders,
-        Folder<TTo> toFolder,
         List<T> files,
         List<T> folders,
+        Folder<TTo> toFolder,
         bool copy,
         bool check = false)
     {
+        var fileDao = serviceProvider.GetRequiredService<IFileDao<T>>();
+        var folderDao = serviceProvider.GetRequiredService<IFolderDao<T>>();
+        var ttoFolderDao = serviceProvider.GetRequiredService<IFolderDao<TTo>>();
+
         string errorMsg = null;
 
         if (toFolder == null)
@@ -51,7 +120,9 @@ public class CopyPermissionsCheck(FileSecurity security, LockerManager lockerMan
 
             return errorMsg;
         }
- 
+
+        var parentFolders = await ttoFolderDao.GetParentFoldersAsync(toFolder.Id).ToListAsync();
+
         if (toFolder.FolderType != FolderType.VirtualRooms && toFolder.FolderType != FolderType.Archive && !await security.CanCreateAsync(toFolder))
         {
             errorMsg = FilesCommonResource.ErrorMessage_SecurityException_Create;
@@ -222,22 +293,9 @@ public class CopyPermissionsCheck(FileSecurity security, LockerManager lockerMan
 
     public async Task<string> CheckFoldersPermissionsAsync<T, TTo>(
         Folder<T> folder, 
-        bool copy, 
-        bool checkPermissions,
-        bool canMoveOrCopy,
-        bool isRoom,
         Folder<TTo> toFolder,
-        List<Folder<TTo>> toFolderParents,
-        bool canUseRoomQuota,
-        bool canUseUserQuota,
-        long roomQuotaLimit,
-        long userQuotaLimit,
-        TTo toFolderId,
-        Folder<TTo> toFolderRoom,
+        bool copy,
         FileConflictResolveType resolveType,
-        IFileDao<T> fileDao,
-        IFolderDao<TTo> ttoFolderDao,
-        IFolderDao<T> folderDao,
         bool check = false) 
     {
         string errorMsg = null;
@@ -252,7 +310,71 @@ public class CopyPermissionsCheck(FileSecurity security, LockerManager lockerMan
 
             return errorMsg;
         }
-        else if (copy && checkPermissions && !canMoveOrCopy)
+
+        var fileDao = serviceProvider.GetRequiredService<IFileDao<T>>();
+        var folderDao = serviceProvider.GetRequiredService<IFolderDao<T>>();
+        var ttoFileDao = serviceProvider.GetRequiredService<IFileDao<TTo>>();
+        var ttoFolderDao = serviceProvider.GetRequiredService<IFolderDao<TTo>>();
+
+        var (rId, _, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(folder);
+        var parentRoomId = rId.ToString();
+        var parentFolders = await ttoFolderDao.GetParentFoldersAsync(toFolder.Id).ToListAsync();
+
+        var isRoom = folder.IsRoom;
+        var canMoveOrCopy = (copy && await security.CanCopyAsync(folder)) || (!copy && await security.CanMoveAsync(folder));
+        var checkPermissions = !isRoom || !canMoveOrCopy;
+
+        var canUseRoomQuota = true;
+        var canUseUserQuota = true;
+        long roomQuotaLimit = 0;
+        long userQuotaLimit = 0;
+
+        var toFolderRoom = parentFolders.FirstOrDefault(f => f.IsRoom);
+
+        if (!isRoom &&
+            toFolderRoom != null &&
+            !string.Equals(parentRoomId, toFolderRoom.Id.ToString()))
+        {
+            TenantEntityQuotaSettings quotaSettings = toFolderRoom.FolderType is FolderType.AiRoom
+               ? await settingsManager.LoadAsync<TenantAiAgentQuotaSettings>()
+               : await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
+            if (quotaSettings.EnableQuota)
+            {
+                roomQuotaLimit = toFolderRoom.SettingsQuota == TenantEntityQuotaSettings.DefaultQuotaValue ? quotaSettings.DefaultQuota : toFolderRoom.SettingsQuota;
+                if (roomQuotaLimit != TenantEntityQuotaSettings.NoQuota)
+                {
+                    if (roomQuotaLimit - toFolderRoom.Counter < folder.Counter)
+                    {
+                        canUseRoomQuota = false;
+                    }
+                }
+            }
+        }
+
+        if (!isRoom &&
+            toFolderRoom == null &&
+            int.TryParse(parentRoomId, out var curRId) && curRId != -1 &&
+            toFolder.FolderType is FolderType.USER or FolderType.DEFAULT)
+        {
+            var tenantId = tenantManager.GetCurrentTenantId();
+            var quotaUserSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
+            if (quotaUserSettings.EnableQuota)
+            {
+                var user = await userManager.GetUsersAsync(toFolder.RootCreateBy);
+                var userQuotaData = await settingsManager.LoadAsync<UserQuotaSettings>(user);
+                userQuotaLimit = userQuotaData.UserQuota == userQuotaData.GetDefault().UserQuota ? quotaUserSettings.DefaultQuota : userQuotaData.UserQuota;
+                var userUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenantId, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
+                if (userQuotaLimit != TenantEntityQuotaSettings.NoQuota)
+                {
+                    if (userQuotaLimit - userUsedSpace < folder.Counter)
+                    {
+                        canUseUserQuota = false;
+                    }
+                }
+            }
+        }
+
+        if (copy && checkPermissions && !canMoveOrCopy)
         {
             errorMsg = FilesCommonResource.ErrorMessage_SecurityException_CopyFolder;
             if (check)
@@ -308,7 +430,7 @@ public class CopyPermissionsCheck(FileSecurity security, LockerManager lockerMan
 
             return errorMsg;
         }
-        else if (!isRoom && folder.SettingsPrivate && !await CompliesPrivateRoomRulesAsync(folderDao, copy, folder, toFolderParents))
+        else if (!isRoom && folder.SettingsPrivate && !await CompliesPrivateRoomRulesAsync(folderDao, copy, folder, parentFolders))
         {
             errorMsg = FilesCommonResource.ErrorMessage_SecurityException_MoveFolder;
             if (check)
@@ -360,19 +482,19 @@ public class CopyPermissionsCheck(FileSecurity security, LockerManager lockerMan
             return errorMsg;
         }
 
-        if (!check || (Equals(folder.ParentId ?? default, toFolderId) && resolveType != FileConflictResolveType.Duplicate))
+        if (!check || (Equals(folder.ParentId ?? default, toFolder.Id) && resolveType != FileConflictResolveType.Duplicate))
         {
             return null;
         }
 
         var conflictFolder = folder.RootFolderType == FolderType.Privacy || isRoom ||
-                                     (!Equals(folder.ParentId ?? default, toFolderId) && resolveType == FileConflictResolveType.Duplicate)
+                                     (!Equals(folder.ParentId ?? default, toFolder.Id) && resolveType == FileConflictResolveType.Duplicate)
                     ? null
-                    : await ttoFolderDao.GetFolderAsync(folder.Title, toFolderId);
+                    : await ttoFolderDao.GetFolderAsync(folder.Title, toFolder.Id);
 
         if (copy || conflictFolder != null)
         {
-            if (toFolder.ProviderId == folder.ProviderId && folderDao.UseRecursiveOperation(folder.Id, toFolderId))
+            if (toFolder.ProviderId == folder.ProviderId && folderDao.UseRecursiveOperation(folder.Id, toFolder.Id))
             {
                 if (!copy && checkPermissions && !await security.CanMoveAsync(folder))
                 {
@@ -402,21 +524,20 @@ public class CopyPermissionsCheck(FileSecurity security, LockerManager lockerMan
         
     public async Task<string> CheckFilesPermissionsAsync<T, TTo>(
         File<T> file,
-        bool checkPermissions,
         Folder<TTo> toFolder,
         bool copy,
-        bool enableUploadFilter,
-        IFolderDao<T> folderDao,
-        VectorizationGlobalSettings vectorizationSettings,
-        List<Folder<TTo>> toParentFolders,
         FileConflictResolveType resolveType,
-        IFileDao<TTo> ttoFileDao,
-        TTo toFolderId,
         bool check = false)
     {
-        string errorMsg = null;
+        var fileDao = serviceProvider.GetRequiredService<IFileDao<T>>();
+        var folderDao = serviceProvider.GetRequiredService<IFolderDao<T>>();
+        var ttoFileDao = serviceProvider.GetRequiredService<IFileDao<TTo>>();
+        var ttoFolderDao = serviceProvider.GetRequiredService<IFolderDao<TTo>>();
 
-        errorMsg = await CheckFilesSecurityPermissionsAsync([file], checkPermissions);
+        var checkPermissions = true;
+        var parentFolders = await ttoFolderDao.GetParentFoldersAsync(toFolder.Id).ToListAsync();
+
+        string errorMsg = null;
 
         if (file == null)
         {
@@ -428,7 +549,10 @@ public class CopyPermissionsCheck(FileSecurity security, LockerManager lockerMan
 
             return errorMsg;
         }
-        else if (toFolder.FolderType == FolderType.VirtualRooms || toFolder.RootFolderType == FolderType.Archive)
+
+        errorMsg = await CheckFilesSecurityPermissionsAsync([file], checkPermissions);
+
+        if (toFolder.FolderType == FolderType.VirtualRooms || toFolder.RootFolderType == FolderType.Archive)
         {
             errorMsg = FilesCommonResource.ErrorMessage_SecurityException_MoveFile;
             if (check)
@@ -468,7 +592,7 @@ public class CopyPermissionsCheck(FileSecurity security, LockerManager lockerMan
 
             return errorMsg;
         }
-        else if (!await CompliesPrivateRoomRulesAsync(folderDao, copy, file, toParentFolders))
+        else if (!await CompliesPrivateRoomRulesAsync(folderDao, copy, file, parentFolders))
         {
             errorMsg = FilesCommonResource.ErrorMessage_SecurityException_MoveFile;
             if (check)
@@ -489,7 +613,7 @@ public class CopyPermissionsCheck(FileSecurity security, LockerManager lockerMan
 
             return errorMsg;
         }
-        else if (enableUploadFilter &&
+        else if (global.EnableUploadFilter &&
                 !fileUtility.ExtsUploadable.Contains(FileUtility.GetFileExtension(file.Title)))
         {
             errorMsg = FilesCommonResource.ErrorMessage_NotSupportedFormat;
@@ -528,7 +652,7 @@ public class CopyPermissionsCheck(FileSecurity security, LockerManager lockerMan
         }
 
         if (toFolder.RootFolderType == FolderType.VirtualRooms &&
-            toParentFolders.Any(folder => folder.FolderType == FolderType.FillingFormsRoom) &&
+            parentFolders.Any(folder => folder.FolderType == FolderType.FillingFormsRoom) &&
             !file.IsForm)
         {
             throw new InvalidOperationException(copy ? FilesCommonResource.ErrorMessage_UploadToFormRoom : FilesCommonResource.ErrorMessage_MoveToFormRoom);
@@ -539,7 +663,7 @@ public class CopyPermissionsCheck(FileSecurity security, LockerManager lockerMan
                                file.Encrypted ||
                                toFolder.FolderType == FolderType.Knowledge
                     ? null
-                    : await ttoFileDao.GetFileAsync(toFolderId, file.Title);
+                    : await ttoFileDao.GetFileAsync(toFolder.Id, file.Title);
 
         errorMsg = await CheckFilesSecurityPermissionsAsync([file], checkPermissions);
 
@@ -564,7 +688,7 @@ public class CopyPermissionsCheck(FileSecurity security, LockerManager lockerMan
             {
                 throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_UpdateEditingFile);
             }
-            else if (!copy && !Equals(file.ParentId.ToString(), toFolderId.ToString()) && errorMsg != null)
+            else if (!copy && !Equals(file.ParentId.ToString(), toFolder.Id.ToString()) && errorMsg != null)
             {
                 throw new SecurityException(errorMsg);
             }

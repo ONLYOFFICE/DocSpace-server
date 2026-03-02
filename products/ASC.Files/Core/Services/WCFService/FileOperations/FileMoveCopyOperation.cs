@@ -157,7 +157,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         var toFolder = await folderDao.GetFolderAsync(tto);
         var parentFolders = await folderDao.GetParentFoldersAsync(toFolder.Id).ToListAsync();
 
-        Err = await permissionsManager.CheckJobPermissionsAsync(FileDao, FolderDao, parentFolders, toFolder, Files, Folders, _copy);
+        Err = await permissionsManager.CheckJobPermissionsAsync(Files, Folders, toFolder, _copy);
         if (Err != null)
         {
             return;
@@ -246,98 +246,16 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
             CancellationToken.ThrowIfCancellationRequested();
 
             var folder = await FolderDao.GetFolderAsync(folderId);
-            var cacheKey = "parentRoomInfo" + folder.ParentId;
-
-            var parentFolderTask = FolderDao.GetFolderAsync(folder.ParentId);
-
-            var parentRoomId = cache.Get<string>(cacheKey);
-
-            if (parentRoomId == null)
-            {
-                var (rId, _, _) = await FolderDao.GetParentRoomInfoFromFileEntryAsync(folder);
-                cache.Insert(cacheKey, rId.ToString(), TimeSpan.FromMinutes(5));
-                parentRoomId = rId.ToString();
-            }
-
-            var isRoom = folder.IsRoom;
-            var isThirdPartyRoom = isRoom && folder.ProviderEntry;
-
-            var canMoveOrCopy = (copy && await FilesSecurity.CanCopyAsync(folder)) || (!copy && await FilesSecurity.CanMoveAsync(folder));
-            checkPermissions = isRoom ? !canMoveOrCopy : checkPermissions;
-
-            var canUseRoomQuota = true;
-            var canUseUserQuota = true;
-            long roomQuotaLimit = 0;
-            long userQuotaLimit = 0;
-
-            var toFolderRoom = toFolderParents.FirstOrDefault(f => f.IsRoom);
-
-            if (!isRoom &&
-                toFolderRoom != null &&
-                !string.Equals(parentRoomId, toFolderRoom.Id.ToString()))
-            {
-                TenantEntityQuotaSettings quotaSettings = toFolderRoom.FolderType is FolderType.AiRoom
-                   ? await settingsManager.LoadAsync<TenantAiAgentQuotaSettings>()
-                   : await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
-                if (quotaSettings.EnableQuota)
-                {
-                    roomQuotaLimit = toFolderRoom.SettingsQuota == TenantEntityQuotaSettings.DefaultQuotaValue ? quotaSettings.DefaultQuota : toFolderRoom.SettingsQuota;
-                    if (roomQuotaLimit != TenantEntityQuotaSettings.NoQuota)
-                    {
-                        if (roomQuotaLimit - toFolderRoom.Counter < folder.Counter)
-                        {
-                            canUseRoomQuota = false;
-                        }
-                    }
-                }
-            }
-
-            if (!isRoom &&
-                toFolderRoom == null &&
-                int.TryParse(parentRoomId, out var curRId) && curRId != -1 &&
-                toFolder.FolderType is FolderType.USER or FolderType.DEFAULT)
-            {
-                var tenantId = tenantManager.GetCurrentTenantId();
-                var quotaUserSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
-                if (quotaUserSettings.EnableQuota)
-                {
-                    var user = await userManager.GetUsersAsync(toFolder.RootCreateBy);
-                    var userQuotaData = await settingsManager.LoadAsync<UserQuotaSettings>(user);
-                    userQuotaLimit = userQuotaData.UserQuota == userQuotaData.GetDefault().UserQuota ? quotaUserSettings.DefaultQuota : userQuotaData.UserQuota;
-                    var userUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenantId, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
-                    if (userQuotaLimit != TenantEntityQuotaSettings.NoQuota)
-                    {
-                        if (userQuotaLimit - userUsedSpace < folder.Counter)
-                        {
-                            canUseUserQuota = false;
-                        }
-                    }
-                }
-            }
-
-            Err = await permissionsManager.CheckFoldersPermissionsAsync(
-                folder,
-                _copy,
-                checkPermissions,
-                canMoveOrCopy,
-                isRoom,
-                toFolder,
-                toFolderParents,
-                canUseRoomQuota,
-                canUseUserQuota,
-                roomQuotaLimit,
-                userQuotaLimit,
-                toFolderId,
-                toFolderRoom,
-                _resolveType,
-                FileDao,
-                folderDao,
-                FolderDao);
+            Err = await permissionsManager.CheckFoldersPermissionsAsync(folder, toFolder, _copy, _resolveType);
 
             if (Err == null)
             {
                 if (!Equals(folder.ParentId ?? default, toFolderId) || _resolveType == FileConflictResolveType.Duplicate)
                 {
+                    var isRoom = folder.IsRoom;
+                    var isThirdPartyRoom = isRoom && folder.ProviderEntry;
+                    var parentFolderTask = FolderDao.GetFolderAsync(folder.ParentId);
+
                     var files = await FileDao.GetFilesAsync(folder.Id, new OrderBy(SortedByType.AZ, true), FilterType.FilesOnly, false, Guid.Empty, string.Empty, null, false, withSubfolders: true).ToListAsync();
                     var errorMsg = await permissionsManager.CheckFilesSecurityPermissionsAsync(files, checkPermissions);
 
@@ -767,20 +685,10 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
             CancellationToken.ThrowIfCancellationRequested();
 
             var file = await FileDao.GetFileAsync(fileId);
-            var errorMsg = await permissionsManager.CheckFilesSecurityPermissionsAsync([file], checkPermissions);
+            
+            Err = await permissionsManager.CheckFilesPermissionsAsync(file, toFolder, _copy,_resolveType);
 
-            Err = await permissionsManager.CheckFilesPermissionsAsync(
-                file, 
-                checkPermissions,
-                toFolder,
-                _copy,
-                global.EnableUploadFilter,
-                FolderDao,
-                vectorizationSettings,
-                toParentFolders,
-                _resolveType,
-                fileDao,
-                toFolderId);
+            var errorMsg = await permissionsManager.CheckFilesSecurityPermissionsAsync([file], checkPermissions);
 
             if (Err == null)
             {
