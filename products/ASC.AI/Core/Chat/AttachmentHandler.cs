@@ -44,8 +44,12 @@ public class AttachmentHandler(
     VectorizationGlobalSettings vectorizationGlobalSettings,
     ProviderSettings providerSettings,
     DataContentLoader dataContentLoader,
+    IConfiguration configuration,
     ILogger<AttachmentHandler> logger)
 {
+    private static int? _maxAttachmentsCount;
+    private int MaxAttachmentsCount => _maxAttachmentsCount ??= configuration.GetValue("ai:maxAttachmentsCount", 5);
+
     public async IAsyncEnumerable<AttachmentResult> HandleAsync(
         ChatExecutionContext context,
         IEnumerable<int> filesIds,
@@ -54,14 +58,28 @@ public class AttachmentHandler(
         var modelSettings = providerSettings.GetModel(context.ClientOptions.Provider, context.ClientOptions.ModelId);
         ArgumentNullException.ThrowIfNull(modelSettings);
 
-        await foreach (var files in HandleAsync(modelSettings.Multimodal, filesIds, context.ChatId, context.Agent.Id))
+        var count = 0;
+
+        await foreach (var result in HandleAsync(modelSettings.Multimodal, filesIds, context.ChatId, context.Agent.Id))
         {
-            yield return files;
+            if (count >= MaxAttachmentsCount)
+            {
+                yield break;
+            }
+
+            count++;
+            yield return result;
         }
 
-        await foreach (var files in HandleAsync(modelSettings.Multimodal, thirdPartyFilesIds, context.ChatId, context.Agent.Id))
+        await foreach (var result in HandleAsync(modelSettings.Multimodal, thirdPartyFilesIds, context.ChatId, context.Agent.Id))
         {
-            yield return files;
+            if (count >= MaxAttachmentsCount)
+            {
+                yield break;
+            }
+
+            count++;
+            yield return result;
         }
     }
     
@@ -108,6 +126,11 @@ public class AttachmentHandler(
                 }
 
                 if (!multimodal.Image.Formats.Contains(extension))
+                {
+                    continue;
+                }
+
+                if (multimodal.Image.MaxSize > 0 && file.ContentLength > multimodal.Image.MaxSize)
                 {
                     continue;
                 }

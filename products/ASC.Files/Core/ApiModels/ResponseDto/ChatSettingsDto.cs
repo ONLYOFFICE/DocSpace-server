@@ -88,4 +88,10 @@ public class ChatImageMultimodalSettingsDto
     /// </summary>
     /// <example>[".jpeg", ".gif"]</example>
     public IEnumerable<string> Formats { get; init; }
+
+    /// <summary>
+    /// The maximum image size in bytes. 0 means no limit.
+    /// </summary>
+    /// <example>20971520</example>
+    public long MaxSize { get; init; }
 }

@@ -55,4 +55,5 @@ public class MultimodalSettings
 public class ImageMultimodalSettings
 {
     public required HashSet<string> Formats { get; init; }
+    public long MaxSize { get; init; }
 }

@@ -403,7 +403,8 @@ public class FolderDtoHelper(
                     {
                         Image = new ChatImageMultimodalSettingsDto
                         {
-                            Formats = multimodalSettings.Image.Formats
+                            Formats = multimodalSettings.Image.Formats,
+                            MaxSize = multimodalSettings.Image.MaxSize
                         }
                     };
                 }
