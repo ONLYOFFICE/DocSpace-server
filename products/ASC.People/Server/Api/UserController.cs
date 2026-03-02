@@ -985,6 +985,8 @@ public class UserController(
     /// <path>api/2.0/people/email</path>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "Detailed profile information", typeof(EmployeeFullDto))]
+    [SwaggerResponse(400, "Incorrect email")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(404, "User not found")]
     [AllowNotPayment]
     [HttpGet("email")]
@@ -997,7 +999,9 @@ public class UserController(
             ? emailValidationKeyModelHelper.DecryptEmail(inDto.EncEmail)
             : inDto.Email;
 
-        var user = await _userManager.GetUserByEmailAsync(email);
+        ArgumentException.ThrowIfNullOrWhiteSpace(email);
+
+        var user = await _userManager.GetUserByEmailAsync(email.Trim());
 
         var isConfirmLink = _httpContextAccessor.HttpContext!.User.Claims
             .Any(role => role.Type == ClaimTypes.Role &&

@@ -71,7 +71,7 @@ public class DocSpaceWebSearchEngine(HttpClient client, DocSpaceWebSearchConfig 
         {
             Title = x.Title,
             Url = x.Url,
-            FaviconUrl = x.FaviconUrl,
+            FaviconUrl = x.Favicon,
             Text = x.Text
         });
     }
@@ -107,8 +107,8 @@ public class DocSpaceWebSearchEngine(HttpClient client, DocSpaceWebSearchConfig 
         {
             Title = result.Title,
             Url = result.Url,
-            FaviconUrl = result.FaviconUrl,
-            Text = result.Text
+            FaviconUrl = result.Favicon,
+            Text = result.Text,
         };
     }
 }
@@ -116,17 +116,14 @@ public class DocSpaceWebSearchEngine(HttpClient client, DocSpaceWebSearchConfig 
 public class SearchRequest
 {
     public required string Query { get; init; }
-    
-    [JsonPropertyName("num_results")]
     public int NumResults { get; init; } = 5;
-    
-    [JsonPropertyName("max_text_characters")]
     public int MaxTextCharacters { get; init; }
 }
 
 public class ContentsRequest
 {
     public required string Url { get; init; }
+    public int? MaxTextCharacters { get; init; }
 }
 
 public class SearchResponse
@@ -138,6 +135,6 @@ public class SearchResult
 {
     public string? Title { get; init; }
     public string? Url { get; init; }
-    public string? FaviconUrl { get; init; }
+    public string? Favicon { get; init; }
     public required string Text { get; init; }
 }

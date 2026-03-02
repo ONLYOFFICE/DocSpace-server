@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2026
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,35 +24,29 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.MCP.Transport;
+namespace ASC.Core.Tenants;
 
-public class DocSpaceTransportBuilder(
-    CookiesManager cookiesManager,
-    CommonLinkUtility commonLinkUtility,
-    IHttpContextAccessor httpContextAccessor,
-    IHttpClientFactory httpClientFactory) : ITransportBuilder
+/// <summary>
+/// The AI models availability settings.
+/// </summary>
+[Scope]
+[Serializable]
+public class TenantAiModelsAvailabilitySettings : ISettings<TenantAiModelsAvailabilitySettings>
 {
-    public ValueTask<HttpClientTransport> BuildAsync(McpServerConnection connection)
+    /// <summary>
+    /// The list of disabled AI model IDs.
+    /// </summary>
+    public List<string> DisabledModels { get; set; }
+
+    public static Guid ID => new("{0882E21C-0779-42DB-92BF-328AB1745BCC}");
+
+    public TenantAiModelsAvailabilitySettings GetDefault()
     {
-        var authorization = cookiesManager.GetCookies(CookiesType.AuthKey);
-
-        if (string.IsNullOrEmpty(authorization))
-        {
-            authorization = httpContextAccessor.HttpContext?.Request.Headers.Authorization.ToString() ?? string.Empty;
-        }
-
-        var options = new HttpClientTransportOptions
-        {
-            Name = connection.Name,
-            Endpoint = new Uri(connection.Endpoint),
-            AdditionalHeaders = new Dictionary<string, string>
-            {
-                {"Referer", commonLinkUtility.GetFullAbsolutePath(string.Empty).TrimEnd('/') + "/"},
-                {"Authorization", authorization}
-            }
-        };
-
-        var transport = new HttpClientTransport(options, httpClientFactory.CreateClient());
-        return ValueTask.FromResult(transport);
+        return new TenantAiModelsAvailabilitySettings();
     }
+
+    /// <summary>
+    /// The date and time when the AI models availability settings were last modified.
+    /// </summary>
+    public DateTime LastModified { get; set; }
 }

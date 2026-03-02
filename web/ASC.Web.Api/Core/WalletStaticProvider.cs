@@ -24,35 +24,50 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.MCP.Transport;
+namespace ASC.Web.Api.Core;
 
-public class DocSpaceTransportBuilder(
-    CookiesManager cookiesManager,
-    CommonLinkUtility commonLinkUtility,
-    IHttpContextAccessor httpContextAccessor,
-    IHttpClientFactory httpClientFactory) : ITransportBuilder
+[Singleton]
+public class WalletStaticProvider
 {
-    public ValueTask<HttpClientTransport> BuildAsync(McpServerConnection connection)
-    {
-        var authorization = cookiesManager.GetCookies(CookiesType.AuthKey);
+    private readonly ConcurrentDictionary<string, string> _cache = new();
 
-        if (string.IsNullOrEmpty(authorization))
+    private static readonly Assembly _assembly = typeof(WalletStaticProvider).Assembly;
+    private static readonly string _assemblyName = _assembly.GetName().Name;
+
+    private const string DefaultKey = "default";
+
+    public async ValueTask<string> GetImageAsync(string key)
+    {
+        if (_cache.TryGetValue(key, out var img))
         {
-            authorization = httpContextAccessor.HttpContext?.Request.Headers.Authorization.ToString() ?? string.Empty;
+            return img;
         }
 
-        var options = new HttpClientTransportOptions
+        img = await ReadSvgResourceAsync(key);
+        if (img == null && key != DefaultKey)
         {
-            Name = connection.Name,
-            Endpoint = new Uri(connection.Endpoint),
-            AdditionalHeaders = new Dictionary<string, string>
-            {
-                {"Referer", commonLinkUtility.GetFullAbsolutePath(string.Empty).TrimEnd('/') + "/"},
-                {"Authorization", authorization}
-            }
-        };
+            img = await GetImageAsync(DefaultKey);
+        }
 
-        var transport = new HttpClientTransport(options, httpClientFactory.CreateClient());
-        return ValueTask.FromResult(transport);
+        if (img != null)
+        {
+            _cache.TryAdd(key, img);
+        }
+
+        return img;
+    }
+
+    private static async Task<string> ReadSvgResourceAsync(string key)
+    {
+        await using var stream = _assembly.GetManifestResourceStream($"{_assemblyName}.img.{key}.svg");
+
+        if (stream == null)
+        {
+            return null;
+        }
+
+        using var reader = new StreamReader(stream);
+
+        return await reader.ReadToEndAsync();
     }
 }
