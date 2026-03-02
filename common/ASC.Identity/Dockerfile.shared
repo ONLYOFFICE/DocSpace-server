@@ -27,7 +27,7 @@ COPY ${AUTHORIZATION_JAR} app.jar
 RUN java -Djarmode=tools -jar app.jar extract --launcher --destination extracted
 
 # Stage 4: Create the shared base image with JRE + merged dependencies
-FROM alpine:3.21
+FROM alpine:latest
 
 # Install required runtime dependencies
 RUN apk add --no-cache ca-certificates tzdata
