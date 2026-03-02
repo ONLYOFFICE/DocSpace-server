@@ -1643,7 +1643,7 @@ public class FileStorageService //: IFileStorageService
 
                 var counter = 0;
 
-                if (!string.IsNullOrWhiteSpace(docTemplate.ThumbnailPath))
+                if (!string.IsNullOrWhiteSpace(docTemplate?.ThumbnailPath))
                 {
                     foreach (var size in thumbnailSettings.Sizes)
                     {
@@ -5209,6 +5209,7 @@ public class FileStorageService //: IFileStorageService
                 }
 
                 var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+                await webhookManager.PublishAsync(WebhookTrigger.FormStopped, form);
                 await filesMessageService.SendAsync(MessageAction.FormStopped, form, MessageInitiator.DocsService, user?.DisplayUserName(false, displayUserSettingsHelper), form.Title);
 
                 break;

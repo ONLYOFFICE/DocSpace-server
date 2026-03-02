@@ -97,4 +97,9 @@ public class TfaValidateRequestsDto
     /// </summary>
     /// <example>123456</example>
     public required string Code { get; set; }
+
+    /// <summary>
+    /// Specifies whether the authentication is session-based.
+    /// </summary>
+    public bool Session { get; set; }
 }

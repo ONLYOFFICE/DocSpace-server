@@ -106,7 +106,7 @@ public class CustomTagsService(
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
-        if (names.Count == 0)
+        if (names == null || names.Count == 0)
         {
             return;
         }

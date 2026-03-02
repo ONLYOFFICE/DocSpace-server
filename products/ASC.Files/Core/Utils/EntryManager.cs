@@ -2303,6 +2303,7 @@ public class EntryManager(IDaoFactory daoFactory,
                     }
                     await fileTracker.RemoveAsync(form.Id);
                     await socketManager.StopEditAsync(form.Id);
+                    await webhookManager.PublishAsync(WebhookTrigger.FormFilledOut, form);
                     await filesMessageService.SendAsync(MessageAction.FormCompletelyFilled, form, MessageInitiator.DocsService, user?.DisplayUserName(false, displayUserSettingsHelper), form.Title);
                     await notifyClient.SendFormFillingEvent(room, form, allRoles.Select(role => role.UserId).ToList(), typeof(FormWasCompletelyFilledNotifyAction));
                 }
