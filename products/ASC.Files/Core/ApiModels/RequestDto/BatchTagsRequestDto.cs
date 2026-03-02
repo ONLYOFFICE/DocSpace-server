@@ -35,6 +35,7 @@ public class BatchTagsRequestDto
     /// The list of tag names.
     /// </summary>
     /// <example>["tag1", "tag2", "tag3"]</example>
+    [Required]
     public List<string> Names { get; set; }
 }
 
