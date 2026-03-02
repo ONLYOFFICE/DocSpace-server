@@ -34,42 +34,50 @@ public class WatermarkRequestDto
     /// <summary>
     /// Specifies whether watermarks are on or off.
     /// </summary>
+    /// <example>true</example>
     public bool? Enabled { get; set; }
 
     /// <summary>
     /// Specifies whether to display the following addditional information or not: username, user email, user IP address, current date and room name.
     /// </summary>
+    /// <example>1</example>
     public WatermarkAdditions Additions { get; set; }
 
     /// <summary>
     /// The watermark text.
     /// </summary>
+    /// <example>Confidential</example>
     [StringLength(255)]
     public string Text { get; set; }
 
     /// <summary>
     /// The watermark text and image rotate angle.
     /// </summary>
+    /// <example>-45</example>
     public int Rotate { get; set; }
 
     /// <summary>
     /// The watermark image scale.
     /// </summary>
+    /// <example>100</example>
     public int ImageScale { get; set; }
 
     /// <summary>
     /// The path to the temporary image file.
     /// </summary>
+    /// <example>/tmp/watermark.png</example>
     public string ImageUrl { get; set; }
 
     /// <summary>
     /// The watermark image height.
     /// </summary>
+    /// <example>100.0</example>
     public double ImageHeight { get; set; }
 
     /// <summary>
     /// The watermark image width.
     /// </summary>
+    /// <example>200.0</example>
     public double ImageWidth { get; set; }
 }
 
@@ -81,6 +89,7 @@ public class WatermarkRequestDto<T>
     /// <summary>
     /// The room ID.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "id")]
     public required T Id { get; set; }
 

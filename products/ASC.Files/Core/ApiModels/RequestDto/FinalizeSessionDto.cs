@@ -27,10 +27,18 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class FinalizeSessionDto<T>
-{    
+{
+    /// <summary>
+    /// The folder ID.
+    /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "folderId")]
     public T FolderId { get; set; }
-    
+
+    /// <summary>
+    /// The session ID.
+    /// </summary>
+    /// <example>doc_key_123</example>
     [FromRoute(Name = "sessionId")]
     public string SessionId { get; set; }
 }

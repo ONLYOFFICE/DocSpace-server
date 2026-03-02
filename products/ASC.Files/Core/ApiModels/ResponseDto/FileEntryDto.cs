@@ -47,60 +47,68 @@ public abstract class FileEntryBaseDto
     /// <summary>
     /// The file entry title.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "Some titile.txt/ Some title")]
+    /// <example>Some title.txt</example>
     public string Title { get; set; }
 
     /// <summary>
     /// The access rights to the file entry.
     /// </summary>
+    /// <example>1</example>
     public FileShare Access { get; set; }
 
     /// <summary>
     /// Provides information about the employee who shared the file or folder.
     /// </summary>
+    /// <example>{"displayName": "John Doe"}</example>
     public EmployeeDto SharedBy { get; set; }
 
     /// <summary>
     /// The information about the employee who owns the file entry.
     /// </summary>
+    /// <example>{"displayName": "John Doe"}</example>
     public EmployeeDto OwnedBy { get; set; }
 
     /// <summary>
     /// Specifies if the file entry is shared via link or not.
     /// </summary>
-    [SwaggerSchemaCustom(Example = false)]
+    /// <example>false</example>
     public bool Shared { get; set; }
 
     /// <summary>
     /// Specifies if the file entry is shared for user or not.
     /// </summary>
-    [SwaggerSchemaCustom(Example = false)]
+    /// <example>false</example>
     public bool SharedForUser { get; set; }
 
     /// <summary>
     /// Indicates whether the parent entity is shared.
     /// </summary>
+    /// <example>false</example>
     public bool ParentShared { get; set; }
 
     /// <summary>
     /// The short Web URL.
     /// </summary>
+    /// <example>http://localhost/s/abc123</example>
     [Url]
     public string ShortWebUrl { get; set; }
 
     /// <summary>
     /// The creation date and time of the file entry.
     /// </summary>
+    /// <example>2021-01-01T00:00:00Z</example>
     public ApiDateTime Created { get; set; }
 
     /// <summary>
     /// The file entry author.
     /// </summary>
+    /// <example>{"displayName": "John Doe"}</example>
     public EmployeeDto CreatedBy { get; set; }
 
     /// <summary>
     /// The last date and time when the file entry was updated.
     /// </summary>
+    /// <example>2021-01-01T00:00:00Z</example>
     public ApiDateTime Updated
     {
         get => field < Created ? Created : field;
@@ -110,51 +118,61 @@ public abstract class FileEntryBaseDto
     /// <summary>
     /// The date and time when the file entry will be automatically deleted.
     /// </summary>
+    /// <example>2021-01-01T00:00:00Z</example>
     public ApiDateTime AutoDelete { get; set; }
 
     /// <summary>
     /// The root folder type of the file entry.
     /// </summary>
+    /// <example>0</example>
     public FolderType RootFolderType { get; set; }
 
     /// <summary>
     /// The parent room type of the file entry.
     /// </summary>
+    /// <example>0</example>
     public FolderType? ParentRoomType { get; set; }
 
     /// <summary>
     /// The user who updated the file entry.
     /// </summary>
+    /// <example>{"displayName": "John Doe"}</example>
     public EmployeeDto UpdatedBy { get; set; }
 
     /// <summary>
     /// Specifies if the file entry provider is specified or not.
     /// </summary>
+    /// <example>false</example>
     public bool? ProviderItem { get; set; }
 
     /// <summary>
     /// The provider key of the file entry.
     /// </summary>
+    /// <example>google-drive</example>
     public string ProviderKey { get; set; }
 
     /// <summary>
     /// The provider ID of the file entry.
     /// </summary>
+    /// <example>1</example>
     public int? ProviderId { get; set; }
 
     /// <summary>
     /// The order of the file entry.
     /// </summary>
+    /// <example>1</example>
     public string Order { get; set; }
 
     /// <summary>
     /// Specifies if the file is a favorite or not.
     /// </summary>
+    /// <example>false</example>
     public bool? IsFavorite { get; set; }
 
     /// <summary>
     /// The file entry type.
     /// </summary>
+    /// <example>0</example>
     public abstract FileEntryType FileEntryType { get; }
 
     protected FileEntryBaseDto(FileEntry entry)
@@ -183,74 +201,87 @@ public abstract class FileEntryDto<T> : FileEntryBaseDto
     /// <summary>
     /// The file entry ID.
     /// </summary>
-    [SwaggerSchemaCustom(Example = 10)]
+    /// <example>10</example>
     public T Id { get; set; }
 
     /// <summary>
     /// The root folder ID of the file entry.
     /// </summary>
+    /// <example>1</example>
     public T RootFolderId { get; set; }
 
     /// <summary>
     /// The origin ID of the file entry.
     /// </summary>
+    /// <example>12</example>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public T OriginId { get; set; }
 
     /// <summary>
     /// The origin room ID of the file entry.
     /// </summary>
+    /// <example>22</example>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public T OriginRoomId { get; set; }
 
     /// <summary>
     /// The origin title of the file entry.
     /// </summary>
+    /// <example>Original Title</example>
     public string OriginTitle { get; set; }
 
     /// <summary>
     /// The origin room title of the file entry.
     /// </summary>
+    /// <example>Original Room</example>
     public string OriginRoomTitle { get; set; }
 
     /// <summary>
     /// Specifies if the file entry can be shared or not.
     /// </summary>
+    /// <example>true</example>
     public bool CanShare { get; set; }
 
     /// <summary>
     /// A dictionary representing the sharing settings for the file entry.
     /// </summary>
+    /// <example>{"ExternalLink": 1, "InvitationLink": 2}</example>
     public IDictionary<SubjectType, int> ShareSettings { get; set; }
 
     /// <summary>
     /// The actions that can be performed with the file entry.
     /// </summary>
+    /// <example>{"Read": true, "Edit": false, "Delete": false}</example>
     public IDictionary<FilesSecurityActions, bool> Security { get; set; }
 
     /// <summary>
     /// The available external rights of the file entry.
     /// </summary>
+    /// <example>{"ExternalLink": ["Read", "Edit"]}</example>
     public IDictionary<SubjectType, IEnumerable<string>> AvailableShareRights { get; set; }
 
     /// <summary>
     /// The request token of the file entry.
     /// </summary>
+    /// <example>token-abc-123</example>
     public string RequestToken { get; set; }
 
     /// <summary>
     /// Specifies if the folder can be accessed via an external link or not.
     /// </summary>
+    /// <example>false</example>
     public bool? External { get; set; }
 
     /// <summary>
     /// Represents the expiration date of the file entry.
     /// </summary>
+    /// <example>2021-01-01T00:00:00Z</example>
     public ApiDateTime ExpirationDate { get; set; }
 
     /// <summary>
     /// Indicates whether the shareable link associated with the file or folder has expired.
     /// </summary>
+    /// <example>false</example>
     public bool? IsLinkExpired { get; set; }
 
     protected FileEntryDto(FileEntry<T> entry)

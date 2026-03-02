@@ -34,6 +34,7 @@ public class GetFolderLinksRequestDto<T>
     /// <summary>
     /// The folder ID.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "id")]
     public required T Id { get; set; }
 }

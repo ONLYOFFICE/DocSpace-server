@@ -829,7 +829,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.Property<decimal>("Price")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("decimal(15,9)")
+                        .HasColumnType("decimal(10,4)")
                         .HasColumnName("price")
                         .HasDefaultValueSql("'0.00'");
 
@@ -999,195 +999,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             TenantId = -13,
                             Features = "aitools",
                             Name = "aitools",
-                            Price = 0m,
+                            Price = 1m,
+                            ServiceName = "ai-tools",
                             Visible = true,
-                            Wallet = true
-                        },
-                        new
-                        {
-                            TenantId = -14,
-                            Features = "websearch",
-                            Name = "websearch",
-                            Price = 0.006m,
-                            ServiceGroup = "aitools",
-                            ServiceName = "websearch",
-                            Visible = false,
-                            Wallet = true
-                        },
-                        new
-                        {
-                            TenantId = -15,
-                            Features = "webfetch",
-                            Name = "webfetch",
-                            Price = 0.0012m,
-                            ServiceGroup = "aitools",
-                            ServiceName = "webfetch",
-                            Visible = false,
-                            Wallet = true
-                        },
-                        new
-                        {
-                            TenantId = -16,
-                            Features = "embedding",
-                            Name = "embedding",
-                            Price = 0.000000024m,
-                            ServiceGroup = "aitools",
-                            ServiceName = "embedding",
-                            Visible = false,
-                            Wallet = true
-                        },
-                        new
-                        {
-                            TenantId = -17,
-                            Features = "deepseek31input",
-                            Name = "deepseek31input",
-                            Price = 0.000000252m,
-                            ServiceGroup = "aitools",
-                            ServiceName = "deepseek3.1input",
-                            Visible = false,
-                            Wallet = true
-                        },
-                        new
-                        {
-                            TenantId = -18,
-                            Features = "deepseek31output",
-                            Name = "deepseek31output",
-                            Price = 0.000000948m,
-                            ServiceGroup = "aitools",
-                            ServiceName = "deepseek3.1output",
-                            Visible = false,
-                            Wallet = true
-                        },
-                        new
-                        {
-                            TenantId = -19,
-                            Features = "claude45input",
-                            Name = "claude45input",
-                            Price = 0.0000036m,
-                            ServiceGroup = "aitools",
-                            ServiceName = "claude4.5input",
-                            Visible = false,
-                            Wallet = true
-                        },
-                        new
-                        {
-                            TenantId = -20,
-                            Features = "claude45output",
-                            Name = "claude45output",
-                            Price = 0.000018m,
-                            ServiceGroup = "aitools",
-                            ServiceName = "claude4.5output",
-                            Visible = false,
-                            Wallet = true
-                        },
-                        new
-                        {
-                            TenantId = -21,
-                            Features = "gpt5input",
-                            Name = "gpt5input",
-                            Price = 0.0000015m,
-                            ServiceGroup = "aitools",
-                            ServiceName = "gpt5input",
-                            Visible = false,
-                            Wallet = true
-                        },
-                        new
-                        {
-                            TenantId = -22,
-                            Features = "gpt5output",
-                            Name = "gpt5output",
-                            Price = 0.000012m,
-                            ServiceGroup = "aitools",
-                            ServiceName = "gpt5output",
-                            Visible = false,
-                            Wallet = true
-                        },
-                        new
-                        {
-                            TenantId = -23,
-                            Features = "deepseek32input",
-                            Name = "deepseek32input",
-                            Price = 0.0000003m,
-                            ServiceGroup = "aitools",
-                            ServiceName = "deepseek3.2input",
-                            Visible = false,
-                            Wallet = true
-                        },
-                        new
-                        {
-                            TenantId = -24,
-                            Features = "deepseek32output",
-                            Name = "deepseek32output",
-                            Price = 0.000000456m,
-                            ServiceGroup = "aitools",
-                            ServiceName = "deepseek3.2output",
-                            Visible = false,
-                            Wallet = true
-                        },
-                        new
-                        {
-                            TenantId = -25,
-                            Features = "gpt52input",
-                            Name = "gpt52input",
-                            Price = 0.0000021m,
-                            ServiceGroup = "aitools",
-                            ServiceName = "gpt5.2input",
-                            Visible = false,
-                            Wallet = true
-                        },
-                        new
-                        {
-                            TenantId = -26,
-                            Features = "gpt52output",
-                            Name = "gpt52output",
-                            Price = 0.0000168m,
-                            ServiceGroup = "aitools",
-                            ServiceName = "gpt5.2output",
-                            Visible = false,
-                            Wallet = true
-                        },
-                        new
-                        {
-                            TenantId = -27,
-                            Features = "gemini3proinput",
-                            Name = "gemini3proinput",
-                            Price = 0.0000024m,
-                            ServiceGroup = "aitools",
-                            ServiceName = "gemini3proinput",
-                            Visible = false,
-                            Wallet = true
-                        },
-                        new
-                        {
-                            TenantId = -28,
-                            Features = "gemini3prooutput",
-                            Name = "gemini3prooutput",
-                            Price = 0.0000144m,
-                            ServiceGroup = "aitools",
-                            ServiceName = "gemini3prooutput",
-                            Visible = false,
-                            Wallet = true
-                        },
-                        new
-                        {
-                            TenantId = -29,
-                            Features = "gemini3flashinput",
-                            Name = "gemini3flashinput",
-                            Price = 0.0000006m,
-                            ServiceGroup = "aitools",
-                            ServiceName = "gemini3flashinput",
-                            Visible = false,
-                            Wallet = true
-                        },
-                        new
-                        {
-                            TenantId = -30,
-                            Features = "gemini3flashoutput",
-                            Name = "gemini3flashoutput",
-                            Price = 0.0000036m,
-                            ServiceGroup = "aitools",
-                            ServiceName = "gemini3flashoutput",
-                            Visible = false,
                             Wallet = true
                         });
                 });
@@ -4092,8 +3906,17 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
+                    b.Property<bool?>("StartFilling")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("start_filling")
+                        .HasComputedColumnSql("IF(JSON_EXTRACT(`data`, '$.FormFilling.StartFilling') IS NULL, NULL, JSON_EXTRACT(`data`, '$.FormFilling.StartFilling'))", true);
+
                     b.HasKey("TenantId", "EntryId")
                         .HasName("PRIMARY");
+
+                    b.HasIndex("TenantId", "StartFilling", "EntryId")
+                        .HasDatabaseName("idx_tenant_start_entry");
 
                     b.ToTable("files_properties", (string)null);
                 });

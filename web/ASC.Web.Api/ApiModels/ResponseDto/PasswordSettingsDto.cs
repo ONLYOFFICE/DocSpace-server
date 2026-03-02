@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2026
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,41 +34,49 @@ public class PasswordSettingsDto
     /// <summary>
     /// The minimum number of characters required for valid passwords.
     /// </summary>
+    /// <example>8</example>
     public required int MinLength { get; set; }
 
     /// <summary>
     /// Specifies whether the password should contain the uppercase letters or not.
     /// </summary>
+    /// <example>true</example>
     public required bool UpperCase { get; set; }
 
     /// <summary>
     /// Specifies whether the password should contain the digits or not.
     /// </summary>
+    /// <example>true</example>
     public required bool Digits { get; set; }
 
     /// <summary>
     /// Specifies whether the password should contain the special symbols or not.
     /// </summary>
+    /// <example>false</example>
     public required bool SpecSymbols { get; set; }
 
     /// <summary>
     /// The allowed password characters in the regex string format.
     /// </summary>
+    /// <example>^[a-zA-Z0-9!@#$%^&amp;*()]+$</example>
     public required string AllowedCharactersRegexStr { get; set; }
 
     /// <summary>
     /// The password digits in the regex string format.
     /// </summary>
+    /// <example>(?=.*\\d)</example>
     public required string DigitsRegexStr { get; set; }
 
     /// <summary>
     /// The password uppercase letters in the regex string format.
     /// </summary>
+    /// <example>(?=.*[A-Z])</example>
     public required string UpperCaseRegexStr { get; set; }
 
     /// <summary>
     /// The passaword special symbols in the regex string format.
     /// </summary>
+    /// <example>(?=.*[!@#$%^&amp;*()])</example>
     public required string SpecSymbolsRegexStr { get; set; }
 }
 

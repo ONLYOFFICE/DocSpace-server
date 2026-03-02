@@ -34,15 +34,18 @@ public class StartReassignRequestDto
     /// <summary>
     /// The user ID whose data will be reassigned to another user.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     public required Guid FromUserId { get; set; }
 
     /// <summary>
     /// The user ID to whom all the data will be reassigned.
     /// </summary>
+    /// <example>11111111-1111-1111-1111-111111111111</example>
     public required Guid ToUserId { get; set; }
 
     /// <summary>
     /// Specifies whether to delete a profile when the data reassignment will be finished or not.
     /// </summary>
+    /// <example>false</example>
     public bool DeleteProfile { get; set; }
 }

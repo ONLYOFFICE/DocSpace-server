@@ -36,6 +36,7 @@ public class TenantBannerSettings : ISettings<TenantBannerSettings>
     /// <summary>
     /// The banners visibility flag.
     /// </summary>
+    /// <example>false</example>
     public bool Hidden { get; set; }
 
     /// <summary>
@@ -50,6 +51,10 @@ public class TenantBannerSettings : ISettings<TenantBannerSettings>
             Hidden = false
         };
     }
-
+    
+    /// <summary>
+    /// The timestamp indicating when the settings were last modified.
+    /// </summary>
+    /// <example>1990-01-01T00:00:00Z</example>
     public DateTime LastModified { get; set; }
 }

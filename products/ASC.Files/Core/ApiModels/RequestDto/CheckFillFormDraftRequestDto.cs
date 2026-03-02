@@ -34,21 +34,25 @@ public class CheckFillFormDraft
     /// <summary>
     /// The file version of the form draft.
     /// </summary>
+    /// <example>1</example>
     public required int Version { get; set; }
 
     /// <summary>
     /// The action with the form draft.
     /// </summary>
+    /// <example>view</example>
     public string Action { get; set; }
 
     /// <summary>
     /// Specifies whether to request the form for viewing or not.
     /// </summary>
+    /// <example>false</example>
     public bool RequestView => (Action ?? "").Equals("view", StringComparison.InvariantCultureIgnoreCase);
 
     /// <summary>
     /// Specifies whether to request an embedded form or not.
     /// </summary>
+    /// <example>false</example>
     public bool RequestEmbedded => (Action ?? "").Equals("embedded", StringComparison.InvariantCultureIgnoreCase);
 }
 
@@ -61,12 +65,14 @@ public class CheckFillFormDraftRequestDto<T>
     /// <summary>
     /// The file ID of the form draft.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "fileId")]
     public required T FileId { get; set; }
 
     /// <summary>
     /// The parameters for checking the form draft filling.
     /// </summary>
+    /// <example>{"version": 1, "action": "view"}</example>
     [FromBody]
     public required CheckFillFormDraft File { get; set; }
 }

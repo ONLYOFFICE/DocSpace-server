@@ -35,6 +35,7 @@ public class GetGroupByUserIdRequestDto
     /// <summary>
     /// The user ID.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "userid")]
     public required Guid UserId { get; set; }
 }
@@ -47,6 +48,7 @@ public class GetGroupByIdRequestDto
     /// <summary>
     /// The group ID.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "id")]
     public required Guid Id { get; set; }
 }

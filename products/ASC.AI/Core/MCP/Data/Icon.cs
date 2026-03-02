@@ -34,20 +34,24 @@ public class Icon
     /// <summary>
     /// Icon URL at 48x48 pixels resolution. Used for large previews and detail views.
     /// </summary>
+    /// <example>https://example.com/icon-48.png</example>
     public required string Icon48 { get; init; }
 
     /// <summary>
     /// Icon URL at 32x32 pixels resolution. Used for standard list items and cards.
     /// </summary>
+    /// <example>https://example.com/icon-32.png</example>
     public required string Icon32 { get; init; }
 
     /// <summary>
     /// Icon URL at 24x24 pixels resolution. Used for compact list items and inline displays.
     /// </summary>
+    /// <example>https://example.com/icon-24.png</example>
     public required string Icon24 { get; init; }
 
     /// <summary>
     /// Icon URL at 16x16 pixels resolution. Used for small indicators, tooltips, and favicons.
     /// </summary>
+    /// <example>https://example.com/icon-16.png</example>
     public required string Icon16 { get; init; }
 }

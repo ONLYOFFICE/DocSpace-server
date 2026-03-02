@@ -34,10 +34,12 @@ public class TransferGroupMembersRequestDto
     /// <summary>
     /// The group ID.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     public Guid GroupId { get; set; }
 
     /// <summary>
     /// The new group ID.
     /// </summary>
+    /// <example>11111111-1111-1111-1111-111111111111</example>
     public Guid NewGroupId { get; set; }
 }

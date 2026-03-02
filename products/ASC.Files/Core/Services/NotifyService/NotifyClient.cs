@@ -233,7 +233,7 @@ public class NotifyClient(
 
     public async Task SendFormSubmittedAsync<T>(Folder<T> room, FileEntry<T> originalForm, FileEntry<T> filledForm)
     {
-        if (filledForm.CreateBy.Equals(originalForm.CreateBy))
+        if (originalForm == null || filledForm.CreateBy.Equals(originalForm.CreateBy))
         {
             return;
         }

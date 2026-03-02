@@ -34,30 +34,36 @@ public class CheckDocServiceUrlRequestDto
     /// <summary>
     /// The ONLYOFFICE Docs URL address.
     /// </summary>
+    /// <example>https://documentserver.example.com</example>
     public required string DocServiceUrl { get; set; }
 
     /// <summary>
     /// The ONLYOFFICE Docs URL address in the local private network.
     /// </summary>
+    /// <example>https://documentserver-internal.example.com</example>
     public string DocServiceUrlInternal { get; set; }
 
     /// <summary>
     /// The ONLYOFFICE Docs URL address.
     /// </summary>
+    /// <example>https://documentserver-portal.example.com</example>
     public string DocServiceUrlPortal { get; set; }
 
     /// <summary>
     /// The signature secret of the ONLYOFFICE Docs.
     /// </summary>
+    /// <example>secret-key-123</example>
     public string DocServiceSignatureSecret { get; set; }
 
     /// <summary>
     /// The signature header of the ONLYOFFICE Docs.
     /// </summary>
+    /// <example>Authorization</example>
     public string DocServiceSignatureHeader { get; set; }
 
     /// <summary>
     /// Specifies if the SSL verification of the ONLYOFFICE Docs is enabled or not.
     /// </summary>
+    /// <example>true</example>
     public bool? DocServiceSslVerification { get; set; }
 }

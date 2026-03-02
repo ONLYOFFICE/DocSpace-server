@@ -75,6 +75,11 @@ public class CachedAiProviderDao(
         return providerDao.GetProvidersTotalCountAsync(tenantId);
     }
 
+    public Task<bool> IsProviderNameExistsAsync(int tenantId, string title, int excludedProviderId = 0)
+    {
+        return providerDao.IsProviderNameExistsAsync(tenantId, title, excludedProviderId);
+    }
+
     public async Task<AiProvider> UpdateProviderAsync(int tenantId, AiProvider provider)
     {
         provider = await providerDao.UpdateProviderAsync(tenantId, provider);

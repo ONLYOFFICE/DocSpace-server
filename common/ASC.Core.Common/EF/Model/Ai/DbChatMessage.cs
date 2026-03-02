@@ -29,7 +29,10 @@ namespace ASC.Core.Common.EF.Model.Ai;
 [EnumExtensions]
 public enum Role
 {
+    [Description("User")]
     User,
+
+    [Description("Assistant")]
     Assistant
 }
 

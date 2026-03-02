@@ -34,10 +34,12 @@ public class AutoCleanupRequestDto
     /// <summary>
     /// Specifies whether to enable the auto-clearing or not.
     /// </summary>
+    /// <example>true</example>
     public bool Set { get; set; }
 
     /// <summary>
     /// The time interval when the auto-clearing will be performed.
     /// </summary>
+    /// <example>0</example>
     public DateToAutoCleanUp Gap { get; set; }
 }

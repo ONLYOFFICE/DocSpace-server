@@ -34,12 +34,14 @@ public class DetailedInformationRequestDto
     /// <summary>
     /// The group ID.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "id")]
     public required Guid Id { get; set; }
 
     /// <summary>
     /// Specifies whether to include the group members or not.
     /// </summary>
+    /// <example>true</example>
     [FromQuery(Name = "includeMembers")]
     public bool IncludeMembers { get; set; } = true;
 }

@@ -38,8 +38,13 @@ public interface IToolPermissionProvider
 
 public enum ToolExecutionDecision
 {
+    [Description("Allow")]
     Allow,
+
+    [Description("AlwaysAllow")]
     AlwaysAllow,
+
+    [Description("Deny")]
     Deny
 }
 

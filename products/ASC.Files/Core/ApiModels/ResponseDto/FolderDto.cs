@@ -34,124 +34,183 @@ public class FolderDto<T> : FileEntryDto<T>
     /// <summary>
     /// The parent folder ID of the folder.
     /// </summary>
-    [SwaggerSchemaCustom(Example = 10)]
+    /// <example>10</example>
     public T ParentId { get; set; }
 
     /// <summary>
     /// The number of files that the folder contains.
     /// </summary>
-    [SwaggerSchemaCustom(Example = 5)]
+    /// <example>5</example>
     public int FilesCount { get; set; }
 
     /// <summary>
     /// The number of folders that the folder contains.
     /// </summary>
-    [SwaggerSchemaCustom(Example = 7)]
+    /// <example>7</example>
     public int FoldersCount { get; set; }
 
     /// <summary>
     /// Specifies if the folder can be shared or not.
     /// </summary>
+    /// <example>true</example>
     public bool? IsShareable { get; set; }
 
     /// <summary>
     /// The new element index in the folder.
     /// </summary>
+    /// <example>0</example>
     public int New { get; set; }
 
     /// <summary>
     /// Specifies if the folder notifications are enabled or not.
     /// </summary>
+    /// <example>false</example>
     public bool Mute { get; set; }
 
     /// <summary>
     /// The list of tags of the folder.
     /// </summary>
+    /// <example>["tag1", "tag2"]</example>
     public IEnumerable<string> Tags { get; set; }
 
     /// <summary>
     /// The folder logo.
     /// </summary>
+    /// <example>{"original": "", "large": "", "medium": "", "small": ""}</example>
     public Logo Logo { get; set; }
 
     /// <summary>
     /// Specifies if the folder is pinned or not.
     /// </summary>
+    /// <example>false</example>
     public bool Pinned { get; set; }
 
     /// <summary>
     /// The room type of the folder.
     /// </summary>
+    /// <example>0</example>
     public RoomType? RoomType { get; set; }
 
     /// <summary>
     /// Specifies if the folder is private or not.
     /// </summary>
+    /// <example>false</example>
     public bool Private { get; set; }
 
     /// <summary>
     /// Specifies if the folder is indexed or not.
     /// </summary>
+    /// <example>true</example>
     public bool Indexing { get; set; }
 
     /// <summary>
     /// Specifies if the folder can be downloaded or not.
     /// </summary>
+    /// <example>false</example>
     public bool DenyDownload { get; set; }
 
     /// <summary>
     /// The room data lifetime settings of the folder.
     /// </summary>
+    /// <example>{"value": 12, "deletePermanently": false}</example>
     public RoomDataLifetimeDto Lifetime { get; set; }
 
     /// <summary>
     /// The watermark settings of the folder.
     /// </summary>
+    /// <example>{"enabled": false}</example>
     public WatermarkDto Watermark { get; set; }
 
     /// <summary>
     /// The folder type.
     /// </summary>
+    /// <example>0</example>
     public FolderType? Type { get; set; }
 
     /// <summary>
     /// Specifies if the folder is placed in the room or not.
     /// </summary>
+    /// <example>false</example>
     public bool? InRoom { get; set; }
 
     /// <summary>
     /// The folder quota limit.
     /// </summary>
+    /// <example>1073741824</example>
     public long? QuotaLimit { get; set; }
 
     /// <summary>
     /// Specifies if the folder room has a custom quota or not.
     /// </summary>
+    /// <example>false</example>
     public bool? IsCustomQuota { get; set; }
 
     /// <summary>
     /// How much folder space is used (counter).
     /// </summary>
+    /// <example>524288000</example>
     public long? UsedSpace { get; set; }
 
     /// <summary>
     /// Specifies if the folder is password protected or not.
     /// </summary>
+    /// <example>false</example>
     public bool? PasswordProtected { get; set; }
 
     /// <summary>
     /// Specifies if an external link to the folder is expired or not.
     /// </summary>
+    /// <example>false</example>
     [Obsolete("Use IsLinkExpired instead")]
     public bool? Expired { get; set; }
 
     /// <summary>
     /// The file entry type of the folder.
     /// </summary>
+    /// <example>1</example>
     public override FileEntryType FileEntryType => FileEntryType.Folder;
 
+    /// <summary>
+    /// The AI chat settings for the folder room. Contains configuration for AI provider, model selection, and custom prompts.
+    /// Only applicable to rooms with AI chat functionality enabled. Null if the room does not have chat settings configured.
+    /// </summary>
+    /// <remarks>
+    /// This property configures AI-powered chat capabilities for a room. The settings include:
+    /// - ProviderId: Identifier for the AI provider (e.g., OpenAI, Azure, internal gateway)
+    /// - ModelId: Specific AI model to use (e.g., "gpt-4", "gpt-3.5-turbo")
+    /// - Prompt: Custom system prompt to guide AI behavior for this room
+    /// - Internal: Auto-calculated flag indicating if using the internal AI gateway
+    /// </remarks>
+    /// <example>
+    /// {
+    ///   "ProviderId": 1,
+    ///   "ModelId": "gpt-4",
+    ///   "Prompt": "You are a helpful assistant for project documentation.",
+    ///   "Internal": false
+    /// }
+    /// </example>
     public ChatSettings ChatSettings { get; set; }
-    
+
+    /// <summary>
+    /// The room type of the root folder. Indicates the type of the parent room if the current folder is nested within a room hierarchy.
+    /// This property helps identify the context in which a nested folder exists.
+    /// </summary>
+    /// <remarks>
+    /// When a folder is located inside a room (e.g., a subfolder within a collaboration room), this property indicates
+    /// the room type of the topmost room in the hierarchy. This is useful for applying room-specific logic or permissions
+    /// to nested folders.
+    ///
+    /// Common room types include:
+    /// - CustomRoom (2): Custom collaboration room
+    /// - FillingFormsRoom (4): Forms filling room
+    /// - EditingRoom (5): Document editing room
+    /// - ReviewRoom (6): Document review room
+    /// - ReadOnlyRoom (7): Read-only room
+    /// - PublicRoom (8): Public access room
+    ///
+    /// Null if the folder is not nested within a room or is itself a top-level room.
+    /// </remarks>
+    /// <example>2</example>
     public RoomType? RootRoomType { get; set; }
 }
 

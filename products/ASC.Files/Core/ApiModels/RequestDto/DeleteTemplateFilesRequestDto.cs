@@ -34,6 +34,7 @@ public class DeleteTemplateFilesRequestDto
     /// <summary>
     /// The file IDs.
     /// </summary>
+    /// <example>[1, 2, 3]</example>
     [FromBody]
     public IEnumerable<int> FileIds { get; set; }
 }

@@ -34,6 +34,7 @@ public class CreateApiKeyRequestDto
     /// <summary>
     /// The API key name.
     /// </summary>
+    /// <example>My API Key</example>
     [StringLength(30, ErrorMessage = "Incorrect name. Length must be less than 30")]
     [Required]
     public required string Name { get; set; }
@@ -41,11 +42,13 @@ public class CreateApiKeyRequestDto
     /// <summary>
     /// The list of permissions granted to the API key.
     /// </summary>
+    /// <example>["read", "write"]</example>
     public List<string> Permissions { get; set; }
 
     /// <summary>
     /// The number of days until the API key expires (null for no expiration).
     /// </summary>
+    /// <example>30</example>
     [Range(1, 365, ErrorMessage = "Incorrect number of days. Value must be between 1 and 365")]
     public int? ExpiresInDays { get; set; }
 }

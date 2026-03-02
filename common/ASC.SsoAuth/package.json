@@ -5,8 +5,7 @@
   "homepage": "http://www.onlyoffice.com",
   "private": true,
   "scripts": {
-    "start": "nodemon app.js",
-    "start:build": "yarn install && node app.js"
+    "start": "nodemon app.js"
   },
   "dependencies": {
     "@authenio/samlify-node-xmllint": "^2.0.0",

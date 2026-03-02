@@ -49,6 +49,14 @@
       <EmbeddedResource Include="img\customization.svg" />
       <EmbeddedResource Include="img\statistic.svg" />
       <EmbeddedResource Include="img\websearch_wallet.svg" />
+      <EmbeddedResource Include="img\anthropic.svg" />
+      <EmbeddedResource Include="img\crawling.svg" />
+      <EmbeddedResource Include="img\deepseek.svg" />
+      <EmbeddedResource Include="img\default.svg" />
+      <EmbeddedResource Include="img\embedding.svg" />
+      <EmbeddedResource Include="img\google.svg" />
+      <EmbeddedResource Include="img\openai.svg" />
+      <EmbeddedResource Include="img\search.svg" />
     </ItemGroup>
     <ItemGroup>
     <ProjectReference Include="..\..\common\ASC.Analyzers\ASC.Analyzers.csproj"  OutputItemType="Analyzer" ReferenceOutputAssembly="false" />

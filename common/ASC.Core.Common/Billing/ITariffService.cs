@@ -45,11 +45,13 @@ public interface ITariffService
     Task<bool> TopUpDepositAsync(int tenantId, decimal amount, string currency, string customerParticipantName, string siteName, Dictionary<string, string> metadata = null, bool waitForChanges = false);
 
     Task<Balance> GetCustomerBalanceAsync(int tenantId, bool refresh = false);
+    Task<Balance> GetCustomerServiceQuotaAsync(int tenantId, string serviceName, bool refresh = false);
     Task<Session> OpenCustomerSessionAsync(int tenantId, string serviceName, string externalRef, int quantity, int duration);
     Task<bool> CloseCustomerSessionAsync(int tenantId, int sessionId);
     Task<Session> ExtendCustomerSessionAsync(int tenantId, int sessionId, int duration);
     Task<bool> CompleteCustomerSessionAsync(int tenantId, string serviceName, int sessionId, int quantity, string customerParticipantName, Dictionary<string, string> metadata = null);
-    Task<Report> GetCustomerOperationsAsync(int tenantId, DateTime utcStartDate, DateTime utcEndDate, string participantName, bool? credit, bool? debit, int? offset, int? limit);
+    Task<ServicePayment> MakeServicePaymentAsync(int tenantId, string serviceName, int quantity, string customerParticipantName, Dictionary<string, string> metadata = null);
+    Task<Report> GetCustomerOperationsAsync(int tenantId, OperationFilter filter);
     Task<List<Currency>> GetAllAccountingCurrenciesAsync();
     List<string> GetSupportedAccountingCurrencies();
 

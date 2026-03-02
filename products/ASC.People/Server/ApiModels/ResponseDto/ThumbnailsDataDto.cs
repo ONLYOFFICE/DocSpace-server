@@ -51,36 +51,36 @@ public class ThumbnailsDataDto
     /// <summary>
     /// The thumbnail original photo.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "default_user_photo_size_1280-1280.png")]
+    /// <example>default_user_photo_size_1280-1280.png</example>
     public string Original { get; set; }
 
     /// <summary>
     /// The thumbnail retina.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "default_user_photo_size_360-360.png")]
+    /// <example>default_user_photo_size_360-360.png</example>
     public string Retina { get; set; }
 
     /// <summary>
     /// The thumbnail maximum size photo.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "default_user_photo_size_200-200.png")]
+    /// <example>default_user_photo_size_200-200.png</example>
     public string Max { get; set; }
 
     /// <summary>
     /// The thumbnail big size photo.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "default_user_photo_size_82-82.png")]
+    /// <example>default_user_photo_size_82-82.png</example>
     public string Big { get; set; }
 
     /// <summary>
     /// The thumbnail medium size photo.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "default_user_photo_size_48-48.png")]
+    /// <example>default_user_photo_size_48-48.png</example>
     public string Medium { get; set; }
 
     /// <summary>
     /// The thumbnail small size photo.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "default_user_photo_size_32-32.png")]
+    /// <example>default_user_photo_size_32-32.png</example>
     public string Small { get; set; }
 }

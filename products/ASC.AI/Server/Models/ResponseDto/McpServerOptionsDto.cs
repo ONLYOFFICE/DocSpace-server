@@ -26,12 +26,38 @@
 
 namespace ASC.AI.Models.ResponseDto;
 
+/// <summary>
+/// The MCP server options.
+/// </summary>
 public class McpServerOptionsDto
 {
+    /// <summary>
+    /// The MCP server ID.
+    /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     public Guid Id { get; init; }
+
+    /// <summary>
+    /// The MCP server name.
+    /// </summary>
+    /// <example>DocSpace Tools</example>
     public required string Name { get; init; }
+
+    /// <summary>
+    /// The MCP server description.
+    /// </summary>
+    /// <example>Provides document management tools</example>
     public string? Description { get; init; }
+
+    /// <summary>
+    /// The MCP server endpoint URL.
+    /// </summary>
+    /// <example>https://mcp.example.com/sse</example>
     public required string Endpoint { get; init; }
+
+    /// <summary>
+    /// The custom HTTP headers for the MCP server connection.
+    /// </summary>
     public Dictionary<string, string>? Headers { get; init; }
 }
 

@@ -46,21 +46,25 @@ public class FormsItemData
     /// <summary>
     /// The form data key.
     /// </summary>
+    /// <example>first_name</example>
     public string Key { get; set; }
 
     /// <summary>
     /// The form data tag.
     /// </summary>
+    /// <example>personal_info</example>
     public string Tag { get; set; }
 
     /// <summary>
     /// The form data value.
     /// </summary>
+    /// <example>John</example>
     public string Value { get; set; }
 
     /// <summary>
     /// The form data type.
     /// </summary>
+    /// <example>text</example>
     public string Type { get; set; }
 }
 
@@ -89,6 +93,11 @@ public class DbFormsItemDataSearch : SubmitFormsData, ISearchItem
     /// The original form ID.
     /// </summary>
     public int OriginalFormId { get; set; }
+
+    /// <summary>
+    /// The original form version.
+    /// </summary>
+    public int OriginalFormVersion { get; set; }
 
     /// <summary>
     /// The ID of the room where the form is located.

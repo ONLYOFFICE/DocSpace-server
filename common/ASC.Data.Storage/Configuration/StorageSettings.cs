@@ -78,11 +78,18 @@ public abstract class BaseStorageSettings<T> : ISettings<BaseStorageSettings<T>>
     /// <summary>
     /// The storage name.
     /// </summary>
+    /// <example>LocalStorage</example>
     public string Module { get; set; }
 
     /// <summary>
     /// The storage properties.
     /// </summary>
+    /// <example>
+    /// {
+    ///   "region": "eu-central-1",
+    ///   "bucket": "tenant-files"
+    /// }
+    /// </example>
     public Dictionary<string, string> Props { get; set; }
 
     [JsonIgnore]
@@ -97,6 +104,10 @@ public abstract class BaseStorageSettings<T> : ISettings<BaseStorageSettings<T>>
         throw new NotImplementedException();
     }
 
+    /// <summary>
+    /// The date and time when the storage settings were last modified.
+    /// </summary>
+    /// <example>2025-01-01T12:00:00Z</example>
     public DateTime LastModified { get; set; }
 }
 

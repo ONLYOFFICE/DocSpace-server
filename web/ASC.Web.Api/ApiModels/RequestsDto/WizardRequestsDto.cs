@@ -29,37 +29,51 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 /// <summary>
 /// The request parameters for initial configuration of the setup wizard.
 /// </summary>
+/// <example>
+/// {
+///   "lng": "en-US",
+///   "timeZone": "UTC",
+///   "amiId": "00000000-0000-0000-0000-000000000001",
+///   "subscribeFromSite": true
+/// }
+/// </example>
 public class WizardRequestsDto
 {
     /// <summary>
     /// The user's email address for authentication and communication.
     /// </summary>
+    /// <example>user@example.com</example>
     [EmailAddress]
     public required string Email { get; set; }
 
     /// <summary>
     /// The hashed representation of the user's password.
     /// </summary>
+    /// <example>2DYmIoA/aYKEksFocEf6uw==</example>
     public required string PasswordHash { get; set; }
 
     /// <summary>
     /// The user's preferred interface language code.
     /// </summary>
+    /// <example>en-US</example>
     public string Lng { get; set; }
 
     /// <summary>
     /// The user's time zone identifier.
     /// </summary>
+    /// <example>UTC</example>
     public string TimeZone { get; set; }
 
     /// <summary>
     /// The Amazon Machine Image (AMI) identifier.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000001</example>
     public string AmiId { get; set; }
 
     /// <summary>
     /// Specifies whether the user opted in for site communications.
     /// </summary>
+    /// <example>true</example>
     public bool SubscribeFromSite { get; set; }
 
     public void Deconstruct(out string email, out string passwordHash, out string lng, out string timeZone, out string amiid, out bool subscribeFromSite)

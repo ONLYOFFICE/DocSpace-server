@@ -34,10 +34,12 @@ public class CookieSettingsRequestsDto
     /// <summary>
     /// The cookie lifetime in minutes.
     /// </summary>
+    /// <example>525600</example>
     public int LifeTime { get; set; }
 
     /// <summary>
     /// Specifies whether the cookie settings are enabled or disabled.
     /// </summary>
+    /// <example>true</example>
     public bool Enabled { get; set; }
 }

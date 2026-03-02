@@ -34,41 +34,43 @@ public class AuthenticationTokenDto
     /// <summary>
     /// The authentication token.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "abcde12345")]
+    /// <example>abcde12345</example>
     public string Token { get; set; }
 
     /// <summary>
     /// The token expiration time.
     /// </summary>
+    /// <example>2024-01-15T10:30:00Z</example>
     public DateTime Expires { get; set; }
 
     /// <summary>
     /// Specifies if the authentication code is sent by SMS or not.
     /// </summary>
-    [SwaggerSchemaCustom(Example = false)]
+    /// <example>true</example>
     public bool Sms { get; set; }
 
     /// <summary>
     /// The phone number.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "")]
+    /// <example>+1***1234</example>
     public string PhoneNoise { get; set; }
 
     /// <summary>
     /// Specifies if the two-factor application is used or not.
     /// </summary>
-    [SwaggerSchemaCustom(Example = false)]
+    /// <example>true</example>
     public bool Tfa { get; set; }
 
     /// <summary>
     /// The two-factor authentication key.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "")]
+    /// <example>JBSWY3DPEHPK3PXP</example>
     public string TfaKey { get; set; }
 
     /// <summary>
     /// The confirmation email URL.
     /// </summary>
+    /// <example>https://example.com/confirm?token=abc123</example>
     [Url]
     public string ConfirmUrl { get; set; }
 }

@@ -34,6 +34,7 @@ public class ExternalShareRequestParam
     /// <summary>
     /// The password to share external data.
     /// </summary>
+    /// <example>p@ssw0rd</example>
     public string Password { get; set; }
 }
 
@@ -45,6 +46,7 @@ public class ExternalShareRequestDto
     /// <summary>
     /// The unique document identifier.
     /// </summary>
+    /// <example>doc_key_123</example>
     [FromRoute(Name = "key")]
     public required string Key { get; set; }
 

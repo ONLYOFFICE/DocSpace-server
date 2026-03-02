@@ -34,6 +34,10 @@ public class VectorizationStartRequestDto
     /// <summary>
     /// The vectorization parameters including file identifiers.
     /// </summary>
+    /// <remarks>
+    /// The body contains data required to initiate a vectorization task, including a collection of file IDs.
+    /// </remarks>
+    /// <example>{"files": [101, 102, 103]}</example>
     [FromBody]
     public required VectorizationStartRequestBody Body { get; init; }
 }
@@ -46,5 +50,6 @@ public class VectorizationStartRequestBody
     /// <summary>
     /// The set of file identifiers to submit for vectorization.
     /// </summary>
+    /// <example>[101, 102, 103]</example>
     public required HashSet<int> Files { get; init; }
 }

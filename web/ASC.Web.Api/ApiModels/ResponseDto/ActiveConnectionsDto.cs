@@ -29,16 +29,19 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 /// <summary>
 /// The active connections parameters.
 /// </summary>
+
 public class ActiveConnectionsDto
 {
     /// <summary>
     /// The login event.
     /// </summary>
+    /// <example>1</example>
     public required int LoginEvent { get; set; }
 
     /// <summary>
     /// The list of active connection items.
     /// </summary>
+    /// <example>[{"id": "conn1", "ip": "192.168.1.1"}]</example>
     public List<ActiveConnectionsItemDto> Items { get; set; }
 }
 
@@ -50,55 +53,66 @@ public class ActiveConnectionsItemDto
     /// <summary>
     /// The active connection ID.
     /// </summary>
+    /// <example>1</example>
     public required int Id { get; set; }
 
     /// <summary>
     /// The tenant ID.
     /// </summary>
+    /// <example>1</example>
     public required int TenantId { get; set; }
 
     /// <summary>
     /// The user ID.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     public required Guid UserId { get; set; }
 
     /// <summary>
     /// Specifies if the active connection has a mobile phone or not.
     /// </summary>
+    /// <example>true</example>
     public bool Mobile { get; set; }
 
     /// <summary>
     /// The IP address of the active connection.
     /// </summary>
+    /// <example>192.0.2.1</example>
     public string Ip { get; set; }
 
     /// <summary>
     /// The active connection country.
     /// </summary>
+    /// <example>United States</example>
     public string Country { get; set; }
 
     /// <summary>
     /// The active connection city.
     /// </summary>
+    /// <example>New York</example>
     public string City { get; set; }
 
     /// <summary>
     /// The active connection browser.
     /// </summary>
+    /// <example>Chrome 120.0</example>
     public string Browser { get; set; }
 
     /// <summary>
     /// The active connection platform.
     /// </summary>
+    /// <example>Windows</example>
     public string Platform { get; set; }
 
     /// <summary>
     /// The active connection date.
     /// </summary>
+    /// <example>2024-01-15T10:30:00Z</example>
     public ApiDateTime Date { get; set; }
 
     /// <summary>
     /// The active connection page.
     /// </summary>
+    /// <example>/rooms/shared</example>
     public string Page { get; set; }
 }

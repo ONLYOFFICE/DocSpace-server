@@ -53,6 +53,7 @@ public class AuthenticationController(
     AccountLinker accountLinker,
     CoreBaseSettings coreBaseSettings,
     Signature signature,
+    CustomNamingPeople customNamingPeople,
     DisplayUserSettingsHelper displayUserSettingsHelper,
     StudioSmsNotificationSettingsHelper studioSmsNotificationSettingsHelper,
     SettingsManager settingsManager,
@@ -606,6 +607,11 @@ public class AuthenticationController(
             messageService.SendLoginMessage(MessageAction.LoginFailRecaptcha, !string.IsNullOrEmpty(inDto.UserName) ? inDto.UserName : AuditResource.EmailNotSpecified);
             throw new RecaptchaException(Resource.RecaptchaInvalid);
         }
+        catch (AuthenticationException ex)
+        {
+            messageService.SendLoginMessage(action, !string.IsNullOrEmpty(inDto.UserName) ? inDto.UserName : AuditResource.EmailNotSpecified);
+            throw new AuthenticationException(ex.Message, ex);
+        }
         catch (Exception ex)
         {
             messageService.SendLoginMessage(action, !string.IsNullOrEmpty(inDto.UserName) ? inDto.UserName : AuditResource.EmailNotSpecified);
@@ -639,8 +645,14 @@ public class AuthenticationController(
             else if (!string.IsNullOrEmpty(loginProfile.EMail) && !string.IsNullOrEmpty(loginProfile.HashId))
             {
                 userInfo = await userManager.GetUserByEmailAsync(loginProfile.EMail);
-                if (userInfo.Id != Constants.LostUser.Id)
+                if (userInfo.Id != Constants.LostUser.Id && userInfo.Status != EmployeeStatus.Terminated)
                 {
+                    if (userInfo.ActivationStatus != EmployeeActivationStatus.Activated)
+                    {
+                        var msg = await customNamingPeople.Substitute<Resource>("ErrorEmailAlreadyExists");
+                        throw new AuthenticationException(msg);
+                    }
+
                     await accountLinker.AddLinkAsync(userInfo.Id, loginProfile);
                 }
             }

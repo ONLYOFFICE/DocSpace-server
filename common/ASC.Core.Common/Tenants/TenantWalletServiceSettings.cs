@@ -36,6 +36,7 @@ public class TenantWalletServiceSettings : ISettings<TenantWalletServiceSettings
     /// <summary>
     /// The list of the enabled wallet services.
     /// </summary>
+    /// <example>[-11, -12]</example>
     public List<TenantWalletService> EnabledServices { get; set; }
 
     public static Guid ID => new("{1285F7B0-9927-4911-9DA1-4F5D1F90FE73}");
@@ -48,5 +49,6 @@ public class TenantWalletServiceSettings : ISettings<TenantWalletServiceSettings
     /// <summary>
     /// The date and time when the wallet services settings were last modified.
     /// </summary>
+    /// <example>1990-01-01T00:00:00Z</example>
     public DateTime LastModified { get; set; }
 }

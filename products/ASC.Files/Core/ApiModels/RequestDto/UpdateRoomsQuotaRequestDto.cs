@@ -34,11 +34,13 @@ public class UpdateRoomsQuotaRequestDto<T>
     /// <summary>
     /// The list of room IDs.
     /// </summary>
+    /// <example>[1, 2, 3]</example>
     public IEnumerable<JsonElement> RoomIds { get; set; } = new List<JsonElement>();
 
     /// <summary>
     /// The room quota.
     /// </summary>
+    /// <example>10485760</example>
     public long Quota { get; set; }
 
 }
@@ -51,5 +53,6 @@ public class UpdateRoomsRoomIdsRequestDto<T>
     /// <summary>
     /// The list of room IDs.
     /// </summary>
+    /// <example>[1, 2, 3]</example>
     public IEnumerable<JsonElement> RoomIds { get; set; } = new List<JsonElement>();
 }

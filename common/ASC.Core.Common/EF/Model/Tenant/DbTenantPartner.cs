@@ -36,23 +36,27 @@ public class DbTenantPartner : BaseEntity
     /// <summary>
     /// The tenant ID.
     /// </summary>
+    /// <example>1</example>
     public int TenantId { get; set; }
 
     /// <summary>
     /// The partner ID.
     /// </summary>
+    /// <example>partner_123</example>
     [MaxLength(36)]
     public string PartnerId { get; set; }
 
     /// <summary>
     /// The affiliate ID.
     /// </summary>
+    /// <example>artifact_123</example>
     [MaxLength(50)]
     public string AffiliateId { get; set; }
 
     /// <summary>
     /// The tenant partner campaign.
     /// </summary>
+    /// <example>campaigh</example>
     [MaxLength(50)]
     public string Campaign { get; set; }
 

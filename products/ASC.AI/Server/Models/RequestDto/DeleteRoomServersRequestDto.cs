@@ -34,12 +34,14 @@ public class DeleteRoomServersRequestDto
     /// <summary>
     /// Identifier of the room from which MCP servers will be removed.
     /// </summary>
+    /// <example>42</example>
     [FromRoute(Name = "roomId")]
     public int RoomId { get; init; }
 
     /// <summary>
     /// Server identifiers to remove.
     /// </summary>
+    /// <example>{"servers": ["00000000-0000-0000-0000-000000000000"]}</example>
     [FromBody]
     public required DeleteRoomServersRequestBody Body { get; init; }
 }
@@ -52,5 +54,6 @@ public class DeleteRoomServersRequestBody
     /// <summary>
     /// Set of unique identifiers of MCP servers to remove from the room. Associated connections and tool configurations will also be cleaned up.
     /// </summary>
+    /// <example>["00000000-0000-0000-0000-000000000000"]</example>
     public required HashSet<Guid> Servers { get; init; }
 }

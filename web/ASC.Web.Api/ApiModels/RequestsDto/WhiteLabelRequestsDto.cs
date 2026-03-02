@@ -29,17 +29,25 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 /// <summary>
 /// The request parameters for configuring the white label branding settings.
 /// </summary>
+/// <example>
+/// {
+///   "logoText": "Company Name",
+///   "logo": ["item1", "item2"]
+/// }
+/// </example>
 public class WhiteLabelRequestsDto
 {
     /// <summary>
     /// The text to display alongside or in place of the logo.
     /// </summary>
+    /// <example>Company Name</example>
     [StringLength(40)]
     public string LogoText { get; set; }
 
     /// <summary>
     /// The white label tenant IDs with their logos (light or dark).
     /// </summary>
+    /// <example>["item1", "item2"]</example>
     public IEnumerable<ItemKeyValuePair<string, LogoRequestsDto>> Logo { get; set; }
 }
 
@@ -51,11 +59,13 @@ public class LogoRequestsDto
     /// <summary>
     /// The URL or base64-encoded image data for the light theme logo.
     /// </summary>
+    /// <example>data:image/png;base64,iVBORw0KGgoAAAANS...</example>
     public string Light { get; set; }
 
     /// <summary>
     /// The URL or base64-encoded image data for the dark theme logo.
     /// </summary>
+    /// <example>data:image/png;base64,iVBORw0KGgoAAAANS...</example>
     public string Dark { get; set; }
 }
 
@@ -67,10 +77,12 @@ public class WhiteLabelQueryRequestsDto
     /// <summary>
     /// Specifies if the white label logo is for the dark theme or not.
     /// </summary>
+    /// <example>true</example>
     public bool? IsDark { get; set; }
 
     /// <summary>
     /// Specifies if the logo is for a default tenant or not.
     /// </summary>
+    /// <example>true</example>
     public bool? IsDefault { get; set; }
 }

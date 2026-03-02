@@ -31,7 +31,12 @@ namespace ASC.Files.Core.Core.Entries;
 /// </summary>
 public enum Location
 {
+    [Description("Room")]
     Room = 1,
+
+    [Description("Documents")]
     Documents = 2,
+
+    [Description("Link")]
     Link = 3
 }

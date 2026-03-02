@@ -35,67 +35,79 @@ public class FileShareDto
     /// <summary>
     /// The access rights type.
     /// </summary>
+    /// <example>1</example>
     public FileShare Access { get; set; }
 
     /// <summary>
     /// The user who has the access to the specified file.
     /// </summary>
+    /// <example>{"displayName": "John Doe"}</example>
     [Obsolete]
     public object SharedTo { get; set; }
 
     /// <summary>
     /// The user who has the access to the specified file.
     /// </summary>
+    /// <example>{"displayName": "John Doe"}</example>
     public EmployeeFullDto SharedToUser { get; set; }
 
     /// <summary>
     /// The user who has the access to the specified file.
     /// </summary>
+    /// <example>{"id": "00000000-0000-0000-0000-000000000000", "name": "Marketing"}</example>
     public GroupSummaryDto SharedToGroup { get; set; }
 
     /// <summary>
     /// The user who has the access to the specified file.
     /// </summary>
+    /// <example>{"id": "00000000-0000-0000-0000-000000000000", "title": "Shared Document", "shareLink": "http://localhost/share/abc123"}</example>
     public FileShareLink SharedLink { get; set; }
 
     /// <summary>
     /// Specifies if the access right is locked or not.
     /// </summary>
-    [SwaggerSchemaCustom(Example = false)]
+    /// <example>false</example>
     public required bool IsLocked { get; set; }
 
     /// <summary>
     /// Specifies if the user is an owner of the specified file or not.
     /// </summary>
+    /// <example>false</example>
     public required bool IsOwner { get; set; }
 
     /// <summary>
     /// Specifies if the user can edit the access to the specified file or not.
     /// </summary>
+    /// <example>true</example>
     public required bool CanEditAccess { get; set; }
 
     /// <summary>
     /// Indicates whether internal editing permissions are granted.
     /// </summary>
+    /// <example>true</example>
     public required bool CanEditInternal { get; set; }
 
     /// <summary>
     /// Determines whether the user has permission to modify the deny download setting for the file share.
     /// </summary>
+    /// <example>true</example>
     public required bool CanEditDenyDownload { get; set; }
 
     /// <summary>
     /// Indicates whether the expiration date of access permissions can be edited.
     /// </summary>
+    /// <example>true</example>
     public required bool CanEditExpirationDate { get; set; }
 
     /// <summary>
     /// Specifies whether the file sharing access can be revoked by the current user.
     /// </summary>
+    /// <example>true</example>
     public required bool CanRevoke { get; set; }
     /// <summary>
     /// The subject type.
     /// </summary>
+    /// <example>0</example>
     public required SubjectType SubjectType { get; set; }
 }
 
@@ -107,16 +119,19 @@ public class FileShareLink
     /// <summary>
     /// The unique identifier of the shared link.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     public Guid Id { get; set; }
 
     /// <summary>
     /// The title of the shared content.
     /// </summary>
+    /// <example>Shared Document</example>
     public string Title { get; set; }
 
     /// <summary>
     /// The URL for accessing the shared content.
     /// </summary>
+    /// <example>http://localhost/share/abc123</example>
     public string ShareLink { get; set; }
 
     /// <summary>
@@ -127,46 +142,55 @@ public class FileShareLink
     /// <summary>
     /// The sharing link type (e.g., Invitation).
     /// </summary>
+    /// <example>0</example>
     public LinkType LinkType { get; set; }
 
     /// <summary>
     /// The password protection for accessing the shared content.
     /// </summary>
+    /// <example>password123</example>
     public string Password { get; set; }
 
     /// <summary>
     /// Indicates whether downloading of the shared content is prohibited.
     /// </summary>
+    /// <example>false</example>
     public bool? DenyDownload { get; set; }
 
     /// <summary>
     /// Indicates whether the shared link has expired.
     /// </summary>
+    /// <example>false</example>
     public bool? IsExpired { get; set; }
 
     /// <summary>
     /// Indicates whether this is the primary shared link.
     /// </summary>
+    /// <example>true</example>
     public bool Primary { get; set; }
 
     /// <summary>
     /// Indicates whether the link is for the internal sharing only.
     /// </summary>
+    /// <example>false</example>
     public bool? Internal { get; set; }
 
     /// <summary>
     /// The token for validating access requests.
     /// </summary>
+    /// <example>token-abc-123</example>
     public string RequestToken { get; set; }
 
     /// <summary>
     /// The maximum number of times the invitation link can be used.
     /// </summary>
+    /// <example>10</example>
     public int? MaxUseCount { get; set; }
 
     /// <summary>
     /// The current number of times the invitation link has been used.
     /// </summary>
+    /// <example>5</example>
     public int? CurrentUseCount { get; set; }
 }
 
