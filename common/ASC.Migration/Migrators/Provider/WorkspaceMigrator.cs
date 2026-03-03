@@ -36,6 +36,7 @@ public class WorkspaceMigrator : Migrator
     public WorkspaceMigrator(
         SecurityContext securityContext,
         UserManager userManager,
+        UserPhotoManager userPhotoManager,
         TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
         QuotaSocketManager quotaSocketManager,
         FileStorageService fileStorageService,
@@ -46,7 +47,7 @@ public class WorkspaceMigrator : Migrator
         AuthContext authContext,
         DisplayUserSettingsHelper displayUserSettingsHelper,
         UserManagerWrapper userManagerWrapper,
-        UserSocketManager socketManager) : base(securityContext, userManager, tenantQuotaFeatureStatHelper, quotaSocketManager, fileStorageService, globalFolderHelper, serviceProvider, daoFactory, migrationLogger, authContext, displayUserSettingsHelper, userManagerWrapper, socketManager)
+        UserSocketManager socketManager) : base(securityContext, userManager, userPhotoManager, tenantQuotaFeatureStatHelper, quotaSocketManager, fileStorageService, globalFolderHelper, serviceProvider, daoFactory, migrationLogger, authContext, displayUserSettingsHelper, userManagerWrapper, socketManager)
     {
         MigrationInfo = new MigrationInfo { Name = "Workspace" };
     }
