@@ -544,6 +544,14 @@ public abstract class Migrator(
         return folder?.Level ?? 0;
     }
 
+    public async Task SaveLogAsync()
+    {
+        if (MigrationLogger != null)
+        {
+            await MigrationLogger.SaveLogAsync();
+        }
+    }
+
     public async ValueTask DisposeAsync()
     {
         if (MigrationLogger != null)
