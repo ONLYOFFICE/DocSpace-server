@@ -42,7 +42,7 @@ public class ModelSettings
 {
     public required string Id { get; init; }
     public required string Alias { get; init; }
-    public int MaxOutputTokens { get; init; }
+    public int? MaxOutputTokens { get; init; }
     public MultimodalSettings? Multimodal { get; init; }
 }
 
