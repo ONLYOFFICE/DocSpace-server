@@ -31,17 +31,17 @@ public static class AuthorizationExtension
 
     public static readonly Dictionary<string, string[]> ScopesMap = new()
     {
-        { "GET api/[0-9].[0-9]/files/rooms", [ "rooms:read", "rooms:write" ] },
-        { "(POST|PUT|DELETE|UPDATE) api/[0-9].[0-9]/files/rooms", [ "rooms:write" ] },
-        { "GET api/[0-9].[0-9]/files", [ "files:read", "files:write" ] },
-        { "(POST|PUT|DELETE|UPDATE) api/[0-9].[0-9]/files", [ "files:write" ] },
-        { "GET api/[0-9].[0-9]/people/@self", [ "accounts.self:read", "accounts.self:write" ] },
-        { "(POST|PUT|DELETE|UPDATE) api/[0-9].[0-9]/people/@self", [ "accounts.self:write" ] },
-        { "GET api/[0-9].[0-9]/people", [ "accounts:read", "accounts:write" ] },
-        { "(POST|PUT|DELETE|UPDATE) api/[0-9].[0-9]/people", [ "accounts:write" ] },
-        { "GET api/[0-9].[0-9]/group", [ "accounts:read" ] },
-        { "(POST|PUT|DELETE|UPDATE) api/[0-9].[0-9]/group", [ "accounts:write" ] },
-        { "(GET|POST|PUT|DELETE|UPDATE) api/[0-9].[0-9]/keys(/.*)?", [ "*" ] }
+        { "GET api/[^/]+/files/rooms", [ "rooms:read", "rooms:write" ] },
+        { "(POST|PUT|DELETE|UPDATE) api/[^/]+/files/rooms", [ "rooms:write" ] },
+        { "GET api/[^/]+/files", [ "files:read", "files:write" ] },
+        { "(POST|PUT|DELETE|UPDATE) api/[^/]+/files", [ "files:write" ] },
+        { "GET api/[^/]+/people/@self", [ "accounts.self:read", "accounts.self:write" ] },
+        { "(POST|PUT|DELETE|UPDATE) api/[^/]+/people/@self", [ "accounts.self:write" ] },
+        { "GET api/[^/]+/people", [ "accounts:read", "accounts:write" ] },
+        { "(POST|PUT|DELETE|UPDATE) api/[^/]+/people", [ "accounts:write" ] },
+        { "GET api/[^/]+/group", [ "accounts:read" ] },
+        { "(POST|PUT|DELETE|UPDATE) api/[^/]+/group", [ "accounts:write" ] },
+        { "(GET|POST|PUT|DELETE|UPDATE) api/[^/]+/keys(/.*)?", [ "*" ] }
     };
 
     private static string GetAuthorizePolicy(string routePattern, string httpMethod)
