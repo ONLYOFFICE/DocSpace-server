@@ -86,6 +86,7 @@ public class CreateWebhooksConfigRequestsDto
     /// Target ID
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000001</example>
+    [StringLength(255)]
     public string TargetId { get; set; }
 }
 
