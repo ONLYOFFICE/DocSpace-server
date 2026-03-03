@@ -29,7 +29,7 @@ using TextContent = Microsoft.Extensions.AI.TextContent;
 
 namespace ASC.AI.Core.Chat.History;
 
-public class AnthropicHistoryAdapter : HistoryAdapter
+public class AnthropicHistoryAdapter(DataContentLoader dataContentLoader) : HistoryAdapter(dataContentLoader)
 {
     protected override IEnumerable<ChatMessage> AdaptAssistantMessage(Message message)
     {

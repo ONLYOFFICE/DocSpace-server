@@ -24,29 +24,68 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Models.ResponseDto;
+namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 /// <summary>
-/// Available AI provider type settings.
+/// The chat settings parameters.
 /// </summary>
-public class ProviderSettingsDto
+public class ChatSettingsDto
 {
     /// <summary>
-    /// AI provider type identifier.
+    /// The AI provider ID.
     /// </summary>
-    /// <example>0</example>
-    public ProviderType Type { get; init; }
+    /// <example>1</example>
+    public int ProviderId { get; set; }
 
     /// <summary>
-    /// Default API endpoint URL for the provider type.
+    /// The AI model ID used for chat completions.
     /// </summary>
-    /// <example>https://api.openai.com/v1</example>
-    public string? Url { get; init; }
+    /// <example>gpt-5.2</example>
+    public string ModelId { get; init; }
+
+    /// <summary>
+    /// The AI model display alias.
+    /// </summary>
+    /// <example>GPT-5.2</example>
+    public string ModelAlias { get; init; }
+
+    /// <summary>
+    /// The system prompt for the chat.
+    /// </summary>
+    /// <example>You are a helpful assistant.</example>
+    public string Prompt { get; init; }
+
+    /// <summary>
+    /// The multimodal settings for the chat model.
+    /// </summary>
+    public ChatMultimodalSettingsDto Multimodal { get; init; }
+
+    /// <summary>
+    /// Indicates whether this is an internal AI gateway provider.
+    /// </summary>
+    /// <example>false</example>
+    public bool Internal => ProviderId == AiGateway.ProviderId;
 }
 
-[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
-    PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
-public static partial class ProviderSettingsMapper
+/// <summary>
+/// The multimodal settings for the chat model.
+/// </summary>
+public class ChatMultimodalSettingsDto
 {
-    public static partial ProviderSettingsDto MapToDto(this ProviderSettingsData settings);
+    /// <summary>
+    /// The image multimodal settings.
+    /// </summary>
+    public ChatImageMultimodalSettingsDto Image { get; init; }
+}
+
+/// <summary>
+/// The image multimodal settings for the chat model.
+/// </summary>
+public class ChatImageMultimodalSettingsDto
+{
+    /// <summary>
+    /// The supported image formats.
+    /// </summary>
+    /// <example>[".jpeg", ".gif"]</example>
+    public IEnumerable<string> Formats { get; init; }
 }

@@ -61,7 +61,8 @@ public class MessageDtoConverter(
     TenantManager tenantManager,
     ApiDateTimeHelper dateTimeHelper,
     McpService mcpService,
-    McpIconStore iconStore)
+    McpIconStore iconStore,
+    DataContentDtoMapper dataContentDtoMapper)
 {
     public async Task<MessageDto> ConvertAsync(Message message)
     {
@@ -92,7 +93,10 @@ public class MessageDtoConverter(
                 
                         continue;
                     }
-                case AttachmentMessageContent attachment:
+                case DataMessageContent data:
+                    contents.Add(dataContentDtoMapper.MapToDto(data));
+                    continue;
+                case TextAttachmentMessageContent attachment:
                     contents.Add(attachment.MapToDto());
                     continue;
                 case TextMessageContent text:

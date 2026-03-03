@@ -24,23 +24,32 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Settings;
+using ASC.Files.Core.Helpers;
+using ASC.Web.Studio.Utility;
 
-public class AiSettings
+namespace ASC.AI.Models.ResponseDto;
+
+public class DataContentDto : MessageContentDto
 {
-    public bool WebSearchEnabled { get; init; }
-    public bool WebSearchNeedReset { get; init; }
-    public bool VectorizationEnabled { get; init; }
-    public bool VectorizationNeedReset { get; init; }
-    public bool AiReady { get; init; }
-    public bool AiReadyNeedReset { get; init; }
-    public required string EmbeddingModel { get; init; }
-    public required IReadOnlyDictionary<string, string> ModelAliases { get; init; }
-    public Guid? PortalMcpServerId { get; init; }
-    public string KnowledgeSearchToolName => KnowledgeSearchTool.Name;
-    public string WebSearchToolName => WebSearchTool.Name;
-    public string WebCrawlingToolName => WebCrawlingTool.Name;
-    public string GenerateDocxToolName => GenerateDocxTool.Name;
-    public string GenerateFormToolName => GenerateFormTool.Name;
-    public string GeneratePresentationToolName => GeneratePresentationTool.Name;
+    public override MessageContentType Type => MessageContentType.Data;
+    public int Id { get; init; }
+    public required string Title { get; init; }
+    public string? Url { get; set; }
+}
+
+[Scope]
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
+    PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public partial class DataContentDtoMapper(CommonLinkUtility commonLinkUtility, FilesLinkUtility filesLinkUtility)
+{
+    [UserMapping(Default = true)]
+    public DataContentDto MapToDto(DataMessageContent source)
+    {
+        var target = Map(source);
+        target.Url = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileDownloadUrl(source.Id));
+
+        return target;
+    }
+    
+    private partial DataContentDto Map(DataMessageContent source);
 }

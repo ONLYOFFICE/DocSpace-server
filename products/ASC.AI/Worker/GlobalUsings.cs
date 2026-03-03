@@ -27,12 +27,33 @@
 global using ASC.AI.Core.Database;
 
 global using ASC.Api.Core;
+global using ASC.AI.Core.Chat.Data;
+global using ASC.AI.Core.Chat.Deletion;
 global using ASC.Api.Core.Extensions;
+global using ASC.AI.Core.Export;
+global using ASC.AI.Worker;
+global using ASC.AI.Worker.BackgroundServices;
+global using ASC.AI.Worker.Extensions;
+global using ASC.AI.Worker.Handlers;
+global using ASC.AI.Worker.Log;
 
+global using ASC.Core;
+global using ASC.Core.Common.EF;
+global using ASC.Core.Common.Hosting;
+global using ASC.Common;
+global using ASC.Common.DependencyInjection;
+
+global using ASC.Common.Threading;
+
+global using ASC.EventBus.Abstractions;
+global using ASC.EventBus.Log;
+
+global using ASC.Files.Core;
 global using ASC.Files.Core.Core;
 global using ASC.Files.Core.EF;
+global using ASC.Files.Core.Vectorization;
+global using ASC.Files.Core.Vectorization.Events;
 
-global using ASC.Core.Common.EF;
 
 global using Autofac;
 
@@ -42,7 +63,4 @@ global using NLog;
 
 global using System.Text;
 
-global using ASC.Common;
-global using ASC.Core;
-global using ASC.EventBus.Abstractions;
-global using ASC.EventBus.Log;
+global using ASC.Web.Files.Utils;

@@ -30,7 +30,8 @@ namespace ASC.AI.Core.Retrieval.Web;
 public class AiSettingsStore(
     SettingsManager settingsManager,
     InstanceCrypto instanceCrypto,
-    TenantManager tenantManager)
+    TenantManager tenantManager,
+    AiConfiguration aiConfiguration)
 {
     public async Task SetWebSearchSettingsAsync(WebSearchSettings webSearchSettings)
     {
@@ -142,5 +143,10 @@ public class AiSettingsStore(
     {
         var settings = await settingsManager.LoadAsync<EncryptedVectorizationSettings>();
         return settings.ProviderType != EmbeddingProviderType.None;
+    }
+
+    public IReadOnlyDictionary<string, string> GetModelAliases()
+    {
+        return aiConfiguration.GetModelAliases();
     }
 }

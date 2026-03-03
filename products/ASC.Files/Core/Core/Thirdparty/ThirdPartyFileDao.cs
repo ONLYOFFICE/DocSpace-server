@@ -353,7 +353,8 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
     {
         return await SaveFileAsync(file, fileStream);
     }
-    public async Task<File<string>> SaveFileAsync(File<string> file, Stream fileStream)
+
+    public async Task<File<string>> SaveFileAsync(File<string> file, Stream fileStream, Guid chatId = default)
     {
         ArgumentNullException.ThrowIfNull(file);
         ArgumentNullException.ThrowIfNull(fileStream);
@@ -553,14 +554,12 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         return Dao.ToFile(newFile);
     }
 
-    public Task<File<int>> CopyFileAsync(string fileId, int toFolderId)
+    public Task<File<int>> CopyFileAsync(string fileId, int toFolderId, Guid chatId)
     {
-        var moved = crossDao.PerformCrossDaoFileCopyAsync(
+        return crossDao.PerformCrossDaoFileCopyAsync(
             fileId, this, daoSelector.ConvertId,
             toFolderId, fileDao, r => r,
-            false);
-
-        return moved;
+            false, chatId);
     }
 
     public async Task<string> FileRenameAsync(File<string> file, string newTitle)

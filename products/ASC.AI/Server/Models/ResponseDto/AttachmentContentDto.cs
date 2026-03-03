@@ -59,5 +59,5 @@ public class AttachmentContentDto : MessageContentDto
     PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
 public static partial class AttachmentContentDtoMapper
 {
-    public static partial AttachmentContentDto MapToDto(this AttachmentMessageContent source);
+    public static partial AttachmentContentDto MapToDto(this TextAttachmentMessageContent source);
 }

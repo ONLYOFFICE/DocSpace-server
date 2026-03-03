@@ -37,7 +37,8 @@ public class ChatCompletionGenerator(
     ChatHistory chatHistory,
     ChatNameGenerator chatNameGenerator,
     ChatExecutionContext context,
-    IServiceScopeFactory serviceScopeFactory)
+    IServiceScopeFactory serviceScopeFactory,
+    AttachmentHandler attachmentHandler)
 {
     public async IAsyncEnumerable<ChatCompletion> GenerateCompletionAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
@@ -79,11 +80,12 @@ public class ChatCompletionGenerator(
                     if (context.Chat == null)
                     {
                         var tempTitle = chatNameGenerator.Generate(context.RawMessage);
-                    
+
                         context.Chat = await chatHistory.AddChatAsync(
                             context.TenantId,
                             context.Agent.Id,
                             context.User.Id,
+                            context.ChatId,
                             tempTitle,
                             context.RawMessage,
                             context.Attachments);
@@ -176,16 +178,18 @@ public class ChatCompletionGenerator(
                 }
             }
 
-            if (errorCaptured)
+            if (!errorCaptured)
             {
-                break;
+                continue;
             }
+
+            await attachmentHandler.CleanupAsync(context.Attachments);
+            break;
         }
-        
+
         var chatResponse = responses.ToChatResponse();
 
         var messageId = await chatHistory.AddAssistantMessagesAsync(context.Chat!.Id, chatResponse.Messages);
-        
         if (messageId > 0)
         {
             await socketManager.CommitMessageAsync(context.Chat.Id, messageId);

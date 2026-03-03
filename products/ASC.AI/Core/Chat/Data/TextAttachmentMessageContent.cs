@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2026
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,23 +24,17 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Settings;
+namespace ASC.AI.Core.Chat.Data;
 
-public class AiSettings
+public class TextAttachmentMessageContent : AttachmentMessageContent
 {
-    public bool WebSearchEnabled { get; init; }
-    public bool WebSearchNeedReset { get; init; }
-    public bool VectorizationEnabled { get; init; }
-    public bool VectorizationNeedReset { get; init; }
-    public bool AiReady { get; init; }
-    public bool AiReadyNeedReset { get; init; }
-    public required string EmbeddingModel { get; init; }
-    public required IReadOnlyDictionary<string, string> ModelAliases { get; init; }
-    public Guid? PortalMcpServerId { get; init; }
-    public string KnowledgeSearchToolName => KnowledgeSearchTool.Name;
-    public string WebSearchToolName => WebSearchTool.Name;
-    public string WebCrawlingToolName => WebCrawlingTool.Name;
-    public string GenerateDocxToolName => GenerateDocxTool.Name;
-    public string GenerateFormToolName => GenerateFormTool.Name;
-    public string GeneratePresentationToolName => GeneratePresentationTool.Name;
+    public required JsonElement Id { get; init; }
+    public required string Title { get; init; }
+    public required string Extension { get; init; }
+    public required string Content { get; init; }
+    
+    public override AIContent ToAiContent()
+    {
+        return new TextContent($"##Attachment: {Title}\n\n{Content}\n\n");
+    }
 }

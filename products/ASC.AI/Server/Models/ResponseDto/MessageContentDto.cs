@@ -50,7 +50,8 @@ public enum MessageContentType
     /// A file attachment reference.
     /// </summary>
     [Description("Attachment")]
-    Attachment
+    Attachment,
+    Data
 }
 
 /// <summary>
@@ -59,6 +60,7 @@ public enum MessageContentType
 [JsonDerivedType(typeof(TextContentDto))]
 [JsonDerivedType(typeof(ToolContentDto))]
 [JsonDerivedType(typeof(AttachmentContentDto))]
+[JsonDerivedType(typeof(DataContentDto))]
 public abstract class MessageContentDto
 {
     /// <summary>

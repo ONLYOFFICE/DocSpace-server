@@ -30,6 +30,7 @@ public partial class AiDbContext(DbContextOptions<AiDbContext> options) : BaseDb
 {
     public DbSet<DbChat> Chats { get; set; }
     public DbSet<DbChatMessage> Messages { get; set; }
+    public DbSet<DbChatMessageAttachment> MessageAttachments { get; set; }
     public DbSet<DbAiProvider> Providers { get; set; }
     public DbSet<DbDefaultAiProvider> DefaultProviders { get; set; }
     public DbSet<DbRoomSettings> RoomSettings { get; set; }
@@ -50,6 +51,7 @@ public partial class AiDbContext(DbContextOptions<AiDbContext> options) : BaseDb
             .AddDbDefaultAiProviders()
             .AddDbChats()
             .AddDbChatsMessages()
+            .AddDbChatMessageAttachment()
             .AddDbMcpServers()
             .AddDbMcpServerStates()
             .AddDbMcpServerSettings()
