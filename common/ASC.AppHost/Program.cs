@@ -55,7 +55,8 @@ switch (builder.Configuration["DOTNET_LAUNCH_PROFILE"])
     case "frontend-dev":
         connectionManager.AddMySql(withDbGate: true)
             .AddRedis()
-            .AddMailPit();
+            .AddMailPit()
+            .AddMcpServer();
         
         configurator
             .AddProject<ASC_Files>(Constants.FilesPort)
