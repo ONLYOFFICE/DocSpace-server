@@ -977,6 +977,32 @@ public class UserController(
     }
 
     /// <remarks>
+    /// Returns a boolean indicating whether a user with the specified email exists on the portal.
+    /// </remarks>
+    /// <summary>
+    /// Check if a user exists by email
+    /// </summary>
+    /// <path>api/2.0/people/exists</path>
+    [Tags("People / Profiles")]
+    [SwaggerResponse(200, "Boolean result", typeof(bool))]
+    [SwaggerResponse(400, "Incorrect email")]
+    [AllowNotPayment]
+    [HttpGet("exists")]
+    [Authorize(AuthenticationSchemes = "confirm", Roles = "LinkInvite,GuestShareLink,Everyone")]
+    public async Task<bool> CheckUserExistsByEmail(GetMemberByEmailRequestDto inDto)
+    {
+        var email = string.IsNullOrEmpty(inDto.Email) && !string.IsNullOrEmpty(inDto.EncEmail)
+            ? emailValidationKeyModelHelper.DecryptEmail(inDto.EncEmail)
+            : inDto.Email;
+
+        ArgumentException.ThrowIfNullOrWhiteSpace(email);
+
+        var user = await _userManager.GetUserByEmailAsync(email.Trim());
+
+        return user.Id != Constants.LostUser.Id;
+    }
+    
+    /// <remarks>
     /// Returns the detailed information about a profile of the user with the email specified in the request.
     /// </remarks>
     /// <summary>
@@ -988,9 +1014,7 @@ public class UserController(
     [SwaggerResponse(400, "Incorrect email")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(404, "User not found")]
-    [AllowNotPayment]
     [HttpGet("email")]
-    [Authorize(AuthenticationSchemes = "confirm", Roles = "LinkInvite,GuestShareLink,Everyone")]
     public async Task<EmployeeFullDto> GetProfileByEmail(GetMemberByEmailRequestDto inDto)
     {
         var cultureInfo = string.IsNullOrEmpty(inDto.Culture) ? null : new CultureInfo(inDto.Culture);
@@ -1003,19 +1027,9 @@ public class UserController(
 
         var user = await _userManager.GetUserByEmailAsync(email.Trim());
 
-        var isConfirmLink = _httpContextAccessor.HttpContext!.User.Claims
-            .Any(role => role.Type == ClaimTypes.Role &&
-                ConfirmTypeExtensions.TryParse(role.Value, out var confirmType) &&
-                confirmType is ConfirmType.LinkInvite or ConfirmType.GuestShareLink);
-
         if (user.Id == Constants.LostUser.Id)
         {
             throw new ItemNotFoundException(Resource.ResourceManager.GetString("ErrorUserNotFound", cultureInfo));
-        }
-
-        if (isConfirmLink)
-        {
-            return await employeeFullDtoHelper.GetSimple(user, false);
         }
 
         if (!await _userManager.CanUserViewAnotherUserAsync(authContext.CurrentAccount.ID, user.Id))
