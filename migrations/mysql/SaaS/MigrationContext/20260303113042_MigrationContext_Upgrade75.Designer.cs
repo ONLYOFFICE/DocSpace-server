@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     [DbContext(typeof(MigrationContext))]
-    [Migration("20260302092350_MigrationContext_Upgrade74")]
-    partial class MigrationContext_Upgrade74
+    [Migration("20260303113042_MigrationContext_Upgrade75")]
+    partial class MigrationContext_Upgrade75
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -5461,8 +5461,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasDefaultValueSql("''");
 
                     b.Property<string>("TargetId")
-                        .HasMaxLength(36)
-                        .HasColumnType("varchar(36)")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("target_id")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
