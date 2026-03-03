@@ -4,6 +4,7 @@ using ASC.Migrations.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     [DbContext(typeof(MigrationContext))]
-    partial class MigrationContextModelSnapshot : ModelSnapshot
+    [Migration("20260303081437_MigrationContext_Upgrade74")]
+    partial class MigrationContext_Upgrade74
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1620,10 +1623,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("datetime")
                         .HasColumnName("created_on");
 
-                    b.Property<DateTime?>("DeletedOn")
-                        .HasColumnType("datetime")
-                        .HasColumnName("deleted_on");
-
                     b.Property<DateTime>("ModifiedOn")
                         .HasColumnType("datetime")
                         .HasColumnName("modified_on");
@@ -1651,9 +1650,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.HasKey("Id")
                         .HasName("PRIMARY");
-
-                    b.HasIndex("DeletedOn")
-                        .HasDatabaseName("IX_deleted_on");
 
                     b.HasIndex("TenantId", "Id")
                         .HasDatabaseName("IX_tenant_id_id");
@@ -3510,46 +3506,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.ToTable("event_bus_integration_event_log", (string)null);
 
                     b.HasAnnotation("MySql:CharSet", "utf8");
-                });
-
-            modelBuilder.Entity("ASC.Files.Core.EF.DbChatMessageAttachment", b =>
-                {
-                    b.Property<int>("TenantId")
-                        .HasColumnType("int")
-                        .HasColumnName("tenant_id");
-
-                    b.Property<Guid>("ChatId")
-                        .HasColumnType("char(36)")
-                        .HasColumnName("chat_id")
-                        .UseCollation("utf8_general_ci")
-                        .HasAnnotation("MySql:CharSet", "utf8");
-
-                    b.Property<int>("FileId")
-                        .HasColumnType("int")
-                        .HasColumnName("file_id");
-
-                    b.Property<long?>("MessageId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("message_id");
-
-                    b.Property<DateTime>("ModifiedOn")
-                        .HasColumnType("datetime")
-                        .HasColumnName("modified_on");
-
-                    b.HasKey("TenantId", "ChatId", "FileId")
-                        .HasName("PRIMARY");
-
-                    b.HasIndex("ChatId")
-                        .HasDatabaseName("IX_chat_id");
-
-                    b.HasIndex("FileId")
-                        .HasDatabaseName("IX_file_id");
-
-                    b.ToTable("files_chat_message_attachment", (string)null);
-
-                    b
-                        .HasAnnotation("MySql:CharSet", "utf8")
-                        .HasAnnotation("Relational:Collation", "utf8_general_ci");
                 });
 
             modelBuilder.Entity("ASC.Files.Core.EF.DbFile", b =>
@@ -5940,17 +5896,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 });
 
             modelBuilder.Entity("ASC.EventBus.Extensions.Logger.IntegrationEventLogEntry", b =>
-                {
-                    b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
-                        .WithMany()
-                        .HasForeignKey("TenantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Tenant");
-                });
-
-            modelBuilder.Entity("ASC.Files.Core.EF.DbChatMessageAttachment", b =>
                 {
                     b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
                         .WithMany()

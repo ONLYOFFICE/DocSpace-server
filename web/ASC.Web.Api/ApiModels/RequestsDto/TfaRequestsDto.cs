@@ -101,5 +101,6 @@ public class TfaValidateRequestsDto
     /// <summary>
     /// Specifies whether the authentication is session-based.
     /// </summary>
+    /// <example>true</example>
     public bool Session { get; set; }
 }
