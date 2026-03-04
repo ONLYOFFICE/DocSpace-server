@@ -196,6 +196,9 @@ public class MyCSharpClientCodegen extends CSharpClientCodegen {
                     }
 
                     if (op.allParams != null) {
+                        // Find parameters with oneOf/anyOf composition
+                        List<CodegenParameter> composedParams = new ArrayList<>();
+
                         for (CodegenParameter param : op.allParams) {
                             if (!param.isPrimitiveType)
                             {
@@ -213,7 +216,73 @@ public class MyCSharpClientCodegen extends CSharpClientCodegen {
                                         }
                                     }
                                 }
+
+                                // Check if this parameter is a oneOf/anyOf composed schema
+                                for (ModelMap modelMap : allModels) {
+                                    CodegenModel model = modelMap.getModel();
+                                    if (model.classname.equals(typeName) && model.getComposedSchemas() != null) {
+                                        List<CodegenProperty> oneOfTypes = model.getComposedSchemas().getOneOf();
+                                        List<CodegenProperty> anyOfTypes = model.getComposedSchemas().getAnyOf();
+
+                                        if (oneOfTypes != null && !oneOfTypes.isEmpty()) {
+                                            param.vendorExtensions.put("x-isComposedOneOf", true);
+                                            param.vendorExtensions.put("x-oneOfTypes", oneOfTypes);
+                                            composedParams.add(param);
+                                        } else if (anyOfTypes != null && !anyOfTypes.isEmpty()) {
+                                            param.vendorExtensions.put("x-isComposedAnyOf", true);
+                                            param.vendorExtensions.put("x-anyOfTypes", anyOfTypes);
+                                            composedParams.add(param);
+                                        }
+                                    }
+                                }
                             }
+                        }
+
+                        // Generate method overloads for oneOf/anyOf parameters
+                        if (!composedParams.isEmpty()) {
+                            List<Map<String, Object>> methodOverloads = new ArrayList<>();
+
+                            for (CodegenParameter composedParam : composedParams) {
+                                List<CodegenProperty> types = composedParam.vendorExtensions.containsKey("x-oneOfTypes")
+                                    ? (List<CodegenProperty>) composedParam.vendorExtensions.get("x-oneOfTypes")
+                                    : (List<CodegenProperty>) composedParam.vendorExtensions.get("x-anyOfTypes");
+
+                                for (CodegenProperty type : types) {
+                                    Map<String, Object> overload = new HashMap<>();
+                                    overload.put("composedParamName", composedParam.paramName);
+                                    overload.put("composedParamBaseName", composedParam.baseName);
+                                    overload.put("composedParamDataType", type.dataType);
+                                    overload.put("composedParamDescription", composedParam.description);
+                                    overload.put("composedParamRequired", composedParam.required);
+                                    overload.put("originalDataType", composedParam.dataType);
+
+                                    // Copy all params for this overload
+                                    List<Map<String, Object>> overloadParams = new ArrayList<>();
+                                    for (CodegenParameter p : op.allParams) {
+                                        Map<String, Object> paramMap = new HashMap<>();
+                                        if (p == composedParam) {
+                                            paramMap.put("paramName", p.paramName);
+                                            paramMap.put("dataType", type.dataType);
+                                            paramMap.put("description", p.description);
+                                            paramMap.put("required", p.required);
+                                            paramMap.put("isComposed", true);
+                                        } else {
+                                            paramMap.put("paramName", p.paramName);
+                                            paramMap.put("dataType", p.dataType);
+                                            paramMap.put("description", p.description);
+                                            paramMap.put("required", p.required);
+                                            paramMap.put("isComposed", false);
+                                        }
+                                        paramMap.put("hasMore", !p.equals(op.allParams.get(op.allParams.size() - 1)));
+                                        overloadParams.add(paramMap);
+                                    }
+                                    overload.put("params", overloadParams);
+                                    methodOverloads.add(overload);
+                                }
+                            }
+
+                            op.vendorExtensions.put("x-hasMethodOverloads", true);
+                            op.vendorExtensions.put("x-methodOverloads", methodOverloads);
                         }
                     }
                 }

@@ -56,6 +56,28 @@ namespace {{packageName}}.{{apiPackage}}.{{x-folder}}
     {
         #region Asynchronous Operations
         {{#operation}}
+        {{#vendorExtensions.x-hasMethodOverloads}}
+        {{#vendorExtensions.x-methodOverloads}}
+        /// <summary>
+        /// {{summary}}
+        /// </summary>
+        /// <remarks>
+        /// {{notes}}
+        /// </remarks>
+        /// <exception cref="{{packageName}}.Client.ApiException">Thrown when fails to make API call</exception>
+        {{#params}}
+        /// <param name="{{paramName}}">{{description}}{{^required}} (optional{{#defaultValue}}, default to {{.}}{{/defaultValue}}){{/required}}{{#isDeprecated}} (deprecated){{/isDeprecated}}</param>
+        {{/params}}
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <seealso href="{{vendorExtensions.x-seealsoUrl}}">REST API Reference for {{operationId}} Operation</seealso>
+        /// <returns>Task of {{returnType}}{{^returnType}}void{{/returnType}}</returns>
+        {{#isDeprecated}}
+        [Obsolete]
+        {{/isDeprecated}}
+        {{#returnType}}Task<{{{.}}}>{{/returnType}}{{^returnType}}Task{{/returnType}} {{operationId}}Async({{#params}}{{{dataType}}} {{paramName}}{{^required}}{{#optionalMethodArgument}} = default{{/optionalMethodArgument}}{{/required}}{{#hasMore}}, {{/hasMore}}{{/params}}{{#params}}{{#-first}}, {{/-first}}{{/params}}CancellationToken cancellationToken = default);
+        {{/vendorExtensions.x-methodOverloads}}
+        {{/vendorExtensions.x-hasMethodOverloads}}
+        {{^vendorExtensions.x-hasMethodOverloads}}
         /// <summary>
         /// {{summary}}
         /// </summary>
@@ -73,7 +95,30 @@ namespace {{packageName}}.{{apiPackage}}.{{x-folder}}
         [Obsolete]
         {{/isDeprecated}}
         {{#returnType}}Task<{{{.}}}>{{/returnType}}{{^returnType}}Task{{/returnType}} {{operationId}}Async({{#allParams}}{{{dataType}}} {{paramName}}{{^required}}{{#optionalMethodArgument}} = default{{/optionalMethodArgument}}{{/required}}{{^-last}}, {{/-last}}{{/allParams}}{{#allParams.0}}, {{/allParams.0}}CancellationToken cancellationToken = default);
+        {{/vendorExtensions.x-hasMethodOverloads}}
 
+        {{#vendorExtensions.x-hasMethodOverloads}}
+        {{#vendorExtensions.x-methodOverloads}}
+        /// <summary>
+        /// {{summary}}
+        /// </summary>
+        /// <remarks>
+        /// {{notes}}
+        /// </remarks>
+        /// <exception cref="{{packageName}}.Client.ApiException">Thrown when fails to make API call</exception>
+        {{#params}}
+        /// <param name="{{paramName}}">{{description}}{{^required}} (optional{{#defaultValue}}, default to {{.}}{{/defaultValue}}){{/required}}{{#isDeprecated}} (deprecated){{/isDeprecated}}</param>
+        {{/params}}
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <seealso href="{{vendorExtensions.x-seealsoUrl}}">REST API Reference for {{operationId}} Operation</seealso>
+        /// <returns>Task of ApiResponse{{#returnType}} ({{.}}){{/returnType}}</returns>
+        {{#isDeprecated}}
+        [Obsolete]
+        {{/isDeprecated}}
+        Task<ApiResponse<{{{returnType}}}{{^returnType}}Object{{/returnType}}>> {{operationId}}WithHttpInfoAsync({{#params}}{{{dataType}}} {{paramName}}{{^required}}{{#optionalMethodArgument}} = default{{/optionalMethodArgument}}{{/required}}{{#hasMore}}, {{/hasMore}}{{/params}}{{#params}}{{#-first}}, {{/-first}}{{/params}}CancellationToken cancellationToken = default);
+        {{/vendorExtensions.x-methodOverloads}}
+        {{/vendorExtensions.x-hasMethodOverloads}}
+        {{^vendorExtensions.x-hasMethodOverloads}}
         /// <summary>
         /// {{summary}}
         /// </summary>
@@ -91,6 +136,7 @@ namespace {{packageName}}.{{apiPackage}}.{{x-folder}}
         [Obsolete]
         {{/isDeprecated}}
         Task<ApiResponse<{{{returnType}}}{{^returnType}}Object{{/returnType}}>> {{operationId}}WithHttpInfoAsync({{#allParams}}{{{dataType}}} {{paramName}}{{^required}}{{#optionalMethodArgument}} = default{{/optionalMethodArgument}}{{/required}}{{^-last}}, {{/-last}}{{/allParams}}{{#allParams.0}}, {{/allParams.0}}CancellationToken cancellationToken = default);
+        {{/vendorExtensions.x-hasMethodOverloads}}
         {{/operation}}
         #endregion Asynchronous Operations
     }
@@ -585,6 +631,38 @@ namespace {{packageName}}.{{apiPackage}}.{{x-folder}}
         }
 
         {{#supportsAsync}}
+        {{#vendorExtensions.x-hasMethodOverloads}}
+        {{#vendorExtensions.x-methodOverloads}}
+        /// <summary>
+        /// {{summary}}
+        /// </summary>
+        {{#notes}}
+        /// <remarks>
+        /// {{.}}
+        /// </remarks>
+        {{/notes}}
+        /// <exception cref="{{packageName}}.Client.ApiException">Thrown when fails to make API call</exception>
+        {{#params}}
+        /// <param name="{{paramName}}">{{description}}{{^required}} (optional{{#defaultValue}}, default to {{.}}{{/defaultValue}}){{/required}}{{#isDeprecated}} (deprecated){{/isDeprecated}}</param>
+        {{/params}}
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <seealso href="{{vendorExtensions.x-seealsoUrl}}">REST API Reference for {{operationId}} Operation</seealso>
+        /// <returns>Task of {{returnType}}{{^returnType}}void{{/returnType}}</returns>
+        {{#isDeprecated}}
+        [Obsolete]
+        {{/isDeprecated}}
+        {{#returnType}}public async Task<{{{.}}}>{{/returnType}}{{^returnType}}public async Task{{/returnType}} {{operationId}}Async({{#params}}{{{dataType}}} {{paramName}}{{^required}}{{#optionalMethodArgument}} = default{{/optionalMethodArgument}}{{/required}}{{#hasMore}}, {{/hasMore}}{{/params}}{{#params}}{{#-first}}, {{/-first}}{{/params}}CancellationToken cancellationToken = default)
+        {
+            {{#composedParamName}}
+            // Wrap the composed parameter
+            var {{composedParamName}}Wrapped = new {{originalDataType}}({{composedParamName}});
+            {{/composedParamName}}
+            {{#returnType}}var localVarResponse = await {{operationId}}WithHttpInfoInternalAsync({{#params}}{{#isComposed}}{{paramName}}Wrapped{{/isComposed}}{{^isComposed}}{{paramName}}{{/isComposed}}{{#hasMore}}, {{/hasMore}}{{/params}}{{#params}}{{#-first}}, {{/-first}}{{/params}}cancellationToken).ConfigureAwait(false);
+            return localVarResponse.Data;{{/returnType}}{{^returnType}}await {{operationId}}WithHttpInfoInternalAsync({{#params}}{{#isComposed}}{{paramName}}Wrapped{{/isComposed}}{{^isComposed}}{{paramName}}{{/isComposed}}{{#hasMore}}, {{/hasMore}}{{/params}}{{#params}}{{#-first}}, {{/-first}}{{/params}}cancellationToken).ConfigureAwait(false);{{/returnType}}
+        }
+        {{/vendorExtensions.x-methodOverloads}}
+        {{/vendorExtensions.x-hasMethodOverloads}}
+        {{^vendorExtensions.x-hasMethodOverloads}}
         /// <summary>
         /// {{summary}}
         /// </summary>
@@ -608,7 +686,53 @@ namespace {{packageName}}.{{apiPackage}}.{{x-folder}}
             {{#returnType}}var localVarResponse = await {{operationId}}WithHttpInfoAsync({{#allParams}}{{paramName}}{{^-last}}, {{/-last}}{{/allParams}}{{#allParams.0}}, {{/allParams.0}}cancellationToken).ConfigureAwait(false);
             return localVarResponse.Data;{{/returnType}}{{^returnType}}await {{operationId}}WithHttpInfoAsync({{#allParams}}{{paramName}}{{^-last}}, {{/-last}}{{/allParams}}{{#allParams.0}}, {{/allParams.0}}cancellationToken).ConfigureAwait(false);{{/returnType}}
         }
+        {{/vendorExtensions.x-hasMethodOverloads}}
 
+        {{#vendorExtensions.x-hasMethodOverloads}}
+        {{#vendorExtensions.x-methodOverloads}}
+        /// <summary>
+        /// {{summary}}
+        /// </summary>
+        {{#notes}}
+        /// <remarks>
+        /// {{.}}
+        /// </remarks>
+        {{/notes}}
+        /// <exception cref="{{packageName}}.Client.ApiException">Thrown when fails to make API call</exception>
+        {{#params}}
+        /// <param name="{{paramName}}">{{description}}{{^required}} (optional{{#defaultValue}}, default to {{.}}{{/defaultValue}}){{/required}}{{#isDeprecated}} (deprecated){{/isDeprecated}}</param>
+        {{/params}}
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <seealso href="{{vendorExtensions.x-seealsoUrl}}">REST API Reference for {{operationId}} Operation</seealso>
+        /// <returns>Task of ApiResponse{{#returnType}} ({{.}}){{/returnType}}</returns>
+        {{#isDeprecated}}
+        [Obsolete]
+        {{/isDeprecated}}
+        public async Task<ApiResponse<{{{returnType}}}{{^returnType}}Object{{/returnType}}>> {{operationId}}WithHttpInfoAsync({{#params}}{{{dataType}}} {{paramName}}{{^required}}{{#optionalMethodArgument}} = default{{/optionalMethodArgument}}{{/required}}{{#hasMore}}, {{/hasMore}}{{/params}}{{#params}}{{#-first}}, {{/-first}}{{/params}}CancellationToken cancellationToken = default)
+        {
+            {{#composedParamName}}
+            // Wrap the composed parameter
+            var {{composedParamName}}Wrapped = new {{originalDataType}}({{composedParamName}});
+            {{/composedParamName}}
+            return await {{operationId}}WithHttpInfoInternalAsync({{#params}}{{#isComposed}}{{paramName}}Wrapped{{/isComposed}}{{^isComposed}}{{paramName}}{{/isComposed}}{{#hasMore}}, {{/hasMore}}{{/params}}{{#params}}{{#-first}}, {{/-first}}{{/params}}cancellationToken).ConfigureAwait(false);
+        }
+        {{/vendorExtensions.x-methodOverloads}}
+
+        private async Task<ApiResponse<{{{returnType}}}{{^returnType}}Object{{/returnType}}>> {{operationId}}WithHttpInfoInternalAsync({{#allParams}}{{{dataType}}} {{paramName}}{{^required}}{{#optionalMethodArgument}} = default{{/optionalMethodArgument}}{{/required}}{{^-last}}, {{/-last}}{{/allParams}}{{#allParams.0}}, {{/allParams.0}}CancellationToken cancellationToken = default)
+        {
+            {{#allParams}}
+            {{#required}}
+            {{^vendorExtensions.x-csharp-value-type}}
+            // verify the required parameter '{{paramName}}' is set
+            if ({{paramName}} == null)
+                throw new ApiException(400, "Missing required parameter '{{paramName}}' when calling {{x-classname}}->{{operationId}}");
+
+            {{/vendorExtensions.x-csharp-value-type}}
+            {{/required}}
+            {{/allParams}}
+            var localVarRequestOptions = new RequestOptions();
+        {{/vendorExtensions.x-hasMethodOverloads}}
+        {{^vendorExtensions.x-hasMethodOverloads}}
         /// <summary>
         /// {{summary}}
         /// </summary>
@@ -640,6 +764,7 @@ namespace {{packageName}}.{{apiPackage}}.{{x-folder}}
             {{/required}}
             {{/allParams}}
             var localVarRequestOptions = new RequestOptions();
+        {{/vendorExtensions.x-hasMethodOverloads}}
 
             string[] contentTypes = [{{#consumes}} "{{{mediaType}}}"{{^-last}}, {{/-last}}{{/consumes}}];
 
