@@ -1139,6 +1139,21 @@ public partial class SettingsController(
     }
 
     /// <remarks>
+    /// Tests an external database connection with the provided settings without saving them.
+    /// </remarks>
+    /// <summary>Test external database connection</summary>
+    /// <path>api/2.0/settings/authservice/externaldb/test</path>
+    [Tags("Settings / Authorization")]
+    [SwaggerResponse(200, "Boolean value: true if the connection succeeded", typeof(bool))]
+    [HttpPost("authservice/externaldb/test")]
+    public async Task<bool> TestExternalDatabaseConnection(ExternalDatabaseSettings inDto)
+    {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        return await ExternalDatabaseProvider.TestConnectionAsync(inDto);
+    }
+
+    /// <remarks>
     /// Returns the portal payment settings.
     /// </remarks>
     /// <summary>Get the payment settings</summary>

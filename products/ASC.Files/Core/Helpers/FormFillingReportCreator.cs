@@ -348,7 +348,7 @@ public class FormFillingReportCreator(
 
     private static object? ConvertFieldValue(string? value, FormMetadata meta)
     {
-        if (value == null)
+        if (string.IsNullOrEmpty(value))
         {
             return null;
         }

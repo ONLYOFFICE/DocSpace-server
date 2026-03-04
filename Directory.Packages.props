@@ -164,6 +164,7 @@
     <PackageVersion Include="ModelContextProtocol" Version="0.4.0-preview.3" />
     <PackageVersion Include="Moq" Version="4.18.4" />
     <PackageVersion Include="MSTest.TestFramework" Version="3.6.3" />
+    <PackageVersion Include="Microsoft.Data.Sqlite" Version="10.0.3" />
     <PackageVersion Include="MySql.Data" Version="9.2.0" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageVersion Include="Novell.Directory.Ldap.NETStandard" Version="3.6.0" />

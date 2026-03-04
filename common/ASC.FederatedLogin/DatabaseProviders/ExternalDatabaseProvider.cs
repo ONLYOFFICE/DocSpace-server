@@ -27,6 +27,8 @@
 using System.Data;
 using System.Data.Common;
 
+using Microsoft.Data.Sqlite;
+
 using MySqlConnector;
 
 namespace ASC.FederatedLogin.DatabaseProviders;
@@ -88,6 +90,11 @@ public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IVa
             return false;
         }
 
+        if (DatabaseType?.ToLowerInvariant() == "sqlite" && !File.Exists(SqliteFilePath))
+        {
+            return false;
+        }
+
         try
         {
             await using var connection = CreateConnection();
@@ -103,6 +110,25 @@ public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IVa
     public Task<bool> TestConnectionAsync()
         => ValidateConnectionAsync();
 
+    public static async Task<bool> TestConnectionAsync(ExternalDatabaseSettings settings)
+    {
+        try
+        {
+            if (settings.DatabaseType?.ToLowerInvariant() == "sqlite" && !File.Exists(settings.SqliteFilePath))
+            {
+                return false;
+            }
+
+            await using var connection = CreateConnection(settings);
+            await connection.OpenAsync();
+            return connection.State == ConnectionState.Open;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
     public ExternalDatabaseSettings GetSettings()
     {
         return new ExternalDatabaseSettings
@@ -113,21 +139,29 @@ public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IVa
             DatabaseName = Database,
             User = User,
             Password = Password,
-            UseSsl = bool.TryParse(UseSsl, out var ssl) && ssl
+            UseSsl = bool.TryParse(UseSsl, out var ssl) && ssl,
+            SqliteFilePath = SqliteFilePath
         };
     }
 
     public DbConnection CreateConnection()
     {
-        switch (DatabaseType?.ToLowerInvariant())
+        return DatabaseType?.ToLowerInvariant() switch
         {
-            case "mysql":
-                return CreateMySqlConnection();
-            case "sqlite":
-                throw new NotImplementedException("SQLite support will be added in the future.");
-            default:
-                throw new NotSupportedException($"Database type '{DatabaseType}' is not supported yet.");
-        }
+            "mysql" => CreateMySqlConnection(),
+            "sqlite" => CreateSqliteConnection(SqliteFilePath),
+            _ => throw new NotSupportedException($"Database type '{DatabaseType}' is not supported yet.")
+        };
+    }
+
+    public static DbConnection CreateConnection(ExternalDatabaseSettings settings)
+    {
+        return settings.DatabaseType?.ToLowerInvariant() switch
+        {
+            "mysql" => CreateMySqlConnection(settings),
+            "sqlite" => CreateSqliteConnection(settings.SqliteFilePath),
+            _ => throw new NotSupportedException($"Database type '{settings.DatabaseType}' is not supported yet.")
+        };
     }
 
     private DbConnection CreateMySqlConnection()
@@ -147,5 +181,31 @@ public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IVa
             : MySqlSslMode.None;
 
         return new MySqlConnection(builder.ConnectionString);
+    }
+
+    private static DbConnection CreateMySqlConnection(ExternalDatabaseSettings settings)
+    {
+        var builder = new MySqlConnectionStringBuilder
+        {
+            Server = settings.Host,
+            Database = settings.DatabaseName,
+            UserID = settings.User,
+            Password = settings.Password,
+            Port = (uint)settings.Port,
+            SslMode = settings.UseSsl ? MySqlSslMode.Preferred : MySqlSslMode.None
+        };
+
+        return new MySqlConnection(builder.ConnectionString);
+    }
+
+    private static DbConnection CreateSqliteConnection(string filePath, SqliteOpenMode mode = SqliteOpenMode.ReadWriteCreate)
+    {
+        var connectionString = new SqliteConnectionStringBuilder
+        {
+            DataSource = filePath,
+            Mode = mode
+        }.ToString();
+
+        return new SqliteConnection(connectionString);
     }
 }

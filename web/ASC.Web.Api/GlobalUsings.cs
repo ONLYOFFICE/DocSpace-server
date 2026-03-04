@@ -97,6 +97,7 @@ global using ASC.Data.Storage.Encryption;
 global using ASC.Data.Storage.Migration;
 global using ASC.EventBus.Abstractions;
 global using ASC.FederatedLogin;
+global using ASC.FederatedLogin.DatabaseProviders;
 global using ASC.FederatedLogin.Helpers;
 global using ASC.FederatedLogin.LoginProviders;
 global using ASC.FederatedLogin.Profile;

@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using System.Data;
+using System.Data.Common;
 
 namespace ASC.FederatedLogin.DatabaseProviders;
 
@@ -43,6 +44,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
     {
         await using var connection = Provider.CreateConnection();
         await connection.OpenAsync();
+        await SetupSqliteAsync(connection);
 
         await using var cmd = connection.CreateCommand();
         cmd.CommandText = Provider.DatabaseType.ToLowerInvariant() switch
@@ -65,7 +67,26 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
     }
 
     private static string BuildSqliteCreateTable(string tableName, IEnumerable<DbColumnDefinition> columns)
-        => throw new NotImplementedException("SQLite support will be added in the future.");
+    {
+        var colDefs = columns.Select(c =>
+        {
+            var type = MapSqliteType(c);
+            return c.IsPrimaryKey ? $"\"{c.Name}\" {type} PRIMARY KEY" : $"\"{c.Name}\" {type}";
+        });
+        return $"CREATE TABLE IF NOT EXISTS \"{tableName}\" ({string.Join(", ", colDefs)});";
+    }
+
+    private static string MapSqliteType(DbColumnDefinition col) => col.Type switch
+    {
+        DbColumnType.Integer => "INTEGER",
+        DbColumnType.Boolean => "INTEGER",
+        DbColumnType.Date => "DATE",
+        DbColumnType.DateTime => "DATETIME",
+        DbColumnType.Enum when col.EnumValues?.Count > 0 =>
+            $"TEXT CHECK(\"{col.Name}\" IN ({string.Join(", ", col.EnumValues.Select(v => $"'{v.Replace("'", "''")}'"))}))",
+        DbColumnType.Enum => "TEXT",
+        _ => "TEXT"
+    };
 
     private static string MapMySqlType(DbColumnDefinition col) => col.Type switch
     {
@@ -95,6 +116,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
             }
             await using var connection = Provider.CreateConnection();
             await connection.OpenAsync();
+            await SetupSqliteAsync(connection);
 
             await using var cmd = connection.CreateCommand();
             cmd.CommandText = BuildInsertSql(tableName, data.Keys, keyColumn);
@@ -143,6 +165,18 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
 
         sql.Append(';');
         return sql.ToString();
+    }
+
+    private async Task SetupSqliteAsync(DbConnection connection)
+    {
+        if (Provider.DatabaseType?.ToLowerInvariant() != "sqlite")
+        {
+            return;
+        }
+
+        await using var cmd = connection.CreateCommand();
+        cmd.CommandText = "PRAGMA busy_timeout = 5000;";
+        await cmd.ExecuteNonQueryAsync();
     }
 
     private static string BuildSqliteInsert(string tableName, List<string> keys, string parameters, string? keyColumn)
