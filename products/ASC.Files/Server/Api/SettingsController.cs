@@ -205,7 +205,7 @@ public class SettingsController(
     /// <summary>Get the "Documents" information</summary>
     /// <path>api/2.0/files/info</path>
     [Tags("Files / Settings")]
-    [SwaggerResponse(200, "Module information: ID, product class name, title, description, icon URL, large icon URL, start URL, primary or nor, help URL", typeof(bool))]
+    [SwaggerResponse(200, "Module information: ID, product class name, title, description, icon URL, large icon URL, start URL, primary or nor, help URL")]
     [HttpGet("info")]
     public ASC.Api.Core.Module GetFilesModule()
     {
