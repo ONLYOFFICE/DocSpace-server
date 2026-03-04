@@ -138,14 +138,17 @@ public class FileCopyTests(
         var resultFileId = 999999999;
 
         // Act
-        var copyParams = new CopyAsJsonElement(
-            destTitle: "resultFile.docx",
-            destFolderId: new CopyAsJsonElementDestFolderId(targetFolderId)
-        );
+        var copyParams = new BatchRequestDto
+        {
+            DestFolderId = new BatchRequestDtoAllOfDestFolderId(targetFolderId),
+            ConflictResolveType = FileConflictResolveType.Skip,
+            FileIds = [new(resultFileId)],
+            FolderIds = [],
+            ReturnSingleOperation = true
+        };
 
         var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _filesApi.CopyFileAsAsync(
-                resultFileId,
+            async () => await _filesOperationsApi.CopyBatchItemsAsync(
                 copyParams,
                 TestContext.Current.CancellationToken));
 
@@ -165,14 +168,17 @@ public class FileCopyTests(
         var targetFolder = await CreateFolderInMy("folder_no_permissions", user);
 
         // Act
-        var copyParams = new CopyAsJsonElement(
-            destTitle: sourceFile.Title,
-            destFolderId: new CopyAsJsonElementDestFolderId(targetFolder.Id)
-        );
+        var copyParams = new BatchRequestDto
+        {
+            DestFolderId = new BatchRequestDtoAllOfDestFolderId(targetFolder.Id),
+            ConflictResolveType = FileConflictResolveType.Skip,
+            FileIds = [new(sourceFile.Id)],
+            FolderIds = [],
+            ReturnSingleOperation = true
+        };
 
         var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _filesApi.CopyFileAsAsync(
-                sourceFile.Id,
+            async () => await _filesOperationsApi.CopyBatchItemsAsync(
                 copyParams,
                 TestContext.Current.CancellationToken));
 
@@ -191,16 +197,19 @@ public class FileCopyTests(
         var folderOwner = await Initializer.InviteContact(EmployeeType.User);
         await _filesClient.Authenticate(folderOwner);
         var targetFolder = await CreateFolder("folder_no_permissions", FolderType.USER, folderOwner);
-        
+
         // Act
-        var copyParams = new CopyAsJsonElement(
-            destTitle: sourceFile.Title,
-            destFolderId: new CopyAsJsonElementDestFolderId(targetFolder.Id)
-        );
+        var copyParams = new BatchRequestDto
+        {
+            DestFolderId = new BatchRequestDtoAllOfDestFolderId(targetFolder.Id),
+            ConflictResolveType = FileConflictResolveType.Skip,
+            FileIds = [new(sourceFile.Id)],
+            FolderIds = [],
+            ReturnSingleOperation = true
+        };
 
         var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _filesApi.CopyFileAsAsync(
-                sourceFile.Id,
+            async () => await _filesOperationsApi.CopyBatchItemsAsync(
                 copyParams,
                 TestContext.Current.CancellationToken));
 
@@ -276,50 +285,22 @@ public class FileCopyTests(
         await _filesClient.Authenticate(user);
 
         // Act
-        var copyParams = new CopyAsJsonElement(
-            destTitle: sourceFile.Title,
-            destFolderId: new CopyAsJsonElementDestFolderId(targetFolder.Id)
-        );
+        var copyParams = new BatchRequestDto
+        {
+            DestFolderId = new BatchRequestDtoAllOfDestFolderId(targetFolder.Id),
+            ConflictResolveType = FileConflictResolveType.Skip,
+            FileIds = [new(sourceFile.Id)],
+            FolderIds = [],
+            ReturnSingleOperation = true
+        };
 
         var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _filesApi.CopyFileAsAsync(
-                sourceFile.Id,
+            async () => await _filesOperationsApi.CopyBatchItemsAsync(
                 copyParams,
                 TestContext.Current.CancellationToken));
 
         // Assert
         exception.ErrorCode.Should().Be(403);
-    }
-
-    [Fact]
-    public async Task CopyFile_NotSupportedFormat_ReturnsError()
-    {
-        // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        var sourceFile = await CreateFileInMy("source_file.docx", Initializer.Owner);
-        sourceFile.FileExst = "unsupported";
-
-        var targetFolderId = await GetUserFolderIdAsync(Initializer.Owner);
-
-        // Act
-        var copyParams = new CopyAsJsonElement(
-            destTitle: "result_file.unsupported",
-            destFolderId: new CopyAsJsonElementDestFolderId(targetFolderId)
-        );
-
-        var a = (await _filesApi.CopyFileAsAsync(
-                sourceFile.Id,
-                copyParams,
-                TestContext.Current.CancellationToken)).Response;
-
-        var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _filesApi.CopyFileAsAsync(
-                sourceFile.Id,
-                copyParams,
-                TestContext.Current.CancellationToken));
-
-        // Assert
-        exception.ErrorCode.Should().Be(500);
     }
 
     [Fact]
@@ -335,14 +316,17 @@ public class FileCopyTests(
         targetFolder.Type = FolderType.VirtualRooms;
 
         // Act
-        var copyParams = new CopyAsJsonElement(
-           destTitle: sourceFile.Title,
-           destFolderId: new CopyAsJsonElementDestFolderId(targetFolder.Id)
-        );
- 
+        var copyParams = new BatchRequestDto
+        {
+            DestFolderId = new BatchRequestDtoAllOfDestFolderId(targetFolder.Id),
+            ConflictResolveType = FileConflictResolveType.Skip,
+            FileIds = [new(sourceFile.Id)],
+            FolderIds = [],
+            ReturnSingleOperation = true
+        };
+
         var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _filesApi.CopyFileAsAsync(
-                sourceFile.Id,
+            async () => await _filesOperationsApi.CopyBatchItemsAsync(
                 copyParams,
                 TestContext.Current.CancellationToken));
 
@@ -355,26 +339,31 @@ public class FileCopyTests(
     {
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
+        var createdRoom = await CreateVirtualRoom("room_to_lock");
+        var sourceFile = await CreateFile("file_to_lock.docx", createdRoom.Id);
+        var lockedFile = (await _filesApi.LockFileAsync(sourceFile.Id, new LockFileParameters(true), TestContext.Current.CancellationToken)).Response;
 
-        var sourceFile = await CreateFileInMy("locked_file.docx", Initializer.Owner);
-        await _filesApi.LockFileAsync(sourceFile.Id, new LockFileParameters(true), TestContext.Current.CancellationToken);
-
-        var targetFolderId = await GetUserFolderIdAsync(Initializer.Owner);
+        var user = await Initializer.InviteContact(EmployeeType.User);
+        await _filesClient.Authenticate(user);
+        var targetFolderId = await GetUserFolderIdAsync(user);
 
         // Act
-        var copyParams = new CopyAsJsonElement(
-            destTitle: sourceFile.Title,
-            destFolderId: new CopyAsJsonElementDestFolderId(targetFolderId)
-        );
+        var copyParams = new BatchRequestDto
+        {
+            DestFolderId = new BatchRequestDtoAllOfDestFolderId(targetFolderId),
+            ConflictResolveType = FileConflictResolveType.Skip,
+            FileIds = [new(sourceFile.Id)],
+            FolderIds = [],
+            ReturnSingleOperation = true
+        };
 
         var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _filesApi.CopyFileAsAsync(
-                sourceFile.Id,
+            async () => await _filesOperationsApi.CopyBatchItemsAsync(
                 copyParams,
                 TestContext.Current.CancellationToken));
 
         // Assert
-        exception.ErrorCode.Should().Be(500);
+        exception.ErrorCode.Should().Be(403);
     }
 
     [Fact]
@@ -382,25 +371,133 @@ public class FileCopyTests(
     {
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
+        var createdRoom = await CreateVirtualRoom("room");
+        var sourceFile = await CreateFile("file_to_edit.docx", createdRoom.Id);
+        await _filesApi.StartEditFileAsync(sourceFile.Id, new StartEdit(true), TestContext.Current.CancellationToken);
 
-        var sourceFile = await CreateFileInMy("editing_file.docx", Initializer.Owner);
-        await _filesApi.StartEditFileAsync(sourceFile.Id, new StartEdit(), TestContext.Current.CancellationToken);
-
-        var targetFolderId = await GetUserFolderIdAsync(Initializer.Owner);
+        var user = await Initializer.InviteContact(EmployeeType.User);
+        await _filesClient.Authenticate(user);
+        var targetFolderId = await GetUserFolderIdAsync(user);
 
         // Act
-        var copyParams = new CopyAsJsonElement(
-            destTitle: sourceFile.Title,
-            destFolderId: new CopyAsJsonElementDestFolderId(targetFolderId)
-        );
+        var copyParams = new BatchRequestDto
+        {
+            DestFolderId = new BatchRequestDtoAllOfDestFolderId(targetFolderId),
+            ConflictResolveType = FileConflictResolveType.Skip,
+            FileIds = [new(sourceFile.Id)],
+            FolderIds = [],
+            ReturnSingleOperation = true
+        };
 
         var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _filesApi.CopyFileAsAsync(
-                sourceFile.Id,
+            async () => await _filesOperationsApi.CopyBatchItemsAsync(
                 copyParams,
                 TestContext.Current.CancellationToken));
 
         // Assert
-        exception.ErrorCode.Should().Be(500);
+        exception.ErrorCode.Should().Be(403);
+    }
+
+    [Fact]
+    public async Task CopyFile_NotSupportedFormat_ReturnsError()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+
+        var roomRequest = new CreateRoomRequestDto("ai_room", indexing: true, roomType: RoomType.AiRoom);
+
+        var aiRoom = (await _roomsApi.CreateRoomAsync(
+            roomRequest,
+            TestContext.Current.CancellationToken)).Response;
+
+        var subFoldersResponse = await _foldersApi.GetFoldersWithHttpInfoAsync(aiRoom.Id, TestContext.Current.CancellationToken);
+
+        using var payload = JsonDocument.Parse(subFoldersResponse.RawContent);
+        var response = payload.RootElement.GetProperty("response");
+
+        int? knowledgeFolderId = null;
+
+        foreach (var folder in response.EnumerateArray())
+        {
+            var isKnowledgeByType = folder.TryGetProperty("type", out var rawType) &&
+                                    rawType.ValueKind == JsonValueKind.Number &&
+                                    rawType.TryGetInt32(out var folderTypeValue) &&
+                                    folderTypeValue == (int)FolderType.Knowledge;
+
+            if (!isKnowledgeByType)
+            {
+                continue;
+            }
+
+            if (folder.TryGetProperty("id", out var idProp) &&
+                idProp.ValueKind == JsonValueKind.Number &&
+                idProp.TryGetInt32(out var id))
+            {
+                knowledgeFolderId = id;
+                break;
+            }
+        }
+
+        knowledgeFolderId.Should().HaveValue();
+
+
+        var settings = (await _filesSettingsApi.GetFilesSettingsAsync(TestContext.Current.CancellationToken)).Response;
+
+        var unsupportedExtension = settings.ExtsUploadable
+            .FirstOrDefault(ext => !settings.ExtsFilesVectorized.Contains(ext, StringComparer.OrdinalIgnoreCase));
+
+        unsupportedExtension.Should().NotBeNullOrWhiteSpace();
+
+        var extension = unsupportedExtension!.StartsWith('.') ? unsupportedExtension : $".{unsupportedExtension}";
+
+        var myFolder = await GetUserFolderIdAsync(Initializer.Owner);
+        var fileName = $"new{extension}";
+
+        await using var stream = new MemoryStream([1, 2, 3, 4]);
+        var contentLength = stream.Length;
+
+        var createdSession = (await _filesOperationsApi.CreateUploadSessionInFolderAsync(myFolder, new SessionRequest(fileName, contentLength), cancellationToken: TestContext.Current.CancellationToken)).Response;
+        createdSession.Should().NotBeNull();
+        createdSession.Id.Should().NotBeEmpty();
+
+        var chunkSize = (int)settings.ChunkUploadSize;
+        var buffer = new byte[chunkSize];
+        var chunkNumber = 1;
+        int bytesRead;
+
+        while ((bytesRead = await stream.ReadAsync(buffer.AsMemory(0, chunkSize), TestContext.Current.CancellationToken)) > 0)
+        {
+            var chunkStream = new MemoryStream(buffer, 0, bytesRead);
+            var fileParameter = new FileParameter(chunkStream);
+
+            await _filesOperationsApi.UploadAsyncSessionAsync(myFolder, createdSession.Id, chunkNumber, fileParameter, TestContext.Current.CancellationToken);
+            chunkNumber++;
+        }
+
+        var resultFile = (await _filesOperationsApi.FinalizeSessionAsync(myFolder, createdSession.Id, TestContext.Current.CancellationToken)).Response;
+
+        // Act
+        var copyParams = new BatchRequestDto
+        {
+            DestFolderId = new BatchRequestDtoAllOfDestFolderId(knowledgeFolderId!.Value),
+            ConflictResolveType = FileConflictResolveType.Skip,
+            FileIds = [new(resultFile.Id)],
+            FolderIds = [],
+            ReturnSingleOperation = true
+        };
+
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _filesOperationsApi.CopyBatchItemsAsync(
+                copyParams,
+                TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(403);
+
+        var attemptedExtension = Path.GetExtension(resultFile.Title);
+        attemptedExtension.Should().NotBeNullOrWhiteSpace();
+        settings.ExtsFilesVectorized.Should().NotContain(
+            ext => string.Equals(ext, attemptedExtension, StringComparison.OrdinalIgnoreCase),
+            $"copied file '{resultFile.Title}' has unsupported extraction format");
     }
 }
