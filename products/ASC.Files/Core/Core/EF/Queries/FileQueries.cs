@@ -359,6 +359,12 @@ public partial class FilesDbContext
     {
         return FileQueries.DeleteVectorizationStatusAsync(this, tenantId, fileId);
     }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    public Task<int> DeleteMessageAttachmentsByFileIdAsync(int tenantId, int fileId)
+    {
+        return FileQueries.DeleteMessageAttachmentsByFileIdAsync(this, tenantId, fileId);
+    }
 }
 
 static file class FileQueries
@@ -1073,6 +1079,13 @@ static file class FileQueries
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, int fileId) =>
                 ctx.FileVectorization
+                    .Where(r => r.TenantId == tenantId && r.FileId == fileId)
+                    .ExecuteDelete());
+
+    public static readonly Func<FilesDbContext, int, int, Task<int>> DeleteMessageAttachmentsByFileIdAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int fileId) =>
+                ctx.MessageAttachments
                     .Where(r => r.TenantId == tenantId && r.FileId == fileId)
                     .ExecuteDelete());
 }

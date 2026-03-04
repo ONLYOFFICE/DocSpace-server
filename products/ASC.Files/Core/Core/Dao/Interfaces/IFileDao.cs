@@ -167,6 +167,7 @@ public interface IFileDao<T>
     /// </summary>
     /// <param name="file"></param>
     /// <param name="fileStream"> </param>
+    /// <param name="chatId"></param>
     /// <returns></returns>
     /// <remarks>
     /// Updates the file if:
@@ -175,7 +176,7 @@ public interface IFileDao<T>
     ///
     /// Save in all other cases
     /// </remarks>
-    Task<File<T>> SaveFileAsync(File<T> file, Stream fileStream);
+    Task<File<T>> SaveFileAsync(File<T> file, Stream fileStream, Guid chatId = default);
 
     /// <summary>
     ///  Saves / updates the version of the file
@@ -195,7 +196,7 @@ public interface IFileDao<T>
     Task<File<T>> SaveFileAsync(File<T> file, Stream fileStream, bool checkFolder);
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="file"></param>
     /// <param name="fileStream"></param>
@@ -250,7 +251,7 @@ public interface IFileDao<T>
     Task<File<T>> CopyFileAsync(T fileId, T toFolderId);
     Task<File<TTo>> CopyFileAsync<TTo>(T fileId, TTo toFolderId);
     Task<File<string>> CopyFileAsync(T fileId, string toFolderId);
-    Task<File<int>> CopyFileAsync(T fileId, int toFolderId);
+    Task<File<int>> CopyFileAsync(T fileId, int toFolderId, Guid chatId);
 
     /// <summary>
     ///   Rename file

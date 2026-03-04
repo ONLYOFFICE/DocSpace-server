@@ -73,7 +73,7 @@ public class ProjectConfigurator(
 
         project.WithEnvironment("core:base-domain", isStandalone ? "localhost" : "")
             .WithEnvironment("ai:mcp:0:endpoint",
-                new UriBuilder(Uri.UriSchemeHttp, Constants.DocSpaceMcpContainer, Constants.DocSpaceMcpPort)
+                new UriBuilder(Uri.UriSchemeHttp, "localhost", Constants.DocSpaceMcpPort)
                     .ToString() + "mcp");
 
                

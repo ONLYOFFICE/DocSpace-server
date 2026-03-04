@@ -160,10 +160,14 @@ public class PortalController(
             return BadRequest(error);
         }
 
-        (var portalName, error) = await GetRandomPortalName();
+        var portalName =  (coreBaseSettings.Standalone ? (model.PortalName ?? "") : string.Empty).Trim();
         if (string.IsNullOrEmpty(portalName))
         {
-            return BadRequest(error ?? "PortalName is required");
+            (portalName, error) = await GetRandomPortalName();
+            if (string.IsNullOrEmpty(portalName))
+            {
+                return BadRequest(error ?? "PortalName is required");
+            }
         }
 
         model.PortalName = portalName;

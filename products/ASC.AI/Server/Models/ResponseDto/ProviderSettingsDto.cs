@@ -41,7 +41,7 @@ public class ProviderSettingsDto
     /// Default API endpoint URL for the provider type.
     /// </summary>
     /// <example>https://api.openai.com/v1</example>
-    public required string Url { get; init; }
+    public string? Url { get; init; }
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,

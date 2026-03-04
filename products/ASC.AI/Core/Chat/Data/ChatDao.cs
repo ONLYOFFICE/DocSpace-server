@@ -35,23 +35,23 @@ public class ChatDao(IDbContextFactory<AiDbContext> dbContextFactory)
         AllowOutOfOrderMetadataProperties = true
     };
     
-    public async Task<ChatSession> AddChatAsync(int tenantId, int roomId, Guid userId, string title, Message message)
+    public async Task<ChatSession> AddChatAsync(int tenantId, int roomId, Guid userId, Guid chatId, string title, Message message)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var strategy = dbContext.Database.CreateExecutionStrategy();
-        
+
         DbChat chat = null!;
 
         await strategy.ExecuteAsync(async () =>
         {
             await using var context = await dbContextFactory.CreateDbContextAsync();
-            
+            await using var transaction = await context.Database.BeginTransactionAsync();
+
             var now = DateTime.UtcNow;
-            var id = Guid.NewGuid();
 
             var dbMessage = new DbChatMessage
             {
-                ChatId = id,
+                ChatId = chatId,
                 Role = message.Role,
                 Content = JsonSerializer.Serialize(message.Contents, _serializerOptions),
                 CreatedOn = now
@@ -59,18 +59,22 @@ public class ChatDao(IDbContextFactory<AiDbContext> dbContextFactory)
 
             chat = new DbChat
             {
-                Id = id,
+                Id = chatId,
                 TenantId = tenantId,
-                RoomId = roomId, 
+                RoomId = roomId,
                 UserId = userId,
                 Title = title,
                 CreatedOn = now,
                 ModifiedOn = now,
                 Messages = [dbMessage]
             };
-            
+
             await context.Chats.AddAsync(chat);
             await context.SaveChangesAsync();
+
+            await LinkAttachmentsToMessageAsync(tenantId, chatId, message, context, dbMessage);
+
+            await transaction.CommitAsync();
         });
 
         return chat.Map();
@@ -82,23 +86,25 @@ public class ChatDao(IDbContextFactory<AiDbContext> dbContextFactory)
         var strategy = dbContext.Database.CreateExecutionStrategy();
 
         await strategy.ExecuteAsync(async () =>
-        { 
+        {
             await using var context = await dbContextFactory.CreateDbContextAsync();
             await using var transaction = await context.Database.BeginTransactionAsync();
 
             await context.UpdateChatAsync(tenantId, chatId, DateTime.UtcNow);
-            
+
             var dbMessage = new DbChatMessage
             {
-                ChatId = chatId, 
-                Role = message.Role, 
+                ChatId = chatId,
+                Role = message.Role,
                 Content = JsonSerializer.Serialize(message.Contents, _serializerOptions),
                 CreatedOn = DateTime.UtcNow
             };
-            
+
             await context.Messages.AddAsync(dbMessage);
-            
             await context.SaveChangesAsync();
+
+            await LinkAttachmentsToMessageAsync(tenantId, chatId, message, context, dbMessage);
+
             await transaction.CommitAsync();
         });
     }
@@ -149,17 +155,40 @@ public class ChatDao(IDbContextFactory<AiDbContext> dbContextFactory)
         return await dbContext.GetChatsTotalCountAsync(tenantId, roomId, userId);
     }
 
-    public async Task DeleteChatsAsync(int tenantId, IEnumerable<Guid> chatIds)
+    public async Task SoftDeleteChatAsync(int tenantId, Guid chatId, Guid userId, Func<Task>? onDeleted = null)
     {
-        await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
-        var strategy = filesDbContext.Database.CreateExecutionStrategy();
-
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        var strategy = dbContext.Database.CreateExecutionStrategy();
+        
         await strategy.ExecuteAsync(async () =>
         {
             await using var context = await dbContextFactory.CreateDbContextAsync();
-            await context.DeleteChatsAsync(tenantId, chatIds);
-            await context.SaveChangesAsync();
+            await using var transaction = await context.Database.BeginTransactionAsync();
+
+            var deleted = await context.MarkChatAsDeletedAsync(tenantId, chatId, userId, DateTime.UtcNow);
+            if (deleted && onDeleted != null)
+            {
+                await onDeleted();
+            }
+
+            await transaction.CommitAsync();
         });
+    }
+
+    public async Task HardDeleteChatAsync(int tenantId, Guid chatId, Guid userId)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        await dbContext.HardDeleteChatAsync(tenantId, chatId, userId);
+    }
+
+    public async IAsyncEnumerable<int> GetAttachmentFileIdsAsync(int tenantId, Guid chatId)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+
+        await foreach (var fileId in dbContext.GetChatAttachmentFileIdsAsync(tenantId, chatId))
+        {
+            yield return fileId;
+        }
     }
 
     public async Task<long> AddMessageAsync(Guid chatId, Message message)
@@ -320,5 +349,49 @@ public class ChatDao(IDbContextFactory<AiDbContext> dbContextFactory)
         return settings == null
             ? new UserChatSettings()
             : settings.Map();
+    }
+    
+    public async IAsyncEnumerable<(int TenantId, Guid UserId, Guid ChatId)> GetDeletedChatsAsync(DateTime cutoffDate, int limit)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+
+        await foreach (var chat in dbContext.GetDeletedChatsAsync(cutoffDate, limit))
+        {
+            yield return chat;
+        }
+    }
+
+    public async Task UpdateDeletedChatsDeletedOnAsync(IEnumerable<Guid> chatIds, DateTime deletedOn)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        await dbContext.UpdateDeletedChatsDeletedOnAsync(chatIds, deletedOn);
+    }
+
+    public async IAsyncEnumerable<(int TenantId, int FileId)> GetOrphanedAttachmentsAsync(DateTime cutoffDate)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+
+        await foreach (var attachment in dbContext.GetOrphanedAttachmentsAsync(cutoffDate))
+        {
+            yield return attachment;
+        }
+    }
+
+    private static async Task LinkAttachmentsToMessageAsync(
+        int tenantId, 
+        Guid chatId, 
+        Message message, 
+        AiDbContext context,
+        DbChatMessage dbMessage)
+    {
+        var fileIds = message.Contents
+            .OfType<DataMessageContent>()
+            .Select(d => d.Id)
+            .ToList();
+
+        if (fileIds.Count > 0)
+        {
+            await context.LinkAttachmentsToMessageAsync(tenantId, chatId, dbMessage.Id, fileIds, DateTime.UtcNow);
+        }
     }
 }

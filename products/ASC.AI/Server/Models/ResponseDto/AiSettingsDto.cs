@@ -78,6 +78,12 @@ public class AiSettingsDto
     /// </summary>
     /// <example>text-embedding-3-small</example>
     public required string EmbeddingModel { get; init; }
+    
+    /// <summary>
+    /// Mapping of model identifiers to human-readable aliases.
+    /// </summary>
+    /// <example>{"gpt-5.2": "GPT-5.2", "claude-sonnet-4-20250514": "Claude Sonnet 4"}</example>
+    public required IReadOnlyDictionary<string, string> ModelAliases { get; init; }
 
     /// <summary>
     /// The tool name used by the AI assistant for knowledge base search.

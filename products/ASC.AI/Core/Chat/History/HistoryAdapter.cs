@@ -26,7 +26,7 @@
 
 namespace ASC.AI.Core.Chat.History;
 
-public abstract class HistoryAdapter
+public abstract class HistoryAdapter(DataContentLoader dataContentLoader)
 {
     public async IAsyncEnumerable<ChatMessage> AdaptHistoryAsync(IAsyncEnumerable<Message> messages)
     {
@@ -35,7 +35,7 @@ public abstract class HistoryAdapter
             switch (message.Role)
             {
                 case Role.User:
-                    yield return AdaptUserMessage(message);
+                    yield return await AdaptUserMessageAsync(message);
                     break;
                 case Role.Assistant:
                     {
@@ -51,10 +51,10 @@ public abstract class HistoryAdapter
             }
         }
     }
-    
+
     protected abstract IEnumerable<ChatMessage> AdaptAssistantMessage(Message message);
 
-    private static ChatMessage AdaptUserMessage(Message message)
+    private async Task<ChatMessage> AdaptUserMessageAsync(Message message)
     {
         var contents = new List<AIContent>(message.Contents.Count);
 
@@ -62,15 +62,21 @@ public abstract class HistoryAdapter
         {
             switch (content)
             {
-                case AttachmentMessageContent attachmentMessageContent:
-                    contents.Add(attachmentMessageContent);
+                case DataMessageContent dataContent:
+                    if (await dataContentLoader.TryLoadAsync(dataContent))
+                    {
+                        contents.Add(dataContent.ToAiContent());
+                    }
+                    continue;
+                case TextAttachmentMessageContent attachmentMessageContent:
+                    contents.Add(attachmentMessageContent.ToAiContent());
                     continue;
                 case TextMessageContent textMessageContent:
                     contents.Add(new TextContent(textMessageContent.Text));
                     continue;
             }
         }
-                    
+
         return new ChatMessage { Role = ChatRole.User, Contents = contents };
     }
 }

@@ -175,10 +175,6 @@
                             <artifactId>tomcat-embed-websocket</artifactId>
                         </exclude>
                         <exclude>
-                            <groupId>net.java.dev.jna</groupId>
-                            <artifactId>jna</artifactId>
-                        </exclude>
-                        <exclude>
                             <groupId>org.jetbrains.kotlin</groupId>
                             <artifactId>kotlin-stdlib</artifactId>
                         </exclude>
