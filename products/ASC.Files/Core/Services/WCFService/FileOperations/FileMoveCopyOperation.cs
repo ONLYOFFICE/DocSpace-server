@@ -151,13 +151,13 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         var fileMarker = scope.ServiceProvider.GetService<FileMarker>();
         var folderDao = scope.ServiceProvider.GetService<IFolderDao<TTo>>();
         var socketManager = scope.ServiceProvider.GetService<SocketManager>();
-        var permissionsManager = scope.ServiceProvider.GetService<CopyPermissionsCheck>();
+        var permissionsManager = scope.ServiceProvider.GetService<CopyPermissionsCheck<T, TTo>>();
 
         //TODO: check on each iteration?
         var toFolder = await folderDao.GetFolderAsync(tto);
         var parentFolders = await folderDao.GetParentFoldersAsync(toFolder.Id).ToListAsync();
 
-        Err = await permissionsManager.CheckJobPermissionsAsync(Files, Folders, toFolder, _copy);
+        Err = await permissionsManager.CheckGeneralPermissionsAsync(Files, Folders, toFolder, _copy);
         if (Err != null)
         {
             return;
@@ -234,7 +234,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         var fileSecurity = scope.ServiceProvider.GetRequiredService<FileSecurity>();
         var notifyClient = scope.ServiceProvider.GetRequiredService<NotifyClient>();
         var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
-        var permissionsManager = scope.ServiceProvider.GetService<CopyPermissionsCheck>();
+        var permissionsManager = scope.ServiceProvider.GetService<CopyPermissionsCheck<T, TTo>>();
 
         var toFolderId = toFolder.Id;
         var isToFolder = Equals(toFolderId, _daoFolderId);
@@ -676,7 +676,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         var cachedFolderDao = scope.ServiceProvider.GetService<ICacheFolderDao<T>>();
         var fileSecurity = scope.ServiceProvider.GetService<FileSecurity>();
         var vectorizationSettings = scope.ServiceProvider.GetService<VectorizationGlobalSettings>();
-        var permissionsManager = scope.ServiceProvider.GetService<CopyPermissionsCheck>();
+        var permissionsManager = scope.ServiceProvider.GetService<CopyPermissionsCheck<T, TTo>>();
 
         var toFolderId = toFolder.Id;
         var sb = new StringBuilder();
@@ -686,7 +686,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
 
             var file = await FileDao.GetFileAsync(fileId);
             
-            Err = await permissionsManager.CheckFilesPermissionsAsync(file, toFolder, _copy,_resolveType);
+            Err = await permissionsManager.CheckFilesPermissionsAsync(file, toFolder, _copy, _resolveType);
 
             var errorMsg = await permissionsManager.CheckFilesSecurityPermissionsAsync([file], checkPermissions);
 

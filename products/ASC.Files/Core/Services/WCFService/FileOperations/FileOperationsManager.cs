@@ -376,7 +376,8 @@ public class FileMoveCopyOperationsManager(
     FileOperationsManagerHolder<FileMoveCopyOperation> fileOperationsManagerHolder,
     ExternalShare externalShare,
     IServiceProvider serviceProvider, 
-    CopyPermissionsCheck permissionsManager) : FileOperationsManager<FileMoveCopyOperation>(httpContextAccessor, eventBus, authContext, fileOperationsManagerHolder, externalShare, serviceProvider)
+    PermissionCheckStarter<int> dataPermissionChecker, 
+    PermissionCheckStarter<string> thirdPartyDataPermissionChecker) : FileOperationsManager<FileMoveCopyOperation>(httpContextAccessor, eventBus, authContext, fileOperationsManagerHolder, externalShare, serviceProvider)
 {
     public async Task<string> Publish(
         List<JsonElement> folderIds,
@@ -418,8 +419,8 @@ public class FileMoveCopyOperationsManager(
         var data = new FileMoveCopyOperationData<int>(folderIntIds, fileIntIds, tenantId, userId, destFolderId, copy, resolveType, toFillOut, holdResult, GetHttpHeaders(), sessionSnapshot);
         var thirdPartyData = new FileMoveCopyOperationData<string>(folderStringIds, fileStringIds, tenantId, userId, destFolderId, copy, resolveType, toFillOut, holdResult, GetHttpHeaders(), sessionSnapshot);
 
-        var dataTask = permissionsManager.RunCopyPermissionCheckAsync(data);
-        var thirdPartyDataTask = permissionsManager.RunCopyPermissionCheckAsync(thirdPartyData);
+        var dataTask = dataPermissionChecker.RunCopyPermissionCheckAsync(data);
+        var thirdPartyDataTask = thirdPartyDataPermissionChecker.RunCopyPermissionCheckAsync(thirdPartyData);
         await Task.WhenAll(dataTask, thirdPartyDataTask);
 
         await _eventBus.PublishAsync(new MoveOrCopyIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
@@ -463,7 +464,8 @@ public class FileDuplicateOperationsManager(
     FileOperationsManagerHolder<FileDuplicateOperation> fileOperationsManagerHolder,
     ExternalShare externalShare,
     IServiceProvider serviceProvider,
-    CopyPermissionsCheck permissionsManager) : FileOperationsManager<FileDuplicateOperation>(httpContextAccessor, eventBus, authContext, fileOperationsManagerHolder, externalShare, serviceProvider)
+    PermissionCheckStarter<int> dataPermissionChecker, 
+    PermissionCheckStarter<string> thirdPartyDataPermissionChecker) : FileOperationsManager<FileDuplicateOperation>(httpContextAccessor, eventBus, authContext, fileOperationsManagerHolder, externalShare, serviceProvider)
 {
     public async Task<string> Publish(
         List<JsonElement> folderIds,
@@ -492,8 +494,9 @@ public class FileDuplicateOperationsManager(
         var data = new FileOperationData<int>(folderIntIds, fileIntIds, tenantId, userId, GetHttpHeaders(), sessionSnapshot);
         var thirdPartyData = new FileOperationData<string>(folderStringIds, fileStringIds, tenantId, userId, GetHttpHeaders(), sessionSnapshot);
 
-        await permissionsManager.RunDuplicatePermissionCheckAsync(data);
-        await permissionsManager.RunDuplicatePermissionCheckAsync(thirdPartyData);
+        var dataTask = dataPermissionChecker.RunDuplicatePermissionCheckAsync(data);
+        var thirdPartyDataTask = thirdPartyDataPermissionChecker.RunDuplicatePermissionCheckAsync(thirdPartyData);
+        await Task.WhenAll(dataTask, thirdPartyDataTask);
 
         await _eventBus.PublishAsync(new DuplicateIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
         {

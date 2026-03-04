@@ -26,24 +26,12 @@
 
 namespace ASC.Files.Core.Services.WCFService.FileOperations;
 
-[Scope]
-public class CopyPermissionsCheck(
-    FileSecurity security, 
-    LockerManager lockerManager, 
-    FileTrackerHelper fileTracker, 
-    FileUtility fileUtility, 
-    IServiceProvider serviceProvider, 
-    SettingsManager settingsManager,
-    UserManager userManager,
-    TenantManager tenantManager,
-    IQuotaService quotaService,
-    Global global,
-    VectorizationGlobalSettings vectorizationSettings)
+[Scope(GenericArguments = [typeof(int)])]
+[Scope(GenericArguments = [typeof(string)])]
+public class PermissionCheckStarter<T>(IFileDao<T> fileDao, CopyPermissionsCheck<T, int> intPermissionManager, CopyPermissionsCheck<T, string> stringPermissionManager)
 {
-    public async Task RunDuplicatePermissionCheckAsync<T>(FileOperationData<T> data)
+    public async Task RunDuplicatePermissionCheckAsync(FileOperationData<T> data)
     {
-        var fileDao = serviceProvider.GetRequiredService<IFileDao<T>>();
-
         var files = data.Files?.ToList() ?? [];
         foreach (var id in files)
         {
@@ -54,25 +42,42 @@ public class CopyPermissionsCheck(
         }
     }
 
-    public async Task RunCopyPermissionCheckAsync<T>(FileMoveCopyOperationData<T> data)
+    public async Task RunCopyPermissionCheckAsync(FileMoveCopyOperationData<T> data)
     {
         if (!int.TryParse(data.DestFolderId, out var i))
         {
-            await CheckCopyDataAsync(data, data.DestFolderId);
+            await stringPermissionManager.CheckCopyDataAsync(data, data.DestFolderId);
         }
         else
         {
-            await CheckCopyDataAsync(data, i);
+            await intPermissionManager.CheckCopyDataAsync(data, i);
         }
     }
+}
 
-    private async Task CheckCopyDataAsync<T, TTo>(FileMoveCopyOperationData<T> data, TTo tto)
+[Scope(GenericArguments = [typeof(int), typeof(int)])]
+[Scope(GenericArguments = [typeof(int), typeof(string)])]
+[Scope(GenericArguments = [typeof(string), typeof(int)])]
+[Scope(GenericArguments = [typeof(string), typeof(string)])]
+public class CopyPermissionsCheck<T, TTo>(
+    IFileDao<T> fileDao,
+    IFolderDao<T> folderDao,
+    IFileDao<TTo> ttoFileDao,
+    IFolderDao<TTo> ttoFolderDao,
+    FileSecurity security, 
+    LockerManager lockerManager, 
+    FileTrackerHelper fileTracker, 
+    FileUtility fileUtility, 
+    SettingsManager settingsManager,
+    UserManager userManager,
+    TenantManager tenantManager,
+    IQuotaService quotaService,
+    Global global,
+    VectorizationGlobalSettings vectorizationSettings)
+{
+    public async Task CheckCopyDataAsync(FileMoveCopyOperationData<T> data, TTo tto)
     {
         var needToCheck = true;
-
-        var ttoFolderDao = serviceProvider.GetRequiredService<IFolderDao<TTo>>();
-        var folderDao = serviceProvider.GetRequiredService<IFolderDao<T>>();
-        var fileDao = serviceProvider.GetRequiredService<IFileDao<T>>();
 
         var copy = data.Copy;
         var fileIds = data.Files?.ToList() ?? [];
@@ -80,7 +85,7 @@ public class CopyPermissionsCheck(
 
         var toFolder = await ttoFolderDao.GetFolderAsync(tto);
 
-        await CheckJobPermissionsAsync(fileIds, folderIds, toFolder, copy, needToCheck);
+        await CheckGeneralPermissionsAsync(fileIds, folderIds, toFolder, copy, needToCheck);
 
         var resolveType = data.ResolveType;
 
@@ -91,23 +96,19 @@ public class CopyPermissionsCheck(
         }
 
         foreach (var fileId in fileIds)
-        { 
+        {
             var file = await fileDao.GetFileAsync(fileId);
             await CheckFilesPermissionsAsync(file, toFolder, copy, resolveType, needToCheck);
         }
     }
 
-    public async Task<string> CheckJobPermissionsAsync<T, TTo>(
+    public async Task<string> CheckGeneralPermissionsAsync(
         List<T> files,
         List<T> folders,
         Folder<TTo> toFolder,
         bool copy,
         bool check = false)
     {
-        var fileDao = serviceProvider.GetRequiredService<IFileDao<T>>();
-        var folderDao = serviceProvider.GetRequiredService<IFolderDao<T>>();
-        var ttoFolderDao = serviceProvider.GetRequiredService<IFolderDao<TTo>>();
-
         string errorMsg = null;
 
         if (toFolder == null)
@@ -291,7 +292,7 @@ public class CopyPermissionsCheck(
         return errorMsg;
     }
 
-    public async Task<string> CheckFoldersPermissionsAsync<T, TTo>(
+    public async Task<string> CheckFoldersPermissionsAsync(
         Folder<T> folder, 
         Folder<TTo> toFolder,
         bool copy,
@@ -310,11 +311,6 @@ public class CopyPermissionsCheck(
 
             return errorMsg;
         }
-
-        var fileDao = serviceProvider.GetRequiredService<IFileDao<T>>();
-        var folderDao = serviceProvider.GetRequiredService<IFolderDao<T>>();
-        var ttoFileDao = serviceProvider.GetRequiredService<IFileDao<TTo>>();
-        var ttoFolderDao = serviceProvider.GetRequiredService<IFolderDao<TTo>>();
 
         var (rId, _, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(folder);
         var parentRoomId = rId.ToString();
@@ -430,7 +426,7 @@ public class CopyPermissionsCheck(
 
             return errorMsg;
         }
-        else if (!isRoom && folder.SettingsPrivate && !await CompliesPrivateRoomRulesAsync(folderDao, copy, folder, parentFolders))
+        else if (!isRoom && folder.SettingsPrivate && !await CompliesPrivateRoomRulesAsync(copy, folder, parentFolders))
         {
             errorMsg = FilesCommonResource.ErrorMessage_SecurityException_MoveFolder;
             if (check)
@@ -522,18 +518,13 @@ public class CopyPermissionsCheck(
         return null;
     }
         
-    public async Task<string> CheckFilesPermissionsAsync<T, TTo>(
+    public async Task<string> CheckFilesPermissionsAsync(
         File<T> file,
         Folder<TTo> toFolder,
         bool copy,
         FileConflictResolveType resolveType,
         bool check = false)
     {
-        var fileDao = serviceProvider.GetRequiredService<IFileDao<T>>();
-        var folderDao = serviceProvider.GetRequiredService<IFolderDao<T>>();
-        var ttoFileDao = serviceProvider.GetRequiredService<IFileDao<TTo>>();
-        var ttoFolderDao = serviceProvider.GetRequiredService<IFolderDao<TTo>>();
-
         var checkPermissions = true;
         var parentFolders = await ttoFolderDao.GetParentFoldersAsync(toFolder.Id).ToListAsync();
 
@@ -592,7 +583,7 @@ public class CopyPermissionsCheck(
 
             return errorMsg;
         }
-        else if (!await CompliesPrivateRoomRulesAsync(folderDao, copy, file, parentFolders))
+        else if (!await CompliesPrivateRoomRulesAsync(copy, file, parentFolders))
         {
             errorMsg = FilesCommonResource.ErrorMessage_SecurityException_MoveFile;
             if (check)
@@ -697,7 +688,7 @@ public class CopyPermissionsCheck(
         return null;
     }
 
-    public async Task<string> CheckFilesSecurityPermissionsAsync<T>(IEnumerable<File<T>> files, bool checkPermissions = true)
+    public async Task<string> CheckFilesSecurityPermissionsAsync(IEnumerable<File<T>> files, bool checkPermissions = true)
     {
         foreach (var file in files)
         {
@@ -720,7 +711,7 @@ public class CopyPermissionsCheck(
         return null;
     }
 
-    private async Task<bool> CompliesPrivateRoomRulesAsync<T, TTo>(IFolderDao<T> folderDao, bool copy, FileEntry<T> entry, IEnumerable<Folder<TTo>> toFolderParents)
+    private async Task<bool> CompliesPrivateRoomRulesAsync(bool copy, FileEntry<T> entry, IEnumerable<Folder<TTo>> toFolderParents)
     {
         var entryParentRoom = await folderDao.GetParentFoldersAsync(entry.ParentId).FirstOrDefaultAsync(f => f.SettingsPrivate && f.IsRoom);
 
