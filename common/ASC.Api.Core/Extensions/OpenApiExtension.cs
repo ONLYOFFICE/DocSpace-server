@@ -47,7 +47,35 @@ public static class OpenApiExtension
                 return;
             }
             var assemblyName = entryAssembly.FullName?.Split(',').First();
-            c.ResolveConflictingActions(a => a.First());
+            c.ResolveConflictingActions(apiDescriptions =>
+            {
+                var list = apiDescriptions.ToList();
+                var first = list.First();
+
+                if (list.Count > 1)
+                {
+                    var pathParams = first.ParameterDescriptions
+                        .Where(p => p.Source?.Id == "Path")
+                        .ToList();
+
+                    foreach (var param in pathParams)
+                    {
+                        var types = list
+                            .SelectMany(d => d.ParameterDescriptions)
+                            .Where(p => p.Source?.Id == "Path" && p.Name == param.Name)
+                            .Select(p => p.Type)
+                            .Distinct()
+                            .ToList();
+
+                        if (types.Count > 1)
+                        {
+                            first.Properties[$"MultiTypeParam_{param.Name}"] = types;
+                        }
+                    }
+                }
+
+                return first;
+            });
             c.CustomOperationIds(r =>
             {
                 return r.ActionDescriptor.RouteValues.TryGetValue("action", out var actionName)
@@ -103,6 +131,7 @@ public static class OpenApiExtension
             c.DocumentFilter<TagDescriptionsDocumentFilter>();
             c.OperationFilter<SwaggerCustomOperationFilter>();
             c.OperationFilter<ContentTypeOperationFilter>();
+            c.OperationFilter<MultiTypePathParameterFilter>();
             c.OperationFilter<AllowAnonymousFilter>();
             c.DocumentFilter<SwaggerSuccessApiResponseFilter>();
             c.EnableAnnotations();
@@ -403,6 +432,30 @@ public static class OpenApiExtension
         }
     }
     
+
+    private class MultiTypePathParameterFilter : IOperationFilter
+    {
+        public void Apply(OpenApiOperation operation, OperationFilterContext context)
+        {
+            foreach (var parameter in operation.Parameters)
+            {
+                if (parameter is OpenApiParameter openApiParameter &&
+                    openApiParameter.In == ParameterLocation.Path &&
+                    context.ApiDescription.Properties.TryGetValue($"MultiTypeParam_{parameter.Name}", out var typesObj) &&
+                    typesObj is List<Type> types && types.Count > 1)
+                {
+                    var schemas = new List<IOpenApiSchema>();
+
+                    foreach (var type in types)
+                    {
+                        schemas.Add(context.SchemaGenerator.GenerateSchema(type, context.SchemaRepository));
+                    }
+
+                    openApiParameter.Schema = new OpenApiSchema { OneOf = schemas };
+                }
+            }
+        }
+    }
 
     private class CustomInheritanceSchemaFilter : ISchemaFilter
     {
