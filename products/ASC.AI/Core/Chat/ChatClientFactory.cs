@@ -37,11 +37,7 @@ public class ChatClientFactory(
     public IChatClient Create(ChatClientOptions options, ToolHolder? toolHolder = null)
     {
         ArgumentNullException.ThrowIfNull(options);
-        
-        if (string.IsNullOrEmpty(options.Endpoint))
-        {
-            throw new ArgumentException("Endpoint is not configured");
-        }
+        ArgumentException.ThrowIfNullOrEmpty(options.Endpoint);
 
         ChatClientBuilder builder;
 
@@ -118,6 +114,27 @@ public class ChatClientFactory(
                     builder = chatClient.AsIChatClient().AsBuilder();
                     break;
                 }
+        }
+
+        if (options.ReasoningEffort is { } reasoningEffort)
+        {
+            builder.ConfigureOptions(x =>
+            {
+                x.Reasoning = new ReasoningOptions
+                {
+                    Effort = reasoningEffort switch
+                    {
+                        ChatReasoningEffort.None => ReasoningEffort.None,
+                        ChatReasoningEffort.Low => ReasoningEffort.Low,
+                        ChatReasoningEffort.Medium => ReasoningEffort.Medium,
+                        ChatReasoningEffort.High => ReasoningEffort.High,
+                        ChatReasoningEffort.XHigh => ReasoningEffort.ExtraHigh,
+                        _ => null
+                    },
+                    Output = ReasoningOutput.Full
+                };
+                x.MaxOutputTokens = 25000;
+            });
         }
 
         if (toolHolder?.Tools is { Count: > 0 })

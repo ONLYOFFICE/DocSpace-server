@@ -65,4 +65,10 @@ public class ContinueChatBody
     /// <summary>The list of attached files.</summary>
     /// <example>[{"id": 1, "type": "file"}]</example>
     public IEnumerable<JsonElement>? Files { get; set; }
+
+    /// <summary>
+    /// The optional reasoning effort level for the AI model.
+    /// Controls how much reasoning the model applies when generating a response.
+    /// </summary>
+    public ChatReasoningEffort? ReasoningEffort { get; set; }
 }

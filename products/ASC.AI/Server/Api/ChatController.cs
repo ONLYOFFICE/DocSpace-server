@@ -63,7 +63,10 @@ public class ChatController(
     public async Task<IActionResult> StartNewChatAsync(StartNewChatRequestDto inDto)
     {
         var generator = await chatCompletionRunner.StartNewChatAsync(
-            inDto.RoomId, inDto.Body.Message, inDto.Body.Files);
+            inDto.RoomId, 
+            inDto.Body.Message, 
+            inDto.Body.Files, 
+            inDto.Body.ReasoningEffort);
 
         var source = generator.GenerateCompletionAsync(Request.HttpContext.RequestAborted);
 
@@ -91,7 +94,10 @@ public class ChatController(
     public async Task<IActionResult> ContinueChatAsync(ContinueChatRequestDto inDto)
     {
         var generator = await chatCompletionRunner.StartChatAsync(
-            inDto.ChatId, inDto.Body.Message, inDto.Body.Files);
+            inDto.ChatId, 
+            inDto.Body.Message, 
+            inDto.Body.Files, 
+            inDto.Body.ReasoningEffort);
 
         var source = generator.GenerateCompletionAsync(Request.HttpContext.RequestAborted);
 
