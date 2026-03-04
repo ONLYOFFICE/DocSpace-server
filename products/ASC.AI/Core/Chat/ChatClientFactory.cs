@@ -47,6 +47,22 @@ public class ChatClientFactory(
 
         switch (options.Provider)
         {
+            case ProviderType.OpenAi:
+                {
+                    var credential = new ApiKeyCredential(options.Key);
+                    var openAiOptions = new OpenAIClientOptions
+                    {
+                        Endpoint = new Uri(options.Endpoint),
+                        Transport = new HttpClientPipelineTransport(httpClientFactory.CreateClient())
+                    };
+        
+                    var openAiClient = new OpenAIClient(credential, openAiOptions);
+#pragma warning disable OPENAI001
+                    var chatClient = openAiClient.GetResponsesClient(options.ModelId);
+                    builder = chatClient.AsIChatClient().AsBuilder();
+#pragma warning restore OPENAI001
+                    break;
+                }
             case ProviderType.Anthropic:
                 {
                     var client = new AnthropicClient(
