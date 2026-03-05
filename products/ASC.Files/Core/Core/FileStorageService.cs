@@ -5249,7 +5249,7 @@ public class FileStorageService //: IFileStorageService
         await socketManager.CreateFileAsync(form);
     }
 
-    public async IAsyncEnumerable<FormResultsDto> GetSubmissionsByFormId(int formId)
+    public async Task<FormSubmissionsDto> GetSubmissionsByFormId(int formId)
     {
         var fileDao = daoFactory.GetFileDao<int>();
         var folderDao = daoFactory.GetFolderDao<int>();
@@ -5287,20 +5287,19 @@ public class FileStorageService //: IFileStorageService
         var room = roomTask.Result;
 
         if (room == null ||
-            resultsFile == null ||
-            formFilling.RoomId != room.Id ||
-            !await fileSecurity.CanReadAsync(resultsFile))
+            formFilling.RoomId != room.Id)
         {
             throw new InvalidOperationException();
         }
 
-        var results = await formFillingReportCreator
-            .GetFormFillingResults(room.Id, form.Id, form.Version);
+        var (metadata, submissions) = await formFillingReportCreator
+            .GetFormSnapshotAsync(room.Id, form.Id, form.Version);
 
-        foreach (var result in results)
+        return new FormSubmissionsDto
         {
-            yield return result.MapToFormResultsDto();
-        }
+            Metadata = metadata,
+            Submissions = submissions.Cast<DbFormsItemDataSearch>().Select(r => r.MapToFormResultsDto())
+        };
     }
 
     public async Task<RoomGroup> SaveRoomGroupAsync(RoomGroup roomGroup)

@@ -34,6 +34,7 @@ public class FormFillingReportCreator(
     IHttpClientFactory clientFactory,
     TenantManager tenantManager,
     FactoryIndexerForm factoryIndexerForm,
+    FactoryIndexerFormMetadata factoryIndexerFormMetadata,
     IServiceScopeFactory serviceScopeFactory,
     ILogger<FormFillingReportCreator> logger)
 {
@@ -119,6 +120,19 @@ public class FormFillingReportCreator(
         return [];
     }
 
+    public async Task<(IEnumerable<FormMetadata> Metadata, IEnumerable<SubmitFormsData> Submissions)> GetFormSnapshotAsync(int roomId, int originalFormId, int originalFormVersion)
+    {
+        factoryIndexerFormMetadata.Refresh();
+        var (metaSuccess, metaResult) = await factoryIndexerFormMetadata.TrySelectAsync(r =>
+            r.Where(s => s.OriginalFormId, originalFormId)
+             .Where(s => s.OriginalFormVersion, originalFormVersion));
+
+        var metadata = metaSuccess ? metaResult.FirstOrDefault()?.Metadata ?? [] : [];
+        var submissions = await GetFormFillingResults(roomId, originalFormId, originalFormVersion);
+
+        return (metadata, submissions.Cast<SubmitFormsData>());
+    }
+
     private async Task<(SubmitFormsData fromData, List<FormMetadata> fromMetaData)> GetSubmitFormsData<T>(
         File<T> formsDataFile,
         int originalFormId,
@@ -173,6 +187,15 @@ public class FormFillingReportCreator(
             };
 
             _ = factoryIndexerForm.IndexAsync(searchItems);
+            _ = factoryIndexerFormMetadata.IndexAsync(new DbFormsMetadataSearch
+            {
+                Id = DbFormsMetadataSearch.ComputeId(originalFormId, originalFormVersion),
+                TenantId = tenantId,
+                OriginalFormId = originalFormId,
+                OriginalFormVersion = originalFormVersion,
+                RoomId = roomId,
+                Metadata = fromMetaData
+            });
         }
 
         return (fromData, fromMetaData);

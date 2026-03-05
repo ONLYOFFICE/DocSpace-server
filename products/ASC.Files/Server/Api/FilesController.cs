@@ -637,7 +637,7 @@ public abstract class FilesController<T>(
     [SwaggerResponse(200, "Form submission results were successfully retrieved")]
     [SwaggerResponse(403, "You do not have enough permissions to perform this action")]
     [HttpGet("file/{fileId}/submissions")]
-    public IAsyncEnumerable<FormResultsDto> GetFormSubmissions(FileIdRequestDto<int> inDto)
+    public Task<FormSubmissionsDto> GetFormSubmissions(FileIdRequestDto<int> inDto)
     {
         return fileStorageService.GetSubmissionsByFormId(inDto.FileId);
     }
