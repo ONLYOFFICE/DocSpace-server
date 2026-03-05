@@ -221,7 +221,7 @@ public class UserController(
     [SwaggerResponse(200, "Newly added user with the detailed information", typeof(EmployeeFullDto))]
     [SwaggerResponse(403, "The invitation link is invalid or its validity has expired")]
     [HttpPost]
-    [Authorize(AuthenticationSchemes = "confirm", Roles = "LinkInvite,Everyone")]
+    [Authorize(AuthenticationSchemes = "confirm", Roles = "LinkInvite,Authenticated")]
     public async Task<EmployeeFullDto> AddMember(MemberRequestDto inDto)
     {
         await securityContext.AuthByClaimAsync();
@@ -988,7 +988,7 @@ public class UserController(
     [SwaggerResponse(400, "Incorrect email")]
     [AllowNotPayment]
     [HttpGet("exists")]
-    [Authorize(AuthenticationSchemes = "confirm", Roles = "LinkInvite,GuestShareLink,Everyone")]
+    [Authorize(AuthenticationSchemes = "confirm", Roles = "LinkInvite,GuestShareLink,Authenticated")]
     public async Task<bool> CheckUserExistsByEmail(GetMemberByEmailRequestDto inDto)
     {
         var email = string.IsNullOrEmpty(inDto.Email) && !string.IsNullOrEmpty(inDto.EncEmail)
@@ -1052,7 +1052,7 @@ public class UserController(
     [SwaggerResponse(400, "Incorrect UserId")]
     [SwaggerResponse(404, "User not found")]
     [AllowNotPayment]
-    [Authorize(AuthenticationSchemes = "confirm", Roles = "LinkInvite,Everyone")]
+    [Authorize(AuthenticationSchemes = "confirm", Roles = "LinkInvite,Authenticated")]
     [HttpGet("{userid}", Order = 1)]
     public async Task<EmployeeFullDto> GetProfileByUserId(GetMemberByIdRequestDto inDto)
     {
