@@ -26,8 +26,6 @@
 
 #pragma warning disable SCME0001
 
-using System.Text.Json.Nodes;
-
 using OpenAI.Chat;
 
 using ChatMessage = Microsoft.Extensions.AI.ChatMessage;
@@ -36,6 +34,8 @@ namespace ASC.AI.Core.Chat;
 
 public class OpenRouterChatClient(IChatClient innerClient) : IChatClient
 {
+    private readonly List<byte[]> _reasoningDetails = [];
+
     public Task<ChatResponse> GetResponseAsync(IEnumerable<ChatMessage> messages, ChatOptions? options = null,
         CancellationToken cancellationToken = new())
     {
@@ -60,45 +60,19 @@ public class OpenRouterChatClient(IChatClient innerClient) : IChatClient
         }
 
         var lastMessage = originalMessages[^1];
-        if (lastMessage.Role == ChatRole.Tool)
+        if (lastMessage.Role == ChatRole.Tool && _reasoningDetails.Count > 0)
         {
             var reasoningMessage = originalMessages[^2];
-            var reasoningDetails = new JsonArray();
+            var arrayJson = BuildJsonArray(_reasoningDetails);
 
-            foreach (var content in reasoningMessage.Contents)
-            {
-                if (content is not TextReasoningContent reasoning)
-                {
-                    continue;
-                }
+            List<ChatMessage> reasoningMessages = [reasoningMessage];
+            var openAiChatMessage = reasoningMessages.AsOpenAIChatMessages().First();
+            openAiChatMessage.Patch.Set("$.reasoning_details"u8, arrayJson);
 
-                if (!string.IsNullOrEmpty(reasoning.ProtectedData))
-                {
-                    reasoningDetails.Add(new JsonObject
-                    {
-                        ["type"] = "reasoning.encrypted",
-                        ["data"] = reasoning.ProtectedData
-                    });
-                }
-                else if (!string.IsNullOrEmpty(reasoning.Text))
-                {
-                    reasoningDetails.Add(new JsonObject
-                    {
-                        ["type"] = "reasoning.text",
-                        ["text"] = reasoning.Text
-                    });
-                }
-            }
-
-            if (reasoningDetails.Count > 0)
-            {
-                List<ChatMessage> reasoningMessages = [reasoningMessage];
-                var openAiChatMessage = reasoningMessages.AsOpenAIChatMessages().First();
-                openAiChatMessage.Patch.Set("$.reasoning_details"u8, reasoningDetails.ToJsonString());
-
-                reasoningMessage.RawRepresentation = openAiChatMessage;
-            }
+            reasoningMessage.RawRepresentation = openAiChatMessage;
         }
+
+        _reasoningDetails.Clear();
 
         await foreach (var update in innerClient.GetStreamingResponseAsync(messages, options, cancellationToken))
         {
@@ -106,6 +80,11 @@ public class OpenRouterChatClient(IChatClient innerClient) : IChatClient
             {
                 if (rawUpdate.Patch.TryGetValue("$.choices[0].delta.reasoning_details[0].type"u8, out string? detailType))
                 {
+                    if (rawUpdate.Patch.TryGetJson("$.choices[0].delta.reasoning_details[0]"u8, out var rawDetailJson))
+                    {
+                        _reasoningDetails.Add(rawDetailJson.ToArray());
+                    }
+
                     var reasoningContent = detailType switch
                     {
                         "reasoning.text" => ExtractTextReasoning(rawUpdate),
@@ -133,6 +112,24 @@ public class OpenRouterChatClient(IChatClient innerClient) : IChatClient
     public void Dispose()
     {
         innerClient.Dispose();
+    }
+
+    private static byte[] BuildJsonArray(List<byte[]> elements)
+    {
+        using var stream = new MemoryStream();
+        using var writer = new Utf8JsonWriter(stream);
+
+        writer.WriteStartArray();
+
+        foreach (var element in elements)
+        {
+            writer.WriteRawValue(element);
+        }
+
+        writer.WriteEndArray();
+        writer.Flush();
+
+        return stream.ToArray();
     }
 
     private static TextReasoningContent? ExtractTextReasoning(StreamingChatCompletionUpdate rawUpdate)
