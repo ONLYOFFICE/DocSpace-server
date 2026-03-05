@@ -90,7 +90,13 @@ public class WeixinLoginProvider : BaseLoginProvider<WeixinLoginProvider>, IDumm
 
     public string GenerateEmail(LoginProfile loginProfile)
     {
-        return $"{loginProfile.Id}@{TenantManager.GetCurrentTenant().GetTenantDomain(CoreSettings)}";
+        var domain = CoreBaseSettings.Basedomain;
+        var currentTenant = TenantManager.GetCurrentTenant(false);
+        if (currentTenant != null)
+        {
+            domain = currentTenant.GetTenantDomain(CoreSettings);
+        }
+        return $"{loginProfile.Id}@{domain}";
     }
 
     private LoginProfile RequestProfile(string accessToken)
