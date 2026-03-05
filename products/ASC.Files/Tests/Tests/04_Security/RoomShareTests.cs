@@ -1012,4 +1012,63 @@ public class RoomShareTests(
         updatedInfo.Should().Contain(x=> x.SubjectType == SubjectType.User && x.Access == FileShare.Read);
     }
 
+    [Fact]
+    [Trait("Category", "Bug")]
+    [Trait("Bug", "80322")]
+    public async Task VdrRoom_UserWithFillForms_SeesOnlyFolderBeforeFormRole_ThenSeesFolderAndFormAfterFormRole()
+    {
+        // Arrange: owner creates a VDR room, a folder and a form inside it
+        await _filesClient.Authenticate(Initializer.Owner);
+        var room = await CreateVDRRoom("vdr_room_entity_count");
+
+        var folder = await CreateFolder("test_folder", room.Id);
+        var form = await CreateFile("test_form.pdf", room.Id);
+
+        // Invite user to the room with FillForms rights
+        var user = await Initializer.InviteContact(EmployeeType.User);
+        await _roomsApi.SetRoomSecurityAsync(room.Id, new RoomInvitationRequest
+        {
+            Invitations = [new RoomInvitation { Id = user.Id, Access = FileShare.FillForms }]
+        }, TestContext.Current.CancellationToken);
+
+        // Act 1: user enters the room — should see only the folder (total = 1)
+        await _filesClient.Authenticate(user);
+        var roomContentBeforeRole = (await _foldersApi.GetFolderByFolderIdAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        // Assert 1: only folder is visible, total = 1
+        roomContentBeforeRole.Should().NotBeNull();
+        roomContentBeforeRole.Folders.Should().HaveCount(1);
+        roomContentBeforeRole.Files.Should().BeEmpty();
+        roomContentBeforeRole.Total.Should().Be(1);
+
+        // Act 2: owner grants user a role on the form
+        await _filesClient.Authenticate(Initializer.Owner);
+        var roles = new List<FormRole>
+        {
+            new() 
+            { 
+                UserId = user.Id, 
+                RoleName = "Anyone",
+                RoomId = room.Id,
+                RoleColor = "ffefbf"
+            }
+        };
+        var roleMapping = new SaveFormRoleMappingDtoInteger(form.Id, roles);
+
+        await _filesApi.SaveFormRoleMappingAsync(form.Id.ToString(), roleMapping, TestContext.Current.CancellationToken);
+
+        // If successful, attempt to retrieve the roles
+        var savedRoles = (await _filesApi.GetAllFormRolesAsync(form.Id, TestContext.Current.CancellationToken)).Response;
+        savedRoles.Should().NotBeNull();
+
+        // Act 3: user re-enters the room — should see folder AND form (total = 2)
+        await _filesClient.Authenticate(user);
+        var roomContentAfterRole = (await _foldersApi.GetFolderByFolderIdAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        // Assert 2: both folder and form are visible, total = 2
+        roomContentAfterRole.Should().NotBeNull();
+        roomContentAfterRole.Folders.Should().HaveCount(1);
+        roomContentAfterRole.Files.Should().HaveCount(1);
+        roomContentAfterRole.Total.Should().Be(2);
+    }
 }

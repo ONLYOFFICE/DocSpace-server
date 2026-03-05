@@ -59,7 +59,6 @@ internal class FileDao(
         StorageFactory storageFactory,
         TenantQuotaController tenantQuotaController,
         IDistributedLockProvider distributedLockProvider,
-        FileStorageService fileStorageService,
         SocketManager socketManager,
         SecurityContext securityContext,
         TempStream tempStream,
@@ -769,7 +768,7 @@ internal class FileDao(
     }
 
     public async Task<int> GetFilesCountAsync(int parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent,
-        bool withSubfolders = false, bool excludeSubject = false, int roomId = 0, FormsItemDto formsItemDto = null, FolderType parentType = FolderType.DEFAULT, AdditionalFilterOption additionalFilterOption = AdditionalFilterOption.All)
+        bool withSubfolders = false, bool excludeSubject = false, int roomId = 0, FormsItemDto formsItemDto = null, FolderType parentType = FolderType.DEFAULT, AdditionalFilterOption additionalFilterOption = AdditionalFilterOption.All, bool applyFormStepFilter = false)
     {
         if (filterType == FilterType.FoldersOnly)
         {
@@ -782,6 +781,10 @@ internal class FileDao(
         if (additionalFilterOption != AdditionalFilterOption.All)
         {
             q = ApplyAdditionalFileFilters(q, filesDbContext, parentId, parentType, additionalFilterOption);
+        }
+        if (applyFormStepFilter)
+        {
+            q = ApplyAdditionalFileFilters(q, filesDbContext, parentId, parentType, AdditionalFilterOption.FormsWithFillingRole);
         }
 
         if (parentType == FolderType.Knowledge)
@@ -3019,7 +3022,6 @@ internal class CacheFileDao(ILogger<FileDao> logger,
         StorageFactory storageFactory,
         TenantQuotaController tenantQuotaController,
         IDistributedLockProvider distributedLockProvider,
-        FileStorageService fileStorageService,
         SocketManager socketManager,
         SecurityContext securityContext,
         TempStream tempStream,
@@ -3063,7 +3065,6 @@ internal class CacheFileDao(ILogger<FileDao> logger,
         storageFactory,
         tenantQuotaController,
         distributedLockProvider,
-        fileStorageService,
         socketManager,
         securityContext,
         tempStream,

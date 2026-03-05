@@ -119,7 +119,7 @@ public class TfaappController(
         var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
         securityContext.Logout();
 
-        var (result, _) = await tfaManager.ValidateAuthCodeAsync(user, inDto.Code, inDto.Session);
+        var (result, _) = await tfaManager.ValidateAuthCodeAsync(user, inDto.Code, session: inDto.Session);
         await userSocketManager.UpdateUserAsync(userManager.GetUsers(authContext.CurrentAccount.ID));
 
         var request = QueryHelpers.ParseQuery(Request.Headers["confirm"]);
