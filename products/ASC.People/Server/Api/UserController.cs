@@ -976,12 +976,12 @@ public class UserController(
         return GetByStatus(status);
     }
 
-    /// <remarks>
-    /// Returns a boolean indicating whether a user with the specified email exists on the portal.
-    /// </remarks>
     /// <summary>
     /// Check if a user exists by email
     /// </summary>
+    /// <remarks>
+    /// Returns a boolean indicating whether a user with the specified email exists on the portal.
+    /// </remarks>
     /// <path>api/2.0/people/exists</path>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "Boolean result", typeof(bool))]
@@ -1001,7 +1001,7 @@ public class UserController(
 
         return user.Id != Constants.LostUser.Id;
     }
-    
+
     /// <remarks>
     /// Returns the detailed information about a profile of the user with the email specified in the request.
     /// </remarks>
