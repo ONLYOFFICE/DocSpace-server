@@ -8424,7 +8424,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/BooleanWrapper"
+                  "$ref": "#/components/schemas/ModuleWrapper"
                 }
               }
             }
@@ -9398,6 +9398,73 @@
               }
             }
           },
+          "400": {
+            "description": "Incorrect or missing file"
+          },
+          "403": {
+            "description": "You don't have enough permission to perform the operation"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Files / Settings"
+        ],
+        "summary": "Reset the default template setting",
+        "description": "Resets the default template setting.",
+        "operationId": "resetDefaultTemplate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DefaultTemplateSettingsResetRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "New default template settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultTemplateSettingsWrapper"
+                }
+              }
+            }
+          },
           "403": {
             "description": "You don't have enough permission to perform the operation"
           },
@@ -9489,6 +9556,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Incorrect or missing file"
           },
           "403": {
             "description": "You don't have enough permission to perform the operation"
@@ -10033,6 +10103,15 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "The list of email addresses is empty"
+          },
+          "403": {
+            "description": "You don't have enough permission to perform the operation"
+          },
+          "404": {
+            "description": "The required file was not found"
           },
           "401": {
             "description": "Unauthorized"
@@ -14383,12 +14462,16 @@
         "type": "object",
         "properties": {
           "data": {
+            "maxLength": 256,
+            "minLength": 0,
             "type": "string",
             "description": "The action data that will be scrolled to.",
             "nullable": true,
             "example": "section"
           },
           "type": {
+            "maxLength": 128,
+            "minLength": 0,
             "type": "string",
             "description": "The action type.",
             "nullable": true,
@@ -14796,6 +14879,9 @@
         "description": "The request parameters for copying/moving files."
       },
       "BatchTagsRequestDto": {
+        "required": [
+          "names"
+        ],
         "type": "object",
         "properties": {
           "names": {
@@ -14804,7 +14890,6 @@
               "type": "string"
             },
             "description": "The list of tag names.",
-            "nullable": true,
             "example": [
               "tag1",
               "tag2",
@@ -14936,6 +15021,35 @@
         "additionalProperties": false,
         "description": "The request parameters for changing the file owner."
       },
+      "ChatImageMultimodalSettingsDto": {
+        "type": "object",
+        "properties": {
+          "formats": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The supported image formats.",
+            "nullable": true,
+            "example": [
+              ".jpeg",
+              ".gif"
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "description": "The image multimodal settings for the chat model."
+      },
+      "ChatMultimodalSettingsDto": {
+        "type": "object",
+        "properties": {
+          "image": {
+            "$ref": "#/components/schemas/ChatImageMultimodalSettingsDto"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The multimodal settings for the chat model."
+      },
       "ChatSettings": {
         "type": "object",
         "properties": {
@@ -14966,6 +15080,46 @@
         },
         "additionalProperties": false,
         "description": "The chat settings."
+      },
+      "ChatSettingsDto": {
+        "type": "object",
+        "properties": {
+          "providerId": {
+            "type": "integer",
+            "description": "The AI provider ID.",
+            "format": "int32",
+            "example": 1
+          },
+          "modelId": {
+            "type": "string",
+            "description": "The AI model ID used for chat completions.",
+            "nullable": true,
+            "example": "gpt-5.2"
+          },
+          "modelAlias": {
+            "type": "string",
+            "description": "The AI model display alias.",
+            "nullable": true,
+            "example": "GPT-5.2"
+          },
+          "prompt": {
+            "type": "string",
+            "description": "The system prompt for the chat.",
+            "nullable": true,
+            "example": "You are a helpful assistant."
+          },
+          "multimodal": {
+            "$ref": "#/components/schemas/ChatMultimodalSettingsDto"
+          },
+          "internal": {
+            "type": "boolean",
+            "description": "Indicates whether this is an internal AI gateway provider.",
+            "readOnly": true,
+            "example": false
+          }
+        },
+        "additionalProperties": false,
+        "description": "The chat settings parameters."
       },
       "CheckConversionRequestDtoInteger": {
         "type": "object",
@@ -16414,6 +16568,13 @@
             "nullable": true,
             "example": "2025-01-01T00:00:00"
           },
+          "fileSize": {
+            "type": "integer",
+            "description": "Filesize (in bytes) of a default template",
+            "format": "int64",
+            "nullable": true,
+            "example": 1024
+          },
           "viewUrl": {
             "type": "string",
             "description": "View url of a default template",
@@ -16450,15 +16611,23 @@
       },
       "DefaultTemplateSettingsRequestDto": {
         "required": [
-          "fileExtension"
+          "fileExtension",
+          "selectedFile"
         ],
         "type": "object",
         "properties": {
           "selectedFile": {
-            "type": "integer",
-            "description": "File id to replace template with (or null to use default template)",
-            "format": "int32",
-            "nullable": true,
+            "oneOf": [
+              {
+                "type": "integer",
+                "example": 1234
+              },
+              {
+                "type": "string",
+                "example": "some text"
+              }
+            ],
+            "description": "File id to replace template with",
             "example": 1
           },
           "fileExtension": {
@@ -16470,6 +16639,22 @@
         },
         "additionalProperties": false,
         "description": "Default templates settings request parameters."
+      },
+      "DefaultTemplateSettingsResetRequestDto": {
+        "required": [
+          "fileExtension"
+        ],
+        "type": "object",
+        "properties": {
+          "fileExtension": {
+            "type": "string",
+            "description": "File extension of a template to reset",
+            "nullable": true,
+            "example": ".docx"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Default templates settings reset request parameters."
       },
       "DefaultTemplateSettingsWrapper": {
         "type": "object",
@@ -21450,7 +21635,7 @@
                 "deprecated": true
               },
               "chatSettings": {
-                "$ref": "#/components/schemas/ChatSettings"
+                "$ref": "#/components/schemas/ChatSettingsDto"
               },
               "rootRoomType": {
                 "$ref": "#/components/schemas/RoomType"
@@ -21591,7 +21776,7 @@
                 "deprecated": true
               },
               "chatSettings": {
-                "$ref": "#/components/schemas/ChatSettings"
+                "$ref": "#/components/schemas/ChatSettingsDto"
               },
               "rootRoomType": {
                 "$ref": "#/components/schemas/RoomType"
@@ -21932,23 +22117,29 @@
           {
             "enum": [
               "Stop",
-              "Resume"
+              "Resume",
+              "Start",
+              "Edit"
             ],
             "type": "string",
-            "description": "[Stop - Stop, Resume - Resume]",
+            "description": "[Stop - Stop, Resume - Resume, Start - Start, Edit - Edit]",
             "example": "Stop"
           },
           {
             "enum": [
               0,
-              1
+              1,
+              2,
+              3
             ],
             "type": "integer",
-            "description": "[0 - Stop, 1 - Resume]",
+            "description": "[0 - Stop, 1 - Resume, 2 - Start, 3 - Edit]",
             "example": 0,
             "x-enum-varnames": [
               "Stop",
-              "Resume"
+              "Resume",
+              "Start",
+              "Edit"
             ]
           }
         ],
@@ -22498,7 +22689,9 @@
           },
           "key": {
             "type": "string",
-            "nullable": true
+            "description": "The action performed on the file.",
+            "nullable": true,
+            "example": "fileUploaded"
           }
         },
         "additionalProperties": false,
@@ -24193,6 +24386,106 @@
         "description": "The user mobile phone activation status.",
         "x-enum-type": "integer"
       },
+      "Module": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The module ID.",
+            "format": "uuid",
+            "example": "00000000-0000-0000-0000-000000000000"
+          },
+          "appName": {
+            "type": "string",
+            "description": "The module product class name.",
+            "nullable": true,
+            "example": "files"
+          },
+          "title": {
+            "type": "string",
+            "description": "The module product class name.",
+            "nullable": true,
+            "example": "Documents"
+          },
+          "link": {
+            "type": "string",
+            "description": "The URL to the module start page.",
+            "nullable": true,
+            "example": "https://example.com"
+          },
+          "iconUrl": {
+            "type": "string",
+            "description": "The module icon URL.",
+            "nullable": true,
+            "example": "https://example.com/icon.svg"
+          },
+          "imageUrl": {
+            "type": "string",
+            "description": "The module large image URL.",
+            "nullable": true,
+            "example": "https://example.com/image.png"
+          },
+          "helpUrl": {
+            "type": "string",
+            "description": "The module help URL.",
+            "nullable": true,
+            "example": "https://example.com/help"
+          },
+          "description": {
+            "type": "string",
+            "description": "The module description.",
+            "nullable": true,
+            "example": "File management"
+          },
+          "isPrimary": {
+            "type": "boolean",
+            "description": "Specifies if the module is primary or not.",
+            "example": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "The module information."
+      },
+      "ModuleWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/Module"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
       "MultiSizeLogoCover": {
         "required": [
           "data",
@@ -24541,7 +24834,8 @@
         "properties": {
           "is_asc": {
             "type": "boolean",
-            "description": "Specifies if the order is ascending."
+            "description": "Specifies if the order is ascending.",
+            "example": true
           },
           "property": {
             "$ref": "#/components/schemas/SortedByType"
@@ -24655,43 +24949,53 @@
         "properties": {
           "comment": {
             "type": "boolean",
-            "description": "Defines if the document can be commented or not."
+            "description": "Defines if the document can be commented or not.",
+            "example": true
           },
           "chat": {
             "type": "boolean",
-            "description": "Defines if the chat functionality is enabled in the document or not."
+            "description": "Defines if the chat functionality is enabled in the document or not.",
+            "example": true
           },
           "download": {
             "type": "boolean",
-            "description": "Defines if the document can be downloaded or only viewed or edited online."
+            "description": "Defines if the document can be downloaded or only viewed or edited online.",
+            "example": true
           },
           "edit": {
             "type": "boolean",
-            "description": "Defines if the document can be edited or only viewed."
+            "description": "Defines if the document can be edited or only viewed.",
+            "example": true
           },
           "fillForms": {
             "type": "boolean",
-            "description": "Defines if the forms can be filled."
+            "description": "Defines if the forms can be filled.",
+            "example": true
           },
           "modifyFilter": {
             "type": "boolean",
-            "description": "Defines if the filter can be applied globally (true) affecting all the other users,\r\nor locally (false), i.e. for the current user only."
+            "description": "Defines if the filter can be applied globally (true) affecting all the other users,\r\nor locally (false), i.e. for the current user only.",
+            "example": true
           },
           "protect": {
             "type": "boolean",
-            "description": "Defines if the \"Protection\" tab on the toolbar and the \"Protect\" button in the left menu are displayedor hidden."
+            "description": "Defines if the \"Protection\" tab on the toolbar and the \"Protect\" button in the left menu are displayedor hidden.",
+            "example": true
           },
           "print": {
             "type": "boolean",
-            "description": "Defines if the document can be printed or not."
+            "description": "Defines if the document can be printed or not.",
+            "example": true
           },
           "review": {
             "type": "boolean",
-            "description": "Defines if the document can be reviewed or not."
+            "description": "Defines if the document can be reviewed or not.",
+            "example": true
           },
           "copy": {
             "type": "boolean",
-            "description": "Defines if the content can be copied to the clipboard or not."
+            "description": "Defines if the content can be copied to the clipboard or not.",
+            "example": true
           }
         },
         "additionalProperties": false,
@@ -26145,14 +26449,19 @@
         "properties": {
           "height": {
             "type": "integer",
-            "format": "int32"
+            "description": "Gets or sets the height dimension of an object, typically measured in pixels or other unit.\r\nIt defines the vertical size of the object.",
+            "format": "int32",
+            "example": 10
           },
           "width": {
             "type": "integer",
-            "format": "int32"
+            "description": "Gets or sets the width dimension of an object, typically measured in pixels or other unit.",
+            "format": "int32",
+            "example": 10
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "Represents dimensions with width and height values."
       },
       "SortOrder": {
         "oneOf": [
@@ -26274,25 +26583,28 @@
             "enum": [
               "None",
               "ShareToFillOut",
-              "StartFilling"
+              "StartFilling",
+              "StartFillingFormRoom"
             ],
             "type": "string",
-            "description": "[None - None, ShareToFillOut - Share to fill out, StartFilling - Start filling]",
+            "description": "[None - None, ShareToFillOut - Share to fill out, StartFilling - Start filling, StartFillingFormRoom - Start filling form room]",
             "example": "None"
           },
           {
             "enum": [
               0,
               1,
-              2
+              2,
+              3
             ],
             "type": "integer",
-            "description": "[0 - None, 1 - Share to fill out, 2 - Start filling]",
+            "description": "[0 - None, 1 - Share to fill out, 2 - Start filling, 3 - Start filling form room]",
             "example": 0,
             "x-enum-varnames": [
               "None",
               "ShareToFillOut",
-              "StartFilling"
+              "StartFilling",
+              "StartFillingFormRoom"
             ]
           }
         ],

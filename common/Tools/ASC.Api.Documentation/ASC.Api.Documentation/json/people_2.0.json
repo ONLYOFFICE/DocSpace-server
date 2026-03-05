@@ -1819,6 +1819,12 @@
               }
             }
           },
+          "400": {
+            "description": "Incorrect email"
+          },
+          "403": {
+            "description": "No permissions to perform this action"
+          },
           "404": {
             "description": "User not found"
           },
@@ -9222,31 +9228,6 @@
         "properties": {
           "employeeType": {
             "$ref": "#/components/schemas/EmployeeType"
-          },
-          "firstName": {
-            "type": "string",
-            "description": "The user first name.",
-            "nullable": true,
-            "example": "John"
-          },
-          "lastName": {
-            "type": "string",
-            "description": "The user last name.",
-            "nullable": true,
-            "example": "Doe"
-          },
-          "email": {
-            "type": "string",
-            "description": "The user email address.",
-            "format": "email",
-            "nullable": true,
-            "example": "john.doe@example.com"
-          },
-          "passwordHash": {
-            "type": "string",
-            "description": "The user password hash.",
-            "nullable": true,
-            "example": "$2a$10$abcdefghijklmnopqrstuv"
           },
           "key": {
             "type": "string",
