@@ -99,6 +99,25 @@ public class ChatClientFactory(
                         });
                     break;
                 }
+            case ProviderType.OpenRouter:
+                {
+                    var credential = new ApiKeyCredential(options.Key);
+                    var openAiOptions = new OpenAIClientOptions
+                    {
+                        Endpoint = new Uri(options.Endpoint),
+                        Transport = new HttpClientPipelineTransport(httpClientFactory.CreateClient())
+                    };
+
+                    var openAiClient = new OpenAIClient(credential, openAiOptions);
+                    var chatClient = openAiClient.GetChatClient(options.ModelId);
+
+                    builder = new OpenRouterChatClient(chatClient.AsIChatClient()).AsBuilder()
+                        .ConfigureOptions(x =>
+                        {
+                            x.ModelId = options.ModelId;
+                        });
+                    break;
+                }
             default:
                 {
                     var credential = new ApiKeyCredential(options.Key);
@@ -107,10 +126,10 @@ public class ChatClientFactory(
                         Endpoint = new Uri(options.Endpoint),
                         Transport = new HttpClientPipelineTransport(httpClientFactory.CreateClient())
                     };
-        
+
                     var openAiClient = new OpenAIClient(credential, openAiOptions);
                     var chatClient = openAiClient.GetChatClient(options.ModelId);
-        
+
                     builder = chatClient.AsIChatClient().AsBuilder();
                     break;
                 }
