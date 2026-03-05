@@ -24,9 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Linq.Expressions;
-using System.Reflection;
-using System.Text.Json.Nodes;
+#pragma warning disable SCME0001
 
 using OpenAI.Chat;
 
@@ -36,9 +34,6 @@ namespace ASC.AI.Core.Chat;
 
 public class DeepSeekChatClient(IChatClient innerClient) : IChatClient
 {
-    private static readonly Func<StreamingChatCompletionUpdate, IDictionary<string, BinaryData>> _completionAdditionalDataGetter 
-        = BuildCompletionDataGetter();
-    
     public Task<ChatResponse> GetResponseAsync(IEnumerable<ChatMessage> messages, ChatOptions? options = null,
         CancellationToken cancellationToken = new())
     {
@@ -80,22 +75,17 @@ public class DeepSeekChatClient(IChatClient innerClient) : IChatClient
             List<ChatMessage> reasoningMessages = [reasoningMessage];
 
             var openAiChatMessage = reasoningMessages.AsOpenAIChatMessages().First();
-
-            var node = ModelReaderWriter.Write(openAiChatMessage).ToObjectFromJson<JsonNode>()!;
-            node["reasoning_content"] = reasoningContent?.Text;
-
-            var binaryData = BinaryData.FromString(node.ToJsonString());
-            var enrichedMsg = ModelReaderWriter.Read<AssistantChatMessage>(binaryData);
+            openAiChatMessage.Patch.Set("$.reasoning_content"u8, reasoningContent!.Text);
             
-            reasoningMessage.RawRepresentation = enrichedMsg;
+            reasoningMessage.RawRepresentation = openAiChatMessage;
         }
         
         await foreach (var update in innerClient.GetStreamingResponseAsync(messages, options, cancellationToken))
         {
             if (update.RawRepresentation is StreamingChatCompletionUpdate rawUpdate)
             {
-                var reasoningContent = GetReasoningContent(rawUpdate);
-                if (reasoningContent != null)
+                if (rawUpdate.Patch.TryGetValue("$.choices[0].delta.reasoning_content"u8, out string? reasoningContent) 
+                    && !string.IsNullOrEmpty(reasoningContent))
                 {
                     update.Contents = [new TextReasoningContent(reasoningContent)];
                 }
@@ -113,48 +103,5 @@ public class DeepSeekChatClient(IChatClient innerClient) : IChatClient
     public void Dispose()
     {
         innerClient.Dispose();
-    }
-
-    private static string? GetReasoningContent(StreamingChatCompletionUpdate update)
-    {
-        var additionalData = _completionAdditionalDataGetter(update);
-        
-        return additionalData.TryGetValue("reasoning_content", out var binaryData) 
-            ? binaryData.ToObjectFromJson<string>()
-            : null;
-    }
-    
-    private static Func<StreamingChatCompletionUpdate, IDictionary<string, BinaryData>> BuildCompletionDataGetter()
-    {
-        var updateType = typeof(StreamingChatCompletionUpdate);
-        
-        var internalChoiceProp = updateType.GetProperty("InternalChoiceDelta", 
-            BindingFlags.NonPublic | BindingFlags.Instance);
-        
-        if (internalChoiceProp == null)
-        {
-            throw new InvalidOperationException("Property 'InternalChoiceDelta' not found");
-        }
-
-        var choiceType = internalChoiceProp.PropertyType;
-        
-        var additionalDataProp = choiceType.GetProperty("SerializedAdditionalRawData",
-            BindingFlags.NonPublic | BindingFlags.Instance);
-        
-        if (additionalDataProp == null)
-        {
-            throw new InvalidOperationException("Property 'SerializedAdditionalRawData' not found");
-        }
-        
-        var param = Expression.Parameter(updateType, "update");
-        
-        var choiceAccess = Expression.Property(param, internalChoiceProp);
-        
-        var dictAccess = Expression.Property(choiceAccess, additionalDataProp);
-        
-        var lambda = Expression.Lambda<Func<StreamingChatCompletionUpdate, IDictionary<string, BinaryData>>>(
-            dictAccess, param);
-        
-        return lambda.Compile();
     }
 }
