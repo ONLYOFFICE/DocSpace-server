@@ -17649,8 +17649,7 @@
       "EditorConfigurationDto": {
         "required": [
           "lang",
-          "mode",
-          "user"
+          "mode"
         ],
         "type": "object",
         "properties": {
@@ -18237,13 +18236,11 @@
       },
       "ExternalShareDto": {
         "required": [
-          "id",
           "isAuthenticated",
           "linkId",
           "shared",
           "status",
-          "tenantId",
-          "title"
+          "tenantId"
         ],
         "type": "object",
         "properties": {
