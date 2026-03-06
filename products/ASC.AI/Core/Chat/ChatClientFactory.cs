@@ -35,7 +35,8 @@ namespace ASC.AI.Core.Chat;
 [Scope]
 public class ChatClientFactory(
     IHttpClientFactory httpClientFactory,
-    IToolPermissionRequester toolPermissionRequester)
+    IToolPermissionRequester toolPermissionRequester,
+    AiConfiguration aiConfiguration)
 {
     public IChatClient Create(ChatClientOptions options, ToolHolder? toolHolder = null)
     {
@@ -58,11 +59,7 @@ public class ChatClientFactory(
                     var client = new AnthropicClient(
                         new APIAuthentication(options.Key), httpClientFactory.CreateClient()).Messages;
 
-                    builder = client.AsBuilder()
-                        .ConfigureOptions(x =>
-                        {
-                            x.MaxOutputTokens = 6144;
-                        });
+                    builder = client.AsBuilder();
                     break;
                 }
             case ProviderType.GoogleAi:
@@ -138,6 +135,14 @@ public class ChatClientFactory(
                     Output = ReasoningOutput.Full
                 };
             });
+        }
+
+        var maxOutputTokens = aiConfiguration.GetEffortSettings(
+            (options.ReasoningEffort ?? ChatReasoningEffort.None).ToStringLowerFast())?.MaxOutputTokens;
+
+        if (maxOutputTokens is > 0)
+        {
+            builder.ConfigureOptions(x => x.MaxOutputTokens = maxOutputTokens);
         }
 
         if (toolHolder?.Tools is { Count: > 0 })

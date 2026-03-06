@@ -33,19 +33,22 @@ namespace ASC.Core.Common.AI;
 public class AiConfiguration
 {
     public int MaxImageSize { get; private set; }
-    
+
     private readonly FrozenDictionary<ProviderType, ProviderSettingsData> _settings;
     private readonly FrozenDictionary<(ProviderType, string), ModelSettings> _modelsByProvider;
     private readonly FrozenDictionary<string, MultimodalSettings> _multimodalByModelId;
     private readonly FrozenDictionary<string, string> _aliasByModelId;
+    private readonly FrozenDictionary<string, EffortSettingsData> _effortSettings;
 
     public AiConfiguration(IConfiguration configuration, CoreBaseSettings coreBaseSettings)
     {
         var section = configuration.GetSection("ai");
         var providers = section.GetSection("providers").Get<List<ProviderSettingsData>>() ?? [];
         var maxImgSize = section.GetSection("maxImageSize").Get<int>();
-        
+        var effort = section.GetSection("effort").Get<Dictionary<string, EffortSettingsData>>() ?? [];
+
         MaxImageSize = maxImgSize > 0 ? maxImgSize : 0;
+        _effortSettings = effort.ToFrozenDictionary(e => e.Key, e => e.Value, StringComparer.OrdinalIgnoreCase);
 
         _settings = coreBaseSettings.Standalone
             ? providers.ToFrozenDictionary(p => p.Type)
@@ -116,5 +119,10 @@ public class AiConfiguration
     public IReadOnlyDictionary<string, string> GetModelAliases()
     {
         return _aliasByModelId;
+    }
+
+    public EffortSettingsData? GetEffortSettings(string effortName)
+    {
+        return _effortSettings.GetValueOrDefault(effortName);
     }
 }

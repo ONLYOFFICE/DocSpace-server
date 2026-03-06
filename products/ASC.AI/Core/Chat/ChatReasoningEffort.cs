@@ -24,11 +24,14 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using NetEscapades.EnumGenerators;
+
 namespace ASC.AI.Core.Chat;
 
 /// <summary>
 /// Specifies the level of reasoning effort for the AI model.
 /// </summary>
+[EnumExtensions]
 public enum ChatReasoningEffort
 {
     /// <summary>No reasoning effort.</summary>
