@@ -34,10 +34,8 @@ namespace ASC.AI.Core.Chat;
 
 public class OpenRouterChatClient(IChatClient innerClient) : IChatClient
 {
-    private readonly List<byte[]> _reasoningDetails = [];
-
     public Task<ChatResponse> GetResponseAsync(
-        IEnumerable<ChatMessage> messages, 
+        IEnumerable<ChatMessage> messages,
         ChatOptions? options = null,
         CancellationToken cancellationToken = new())
     {
@@ -62,26 +60,31 @@ public class OpenRouterChatClient(IChatClient innerClient) : IChatClient
         }
 
         var lastMessage = originalMessages[^1];
-        if (lastMessage.Role == ChatRole.Tool && _reasoningDetails.Count > 0)
+        if (lastMessage.Role == ChatRole.Tool)
         {
             var reasoningMessage = originalMessages[^2];
-            var arrayJson = BuildJsonArray(_reasoningDetails);
+            var prevAccumulator = FindAccumulator(reasoningMessage);
 
-            List<ChatMessage> reasoningMessages = [reasoningMessage];
-            var openAiChatMessage = reasoningMessages.AsOpenAIChatMessages().First();
-            openAiChatMessage.Patch.Set("$.reasoning_details"u8, arrayJson);
+            if (prevAccumulator != null)
+            {
+                List<ChatMessage> reasoningMessages = [reasoningMessage];
+                var openAiChatMessage = reasoningMessages.AsOpenAIChatMessages().First();
+                openAiChatMessage.Patch.Set("$.reasoning_details"u8, prevAccumulator.Read());
 
-            reasoningMessage.RawRepresentation = openAiChatMessage;
+                reasoningMessage.RawRepresentation = openAiChatMessage;
+            }
         }
 
-        _reasoningDetails.Clear();
+        ReasoningArrayAccumulator? accumulator = null;
+        var accumulatorStored = false;
 
         await foreach (var update in innerClient.GetStreamingResponseAsync(messages, options, cancellationToken))
         {
             if (update.RawRepresentation is StreamingChatCompletionUpdate rawUpdate
                 && rawUpdate.Patch.TryGetJson("$.choices[0].delta.reasoning_details[0]"u8, out var rawDetailJson))
             {
-                _reasoningDetails.Add(rawDetailJson.ToArray());
+                accumulator ??= new ReasoningArrayAccumulator();
+                accumulator.Write(rawDetailJson.Span);
 
                 var detail = JsonSerializer.Deserialize<ReasoningDetail>(rawDetailJson.Span);
 
@@ -110,6 +113,15 @@ public class OpenRouterChatClient(IChatClient innerClient) : IChatClient
 
                 if (reasoningContent != null)
                 {
+                    if (!accumulatorStored)
+                    {
+                        reasoningContent.AdditionalProperties = new AdditionalPropertiesDictionary
+                        {
+                            [ReasoningArrayAccumulator.Key] = accumulator
+                        };
+                        accumulatorStored = true;
+                    }
+
                     update.Contents = [reasoningContent];
                 }
             }
@@ -128,22 +140,43 @@ public class OpenRouterChatClient(IChatClient innerClient) : IChatClient
         innerClient.Dispose();
     }
 
-    private static byte[] BuildJsonArray(List<byte[]> elements)
+    private static ReasoningArrayAccumulator? FindAccumulator(ChatMessage message)
     {
-        using var stream = new MemoryStream();
-        using var writer = new Utf8JsonWriter(stream);
+        var props = message.Contents.OfType<TextReasoningContent>().FirstOrDefault()
+            ?.AdditionalProperties;
 
-        writer.WriteStartArray();
-
-        foreach (var element in elements)
+        if (props?.TryGetValue(ReasoningArrayAccumulator.Key, out var value) != true
+            || value is not ReasoningArrayAccumulator accumulator)
         {
-            writer.WriteRawValue(element);
+            return null;
         }
 
-        writer.WriteEndArray();
-        writer.Flush();
+        return accumulator;
+    }
+}
 
-        return stream.ToArray();
+sealed class ReasoningArrayAccumulator
+{
+    public const string Key = nameof(ReasoningArrayAccumulator);
+
+    private readonly ArrayBufferWriter<byte> _buffer = new();
+
+    public void Write(ReadOnlySpan<byte> rawJson)
+    {
+        _buffer.Write(_buffer.WrittenCount > 0 ? ","u8 : "["u8);
+        _buffer.Write(rawJson);
+    }
+
+    public ReadOnlySpan<byte> Read()
+    {
+        if (_buffer.WrittenCount == 0 || _buffer.WrittenSpan[^1] == (byte)']')
+        {
+            return _buffer.WrittenSpan;
+        }
+
+        _buffer.Write("]"u8);
+
+        return _buffer.WrittenSpan;
     }
 }
 
