@@ -239,7 +239,7 @@ public class EditorConfigurationDto
     /// <summary>
     /// The user configuration of the editor.
     /// </summary>
-    public required UserConfig User { get; set; }
+    public UserConfig User { get; set; }
 
 }
 

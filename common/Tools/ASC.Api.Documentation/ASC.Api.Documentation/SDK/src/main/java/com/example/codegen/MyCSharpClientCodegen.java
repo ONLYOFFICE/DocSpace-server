@@ -73,10 +73,6 @@ public class MyCSharpClientCodegen extends CSharpClientCodegen {
         ));
 
         supportingFiles.add(new SupportingFile(
-            "GlobalUsing.mustache", packageFolder, "GlobalUsings.cs"
-        ));
-
-        supportingFiles.add(new SupportingFile(
             "AUTHORS.mustache", "", "AUTHORS.md"
         ));
 

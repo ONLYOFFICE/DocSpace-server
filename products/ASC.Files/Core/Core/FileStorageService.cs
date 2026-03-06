@@ -1766,7 +1766,9 @@ public class FileStorageService //: IFileStorageService
         {
             await fileMarker.MarkAsNewAsync(file);
         }
+        
         await socketManager.CreateFileAsync(file);
+        
         if (room != null && !DocSpaceHelper.FormsFillingSystemFolders.Contains(folder.FolderType))
         {
             var userIDs = (await fileSecurity.WhoCanReadAsync(room, true)).ToList();
@@ -1777,6 +1779,11 @@ public class FileStorageService //: IFileStorageService
             }
 
             await notifyClient.SendDocumentCreatedInRoom(room, userIDs, file, authContext.CurrentAccount.ID);
+        }
+
+        if (room is { FolderType: FolderType.PublicRoom })
+        {
+            await SetExternalLinkAsync(file, Guid.NewGuid(), FileShare.Read, title ?? FilesCommonResource.DefaultExternalLinkTitle, primary: true);
         }
 
         return file;
@@ -5508,13 +5515,14 @@ public class FileStorageService //: IFileStorageService
             }
         }
 
-        if (entry is Folder<T> folderEntry)
+        switch (entry)
         {
-            await socketManager.UpdateFolderAsync(folderEntry);
-        }
-        else if (entry is File<T> fileEntry)
-        {
-            await socketManager.UpdateFileAsync(fileEntry);
+            case Folder<T> folderEntry:
+                await socketManager.UpdateFolderAsync(folderEntry);
+                break;
+            case File<T> fileEntry:
+                await socketManager.UpdateFileAsync(fileEntry);
+                break;
         }
 
         return await fileSharing.GetPureSharesAsync(entry, [linkId]).FirstOrDefaultAsync();
