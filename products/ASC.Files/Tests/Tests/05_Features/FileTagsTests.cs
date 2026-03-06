@@ -202,10 +202,7 @@ public class FileTagsTests(
         var tag4 = (await _roomsApi.CreateRoomTagAsync(createTagRequest4, TestContext.Current.CancellationToken)).Response;
         
         // Act - add two tags at once
-        var addBatchTagsRequest = new BatchTagsRequestDto
-        {
-            Names = [tag3.ToString()!, tag4.ToString()!]
-        };
+        var addBatchTagsRequest = new BatchTagsRequestDto([tag3, tag4]);
         
         var roomWithBatchTags = (await _roomsApi.AddRoomTagsAsync(room.Id, addBatchTagsRequest, TestContext.Current.CancellationToken)).Response;
         
