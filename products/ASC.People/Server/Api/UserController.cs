@@ -1893,6 +1893,9 @@ public class UserController(
                 if (currentUserIsDocSpaceAdmin)
                 {
                     user.Title = inDto.UpdateMember.Title ?? user.Title;
+                    user.WorkFromDate = inDto.UpdateMember.Worksfrom != null
+                        ? tenantUtil.DateTimeFromUtc(inDto.UpdateMember.Worksfrom)
+                        : user.WorkFromDate;
                 }
             }
 
@@ -1914,10 +1917,6 @@ public class UserController(
             {
                 user.BirthDate = null;
             }
-
-            user.WorkFromDate = inDto.UpdateMember.Worksfrom != null
-                ? tenantUtil.DateTimeFromUtc(inDto.UpdateMember.Worksfrom)
-                : user.WorkFromDate;
 
             if (user.WorkFromDate == resetDate)
             {
