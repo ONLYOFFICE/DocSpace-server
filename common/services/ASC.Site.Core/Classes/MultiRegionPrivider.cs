@@ -235,9 +235,9 @@ namespace ASC.Site.Core.Classes
             var securityDate = await userDbContext.UserSecurity
                 .Where(us => us.TenantId == tenantId && us.UserId == userId)
                 .Select(us => us.LastModified)
-                .FirstAsync();
+                .FirstOrDefaultAsync();
 
-            return auditDate.CompareTo(securityDate.Value) > 0 ? auditDate : securityDate.Value;
+            return securityDate == null || auditDate.CompareTo(securityDate.Value) > 0 ? auditDate : securityDate.Value;
         }
     }
 
