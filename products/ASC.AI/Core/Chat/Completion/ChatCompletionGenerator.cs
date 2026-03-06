@@ -144,7 +144,7 @@ public class ChatCompletionGenerator(
             {
                 switch (content)
                 {
-                    case TextReasoningContent textReasoning:
+                    case TextReasoningContent { Text.Length: > 0 } textReasoning:
                         yield return new ReasoningCompletion
                         {
                             Text = textReasoning.Text
