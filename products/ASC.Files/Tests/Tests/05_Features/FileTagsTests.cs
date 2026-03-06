@@ -92,10 +92,7 @@ public class FileTagsTests(
         var tag = (await _roomsApi.CreateRoomTagAsync(createTagRequest, TestContext.Current.CancellationToken)).Response;
         
         // Act
-        var deleteRequest = new BatchTagsRequestDto
-        {
-            Names = [tag.ToString()!]
-        };
+        var deleteRequest = new BatchTagsRequestDto([tag]);
         
         await _roomsApi.DeleteCustomTagsAsync(deleteRequest, TestContext.Current.CancellationToken);
         
@@ -127,28 +124,19 @@ public class FileTagsTests(
         tagsAfterCreate.Should().Contain(t => t.ToString() == tagName);
         
         // 2. Add tag to a room
-        var addTagsRequest = new BatchTagsRequestDto
-        {
-            Names = [tag.ToString()!]
-        };
+        var addTagsRequest = new BatchTagsRequestDto([tag]);
         
         var roomWithTag = (await _roomsApi.AddRoomTagsAsync(room.Id, addTagsRequest, TestContext.Current.CancellationToken)).Response;
         roomWithTag.Should().NotBeNull();
         
         // 3. Delete tag from the room
-        var deleteFromRoomRequest = new BatchTagsRequestDto
-        {
-            Names = [tag.ToString()!]
-        };
+        var deleteFromRoomRequest =  new BatchTagsRequestDto([tag]);
         
         var roomWithoutTag = (await _roomsApi.DeleteRoomTagsAsync(room.Id, deleteFromRoomRequest, TestContext.Current.CancellationToken)).Response;
         roomWithoutTag.Should().NotBeNull();
         
         // 4. Delete tag completely
-        var deleteTagRequest = new BatchTagsRequestDto
-        {
-            Names = [tag.ToString()!]
-        };
+        var deleteTagRequest = new BatchTagsRequestDto([tag]);
         
         await _roomsApi.DeleteCustomTagsAsync(deleteTagRequest, TestContext.Current.CancellationToken);
         
@@ -181,10 +169,7 @@ public class FileTagsTests(
         
         // Part 1: Test adding a single tag to a room
         // Act
-        var addSingleTagRequest = new BatchTagsRequestDto
-        {
-            Names = [tag1.ToString()!]
-        };
+        var addSingleTagRequest = new BatchTagsRequestDto([tag1]);
         
         var roomWithSingleTag = (await _roomsApi.AddRoomTagsAsync(room.Id, addSingleTagRequest, TestContext.Current.CancellationToken)).Response;
         
@@ -195,10 +180,7 @@ public class FileTagsTests(
         
         // Part 2: Test adding multiple tags to a room
         // Act
-        var addMultipleTagsRequest = new BatchTagsRequestDto
-        {
-            Names = [tag2.ToString()!]
-        };
+        var addMultipleTagsRequest = new BatchTagsRequestDto([tag2]);
         
         var roomWithMultipleTags = (await _roomsApi.AddRoomTagsAsync(room.Id, addMultipleTagsRequest, TestContext.Current.CancellationToken)).Response;
         
