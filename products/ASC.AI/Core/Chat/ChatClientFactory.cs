@@ -24,8 +24,11 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+#pragma warning disable OPENAI001
+
 using Mscc.GenerativeAI;
 using Mscc.GenerativeAI.Microsoft;
+using Mscc.GenerativeAI.Types;
 
 namespace ASC.AI.Core.Chat;
 
@@ -45,18 +48,9 @@ public class ChatClientFactory(
         {
             case ProviderType.OpenAi:
                 {
-                    var credential = new ApiKeyCredential(options.Key);
-                    var openAiOptions = new OpenAIClientOptions
-                    {
-                        Endpoint = new Uri(options.Endpoint),
-                        Transport = new HttpClientPipelineTransport(httpClientFactory.CreateClient())
-                    };
-        
-                    var openAiClient = new OpenAIClient(credential, openAiOptions);
-#pragma warning disable OPENAI001
+                    var openAiClient = CreateOpenAiClient(options);
                     var chatClient = openAiClient.GetResponsesClient(options.ModelId);
                     builder = chatClient.AsIChatClient().AsBuilder();
-#pragma warning restore OPENAI001
                     break;
                 }
             case ProviderType.Anthropic:
@@ -67,7 +61,6 @@ public class ChatClientFactory(
                     builder = client.AsBuilder()
                         .ConfigureOptions(x =>
                         {
-                            x.ModelId = options.ModelId;
                             x.MaxOutputTokens = 6144;
                         });
                     break;
@@ -75,59 +68,49 @@ public class ChatClientFactory(
             case ProviderType.GoogleAi:
                 {
                     var googleAi = new GoogleAI(apiKey: options.Key, httpClientFactory: httpClientFactory);
-                    var client = new GoogleAiChatClient(googleAi.GenerativeModel().AsIChatClient());
 
-                    builder = client.AsBuilder();
+                    var generationConfig = new GenerationConfig();
+
+                    if (options.ReasoningEffort is { } effort and not ChatReasoningEffort.None)
+                    {
+                        generationConfig.ThinkingConfig = new ThinkingConfig
+                        {
+                            IncludeThoughts = true,
+                            ThinkingLevel = effort switch
+                            {
+                                ChatReasoningEffort.Low => ThinkingLevel.Minimal,
+                                ChatReasoningEffort.Medium => ThinkingLevel.Low,
+                                ChatReasoningEffort.High => ThinkingLevel.Medium,
+                                ChatReasoningEffort.XHigh => ThinkingLevel.High,
+                                _ => null
+                            }
+                        };
+                    }
+
+                    var model = googleAi.GenerativeModel(generationConfig: generationConfig);
+
+                    builder = model.AsIChatClient().AsBuilder();
                     break;
                 }
             case ProviderType.DeepSeek:
                 {
-                    var credential = new ApiKeyCredential(options.Key);
-                    var openAiOptions = new OpenAIClientOptions
-                    {
-                        Endpoint = new Uri(options.Endpoint),
-                        Transport = new HttpClientPipelineTransport(httpClientFactory.CreateClient())
-                    };
-        
-                    var openAiClient = new OpenAIClient(credential, openAiOptions);
+                    var openAiClient = CreateOpenAiClient(options);
                     var chatClient = openAiClient.GetChatClient(options.ModelId);
-        
-                    builder = new DeepSeekChatClient(chatClient.AsIChatClient()).AsBuilder()
-                        .ConfigureOptions(x =>
-                        {
-                            x.ModelId = options.ModelId;
-                        });
+
+                    builder = new DeepSeekChatClient(chatClient.AsIChatClient()).AsBuilder();
                     break;
                 }
             case ProviderType.OpenRouter:
                 {
-                    var credential = new ApiKeyCredential(options.Key);
-                    var openAiOptions = new OpenAIClientOptions
-                    {
-                        Endpoint = new Uri(options.Endpoint),
-                        Transport = new HttpClientPipelineTransport(httpClientFactory.CreateClient())
-                    };
-
-                    var openAiClient = new OpenAIClient(credential, openAiOptions);
+                    var openAiClient = CreateOpenAiClient(options);
                     var chatClient = openAiClient.GetChatClient(options.ModelId);
 
-                    builder = new OpenRouterChatClient(chatClient.AsIChatClient()).AsBuilder()
-                        .ConfigureOptions(x =>
-                        {
-                            x.ModelId = options.ModelId;
-                        });
+                    builder = new OpenRouterChatClient(chatClient.AsIChatClient()).AsBuilder();
                     break;
                 }
             default:
                 {
-                    var credential = new ApiKeyCredential(options.Key);
-                    var openAiOptions = new OpenAIClientOptions
-                    {
-                        Endpoint = new Uri(options.Endpoint),
-                        Transport = new HttpClientPipelineTransport(httpClientFactory.CreateClient())
-                    };
-
-                    var openAiClient = new OpenAIClient(credential, openAiOptions);
+                    var openAiClient = CreateOpenAiClient(options);
                     var chatClient = openAiClient.GetChatClient(options.ModelId);
 
                     builder = chatClient.AsIChatClient().AsBuilder();
@@ -135,7 +118,9 @@ public class ChatClientFactory(
                 }
         }
 
-        if (options.ReasoningEffort is { } reasoningEffort)
+        builder.ConfigureOptions(x => x.ModelId = options.ModelId);
+
+        if (options.ReasoningEffort is { } reasoningEffort and not ChatReasoningEffort.None)
         {
             builder.ConfigureOptions(x =>
             {
@@ -152,7 +137,6 @@ public class ChatClientFactory(
                     },
                     Output = ReasoningOutput.Full
                 };
-                x.MaxOutputTokens = 25000;
             });
         }
 
@@ -162,7 +146,7 @@ public class ChatClientFactory(
             {
                 x.Tools = toolHolder.Tools;
                 x.ToolMode = ChatToolMode.Auto;
-                x.AllowMultipleToolCalls = true;
+                x.AllowMultipleToolCalls = false;
             });
             
             builder = builder.Use((innerClient, _) =>
@@ -181,5 +165,17 @@ public class ChatClientFactory(
         }
 
         return builder.Build();
+    }
+
+    private OpenAIClient CreateOpenAiClient(ChatClientOptions options)
+    {
+        var credential = new ApiKeyCredential(options.Key);
+        var clientOptions = new OpenAIClientOptions
+        {
+            Endpoint = new Uri(options.Endpoint),
+            Transport = new HttpClientPipelineTransport(httpClientFactory.CreateClient())
+        };
+
+        return new OpenAIClient(credential, clientOptions);
     }
 }
