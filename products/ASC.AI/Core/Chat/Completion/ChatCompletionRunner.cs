@@ -46,7 +46,7 @@ public class ChatCompletionRunner(
         
         var context = await contextBuilder.BuildAsync(roomId);
         
-        var attachments = await GetAttachmentsAsync(files).ToListAsync();
+        var attachments = await GetAttachmentsAsync(files, context).ToListAsync();
         
         var userMessage = FormatUserMessage(message, attachments);
 
@@ -103,7 +103,7 @@ public class ChatCompletionRunner(
         var context = await contextBuilder.BuildAsync(chat.RoomId);
         context.Chat = chat;
         
-        var attachments = await GetAttachmentsAsync(files).ToListAsync();
+        var attachments = await GetAttachmentsAsync(files, context).ToListAsync();
         
         var systemPrompt = ChatPromptTemplate.GetPrompt(
             context.Instruction, 
@@ -144,7 +144,7 @@ public class ChatCompletionRunner(
             serviceScopeFactory);
     }
 
-    private async IAsyncEnumerable<AttachmentMessageContent> GetAttachmentsAsync(IEnumerable<JsonElement>? files)
+    private async IAsyncEnumerable<AttachmentMessageContent> GetAttachmentsAsync(IEnumerable<JsonElement>? files, ChatExecutionContext context)
     {
         if (files == null)
         {
@@ -161,7 +161,12 @@ public class ChatCompletionRunner(
             {
                 failedEntries.Add(result.File);
             }
-            
+
+            if (result.DynamicTool != null && !context.Tools.ContainsSystemTool(SystemToolType.FormDataQuery))
+            {
+                context.Tools.AddTool(SystemToolType.FormDataQuery, result.DynamicTool);
+            }
+
             if (result.AttachmentContent != null)
             {
                 yield return result.AttachmentContent;

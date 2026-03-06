@@ -74,6 +74,7 @@ global using ASC.Files.Core.Vectorization.Embedding;
 global using ASC.Files.Core.Vectorization.Settings;
 
 global using ASC.FederatedLogin;
+global using ASC.FederatedLogin.DatabaseProviders;
 global using ASC.FederatedLogin.Helpers;
 global using ASC.FederatedLogin.LoginProviders;
 

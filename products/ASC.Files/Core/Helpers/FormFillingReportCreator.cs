@@ -120,6 +120,20 @@ public class FormFillingReportCreator(
         return [];
     }
 
+    public static string GetTableName(int originalFormId, int originalFormVersion)
+        => $"form_{originalFormId}_v{originalFormVersion}";
+
+    public async Task<IEnumerable<DbColumnDefinition>> GetColumnDefinitionsAsync(int originalFormId, int originalFormVersion)
+    {
+        factoryIndexerFormMetadata.Refresh();
+        var (metaSuccess, metaResult) = await factoryIndexerFormMetadata.TrySelectAsync(r =>
+            r.Where(s => s.OriginalFormId, originalFormId)
+             .Where(s => s.OriginalFormVersion, originalFormVersion));
+
+        var metadata = metaSuccess ? metaResult.FirstOrDefault()?.Metadata ?? [] : [];
+        return BuildColumnDefinitions(NormalizeMetadata(metadata));
+    }
+
     public async Task<(IEnumerable<FormMetadata> Metadata, IEnumerable<SubmitFormsData> Submissions)> GetFormSnapshotAsync(int roomId, int originalFormId, int originalFormVersion)
     {
         factoryIndexerFormMetadata.Refresh();

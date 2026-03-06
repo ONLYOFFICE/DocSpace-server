@@ -31,6 +31,7 @@ public class AttachmentResult
     public required FileEntry File { get; init; }
     public AttachmentMessageContent? AttachmentContent { get; init; }
     public bool Success { get; init; }
+    public ToolWrapper? DynamicTool { get; init; }
 }
 
 [Scope]
@@ -39,7 +40,9 @@ public class AttachmentHandler(
     FileSecurity fileSecurity,
     ITextExtractor textExtractor,
     VectorizationGlobalSettings vectorizationGlobalSettings,
-    FormFillingReportCreator formFillingReportCreator)
+    FormFillingReportCreator formFillingReportCreator,
+    ExternalDatabaseClient externalDatabaseClient,
+    FormDataQueryTool formDataQueryTool)
 {
     
     public async IAsyncEnumerable<AttachmentResult> HandleAsync(IEnumerable<int> filesIds, IEnumerable<string> thirdPartyFilesIds)
@@ -91,16 +94,22 @@ public class AttachmentHandler(
                 continue;
             }
 
-            var formData = await TryGetFormDataAsync(file);
-            if (formData != null)
+            ToolWrapper? formTool = null;
+            if (file.IsForm)
             {
-                content += formData;
+                var (formData, tool) = await TryGetFormDataAsync(file);
+                formTool = tool;
+                if (formData != null)
+                {
+                    content += formData;
+                }
             }
 
             yield return new AttachmentResult
             {
                 File = file,
                 Success = true,
+                DynamicTool = formTool,
                 AttachmentContent = new AttachmentMessageContent
                 {
                     Id = JsonSerializer.SerializeToElement(file.Id),
@@ -112,11 +121,11 @@ public class AttachmentHandler(
         }
     }
 
-    private async Task<string?> TryGetFormDataAsync<T>(File<T> file)
+    private async Task<(string? contextText, ToolWrapper? tool)> TryGetFormDataAsync<T>(File<T> file)
     {
         if (file is not File<int> intFile)
         {
-            return null;
+            return (null, null);
         }
 
         var fileDao = daoFactory.GetFileDao<int>();
@@ -125,55 +134,50 @@ public class AttachmentHandler(
 
         if (formFilling?.StartFilling != true || formFilling.OriginalFormId != intFile.Id)
         {
-            return null;
+            return (null, null);
         }
 
-        var (metadata, submissions) = await formFillingReportCreator.GetFormSnapshotAsync(
-            formFilling.RoomId, intFile.Id, intFile.Version);
+        if (!externalDatabaseClient.IsEnabled())
+        {
+            return (null, null);
+        }
 
-        return FormatFormData(metadata, submissions);
+        var tableName = FormFillingReportCreator.GetTableName(intFile.Id, intFile.Version);
+        if (!await externalDatabaseClient.TableExistsAsync(tableName))
+        {
+            return (null, null);
+        }
+
+        var rowCount = await externalDatabaseClient.CountAsync(tableName);
+        var columns = await formFillingReportCreator.GetColumnDefinitionsAsync(intFile.Id, intFile.Version);
+        var columnList = columns.ToList();
+
+        var tool = formDataQueryTool.Init(tableName, rowCount, columnList);
+        var toolWrapper = new ToolWrapper
+        {
+            Tool = tool,
+            Context = new ToolContext { Name = tool.Name, AutoInvoke = true }
+        };
+
+        return (FormatFormDataFromExternalDb(tableName, rowCount, columnList), toolWrapper);
     }
 
-    private static string FormatFormData(
-        IEnumerable<ASC.Files.Core.Services.OFormService.FormMetadata> metadata,
-        IEnumerable<SubmitFormsData> submissions)
+    private static string FormatFormDataFromExternalDb(string tableName, long rowCount, IEnumerable<DbColumnDefinition> columns)
     {
         var sb = new StringBuilder();
-
-        var metaList = metadata.ToList();
-        if (metaList.Count > 0)
+        sb.AppendLine($"\n\n##Form Submissions ({rowCount} total, stored in external database)");
+        sb.AppendLine($"Table: {tableName}");
+        sb.AppendLine("Schema:");
+        foreach (var col in columns)
         {
-            sb.AppendLine("\n\n##Form Fields:");
-            foreach (var field in metaList)
+            sb.Append($"- {col.Name} ({col.Type})");
+            if (col.EnumValues?.Count > 0)
             {
-                sb.Append($"- {field.Key} ({field.Type})");
-                if (field.PossibleValues?.Count > 0)
-                {
-                    sb.Append($": {string.Join(", ", field.PossibleValues)}");
-                }
-                sb.AppendLine();
+                sb.Append($": {string.Join(", ", col.EnumValues)}");
             }
+            sb.AppendLine();
         }
-
-        var submissionList = submissions.ToList();
-        if (submissionList.Count > 0)
-        {
-            sb.AppendLine($"\n##Form Submissions ({submissionList.Count}):");
-            foreach (var submission in submissionList)
-            {
-                var formNumber = submission.FormsData?.FirstOrDefault(f => f.Key == "FormNumber")?.Value;
-                sb.AppendLine($"\nSubmission #{formNumber}:");
-                foreach (var item in submission.FormsData ?? [])
-                {
-                    if (item.Key == "FormNumber")
-                    {
-                        continue;
-                    }
-                    sb.AppendLine($"- {item.Key}: {item.Value}");
-                }
-            }
-        }
-
+        sb.AppendLine($"\nUse the '{FormDataQueryTool.Name}' tool to query this data with SQL SELECT statements.");
         return sb.ToString();
     }
 }

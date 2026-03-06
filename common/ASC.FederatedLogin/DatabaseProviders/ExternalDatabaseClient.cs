@@ -100,6 +100,74 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         _ => "TEXT"
     };
 
+    public async Task<bool> TableExistsAsync(string tableName)
+    {
+        await using var connection = Provider.CreateConnection();
+        await connection.OpenAsync();
+        await SetupSqliteAsync(connection);
+
+        await using var cmd = connection.CreateCommand();
+        cmd.CommandText = Provider.DatabaseType.ToLowerInvariant() switch
+        {
+            "mysql" => "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME=@tableName",
+            "sqlite" => "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name=@tableName",
+            _ => throw new NotSupportedException($"Database type '{Provider.DatabaseType}' is not supported yet.")
+        };
+        var param = cmd.CreateParameter();
+        param.ParameterName = "@tableName";
+        param.Value = tableName;
+        cmd.Parameters.Add(param);
+
+        var result = await cmd.ExecuteScalarAsync();
+        return Convert.ToInt64(result) > 0;
+    }
+
+    public async Task<long> CountAsync(string tableName)
+    {
+        await using var connection = Provider.CreateConnection();
+        await connection.OpenAsync();
+        await SetupSqliteAsync(connection);
+
+        await using var cmd = connection.CreateCommand();
+        cmd.CommandText = Provider.DatabaseType.ToLowerInvariant() switch
+        {
+            "mysql" => $"SELECT COUNT(*) FROM `{tableName}`",
+            "sqlite" => $"SELECT COUNT(*) FROM \"{tableName}\"",
+            _ => throw new NotSupportedException($"Database type '{Provider.DatabaseType}' is not supported yet.")
+        };
+
+        var result = await cmd.ExecuteScalarAsync();
+        return Convert.ToInt64(result);
+    }
+
+    public async Task<string> QueryAsync(string sql, int maxRows = 500)
+    {
+        await using var connection = Provider.CreateConnection();
+        await connection.OpenAsync();
+        await SetupSqliteAsync(connection);
+
+        await using var cmd = connection.CreateCommand();
+        cmd.CommandText = sql;
+        cmd.CommandTimeout = 30;
+
+        await using var reader = await cmd.ExecuteReaderAsync();
+        var results = new List<Dictionary<string, object?>>();
+        var rowCount = 0;
+
+        while (await reader.ReadAsync() && rowCount < maxRows)
+        {
+            var row = new Dictionary<string, object?>();
+            for (var i = 0; i < reader.FieldCount; i++)
+            {
+                row[reader.GetName(i)] = reader.IsDBNull(i) ? null : reader.GetValue(i);
+            }
+            results.Add(row);
+            rowCount++;
+        }
+
+        return System.Text.Json.JsonSerializer.Serialize(results);
+    }
+
     public Task InsertDataAsync(string tableName, Dictionary<string, object> data)
         => ExecuteInsertAsync(tableName, data, keyColumn: null);
 
