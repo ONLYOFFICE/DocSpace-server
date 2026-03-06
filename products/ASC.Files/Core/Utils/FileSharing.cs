@@ -67,7 +67,24 @@ public class FileSharingAceHelper(
             throw new ArgumentNullException(FilesCommonResource.ErrorMessage_BadRequest);
         }
 
+        var cachedFolderDao = daoFactory.GetCacheFolderDao<T>();
+        var folder = entry as Folder<T>;
+        var file = entry as File<T>;
+        var room = folder is { IsRoom: true } ? folder : null;
+        
         if (!aceWrappers.TrueForAll(r => r.Id == authContext.CurrentAccount.ID && r.Access == FileShare.None) &&
+            !await aceWrappers.ToAsyncEnumerable().AnyAsync(async (r,_) =>
+            {
+                var roomType = room?.FolderType;
+
+                if (roomType == null)
+                {
+                    var entryRoom = await cachedFolderDao.GetParentFoldersAsync(folder != null ? folder.Id : entry.ParentId).FirstOrDefaultAsync(f => f.IsRoom, cancellationToken: _);
+                    roomType = entryRoom?.FolderType;
+                }
+                
+                return roomType == FolderType.PublicRoom && r.SubjectType == SubjectType.PrimaryExternalLink && r.Access == FileShare.Read;
+            }) &&
             !beforeOwnerChange &&
             !await fileSharingHelper.CanSetAccessAsync(entry))
         {
@@ -75,9 +92,7 @@ public class FileSharingAceHelper(
         }
 
         var handledAces = new List<ProcessedItem<T>>(aceWrappers.Count);
-        var folder = entry as Folder<T>;
-        var file = entry as File<T>;
-        var room = folder != null && folder.IsRoom ? folder : null;
+
 
         var roomUrl = room != null
             ? room.FolderType == FolderType.AiRoom
@@ -206,7 +221,7 @@ public class FileSharingAceHelper(
 
                 if (roomType == null)
                 {
-                    var entryRoom = await daoFactory.GetCacheFolderDao<T>().GetParentFoldersAsync(folder != null ? folder.Id : entry.ParentId).FirstOrDefaultAsync(f => f.IsRoom);
+                    var entryRoom = await cachedFolderDao.GetParentFoldersAsync(folder != null ? folder.Id : entry.ParentId).FirstOrDefaultAsync(f => f.IsRoom);
                     roomType = entryRoom?.FolderType;
                 }
 
@@ -694,7 +709,7 @@ public class FileSharing(
             fileSecurity.CanEditExpirationAsync(entry)
         ).ContinueWith(t => (t.Result[0], t.Result[1], t.Result[2]));
 
-        var canAccess = entry is Folder<T> folder && folder.IsRoom
+        var canAccess = entry is Folder<T> { IsRoom: true } || entry.ParentRoomType is FolderType.PublicRoom
             ? await CheckAccessAsync(entry, filterType)
             : canEditAccess;
 

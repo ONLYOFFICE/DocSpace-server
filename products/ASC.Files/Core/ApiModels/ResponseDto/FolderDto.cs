@@ -237,10 +237,11 @@ public class FolderDtoHelper(
     SecurityContext securityContext,
     UserManager userManager,
     IUrlShortener urlShortener,
+    FileSharing fileSharing,
     EntryStatusManager entryStatusManager,
     AiAccessibility accessibility,
     AiConfiguration aiConfiguration)
-    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, urlShortener)
+    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, fileSharing, urlShortener)
 {
     private readonly EmployeeDtoHelper _employeeWrapperHelper = employeeWrapperHelper;
 
