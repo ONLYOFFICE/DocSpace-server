@@ -36,7 +36,9 @@ public class OpenRouterChatClient(IChatClient innerClient) : IChatClient
 {
     private readonly List<byte[]> _reasoningDetails = [];
 
-    public Task<ChatResponse> GetResponseAsync(IEnumerable<ChatMessage> messages, ChatOptions? options = null,
+    public Task<ChatResponse> GetResponseAsync(
+        IEnumerable<ChatMessage> messages, 
+        ChatOptions? options = null,
         CancellationToken cancellationToken = new())
     {
         return innerClient.GetResponseAsync(messages, options, cancellationToken);
@@ -76,27 +78,39 @@ public class OpenRouterChatClient(IChatClient innerClient) : IChatClient
 
         await foreach (var update in innerClient.GetStreamingResponseAsync(messages, options, cancellationToken))
         {
-            if (update.RawRepresentation is StreamingChatCompletionUpdate rawUpdate)
+            if (update.RawRepresentation is StreamingChatCompletionUpdate rawUpdate
+                && rawUpdate.Patch.TryGetJson("$.choices[0].delta.reasoning_details[0]"u8, out var rawDetailJson))
             {
-                if (rawUpdate.Patch.TryGetValue("$.choices[0].delta.reasoning_details[0].type"u8, out string? detailType))
+                _reasoningDetails.Add(rawDetailJson.ToArray());
+
+                var detail = JsonSerializer.Deserialize<ReasoningDetail>(rawDetailJson.Span);
+
+                TextReasoningContent? reasoningContent = null;
+
+                switch (detail)
                 {
-                    if (rawUpdate.Patch.TryGetJson("$.choices[0].delta.reasoning_details[0]"u8, out var rawDetailJson))
-                    {
-                        _reasoningDetails.Add(rawDetailJson.ToArray());
-                    }
+                    case TextReasoningDetail { Text.Length: > 0 } text:
+                        {
+                            reasoningContent = new TextReasoningContent(text.Text);
 
-                    var reasoningContent = detailType switch
-                    {
-                        "reasoning.text" => ExtractTextReasoning(rawUpdate),
-                        "reasoning.summary" => ExtractSummaryReasoning(rawUpdate),
-                        "reasoning.encrypted" => ExtractEncryptedReasoning(rawUpdate),
-                        _ => null
-                    };
+                            if (!string.IsNullOrEmpty(text.Signature))
+                            {
+                                reasoningContent.ProtectedData = text.Signature;
+                            }
 
-                    if (reasoningContent != null)
-                    {
-                        update.Contents = [reasoningContent];
-                    }
+                            break;
+                        }
+                    case SummaryReasoningDetail { Summary.Length: > 0 } summary:
+                        reasoningContent = new TextReasoningContent(summary.Summary);
+                        break;
+                    case EncryptedReasoningDetail { Data.Length: > 0 } encrypted:
+                        reasoningContent = new TextReasoningContent(string.Empty) { ProtectedData = encrypted.Data };
+                        break;
+                }
+
+                if (reasoningContent != null)
+                {
+                    update.Contents = [reasoningContent];
                 }
             }
 
@@ -131,45 +145,31 @@ public class OpenRouterChatClient(IChatClient innerClient) : IChatClient
 
         return stream.ToArray();
     }
+}
 
-    private static TextReasoningContent? ExtractTextReasoning(StreamingChatCompletionUpdate rawUpdate)
-    {
-        if (!rawUpdate.Patch.TryGetValue("$.choices[0].delta.reasoning_details[0].text"u8, out string? text)
-            || string.IsNullOrEmpty(text))
-        {
-            return null;
-        }
+[JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
+[JsonDerivedType(typeof(TextReasoningDetail), "reasoning.text")]
+[JsonDerivedType(typeof(SummaryReasoningDetail), "reasoning.summary")]
+[JsonDerivedType(typeof(EncryptedReasoningDetail), "reasoning.encrypted")]
+public abstract class ReasoningDetail;
 
-        var content = new TextReasoningContent(text);
+public class TextReasoningDetail : ReasoningDetail
+{
+    [JsonPropertyName("text")]
+    public string? Text { get; set; }
 
-        if (rawUpdate.Patch.TryGetValue("$.choices[0].delta.reasoning_details[0].signature"u8, out string? signature)
-            && !string.IsNullOrEmpty(signature))
-        {
-            content.ProtectedData = signature;
-        }
+    [JsonPropertyName("signature")]
+    public string? Signature { get; set; }
+}
 
-        return content;
-    }
+public class SummaryReasoningDetail : ReasoningDetail
+{
+    [JsonPropertyName("summary")]
+    public string? Summary { get; set; }
+}
 
-    private static TextReasoningContent? ExtractSummaryReasoning(StreamingChatCompletionUpdate rawUpdate)
-    {
-        if (!rawUpdate.Patch.TryGetValue("$.choices[0].delta.reasoning_details[0].summary"u8, out string? summary)
-            || string.IsNullOrEmpty(summary))
-        {
-            return null;
-        }
-
-        return new TextReasoningContent(summary);
-    }
-
-    private static TextReasoningContent? ExtractEncryptedReasoning(StreamingChatCompletionUpdate rawUpdate)
-    {
-        if (!rawUpdate.Patch.TryGetValue("$.choices[0].delta.reasoning_details[0].data"u8, out string? data)
-            || string.IsNullOrEmpty(data))
-        {
-            return null;
-        }
-
-        return new TextReasoningContent(string.Empty) { ProtectedData = data };
-    }
+public class EncryptedReasoningDetail : ReasoningDetail
+{
+    [JsonPropertyName("data")]
+    public string? Data { get; set; }
 }
