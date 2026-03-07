@@ -698,7 +698,7 @@ public class TenantQuota
     }
     public string GetPaymentId()
     {
-        return Wallet && !string.IsNullOrEmpty(ServiceName) ? ServiceName : ProductId;
+        return string.IsNullOrEmpty(ProductId) ? ServiceName : ProductId;
     }
 
     internal string GetFeature(string name)
