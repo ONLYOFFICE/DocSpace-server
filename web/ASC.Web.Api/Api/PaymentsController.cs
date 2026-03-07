@@ -791,9 +791,9 @@ public class PaymentController(
             return null;
         }
 
-        var (serviceName, _) = await GetPaymentServiceName(inDto.ServiceName);
+        await CheckWalletServiceName(inDto.ServiceName);
 
-        var result = await tariffService.GetCustomerServiceQuotaAsync(tenant.Id, serviceName, inDto.Refresh);
+        var result = await tariffService.GetCustomerServiceQuotaAsync(tenant.Id, inDto.ServiceName, inDto.Refresh);
         return result;
     }
 
@@ -826,13 +826,18 @@ public class PaymentController(
             return null;
         }
 
-        var (serviceName, _) = string.IsNullOrEmpty(inDto.ServiceName) ? (null, default) : await GetPaymentServiceName(inDto.ServiceName);
+        if (!string.IsNullOrEmpty(inDto.ServiceName))
+        {
+            await CheckWalletServiceName(inDto.ServiceName);
+        }
+
         var utcStartDate = tenantUtil.DateTimeToUtc(inDto.StartDate ?? tenant.CreationDateTime);
         var utcEndDate = tenantUtil.DateTimeToUtc(inDto.EndDate ?? DateTime.UtcNow);
 
         var filter = new OperationFilter
         {
-            ServiceName = serviceName,
+            ServiceName = inDto.ServiceName,
+            WriteOffServiceQuota = inDto.WriteOffServiceQuota,
             UtcStartDate = utcStartDate,
             UtcEndDate = utcEndDate,
             ParticipantName = inDto.ParticipantName,
@@ -886,9 +891,12 @@ public class PaymentController(
             return null;
         }
 
-        var (serviceName, _) = string.IsNullOrEmpty(inDto.ServiceName) ? (null, default) : await GetPaymentServiceName(inDto.ServiceName);
-
         inDto ??= new CustomerOperationsReportRequestDto();
+
+        if (!string.IsNullOrEmpty(inDto.ServiceName))
+        {
+            await CheckWalletServiceName(inDto.ServiceName);
+        }
 
         var userId = securityContext.CurrentAccount.ID;
 
@@ -907,7 +915,8 @@ public class PaymentController(
             userId,
             tenantId,
             baseUri,
-            serviceName,
+            inDto.ServiceName,
+            inDto.WriteOffServiceQuota,
             inDto.StartDate,
             inDto.EndDate,
             inDto.ParticipantName,
@@ -979,7 +988,7 @@ public class PaymentController(
             return;
         }
 
-        var evt = new CustomerOperationsReportIntegrationEvent(securityContext.CurrentAccount.ID, tenantId, null, null, terminate: true);
+        var evt = new CustomerOperationsReportIntegrationEvent(securityContext.CurrentAccount.ID, tenantId, null, null, false, terminate: true);
 
         await eventBus.PublishAsync(evt);
     }
@@ -1192,12 +1201,18 @@ public class PaymentController(
 
         await DemandPayerAsync(customerInfo);
 
-        var (serviceName, walletService) = await GetPaymentServiceName(inDto.ServiceName);
-        var customerParticipantName = securityContext.CurrentAccount.ID.ToString();
-        var details = $"{serviceName} {inDto.Quantity}";
-        //var metadata = new Dictionary<string, string> { { BillingClient.MetadataDetails, details } };
+        var walletService = await CheckWalletServiceName(inDto.ServiceName);
 
-        var result = await tariffService.MakeServicePaymentAsync(tenant.Id, serviceName, inDto.Quantity, customerParticipantName, metadata: null);
+        // For now, only aitools available for purchasing!
+        if (walletService != TenantWalletService.AITools)
+        {
+            throw new ItemNotFoundException("Service could not be found");
+        }
+
+        var customerParticipantName = securityContext.CurrentAccount.ID.ToString();
+        var details = $"{inDto.ServiceName} {inDto.Quantity}";
+
+        var result = await tariffService.MakeServicePaymentAsync(tenant.Id, inDto.ServiceName, inDto.Quantity, customerParticipantName, metadata: null);
         if (result != null)
         {
             messageService.Send(MessageAction.CustomerOperationPerformed, null, details);
@@ -1400,18 +1415,16 @@ public class PaymentController(
         await fusionCache.SetAsync(key, count + 1, TimeSpan.FromMinutes(_expirationMinutes));
     }
 
-    private async Task<(string, TenantWalletService)> GetPaymentServiceName(string quotaName)
+    private async Task<TenantWalletService> CheckWalletServiceName(string serviceName)
     {
         var quotaList = await tenantManager.GetTenantQuotasAsync(true, true);
 
         var selectedQuota = quotaList.FirstOrDefault(x =>
-            x.Name.Equals(quotaName, StringComparison.InvariantCultureIgnoreCase));
+            x.ServiceName.Equals(serviceName, StringComparison.InvariantCultureIgnoreCase));
 
-        // For now, only aitools available for purchasing!
-        if (selectedQuota is { TenantId: (int)TenantWalletService.AITools })
+        if (selectedQuota != null && Enum.IsDefined(typeof(TenantWalletService), selectedQuota.TenantId))
         {
-            var paymentId = selectedQuota.GetPaymentId();
-            return (paymentId, TenantWalletService.AITools);
+            return (TenantWalletService)selectedQuota.TenantId;
         }
 
         throw new ItemNotFoundException("Service could not be found");

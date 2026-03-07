@@ -149,6 +149,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
             var filter = new OperationFilter
             {
                 ServiceName = taskData.ServiceName,
+                WriteOffServiceQuota = taskData.WriteOffServiceQuota,
                 UtcStartDate = utcStartDate,
                 UtcEndDate = utcEndDate,
                 ParticipantName = taskData.ParticipantName,
@@ -263,6 +264,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
 public record CustomerOperationsReportTaskData(
     IDictionary<string, string> Headers,
     string ServiceName,
+    bool WriteOffServiceQuota,
     DateTime? StartDate,
     DateTime? EndDate,
     string ParticipantName,

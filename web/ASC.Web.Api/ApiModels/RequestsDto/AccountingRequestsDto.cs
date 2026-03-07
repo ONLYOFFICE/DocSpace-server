@@ -65,6 +65,12 @@ public class CustomerOperationsReportRequestDto
     /// </summary>
     /// <example>aitools</example>
     public string ServiceName { get; set; }
+    
+    /// <summary>
+    /// Write-off of the quota for the service
+    /// </summary>
+    /// <example>true</example>
+    public bool WriteOffServiceQuota { get; set; }
 
     /// <summary>
     /// The report start date.
