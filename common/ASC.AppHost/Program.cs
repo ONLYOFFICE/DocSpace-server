@@ -24,8 +24,12 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-var builder = DistributedApplication.CreateBuilder(args);
+using Aspire.Hosting.JavaScript;
 
+#pragma warning disable ASPIREINTERACTION001
+
+var builder = DistributedApplication.CreateBuilder(args);
+IResourceBuilder<JavaScriptAppResource>? playwright = null;
 var basePath = Path.GetFullPath(Path.Combine("..", "..", ".."));
 var isDocker = String.Compare(builder.Configuration["Docker"], "true", StringComparison.OrdinalIgnoreCase) == 0;
 var skipClient = String.Compare(builder.Configuration["SKIP_CLIENT"], "true", StringComparison.OrdinalIgnoreCase) == 0;
@@ -36,11 +40,12 @@ var connectionManager = new ConnectionStringManager(builder, basePath)
 
 var configurator = new ProjectConfigurator(builder, connectionManager, basePath, isDocker);
 
-switch (builder.Configuration["DOTNET_LAUNCH_PROFILE"])
+var launchProfile = builder.Configuration["DOTNET_LAUNCH_PROFILE"];
+switch (launchProfile)
 {
     case "preview":
         connectionManager.AddMySql()
-                         .AddRedis();
+            .AddRedis();
         configurator
             .AddProject<ASC_Files>(Constants.FilesPort)
             .AddProject<ASC_Files_Worker>(Constants.FilesWorkerPort)
@@ -57,7 +62,7 @@ switch (builder.Configuration["DOTNET_LAUNCH_PROFILE"])
             .AddRedis()
             .AddMailPit()
             .AddMcpServer();
-        
+
         configurator
             .AddProject<ASC_Files>(Constants.FilesPort)
             .AddProject<ASC_Files_Worker>(Constants.FilesWorkerPort)
@@ -82,26 +87,56 @@ switch (builder.Configuration["DOTNET_LAUNCH_PROFILE"])
             .AddMcpServer()
             .AddOpensearch()
             .AddMailPit();
+
+        Dictionary<string, string>? apiSystemVariables = null;
+        Dictionary<string, string>? additionalSystemVariables = null;
+        if (launchProfile == "test")
+        {
+            var docspaceOwnerEmail = builder.Configuration["OWNER_EMAIL"];
+            var coreMachineKey = builder.Configuration["core:machinekey"] ?? "test-machine-key";
+            
+            var playwrightTestsPath = Path.Combine(basePath, "test", "api");
+
+            playwright = builder.AddJavaScriptApp("playwright-tests", playwrightTestsPath, "test")
+                .WithNpm()
+                .WithEnvironment("MACHINEKEY", coreMachineKey)
+                .WithEnvironment("PKEY", "PKEY")
+                .WithEnvironment("LOCAL_PORTAL_DOMAIN", $"localhost:{Constants.AppHostPort.ToString()}")
+                .WithEnvironment("DOCSPACE_OWNER_EMAIL", docspaceOwnerEmail);
+            
+            additionalSystemVariables= new Dictionary<string, string>
+            {
+                { "web:autotest:secret-email", docspaceOwnerEmail },
+                { "core:machinekey", coreMachineKey }
+            };
+            
+            apiSystemVariables = new Dictionary<string, string>(additionalSystemVariables)
+            {
+                { "auth:allowskip:default", true.ToString() },
+                { "auth:allowskip:registerportal", true.ToString() }
+            };
+        }
         
         configurator
-            .AddProject<ASC_Files>(Constants.FilesPort)
-            .AddProject<ASC_Files_Worker>(Constants.FilesWorkerPort)
-            .AddProject<ASC_People>(Constants.PeoplePort)
-            .AddProject<ASC_Web_Api>(Constants.WebApiPort)
-            .AddProject<ASC_ApiSystem>(Constants.ApiSystemPort)
-            .AddProject<ASC_ClearEvents>(Constants.ClearEventsPort)
-            .AddProject<ASC_Data_Backup>(Constants.BackupPort)
-            .AddProject<ASC_Data_Backup_Worker>(Constants.BackupWorkerPort)
-            .AddProject<ASC_Notify>(Constants.NotifyPort)
-            .AddProject<ASC_Studio_Notify>(Constants.StudioNotifyPort)
-            .AddProject<ASC_Web_Studio>(Constants.WebstudioPort)
-            .AddProject<ASC_AI>(Constants.AiPort)
-            .AddProject<ASC_AI_Worker>(Constants.AiWorkerPort)
-            .AddProject<ASC_TelegramService>(Constants.TelegramPort)
+            .AddProject<ASC_Files>(Constants.FilesPort, additionalSystemVariables)
+            .AddProject<ASC_Files_Worker>(Constants.FilesWorkerPort, additionalSystemVariables)
+            .AddProject<ASC_People>(Constants.PeoplePort, additionalSystemVariables)
+            .AddProject<ASC_Web_Api>(Constants.WebApiPort, additionalSystemVariables)
+            .AddProject<ASC_ApiSystem>(Constants.ApiSystemPort, apiSystemVariables)
+            .AddProject<ASC_ClearEvents>(Constants.ClearEventsPort, additionalSystemVariables)
+            .AddProject<ASC_Data_Backup>(Constants.BackupPort, additionalSystemVariables)
+            .AddProject<ASC_Data_Backup_Worker>(Constants.BackupWorkerPort, additionalSystemVariables)
+            .AddProject<ASC_Notify>(Constants.NotifyPort, additionalSystemVariables)
+            .AddProject<ASC_Studio_Notify>(Constants.StudioNotifyPort, additionalSystemVariables)
+            .AddProject<ASC_Web_Studio>(Constants.WebstudioPort, additionalSystemVariables)
+            .AddProject<ASC_AI>(Constants.AiPort, additionalSystemVariables)
+            .AddProject<ASC_AI_Worker>(Constants.AiWorkerPort, additionalSystemVariables)
+            .AddProject<ASC_TelegramService>(Constants.TelegramPort, additionalSystemVariables)
             .AddSocketIO()
             .AddSsoAuth()
             .AddWebDav()
             .AddIdentity();
+
         break;
 }
 
@@ -114,6 +149,8 @@ if (!skipClient)
     startPackages = builder.AddJavaScriptApp("onlyoffice-client", clientBasePath, "start").WithPnpm();
 }
 
-NginxConfiguration.ConfigureOpenResty(builder, basePath, clientBasePath, startPackages, isDocker);
+var openresty = NginxConfiguration.ConfigureOpenResty(builder, basePath, clientBasePath, startPackages, isDocker);
+
+playwright?.WaitFor(openresty);
 
 await builder.Build().RunAsync();

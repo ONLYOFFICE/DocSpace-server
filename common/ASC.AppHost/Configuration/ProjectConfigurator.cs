@@ -40,21 +40,21 @@ public class ProjectConfigurator(
         return name.StartsWith("asc-") ? "onlyoffice-" + name.Substring(4) : name;
     }
     
-    public ProjectConfigurator AddProject<TProject>(int projectPort) where TProject : IProjectMetadata, new()
+    public ProjectConfigurator AddProject<TProject>(int projectPort, Dictionary<string, string>? parameters = null) where TProject : IProjectMetadata, new()
     {
         if (isDocker)
         {
-            AddProjectDocker<TProject>(projectPort);
+            AddProjectDocker<TProject>(projectPort, parameters);
         }
         else
         {
-            AddProjectWithDefaultConfiguration<TProject>();
+            AddProjectWithDefaultConfiguration<TProject>(parameters);
         }
 
         return this;
     }
 
-    private void AddProjectWithDefaultConfiguration<TProject>() where TProject : IProjectMetadata, new()
+    private void AddProjectWithDefaultConfiguration<TProject>(Dictionary<string, string>? parameters = null) where TProject : IProjectMetadata, new()
     {
         var project = builder
             .AddProject<TProject>(GetProjectName<TProject>())
@@ -72,9 +72,7 @@ public class ProjectConfigurator(
         var isStandalone = String.Compare(builder.Configuration["APP_HOSTING_STANDALONE"], "true", StringComparison.OrdinalIgnoreCase) == 0;
 
         project.WithEnvironment("core:base-domain", isStandalone ? "localhost" : "")
-            .WithEnvironment("ai:mcp:0:endpoint",
-                new UriBuilder(Uri.UriSchemeHttp, "localhost", Constants.DocSpaceMcpPort)
-                    .ToString() + "mcp");
+            .WithEnvironment("ai:mcp:0:endpoint", new UriBuilder(Uri.UriSchemeHttp, "localhost", Constants.DocSpaceMcpPort) + "mcp");
 
                
         switch (builder.Configuration["APP_EDITION"])
@@ -90,11 +88,19 @@ public class ProjectConfigurator(
                 break;
         }
 
+        if (parameters != null)
+        {
+            foreach (var parameter in parameters)
+            {
+                project.WithEnvironment(parameter.Key, parameter.Value);
+            }
+        }
+        
         connectionManager.AddBaseConfig(project, isDocker);
         connectionManager.AddWaitFor(project);
     }
 
-    private void AddProjectDocker<TProject>(int projectPort) where TProject : IProjectMetadata, new()
+    private void AddProjectDocker<TProject>(int projectPort, Dictionary<string, string>? parameters = null) where TProject : IProjectMetadata, new()
     {
         var projectMetadata = new TProject();
         var projectBasePath = Path.GetDirectoryName(projectMetadata.ProjectPath) ?? basePath;
@@ -149,7 +155,15 @@ public class ProjectConfigurator(
                 .WithHttpEndpoint(projectPort, projectPort)
                 .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
         }
-
+        
+        if (parameters != null)
+        {
+            foreach (var parameter in parameters)
+            {
+                resourceBuilder.WithEnvironment(parameter.Key, parameter.Value);
+            }
+        }
+        
         connectionManager.AddBaseConfig(resourceBuilder, isDocker);
         connectionManager.AddWaitFor(resourceBuilder);
 
