@@ -36,6 +36,7 @@ public class AiConfiguration
 
     private readonly FrozenDictionary<ProviderType, ProviderSettingsData> _settings;
     private readonly FrozenDictionary<(ProviderType, string), ModelSettings> _modelsByProvider;
+    private readonly FrozenDictionary<(ProviderType, string), string> _modelIdMigrations;
     private readonly FrozenDictionary<string, string> _aliasByModelId;
     private readonly FrozenDictionary<string, EffortSettingsData> _effortSettings;
 
@@ -56,6 +57,7 @@ public class AiConfiguration
                 .ToFrozenDictionary(p => p.Type);
 
         var modelsByProvider = new Dictionary<(ProviderType, string), ModelSettings>();
+        var modelIdMigrations = new Dictionary<(ProviderType, string), string>();
         var aliasByModelId = new Dictionary<string, string>();
 
         foreach (var provider in _settings.Values)
@@ -69,10 +71,21 @@ public class AiConfiguration
             {
                 modelsByProvider[(provider.Type, model.Id)] = model;
                 aliasByModelId.TryAdd(model.Id, model.Alias);
+
+                if (model.Replaces == null)
+                {
+                    continue;
+                }
+
+                foreach (var previousId in model.Replaces)
+                {
+                    modelIdMigrations[(provider.Type, previousId)] = model.Id;
+                }
             }
         }
 
         _modelsByProvider = modelsByProvider.ToFrozenDictionary();
+        _modelIdMigrations = modelIdMigrations.ToFrozenDictionary();
         _aliasByModelId = aliasByModelId.ToFrozenDictionary();
     }
 
@@ -96,6 +109,11 @@ public class AiConfiguration
     public ModelSettings? GetModel(ProviderType type, string modelId)
     {
         return _modelsByProvider.GetValueOrDefault((type, modelId));
+    }
+
+    public string ResolveModelId(ProviderType type, string modelId)
+    {
+        return _modelIdMigrations.GetValueOrDefault((type, modelId), modelId);
     }
 
     public IReadOnlyDictionary<string, string> GetModelAliases()

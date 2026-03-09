@@ -30,7 +30,8 @@ namespace ASC.AI.Core.Provider.Data;
 public class AiProviderDao(
     IDbContextFactory<AiDbContext> dbContextFactory,
     InstanceCrypto crypto,
-    AiGateway gateway) : IAiProviderDao
+    AiGateway gateway,
+    AiConfiguration aiConfiguration) : IAiProviderDao
 {
     public async Task<AiProvider> AddProviderAsync(
         int tenantId,
@@ -271,26 +272,30 @@ public class AiProviderDao(
             return null;
         }
 
-        if (result.ProviderId != AiGateway.ProviderId)
+        if (result.ProviderId == AiGateway.ProviderId)
         {
-            return result;
-        }
-
-        if (!await gateway.IsEnabledAsync())
-        {
-            var strategy = dbContext.Database.CreateExecutionStrategy();
-
-            await strategy.ExecuteAsync(async () =>
+            if (!await gateway.IsEnabledAsync())
             {
-                await using var context = await dbContextFactory.CreateDbContextAsync();
-                await context.DeleteDefaultProvidersByProviderIdsAsync(tenantId, new HashSet<int> { AiGateway.ProviderId });
-                await context.SaveChangesAsync();
-            });
+                var strategy = dbContext.Database.CreateExecutionStrategy();
 
-            return null;
+                await strategy.ExecuteAsync(async () =>
+                {
+                    await using var context = await dbContextFactory.CreateDbContextAsync();
+                    await context.DeleteDefaultProvidersByProviderIdsAsync(tenantId, new HashSet<int> { AiGateway.ProviderId });
+                    await context.SaveChangesAsync();
+                });
+
+                return null;
+            }
+
+            result.ProviderTitle = AiGateway.ProviderTitle;
+            result.ProviderType = ProviderType.PortalAi;
         }
 
-        result.ProviderTitle = AiGateway.ProviderTitle;
+        if (result.ProviderType.HasValue)
+        {
+            result.DefaultModel = aiConfiguration.ResolveModelId(result.ProviderType.Value, result.DefaultModel);
+        }
 
         return result;
     }

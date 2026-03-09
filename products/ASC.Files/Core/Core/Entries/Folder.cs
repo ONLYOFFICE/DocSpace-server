@@ -319,7 +319,7 @@ public class Folder<T> : FileEntry<T>, IFolder
 
 [Scope]
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
-public partial class FolderMapper(IServiceProvider serviceProvider, TenantDateTimeConverter tenantDateTimeConverter, FilesMappingAction filesMappingAction)
+public partial class FolderMapper(IServiceProvider serviceProvider, TenantDateTimeConverter tenantDateTimeConverter, FilesMappingAction filesMappingAction, AiConfiguration aiConfiguration)
 {
     private partial Folder<int> Map(DbFolderQuery source);
 
@@ -344,6 +344,17 @@ public partial class FolderMapper(IServiceProvider serviceProvider, TenantDateTi
         {
             result.Shared = dbFolderQuery.UserShared.Any(r => r is SubjectType.ExternalLink or SubjectType.PrimaryExternalLink);
             result.SharedForUser = dbFolderQuery.UserShared.Any(r => r is SubjectType.Group or SubjectType.User);
+        }
+
+        if (!result.ChatProviderType.HasValue || result.SettingsChatParameters?.ModelId == null)
+        {
+            return result;
+        }
+
+        var resolved = aiConfiguration.ResolveModelId(result.ChatProviderType.Value, result.SettingsChatParameters.ModelId);
+        if (resolved != result.SettingsChatParameters.ModelId)
+        {
+            result.SettingsChatParameters = result.SettingsChatParameters with { ModelId = resolved };
         }
 
         return result;

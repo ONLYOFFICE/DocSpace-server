@@ -44,6 +44,7 @@ public class ModelSettings
     public required string Alias { get; init; }
     public MultimodalSettings? Multimodal { get; init; }
     public bool Thinking { get; init; }
+    public HashSet<string>? Replaces { get; init; }
 }
 
 public class MultimodalSettings
