@@ -393,6 +393,7 @@ public class FolderDtoHelper(
             var modelId = folder.SettingsChatProviderId == 0 ? null : folder.SettingsChatParameters.ModelId;
             ChatMultimodalSettingsDto multimodal = null;
             string modelAlias = null;
+            var thinking = false;
 
             if (modelId != null)
             {
@@ -408,6 +409,11 @@ public class FolderDtoHelper(
                         }
                     };
                 }
+
+                if (folder.ChatProviderType.HasValue)
+                {
+                    thinking = aiConfiguration.GetModel(folder.ChatProviderType.Value, modelId)?.Thinking ?? false;
+                }
             }
 
             result.ChatSettings = new ChatSettingsDto
@@ -416,7 +422,8 @@ public class FolderDtoHelper(
                 ModelId = modelId,
                 ModelAlias = modelAlias,
                 Prompt = folder.SettingsChatParameters.Prompt,
-                Multimodal = multimodal
+                Multimodal = multimodal,
+                Thinking = thinking
             };
         }
 

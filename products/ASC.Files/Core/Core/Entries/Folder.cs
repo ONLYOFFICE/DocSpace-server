@@ -267,6 +267,7 @@ public class Folder<T> : FileEntry<T>, IFolder
     
     public int SettingsChatProviderId { get; set; }
     public ChatParameters SettingsChatParameters { get; set; }
+    public ProviderType? ChatProviderType { get; set; }
     
     /// <summary>
     /// Specifies if the files can be downloaded from this folder or not.
