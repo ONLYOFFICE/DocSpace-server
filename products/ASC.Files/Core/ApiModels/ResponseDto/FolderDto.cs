@@ -391,39 +391,30 @@ public class FolderDtoHelper(
             }
             
             var modelId = folder.SettingsChatProviderId == 0 ? null : folder.SettingsChatParameters.ModelId;
+            var model = modelId != null && folder.ChatProviderType.HasValue
+                ? aiConfiguration.GetModel(folder.ChatProviderType.Value, modelId)
+                : null;
+
             ChatMultimodalSettingsDto multimodal = null;
-            string modelAlias = null;
-            var thinking = false;
-
-            if (modelId != null)
+            if (model?.Multimodal?.Image != null)
             {
-                modelAlias = aiConfiguration.GetModelAlias(modelId);
-                var multimodalSettings = aiConfiguration.GetMultimodalSettings(modelId);
-                if (multimodalSettings?.Image != null)
+                multimodal = new ChatMultimodalSettingsDto
                 {
-                    multimodal = new ChatMultimodalSettingsDto
+                    Image = new ChatImageMultimodalSettingsDto
                     {
-                        Image = new ChatImageMultimodalSettingsDto
-                        {
-                            Formats = multimodalSettings.Image.Formats
-                        }
-                    };
-                }
-
-                if (folder.ChatProviderType.HasValue)
-                {
-                    thinking = aiConfiguration.GetModel(folder.ChatProviderType.Value, modelId)?.Thinking ?? false;
-                }
+                        Formats = model.Multimodal.Image.Formats
+                    }
+                };
             }
 
             result.ChatSettings = new ChatSettingsDto
             {
                 ProviderId = folder.SettingsChatProviderId,
                 ModelId = modelId,
-                ModelAlias = modelAlias,
+                ModelAlias = model?.Alias,
                 Prompt = folder.SettingsChatParameters.Prompt,
                 Multimodal = multimodal,
-                Thinking = thinking
+                Thinking = model?.Thinking ?? false
             };
         }
 
