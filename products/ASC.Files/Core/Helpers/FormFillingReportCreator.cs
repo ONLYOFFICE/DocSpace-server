@@ -33,47 +33,57 @@ public class FormFillingReportCreator(
     IDaoFactory daoFactory,
     IHttpClientFactory clientFactory,
     TenantManager tenantManager,
+    AuthContext authContext,
+    IEventBus eventBus,
     FactoryIndexerForm factoryIndexerForm,
     FactoryIndexerFormMetadata factoryIndexerFormMetadata,
-    IServiceScopeFactory serviceScopeFactory,
     ILogger<FormFillingReportCreator> logger)
 {
 
     public async Task UpdateFormFillingReport<T>(int originalFormId, int originalFormVersion, int roomId, int resultFormNumber, string formsDataUrl, File<T> formsDataFile, bool sendFormToExternalDB, bool settingsSaveFormAsXLSX)
     {
-        var (formData, metaData) = await GetSubmitFormsData(formsDataFile, originalFormId, originalFormVersion, roomId, resultFormNumber, formsDataUrl);
+        await GetSubmitFormsData(formsDataFile, originalFormId, originalFormVersion, roomId, resultFormNumber, formsDataUrl);
 
         if (sendFormToExternalDB && externalDatabaseClient.IsEnabled())
         {
             var fileId = formsDataFile.Id is int id ? id : 0;
-            var tableName = $"form_{originalFormId}_v{originalFormVersion}";
-            var normalizedMeta = NormalizeMetadata(metaData).ToList();
-            var columnDefinitions = BuildColumnDefinitions(normalizedMeta).ToList();
-            var rowData = BuildRowData(formData, normalizedMeta, fileId);
+            var userId = authContext.CurrentAccount.ID;
             var tenantId = tenantManager.GetCurrentTenantId();
 
-            _ = Task.Run(async () =>
-            {
-                try
-                {
-                    await using var scope = serviceScopeFactory.CreateAsyncScope();
-                    var scopedTenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
-                    await scopedTenantManager.SetCurrentTenantAsync(tenantId);
-
-                    var dbClient = scope.ServiceProvider.GetRequiredService<ExternalDatabaseClient>();
-                    await dbClient.CreateTableIfNotExistsAsync(tableName, columnDefinitions);
-                    await dbClient.UpsertDataAsync(tableName, rowData, keyColumn: "form_id");
-                }
-                catch (Exception ex)
-                {
-                    logger.LogError(ex, "Failed to export form {FormId} data to external database", originalFormId);
-                }
-            });
+            await eventBus.PublishAsync(new ExternalDbFormSubmissionIntegrationEvent(
+                userId, tenantId, originalFormId, originalFormVersion,
+                roomId, fileId, resultFormNumber, formsDataUrl));
         }
+
         if (settingsSaveFormAsXLSX)
         {
             await exportToXLSX.UpdateXlsxReport(roomId, originalFormId, originalFormVersion);
         }
+    }
+
+    public async Task ExportToExternalDbAsync(int fileId, int originalFormId, int originalFormVersion, int resultFormNumber, string formsDataUrl)
+    {
+        var httpClient = clientFactory.CreateClient();
+        using var response = await httpClient.SendAsync(new HttpRequestMessage
+        {
+            RequestUri = new Uri(formsDataUrl),
+            Method = HttpMethod.Get
+        });
+
+        var data = await response.Content.ReadAsStringAsync();
+        var parsed = ParseSubmitAndMetadata(data);
+
+        parsed.Data.FormsData = parsed.Data.FormsData
+            .Where(f => f.Type != "picture" && f.Type != "signature")
+            .ToList();
+
+        var tableName = GetTableName(originalFormId, originalFormVersion);
+        var normalizedMeta = NormalizeMetadata(parsed.MetaData).ToList();
+        var columnDefinitions = BuildColumnDefinitions(normalizedMeta).ToList();
+        var rowData = BuildRowData(parsed.Data, normalizedMeta, fileId);
+
+        await externalDatabaseClient.CreateTableIfNotExistsAsync(tableName, columnDefinitions);
+        await externalDatabaseClient.UpsertDataAsync(tableName, rowData, keyColumn: "form_id");
     }
 
     public async Task<IEnumerable<FormsItemData>> GetFormsFields(int folderId)
