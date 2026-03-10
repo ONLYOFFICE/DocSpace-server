@@ -63,13 +63,13 @@ public class CustomerOperationsReportRequestDto
     /// <summary>
     /// The service name.
     /// </summary>
-    /// <example>aitools</example>
+    /// <example>backup</example>
     public string ServiceName { get; set; }
-    
+
     /// <summary>
     /// Write-off of the quota for the service
     /// </summary>
-    /// <example>true</example>
+    /// <example>false</example>
     public bool WriteOffServiceQuota { get; set; }
 
     /// <summary>

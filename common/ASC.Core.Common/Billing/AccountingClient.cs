@@ -579,7 +579,7 @@ public class Balance
     /// <summary>
     /// The account name.
     /// </summary>
-    /// <example>aitools</example>
+    /// <example>account name</example>
     public string AccountName { get; init; }
     /// <summary>
     /// The account currency.
@@ -677,7 +677,7 @@ public class Session
 }
 
 /// <summary>
-/// Represents a service information.
+/// Represents service information.
 /// </summary>
 public class ServiceInfo
 {

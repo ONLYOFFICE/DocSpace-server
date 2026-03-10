@@ -1203,7 +1203,7 @@ public class PaymentController(
 
         var walletService = await CheckWalletServiceName(inDto.ServiceName);
 
-        // For now, only aitools available for purchasing!
+        // For now, only ai-tools available for purchasing!
         if (walletService != TenantWalletService.AITools)
         {
             throw new ItemNotFoundException("Service could not be found");
