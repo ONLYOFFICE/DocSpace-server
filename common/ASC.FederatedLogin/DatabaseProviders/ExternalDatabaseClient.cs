@@ -199,6 +199,66 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
     public Task UpsertDataAsync(string tableName, Dictionary<string, object> data, string keyColumn)
         => ExecuteInsertAsync(tableName, data, keyColumn);
 
+    public async Task CreateTableAndUpsertAsync(string tableName, IEnumerable<DbColumnDefinition> columns, Dictionary<string, object> data, string keyColumn)
+    {
+        if (data == null || data.Count == 0)
+        {
+            throw new ArgumentException("Data dictionary is empty.", nameof(data));
+        }
+
+        await using var connection = Provider.CreateConnection();
+        await connection.OpenAsync();
+        await SetupSqliteAsync(connection);
+
+        var dbType = Provider.DatabaseType.ToLowerInvariant();
+        DbTransaction? tx = dbType == "sqlite" ? await connection.BeginTransactionAsync() : null;
+
+        try
+        {
+            await using var createCmd = connection.CreateCommand();
+            createCmd.Transaction = tx;
+            createCmd.CommandText = dbType switch
+            {
+                "mysql" => BuildMySqlCreateTable(tableName, columns),
+                "sqlite" => BuildSqliteCreateTable(tableName, columns),
+                _ => throw new NotSupportedException($"Database type '{Provider.DatabaseType}' is not supported yet.")
+            };
+            await createCmd.ExecuteNonQueryAsync();
+
+            await using var insertCmd = connection.CreateCommand();
+            insertCmd.Transaction = tx;
+            insertCmd.CommandText = BuildInsertSql(tableName, data.Keys, keyColumn);
+            foreach (var kvp in data)
+            {
+                var param = insertCmd.CreateParameter();
+                param.ParameterName = "@" + kvp.Key;
+                param.Value = kvp.Value ?? DBNull.Value;
+                insertCmd.Parameters.Add(param);
+            }
+            await insertCmd.ExecuteNonQueryAsync();
+
+            if (tx != null)
+            {
+                await tx.CommitAsync();
+            }
+        }
+        catch
+        {
+            if (tx != null)
+            {
+                await tx.RollbackAsync();
+            }
+            throw;
+        }
+        finally
+        {
+            if (tx != null)
+            {
+                await tx.DisposeAsync();
+            }
+        }
+    }
+
     private async Task ExecuteInsertAsync(string tableName, Dictionary<string, object> data, string? keyColumn)
     {
         try
@@ -224,9 +284,9 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
 
             await cmd.ExecuteNonQueryAsync();
         }
-        catch (Exception ex) 
+        catch (Exception ex)
         {
-            logger.Error(ex.Message);
+            logger.LogError(ex.Message);
         }
     }
 

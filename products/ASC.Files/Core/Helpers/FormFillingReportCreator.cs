@@ -82,8 +82,7 @@ public class FormFillingReportCreator(
         var columnDefinitions = BuildColumnDefinitions(normalizedMeta).ToList();
         var rowData = BuildRowData(parsed.Data, normalizedMeta, fileId);
 
-        await externalDatabaseClient.CreateTableIfNotExistsAsync(tableName, columnDefinitions);
-        await externalDatabaseClient.UpsertDataAsync(tableName, rowData, keyColumn: "form_id");
+        await externalDatabaseClient.CreateTableAndUpsertAsync(tableName, columnDefinitions, rowData, keyColumn: "form_id");
     }
 
     public async Task<IEnumerable<FormsItemData>> GetFormsFields(int folderId)
