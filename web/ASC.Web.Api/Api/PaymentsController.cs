@@ -526,9 +526,9 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/walletservice</path>
     /// <collection>list</collection>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "Wallet service", typeof(QuotaDto))]
+    [SwaggerResponse(200, "Wallet service", typeof(WalletServiceDto))]
     [HttpGet("walletservice")]
-    public async Task<QuotaDto> GetWalletService(GetWalletServiceRequestDto inDto)
+    public async Task<WalletServiceDto> GetWalletService(GetWalletServiceRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -539,7 +539,10 @@ public class PaymentController(
             throw new ItemNotFoundException();
         }
 
-        return await tariffHelper.ToQuotaDtoAsync(quota, false);
+        var quotaDto = await tariffHelper.ToQuotaDtoAsync(quota, false);
+        var walletServiceDto = quotaDto.MapToWalletServiceDto();
+        walletServiceDto.ServiceName = quota.ServiceName;
+        return walletServiceDto;
     }
 
     /// <remarks>
