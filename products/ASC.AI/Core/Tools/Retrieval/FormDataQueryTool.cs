@@ -35,8 +35,18 @@ public class FormDataQueryTool(ExternalDatabaseClient externalDatabaseClient)
 {
     public const string Name = "query_form_data";
 
-    private static readonly string[] _dangerousKeywords =
-        ["DROP", "DELETE", "INSERT", "UPDATE", "ALTER", "CREATE", "EXEC", "TRUNCATE", "GRANT", "REVOKE"];
+    private static readonly Regex[] _dangerousKeywordRegexes = Array.ConvertAll(
+        (string[])["DROP", "DELETE", "INSERT", "UPDATE", "ALTER", "CREATE", "EXEC", "TRUNCATE",
+                   "GRANT", "REVOKE", "UNION", "WITH", "INTO", "ATTACH", "PRAGMA", "LOAD_EXTENSION"],
+        k => new Regex($@"\b{k}\b", RegexOptions.Compiled | RegexOptions.IgnoreCase));
+
+    private static readonly Regex _tableRefPattern = new(
+        @"(?:FROM|JOIN)\s+[`""']?(\w+)[`""']?",
+        RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+    private static readonly Regex _implicitJoinPattern = new(
+        @"\bFROM\s+[`""']?\w+[`""']?\s*,",
+        RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
     public AIFunction Init(string tableName, long rowCount, IEnumerable<DbColumnDefinition> columns)
     {
@@ -50,14 +60,14 @@ public class FormDataQueryTool(ExternalDatabaseClient externalDatabaseClient)
 
         async Task<ToolResponse<string>> Function([Description("SQL SELECT query to execute against the form data table")] string sql)
         {
-            if (!IsSafeSelect(sql))
+            if (!IsSafeSelect(sql, tableName))
             {
-                return new ToolResponse<string> { Error = "Only SELECT queries are allowed." };
+                return new ToolResponse<string> { Error = "Only SELECT queries against the form data table are allowed." };
             }
 
             try
             {
-                var result = await externalDatabaseClient.QueryAsync(sql);
+                var result = await externalDatabaseClient.QueryAsync(sql, tableName);
                 return new ToolResponse<string> { Data = result };
             }
             catch (Exception e)
@@ -67,7 +77,7 @@ public class FormDataQueryTool(ExternalDatabaseClient externalDatabaseClient)
         }
     }
 
-    private static bool IsSafeSelect(string sql)
+    private static bool IsSafeSelect(string sql, string allowedTableName)
     {
         var trimmed = sql.Trim();
 
@@ -82,13 +92,38 @@ public class FormDataQueryTool(ExternalDatabaseClient externalDatabaseClient)
             return false;
         }
 
-        var upper = trimmed.ToUpperInvariant();
-        if (_dangerousKeywords.Any(k => Regex.IsMatch(upper, $@"\b{k}\b")))
+        if (trimmed.Contains("--") || trimmed.Contains("/*") || trimmed.Contains("*/"))
+        {
+            return false;
+        }
+
+        if (_implicitJoinPattern.IsMatch(trimmed))
+        {
+            return false;
+        }
+
+        if (_dangerousKeywordRegexes.Any(r => r.IsMatch(trimmed)))
+        {
+            return false;
+        }
+
+        if (!ReferencesOnlyAllowedTable(trimmed, allowedTableName))
         {
             return false;
         }
 
         return true;
+    }
+
+    private static bool ReferencesOnlyAllowedTable(string sql, string allowedTableName)
+    {
+        var matches = _tableRefPattern.Matches(sql);
+        if (matches.Count == 0)
+        {
+            return false;
+        }
+
+        return matches.All(m => m.Groups[1].Value.Equals(allowedTableName, StringComparison.OrdinalIgnoreCase));
     }
 
     private static string BuildDescription(string tableName, long rowCount, IEnumerable<DbColumnDefinition> columns)

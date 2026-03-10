@@ -140,8 +140,33 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         return Convert.ToInt64(result);
     }
 
-    public async Task<string> QueryAsync(string sql, int maxRows = 500)
+    private static readonly Regex _queryTableRefPattern = new(
+        @"(?:FROM|JOIN)\s+[`""']?(\w+)[`""']?",
+        RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+    private static readonly Regex _implicitJoinPattern = new(
+        @"\bFROM\s+[`""']?\w+[`""']?\s*,",
+        RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+    private static void ValidateQueryTableReferences(string sql, string allowedTableName)
     {
+        if (_implicitJoinPattern.IsMatch(sql))
+        {
+            throw new UnauthorizedAccessException("Implicit comma-style joins are not allowed.");
+        }
+
+        var matches = _queryTableRefPattern.Matches(sql);
+        if (matches.Count == 0 || matches.Cast<Match>().Any(m =>
+            !m.Groups[1].Value.Equals(allowedTableName, StringComparison.OrdinalIgnoreCase)))
+        {
+            throw new UnauthorizedAccessException($"Query may only reference the '{allowedTableName}' table.");
+        }
+    }
+
+    public async Task<string> QueryAsync(string sql, string allowedTableName, int maxRows = 500)
+    {
+        ValidateQueryTableReferences(sql, allowedTableName);
+
         await using var connection = Provider.CreateConnection();
         await connection.OpenAsync();
         await SetupSqliteAsync(connection);
