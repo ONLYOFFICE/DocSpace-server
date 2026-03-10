@@ -1217,7 +1217,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
                 if (Equals(properties.FormFilling.ResultsFolderId, default(T)))
                 {
-                    var initFormFillingProperties = await InitFormFillingProperties(folderIfNew.Id, sourceTitle, sourceFile.Id, inProcessFormFolderId, readyFormFolderId, folderIfNew.CreateBy, properties, fileDao, folderDao);
+                    var initFormFillingProperties = await InitFormFillingProperties(folderIfNew.Id, sourceTitle, sourceFile.Id, sourceFile.Version, inProcessFormFolderId, readyFormFolderId, folderIfNew.CreateBy, properties, fileDao, folderDao);
                     linkedFile.ParentId = initFormFillingProperties.FormFilling.ToFolderId;
                 }
                 else if (resultFolder is not { FolderType: FolderType.FormFillingFolderInProgress })
@@ -1977,7 +1977,7 @@ public class EntryManager(IDaoFactory daoFactory,
             await filesMessageService.SendAsync(MessageAction.FolderCreated, formFolder, formFolder.Title);
         }
 
-        await InitFormFillingProperties(folder.Id, Path.GetFileNameWithoutExtension(file.Title), file.Id, inProcessFormFolderId, readyFormFolderId, folder.CreateBy, properties, fileDao, folderDao);
+        await InitFormFillingProperties(folder.Id, Path.GetFileNameWithoutExtension(file.Title), file.Id, file.Version, inProcessFormFolderId, readyFormFolderId, folder.CreateBy, properties, fileDao, folderDao);
     }
 
     public async Task<(T readyFormFolderId, T inProcessFolderId)> InitSystemFormFillingFolders<T>(T formFillingRoomId, IFolderDao<T> folderDao, Guid createBy)
@@ -2056,7 +2056,7 @@ public class EntryManager(IDaoFactory daoFactory,
         }
     }
 
-    private async Task<EntryProperties<T>> InitFormFillingProperties<T>(T roomId, string sourceTitle, T sourceFileId, T inProcessFormFolderId, T readyFormFolderId, Guid createBy, EntryProperties<T> properties, IFileDao<T> fileDao, IFolderDao<T> folderDao)
+    private async Task<EntryProperties<T>> InitFormFillingProperties<T>(T roomId, string sourceTitle, T sourceFileId, int sourceFileVersion, T inProcessFormFolderId, T readyFormFolderId, Guid createBy, EntryProperties<T> properties, IFileDao<T> fileDao, IFolderDao<T> folderDao)
     {
         var templatesFolderTask = CreateFormFillingFolder(sourceTitle, inProcessFormFolderId, FolderType.FormFillingFolderInProgress, createBy, folderDao);
         var resultsFolderTask = CreateFormFillingFolder(sourceTitle, readyFormFolderId, FolderType.FormFillingFolderDone, createBy, folderDao);
@@ -2069,6 +2069,7 @@ public class EntryManager(IDaoFactory daoFactory,
         properties.FormFilling.Title = sourceTitle;
         properties.FormFilling.RoomId = roomId;
         properties.FormFilling.OriginalFormId = sourceFileId;
+        properties.FormFilling.OriginalFormVersion = sourceFileVersion;
         properties.FormFilling.ToFolderId = templatesFolderId;
         properties.FormFilling.ResultsFolderId = resultsFolderId;
         properties.FormFilling.StartFilling = true;
