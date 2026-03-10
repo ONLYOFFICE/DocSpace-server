@@ -252,4 +252,9 @@ public class SettingsDto
     /// Specifies the default folder type for the current settings.
     /// </summary>
     public FolderType DefaultFolderType { get; set; }
+
+    /// <summary>
+    /// Specifies if an external database is connected for storing form results.
+    /// </summary>
+    public bool ExternalDbEnabled { get; set; }
 }

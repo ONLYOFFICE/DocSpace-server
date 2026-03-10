@@ -64,7 +64,8 @@ public partial class SettingsController(
     UsersQuotaSyncOperation usersQuotaSyncOperation,
     CustomQuota customQuota,
     UserSocketManager userSocketManager,
-    QuotaSocketManager quotaSocketManager)
+    QuotaSocketManager quotaSocketManager,
+    ExternalDatabaseClient externalDatabaseClient)
     : BaseSettingsController(fusionCache, webItemManager)
 {
     [GeneratedRegex("^[a-z0-9]([a-z0-9-.]){1,253}[a-z0-9]$")]
@@ -180,6 +181,7 @@ public partial class SettingsController(
             settings.InvitationLimit = await userInvitationLimitHelper.GetLimit();
             settings.MaxImageUploadSize = setupInfo.MaxImageUploadSize;
             settings.DefaultFolderType = (await settingsManager.LoadForCurrentUserAsync<StudioDefaultPageSettings>()).DefaultFolderType;
+            settings.ExternalDbEnabled = externalDatabaseClient.IsEnabled();
         }
         else
         {
