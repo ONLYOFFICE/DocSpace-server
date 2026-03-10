@@ -101,6 +101,11 @@ module.exports = (files) => {
     files.changeInvitationLimitValue(req.body);
     res.end();
   });
+
+  router.post("/change-web-plugin", (req, res) => {
+    files.changeWebPlugin(req.body);
+    res.end();
+  });
   
   router.post("/update-history", (req, res) => {
     files.updateHistory(req.body);
