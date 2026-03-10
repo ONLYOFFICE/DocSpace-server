@@ -365,7 +365,7 @@ public class FormFillingReportCreator(
     {
         if (string.IsNullOrEmpty(key))
         {
-            return "field";
+            return "col_field";
         }
 
         // Transliterate any Unicode script to ASCII (Cyrillic, Chinese, Japanese, Korean, Arabic, etc.)
@@ -377,11 +377,13 @@ public class FormFillingReportCreator(
         // Collapse consecutive underscores and strip leading/trailing ones
         name = Regex.Replace(name, @"_+", "_").Trim('_');
 
-        // If empty after cleanup or starts with a digit — prefix to produce a valid identifier
-        if (name.Length == 0 || char.IsDigit(name[0]))
+        if (name.Length == 0)
         {
-            name = "f_" + name;
+            return "col_field";
         }
+
+        // col_ prefix guarantees the name never collides with any SQL reserved word
+        name = "col_" + name;
 
         // Truncate to 64 characters (MySQL/PostgreSQL identifier limit)
         if (name.Length > 64)
