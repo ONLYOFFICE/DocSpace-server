@@ -532,7 +532,12 @@ public class PaymentController(
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var (quota, _) = await CheckWalletServiceName(inDto.ServiceName);
+        var quotaList = await quotaService.GetTenantQuotasAsync();
+        var quota = quotaList.FirstOrDefault(q => q.Wallet && q.TenantId == (int)inDto.Service);
+        if (quota == null)
+        {
+            throw new ItemNotFoundException();
+        }
 
         var quotaDto = await tariffHelper.ToQuotaDtoAsync(quota, false);
         var walletServiceDto = quotaDto.MapToWalletServiceDto();
@@ -1199,7 +1204,7 @@ public class PaymentController(
 
         await DemandPayerAsync(customerInfo);
 
-        var (quota, walletService) = await CheckWalletServiceName(inDto.ServiceName);
+        var walletService = await CheckWalletServiceName(inDto.ServiceName);
 
         // For now, only ai-tools available for purchasing!
         if (walletService != TenantWalletService.AITools)
@@ -1210,7 +1215,7 @@ public class PaymentController(
         var customerParticipantName = securityContext.CurrentAccount.ID.ToString();
         var details = $"{inDto.ServiceName} {inDto.Quantity}";
 
-        var result = await tariffService.MakeServicePaymentAsync(tenant.Id, quota.ServiceName, inDto.Quantity, customerParticipantName, metadata: null);
+        var result = await tariffService.MakeServicePaymentAsync(tenant.Id, inDto.ServiceName, inDto.Quantity, customerParticipantName, metadata: null);
         if (result != null)
         {
             messageService.Send(MessageAction.CustomerOperationPerformed, null, details);
@@ -1413,17 +1418,16 @@ public class PaymentController(
         await fusionCache.SetAsync(key, count + 1, TimeSpan.FromMinutes(_expirationMinutes));
     }
 
-    private async Task<(TenantQuota, TenantWalletService)> CheckWalletServiceName(string serviceName)
+    private async Task<TenantWalletService> CheckWalletServiceName(string serviceName)
     {
         var quotaList = await tenantManager.GetTenantQuotasAsync(true, true);
 
-        var quota = quotaList.FirstOrDefault(x =>
-            x.Wallet &&
+        var selectedQuota = quotaList.FirstOrDefault(x =>
             x.ServiceName.Equals(serviceName, StringComparison.InvariantCultureIgnoreCase));
 
-        if (quota != null && Enum.IsDefined(typeof(TenantWalletService), quota.TenantId))
+        if (selectedQuota != null && Enum.IsDefined(typeof(TenantWalletService), selectedQuota.TenantId))
         {
-            return (quota, (TenantWalletService)quota.TenantId);
+            return (TenantWalletService)selectedQuota.TenantId;
         }
 
         throw new ItemNotFoundException("Service could not be found");

@@ -189,11 +189,12 @@ public class BuyWalletServiceRequestDto
 public class GetWalletServiceRequestDto
 {
     /// <summary>
-    /// The wallet service name.
+    /// The wallet service type.
     /// </summary>
-    /// <example>backup</example>
-    [FromQuery(Name = "serviceName")]
-    public required string ServiceName { get; set; }
+    /// <example>Storage</example>
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    [FromQuery(Name = "service")]
+    public required TenantWalletService Service { get; set; }
 }
 
 /// <summary>
