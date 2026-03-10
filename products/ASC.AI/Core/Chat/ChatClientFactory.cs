@@ -32,12 +32,19 @@ namespace ASC.AI.Core.Chat;
 [Scope]
 public class ChatClientFactory(
     IHttpClientFactory httpClientFactory,
-    IToolPermissionRequester toolPermissionRequester)
+    IToolPermissionRequester toolPermissionRequester,
+    SettingsManager settingsManager)
 {
-    public IChatClient Create(ChatClientOptions options, ToolHolder? toolHolder = null)
+    public async Task<IChatClient> CreateAsync(ChatClientOptions options, ToolHolder? toolHolder = null)
     {
         ArgumentNullException.ThrowIfNull(options);
-        
+
+        var aiAccessSettings = await settingsManager.LoadAsync<TenantAiAccessSettings>();
+        if (!aiAccessSettings.Enabled)
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_AiServicesDisabled);
+        }
+
         if (string.IsNullOrEmpty(options.Endpoint))
         {
             throw new ArgumentException("Endpoint is not configured");

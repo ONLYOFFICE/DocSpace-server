@@ -76,7 +76,7 @@ public class ChatCompletionRunner(
             context.Attachments = attachments;
         }
         
-        var client = chatClientFactory.Create(context.ClientOptions, context.Tools);
+        var client = await chatClientFactory.CreateAsync(context.ClientOptions, context.Tools);
         
         return new ChatCompletionGenerator(
             client,
@@ -135,7 +135,7 @@ public class ChatCompletionRunner(
             context.Attachments = attachments;
         }
         
-        var client = chatClientFactory.Create(context.ClientOptions, context.Tools);
+        var client = await chatClientFactory.CreateAsync(context.ClientOptions, context.Tools);
 
         return new ChatCompletionGenerator(
             client,

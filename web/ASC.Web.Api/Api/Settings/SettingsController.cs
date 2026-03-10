@@ -139,6 +139,7 @@ public partial class SettingsController(
             settings.LimitedAccessSpace = (await settingsManager.LoadAsync<TenantAccessSpaceSettings>()).LimitedAccessSpace;
             settings.LimitedAccessDevToolsForUsers = (await settingsManager.LoadAsync<TenantDevToolsAccessSettings>()).LimitedAccessForUsers;
             settings.DisplayBanners = coreBaseSettings.Standalone ? !(await settingsManager.LoadAsync<TenantBannerSettings>()).Hidden : true;
+            settings.AiEnabled = (await settingsManager.LoadAsync<TenantAiAccessSettings>()).Enabled;
 
             settings.Firebase = new FirebaseDto
             {
@@ -1247,6 +1248,50 @@ public partial class SettingsController(
         await settingsManager.SaveAsync(settings);
 
         messageService.Send(MessageAction.BannerSettingsChanged);
+
+        return settings;
+    }
+
+    /// <summary>
+    /// Get the AI access settings
+    /// </summary>
+    /// <remarks>
+    /// Returns the current tenant-level AI access settings that control whether all AI functionality
+    /// (chat, agents, vectorization) is available for the tenant. AI is enabled by default.
+    /// </remarks>
+    /// <path>api/2.0/settings/ai-access</path>
+    [Tags("Settings / AI access")]
+    [SwaggerResponse(200, "Tenant AI access settings", typeof(TenantAiAccessSettings))]
+    [HttpGet("ai-access")]
+    public async Task<TenantAiAccessSettings> GetTenantAiAccessSettings()
+    {
+        return await settingsManager.LoadAsync<TenantAiAccessSettings>();
+    }
+
+    /// <summary>
+    /// Enable or disable AI access for the tenant
+    /// </summary>
+    /// <remarks>
+    /// Updates the tenant-level AI access settings. When AI is disabled, all AI features are turned off:
+    /// the AI Agents folder is hidden from root folder listings, AI status checks immediately return disabled,
+    /// and AI chat endpoints become inaccessible. Only users with the DocSpaceAdmin role
+    /// (EditPortalSettings permission) can change this setting.
+    /// An audit trail entry is created with either "AI access enabled" or "AI access disabled" depending on the new value.
+    /// </remarks>
+    /// <path>api/2.0/settings/ai-access</path>
+    [Tags("Settings / AI access")]
+    [SwaggerResponse(200, "Updated tenant AI access settings", typeof(TenantAiAccessSettings))]
+    [SwaggerResponse(403, "You don't have enough permission to change the AI access settings")]
+    [HttpPost("ai-access")]
+    public async Task<TenantAiAccessSettings> SetTenantAiAccessSettings(TenantAiAccessSettingsDto inDto)
+    {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        var settings = new TenantAiAccessSettings { Enabled = inDto.Enabled };
+
+        await settingsManager.SaveAsync(settings);
+
+        messageService.Send(inDto.Enabled ? MessageAction.AIAccessEnabled : MessageAction.AIAccessDisabled);
 
         return settings;
     }

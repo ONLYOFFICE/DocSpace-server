@@ -43,6 +43,12 @@ public class AiAccessibility(
     {
         var tenantId = tenantManager.GetCurrentTenantId();
         
+        var aiAccessSettings = await settingsManager.LoadAsync<TenantAiAccessSettings>(tenantId);
+        if (!aiAccessSettings.Enabled)
+        {
+            return new AiStatus { Enabled = false, GatewayEnabled = false };
+        }
+
         if (await aiGateway.IsEnabledAsync())
         {
             return new AiStatus { Enabled = true, GatewayEnabled = true };

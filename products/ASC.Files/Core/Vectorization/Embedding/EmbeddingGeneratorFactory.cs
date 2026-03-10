@@ -38,6 +38,12 @@ public class EmbeddingGeneratorFactory(
 {
     public async Task<IEmbeddingGenerator<string, Embedding<float>>> CreateAsync(int providerId)
     {
+        var aiAccessSettings = await settingsManager.LoadAsync<TenantAiAccessSettings>();
+        if (!aiAccessSettings.Enabled)
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_AiServicesDisabled);
+        }
+
         string url;
         string key;
         string modelId;
