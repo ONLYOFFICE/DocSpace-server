@@ -1253,15 +1253,15 @@ public partial class SettingsController(
     }
 
     /// <summary>
-    /// Get the AI access settings
+    /// Get the AI access settings for the portal
     /// </summary>
     /// <remarks>
-    /// Returns the current tenant-level AI access settings that control whether all AI functionality
-    /// (chat, agents, vectorization) is available for the tenant. AI is enabled by default.
+    /// Returns the current portal-level AI access settings that control whether all AI functionality
+    /// (chat, agents, vectorization) is available for the portal. AI is enabled by default.
     /// </remarks>
     /// <path>api/2.0/settings/ai-access</path>
-    [Tags("Settings / AI access")]
-    [SwaggerResponse(200, "Tenant AI access settings", typeof(TenantAiAccessSettings))]
+    [Tags("Settings / Common settings")]
+    [SwaggerResponse(200, "AI access settings", typeof(TenantAiAccessSettings))]
     [HttpGet("ai-access")]
     public async Task<TenantAiAccessSettings> GetTenantAiAccessSettings()
     {
@@ -1269,18 +1269,17 @@ public partial class SettingsController(
     }
 
     /// <summary>
-    /// Enable or disable AI access for the tenant
+    /// Set the AI access for the portal
     /// </summary>
     /// <remarks>
-    /// Updates the tenant-level AI access settings. When AI is disabled, all AI features are turned off:
+    /// Updates the portal-level AI access settings. When AI is disabled, all AI features are turned off:
     /// the AI Agents folder is hidden from root folder listings, AI status checks immediately return disabled,
     /// and AI chat endpoints become inaccessible. Only users with the DocSpaceAdmin role
     /// (EditPortalSettings permission) can change this setting.
-    /// An audit trail entry is created with either "AI access enabled" or "AI access disabled" depending on the new value.
     /// </remarks>
     /// <path>api/2.0/settings/ai-access</path>
-    [Tags("Settings / AI access")]
-    [SwaggerResponse(200, "Updated tenant AI access settings", typeof(TenantAiAccessSettings))]
+    [Tags("Settings / Common settings")]
+    [SwaggerResponse(200, "Updated AI access settings", typeof(TenantAiAccessSettings))]
     [SwaggerResponse(403, "You don't have enough permission to change the AI access settings")]
     [HttpPost("ai-access")]
     public async Task<TenantAiAccessSettings> SetTenantAiAccessSettings(TenantAiAccessSettingsDto inDto)
