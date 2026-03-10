@@ -34,7 +34,7 @@ using MySqlConnector;
 namespace ASC.FederatedLogin.DatabaseProviders;
 
 [Scope]
-public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IValidateKeysProvider
+public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IValidateKeysProvider, IConsumerKeyMetadataProvider
 {
     public string DatabaseType => this["databaseType"] ?? "mysql";
     public string Host => this["dbHost"];
@@ -61,6 +61,19 @@ public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IVa
             _ => false
         };
     }
+
+    public AuthKeyMetadata GetKeyMetadata(string key) => key switch
+    {
+        "databaseType"    => new() { Type = "select",   Options = ["mysql", "sqlite"] },
+        "dbPassword"      => new() { Type = "password", DependsOn = "databaseType", DependsOnValue = "mysql" },
+        "dbSsl"           => new() { Type = "toggle",   DependsOn = "databaseType", DependsOnValue = "mysql" },
+        "dbHost"          => new() { DependsOn = "databaseType", DependsOnValue = "mysql" },
+        "dbPort"          => new() { DependsOn = "databaseType", DependsOnValue = "mysql" },
+        "dbName"          => new() { DependsOn = "databaseType", DependsOnValue = "mysql" },
+        "dbUser"          => new() { DependsOn = "databaseType", DependsOnValue = "mysql" },
+        "sqliteFilePath"  => new() { DependsOn = "databaseType", DependsOnValue = "sqlite" },
+        _                 => new()
+    };
 
     public ExternalDatabaseProvider() { }
 
