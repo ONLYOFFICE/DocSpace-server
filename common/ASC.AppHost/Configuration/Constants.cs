@@ -53,6 +53,7 @@ public static class Constants
     public const int DocSpaceMcpPort = 8000;
 
     public const int TelegramPort = 5050;
+    public const int MonolithPort = 5027;
     
     public const string HostDockerInternal = "host.docker.internal";
     public const string OpenRestyContainer = "onlyoffice-openresty";

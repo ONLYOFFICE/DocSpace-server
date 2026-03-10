@@ -27,6 +27,7 @@
       <ProjectReference Include="..\services\ASC.Notify\ASC.Notify.csproj" />
       <ProjectReference Include="..\services\ASC.Studio.Notify\ASC.Studio.Notify.csproj" />
       <ProjectReference Include="..\services\ASC.TelegramService\ASC.TelegramService.csproj" />
+      <ProjectReference Include="..\services\ASC.Monolith\ASC.Monolith.csproj" />
       <ProjectReference Include="..\Tools\ASC.Migration.Runner\ASC.Migration.Runner.csproj" />
       <ProjectReference Include="..\..\products\ASC.Files\Server\ASC.Files.csproj" />
       <ProjectReference Include="..\..\products\ASC.Files\Worker\ASC.Files.Worker.csproj" />
