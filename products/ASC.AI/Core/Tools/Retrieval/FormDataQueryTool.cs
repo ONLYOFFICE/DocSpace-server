@@ -31,7 +31,10 @@ using ASC.FederatedLogin.DatabaseProviders;
 namespace ASC.AI.Core.Tools.Retrieval;
 
 [Scope]
-public class FormDataQueryTool(ExternalDatabaseClient externalDatabaseClient)
+public class FormDataQueryTool(
+    ExternalDatabaseClient externalDatabaseClient,
+    IDaoFactory daoFactory,
+    FileSecurity fileSecurity)
 {
     public const string Name = "query_form_data";
 
@@ -48,8 +51,15 @@ public class FormDataQueryTool(ExternalDatabaseClient externalDatabaseClient)
         @"\bFROM\s+[`""']?\w+[`""']?\s*,",
         RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-    public AIFunction Init(string tableName, long rowCount, IEnumerable<DbColumnDefinition> columns)
+    public async Task<AIFunction?> InitAsync(int fileId, string tableName, long rowCount, IEnumerable<DbColumnDefinition> columns)
     {
+        var fileDao = daoFactory.GetFileDao<int>();
+        var file = await fileDao.GetFileAsync(fileId);
+        if (file == null || !await fileSecurity.CanEditAsync(file))
+        {
+            return null;
+        }
+
         var description = BuildDescription(tableName, rowCount, columns);
 
         return AIFunctionFactory.Create(Function, new AIFunctionFactoryOptions

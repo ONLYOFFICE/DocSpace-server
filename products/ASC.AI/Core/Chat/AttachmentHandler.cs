@@ -308,7 +308,12 @@ public class AttachmentHandler(
         var columns = await formFillingReportCreator.GetColumnDefinitionsAsync(intFile.Id, intFile.Version);
         var columnList = columns.ToList();
 
-        var tool = formDataQueryTool.Init(tableName, rowCount, columnList);
+        var tool = await formDataQueryTool.InitAsync(intFile.Id, tableName, rowCount, columnList);
+        if (tool == null)
+        {
+            return (null, null);
+        }
+
         var toolWrapper = new ToolWrapper
         {
             Tool = tool,
