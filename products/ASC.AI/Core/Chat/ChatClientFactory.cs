@@ -97,6 +97,7 @@ public class ChatClientFactory(
                     builder = new DeepSeekChatClient(chatClient.AsIChatClient()).AsBuilder();
                     break;
                 }
+            case ProviderType.PortalAi:
             case ProviderType.OpenRouter:
                 {
                     var openAiClient = CreateOpenAiClient(options);
@@ -151,7 +152,7 @@ public class ChatClientFactory(
             {
                 x.Tools = toolHolder.Tools;
                 x.ToolMode = ChatToolMode.Auto;
-                x.AllowMultipleToolCalls = false;
+                x.AllowMultipleToolCalls = true;
             });
             
             builder = builder.Use((innerClient, _) =>
