@@ -172,8 +172,13 @@ public class DbFormsMetadataSearch : ISearchItem
     /// </summary>
     public static int ComputeId(int originalFormId, int originalFormVersion)
     {
-        var hash = HashCode.Combine(originalFormId, originalFormVersion);
-        return hash == int.MinValue ? int.MaxValue : Math.Abs(hash);
+        unchecked
+        {
+            var hash = 2166136261u;
+            hash = (hash ^ (uint)originalFormId) * 16777619u;
+            hash = (hash ^ (uint)originalFormVersion) * 16777619u;
+            return (int)(hash & (uint)int.MaxValue);
+        }
     }
 }
 

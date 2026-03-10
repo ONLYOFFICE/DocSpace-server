@@ -70,6 +70,7 @@ public class FormFillingReportCreator(
             Method = HttpMethod.Get
         });
 
+        response.EnsureSuccessStatusCode();
         var data = await response.Content.ReadAsStringAsync();
         var parsed = ParseSubmitAndMetadata(data);
 
@@ -96,6 +97,11 @@ public class FormFillingReportCreator(
 
         var fileDao = daoFactory.GetFileDao<int>();
         var file = await fileDao.GetFilesAsync([folderId], FilterType.Pdf, false, Guid.Empty, null, null, false).FirstOrDefaultAsync();
+        if (file == null)
+        {
+            return [];
+        }
+
         var (success, result) = await factoryIndexerForm.TrySelectAsync(r => r.Where(s => s.Id, file.Id));
 
         if (success)
@@ -172,6 +178,7 @@ public class FormFillingReportCreator(
 
         var httpClient = clientFactory.CreateClient();
         using var response = await httpClient.SendAsync(request);
+        response.EnsureSuccessStatusCode();
         var data = await response.Content.ReadAsStringAsync();
 
         var formNumber = new List<FormsItemData>
@@ -417,11 +424,17 @@ public class FormFillingReportCreator(
         }
 
         var dotNetFormat = format
-            .Replace("mm", "MM")
-            .Replace("yyyy", "yyyy")
-            .Replace("yy", "yy");
+            .Replace("DD", "dd")
+            .Replace("YYYY", "yyyy")
+            .Replace("YY", "yy")
+            .Replace("mm", "MM");
 
-        return DateTime.TryParseExact(value, dotNetFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out var dt) ? dt : null;
+        if (DateTime.TryParseExact(value, dotNetFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out var dt))
+        {
+            return dt;
+        }
+
+        return DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out var fallback) ? fallback : null;
     }
 
     public class BoolToStringConverter : JsonConverter<string>
