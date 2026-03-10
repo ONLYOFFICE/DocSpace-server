@@ -524,7 +524,6 @@ public class PaymentController(
     /// Get wallet service
     /// </summary>
     /// <path>api/2.0/portal/payment/walletservice</path>
-    /// <collection>list</collection>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "Wallet service", typeof(WalletServiceDto))]
     [HttpGet("walletservice")]

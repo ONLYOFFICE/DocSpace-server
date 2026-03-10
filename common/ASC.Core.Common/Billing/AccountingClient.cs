@@ -223,7 +223,7 @@ public class AccountingClient
             queryParams.Add("serviceName", filter.ServiceName);
         }
 
-        var path = filter.WriteOffServiceQuota
+        var path = filter.WriteOffServiceQuota && !string.IsNullOrEmpty(filter.ServiceName)
             ? $"/customer/{portalId}/quota-detail/{filter.ServiceName}"
             : $"/customer/{portalId}/operations";
 
@@ -302,7 +302,10 @@ public class AccountingClient
 
             foreach (string key in queryParams)
             {
-                query[key] = queryParams[key];
+                foreach (var value in queryParams.GetValues(key) ?? [])
+                {
+                    query.Add(key, value);
+                }
             }
 
             uriBuilder.Query = query.ToString();
