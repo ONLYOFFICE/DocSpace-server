@@ -92,6 +92,7 @@ global using ASC.EventBus;
 global using ASC.EventBus.Abstractions;
 global using ASC.EventBus.ActiveMQ;
 global using ASC.EventBus.Extensions.Logger;
+global using ASC.EventBus.InMemory;
 global using ASC.EventBus.RabbitMQ;
 global using ASC.EventBus.Serializers;
 global using ASC.MessagingSystem.Core;
