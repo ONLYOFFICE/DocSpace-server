@@ -29,69 +29,213 @@ namespace ASC.AI.Core.Chat;
 public class AttachmentResult
 {
     public required FileEntry File { get; init; }
-    public AttachmentMessageContent? AttachmentContent { get; init; }
+    public AttachmentMessageContent? Content { get; init; }
     public bool Success { get; init; }
     public ToolWrapper? DynamicTool { get; init; }
 }
 
 [Scope]
 public class AttachmentHandler(
+    IEventBus eventBus,
+    AuthContext authContext,
+    TenantManager tenantManager,
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
     ITextExtractor textExtractor,
     VectorizationGlobalSettings vectorizationGlobalSettings,
+    AiConfiguration aiConfiguration,
+    DataContentLoader dataContentLoader,
+    IConfiguration configuration,
+    ILogger<AttachmentHandler> logger,
     FormFillingReportCreator formFillingReportCreator,
     ExternalDatabaseClient externalDatabaseClient,
     FormDataQueryTool formDataQueryTool)
 {
-    
-    public async IAsyncEnumerable<AttachmentResult> HandleAsync(IEnumerable<int> filesIds, IEnumerable<string> thirdPartyFilesIds)
+    private static int? _maxAttachmentsCount;
+    private int MaxAttachmentsCount => _maxAttachmentsCount ??= configuration.GetValue("ai:maxAttachmentsCount", 5);
+
+    public async IAsyncEnumerable<AttachmentResult> HandleAsync(
+        ChatExecutionContext context,
+        IEnumerable<int> filesIds,
+        IEnumerable<string> thirdPartyFilesIds)
     {
-        await foreach (var files in HandleAsync(filesIds))
+        var modelSettings = aiConfiguration.GetModel(context.ClientOptions.Provider, context.ClientOptions.ModelId);
+        ArgumentNullException.ThrowIfNull(modelSettings);
+
+        var count = 0;
+
+        await foreach (var result in HandleAsync(modelSettings.Multimodal, filesIds, context.ChatId, context.Agent.Id))
         {
-            yield return files;
+            if (count >= MaxAttachmentsCount)
+            {
+                yield break;
         }
-        
-        await foreach (var files in HandleAsync(thirdPartyFilesIds))
+
+            count++;
+            yield return result;
+        }
+
+        await foreach (var result in HandleAsync(modelSettings.Multimodal, thirdPartyFilesIds, context.ChatId, context.Agent.Id))
         {
-            yield return files;
+            if (count >= MaxAttachmentsCount)
+            {
+                yield break;
         }
+
+            count++;
+            yield return result;
+    }
     }
     
-    private async IAsyncEnumerable<AttachmentResult> HandleAsync<T>(IEnumerable<T> filesIds)
+    public async Task CleanupAsync(IEnumerable<AttachmentMessageContent>? attachments)
+    {
+        if (attachments == null)
+        {
+            return;
+        }
+
+        var fileIds = attachments
+            .OfType<DataMessageContent>()
+            .Select(attachment => attachment.Id);
+
+        await DeleteInBackgroundAsync(fileIds);
+    }
+
+    private async IAsyncEnumerable<AttachmentResult> HandleAsync<T>(
+        MultimodalSettings? multimodal,
+        IEnumerable<T> filesIds,
+        Guid chatId,
+        int agentId)
     {
         var fileDao = daoFactory.GetFileDao<T>();
-        
-        await foreach(var fileEntry in fileSecurity.FilterReadAsync(fileDao.GetFilesAsync(filesIds)))
+
+        var textFiles = new List<(File<T> File, string Extension)>();
+        var mediaFiles = new List<(File<T> File, FileType FileType, string Extension)>();
+
+        await foreach (var fileEntry in fileSecurity.FilterReadAsync(fileDao.GetFilesAsync(filesIds)))
         {
             if (fileEntry is not File<T> file)
             {
                 continue;
             }
 
+            var extension = FileUtility.GetFileExtension(file.Title);
+            var fileType = FileUtility.GetFileTypeByExtention(extension);
+
+            if (fileType == FileType.Image)
+            {
+                if (multimodal?.Image == null)
+                {
+                    continue;
+                }
+
+                if (!multimodal.Image.Formats.Contains(extension))
+                {
+                    continue;
+                }
+
+                if (aiConfiguration.MaxImageSize > 0 && file.ContentLength > aiConfiguration.MaxImageSize)
+                {
+                    continue;
+                }
+
+                mediaFiles.Add((file, fileType, extension));
+            }
+            else
+            {
             if (!vectorizationGlobalSettings.IsSupportedContentExtraction(file.Title) ||
                 file.ContentLength > vectorizationGlobalSettings.MaxContentLength)
             {
                 continue;
             }
 
-            await using var stream = await fileDao.GetFileStreamAsync(file);
-            
-            await using var memoryStream = new MemoryStream();
-            await stream.CopyToAsync(memoryStream);
-            
-            var slice = new Memory<byte>(memoryStream.GetBuffer(), 0, (int)memoryStream.Length);
+                textFiles.Add((file, extension));
+            }
+        }
 
-            var content = await textExtractor.ExtractAsync(slice);
+        var copiedFiles = await CopyMediaFilesAsync(fileDao, mediaFiles, chatId, agentId);
+
+        foreach (var (copiedFile, fileType, extension) in copiedFiles)
+        {
+            yield return await HandleMediaAsync(copiedFile, fileType, extension);
+        }
+
+        foreach (var (file, extension) in textFiles)
+        {
+            yield return await HandleTextAsync(fileDao, file, extension);
+        }
+    }
+
+    private async Task<List<(File<int> CopiedFile, FileType FileType, string Extension)>> CopyMediaFilesAsync<T>(
+        IFileDao<T> fileDao,
+        List<(File<T> File, FileType FileType, string Extension)> mediaFiles,
+        Guid chatId,
+        int agentId)
+    {
+        var copiedFiles = new List<(File<int> CopiedFile, FileType FileType, string Extension)>();
+
+        try
+        {
+            foreach (var (file, fileType, extension) in mediaFiles)
+            {
+                var copiedFile = await fileDao.CopyFileAsync(file.Id, agentId, chatId);
+                copiedFiles.Add((copiedFile, fileType, extension));
+            }
+
+            return copiedFiles;
+        }
+        catch (Exception e)
+        {
+            logger.ErrorWithException(e);
+
+            await DeleteInBackgroundAsync(copiedFiles.Select(item => item.CopiedFile.Id));
+
+            throw;
+        }
+    }
+
+    private async Task DeleteInBackgroundAsync(IEnumerable<int> fileIds)
+    {
+        var ids = fileIds
+            .Distinct()
+            .ToList();
+
+        if (ids.Count == 0)
+        {
+            return;
+        }
+
+        try
+        {
+            await eventBus.PublishAsync(new ChatDeletionIntegrationEvent(
+                authContext.IsAuthenticated ? authContext.CurrentAccount.ID : Guid.Empty,
+                tenantManager.GetCurrentTenantId())
+            {
+                FileIds = ids
+            });
+        }
+        catch (Exception e)
+        {
+            logger.ErrorWithException(e);
+        }
+    }
+
+    private async Task<AttachmentResult> HandleTextAsync<T>(IFileDao<T> fileDao, File<T> file, string extension)
+    {
+            await using var stream = await fileDao.GetFileStreamAsync(file);
+
+        var length = (int)file.ContentLength;
+        var buffer = new byte[length];
+        await stream.ReadExactlyAsync(buffer);
+
+        var content = await textExtractor.ExtractAsync(buffer);
             if (string.IsNullOrEmpty(content))
             {
-                yield return new AttachmentResult
+            return new AttachmentResult
                 {
                     File = file,
                     Success = false
                 };
-                
-                continue;
             }
 
             ToolWrapper? formTool = null;
@@ -105,20 +249,32 @@ public class AttachmentHandler(
                 }
             }
 
-            yield return new AttachmentResult
+            return new AttachmentResult
             {
                 File = file,
                 Success = true,
                 DynamicTool = formTool,
-                AttachmentContent = new AttachmentMessageContent
+                Content = new TextAttachmentMessageContent
                 {
                     Id = JsonSerializer.SerializeToElement(file.Id),
                     Title = file.Title,
-                    Extension = FileUtility.GetFileExtension(file.Title),
+                Extension = extension,
                     Content = content
                 }
             };
         }
+    
+    private async Task<AttachmentResult> HandleMediaAsync(
+        File<int> file,
+        FileType fileType,
+        string extension)
+    {
+        return new AttachmentResult
+        {
+            File = file,
+            Success = true,
+            Content = await dataContentLoader.CreateAsync(file, fileType, extension)
+        };
     }
 
     private async Task<(string? contextText, ToolWrapper? tool)> TryGetFormDataAsync<T>(File<T> file)

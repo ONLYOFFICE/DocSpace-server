@@ -311,8 +311,8 @@ internal class SharePointFileDao(
     {
         return await SaveFileAsync(file, fileStream);
     }
-
-    public async Task<File<string>> SaveFileAsync(File<string> file, Stream fileStream)
+    
+    public async Task<File<string>> SaveFileAsync(File<string> file, Stream fileStream, Guid chatId = default)
     {
         ArgumentNullException.ThrowIfNull(fileStream);
 
@@ -427,15 +427,12 @@ internal class SharePointFileDao(
         throw new NotImplementedException();
     }
 
-    public async Task<File<int>> CopyFileAsync(string fileId, int toFolderId)
+    public async Task<File<int>> CopyFileAsync(string fileId, int toFolderId, Guid chatId)
     {
-        var moved = await crossDao.PerformCrossDaoFileCopyAsync(
+        return await crossDao.PerformCrossDaoFileCopyAsync(
             fileId, this, sharePointDaoSelector.ConvertId,
             toFolderId, fileDao, r => r,
-            false)
-            ;
-
-        return moved;
+            false, chatId);
     }
 
     public async Task<File<string>> CopyFileAsync(string fileId, string toFolderId)

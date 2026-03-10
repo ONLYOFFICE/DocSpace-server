@@ -34,12 +34,14 @@ public class UpdateProviderRequestDto
     /// <summary>
     /// The identifier of the AI provider to update.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "id")]
     public int Id { get; set; }
 
     /// <summary>
     /// The AI provider configuration parameters to update.
     /// </summary>
+    /// <example>{"title": "Updated Provider", "url": "https://api.openai.com/v1", "key": "sk-example-key-123"}</example>
     [FromBody]
     public required UpdateProviderBody Body { get; set; }
 }
@@ -52,15 +54,18 @@ public class UpdateProviderBody
     /// <summary>
     /// The new display title for the AI provider. If null, the title is not changed.
     /// </summary>
+    /// <example>Updated Provider</example>
     public string? Title { get; set; }
 
     /// <summary>
     /// The new API endpoint URL for the AI provider. If null, the URL is not changed.
     /// </summary>
+    /// <example>https://api.openai.com/v1</example>
     public string? Url { get; set; }
 
     /// <summary>
     /// The new authentication API key for the AI provider. If null, the key is not changed.
     /// </summary>
+    /// <example>sk-example-key-123</example>
     public string? Key { get; set; }
 }

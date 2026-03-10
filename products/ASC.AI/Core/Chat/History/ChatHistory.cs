@@ -32,16 +32,17 @@ namespace ASC.AI.Core.Chat.History;
 public class ChatHistory(ChatDao chatDao)
 {
     public Task<ChatSession> AddChatAsync(
-        int tenantId, 
-        int roomId, 
+        int tenantId,
+        int roomId,
         Guid userId,
+        Guid chatId,
         string title,
-        string message, 
+        string message,
         List<AttachmentMessageContent> attachments)
     {
         var contents = new List<MessageContent>(attachments) { new TextMessageContent(message) };
 
-        return chatDao.AddChatAsync(tenantId, roomId, userId, title,
+        return chatDao.AddChatAsync(tenantId, roomId, userId, chatId, title,
             new Message(0, Role.User, contents, DateTime.UtcNow));
     }
 
@@ -122,20 +123,20 @@ public class ChatHistory(ChatDao chatDao)
     }
 
     public async IAsyncEnumerable<ChatMessage> GetMessagesAsync(
-        Guid chatId, 
-        HistoryAdapter adapter, 
+        Guid chatId,
+        HistoryAdapter adapter,
         ChatMessage systemMessage,
         ChatMessage userMessage)
     {
         yield return systemMessage;
-        
+
         var history = chatDao.GetMessagesAsync(chatId);
-        
+
         await foreach (var msg in adapter.AdaptHistoryAsync(history))
         {
             yield return msg;
         }
-        
+
         yield return userMessage;
     }
 }

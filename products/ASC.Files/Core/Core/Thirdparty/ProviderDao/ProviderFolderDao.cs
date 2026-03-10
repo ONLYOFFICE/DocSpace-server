@@ -111,7 +111,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
     }
 
     public override async IAsyncEnumerable<Folder<string>> GetProviderBasedRoomsAsync(SearchArea searchArea, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId,
-        string searchText, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds)
+        string searchText, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds, int? groupId = null)
     {
         if (provider == ProviderFilter.Storage)
         {
@@ -125,7 +125,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
             .Where(a => a.TenantId == tenantId && !string.IsNullOrEmpty(a.FolderId));
 
         var q1 = GetRoomsProvidersQuery(searchArea, filterTypes, tags, subjectId, searchText, withoutTags, excludeSubject, provider, subjectFilter,
-            subjectEntriesIds, q, filesDbContext, tenantId);
+            subjectEntriesIds, q, filesDbContext, tenantId, groupId);
 
         var virtualRoomsFolderId = IdConverter.Convert<string>(await globalFolderHelper.GetFolderVirtualRooms());
         var archiveFolderId = IdConverter.Convert<string>(await globalFolderHelper.GetFolderArchive());
@@ -137,7 +137,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
     }
 
     public override async IAsyncEnumerable<Folder<string>> GetProviderBasedRoomsAsync(SearchArea searchArea, IEnumerable<string> roomsIds, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags,
-        Guid subjectId, string searchText, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds)
+        Guid subjectId, string searchText, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds, int? groupId = null)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
@@ -147,7 +147,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
                                                && (a.UserId == authContext.CurrentAccount.ID || roomsIds.Contains(a.FolderId)));
 
         var q1 = GetRoomsProvidersQuery(searchArea, filterTypes, tags, subjectId, searchText, withoutTags, excludeSubject, provider, subjectFilter,
-            subjectEntriesIds, q, filesDbContext, tenantId);
+            subjectEntriesIds, q, filesDbContext, tenantId, groupId);
 
         var virtualRoomsFolderId = IdConverter.Convert<string>(await globalFolderHelper.GetFolderVirtualRooms());
         var archiveFolderId = IdConverter.Convert<string>(await globalFolderHelper.GetFolderArchive());
@@ -560,7 +560,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
 
     private static IQueryable<RoomProviderQuery> GetRoomsProvidersQuery(SearchArea searchArea, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText,
         bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds, IQueryable<DbFilesThirdpartyAccount> q,
-        FilesDbContext filesDbContext, int tenantId)
+        FilesDbContext filesDbContext, int tenantId, int? groupId = null)
     {
         q = searchArea switch
         {
@@ -571,6 +571,16 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
             SearchArea.Any => q.Where(a => a.FolderType == FolderType.VirtualRooms || a.FolderType == FolderType.Archive),
             _ => q
         };
+
+        if (groupId.HasValue)
+        {
+            q = q.Join(filesDbContext.RoomGroupRef,
+                    a => a.FolderId,
+                    rg => rg.ThirdpartyRoomId,
+                    (a, rg) => new { a, rg.GroupId })
+                .Where(x => x.GroupId == groupId.Value)
+                .Select(x => x.a);
+        }
 
         if (provider != ProviderFilter.None)
         {

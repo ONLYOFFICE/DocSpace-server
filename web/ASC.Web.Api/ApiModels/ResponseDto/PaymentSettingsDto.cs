@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2026
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,36 +29,47 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 /// <summary>
 /// The payment settings parameters.
 /// </summary>
+/// <example>
+/// {
+///   "feedbackAndSupportUrl": "example value"
+/// }
+/// </example>
 public class PaymentSettingsDto
 {
     /// <summary>
     /// The email address for sales inquiries and support.
     /// </summary>
+    /// <example>sales@example.com</example>
     public required string SalesEmail { get; set; }
 
     /// <summary>
     /// The URL for accessing the feedback and support resources.
     /// </summary>
+    /// <example>https://example.com</example>
     public string FeedbackAndSupportUrl { get; set; }
 
     /// <summary>
     /// The URL for purchasing or upgrading the product.
     /// </summary>
+    /// <example>https://example.com/buy</example>
     public required string BuyUrl { get; set; }
 
     /// <summary>
     /// Indicates whether the system is running in standalone mode.
     /// </summary>
+    /// <example>false</example>
     public required bool Standalone { get; set; }
 
     /// <summary>
     /// The current license information.
     /// </summary>
+    /// <example>{"trial": false, "dueDate": "2025-06-15T10:30:00.0000000Z"}</example>
     public required CurrentLicenseInfo CurrentLicense { get; set; }
 
     /// <summary>
     /// The maximum quota quantity.
     /// </summary>
+    /// <example>1</example>
     public required int Max { get; set; }
 }
 
@@ -70,10 +81,12 @@ public class CurrentLicenseInfo
     /// <summary>
     /// Specifies whether the license is trial or not.
     /// </summary>
+    /// <example>false</example>
     public required bool Trial { get; set; }
 
     /// <summary>
     /// The date when the license expires.
     /// </summary>
+    /// <example>2025-06-15T10:30:00.0000000Z</example>
     public required DateTime DueDate { get; set; }
 }

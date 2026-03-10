@@ -568,6 +568,11 @@ public class EntryManager(IDaoFactory daoFactory,
                     }
                 }
 
+                if (parent.FolderType is FolderType.AiRoom)
+                {
+                    filesFilterType = FilterType.FoldersOnly;
+                }
+
                 var foldersTask = folderDao.GetFoldersAsync(parent.Id, orderBy, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders,
                     excludeSubject, from, count, roomId, containingMyFiles, parent.FolderType);
 
@@ -578,9 +583,12 @@ public class EntryManager(IDaoFactory daoFactory,
                     folders = folders.GroupBy(folder => folder.Id).Select(f => f.First()).ToList();
                 }
 
+                var applyFormStepFilter = room is { FolderType: FolderType.VirtualDataRoom } && parent.ShareRecord is { Share: FileShare.FillForms };
+
                 allFilesCountTask = fileDao.GetFilesCountAsync(parent.Id, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders, excludeSubject, roomId, formsItemDto,
                     containingMyFiles && withSubfolders ? parent.FolderType : FolderType.DEFAULT,
-                    containingMyFiles && withSubfolders ? AdditionalFilterOption.MyFilesAndFolders : AdditionalFilterOption.All);
+                    containingMyFiles && withSubfolders ? AdditionalFilterOption.MyFilesAndFolders : AdditionalFilterOption.All,
+                    applyFormStepFilter: applyFormStepFilter);
 
                 allFoldersCountTask = folderDao.GetFoldersCountAsync(parent.Id, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders, excludeSubject, roomId,
                     containingMyFiles ? parent.FolderType : FolderType.DEFAULT,
@@ -591,7 +599,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
                 var filesTask = fileDao.GetFilesAsync(parent.Id, orderBy, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders,
                 excludeSubject, filesOffset, filesCount, roomId, withShared, containingMyFiles && withSubfolders, parent.FolderType, formsItemDto,
-                applyFormStepFilter: room is { FolderType: FolderType.VirtualDataRoom } && parent.ShareRecord is { Share: FileShare.FillForms });
+                applyFormStepFilter: applyFormStepFilter);
 
                 var files = await filesTask.ToListAsync();
 
@@ -2078,7 +2086,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
         await using (await distributedLockProvider.TryAcquireFairLockAsync($"fillform_{room.Id}_{originalFormId}"))
         {
-            var origProperties = await daoFactory.GetFileDao<T>().GetProperties(originalFormId);
+            var origProperties = await daoFactory.GetFileDao<T>().GetProperties(originalFormId) ?? properties;
             if (userId.Equals(ASC.Core.Configuration.Constants.Guest.ID) &&
                 (origProperties.FormFilling.ResultsFileID == null || Equals(origProperties.FormFilling.ResultsFileID, default(T))))
             {
@@ -2092,7 +2100,7 @@ public class EntryManager(IDaoFactory daoFactory,
             var resultFolder = await folderDao.GetFolderAsync(origProperties.FormFilling.ResultsFolderId);
             var resultFile = await fileDao.GetFileAsync(origProperties.FormFilling.ResultsFileID);
             var resultFileExtension = resultFile != null ? FileUtility.GetFileExtension(resultFile.Title) : "";
-            if (resultFolder is not { FolderType: FolderType.FormFillingFolderDone })
+            if (originalForm != null && resultFolder is not { FolderType: FolderType.FormFillingFolderDone })
             {
                 logger.LogDebug("Result folder: {Folder} not found.", origProperties.FormFilling.ResultsFolderId);
 
@@ -2334,6 +2342,7 @@ public class EntryManager(IDaoFactory daoFactory,
                     }
                     await fileTracker.RemoveAsync(form.Id);
                     await socketManager.StopEditAsync(form.Id);
+                    await webhookManager.PublishAsync(WebhookTrigger.FormFilledOut, form);
                     await filesMessageService.SendAsync(MessageAction.FormCompletelyFilled, form, MessageInitiator.DocsService, user?.DisplayUserName(false, displayUserSettingsHelper), form.Title);
                     await notifyClient.SendFormFillingEvent(room, form, allRoles.Select(role => role.UserId).ToList(), typeof(FormWasCompletelyFilledNotifyAction));
                 }

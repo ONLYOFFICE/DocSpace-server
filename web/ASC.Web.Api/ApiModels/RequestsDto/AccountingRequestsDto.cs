@@ -29,79 +29,94 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 /// <summary>
 /// The request parameters for receiving a report on client operations.
 /// </summary>
-public class CustomerOperationsRequestDto
+public class CustomerOperationsRequestDto : CustomerOperationsReportRequestDto
 {
-    /// <summary>
-    /// The report start date.
-    /// </summary>
-    [FromQuery(Name = "startDate")]
-    public DateTime StartDate { get; set; }
-
-    /// <summary>
-    /// The report end date.
-    /// </summary>
-    [FromQuery(Name = "endDate")]
-    public DateTime EndDate { get; set; }
-
-    /// <summary>
-    /// The participant name.
-    /// </summary>
-    [FromQuery(Name = "participantName")]
-    public string ParticipantName { get; set; }
-
-    /// <summary>
-    /// Specifies whether to include credit operations in the report. The default value is true.
-    /// </summary>
-    [FromQuery(Name = "credit")]
-    public bool? Credit { get; set; }
-
-    /// <summary>
-    /// Specifies whether to include debit operations in the report. The default value is true.
-    /// </summary>
-    [FromQuery(Name = "debit")]
-    public bool? Debit { get; set; }
-
     /// <summary>
     /// The number of items to skip for pagination. The default value is 0.
     /// </summary>
+    /// <example>0</example>
     [FromQuery(Name = "offset")]
     public int? Offset { get; set; }
 
     /// <summary>
     /// The maximum number of items to return for pagination. The default value is 25.
     /// </summary>
+    /// <example>25</example>
     [FromQuery(Name = "limit")]
     public int? Limit { get; set; }
-
 }
 
 /// <summary>
 /// The request parameters for generating a report on client operations.
 /// </summary>
+/// <example>
+/// {
+///   "startDate": "2024-01-01T00:00:00Z",
+///   "endDate": "2024-01-31T23:59:59Z",
+///   "participantName": "ACME Corp",
+///   "credit": true,
+///   "debit": false
+/// }
+/// </example>
 public class CustomerOperationsReportRequestDto
 {
     /// <summary>
+    /// The service name.
+    /// </summary>
+    /// <example>aitools</example>
+    public string ServiceName { get; set; }
+
+    /// <summary>
     /// The report start date.
     /// </summary>
+    /// <example>2024-01-01T00:00:00Z</example>
     public DateTime? StartDate { get; set; }
 
     /// <summary>
     /// The report end date.
     /// </summary>
+    /// <example>2024-01-31T23:59:59Z</example>
     public DateTime? EndDate { get; set; }
 
     /// <summary>
     /// The participant name.
     /// </summary>
+    /// <example>ACME Corp</example>
     public string ParticipantName { get; set; }
 
     /// <summary>
     /// Specifies whether to include credit operations in the report.
     /// </summary>
+    /// <example>true</example>
     public bool? Credit { get; set; }
 
     /// <summary>
     /// Specifies whether to include debit operations in the report.
     /// </summary>
+    /// <example>false</example>
     public bool? Debit { get; set; }
+
+    /// <summary>
+    /// List of operation types to filter by.
+    /// </summary>
+    /// <example>Any</example>
+    public ASC.Core.Billing.OperationType? Types { get; init; }
+
+    /// <summary>
+    /// List of operation status to filter by.
+    /// </summary>
+    /// <example>Any</example>
+    public OperationStatus? Status { get; init; }
+
+    /// <summary>
+    /// The field to order by.
+    /// </summary>
+    /// <example>StartDate</example>
+    public string OrderBy { get; init; }
+
+    /// <summary>
+    /// Order direction: Ascending or Descending.
+    /// </summary>
+    /// <example>Descending</example>
+    public OperationOrderType? OrderType  { get; init; }
 }

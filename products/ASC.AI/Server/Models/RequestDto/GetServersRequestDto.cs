@@ -34,6 +34,7 @@ public class GetServersRequestDto
     /// <summary>
     /// Unique identifier of the MCP server to retrieve.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "id")]
     public Guid Id { get; init; }
 }

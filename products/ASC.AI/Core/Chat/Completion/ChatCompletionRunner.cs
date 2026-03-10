@@ -35,6 +35,7 @@ public class ChatCompletionRunner(
     ChatClientFactory chatClientFactory,
     ILogger<ChatCompletionGenerator> logger,
     AttachmentHandler attachmentHandler,
+    DataContentLoader dataContentLoader,
     SocketManager socketManager,
     ChatNameGenerator chatNameGenerator,
     IServiceScopeFactory serviceScopeFactory)
@@ -43,10 +44,11 @@ public class ChatCompletionRunner(
         int roomId, string message, IEnumerable<JsonElement>? files = null)
     {
         ArgumentException.ThrowIfNullOrEmpty(message);
-        
+
         var context = await contextBuilder.BuildAsync(roomId);
-        
-        var attachments = await GetAttachmentsAsync(files, context).ToListAsync();
+        context.ChatId = Guid.NewGuid();
+
+        var attachments = await GetAttachmentsAsync(context, files).ToListAsync();
         
         var userMessage = FormatUserMessage(message, attachments);
 
@@ -77,14 +79,15 @@ public class ChatCompletionRunner(
         var client = chatClientFactory.Create(context.ClientOptions, context.Tools);
         
         return new ChatCompletionGenerator(
-            client, 
-            logger, 
-            socketManager, 
-            messages, 
-            chatHistory, 
-            chatNameGenerator, 
+            client,
+            logger,
+            socketManager,
+            messages,
+            chatHistory,
+            chatNameGenerator,
             context,
-            serviceScopeFactory);
+            serviceScopeFactory,
+            attachmentHandler);
     }
 
     public async Task<ChatCompletionGenerator> StartChatAsync(
@@ -102,8 +105,9 @@ public class ChatCompletionRunner(
         
         var context = await contextBuilder.BuildAsync(chat.RoomId);
         context.Chat = chat;
-        
-        var attachments = await GetAttachmentsAsync(files, context).ToListAsync();
+        context.ChatId = chat.Id;
+
+        var attachments = await GetAttachmentsAsync(context, files).ToListAsync();
         
         var systemPrompt = ChatPromptTemplate.GetPrompt(
             context.Instruction, 
@@ -119,7 +123,7 @@ public class ChatCompletionRunner(
         
         var userMessage = FormatUserMessage(message, attachments);
 
-        var historyAdapter = HistoryHelper.GetAdapter(context.ClientOptions.Provider);
+        var historyAdapter = HistoryHelper.GetAdapter(context.ClientOptions.Provider, dataContentLoader);
         var messages = await chatHistory.GetMessagesAsync(chatId, historyAdapter, systemMessage, userMessage)
             .ToListAsync();
         
@@ -134,17 +138,20 @@ public class ChatCompletionRunner(
         var client = chatClientFactory.Create(context.ClientOptions, context.Tools);
 
         return new ChatCompletionGenerator(
-            client, 
-            logger, 
-            socketManager, 
-            messages, 
-            chatHistory, 
-            chatNameGenerator, 
+            client,
+            logger,
+            socketManager,
+            messages,
+            chatHistory,
+            chatNameGenerator,
             context,
-            serviceScopeFactory);
+            serviceScopeFactory,
+            attachmentHandler);
     }
 
-    private async IAsyncEnumerable<AttachmentMessageContent> GetAttachmentsAsync(IEnumerable<JsonElement>? files, ChatExecutionContext context)
+    private async IAsyncEnumerable<AttachmentMessageContent> GetAttachmentsAsync(
+        ChatExecutionContext context, 
+        IEnumerable<JsonElement>? files)
     {
         if (files == null)
         {
@@ -155,7 +162,7 @@ public class ChatCompletionRunner(
 
         var failedEntries = new List<FileEntry>();
 
-        await foreach (var result in attachmentHandler.HandleAsync(ids, thirdPartyIds))
+        await foreach (var result in attachmentHandler.HandleAsync(context, ids, thirdPartyIds))
         {
             if (!result.Success)
             {
@@ -167,9 +174,9 @@ public class ChatCompletionRunner(
                 context.Tools.AddTool(SystemToolType.FormDataQuery, result.DynamicTool);
             }
 
-            if (result.AttachmentContent != null)
+            if (result.Content != null)
             {
-                yield return result.AttachmentContent;
+                yield return result.Content;
             }
         }
 
@@ -190,7 +197,7 @@ public class ChatCompletionRunner(
         }
 
         var contents = new List<AIContent>(attachments.Count + 1);
-        contents.AddRange(attachments.Select(attachment => (AIContent)attachment));
+        contents.AddRange(attachments.Select(attachment => attachment.ToAiContent()));
         contents.Add(new TextContent($"##User query: {message}"));
 
         return new ChatMessage { Role = ChatRole.User, Contents = contents };

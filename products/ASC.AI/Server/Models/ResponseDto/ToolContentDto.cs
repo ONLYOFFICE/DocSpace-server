@@ -28,16 +28,21 @@ using ASC.AI.Core.Chat.Tool;
 
 namespace ASC.AI.Models.ResponseDto;
 
+/// <summary>
+/// The tool call message content.
+/// </summary>
 public class ToolContentDto : MessageContentDto
 {
     /// <summary>
-    /// The content block type. Always equals "Tool".
+    /// The content type.
     /// </summary>
+    /// <example>1</example>
     public override MessageContentType Type => MessageContentType.Tool;
 
     /// <summary>
     /// The name of the tool that was invoked by the AI assistant.
     /// </summary>
+    /// <example>search_documents</example>
     public required string Name { get; init; }
 
     /// <summary>

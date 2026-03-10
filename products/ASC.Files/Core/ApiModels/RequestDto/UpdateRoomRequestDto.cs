@@ -34,56 +34,70 @@ public class UpdateRoomRequest
     /// <summary>
     /// The room title.
     /// </summary>
+    /// <example>My Document</example>
     [StringLength(170)]
     public string Title { get; set; }
 
     /// <summary>
     /// The room quota.
     /// </summary>
+    /// <example>10485760</example>
     public long? Quota { get; set; }
 
     /// <summary>
     /// Specifies whether to create a third-party room with indexing.
     /// </summary>
+    /// <example>true</example>
     public bool? Indexing { get; set; }
 
     /// <summary>
     /// Specifies whether to deny downloads from the third-party room.
     /// </summary>
+    /// <example>true</example>
     public bool? DenyDownload { get; set; }
 
     /// <summary>
     /// The room data lifetime information.
     /// </summary>
+    /// <example>{"value": 12, "deletePermanently": false}</example>
     public RoomDataLifetimeDto Lifetime { get; set; }
 
     /// <summary>
     /// The watermark settings.
     /// </summary>
+    /// <example>{"enabled": false}</example>
     public WatermarkRequestDto Watermark { get; set; }
 
     /// <summary>
     /// The room logo.
     /// </summary>
+    /// <example>{"tmpFile": "temp_logo.png", "x": 0, "y": 0, "width": 100, "height": 100}</example>
     public LogoRequest Logo { get; set; }
 
     /// <summary>
     /// The list of tags.
     /// </summary>
+    /// <example>["tag1", "tag2"]</example>
     public IEnumerable<string> Tags { get; set; }
 
     /// <summary>
     /// The room color.
     /// </summary>
+    /// <example>#FF5733</example>
     [StringLength(6)]
     public string Color { get; set; }
 
     /// <summary>
     /// The room cover.
     /// </summary>
+    /// <example>cover1</example>
     [StringLength(50)]
     public string Cover { get; set; }
     
+    /// <summary>
+    /// The chat settings.
+    /// </summary>
+    /// <example>{"providerId": 1, "modelId": "gpt-4", "prompt": "You are a helpful assistant."}</example>
     public ChatSettings ChatSettings { get; set; }
 
     /// <summary>
@@ -105,6 +119,7 @@ public class UpdateRoomRequestDto<T>
     /// <summary>
     /// The room ID.
     /// </summary>
+    /// <example>file-id</example>
     [FromRoute(Name = "id")]
     public required T Id { get; set; }
 

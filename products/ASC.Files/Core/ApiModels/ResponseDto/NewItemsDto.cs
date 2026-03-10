@@ -34,6 +34,7 @@ public class NewItemsDto<TItem>
     /// <summary>
     /// The date and time when the new item was created.
     /// </summary>
+    /// <example>2025-01-01T00:00:00Z</example>
     public required ApiDateTime Date { get; init; }
 
     /// <summary>

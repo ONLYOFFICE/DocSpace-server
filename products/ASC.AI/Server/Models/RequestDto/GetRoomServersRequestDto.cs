@@ -34,6 +34,7 @@ public class GetRoomServersRequestDto
     /// <summary>
     /// Identifier of the room whose assigned MCP servers are being retrieved.
     /// </summary>
+    /// <example>42</example>
     [FromRoute(Name = "roomId")]
     public int RoomId { get; init; }
 }

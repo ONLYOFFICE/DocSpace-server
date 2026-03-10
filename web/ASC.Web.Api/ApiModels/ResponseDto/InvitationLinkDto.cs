@@ -36,37 +36,44 @@ public class InvitationLinkDto
     /// <summary>
     /// The ID of the invitation link.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     public Guid Id { get; set; }
 
     /// <summary>
     /// The type of employee role for the invitation link.
     /// </summary>
+    /// <example>0</example>
     [JsonConverter(typeof(JsonNumberEnumConverter<EmployeeType>))]
     public required EmployeeType EmployeeType { get; set; }
 
     /// <summary>
     /// The expiration date of the invitation link.
     /// </summary>
+    /// <example>2024-01-15T10:30:00Z</example>
     public ApiDateTime Expiration { get; set; }
 
     /// <summary>
     /// Indicates whether the invitation link has expired.
     /// </summary>
+    /// <example>true</example>
     public bool IsExpired { get; set; }
 
     /// <summary>
     /// The maximum number of times the invitation link can be used.
     /// </summary>
+    /// <example>1</example>
     public int? MaxUseCount { get; set; }
 
     /// <summary>
     /// The current number of times the invitation link has been used.
     /// </summary>
+    /// <example>1</example>
     public int CurrentUseCount { get; set; }
 
     /// <summary>
     /// The URL of the invitation link.
     /// </summary>
+    /// <example>https://example.com</example>
     public string Url { get; set; }
 }
 

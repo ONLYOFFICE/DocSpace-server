@@ -188,6 +188,8 @@ namespace ASC.Site.Core.Classes
         private static Task<List<TenantUser>> GetTenantsBySocialAsync(HostedRegionDbContext userDbContext, LoginProfile loginProfile)
         {
             var region = userDbContext is EuRegionDbContext ? TenantRegion.Eu : TenantRegion.Us;
+            var email = loginProfile.EMail?.ToLowerInvariant();
+            var findByEmail = !string.IsNullOrWhiteSpace(email);
 
             return userDbContext.Users
                  .Join(userDbContext.Tenants, u => u.TenantId, t => t.Id, (user, tenant) => new
@@ -195,15 +197,16 @@ namespace ASC.Site.Core.Classes
                      user,
                      tenant
                  })
-                 .Join(userDbContext.AccountLinks, r => r.user.Id.ToString(), a => a.Id, (r, account) => new
+                 .GroupJoin(userDbContext.AccountLinks, r => r.user.Id.ToString(), a => a.Id, (r, accounts) => new
                  {
                      r.tenant,
                      r.user,
-                     account
+                     account = accounts.FirstOrDefault()
                  })
                  .Where(r => r.tenant.Status == TenantStatus.Active)
                  .Where(r => !r.user.Removed && r.user.Status == EmployeeStatus.Active)
-                 .Where(r => r.user.Email == loginProfile.EMail || r.account.UId == loginProfile.HashId)
+                 .Where(r => (r.account != null && r.account.UId == loginProfile.HashId) ||
+                             (findByEmail && r.user.Email == email && r.user.ActivationStatus == EmployeeActivationStatus.Activated))
                  .Select(r => new TenantUser
                  {
                      UserId = r.user.Id,
@@ -232,9 +235,9 @@ namespace ASC.Site.Core.Classes
             var securityDate = await userDbContext.UserSecurity
                 .Where(us => us.TenantId == tenantId && us.UserId == userId)
                 .Select(us => us.LastModified)
-                .FirstAsync();
+                .FirstOrDefaultAsync();
 
-            return auditDate.CompareTo(securityDate.Value) > 0 ? auditDate : securityDate.Value;
+            return securityDate == null || auditDate.CompareTo(securityDate.Value) > 0 ? auditDate : securityDate.Value;
         }
     }
 

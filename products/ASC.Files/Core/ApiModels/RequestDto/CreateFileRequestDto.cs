@@ -34,22 +34,26 @@ public class CreateFile<T>
     /// <summary>
     /// The file title for creation.
     /// </summary>
+    /// <example>New Document.docx</example>
     [StringLength(165)]
     public required string Title { get; set; }
 
     /// <summary>
     /// The template file ID for creation.
     /// </summary>
+    /// <example>1</example>
     public T TemplateId { get; set; }
 
     /// <summary>
     /// Specifies whether to allow creating a file of an external extension or not.
     /// </summary>
+    /// <example>false</example>
     public bool EnableExternalExt { get; set; }
 
     /// <summary>
     /// The form ID for creation.
     /// </summary>
+    /// <example>0</example>
     public int FormId { get; set; }
 }
 
@@ -61,12 +65,14 @@ public class CreateFileRequestDto<T>
     /// <summary>
     /// The folder ID for the file creation.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "folderId")]
     public required T FolderId { get; set; }
 
     /// <summary>
     /// The parameters for creating a file.
     /// </summary>
+    /// <example>{"title": "New Document.docx", "templateId": "1", "enableExternalExt": false, "formId": 0}</example>
     [FromBody]
     public required CreateFile<JsonElement> File { get; set; }
 }

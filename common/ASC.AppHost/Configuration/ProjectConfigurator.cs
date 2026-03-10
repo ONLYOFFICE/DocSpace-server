@@ -73,7 +73,7 @@ public class ProjectConfigurator(
 
         project.WithEnvironment("core:base-domain", isStandalone ? "localhost" : "")
             .WithEnvironment("ai:mcp:0:endpoint",
-                new UriBuilder(Uri.UriSchemeHttp, Constants.DocSpaceMcpContainer, Constants.DocSpaceMcpPort)
+                new UriBuilder(Uri.UriSchemeHttp, "localhost", Constants.DocSpaceMcpPort)
                     .ToString() + "mcp");
 
                
@@ -199,7 +199,8 @@ public class ProjectConfigurator(
         }
         else
         {
-            var resourceBuilder = builder.AddNpmApp(name, path, "start:build")
+            var resourceBuilder = builder.AddJavaScriptApp(name, path, "start")
+                .WithYarn()
                 .WithEnvironment("NODE_ENV", "development")
                 .WithEnvironment("Redis:Hosts:0:Host", () => connectionManager.Redis?.Host ?? string.Empty)
                 .WithEnvironment("Redis:Hosts:0:Port", () => connectionManager.Redis?.Port ?? string.Empty)
@@ -236,7 +237,8 @@ public class ProjectConfigurator(
         }
         else
         {
-            builder.AddNpmApp(name, path, "start:build")
+            builder.AddJavaScriptApp(name, path, "start")
+                .WithYarn()
                 .WithEnvironment("NODE_ENV", "development")
                 .WithHttpEndpoint(targetPort: port)
                 .WithHttpHealthCheck("/health")
@@ -267,7 +269,8 @@ public class ProjectConfigurator(
         }
         else
         {
-            builder.AddNpmApp(name, path, "start:build")
+            builder.AddJavaScriptApp(name, path, "start")
+                .WithYarn()
                 .WithEnvironment("NODE_ENV", "development")
                 .WithHttpEndpoint(targetPort: port)
                 .WithHttpHealthCheck("/health")

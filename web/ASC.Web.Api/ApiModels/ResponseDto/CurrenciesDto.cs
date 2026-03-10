@@ -29,21 +29,31 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 /// <summary>
 /// The currencies parameters.
 /// </summary>
+/// <example>
+/// {
+///   "iSOCountryCode": "US",
+///   "iSOCurrencySymbol": "USD",
+///   "currencyNativeName": "US Dollar"
+/// }
+/// </example>
 public class CurrenciesDto
 {
     /// <summary>
     /// The ISO country code.
     /// </summary>
+    /// <example>US</example>
     public string ISOCountryCode { get; set; }
 
     /// <summary>
     /// The ISO currency symbol.
     /// </summary>
+    /// <example>USD</example>
     public string ISOCurrencySymbol { get; set; }
 
     /// <summary>
     /// The currency native name.
     /// </summary>
+    /// <example>Example Name</example>
     public string CurrencyNativeName { get; set; }
 
     public CurrenciesDto()

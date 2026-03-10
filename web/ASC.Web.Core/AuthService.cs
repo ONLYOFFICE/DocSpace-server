@@ -107,17 +107,20 @@ public class AuthKey
     /// <summary>
     /// The authorization key name.
     /// </summary>
+    /// <example>Auth-Key</example>
     public required string Name { get; init; }
 
     /// <summary>
     /// The authorization key value.
     /// </summary>
+    /// <example>abc123xyz456</example>
     [StringLength(255)]
     public required string Value { get; init; }
 
     /// <summary>
     /// The authorization key title.
     /// </summary>
+    /// <example>API key</example>
     public string Title { get; set; }
 
     /// <summary>

@@ -34,16 +34,19 @@ public class PrivacyRoomRequestDto
     /// <summary>
     /// The public key of the privacy room.
     /// </summary>
+    /// <example>doc_key_123</example>
     public required string PublicKey { get; set; }
 
     /// <summary>
     /// The private key of the privacy room.
     /// </summary>
+    /// <example>doc_key_123</example>
     public required string PrivateKeyEnc { get; set; }
 
     /// <summary>
     /// Specifies if the encryption keys need to be updated or not.
     /// </summary>
+    /// <example>true</example>
     public bool Update { get; set; }
 }
 
@@ -55,5 +58,6 @@ public class PrivacyRoomEnableRequestDto
     /// <summary>
     /// Specifies whether to enable the Private Room settings or not.
     /// </summary>
+    /// <example>true</example>
     public bool Enable { get; set; }
 }

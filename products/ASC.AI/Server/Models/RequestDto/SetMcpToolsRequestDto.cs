@@ -34,18 +34,22 @@ public class SetMcpToolsRequestDto
     /// <summary>
     /// Identifier of the room containing the MCP server.
     /// </summary>
+    /// <summary>The room ID.</summary>
+    /// <example>42</example>
     [FromRoute(Name = "roomId")]
     public int RoomId { get; init; }
 
     /// <summary>
     /// Unique identifier of the MCP server whose tools are being configured.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "serverId")]
     public Guid ServerId { get; init; }
 
     /// <summary>
     /// Tool configuration parameters.
     /// </summary>
+    /// <example>{"disabledTools": ["tool1", "tool2"]}</example>
     [FromBody]
     public required SetMcpToolsRequestBody Body { get; init; }
 }
@@ -58,5 +62,6 @@ public class SetMcpToolsRequestBody
     /// <summary>
     /// List of tool names to disable. Tools not included in this list will remain enabled. Pass an empty list to enable all tools.
     /// </summary>
+    /// <example>["tool1", "tool2"]</example>
     public required List<string> DisabledTools { get; init; }
 }

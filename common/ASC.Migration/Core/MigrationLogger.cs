@@ -48,7 +48,7 @@ public class MigrationLogger(
         }
     }
 
-    private async Task SaveLogAsync()
+    public async Task SaveLogAsync()
     {
         var store = await storageFactory.GetStorageAsync(tenantManager.GetCurrentTenantId(), "migration_log", (IQuotaController)null);
         _migrationStream.Position = 0;
@@ -81,7 +81,6 @@ public class MigrationLogger(
     {
         if (_migrationLog != null)
         {
-            await SaveLogAsync();
             await _migrationLog.DisposeAsync();
         }
     }

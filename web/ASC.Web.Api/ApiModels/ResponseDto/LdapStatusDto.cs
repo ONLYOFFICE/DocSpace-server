@@ -29,51 +29,73 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 /// <summary>
 /// The status parameters of the synchronization with LDAP server.
 /// </summary>
+/// <example>
+/// {
+///   "completed": true,
+///   "id": "00000000-0000-0000-0000-000000000001",
+///   "status": "InProgress",
+///   "error": "Connection timeout",
+///   "warning": "Certificate not verified",
+///   "percents": 1,
+///   "certificateConfirmRequest": "Please verify certificate",
+///   "source": "ldap.example.com",
+///   "operationType": "Sync"
+/// }
+/// </example>
 public class LdapStatusDto
 {
     /// <summary>
     /// Specifies if the LDAP synchronization is completed or not.
     /// </summary>
+    /// <example>true</example>
     public bool Completed { get; set; }
 
     /// <summary>
     /// The LDAP ID.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000001</example>
     public string Id { get; set; }
 
     /// <summary>
     /// The LDAP status.
     /// </summary>
+    /// <example>InProgress</example>
     public string Status { get; set; }
 
     /// <summary>
     /// The LDAP error message.
     /// </summary>
+    /// <example>Connection timeout</example>
     public string Error { get; set; }
 
     /// <summary>
     /// The LDAP warning message.
     /// </summary>
+    /// <example>Certificate not verified</example>
     public string Warning { get; set; }
 
     /// <summary>
     /// The percentage of the LDAP operation completion.
     /// </summary>
+    /// <example>1</example>
     public int Percents { get; set; }
 
     /// <summary>
     /// The LDAP certificate confirmation request.
     /// </summary>
+    /// <example>Please verify certificate</example>
     public string CertificateConfirmRequest { get; set; }
 
     /// <summary>
     /// The LDAP source.
     /// </summary>
+    /// <example>ldap.example.com</example>
     public string Source { get; set; }
 
     /// <summary>
     /// The LDAP operation type.
     /// </summary>
+    /// <example>Sync</example>
     public string OperationType { get; set; }
 }
 

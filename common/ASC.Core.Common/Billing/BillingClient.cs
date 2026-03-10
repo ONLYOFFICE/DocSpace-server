@@ -39,6 +39,8 @@ public class BillingClient
     internal const string ResiliencePipelineName = "billingResiliencePipeline";
     public const string GetCurrentPaymentsUri = "GetActiveResources";
     public const string MetadataDetails = "details";
+    public const string MetadataType = "type";
+    public const string MetadataModel = "model";
 
     public BillingClient(IConfiguration configuration, IHttpClientFactory httpClientFactory)
     {

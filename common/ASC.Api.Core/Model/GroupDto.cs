@@ -36,51 +36,61 @@ public class GroupDto
     /// <summary>
     /// The group name.
     /// </summary>
+    /// <example>Marketing Team</example>
     public required string Name { get; set; }
 
     /// <summary>
     /// The parent group ID.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     public Guid? Parent { get; set; }
 
     /// <summary>
     /// The group category ID.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     public required Guid Category { get; set; }
 
     /// <summary>
     /// The group ID.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     public required Guid Id { get; set; }
 
     /// <summary>
     /// Specifies if the LDAP settings are enabled for the group or not.
     /// </summary>
+    /// <example>false</example>
     public required bool IsLDAP { get; set; }
 
     /// <summary>
     /// Indicates whether the group is a system group.
     /// </summary>
+    /// <example>false</example>
     public bool? IsSystem { get; set; }
 
     /// <summary>
     /// The group manager full information.
     /// </summary>
+    /// <example>{"displayName": "John Doe"}</example>
     public EmployeeFullDto Manager { get; set; }
 
     /// <summary>
     /// The list of group members.
     /// </summary>
+    /// <example>[{"displayName": "John Doe"}]</example>
     public List<EmployeeFullDto> Members { get; set; }
 
     /// <summary>
     /// Specifies whether the group can be shared or not.
     /// </summary>
+    /// <example>false</example>
     public bool? Shared { get; set; }
 
     /// <summary>
     /// The number of group members.
     /// </summary>
+    /// <example>0</example>
     public int MembersCount { get; set; }
 }
 

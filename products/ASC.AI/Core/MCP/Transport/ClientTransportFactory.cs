@@ -32,6 +32,7 @@ public class ClientTransportFactory(
     AuthContext authContext,
     CommonLinkUtility commonLinkUtility,
     CookiesManager cookiesManager,
+    IHttpContextAccessor httpContextAccessor,
     IHttpClientFactory clientFactory,
     IHttpMessageHandlerFactory messageHandlerFactory,
     OAuth20TokenHelper tokenHelper)
@@ -40,7 +41,7 @@ public class ClientTransportFactory(
     {
         if (connection.ServerType is ServerType.DocSpace)
         {
-            var docspaceBuilder = new DocSpaceTransportBuilder(cookiesManager, commonLinkUtility, clientFactory);
+            var docspaceBuilder = new DocSpaceTransportBuilder(cookiesManager, commonLinkUtility, httpContextAccessor, clientFactory);
             return await docspaceBuilder.BuildAsync(connection);
         }
 

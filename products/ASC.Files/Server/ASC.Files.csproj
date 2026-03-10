@@ -46,12 +46,14 @@
         <Copy SourceFiles="@(DocStoreSourceFiles)"
               DestinationFiles="@(DocStoreSourceFiles->'$(ProjectDir)DocStore\%(RecursiveDir)%(FileName)%(Extension)')"
               SkipUnchangedFiles="true" />
+
+        <ItemGroup>
+            <None Include="$(ProjectDir)DocStore\**\*">
+                <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            </None>
+        </ItemGroup>
     </Target>
-    <ItemGroup>
-        <None Update="DocStore\**\*">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
-    </ItemGroup>
+    
     <Target Name="CleanDocStore" AfterTargets="Clean">
         <RemoveDir Directories="$(ProjectDir)DocStore" />
     </Target>

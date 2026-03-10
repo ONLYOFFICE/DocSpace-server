@@ -29,10 +29,16 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 /// <summary>
 /// The request parameters for the portal renaming operations.
 /// </summary>
+/// <example>
+/// {
+///   // TODO: Add appropriate JSON example
+/// }
+/// </example>
 public class PortalRenameRequestsDto
 {
     /// <summary>
     /// The portal name or identifier.
     /// </summary>
+    /// <example>my-portal</example>
     public required string Alias { get; set; }
 }

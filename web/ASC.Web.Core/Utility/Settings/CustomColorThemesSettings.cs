@@ -61,13 +61,13 @@ public class CustomColorThemesSettingsItem
     /// <summary>
     /// The custom color theme ID.
     /// </summary>
-    [SwaggerSchemaCustom(Example = 1)]
+    /// <example>1</example>
     public int Id { get; set; }
 
     /// <summary>
     /// The custom color theme name.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "blue")]
+    /// <example>blue</example>
     public string Name { get; set; }
 
     /// <summary>
@@ -140,12 +140,12 @@ public class CustomColorThemesSettingsColorItem
     /// <summary>
     /// The accent color.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "#4781D1")]
+    /// <example>#4781D1</example>
     public string Accent { get; init; }
 
     /// <summary>
     /// The button color.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "#5299E0")]
+    /// <example>#5299E0</example>
     public string Buttons { get; init; }
 }

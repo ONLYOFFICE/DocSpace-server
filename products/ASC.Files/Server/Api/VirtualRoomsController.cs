@@ -483,11 +483,14 @@ public abstract class VirtualRoomsController<T>(
 
         var room = await _fileStorageService.GetFolderAsync(inDto.Id).NotFoundIfNull("Folder not found");
 
-        if (room.RootId is int root &&
-            root == await globalFolderHelper.FolderRoomTemplatesAsync &&
-            (inDto.RoomInvitation.Invitations.Any(i => i.Access != FileShare.None && i.Access != FileShare.Read) || guestsInvited || newGuestsInvited || usersInvited))
+        if (room.RootId is int root && root == await globalFolderHelper.FolderRoomTemplatesAsync)
         {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
+            if (inDto.RoomInvitation.Invitations.Any(i => i.Access != FileShare.None && i.Access != FileShare.Read) || guestsInvited || newGuestsInvited || usersInvited)
+            {
+                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
+            }
+
+            inDto.RoomInvitation.Notify = false;
         }
 
         foreach (var invitation in inDto.RoomInvitation.Invitations)
@@ -961,9 +964,9 @@ public class VirtualRoomsCommonController(
     [SwaggerResponse(200, "True if tag has links, false otherwise", typeof(bool))]
     [SwaggerResponse(404, "Tag not found")]
     [HttpGet("tags/{tagName}/haslinks")]
-    public async Task<bool> HasTagLinks(string tagName)
+    public async Task<bool> HasTagLinks(HasTagLinksRequestDto requestDto)
     {
-        var hasTagLinks = await customTagsService.HasTagLinks(tagName);
+        var hasTagLinks = await customTagsService.HasTagLinks(requestDto.TagName);
         return hasTagLinks;
     }
 

@@ -31,60 +31,86 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 /// <summary>
 /// The tenant extra parameters.
 /// </summary>
+/// <example>
+/// {
+///   "customMode": true,
+///   "opensource": true,
+///   "enterprise": true,
+///   "developer": true,
+///   "tariff": {},
+///   "quota": {},
+///   "notPaid": true,
+///   "licenseAccept": "example value",
+///   "enableTariffPage": true,
+///   "docServerUserQuota": "2024-01-15T10:30:00Z",
+///   "docServerLicense": {}
+/// }
+/// </example>
 public class TenantExtraDto
 {
     /// <summary>
     /// Specifies if an extra tenant license is customizable or not.
     /// </summary>
+    /// <example>true</example>
     public bool CustomMode { get; set; }
 
     /// <summary>
     /// Specifies if an extra tenant license is Community or not.
     /// </summary>
+    /// <example>true</example>
     public bool Opensource { get; set; }
 
     /// <summary>
     /// Specifies if an extra tenant license is Enterprise or not.
     /// </summary>
+    /// <example>true</example>
     public bool Enterprise { get; set; }
 
     /// <summary>
     /// Specifies if an extra tenant license is Developer or not.
     /// </summary>
+    /// <example>true</example>
     public bool Developer { get; set; }
 
     /// <summary>
     /// The license tariff.
     /// </summary>
+    /// <example>{}</example>
     public Tariff Tariff { get; set; }
 
     /// <summary>
     /// The license quota.
     /// </summary>
+    /// <example>{}</example>
     public QuotaDto Quota { get; set; }
 
     /// <summary>
     /// Specifies if the license is paid or not.
     /// </summary>
+    /// <example>true</example>
     public bool NotPaid { get; set; }
 
     /// <summary>
     /// The time when the license was accepted.
     /// </summary>
+    /// <example>2024-01-15T10:30:00Z</example>
     public string LicenseAccept { get; set; }
 
     /// <summary>
     /// Specifies if the tariff page is enabled or not.
     /// </summary>
+    /// <example>true</example>
     public bool EnableTariffPage { get; set; }
 
     /// <summary>
     /// The ONLYOFFICE Docs user quotas.
     /// </summary>
+    /// <example>2024-01-15T10:30:00Z</example>
     public Dictionary<string, DateTime> DocServerUserQuota { get; set; }
 
     /// <summary>
     /// The ONLYOFFICE Docs license.
     /// </summary>
+    /// <example>{}</example>
     public License DocServerLicense { get; set; }
 }

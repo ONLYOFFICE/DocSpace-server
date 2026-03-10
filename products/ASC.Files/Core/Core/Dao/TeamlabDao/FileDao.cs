@@ -59,7 +59,6 @@ internal class FileDao(
         StorageFactory storageFactory,
         TenantQuotaController tenantQuotaController,
         IDistributedLockProvider distributedLockProvider,
-        FileStorageService fileStorageService,
         SocketManager socketManager,
         SecurityContext securityContext,
         TempStream tempStream,
@@ -394,16 +393,23 @@ internal class FileDao(
 
         return await (await globalStore.GetStoreAsync(tenantId.Value)).GetReadStreamAsync(string.Empty, GetUniqFilePath(file), 0);
     }
-    public async Task<File<int>> SaveFileAsync(File<int> file, Stream fileStream)
+    public async Task<File<int>> SaveFileAsync(File<int> file, Stream fileStream, Guid chatId = default)
     {
-        return await SaveFileAsync(file, fileStream, true, true);
+        return await SaveFileAsync(file, fileStream, true, true, null, chatId);
     }
+
     public async Task<File<int>> SaveFileAsync(File<int> file, Stream fileStream, bool checkFolder)
     {
         return await SaveFileAsync(file, fileStream, true, checkFolder);
     }
 
-    public async Task<File<int>> SaveFileAsync(File<int> file, Stream fileStream, bool checkQuota, bool checkFolder, ChunkedUploadSession<int> uploadSession = null)
+    public async Task<File<int>> SaveFileAsync(
+        File<int> file, 
+        Stream fileStream, 
+        bool checkQuota, 
+        bool checkFolder, 
+        ChunkedUploadSession<int> uploadSession = null, 
+        Guid chatId = default)
     {
         ArgumentNullException.ThrowIfNull(file);
 
@@ -617,6 +623,18 @@ internal class FileDao(
                                     });
                         }
 
+                        if (chatId != Guid.Empty)
+                        {
+                            var attachment = new DbChatMessageAttachment
+                            {
+                                TenantId = tenantId,
+                                ChatId = chatId,
+                                FileId = file.Id,
+                                ModifiedOn = DateTime.UtcNow
+                            };
+
+                            await filesDbContext.MessageAttachments.AddAsync(attachment);
+                        }
                         await filesDbContext.SaveChangesAsync();
                         await tx.CommitAsync();
                     });
@@ -750,7 +768,7 @@ internal class FileDao(
     }
 
     public async Task<int> GetFilesCountAsync(int parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent,
-        bool withSubfolders = false, bool excludeSubject = false, int roomId = 0, FormsItemDto formsItemDto = null, FolderType parentType = FolderType.DEFAULT, AdditionalFilterOption additionalFilterOption = AdditionalFilterOption.All)
+        bool withSubfolders = false, bool excludeSubject = false, int roomId = 0, FormsItemDto formsItemDto = null, FolderType parentType = FolderType.DEFAULT, AdditionalFilterOption additionalFilterOption = AdditionalFilterOption.All, bool applyFormStepFilter = false)
     {
         if (filterType == FilterType.FoldersOnly)
         {
@@ -763,6 +781,10 @@ internal class FileDao(
         if (additionalFilterOption != AdditionalFilterOption.All)
         {
             q = ApplyAdditionalFileFilters(q, filesDbContext, parentId, parentType, additionalFilterOption);
+        }
+        if (applyFormStepFilter)
+        {
+            q = ApplyAdditionalFileFilters(q, filesDbContext, parentId, parentType, AdditionalFilterOption.FormsWithFillingRole);
         }
 
         if (parentType == FolderType.Knowledge)
@@ -1015,6 +1037,8 @@ internal class FileDao(
             await context.DeleteSecurityAsync(tenantId, fileId);
 
             await DeleteCustomOrder(filesDbContext, fileId);
+
+            await context.DeleteMessageAttachmentsByFileIdAsync(tenantId, fileId);
 
             var entryEventsIds = await context.GetAuditEventsIdsAsync(fileId, FileEntryType.File).ToListAsync();
             await context.MarkAuditReferencesAsCorruptedAsync(entryEventsIds);
@@ -1358,7 +1382,7 @@ internal class FileDao(
         throw new NotImplementedException();
     }
 
-    private async Task<File<int>> CopyFileAsync(File<int> file, int toFolderId)
+    private async Task<File<int>> CopyFileAsync(File<int> file, int toFolderId, Guid chatId = default)
     {
         var fileState = await fileHelper.GetFileState(file);
 
@@ -1380,7 +1404,7 @@ internal class FileDao(
         await using (var stream = await GetFileStreamAsync(file))
         {
             copy.ContentLength = stream.CanSeek ? stream.Length : file.ContentLength;
-            copy = await SaveFileAsync(copy, stream);
+            copy = await SaveFileAsync(copy, stream, true, true, null, chatId);
         }
 
         if (file.ThumbnailStatus != Thumbnail.Created)
@@ -1406,14 +1430,19 @@ internal class FileDao(
         return copy;
     }
 
-    public async Task<File<int>> CopyFileAsync(int fileId, int toFolderId)
+    public Task<File<int>> CopyFileAsync(int fileId, int toFolderId)
+    {
+        return CopyFileAsync(fileId, toFolderId, Guid.Empty);
+    }
+
+    public async Task<File<int>> CopyFileAsync(int fileId, int toFolderId, Guid chatId)
     {
         var file = await GetFileAsync(fileId);
         if (file != null)
         {
-            return await CopyFileAsync(file, toFolderId);
+            return await CopyFileAsync(file, toFolderId, chatId);
         }
-        
+
         return null;
     }
 
@@ -2993,7 +3022,6 @@ internal class CacheFileDao(ILogger<FileDao> logger,
         StorageFactory storageFactory,
         TenantQuotaController tenantQuotaController,
         IDistributedLockProvider distributedLockProvider,
-        FileStorageService fileStorageService,
         SocketManager socketManager,
         SecurityContext securityContext,
         TempStream tempStream,
@@ -3037,7 +3065,6 @@ internal class CacheFileDao(ILogger<FileDao> logger,
         storageFactory,
         tenantQuotaController,
         distributedLockProvider,
-        fileStorageService,
         socketManager,
         securityContext,
         tempStream,

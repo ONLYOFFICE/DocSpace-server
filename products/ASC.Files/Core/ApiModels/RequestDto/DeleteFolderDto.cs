@@ -34,11 +34,13 @@ public class DeleteFolder
     /// <summary>
     /// Specifies whether to delete a folder after the editing session is finished or not.
     /// </summary>
+    /// <example>false</example>
     public bool DeleteAfter { get; set; }
 
     /// <summary>
     /// Specifies whether to move a folder to the \"Trash\" folder or delete it immediately.
     /// </summary>
+    /// <example>false</example>
     public bool Immediately { get; set; }
 }
 
@@ -50,6 +52,7 @@ public class DeleteFolder<T>
     /// <summary>
     /// The folder ID to delete.
     /// </summary>
+    /// <example>10</example>
     [FromRoute(Name = "folderId")]
     public required T FolderId { get; set; }
 

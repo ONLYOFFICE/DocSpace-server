@@ -34,16 +34,19 @@ public class MailDomainSettingsRequestsDto
     /// <summary>
     /// Defines how trusted domains are handled and validated.
     /// </summary>
+    /// <example>All</example>
     public required TenantTrustedDomainsType Type { get; set; }
 
     /// <summary>
     /// The list of authorized email domains that are considered trusted.
     /// </summary>
+    /// <example>["example.com", "company.com"]</example>
     public required List<string> Domains { get; set; }
 
     /// <summary>
     /// Specifies the default permission level for the invited users (visitors or not).
     /// </summary>
+    /// <example>false</example>
     public required bool InviteUsersAsVisitors { get; set; }
 }
 
@@ -55,6 +58,7 @@ public class AdminMessageBaseSettingsRequestsDto
     /// <summary>
     /// The email address used for sending administrator messages.
     /// </summary>
+    /// <example>admin@example.com</example>
     [EmailAddress]
     [StringLength(255)]
     public required string Email { get; set; }
@@ -62,6 +66,7 @@ public class AdminMessageBaseSettingsRequestsDto
     /// <summary>
     /// The locale identifier for message localization.
     /// </summary>
+    /// <example>en-US</example>
     public string Culture { get; set; }
 }
 
@@ -73,12 +78,14 @@ public class AdminMessageSettingsRequestsDto
     /// <summary>
     /// The content of the administrator message to be sent.
     /// </summary>
+    /// <example>Hello, this is a test message from the administrator.</example>
     [StringLength(255)]
     public required string Message { get; set; }
 
     /// <summary>
     /// Email
     /// </summary>
+    /// <example>user@example.com</example>
     [EmailAddress]
     [StringLength(255)]
     public required string Email { get; set; }
@@ -86,16 +93,19 @@ public class AdminMessageSettingsRequestsDto
     /// <summary>
     /// Culture
     /// </summary>
+    /// <example>en-US</example>
     public string Culture { get; set; }
 
     /// <summary>
     /// The type of CAPTCHA validation used.
     /// </summary>
+    /// <example>Default</example>
     public RecaptchaType RecaptchaType { get; set; }
 
     /// <summary>
     /// The user's response to the CAPTCHA challenge.
     /// </summary>
+    /// <example>03AGdBq24PBCbwiDRaS...</example>
     public string RecaptchaResponse { get; set; }
 }
 
@@ -107,5 +117,6 @@ public class TurnOnAdminMessageSettingsRequestDto
     /// <summary>
     /// The global switch for the administrator messaging functionality.
     /// </summary>
+    /// <example>true</example>
     public bool TurnOn { get; set; }
 }

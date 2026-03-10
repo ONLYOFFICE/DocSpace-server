@@ -34,16 +34,19 @@ public class MailWhiteLabelSettingsDto
     ///<summary>
     /// Specifies if the mail footer is enabled or not.
     ///</summary>
+    /// <example>true</example>
     public bool FooterEnabled { get; set; }
 
     ///<summary>
     /// Specifies if the footer with social media contacts is enabled or not.
     ///</summary>
+    /// <example>true</example>
     public bool FooterSocialEnabled { get; set; }
 
     ///<summary>
     /// Specifies if the mail white label settings are default or not.
     ///</summary>
+    /// <example>false</example>
     public bool IsDefault { get; set; }
 }
 

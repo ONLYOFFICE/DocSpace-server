@@ -53,7 +53,8 @@ public class FileSecurity(
     VectorizationGlobalSettings vectorizationGlobalSettings,
     VectorizationHelper vectorizationHelper,
     AiAccessibility aiAccessibility,
-    IServiceProvider serviceProvider)
+    IServiceProvider serviceProvider,
+    AiConfiguration aiConfiguration)
     : IFileSecurity
 {
     public readonly FileShare DefaultMyShare = FileShare.Restrict;
@@ -1120,17 +1121,48 @@ public class FileSecurity(
             return false;
         }
 
+        if (folder is { FolderType: FolderType.DefaultTemplates } &&
+            action is FilesSecurityActions.Create or
+                FilesSecurityActions.Copy or
+                FilesSecurityActions.CopyTo or
+                FilesSecurityActions.Move or
+                FilesSecurityActions.MoveTo or
+                FilesSecurityActions.Duplicate or
+                FilesSecurityActions.Delete
+            )
+        {
+            return false;
+        }
+
         if (action is FilesSecurityActions.UseChat && folder is not { FolderType: FolderType.AiRoom })
         {
             return false;
         }
 
-        if (action is FilesSecurityActions.AskAi &&
-            (file == null || 
-             file.ContentLength > vectorizationGlobalSettings.MaxContentLength || 
-             !vectorizationGlobalSettings.IsSupportedContentExtraction(file.Title)))
+        if (action is FilesSecurityActions.AskAi)
         {
-            return false;
+            if (file == null)
+            {
+                return false;
+            }
+
+            if (file.FilterType == FilterType.ImagesOnly && file.ContentLength > aiConfiguration.MaxImageSize)
+            {
+                return false;
+            }
+
+            if (file.FilterType != FilterType.ImagesOnly)
+            {
+                if (file.ContentLength > vectorizationGlobalSettings.MaxContentLength)
+                {
+                    return false;
+                }
+
+                if (!vectorizationGlobalSettings.IsSupportedContentExtraction(file.Title))
+                {
+                    return false;
+                }
+            }
         }
 
         if (action == FilesSecurityActions.Vectorization)
@@ -1730,6 +1762,12 @@ public class FileSecurity(
                 if (isDocSpaceAdmin)
                 {
                     return true;
+                }
+                break;
+            case FolderType.DefaultTemplates:
+                if (action is not (FilesSecurityActions.Read or FilesSecurityActions.Rename))
+                {
+                    return false;
                 }
                 break;
         }
@@ -2548,7 +2586,7 @@ public class FileSecurity(
         }
 
         return await GetVirtualRoomsForMeAsync(filterTypes, subjectId, searchText, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject, provider,
-            subjectFilter, subjectEntries, storageFilter, internalRoomsRecords, thirdPartyRoomsRecords);
+            subjectFilter, subjectEntries, storageFilter, internalRoomsRecords, thirdPartyRoomsRecords, groupId);
     }
 
     private async Task<List<FileEntry>> GetAllVirtualRoomsAsync(
@@ -2593,7 +2631,7 @@ public class FileSecurity(
 
         var thirdPartyRoomsEntries = storageFilter == StorageFilter.Internal ?
             [] :
-            await folderThirdPartyDao.GetProviderBasedRoomsAsync(searchArea, filterTypes, tagNames, subjectId, search, withoutTags, excludeSubject, provider, subjectFilter, subjectEntries)
+            await folderThirdPartyDao.GetProviderBasedRoomsAsync(searchArea, filterTypes, tagNames, subjectId, search, withoutTags, excludeSubject, provider, subjectFilter, subjectEntries, groupId)
                 .Where(r => withSubfolders || r.IsRoom)
                 .Distinct()
                 .ToListAsync();
@@ -2670,7 +2708,8 @@ public class FileSecurity(
         IEnumerable<string> subjectEntries,
         StorageFilter storageFilter,
         Dictionary<int, FileShareRecord<int>> internalRecords,
-        Dictionary<string, FileShareRecord<string>> thirdPartyRecords)
+        Dictionary<string, FileShareRecord<string>> thirdPartyRecords,
+        int? groupId = null)
     {
         var folderDao = daoFactory.GetFolderDao<int>();
         var folderThirdPartyDao = daoFactory.GetFolderDao<string>();
@@ -2696,7 +2735,7 @@ public class FileSecurity(
 
         var thirdPartyRooms = storageFilter == StorageFilter.Internal
             ? []
-            : await folderThirdPartyDao.GetProviderBasedRoomsAsync(searchArea, thirdPartyRecords.Keys, filterTypes, tagNames, subjectId, search, withoutTags, excludeSubject, provider, subjectFilter, subjectEntries)
+            : await folderThirdPartyDao.GetProviderBasedRoomsAsync(searchArea, thirdPartyRecords.Keys, filterTypes, tagNames, subjectId, search, withoutTags, excludeSubject, provider, subjectFilter, subjectEntries, groupId)
                 .Where(r => withSubfolders || r.IsRoom)
                 .Where(r => Filter(r, thirdPartyRecords))
                 .Distinct()

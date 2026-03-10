@@ -34,54 +34,63 @@ public class AuditEventRequestDto
     /// <summary>
     /// The ID of the user who triggered the audit event.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000001</example>
     [FromQuery(Name = "userId")]
     public Guid UserId { get; set; }
 
     /// <summary>
     /// The location where the audit event occurred.
     /// </summary>
+    /// <example>Files</example>
     [FromQuery(Name = "moduleType")]
     public LocationType LocationType { get; set; }
 
     /// <summary>
     /// The type of action performed in the audit event (e.g., Create, Update, Delete).
     /// </summary>
+    /// <example>Create</example>
     [FromQuery(Name = "actionType")]
     public ActionType ActionType { get; set; }
 
     /// <summary>
     /// The specific action that occurred within the audit event.
     /// </summary>
+    /// <example>FileCreated</example>
     [FromQuery(Name = "action")]
     public MessageAction Action { get; set; }
 
     /// <summary>
     /// The type of audit entry (e.g., Folder, User, File).
     /// </summary>
+    /// <example>File</example>
     [FromQuery(Name = "entryType")]
     public EntryType EntryType { get; set; }
 
     /// <summary>
     /// The target object affected by the audit event (e.g., document ID, user account).
     /// </summary>
+    /// <example>document.docx</example>
     [FromQuery(Name = "target")]
     public string Target { get; set; }
 
     /// <summary>
     /// The starting date and time for filtering audit events.
     /// </summary>
+    /// <example>2024-01-01T00:00:00Z</example>
     [FromQuery(Name = "from")]
     public ApiDateTime From { get; set; }
 
     /// <summary>
     /// The ending date and time for filtering audit events.
     /// </summary>
+    /// <example>2024-01-31T23:59:59Z</example>
     [FromQuery(Name = "to")]
     public ApiDateTime To { get; set; }
 
     /// <summary>
     /// The maximum number of audit event records to retrieve.
     /// </summary>
+    /// <example>100</example>
     [FromQuery(Name = "count")]
     [Range(1, ApiContext.MaxCount)]
     public int Count { get; set; } = ApiContext.DefaultCount;
@@ -89,6 +98,7 @@ public class AuditEventRequestDto
     /// <summary>
     /// The index of the first audit event record to retrieve in a paged query.
     /// </summary>
+    /// <example>0</example>
     [FromQuery(Name = "startIndex")]
     public int StartIndex { get; set; }
 }

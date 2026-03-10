@@ -34,12 +34,14 @@ public class RoomGroupIdRequestDto
     /// <summary>
     /// The group unique identifier.
     /// </summary>
+    /// <example>10</example>
     [FromRoute(Name = "id")]
     public required int Id { get; set; }
 
     /// <summary>
     /// Whether to include group members.
     /// </summary>
+    /// <example>true</example>
     [FromQuery(Name = "includeMembers")]
     public bool IncludeMembers { get; set; } = true;
 }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2026
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -23,11 +23,6 @@
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
-
-using ASC.AI.Core.Export;
-using ASC.Common.Threading;
-using ASC.Files.Core.Vectorization;
-using ASC.Web.Files.Utils;
 
 namespace ASC.AI.Worker;
 
@@ -64,5 +59,9 @@ public class Startup : BaseWorkerStartup
         services.RegisterQueue<ChatExportTask>();
         services.RegisterQueue<AsyncTaskData<int>>();
         services.RegisterQueue<AsyncTaskData<string>>();
+        services.RegisterQueue<ChatDeletionTask>();
+        
+        services.AddActivePassiveHostedService<OrphanAttachmentCleanerService>(Configuration);
+        services.AddActivePassiveHostedService<DeletedChatCleanerService>(Configuration);
     }
 }

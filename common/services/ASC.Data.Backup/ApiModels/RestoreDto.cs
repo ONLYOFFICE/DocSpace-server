@@ -34,6 +34,7 @@ public class RestoreDto
     /// <summary>
     /// Specifies if a dump will be created or not.
     /// </summary>
+    /// <example>false</example>
     [FromQuery]
     public bool? Dump { get; set; }
 }

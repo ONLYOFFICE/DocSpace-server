@@ -34,6 +34,7 @@ public class UnlinkAccountRequestDto
     /// <summary>
     /// The provider name.
     /// </summary>
+    /// <example>Google</example>
     [FromQuery(Name = "provider")]
     public string Provider { get; set; }
 }

@@ -29,40 +29,58 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 /// <summary>
 /// The parameters representing the Two-Factor Authentication (TFA) configuration settings.
 /// </summary>
+/// <example>
+/// {
+///   "id": "tfa-default",
+///   "title": "Default TFA policy",
+///   "enabled": true,
+///   "avaliable": true,
+///   "trustedIps": ["item1", "item2"],
+///   "mandatoryUsers": [],
+///   "mandatoryGroups": []
+/// }
+/// </example>
 public class TfaSettingsDto
 {
     /// <summary>
     /// The ID of the TFA configuration.
     /// </summary>
+    /// <example>tfa-default</example>
     public required string Id { get; set; }
 
     /// <summary>
     /// The display name or description of the TFA configuration.
     /// </summary>
+    /// <example>Default TFA policy</example>
     public required string Title { get; set; }
 
     /// <summary>
     /// Indicates whether the TFA configuration is currently active.
     /// </summary>
+    /// <example>true</example>
     public required bool Enabled { get; set; }
 
     /// <summary>
     /// Indicates whether the TFA configuration can be used.
     /// </summary>
+    /// <example>true</example>
     public required bool Avaliable { get; set; }
 
     /// <summary>
     /// The list of IP addresses that are exempt from TFA requirements.
     /// </summary>
+    /// <example>["item1", "item2"]</example>
     public List<string> TrustedIps { get; set; }
 
     /// <summary>
     /// The list of user IDs that are required to use TFA.
     /// </summary>
+    /// <example>["00000000-0000-0000-0000-000000000000"]</example>
     public List<Guid> MandatoryUsers { get; set; }
 
     /// <summary>
     /// The list of group IDs whose members are required to use TFA.
     /// </summary>
+    /// <example>["00000000-0000-0000-0000-000000000000"]</example>
     public List<Guid> MandatoryGroups { get; set; }
 }

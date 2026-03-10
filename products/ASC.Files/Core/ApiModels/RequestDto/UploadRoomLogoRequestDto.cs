@@ -34,5 +34,6 @@ public class UploadRoomLogoRequestDto
     /// <summary>
     /// The image data.
     /// </summary>
+    /// <example>multipart/form-data</example>
     public IFormCollection FormCollection { get; set; }
 }
