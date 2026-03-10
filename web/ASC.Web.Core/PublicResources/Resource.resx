@@ -1464,4 +1464,40 @@
   <data name="AccountingCustomerOperationServiceUOM_websearch" xml:space="preserve">
     <value>Request</value>
   </data>
+  <data name="ConsumersExternalDb" xml:space="preserve">
+    <value>Database connection</value>
+  </data>
+  <data name="ConsumersExternalDbDescription" xml:space="preserve">
+    <value>Store form results in an external database such as MySQL or SQLite.</value>
+  </data>
+  <data name="ConsumersExternalDbInstruction" xml:space="preserve">
+    <value>Connect an external database to store form results.</value>
+  </data>
+  <data name="ConsumersdatabaseType" xml:space="preserve">
+    <value>Database type</value>
+  </data>
+  <data name="ConsumersdbHost" xml:space="preserve">
+    <value>Host</value>
+  </data>
+  <data name="ConsumersdbPort" xml:space="preserve">
+    <value>Port</value>
+  </data>
+  <data name="ConsumersdbName" xml:space="preserve">
+    <value>Database name</value>
+  </data>
+  <data name="ConsumersdbUser" xml:space="preserve">
+    <value>User</value>
+  </data>
+  <data name="ConsumersdbPassword" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="ConsumersdbSsl" xml:space="preserve">
+    <value>Use SSL</value>
+  </data>
+  <data name="ConsumersExternalDbTestConnection" xml:space="preserve">
+    <value>Test connection</value>
+  </data>
+  <data name="ConsumerssqliteFilePath" xml:space="preserve">
+    <value>SQLite file path</value>
+  </data>
 </root>
