@@ -123,7 +123,7 @@ public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IVa
     public Task<bool> TestConnectionAsync()
         => ValidateConnectionAsync();
 
-    public static async Task<bool> TestConnectionAsync(ExternalDatabaseSettings settings)
+    public static async Task<bool> TestConnectionAsync(ExternalDatabaseSettings settings, IConfiguration configuration)
     {
         try
         {
@@ -132,7 +132,7 @@ public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IVa
                 return false;
             }
 
-            await using var connection = CreateConnection(settings);
+            await using var connection = CreateConnection(settings, configuration);
             await connection.OpenAsync();
             return connection.State == ConnectionState.Open;
         }
@@ -162,19 +162,44 @@ public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IVa
         return DatabaseType?.ToLowerInvariant() switch
         {
             "mysql" => CreateMySqlConnection(),
-            "sqlite" => CreateSqliteConnection(SqliteFilePath),
+            "sqlite" => CreateSqliteConnection(ValidateSqlitePath(SqliteFilePath, Configuration)),
             _ => throw new NotSupportedException($"Database type '{DatabaseType}' is not supported yet.")
         };
     }
 
-    public static DbConnection CreateConnection(ExternalDatabaseSettings settings)
+    public static DbConnection CreateConnection(ExternalDatabaseSettings settings, IConfiguration configuration)
     {
         return settings.DatabaseType?.ToLowerInvariant() switch
         {
             "mysql" => CreateMySqlConnection(settings),
-            "sqlite" => CreateSqliteConnection(settings.SqliteFilePath),
+            "sqlite" => CreateSqliteConnection(ValidateSqlitePath(settings.SqliteFilePath, configuration)),
             _ => throw new NotSupportedException($"Database type '{settings.DatabaseType}' is not supported yet.")
         };
+    }
+
+    private static string ValidateSqlitePath(string filePath, IConfiguration configuration)
+    {
+        if (string.IsNullOrWhiteSpace(filePath))
+        {
+            throw new ArgumentException("SQLite file path is not configured.");
+        }
+
+        var allowedBasePath = configuration["files:externalDatabase:allowedBasePath"];
+        if (string.IsNullOrWhiteSpace(allowedBasePath))
+        {
+            throw new InvalidOperationException("files:externalDatabase:allowedBasePath is not configured.");
+        }
+
+        var fullPath = Path.GetFullPath(filePath);
+        var normalizedBase = Path.GetFullPath(allowedBasePath);
+
+        if (!fullPath.StartsWith(normalizedBase + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)
+            && !fullPath.Equals(normalizedBase, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new UnauthorizedAccessException("SQLite path is outside the allowed directory.");
+        }
+
+        return fullPath;
     }
 
     private DbConnection CreateMySqlConnection()

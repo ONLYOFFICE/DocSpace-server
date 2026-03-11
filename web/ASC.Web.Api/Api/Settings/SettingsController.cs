@@ -1154,7 +1154,7 @@ public partial class SettingsController(
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        return await ExternalDatabaseProvider.TestConnectionAsync(inDto);
+        return await ExternalDatabaseProvider.TestConnectionAsync(inDto, configuration);
     }
 
     /// <remarks>
