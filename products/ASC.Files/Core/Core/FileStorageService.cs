@@ -101,7 +101,8 @@ public class FileStorageService //: IFileStorageService
     WebhookManager webhookManager,
     FileSharingHelper fileSharingHelper,
     AiGateway gateway,
-    FormFillingReportCreator formFillingReportCreator)
+    FormFillingReportCreator formFillingReportCreator,
+    ExportToXLSX exportToXLSX)
 {
     private readonly ILogger _logger = optionMonitor.CreateLogger("ASC.Files");
 
@@ -1162,8 +1163,10 @@ public class FileStorageService //: IFileStorageService
         var colorChanged = updateData.Color != null && folder.SettingsColor != updateData.Color;
         var coverChanged = updateData.Cover != null && folder.SettingsCover != updateData.Cover;
         var chatSettingsChanged = updateData.ChatSettings != null;
+        var sendFormToExternalDBChanged = updateData.SendFormToExternalDB.HasValue && folder.SettingsSendFormToExternalDB != updateData.SendFormToExternalDB;
+        var saveFormAsXLSXChanged = updateData.SaveFormAsXLSX.HasValue && folder.SettingsSaveFormAsXLSX != updateData.SaveFormAsXLSX;
 
-        if (titleChanged || quotaChanged || indexingChanged || denyDownloadChanged || lifetimeChanged || watermarkChanged || colorChanged || coverChanged || chatSettingsChanged)
+        if (titleChanged || quotaChanged || indexingChanged || denyDownloadChanged || lifetimeChanged || watermarkChanged || colorChanged || coverChanged || chatSettingsChanged || sendFormToExternalDBChanged || saveFormAsXLSXChanged)
         {
             var oldTitle = folder.Title;
             WatermarkSettings watermark = null;
@@ -1203,7 +1206,9 @@ public class FileStorageService //: IFileStorageService
                 watermarkChanged ? updateData.Watermark.Enabled.HasValue && !updateData.Watermark.Enabled.Value ? null : watermark : folder.SettingsWatermark,
                 colorChanged ? updateData.Color : folder.SettingsColor,
                 coverChanged ? updateData.Cover : folder.SettingsCover,
-                chatSettingsChanged ? updateData.ChatSettings : null);
+                chatSettingsChanged ? updateData.ChatSettings : null,
+                sendFormToExternalDBChanged ? updateData.SendFormToExternalDB.Value : folder.SettingsSendFormToExternalDB,
+                saveFormAsXLSXChanged ? updateData.SaveFormAsXLSX.Value : folder.SettingsSaveFormAsXLSX);
 
             folder = await folderDao.GetFolderAsync(newFolderId);
 
@@ -1645,22 +1650,22 @@ public class FileStorageService //: IFileStorageService
 
                 if (!string.IsNullOrWhiteSpace(docTemplate?.ThumbnailPath))
                 {
-                    foreach (var size in thumbnailSettings.Sizes)
-                    {
+                foreach (var size in thumbnailSettings.Sizes)
+                {
                         var pathThumb = $"{docTemplate.ThumbnailPath}{fileExt.Trim('.')}.{size.Width}x{size.Height}.{global.ThumbnailExtension}";
 
-                        if (!await storeTemplate.IsFileAsync("", pathThumb))
-                        {
-                            break;
-                        }
-
-                        await using (var streamThumb = await storeTemplate.GetReadStreamAsync("", pathThumb, 0))
-                        {
-                            await (await globalStore.GetStoreAsync()).SaveAsync(fileDao.GetUniqThumbnailPath(file, size.Width, size.Height), streamThumb);
-                        }
-
-                        counter++;
+                    if (!await storeTemplate.IsFileAsync("", pathThumb))
+                    {
+                        break;
                     }
+
+                    await using (var streamThumb = await storeTemplate.GetReadStreamAsync("", pathThumb, 0))
+                    {
+                        await (await globalStore.GetStoreAsync()).SaveAsync(fileDao.GetUniqThumbnailPath(file, size.Width, size.Height), streamThumb);
+                    }
+
+                    counter++;
+                }
                 }
 
                 if (thumbnailSettings.Sizes.Count() == counter)
@@ -5255,7 +5260,7 @@ public class FileStorageService //: IFileStorageService
         await socketManager.CreateFileAsync(form);
     }
 
-    public async IAsyncEnumerable<FormResultsDto> GetSubmissionsByFormId(int formId)
+    public async Task<FormSubmissionsDto> GetSubmissionsByFormId(int formId)
     {
         var fileDao = daoFactory.GetFileDao<int>();
         var folderDao = daoFactory.GetFolderDao<int>();
@@ -5293,20 +5298,19 @@ public class FileStorageService //: IFileStorageService
         var room = roomTask.Result;
 
         if (room == null ||
-            resultsFile == null ||
-            formFilling.RoomId != room.Id ||
-            !await fileSecurity.CanReadAsync(resultsFile))
+            formFilling.RoomId != room.Id)
         {
             throw new InvalidOperationException();
         }
 
-        var results = await formFillingReportCreator
-            .GetFormFillingResults(room.Id, form.Id, form.Version);
+        var (metadata, submissions) = await formFillingReportCreator
+            .GetFormSnapshotAsync(room.Id, form.Id, form.Version);
 
-        foreach (var result in results)
+        return new FormSubmissionsDto
         {
-            yield return result.MapToFormResultsDto();
-        }
+            Metadata = metadata,
+            Submissions = submissions.Cast<DbFormsItemDataSearch>().Select(r => r.MapToFormResultsDto())
+        };
     }
 
     public async Task<RoomGroup> SaveRoomGroupAsync(RoomGroup roomGroup)
@@ -5359,6 +5363,63 @@ public class FileStorageService //: IFileStorageService
             return await SaveRoomGroupAsync(group);
         }
         return group;
+    }
+
+    public async Task GenerateXlsxAsync(int formId)
+    {
+        var fileDao = daoFactory.GetFileDao<int>();
+        var folderDao = daoFactory.GetFolderDao<int>();
+
+        var form = await fileDao.GetFileAsync(formId);
+        if (form == null)
+        {
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+
+        if (!await DocSpaceHelper.IsFormOrCompletedForm(form, daoFactory))
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (!await fileSecurity.CanEditAsync(form))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
+        }
+
+        var properties = await fileDao.GetProperties(form.Id);
+        var formFilling = properties?.FormFilling;
+
+        if (formFilling?.StartFilling != true || formFilling.OriginalFormId != form.Id)
+        {
+            throw new InvalidOperationException();
+        }
+
+        var resultsFileTask = fileDao.GetFileAsync(formFilling.ResultsFileID);
+        var roomTask = DocSpaceHelper.GetParentRoom(form, folderDao);
+        var resultFolderTask = folderDao.GetFolderAsync(formFilling.ResultsFolderId);
+
+        await Task.WhenAll(resultsFileTask, roomTask, resultFolderTask);
+
+        var resultsFile = resultsFileTask.Result;
+        var room = roomTask.Result;
+        var resultFolder = resultFolderTask.Result;
+
+        if (room == null ||
+            formFilling.RoomId != room.Id ||
+            room.FolderType != FolderType.FillingFormsRoom)
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (resultsFile != null && !await fileSecurity.CanReadAsync(resultsFile))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
+        }
+
+        await entryManager.EnsureFormFillingOutputAsync(form, room, resultsFile, resultFolder, properties, folderDao, fileDao);
+
+        await exportToXLSX.UpdateXlsxReport(room.Id, form.Id, form.Version);
+
     }
 
     private async Task CheckRoomAvailability<T>(T roomId)

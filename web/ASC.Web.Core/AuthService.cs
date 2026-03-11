@@ -59,12 +59,23 @@ public class AuthService
 
         foreach (var item in consumer.ManagedKeys)
         {
-            result.Props.Add(new AuthKey
+            var authKey = new AuthKey
             {
                 Name = item,
                 Value = await consumer.GetAsync(item),
                 Title = ConsumerExtension.GetResourceString(item) ?? item
-            });
+            };
+
+            if (consumer is IConsumerKeyMetadataProvider metadataProvider)
+            {
+                var meta = metadataProvider.GetKeyMetadata(item);
+                authKey.Type = meta.Type;
+                authKey.Options = meta.Options;
+                authKey.DependsOn = meta.DependsOn;
+                authKey.DependsOnValue = meta.DependsOnValue;
+            }
+
+            result.Props.Add(authKey);
         }
 
         return result;
@@ -111,4 +122,24 @@ public class AuthKey
     /// </summary>
     /// <example>API key</example>
     public string Title { get; set; }
+
+    /// <summary>
+    /// The field type: "text", "password", "select", "toggle".
+    /// </summary>
+    public string Type { get; set; } = "text";
+
+    /// <summary>
+    /// The list of options for "select" type fields.
+    /// </summary>
+    public List<string> Options { get; set; }
+
+    /// <summary>
+    /// The name of another key this field depends on for visibility.
+    /// </summary>
+    public string DependsOn { get; set; }
+
+    /// <summary>
+    /// The value of <see cref="DependsOn"/> key that makes this field visible.
+    /// </summary>
+    public string DependsOnValue { get; set; }
 }
