@@ -45,6 +45,7 @@ public class SettingsController(AiSettingsService aiSettingsService) : Controlle
     [SwaggerResponse(200, "Updated web search settings", typeof(WebSearchSettingsDto))]
     [HttpPut("config/web-search")]
     [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
+    [AiFeature]
     public async Task<WebSearchSettingsDto> SetWebSearchSettingsAsync(SetWebSearchConfigRequestDto inDto)
     {
         var settings = await aiSettingsService.SetWebSearchSettingsAsync(
@@ -66,6 +67,7 @@ public class SettingsController(AiSettingsService aiSettingsService) : Controlle
     [Tags("AI / Settings")]
     [SwaggerResponse(200, "Current web search settings", typeof(WebSearchSettingsDto))]
     [HttpGet("config/web-search")]
+    [AiFeature]
     public async Task<WebSearchSettingsDto> GetWebSearchSettingsAsync()
     {
         var settings = await aiSettingsService.GetWebSearchSettingsAsync();
@@ -86,6 +88,7 @@ public class SettingsController(AiSettingsService aiSettingsService) : Controlle
     [SwaggerResponse(200, "Updated vectorization settings", typeof(VectorizationSettingsDto))]
     [HttpPut("config/vectorization")]
     [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
+    [AiFeature]
     public async Task<VectorizationSettingsDto> SetVectorizationSettingsAsync(SetEmbeddingConfigRequestDto inDto)
     {
         var settings = await aiSettingsService.SetVectorizationSettingsAsync(inDto.Body.Type, inDto.Body.Key);
@@ -104,6 +107,7 @@ public class SettingsController(AiSettingsService aiSettingsService) : Controlle
     [Tags("AI / Settings")]
     [SwaggerResponse(200, "Current vectorization settings", typeof(VectorizationSettingsDto))]
     [HttpGet("config/vectorization")]
+    [AiFeature]
     public async Task<VectorizationSettingsDto> GetVectorizationSettingsAsync()
     {
         var settings = await aiSettingsService.GetVectorizationSettingsAsync();

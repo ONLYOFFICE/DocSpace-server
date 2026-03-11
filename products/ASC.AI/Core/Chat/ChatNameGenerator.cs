@@ -66,7 +66,7 @@ public class ChatNameGenerator(
         
         try
         {
-            var client = await chatClientFactory.CreateAsync(options);
+            var client = chatClientFactory.Create(options);
 
             var messages = new List<ChatMessage> { _systemMessage, new(ChatRole.User, userMessage) };
 
