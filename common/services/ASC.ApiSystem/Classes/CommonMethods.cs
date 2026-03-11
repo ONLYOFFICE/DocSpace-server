@@ -93,11 +93,13 @@ public class CommonMethods(
     private async Task<string> CallSendMethod(string requestUriScheme, string apiMethod, HttpMethod httpMethod, Tenant tenant, ConfirmType confirmType, bool skipAndReturnUrl)
     {
         var validationKey = emailValidationKeyProvider.GetEmailKey(tenant.OwnerId.ToString() + confirmType, tenant.Id);
-
+        var domain = tenant.GetTenantDomain(coreSettings);
+        var port = httpContextAccessor.HttpContext?.Request.Host.Port ?? 80;
+        
         var url = string.Format("{0}{1}{2}{3}{4}?userid={5}&key={6}",
                             requestUriScheme,
                             Uri.SchemeDelimiter,
-                            tenant.GetTenantDomain(coreSettings),
+                            domain == "localhost" && port != 80 ? $"{domain}:{port}" : domain,
                             commonConstants.WebApiBaseUrl,
                             apiMethod,
                             tenant.OwnerId.ToString(),
@@ -120,7 +122,7 @@ public class CommonMethods(
         try
         {
             var httpClient = clientFactory.CreateClient();
-            using var response = await httpClient.SendAsync(request);
+            using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
 
             log.LogDebug($"SendMethod {apiMethod} result = {response.StatusCode}");
 
