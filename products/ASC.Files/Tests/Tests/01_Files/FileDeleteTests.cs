@@ -71,6 +71,7 @@ public class FileDeleteTests(
             async () => await _filesApi.DeleteFileAsync(
                 nonExistingFileId,
                 new Delete(false, true),
+                false,
                 TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(404);
@@ -92,6 +93,7 @@ public class FileDeleteTests(
             async () => await _filesApi.DeleteFileAsync(
                 file.Id, 
                 new Delete(false, true), 
+                false,
                 TestContext.Current.CancellationToken));
         
         exception.ErrorCode.Should().Be(403);
@@ -111,6 +113,7 @@ public class FileDeleteTests(
             async () => await _filesApi.DeleteFileAsync(
                 file.Id, 
                 new Delete(false, true), 
+                false,
                 TestContext.Current.CancellationToken));
         
         exception.ErrorCode.Should().Be(403);
@@ -130,6 +133,7 @@ public class FileDeleteTests(
             async () => await _filesApi.DeleteFileAsync(
                 file.Id,
                 new Delete(false, true),
+                false,
                 TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(403);
