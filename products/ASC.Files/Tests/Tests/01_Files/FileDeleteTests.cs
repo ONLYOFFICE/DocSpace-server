@@ -121,7 +121,7 @@ public class FileDeleteTests(
         await _filesClient.Authenticate(Initializer.Owner);
 
         var file = await CreateFile("editing_file.docx", FolderType.USER, Initializer.Owner);
-        await _filesApi.StartEditFileAsync(file.Id, new StartEdit(), TestContext.Current.CancellationToken);
+        await _filesApi.StartEditFileAsync(file.Id, new StartEdit(true), TestContext.Current.CancellationToken);
 
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ApiException>(
