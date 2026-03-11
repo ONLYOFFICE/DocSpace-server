@@ -129,14 +129,14 @@ public class VectorizationTask : DistributedTaskProgress
             await using var stream = await fileDao.GetFileStreamAsync(file);
 
             var fileExtension = FileUtility.GetFileExtension(file.Title);
+            var textChunks = textProcessor.ProcessAsync(
+                stream, 
+                file.ContentLength, 
+                fileExtension, 
+                chunkerSettings,
+                CancellationToken);
 
-            var textChunks = new List<string>();
-            await foreach (var chunk in textProcessor.ProcessAsync(stream, file.ContentLength, fileExtension, chunkerSettings, CancellationToken))
-            {
-                textChunks.Add(chunk);
-            }
-
-            foreach (var batch in textChunks.Chunk(vectorizationSettings.ChunksBatchSize))
+            await foreach (var batch in textChunks.Chunk(vectorizationSettings.ChunksBatchSize))
             {
                 var embeddings = await embeddingGenerator.GenerateAsync(batch, cancellationToken: CancellationToken);
                 var chunks = batch.Select((text, index) =>
