@@ -50,4 +50,26 @@
     <ProjectReference Include="../ASC.ApiSystem/ASC.ApiSystem.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+      <DocStoreSourceFiles Include="../../resources/DocStore/**/*"
+                           Exclude="../../resources/DocStore/.git/**/*;../../resources/DocStore/**/*.md;../../resources/DocStore/LICENSE"
+                           Visible="false"/>
+  </ItemGroup>
+
+  <Target Name="CopyDocStoreToProject" BeforeTargets="BeforeBuild">
+      <Copy SourceFiles="@(DocStoreSourceFiles)"
+            DestinationFiles="@(DocStoreSourceFiles->'$(ProjectDir)DocStore/%(RecursiveDir)%(FileName)%(Extension)')"
+            SkipUnchangedFiles="true" />
+
+      <ItemGroup>
+          <None Include="$(ProjectDir)DocStore/**/*">
+              <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+          </None>
+      </ItemGroup>
+  </Target>
+
+  <Target Name="CleanDocStore" AfterTargets="Clean">
+      <RemoveDir Directories="$(ProjectDir)DocStore" />
+  </Target>
+
 </Project>
