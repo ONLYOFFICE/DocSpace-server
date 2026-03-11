@@ -35,6 +35,12 @@ public enum DbColumnType { Text, Integer, Boolean, Date, DateTime, Enum }
 
 public record DbColumnDefinition(string Name, DbColumnType Type, IReadOnlyList<string>? EnumValues = null, bool IsPrimaryKey = false);
 
+/// <summary>Column filter for structured queries against an external database table.</summary>
+/// <param name="Column">Name of the column to filter on.</param>
+/// <param name="Operator">Comparison operator: =, !=, &lt;, &gt;, &lt;=, &gt;=, LIKE, NOT LIKE, IS NULL, IS NOT NULL.</param>
+/// <param name="Value">Value to compare against. Not required for IS NULL / IS NOT NULL.</param>
+public record QueryFilter(string Column, string Operator, string? Value = null);
+
 [Scope]
 public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<ExternalDatabaseClient> logger)
 {
@@ -142,46 +148,120 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         return Convert.ToInt64(result);
     }
 
-    private static readonly Regex _queryTableRefPattern = new(
-        @"(?:FROM|JOIN)\s+[`""']?(\w+)[`""']?",
-        RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
-    private static readonly Regex _implicitJoinPattern = new(
-        @"\bFROM\s+[`""']?\w+[`""']?\s*,",
-        RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
-    private static void ValidateQueryTableReferences(string sql, string allowedTableName)
+    private static readonly HashSet<string> _allowedOperators = new(StringComparer.OrdinalIgnoreCase)
     {
-        if (_implicitJoinPattern.IsMatch(sql))
+        "=", "!=", "<>", "<", ">", "<=", ">=", "LIKE", "NOT LIKE", "IS NULL", "IS NOT NULL"
+    };
+
+    private static readonly HashSet<string> _nullaryOperators = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "IS NULL", "IS NOT NULL"
+    };
+
+    public const int MaxRowsPerRequest = 500;
+
+    public async Task<string> QueryAsync(
+        string tableName,
+        IReadOnlyCollection<string> allowedColumns,
+        IEnumerable<string>? selectColumns = null,
+        IEnumerable<QueryFilter>? filters = null,
+        string? orderByColumn = null,
+        bool orderByDescending = false,
+        int maxRows = 50,
+        int offset = 0)
+    {
+        var dbType = Provider.DatabaseType.ToLowerInvariant();
+        var q = dbType == "mysql" ? '`' : '"';
+
+        var selectList = selectColumns?.ToList();
+        if (selectList is { Count: > 0 })
         {
-            throw new UnauthorizedAccessException("Implicit comma-style joins are not allowed.");
+            var invalid = selectList.Except(allowedColumns, StringComparer.OrdinalIgnoreCase).ToList();
+            if (invalid.Count > 0)
+            {
+                throw new UnauthorizedAccessException($"Unknown columns: {string.Join(", ", invalid)}");
+            }
         }
 
-        var matches = _queryTableRefPattern.Matches(sql);
-        if (matches.Count == 0 || matches.Cast<Match>().Any(m =>
-            !m.Groups[1].Value.Equals(allowedTableName, StringComparison.OrdinalIgnoreCase)))
+        var filterList = filters?.ToList() ?? [];
+        foreach (var f in filterList)
         {
-            throw new UnauthorizedAccessException($"Query may only reference the '{allowedTableName}' table.");
+            if (!allowedColumns.Contains(f.Column, StringComparer.OrdinalIgnoreCase))
+            {
+                throw new UnauthorizedAccessException($"Unknown column in filter: {f.Column}");
+            }
+            if (!_allowedOperators.Contains(f.Operator))
+            {
+                throw new UnauthorizedAccessException($"Operator not allowed: {f.Operator}");
+            }
         }
-    }
 
-    public async Task<string> QueryAsync(string sql, string allowedTableName, int maxRows = 500)
-    {
-        ValidateQueryTableReferences(sql, allowedTableName);
+        if (orderByColumn != null && !allowedColumns.Contains(orderByColumn, StringComparer.OrdinalIgnoreCase))
+        {
+            throw new UnauthorizedAccessException($"Unknown column in ORDER BY: {orderByColumn}");
+        }
+
+        var selectPart = selectList is { Count: > 0 }
+            ? string.Join(", ", selectList.Select(c => $"{q}{c}{q}"))
+            : "*";
+
+        var whereParts = new List<string>();
+        var parameters = new Dictionary<string, object?>();
+        var paramIndex = 0;
+
+        foreach (var f in filterList)
+        {
+            var colQuoted = $"{q}{f.Column}{q}";
+            var op = f.Operator.ToUpperInvariant();
+            if (_nullaryOperators.Contains(op))
+            {
+                whereParts.Add($"{colQuoted} {op}");
+            }
+            else
+            {
+                var paramName = $"@w{paramIndex++}";
+                whereParts.Add($"{colQuoted} {op} {paramName}");
+                parameters[paramName] = f.Value;
+            }
+        }
+
+        var sql = new StringBuilder($"SELECT {selectPart} FROM {q}{tableName}{q}");
+
+        if (whereParts.Count > 0)
+        {
+            sql.Append($" WHERE {string.Join(" AND ", whereParts)}");
+        }
+
+        if (orderByColumn != null)
+        {
+            var dir = orderByDescending ? "DESC" : "ASC";
+            sql.Append($" ORDER BY {q}{orderByColumn}{q} {dir}");
+        }
+
+        var pageSize = Math.Clamp(maxRows, 1, MaxRowsPerRequest);
+        var pageOffset = Math.Max(0, offset);
+        sql.Append($" LIMIT {pageSize} OFFSET {pageOffset}");
 
         await using var connection = Provider.CreateConnection();
         await connection.OpenAsync();
         await SetupSqliteAsync(connection);
 
         await using var cmd = connection.CreateCommand();
-        cmd.CommandText = sql;
+        cmd.CommandText = sql.ToString();
         cmd.CommandTimeout = 30;
+
+        foreach (var (name, value) in parameters)
+        {
+            var param = cmd.CreateParameter();
+            param.ParameterName = name;
+            param.Value = value ?? DBNull.Value;
+            cmd.Parameters.Add(param);
+        }
 
         await using var reader = await cmd.ExecuteReaderAsync();
         var results = new List<Dictionary<string, object?>>();
-        var rowCount = 0;
 
-        while (await reader.ReadAsync() && rowCount < maxRows)
+        while (await reader.ReadAsync())
         {
             var row = new Dictionary<string, object?>();
             for (var i = 0; i < reader.FieldCount; i++)
@@ -189,7 +269,6 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
                 row[reader.GetName(i)] = reader.IsDBNull(i) ? null : reader.GetValue(i);
             }
             results.Add(row);
-            rowCount++;
         }
 
         return System.Text.Json.JsonSerializer.Serialize(results);

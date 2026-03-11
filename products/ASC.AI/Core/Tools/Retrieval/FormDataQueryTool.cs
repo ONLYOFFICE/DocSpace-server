@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Text.RegularExpressions;
-
 namespace ASC.AI.Core.Tools.Retrieval;
 
 [Scope]
@@ -36,19 +34,6 @@ public class FormDataQueryTool(
 {
     public const string Name = "query_form_data";
 
-    private static readonly Regex[] _dangerousKeywordRegexes = Array.ConvertAll(
-        (string[])["DROP", "DELETE", "INSERT", "UPDATE", "ALTER", "CREATE", "EXEC", "TRUNCATE",
-                   "GRANT", "REVOKE", "UNION", "WITH", "INTO", "ATTACH", "PRAGMA", "LOAD_EXTENSION"],
-        k => new Regex($@"\b{k}\b", RegexOptions.Compiled | RegexOptions.IgnoreCase));
-
-    private static readonly Regex _tableRefPattern = new(
-        @"(?:FROM|JOIN)\s+[`""']?(\w+)[`""']?",
-        RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
-    private static readonly Regex _implicitJoinPattern = new(
-        @"\bFROM\s+[`""']?\w+[`""']?\s*,",
-        RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
     public async Task<AIFunction?> InitAsync(int fileId, string tableName, long rowCount, IEnumerable<DbColumnDefinition> columns)
     {
         var fileDao = daoFactory.GetFileDao<int>();
@@ -58,7 +43,9 @@ public class FormDataQueryTool(
             return null;
         }
 
-        var description = BuildDescription(tableName, rowCount, columns);
+        var columnList = columns.ToList();
+        var allowedColumns = columnList.Select(c => c.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var description = BuildDescription(tableName, rowCount, columnList);
 
         return AIFunctionFactory.Create(Function, new AIFunctionFactoryOptions
         {
@@ -66,16 +53,19 @@ public class FormDataQueryTool(
             Description = description
         });
 
-        async Task<ToolResponse<string>> Function([Description("SQL SELECT query to execute against the form data table")] string sql)
+        async Task<ToolResponse<string>> Function(
+            [Description("Column names to include in the result. Always specify only the columns relevant to the question — do not request all columns unless explicitly needed.")] IEnumerable<string>? selectColumns,
+            [Description("Filter conditions applied with AND. Always apply filters to narrow down the data to what is relevant. Each filter specifies a column, an operator (=, !=, <, >, <=, >=, LIKE, NOT LIKE, IS NULL, IS NOT NULL), and an optional value.")] IEnumerable<QueryFilter>? filters,
+            [Description("Column name to sort results by.")] string? orderByColumn,
+            [Description("Set to true to sort in descending order.")] bool orderByDescending,
+            [Description("Maximum number of rows to return per request (1–500). Use a small value (10–50) for exploration. Use 500 and increase offset for paginated full-table analysis.")] int limit,
+            [Description("Number of rows to skip (for pagination). Set to 0 for the first page, then increment by limit to retrieve subsequent pages.")] int offset)
         {
-            if (!IsSafeSelect(sql, tableName))
-            {
-                return new ToolResponse<string> { Error = "Only SELECT queries against the form data table are allowed." };
-            }
-
             try
             {
-                var result = await externalDatabaseClient.QueryAsync(sql, tableName);
+                var result = await externalDatabaseClient.QueryAsync(
+                    tableName, allowedColumns, selectColumns, filters,
+                    orderByColumn, orderByDescending, limit, offset);
                 return new ToolResponse<string> { Data = result };
             }
             catch (Exception e)
@@ -85,61 +75,16 @@ public class FormDataQueryTool(
         }
     }
 
-    private static bool IsSafeSelect(string sql, string allowedTableName)
-    {
-        var trimmed = sql.Trim();
-
-        if (!trimmed.StartsWith("SELECT", StringComparison.OrdinalIgnoreCase))
-        {
-            return false;
-        }
-
-        var withoutTrailingSemicolon = trimmed.TrimEnd().TrimEnd(';');
-        if (withoutTrailingSemicolon.Contains(';'))
-        {
-            return false;
-        }
-
-        if (trimmed.Contains("--") || trimmed.Contains("/*") || trimmed.Contains("*/"))
-        {
-            return false;
-        }
-
-        if (_implicitJoinPattern.IsMatch(trimmed))
-        {
-            return false;
-        }
-
-        if (_dangerousKeywordRegexes.Any(r => r.IsMatch(trimmed)))
-        {
-            return false;
-        }
-
-        if (!ReferencesOnlyAllowedTable(trimmed, allowedTableName))
-        {
-            return false;
-        }
-
-        return true;
-    }
-
-    private static bool ReferencesOnlyAllowedTable(string sql, string allowedTableName)
-    {
-        var matches = _tableRefPattern.Matches(sql);
-        if (matches.Count == 0)
-        {
-            return false;
-        }
-
-        return matches.All(m => m.Groups[1].Value.Equals(allowedTableName, StringComparison.OrdinalIgnoreCase));
-    }
-
     private static string BuildDescription(string tableName, long rowCount, IEnumerable<DbColumnDefinition> columns)
     {
         var sb = new StringBuilder();
-        sb.Append($"Execute a SQL SELECT query against form submission data stored in an external database. ");
+        sb.Append("Query form submission data from an external database. ");
+        sb.Append("You may call this tool multiple times with different filters and column selections to answer a question — prefer targeted queries over fetching all rows. ");
+        sb.Append("Always use selectColumns to request only the columns you need, and use filters to narrow down the result set. ");
+        sb.Append($"A single request returns at most {ExternalDatabaseClient.MaxRowsPerRequest} rows. ");
+        sb.Append("When a complete analysis requires more rows than that, paginate: call the tool repeatedly with limit=500 and offset=0, 500, 1000, … until all rows are retrieved. ");
         sb.Append($"Table: '{tableName}', total rows: {rowCount}. ");
-        sb.Append("Columns: ");
+        sb.Append("Available columns: ");
         sb.Append(string.Join(", ", columns.Select(c =>
         {
             var desc = $"{c.Name} ({c.Type})";
@@ -149,7 +94,6 @@ public class FormDataQueryTool(
             }
             return desc;
         })));
-        sb.Append(". Only SELECT queries are allowed.");
         return sb.ToString();
     }
 }
