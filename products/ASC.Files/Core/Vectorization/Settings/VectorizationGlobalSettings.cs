@@ -61,9 +61,9 @@ public class VectorizationGlobalSettings
     
     private class Settings
     {
-        public int ChunkSize { get; init; }
-        public float ChunkOverlap { get; init; }
-        public int ChunksBatchSize { get; init; }
+        public int ChunkSize { get; init; } = 512;
+        public float ChunkOverlap { get; init; } = 0.1f;
+        public int ChunksBatchSize { get; init; } = 10;
         public long MaxContentLengthBytes { get; init; }
         public HashSet<string> SupportedFormats { get; init; }
         public string ModelId { get; init; }

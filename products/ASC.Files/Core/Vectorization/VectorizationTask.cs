@@ -85,13 +85,16 @@ public class VectorizationTask : DistributedTaskProgress
 
             var vectorStore = scope.ServiceProvider.GetRequiredService<VectorStore>();
             var generatorFactory = scope.ServiceProvider.GetRequiredService<EmbeddingGeneratorFactory>();
-            var fileProcessor = scope.ServiceProvider.GetRequiredService<FileTextProcessor>();
+            var textProcessor = scope.ServiceProvider.GetRequiredService<TextProcessor>();
+            var tokenizerFactory = scope.ServiceProvider.GetRequiredService<TokenizerFactory>();
             var vectorizationSettings = scope.ServiceProvider.GetRequiredService<VectorizationGlobalSettings>();
 
-            var splitterSettings = new SplitterSettings
+            var tokenCounter = tokenizerFactory.GetTokenCounter(vectorizationSettings.Model.Id);
+            var chunkerSettings = new ChunkerSettings
             {
-                MaxTokensPerChunk = (int)(vectorizationSettings.ChunkSize * 0.75),
-                ChunkOverlap = vectorizationSettings.ChunkOverlap
+                MaxTokensPerChunk = vectorizationSettings.ChunkSize,
+                ChunkOverlap = vectorizationSettings.ChunkOverlap,
+                TokenCounter = tokenCounter
             };
 
             collection = vectorStore.GetCollection<Chunk>(
@@ -123,7 +126,18 @@ public class VectorizationTask : DistributedTaskProgress
             await collection.EnsureCollectionExistsAsync(CancellationToken);
             var embeddingGenerator = await generatorFactory.CreateAsync(room.SettingsChatProviderId);
 
-            var textChunks = await fileProcessor.GetTextChunksAsync(file, splitterSettings);
+            await using var stream = await fileDao.GetFileStreamAsync(file);
+            await using var memoryStream = new MemoryStream();
+            await stream.CopyToAsync(memoryStream);
+            var memory = new Memory<byte>(memoryStream.GetBuffer(), 0, (int)memoryStream.Length);
+
+            var fileExtension = FileUtility.GetFileExtension(file.Title);
+
+            var textChunks = new List<string>();
+            await foreach (var chunk in textProcessor.ProcessAsync(memory, fileExtension, chunkerSettings, CancellationToken))
+            {
+                textChunks.Add(chunk);
+            }
 
             foreach (var batch in textChunks.Chunk(vectorizationSettings.ChunksBatchSize))
             {
