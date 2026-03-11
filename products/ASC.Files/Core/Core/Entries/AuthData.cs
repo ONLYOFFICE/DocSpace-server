@@ -35,32 +35,48 @@ public class AuthData(string url = null, string login = null, string password = 
     /// <summary>
     /// The authentication login.
     /// </summary>
+    /// <example>user@example.com</example>
     public string Login { get; init; } = login ?? string.Empty;
 
     /// <summary>
     /// The authentication password.
     /// </summary>
+    /// <example>p@ssw0rd!</example>
     public string Password { get; init; } = password ?? string.Empty;
 
     /// <summary>
     /// The authentication raw token.
     /// </summary>
+    /// <example>{"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...","expires_in":3600}</example>
     public string RawToken { get; init; } = token ?? string.Empty;
 
     /// <summary>
     /// The authentication URL.
     /// </summary>
+    /// <example>https://auth.example.com</example>
     [Url]
     public string Url { get; set; } = url ?? string.Empty;
 
     /// <summary>
     /// The authentication provider.
     /// </summary>
+    /// <example>OAuth2</example>
     public string Provider { get; init; } = provider ?? string.Empty;
 
     /// <summary>
     /// The authentication token.
     /// </summary>
+    /// <example>
+    /// {
+    ///   "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    ///   "refresh_token": "def50200a1b2c3d4e5f6...",
+    ///   "expires_in": 3600,
+    ///   "client_id": "my-client-id",
+    ///   "client_secret": "my-client-secret",
+    ///   "redirect_uri": "https://app.example.com/callback",
+    ///   "timestamp": "2026-01-01T00:00:00Z"
+    /// }
+    /// </example>
     public OAuth20Token Token
     {
         get

@@ -34,41 +34,49 @@ public class FormRole
     /// <summary>
     /// The room ID.
     /// </summary>
+    /// <example>1</example>
     public int RoomId { get; set; }
 
     /// <summary>
     /// The role name.
     /// </summary>
+    /// <example>Manager</example>
     public string RoleName { get; set; }
 
     /// <summary>
     /// The role color.
     /// </summary>
+    /// <example>#4781D1</example>
     public string RoleColor { get; set; }
 
     /// <summary>
     /// The user ID.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     public Guid UserId { get; set; }
 
     /// <summary>
     /// The role sequence.
     /// </summary>
+    /// <example>12</example>
     public int Sequence { get; set; }
 
     /// <summary>
     /// Specifies if the role was submitted or not.
     /// </summary>
+    /// <example>false</example>
     public bool Submitted { get; set; }
 
     /// <summary>
     /// The date and time when the role was opened.
     /// </summary>
+    /// <example>2026-01-01T10:00:00Z</example>
     public DateTime OpenedAt { get; set; }
 
     /// <summary>
     /// The date and time when the role was submitted.
     /// </summary>
+    /// <example>2026-01-01T10:00:00Z</example>
     public DateTime SubmissionDate { get; set; }
 }
 

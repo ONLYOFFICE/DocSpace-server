@@ -985,6 +985,8 @@ public class UserController(
     /// <path>api/2.0/people/email</path>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "Detailed profile information", typeof(EmployeeFullDto))]
+    [SwaggerResponse(400, "Incorrect email")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(404, "User not found")]
     [AllowNotPayment]
     [HttpGet("email")]
@@ -997,7 +999,9 @@ public class UserController(
             ? emailValidationKeyModelHelper.DecryptEmail(inDto.EncEmail)
             : inDto.Email;
 
-        var user = await _userManager.GetUserByEmailAsync(email);
+        ArgumentException.ThrowIfNullOrWhiteSpace(email);
+
+        var user = await _userManager.GetUserByEmailAsync(email.Trim());
 
         var isConfirmLink = _httpContextAccessor.HttpContext!.User.Claims
             .Any(role => role.Type == ClaimTypes.Role &&
@@ -1725,6 +1729,10 @@ public class UserController(
         if (!string.IsNullOrEmpty(error))
         {
             logger.ErrorPasswordRecovery(inDto.Email, error);
+            if (authContext.IsAuthenticated)
+            {
+                throw new InvalidOperationException(error);
+            }
         }
 
         var pattern = authContext.IsAuthenticated ? Resource.MessagePasswordSendedToEmail : Resource.MessageYourPasswordSendedToEmail;
@@ -1885,6 +1893,9 @@ public class UserController(
                 if (currentUserIsDocSpaceAdmin)
                 {
                     user.Title = inDto.UpdateMember.Title ?? user.Title;
+                    user.WorkFromDate = inDto.UpdateMember.Worksfrom != null
+                        ? tenantUtil.DateTimeFromUtc(inDto.UpdateMember.Worksfrom)
+                        : user.WorkFromDate;
                 }
             }
 
@@ -1906,10 +1917,6 @@ public class UserController(
             {
                 user.BirthDate = null;
             }
-
-            user.WorkFromDate = inDto.UpdateMember.Worksfrom != null
-                ? tenantUtil.DateTimeFromUtc(inDto.UpdateMember.Worksfrom)
-                : user.WorkFromDate;
 
             if (user.WorkFromDate == resetDate)
             {
@@ -2331,13 +2338,14 @@ public class UserController(
     /// <collection>list</collection>
     [Tags("People / Quota")]
     [SwaggerResponse(200, "List of users with the detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
-    [SwaggerResponse(402, "Failed to set quota per user. The entered value is greater than the total DocSpace storage")]
+    [SwaggerResponse(400, "The entered quota value is invalid or greater than the total storage size")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPut("userquota")]
     public async IAsyncEnumerable<EmployeeFullDto> UpdateUserQuota(UpdateMembersQuotaRequestDto inDto)
     {
         if (!inDto.Quota.TryGetInt64(out var quota))
         {
-            throw new Exception(Resource.UserQuotaGreaterPortalError);
+            throw new ArgumentException(Resource.UserQuotaGreaterPortalError);
         }
 
         await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
@@ -2353,7 +2361,7 @@ public class UserController(
 
         if (maxTotalSize < quota)
         {
-            throw new Exception(Resource.UserQuotaGreaterPortalError);
+            throw new ArgumentException(Resource.UserQuotaGreaterPortalError);
         }
         if (coreBaseSettings.Standalone)
         {
@@ -2362,7 +2370,7 @@ public class UserController(
             {
                 if (tenantQuotaSetting.Quota < quota)
                 {
-                    throw new Exception(Resource.UserQuotaGreaterPortalError);
+                    throw new ArgumentException(Resource.UserQuotaGreaterPortalError);
                 }
             }
         }

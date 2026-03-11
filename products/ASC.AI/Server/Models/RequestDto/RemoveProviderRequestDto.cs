@@ -34,5 +34,6 @@ public class RemoveProviderRequestDto
     /// <summary>
     /// The set of AI provider identifiers to delete.
     /// </summary>
+    /// <example>[1, 2, 3]</example>
     public required HashSet<int> Ids { get; set; }
 }

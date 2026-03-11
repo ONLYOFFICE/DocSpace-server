@@ -34,30 +34,36 @@ public class ThirdPartyBackupRequestDto
     /// <summary>
     /// The connection URL for the sharepoint.
     /// </summary>
+    /// <example>https://sharepoint.example.com</example>
     public string Url { get; set; }
 
     /// <summary>
     /// The login.
     /// </summary>
+    /// <example>admin</example>
     public string Login { get; set; }
 
     /// <summary>
     /// The password.
     /// </summary>
+    /// <example>P@ssw0rd</example>
     public string Password { get; set; }
 
     /// <summary>
     /// The authentication token.
     /// </summary>
+    /// <example>abc123def456</example>
     public string Token { get; set; }
 
     /// <summary>
     /// The customer title.
     /// </summary>
+    /// <example>My Cloud Storage</example>
     public string CustomerTitle { get; set; }
 
     /// <summary>
     /// The provider key.
     /// </summary>
+    /// <example>SharePoint</example>
     public string ProviderKey { get; set; }
 }

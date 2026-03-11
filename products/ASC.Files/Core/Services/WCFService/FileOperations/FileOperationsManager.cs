@@ -133,6 +133,11 @@ public static class FileOperationsManager
     {
         var (resultInt, resultString) = (new List<int>(), new List<string>());
 
+        if(items == null)
+        {
+            return (resultInt, resultString);
+        }
+
         foreach (var item in items)
         {
             switch (item.ValueKind)
@@ -163,7 +168,12 @@ public static class FileOperationsManager
     public static (List<FilesDownloadOperationItem<int>>, List<FilesDownloadOperationItem<string>>) GetIds(IEnumerable<FilesDownloadOperationItem<JsonElement>> items)
     {
         var (resultInt, resultString) = (new List<FilesDownloadOperationItem<int>>(), new List<FilesDownloadOperationItem<string>>());
-
+        
+        if(items == null)
+        {
+            return (resultInt, resultString);
+        }
+        
         foreach (var item in items)
         {
             if (item.Id.ValueKind == JsonValueKind.Number)

@@ -26,11 +26,15 @@
 
 namespace ASC.AI.Models.ResponseDto;
 
+/// <summary>
+/// The attachment message content.
+/// </summary>
 public class AttachmentContentDto : MessageContentDto
 {
     /// <summary>
     /// The content block type. Always equals "Attachment".
     /// </summary>
+    /// <example>Attachment</example>
     public override MessageContentType Type => MessageContentType.Attachment;
 
     /// <summary>
@@ -41,11 +45,13 @@ public class AttachmentContentDto : MessageContentDto
     /// <summary>
     /// The display title of the attached file.
     /// </summary>
+    /// <example>Report</example>
     public required string Title { get; init; }
 
     /// <summary>
     /// The file extension of the attached file (e.g., "docx", "pdf").
     /// </summary>
+    /// <example>.docx</example>
     public required string Extension { get; init; }
 }
 
@@ -53,5 +59,5 @@ public class AttachmentContentDto : MessageContentDto
     PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
 public static partial class AttachmentContentDtoMapper
 {
-    public static partial AttachmentContentDto MapToDto(this AttachmentMessageContent source);
+    public static partial AttachmentContentDto MapToDto(this TextAttachmentMessageContent source);
 }

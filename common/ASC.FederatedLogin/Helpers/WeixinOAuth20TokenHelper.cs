@@ -79,7 +79,7 @@ public class WeixinOAuth20TokenHelper(
             stateUriBuilder.Query = stateQuery[1..];
         }
 
-        var state = HttpUtility.UrlEncode(stateUriBuilder.Uri.AbsoluteUri);
+        var state = HttpUtility.UrlEncode(HttpUtility.UrlEncode(stateUriBuilder.Uri.AbsoluteUri));
         query += $"&state={state}";
 
         if (additionalArgs != null)

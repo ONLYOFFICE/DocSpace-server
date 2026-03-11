@@ -34,12 +34,14 @@ public class UpdateRoomGroupRequestDto
     /// <summary>
     /// The group ID.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "id")]
     public required int Id { get; set; }
 
     /// <summary>
     /// The request for updating a group.
     /// </summary>
+    /// <example>{"groupName": "New Group Name"}</example>
     [FromBody]
     public required UpdateRoomGroupRequest UpdateRoom { get; set; }
 }
@@ -49,16 +51,19 @@ public class UpdateRoomGroupRequest
     /// <summary>
     /// The list of room IDs to add to the group.
     /// </summary>
+    /// <example>[1, 2, 3]</example>
     public List<JsonElement> RoomsToAdd { get; set; }
 
     /// <summary>
     /// The list of room IDs to remove from the group.
     /// </summary>
+    /// <example>[1, 2, 3]</example>
     public List<JsonElement> RoomsToRemove { get; set; }
 
     /// <summary>
     /// The group name.
     /// </summary>
+    /// <example>New Group Name</example>
     [StringLength(128)]
     public string GroupName { get; set; }
 }

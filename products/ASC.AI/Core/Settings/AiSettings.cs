@@ -35,6 +35,7 @@ public class AiSettings
     public bool AiReady { get; init; }
     public bool AiReadyNeedReset { get; init; }
     public required string EmbeddingModel { get; init; }
+    public required IReadOnlyDictionary<string, string> ModelAliases { get; init; }
     public Guid? PortalMcpServerId { get; init; }
     public string KnowledgeSearchToolName => KnowledgeSearchTool.Name;
     public string WebSearchToolName => WebSearchTool.Name;

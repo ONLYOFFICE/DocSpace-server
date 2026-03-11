@@ -34,6 +34,7 @@ public class GetVectorizationTasksRequestDto
     /// <summary>
     /// The identifier of the room whose vectorization tasks are to be listed.
     /// </summary>
+    /// <example>42</example>
     [FromRoute(Name = "roomId")]
     public int RoomId { get; init; }
 }

@@ -186,6 +186,12 @@ public class AiProviderDao(
         return count;
     }
 
+    public async Task<bool> IsProviderNameExistsAsync(int tenantId, string title, int excludedProviderId = 0)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        return await dbContext.IsProviderNameExistsAsync(tenantId, title, excludedProviderId);
+    }
+
     public async Task<AiProvider> UpdateProviderAsync(int tenantId, AiProvider provider)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();

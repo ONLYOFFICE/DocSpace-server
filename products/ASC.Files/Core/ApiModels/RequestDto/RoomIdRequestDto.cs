@@ -34,6 +34,7 @@ public class RoomIdRequestDto<T>
     /// <summary>
     /// The room ID.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "id")]
     public required T Id { get; set; }
 }

@@ -34,18 +34,21 @@ public class ExternalShareDataRequestDto
     /// <summary>
     /// The unique key of the external shared data.
     /// </summary>
+    /// <example>doc_key_123</example>
     [FromRoute(Name = "key")]
     public required string Key { get; set; }
 
     /// <summary>
     /// The unique document identifier.
     /// </summary>
+    /// <example>1</example>
     [FromQuery(Name = "fileId")]
     public string FileId { get; set; } = null;
 
     /// <summary>
     /// The unique folder identifier.
     /// </summary>
+    /// <example>1</example>
     [FromQuery(Name = "folderId")]
     public string FolderId { get; set; } = null;
 }

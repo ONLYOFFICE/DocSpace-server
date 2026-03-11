@@ -29,6 +29,13 @@ namespace ASC.Core.Tenants;
 /// <summary>
 /// The tenant entity quota settings.
 /// </summary>
+/// <example>
+/// {
+///   "enableQuota": true,
+///   "defaultQuota": 1000,
+///   "lastRecalculateDate": "2024-01-01T00:00:00Z"
+/// }
+/// </example>
 public abstract class TenantEntityQuotaSettings
 {
     /// <summary>
@@ -44,16 +51,19 @@ public abstract class TenantEntityQuotaSettings
     /// <summary>
     /// Specifies if the quota is enabled for the tenant entity or not.
     /// </summary>
+    /// <example>true</example>
     public bool EnableQuota { get; set; }
 
     /// <summary>
     /// The default quota of the tenant entity.
     /// </summary>
+    /// <example>1000</example>
     public long DefaultQuota { get; set; } = DefaultQuotaValue;
 
     /// <summary>
     /// The date of the last quota recalculation.
     /// </summary>
+    /// <example>2024-01-01T00:00:00Z</example>
     public DateTime? LastRecalculateDate { get; set; }
 
 }

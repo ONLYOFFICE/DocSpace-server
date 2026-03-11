@@ -35,12 +35,14 @@ public class MoveGroupMemebersRequestDto
     /// <summary>
     /// The group ID to move from.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "fromId")]
     public required Guid FromId { get; set; }
 
     /// <summary>
     /// The group ID to move to.
     /// </summary>
+    /// <example>11111111-1111-1111-1111-111111111111</example>
     [FromRoute(Name = "toId")]
     public required Guid ToId { get; set; }
 }

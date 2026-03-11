@@ -32,18 +32,21 @@ namespace ASC.Web.Files.Core.Entries;
 public class EncryptionKeyPairDto
 {
     /// <summary>
-    /// The private key.
+    /// The encrypted private key.
     /// </summary>
+    /// <example>MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDQg...</example>
     public string PrivateKeyEnc { get; set; }
 
     /// <summary>
     /// The public key.
     /// </summary>
+    /// <example>-----BEGIN PUBLIC KEY----------END PUBLIC KEY-----</example>
     public string PublicKey { get; set; }
 
     /// <summary>
     /// The user ID of the encryption keys.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     public Guid UserId { get; set; }
 }
 

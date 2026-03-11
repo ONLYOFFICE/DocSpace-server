@@ -34,23 +34,27 @@ public class RoomDataLifetimeDto
     /// <summary>
     /// Specifies whether to permanently delete the room data or not.
     /// </summary>
+    /// <example>true</example>
     public bool DeletePermanently { get; set; }
 
     /// <summary>
     /// Specifies the time period type of the room data lifetime.
     /// </summary>
+    /// <example>2</example>
     [EnumDataType(typeof(RoomDataLifetimePeriod))]
     public RoomDataLifetimePeriod Period { get; set; }
 
     /// <summary>
     /// Specifies the time period value of the room data lifetime.
     /// </summary>
+    /// <example>33</example>
     [Range(1, 999)]
     public int? Value { get; set; }
 
     /// <summary>
     /// Specifies whether the room data lifetime setting is enabled or not.
     /// </summary>
+    /// <example>true</example>
     public bool? Enabled { get; set; }
 }
 

@@ -206,6 +206,7 @@ public class AiSettingsService(
             AiReady = aiReady,
             AiReadyNeedReset = needResetProviders,
             EmbeddingModel = vectorizationGlobalSettings.Model.Id,
+            ModelAliases = aiSettingsStore.GetModelAliases(),
             PortalMcpServerId = docSpaceMcpServer?.Id
         };
     }

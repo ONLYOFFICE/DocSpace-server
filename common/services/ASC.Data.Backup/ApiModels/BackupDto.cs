@@ -34,17 +34,20 @@ public class BackupDto
     /// <summary>
     /// The backup storage type.
     /// </summary>
+    /// <example>Documents</example>
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public BackupStorageType? StorageType { get; set; }
 
     /// <summary>
     /// The backup storage parameters.
     /// </summary>
+    /// <example>[{"key": "path", "value": "/backup"}]</example>
     public IEnumerable<ItemKeyValuePair<object, object>> StorageParams { get; set; }
 
     /// <summary>
     /// Specifies if a dump will be created or not.
     /// </summary>
+    /// <example>false</example>
     public bool Dump { get; set; }
 }
 
@@ -57,18 +60,21 @@ public class BackupsCountDto
     /// <summary>
     /// The from date.
     /// </summary>
+    /// <example>2025-01-01T00:00:00Z</example>
     [FromQuery(Name = "from")]
     public DateTime? From { get; set; }
 
     /// <summary>
     /// The to date.
     /// </summary>
+    /// <example>2025-12-31T23:59:59Z</example>
     [FromQuery(Name = "to")]
     public DateTime? To { get; set; }
 
     /// <summary>
     /// Specifies if the backups are paid or not.
     /// </summary>
+    /// <example>false</example>
     [FromQuery(Name = "paid")]
     public bool Paid { get; set; }
 }
@@ -81,5 +87,6 @@ public class BackupServiceStateDto
     /// <summary>
     /// Specifies if the backup service is enabled or not.
     /// </summary>
+    /// <example>true</example>
     public bool Enabled { get; set; }
 }

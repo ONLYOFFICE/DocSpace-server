@@ -34,24 +34,28 @@ public class HistoryRequestDto
     /// <summary>
     /// The file ID of the history request.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "fileId")]
     public required int FileId { get; set; }
 
     /// <summary>
     /// The start date of the history.
     /// </summary>
+    /// <example>2025-01-01T00:00:00.0000000Z</example>
     [FromQuery(Name = "fromDate")]
     public ApiDateTime FromDate { get; set; }
 
     /// <summary>
     /// The end date of the history.
     /// </summary>
+    /// <example>2025-12-31T23:59:59.0000000Z</example>
     [FromQuery(Name = "toDate")]
     public ApiDateTime ToDate { get; set; }
 
     /// <summary>
     /// The number of history entries to retrieve for the file log.
     /// </summary>
+    /// <example>25</example>
     [FromQuery(Name = "count")]
     [Range(1, ApiContext.MaxCount)]
     public int Count { get; set; } = ApiContext.DefaultCount;
@@ -59,6 +63,7 @@ public class HistoryRequestDto
     /// <summary>
     /// The starting index for retrieving a subset of file history entries.
     /// </summary>
+    /// <example>0</example>
     [FromQuery(Name = "startIndex")]
     public int StartIndex { get; set; }
 }
@@ -71,24 +76,28 @@ public class HistoryFolderRequestDto
     /// <summary>
     /// The folder ID of the history request.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "folderId")]
     public required int FolderId { get; set; }
 
     /// <summary>
     /// The start date of the history request.
     /// </summary>
+    /// <example>2025-01-01T00:00:00.0000000Z</example>
     [FromQuery(Name = "fromDate")]
     public ApiDateTime FromDate { get; set; }
 
     /// <summary>
     /// The end date of the history request.
     /// </summary>
+    /// <example>2025-12-31T23:59:59.0000000Z</example>
     [FromQuery(Name = "toDate")]
     public ApiDateTime ToDate { get; set; }
 
     /// <summary>
     /// The number of records to retrieve for the folder history.
     /// </summary>
+    /// <example>25</example>
     [FromQuery(Name = "count")]
     [Range(1, ApiContext.MaxCount)]
     public int Count { get; set; } = ApiContext.DefaultCount;
@@ -96,6 +105,7 @@ public class HistoryFolderRequestDto
     /// <summary>
     /// The starting index from which the history records are retrieved in the request.
     /// </summary>
+    /// <example>0</example>
     [FromQuery(Name = "startIndex")]
     public int StartIndex { get; set; }
 }

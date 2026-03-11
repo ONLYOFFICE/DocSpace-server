@@ -34,35 +34,42 @@ public record ProviderDto(string Name, string Key, bool Connected, bool Oauth = 
     /// <summary>
     /// The provider name.
     /// </summary>
+    /// <example>GoogleDrive</example>
     public string Name { get; init; } = Name;
 
     /// <summary>
     /// The provider key.
     /// </summary>
+    /// <example>google-drive</example>
     public string Key { get; init; } = Key;
 
     /// <summary>
     /// Specifies whether the provider is connected.
     /// </summary>
+    /// <example>true</example>
     public bool Connected { get; init; } = Connected;
 
     /// <summary>
     /// Specifies if the provider is OAuth.
     /// </summary>
+    /// <example>true</example>
     public bool Oauth { get; init; } = Oauth;
 
     /// <summary>
     /// The provider redirect URL.
     /// </summary>
+    /// <example>http://localhost/redirect</example>
     public string RedirectUrl { get; init; } = RedirectUrl;
 
     /// <summary>
     /// The required connection URL flag.
     /// </summary>
+    /// <example>false</example>
     public bool RequiredConnectionUrl { get; init; } = RequiredConnectionUrl;
 
     /// <summary>
     /// The provider OAuth client ID.
     /// </summary>
+    /// <example>client-id-123</example>
     public string ClientId { get; init; } = ClientId;
 }

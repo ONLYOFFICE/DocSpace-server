@@ -34,27 +34,32 @@ public class SecurityInfoRequestDto
     /// <summary>
     /// The list of the shared folder IDs.
     /// </summary>
+    /// <example>[1, 2, 3]</example>
     public List<JsonElement> FolderIds { get; set; } = [];
 
     /// <summary>
     /// The list of the shared file IDs.
     /// </summary>
+    /// <example>[1, 2, 3]</example>
     public List<JsonElement> FileIds { get; set; } = [];
 
     /// <summary>
     /// The collection of sharing parameters.
     /// </summary>
+    /// <example>[{"access": 1, "shareTo": "00000000-0000-0000-0000-000000000000"}]</example>
     [MaxEmailInvitations]
     public List<FileShareParams> Share { get; set; }
 
     /// <summary>
     /// Specifies whether to notify users about the shared file or not.
     /// </summary>
+    /// <example>true</example>
     public bool Notify { get; set; }
 
     /// <summary>
     /// The message to send when notifying about the shared file.
     /// </summary>
+    /// <example>You have been granted access to the file</example>
     [StringLength(255)]
     public string SharingMessage { get; set; }
 }
@@ -67,17 +72,20 @@ public class SecurityInfoSimpleRequestDto
     /// <summary>
     /// The collection of sharing parameters.
     /// </summary>
+    /// <example>[{"access": 1, "shareTo": "00000000-0000-0000-0000-000000000000"}]</example>
     [MaxEmailInvitations]
     public List<FileShareParams> Share { get; set; }
 
     /// <summary>
     /// Specifies whether to notify users about the shared file or not.
     /// </summary>
+    /// <example>true</example>
     public bool Notify { get; set; }
 
     /// <summary>
     /// The message to send when notifying about the shared file.
     /// </summary>
+    /// <example>You have been granted access to the file</example>
     [StringLength(255)]
     public string SharingMessage { get; set; }
 }
@@ -90,6 +98,7 @@ public class FileSecurityInfoSimpleRequestDto<T>
     /// <summary>
     /// The file ID.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "fileId")]
     public required T FileId { get; set; }
 
@@ -108,6 +117,7 @@ public class FolderSecurityInfoSimpleRequestDto<T>
     /// <summary>
     /// The folder ID.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "folderId")]
     public required T FolderId { get; set; }
 

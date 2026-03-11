@@ -70,26 +70,31 @@ public class BackupHistoryRecord
     /// <summary>
     /// The backup ID.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     public required Guid Id { get; set; }
 
     /// <summary>
     /// The backup file name.
     /// </summary>
+    /// <example>tenant-backup</example>
     public required string FileName { get; set; }
 
     /// <summary>
     /// The backup storage type.
     /// </summary>
+    /// <example>Documents</example>
     public required BackupStorageType StorageType { get; set; }
 
     /// <summary>
     /// The backup creation date.
     /// </summary>
+    /// <example>2026-03-01T02:15:00Z</example>
     public required DateTime CreatedOn { get; set; }
 
     /// <summary>
     /// The backup expiration date.
     /// </summary>
+    /// <example>2026-03-31T02:15:00Z</example>
     public required DateTime ExpiresOn { get; set; }
 }
 

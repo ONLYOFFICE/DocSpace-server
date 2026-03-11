@@ -34,6 +34,7 @@ public class DumpDto
     /// <summary>
     /// Specifies if a dump will be created or not.
     /// </summary>
+    /// <example>true</example>
     [FromQuery]
     public bool Dump { get; set; }
 }

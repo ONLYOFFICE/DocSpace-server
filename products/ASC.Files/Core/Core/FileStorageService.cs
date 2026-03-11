@@ -1643,7 +1643,7 @@ public class FileStorageService //: IFileStorageService
 
                 var counter = 0;
 
-                if (!string.IsNullOrWhiteSpace(docTemplate.ThumbnailPath))
+                if (!string.IsNullOrWhiteSpace(docTemplate?.ThumbnailPath))
                 {
                     foreach (var size in thumbnailSettings.Sizes)
                     {
@@ -1903,8 +1903,6 @@ public class FileStorageService //: IFileStorageService
 
             await fileDao.SaveProperties(fileId, properties);
 
-            var count = await GetPureSharesCountAsync(folder.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, "");
-            await socketManager.CreateFormAsync(file, securityContext.CurrentAccount.ID, count <= 1);
             await socketManager.CreateFileAsync(file);
         }
 
@@ -4023,7 +4021,10 @@ public class FileStorageService //: IFileStorageService
                                                 break;
                                             }
                                             await filesMessageService.SendAsync(MessageAction.RoomCreateUser, entry, user.Id, ace.Access, null, true, name);
-                                            await notifyClient.SendInvitedToRoom(folder, user);
+                                            if (notify)
+                                            {
+                                                await notifyClient.SendInvitedToRoom(folder, user);
+                                            }
                                             break;
                                         case EventType.Remove:
                                             if (beforeOwnerChange)
@@ -4034,11 +4035,14 @@ public class FileStorageService //: IFileStorageService
                                             break;
                                         case EventType.Update:
                                             await filesMessageService.SendAsync(MessageAction.RoomUpdateAccessForUser, entry, user.Id, ace.Access, pastRecord.Share, true, name);
-                                            await notifyClient.SendRoomUpdateAccessForUser(folder, user, ace.Access);
+                                            if (notify)
+                                            {
+                                                await notifyClient.SendRoomUpdateAccessForUser(folder, user, ace.Access);
 
-                                            var role = FileShareExtensions.GetAccessString(ace.Access, true, folder.FolderType == FolderType.AiRoom);
-                                            var url = commonLinkUtility.GetFullAbsolutePath($"rooms/shared/{folder.Id}");
-                                            await studioNotifyService.SendMsgUserRoleChangedAsync(user, folder.Title, url, role, folder.FolderType == FolderType.AiRoom);
+                                                var role = FileShareExtensions.GetAccessString(ace.Access, true, folder.FolderType == FolderType.AiRoom);
+                                                var url = commonLinkUtility.GetFullAbsolutePath($"rooms/shared/{folder.Id}");
+                                                await studioNotifyService.SendMsgUserRoleChangedAsync(user, folder.Title, url, role, folder.FolderType == FolderType.AiRoom);
+                                            }
                                             break;
                                     }
                                 }
@@ -4662,6 +4666,8 @@ public class FileStorageService //: IFileStorageService
 
     public async Task<List<AceShortWrapper>> SendEditorNotifyAsync<T>(T fileId, MentionMessageWrapper mentionMessage)
     {
+        ArgumentNullException.ThrowIfNull(mentionMessage?.Emails);
+
         if (!authContext.IsAuthenticated)
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
@@ -4672,19 +4678,14 @@ public class FileStorageService //: IFileStorageService
 
         if (file == null)
         {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
+            throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
-        var canRead = await fileSecurity.CanReadAsync(file);
+        var canComment = await fileSecurity.CanCommentAsync(file);
 
-        if (!canRead)
+        if (!canComment)
         {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
-        }
-
-        if (mentionMessage?.Emails == null)
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_BadRequest);
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
         }
 
         var showSharingSettings = false;
@@ -5176,11 +5177,11 @@ public class FileStorageService //: IFileStorageService
     public async Task ManageFormFilling<T>(T formId, FormFillingManageAction action)
     {
         var fileDao = daoFactory.GetFileDao<T>();
-        var folderDao = daoFactory.GetFolderDao<T>();
         var form = await fileDao.GetFileAsync(formId);
         await ValidateChangeRolesPermission(form);
 
         var properties = await daoFactory.GetFileDao<T>().GetProperties(formId);
+        var room = await DocSpaceHelper.GetParentRoom(form, daoFactory.GetFolderDao<T>());
         switch (action)
         {
             case FormFillingManageAction.Stop:
@@ -5188,20 +5189,29 @@ public class FileStorageService //: IFileStorageService
                 {
                     throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
                 }
-                var role = await fileDao.GetFormRoles(formId).Where(r => !r.Submitted).FirstOrDefaultAsync();
-                properties.FormFilling.FillingStopedDate = DateTime.UtcNow;
-                properties.FormFilling.FormFillingInterruption =
-                    new FormFillingInterruption
-                    {
-                        UserId = authContext.CurrentAccount.ID,
-                        RoleName = role?.RoleName
-                    };
-                var room = await DocSpaceHelper.GetParentRoom(form, folderDao);
-                var allRoleUserIds = await fileDao.GetFormRoles(form.Id).Where(role => role.UserId != authContext.CurrentAccount.ID).Select(r => r.UserId).ToListAsync();
+                if (room.FolderType == FolderType.VirtualDataRoom)
+                {
+                    var role = await fileDao.GetFormRoles(formId).Where(r => !r.Submitted).FirstOrDefaultAsync();
+                    properties.FormFilling.FillingStopedDate = DateTime.UtcNow;
+                    properties.FormFilling.FormFillingInterruption =
+                        new FormFillingInterruption
+                        {
+                            UserId = authContext.CurrentAccount.ID,
+                            RoleName = role?.RoleName
+                        };
+
+                    var allRoleUserIds = await fileDao.GetFormRoles(form.Id).Where(role => role.UserId != authContext.CurrentAccount.ID).Select(r => r.UserId).ToListAsync();
+                    await notifyClient.SendFormFillingEvent(room, form, allRoleUserIds, typeof(StoppedFormFillingNotifyAction), authContext.CurrentAccount.ID);
+                }
+                if (room.FolderType == FolderType.FillingFormsRoom)
+                {
+                    properties.FormFilling.StartFilling = false;
+                }
 
                 var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+                await webhookManager.PublishAsync(WebhookTrigger.FormStopped, form);
                 await filesMessageService.SendAsync(MessageAction.FormStopped, form, MessageInitiator.DocsService, user?.DisplayUserName(false, displayUserSettingsHelper), form.Title);
-                await notifyClient.SendFormFillingEvent(room, form, allRoleUserIds, typeof(StoppedFormFillingNotifyAction), authContext.CurrentAccount.ID);
+
                 break;
 
             case FormFillingManageAction.Resume:
@@ -5209,12 +5219,33 @@ public class FileStorageService //: IFileStorageService
                 properties.FormFilling.FormFillingInterruption = null;
                 break;
 
+            case FormFillingManageAction.Start:
+                if (!await fileSecurity.CanStartFillingAsync(form, authContext.CurrentAccount.ID))
+                {
+                    throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
+                }
+                if (room.FolderType == FolderType.FillingFormsRoom)
+                {
+                    properties.FormFilling.StartFilling = true;
+                }
+
+                break;
+
+            case FormFillingManageAction.Edit:
+                if (room.FolderType == FolderType.FillingFormsRoom)
+                {
+                    properties.FormFilling.StartFilling = false;
+                    properties.FormFilling.OriginalFormVersion = form.Version;
+                }
+
+                break;
+
             default:
                 throw new InvalidOperationException();
         }
 
         await fileDao.SaveProperties(formId, properties);
-        await socketManager.UpdateFileAsync(form);
+        await socketManager.CreateFileAsync(form);
     }
 
     public async IAsyncEnumerable<FormResultsDto> GetSubmissionsByFormId(int formId)
@@ -5263,7 +5294,7 @@ public class FileStorageService //: IFileStorageService
         }
 
         var results = await formFillingReportCreator
-            .GetFormFillingResults(room.Id, form.Id);
+            .GetFormFillingResults(room.Id, form.Id, form.Version);
 
         foreach (var result in results)
         {

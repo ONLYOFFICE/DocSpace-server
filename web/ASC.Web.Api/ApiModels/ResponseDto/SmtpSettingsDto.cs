@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2026
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,65 +34,66 @@ public class SmtpSettingsDto
     /// <summary>
     /// The SMTP host.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "mail.example.com")]
+    /// <example>mail.example.com</example>
     [StringLength(255)]
     public string Host { get; set; }
 
     /// <summary>
     /// The SMTP port.
     /// </summary>
-    [SwaggerSchemaCustom(Example = 25)]
+    /// <example>25</example>
     [Range(1, 65535)]
     public int? Port { get; set; }
 
     /// <summary>
     /// The sender address.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "notify@example.com")]
+    /// <example>notify@example.com</example>
     [StringLength(255)]
     public string SenderAddress { get; set; }
 
     /// <summary>
     /// The sender display name.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "Postman")]
+    /// <example>Postman</example>
     [StringLength(255)]
     public string SenderDisplayName { get; set; }
 
     /// <summary>
     /// The credentials username.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "notify@example.com")]
+    /// <example>notify@example.com</example>
     [StringLength(255)]
     public string CredentialsUserName { get; set; }
 
     /// <summary>
     /// The credentials user password.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "{password}")]
+    /// <example>example value</example>
     public string CredentialsUserPassword { get; set; }
 
     /// <summary>
     /// Specifies whether the SSL is enabled or not.
     /// </summary>
-    [SwaggerSchemaCustom(Example = false)]
+    /// <example>true</example>
     public bool EnableSSL { get; set; }
 
     /// <summary>
     /// Specifies whether the authentication is enabled or not.
     /// </summary>
+    /// <example>true</example>
     public bool EnableAuth { get; set; }
 
     /// <summary>
     /// Specifies whether to use NTLM or not.
     /// </summary>
-    [SwaggerSchemaCustom(Example = false)]
+    /// <example>true</example>
     public bool UseNtlm { get; set; }
 
     /// <summary>
     /// Specifies if the current settings are default or not.
     /// </summary>
-    [SwaggerSchemaCustom(Example = false)]
+    /// <example>true</example>
     public bool IsDefaultSettings { get; set; }
 }
 

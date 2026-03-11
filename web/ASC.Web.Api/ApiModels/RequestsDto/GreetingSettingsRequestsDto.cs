@@ -34,6 +34,7 @@ public class GreetingSettingsRequestsDto
     /// <summary>
     /// The title of the tenant greeting settings.
     /// </summary>
+    /// <example>Welcome to Our Portal</example>
     [StringLength(255)]
     public required string Title { get; set; }
 }

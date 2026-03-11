@@ -940,17 +940,20 @@ public static class DocumentService
         /// <summary>
         /// The type of the file for the source viewed or edited document.
         /// </summary>
+        /// <example>docx</example>
         [JsonPropertyName("filetype")]
         public required string FileType { get; set; }
 
         /// <summary>
         /// The encrypted signature added to the config in the form of a token.
         /// </summary>
+        /// <example>token</example>
         public string Token { get; set; }
 
         /// <summary>
         /// The absolute URL where the source viewed or edited document is stored.
         /// </summary>
+        /// <example>https://example.com/file.docx</example>
         [Url]
         public required string Url { get; set; }
     }

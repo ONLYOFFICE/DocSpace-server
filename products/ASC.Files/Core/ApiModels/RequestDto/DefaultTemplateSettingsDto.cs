@@ -32,12 +32,26 @@ namespace ASC.Files.Core.ApiModels.RequestDto
     public class DefaultTemplateSettingsRequestDto
     {
         /// <summary>
-        /// File id to replace template with (or null to use default template)
+        /// File id to replace template with
         /// </summary>
-        public int? SelectedFile { get; set; }
+        /// <example>1</example>
+        public required JsonElement SelectedFile { get; set; }
         /// <summary>
         /// File extension of a template to replace
         /// </summary>
+        /// <example>.docx</example>
+        public required string FileExtension { get; set; }
+    }
+
+    /// <summary>
+    /// Default templates settings reset request parameters.
+    /// </summary>
+    public class DefaultTemplateSettingsResetRequestDto
+    {
+        /// <summary>
+        /// File extension of a template to reset
+        /// </summary>
+        /// <example>.docx</example>
         public required string FileExtension { get; set; }
     }
 
@@ -49,11 +63,13 @@ namespace ASC.Files.Core.ApiModels.RequestDto
         /// <summary>
         /// File extension of a template to replace
         /// </summary>
+        /// <example>.docx</example>
         public required string FileExtension { get; set; }
 
         /// <summary>
         /// File to replace template with
         /// </summary>
+        /// <example>binary file data</example>
         public required IFormFile File { get; set; }
     }
 }

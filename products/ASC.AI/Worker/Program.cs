@@ -24,13 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.AI.Core.Export;
-using ASC.AI.Worker;
-using ASC.AI.Worker.Extensions;
-using ASC.AI.Worker.Handlers;
-using ASC.Common.DependencyInjection;
-using ASC.Files.Core.Vectorization.Events;
-
 var options = new WebApplicationOptions
 {
     Args = args,
@@ -80,6 +73,8 @@ try
 
     await eventBus.SubscribeAsync<MessageExportIntegrationEvent, MessageExportIntegrationEventHandler>();
     await eventBus.SubscribeAsync<ChatExportIntegrationEvent, ChatExportIntegrationEventHandler>();
+
+    await eventBus.SubscribeAsync<ChatDeletionIntegrationEvent, ChatDeletionIntegrationEventHandler>();
 
     logger.Info("Starting web host ({applicationContext})...", AppName);
 

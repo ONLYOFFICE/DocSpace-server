@@ -117,9 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AccountingCustomerOperationServiceDesc_embedding" xml:space="preserve">
-    <value>Vektorisierung</value>
-  </data>
   <data name="AccountingCustomerOperationContact" xml:space="preserve">
     <value>Kontakt</value>
   </data>
@@ -141,7 +138,7 @@
   <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
     <value>Menge</value>
   </data>
-  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
+  <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
     <value>KI-Tools</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
@@ -150,20 +147,26 @@
   <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
     <value>Speicherplatz</value>
   </data>
+  <data name="AccountingCustomerOperationServiceDesc_embedding" xml:space="preserve">
+    <value>Vektorisierung</value>
+  </data>
   <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
     <value>Guthaben aufladen</value>
   </data>
   <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
     <value>Maßeinheit</value>
   </data>
-  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
-    <value>Tokens</value>
-  </data>
   <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
     <value>Backup</value>
   </data>
+  <data name="AccountingCustomerOperationServiceUOM_chat" xml:space="preserve">
+    <value>Tokens</value>
+  </data>
   <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
     <value>GB</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_embedding" xml:space="preserve">
+    <value>Tokens</value>
   </data>
   <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
     <value>Kundenvorgangsbericht ({0}-{1})</value>
@@ -1247,12 +1250,6 @@
   </data>
   <data name="TariffsFeature_users_exception" xml:space="preserve">
     <value>Die Anzahl der Benutzer sollte {0} nicht überschreiten</value>
-  </data>
-  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
-    <value>KI-Websuche</value>
-  </data>
-  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
-    <value>Laden Sie Guthaben in Ihre Wallet auf, um die KI-Websuche freizuschalten.</value>
   </data>
   <data name="Tariffs_admin" xml:space="preserve">
     <value>Business</value>

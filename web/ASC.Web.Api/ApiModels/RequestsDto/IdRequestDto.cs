@@ -34,6 +34,7 @@ public class IdRequestDto<T>
     /// <summary>
     /// The ID extracted from the route parameters.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "id")]
     public required T Id { get; set; }
 }
@@ -46,6 +47,7 @@ public class LoginEvenrIdRequestDto
     /// <summary>
     /// The ID of the specific login event.
     /// </summary>
+    /// <example>12345</example>
     [FromRoute(Name = "loginEventId")]
     public required int Id { get; set; }
 }
@@ -58,6 +60,7 @@ public class UserIdRequestDto
     /// <summary>
     /// The user ID extracted from the route parameters.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "userId")]
     public required Guid Id { get; set; }
 }
@@ -70,6 +73,7 @@ public class UserIDRequestDto
     /// <summary>
     /// The user ID extracted from the route parameters.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "userID")]
     public required Guid Id { get; set; }
 }
@@ -82,6 +86,7 @@ public class ProductIdRequestDto
     /// <summary>
     /// The ID of the product extracted from the route parameters.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "productid")]
     public required Guid ProductId { get; set; }
 }
@@ -94,12 +99,14 @@ public class UserProductIdsRequestDto
     /// <summary>
     /// The ID of the product extracted from the query parameters.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromQuery(Name = "productid")]
     public required Guid ProductId { get; set; }
 
     /// <summary>
     /// The user ID extracted from the query parameters.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromQuery(Name = "userid")]
     public required Guid UserId { get; set; }
 }
@@ -112,6 +119,7 @@ public class MigratorNameRequestDto
     /// <summary>
     /// The migrator name extracted from the route parameters.
     /// </summary>
+    /// <example>GoogleWorkspace</example>
     [FromRoute(Name = "migratorName")]
     public required string MigratorName { get; set; }
 }

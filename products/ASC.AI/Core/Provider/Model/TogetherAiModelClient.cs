@@ -30,22 +30,12 @@ public class TogetherAiModelClient(HttpClient client, string url, string apiKey)
 {
     protected override async Task<IEnumerable<ModelInfo>> GetModelsDataAsync(HttpResponseMessage response, Scope? scope)
     {
-        var content = await response.Content.ReadFromJsonAsync<IEnumerable<TogetherModel>>();
+        var content = await response.Content.ReadFromJsonAsync<IEnumerable<ModelInfo>>();
         if (content == null)
         {
             return [];
         }
 
-        if (scope is Scope.Chat)
-        {
-            content = content.Where(x => x.Type == "chat");
-        }
-
         return content.OrderByDescending(x => x.Created);
-    }
-
-    private class TogetherModel : ModelInfo
-    {
-        public required string Type { get; init; }
     }
 }

@@ -34,36 +34,43 @@ public class FormGalleryDto
     /// <summary>
     /// The form gallery path.
     /// </summary>
+    /// <example>/forms/templates</example>
     public required string Path { get; set; }
 
     /// <summary>
     /// The form gallery domain.
     /// </summary>
+    /// <example>https://forms.example.com</example>
     public required string Domain { get; set; }
 
     /// <summary>
     /// The form gallery extension.
     /// </summary>
+    /// <example>.docxf</example>
     public required string Ext { get; set; }
 
     /// <summary>
     /// The form gallery upload path.
     /// </summary>
+    /// <example>/forms/upload</example>
     public required string UploadPath { get; set; }
 
     /// <summary>
     /// The form gallery upload domain.
     /// </summary>
+    /// <example>https://upload.forms.example.com</example>
     public required string UploadDomain { get; set; }
 
     /// <summary>
     /// The form gallery upload extension.
     /// </summary>
+    /// <example>.docxf</example>
     public required string UploadExt { get; set; }
 
     /// <summary>
     /// The form gallery upload dashboard.
     /// </summary>
+    /// <example>/dashboard/forms</example>
     public required string UploadDashboard { get; set; }
 }
 

@@ -29,16 +29,23 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 /// <summary>
 /// The request parameters for configuring notification settings.
 /// </summary>
+/// <example>
+/// {
+///   "isEnabled": true
+/// }
+/// </example>
 public class NotificationSettingsRequestsDto
 {
     /// <summary>
     /// The notification to be configured.
     /// </summary>
+    /// <example>0</example>
     public required NotificationType Type { get; set; }
 
     /// <summary>
     /// Specifies if the specified notification type is enabled or not.
     /// </summary>
+    /// <example>true</example>
     public bool IsEnabled { get; set; }
 }
 
@@ -51,6 +58,7 @@ public class NotificationTypeRequestsDto
     /// <summary>
     /// The type of notification to query, specified in the route.
     /// </summary>
+    /// <example>0</example>
     [FromRoute(Name = "type")]
     public required NotificationType Type { get; set; }
 }

@@ -34,24 +34,28 @@ public class AuthProvidersRequestDto
     /// <summary>
     /// Specifies whether to return providers that are available for invitation links, i.e. the user can login or register through these providers.
     /// </summary>
+    /// <example>false</example>
     [FromQuery(Name = "inviteView")]
     public bool InviteView { get; set; }
 
     /// <summary>
     /// Specifies whether to display the provider settings in a pop-up window (true) or redirect them to the desktop application (false).
     /// </summary>
+    /// <example>false</example>
     [FromQuery(Name = "settingsView")]
     public bool SettingsView { get; set; }
 
     /// <summary>
     /// The method that is called after authentication.
     /// </summary>
+    /// <example>onAuthCallback</example>
     [FromQuery(Name = "clientCallback")]
     public string ClientCallback { get; set; }
 
     /// <summary>
     /// The provider name if a response is required only from this provider.
     /// </summary>
+    /// <example>Google</example>
     [FromQuery(Name = "fromOnly")]
     public string FromOnly { get; set; }
 }

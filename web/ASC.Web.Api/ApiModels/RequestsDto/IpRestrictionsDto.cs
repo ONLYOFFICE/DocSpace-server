@@ -29,11 +29,17 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 /// <summary>
 /// The base parameters for managing the IP restriction settings.
 /// </summary>
+/// <example>
+/// {
+///   "ipRestrictions": []
+/// }
+/// </example>
 public class IpRestrictionsBaseRequestsDto
 {
     /// <summary>
     /// The list of IP restriction addresses.
     /// </summary>
+    /// <example>[{"ip": "192.168.1.0/24"}]</example>
     public IEnumerable<IpRestrictionBase> IpRestrictions { get; set; }
 }
 
@@ -45,10 +51,12 @@ public class IpRestrictionsDto
     /// <summary>
     /// The list of IP restriction addresses.
     /// </summary>
+    /// <example>[{ "ip": "192.0.2.1", "forAdmin": false }]</example>
     public required IEnumerable<IpRestrictionBase> IpRestrictions { get; set; }
 
     /// <summary>
     /// Specifies whether to enable IP restrictions or not.
     /// </summary>
+    /// <example>true</example>
     public bool? Enable { get; set; }
 }

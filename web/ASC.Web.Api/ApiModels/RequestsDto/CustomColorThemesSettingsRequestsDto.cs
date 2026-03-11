@@ -34,10 +34,25 @@ public class CustomColorThemesSettingsRequestsDto
     /// <summary>
     /// The custom color theme configuration.
     /// </summary>
+    /// <example>
+    /// {
+    ///   "id": 1,
+    ///   "name": "blue",
+    ///   "main": {
+    ///     "accent": "#4781D1",
+    ///     "buttons": "#5299E0"
+    ///   },
+    ///   "text": {
+    ///     "accent": "#FFFFFF",
+    ///     "buttons": "#FFFFFF"
+    ///   }
+    /// }
+    /// </example>
     public CustomColorThemesSettingsItem Theme { get; set; }
 
     /// <summary>
     /// Specifies the optional value indicating the selected custom color theme.
     /// </summary>
+    /// <example>1</example>
     public int? Selected { get; set; }
 }

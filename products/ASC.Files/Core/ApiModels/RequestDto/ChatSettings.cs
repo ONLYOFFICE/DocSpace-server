@@ -26,10 +26,32 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// The chat settings.
+/// </summary>
 public class ChatSettings
 {
+    /// <summary>
+    /// The provider ID.
+    /// </summary>
+    /// <example>1</example>
     public int ProviderId { get; set; }
+
+    /// <summary>
+    /// The model ID.
+    /// </summary>
+    /// <example>gpt-4</example>
     public string ModelId { get; init; }
+
+    /// <summary>
+    /// The prompt.
+    /// </summary>
+    /// <example>Please analyze this document</example>
     public string Prompt { get; init; }
+
+    /// <summary>
+    /// Specifies whether the provider is internal or not.
+    /// </summary>
+    /// <example>false</example>
     public bool Internal => ProviderId == AiGateway.ProviderId;
 }

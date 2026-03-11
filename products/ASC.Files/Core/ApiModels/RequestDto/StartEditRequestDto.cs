@@ -34,6 +34,7 @@ public class StartEdit
     /// <summary>
     /// Specifies whether to share the file with other users for editing or not.
     /// </summary>
+    /// <example>false</example>
     public bool EditingAlone { get; set; }
 }
 
@@ -45,6 +46,7 @@ public class StartEditRequestDto<T>
     /// <summary>
     /// The file ID to start editing.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "fileId")]
     public required T FileId { get; set; }
 

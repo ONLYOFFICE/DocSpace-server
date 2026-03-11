@@ -41,9 +41,7 @@ public class MigrationOperation : DistributedTaskProgress
     public string LogName { get; set; }
 
     private readonly ILogger<MigrationOperation> _logger;
-    private readonly MigrationCore _migrationCore;
-    private readonly TenantManager _tenantManager;
-    private readonly SecurityContext _securityContext;
+    private readonly IServiceScopeFactory _serviceScopeFactory;
     private readonly IFusionCache _hybridCache;
 
     public MigrationOperation()
@@ -52,15 +50,11 @@ public class MigrationOperation : DistributedTaskProgress
     }
 
     public MigrationOperation(ILogger<MigrationOperation> logger,
-        MigrationCore migrationCore,
-        TenantManager tenantManager,
-        SecurityContext securityContext,
+        IServiceScopeFactory serviceScopeFactory,
         IFusionCache hybridCache)
     {
         _logger = logger;
-        _migrationCore = migrationCore;
-        _tenantManager = tenantManager;
-        _securityContext = securityContext;
+        _serviceScopeFactory = serviceScopeFactory;
         _hybridCache = hybridCache;
     }
 
@@ -85,6 +79,12 @@ public class MigrationOperation : DistributedTaskProgress
         var clearMigrationFolder = false;
         string folder = null;
         Migrator migrator = null;
+
+        await using var scope = _serviceScopeFactory.CreateAsyncScope();
+        var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
+        var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
+        var migrationCore = scope.ServiceProvider.GetRequiredService<MigrationCore>();
+
         try
         {
             var onlyParse = MigrationApiInfo == null;
@@ -95,9 +95,9 @@ public class MigrationOperation : DistributedTaskProgress
             }
             CustomSynchronizationContext.CreateContext();
 
-            var tenant = await _tenantManager.SetCurrentTenantAsync(TenantId);
-            await _securityContext.AuthenticateMeWithoutCookieAsync(_userId);
-            migrator = _migrationCore.GetMigrator(_migratorName);
+            var tenant = await tenantManager.SetCurrentTenantAsync(TenantId);
+            await securityContext.AuthenticateMeWithoutCookieAsync(_userId);
+            migrator = migrationCore.GetMigrator(_migratorName);
             migrator.OnProgressUpdateAsync = Migrator_OnProgressUpdateAsync;
 
             var culture = tenant.GetCulture();
@@ -113,7 +113,7 @@ public class MigrationOperation : DistributedTaskProgress
             folder = await _hybridCache.GetOrDefaultAsync<string>(key);
             await migrator.InitAsync(folder, onlyParse ? OperationType.Parse : OperationType.Migration, CancellationToken);
 
-            var tenantQuota = await _tenantManager.GetTenantQuotaAsync(TenantId);
+            var tenantQuota = await tenantManager.GetTenantQuotaAsync(TenantId);
             var maxTotalSize = tenantQuota?.MaxTotalSize ?? long.MaxValue;
 
             if (maxTotalSize > 0 && maxTotalSize != long.MaxValue)
@@ -161,6 +161,7 @@ public class MigrationOperation : DistributedTaskProgress
             {
                 ImportedUsers = migrator.GetGuidImportedUsers();
                 LogName = migrator.GetLogName();
+                await migrator.SaveLogAsync();
                 await migrator.DisposeAsync();
             }
             if (!CancellationToken.IsCancellationRequested)

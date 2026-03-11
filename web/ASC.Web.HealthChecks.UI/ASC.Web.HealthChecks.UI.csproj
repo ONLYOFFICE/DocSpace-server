@@ -2,7 +2,7 @@
 
   <PropertyGroup>
       <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-      <NoWarn>AD0001</NoWarn>
+      <NoWarn>AD0001,NU1902</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

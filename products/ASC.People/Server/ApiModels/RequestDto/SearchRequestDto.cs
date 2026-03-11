@@ -34,18 +34,21 @@ public class SearchDto
     /// <summary>
     /// The user status.
     /// </summary>
+    /// <example>1</example>
     [FromQuery(Name = "employeeStatus")]
     public EmployeeStatus? EmployeeStatus { get; set; }
 
     /// <summary>
     /// The user activation status.
     /// </summary>
+    /// <example>1</example>
     [FromQuery(Name = "activationStatus")]
     public EmployeeActivationStatus? ActivationStatus { get; set; }
 
     /// <summary>
     /// Specifies whether to exclude the user sharing settings or not.
     /// </summary>
+    /// <example>false</example>
     [FromQuery(Name = "excludeShared")]
     public bool? ExcludeShared { get; set; }
 }
@@ -58,6 +61,7 @@ public class SearchIdDto<T>
     /// <summary>
     /// The search ID.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "id")]
     public required T Id { get; set; }
 }
@@ -71,24 +75,28 @@ public class AdvancedSearchDto
     /// <summary>
     /// The user status.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "status")]
     public required EmployeeStatus Status { get; set; }
 
     /// <summary>
     /// The advanced search query.
     /// </summary>
+    /// <example>John</example>
     [FromQuery(Name = "query")]
     public string Query { get; set; }
 
     /// <summary>
     /// Specifies the criteria used to filter search results in advanced queries.
     /// </summary>
+    /// <example>displayName</example>
     [FromQuery(Name = "filterBy")]
     public string FilterBy { get; set; }
 
     /// <summary>
     /// The value used to filter the search query.
     /// </summary>
+    /// <example>John</example>
     [FromQuery(Name = "filterValue")]
     public string Text { get; set; }
 }

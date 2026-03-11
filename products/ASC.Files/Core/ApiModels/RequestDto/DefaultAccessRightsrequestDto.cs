@@ -34,6 +34,7 @@ public class DefaultAccessRightsrequestDto
     /// <summary>
     /// Sharing rights (None, ReadWrite, Read, Restrict, Varies, Review, Comment, FillForms, CustomFilter, RoomAdmin, Editing, Collaborator).
     /// </summary>
+    /// <example>[1]</example>
     [FromBody]
     public List<FileShare> Value { get; set; }
 }

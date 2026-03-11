@@ -35,41 +35,49 @@ public class FormRoleDto
     /// <summary>
     /// The role name.
     /// </summary>
+    /// <example>Approver</example>
     public required string RoleName { get; set; }
 
     /// <summary>
     /// The role color.
     /// </summary>
+    /// <example>#FF5733</example>
     public string RoleColor { get; set; }
 
     /// <summary>
     /// The user of the role.
     /// </summary>
+    /// <example>{"displayName": "John Doe"}</example>
     public EmployeeFullDto User { get; set; }
 
     /// <summary>
     /// The role sequence.
     /// </summary>
+    /// <example>1</example>
     public required int Sequence { get; set; }
 
     /// <summary>
     /// Specifies if the role is submitted.
     /// </summary>
+    /// <example>false</example>
     public required bool Submitted { get; set; }
 
     /// <summary>
     /// The user who stopped the role.
     /// </summary>
+    /// <example>{"displayName": "John Doe"}</example>
     public EmployeeFullDto StopedBy { get; set; }
 
     /// <summary>
     /// The role history.
     /// </summary>
+    /// <example>{"0": "2025-01-15T10:30:00Z"}</example>
     public Dictionary<int, DateTime> History { get; set; }
 
     /// <summary>
     /// The role status.
     /// </summary>
+    /// <example>0</example>
     public FormFillingStatus RoleStatus { get; set; }
 }
 [Scope]

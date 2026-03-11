@@ -34,90 +34,105 @@ public class SimpleByFilterRequestDto
     /// <summary>
     /// The user status.
     /// </summary>
+    /// <example>1</example>
     [FromQuery(Name = "employeeStatus")]
     public EmployeeStatus? EmployeeStatus { get; set; }
 
     /// <summary>
     /// The group ID.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromQuery(Name = "groupId")]
     public Guid? GroupId { get; set; }
 
     /// <summary>
     /// The user activation status.
     /// </summary>
+    /// <example>1</example>
     [FromQuery(Name = "activationStatus")]
     public EmployeeActivationStatus? ActivationStatus { get; set; }
 
     /// <summary>
     /// The user type.
     /// </summary>
+    /// <example>1</example>
     [FromQuery(Name = "employeeType")]
     public EmployeeType? EmployeeType { get; set; }
 
     /// <summary>
     /// The list of user types.
     /// </summary>
+    /// <example>[1, 2]</example>
     [FromQuery(Name = "employeeTypes")]
     public EmployeeType[] EmployeeTypes { get; set; }
 
     /// <summary>
     /// Specifies if the user is an administrator or not.
     /// </summary>
+    /// <example>false</example>
     [FromQuery(Name = "isAdministrator")]
     public bool? IsAdministrator { get; set; }
 
     /// <summary>
     /// The user payment status.
     /// </summary>
+    /// <example>0</example>
     [FromQuery(Name = "payments")]
     public Payments? Payments { get; set; }
 
     /// <summary>
     /// The account login type.
     /// </summary>
+    /// <example>0</example>
     [FromQuery(Name = "accountLoginType")]
     public AccountLoginType? AccountLoginType { get; set; }
 
     /// <summary>
     /// The quota filter (All - 0, Default - 1, Custom - 2).
     /// </summary>
+    /// <example>0</example>
     [FromQuery(Name = "quotaFilter")]
     public QuotaFilter? QuotaFilter { get; set; }
 
     /// <summary>
     /// Specifies whether the user should be a member of a group or not.
     /// </summary>
+    /// <example>false</example>
     [FromQuery(Name = "withoutGroup")]
     public bool? WithoutGroup { get; set; }
 
     /// <summary>
     /// Specifies whether the user should be a member of the group with the specified ID.
     /// </summary>
+    /// <example>false</example>
     [FromQuery(Name = "excludeGroup")]
     public bool? ExcludeGroup { get; set; }
 
     /// <summary>
     /// Specifies whether the user is invited by the current user or not.
     /// </summary>
+    /// <example>false</example>
     [FromQuery(Name = "invitedByMe")]
     public bool? InvitedByMe { get; set; }
 
     /// <summary>
     /// The inviter ID.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromQuery(Name = "inviterId")]
     public Guid? InviterId { get; set; }
 
     /// <summary>
     /// The filter area.
     /// </summary>
+    /// <example>0</example>
     [FromQuery(Name = "area")]
     public Area Area { get; set; } = Area.All;
 
     /// <summary>
     /// The maximum number of items to be retrieved in the response.
     /// </summary>
+    /// <example>25</example>
     [FromQuery(Name = "count")]
     [Range(1, ApiContext.MaxCount)]
     public int Count { get; set; } = ApiContext.DefaultCount;
@@ -125,30 +140,35 @@ public class SimpleByFilterRequestDto
     /// <summary>
     /// The zero-based index of the first item to be retrieved in a filtered result set.
     /// </summary>
+    /// <example>0</example>
     [FromQuery(Name = "startIndex")]
     public int StartIndex { get; set; }
 
     /// <summary>
     /// Specifies the property or field name by which the results should be sorted.
     /// </summary>
+    /// <example>displayName</example>
     [FromQuery(Name = "sortBy")]
     public string SortBy { get; set; }
 
     /// <summary>
     /// The order in which the results are sorted.
     /// </summary>
+    /// <example>0</example>
     [FromQuery(Name = "sortOrder")]
     public SortOrder SortOrder { get; set; }
 
     /// <summary>
     /// Represents the separator used to split filter criteria in query parameters.
     /// </summary>
+    /// <example>,</example>
     [FromQuery(Name = "filterSeparator")]
     public string FilterSeparator { get; set; }
 
     /// <summary>
     /// The search text used to filter results based on user input.
     /// </summary>
+    /// <example>John</example>
     [FromQuery(Name = "filterValue")]
     public string Text { get; set; }
 }

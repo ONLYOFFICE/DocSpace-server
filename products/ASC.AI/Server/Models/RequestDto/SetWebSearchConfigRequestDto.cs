@@ -34,6 +34,7 @@ public class SetWebSearchConfigRequestDto
     /// <summary>
     /// The web search configuration parameters.
     /// </summary>
+    /// <example>{"enabled": true, "type": 1, "key": "search-api-key-123"}</example>
     [FromBody]
     public required SetWebSearchSettingsRequestBody Body { get; init; }
 }
@@ -46,15 +47,18 @@ public class SetWebSearchSettingsRequestBody
     /// <summary>
     /// Indicates whether web search is enabled for AI chat sessions.
     /// </summary>
+    /// <example>true</example>
     public bool Enabled { get; init; }
 
     /// <summary>
     /// The type of web search engine to use.
     /// </summary>
+    /// <example>1</example>
     public EngineType Type { get; init; }
 
     /// <summary>
     /// The API key for the selected web search engine. Pass null to keep the existing key unchanged.
     /// </summary>
+    /// <example>search-api-key-123</example>
     public string? Key { get; init; }
 }

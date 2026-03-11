@@ -34,11 +34,13 @@ public class WebPluginRequests
     /// <summary>
     /// Controls whether the web plugin is active and operational.
     /// </summary>
+    /// <example>true</example>
     public bool Enabled { get; set; }
 
     /// <summary>
     /// The JSON-formatted configuration settings for the web plugin.
     /// </summary>
+    /// <example>{"theme":"dark","autoSave":true}</example>
     [StringLength(255)]
     public required string Settings { get; set; }
 }
@@ -51,12 +53,14 @@ public class WebPluginRequestsDto
     /// <summary>
     /// The web plugin name.
     /// </summary>
+    /// <example>example-plugin</example>
     [FromRoute(Name = "name")]
     public required string Name { get; set; }
 
     /// <summary>
     /// The configuration settings for the web plugin instance.
     /// </summary>
+    /// <example>{"enabled": true, "settings": "{\"theme\":\"dark\"}"}</example>
     [FromBody]
     public required WebPluginRequests WebPlugin { get; set; }
 }
@@ -69,6 +73,7 @@ public class WebPluginNameRequestDto
     /// <summary>
     /// The web plugin name.
     /// </summary>
+    /// <example>example-plugin</example>
     [FromRoute(Name = "name")]
     public required string Name { get; set; }
 }
@@ -81,6 +86,7 @@ public class WebPluginFromFileRequestDto
     /// <summary>
     /// Specifies whether to load the system plugins or not.
     /// </summary>
+    /// <example>false</example>
     [FromQuery(Name = "system")]
     public bool System { get; set; }
 }
@@ -94,6 +100,7 @@ public class GetWebPluginsRequestDto
     /// <summary>
     /// The optional filter for the plugin enabled state.
     /// </summary>
+    /// <example>true</example>
     [FromQuery(Name = "enabled")]
     public bool? Enabled { get; set; }
 }

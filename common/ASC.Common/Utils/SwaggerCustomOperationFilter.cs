@@ -40,6 +40,14 @@ public class SwaggerCustomOperationFilter : IOperationFilter
             {
                 (parameter as OpenApiParameter)?.Style = ParameterStyle.DeepObject;
             }
+
+        // Remove duplicate example from parameter level if it exists in schema
+        if (parameter is OpenApiParameter openApiParameter &&
+            openApiParameter.Example != null &&
+            openApiParameter.Schema?.Example != null)
+        {
+            openApiParameter.Example = null;
+        }
         }
     }
 }

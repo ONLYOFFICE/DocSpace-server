@@ -35,12 +35,14 @@ public class MigratingApiUser : ImportableApiEntity
     /// <summary>
     /// The user key.
     /// </summary>
+    /// <example>abcd1234</example>
     [ProtoMember(2)]
     public string Key { get; set; }
 
     /// <summary>
     /// The user email.
     /// </summary>
+    /// <example>john.doe@example.com</example>
     [ProtoMember(3)]
     [EmailAddress]
     public string Email { get; set; }
@@ -48,24 +50,28 @@ public class MigratingApiUser : ImportableApiEntity
     /// <summary>
     /// The user display name.
     /// </summary>
+    /// <example>John Doe</example>
     [ProtoMember(4)]
     public string DisplayName { get; set; }
 
     /// <summary>
     /// The user first name.
     /// </summary>
+    /// <example>John</example>
     [ProtoMember(5)]
     public string FirstName { get; set; }
 
     /// <summary>
     /// The user last name.
     /// </summary>
+    /// <example>Doe</example>
     [ProtoMember(6)]
     public string LastName { get; set; }
 
     /// <summary>
     /// The user type.
     /// </summary>
+    /// <example>1</example>
     [ProtoMember(7)]
     public EmployeeType UserType { get; set; }
 
