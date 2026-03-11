@@ -26,8 +26,6 @@
 
 using System.Text.RegularExpressions;
 
-using ASC.FederatedLogin.DatabaseProviders;
-
 namespace ASC.AI.Core.Tools.Retrieval;
 
 [Scope]

@@ -106,6 +106,7 @@ global using ASC.FederatedLogin.Profile;
 global using ASC.Files.Core.ApiModels.RequestDto;
 global using ASC.Files.Core.Core;
 global using ASC.Files.Core.EF;
+global using ASC.Files.Core.ExternalDatabase;
 global using ASC.Files.Core.Helpers;
 global using ASC.Files.Core.Security;
 global using ASC.Files.Core.Services.OFormService;

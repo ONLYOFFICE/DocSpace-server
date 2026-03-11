@@ -70,6 +70,7 @@ global using ASC.EventBus.Events;
 global using ASC.Files.Core;
 global using ASC.Files.Core.Core.AI;
 global using ASC.Files.Core.EF;
+global using ASC.Files.Core.ExternalDatabase;
 global using ASC.Files.Core.Helpers;
 global using ASC.Files.Core.Resources;
 global using ASC.Files.Core.Security;
@@ -80,7 +81,6 @@ global using ASC.Files.Core.Vectorization.Embedding;
 global using ASC.Files.Core.Vectorization.Settings;
 
 global using ASC.FederatedLogin;
-global using ASC.FederatedLogin.DatabaseProviders;
 global using ASC.FederatedLogin.Helpers;
 global using ASC.FederatedLogin.LoginProviders;
 
