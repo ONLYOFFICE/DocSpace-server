@@ -24,24 +24,30 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+#pragma warning disable SKEXP0050
+
+using Microsoft.SemanticKernel.Text;
+
 namespace ASC.Files.Core.Text;
 
-[Singleton]
-public class TextProcessor(IServiceProvider serviceProvider)
+internal static class TextChunkingHelper
 {
-    public IAsyncEnumerable<string> ProcessAsync(
-        Stream content,
-        long contentLength,
-        string fileExtension,
-        ChunkerSettings settings,
-        CancellationToken cancellationToken = default)
+    public static IEnumerable<string> Split(string text, ChunkerSettings settings)
     {
-        IDocumentProcessingStrategy strategy = fileExtension.ToLowerInvariant() switch
-        {
-            ".csv" => serviceProvider.GetRequiredService<CsvDocumentProcessingStrategy>(),
-            _ => serviceProvider.GetRequiredService<GenericDocumentProcessingStrategy>()
-        };
+        var overlapInTokens = (int)Math.Floor(settings.ChunkOverlap * settings.MaxTokensPerChunk);
 
-        return strategy.ProcessAsync(content, contentLength, fileExtension, settings, cancellationToken);
+        TextChunker.TokenCounter tokenCounter = input => settings.TokenCounter(input);
+
+        var lines = TextChunker.SplitPlainTextLines(text, settings.MaxTokensPerChunk, tokenCounter);
+        var chunks = TextChunker.SplitPlainTextParagraphs(
+            lines,
+            settings.MaxTokensPerChunk,
+            overlapInTokens,
+            tokenCounter: tokenCounter);
+
+        foreach (var chunk in chunks)
+        {
+            yield return chunk;
+        }
     }
 }
