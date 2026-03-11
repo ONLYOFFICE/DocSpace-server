@@ -123,22 +123,24 @@ public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IVa
     public Task<bool> TestConnectionAsync()
         => ValidateConnectionAsync();
 
-    public static async Task<bool> TestConnectionAsync(ExternalDatabaseSettings settings, IConfiguration configuration)
+    public static async Task<ConnectionTestResult> TestConnectionAsync(ExternalDatabaseSettings settings, IConfiguration configuration)
     {
         try
         {
             if (settings.DatabaseType?.ToLowerInvariant() == "sqlite" && !File.Exists(settings.SqliteFilePath))
             {
-                return false;
+                return ConnectionTestResult.Failure("SQLite file not found.");
             }
 
             await using var connection = CreateConnection(settings, configuration);
             await connection.OpenAsync();
-            return connection.State == ConnectionState.Open;
+            return connection.State == ConnectionState.Open
+                ? ConnectionTestResult.Ok()
+                : ConnectionTestResult.Failure("Connection did not open.");
         }
-        catch
+        catch (Exception ex)
         {
-            return false;
+            return ConnectionTestResult.Failure(ex.Message);
         }
     }
 

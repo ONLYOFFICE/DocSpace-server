@@ -27,6 +27,12 @@
 
 namespace ASC.FederatedLogin.DatabaseProviders;
 
+public record ConnectionTestResult(bool Success, string? Error = null)
+{
+    public static ConnectionTestResult Ok() => new(true);
+    public static ConnectionTestResult Failure(string error) => new(false, error);
+}
+
 public class ExternalDatabaseSettings
 {
     public string DatabaseType { get; set; }

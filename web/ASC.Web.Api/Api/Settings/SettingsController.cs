@@ -1148,9 +1148,9 @@ public partial class SettingsController(
     /// <summary>Test external database connection</summary>
     /// <path>api/2.0/settings/authservice/externaldb/test</path>
     [Tags("Settings / Authorization")]
-    [SwaggerResponse(200, "Boolean value: true if the connection succeeded", typeof(bool))]
+    [SwaggerResponse(200, "Connection test result with Success flag and optional Error message", typeof(ConnectionTestResult))]
     [HttpPost("authservice/externaldb/test")]
-    public async Task<bool> TestExternalDatabaseConnection(ExternalDatabaseSettings inDto)
+    public async Task<ConnectionTestResult> TestExternalDatabaseConnection(ExternalDatabaseSettings inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
