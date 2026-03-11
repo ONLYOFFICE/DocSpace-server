@@ -51,18 +51,23 @@
   </ItemGroup>
 
   <ItemGroup>
-      <DocStoreSourceFiles Include="../../resources/DocStore/**/*"
-                           Exclude="../../resources/DocStore/.git/**/*;../../resources/DocStore/**/*.md;../../resources/DocStore/LICENSE"
-                           Visible="false"/>
+      <None Remove="DocStore/**/*" />
+      <Content Remove="DocStore/**/*" />
   </ItemGroup>
 
   <Target Name="CopyDocStoreToProject" BeforeTargets="BeforeBuild">
+      <ItemGroup>
+          <DocStoreSourceFiles Include="../../resources/DocStore/**/*"
+                               Exclude="../../resources/DocStore/.git/**/*;../../resources/DocStore/**/*.md;../../resources/DocStore/LICENSE" />
+      </ItemGroup>
+
       <Copy SourceFiles="@(DocStoreSourceFiles)"
             DestinationFiles="@(DocStoreSourceFiles->'$(ProjectDir)DocStore/%(RecursiveDir)%(FileName)%(Extension)')"
             SkipUnchangedFiles="true" />
 
       <ItemGroup>
-          <None Include="$(ProjectDir)DocStore/**/*">
+          <None Include="$(ProjectDir)DocStore/**/*"
+                Visible="false">
               <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
           </None>
       </ItemGroup>
