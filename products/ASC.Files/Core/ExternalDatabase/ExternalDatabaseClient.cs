@@ -367,7 +367,8 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         }
         catch (Exception ex)
         {
-            logger.LogError(ex.Message);
+            logger.LogError(ex, "Insert into table {TableName} failed", tableName);
+            throw;
         }
     }
 
