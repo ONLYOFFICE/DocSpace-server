@@ -24,9 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Data;
-using System.Data.Common;
-
 using ASC.FederatedLogin.DatabaseProviders;
 
 namespace ASC.Files.Core.ExternalDatabase;
@@ -44,12 +41,23 @@ public record QueryFilter(string Column, string Operator, string? Value = null);
 [Scope]
 public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<ExternalDatabaseClient> logger)
 {
+    private static readonly Regex _tableNameRegex = new(@"^[a-zA-Z0-9_]+$", RegexOptions.Compiled);
+
+    private static void ValidateTableName(string tableName)
+    {
+        if (string.IsNullOrWhiteSpace(tableName) || !_tableNameRegex.IsMatch(tableName))
+        {
+            throw new ArgumentException($"Invalid table name: '{tableName}'.");
+        }
+    }
+
     private ExternalDatabaseProvider Provider => consumerFactory.Get<ExternalDatabaseProvider>();
 
     public bool IsEnabled() => Provider.IsEnabled();
 
     public async Task CreateTableIfNotExistsAsync(string tableName, IEnumerable<DbColumnDefinition> columns)
     {
+        ValidateTableName(tableName);
         await using var connection = Provider.CreateConnection();
         await connection.OpenAsync();
         await SetupSqliteAsync(connection);
@@ -110,6 +118,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
 
     public async Task<bool> TableExistsAsync(string tableName)
     {
+        ValidateTableName(tableName);
         await using var connection = Provider.CreateConnection();
         await connection.OpenAsync();
         await SetupSqliteAsync(connection);
@@ -132,6 +141,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
 
     public async Task<long> CountAsync(string tableName)
     {
+        ValidateTableName(tableName);
         await using var connection = Provider.CreateConnection();
         await connection.OpenAsync();
         await SetupSqliteAsync(connection);
@@ -170,6 +180,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         int maxRows = 50,
         int offset = 0)
     {
+        ValidateTableName(tableName);
         var dbType = Provider.DatabaseType.ToLowerInvariant();
         var q = dbType == "mysql" ? '`' : '"';
 
@@ -282,6 +293,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
 
     public async Task CreateTableAndUpsertAsync(string tableName, IEnumerable<DbColumnDefinition> columns, Dictionary<string, object> data, string keyColumn)
     {
+        ValidateTableName(tableName);
         if (data == null || data.Count == 0)
         {
             throw new ArgumentException("Data dictionary is empty.", nameof(data));
@@ -342,6 +354,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
 
     private async Task ExecuteInsertAsync(string tableName, Dictionary<string, object> data, string? keyColumn)
     {
+        ValidateTableName(tableName);
         try
         {
             if (data == null || data.Count == 0)

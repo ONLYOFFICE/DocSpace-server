@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+global using System.Data;
+global using System.Data.Common;
 global using System.Collections.Concurrent;
 global using System.Collections.Frozen;
 global using System.Collections.Immutable;
