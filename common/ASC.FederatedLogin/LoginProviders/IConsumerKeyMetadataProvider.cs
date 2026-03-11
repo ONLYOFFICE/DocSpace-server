@@ -37,6 +37,11 @@ public interface IConsumerKeyMetadataProvider
 public class AuthKeyMetadata
 {
     /// <summary>
+    /// The display order of the field.
+    /// </summary>
+    public int Order { get; init; } = int.MaxValue;
+
+    /// <summary>
     /// The field type: "text", "password", "select", "toggle".
     /// </summary>
     public string Type { get; init; } = "text";

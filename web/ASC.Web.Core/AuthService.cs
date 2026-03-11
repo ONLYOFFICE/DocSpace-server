@@ -57,7 +57,12 @@ public class AuthService
             Props = []
         };
 
-        foreach (var item in consumer.ManagedKeys)
+        var metadataProvider = consumer as IConsumerKeyMetadataProvider;
+        var keys = metadataProvider != null
+            ? consumer.ManagedKeys.OrderBy(k => metadataProvider.GetKeyMetadata(k).Order)
+            : consumer.ManagedKeys;
+
+        foreach (var item in keys)
         {
             var authKey = new AuthKey
             {
@@ -66,7 +71,7 @@ public class AuthService
                 Title = ConsumerExtension.GetResourceString(item) ?? item
             };
 
-            if (consumer is IConsumerKeyMetadataProvider metadataProvider)
+            if (metadataProvider != null)
             {
                 var meta = metadataProvider.GetKeyMetadata(item);
                 authKey.Type = meta.Type;

@@ -64,15 +64,15 @@ public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IVa
 
     public AuthKeyMetadata GetKeyMetadata(string key) => key switch
     {
-        "databaseType"    => new() { Type = "select",   Options = ["mysql", "sqlite"] },
-        "dbPassword"      => new() { Type = "password", DependsOn = "databaseType", DependsOnValue = "mysql" },
-        "dbSsl"           => new() { Type = "toggle",   DependsOn = "databaseType", DependsOnValue = "mysql" },
-        "dbHost"          => new() { DependsOn = "databaseType", DependsOnValue = "mysql" },
-        "dbPort"          => new() { DependsOn = "databaseType", DependsOnValue = "mysql" },
-        "dbName"          => new() { DependsOn = "databaseType", DependsOnValue = "mysql" },
-        "dbUser"          => new() { DependsOn = "databaseType", DependsOnValue = "mysql" },
-        "sqliteFilePath"  => new() { DependsOn = "databaseType", DependsOnValue = "sqlite" },
-        _                 => new()
+        "databaseType"   => new() { Order = 0, Type = "select",   Options = ["mysql", "sqlite"] },
+        "dbHost"         => new() { Order = 1, DependsOn = "databaseType", DependsOnValue = "mysql" },
+        "dbPort"         => new() { Order = 2, Type = "number", DependsOn = "databaseType", DependsOnValue = "mysql" },
+        "dbName"         => new() { Order = 3, DependsOn = "databaseType", DependsOnValue = "mysql" },
+        "dbUser"         => new() { Order = 4, DependsOn = "databaseType", DependsOnValue = "mysql" },
+        "dbPassword"     => new() { Order = 5, Type = "password", DependsOn = "databaseType", DependsOnValue = "mysql" },
+        "dbSsl"          => new() { Order = 6, Type = "toggle",   DependsOn = "databaseType", DependsOnValue = "mysql" },
+        "sqliteFilePath" => new() { Order = 7, DependsOn = "databaseType", DependsOnValue = "sqlite" },
+        _                => new()
     };
 
     public ExternalDatabaseProvider() { }
