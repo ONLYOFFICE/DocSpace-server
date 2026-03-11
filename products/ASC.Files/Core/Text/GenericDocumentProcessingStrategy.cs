@@ -36,12 +36,13 @@ namespace ASC.Files.Core.Text;
 public class GenericDocumentProcessingStrategy(DocumentTextExtractor documentTextExtractor) : IDocumentProcessingStrategy
 {
     public async IAsyncEnumerable<string> ProcessAsync(
-        Memory<byte> content,
+        Stream content,
+        long contentLength,
         string fileExtension,
         ChunkerSettings settings,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        var text = await documentTextExtractor.ExtractAsync(content, fileExtension);
+        var text = await documentTextExtractor.ExtractAsync(content, contentLength, fileExtension);
 
         if (string.IsNullOrEmpty(text))
         {

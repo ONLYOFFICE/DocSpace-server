@@ -127,14 +127,11 @@ public class VectorizationTask : DistributedTaskProgress
             var embeddingGenerator = await generatorFactory.CreateAsync(room.SettingsChatProviderId);
 
             await using var stream = await fileDao.GetFileStreamAsync(file);
-            await using var memoryStream = new MemoryStream();
-            await stream.CopyToAsync(memoryStream);
-            var memory = new Memory<byte>(memoryStream.GetBuffer(), 0, (int)memoryStream.Length);
 
             var fileExtension = FileUtility.GetFileExtension(file.Title);
 
             var textChunks = new List<string>();
-            await foreach (var chunk in textProcessor.ProcessAsync(memory, fileExtension, chunkerSettings, CancellationToken))
+            await foreach (var chunk in textProcessor.ProcessAsync(stream, file.ContentLength, fileExtension, chunkerSettings, CancellationToken))
             {
                 textChunks.Add(chunk);
             }

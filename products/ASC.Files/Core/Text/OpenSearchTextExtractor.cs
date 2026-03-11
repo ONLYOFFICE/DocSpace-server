@@ -35,14 +35,17 @@ public class OpenSearchTextExtractor(Client client) : ITextExtractor
 {
     private const string PipelineId = "attachments";
     
-    public async Task<string?> ExtractAsync(Memory<byte> content)
+    public async Task<string?> ExtractAsync(Stream content, long contentLength)
     {
+        var buffer = new byte[contentLength];
+        await content.ReadExactlyAsync(buffer); 
+
         var document = new SimulatePipelineDocument
         {
             Index = "extract", //not used, needed to avoid error
             Source = new Source
             {
-                Document = new Document { Data = Convert.ToBase64String(content.Span) }
+                Document = new Document { Data = Convert.ToBase64String(buffer) }
             }
         };
         

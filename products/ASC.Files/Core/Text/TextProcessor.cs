@@ -30,16 +30,17 @@ namespace ASC.Files.Core.Text;
 public class TextProcessor(IServiceProvider serviceProvider)
 {
     public IAsyncEnumerable<string> ProcessAsync(
-        Memory<byte> content, 
-        string fileExtension, 
-        ChunkerSettings settings, 
+        Stream content,
+        long contentLength,
+        string fileExtension,
+        ChunkerSettings settings,
         CancellationToken cancellationToken = default)
     {
         var strategy = fileExtension switch
         {
             _ => serviceProvider.GetRequiredService<GenericDocumentProcessingStrategy>()
         };
-        
-        return strategy.ProcessAsync(content, fileExtension, settings, cancellationToken);
+
+        return strategy.ProcessAsync(content, contentLength, fileExtension, settings, cancellationToken);
     }
 }

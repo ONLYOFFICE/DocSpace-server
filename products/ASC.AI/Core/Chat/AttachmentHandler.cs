@@ -220,11 +220,7 @@ public class AttachmentHandler(
     {
         await using var stream = await fileDao.GetFileStreamAsync(file);
 
-        var length = (int)file.ContentLength;
-        var buffer = new byte[length];
-        await stream.ReadExactlyAsync(buffer);
-
-        var content = await textExtractor.ExtractAsync(buffer);
+        var content = await textExtractor.ExtractAsync(stream, file.ContentLength);
         if (string.IsNullOrEmpty(content))
         {
             return new AttachmentResult

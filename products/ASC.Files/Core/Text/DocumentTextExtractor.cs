@@ -32,13 +32,14 @@ public class DocumentTextExtractor(ITextExtractor extractor)
 {
     private static readonly HashSet<string> _plainTextExtensions = [".txt", ".csv", ".md"];
 
-    public async Task<string?> ExtractAsync(Memory<byte> content, string fileExtension)
+    public async Task<string?> ExtractAsync(Stream content, long contentLength, string fileExtension)
     {
-        if (_plainTextExtensions.Contains(fileExtension))
+        if (!_plainTextExtensions.Contains(fileExtension))
         {
-            return Encoding.UTF8.GetString(content.Span);
+            return await extractor.ExtractAsync(content, contentLength);
         }
 
-        return await extractor.ExtractAsync(content);
+        using var reader = new StreamReader(content, Encoding.UTF8, leaveOpen: true);
+        return await reader.ReadToEndAsync();
     }
 }

@@ -28,5 +28,5 @@ namespace ASC.Files.Core.Text;
 
 public interface IDocumentProcessingStrategy
 {
-    IAsyncEnumerable<string> ProcessAsync(Memory<byte> content, string fileExtension, ChunkerSettings settings, CancellationToken cancellationToken = default);
+    IAsyncEnumerable<string> ProcessAsync(Stream content, long contentLength, string fileExtension, ChunkerSettings settings, CancellationToken cancellationToken = default);
 }
