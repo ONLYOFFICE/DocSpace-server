@@ -143,11 +143,11 @@ public class AttachmentHandler(
             }
             else
             {
-            if (!vectorizationGlobalSettings.IsSupportedContentExtraction(file.Title) ||
-                file.ContentLength > vectorizationGlobalSettings.MaxContentLength)
-            {
-                continue;
-            }
+                if (!vectorizationGlobalSettings.IsSupportedContentExtraction(file.Title) ||
+                    file.ContentLength > vectorizationGlobalSettings.MaxContentLength)
+                {
+                    continue;
+                }
 
                 textFiles.Add((file, extension));
             }
@@ -222,48 +222,48 @@ public class AttachmentHandler(
 
     private async Task<AttachmentResult> HandleTextAsync<T>(IFileDao<T> fileDao, File<T> file, string extension)
     {
-            await using var stream = await fileDao.GetFileStreamAsync(file);
+        await using var stream = await fileDao.GetFileStreamAsync(file);
 
         var length = (int)file.ContentLength;
         var buffer = new byte[length];
         await stream.ReadExactlyAsync(buffer);
 
         var content = await textExtractor.ExtractAsync(buffer);
-            if (string.IsNullOrEmpty(content))
-            {
-            return new AttachmentResult
-                {
-                    File = file,
-                    Success = false
-                };
-            }
-
-            ToolWrapper? formTool = null;
-            if (file.IsForm)
-            {
-                var (formData, tool) = await TryGetFormDataAsync(file);
-                formTool = tool;
-                if (formData != null)
-                {
-                    content += formData;
-                }
-            }
-
+        if (string.IsNullOrEmpty(content))
+        {
             return new AttachmentResult
             {
                 File = file,
-                Success = true,
-                DynamicTool = formTool,
-                Content = new TextAttachmentMessageContent
-                {
-                    Id = JsonSerializer.SerializeToElement(file.Id),
-                    Title = file.Title,
-                Extension = extension,
-                    Content = content
-                }
+                Success = false
             };
         }
-    
+
+        ToolWrapper? formTool = null;
+        if (file.IsForm)
+        {
+            var (formData, tool) = await TryGetFormDataAsync(file);
+            formTool = tool;
+            if (formData != null)
+            {
+                content += formData;
+            }
+        }
+
+        return new AttachmentResult
+        {
+            File = file,
+            Success = true,
+            DynamicTool = formTool,
+            Content = new TextAttachmentMessageContent
+            {
+                Id = JsonSerializer.SerializeToElement(file.Id),
+                Title = file.Title,
+                Extension = extension,
+                Content = content
+            }
+        };
+    }
+
     private async Task<AttachmentResult> HandleMediaAsync(
         File<int> file,
         FileType fileType,
