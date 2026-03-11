@@ -82,56 +82,33 @@ switch (launchProfile)
 
         break;
     default:
-        connectionManager.AddMySql(withDbGate: true)
+        connectionManager
+            .AddMySql(withDbGate: true)
             .AddRedis(withRedisInsight: true)
             .AddMcpServer()
             .AddOpensearch()
             .AddMailPit();
 
-        Dictionary<string, string>? apiSystemVariables = null;
-        Dictionary<string, string>? additionalSystemVariables = null;
         if (launchProfile == "test")
         {
-            var docspaceOwnerEmail = builder.Configuration["OWNER_EMAIL"];
-            var coreMachineKey = builder.Configuration["core:machinekey"] ?? "test-machine-key";
-            
-            var playwrightTestsPath = Path.Combine(basePath, "test", "api");
-
-            playwright = builder.AddJavaScriptApp("playwright-tests", playwrightTestsPath, "test")
-                .WithNpm()
-                .WithEnvironment("MACHINEKEY", coreMachineKey)
-                .WithEnvironment("PKEY", "PKEY")
-                .WithEnvironment("LOCAL_PORTAL_DOMAIN", $"localhost:{Constants.AppHostPort.ToString()}")
-                .WithEnvironment("DOCSPACE_OWNER_EMAIL", docspaceOwnerEmail);
-            
-            additionalSystemVariables= new Dictionary<string, string>
-            {
-                { "web:autotest:secret-email", docspaceOwnerEmail },
-                { "core:machinekey", coreMachineKey }
-            };
-            
-            apiSystemVariables = new Dictionary<string, string>(additionalSystemVariables)
-            {
-                { "auth:allowskip:default", true.ToString() },
-                { "auth:allowskip:registerportal", true.ToString() }
-            };
+            connectionManager.AddApiTest();
         }
         
         configurator
-            .AddProject<ASC_Files>(Constants.FilesPort, additionalSystemVariables)
-            .AddProject<ASC_Files_Worker>(Constants.FilesWorkerPort, additionalSystemVariables)
-            .AddProject<ASC_People>(Constants.PeoplePort, additionalSystemVariables)
-            .AddProject<ASC_Web_Api>(Constants.WebApiPort, additionalSystemVariables)
-            .AddProject<ASC_ApiSystem>(Constants.ApiSystemPort, apiSystemVariables)
-            .AddProject<ASC_ClearEvents>(Constants.ClearEventsPort, additionalSystemVariables)
-            .AddProject<ASC_Data_Backup>(Constants.BackupPort, additionalSystemVariables)
-            .AddProject<ASC_Data_Backup_Worker>(Constants.BackupWorkerPort, additionalSystemVariables)
-            .AddProject<ASC_Notify>(Constants.NotifyPort, additionalSystemVariables)
-            .AddProject<ASC_Studio_Notify>(Constants.StudioNotifyPort, additionalSystemVariables)
-            .AddProject<ASC_Web_Studio>(Constants.WebstudioPort, additionalSystemVariables)
-            .AddProject<ASC_AI>(Constants.AiPort, additionalSystemVariables)
-            .AddProject<ASC_AI_Worker>(Constants.AiWorkerPort, additionalSystemVariables)
-            .AddProject<ASC_TelegramService>(Constants.TelegramPort, additionalSystemVariables)
+            .AddProject<ASC_Files>(Constants.FilesPort)
+            .AddProject<ASC_Files_Worker>(Constants.FilesWorkerPort)
+            .AddProject<ASC_People>(Constants.PeoplePort)
+            .AddProject<ASC_Web_Api>(Constants.WebApiPort)
+            .AddProject<ASC_ApiSystem>(Constants.ApiSystemPort)
+            .AddProject<ASC_ClearEvents>(Constants.ClearEventsPort)
+            .AddProject<ASC_Data_Backup>(Constants.BackupPort)
+            .AddProject<ASC_Data_Backup_Worker>(Constants.BackupWorkerPort)
+            .AddProject<ASC_Notify>(Constants.NotifyPort)
+            .AddProject<ASC_Studio_Notify>(Constants.StudioNotifyPort)
+            .AddProject<ASC_Web_Studio>(Constants.WebstudioPort)
+            .AddProject<ASC_AI>(Constants.AiPort)
+            .AddProject<ASC_AI_Worker>(Constants.AiWorkerPort)
+            .AddProject<ASC_TelegramService>(Constants.TelegramPort)
             .AddSocketIO()
             .AddSsoAuth()
             .AddWebDav()

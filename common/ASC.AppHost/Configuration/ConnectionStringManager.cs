@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Aspire.Hosting.JavaScript;
+
 using MySqlConnector;
 
 namespace ASC.AppHost.Configuration;
@@ -43,9 +45,9 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
     private IResourceBuilder<ContainerResource>? EditorResource { get; set; }
     private IResourceBuilder<MailPitContainerResource>? MailResource { get; set; }
     private IResourceBuilder<ContainerResource>? OpensearchResource { get; set; }
-    
     private IResourceBuilder<ContainerResource>? McpResource { get; set; }
-    
+    private IResourceBuilder<JavaScriptAppResource>? ApiTestResource { get; set; }
+    private Dictionary<string, string>? _parameters;
 
     public ConnectionStringManager AddMySql(bool withDbGate = false)
     {
@@ -236,6 +238,31 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         return this;
     }
 
+    public ConnectionStringManager AddApiTest()
+    {
+        var docspaceOwnerEmail = builder.Configuration["OWNER_EMAIL"] ?? "test@example.com";
+        var coreMachineKey = builder.Configuration["core:machinekey"] ?? "test-machine-key";
+        
+        var playwrightTestsPath = Path.Combine(basePath, "test", "api");
+
+        ApiTestResource = builder.AddJavaScriptApp("playwright-tests", playwrightTestsPath, "test")
+            .WithNpm()
+            .WithEnvironment("MACHINEKEY", coreMachineKey)
+            .WithEnvironment("PKEY", "PKEY")
+            .WithEnvironment("LOCAL_PORTAL_DOMAIN", $"localhost:{Constants.AppHostPort.ToString()}")
+            .WithEnvironment("DOCSPACE_OWNER_EMAIL", docspaceOwnerEmail);
+        
+        _parameters = new Dictionary<string, string>()
+        { 
+            { "web:autotest:secret-email", docspaceOwnerEmail },
+            { "core:machinekey", coreMachineKey },
+            { "auth:allowskip:default", true.ToString() },
+            { "auth:allowskip:registerportal", true.ToString() }
+        };
+        
+        return this;
+    }
+
     public void AddWaitFor<T>(
         IResourceBuilder<T> resourceBuilder,
         bool includeMigrate = true,
@@ -270,10 +297,13 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         {
             resourceBuilder.WaitFor(OpensearchResource);
         }
+        
         if (includeMailPit && MailResource != null)
         {
             resourceBuilder.WaitFor(MailResource);
         }
+
+        ApiTestResource?.WaitFor((IResourceBuilder<IResource>)resourceBuilder);
     }
 
     public void AddBaseConfig<T>(IResourceBuilder<T> resourceBuilder, bool isDocker) where T : IResourceWithEnvironment, IResourceWithWaitSupport, IResourceWithEndpoints
@@ -296,7 +326,6 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             resourceBuilder
                 .WithReference(MailResource)
                 .WithEnvironment("core:notify:postman", "mailpit");
-            
         }
 
         if (isDocker)
@@ -333,6 +362,14 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
                 .WithEnvironment("elastic:Host", () => (isDocker ? Constants.OpensearchContainer : "localhost"))
                 .WithEnvironment("elastic:Port", () => Constants.OpensearchPort.ToString())
                 .WithEnvironment("elastic:Threads", () => "1");
+        }
+        
+        if (_parameters != null)
+        {
+            foreach (var parameter in _parameters)
+            {
+                resourceBuilder.WithEnvironment(parameter.Key, parameter.Value);
+            }
         }
     }
     
