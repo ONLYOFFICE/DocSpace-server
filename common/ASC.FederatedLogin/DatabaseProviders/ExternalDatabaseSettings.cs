@@ -35,13 +35,28 @@ public record ConnectionTestResult(bool Success, string? Error = null)
 
 public class ExternalDatabaseSettings
 {
+    [JsonPropertyName("databaseType")]
     public string DatabaseType { get; set; }
+
+    [JsonPropertyName("dbHost")]
     public string Host { get; set; }
+
+    [JsonPropertyName("dbPort")]
     public int Port { get; set; }
+
+    [JsonPropertyName("dbName")]
     public string DatabaseName { get; set; }
+
+    [JsonPropertyName("dbUser")]
     public string User { get; set; }
+
+    [JsonPropertyName("dbPassword")]
     public string Password { get; set; }
+
+    [JsonPropertyName("dbSsl")]
     public bool UseSsl { get; set; }
+
+    [JsonPropertyName("sqliteFilePath")]
     public string SqliteFilePath { get; set; }
 }
 
