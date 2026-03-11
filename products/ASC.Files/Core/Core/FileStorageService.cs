@@ -949,8 +949,13 @@ public class FileStorageService //: IFileStorageService
             _ = RoomLogoManager.ColorChanged(color, newFolder);
             _ = await RoomLogoManager.CoverChanged(cover, newFolder);
 
+            if (folderType == FolderType.FillingFormsRoom)
+            {
+                newFolder.SettingsSaveFormAsXLSX = true;
+            }
+
             T folderId;
-            
+
             if (folderType == FolderType.AiRoom)
             {
                 var knowledge = serviceProvider.GetService<Folder<T>>();

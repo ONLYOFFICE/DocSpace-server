@@ -556,7 +556,9 @@ internal class FolderDao(
                     Quota = folder.SettingsQuota,
                     Lifetime = folder.SettingsLifetime.Map(),
                     ChatProviderId = folder.SettingsChatProviderId,
-                    ChatParameters = folder.SettingsChatParameters
+                    ChatParameters = folder.SettingsChatParameters,
+                    SaveFormAsXLSX = folder.SettingsSaveFormAsXLSX,
+                    SendFormToExternalDB = folder.SettingsSendFormToExternalDB
                 };
             }
 
@@ -601,7 +603,9 @@ internal class FolderDao(
                     Quota = folder.SettingsQuota,
                     Lifetime = folder.SettingsLifetime.Map(),
                     ChatProviderId = folder.SettingsChatProviderId,
-                    ChatParameters = folder.SettingsChatParameters
+                    ChatParameters = folder.SettingsChatParameters,
+                    SaveFormAsXLSX = folder.SettingsSaveFormAsXLSX,
+                    SendFormToExternalDB = folder.SettingsSendFormToExternalDB
                 };
             }
 
