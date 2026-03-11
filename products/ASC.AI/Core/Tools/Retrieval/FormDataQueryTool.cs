@@ -30,7 +30,8 @@ namespace ASC.AI.Core.Tools.Retrieval;
 public class FormDataQueryTool(
     ExternalDatabaseClient externalDatabaseClient,
     IDaoFactory daoFactory,
-    FileSecurity fileSecurity)
+    FileSecurity fileSecurity,
+    ILogger<FormDataQueryTool> logger)
 {
     public const string Name = "query_form_data";
 
@@ -70,7 +71,8 @@ public class FormDataQueryTool(
             }
             catch (Exception e)
             {
-                return new ToolResponse<string> { Error = e.Message };
+                logger.LogError(e, "Form data query failed for table {TableName}", tableName);
+                return new ToolResponse<string> { Error = "Query execution failed." };
             }
         }
     }
