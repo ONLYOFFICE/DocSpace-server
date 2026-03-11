@@ -212,6 +212,16 @@ public class FolderDto<T> : FileEntryDto<T>
     /// </remarks>
     /// <example>2</example>
     public RoomType? RootRoomType { get; set; }
+
+    /// <summary>
+    /// Specifies whether to save form data as XLSX file.
+    /// </summary>
+    public bool? SaveFormAsXLSX {  get; set; }
+
+    /// <summary>
+    /// Specifies whether to send form data to external database.
+    /// </summary>
+    public bool? SendFormToExternalDB { get; set; }
 }
 
 [Scope]
@@ -237,10 +247,11 @@ public class FolderDtoHelper(
     SecurityContext securityContext,
     UserManager userManager,
     IUrlShortener urlShortener,
+    FileSharing fileSharing,
     EntryStatusManager entryStatusManager,
     AiAccessibility accessibility,
     AiConfiguration aiConfiguration)
-    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, urlShortener)
+    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, fileSharing, urlShortener)
 {
     private readonly EmployeeDtoHelper _employeeWrapperHelper = employeeWrapperHelper;
 
@@ -544,6 +555,11 @@ public class FolderDtoHelper(
         {
             result.FilesCount = folder.FilesCount;
             result.FoldersCount = folder.FoldersCount;
+        }
+        if (folder.FolderType == FolderType.FillingFormsRoom)
+        {
+            result.SaveFormAsXLSX = folder.SettingsSaveFormAsXLSX;
+            result.SendFormToExternalDB = folder.SettingsSendFormToExternalDB;
         }
 
         await entryStatusManager.SetIsFavoriteFolderAsync(folder);

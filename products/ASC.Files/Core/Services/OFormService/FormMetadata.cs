@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2026
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,48 +24,27 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Common.Security.Authorizing;
+namespace ASC.Files.Core.Services.OFormService;
 
-public sealed class Role : IRole
+public class FormMetadata
 {
-    public const string Authenticated = "Authenticated";
-    public const string Users = "Visitors";
-    public const string RoomAdministrators = "Users";
-    public const string DocSpaceAdministrators = "Administrators";
-    public const string System = "System";
+    /// <summary>
+    /// The form field key.
+    /// </summary>
+    public string Key { get; set; } = "";
 
-    public Guid ID { get; internal set; }
-    public string Name { get; internal set; }
-    public string AuthenticationType => "ASC";
-    public bool IsAuthenticated => false;
+    /// <summary>
+    /// The form field type.
+    /// </summary>
+    public string Type { get; set; } = "";
 
-    public string Key => ID.ToString();
+    /// <summary>
+    /// The form field format.
+    /// </summary>
+    public string? Format { get; set; }
 
-    public Role(Guid id, string name)
-    {
-        if (id == Guid.Empty)
-        {
-            throw new ArgumentException(nameof(id));
-        }
-
-        ArgumentException.ThrowIfNullOrEmpty(name);
-
-        ID = id;
-        Name = name;
-    }
-
-    public override int GetHashCode()
-    {
-        return ID.GetHashCode();
-    }
-
-    public override bool Equals(object obj)
-    {
-        return obj is Role r && r.ID == ID;
-    }
-
-    public override string ToString()
-    {
-        return $"Role: {Name}";
-    }
+    /// <summary>
+    /// The list of possible values for the form field.
+    /// </summary>
+    public List<string>? PossibleValues { get; set; }
 }

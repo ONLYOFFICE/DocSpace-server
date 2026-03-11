@@ -5027,6 +5027,72 @@
         ]
       }
     },
+    "/api/2.0/files/file/{fileId}/xlsx": {
+      "post": {
+        "tags": [
+          "Files / Files"
+        ],
+        "summary": "Generate XLSX report",
+        "description": "Triggers asynchronous XLSX report generation for the specified form file.",
+        "operationId": "generateXlsx",
+        "parameters": [
+          {
+            "name": "fileId",
+            "in": "path",
+            "description": "The file unique identifier.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "XLSX report generation has been queued"
+          },
+          "403": {
+            "description": "You do not have enough permissions to perform this action"
+          },
+          "404": {
+            "description": "Form file not found"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": []
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": []
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": []
+          }
+        ]
+      }
+    },
     "/api/2.0/files/file/{fileId}/log": {
       "get": {
         "tags": [
@@ -5732,6 +5798,15 @@
               "type": "integer",
               "format": "int32",
               "example": 1
+            }
+          },
+          {
+            "name": "ReturnSingleOperation",
+            "in": "query",
+            "description": "Specifies whether to return only the current operation",
+            "schema": {
+              "type": "boolean",
+              "example": false
             }
           }
         ],
@@ -6977,7 +7052,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FormResultsArrayWrapper"
+                  "$ref": "#/components/schemas/FormSubmissionsWrapper"
                 }
               }
             }
@@ -23451,6 +23526,95 @@
         ]
       }
     },
+    "/api/2.0/people/exists": {
+      "get": {
+        "tags": [
+          "People / Profiles"
+        ],
+        "summary": "Check if a user exists by email",
+        "description": "Returns a boolean indicating whether a user with the specified email exists on the portal.",
+        "operationId": "checkUserExistsByEmail",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "query",
+            "description": "The user email address.",
+            "schema": {
+              "maxLength": 255,
+              "minLength": 0,
+              "type": "string",
+              "format": "email",
+              "example": "john.doe@example.com"
+            }
+          },
+          {
+            "name": "encemail",
+            "in": "query",
+            "description": "The user encrypted email address.",
+            "schema": {
+              "type": "string",
+              "example": "encrypted_email_string"
+            }
+          },
+          {
+            "name": "culture",
+            "in": "query",
+            "description": "Culture",
+            "schema": {
+              "type": "string",
+              "example": "en-US"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Boolean result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BooleanWrapper"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Incorrect email"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": []
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": []
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": []
+          }
+        ]
+      }
+    },
     "/api/2.0/people/delete": {
       "put": {
         "tags": [
@@ -33000,6 +33164,69 @@
         ]
       }
     },
+    "/api/2.0/settings/authservice/externaldb/test": {
+      "post": {
+        "tags": [
+          "Settings / Authorization"
+        ],
+        "summary": "Test external database connection",
+        "description": "Tests an external database connection with the provided settings without saving them.",
+        "operationId": "testExternalDatabaseConnection",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExternalDatabaseSettings"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Connection test result with Success flag and optional Error message",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConnectionTestResultWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": []
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": []
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": []
+          }
+        ]
+      }
+    },
     "/api/2.0/settings": {
       "get": {
         "tags": [
@@ -42380,6 +42607,16 @@
               },
               "rootRoomType": {
                 "$ref": "#/components/schemas/RoomType"
+              },
+              "saveFormAsXLSX": {
+                "type": "boolean",
+                "description": "Specifies whether to save form data as XLSX file.",
+                "nullable": true
+              },
+              "sendFormToExternalDB": {
+                "type": "boolean",
+                "description": "Specifies whether to send form data to external database.",
+                "nullable": true
               }
             }
           }
@@ -43893,6 +44130,16 @@
           },
           "chatSettings": {
             "$ref": "#/components/schemas/ChatSettings"
+          },
+          "sendFormToExternalDB": {
+            "type": "boolean",
+            "description": "Specifies whether to send form data to external database.",
+            "nullable": true
+          },
+          "saveFormAsXLSX": {
+            "type": "boolean",
+            "description": "Specifies whether to save form data as XLSX file.",
+            "nullable": true
           }
         },
         "additionalProperties": false,
@@ -50841,6 +51088,16 @@
               },
               "rootRoomType": {
                 "$ref": "#/components/schemas/RoomType"
+              },
+              "saveFormAsXLSX": {
+                "type": "boolean",
+                "description": "Specifies whether to save form data as XLSX file.",
+                "nullable": true
+              },
+              "sendFormToExternalDB": {
+                "type": "boolean",
+                "description": "Specifies whether to send form data to external database.",
+                "nullable": true
               }
             }
           }
@@ -51019,48 +51276,34 @@
           "Stoped"
         ]
       },
-      "FormResultsArrayWrapper": {
+      "FormMetadata": {
         "type": "object",
         "properties": {
-          "response": {
+          "key": {
+            "type": "string",
+            "description": "The form field key.",
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "description": "The form field type.",
+            "nullable": true
+          },
+          "format": {
+            "type": "string",
+            "description": "The form field format.",
+            "nullable": true
+          },
+          "possibleValues": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/FormResultsDto"
-            }
-          },
-          "count": {
-            "type": "integer",
-            "description": "The total number of items in the response",
-            "format": "int32"
-          },
-          "links": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "href": {
-                  "type": "string",
-                  "description": "URL of the link"
-                },
-                "action": {
-                  "type": "string",
-                  "description": "Action associated with the link"
-                }
-              }
+              "type": "string"
             },
-            "description": "List of links related to the response"
-          },
-          "status": {
-            "type": "integer",
-            "description": "HTTP status code of the response",
-            "format": "int32"
-          },
-          "statusCode": {
-            "type": "integer",
-            "description": "HTTP status code of the response (duplicate of status)",
-            "format": "int32"
+            "description": "The list of possible values for the form field.",
+            "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "FormResultsDto": {
         "type": "object",
@@ -51240,6 +51483,68 @@
         },
         "additionalProperties": false,
         "description": "The form role parameters."
+      },
+      "FormSubmissionsDto": {
+        "type": "object",
+        "properties": {
+          "metadata": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FormMetadata"
+            },
+            "description": "The form field metadata.",
+            "nullable": true
+          },
+          "submissions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FormResultsDto"
+            },
+            "description": "All submissions.",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "FormSubmissionsWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/FormSubmissionsDto"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
       },
       "FormsItemArrayWrapper": {
         "type": "object",
@@ -58667,6 +58972,29 @@
             "description": "The authorization key title.",
             "nullable": true,
             "example": "API key"
+          },
+          "type": {
+            "type": "string",
+            "description": "The field type: text, password, select, toggle.",
+            "nullable": true
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The list of options for select type fields.",
+            "nullable": true
+          },
+          "dependsOn": {
+            "type": "string",
+            "description": "The name of another key this field depends on for visibility.",
+            "nullable": true
+          },
+          "dependsOnValue": {
+            "type": "string",
+            "description": "The value of ASC.Web.Studio.UserControls.Management.AuthKey.DependsOn key that makes this field visible.",
+            "nullable": true
           }
         },
         "additionalProperties": false,
@@ -59549,6 +59877,59 @@
         "properties": {
           "response": {
             "$ref": "#/components/schemas/ConfirmDto"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
+      "ConnectionTestResult": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ConnectionTestResultWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/ConnectionTestResult"
           },
           "count": {
             "type": "integer",
@@ -60776,6 +61157,43 @@
           "Agent"
         ],
         "description": "[0 - None, 1 - File, 2 - Folder, 23 - User, 24 - Group, 25 - Room, 26 - Tag, 27 - Agent]"
+      },
+      "ExternalDatabaseSettings": {
+        "type": "object",
+        "properties": {
+          "databaseType": {
+            "type": "string",
+            "nullable": true
+          },
+          "dbHost": {
+            "type": "string",
+            "nullable": true
+          },
+          "dbPort": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "dbName": {
+            "type": "string",
+            "nullable": true
+          },
+          "dbUser": {
+            "type": "string",
+            "nullable": true
+          },
+          "dbPassword": {
+            "type": "string",
+            "nullable": true
+          },
+          "dbSsl": {
+            "type": "boolean"
+          },
+          "sqliteFilePath": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
       },
       "FeatureUsedDto": {
         "required": [
@@ -64153,6 +64571,10 @@
           },
           "defaultFolderType": {
             "$ref": "#/components/schemas/FolderType"
+          },
+          "externalDbEnabled": {
+            "type": "boolean",
+            "description": "Specifies if an external database is connected for storing form results."
           }
         },
         "additionalProperties": false,

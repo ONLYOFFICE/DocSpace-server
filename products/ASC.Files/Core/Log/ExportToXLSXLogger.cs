@@ -24,48 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Common.Security.Authorizing;
+namespace ASC.Files.Core.Log;
 
-public sealed class Role : IRole
+internal static partial class ExportToXLSXLogger
 {
-    public const string Authenticated = "Authenticated";
-    public const string Users = "Visitors";
-    public const string RoomAdministrators = "Users";
-    public const string DocSpaceAdministrators = "Administrators";
-    public const string System = "System";
-
-    public Guid ID { get; internal set; }
-    public string Name { get; internal set; }
-    public string AuthenticationType => "ASC";
-    public bool IsAuthenticated => false;
-
-    public string Key => ID.ToString();
-
-    public Role(Guid id, string name)
-    {
-        if (id == Guid.Empty)
-        {
-            throw new ArgumentException(nameof(id));
-        }
-
-        ArgumentException.ThrowIfNullOrEmpty(name);
-
-        ID = id;
-        Name = name;
-    }
-
-    public override int GetHashCode()
-    {
-        return ID.GetHashCode();
-    }
-
-    public override bool Equals(object obj)
-    {
-        return obj is Role r && r.ID == ID;
-    }
-
-    public override string ToString()
-    {
-        return $"Role: {Name}";
-    }
+    [LoggerMessage(LogLevel.Error, "Error while generating XLSX report:")]
+    public static partial void ErrorWhileGeneratingXlsx(this ILogger<ExportToXLSX> logger, Exception exception);
 }
