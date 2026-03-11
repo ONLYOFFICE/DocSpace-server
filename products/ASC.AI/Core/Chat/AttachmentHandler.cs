@@ -338,7 +338,7 @@ public class AttachmentHandler(
             }
             sb.AppendLine();
         }
-        sb.AppendLine($"\nUse the '{FormDataQueryTool.Name}' tool to query this data with SQL SELECT statements.");
+        sb.AppendLine($"\nUse the '{FormDataQueryTool.Name}' tool to query this data using structured filters and column selection.");
         return sb.ToString();
     }
 }
