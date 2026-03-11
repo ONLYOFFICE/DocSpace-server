@@ -28,8 +28,23 @@ namespace ASC.Files.Core.Services.OFormService;
 
 public class FormMetadata
 {
+    /// <summary>
+    /// The form field key.
+    /// </summary>
     public string Key { get; set; } = "";
+
+    /// <summary>
+    /// The form field type.
+    /// </summary>
     public string Type { get; set; } = "";
+
+    /// <summary>
+    /// The form field format.
+    /// </summary>
     public string? Format { get; set; }
+
+    /// <summary>
+    /// The list of possible values for the form field.
+    /// </summary>
     public List<string>? PossibleValues { get; set; }
 }
