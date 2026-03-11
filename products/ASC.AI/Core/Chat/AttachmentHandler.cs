@@ -69,7 +69,7 @@ public class AttachmentHandler(
             if (count >= MaxAttachmentsCount)
             {
                 yield break;
-        }
+            }
 
             count++;
             yield return result;
@@ -80,13 +80,13 @@ public class AttachmentHandler(
             if (count >= MaxAttachmentsCount)
             {
                 yield break;
-        }
+            }
 
             count++;
             yield return result;
+        }
     }
-    }
-    
+
     public async Task CleanupAsync(IEnumerable<AttachmentMessageContent>? attachments)
     {
         if (attachments == null)
