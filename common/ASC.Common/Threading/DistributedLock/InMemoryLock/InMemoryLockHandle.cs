@@ -28,7 +28,7 @@ using ASC.Common.Threading.DistributedLock.Abstractions;
 
 namespace ASC.Common.Threading.DistributedLock.InMemoryLock;
 
-public class InMemoryLockHandle(string resource, SemaphoreSlim semaphore) : LockHandleBase
+public class InMemoryLockHandle(string resource, InMemoryLockProvider.LockEntry entry, InMemoryLockProvider provider) : LockHandleBase
 {
     public override void Dispose()
     {
@@ -38,7 +38,8 @@ public class InMemoryLockHandle(string resource, SemaphoreSlim semaphore) : Lock
         }
 
         _disposed = true;
-        semaphore.Release();
+        entry.Semaphore.Release();
+        provider.ReleaseEntry(resource, entry);
     }
 
     public override ValueTask DisposeAsync()

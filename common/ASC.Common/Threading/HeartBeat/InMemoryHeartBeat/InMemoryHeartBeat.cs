@@ -28,9 +28,10 @@ using ASC.Common.Threading.HeartBeat.Abstractions;
 
 namespace ASC.Common.Threading.HeartBeat.InMemoryHeartBeat;
 
-public class InMemoryHeartBeat(string key) : IHeartBeat
+public class InMemoryHeartBeat(string key, PeriodicTimer timer) : IHeartBeat
 {
     private bool _disposed;
+    private PeriodicTimer _timer = timer;
 
     public ValueTask StopAsync()
     {
@@ -43,6 +44,9 @@ public class InMemoryHeartBeat(string key) : IHeartBeat
         {
             throw new ObjectDisposedException(nameof(InMemoryHeartBeat));
         }
+
+        _timer?.Dispose();
+        _timer = null;
 
         _disposed = true;
         InMemoryHeartBeatStore.Remove(key);

@@ -30,9 +30,41 @@ namespace ASC.Common.Threading.HeartBeat.InMemoryHeartBeat;
 
 internal static class InMemoryHeartBeatStore
 {
-    private static readonly ConcurrentDictionary<string, byte> _keys = new();
+    private static readonly ConcurrentDictionary<string, long> _keys = new();
 
-    public static bool TryAdd(string key) => _keys.TryAdd(key, 0);
-    public static bool Contains(string key) => _keys.ContainsKey(key);
+    public static bool TryAdd(string key, TimeSpan timeout)
+    {
+        var expiresAt = timeout > TimeSpan.Zero
+            ? Environment.TickCount64 + (long)timeout.TotalMilliseconds
+            : long.MaxValue;
+
+        return _keys.TryAdd(key, expiresAt);
+    }
+
+    public static bool Contains(string key)
+    {
+        if (!_keys.TryGetValue(key, out var expiresAt))
+        {
+            return false;
+        }
+
+        if (Environment.TickCount64 <= expiresAt)
+        {
+            return true;
+        }
+
+        _keys.TryRemove(key, out _);
+
+        return false;
+    }
+
+    public static void Extend(string key, TimeSpan timeout)
+    {
+        if (_keys.ContainsKey(key))
+        {
+            _keys[key] = Environment.TickCount64 + (long)timeout.TotalMilliseconds;
+        }
+    }
+
     public static void Remove(string key) => _keys.TryRemove(key, out _);
 }

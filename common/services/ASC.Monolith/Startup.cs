@@ -51,8 +51,13 @@ public class Startup : BaseStartup
         // === BaseStartup: core DI, auth, rate limiting, health checks, etc. ===
         await base.ConfigureServices(builder);
 
-        // === In-memory fallbacks when Redis is disabled ===
-        if (!ASC.Api.Core.Extensions.ServiceCollectionExtension.IsRedisEnabled(_configuration))
+        // === Tool permission: Redis or In-memory ===
+        if (ASC.Api.Core.Extensions.ServiceCollectionExtension.IsRedisEnabled(_configuration))
+        {
+            services.AddSingleton<IToolPermissionRequester, RedisToolPermissionRequester>();
+            services.AddSingleton<IToolPermissionProvider, RedisToolPermissionProvider>();
+        }
+        else
         {
             services.AddSingleton<IToolPermissionRequester, InMemoryToolPermissionRequester>();
             services.AddSingleton<IToolPermissionProvider, InMemoryToolPermissionProvider>();

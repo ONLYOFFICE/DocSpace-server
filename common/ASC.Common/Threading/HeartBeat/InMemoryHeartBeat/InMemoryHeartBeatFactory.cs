@@ -40,13 +40,33 @@ public class InMemoryHeartBeatFactory : IHeartBeatFactory
         TimeSpan pulseInterval,
         CancellationToken cancellationToken = default)
     {
-        if (!InMemoryHeartBeatStore.TryAdd(key))
+        if (!InMemoryHeartBeatStore.TryAdd(key, timeout))
         {
             throw new HeartBeatExistsException();
         }
 
-        var heartBeat = new InMemoryHeartBeat(key);
+        var timer = StartPulseLoop(key, timeout, pulseInterval, cancellationToken);
+        var heartBeat = new InMemoryHeartBeat(key, timer);
 
         return ValueTask.FromResult<IHeartBeat>(heartBeat);
+    }
+
+    private static PeriodicTimer StartPulseLoop(
+        string key,
+        TimeSpan timeout,
+        TimeSpan pulseInterval,
+        CancellationToken cancellationToken)
+    {
+        var timer = new PeriodicTimer(pulseInterval);
+
+        _ = Task.Run(async () =>
+        {
+            while (await timer.WaitForNextTickAsync(cancellationToken))
+            {
+                InMemoryHeartBeatStore.Extend(key, timeout);
+            }
+        }, cancellationToken);
+
+        return timer;
     }
 }

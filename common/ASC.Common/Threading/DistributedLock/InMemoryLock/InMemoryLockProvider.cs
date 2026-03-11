@@ -38,7 +38,8 @@ namespace ASC.Common.Threading.DistributedLock.InMemoryLock;
 /// </summary>
 public class InMemoryLockProvider : Abstractions.IDistributedLockProvider
 {
-    private static readonly ConcurrentDictionary<string, SemaphoreSlim> _locks = new();
+    private static readonly ConcurrentDictionary<string, LockEntry> _locks = new();
+    private static readonly TimeSpan _defaultMinTimeout = TimeSpan.FromSeconds(30);
 
     public async Task<IDistributedLockHandle> TryAcquireFairLockAsync(
         string resource,
@@ -55,14 +56,21 @@ public class InMemoryLockProvider : Abstractions.IDistributedLockProvider
         bool throwIfNotAcquired = true,
         CancellationToken cancellationToken = default)
     {
-        var semaphore = _locks.GetOrAdd(resource, _ => new SemaphoreSlim(1, 1));
+        if (timeout < _defaultMinTimeout || timeout == Timeout.InfiniteTimeSpan || timeout == TimeSpan.MaxValue)
+        {
+            timeout = _defaultMinTimeout;
+        }
+
+        var entry = AcquireEntry(resource);
 
         var sw = Stopwatch.StartNew();
-        var acquired = await semaphore.WaitAsync(timeout, cancellationToken);
+        var acquired = await entry.Semaphore.WaitAsync(timeout, cancellationToken);
         sw.Stop();
 
         if (!acquired)
         {
+            ReleaseEntry(resource, entry);
+
             if (throwIfNotAcquired)
             {
                 throw new DistributedLockException(LockStatus.NotAcquired, resource, sw.ElapsedMilliseconds);
@@ -71,6 +79,48 @@ public class InMemoryLockProvider : Abstractions.IDistributedLockProvider
             return new DefaultHandle();
         }
 
-        return new InMemoryLockHandle(resource, semaphore);
+        return new InMemoryLockHandle(resource, entry, this);
+    }
+
+    public void ReleaseEntry(string resource, LockEntry entry)
+    {
+        lock (entry)
+        {
+            entry.RefCount--;
+
+            if (entry.RefCount == 0)
+            {
+                _locks.TryRemove(new KeyValuePair<string, LockEntry>(resource, entry));
+            }
+        }
+    }
+
+    private static LockEntry AcquireEntry(string resource)
+    {
+        while (true)
+        {
+            var entry = _locks.GetOrAdd(resource, _ => new LockEntry());
+
+            lock (entry)
+            {
+                if (_locks.TryGetValue(resource, out var current) && ReferenceEquals(current, entry))
+                {
+                    entry.RefCount++;
+
+                    return entry;
+                }
+            }
+        }
+    }
+
+    public sealed class LockEntry : IDisposable
+    {
+        public readonly SemaphoreSlim Semaphore = new(1, 1);
+        public int RefCount;
+
+        public void Dispose()
+        {
+            Semaphore.Dispose();
+        }
     }
 }
