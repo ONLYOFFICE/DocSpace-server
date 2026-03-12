@@ -24,15 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Tools;
+namespace ASC.Files.Core.Log;
 
-public enum SystemToolType
+internal static partial class ExportToXLSXLogger
 {
-    KnowledgeSearch,
-    WebSearch,
-    WebCrawling,
-    GeneratePresentation,
-    GenerateDocx,
-    GenerateForm,
-    FormDataQuery
+    [LoggerMessage(LogLevel.Error, "Error while generating XLSX report:")]
+    public static partial void ErrorWhileGeneratingXlsx(this ILogger<ExportToXLSX> logger, Exception exception);
 }

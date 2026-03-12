@@ -179,7 +179,7 @@ public class Delete
 /// <summary>
 /// The request parameters for deleting a file.
 /// </summary>
-public class DeleteRequestDto<T>
+public class DeleteRequestDto<T> : FileOperationRequestBaseDto
 {
     /// <summary>
     /// The file ID to delete.

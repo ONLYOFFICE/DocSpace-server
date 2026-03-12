@@ -31,6 +31,7 @@ public class AttachmentResult
     public required FileEntry File { get; init; }
     public AttachmentMessageContent? Content { get; init; }
     public bool Success { get; init; }
+    public ToolWrapper? DynamicTool { get; init; }
 }
 
 [Scope]
@@ -45,7 +46,10 @@ public class AttachmentHandler(
     AiConfiguration aiConfiguration,
     DataContentLoader dataContentLoader,
     IConfiguration configuration,
-    ILogger<AttachmentHandler> logger)
+    ILogger<AttachmentHandler> logger,
+    FormFillingReportCreator formFillingReportCreator,
+    ExternalDatabaseClient externalDatabaseClient,
+    FormDataQueryTool formDataQueryTool)
 {
     private static int? _maxAttachmentsCount;
     private int MaxAttachmentsCount => _maxAttachmentsCount ??= configuration.GetValue("ai:maxAttachmentsCount", 5);
@@ -82,7 +86,7 @@ public class AttachmentHandler(
             yield return result;
         }
     }
-    
+
     public async Task CleanupAsync(IEnumerable<AttachmentMessageContent>? attachments)
     {
         if (attachments == null)
@@ -230,10 +234,22 @@ public class AttachmentHandler(
             };
         }
 
+        ToolWrapper? formTool = null;
+        if (file.IsForm)
+        {
+            var (formData, tool) = await TryGetFormDataAsync(file);
+            formTool = tool;
+            if (formData != null)
+            {
+                content += formData;
+            }
+        }
+
         return new AttachmentResult
         {
             File = file,
             Success = true,
+            DynamicTool = formTool,
             Content = new TextAttachmentMessageContent
             {
                 Id = JsonSerializer.SerializeToElement(file.Id),
@@ -243,7 +259,7 @@ public class AttachmentHandler(
             }
         };
     }
-    
+
     private async Task<AttachmentResult> HandleMediaAsync(
         File<int> file,
         FileType fileType,
@@ -255,5 +271,70 @@ public class AttachmentHandler(
             Success = true,
             Content = await dataContentLoader.CreateAsync(file, fileType, extension)
         };
+    }
+
+    private async Task<(string? contextText, ToolWrapper? tool)> TryGetFormDataAsync<T>(File<T> file)
+    {
+        if (file is not File<int> intFile)
+        {
+            return (null, null);
+        }
+
+        var fileDao = daoFactory.GetFileDao<int>();
+        var properties = await fileDao.GetProperties(intFile.Id);
+        var formFilling = properties?.FormFilling;
+
+        if (formFilling?.StartFilling != true || formFilling.OriginalFormId != intFile.Id)
+        {
+            return (null, null);
+        }
+
+        if (!externalDatabaseClient.IsEnabled())
+        {
+            return (null, null);
+        }
+
+        var tableName = FormFillingReportCreator.GetTableName(intFile.Id, intFile.Version);
+        if (!await externalDatabaseClient.TableExistsAsync(tableName))
+        {
+            return (null, null);
+        }
+
+        var rowCount = await externalDatabaseClient.CountAsync(tableName);
+        var columns = await formFillingReportCreator.GetColumnDefinitionsAsync(intFile.Id, intFile.Version);
+        var columnList = columns.ToList();
+
+        var tool = await formDataQueryTool.InitAsync(intFile.Id, tableName, rowCount, columnList);
+        if (tool == null)
+        {
+            return (null, null);
+        }
+
+        var toolWrapper = new ToolWrapper
+        {
+            Tool = tool,
+            Context = new ToolContext { Name = tool.Name, AutoInvoke = true }
+        };
+
+        return (FormatFormDataFromExternalDb(tableName, rowCount, columnList), toolWrapper);
+    }
+
+    private static string FormatFormDataFromExternalDb(string tableName, long rowCount, IEnumerable<DbColumnDefinition> columns)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine($"\n\n##Form Submissions ({rowCount} total, stored in external database)");
+        sb.AppendLine($"Table: {tableName}");
+        sb.AppendLine("Schema:");
+        foreach (var col in columns)
+        {
+            sb.Append($"- {col.Name} ({col.Type})");
+            if (col.EnumValues?.Count > 0)
+            {
+                sb.Append($": {string.Join(", ", col.EnumValues)}");
+            }
+            sb.AppendLine();
+        }
+        sb.AppendLine($"\nUse the '{FormDataQueryTool.Name}' tool to query this data using structured filters and column selection.");
+        return sb.ToString();
     }
 }

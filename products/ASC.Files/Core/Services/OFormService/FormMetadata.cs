@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2026
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,15 +24,27 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Tools;
+namespace ASC.Files.Core.Services.OFormService;
 
-public enum SystemToolType
+public class FormMetadata
 {
-    KnowledgeSearch,
-    WebSearch,
-    WebCrawling,
-    GeneratePresentation,
-    GenerateDocx,
-    GenerateForm,
-    FormDataQuery
+    /// <summary>
+    /// The form field key.
+    /// </summary>
+    public string Key { get; set; } = "";
+
+    /// <summary>
+    /// The form field type.
+    /// </summary>
+    public string Type { get; set; } = "";
+
+    /// <summary>
+    /// The form field format.
+    /// </summary>
+    public string? Format { get; set; }
+
+    /// <summary>
+    /// The list of possible values for the form field.
+    /// </summary>
+    public List<string>? PossibleValues { get; set; }
 }

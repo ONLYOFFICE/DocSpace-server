@@ -121,6 +121,127 @@ public class DbFormsItemDataSearch : SubmitFormsData, ISearchItem
     }
 }
 
+/// <summary>
+/// The OpenSearch document for form metadata (one instance per original form version).
+/// </summary>
+[Transient]
+public class DbFormsMetadataSearch : ISearchItem
+{
+    /// <summary>
+    /// The document ID. Encoded as a stable hash of (OriginalFormId, OriginalFormVersion).
+    /// </summary>
+    public int Id { get; set; }
+
+    /// <summary>
+    /// The tenant ID.
+    /// </summary>
+    public int TenantId { get; set; }
+
+    /// <summary>
+    /// The original form ID.
+    /// </summary>
+    public int OriginalFormId { get; set; }
+
+    /// <summary>
+    /// The original form version.
+    /// </summary>
+    public int OriginalFormVersion { get; set; }
+
+    /// <summary>
+    /// The ID of the room where the form is located.
+    /// </summary>
+    public int RoomId { get; set; }
+
+    /// <summary>
+    /// The form field metadata.
+    /// </summary>
+    [Nested]
+    public IEnumerable<FormMetadata> Metadata { get; set; }
+
+    /// <summary>
+    /// The metadata index name.
+    /// </summary>
+    [Ignore]
+    public string IndexName => "forms_metadata";
+
+    public Expression<Func<ISearchItem, object[]>> GetSearchContentFields(SearchSettingsHelper searchSettings)
+        => _ => Array.Empty<object>();
+
+    /// <summary>
+    /// Computes a stable non-negative int document ID from the (OriginalFormId, OriginalFormVersion) pair.
+    /// </summary>
+    public static int ComputeId(int originalFormId, int originalFormVersion)
+    {
+        unchecked
+        {
+            var hash = 2166136261u;
+            hash = (hash ^ (uint)originalFormId) * 16777619u;
+            hash = (hash ^ (uint)originalFormVersion) * 16777619u;
+            return (int)(hash & (uint)int.MaxValue);
+        }
+    }
+}
+
+[Scope]
+public class BaseIndexerFormMetadata(Client client,
+    ILogger<BaseIndexerFormMetadata> log,
+    IDbContextFactory<WebstudioDbContext> dbContextManager,
+    TenantManager tenantManager,
+    BaseIndexerHelper baseIndexerHelper,
+    Settings settings,
+    IServiceProvider serviceProvider)
+    : BaseIndexer<DbFormsMetadataSearch>(client, log, dbContextManager, tenantManager, baseIndexerHelper, settings, serviceProvider);
+
+[Scope(typeof(IFactoryIndexer))]
+public class FactoryIndexerFormMetadata(
+    ILoggerProvider options,
+    TenantManager tenantManager,
+    SearchSettingsHelper searchSettingsHelper,
+    FactoryIndexer factoryIndexer,
+    BaseIndexerFormMetadata baseIndexer,
+    IServiceProvider serviceProvider,
+    ICache cache)
+    : FactoryIndexer<DbFormsMetadataSearch>(options, tenantManager, searchSettingsHelper, factoryIndexer, baseIndexer, serviceProvider, cache)
+{
+    public override async Task IndexAllAsync()
+    {
+        try
+        {
+            var now = DateTime.UtcNow;
+
+            await foreach (var _ in _indexer.IndexAllAsync(GetCount, GetIds, GetData))
+            {
+
+            }
+
+            await _indexer.OnComplete(now);
+        }
+        catch (Exception e)
+        {
+            Logger.ErrorFactoryIndexerFile(e);
+            throw;
+        }
+
+        return;
+
+        List<int> GetIds(DateTime lastIndexed)
+        {
+            return [];
+        }
+
+        List<DbFormsMetadataSearch> GetData(long start, long stop, DateTime lastIndexed)
+        {
+            return [];
+
+        }
+
+        (int, int, int) GetCount(DateTime lastIndexed)
+        {
+            return new ValueTuple<int, int, int>(0, 0, 0);
+        }
+    }
+}
+
 [Scope]
 public class BaseIndexerForm(Client client,
     ILogger<BaseIndexerForm> log,
