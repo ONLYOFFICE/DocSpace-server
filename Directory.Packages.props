@@ -49,6 +49,7 @@
     <PackageVersion Include="Microsoft.Extensions.Hosting.Systemd" Version="10.0.3" />
     <PackageVersion Include="Microsoft.Extensions.Hosting.WindowsServices" Version="10.0.3" />
     <PackageVersion Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="8.15.0" />
+    <PackageVersion Include="Microsoft.ML.Tokenizers.Data.Cl100kBase" Version="2.0.0" />
     <PackageVersion Include="Mscc.GenerativeAI.Microsoft" Version="2.9.8" />
     <PackageVersion Include="NLog.Targets.ElasticSearch" Version="7.7.0" />
     <PackageVersion Include="NLog.Web.AspNetCore" Version="5.5.0" />
@@ -160,7 +161,7 @@
     <PackageVersion Include="Microsoft.Extensions.Options" Version="10.0.3" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
     <PackageVersion Include="Microsoft.OneDriveSDK" Version="2.1.0" />
-    <PackageVersion Include="Microsoft.ML.Tokenizers" Version="1.0.2" />
+    <PackageVersion Include="Microsoft.ML.Tokenizers" Version="2.0.0" />
     <PackageVersion Include="Microsoft.SemanticKernel.Core" Version="1.72.0" />
     <PackageVersion Include="Microsoft.SharePoint.Client" Version="14.0.4762.1000" />
     <PackageVersion Include="ModelContextProtocol" Version="1.0.0" />
