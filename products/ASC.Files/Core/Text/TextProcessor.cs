@@ -39,6 +39,7 @@ public class TextProcessor(IServiceProvider serviceProvider)
         IDocumentProcessingStrategy strategy = fileExtension.ToLowerInvariant() switch
         {
             ".csv" => serviceProvider.GetRequiredService<CsvDocumentProcessingStrategy>(),
+            ".md" => serviceProvider.GetRequiredService<MarkdownDocumentProcessingStrategy>(),
             _ => serviceProvider.GetRequiredService<GenericDocumentProcessingStrategy>()
         };
 
