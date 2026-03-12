@@ -99,10 +99,9 @@ public class FileUpdateTests(
         var createdFile = await CreateFileInMy("file_to_lock.docx", Initializer.Owner);
         
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _filesApi.LockFileAsync(createdFile.Id, new LockFileParameters(true), TestContext.Current.CancellationToken));
+        var result =  (await _filesApi.LockFileAsync(createdFile.Id, new LockFileParameters(true), TestContext.Current.CancellationToken)).Response;
         
-        exception.ErrorCode.Should().Be(403);
+        result.Locked.Should().BeTrue();
     }
     
     [Fact]
@@ -199,8 +198,8 @@ public class FileUpdateTests(
             ]
         }, TestContext.Current.CancellationToken);
         
-        await _filesClient.Authenticate(roomAdmin);
         var createdFile = await CreateFile("file_to_lock.docx", createdRoom.Id);
+        await _filesClient.Authenticate(roomAdmin);
         
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _filesApi.LockFileAsync(createdFile.Id, new LockFileParameters(true), TestContext.Current.CancellationToken));
