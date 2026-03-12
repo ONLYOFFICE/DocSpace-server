@@ -147,10 +147,7 @@ public class RoomsApiTests(
         var tag = (await _roomsApi.CreateRoomTagAsync(createTagRequest, TestContext.Current.CancellationToken)).Response;
         
         // Act
-        var tagsRequest = new BatchTagsRequestDto
-        {
-            Names = [tag.ToString()!]
-        };
+        var tagsRequest = new BatchTagsRequestDto([tag]);
         
         var taggedRoom = (await _roomsApi.AddRoomTagsAsync(room.Id, tagsRequest, TestContext.Current.CancellationToken)).Response;
         
@@ -182,18 +179,12 @@ public class RoomsApiTests(
         var tag = (await _roomsApi.CreateRoomTagAsync(createTagRequest, TestContext.Current.CancellationToken)).Response;
         
         // Add the tag to the room
-        var addTagsRequest = new BatchTagsRequestDto
-        {
-            Names = [tag.ToString()!]
-        };
+        var addTagsRequest = new BatchTagsRequestDto([tag]);
         
         await _roomsApi.AddRoomTagsAsync(room.Id, addTagsRequest, TestContext.Current.CancellationToken);
         
         // Act
-        var deleteTagsRequest = new BatchTagsRequestDto
-        {
-            Names = [tag.ToString()!]
-        };
+        var deleteTagsRequest = new BatchTagsRequestDto([tag]);
         
         var result = (await _roomsApi.DeleteRoomTagsAsync(room.Id, deleteTagsRequest, TestContext.Current.CancellationToken)).Response;
         

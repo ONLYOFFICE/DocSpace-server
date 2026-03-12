@@ -1819,6 +1819,12 @@
               }
             }
           },
+          "400": {
+            "description": "Incorrect email"
+          },
+          "403": {
+            "description": "No permissions to perform this action"
+          },
           "404": {
             "description": "User not found"
           },
@@ -3196,6 +3202,95 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/people/exists": {
+      "get": {
+        "tags": [
+          "People / Profiles"
+        ],
+        "summary": "Check if a user exists by email",
+        "description": "Returns a boolean indicating whether a user with the specified email exists on the portal.",
+        "operationId": "checkUserExistsByEmail",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "query",
+            "description": "The user email address.",
+            "schema": {
+              "maxLength": 255,
+              "minLength": 0,
+              "type": "string",
+              "format": "email",
+              "example": "john.doe@example.com"
+            }
+          },
+          {
+            "name": "encemail",
+            "in": "query",
+            "description": "The user encrypted email address.",
+            "schema": {
+              "type": "string",
+              "example": "encrypted_email_string"
+            }
+          },
+          {
+            "name": "culture",
+            "in": "query",
+            "description": "Culture",
+            "schema": {
+              "type": "string",
+              "example": "en-US"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Boolean result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BooleanWrapper"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Incorrect email"
           },
           "401": {
             "description": "Unauthorized"
@@ -9222,31 +9317,6 @@
         "properties": {
           "employeeType": {
             "$ref": "#/components/schemas/EmployeeType"
-          },
-          "firstName": {
-            "type": "string",
-            "description": "The user first name.",
-            "nullable": true,
-            "example": "John"
-          },
-          "lastName": {
-            "type": "string",
-            "description": "The user last name.",
-            "nullable": true,
-            "example": "Doe"
-          },
-          "email": {
-            "type": "string",
-            "description": "The user email address.",
-            "format": "email",
-            "nullable": true,
-            "example": "john.doe@example.com"
-          },
-          "passwordHash": {
-            "type": "string",
-            "description": "The user password hash.",
-            "nullable": true,
-            "example": "$2a$10$abcdefghijklmnopqrstuv"
           },
           "key": {
             "type": "string",

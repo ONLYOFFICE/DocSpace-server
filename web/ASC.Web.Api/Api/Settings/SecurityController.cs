@@ -141,7 +141,7 @@ public class SecurityController(
     [SwaggerResponse(200, "Password settings", typeof(PasswordSettingsDto))]
     [HttpGet("password")]
     [AllowNotPayment]
-    [Authorize(AuthenticationSchemes = "confirm", Roles = "Everyone")]
+    [Authorize(AuthenticationSchemes = "confirm", Roles = "Authenticated")]
     public async Task<PasswordSettingsDto> GetPasswordSettings()
     {
         var settings = await settingsManager.LoadAsync<PasswordSettings>(HttpContext.GetIfModifiedSince());

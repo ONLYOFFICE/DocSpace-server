@@ -43,13 +43,13 @@ public class ExternalShareDto
     /// The external data ID.
     /// </summary>
     /// <example>123</example>
-    public required string Id { get; set; }
+    public string Id { get; set; }
 
     /// <summary>
     /// The external data title.
     /// </summary>
     /// <example>Shared Document</example>
-    public required string Title { get; set; }
+    public string Title { get; set; }
 
     /// <summary>
     /// The type of the external data.

@@ -110,7 +110,7 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="{{classname}}" /> class.
         /// </summary>
-        [JsonConstructorAttribute]
+        [JsonConstructor]
         {{^isAdditionalPropertiesTrue}}
         protected {{classname}}() { }
         {{/isAdditionalPropertiesTrue}}
@@ -130,7 +130,7 @@
         /// <param name="{{#lambda.camelcase_sanitize_param}}{{name}}{{/lambda.camelcase_sanitize_param}}">{{description}}{{^description}}{{#lambda.camelcase_sanitize_param}}{{name}}{{/lambda.camelcase_sanitize_param}}{{/description}}{{#required}} (required){{/required}}{{#defaultValue}} (default to {{.}}){{/defaultValue}}.</param>
         {{/vendorExtensions.x-localVars}}
     {{#hasOnlyReadOnly}}
-        [JsonConstructorAttribute]
+        [JsonConstructor]
     {{/hasOnlyReadOnly}}
         public {{classname}}({{#vendorExtensions.x-localVars}}{{{datatypeWithEnum}}}{{#isEnum}}{{^isContainer}}{{^required}}?{{/required}}{{/isContainer}}{{/isEnum}} {{#lambda.camelcase_sanitize_param}}{{name}}{{/lambda.camelcase_sanitize_param}} = {{#defaultValue}}{{^isDateTime}}{{#isString}}{{^isEnum}}@{{/isEnum}}{{/isString}}{{{defaultValue}}}{{/isDateTime}}{{#isDateTime}}default{{/isDateTime}}{{/defaultValue}}{{^defaultValue}}default{{/defaultValue}}{{^-last}}, {{/-last}}{{/vendorExtensions.x-localVars}}){{#parent}} : base({{#parentVars}}{{#lambda.camelcase_sanitize_param}}{{name}}{{/lambda.camelcase_sanitize_param}}{{^-last}}, {{/-last}}{{/parentVars}}){{/parent}}
         {
@@ -222,7 +222,7 @@
         [DataMember(Name = "{{baseName}}"{{#required}}, IsRequired = true{{/required}}, EmitDefaultValue = {{#vendorExtensions.x-emit-default-value}}true{{/vendorExtensions.x-emit-default-value}}{{^vendorExtensions.x-emit-default-value}}{{#required}}true{{/required}}{{^required}}{{#isBoolean}}true{{/isBoolean}}{{^isBoolean}}{{#isNullable}}true{{/isNullable}}{{^isNullable}}false{{/isNullable}}{{/isBoolean}}{{/required}}{{/vendorExtensions.x-emit-default-value}})]
         {{#isDate}}
         {{^supportsDateOnly}}
-        [System.Text.Json.Serialization.JsonConverter(typeof(OpenAPIDateConverter))]
+        [JsonConverter(typeof(OpenAPIDateConverter))]
         {{/supportsDateOnly}}
         {{/isDate}}
         {{#deprecated}}
@@ -245,7 +245,7 @@
         {{#isReadOnly}}
         [DataMember(Name = "{{baseName}}"{{#required}}, IsRequired = true{{/required}}, EmitDefaultValue = {{#vendorExtensions.x-emit-default-value}}true{{/vendorExtensions.x-emit-default-value}}{{^vendorExtensions.x-emit-default-value}}{{#required}}true{{/required}}{{^required}}{{#isBoolean}}true{{/isBoolean}}{{^isBoolean}}{{#isNullable}}true{{/isNullable}}{{^isNullable}}false{{/isNullable}}{{/isBoolean}}{{/required}}{{/vendorExtensions.x-emit-default-value}})]
         {{#isDate}}
-        [System.Text.Json.Serialization.JsonConverter(typeof(OpenAPIDateConverter))]
+        [JsonConverter(typeof(OpenAPIDateConverter))]
         {{/isDate}}
         {{#deprecated}}
         [Obsolete]
@@ -263,7 +263,7 @@
         {{/isReadOnly}}
         {{^isReadOnly}}
         {{#isDate}}
-        [System.Text.Json.Serialization.JsonConverter(typeof(OpenAPIDateConverter))]
+        [JsonConverter(typeof(OpenAPIDateConverter))]
         {{/isDate}}
         [DataMember(Name = "{{baseName}}"{{#required}}, IsRequired = true{{/required}}, EmitDefaultValue = {{#vendorExtensions.x-emit-default-value}}true{{/vendorExtensions.x-emit-default-value}}{{^vendorExtensions.x-emit-default-value}}{{#required}}true{{/required}}{{^required}}{{#isBoolean}}true{{/isBoolean}}{{^isBoolean}}{{#isNullable}}true{{/isNullable}}{{^isNullable}}false{{/isNullable}}{{/isBoolean}}{{/required}}{{/vendorExtensions.x-emit-default-value}})]
         {{#deprecated}}
@@ -298,8 +298,8 @@
         /// <summary>
         /// Gets or Sets additional properties
         /// </summary>
-        [System.Text.Json.Serialization.JsonExtensionData]
-        public IDictionary<string, object> AdditionalProperties { get; set; }
+        [JsonExtensionData]
+        public IDictionary<string, JToken> AdditionalProperties { get; set; }
 
         {{/isAdditionalPropertiesTrue}}
         /// <summary>
@@ -329,7 +329,7 @@
         /// <returns>JSON string presentation of the object</returns>
         public override string ToJson()
         {
-            return JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true });
+            return JsonConvert.SerializeObject(this, Formatting.Indented);
         }
     
 

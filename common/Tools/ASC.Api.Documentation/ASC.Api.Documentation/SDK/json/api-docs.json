@@ -2794,6 +2794,9 @@
               }
             }
           },
+          "400": {
+            "description": "Invalid connection data or provider with this name already exists"
+          },
           "403": {
             "description": "You don't have enough permission to manage providers"
           },
@@ -3005,6 +3008,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Invalid connection data or provider with this name already exists"
           },
           "403": {
             "description": "You don't have enough permission to manage providers"
@@ -5021,6 +5027,72 @@
         ]
       }
     },
+    "/api/2.0/files/file/{fileId}/xlsx": {
+      "post": {
+        "tags": [
+          "Files / Files"
+        ],
+        "summary": "Generate XLSX report",
+        "description": "Triggers asynchronous XLSX report generation for the specified form file.",
+        "operationId": "generateXlsx",
+        "parameters": [
+          {
+            "name": "fileId",
+            "in": "path",
+            "description": "The file unique identifier.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "XLSX report generation has been queued"
+          },
+          "403": {
+            "description": "You do not have enough permissions to perform this action"
+          },
+          "404": {
+            "description": "Form file not found"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": []
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": []
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": []
+          }
+        ]
+      }
+    },
     "/api/2.0/files/file/{fileId}/log": {
       "get": {
         "tags": [
@@ -5726,6 +5798,15 @@
               "type": "integer",
               "format": "int32",
               "example": 1
+            }
+          },
+          {
+            "name": "ReturnSingleOperation",
+            "in": "query",
+            "description": "Specifies whether to return only the current operation",
+            "schema": {
+              "type": "boolean",
+              "example": false
             }
           }
         ],
@@ -6971,7 +7052,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FormResultsArrayWrapper"
+                  "$ref": "#/components/schemas/FormSubmissionsWrapper"
                 }
               }
             }
@@ -12825,7 +12906,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/BooleanWrapper"
+                  "$ref": "#/components/schemas/ModuleWrapper"
                 }
               }
             }
@@ -13776,6 +13857,73 @@
               }
             }
           },
+          "400": {
+            "description": "Incorrect or missing file"
+          },
+          "403": {
+            "description": "You don't have enough permission to perform the operation"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": []
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": []
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Files / Settings"
+        ],
+        "summary": "Reset the default template setting",
+        "description": "Resets the default template setting.",
+        "operationId": "resetDefaultTemplate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DefaultTemplateSettingsResetRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "New default template settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultTemplateSettingsWrapper"
+                }
+              }
+            }
+          },
           "403": {
             "description": "You don't have enough permission to perform the operation"
           },
@@ -13867,6 +14015,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Incorrect or missing file"
           },
           "403": {
             "description": "You don't have enough permission to perform the operation"
@@ -14411,6 +14562,15 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "The list of email addresses is empty"
+          },
+          "403": {
+            "description": "You don't have enough permission to perform the operation"
+          },
+          "404": {
+            "description": "The required file was not found"
           },
           "401": {
             "description": "Unauthorized"
@@ -21947,6 +22107,12 @@
               }
             }
           },
+          "400": {
+            "description": "Incorrect email"
+          },
+          "403": {
+            "description": "No permissions to perform this action"
+          },
           "404": {
             "description": "User not found"
           },
@@ -23324,6 +23490,95 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": []
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": []
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": []
+          }
+        ]
+      }
+    },
+    "/api/2.0/people/exists": {
+      "get": {
+        "tags": [
+          "People / Profiles"
+        ],
+        "summary": "Check if a user exists by email",
+        "description": "Returns a boolean indicating whether a user with the specified email exists on the portal.",
+        "operationId": "checkUserExistsByEmail",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "query",
+            "description": "The user email address.",
+            "schema": {
+              "maxLength": 255,
+              "minLength": 0,
+              "type": "string",
+              "format": "email",
+              "example": "john.doe@example.com"
+            }
+          },
+          {
+            "name": "encemail",
+            "in": "query",
+            "description": "The user encrypted email address.",
+            "schema": {
+              "type": "string",
+              "example": "encrypted_email_string"
+            }
+          },
+          {
+            "name": "culture",
+            "in": "query",
+            "description": "Culture",
+            "schema": {
+              "type": "string",
+              "example": "en-US"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Boolean result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BooleanWrapper"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Incorrect email"
           },
           "401": {
             "description": "Unauthorized"
@@ -27270,7 +27525,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/AuthRequestsDto"
+                "$ref": "#/components/schemas/AuthWithCodeRequestsDto"
               }
             }
           }
@@ -27932,7 +28187,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/PaymentUrlRequestsDto"
+                "$ref": "#/components/schemas/PaymentUrlRequestDto"
               }
             }
           }
@@ -28199,7 +28454,7 @@
             "description": "The URL where the user will be redirected after payment processing.",
             "schema": {
               "type": "string",
-              "example": "https://example.com/payment/success"
+              "example": "https://example.com"
             }
           }
         ],
@@ -28986,6 +29241,86 @@
         ]
       }
     },
+    "/api/2.0/portal/payment/customer/servicequota": {
+      "get": {
+        "tags": [
+          "Portal / Payment"
+        ],
+        "summary": "Get the service quota",
+        "description": "Returns the service quota from the accounting service.",
+        "operationId": "getCustomerServiceQuota",
+        "parameters": [
+          {
+            "name": "serviceName",
+            "in": "query",
+            "description": "The service name.",
+            "schema": {
+              "type": "string",
+              "example": "aitools"
+            }
+          },
+          {
+            "name": "refresh",
+            "in": "query",
+            "description": "Specifies whether to refresh the payment information cache or not.",
+            "schema": {
+              "type": "boolean",
+              "example": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The service quota",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BalanceWrapper"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "No permissions to perform this action"
+          },
+          "404": {
+            "description": "Service could not be found"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": []
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": []
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": []
+          }
+        ]
+      }
+    },
     "/api/2.0/portal/payment/customer/operations": {
       "get": {
         "tags": [
@@ -28995,53 +29330,6 @@
         "description": "Returns the report of customer operations from the accounting service.",
         "operationId": "getCustomerOperations",
         "parameters": [
-          {
-            "name": "startDate",
-            "in": "query",
-            "description": "The report start date.",
-            "schema": {
-              "type": "string",
-              "format": "date-time",
-              "example": "2024-01-01T00:00:00Z"
-            }
-          },
-          {
-            "name": "endDate",
-            "in": "query",
-            "description": "The report end date.",
-            "schema": {
-              "type": "string",
-              "format": "date-time",
-              "example": "2024-01-31T23:59:59Z"
-            }
-          },
-          {
-            "name": "participantName",
-            "in": "query",
-            "description": "The participant name.",
-            "schema": {
-              "type": "string",
-              "example": "ACME Corp"
-            }
-          },
-          {
-            "name": "credit",
-            "in": "query",
-            "description": "Specifies whether to include credit operations in the report. The default value is true.",
-            "schema": {
-              "type": "boolean",
-              "example": true
-            }
-          },
-          {
-            "name": "debit",
-            "in": "query",
-            "description": "Specifies whether to include debit operations in the report. The default value is true.",
-            "schema": {
-              "type": "boolean",
-              "example": true
-            }
-          },
           {
             "name": "offset",
             "in": "query",
@@ -29061,6 +29349,98 @@
               "format": "int32",
               "example": 25
             }
+          },
+          {
+            "name": "ServiceName",
+            "in": "query",
+            "description": "The service name.",
+            "schema": {
+              "type": "string",
+              "example": "aitools"
+            }
+          },
+          {
+            "name": "StartDate",
+            "in": "query",
+            "description": "The report start date.",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "example": "2024-01-01T00:00:00Z"
+            }
+          },
+          {
+            "name": "EndDate",
+            "in": "query",
+            "description": "The report end date.",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "example": "2024-01-31T23:59:59Z"
+            }
+          },
+          {
+            "name": "ParticipantName",
+            "in": "query",
+            "description": "The participant name.",
+            "schema": {
+              "type": "string",
+              "example": "ACME Corp"
+            }
+          },
+          {
+            "name": "Credit",
+            "in": "query",
+            "description": "Specifies whether to include credit operations in the report.",
+            "schema": {
+              "type": "boolean",
+              "example": true
+            }
+          },
+          {
+            "name": "Debit",
+            "in": "query",
+            "description": "Specifies whether to include debit operations in the report.",
+            "schema": {
+              "type": "boolean",
+              "example": false
+            }
+          },
+          {
+            "name": "Types",
+            "in": "query",
+            "description": "List of operation types to filter by.",
+            "schema": {
+              "$ref": "#/components/schemas/OperationType"
+            },
+            "example": "Any"
+          },
+          {
+            "name": "Status",
+            "in": "query",
+            "description": "List of operation status to filter by.",
+            "schema": {
+              "$ref": "#/components/schemas/OperationStatus"
+            },
+            "example": "Any"
+          },
+          {
+            "name": "OrderBy",
+            "in": "query",
+            "description": "The field to order by.",
+            "schema": {
+              "type": "string",
+              "example": "StartDate"
+            }
+          },
+          {
+            "name": "OrderType",
+            "in": "query",
+            "description": "Order direction: Ascending or Descending.",
+            "schema": {
+              "$ref": "#/components/schemas/OperationOrderType"
+            },
+            "example": "Descending"
           }
         ],
         "responses": {
@@ -29076,6 +29456,9 @@
           },
           "403": {
             "description": "No permissions to perform this action"
+          },
+          "404": {
+            "description": "Service could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -29139,6 +29522,12 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "No permissions to perform this action"
+          },
+          "404": {
+            "description": "Service could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -29277,8 +29666,8 @@
         "tags": [
           "Portal / Payment"
         ],
-        "summary": "Get wallet auto top-up settings",
-        "description": "Returns the wallet auto top-up settings.",
+        "summary": "Gets the tenant wallet auto top up settings",
+        "description": "Returns the wallet auto top up settings for the current tenant.",
         "operationId": "getTenantWalletSettings",
         "responses": {
           "200": {
@@ -29332,8 +29721,8 @@
         "tags": [
           "Portal / Payment"
         ],
-        "summary": "Set wallet auto top-up settings",
-        "description": "Sets the wallet auto top-up settings.",
+        "summary": "Set the wallet auto top up settings",
+        "description": "Updates the wallet auto top up settings for the current tenant.\r\nRequires the tariff service to be configured and the user to be authorized as a payer.\r\nReturns null if the tariff service is not configured or customer information/balance cannot be retrieved.",
         "operationId": "setTenantWalletSettings",
         "requestBody": {
           "content": {
@@ -29398,12 +29787,12 @@
         "tags": [
           "Portal / Payment"
         ],
-        "summary": "Get wallet services settings",
-        "description": "Returns the wallet services settings.",
+        "summary": "Gets the wallet service settings for the tenant.",
+        "description": "Retrieves configuration settings related to the wallet service associated with the current tenant.",
         "operationId": "getTenantWalletServiceSettings",
         "responses": {
           "200": {
-            "description": "The wallet services settings",
+            "description": "The wallet service settings for the tenant",
             "content": {
               "application/json": {
                 "schema": {
@@ -29455,8 +29844,8 @@
         "tags": [
           "Portal / Payment"
         ],
-        "summary": "Change wallet service state",
-        "description": "Changes the wallet service state.",
+        "summary": "Change tenant wallet service state",
+        "description": "Changes the state of a wallet service for the current tenant.\r\nRequires permission to edit portal settings and a configured tariff service.\r\nAdds or removes the specified service from the enabled services list based on the enabled flag.",
         "operationId": "changeTenantWalletServiceState",
         "requestBody": {
           "content": {
@@ -29469,11 +29858,258 @@
         },
         "responses": {
           "200": {
-            "description": "The wallet service settings",
+            "description": "The updated tenant wallet service settings",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/TenantWalletServiceSettingsWrapper"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "No permissions to perform this action"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": []
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": []
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": []
+          }
+        ]
+      }
+    },
+    "/api/2.0/portal/payment/buywalletservice": {
+      "post": {
+        "tags": [
+          "Portal / Payment"
+        ],
+        "summary": "Purchases a wallet service with the specified quantity.",
+        "description": "This method processes a payment for a wallet service using the configured payment method.\r\nRequires the tariff service to be configured and a valid payment method to be set for the customer.\r\nRate limiting is applied according to the payments API policy.",
+        "operationId": "buyWalletService",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BuyWalletServiceRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The service payment information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServicePaymentWrapper"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "No permissions to perform this action"
+          },
+          "404": {
+            "description": "Service could not be found"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": []
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": []
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": []
+          }
+        ]
+      }
+    },
+    "/api/2.0/portal/payment/ai-prices": {
+      "get": {
+        "tags": [
+          "Portal / Payment"
+        ],
+        "summary": "Get AI model prices",
+        "description": "Retrieves the pricing information for AI models including chat, embedding, and web search services.\r\nThe prices are returned in the configured currency and normalized per million tokens.\r\nRequires administrator permissions to access.",
+        "operationId": "getAiPrices",
+        "responses": {
+          "200": {
+            "description": "Prices for AI models",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiPricesResponseWrapper"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "No permissions to perform this action"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": []
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": []
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": []
+          }
+        ]
+      }
+    },
+    "/api/2.0/portal/payment/ai-model/restrictions": {
+      "get": {
+        "tags": [
+          "Portal / Payment"
+        ],
+        "summary": "Get restricted AI models",
+        "description": "Returns the list of AI chat model IDs that are restricted (disabled) for the current tenant.\r\nRestricted models cannot be used for AI chat conversations by any user within the portal.\r\nOnly DocSpace administrators can access this endpoint.",
+        "operationId": "getRestrictedAiModels",
+        "responses": {
+          "200": {
+            "description": "The list of restricted AI model IDs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RestrictedModelsResponseWrapper"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "No permissions to perform this action"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": []
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": []
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Portal / Payment"
+        ],
+        "summary": "Set restricted AI models",
+        "description": "Overwrites the entire set of restricted AI model IDs for the current tenant.\r\nThe request body must contain the complete desired set — to add a restriction, include the new model alongside existing ones;\r\nto remove one, omit it. An empty set lifts all restrictions. Only the portal payer can perform this action.",
+        "operationId": "setRestrictedAiModels",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetRestrictedAiModelsRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated list of restricted AI model IDs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RestrictedModelsResponseWrapper"
                 }
               }
             }
@@ -32492,6 +33128,69 @@
           },
           "402": {
             "description": "Your pricing plan does not support this option"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": []
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": []
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": []
+          }
+        ]
+      }
+    },
+    "/api/2.0/settings/authservice/externaldb/test": {
+      "post": {
+        "tags": [
+          "Settings / Authorization"
+        ],
+        "summary": "Test external database connection",
+        "description": "Tests an external database connection with the provided settings without saving them.",
+        "operationId": "testExternalDatabaseConnection",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExternalDatabaseSettings"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Connection test result with Success flag and optional Error message",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConnectionTestResultWrapper"
+                }
+              }
+            }
           },
           "401": {
             "description": "Unauthorized"
@@ -40171,6 +40870,7 @@
           "generateFormToolName",
           "generatePresentationToolName",
           "knowledgeSearchToolName",
+          "modelAliases",
           "webCrawlingToolName",
           "webSearchToolName"
         ],
@@ -40218,6 +40918,18 @@
             "description": "The name of the embedding model used for document vectorization.",
             "nullable": true,
             "example": "text-embedding-3-small"
+          },
+          "modelAliases": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Mapping of model identifiers to human-readable aliases.",
+            "nullable": true,
+            "example": {
+              "gpt-5.2": "GPT-5.2",
+              "claude-sonnet-4-20250514": "Claude Sonnet 4"
+            }
           },
           "knowledgeSearchToolName": {
             "type": "string",
@@ -40391,6 +41103,35 @@
         "additionalProperties": false,
         "description": "The chat session information."
       },
+      "ChatImageMultimodalSettingsDto": {
+        "type": "object",
+        "properties": {
+          "formats": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The supported image formats.",
+            "nullable": true,
+            "example": [
+              ".jpeg",
+              ".gif"
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "description": "The image multimodal settings for the chat model."
+      },
+      "ChatMultimodalSettingsDto": {
+        "type": "object",
+        "properties": {
+          "image": {
+            "$ref": "#/components/schemas/ChatImageMultimodalSettingsDto"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The multimodal settings for the chat model."
+      },
       "ChatSettings": {
         "type": "object",
         "properties": {
@@ -40421,6 +41162,46 @@
         },
         "additionalProperties": false,
         "description": "The chat settings."
+      },
+      "ChatSettingsDto": {
+        "type": "object",
+        "properties": {
+          "providerId": {
+            "type": "integer",
+            "description": "The AI provider ID.",
+            "format": "int32",
+            "example": 1
+          },
+          "modelId": {
+            "type": "string",
+            "description": "The AI model ID used for chat completions.",
+            "nullable": true,
+            "example": "gpt-5.2"
+          },
+          "modelAlias": {
+            "type": "string",
+            "description": "The AI model display alias.",
+            "nullable": true,
+            "example": "GPT-5.2"
+          },
+          "prompt": {
+            "type": "string",
+            "description": "The system prompt for the chat.",
+            "nullable": true,
+            "example": "You are a helpful assistant."
+          },
+          "multimodal": {
+            "$ref": "#/components/schemas/ChatMultimodalSettingsDto"
+          },
+          "internal": {
+            "type": "boolean",
+            "description": "Indicates whether this is an internal AI gateway provider.",
+            "readOnly": true,
+            "example": false
+          }
+        },
+        "additionalProperties": false,
+        "description": "The chat settings parameters."
       },
       "ChatWrapper": {
         "type": "object",
@@ -41822,10 +42603,20 @@
                 "deprecated": true
               },
               "chatSettings": {
-                "$ref": "#/components/schemas/ChatSettings"
+                "$ref": "#/components/schemas/ChatSettingsDto"
               },
               "rootRoomType": {
                 "$ref": "#/components/schemas/RoomType"
+              },
+              "saveFormAsXLSX": {
+                "type": "boolean",
+                "description": "Specifies whether to save form data as XLSX file.",
+                "nullable": true
+              },
+              "sendFormToExternalDB": {
+                "type": "boolean",
+                "description": "Specifies whether to send form data to external database.",
+                "nullable": true
               }
             }
           }
@@ -42617,7 +43408,8 @@
         "x-derived-types": [
           "TextContentDto",
           "ToolContentDto",
-          "AttachmentContentDto"
+          "AttachmentContentDto",
+          "DataContentDto"
         ]
       },
       "MessageContentType": {
@@ -42625,14 +43417,16 @@
         "enum": [
           0,
           1,
-          2
+          2,
+          3
         ],
         "type": "integer",
         "example": 0,
         "x-enum-varnames": [
           "Text",
           "Tool",
-          "Attachment"
+          "Attachment",
+          "Data"
         ]
       },
       "MessageDto": {
@@ -42843,9 +43637,6 @@
         }
       },
       "ProviderSettingsDto": {
-        "required": [
-          "url"
-        ],
         "type": "object",
         "properties": {
           "type": {
@@ -43339,6 +44130,16 @@
           },
           "chatSettings": {
             "$ref": "#/components/schemas/ChatSettings"
+          },
+          "sendFormToExternalDB": {
+            "type": "boolean",
+            "description": "Specifies whether to send form data to external database.",
+            "nullable": true
+          },
+          "saveFormAsXLSX": {
+            "type": "boolean",
+            "description": "Specifies whether to save form data as XLSX file.",
+            "nullable": true
           }
         },
         "additionalProperties": false,
@@ -44461,12 +45262,16 @@
         "type": "object",
         "properties": {
           "data": {
+            "maxLength": 256,
+            "minLength": 0,
             "type": "string",
             "description": "The action data that will be scrolled to.",
             "nullable": true,
             "example": "section"
           },
           "type": {
+            "maxLength": 128,
+            "minLength": 0,
             "type": "string",
             "description": "The action type.",
             "nullable": true,
@@ -44837,6 +45642,9 @@
         "description": "The request parameters for copying/moving files."
       },
       "BatchTagsRequestDto": {
+        "required": [
+          "names"
+        ],
         "type": "object",
         "properties": {
           "names": {
@@ -44845,7 +45653,6 @@
               "type": "string"
             },
             "description": "The list of tag names.",
-            "nullable": true,
             "example": [
               "tag1",
               "tag2",
@@ -46313,6 +47120,13 @@
             "nullable": true,
             "example": "2025-01-01T00:00:00"
           },
+          "fileSize": {
+            "type": "integer",
+            "description": "Filesize (in bytes) of a default template",
+            "format": "int64",
+            "nullable": true,
+            "example": 1024
+          },
           "viewUrl": {
             "type": "string",
             "description": "View url of a default template",
@@ -46349,15 +47163,23 @@
       },
       "DefaultTemplateSettingsRequestDto": {
         "required": [
-          "fileExtension"
+          "fileExtension",
+          "selectedFile"
         ],
         "type": "object",
         "properties": {
           "selectedFile": {
-            "type": "integer",
-            "description": "File id to replace template with (or null to use default template)",
-            "format": "int32",
-            "nullable": true,
+            "oneOf": [
+              {
+                "type": "integer",
+                "example": 1234
+              },
+              {
+                "type": "string",
+                "example": "some text"
+              }
+            ],
+            "description": "File id to replace template with",
             "example": 1
           },
           "fileExtension": {
@@ -46369,6 +47191,22 @@
         },
         "additionalProperties": false,
         "description": "Default templates settings request parameters."
+      },
+      "DefaultTemplateSettingsResetRequestDto": {
+        "required": [
+          "fileExtension"
+        ],
+        "type": "object",
+        "properties": {
+          "fileExtension": {
+            "type": "string",
+            "description": "File extension of a template to reset",
+            "nullable": true,
+            "example": ".docx"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Default templates settings reset request parameters."
       },
       "DefaultTemplateSettingsWrapper": {
         "type": "object",
@@ -47315,8 +48153,7 @@
       "EditorConfigurationDto": {
         "required": [
           "lang",
-          "mode",
-          "user"
+          "mode"
         ],
         "type": "object",
         "properties": {
@@ -47766,13 +48603,11 @@
       },
       "ExternalShareDto": {
         "required": [
-          "id",
           "isAuthenticated",
           "linkId",
           "shared",
           "status",
-          "tenantId",
-          "title"
+          "tenantId"
         ],
         "type": "object",
         "properties": {
@@ -50249,10 +51084,20 @@
                 "deprecated": true
               },
               "chatSettings": {
-                "$ref": "#/components/schemas/ChatSettings"
+                "$ref": "#/components/schemas/ChatSettingsDto"
               },
               "rootRoomType": {
                 "$ref": "#/components/schemas/RoomType"
+              },
+              "saveFormAsXLSX": {
+                "type": "boolean",
+                "description": "Specifies whether to save form data as XLSX file.",
+                "nullable": true
+              },
+              "sendFormToExternalDB": {
+                "type": "boolean",
+                "description": "Specifies whether to send form data to external database.",
+                "nullable": true
               }
             }
           }
@@ -50394,16 +51239,20 @@
         }
       },
       "FormFillingManageAction": {
-        "description": "[0 - Stop, 1 - Resume]",
+        "description": "[0 - Stop, 1 - Resume, 2 - Start, 3 - Edit]",
         "enum": [
           0,
-          1
+          1,
+          2,
+          3
         ],
         "type": "integer",
         "example": 0,
         "x-enum-varnames": [
           "Stop",
-          "Resume"
+          "Resume",
+          "Start",
+          "Edit"
         ]
       },
       "FormFillingStatus": {
@@ -50427,48 +51276,34 @@
           "Stoped"
         ]
       },
-      "FormResultsArrayWrapper": {
+      "FormMetadata": {
         "type": "object",
         "properties": {
-          "response": {
+          "key": {
+            "type": "string",
+            "description": "The form field key.",
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "description": "The form field type.",
+            "nullable": true
+          },
+          "format": {
+            "type": "string",
+            "description": "The form field format.",
+            "nullable": true
+          },
+          "possibleValues": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/FormResultsDto"
-            }
-          },
-          "count": {
-            "type": "integer",
-            "description": "The total number of items in the response",
-            "format": "int32"
-          },
-          "links": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "href": {
-                  "type": "string",
-                  "description": "URL of the link"
-                },
-                "action": {
-                  "type": "string",
-                  "description": "Action associated with the link"
-                }
-              }
+              "type": "string"
             },
-            "description": "List of links related to the response"
-          },
-          "status": {
-            "type": "integer",
-            "description": "HTTP status code of the response",
-            "format": "int32"
-          },
-          "statusCode": {
-            "type": "integer",
-            "description": "HTTP status code of the response (duplicate of status)",
-            "format": "int32"
+            "description": "The list of possible values for the form field.",
+            "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "FormResultsDto": {
         "type": "object",
@@ -50648,6 +51483,68 @@
         },
         "additionalProperties": false,
         "description": "The form role parameters."
+      },
+      "FormSubmissionsDto": {
+        "type": "object",
+        "properties": {
+          "metadata": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FormMetadata"
+            },
+            "description": "The form field metadata.",
+            "nullable": true
+          },
+          "submissions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FormResultsDto"
+            },
+            "description": "All submissions.",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "FormSubmissionsWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/FormSubmissionsDto"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
       },
       "FormsItemArrayWrapper": {
         "type": "object",
@@ -50930,7 +51827,9 @@
           },
           "key": {
             "type": "string",
-            "nullable": true
+            "description": "The action performed on the file.",
+            "nullable": true,
+            "example": "fileUploaded"
           }
         },
         "additionalProperties": false,
@@ -52129,6 +53028,106 @@
           "Activated"
         ]
       },
+      "Module": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The module ID.",
+            "format": "uuid",
+            "example": "00000000-0000-0000-0000-000000000000"
+          },
+          "appName": {
+            "type": "string",
+            "description": "The module product class name.",
+            "nullable": true,
+            "example": "files"
+          },
+          "title": {
+            "type": "string",
+            "description": "The module product class name.",
+            "nullable": true,
+            "example": "Documents"
+          },
+          "link": {
+            "type": "string",
+            "description": "The URL to the module start page.",
+            "nullable": true,
+            "example": "https://example.com"
+          },
+          "iconUrl": {
+            "type": "string",
+            "description": "The module icon URL.",
+            "nullable": true,
+            "example": "https://example.com/icon.svg"
+          },
+          "imageUrl": {
+            "type": "string",
+            "description": "The module large image URL.",
+            "nullable": true,
+            "example": "https://example.com/image.png"
+          },
+          "helpUrl": {
+            "type": "string",
+            "description": "The module help URL.",
+            "nullable": true,
+            "example": "https://example.com/help"
+          },
+          "description": {
+            "type": "string",
+            "description": "The module description.",
+            "nullable": true,
+            "example": "File management"
+          },
+          "isPrimary": {
+            "type": "boolean",
+            "description": "Specifies if the module is primary or not.",
+            "example": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "The module information."
+      },
+      "ModuleWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/Module"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
       "MultiSizeLogoCover": {
         "required": [
           "data",
@@ -52477,7 +53476,8 @@
         "properties": {
           "is_asc": {
             "type": "boolean",
-            "description": "Specifies if the order is ascending."
+            "description": "Specifies if the order is ascending.",
+            "example": true
           },
           "property": {
             "$ref": "#/components/schemas/SortedByType"
@@ -52591,43 +53591,53 @@
         "properties": {
           "comment": {
             "type": "boolean",
-            "description": "Defines if the document can be commented or not."
+            "description": "Defines if the document can be commented or not.",
+            "example": true
           },
           "chat": {
             "type": "boolean",
-            "description": "Defines if the chat functionality is enabled in the document or not."
+            "description": "Defines if the chat functionality is enabled in the document or not.",
+            "example": true
           },
           "download": {
             "type": "boolean",
-            "description": "Defines if the document can be downloaded or only viewed or edited online."
+            "description": "Defines if the document can be downloaded or only viewed or edited online.",
+            "example": true
           },
           "edit": {
             "type": "boolean",
-            "description": "Defines if the document can be edited or only viewed."
+            "description": "Defines if the document can be edited or only viewed.",
+            "example": true
           },
           "fillForms": {
             "type": "boolean",
-            "description": "Defines if the forms can be filled."
+            "description": "Defines if the forms can be filled.",
+            "example": true
           },
           "modifyFilter": {
             "type": "boolean",
-            "description": "Defines if the filter can be applied globally (true) affecting all the other users,\r\nor locally (false), i.e. for the current user only."
+            "description": "Defines if the filter can be applied globally (true) affecting all the other users,\r\nor locally (false), i.e. for the current user only.",
+            "example": true
           },
           "protect": {
             "type": "boolean",
-            "description": "Defines if the Protection tab on the toolbar and the Protect button in the left menu are displayedor hidden."
+            "description": "Defines if the Protection tab on the toolbar and the Protect button in the left menu are displayedor hidden.",
+            "example": true
           },
           "print": {
             "type": "boolean",
-            "description": "Defines if the document can be printed or not."
+            "description": "Defines if the document can be printed or not.",
+            "example": true
           },
           "review": {
             "type": "boolean",
-            "description": "Defines if the document can be reviewed or not."
+            "description": "Defines if the document can be reviewed or not.",
+            "example": true
           },
           "copy": {
             "type": "boolean",
-            "description": "Defines if the content can be copied to the clipboard or not."
+            "description": "Defines if the content can be copied to the clipboard or not.",
+            "example": true
           }
         },
         "additionalProperties": false,
@@ -53854,14 +54864,19 @@
         "properties": {
           "height": {
             "type": "integer",
-            "format": "int32"
+            "description": "Gets or sets the height dimension of an object, typically measured in pixels or other unit.\r\nIt defines the vertical size of the object.",
+            "format": "int32",
+            "example": 10
           },
           "width": {
             "type": "integer",
-            "format": "int32"
+            "description": "Gets or sets the width dimension of an object, typically measured in pixels or other unit.",
+            "format": "int32",
+            "example": 10
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "Represents dimensions with width and height values."
       },
       "SortedByType": {
         "description": "[0 - Date and time, 1 - AZ, 2 - Size, 3 - Author, 4 - Type, 5 - New, 6 - Date and time creation, 7 - Room type, 8 - Tags, 9 - Room, 10 - Custom order, 11 - Last opened, 12 - Used space]",
@@ -53924,18 +54939,20 @@
         "description": "The parameters of the button that starts filling out the form."
       },
       "StartFillingMode": {
-        "description": "[0 - None, 1 - Share to fill out, 2 - Start filling]",
+        "description": "[0 - None, 1 - Share to fill out, 2 - Start filling, 3 - Start filling form room]",
         "enum": [
           0,
           1,
-          2
+          2,
+          3
         ],
         "type": "integer",
         "example": 0,
         "x-enum-varnames": [
           "None",
           "ShareToFillOut",
-          "StartFilling"
+          "StartFilling",
+          "StartFillingFormRoom"
         ]
       },
       "Status": {
@@ -56659,31 +57676,6 @@
           "employeeType": {
             "$ref": "#/components/schemas/EmployeeType"
           },
-          "firstName": {
-            "type": "string",
-            "description": "The user first name.",
-            "nullable": true,
-            "example": "John"
-          },
-          "lastName": {
-            "type": "string",
-            "description": "The user last name.",
-            "nullable": true,
-            "example": "Doe"
-          },
-          "email": {
-            "type": "string",
-            "description": "The user email address.",
-            "format": "email",
-            "nullable": true,
-            "example": "john.doe@example.com"
-          },
-          "passwordHash": {
-            "type": "string",
-            "description": "The user password hash.",
-            "nullable": true,
-            "example": "$2a$10$abcdefghijklmnopqrstuv"
-          },
           "key": {
             "type": "string",
             "description": "The user link key.",
@@ -57627,6 +58619,178 @@
         "additionalProperties": false,
         "description": "The request parameters for configuring the administrator message content."
       },
+      "AiChatModelPricing": {
+        "required": [
+          "id",
+          "price"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": true
+          },
+          "alias": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownedBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "provider": {
+            "type": "string",
+            "nullable": true
+          },
+          "price": {
+            "$ref": "#/components/schemas/AiChatPrice"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AiChatPrice": {
+        "type": "object",
+        "properties": {
+          "prompt": {
+            "type": "number",
+            "format": "double"
+          },
+          "completion": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AiEmbeddingModelPricing": {
+        "required": [
+          "id",
+          "price"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": true
+          },
+          "alias": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownedBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "provider": {
+            "type": "string",
+            "nullable": true
+          },
+          "price": {
+            "$ref": "#/components/schemas/AiEmbeddingPrice"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AiEmbeddingPrice": {
+        "type": "object",
+        "properties": {
+          "prompt": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AiPricesResponse": {
+        "required": [
+          "chat",
+          "currency",
+          "embedding",
+          "webSearch"
+        ],
+        "type": "object",
+        "properties": {
+          "chat": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AiChatModelPricing"
+            },
+            "nullable": true
+          },
+          "embedding": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AiEmbeddingModelPricing"
+            },
+            "nullable": true
+          },
+          "webSearch": {
+            "$ref": "#/components/schemas/AiWebSearchPricing"
+          },
+          "currency": {
+            "$ref": "#/components/schemas/CurrencyInfo"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AiPricesResponseWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/AiPricesResponse"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
+      "AiWebSearchPricing": {
+        "type": "object",
+        "properties": {
+          "provider": {
+            "type": "string",
+            "nullable": true
+          },
+          "search": {
+            "type": "number",
+            "format": "double"
+          },
+          "contents": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
       "AuditEventArrayWrapper": {
         "type": "object",
         "properties": {
@@ -57808,6 +58972,29 @@
             "description": "The authorization key title.",
             "nullable": true,
             "example": "API key"
+          },
+          "type": {
+            "type": "string",
+            "description": "The field type: text, password, select, toggle.",
+            "nullable": true
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The list of options for select type fields.",
+            "nullable": true
+          },
+          "dependsOn": {
+            "type": "string",
+            "description": "The name of another key this field depends on for visibility.",
+            "nullable": true
+          },
+          "dependsOnValue": {
+            "type": "string",
+            "description": "The value of ASC.Web.Studio.UserControls.Management.AuthKey.DependsOn key that makes this field visible.",
+            "nullable": true
           }
         },
         "additionalProperties": false,
@@ -57854,12 +59041,6 @@
               "name": "John Doe",
               "email": "john@example.com"
             }
-          },
-          "code": {
-            "type": "string",
-            "description": "The code for two-factor authentication.",
-            "nullable": true,
-            "example": 123456
           },
           "codeOAuth": {
             "type": "string",
@@ -57992,6 +59173,26 @@
         "additionalProperties": false,
         "description": "The request parameters for handling the authorization service."
       },
+      "AuthWithCodeRequestsDto": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AuthRequestsDto"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string",
+                "description": "The code for two-factor authentication.",
+                "nullable": true,
+                "example": 123456
+              }
+            }
+          }
+        ],
+        "additionalProperties": false,
+        "description": "The parameters required for the user two-factor authentication requests."
+      },
       "AuthenticationTokenDto": {
         "type": "object",
         "properties": {
@@ -58089,6 +59290,24 @@
             "format": "int32",
             "example": 12345
           },
+          "subAccountNumber": {
+            "type": "integer",
+            "description": "The sub-account number.",
+            "format": "int32",
+            "example": 12345
+          },
+          "accountName": {
+            "type": "string",
+            "description": "The account name.",
+            "nullable": true,
+            "example": "aitools"
+          },
+          "accountCurrency": {
+            "type": "string",
+            "description": "The account currency.",
+            "nullable": true,
+            "example": "USD"
+          },
           "subAccounts": {
             "type": "array",
             "items": {
@@ -58102,6 +59321,9 @@
                 "amount": 1500.75
               }
             ]
+          },
+          "lastCredit": {
+            "$ref": "#/components/schemas/TransactionInfo"
           }
         },
         "additionalProperties": false,
@@ -58190,6 +59412,27 @@
           }
         },
         "additionalProperties": false
+      },
+      "BuyWalletServiceRequestDto": {
+        "type": "object",
+        "properties": {
+          "quantity": {
+            "maximum": 999999,
+            "minimum": 1,
+            "type": "integer",
+            "description": "Number of services provided.",
+            "format": "int32",
+            "example": 1
+          },
+          "serviceName": {
+            "type": "string",
+            "description": "The service name.",
+            "nullable": true,
+            "example": "aitools"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The request parameters for buying wallet service."
       },
       "CapabilitiesDto": {
         "required": [
@@ -58669,6 +59912,59 @@
           }
         }
       },
+      "ConnectionTestResult": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ConnectionTestResultWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/ConnectionTestResult"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
       "CookieSettingsDto": {
         "required": [
           "enabled",
@@ -58791,6 +60087,8 @@
             "$ref": "#/components/schemas/WebhookTrigger"
           },
           "targetId": {
+            "maxLength": 255,
+            "minLength": 0,
             "type": "string",
             "description": "Target ID",
             "nullable": true,
@@ -59015,6 +60313,24 @@
         },
         "additionalProperties": false,
         "description": "The currencies parameters."
+      },
+      "CurrencyInfo": {
+        "required": [
+          "code",
+          "symbol"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "nullable": true
+          },
+          "symbol": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
       },
       "CurrentLicenseInfo": {
         "required": [
@@ -59242,6 +60558,12 @@
       "CustomerOperationsReportRequestDto": {
         "type": "object",
         "properties": {
+          "serviceName": {
+            "type": "string",
+            "description": "The service name.",
+            "nullable": true,
+            "example": "aitools"
+          },
           "startDate": {
             "type": "string",
             "description": "The report start date.",
@@ -59273,6 +60595,21 @@
             "description": "Specifies whether to include debit operations in the report.",
             "nullable": true,
             "example": false
+          },
+          "types": {
+            "$ref": "#/components/schemas/OperationType"
+          },
+          "status": {
+            "$ref": "#/components/schemas/OperationStatus"
+          },
+          "orderBy": {
+            "type": "string",
+            "description": "The field to order by.",
+            "nullable": true,
+            "example": "StartDate"
+          },
+          "orderType": {
+            "$ref": "#/components/schemas/OperationOrderType"
           }
         },
         "additionalProperties": false,
@@ -59820,6 +61157,43 @@
           "Agent"
         ],
         "description": "[0 - None, 1 - File, 2 - Folder, 23 - User, 24 - Group, 25 - Room, 26 - Tag, 27 - Agent]"
+      },
+      "ExternalDatabaseSettings": {
+        "type": "object",
+        "properties": {
+          "databaseType": {
+            "type": "string",
+            "nullable": true
+          },
+          "dbHost": {
+            "type": "string",
+            "nullable": true
+          },
+          "dbPort": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "dbName": {
+            "type": "string",
+            "nullable": true
+          },
+          "dbUser": {
+            "type": "string",
+            "nullable": true
+          },
+          "dbPassword": {
+            "type": "string",
+            "nullable": true
+          },
+          "dbSsl": {
+            "type": "boolean"
+          },
+          "sqliteFilePath": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
       },
       "FeatureUsedDto": {
         "required": [
@@ -61547,6 +62921,85 @@
         "additionalProperties": false,
         "description": "Represents an operation."
       },
+      "OperationOrderType": {
+        "description": "[0 - Descending, 1 - Ascending]",
+        "enum": [
+          0,
+          1
+        ],
+        "type": "integer",
+        "example": 0,
+        "x-enum-varnames": [
+          "Descending",
+          "Ascending"
+        ]
+      },
+      "OperationStatus": {
+        "description": "[0 - Any, 1 - Pending, 2 - Completed, 4 - Rejected, 8 - Canceled]",
+        "enum": [
+          0,
+          1,
+          2,
+          4,
+          8
+        ],
+        "type": "integer",
+        "example": 0,
+        "x-enum-varnames": [
+          "Any",
+          "Pending",
+          "Completed",
+          "Rejected",
+          "Canceled"
+        ]
+      },
+      "OperationType": {
+        "description": "[0 - Any, 1 - Unknown, 2 - ServicePayment, 4 - PackagePayment, 8 - ServiceUsage, 16 - Deposit, 32 - ReceiveProviderInvoice, 64 - ProcessProviderInvoice, 128 - WriteOffServiceProfit, 256 - Profit, 512 - PartnerAccrual, 1024 - ProviderPayment, 2048 - PartnerPayment, 4096 - Refund, 8192 - BankDeposit, 16384 - BankWithdrawal, 32768 - GoodwillCredit, 65536 - WriteOffProfit, 131072 - WriteOffDifferenceCurrency]",
+        "enum": [
+          0,
+          1,
+          2,
+          4,
+          8,
+          16,
+          32,
+          64,
+          128,
+          256,
+          512,
+          1024,
+          2048,
+          4096,
+          8192,
+          16384,
+          32768,
+          65536,
+          131072
+        ],
+        "type": "integer",
+        "example": 0,
+        "x-enum-varnames": [
+          "Any",
+          "Unknown",
+          "ServicePayment",
+          "PackagePayment",
+          "ServiceUsage",
+          "Deposit",
+          "ReceiveProviderInvoice",
+          "ProcessProviderInvoice",
+          "WriteOffServiceProfit",
+          "Profit",
+          "PartnerAccrual",
+          "ProviderPayment",
+          "PartnerPayment",
+          "Refund",
+          "BankDeposit",
+          "BankWithdrawal",
+          "GoodwillCredit",
+          "WriteOffProfit",
+          "WriteOffDifferenceCurrency"
+        ]
+      },
       "OwnerChangeInstructionsDto": {
         "type": "object",
         "properties": {
@@ -61948,7 +63401,7 @@
           }
         }
       },
-      "PaymentUrlRequestsDto": {
+      "PaymentUrlRequestDto": {
         "type": "object",
         "properties": {
           "backUrl": {
@@ -62488,6 +63941,62 @@
           }
         }
       },
+      "RestrictedModelsResponse": {
+        "required": [
+          "models"
+        ],
+        "type": "object",
+        "properties": {
+          "models": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RestrictedModelsResponseWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/RestrictedModelsResponse"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
       "RoomsNotificationSettingsDto": {
         "type": "object",
         "properties": {
@@ -62716,6 +64225,120 @@
         },
         "additionalProperties": false,
         "description": "The request parameters for managing user security and access permissions."
+      },
+      "ServicePayment": {
+        "type": "object",
+        "properties": {
+          "operationId": {
+            "type": "integer",
+            "description": "The payment operation ID.",
+            "format": "int32",
+            "example": 12345
+          },
+          "amount": {
+            "type": "number",
+            "description": "The balance of the sub-account in the specified currency.",
+            "format": "double",
+            "example": 1500.75
+          },
+          "currency": {
+            "type": "string",
+            "description": "The three-character ISO 4217 currency symbol.",
+            "nullable": true,
+            "example": "USD"
+          },
+          "quantity": {
+            "type": "integer",
+            "description": "Total quantity of operations.",
+            "format": "int32",
+            "example": 10
+          },
+          "subscriptionId": {
+            "type": "integer",
+            "description": "The subscription ID",
+            "format": "int32",
+            "nullable": true,
+            "example": 12345
+          },
+          "startDate": {
+            "type": "string",
+            "description": "The subscription start date.",
+            "format": "date-time",
+            "nullable": true,
+            "example": "2024-01-15T10:30:00Z"
+          },
+          "endDate": {
+            "type": "string",
+            "description": "The subscription end date.",
+            "format": "date-time",
+            "nullable": true,
+            "example": "2024-01-15T10:30:00Z"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Represents service payment information."
+      },
+      "ServicePaymentWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/ServicePayment"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
+      "SetRestrictedAiModelsRequestDto": {
+        "required": [
+          "models"
+        ],
+        "type": "object",
+        "properties": {
+          "models": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The set of restricted AI model IDs.",
+            "example": [
+              "model1",
+              "model2"
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "description": "The request parameters for setting restricted AI models."
       },
       "SettingsDto": {
         "required": [
@@ -62948,6 +64571,10 @@
           },
           "defaultFolderType": {
             "$ref": "#/components/schemas/FolderType"
+          },
+          "externalDbEnabled": {
+            "type": "boolean",
+            "description": "Specifies if an external database is connected for storing form results."
           }
         },
         "additionalProperties": false,
@@ -63849,12 +65476,14 @@
           "currency": {
             "type": "string",
             "description": "The three-character ISO 4217 currency symbol of the sub-account.",
-            "nullable": true
+            "nullable": true,
+            "example": "USD"
           },
           "amount": {
             "type": "number",
             "description": "The balance of the sub-account in the specified currency.",
-            "format": "double"
+            "format": "double",
+            "example": 1500.75
           }
         },
         "additionalProperties": false,
@@ -64795,7 +66424,7 @@
           },
           "backup": {
             "type": "boolean",
-            "description": "Specifies if the backup anabled as a wallet service or not.",
+            "description": "Specifies if the backup enabled as a wallet service or not.",
             "example": true
           },
           "countAIAgent": {
@@ -64806,92 +66435,7 @@
           },
           "aiTools": {
             "type": "boolean",
-            "description": "Specifies if the AI tools anabled as a wallet service or not.",
-            "example": true
-          },
-          "aiToolsWebSearch": {
-            "type": "boolean",
-            "description": "Specifies whether the web search is enabled as a subservice of AI tools.",
-            "example": true
-          },
-          "aiToolsWebFetch": {
-            "type": "boolean",
-            "description": "Specifies whether the web fetch is enabled as a subservice of AI tools",
-            "example": true
-          },
-          "aiToolsEmbedding": {
-            "type": "boolean",
-            "description": "Specifies whether the embedding is enabled as a subservice of AI tools",
-            "example": true
-          },
-          "aiToolsDeepseek31Input": {
-            "type": "boolean",
-            "description": "Specifies whether the Deepseek 3.1 input tokens is enabled as a subservice of AI tools",
-            "example": true
-          },
-          "aiToolsDeepseek31Output": {
-            "type": "boolean",
-            "description": "Specifies whether the Deepseek 3.1 output tokens is enabled as a subservice of AI tools",
-            "example": true
-          },
-          "aiToolsClaude45Input": {
-            "type": "boolean",
-            "description": "Specifies whether the Claude 4.5 input tokens is enabled as a subservice of AI tools",
-            "example": true
-          },
-          "aiToolsClaude45Output": {
-            "type": "boolean",
-            "description": "Specifies whether the Claude 4.5 output tokens is enabled as a subservice of AI tools",
-            "example": true
-          },
-          "aiToolsGPT5Input": {
-            "type": "boolean",
-            "description": "Specifies whether the GPT 5 input tokens is enabled as a subservice of AI tools",
-            "example": true
-          },
-          "aiToolsGPT5Output": {
-            "type": "boolean",
-            "description": "Specifies whether the GPT 5 output tokens is enabled as a subservice of AI tools",
-            "example": true
-          },
-          "aiToolsDeepseek32Input": {
-            "type": "boolean",
-            "description": "Specifies whether the Deepseek 3.2 input tokens is enabled as a subservice of AI tools",
-            "example": true
-          },
-          "aiToolsDeepseek32Output": {
-            "type": "boolean",
-            "description": "Specifies whether the Deepseek 3.2 output tokens is enabled as a subservice of AI tools",
-            "example": true
-          },
-          "aiToolsGPT52Input": {
-            "type": "boolean",
-            "description": "Specifies whether the GPT 5.2 input tokens is enabled as a subservice of AI tools",
-            "example": true
-          },
-          "aiToolsGPT52Output": {
-            "type": "boolean",
-            "description": "Specifies whether the GPT 5.2 output tokens is enabled as a subservice of AI tools",
-            "example": true
-          },
-          "aiToolsGemini3ProInput": {
-            "type": "boolean",
-            "description": "Specifies whether the Gemini 3 Pro input tokens is enabled as a subservice of AI tools",
-            "example": true
-          },
-          "aiToolsGemini3ProOutput": {
-            "type": "boolean",
-            "description": "Specifies whether the Gemini 3 Pro output tokens is enabled as a subservice of AI tools",
-            "example": true
-          },
-          "aiToolsGemini3FlashInput": {
-            "type": "boolean",
-            "description": "Specifies whether the Gemini 3 Flash input tokens is enabled as a subservice of AI tools",
-            "example": true
-          },
-          "aiToolsGemini3FlashOutput": {
-            "type": "boolean",
-            "description": "Specifies whether the Gemini 3 Flash output tokens is enabled as a subservice of AI tools",
+            "description": "Specifies if the AI tools enabled as a wallet service or not.",
             "example": true
           }
         },
@@ -65689,6 +67233,11 @@
             "description": "The verification code provided by the user.",
             "nullable": true,
             "example": 123456
+          },
+          "session": {
+            "type": "boolean",
+            "description": "Specifies whether the authentication is session-based.",
+            "example": true
           }
         },
         "additionalProperties": false,
@@ -65780,6 +67329,31 @@
         },
         "additionalProperties": false,
         "description": "The request parameters for putting money on deposit."
+      },
+      "TransactionInfo": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "description": "The date and time when the credit transaction occurred.",
+            "format": "date-time",
+            "example": "2024-01-15T10:30:00Z"
+          },
+          "currency": {
+            "type": "string",
+            "description": "The three-character ISO 4217 currency symbol of the transaction.",
+            "nullable": true,
+            "example": "USD"
+          },
+          "amount": {
+            "type": "number",
+            "description": "Amount of the transaction.",
+            "format": "double",
+            "example": 1500.75
+          }
+        },
+        "additionalProperties": false,
+        "description": "Represents information about the transaction applied to an account."
       },
       "TurnOnAdminMessageSettingsRequestDto": {
         "type": "object",
@@ -66392,7 +67966,7 @@
         "description": "The parameters for requesting the webhook delivery retries."
       },
       "WebhookTrigger": {
-        "description": "[0 - *, 1 - user.created, 2 - user.invited, 4 - user.updated, 8 - user.deleted, 16 - group.created, 32 - group.updated, 64 - group.deleted, 128 - file.created, 256 - file.uploaded, 512 - file.updated, 1024 - file.trashed, 2048 - file.deleted, 4096 - file.restored, 8192 - file.copied, 16384 - file.moved, 32768 - folder.created, 65536 - folder.updated, 131072 - folder.trashed, 262144 - folder.deleted, 524288 - folder.restored, 1048576 - folder.copied, 2097152 - folder.moved, 4194304 - room.created, 8388608 - room.updated, 16777216 - room.archived, 33554432 - room.deleted, 67108864 - room.restored, 134217728 - room.copied]",
+        "description": "[0 - *, 1 - user.created, 2 - user.invited, 4 - user.updated, 8 - user.deleted, 16 - group.created, 32 - group.updated, 64 - group.deleted, 128 - file.created, 256 - file.uploaded, 512 - file.updated, 1024 - file.trashed, 2048 - file.deleted, 4096 - file.restored, 8192 - file.copied, 16384 - file.moved, 32768 - folder.created, 65536 - folder.updated, 131072 - folder.trashed, 262144 - folder.deleted, 524288 - folder.restored, 1048576 - folder.copied, 2097152 - folder.moved, 4194304 - room.created, 8388608 - room.updated, 16777216 - room.archived, 33554432 - room.deleted, 67108864 - room.restored, 134217728 - room.copied, 268435456 - form.submit, 536870912 - form.filled.out, 1073741824 - form.stopped]",
         "enum": [
           0,
           1,
@@ -66422,7 +67996,10 @@
           16777216,
           33554432,
           67108864,
-          134217728
+          134217728,
+          268435456,
+          536870912,
+          1073741824
         ],
         "type": "integer",
         "example": 0,
@@ -66455,7 +68032,10 @@
           "RoomArchived",
           "RoomDeleted",
           "RoomRestored",
-          "RoomCopied"
+          "RoomCopied",
+          "FormSubmit",
+          "FormFilledOut",
+          "FormStopped"
         ]
       },
       "WebhooksConfigDto": {

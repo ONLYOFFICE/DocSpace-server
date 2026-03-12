@@ -124,7 +124,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/AuthRequestsDto"
+                "$ref": "#/components/schemas/AuthWithCodeRequestsDto"
               }
             }
           }
@@ -786,7 +786,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/PaymentUrlRequestsDto"
+                "$ref": "#/components/schemas/PaymentUrlRequestDto"
               }
             }
           }
@@ -1053,7 +1053,7 @@
             "description": "The URL where the user will be redirected after payment processing.",
             "schema": {
               "type": "string",
-              "example": "https://example.com/payment/success"
+              "example": "https://example.com"
             }
           }
         ],
@@ -1840,6 +1840,86 @@
         ]
       }
     },
+    "/api/2.0/portal/payment/customer/servicequota": {
+      "get": {
+        "tags": [
+          "Portal / Payment"
+        ],
+        "summary": "Get the service quota",
+        "description": "Returns the service quota from the accounting service.",
+        "operationId": "getCustomerServiceQuota",
+        "parameters": [
+          {
+            "name": "serviceName",
+            "in": "query",
+            "description": "The service name.",
+            "schema": {
+              "type": "string",
+              "example": "aitools"
+            }
+          },
+          {
+            "name": "refresh",
+            "in": "query",
+            "description": "Specifies whether to refresh the payment information cache or not.",
+            "schema": {
+              "type": "boolean",
+              "example": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The service quota",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BalanceWrapper"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "No permissions to perform this action"
+          },
+          "404": {
+            "description": "Service could not be found"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
     "/api/2.0/portal/payment/customer/operations": {
       "get": {
         "tags": [
@@ -1849,53 +1929,6 @@
         "description": "Returns the report of customer operations from the accounting service.",
         "operationId": "getCustomerOperations",
         "parameters": [
-          {
-            "name": "startDate",
-            "in": "query",
-            "description": "The report start date.",
-            "schema": {
-              "type": "string",
-              "format": "date-time",
-              "example": "2024-01-01T00:00:00Z"
-            }
-          },
-          {
-            "name": "endDate",
-            "in": "query",
-            "description": "The report end date.",
-            "schema": {
-              "type": "string",
-              "format": "date-time",
-              "example": "2024-01-31T23:59:59Z"
-            }
-          },
-          {
-            "name": "participantName",
-            "in": "query",
-            "description": "The participant name.",
-            "schema": {
-              "type": "string",
-              "example": "ACME Corp"
-            }
-          },
-          {
-            "name": "credit",
-            "in": "query",
-            "description": "Specifies whether to include credit operations in the report. The default value is true.",
-            "schema": {
-              "type": "boolean",
-              "example": true
-            }
-          },
-          {
-            "name": "debit",
-            "in": "query",
-            "description": "Specifies whether to include debit operations in the report. The default value is true.",
-            "schema": {
-              "type": "boolean",
-              "example": true
-            }
-          },
           {
             "name": "offset",
             "in": "query",
@@ -1915,6 +1948,98 @@
               "format": "int32",
               "example": 25
             }
+          },
+          {
+            "name": "ServiceName",
+            "in": "query",
+            "description": "The service name.",
+            "schema": {
+              "type": "string",
+              "example": "aitools"
+            }
+          },
+          {
+            "name": "StartDate",
+            "in": "query",
+            "description": "The report start date.",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "example": "2024-01-01T00:00:00Z"
+            }
+          },
+          {
+            "name": "EndDate",
+            "in": "query",
+            "description": "The report end date.",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "example": "2024-01-31T23:59:59Z"
+            }
+          },
+          {
+            "name": "ParticipantName",
+            "in": "query",
+            "description": "The participant name.",
+            "schema": {
+              "type": "string",
+              "example": "ACME Corp"
+            }
+          },
+          {
+            "name": "Credit",
+            "in": "query",
+            "description": "Specifies whether to include credit operations in the report.",
+            "schema": {
+              "type": "boolean",
+              "example": true
+            }
+          },
+          {
+            "name": "Debit",
+            "in": "query",
+            "description": "Specifies whether to include debit operations in the report.",
+            "schema": {
+              "type": "boolean",
+              "example": false
+            }
+          },
+          {
+            "name": "Types",
+            "in": "query",
+            "description": "List of operation types to filter by.",
+            "schema": {
+              "$ref": "#/components/schemas/OperationType"
+            },
+            "example": "Any"
+          },
+          {
+            "name": "Status",
+            "in": "query",
+            "description": "List of operation status to filter by.",
+            "schema": {
+              "$ref": "#/components/schemas/OperationStatus"
+            },
+            "example": "Any"
+          },
+          {
+            "name": "OrderBy",
+            "in": "query",
+            "description": "The field to order by.",
+            "schema": {
+              "type": "string",
+              "example": "StartDate"
+            }
+          },
+          {
+            "name": "OrderType",
+            "in": "query",
+            "description": "Order direction: Ascending or Descending.",
+            "schema": {
+              "$ref": "#/components/schemas/OperationOrderType"
+            },
+            "example": "Descending"
           }
         ],
         "responses": {
@@ -1930,6 +2055,9 @@
           },
           "403": {
             "description": "No permissions to perform this action"
+          },
+          "404": {
+            "description": "Service could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -1993,6 +2121,12 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "No permissions to perform this action"
+          },
+          "404": {
+            "description": "Service could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -2131,8 +2265,8 @@
         "tags": [
           "Portal / Payment"
         ],
-        "summary": "Get wallet auto top-up settings",
-        "description": "Returns the wallet auto top-up settings.",
+        "summary": "Gets the tenant wallet auto top up settings",
+        "description": "Returns the wallet auto top up settings for the current tenant.",
         "operationId": "getTenantWalletSettings",
         "responses": {
           "200": {
@@ -2186,8 +2320,8 @@
         "tags": [
           "Portal / Payment"
         ],
-        "summary": "Set wallet auto top-up settings",
-        "description": "Sets the wallet auto top-up settings.",
+        "summary": "Set the wallet auto top up settings",
+        "description": "Updates the wallet auto top up settings for the current tenant.\r\nRequires the tariff service to be configured and the user to be authorized as a payer.\r\nReturns null if the tariff service is not configured or customer information/balance cannot be retrieved.",
         "operationId": "setTenantWalletSettings",
         "requestBody": {
           "content": {
@@ -2252,12 +2386,12 @@
         "tags": [
           "Portal / Payment"
         ],
-        "summary": "Get wallet services settings",
-        "description": "Returns the wallet services settings.",
+        "summary": "Gets the wallet service settings for the tenant.",
+        "description": "Retrieves configuration settings related to the wallet service associated with the current tenant.",
         "operationId": "getTenantWalletServiceSettings",
         "responses": {
           "200": {
-            "description": "The wallet services settings",
+            "description": "The wallet service settings for the tenant",
             "content": {
               "application/json": {
                 "schema": {
@@ -2309,8 +2443,8 @@
         "tags": [
           "Portal / Payment"
         ],
-        "summary": "Change wallet service state",
-        "description": "Changes the wallet service state.",
+        "summary": "Change tenant wallet service state",
+        "description": "Changes the state of a wallet service for the current tenant.\r\nRequires permission to edit portal settings and a configured tariff service.\r\nAdds or removes the specified service from the enabled services list based on the enabled flag.",
         "operationId": "changeTenantWalletServiceState",
         "requestBody": {
           "content": {
@@ -2323,11 +2457,258 @@
         },
         "responses": {
           "200": {
-            "description": "The wallet service settings",
+            "description": "The updated tenant wallet service settings",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/TenantWalletServiceSettingsWrapper"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "No permissions to perform this action"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/portal/payment/buywalletservice": {
+      "post": {
+        "tags": [
+          "Portal / Payment"
+        ],
+        "summary": "Purchases a wallet service with the specified quantity.",
+        "description": "This method processes a payment for a wallet service using the configured payment method.\r\nRequires the tariff service to be configured and a valid payment method to be set for the customer.\r\nRate limiting is applied according to the payments API policy.",
+        "operationId": "buyWalletService",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BuyWalletServiceRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The service payment information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServicePaymentWrapper"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "No permissions to perform this action"
+          },
+          "404": {
+            "description": "Service could not be found"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/portal/payment/ai-prices": {
+      "get": {
+        "tags": [
+          "Portal / Payment"
+        ],
+        "summary": "Get AI model prices",
+        "description": "Retrieves the pricing information for AI models including chat, embedding, and web search services.\r\nThe prices are returned in the configured currency and normalized per million tokens.\r\nRequires administrator permissions to access.",
+        "operationId": "getAiPrices",
+        "responses": {
+          "200": {
+            "description": "Prices for AI models",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiPricesResponseWrapper"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "No permissions to perform this action"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/portal/payment/ai-model/restrictions": {
+      "get": {
+        "tags": [
+          "Portal / Payment"
+        ],
+        "summary": "Get restricted AI models",
+        "description": "Returns the list of AI chat model IDs that are restricted (disabled) for the current tenant.\r\nRestricted models cannot be used for AI chat conversations by any user within the portal.\r\nOnly DocSpace administrators can access this endpoint.",
+        "operationId": "getRestrictedAiModels",
+        "responses": {
+          "200": {
+            "description": "The list of restricted AI model IDs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RestrictedModelsResponseWrapper"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "No permissions to perform this action"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Portal / Payment"
+        ],
+        "summary": "Set restricted AI models",
+        "description": "Overwrites the entire set of restricted AI model IDs for the current tenant.\r\nThe request body must contain the complete desired set — to add a restriction, include the new model alongside existing ones;\r\nto remove one, omit it. An empty set lifts all restrictions. Only the portal payer can perform this action.",
+        "operationId": "setRestrictedAiModels",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetRestrictedAiModelsRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated list of restricted AI model IDs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RestrictedModelsResponseWrapper"
                 }
               }
             }
@@ -5342,6 +5723,69 @@
           },
           "402": {
             "description": "Your pricing plan does not support this option"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/settings/authservice/externaldb/test": {
+      "post": {
+        "tags": [
+          "Settings / Authorization"
+        ],
+        "summary": "Test external database connection",
+        "description": "Tests an external database connection with the provided settings without saving them.",
+        "operationId": "testExternalDatabaseConnection",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExternalDatabaseSettings"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Connection test result with Success flag and optional Error message",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConnectionTestResultWrapper"
+                }
+              }
+            }
           },
           "401": {
             "description": "Unauthorized"
@@ -13184,6 +13628,178 @@
         "additionalProperties": false,
         "description": "The request parameters for configuring the administrator message content."
       },
+      "AiChatModelPricing": {
+        "required": [
+          "id",
+          "price"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": true
+          },
+          "alias": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownedBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "provider": {
+            "type": "string",
+            "nullable": true
+          },
+          "price": {
+            "$ref": "#/components/schemas/AiChatPrice"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AiChatPrice": {
+        "type": "object",
+        "properties": {
+          "prompt": {
+            "type": "number",
+            "format": "double"
+          },
+          "completion": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AiEmbeddingModelPricing": {
+        "required": [
+          "id",
+          "price"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": true
+          },
+          "alias": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownedBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "provider": {
+            "type": "string",
+            "nullable": true
+          },
+          "price": {
+            "$ref": "#/components/schemas/AiEmbeddingPrice"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AiEmbeddingPrice": {
+        "type": "object",
+        "properties": {
+          "prompt": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AiPricesResponse": {
+        "required": [
+          "chat",
+          "currency",
+          "embedding",
+          "webSearch"
+        ],
+        "type": "object",
+        "properties": {
+          "chat": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AiChatModelPricing"
+            },
+            "nullable": true
+          },
+          "embedding": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AiEmbeddingModelPricing"
+            },
+            "nullable": true
+          },
+          "webSearch": {
+            "$ref": "#/components/schemas/AiWebSearchPricing"
+          },
+          "currency": {
+            "$ref": "#/components/schemas/CurrencyInfo"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AiPricesResponseWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/AiPricesResponse"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
+      "AiWebSearchPricing": {
+        "type": "object",
+        "properties": {
+          "provider": {
+            "type": "string",
+            "nullable": true
+          },
+          "search": {
+            "type": "number",
+            "format": "double"
+          },
+          "contents": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
       "ApiDateTime": {
         "type": "object",
         "properties": {
@@ -13386,6 +14002,29 @@
             "description": "The authorization key title.",
             "nullable": true,
             "example": "API key"
+          },
+          "type": {
+            "type": "string",
+            "description": "The field type: \"text\", \"password\", \"select\", \"toggle\".",
+            "nullable": true
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The list of options for \"select\" type fields.",
+            "nullable": true
+          },
+          "dependsOn": {
+            "type": "string",
+            "description": "The name of another key this field depends on for visibility.",
+            "nullable": true
+          },
+          "dependsOnValue": {
+            "type": "string",
+            "description": "The value of ASC.Web.Studio.UserControls.Management.AuthKey.DependsOn key that makes this field visible.",
+            "nullable": true
           }
         },
         "additionalProperties": false,
@@ -13432,12 +14071,6 @@
               "name": "John Doe",
               "email": "john@example.com"
             }
-          },
-          "code": {
-            "type": "string",
-            "description": "The code for two-factor authentication.",
-            "nullable": true,
-            "example": 123456
           },
           "codeOAuth": {
             "type": "string",
@@ -13570,6 +14203,26 @@
         "additionalProperties": false,
         "description": "The request parameters for handling the authorization service."
       },
+      "AuthWithCodeRequestsDto": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AuthRequestsDto"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string",
+                "description": "The code for two-factor authentication.",
+                "nullable": true,
+                "example": 123456
+              }
+            }
+          }
+        ],
+        "additionalProperties": false,
+        "description": "The parameters required for the user two-factor authentication requests."
+      },
       "AuthenticationTokenDto": {
         "type": "object",
         "properties": {
@@ -13667,6 +14320,24 @@
             "format": "int32",
             "example": 12345
           },
+          "subAccountNumber": {
+            "type": "integer",
+            "description": "The sub-account number.",
+            "format": "int32",
+            "example": 12345
+          },
+          "accountName": {
+            "type": "string",
+            "description": "The account name.",
+            "nullable": true,
+            "example": "aitools"
+          },
+          "accountCurrency": {
+            "type": "string",
+            "description": "The account currency.",
+            "nullable": true,
+            "example": "USD"
+          },
           "subAccounts": {
             "type": "array",
             "items": {
@@ -13680,6 +14351,9 @@
                 "amount": 1500.75
               }
             ]
+          },
+          "lastCredit": {
+            "$ref": "#/components/schemas/TransactionInfo"
           }
         },
         "additionalProperties": false,
@@ -13808,6 +14482,27 @@
             "format": "int32"
           }
         }
+      },
+      "BuyWalletServiceRequestDto": {
+        "type": "object",
+        "properties": {
+          "quantity": {
+            "maximum": 999999,
+            "minimum": 1,
+            "type": "integer",
+            "description": "Number of services provided.",
+            "format": "int32",
+            "example": 1
+          },
+          "serviceName": {
+            "type": "string",
+            "description": "The service name.",
+            "nullable": true,
+            "example": "aitools"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The request parameters for buying wallet service."
       },
       "CapabilitiesDto": {
         "required": [
@@ -14340,6 +15035,59 @@
           }
         }
       },
+      "ConnectionTestResult": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ConnectionTestResultWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/ConnectionTestResult"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
       "CookieSettingsDto": {
         "required": [
           "enabled",
@@ -14462,6 +15210,8 @@
             "$ref": "#/components/schemas/WebhookTrigger"
           },
           "targetId": {
+            "maxLength": 255,
+            "minLength": 0,
             "type": "string",
             "description": "Target ID",
             "nullable": true,
@@ -14686,6 +15436,24 @@
         },
         "additionalProperties": false,
         "description": "The currencies parameters."
+      },
+      "CurrencyInfo": {
+        "required": [
+          "code",
+          "symbol"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "nullable": true
+          },
+          "symbol": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
       },
       "CurrentLicenseInfo": {
         "required": [
@@ -14913,6 +15681,12 @@
       "CustomerOperationsReportRequestDto": {
         "type": "object",
         "properties": {
+          "serviceName": {
+            "type": "string",
+            "description": "The service name.",
+            "nullable": true,
+            "example": "aitools"
+          },
           "startDate": {
             "type": "string",
             "description": "The report start date.",
@@ -14944,6 +15718,21 @@
             "description": "Specifies whether to include debit operations in the report.",
             "nullable": true,
             "example": false
+          },
+          "types": {
+            "$ref": "#/components/schemas/OperationType"
+          },
+          "status": {
+            "$ref": "#/components/schemas/OperationStatus"
+          },
+          "orderBy": {
+            "type": "string",
+            "description": "The field to order by.",
+            "nullable": true,
+            "example": "StartDate"
+          },
+          "orderType": {
+            "$ref": "#/components/schemas/OperationOrderType"
           }
         },
         "additionalProperties": false,
@@ -15901,6 +16690,43 @@
           }
         ],
         "x-enum-type": "integer"
+      },
+      "ExternalDatabaseSettings": {
+        "type": "object",
+        "properties": {
+          "databaseType": {
+            "type": "string",
+            "nullable": true
+          },
+          "dbHost": {
+            "type": "string",
+            "nullable": true
+          },
+          "dbPort": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "dbName": {
+            "type": "string",
+            "nullable": true
+          },
+          "dbUser": {
+            "type": "string",
+            "nullable": true
+          },
+          "dbPassword": {
+            "type": "string",
+            "nullable": true
+          },
+          "dbSsl": {
+            "type": "boolean"
+          },
+          "sqliteFilePath": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
       },
       "FeatureUsedDto": {
         "required": [
@@ -18961,6 +19787,150 @@
         "additionalProperties": false,
         "description": "Represents an operation."
       },
+      "OperationOrderType": {
+        "oneOf": [
+          {
+            "enum": [
+              "Descending",
+              "Ascending"
+            ],
+            "type": "string",
+            "description": "[Descending - Descending, Ascending - Ascending]",
+            "example": "Descending"
+          },
+          {
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "description": "[0 - Descending, 1 - Ascending]",
+            "example": 0,
+            "x-enum-varnames": [
+              "Descending",
+              "Ascending"
+            ]
+          }
+        ],
+        "description": "The operation filtering order type",
+        "x-enum-type": "integer"
+      },
+      "OperationStatus": {
+        "oneOf": [
+          {
+            "enum": [
+              "Any",
+              "Pending",
+              "Completed",
+              "Rejected",
+              "Canceled"
+            ],
+            "type": "string",
+            "description": "[Any - Any, Pending - Pending, Completed - Completed, Rejected - Rejected, Canceled - Canceled]",
+            "example": "Any"
+          },
+          {
+            "enum": [
+              0,
+              1,
+              2,
+              4,
+              8
+            ],
+            "type": "integer",
+            "description": "[0 - Any, 1 - Pending, 2 - Completed, 4 - Rejected, 8 - Canceled]",
+            "example": 0,
+            "x-enum-varnames": [
+              "Any",
+              "Pending",
+              "Completed",
+              "Rejected",
+              "Canceled"
+            ]
+          }
+        ],
+        "description": "The operation status",
+        "x-enum-type": "integer"
+      },
+      "OperationType": {
+        "oneOf": [
+          {
+            "enum": [
+              "Any",
+              "Unknown",
+              "ServicePayment",
+              "PackagePayment",
+              "ServiceUsage",
+              "Deposit",
+              "ReceiveProviderInvoice",
+              "ProcessProviderInvoice",
+              "WriteOffServiceProfit",
+              "Profit",
+              "PartnerAccrual",
+              "ProviderPayment",
+              "PartnerPayment",
+              "Refund",
+              "BankDeposit",
+              "BankWithdrawal",
+              "GoodwillCredit",
+              "WriteOffProfit",
+              "WriteOffDifferenceCurrency"
+            ],
+            "type": "string",
+            "description": "[Any - Any, Unknown - Unknown, ServicePayment - ServicePayment, PackagePayment - PackagePayment, ServiceUsage - ServiceUsage, Deposit - Deposit, ReceiveProviderInvoice - ReceiveProviderInvoice, ProcessProviderInvoice - ProcessProviderInvoice, WriteOffServiceProfit - WriteOffServiceProfit, Profit - Profit, PartnerAccrual - PartnerAccrual, ProviderPayment - ProviderPayment, PartnerPayment - PartnerPayment, Refund - Refund, BankDeposit - BankDeposit, BankWithdrawal - BankWithdrawal, GoodwillCredit - GoodwillCredit, WriteOffProfit - WriteOffProfit, WriteOffDifferenceCurrency - WriteOffDifferenceCurrency]",
+            "example": "Any"
+          },
+          {
+            "enum": [
+              0,
+              1,
+              2,
+              4,
+              8,
+              16,
+              32,
+              64,
+              128,
+              256,
+              512,
+              1024,
+              2048,
+              4096,
+              8192,
+              16384,
+              32768,
+              65536,
+              131072
+            ],
+            "type": "integer",
+            "description": "[0 - Any, 1 - Unknown, 2 - ServicePayment, 4 - PackagePayment, 8 - ServiceUsage, 16 - Deposit, 32 - ReceiveProviderInvoice, 64 - ProcessProviderInvoice, 128 - WriteOffServiceProfit, 256 - Profit, 512 - PartnerAccrual, 1024 - ProviderPayment, 2048 - PartnerPayment, 4096 - Refund, 8192 - BankDeposit, 16384 - BankWithdrawal, 32768 - GoodwillCredit, 65536 - WriteOffProfit, 131072 - WriteOffDifferenceCurrency]",
+            "example": 0,
+            "x-enum-varnames": [
+              "Any",
+              "Unknown",
+              "ServicePayment",
+              "PackagePayment",
+              "ServiceUsage",
+              "Deposit",
+              "ReceiveProviderInvoice",
+              "ProcessProviderInvoice",
+              "WriteOffServiceProfit",
+              "Profit",
+              "PartnerAccrual",
+              "ProviderPayment",
+              "PartnerPayment",
+              "Refund",
+              "BankDeposit",
+              "BankWithdrawal",
+              "GoodwillCredit",
+              "WriteOffProfit",
+              "WriteOffDifferenceCurrency"
+            ]
+          }
+        ],
+        "description": "The operation type",
+        "x-enum-type": "integer"
+      },
       "OwnerChangeInstructionsDto": {
         "type": "object",
         "properties": {
@@ -19378,7 +20348,7 @@
           }
         }
       },
-      "PaymentUrlRequestsDto": {
+      "PaymentUrlRequestDto": {
         "type": "object",
         "properties": {
           "backUrl": {
@@ -20016,6 +20986,62 @@
           }
         }
       },
+      "RestrictedModelsResponse": {
+        "required": [
+          "models"
+        ],
+        "type": "object",
+        "properties": {
+          "models": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RestrictedModelsResponseWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/RestrictedModelsResponse"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
       "RoomsNotificationSettingsDto": {
         "type": "object",
         "properties": {
@@ -20288,6 +21314,120 @@
         "additionalProperties": false,
         "description": "The request parameters for managing user security and access permissions."
       },
+      "ServicePayment": {
+        "type": "object",
+        "properties": {
+          "operationId": {
+            "type": "integer",
+            "description": "The payment operation ID.",
+            "format": "int32",
+            "example": 12345
+          },
+          "amount": {
+            "type": "number",
+            "description": "The balance of the sub-account in the specified currency.",
+            "format": "double",
+            "example": 1500.75
+          },
+          "currency": {
+            "type": "string",
+            "description": "The three-character ISO 4217 currency symbol.",
+            "nullable": true,
+            "example": "USD"
+          },
+          "quantity": {
+            "type": "integer",
+            "description": "Total quantity of operations.",
+            "format": "int32",
+            "example": 10
+          },
+          "subscriptionId": {
+            "type": "integer",
+            "description": "The subscription ID",
+            "format": "int32",
+            "nullable": true,
+            "example": 12345
+          },
+          "startDate": {
+            "type": "string",
+            "description": "The subscription start date.",
+            "format": "date-time",
+            "nullable": true,
+            "example": "2024-01-15T10:30:00Z"
+          },
+          "endDate": {
+            "type": "string",
+            "description": "The subscription end date.",
+            "format": "date-time",
+            "nullable": true,
+            "example": "2024-01-15T10:30:00Z"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Represents service payment information."
+      },
+      "ServicePaymentWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/ServicePayment"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
+      "SetRestrictedAiModelsRequestDto": {
+        "required": [
+          "models"
+        ],
+        "type": "object",
+        "properties": {
+          "models": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The set of restricted AI model IDs.",
+            "example": [
+              "model1",
+              "model2"
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "description": "The request parameters for setting restricted AI models."
+      },
       "SettingsDto": {
         "required": [
           "baseDomain",
@@ -20519,6 +21659,10 @@
           },
           "defaultFolderType": {
             "$ref": "#/components/schemas/FolderType"
+          },
+          "externalDbEnabled": {
+            "type": "boolean",
+            "description": "Specifies if an external database is connected for storing form results."
           }
         },
         "additionalProperties": false,
@@ -21460,12 +22604,14 @@
           "currency": {
             "type": "string",
             "description": "The three-character ISO 4217 currency symbol of the sub-account.",
-            "nullable": true
+            "nullable": true,
+            "example": "USD"
           },
           "amount": {
             "type": "number",
             "description": "The balance of the sub-account in the specified currency.",
-            "format": "double"
+            "format": "double",
+            "example": 1500.75
           }
         },
         "additionalProperties": false,
@@ -22453,7 +23599,7 @@
           },
           "backup": {
             "type": "boolean",
-            "description": "Specifies if the backup anabled as a wallet service or not.",
+            "description": "Specifies if the backup enabled as a wallet service or not.",
             "example": true
           },
           "countAIAgent": {
@@ -22464,92 +23610,7 @@
           },
           "aiTools": {
             "type": "boolean",
-            "description": "Specifies if the AI tools anabled as a wallet service or not.",
-            "example": true
-          },
-          "aiToolsWebSearch": {
-            "type": "boolean",
-            "description": "Specifies whether the web search is enabled as a subservice of AI tools.",
-            "example": true
-          },
-          "aiToolsWebFetch": {
-            "type": "boolean",
-            "description": "Specifies whether the web fetch is enabled as a subservice of AI tools",
-            "example": true
-          },
-          "aiToolsEmbedding": {
-            "type": "boolean",
-            "description": "Specifies whether the embedding is enabled as a subservice of AI tools",
-            "example": true
-          },
-          "aiToolsDeepseek31Input": {
-            "type": "boolean",
-            "description": "Specifies whether the Deepseek 3.1 input tokens is enabled as a subservice of AI tools",
-            "example": true
-          },
-          "aiToolsDeepseek31Output": {
-            "type": "boolean",
-            "description": "Specifies whether the Deepseek 3.1 output tokens is enabled as a subservice of AI tools",
-            "example": true
-          },
-          "aiToolsClaude45Input": {
-            "type": "boolean",
-            "description": "Specifies whether the Claude 4.5 input tokens is enabled as a subservice of AI tools",
-            "example": true
-          },
-          "aiToolsClaude45Output": {
-            "type": "boolean",
-            "description": "Specifies whether the Claude 4.5 output tokens is enabled as a subservice of AI tools",
-            "example": true
-          },
-          "aiToolsGPT5Input": {
-            "type": "boolean",
-            "description": "Specifies whether the GPT 5 input tokens is enabled as a subservice of AI tools",
-            "example": true
-          },
-          "aiToolsGPT5Output": {
-            "type": "boolean",
-            "description": "Specifies whether the GPT 5 output tokens is enabled as a subservice of AI tools",
-            "example": true
-          },
-          "aiToolsDeepseek32Input": {
-            "type": "boolean",
-            "description": "Specifies whether the Deepseek 3.2 input tokens is enabled as a subservice of AI tools",
-            "example": true
-          },
-          "aiToolsDeepseek32Output": {
-            "type": "boolean",
-            "description": "Specifies whether the Deepseek 3.2 output tokens is enabled as a subservice of AI tools",
-            "example": true
-          },
-          "aiToolsGPT52Input": {
-            "type": "boolean",
-            "description": "Specifies whether the GPT 5.2 input tokens is enabled as a subservice of AI tools",
-            "example": true
-          },
-          "aiToolsGPT52Output": {
-            "type": "boolean",
-            "description": "Specifies whether the GPT 5.2 output tokens is enabled as a subservice of AI tools",
-            "example": true
-          },
-          "aiToolsGemini3ProInput": {
-            "type": "boolean",
-            "description": "Specifies whether the Gemini 3 Pro input tokens is enabled as a subservice of AI tools",
-            "example": true
-          },
-          "aiToolsGemini3ProOutput": {
-            "type": "boolean",
-            "description": "Specifies whether the Gemini 3 Pro output tokens is enabled as a subservice of AI tools",
-            "example": true
-          },
-          "aiToolsGemini3FlashInput": {
-            "type": "boolean",
-            "description": "Specifies whether the Gemini 3 Flash input tokens is enabled as a subservice of AI tools",
-            "example": true
-          },
-          "aiToolsGemini3FlashOutput": {
-            "type": "boolean",
-            "description": "Specifies whether the Gemini 3 Flash output tokens is enabled as a subservice of AI tools",
+            "description": "Specifies if the AI tools enabled as a wallet service or not.",
             "example": true
           }
         },
@@ -23431,6 +24492,11 @@
             "description": "The verification code provided by the user.",
             "nullable": true,
             "example": 123456
+          },
+          "session": {
+            "type": "boolean",
+            "description": "Specifies whether the authentication is session-based.",
+            "example": true
           }
         },
         "additionalProperties": false,
@@ -23522,6 +24588,31 @@
         },
         "additionalProperties": false,
         "description": "The request parameters for putting money on deposit."
+      },
+      "TransactionInfo": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "description": "The date and time when the credit transaction occurred.",
+            "format": "date-time",
+            "example": "2024-01-15T10:30:00Z"
+          },
+          "currency": {
+            "type": "string",
+            "description": "The three-character ISO 4217 currency symbol of the transaction.",
+            "nullable": true,
+            "example": "USD"
+          },
+          "amount": {
+            "type": "number",
+            "description": "Amount of the transaction.",
+            "format": "double",
+            "example": 1500.75
+          }
+        },
+        "additionalProperties": false,
+        "description": "Represents information about the transaction applied to an account."
       },
       "TurnOnAdminMessageSettingsRequestDto": {
         "type": "object",
@@ -24397,10 +25488,13 @@
               "RoomArchived",
               "RoomDeleted",
               "RoomRestored",
-              "RoomCopied"
+              "RoomCopied",
+              "FormSubmit",
+              "FormFilledOut",
+              "FormStopped"
             ],
             "type": "string",
-            "description": "[All - *, UserCreated - user.created, UserInvited - user.invited, UserUpdated - user.updated, UserDeleted - user.deleted, GroupCreated - group.created, GroupUpdated - group.updated, GroupDeleted - group.deleted, FileCreated - file.created, FileUploaded - file.uploaded, FileUpdated - file.updated, FileTrashed - file.trashed, FileDeleted - file.deleted, FileRestored - file.restored, FileCopied - file.copied, FileMoved - file.moved, FolderCreated - folder.created, FolderUpdated - folder.updated, FolderTrashed - folder.trashed, FolderDeleted - folder.deleted, FolderRestored - folder.restored, FolderCopied - folder.copied, FolderMoved - folder.moved, RoomCreated - room.created, RoomUpdated - room.updated, RoomArchived - room.archived, RoomDeleted - room.deleted, RoomRestored - room.restored, RoomCopied - room.copied]",
+            "description": "[All - *, UserCreated - user.created, UserInvited - user.invited, UserUpdated - user.updated, UserDeleted - user.deleted, GroupCreated - group.created, GroupUpdated - group.updated, GroupDeleted - group.deleted, FileCreated - file.created, FileUploaded - file.uploaded, FileUpdated - file.updated, FileTrashed - file.trashed, FileDeleted - file.deleted, FileRestored - file.restored, FileCopied - file.copied, FileMoved - file.moved, FolderCreated - folder.created, FolderUpdated - folder.updated, FolderTrashed - folder.trashed, FolderDeleted - folder.deleted, FolderRestored - folder.restored, FolderCopied - folder.copied, FolderMoved - folder.moved, RoomCreated - room.created, RoomUpdated - room.updated, RoomArchived - room.archived, RoomDeleted - room.deleted, RoomRestored - room.restored, RoomCopied - room.copied, FormSubmit - form.submit, FormFilledOut - form.filled.out, FormStopped - form.stopped]",
             "example": "All"
           },
           {
@@ -24433,10 +25527,13 @@
               16777216,
               33554432,
               67108864,
-              134217728
+              134217728,
+              268435456,
+              536870912,
+              1073741824
             ],
             "type": "integer",
-            "description": "[0 - *, 1 - user.created, 2 - user.invited, 4 - user.updated, 8 - user.deleted, 16 - group.created, 32 - group.updated, 64 - group.deleted, 128 - file.created, 256 - file.uploaded, 512 - file.updated, 1024 - file.trashed, 2048 - file.deleted, 4096 - file.restored, 8192 - file.copied, 16384 - file.moved, 32768 - folder.created, 65536 - folder.updated, 131072 - folder.trashed, 262144 - folder.deleted, 524288 - folder.restored, 1048576 - folder.copied, 2097152 - folder.moved, 4194304 - room.created, 8388608 - room.updated, 16777216 - room.archived, 33554432 - room.deleted, 67108864 - room.restored, 134217728 - room.copied]",
+            "description": "[0 - *, 1 - user.created, 2 - user.invited, 4 - user.updated, 8 - user.deleted, 16 - group.created, 32 - group.updated, 64 - group.deleted, 128 - file.created, 256 - file.uploaded, 512 - file.updated, 1024 - file.trashed, 2048 - file.deleted, 4096 - file.restored, 8192 - file.copied, 16384 - file.moved, 32768 - folder.created, 65536 - folder.updated, 131072 - folder.trashed, 262144 - folder.deleted, 524288 - folder.restored, 1048576 - folder.copied, 2097152 - folder.moved, 4194304 - room.created, 8388608 - room.updated, 16777216 - room.archived, 33554432 - room.deleted, 67108864 - room.restored, 134217728 - room.copied, 268435456 - form.submit, 536870912 - form.filled.out, 1073741824 - form.stopped]",
             "example": 0,
             "x-enum-varnames": [
               "All",
@@ -24467,7 +25564,10 @@
               "RoomArchived",
               "RoomDeleted",
               "RoomRestored",
-              "RoomCopied"
+              "RoomCopied",
+              "FormSubmit",
+              "FormFilledOut",
+              "FormStopped"
             ]
           }
         ],

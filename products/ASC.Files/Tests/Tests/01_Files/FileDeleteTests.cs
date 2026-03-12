@@ -43,14 +43,16 @@ public class FileDeleteTests(
     {
         var createdFile = await CreateFileInMy("test.docx", Initializer.Owner);
         
-        var fileToDelete = (await _filesApi.DeleteFileAsync(createdFile.Id, new Delete { Immediately = true }, TestContext.Current.CancellationToken)).Response;
+        var results = (await _filesApi.DeleteFileAsync(createdFile.Id, new Delete { Immediately = true }, true, TestContext.Current.CancellationToken)).Response;
+        var operationId = results.FirstOrDefault()?.Id;
         
-        if (fileToDelete.Any(r => !r.Finished))
+        // Assert
+        if (results.Any(r => !r.Finished))
         {
-            fileToDelete = await WaitLongOperation();
+            results = await WaitLongOperation(operationId);
         }
         
-        fileToDelete.Should().NotContain(x => !string.IsNullOrEmpty(x.Error));
+        results.Should().NotContain(x => !string.IsNullOrEmpty(x.Error));
         
         // Verify file no longer exists or has been moved to trash
         await Assert.ThrowsAsync<ApiException>(async () => 
