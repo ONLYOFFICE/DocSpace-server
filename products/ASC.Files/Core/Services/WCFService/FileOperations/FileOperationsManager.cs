@@ -644,9 +644,7 @@ public class FileDeleteOperationsManager(
     {
         var fileId = files.FirstOrDefault();
         var file = await fileDao.GetFileAsync(fileId);
-
-        var throwException = true;
-        await security.CheckVersionPermissionsAsync(file, versions, throwException);
+        await security.CheckVersionPermissionsAsync(file, versions, true);
     }
 
     private async Task CheckFolderAsync<T>(List<T> data, IFolderDao<T> folderDao, DeletePermissionsCheck security, bool ignoreException, bool immediately)
@@ -654,9 +652,7 @@ public class FileDeleteOperationsManager(
         foreach (var folderId in data)
         {
             var folder = await folderDao.GetFolderAsync(folderId);
-
-            var throwException = true;
-            await security.CheckFolderPermissionsAsync([folder], immediately, ignoreException, throwException);
+            await security.CheckFolderPermissionsAsync([folder], immediately, ignoreException, true);
         }
     }
 
@@ -665,11 +661,7 @@ public class FileDeleteOperationsManager(
         foreach (var fileId in data)
         {
             var file = await fileDao.GetFileAsync(fileId);
-
-            var folder = false;
-            var checkPermissions = true;
-            var throwException = true;
-            await security.CheckFilePermissionsAsync([file], folder, checkPermissions, throwException);
+            await security.CheckFilePermissionsAsync([file], false, true, true);
         }
     }
 

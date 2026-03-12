@@ -31,10 +31,10 @@ public class DeletePermissionsCheck(LockerManager lockerManager, FileTrackerHelp
 {
     public async Task<string> CheckFilePermissionsAsync<T>(IEnumerable<File<T>> files, bool folder, bool checkPermissions, bool throwExeption = false)
     {
-        string errorMsg = null;
-
         foreach (var file in files)
         {
+            string errorMsg;
+            
             if (file == null)
             {
                 errorMsg = FilesCommonResource.ErrorMessage_FileNotFound;
@@ -91,9 +91,10 @@ public class DeletePermissionsCheck(LockerManager lockerManager, FileTrackerHelp
 
     public async Task<string> CheckFolderPermissionsAsync<T>(IEnumerable<Folder<T>> folders, bool immediately, bool ignoreException, bool throwException = false)
     {
-        string errorMsg = null;
         foreach (var folder in folders)
         {
+            string errorMsg;
+            
             if (folder == null)
             {
                 errorMsg = FilesCommonResource.ErrorMessage_FolderNotFound;
@@ -126,7 +127,7 @@ public class DeletePermissionsCheck(LockerManager lockerManager, FileTrackerHelp
 
     public async Task<string> CheckVersionPermissionsAsync<T>(File<T> file, IEnumerable<int> versions = null, bool throwException = false)
     {
-        string errorMsg = null;
+        string errorMsg;
 
         if (file == null)
         {
@@ -168,11 +169,6 @@ public class DeletePermissionsCheck(LockerManager lockerManager, FileTrackerHelp
         }
         
         errorMsg = await CheckFilePermissionsAsync([file], false, true, throwException);
-        if (errorMsg != null)
-        {
-            return errorMsg;
-        }
-
-        return null;
+        return errorMsg;
     }
 }

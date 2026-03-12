@@ -221,13 +221,8 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         var countRoomChecker = scope.ServiceProvider.GetRequiredService<CountRoomChecker>();
         var socketManager = scope.ServiceProvider.GetService<SocketManager>();
         var webhookManager = scope.ServiceProvider.GetService<WebhookManager>();
-        var userManager = scope.ServiceProvider.GetService<UserManager>();
         var tenantQuotaFeatureStatHelper = scope.ServiceProvider.GetService<TenantQuotaFeatureStatHelper>();
         var quotaSocketManager = scope.ServiceProvider.GetService<QuotaSocketManager>();
-        var settingsManager = scope.ServiceProvider.GetService<SettingsManager>();
-        var tenantManager = scope.ServiceProvider.GetService<TenantManager>();
-        var quotaService = scope.ServiceProvider.GetService<IQuotaService>();
-        var cache = scope.ServiceProvider.GetService<ICache>();
         var distributedLockProvider = scope.ServiceProvider.GetRequiredService<IDistributedLockProvider>();
         var roomLogoManager = scope.ServiceProvider.GetRequiredService<RoomLogoManager>();
         var global = scope.ServiceProvider.GetRequiredService<Global>();
@@ -672,10 +667,8 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         var webhookManager = scope.ServiceProvider.GetService<WebhookManager>();
         var globalStorage = scope.ServiceProvider.GetService<GlobalStore>();
         var fileStorageService = scope.ServiceProvider.GetService<FileStorageService>();
-        var securityContext = scope.ServiceProvider.GetService<SecurityContext>();
         var cachedFolderDao = scope.ServiceProvider.GetService<ICacheFolderDao<T>>();
         var fileSecurity = scope.ServiceProvider.GetService<FileSecurity>();
-        var vectorizationSettings = scope.ServiceProvider.GetService<VectorizationGlobalSettings>();
         var permissionsManager = scope.ServiceProvider.GetService<CopyPermissionsCheck<T, TTo>>();
 
         var toFolderId = toFolder.Id;

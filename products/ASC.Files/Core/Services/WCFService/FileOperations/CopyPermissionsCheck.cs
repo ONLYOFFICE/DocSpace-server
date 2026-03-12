@@ -77,28 +77,26 @@ public class CopyPermissionsCheck<T, TTo>(
 {
     public async Task CheckCopyDataAsync(FileMoveCopyOperationData<T> data, TTo tto)
     {
-        var needToCheck = true;
-
         var copy = data.Copy;
         var fileIds = data.Files?.ToList() ?? [];
         var folderIds = data.Folders?.ToList() ?? [];
 
         var toFolder = await ttoFolderDao.GetFolderAsync(tto);
 
-        await CheckGeneralPermissionsAsync(fileIds, folderIds, toFolder, copy, needToCheck);
+        await CheckGeneralPermissionsAsync(fileIds, folderIds, toFolder, copy, true);
 
         var resolveType = data.ResolveType;
 
         foreach (var folderId in folderIds)
         {
             var folder = await folderDao.GetFolderAsync(folderId);
-            await CheckFoldersPermissionsAsync(folder, toFolder, copy, resolveType, needToCheck);
+            await CheckFoldersPermissionsAsync(folder, toFolder, copy, resolveType, true);
         }
 
         foreach (var fileId in fileIds)
         {
             var file = await fileDao.GetFileAsync(fileId);
-            await CheckFilesPermissionsAsync(file, toFolder, copy, resolveType, needToCheck);
+            await CheckFilesPermissionsAsync(file, toFolder, copy, resolveType, true);
         }
     }
 
@@ -221,16 +219,14 @@ public class CopyPermissionsCheck<T, TTo>(
                     return errorMsg;
 
                 }
-                else
-                {
-                    errorMsg = FilesCommonResource.ErrorMessage_SecurityException_MoveFolder;
-                    if (check)
-                    {
-                        throw new SecurityException(errorMsg);
-                    }
 
-                    return errorMsg;
+                errorMsg = FilesCommonResource.ErrorMessage_SecurityException_MoveFolder;
+                if (check)
+                {
+                    throw new SecurityException(errorMsg);
                 }
+
+                return errorMsg;
             }
         }
 
@@ -281,15 +277,10 @@ public class CopyPermissionsCheck<T, TTo>(
                 _ => FilesCommonResource.ErrorMessage_SecurityException_MoveToFolder
             };
 
-            if (check)
-            {
-                throw new SecurityException(errorMsg);
-            }
-
-            return errorMsg;
+            return check ? throw new SecurityException(errorMsg) : errorMsg;
         }
 
-        return errorMsg;
+        return null;
     }
 
     public async Task<string> CheckFoldersPermissionsAsync(
@@ -299,7 +290,7 @@ public class CopyPermissionsCheck<T, TTo>(
         FileConflictResolveType resolveType,
         bool check = false) 
     {
-        string errorMsg = null;
+        string errorMsg;
 
         if (folder == null)
         {
@@ -380,7 +371,8 @@ public class CopyPermissionsCheck<T, TTo>(
 
             return errorMsg;
         }
-        else if (!copy && checkPermissions && !canMoveOrCopy)
+
+        if (!copy && checkPermissions && !canMoveOrCopy)
         {
             if (isRoom)
             {
@@ -395,18 +387,17 @@ public class CopyPermissionsCheck<T, TTo>(
 
                 return errorMsg;
             }
-            else
-            {
-                errorMsg = FilesCommonResource.ErrorMessage_SecurityException_MoveFolder;
-                if (check)
-                {
-                    throw new SecurityException(errorMsg);
-                }
 
-                return errorMsg;
+            errorMsg = FilesCommonResource.ErrorMessage_SecurityException_MoveFolder;
+            if (check)
+            {
+                throw new SecurityException(errorMsg);
             }
+
+            return errorMsg;
         }
-        else if (!isRoom && (toFolder.FolderType == FolderType.VirtualRooms || toFolder.RootFolderType == FolderType.Archive))
+
+        if (!isRoom && (toFolder.FolderType == FolderType.VirtualRooms || toFolder.RootFolderType == FolderType.Archive))
         {
             errorMsg = FilesCommonResource.ErrorMessage_SecurityException_MoveFolder;
             if (check)
@@ -416,7 +407,8 @@ public class CopyPermissionsCheck<T, TTo>(
 
             return errorMsg;
         }
-        else if (isRoom && toFolder.FolderType != FolderType.VirtualRooms && toFolder.FolderType != FolderType.Archive)
+
+        if (isRoom && toFolder.FolderType != FolderType.VirtualRooms && toFolder.FolderType != FolderType.Archive)
         {
             errorMsg = FilesCommonResource.ErrorMessage_SecurityException_UnarchiveRoom;
             if (check)
@@ -426,7 +418,8 @@ public class CopyPermissionsCheck<T, TTo>(
 
             return errorMsg;
         }
-        else if (!isRoom && folder.SettingsPrivate && !await CompliesPrivateRoomRulesAsync(copy, folder, parentFolders))
+
+        if (!isRoom && folder.SettingsPrivate && !await CompliesPrivateRoomRulesAsync(copy, folder, parentFolders))
         {
             errorMsg = FilesCommonResource.ErrorMessage_SecurityException_MoveFolder;
             if (check)
@@ -436,7 +429,8 @@ public class CopyPermissionsCheck<T, TTo>(
 
             return errorMsg;
         }
-        else if (checkPermissions && folder.RootFolderType != FolderType.TRASH && !await security.CanDownloadAsync(folder))
+
+        if (checkPermissions && folder.RootFolderType != FolderType.TRASH && !await security.CanDownloadAsync(folder))
         {
             errorMsg = FilesCommonResource.ErrorMessage_SecurityException;
             if (check)
@@ -446,8 +440,9 @@ public class CopyPermissionsCheck<T, TTo>(
 
             return errorMsg;
         }
-        else if (folder.RootFolderType == FolderType.Privacy
-                 && (copy || toFolder.RootFolderType != FolderType.Privacy))
+
+        if (folder.RootFolderType == FolderType.Privacy
+            && (copy || toFolder.RootFolderType != FolderType.Privacy))
         {
             errorMsg = FilesCommonResource.ErrorMessage_SecurityException_MoveFolder;
             if (check)
@@ -457,7 +452,8 @@ public class CopyPermissionsCheck<T, TTo>(
 
             return errorMsg;
         }
-        else if (!canUseRoomQuota)
+
+        if (!canUseRoomQuota)
         {
             errorMsg = FileSizeComment.GetRoomFreeSpaceException(roomQuotaLimit, toFolderRoom.FolderType is FolderType.AiRoom).Message;
             if (check)
@@ -467,7 +463,8 @@ public class CopyPermissionsCheck<T, TTo>(
 
             return errorMsg;
         }
-        else if (!canUseUserQuota)
+
+        if (!canUseUserQuota)
         {
             errorMsg = FileSizeComment.GetUserFreeSpaceException(userQuotaLimit).Message;
             if (check)
@@ -594,7 +591,7 @@ public class CopyPermissionsCheck<T, TTo>(
             return errorMsg;
         }
         else if (file.RootFolderType == FolderType.Privacy
-                 && (copy || toFolder.RootFolderType != FolderType.Privacy))
+            && (copy || toFolder.RootFolderType != FolderType.Privacy))
         {
             errorMsg = FilesCommonResource.ErrorMessage_SecurityException_MoveFile;
             if (check)
@@ -605,7 +602,7 @@ public class CopyPermissionsCheck<T, TTo>(
             return errorMsg;
         }
         else if (global.EnableUploadFilter &&
-                !fileUtility.ExtsUploadable.Contains(FileUtility.GetFileExtension(file.Title)))
+            !fileUtility.ExtsUploadable.Contains(FileUtility.GetFileExtension(file.Title)))
         {
             errorMsg = FilesCommonResource.ErrorMessage_NotSupportedFormat;
             if (check)
@@ -626,7 +623,7 @@ public class CopyPermissionsCheck<T, TTo>(
             return errorMsg;
         }
         else if (toFolder.FolderType is FolderType.Knowledge &&
-                 file.ContentLength > vectorizationSettings.MaxContentLength)
+            file.ContentLength > vectorizationSettings.MaxContentLength)
         {
             errorMsg = FileSizeComment.GetFileSizeExceptionString(vectorizationSettings.MaxContentLength);
             if (check)
@@ -636,7 +633,7 @@ public class CopyPermissionsCheck<T, TTo>(
 
             return errorMsg;
         }
-
+        
         if (!check)
         {
             return errorMsg;
@@ -656,7 +653,7 @@ public class CopyPermissionsCheck<T, TTo>(
                     ? null
                     : await ttoFileDao.GetFileAsync(toFolder.Id, file.Title);
 
-        errorMsg = await CheckFilesSecurityPermissionsAsync([file], checkPermissions);
+        errorMsg = await CheckFilesSecurityPermissionsAsync([file]);
 
         if (conflict == null || conflict.Category != file.Category)
         {
@@ -667,25 +664,35 @@ public class CopyPermissionsCheck<T, TTo>(
         }
         else if (resolveType == FileConflictResolveType.Overwrite)
         {
-            if (checkPermissions && !await security.CanEditAsync(conflict) && !await security.CanFillFormsAsync(conflict))
+            if (!await security.CanEditAsync(conflict) && !await security.CanFillFormsAsync(conflict))
             {
                 throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
             }
-            else if (await lockerManager.FileLockedForMeAsync(conflict.Id))
+
+            if (await lockerManager.FileLockedForMeAsync(conflict.Id))
             {
                 throw new InvalidOperationException(FilesCommonResource.ErrorMessage_LockedFile);
             }
-            else if (await fileTracker.IsEditingAsync(conflict.Id, false))
+
+            if (await fileTracker.IsEditingAsync(conflict.Id, false))
             {
                 throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_UpdateEditingFile);
             }
-            else if (!copy && !Equals(file.ParentId.ToString(), toFolder.Id.ToString()) && errorMsg != null)
+
+            if (!copy && !Equals(file.ParentId.ToString(), toFolder.Id.ToString()) && errorMsg != null)
             {
                 throw new SecurityException(errorMsg);
             }
         }
 
         return null;
+
+        string ErrorMessageSecurityExceptionMoveFile(string msg)
+        {
+            return check ? 
+                throw new SecurityException(msg) : 
+                msg;
+        }
     }
 
     public async Task<string> CheckFilesSecurityPermissionsAsync(IEnumerable<File<T>> files, bool checkPermissions = true)
