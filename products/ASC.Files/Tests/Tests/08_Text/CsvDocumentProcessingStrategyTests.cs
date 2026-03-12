@@ -36,7 +36,12 @@ public class CsvDocumentProcessingStrategyTests
         var strategy = new CsvDocumentProcessingStrategy();
         await using var stream = CreateStream("alpha,beta\r\ngamma,delta\r\n");
 
-        var chunks = await ToListAsync(strategy.ProcessAsync(stream, stream.Length, ".csv", CreateSettings()));
+        var chunks = await ToListAsync(strategy.ProcessAsync(
+            stream, 
+            stream.Length, 
+            ".csv", 
+            CreateSettings(), 
+            TestContext.Current.CancellationToken));
 
         chunks.Should().Equal(
             "Column 1: alpha\nColumn 2: beta",
@@ -49,7 +54,12 @@ public class CsvDocumentProcessingStrategyTests
         var strategy = new CsvDocumentProcessingStrategy();
         await using var stream = CreateStream("one two three four five six seven eight nine\r\n");
 
-        var chunks = await ToListAsync(strategy.ProcessAsync(stream, stream.Length, ".csv", CreateSettings(maxTokensPerChunk: 4, chunkOverlap: 0.25f)));
+        var chunks = await ToListAsync(strategy.ProcessAsync(
+            stream, 
+            stream.Length, 
+            ".csv", 
+            CreateSettings(maxTokensPerChunk: 4, chunkOverlap: 0.25f), 
+            TestContext.Current.CancellationToken));
 
         chunks.Should().HaveCountGreaterThan(1);
         chunks.Should().OnlyContain(chunk => CountTokens(chunk) <= 4);
@@ -62,7 +72,12 @@ public class CsvDocumentProcessingStrategyTests
         var strategy = new CsvDocumentProcessingStrategy();
         await using var stream = CreateStream(",,\r\nfirst,second\r\n");
 
-        var chunks = await ToListAsync(strategy.ProcessAsync(stream, stream.Length, ".csv", CreateSettings()));
+        var chunks = await ToListAsync(strategy.ProcessAsync(
+            stream, 
+            stream.Length, 
+            ".csv", 
+            CreateSettings(), 
+            TestContext.Current.CancellationToken));
 
         chunks.Should().Equal("Column 1: first\nColumn 2: second");
     }
@@ -73,7 +88,12 @@ public class CsvDocumentProcessingStrategyTests
         var strategy = new CsvDocumentProcessingStrategy();
         await using var stream = CreateStream("name,age\r\nalice,30\r\n");
 
-        var chunks = await ToListAsync(strategy.ProcessAsync(stream, stream.Length, ".csv", CreateSettings()));
+        var chunks = await ToListAsync(strategy.ProcessAsync(
+            stream, 
+            stream.Length, 
+            ".csv", 
+            CreateSettings(), 
+            TestContext.Current.CancellationToken));
 
         chunks.Should().HaveCount(2);
         chunks[0].Should().Be("Column 1: name\nColumn 2: age");
@@ -86,7 +106,12 @@ public class CsvDocumentProcessingStrategyTests
         var strategy = new CsvDocumentProcessingStrategy();
         await using var stream = CreateStream("\"hello\r\nworld\",value\r\n");
 
-        var chunks = await ToListAsync(strategy.ProcessAsync(stream, stream.Length, ".csv", CreateSettings()));
+        var chunks = await ToListAsync(strategy.ProcessAsync(
+            stream, 
+            stream.Length, 
+            ".csv", 
+            CreateSettings(), 
+            TestContext.Current.CancellationToken));
 
         chunks.Should().Equal("Column 1: hello world\nColumn 2: value");
     }
@@ -105,10 +130,19 @@ public class CsvDocumentProcessingStrategyTests
         var processor = services.GetRequiredService<TextProcessor>();
 
         await using var csvStream = CreateStream("first,second\r\n");
-        var csvChunks = await ToListAsync(processor.ProcessAsync(csvStream, csvStream.Length, ".csv", CreateSettings()));
+        var csvChunks = await ToListAsync(processor.ProcessAsync(
+            csvStream, 
+            csvStream.Length, 
+            ".csv", 
+            CreateSettings(), 
+            TestContext.Current.CancellationToken));
 
         await using var textStream = CreateStream("plain text document");
-        var textChunks = await ToListAsync(processor.ProcessAsync(textStream, textStream.Length, ".txt", CreateSettings()));
+        var textChunks = await ToListAsync(processor.ProcessAsync(
+            textStream, 
+            textStream.Length, 
+            ".txt", CreateSettings(), 
+            TestContext.Current.CancellationToken));
 
         csvChunks.Should().Equal("Column 1: first\nColumn 2: second");
         textChunks.Should().Equal("plain text document");

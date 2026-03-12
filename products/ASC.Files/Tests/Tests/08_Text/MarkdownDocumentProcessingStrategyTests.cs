@@ -36,7 +36,12 @@ public class MarkdownDocumentProcessingStrategyTests
         var strategy = CreateStrategy();
         await using var stream = CreateStream("# Intro\nalpha\n## Details\nbeta\n### Deep Dive\ngamma");
 
-        var chunks = await ToListAsync(strategy.ProcessAsync(stream, stream.Length, ".md", CreateSettings()));
+        var chunks = await ToListAsync(strategy.ProcessAsync(
+            stream, 
+            stream.Length, 
+            ".md", 
+            CreateSettings(), 
+            TestContext.Current.CancellationToken));
 
         chunks.Should().Equal(
             "# Intro\nalpha",
@@ -50,7 +55,12 @@ public class MarkdownDocumentProcessingStrategyTests
         var strategy = CreateStrategy();
         await using var stream = CreateStream("# Title\none two three four five six seven eight nine ten");
 
-        var chunks = await ToListAsync(strategy.ProcessAsync(stream, stream.Length, ".md", CreateSettings(maxTokensPerChunk: 5, chunkOverlap: 0.2f)));
+        var chunks = await ToListAsync(strategy.ProcessAsync(
+            stream, 
+            stream.Length, 
+            ".md", 
+            CreateSettings(maxTokensPerChunk: 5, chunkOverlap: 0.2f), 
+            TestContext.Current.CancellationToken));
 
         chunks.Should().HaveCountGreaterThan(1);
         chunks.Should().OnlyContain(chunk => chunk.StartsWith("# Title\n"));
@@ -64,7 +74,12 @@ public class MarkdownDocumentProcessingStrategyTests
         var strategy = CreateStrategy();
         await using var stream = CreateStream("Lead in\n\n# Title\nBody");
 
-        var chunks = await ToListAsync(strategy.ProcessAsync(stream, stream.Length, ".md", CreateSettings()));
+        var chunks = await ToListAsync(strategy.ProcessAsync(
+            stream, 
+            stream.Length, 
+            ".md", 
+            CreateSettings(),
+            TestContext.Current.CancellationToken));
 
         chunks.Should().Equal(
             "Lead in",
@@ -77,7 +92,12 @@ public class MarkdownDocumentProcessingStrategyTests
         var strategy = CreateStrategy();
         await using var stream = CreateStream("# Title\n```\n## not heading\n```\nBody\n## Next\nTail");
 
-        var chunks = await ToListAsync(strategy.ProcessAsync(stream, stream.Length, ".md", CreateSettings()));
+        var chunks = await ToListAsync(strategy.ProcessAsync(
+            stream, 
+            stream.Length, 
+            ".md", 
+            CreateSettings(),
+            TestContext.Current.CancellationToken));
 
         chunks.Should().HaveCount(2);
         chunks[0].Should().Be("# Title\n```\n## not heading\n```\nBody");
@@ -99,7 +119,12 @@ public class MarkdownDocumentProcessingStrategyTests
         var processor = services.GetRequiredService<TextProcessor>();
 
         await using var markdownStream = CreateStream("# Intro\nalpha\n## Details\nbeta");
-        var markdownChunks = await ToListAsync(processor.ProcessAsync(markdownStream, markdownStream.Length, ".md", CreateSettings()));
+        var markdownChunks = await ToListAsync(processor.ProcessAsync(
+            markdownStream, 
+            markdownStream.Length, 
+            ".md", 
+            CreateSettings(),
+            TestContext.Current.CancellationToken));
 
         markdownChunks.Should().Equal(
             "# Intro\nalpha",
