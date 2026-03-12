@@ -1453,7 +1453,7 @@ public class FileSecurity(
                 }
                 break;
             case FolderType.USER:
-                if (isOutsider || action == FilesSecurityActions.Lock)
+                if (isOutsider)
                 {
                     return false;
                 }
