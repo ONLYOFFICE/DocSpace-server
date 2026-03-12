@@ -38,7 +38,8 @@ public class CsvDocumentProcessingStrategy : IDocumentProcessingStrategy
     {
         HasHeaderRecord = false,
         IgnoreBlankLines = false,
-        TrimOptions = TrimOptions.Trim
+        TrimOptions = TrimOptions.Trim,
+        DetectDelimiter = true
     };
 
     public async IAsyncEnumerable<string> ProcessAsync(
