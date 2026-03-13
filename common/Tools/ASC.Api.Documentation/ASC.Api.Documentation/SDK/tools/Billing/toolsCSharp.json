@@ -5,18 +5,22 @@
     "version": "7.19.0"
   },
   "generatorName": "my-csharp",
-  "inputSpec": "./json/api-docs.json",
+  "inputSpec": "./json/billing-api.json",
   "outputDir": "ClientNet",
   "additionalProperties": {
-    "packageName": "DocSpace.API.SDK",
+    "packageName": "BillingApiSDK",
     "packageVersion": "3.6.0",
     "licenseName": "Apache-2.0",
-    "repositoryUrl": "https://github.com/ONLYOFFICE/docspace-api-sdk-csharp",
+    "repositoryUrl": "https://github.com/ONLYOFFICE/billing-api-sdk-csharp",
     "library": "httpclient",
     "targetFramework": "net10.0",
     "useOneOfDiscriminatorLookup": false,
     "excludeTests": true,
     "zeroBasedEnums": true,
-    "packageTitle": "DocSpace.API.SDK"
+    "packageTitle": "Billing.API.SDK",
+    "outputFolder": "generated-sdk/billing-api-sdk-csharp",
+    "seealsoBaseUrl": "https://api.onlyoffice.com/billing",
+    "example": false,
+    "readMe": "README_Billing.mustache"
   }
 }

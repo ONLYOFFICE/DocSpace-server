@@ -4,7 +4,7 @@
   "generator-cli": {
     "version": "7.19.0"
   },
-  "generatorName": "my-go",
+  "generatorName": "my-csharp",
   "inputSpec": "./json/api-docs.json",
   "outputDir": "ClientNet",
   "additionalProperties": {
@@ -17,6 +17,11 @@
     "useOneOfDiscriminatorLookup": false,
     "excludeTests": true,
     "zeroBasedEnums": true,
-    "packageTitle": "DocSpace.API.SDK"
+    "packageTitle": "DocSpace.API.SDK",
+    "outputFolder": "../../../../../sdk/docspace-api-sdk-csharp",
+    "packageDescription": "A simple PHP SDK for integrating with the ONLYOFFICE DocSpace API",
+    "seealsoBaseUrl": "https://api.onlyoffice.com/docspace/api-backend/usage-api",
+    "example": true,
+    "readMe": "README.mustache"
   }
 }

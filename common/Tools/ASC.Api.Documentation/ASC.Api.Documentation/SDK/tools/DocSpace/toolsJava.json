@@ -17,6 +17,11 @@
     "repositoryName": "ONLYOFFICE/docs-integration-sdk-java",
     "groupId": "com.onlyoffice",
     "library": "apache-httpclient",
-    "excludeTests": true
+    "excludeTests": true,
+    "outputFolder": "../../../../../sdk/docspace-api-sdk-java",
+    "packageDescription": "A simple PHP SDK for integrating with the ONLYOFFICE DocSpace API",
+    "seealsoBaseUrl": "https://api.onlyoffice.com/docspace/api-backend/usage-api",
+    "example": true,
+    "readMe": "README.mustache"
   }
 }

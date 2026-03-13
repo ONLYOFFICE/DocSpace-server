@@ -15,6 +15,8 @@
     "repositoryUrl": "https://github.com/ONLYOFFICE/docspace-api-sdk-kotlin",
     "library": "jvm-retrofit2",
     "dateLibrary": "java8",
-    "excludeTests": true
+    "excludeTests": true,
+    "outputFolder": "../../../../../sdk/docspace-api-sdk-kotlin",
+    "seealsoBaseUrl": "https://api.onlyoffice.com/docspace/api-backend/usage-api"
   }
 }

@@ -1,0 +1,27 @@
+{
+  "$schema": "./node_modules/@openapitools/openapi-generator-cli/config.schema.json",
+  "spaces": 2,
+  "generator-cli": {
+    "version": "7.19.0"
+  },
+  "generatorName": "my-java",
+  "inputSpec": "./json/billing-api.json",
+  "outputDir": "java-sdk",
+  "additionalProperties": {
+    "packageName": "billing-api-sdk",
+    "packageVersion": "3.6.0",
+    "artifactId": "billing-api-sdk",
+    "artifactVersion": "3.6.0",
+    "licenseName": "Apache-2.0",
+    "repositoryUrl": "https://github.com/ONLYOFFICE/billing-api-sdk-java",
+    "repositoryName": "ONLYOFFICE/docs-integration-sdk-java",
+    "groupId": "com.onlyoffice",
+    "library": "apache-httpclient",
+    "excludeTests": true,
+    "outputFolder": "generated-sdk/billing-api-sdk-java",
+    "packageDescription": "A simple PHP SDK for integrating with the ONLYOFFICE DocSpace API",
+    "seealsoBaseUrl": "https://api.onlyoffice.com/billing",
+    "example": false,
+    "readMe": "README_Billing.mustache"
+  }
+}

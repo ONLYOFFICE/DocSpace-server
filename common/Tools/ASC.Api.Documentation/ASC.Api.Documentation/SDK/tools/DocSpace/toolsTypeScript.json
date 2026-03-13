@@ -15,6 +15,18 @@
     "withSeparateModelsAndApi": true,
     "modelPackage": "models",
     "apiPackage": "api", 
-    "axiosVersion": "1.13.5"
+    "axiosVersion": "1.13.5",
+    "outputFolder": "../../../../../sdk/docspace-api-sdk-typescript",
+    "packageDescription": "A simple TypeScript SDK for integrating with the ONLYOFFICE DocSpace API",
+    "packageKeywords": [
+      "onlyoffice",
+      "docspace",
+      "sdk"
+    ],
+    "homepage": "https://www.onlyoffice.com",
+    "supportEmail": "support@onlyoffice.com",
+    "authorsName": "Ascensio System SIA <integration@onlyoffice.com> (https://www.onlyoffice.com)",
+    "seealsoBaseUrl": "https://api.onlyoffice.com/docspace/api-backend/usage-api",
+    "readMe": "README.mustache"
   }
 }

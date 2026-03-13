@@ -1,0 +1,18 @@
+{
+  "$schema": "./node_modules/@openapitools/openapi-generator-cli/config.schema.json",
+  "spaces": 2,
+  "generator-cli": {
+    "version": "7.17.0"
+  },
+  "generatorName": "my-postman-collection",
+  "inputSpec": "./json/api-docs.json",
+  "outputDir": "postman-collection-sdk",
+  "additionalProperties": {
+    "packageName": "DocSpace API",
+    "packageVersion": "3.6.0",
+    "outputFolder": "../../../../../sdk/docspace-api-postman-collections",
+    "packageDescription": "A simple Postman Collection for integrating with the ONLYOFFICE DocSpace API",
+    "postmanId": "5d8c9db9-3822-4cc8-864b-75521aa761c2",
+    "postmanSchema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  }
+}
