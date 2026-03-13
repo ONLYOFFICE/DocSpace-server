@@ -550,7 +550,8 @@ public class CopyPermissionsCheck<T, TTo>(
 
             return errorMsg;
         }
-        else if (copy && !await security.CanCopyAsync(file))
+
+        if (copy && !await security.CanCopyAsync(file))
         {
             errorMsg = FilesCommonResource.ErrorMessage_SecurityException_CopyFile;
             if (check)
@@ -560,7 +561,8 @@ public class CopyPermissionsCheck<T, TTo>(
 
             return errorMsg;
         }
-        else if (!copy && checkPermissions && !await security.CanMoveAsync(file))
+
+        if (!copy && checkPermissions && !await security.CanMoveAsync(file))
         {
             errorMsg = FilesCommonResource.ErrorMessage_SecurityException_MoveFile;
             if (check)
@@ -570,7 +572,8 @@ public class CopyPermissionsCheck<T, TTo>(
 
             return errorMsg;
         }
-        else if (checkPermissions && file.RootFolderType != FolderType.TRASH && !await security.CanDownloadAsync(file))
+
+        if (checkPermissions && file.RootFolderType != FolderType.TRASH && !await security.CanDownloadAsync(file))
         {
             errorMsg = FilesCommonResource.ErrorMessage_SecurityException;
             if (check)
@@ -580,7 +583,8 @@ public class CopyPermissionsCheck<T, TTo>(
 
             return errorMsg;
         }
-        else if (!await CompliesPrivateRoomRulesAsync(copy, file, parentFolders))
+
+        if (!await CompliesPrivateRoomRulesAsync(copy, file, parentFolders))
         {
             errorMsg = FilesCommonResource.ErrorMessage_SecurityException_MoveFile;
             if (check)
@@ -590,7 +594,8 @@ public class CopyPermissionsCheck<T, TTo>(
 
             return errorMsg;
         }
-        else if (file.RootFolderType == FolderType.Privacy
+
+        if (file.RootFolderType == FolderType.Privacy
             && (copy || toFolder.RootFolderType != FolderType.Privacy))
         {
             errorMsg = FilesCommonResource.ErrorMessage_SecurityException_MoveFile;
@@ -601,7 +606,8 @@ public class CopyPermissionsCheck<T, TTo>(
 
             return errorMsg;
         }
-        else if (global.EnableUploadFilter &&
+
+        if (global.EnableUploadFilter &&
             !fileUtility.ExtsUploadable.Contains(FileUtility.GetFileExtension(file.Title)))
         {
             errorMsg = FilesCommonResource.ErrorMessage_NotSupportedFormat;
@@ -612,7 +618,8 @@ public class CopyPermissionsCheck<T, TTo>(
 
             return errorMsg;
         }
-        else if (toFolder.FolderType is FolderType.Knowledge && !vectorizationSettings.IsSupportedContentExtraction(file.Title))
+
+        if (toFolder.FolderType is FolderType.Knowledge && !vectorizationSettings.IsSupportedContentExtraction(file.Title))
         {
             errorMsg = FilesCommonResource.ErrorMessage_NotSupportedFormat;
             if (check)
@@ -622,7 +629,8 @@ public class CopyPermissionsCheck<T, TTo>(
 
             return errorMsg;
         }
-        else if (toFolder.FolderType is FolderType.Knowledge &&
+
+        if (toFolder.FolderType is FolderType.Knowledge &&
             file.ContentLength > vectorizationSettings.MaxContentLength)
         {
             errorMsg = FileSizeComment.GetFileSizeExceptionString(vectorizationSettings.MaxContentLength);
@@ -633,7 +641,7 @@ public class CopyPermissionsCheck<T, TTo>(
 
             return errorMsg;
         }
-        
+
         if (!check)
         {
             return errorMsg;

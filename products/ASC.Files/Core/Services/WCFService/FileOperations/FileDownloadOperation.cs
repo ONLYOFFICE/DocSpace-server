@@ -249,7 +249,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
 
         (_entriesPathId, var filesForSend, var folderForSend) = await GetEntriesPathIdAsync(serviceScope);
 
-        var permissionsManager = serviceScope.ServiceProvider.GetRequiredService<DownloadPermissionsCheck>();
+        var permissionsManager = serviceScope.ServiceProvider.GetRequiredService<DownloadPermissionsCheck<T>>();
         await permissionsManager.CheckPermissionsAsync(_entriesPathId, Files);
 
         Total = _entriesPathId.Count + 1;
