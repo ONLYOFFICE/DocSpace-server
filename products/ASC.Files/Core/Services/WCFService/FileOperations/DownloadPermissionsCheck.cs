@@ -26,25 +26,15 @@
 
 namespace ASC.Files.Core.Services.WCFService.FileOperations;
 
-public class DownloadPermissionsCheckContext<T>()
+[Scope(GenericArguments = [typeof(int)])]
+[Scope(GenericArguments = [typeof(string)])]
+public class DownloadPermissionsCheck<T>(FileSecurity security, IFileDao<T> fileDao, IFolderDao<T> folderDao)
 {
-    public IFolderDao<T> FolderDao { get; init; }
-
-    public IFileDao<T> FileDao { get; init; }
-
-    public List<T> Files { get; init; }
-
-    public List<T> Folders { get; init; }
-}
-
-[Scope]
-public class DownloadPermissionsCheck(FileSecurity security)
-{
-    internal async Task CheckPermissionsAsync<T>(ItemNameValueCollection<T> entriesPathId, List<T> files)
+    internal async Task CheckPermissionsAsync(ItemNameValueCollection<T> entriesPathId, IEnumerable<T> files)
     {
         if (entriesPathId == null || entriesPathId.Count == 0)
         {
-            if (files.Count > 0)
+            if (files.Any())
             {
                 throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
             }
@@ -53,37 +43,37 @@ public class DownloadPermissionsCheck(FileSecurity security)
         }
     }
 
-    public async Task CheckEntriesPermissionsAsync<T>(DownloadPermissionsCheckContext<T> ctx)
+    public async Task CheckEntriesPermissionsAsync(FileDownloadOperationData<T> data)
     {
         var entriesPathId = new ItemNameValueCollection<T>();
 
-        if (ctx.Files.Count > 0)
+        if (data.Files.Any())
         {
-            var filesForSend = await security.FilterDownloadAsync(ctx.FileDao.GetFilesAsync(ctx.Files)).ToListAsync();
+            var filesForSend = await security.FilterDownloadAsync(fileDao.GetFilesAsync(data.Files)).ToListAsync();
             foreach (var file in filesForSend)
             {
                 entriesPathId.Add("", file.Id);
             }
         }
 
-        if (ctx.Folders.Count > 0)
+        if (data.Folders.Any())
         {
-            var folderForSend = await security.FilterDownloadAsync(ctx.FolderDao.GetFoldersAsync(ctx.Folders)).ToListAsync();
+            var folderForSend = await security.FilterDownloadAsync(folderDao.GetFoldersAsync(data.Folders)).ToListAsync();
 
-            var filesInFolder = await GetFilesInFoldersAsync(folderForSend.Select(x => x.Id), string.Empty, ctx);
+            var filesInFolder = await GetFilesInFoldersAsync(folderForSend.Select(x => x.Id), string.Empty);
             entriesPathId.Add(filesInFolder);
         }
 
-        await CheckPermissionsAsync(entriesPathId, ctx.Files);
+        await CheckPermissionsAsync(entriesPathId, data.Files);
     }
 
-    private async Task<ItemNameValueCollection<T>> GetFilesInFoldersAsync<T>(IEnumerable<T> folderIds, string path, DownloadPermissionsCheckContext<T> ctx)
+    private async Task<ItemNameValueCollection<T>> GetFilesInFoldersAsync(IEnumerable<T> folderIds, string path)
     {
         var entriesPathId = new ItemNameValueCollection<T>();
 
         foreach (var folderId in folderIds)
         {
-            var folder = await ctx.FolderDao.GetFolderAsync(folderId);
+            var folder = await folderDao.GetFolderAsync(folderId);
             if (folder == null || !await security.CanDownloadAsync(folder))
             {
                 continue;
@@ -92,16 +82,16 @@ public class DownloadPermissionsCheck(FileSecurity security)
             var folderPath = path + folder.Title + "/";
             entriesPathId.Add(folderPath, default(T));
 
-            var files = security.FilterDownloadAsync(ctx.FileDao.GetFilesAsync(folder.Id, null, FilterType.None, false, Guid.Empty, string.Empty, null, true));
+            var files = security.FilterDownloadAsync(fileDao.GetFilesAsync(folder.Id, null, FilterType.None, false, Guid.Empty, string.Empty, null, true));
 
             await foreach (var file in files)
             {
                 entriesPathId.Add("", file.Id);
             }
 
-            var nestedFolders = await security.FilterDownloadAsync(ctx.FolderDao.GetFoldersAsync(folder.Id)).ToListAsync();
+            var nestedFolders = await security.FilterDownloadAsync(folderDao.GetFoldersAsync(folder.Id)).ToListAsync();
 
-            var filesInFolder = await GetFilesInFoldersAsync(nestedFolders.Select(f => f.Id), folderPath, ctx);
+            var filesInFolder = await GetFilesInFoldersAsync(nestedFolders.Select(f => f.Id), folderPath);
             entriesPathId.Add(filesInFolder);
         }
 

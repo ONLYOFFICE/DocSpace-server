@@ -355,16 +355,8 @@ public class FileDownloadOperationsManager(
         var data = new FileDownloadOperationData<int>(folderIntIds, fileIntIds, tenantId, userId, GetHttpHeaders(), sessionSnapshot, baseUri);
         var thirdPartyData = new FileDownloadOperationData<string>(folderStringIds, fileStringIds, tenantId, userId, GetHttpHeaders(), sessionSnapshot, baseUri);
 
-        var permissionsCheck = _serviceProvider.GetService<DownloadPermissionsCheck>();
-
-        var ctx = new DownloadPermissionsCheckContext<int>
-        { 
-            Files = data.Files?.ToList() ?? [],
-            Folders = data.Folders?.ToList() ?? [],
-            FileDao = _serviceProvider.GetService<IFileDao<int>>(),
-            FolderDao = _serviceProvider.GetService<IFolderDao<int>>()
-        };
-        await permissionsCheck.CheckEntriesPermissionsAsync(ctx);
+        var permissionsCheck = _serviceProvider.GetService<DownloadPermissionsCheck<int>>();
+        await permissionsCheck.CheckEntriesPermissionsAsync(data);
 
         await _eventBus.PublishAsync(new BulkDownloadIntegrationEvent(await GetUserIdAsync(), tenantId)
         {
