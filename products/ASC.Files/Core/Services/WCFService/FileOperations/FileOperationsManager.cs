@@ -575,17 +575,18 @@ public class FileDeleteOperationsManager(
             return null;
         }
 
-        var permissionsCheck = _serviceProvider.GetService<DeletePermissionsCheck>();
-
-        await CheckDataAsync(folders.Item1, files.Item1, permissionsCheck, ignoreException, immediately, versions);
-        await CheckDataAsync(folders.Item2, files.Item2, permissionsCheck, ignoreException, immediately, versions);
-
         var tenantId = tenantManager.GetCurrentTenantId();
         var userId = _authContext.CurrentAccount.ID;
         var sessionSnapshot = await _externalShare.TakeSessionSnapshotAsync();
 
         var data = new FileDeleteOperationData<int>(folders.Item1, files.Item1, versions, tenantId, userId, GetHttpHeaders(), sessionSnapshot, holdResult, ignoreException, immediately, isEmptyTrash);
         var thirdPartyData = new FileDeleteOperationData<string>(folders.Item2, files.Item2, versions, tenantId, userId, GetHttpHeaders(), sessionSnapshot, holdResult, ignoreException, immediately, isEmptyTrash);
+        
+        var permissionsCheckInternal = _serviceProvider.GetService<DeletePermissionsCheck<int>>();
+        await permissionsCheckInternal.CheckDataAsync(data);
+        
+        var permissionsCheckThirdParty = _serviceProvider.GetService<DeletePermissionsCheck<string>>();
+        await permissionsCheckThirdParty.CheckDataAsync(thirdPartyData);
         
         var op = _serviceProvider.GetService<FileDeleteOperation>();
         op.Init(holdResult);
@@ -615,47 +616,4 @@ public class FileDeleteOperationsManager(
 
         return taskId;
     }
-
-    private async Task CheckDataAsync<T>(List<T> folders, List<T> files, DeletePermissionsCheck security, bool ignoreException, bool immediately, List<int> versions)
-    {
-        var folderDao = _serviceProvider.GetService<IFolderDao<T>>();
-        var fileDao = _serviceProvider.GetService<IFileDao<T>>();
-
-        if (versions != null && versions.Any() && files.Count > 0)
-        {
-            await CheckVersionsAsync(files, fileDao, versions, security);
-        }
-        else
-        {
-            await CheckFolderAsync(folders, folderDao, security, ignoreException, immediately);
-            await CheckFilesAsync(files, security, fileDao);
-        }
-    }
-
-    private async Task CheckVersionsAsync<T>(List<T> files, IFileDao<T> fileDao, List<int> versions, DeletePermissionsCheck security)
-    {
-        var fileId = files.FirstOrDefault();
-        var file = await fileDao.GetFileAsync(fileId);
-        await security.CheckVersionPermissionsAsync(file, versions, true);
-    }
-
-    private async Task CheckFolderAsync<T>(List<T> data, IFolderDao<T> folderDao, DeletePermissionsCheck security, bool ignoreException, bool immediately)
-    {
-        foreach (var folderId in data)
-        {
-            var folder = await folderDao.GetFolderAsync(folderId);
-            await security.CheckFolderPermissionsAsync([folder], immediately, ignoreException, true);
-        }
-    }
-
-    private async Task CheckFilesAsync<T>(List<T> data, DeletePermissionsCheck security, IFileDao<T> fileDao)
-    {
-        foreach (var fileId in data)
-        {
-            var file = await fileDao.GetFileAsync(fileId);
-            await security.CheckFilePermissionsAsync([file], false, true, true);
-        }
-    }
-
-    
 }

@@ -27,9 +27,47 @@
 namespace ASC.Files.Core.Services.WCFService.FileOperations;
 
 [Scope]
-public class DeletePermissionsCheck(LockerManager lockerManager, FileTrackerHelper fileTracker, FileSecurity security)
+public class DeletePermissionsCheck<T>(IFileDao<T> fileDao, IFolderDao<T> folderDao, LockerManager lockerManager, FileTrackerHelper fileTracker, FileSecurity security)
 {
-    public async Task<string> CheckFilePermissionsAsync<T>(IEnumerable<File<T>> files, bool folder, bool checkPermissions, bool throwException = false)
+    public async Task CheckDataAsync(FileDeleteOperationData<T> data)
+    {
+        if (data.FilesVersions != null && data.FilesVersions.Any() && data.Files.Any())
+        {
+            await CheckVersionsAsync(data.Files.ToList(), data.FilesVersions.ToList());
+        }
+        else
+        {
+            await CheckFolderAsync(data.Folders.ToList(), data.IgnoreException, data.Immediately);
+            await CheckFilesAsync(data.Files.ToList());
+        }
+    }
+
+    private async Task CheckVersionsAsync(List<T> files, List<int> versions)
+    {
+        var fileId = files.FirstOrDefault();
+        var file = await fileDao.GetFileAsync(fileId);
+        await CheckVersionPermissionsAsync(file, versions, true);
+    }
+
+    private async Task CheckFolderAsync(List<T> data, bool ignoreException, bool immediately)
+    {
+        foreach (var folderId in data)
+        {
+            var folder = await folderDao.GetFolderAsync(folderId);
+            await CheckFolderPermissionsAsync([folder], immediately, ignoreException, true);
+        }
+    }
+
+    private async Task CheckFilesAsync(List<T> data)
+    {
+        foreach (var fileId in data)
+        {
+            var file = await fileDao.GetFileAsync(fileId);
+            await CheckFilePermissionsAsync([file], false, true, true);
+        }
+    }
+    
+    public async Task<string> CheckFilePermissionsAsync(IEnumerable<File<T>> files, bool folder, bool checkPermissions, bool throwException = false)
     {
         foreach (var file in files)
         {
@@ -66,7 +104,7 @@ public class DeletePermissionsCheck(LockerManager lockerManager, FileTrackerHelp
         return null;
     }
 
-    public async Task<string> CheckFolderPermissionsAsync<T>(IEnumerable<Folder<T>> folders, bool immediately, bool ignoreException, bool throwException = false)
+    public async Task<string> CheckFolderPermissionsAsync(IEnumerable<Folder<T>> folders, bool immediately, bool ignoreException, bool throwException = false)
     {
         foreach (var folder in folders)
         {
@@ -92,7 +130,7 @@ public class DeletePermissionsCheck(LockerManager lockerManager, FileTrackerHelp
         return null;
     }
 
-    public async Task<string> CheckVersionPermissionsAsync<T>(File<T> file, IEnumerable<int> versions = null, bool throwException = false)
+    public async Task<string> CheckVersionPermissionsAsync(File<T> file, IEnumerable<int> versions = null, bool throwException = false)
     {
         string errorMsg;
 

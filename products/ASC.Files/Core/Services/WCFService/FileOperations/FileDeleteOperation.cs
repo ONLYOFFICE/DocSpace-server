@@ -174,7 +174,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
         var fileSharing = scope.ServiceProvider.GetService<FileSharing>();
         var authContext = scope.ServiceProvider.GetService<AuthContext>();
         var notifyClient = scope.ServiceProvider.GetService<NotifyClient>();
-        var permissionsManager = scope.ServiceProvider.GetService<DeletePermissionsCheck>();
+        var permissionsManager = scope.ServiceProvider.GetService<DeletePermissionsCheck<T>>();
 
         var (fileMarker, filesMessageService, roomLogoManager) = scopeClass;
         roomLogoManager.EnableAudit = false;
@@ -409,7 +409,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
         var scopeClass = scope.ServiceProvider.GetService<FileDeleteOperationScope>();
         var socketManager = scope.ServiceProvider.GetService<SocketManager>();
         var webhookManager = scope.ServiceProvider.GetService<WebhookManager>();
-        var security = scope.ServiceProvider.GetService<DeletePermissionsCheck>();
+        var security = scope.ServiceProvider.GetService<DeletePermissionsCheck<T>>();
 
         var (fileMarker, filesMessageService, _) = scopeClass;
 
@@ -532,7 +532,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
         var socketManager = scope.ServiceProvider.GetService<SocketManager>();
         var webhookManager = scope.ServiceProvider.GetService<WebhookManager>();
         var filesMessageService = scope.ServiceProvider.GetService<FilesMessageService>();
-        var permissionManager = scope.ServiceProvider.GetService<DeletePermissionsCheck>();
+        var permissionManager = scope.ServiceProvider.GetService<DeletePermissionsCheck<T>>();
 
         var file = await FileDao.GetFileAsync(fileId);
 
