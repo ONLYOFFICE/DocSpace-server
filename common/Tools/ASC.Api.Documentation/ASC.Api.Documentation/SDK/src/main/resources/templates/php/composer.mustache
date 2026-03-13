@@ -2,25 +2,25 @@
     "name": "{{{packageName}}}",
     "type": "library",
     "version": "{{{packageVersion}}}",
-    "description": "A simple PHP SDK for integrating with the ONLYOFFICE DocSpace API",
+    "description": "{{packageDescription}}",
     "keywords": [
-        "onlyoffice",
-        "docspace",
-        "sdk"
+    {{#packageKeywords}}
+        "{{.}}"{{^-last}},{{/-last}}
+    {{/packageKeywords}}
     ],
-    "homepage": "https://www.onlyoffice.com",
+    "homepage": "{{homepage}}",
     "license": "{{{licenseName}}}",
     "authors": [
         {
-            "name": "Ascensio System SIA",
-            "homepage": "https://www.onlyoffice.com"
+            "name": "{{authorsName}}",
+            "homepage": "{{homepage}}"
         }
     ],
     "support": {
         "issues": "{{repositoryUrl}}/issues",
         "source": "{{repositoryUrl}}",
-        "email": "support@onlyoffice.com",
-        "forum": "https://forum.onlyoffice.com/"
+        "email": "{{supportEmail}}",
+        "forum": "{{supportForum}}"
     },
     "require": {
         "php": "^8.1",

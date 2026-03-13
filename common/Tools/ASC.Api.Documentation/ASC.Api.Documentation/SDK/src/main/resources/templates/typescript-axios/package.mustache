@@ -1,11 +1,11 @@
 {
   "name": "{{packageName}}",
   "version": "{{packageVersion}}",
-  "description": "A simple TypeScript SDK for integrating with the ONLYOFFICE DocSpace API",
-  "homepage": "https://www.onlyoffice.com",
-  "author": "Ascensio System SIA <integration@onlyoffice.com> (https://www.onlyoffice.com)",
+  "description": "{{packageDescription}}",
+  "homepage": "{{homepage}}",
+  "author": "{{{authorsName}}}",
   "maintainers": [
-    "Ascensio System SIA <integration@onlyoffice.com> (https://www.onlyoffice.com)"
+    "{{{authorsName}}}"
   ],
   "repository": {
     "type": "git",
@@ -13,12 +13,12 @@
   },
   "bugs": {
     "url": "{{repositoryUrl}}/issues",
-    "email": "support@onlyoffice.com"
+    "email": "{{supportEmail}}"
   },
   "keywords": [
-    "onlyoffice",
-    "docspace",
-    "sdk"
+  {{#packageKeywords}}
+    "{{.}}"{{^-last}},{{/-last}}
+  {{/packageKeywords}}
   ],
   "license": "{{licenseName}}",
   "main": "./dist/index.js",
