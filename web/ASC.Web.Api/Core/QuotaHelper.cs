@@ -72,11 +72,17 @@ public class QuotaHelper(
 
         var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
         var enabledWalletServices = coreBaseSettings.Standalone ? null : (await settingsManager.LoadAsync<TenantWalletServiceSettings>()).EnabledServices;
+        var aiEnabled = !coreBaseSettings.Standalone && (await settingsManager.LoadAsync<TenantAiAccessSettings>()).Enabled;
 
         var dict = new Dictionary<string, WalletServiceDto>();
 
         foreach (var quota in quotas.OrderByDescending(q => q.Visible))
         {
+            if (quota.AITools && !aiEnabled)
+            {
+                continue;
+            }
+            
             var quotaDto = await ToQuotaDto(quota, userType, false, enabledWalletServices);
 
             if (quota.Visible)
