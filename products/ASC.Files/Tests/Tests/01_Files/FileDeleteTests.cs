@@ -43,7 +43,7 @@ public class FileDeleteTests(
     {
         var createdFile = await CreateFileInMy("test.docx", Initializer.Owner);
         
-        var results = (await _filesApi.DeleteFileAsync(createdFile.Id, new Delete { Immediately = true }, true, TestContext.Current.CancellationToken)).Response;
+        var results = (await _filesApi.DeleteFileAsync(createdFile.Id, new Delete { Immediately = true }, TestContext.Current.CancellationToken)).Response;
         var operationId = results.FirstOrDefault()?.Id;
         
         // Assert
@@ -71,7 +71,6 @@ public class FileDeleteTests(
             async () => await _filesApi.DeleteFileAsync(
                 nonExistingFileId,
                 new Delete(false, true),
-                false,
                 TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(404);
@@ -93,7 +92,6 @@ public class FileDeleteTests(
             async () => await _filesApi.DeleteFileAsync(
                 file.Id, 
                 new Delete(false, true), 
-                false,
                 TestContext.Current.CancellationToken));
         
         exception.ErrorCode.Should().Be(403);
@@ -104,16 +102,19 @@ public class FileDeleteTests(
     {
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
-        
-        var file = await CreateFile("locked_file.docx", FolderType.USER, Initializer.Owner);
-        await _filesApi.LockFileAsync(file.Id, new LockFileParameters(true), TestContext.Current.CancellationToken);
+        var createdRoom = await CreateVirtualRoom("room_to_lock");
+        var sourceFile = await CreateFile("file_to_lock.docx", createdRoom.Id);
+        var lockedFile = (await _filesApi.LockFileAsync(sourceFile.Id, new LockFileParameters(true), TestContext.Current.CancellationToken)).Response;
+
+        var user = await Initializer.InviteContact(EmployeeType.User);
+        await _filesClient.Authenticate(user);
+        var targetFolderId = await GetUserFolderIdAsync(user);
 
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _filesApi.DeleteFileAsync(
-                file.Id, 
+                lockedFile.Id, 
                 new Delete(false, true), 
-                false,
                 TestContext.Current.CancellationToken));
         
         exception.ErrorCode.Should().Be(403);
@@ -133,7 +134,6 @@ public class FileDeleteTests(
             async () => await _filesApi.DeleteFileAsync(
                 file.Id,
                 new Delete(false, true),
-                false,
                 TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(403);
