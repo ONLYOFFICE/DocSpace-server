@@ -347,17 +347,20 @@ public class FileDownloadOperationsManager(
         {
             return null;
         }
-
-        var op = _serviceProvider.GetService<FileDownloadOperation>();
-        op.Init(true);
-        var taskId = await _fileOperationsManagerHolder.Publish(op);
-
+        
         var data = new FileDownloadOperationData<int>(folderIntIds, fileIntIds, tenantId, userId, GetHttpHeaders(), sessionSnapshot, baseUri);
         var thirdPartyData = new FileDownloadOperationData<string>(folderStringIds, fileStringIds, tenantId, userId, GetHttpHeaders(), sessionSnapshot, baseUri);
 
         var permissionsCheck = _serviceProvider.GetService<DownloadPermissionsCheck<int>>();
         await permissionsCheck.CheckEntriesPermissionsAsync(data);
-
+        
+        var permissionsCheckThirdParty = _serviceProvider.GetService<DownloadPermissionsCheck<string>>();
+        await permissionsCheckThirdParty.CheckEntriesPermissionsAsync(thirdPartyData);
+        
+        var op = _serviceProvider.GetService<FileDownloadOperation>();
+        op.Init(true);
+        var taskId = await _fileOperationsManagerHolder.Publish(op);
+        
         await _eventBus.PublishAsync(new BulkDownloadIntegrationEvent(await GetUserIdAsync(), tenantId)
         {
             TaskId = taskId,
@@ -488,18 +491,19 @@ public class FileDuplicateOperationsManager(
         {
             return null;
         }
-
-        var op = _serviceProvider.GetService<FileDuplicateOperation>();
-        op.Init(true);
-        var taskId = await _fileOperationsManagerHolder.Publish(op);
-
+        
         var data = new FileOperationData<int>(folderIntIds, fileIntIds, tenantId, userId, GetHttpHeaders(), sessionSnapshot);
         var thirdPartyData = new FileOperationData<string>(folderStringIds, fileStringIds, tenantId, userId, GetHttpHeaders(), sessionSnapshot);
 
         var dataTask = dataPermissionChecker.RunDuplicatePermissionCheckAsync(data);
         var thirdPartyDataTask = thirdPartyDataPermissionChecker.RunDuplicatePermissionCheckAsync(thirdPartyData);
+        
         await Task.WhenAll(dataTask, thirdPartyDataTask);
-
+        
+        var op = _serviceProvider.GetService<FileDuplicateOperation>();
+        op.Init(true);
+        var taskId = await _fileOperationsManagerHolder.Publish(op);
+        
         await _eventBus.PublishAsync(new DuplicateIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
         {
             TaskId = taskId,
