@@ -26,8 +26,6 @@
 
 using System.Text.RegularExpressions;
 
-using ASC.MessagingSystem.Core;
-using ASC.MessagingSystem.EF.Model;
 using ASC.Web.Files.Helpers;
 
 namespace ASC.AI.Core.MCP;

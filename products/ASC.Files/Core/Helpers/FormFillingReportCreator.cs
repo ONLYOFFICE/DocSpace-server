@@ -36,8 +36,7 @@ public class FormFillingReportCreator(
     AuthContext authContext,
     IEventBus eventBus,
     FactoryIndexerForm factoryIndexerForm,
-    FactoryIndexerFormMetadata factoryIndexerFormMetadata,
-    ILogger<FormFillingReportCreator> logger)
+    FactoryIndexerFormMetadata factoryIndexerFormMetadata)
 {
 
     public async Task UpdateFormFillingReport<T>(int originalFormId, int originalFormVersion, int roomId, int resultFormNumber, string formsDataUrl, File<T> formsDataFile, bool sendFormToExternalDB, bool settingsSaveFormAsXLSX)
@@ -336,9 +335,9 @@ public class FormFillingReportCreator(
             var name = NormalizeColumnName(field.Key);
             var (type, enumValues) = field.Type switch
             {
-                "checkBox" => (DbColumnType.Boolean, (IReadOnlyList<string>?)null),
+                "checkBox" => (DbColumnType.Boolean, (IReadOnlyList<string>)null),
                 "dateTime" => (DbColumnType.Date, null),
-                "comboBox" or "dropDownList" or "radio" => (DbColumnType.Enum, (IReadOnlyList<string>?)field.PossibleValues),
+                "comboBox" or "dropDownList" or "radio" => (DbColumnType.Enum, (IReadOnlyList<string>)field.PossibleValues),
                 _ => (DbColumnType.Text, null)
             };
             yield return new DbColumnDefinition(name, type, enumValues);
@@ -401,7 +400,7 @@ public class FormFillingReportCreator(
         return name.ToLower();
     }
 
-    private static object? ConvertFieldValue(string? value, FormMetadata meta)
+    private static object ConvertFieldValue(string value, FormMetadata meta)
     {
         if (string.IsNullOrEmpty(value))
         {
@@ -416,7 +415,7 @@ public class FormFillingReportCreator(
         };
     }
 
-    private static DateTime? ParseDate(string value, string? format)
+    private static DateTime? ParseDate(string value, string format)
     {
         if (string.IsNullOrWhiteSpace(format))
         {
