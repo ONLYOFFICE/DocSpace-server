@@ -24,6 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+#nullable enable
 namespace ASC.Files.Core.Services.OFormService;
 
 public class FormMetadata
@@ -31,16 +32,19 @@ public class FormMetadata
     /// <summary>
     /// The form field key.
     /// </summary>
+    /// <example>name</example>
     public string Key { get; set; } = "";
 
     /// <summary>
     /// The form field type.
     /// </summary>
+    /// <example>text</example>
     public string Type { get; set; } = "";
 
     /// <summary>
     /// The form field format.
     /// </summary>
+    /// <example>date</example>
     public string? Format { get; set; }
 
     /// <summary>

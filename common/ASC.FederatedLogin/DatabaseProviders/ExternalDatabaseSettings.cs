@@ -24,7 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-
+#nullable enable
 namespace ASC.FederatedLogin.DatabaseProviders;
 
 public record ConnectionTestResult(bool Success, string? Error = null)
@@ -32,6 +32,7 @@ public record ConnectionTestResult(bool Success, string? Error = null)
     public static ConnectionTestResult Ok() => new(true);
     public static ConnectionTestResult Failure(string error) => new(false, error);
 }
+#nullable disable
 
 public class ExternalDatabaseSettings
 {

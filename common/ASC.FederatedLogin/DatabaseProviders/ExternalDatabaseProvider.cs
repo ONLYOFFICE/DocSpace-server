@@ -31,6 +31,7 @@ using Microsoft.Data.Sqlite;
 
 using MySqlConnector;
 
+#nullable enable
 namespace ASC.FederatedLogin.DatabaseProviders;
 
 [Scope]
