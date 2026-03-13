@@ -34,7 +34,8 @@ public class MyPostmanCollectionClientCodegen extends PostmanCollectionCodegen {
     @Override
     public void processOpts() {
         super.processOpts();
-        this.outputFolder = "../../../../../sdk/docspace-api-postman-collections";
+        
+        this.outputFolder = additionalProperties.containsKey("outputFolder") ? additionalProperties.get("outputFolder").toString() : "generated-sdk";
 
         if (openAPI.getServers() != null && !openAPI.getServers().isEmpty()) {
             Server server = openAPI.getServers().get(0);

@@ -37,7 +37,19 @@ public class MyPythonClientCodegen extends PythonClientCodegen {
         this.templateDir = "templates/python";
         this.embeddedTemplateDir = "python";
 
-        supportingFiles.add(new SupportingFile("main.mustache", "samples", "main.py"));
+        String readMe = (String) additionalProperties.get("readMe");
+
+        if (readMe != null && !readMe.isEmpty()) {
+            supportingFiles.removeIf(file -> "README.mustache".equals(file.getTemplateFile()));
+            supportingFiles.add(new SupportingFile(readMe, "", "README.md"));
+        }
+
+        Boolean example = (Boolean) additionalProperties.get("example");
+
+        if(Boolean.TRUE.equals(example))
+        {
+            supportingFiles.add(new SupportingFile("main.mustache", "samples", "main.py"));
+        }
         
         supportingFiles.add(new SupportingFile(
             "AUTHORS.mustache", "", "AUTHORS.md"
@@ -55,7 +67,8 @@ public class MyPythonClientCodegen extends PythonClientCodegen {
     @Override
     public void processOpts() {
         super.processOpts();
-        this.outputFolder = "../../../../../sdk/docspace-api-sdk-python";
+        
+        this.outputFolder = additionalProperties.containsKey("outputFolder") ? additionalProperties.get("outputFolder").toString() : "generated-sdk";
 
         if (openAPI.getServers() != null && !openAPI.getServers().isEmpty()) {
             Server server = openAPI.getServers().get(0);

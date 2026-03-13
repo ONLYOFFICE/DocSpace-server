@@ -44,7 +44,7 @@ public class MyCSharpClientCodegen extends CSharpClientCodegen {
     public void processOpts() {
         super.processOpts();
 
-        this.outputFolder = "../../../../../sdk/docspace-api-sdk-csharp";
+        this.outputFolder = additionalProperties.containsKey("outputFolder") ? additionalProperties.get("outputFolder").toString() : "generated-sdk";
 
         if (openAPI.getServers() != null && !openAPI.getServers().isEmpty()) {
             Server server = openAPI.getServers().get(0);
@@ -57,20 +57,30 @@ public class MyCSharpClientCodegen extends CSharpClientCodegen {
             }
         }
 
-        String packageFolder = sourceFolder + File.separator + packageName;
-
         supportingFiles.removeIf(f -> f.getTemplateFile().equals("git_push.sh.mustache") || 
             f.getTemplateFile().equals("appveyor.mustache") ||
             f.getDestinationFilename().equals(".openapi-generator-ignore")
         );
 
-        supportingFiles.add(new SupportingFile(
-            "Program.mustache", "samples" + File.separator + packageName + ".Example", "Program.cs"
-        ));
+        String readMe = (String) additionalProperties.get("readMe");
 
-        supportingFiles.add(new SupportingFile(
-            "ExampleProject.mustache", "samples" + File.separator + packageName + ".Example", packageName + ".Example.csproj"
-        ));
+        if (readMe != null && !readMe.isEmpty()) {
+            supportingFiles.removeIf(file -> "README.mustache".equals(file.getTemplateFile()));
+            supportingFiles.add(new SupportingFile(readMe, "", "README.md"));
+        }
+
+        Boolean example = (Boolean) additionalProperties.get("example");
+
+        if(Boolean.TRUE.equals(example))
+        {
+            supportingFiles.add(new SupportingFile(
+            "Program.mustache", "samples" + File.separator + packageName + ".Example", "Program.cs"
+            ));
+
+            supportingFiles.add(new SupportingFile(
+                "ExampleProject.mustache", "samples" + File.separator + packageName + ".Example", packageName + ".Example.csproj"
+            ));
+        }
 
         supportingFiles.add(new SupportingFile(
             "AUTHORS.mustache", "", "AUTHORS.md"
@@ -152,6 +162,8 @@ public class MyCSharpClientCodegen extends CSharpClientCodegen {
     public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List<ModelMap> allModels) {
         super.postProcessOperationsWithModels(objs, allModels);
 
+        String baseUrl = (String) additionalProperties.get("seealsoBaseUrl");
+
         if (objs != null && objs.getOperations() != null) {
             OperationMap operationMap = objs.getOperations();
             List<CodegenOperation> operationList = operationMap.getOperation();
@@ -168,7 +180,7 @@ public class MyCSharpClientCodegen extends CSharpClientCodegen {
                 for (CodegenOperation op : operationList) { 
                     if (op.operationId != null) {
                         String dashedId = toDashCase(op.operationId);
-                        String seealsoUrl = "https://api.onlyoffice.com/docspace/api-backend/usage-api/" + dashedId + "/";
+                        String seealsoUrl = baseUrl + "/" + dashedId + "/";
                         op.vendorExtensions.put("x-seealsoUrl", seealsoUrl);
                     }
 

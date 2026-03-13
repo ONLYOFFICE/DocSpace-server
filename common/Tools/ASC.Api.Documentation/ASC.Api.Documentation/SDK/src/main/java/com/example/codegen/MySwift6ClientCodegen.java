@@ -39,7 +39,8 @@ public class MySwift6ClientCodegen extends Swift6ClientCodegen {
     @Override
     public void processOpts() {
         super.processOpts();
-        this.outputFolder = "../../../../../sdk/docspace-api-sdk-swift";
+        
+        this.outputFolder = additionalProperties.containsKey("outputFolder") ? additionalProperties.get("outputFolder").toString() : "generated-sdk";
 
         if (openAPI.getServers() != null && !openAPI.getServers().isEmpty()) {
             Server server = openAPI.getServers().get(0);
@@ -72,6 +73,7 @@ public class MySwift6ClientCodegen extends Swift6ClientCodegen {
     @Override
     public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List<ModelMap> allModels) {
         super.postProcessOperationsWithModels(objs, allModels);
+        String baseUrl = (String) additionalProperties.get("seealsoBaseUrl");
 
         if (objs != null && objs.getOperations() != null) {
             OperationMap operationMap = objs.getOperations();
@@ -90,7 +92,7 @@ public class MySwift6ClientCodegen extends Swift6ClientCodegen {
                 for (CodegenOperation op : operationList) { 
                     if (op.operationId != null) {
                         String dashedId = toDashCase(op.operationId);
-                        String seealsoUrl = "https://api.onlyoffice.com/docspace/api-backend/usage-api/" + dashedId + "/";
+                        String seealsoUrl = baseUrl + "/" + dashedId + "/";
                         op.vendorExtensions.put("x-seealsoUrl", seealsoUrl);
                     }
 

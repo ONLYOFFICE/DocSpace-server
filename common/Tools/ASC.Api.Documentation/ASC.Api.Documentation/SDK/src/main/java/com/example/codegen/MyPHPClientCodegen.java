@@ -38,7 +38,8 @@ public class MyPHPClientCodegen extends PhpClientCodegen {
     @Override
     public void processOpts() {
         super.processOpts();
-        this.outputFolder = "../../../../../sdk/docspace-api-sdk-php";
+        
+        this.outputFolder = additionalProperties.containsKey("outputFolder") ? additionalProperties.get("outputFolder").toString() : "generated-sdk";
 
         if (openAPI.getServers() != null && !openAPI.getServers().isEmpty()) {
             Server server = openAPI.getServers().get(0);
@@ -61,6 +62,13 @@ public class MyPHPClientCodegen extends PhpClientCodegen {
             apiTestTemplateFiles.clear();
         }
 
+        String readMe = (String) additionalProperties.get("readMe");
+
+        if (readMe != null && !readMe.isEmpty()) {
+            supportingFiles.removeIf(file -> "README.mustache".equals(file.getTemplateFile()));
+            supportingFiles.add(new SupportingFile(readMe, "", "README.md"));
+        }
+
         supportingFiles.add(new SupportingFile(
             "AUTHORS.mustache", "", "AUTHORS.md"
         ));
@@ -77,6 +85,7 @@ public class MyPHPClientCodegen extends PhpClientCodegen {
     @Override
     public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List<ModelMap> allModels) {
         super.postProcessOperationsWithModels(objs, allModels);
+        String baseUrl = (String) additionalProperties.get("seealsoBaseUrl");
 
         if (objs != null && objs.getOperations() != null) {
             OperationMap operationMap = objs.getOperations();
@@ -94,7 +103,7 @@ public class MyPHPClientCodegen extends PhpClientCodegen {
                 for (CodegenOperation op : operationList) { 
                     if (op.operationId != null) {
                         String dashedId = toDashCase(op.operationId);
-                        String seealsoUrl = "https://api.onlyoffice.com/docspace/api-backend/usage-api/" + dashedId + "/";
+                        String seealsoUrl = baseUrl + "/" + dashedId + "/";
                         op.vendorExtensions.put("x-seealsoUrl", seealsoUrl);
                     }
                     if ("GET".equalsIgnoreCase(op.httpMethod)) {

@@ -45,6 +45,13 @@ public class MyTypeScriptAxiosClientCodegen extends TypeScriptAxiosClientCodegen
         modelDocTemplateFiles.put("model_doc.mustache", ".md");
         apiDocTemplateFiles.put("api_doc.mustache", ".md");
 
+        String readMe = (String) additionalProperties.get("readMe");
+
+        if (readMe != null && !readMe.isEmpty()) {
+            supportingFiles.removeIf(file -> "README.mustache".equals(file.getTemplateFile()));
+            supportingFiles.add(new SupportingFile(readMe, "", "README.md"));
+        }
+
         supportingFiles.add(new SupportingFile(
             "AUTHORS.mustache", "", "AUTHORS.md"
         ));
@@ -61,7 +68,7 @@ public class MyTypeScriptAxiosClientCodegen extends TypeScriptAxiosClientCodegen
     @Override
     public void processOpts() {
         super.processOpts();
-        this.outputFolder = "../../../../../sdk/docspace-api-sdk-typescript";
+        this.outputFolder = additionalProperties.containsKey("outputFolder") ? additionalProperties.get("outputFolder").toString() : "generated-sdk";
 
         if (openAPI.getServers() != null && !openAPI.getServers().isEmpty()) {
             Server server = openAPI.getServers().get(0);
@@ -130,6 +137,8 @@ public class MyTypeScriptAxiosClientCodegen extends TypeScriptAxiosClientCodegen
     @Override
     public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List<ModelMap> allModels) {
         objs = super.postProcessOperationsWithModels(objs, allModels);
+        String baseUrl = (String) additionalProperties.get("seealsoBaseUrl");
+
         OperationMap operationMap = objs.getOperations();
         List<CodegenOperation> operations = operationMap.getOperation();
         String className = operationMap.getClassname();
@@ -146,7 +155,7 @@ public class MyTypeScriptAxiosClientCodegen extends TypeScriptAxiosClientCodegen
             for (CodegenOperation op : operations) {
                 if (op.operationId != null) {
                     String dashedId = toDashCase(op.operationId);
-                    String seealsoUrl = "https://api.onlyoffice.com/docspace/api-backend/usage-api/" + dashedId + "/";
+                    String seealsoUrl = baseUrl + "/" + dashedId + "/";
                     op.vendorExtensions.put("x-seealsoUrl", seealsoUrl);
                 }
 

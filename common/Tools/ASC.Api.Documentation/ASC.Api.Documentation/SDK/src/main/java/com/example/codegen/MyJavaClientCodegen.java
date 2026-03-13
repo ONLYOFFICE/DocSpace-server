@@ -38,7 +38,7 @@ public class MyJavaClientCodegen extends JavaClientCodegen {
     @Override
     public void processOpts() {
         super.processOpts();
-        this.outputFolder = "../../../../../sdk/docspace-api-sdk-java";
+        this.outputFolder = additionalProperties.containsKey("outputFolder") ? additionalProperties.get("outputFolder").toString() : "generated-sdk";
 
         if (openAPI.getServers() != null && !openAPI.getServers().isEmpty()) {
             Server server = openAPI.getServers().get(0);
@@ -60,6 +60,14 @@ public class MyJavaClientCodegen extends JavaClientCodegen {
             modelTestTemplateFiles.clear();
             apiTestTemplateFiles.clear();
         }
+        
+        String readMe = (String) additionalProperties.get("readMe");
+
+        if (readMe != null && !readMe.isEmpty()) {
+            supportingFiles.removeIf(file -> "README.mustache".equals(file.getTemplateFile()));
+            supportingFiles.add(new SupportingFile(readMe, "", "README.md"));
+        }
+
 
         supportingFiles.add(new SupportingFile(
             "AUTHORS.mustache", "", "AUTHORS.md"
@@ -72,7 +80,13 @@ public class MyJavaClientCodegen extends JavaClientCodegen {
         supportingFiles.add(new SupportingFile(
             "CHANGELOG.mustache", "", "CHANGELOG.md"
         ));
-        supportingFiles.add(new SupportingFile("sample.mustache", "samples", "sample.java"));
+
+        Boolean example = (Boolean) additionalProperties.get("example");
+
+        if(Boolean.TRUE.equals(example))
+        {
+            supportingFiles.add(new SupportingFile("sample.mustache", "samples", "sample.java"));
+        }
         supportingFiles.add(new SupportingFile("auth/OpenIdAuth.mustache", this.authFolder, "OpenIdAuth.java"));
     }
 
@@ -80,6 +94,8 @@ public class MyJavaClientCodegen extends JavaClientCodegen {
     @Override
     public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List<ModelMap> allModels) {
         super.postProcessOperationsWithModels(objs, allModels);
+
+        String baseUrl = (String) additionalProperties.get("seealsoBaseUrl");
 
         if (objs != null && objs.getOperations() != null) {
             OperationMap operationMap = objs.getOperations();
@@ -106,7 +122,7 @@ public class MyJavaClientCodegen extends JavaClientCodegen {
                 for (CodegenOperation op : operationList) { 
                     if (op.operationId != null) {
                         String dashedId = toDashCase(op.operationId);
-                        String seealsoUrl = "https://api.onlyoffice.com/docspace/api-backend/usage-api/" + dashedId + "/";
+                        String seealsoUrl = baseUrl + "/" + dashedId + "/";
                         op.vendorExtensions.put("x-seealsoUrl", seealsoUrl);
                     }
                     if ("GET".equalsIgnoreCase(op.httpMethod)) {
