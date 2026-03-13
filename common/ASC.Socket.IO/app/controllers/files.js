@@ -237,5 +237,10 @@ module.exports = (files) => {
      res.end();
   });
 
+  router.post("/external-db-settings", (req, res) => {
+    files.externalDbSettings(req.body);
+    res.end();
+  });
+
   return router;
 };

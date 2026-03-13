@@ -168,7 +168,12 @@ public class ChatCompletionRunner(
             {
                 failedEntries.Add(result.File);
             }
-            
+
+            if (result.DynamicTool != null && !context.Tools.ContainsSystemTool(SystemToolType.FormDataQuery))
+            {
+                context.Tools.AddTool(SystemToolType.FormDataQuery, result.DynamicTool);
+            }
+
             if (result.Content != null)
             {
                 yield return result.Content;

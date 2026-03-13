@@ -46,6 +46,8 @@ public class DbRoomSettings
     public DbRoomDataLifetime Lifetime { get; set; }
     public int ChatProviderId { get; set; }
     public ChatParameters ChatParameters { get; set; }
+    public bool SendFormToExternalDB { get; set; }
+    public bool SaveFormAsXLSX { get; set; }
     
     public DbTenant Tenant { get; set; }
     public DbFolder Room { get; set; }
@@ -130,6 +132,14 @@ public static class DbRoomSettingsExtension
                     .HasColumnType("json")
                     .HasCharSet("utf8")
                     .UseCollation("utf8_general_ci");
+
+                entity.Property(e => e.SendFormToExternalDB)
+                    .HasColumnName("send_form_to_external_db")
+                    .HasDefaultValueSql("0");
+
+                entity.Property(e => e.SaveFormAsXLSX)
+                    .HasColumnName("save_form_as_xlsx")
+                    .HasDefaultValueSql("0");
             });
         }
 
@@ -182,6 +192,14 @@ public static class DbRoomSettingsExtension
 
                 entity.Property(e => e.DenyDownload)
                     .HasColumnName("deny_download")
+                    .HasDefaultValueSql("false");
+
+                entity.Property(e => e.SendFormToExternalDB)
+                    .HasColumnName("send_form_to_external_db")
+                    .HasDefaultValueSql("false");
+
+                entity.Property(e => e.SaveFormAsXLSX)
+                    .HasColumnName("save_form_as_xlsx")
                     .HasDefaultValueSql("false");
             });
         }
