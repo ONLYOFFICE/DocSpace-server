@@ -28,9 +28,10 @@ namespace ASC.Files.Core.Services.WCFService.FileOperations;
 
 [Scope(GenericArguments = [typeof(int)])]
 [Scope(GenericArguments = [typeof(string)])]
-public class PermissionCheckStarter<T>(IFileDao<T> fileDao, CopyPermissionsCheck<T, int> intPermissionManager, CopyPermissionsCheck<T, string> stringPermissionManager)
+public class CopyPermissionsCheck<T>(IFileDao<T> fileDao, PermissionCheckStarter<T, int> intPermissionManager, PermissionCheckStarter<T, string> stringPermissionManager) 
+    : IPermissionsChecker<FileMoveCopyOperationData<T>, T>,  IPermissionsChecker<FileOperationData<T>, T>
 {
-    public async Task RunDuplicatePermissionCheckAsync(FileOperationData<T> data)
+    public async Task RunPermissionCheckAsync(FileOperationData<T> data)
     {
         var files = data.Files?.ToList() ?? [];
         foreach (var id in files)
@@ -38,11 +39,11 @@ public class PermissionCheckStarter<T>(IFileDao<T> fileDao, CopyPermissionsCheck
             var file = await fileDao.GetFilesAsync([id]).FirstOrDefaultAsync();
             var copyOperationData = new FileMoveCopyOperationData<T>([], [id], data.TenantId, data.UserId, JsonSerializer.SerializeToElement(file.ParentId), true, FileConflictResolveType.Duplicate, false, true, data.Headers, data.SessionSnapshot);
 
-            await RunCopyPermissionCheckAsync(copyOperationData);
+            await RunPermissionCheckAsync(copyOperationData);
         }
     }
 
-    public async Task RunCopyPermissionCheckAsync(FileMoveCopyOperationData<T> data)
+    public async Task RunPermissionCheckAsync(FileMoveCopyOperationData<T> data)
     {
         if (!int.TryParse(data.DestFolderId, out var i))
         {
@@ -59,7 +60,7 @@ public class PermissionCheckStarter<T>(IFileDao<T> fileDao, CopyPermissionsCheck
 [Scope(GenericArguments = [typeof(int), typeof(string)])]
 [Scope(GenericArguments = [typeof(string), typeof(int)])]
 [Scope(GenericArguments = [typeof(string), typeof(string)])]
-public class CopyPermissionsCheck<T, TTo>(
+public class PermissionCheckStarter<T, TTo>(
     IFileDao<T> fileDao,
     IFolderDao<T> folderDao,
     IFileDao<TTo> ttoFileDao,

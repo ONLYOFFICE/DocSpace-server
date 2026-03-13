@@ -151,7 +151,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         var fileMarker = scope.ServiceProvider.GetService<FileMarker>();
         var folderDao = scope.ServiceProvider.GetService<IFolderDao<TTo>>();
         var socketManager = scope.ServiceProvider.GetService<SocketManager>();
-        var permissionsManager = scope.ServiceProvider.GetService<CopyPermissionsCheck<T, TTo>>();
+        var permissionsManager = scope.ServiceProvider.GetService<PermissionCheckStarter<T, TTo>>();
 
         //TODO: check on each iteration?
         var toFolder = await folderDao.GetFolderAsync(tto);
@@ -229,7 +229,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         var fileSecurity = scope.ServiceProvider.GetRequiredService<FileSecurity>();
         var notifyClient = scope.ServiceProvider.GetRequiredService<NotifyClient>();
         var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
-        var permissionsManager = scope.ServiceProvider.GetService<CopyPermissionsCheck<T, TTo>>();
+        var permissionsManager = scope.ServiceProvider.GetService<PermissionCheckStarter<T, TTo>>();
 
         var toFolderId = toFolder.Id;
         var isToFolder = Equals(toFolderId, _daoFolderId);
@@ -669,7 +669,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         var fileStorageService = scope.ServiceProvider.GetService<FileStorageService>();
         var cachedFolderDao = scope.ServiceProvider.GetService<ICacheFolderDao<T>>();
         var fileSecurity = scope.ServiceProvider.GetService<FileSecurity>();
-        var permissionsManager = scope.ServiceProvider.GetService<CopyPermissionsCheck<T, TTo>>();
+        var permissionsManager = scope.ServiceProvider.GetService<PermissionCheckStarter<T, TTo>>();
 
         var toFolderId = toFolder.Id;
         var sb = new StringBuilder();

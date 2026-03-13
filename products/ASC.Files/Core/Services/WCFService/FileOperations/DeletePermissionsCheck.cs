@@ -26,10 +26,12 @@
 
 namespace ASC.Files.Core.Services.WCFService.FileOperations;
 
-[Scope]
-public class DeletePermissionsCheck<T>(IFileDao<T> fileDao, IFolderDao<T> folderDao, LockerManager lockerManager, FileTrackerHelper fileTracker, FileSecurity security)
+[Scope(GenericArguments = [typeof(int)])]
+[Scope(GenericArguments = [typeof(string)])]
+public class DeletePermissionsCheck<T>(IFileDao<T> fileDao, IFolderDao<T> folderDao, LockerManager lockerManager, FileTrackerHelper fileTracker, FileSecurity security) 
+    : IPermissionsChecker<FileDeleteOperationData<T>, T>
 {
-    public async Task CheckDataAsync(FileDeleteOperationData<T> data)
+    public async Task RunPermissionCheckAsync(FileDeleteOperationData<T> data)
     {
         if (data.FilesVersions != null && data.FilesVersions.Any() && data.Files.Any())
         {

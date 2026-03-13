@@ -28,22 +28,10 @@ namespace ASC.Files.Core.Services.WCFService.FileOperations;
 
 [Scope(GenericArguments = [typeof(int)])]
 [Scope(GenericArguments = [typeof(string)])]
-public class DownloadPermissionsCheck<T>(FileSecurity security, IFileDao<T> fileDao, IFolderDao<T> folderDao)
+public class DownloadPermissionsCheck<T>(FileSecurity security, IFileDao<T> fileDao, IFolderDao<T> folderDao)    
+    : IPermissionsChecker<FileDownloadOperationData<T>, T>
 {
-    internal async Task CheckPermissionsAsync(ItemNameValueCollection<T> entriesPathId, IEnumerable<T> files)
-    {
-        if (entriesPathId == null || entriesPathId.Count == 0)
-        {
-            if (files.Any())
-            {
-                throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
-            }
-
-            throw new DirectoryNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
-        }
-    }
-
-    public async Task CheckEntriesPermissionsAsync(FileDownloadOperationData<T> data)
+    public async Task RunPermissionCheckAsync(FileDownloadOperationData<T> data)
     {
         var entriesPathId = new ItemNameValueCollection<T>();
 
@@ -67,6 +55,19 @@ public class DownloadPermissionsCheck<T>(FileSecurity security, IFileDao<T> file
         await CheckPermissionsAsync(entriesPathId, data.Files);
     }
 
+    internal async Task CheckPermissionsAsync(ItemNameValueCollection<T> entriesPathId, IEnumerable<T> files)
+    {
+        if (entriesPathId == null || entriesPathId.Count == 0)
+        {
+            if (files.Any())
+            {
+                throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+            }
+
+            throw new DirectoryNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
+    }
+    
     private async Task<ItemNameValueCollection<T>> GetFilesInFoldersAsync(IEnumerable<T> folderIds, string path)
     {
         var entriesPathId = new ItemNameValueCollection<T>();

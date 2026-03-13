@@ -352,10 +352,10 @@ public class FileDownloadOperationsManager(
         var thirdPartyData = new FileDownloadOperationData<string>(folderStringIds, fileStringIds, tenantId, userId, GetHttpHeaders(), sessionSnapshot, baseUri);
 
         var permissionsCheck = _serviceProvider.GetService<DownloadPermissionsCheck<int>>();
-        await permissionsCheck.CheckEntriesPermissionsAsync(data);
+        await permissionsCheck.RunPermissionCheckAsync(data);
         
         var permissionsCheckThirdParty = _serviceProvider.GetService<DownloadPermissionsCheck<string>>();
-        await permissionsCheckThirdParty.CheckEntriesPermissionsAsync(thirdPartyData);
+        await permissionsCheckThirdParty.RunPermissionCheckAsync(thirdPartyData);
         
         var op = _serviceProvider.GetService<FileDownloadOperation>();
         op.Init(true);
@@ -381,8 +381,9 @@ public class FileMoveCopyOperationsManager(
     FileOperationsManagerHolder<FileMoveCopyOperation> fileOperationsManagerHolder,
     ExternalShare externalShare,
     IServiceProvider serviceProvider, 
-    PermissionCheckStarter<int> dataPermissionChecker, 
-    PermissionCheckStarter<string> thirdPartyDataPermissionChecker) : FileOperationsManager<FileMoveCopyOperation>(httpContextAccessor, eventBus, authContext, fileOperationsManagerHolder, externalShare, serviceProvider)
+    CopyPermissionsCheck<int> dataPermissionChecker, 
+    CopyPermissionsCheck<string> thirdPartyDataPermissionChecker) 
+    : FileOperationsManager<FileMoveCopyOperation>(httpContextAccessor, eventBus, authContext, fileOperationsManagerHolder, externalShare, serviceProvider)
 {
     public async Task<string> Publish(
         List<JsonElement> folderIds,
@@ -416,18 +417,18 @@ public class FileMoveCopyOperationsManager(
             await GetContent(folderIntIds, fileIntIds);
             await GetContent(folderStringIds, fileStringIds);
         }
-
-        var op = _serviceProvider.GetService<FileMoveCopyOperation>();
-        op.Init(holdResult, copy);
-        var taskId = await _fileOperationsManagerHolder.Publish(op);
-
+        
         var data = new FileMoveCopyOperationData<int>(folderIntIds, fileIntIds, tenantId, userId, destFolderId, copy, resolveType, toFillOut, holdResult, GetHttpHeaders(), sessionSnapshot);
         var thirdPartyData = new FileMoveCopyOperationData<string>(folderStringIds, fileStringIds, tenantId, userId, destFolderId, copy, resolveType, toFillOut, holdResult, GetHttpHeaders(), sessionSnapshot);
 
-        var dataTask = dataPermissionChecker.RunCopyPermissionCheckAsync(data);
-        var thirdPartyDataTask = thirdPartyDataPermissionChecker.RunCopyPermissionCheckAsync(thirdPartyData);
+        var dataTask = dataPermissionChecker.RunPermissionCheckAsync(data);
+        var thirdPartyDataTask = thirdPartyDataPermissionChecker.RunPermissionCheckAsync(thirdPartyData);
         await Task.WhenAll(dataTask, thirdPartyDataTask);
-
+        
+        var op = _serviceProvider.GetService<FileMoveCopyOperation>();
+        op.Init(holdResult, copy);
+        var taskId = await _fileOperationsManagerHolder.Publish(op);
+        
         await _eventBus.PublishAsync(new MoveOrCopyIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
         {
             TaskId = taskId,
@@ -469,8 +470,9 @@ public class FileDuplicateOperationsManager(
     FileOperationsManagerHolder<FileDuplicateOperation> fileOperationsManagerHolder,
     ExternalShare externalShare,
     IServiceProvider serviceProvider,
-    PermissionCheckStarter<int> dataPermissionChecker, 
-    PermissionCheckStarter<string> thirdPartyDataPermissionChecker) : FileOperationsManager<FileDuplicateOperation>(httpContextAccessor, eventBus, authContext, fileOperationsManagerHolder, externalShare, serviceProvider)
+    CopyPermissionsCheck<int> dataPermissionChecker, 
+    CopyPermissionsCheck<string> thirdPartyDataPermissionChecker) 
+    : FileOperationsManager<FileDuplicateOperation>(httpContextAccessor, eventBus, authContext, fileOperationsManagerHolder, externalShare, serviceProvider)
 {
     public async Task<string> Publish(
         List<JsonElement> folderIds,
@@ -495,8 +497,8 @@ public class FileDuplicateOperationsManager(
         var data = new FileOperationData<int>(folderIntIds, fileIntIds, tenantId, userId, GetHttpHeaders(), sessionSnapshot);
         var thirdPartyData = new FileOperationData<string>(folderStringIds, fileStringIds, tenantId, userId, GetHttpHeaders(), sessionSnapshot);
 
-        var dataTask = dataPermissionChecker.RunDuplicatePermissionCheckAsync(data);
-        var thirdPartyDataTask = thirdPartyDataPermissionChecker.RunDuplicatePermissionCheckAsync(thirdPartyData);
+        var dataTask = dataPermissionChecker.RunPermissionCheckAsync(data);
+        var thirdPartyDataTask = thirdPartyDataPermissionChecker.RunPermissionCheckAsync(thirdPartyData);
         
         await Task.WhenAll(dataTask, thirdPartyDataTask);
         
@@ -523,7 +525,8 @@ public class FileDeleteOperationsManager(
     TenantManager tenantManager,
     FileOperationsManagerHolder<FileDeleteOperation> fileOperationsManagerHolder,
     ExternalShare externalShare,
-    IServiceProvider serviceProvider) : FileOperationsManager<FileDeleteOperation>(httpContextAccessor, eventBus, authContext, fileOperationsManagerHolder, externalShare, serviceProvider)
+    IServiceProvider serviceProvider) 
+    : FileOperationsManager<FileDeleteOperation>(httpContextAccessor, eventBus, authContext, fileOperationsManagerHolder, externalShare, serviceProvider)
 {
     public Task<string> Publish<T>(
         List<T> folders,
@@ -587,10 +590,10 @@ public class FileDeleteOperationsManager(
         var thirdPartyData = new FileDeleteOperationData<string>(folders.Item2, files.Item2, versions, tenantId, userId, GetHttpHeaders(), sessionSnapshot, holdResult, ignoreException, immediately, isEmptyTrash);
         
         var permissionsCheckInternal = _serviceProvider.GetService<DeletePermissionsCheck<int>>();
-        await permissionsCheckInternal.CheckDataAsync(data);
+        await permissionsCheckInternal.RunPermissionCheckAsync(data);
         
         var permissionsCheckThirdParty = _serviceProvider.GetService<DeletePermissionsCheck<string>>();
-        await permissionsCheckThirdParty.CheckDataAsync(thirdPartyData);
+        await permissionsCheckThirdParty.RunPermissionCheckAsync(thirdPartyData);
         
         var op = _serviceProvider.GetService<FileDeleteOperation>();
         op.Init(holdResult);
