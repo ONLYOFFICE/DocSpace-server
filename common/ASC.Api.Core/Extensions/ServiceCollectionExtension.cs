@@ -24,7 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Common.Threading.DistributedLock.InMemoryLock;
 using ASC.Common.Threading.HeartBeat.Abstractions;
+using ASC.Common.Threading.HeartBeat.InMemoryHeartBeat;
 using ASC.Common.Threading.HeartBeat.RedisHeartBeat;
 using ASC.EventBus.RedisMQ;
 
@@ -37,6 +39,18 @@ namespace ASC.Api.Core.Extensions;
 
 public static class ServiceCollectionExtension
 {
+    public static bool IsRedisEnabled(IConfiguration configuration)
+    {
+        return !string.Equals(configuration["Redis:Enabled"], "false", StringComparison.OrdinalIgnoreCase)
+            && configuration.GetSection("Redis").Get<RedisConfiguration>() != null;
+    }
+
+    public static bool IsRabbitMqEnabled(IConfiguration configuration)
+    {
+        return !string.Equals(configuration["RabbitMQ:Enabled"], "false", StringComparison.OrdinalIgnoreCase)
+            && configuration.GetSection("RabbitMQ").Get<RabbitMQSettings>() != null;
+    }
+
     extension(IServiceCollection services)
     {
         public IServiceCollection AddCacheNotify(IConfiguration configuration)
@@ -45,13 +59,13 @@ public static class ServiceCollectionExtension
             var kafkaConfiguration = configuration.GetSection("kafka").Get<KafkaSettings>();
             var rabbitMqConfiguration = configuration.GetSection("RabbitMQ").Get<RabbitMQSettings>();
 
-            if (redisConfiguration != null)
+            if (redisConfiguration != null && IsRedisEnabled(configuration))
             {
                 services.AddStackExchangeRedisExtensions<RedisProtobufSerializer>(serviceProvider => new List<RedisConfiguration> { serviceProvider.GetRequiredService<RedisConfiguration>() });
 
                 services.AddSingleton(typeof(ICacheNotify<>), typeof(RedisCacheNotify<>));
             }
-            else if (rabbitMqConfiguration != null)
+            else if (rabbitMqConfiguration != null && IsRabbitMqEnabled(configuration))
             {
                 services.AddSingleton(typeof(ICacheNotify<>), typeof(RabbitMQCache<>));
             }
@@ -150,7 +164,7 @@ public static class ServiceCollectionExtension
         {
             var redisConfiguration = configuration.GetSection("Redis").Get<RedisConfiguration>();
 
-            if (redisConfiguration != null)
+            if (redisConfiguration != null && IsRedisEnabled(configuration))
             {
                 services.AddSingleton<Medallion.Threading.IDistributedLockProvider>(sp =>
                 {
@@ -239,10 +253,11 @@ public static class ServiceCollectionExtension
                     return TimeSpan.TryParse(cfg["core:lock:minTimeout"], out var minTimeout)
                         ? new ZooKeeperDistributedLockProvider(internalProvider, logger, minTimeout)
                         : new ZooKeeperDistributedLockProvider(internalProvider, logger);
+                    
                 });
             }
 
-            throw new NotImplementedException("DistributedLock: Provider not found.");
+            return services.AddSingleton<IDistributedLockProvider, InMemoryLockProvider>();
         }
 
         public IServiceCollection AddEventBus(IConfiguration configuration)
@@ -253,7 +268,7 @@ public static class ServiceCollectionExtension
             var activeMqConfiguration = configuration.GetSection("ActiveMQ").Get<ActiveMQSettings>();
             var redisConfiguration = configuration.GetSection("Redis").Get<RedisConfiguration>();
 
-            if (rabbitMqConfiguration != null)
+            if (rabbitMqConfiguration != null && IsRabbitMqEnabled(configuration))
             {
                 services.AddSingleton<IRabbitMQPersistentConnection>(sp =>
                 {
@@ -347,7 +362,7 @@ public static class ServiceCollectionExtension
                     return new EventBusActiveMQ(activeMqPersistentConnection, logger, sp, eventBusSubscriptionsManager, serializer, subscriptionClientName, retryCount);
                 });
             }
-            else if (redisConfiguration != null)
+            else if (redisConfiguration != null && IsRedisEnabled(configuration))
             {
                 services.AddSingleton<IEventBus, EventBusRedisMQ>(sp =>
                 {
@@ -371,7 +386,7 @@ public static class ServiceCollectionExtension
             }
             else
             {
-                throw new NotImplementedException("EventBus: Provider not found.");
+                services.AddSingleton<IEventBus, EventBusInMemory>();
             }
 
             return services;
@@ -380,25 +395,28 @@ public static class ServiceCollectionExtension
         public IServiceCollection AddHeartBeat(IConfiguration configuration)
         {
             var redisConfiguration = configuration.GetSection("Redis").Get<RedisConfiguration>();
-            if (redisConfiguration == null)
+            if (redisConfiguration != null && IsRedisEnabled(configuration))
             {
-                throw new NotImplementedException("HeartBeat: Provider not found.");
+                services.AddSingleton<IHeartBeatFactory, RedisHeartBeatFactory>(sp =>
+                {
+                    var redisDatabase = sp.GetRequiredService<IRedisClient>().GetDefaultDatabase();
+
+                    return new RedisHeartBeatFactory(redisDatabase);
+                });
+
+                services.AddSingleton<IHeartBeatMonitor, RedisHeartBeatMonitor>(sp =>
+                {
+                    var redisDatabase = sp.GetRequiredService<IRedisClient>().GetDefaultDatabase();
+
+                    return new RedisHeartBeatMonitor(redisDatabase);
+                });
             }
-        
-            services.AddSingleton<IHeartBeatFactory, RedisHeartBeatFactory>(sp =>
+            else
             {
-                var redisDatabase = sp.GetRequiredService<IRedisClient>().GetDefaultDatabase();
-            
-                return new RedisHeartBeatFactory(redisDatabase);
-            });
-        
-            services.AddSingleton<IHeartBeatMonitor, RedisHeartBeatMonitor>(sp =>
-            {
-                var redisDatabase = sp.GetRequiredService<IRedisClient>().GetDefaultDatabase();
-            
-                return new RedisHeartBeatMonitor(redisDatabase);
-            });
-        
+                services.AddSingleton<IHeartBeatFactory, InMemoryHeartBeatFactory>();
+                services.AddSingleton<IHeartBeatMonitor, InMemoryHeartBeatMonitor>();
+            }
+
             return services;
         }
     }
@@ -458,7 +476,7 @@ public static class ServiceCollectionExtension
         {
             var redisConfiguration = configuration.GetSection("Redis").Get<RedisConfiguration>();
 
-            if (redisConfiguration == null)
+            if (redisConfiguration == null || !IsRedisEnabled(configuration))
             {
                 return null;
             }

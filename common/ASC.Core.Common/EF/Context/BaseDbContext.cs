@@ -122,10 +122,19 @@ public class BaseDbContext(DbContextOptions options) : DbContext(options)
 }
 public static class BaseDbContextExtension
 {
+    private const int DefaultPoolSize = 1024;
+    private static int? _cachedPoolSize;
+
     public static IServiceCollection AddBaseDbContextPool<T>(this IServiceCollection services, string region = "current", string nameConnectionString = "default") where T : DbContext
     {
+        _cachedPoolSize ??= services
+            .FirstOrDefault(d => d.ServiceType == typeof(IConfiguration))
+            ?.ImplementationInstance is IConfiguration cfg
+            ? cfg.GetValue("core:dbContextPoolSize", DefaultPoolSize)
+            : DefaultPoolSize;
+
         var installerOptionsAction = new InstallerOptionsAction(region, nameConnectionString);
-        services.AddPooledDbContextFactory<T>(installerOptionsAction.OptionsAction);
+        services.AddPooledDbContextFactory<T>(installerOptionsAction.OptionsAction, _cachedPoolSize.Value);
 
         return services;
     }
