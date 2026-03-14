@@ -32,6 +32,8 @@ using ASC.Files.Core.Services.NotifyService;
 using ASC.Files.Worker.Services;
 using ASC.Web.Files.Configuration;
 
+using ImageMagick;
+
 namespace ASC.Files.Worker;
 
 public class Startup : BaseWorkerStartup
@@ -49,6 +51,12 @@ public class Startup : BaseWorkerStartup
     public override async Task ConfigureServices(WebApplicationBuilder builder)
     {
         await base.ConfigureServices(builder);
+
+        var memoryLimit = Configuration.GetValue<long>("thumbnail:ImageMagickMemoryLimit");
+        var threadLimit = Configuration.GetValue<int>("thumbnail:ImageMagickThreadLimit");
+        ResourceLimits.Memory = (ulong)(memoryLimit > 0 ? memoryLimit : 256L * 1024L * 1024L);
+        ResourceLimits.Thread = (uint)(threadLimit > 0 ? threadLimit : 2);
+        OpenCL.IsEnabled = false;
 
         var services = builder.Services;
         services.AddHttpClient();
@@ -106,7 +114,12 @@ public class Startup : BaseWorkerStartup
         services.AddBaseDbContextPool<FilesDbContext>();
         services.AddScoped<IWebItem, ProductEntryPoint>();
 
-        services.AddSingleton(Channel.CreateUnbounded<FileData<int>>());
+        services.AddSingleton(Channel.CreateBounded<FileData<int>>(new BoundedChannelOptions(500)
+        {
+            FullMode = BoundedChannelFullMode.Wait,
+            SingleReader = false,
+            SingleWriter = false
+        }));
         services.AddSingleton(svc => svc.GetRequiredService<Channel<FileData<int>>>().Reader);
         services.AddSingleton(svc => svc.GetRequiredService<Channel<FileData<int>>>().Writer);
         services.AddDocumentServiceHttpClient(Configuration);

@@ -37,7 +37,7 @@ public class FFmpegService
     {
         get
         {
-            if (string.IsNullOrEmpty(_fFmpegPath))
+            if (string.IsNullOrEmpty(ResolveFfmpegPath()))
             {
                 return [];
             }
@@ -48,12 +48,13 @@ public class FFmpegService
 
     private readonly List<string> _convertableMedia;
     private readonly List<string> _fFmpegExecutables = ["ffmpeg", "avconv"];
-    private readonly string _fFmpegPath;
     private readonly string _fFmpegArgs;
     private readonly string _fFmpegThumbnailsArgs;
     private readonly ImmutableList<string> _fFmpegFormats;
 
     private readonly ILogger<FFmpegService> _logger;
+    private string _fFmpegPath;
+    private bool _fFmpegPathResolved;
 
     public bool IsConvertable(string extension)
     {
@@ -82,54 +83,73 @@ public class FFmpegService
         using var process = Process.Start(startInfo);
 
         await inputStream.CopyToAsync(process.StandardInput.BaseStream);
+        await process.StandardInput.BaseStream.FlushAsync();
+        process.StandardInput.Close();
 
-        await ProcessLog(process.StandardError.BaseStream);
+        var outputStream = new MemoryStream();
+        var copyTask = process.StandardOutput.BaseStream.CopyToAsync(outputStream);
+        var logTask = ProcessLog(process.StandardError.BaseStream);
 
-        return process.StandardOutput.BaseStream;
+        await Task.WhenAll(copyTask, logTask);
+        await process.WaitForExitAsync();
+
+        outputStream.Position = 0;
+
+        return outputStream;
     }
 
     public FFmpegService(ILogger<FFmpegService> logger, IConfiguration configuration)
     {
         _logger = logger;
         _fFmpegPath = configuration["files:ffmpeg:value"];
+        _fFmpegPathResolved = !string.IsNullOrEmpty(_fFmpegPath);
         _fFmpegArgs = configuration["files:ffmpeg:args"] ?? "-i - -preset ultrafast -movflags frag_keyframe+empty_moov -f {0} -";
         _fFmpegThumbnailsArgs = configuration["files:ffmpeg:thumbnails:args"] ?? "-i \"{0}\" -frames:v 1 \"{1}\" -y";
         var ffMpegFormats = configuration.GetSection("files:ffmpeg:thumbnails:formats").Get<List<string>>();
         _fFmpegFormats = ffMpegFormats != null ? ffMpegFormats.ToImmutableList() : FileUtility.ExtsVideo;
 
         _convertableMedia = (configuration.GetSection("files:ffmpeg:exts").Get<string[]>() ?? []).ToList();
+    }
 
-        if (string.IsNullOrEmpty(_fFmpegPath))
+    private string ResolveFfmpegPath()
+    {
+        if (_fFmpegPathResolved)
         {
-            var pathvar = Environment.GetEnvironmentVariable("PATH");
-            var folders = pathvar.Split(Path.PathSeparator).Distinct();
+            return _fFmpegPath;
+        }
 
-            foreach (var folder in folders)
+        _fFmpegPathResolved = true;
+
+        var pathvar = Environment.GetEnvironmentVariable("PATH");
+        if (string.IsNullOrEmpty(pathvar))
+        {
+            return _fFmpegPath;
+        }
+
+        var folders = pathvar.Split(Path.PathSeparator).Distinct();
+
+        foreach (var folder in folders)
+        {
+            if (!Directory.Exists(folder))
             {
-                if (!Directory.Exists(folder))
+                continue;
+            }
+
+            foreach (var name in _fFmpegExecutables)
+            {
+                var path = CrossPlatform.PathCombine(folder, RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? name + ".exe" : name);
+
+                if (File.Exists(path))
                 {
-                    continue;
-                }
+                    _fFmpegPath = path;
+                    _logger.InformationFFmpegFoundIn(path);
 
-                foreach (var name in _fFmpegExecutables)
-                {
-                    var path = CrossPlatform.PathCombine(folder, RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? name + ".exe" : name);
-
-                    if (File.Exists(path))
-                    {
-                        _fFmpegPath = path;
-                        _logger.InformationFFmpegFoundIn(path);
-
-                        break;
-                    }
-                }
-
-                if (!string.IsNullOrEmpty(_fFmpegPath))
-                {
-                    break;
+                    return _fFmpegPath;
                 }
             }
         }
+
+        return _fFmpegPath;
     }
 
     private ProcessStartInfo PrepareFFmpeg(string inputFormat)
@@ -150,13 +170,14 @@ public class FFmpegService
     {
         var startInfo = new ProcessStartInfo();
 
-        if (string.IsNullOrEmpty(_fFmpegPath))
+        var ffmpegPath = ResolveFfmpegPath();
+        if (string.IsNullOrEmpty(ffmpegPath))
         {
             _logger.ErrorFFmpeg();
             throw new Exception("no ffmpeg");
         }
 
-        startInfo.FileName = _fFmpegPath;
+        startInfo.FileName = ffmpegPath;
         startInfo.UseShellExecute = false;
         startInfo.RedirectStandardOutput = true;
         startInfo.RedirectStandardInput = true;
@@ -176,7 +197,7 @@ public class FFmpegService
         }
     }
 
-    public async Task CreateThumbnail(string sourcePath, string destPath)
+    public async Task CreateThumbnail(string sourcePath, string destPath, CancellationToken cancellationToken = default)
     {
         var startInfo = PrepareCommonFFmpeg();
 
@@ -186,6 +207,25 @@ public class FFmpegService
 
         await ProcessLog(process.StandardError.BaseStream);
 
-        await process.WaitForExitAsync();
+        using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        timeoutCts.CancelAfter(TimeSpan.FromMinutes(5));
+
+        try
+        {
+            await process.WaitForExitAsync(timeoutCts.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            try
+            {
+                process.Kill(entireProcessTree: true);
+            }
+            catch
+            {
+                // process may have already exited
+            }
+
+            throw;
+        }
     }
 }
