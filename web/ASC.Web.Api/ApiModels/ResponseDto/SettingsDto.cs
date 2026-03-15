@@ -290,4 +290,10 @@ public class SettingsDto
     /// </summary>
     /// <example>DEFAULT</example>
     public FolderType DefaultFolderType { get; set; }
+
+    /// <summary>
+    /// Specifies if an external database is connected for storing form results.
+    /// </summary>
+    /// <example>true</example>
+    public bool ExternalDbEnabled { get; set; }
 }

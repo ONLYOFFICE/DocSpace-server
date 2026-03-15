@@ -342,7 +342,11 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
                 .WithEnvironment("RabbitMQ:Password", () => RabbitMqUri != null ? $"{RabbitMqUri.UserInfo.Split(':')[1]}" : "")
                 .WithEnvironment("RabbitMQ:VirtualHost", () => RabbitMqUri != null ? $"{RabbitMqUri.PathAndQuery}" : "");
         }
-      
+        else
+        {
+            resourceBuilder.WithEnvironment("RabbitMQ:Enabled", "false");
+        }
+
         if (RedisResource != null)
         {
             resourceBuilder
@@ -353,6 +357,10 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             {
                 resourceBuilder.WithEnvironment("Redis:Password", () => Redis?.Password ?? string.Empty);
             }
+        }
+        else
+        {
+            resourceBuilder.WithEnvironment("Redis:Enabled", "false");
         }
 
         if (OpensearchResource != null)

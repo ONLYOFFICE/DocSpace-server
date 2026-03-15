@@ -39,6 +39,7 @@ public class SwaggerCustomOperationFilter : IOperationFilter
             if (parameter.In == ParameterLocation.Query && parameter.Schema.Type == JsonSchemaType.Array)
             {
                 (parameter as OpenApiParameter)?.Style = ParameterStyle.DeepObject;
+                (parameter as OpenApiParameter)?.Explode = true;
             }
 
         // Remove duplicate example from parameter level if it exists in schema

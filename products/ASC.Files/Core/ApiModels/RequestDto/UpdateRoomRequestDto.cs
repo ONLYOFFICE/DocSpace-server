@@ -99,6 +99,16 @@ public class UpdateRoomRequest
     /// </summary>
     /// <example>{"providerId": 1, "modelId": "gpt-4", "prompt": "You are a helpful assistant."}</example>
     public ChatSettings ChatSettings { get; set; }
+
+    /// <summary>
+    /// Specifies whether to send form data to external database.
+    /// </summary>
+    public bool? SendFormToExternalDB { get; set; }
+
+    /// <summary>
+    /// Specifies whether to save form data as XLSX file.
+    /// </summary>
+    public bool? SaveFormAsXLSX { get; set; }
 }
 
 /// <summary>

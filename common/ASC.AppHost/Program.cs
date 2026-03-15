@@ -35,7 +35,7 @@ var isDocker = String.Compare(builder.Configuration["Docker"], "true", StringCom
 var skipClient = String.Compare(builder.Configuration["SKIP_CLIENT"], "true", StringComparison.OrdinalIgnoreCase) == 0;
 
 var connectionManager = new ConnectionStringManager(builder, basePath)
-    .AddRabbitMq()
+   
     .AddEditors();
 
 var configurator = new ProjectConfigurator(builder, connectionManager, basePath, isDocker);
@@ -44,21 +44,17 @@ var launchProfile = builder.Configuration["DOTNET_LAUNCH_PROFILE"];
 switch (launchProfile)
 {
     case "preview":
-        connectionManager.AddMySql()
-            .AddRedis();
+        connectionManager
+            .AddMySql();
+
         configurator
-            .AddProject<ASC_Files>(Constants.FilesPort)
-            .AddProject<ASC_Files_Worker>(Constants.FilesWorkerPort)
-            .AddProject<ASC_People>(Constants.PeoplePort)
-            .AddProject<ASC_Web_Api>(Constants.WebApiPort)
-            .AddProject<ASC_Web_Studio>(Constants.WebstudioPort)
-            .AddProject<ASC_AI>(Constants.AiPort)
-            .AddProject<ASC_AI_Worker>(Constants.AiWorkerPort)
+            .AddProject<ASC_Monolith>(Constants.MonolithPort)
             .AddSocketIO();
 
         break;
     case "frontend-dev":
         connectionManager.AddMySql(withDbGate: true)
+            .AddRabbitMq()
             .AddRedis()
             .AddMailPit()
             .AddMcpServer();
@@ -84,6 +80,7 @@ switch (launchProfile)
     default:
         connectionManager
             .AddMySql(withDbGate: true)
+            .AddRabbitMq()
             .AddRedis(withRedisInsight: true)
             .AddMcpServer()
             .AddOpensearch()
@@ -126,7 +123,8 @@ if (!skipClient)
     startPackages = builder.AddJavaScriptApp("onlyoffice-client", clientBasePath, "start").WithPnpm();
 }
 
-var openresty = NginxConfiguration.ConfigureOpenResty(builder, basePath, clientBasePath, startPackages, isDocker);
+var isPreview = builder.Configuration["DOTNET_LAUNCH_PROFILE"] == "preview";
+var openresty = NginxConfiguration.ConfigureOpenResty(builder, basePath, clientBasePath, startPackages, isDocker, isPreview);
 
 playwright?.WaitFor(openresty);
 

@@ -199,7 +199,7 @@ public class SecurityContext(
             return;
         }
 
-        var roles = new List<string> { Role.Everyone };
+        var roles = new List<string> { Role.Authenticated };
 
         if (account is ISystemAccount && account.ID == Constants.CoreSystem.ID)
         {

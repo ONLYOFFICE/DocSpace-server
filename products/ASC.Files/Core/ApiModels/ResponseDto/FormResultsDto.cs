@@ -41,6 +41,19 @@ public class FormResultsDto
     public IEnumerable<FormsItemData> FormsData { get; set; }
 }
 
+public class FormSubmissionsDto
+{
+    /// <summary>
+    /// The form field metadata.
+    /// </summary>
+    public IEnumerable<FormMetadata> Metadata { get; set; }
+
+    /// <summary>
+    /// All submissions.
+    /// </summary>
+    public IEnumerable<FormResultsDto> Submissions { get; set; }
+}
+
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
 public static partial class FormResultsDtoMapper
 {

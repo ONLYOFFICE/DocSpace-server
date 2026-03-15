@@ -307,6 +307,7 @@ public class FileEntryDtoHelper(
     UserManager userManager,
     IDaoFactory daoFactory,
     ExternalShare externalShare,
+    FileSharing fileSharing,
     IUrlShortener urlShortener)
 {
     protected readonly FileSecurity _fileSecurity = fileSecurity;
@@ -352,6 +353,14 @@ public class FileEntryDtoHelper(
                 {
                     var linkData = await _externalShare.GetLinkDataAsync(entry, record.Subject);
                     shortWebUrl = await _urlShortener.GetShortenLinkAsync(linkData.Url);
+                }
+            }
+            else if(entry.ParentRoomType == FolderType.PublicRoom)
+            {
+                var link = await fileSharing.GetPureSharesAsync(entry, ShareFilterType.PrimaryExternalLink, null, null, 0, 1).FirstOrDefaultAsync();
+                if (link != null)
+                {
+                    shortWebUrl = link.Link;
                 }
             }
         }

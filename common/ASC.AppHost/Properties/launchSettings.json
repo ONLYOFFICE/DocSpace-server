@@ -36,7 +36,7 @@
       "applicationUrl": "http://0.0.0.0:15208",
       "environmentVariables": {
         "ASPIRE_ALLOW_UNSECURED_TRANSPORT": "true",
-        "Docker": "true",
+        "Docker": "false",
         "APP_HOSTING_STANDALONE": "true",
         "DOTNET_ENVIRONMENT": "Development",
         "DOTNET_DASHBOARD_OTLP_ENDPOINT_URL": "http://localhost:19085",

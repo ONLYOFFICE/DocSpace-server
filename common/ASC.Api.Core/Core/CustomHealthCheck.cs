@@ -52,9 +52,10 @@ public static class CustomHealthCheck
     {
         public IHealthChecksBuilder AddDistibutedCache(IConfiguration configuration)
         {
+            var redisEnabled = !string.Equals(configuration["Redis:Enabled"], "false", StringComparison.OrdinalIgnoreCase);
             var redisConfiguration = configuration.GetSection("Redis").Get<RedisConfiguration>();
 
-            if (redisConfiguration != null)
+            if (redisConfiguration != null && redisEnabled)
             {
                 hcBuilder.AddRedis(x => x.GetRequiredService<RedisPersistentConnection>().GetConnection(),
                     name: "redis",
@@ -92,9 +93,10 @@ public static class CustomHealthCheck
 
         public IHealthChecksBuilder AddMessageQueue(IConfiguration configuration)
         {
+            var rabbitMqEnabled = !string.Equals(configuration["RabbitMQ:Enabled"], "false", StringComparison.OrdinalIgnoreCase);
             var rabbitMQConfiguration = configuration.GetSection("RabbitMQ").Get<RabbitMQSettings>();
 
-            if (rabbitMQConfiguration != null)
+            if (rabbitMQConfiguration != null && rabbitMqEnabled)
             {
                 hcBuilder.AddRabbitMQ(async sp =>
                     {
