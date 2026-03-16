@@ -69,12 +69,13 @@ try
 
     var eventBus = ((IApplicationBuilder)app).ApplicationServices.GetRequiredService<IEventBus>();
 
-    await eventBus.SubscribeAsync<RemovePortalIntegrationEvent, RemovePortalIntegrationEventHandler>();
-    await eventBus.SubscribeAsync<MigrationParseIntegrationEvent, MigrationIntegrationEventHandler>();
-    await eventBus.SubscribeAsync<MigrationIntegrationEvent, MigrationIntegrationEventHandler>();
-    await eventBus.SubscribeAsync<MigrationCancelIntegrationEvent, MigrationIntegrationEventHandler>();
-    await eventBus.SubscribeAsync<MigrationClearIntegrationEvent, MigrationIntegrationEventHandler>();
-    await eventBus.SubscribeAsync<EventDataIntegrationEvent, EventDataIntegrationEventHandler>();
+    await Task.WhenAll(
+        eventBus.SubscribeAsync<RemovePortalIntegrationEvent, RemovePortalIntegrationEventHandler>(),
+        eventBus.SubscribeAsync<MigrationParseIntegrationEvent, MigrationIntegrationEventHandler>(),
+        eventBus.SubscribeAsync<MigrationIntegrationEvent, MigrationIntegrationEventHandler>(),
+        eventBus.SubscribeAsync<MigrationCancelIntegrationEvent, MigrationIntegrationEventHandler>(),
+        eventBus.SubscribeAsync<MigrationClearIntegrationEvent, MigrationIntegrationEventHandler>(),
+        eventBus.SubscribeAsync<EventDataIntegrationEvent, EventDataIntegrationEventHandler>());
 
     logger.Info("Starting web host ({applicationContext})...", AppName);
     await app.RunWithTasksAsync();

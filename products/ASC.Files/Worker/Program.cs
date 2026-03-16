@@ -72,21 +72,22 @@ try
 
     var eventBus = sp.GetRequiredService<IEventBus>();
 
-    await eventBus.SubscribeAsync<ThumbnailRequestedIntegrationEvent, ThumbnailRequestedIntegrationEventHandler>();
-    await eventBus.SubscribeAsync<RoomIndexExportIntegrationEvent, RoomIndexExportIntegrationEventHandler>();
-    await eventBus.SubscribeAsync<DeleteIntegrationEvent, DeleteIntegrationEventHandler>();
-    await eventBus.SubscribeAsync<MoveOrCopyIntegrationEvent, MoveOrCopyIntegrationEventHandler>();
-    await eventBus.SubscribeAsync<DuplicateIntegrationEvent, DuplicateIntegrationEventHandler>();
-    await eventBus.SubscribeAsync<BulkDownloadIntegrationEvent, BulkDownloadIntegrationEventHandler>();
-    await eventBus.SubscribeAsync<MarkAsReadIntegrationEvent, MarkAsReadIntegrationEventHandler>();
-    await eventBus.SubscribeAsync<EmptyTrashIntegrationEvent, EmptyTrashIntegrationEventHandler>();
-    await eventBus.SubscribeAsync<FormFillingReportIntegrationEvent, FormFillingReportIntegrationEventHandler>();
-    await eventBus.SubscribeAsync<ExternalDbFormSubmissionIntegrationEvent, ExternalDbFormSubmissionIntegrationEventHandler>();
-    await eventBus.SubscribeAsync<RoomNotifyIntegrationEvent, RoomNotifyIntegrationEventHandler>();
-    await eventBus.SubscribeAsync<CreateRoomTemplateIntegrationEvent, RoomTemplatesIntegrationEventHandler>();
-    await eventBus.SubscribeAsync<CreateRoomFromTemplateIntegrationEvent, RoomTemplatesIntegrationEventHandler>();
-    await eventBus.SubscribeAsync<DataStorageEncryptionIntegrationEvent, DataStorageEncryptionIntegrationEventHandler>();
-    await eventBus.SubscribeAsync<CustomerOperationsReportIntegrationEvent, CustomerOperationsReportIntegrationEventHandler>();
+    await Task.WhenAll(
+        eventBus.SubscribeAsync<ThumbnailRequestedIntegrationEvent, ThumbnailRequestedIntegrationEventHandler>(),
+        eventBus.SubscribeAsync<RoomIndexExportIntegrationEvent, RoomIndexExportIntegrationEventHandler>(),
+        eventBus.SubscribeAsync<DeleteIntegrationEvent, DeleteIntegrationEventHandler>(),
+        eventBus.SubscribeAsync<MoveOrCopyIntegrationEvent, MoveOrCopyIntegrationEventHandler>(),
+        eventBus.SubscribeAsync<DuplicateIntegrationEvent, DuplicateIntegrationEventHandler>(),
+        eventBus.SubscribeAsync<BulkDownloadIntegrationEvent, BulkDownloadIntegrationEventHandler>(),
+        eventBus.SubscribeAsync<MarkAsReadIntegrationEvent, MarkAsReadIntegrationEventHandler>(),
+        eventBus.SubscribeAsync<EmptyTrashIntegrationEvent, EmptyTrashIntegrationEventHandler>(),
+        eventBus.SubscribeAsync<FormFillingReportIntegrationEvent, FormFillingReportIntegrationEventHandler>(),
+        eventBus.SubscribeAsync<ExternalDbFormSubmissionIntegrationEvent, ExternalDbFormSubmissionIntegrationEventHandler>(),
+        eventBus.SubscribeAsync<RoomNotifyIntegrationEvent, RoomNotifyIntegrationEventHandler>(),
+        eventBus.SubscribeAsync<CreateRoomTemplateIntegrationEvent, RoomTemplatesIntegrationEventHandler>(),
+        eventBus.SubscribeAsync<CreateRoomFromTemplateIntegrationEvent, RoomTemplatesIntegrationEventHandler>(),
+        eventBus.SubscribeAsync<DataStorageEncryptionIntegrationEvent, DataStorageEncryptionIntegrationEventHandler>(),
+        eventBus.SubscribeAsync<CustomerOperationsReportIntegrationEvent, CustomerOperationsReportIntegrationEventHandler>());
 
     sp.GetRequiredService<FileTrackerHelper>().Subscribe();
 

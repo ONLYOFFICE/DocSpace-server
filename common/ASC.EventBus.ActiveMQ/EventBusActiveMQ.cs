@@ -41,11 +41,12 @@ public class EventBusActiveMQ : IEventBus, IDisposable
     private readonly IIntegrationEventSerializer _serializer;
     private ISession _consumerSession;
 
-    private readonly List<IMessageConsumer> _consumers;
+    private readonly ConcurrentDictionary<string, IMessageConsumer> _consumers;
 
     private readonly int _retryCount;
     private string _queueName;
     private readonly Task _initializeTask;
+    private readonly SemaphoreSlim _consumeSemaphore = new(1, 1);
 
     public EventBusActiveMQ(IActiveMQPersistentConnection persistentConnection,
                             ILogger<EventBusActiveMQ> logger,
@@ -63,7 +64,7 @@ public class EventBusActiveMQ : IEventBus, IDisposable
         _serviceProvider = serviceProvider;
         _retryCount = retryCount;
         _subsManager.OnEventRemoved += SubsManager_OnEventRemoved;
-        _consumers = [];
+        _consumers = new ConcurrentDictionary<string, IMessageConsumer>();
         _initializeTask = InitializeAsync();
     }
 
@@ -84,17 +85,9 @@ public class EventBusActiveMQ : IEventBus, IDisposable
             await _persistentConnection.TryConnectAsync();
         }
 
-        using var session = await _persistentConnection.CreateSessionAsync(AcknowledgementMode.ClientAcknowledge);
-
-        var messageSelector = $"eventName='{eventName}'";
-
-        var findedConsumer = _consumers.Find(x => x.MessageSelector == messageSelector);
-
-        if (findedConsumer != null)
+        if (_consumers.TryRemove(eventName, out var consumer))
         {
-            await findedConsumer.CloseAsync();
-
-            _consumers.Remove(findedConsumer);
+            await consumer.CloseAsync();
         }
 
         if (_subsManager.IsEmpty)
@@ -102,7 +95,6 @@ public class EventBusActiveMQ : IEventBus, IDisposable
             _queueName = string.Empty;
             await _consumerSession.CloseAsync();
         }
-
     }
 
     public async Task PublishAsync(IntegrationEvent @event)
@@ -182,26 +174,26 @@ public class EventBusActiveMQ : IEventBus, IDisposable
     {
         _logger.TraceStartingBasicConsume();
 
-        if (!_persistentConnection.IsConnected)
+        await _consumeSemaphore.WaitAsync();
+        try
         {
-            await _persistentConnection.TryConnectAsync();
-        }
+            if (!_persistentConnection.IsConnected)
+            {
+                await _persistentConnection.TryConnectAsync();
+            }
 
-        var destination = await _consumerSession.GetQueueAsync(_queueName);
+            var destination = await _consumerSession.GetQueueAsync(_queueName);
 
-        var messageSelector = $"eventName='{eventName}'";
+            var messageSelector = $"eventName='{eventName}'";
 
-        var consumer = await _consumerSession.CreateConsumerAsync(destination, messageSelector);
+            var consumer = await _consumerSession.CreateConsumerAsync(destination, messageSelector);
 
-        _consumers.Add(consumer);
-
-        if (_consumerSession != null)
-        {
+            _consumers.TryAdd(eventName, consumer);
             consumer.Listener += Consumer_Listener;
         }
-        else
+        finally
         {
-            _logger.ErrorStartBasicConsumeCantCall();
+            _consumeSemaphore.Release();
         }
     }
 
@@ -356,7 +348,7 @@ public class EventBusActiveMQ : IEventBus, IDisposable
 
     public void Dispose()
     {
-        foreach (var consumer in _consumers)
+        foreach (var consumer in _consumers.Values)
         {
             consumer.Dispose();
         }
