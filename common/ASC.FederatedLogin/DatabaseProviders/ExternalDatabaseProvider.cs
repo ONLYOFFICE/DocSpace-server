@@ -58,14 +58,16 @@ public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IVa
             "mysql" => !string.IsNullOrWhiteSpace(Host) &&
                        !string.IsNullOrWhiteSpace(Database) &&
                        !string.IsNullOrWhiteSpace(User),
-            "sqlite" => !string.IsNullOrWhiteSpace(SqliteFilePath),
+            "sqlite" => IsSqliteAllowed && !string.IsNullOrWhiteSpace(SqliteFilePath),
             _ => false
         };
     }
 
+    private bool IsSqliteAllowed => CoreBaseSettings.Standalone;
+
     public AuthKeyMetadata GetKeyMetadata(string key) => key switch
     {
-        "databaseType"   => new() { Order = 0, Type = "select",   Options = ["mysql", "sqlite"] },
+        "databaseType"   => new() { Order = 0, Type = "select",   Options = IsSqliteAllowed ? ["mysql", "sqlite"] : ["mysql"] },
         "dbHost"         => new() { Order = 1, DependsOn = "databaseType", DependsOnValue = "mysql" },
         "dbPort"         => new() { Order = 2, Type = "number", DependsOn = "databaseType", DependsOnValue = "mysql" },
         "dbName"         => new() { Order = 3, DependsOn = "databaseType", DependsOnValue = "mysql" },
@@ -104,13 +106,13 @@ public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IVa
             return false;
         }
 
-        if (DatabaseType?.ToLowerInvariant() == "sqlite" && !File.Exists(SqliteFilePath))
-        {
-            return false;
-        }
-
         try
         {
+            if (DatabaseType?.ToLowerInvariant() == "sqlite" && !File.Exists(ValidateSqlitePath(SqliteFilePath, Configuration)))
+            {
+                return false;
+            }
+
             await using var connection = CreateConnection();
             await connection.OpenAsync();
             return connection.State == ConnectionState.Open;
@@ -128,7 +130,8 @@ public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IVa
     {
         try
         {
-            if (settings.DatabaseType?.ToLowerInvariant() == "sqlite" && !File.Exists(settings.SqliteFilePath))
+            if (settings.DatabaseType?.ToLowerInvariant() == "sqlite" &&
+                !File.Exists(ValidateSqlitePath(settings.SqliteFilePath, configuration)))
             {
                 return ConnectionTestResult.Failure("SQLite file not found.");
             }
@@ -180,29 +183,25 @@ public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IVa
         };
     }
 
-    private static string ValidateSqlitePath(string filePath, IConfiguration configuration)
+    private static string ValidateSqlitePath(string fileName, IConfiguration configuration)
     {
-        if (string.IsNullOrWhiteSpace(filePath))
+        if (string.IsNullOrWhiteSpace(fileName))
         {
-            throw new ArgumentException("SQLite file path is not configured.");
+            throw new ArgumentException("SQLite file name is not configured.");
         }
 
-        var allowedBasePath = configuration["files:externalDatabase:allowedBasePath"];
-        if (string.IsNullOrWhiteSpace(allowedBasePath))
+        if (fileName != Path.GetFileName(fileName))
         {
-            throw new InvalidOperationException("files:externalDatabase:allowedBasePath is not configured.");
+            throw new ArgumentException("SQLite file name must not contain path separators.");
         }
 
-        var fullPath = Path.GetFullPath(filePath);
-        var normalizedBase = Path.GetFullPath(allowedBasePath);
-
-        if (!fullPath.StartsWith(normalizedBase + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)
-            && !fullPath.Equals(normalizedBase, StringComparison.OrdinalIgnoreCase))
+        var storageRoot = configuration["$STORAGE_ROOT"];
+        if (string.IsNullOrWhiteSpace(storageRoot))
         {
-            throw new UnauthorizedAccessException("SQLite path is outside the allowed directory.");
+            throw new InvalidOperationException("$STORAGE_ROOT is not configured.");
         }
 
-        return fullPath;
+        return Path.Combine(storageRoot, fileName);
     }
 
     private DbConnection CreateMySqlConnection()
