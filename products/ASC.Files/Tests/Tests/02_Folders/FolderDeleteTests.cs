@@ -62,31 +62,17 @@ public class FolderDeleteTests(
         await _filesClient.Authenticate(Initializer.Owner);
 
         var folder = await CreateFolder("folder_no_permissions", FolderType.USER, Initializer.Owner);
-        await CreateFile("file_inside_folder.docx", folder.Id);
 
         var user = await Initializer.InviteContact(EmployeeType.User);
         await _filesClient.Authenticate(user);
 
-        // Act
-        var results = (await _foldersApi.DeleteFolderAsync(
-            folder.Id,
-            new DeleteFolder(false, true),
-            TestContext.Current.CancellationToken)).Response;
-
-        var operationId = results.FirstOrDefault()?.Id;
-
-        if (results.Any(r => !r.Finished))
-        {
-            results = await WaitLongOperation(operationId);
-        }
-
-        // Assert
-        results.Should().Contain(r => !string.IsNullOrEmpty(r.Error));
-
-        await _filesClient.Authenticate(Initializer.Owner);
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _foldersApi.DeleteFolderAsync(
+                folder.Id,
+                new DeleteFolder(false, true),
+                TestContext.Current.CancellationToken));
         
-        var folderInfo = (await _foldersApi.GetFolderInfoAsync(folder.Id, TestContext.Current.CancellationToken)).Response;
-        folderInfo.Should().NotBeNull();
-        folderInfo.Id.Should().Be(folder.Id);
+        exception.ErrorCode.Should().Be(403);
     }
 }

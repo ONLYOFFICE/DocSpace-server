@@ -121,7 +121,7 @@ public class DeletePermissionsCheck<T>(IFileDao<T> fileDao, IFolderDao<T> folder
 
             var canDelete = await security.CanDeleteAsync(folder);
             var checkPermissions = !folder.IsRoom || !canDelete;
-            if ((immediately && folder.IsRoom) || (ignoreException && checkPermissions && !canDelete))
+            if ((!immediately && folder.IsRoom) || (!ignoreException && checkPermissions && !canDelete))
             {
                 errorMsg = FilesCommonResource.ErrorMessage_SecurityException_DeleteFolder;
 
