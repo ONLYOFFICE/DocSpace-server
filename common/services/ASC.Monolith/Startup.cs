@@ -341,75 +341,76 @@ public class Startup : BaseStartup
     {
         var eventBus = serviceProvider.GetRequiredService<IEventBus>();
 
-        // --- ASC.Files.Worker event handlers ---
-        await eventBus.SubscribeAsync<ThumbnailRequestedIntegrationEvent,
-            ASC.Files.Worker.IntegrationEvents.EventHandling.ThumbnailRequestedIntegrationEventHandler>();
-        await eventBus.SubscribeAsync<RoomIndexExportIntegrationEvent,
-            ASC.Files.Worker.IntegrationEvents.EventHandling.RoomIndexExportIntegrationEventHandler>();
-        await eventBus.SubscribeAsync<DeleteIntegrationEvent,
-            ASC.Files.Worker.IntegrationEvents.EventHandling.DeleteIntegrationEventHandler>();
-        await eventBus.SubscribeAsync<MoveOrCopyIntegrationEvent,
-            ASC.Files.Worker.IntegrationEvents.EventHandling.MoveOrCopyIntegrationEventHandler>();
-        await eventBus.SubscribeAsync<DuplicateIntegrationEvent,
-            ASC.Files.Worker.IntegrationEvents.EventHandling.DuplicateIntegrationEventHandler>();
-        await eventBus.SubscribeAsync<BulkDownloadIntegrationEvent,
-            ASC.Files.Worker.IntegrationEvents.EventHandling.BulkDownloadIntegrationEventHandler>();
-        await eventBus.SubscribeAsync<MarkAsReadIntegrationEvent,
-            ASC.Files.Worker.IntegrationEvents.EventHandling.MarkAsReadIntegrationEventHandler>();
-        await eventBus.SubscribeAsync<EmptyTrashIntegrationEvent,
-            ASC.Files.Worker.IntegrationEvents.EventHandling.EmptyTrashIntegrationEventHandler>();
-        await eventBus.SubscribeAsync<FormFillingReportIntegrationEvent,
-            ASC.Files.Worker.IntegrationEvents.EventHandling.FormFillingReportIntegrationEventHandler>();
-        await eventBus.SubscribeAsync<RoomNotifyIntegrationEvent,
-            ASC.Files.Worker.IntegrationEvents.EventHandling.RoomNotifyIntegrationEventHandler>();
-        await eventBus.SubscribeAsync<CreateRoomTemplateIntegrationEvent,
-            ASC.Files.Core.RoomTemplates.Events.RoomTemplatesIntegrationEventHandler>();
-        await eventBus.SubscribeAsync<CreateRoomFromTemplateIntegrationEvent,
-            ASC.Files.Core.RoomTemplates.Events.RoomTemplatesIntegrationEventHandler>();
-        await eventBus.SubscribeAsync<DataStorageEncryptionIntegrationEvent,
-            ASC.Files.Worker.IntegrationEvents.EventHandling.DataStorageEncryptionIntegrationEventHandler>();
-        await eventBus.SubscribeAsync<CustomerOperationsReportIntegrationEvent,
-            ASC.Files.Worker.IntegrationEvents.EventHandling.CustomerOperationsReportIntegrationEventHandler>();
+        await Task.WhenAll(
+            // --- ASC.Files.Worker event handlers ---
+            eventBus.SubscribeAsync<ThumbnailRequestedIntegrationEvent,
+                ASC.Files.Worker.IntegrationEvents.EventHandling.ThumbnailRequestedIntegrationEventHandler>(),
+            eventBus.SubscribeAsync<RoomIndexExportIntegrationEvent,
+                ASC.Files.Worker.IntegrationEvents.EventHandling.RoomIndexExportIntegrationEventHandler>(),
+            eventBus.SubscribeAsync<DeleteIntegrationEvent,
+                ASC.Files.Worker.IntegrationEvents.EventHandling.DeleteIntegrationEventHandler>(),
+            eventBus.SubscribeAsync<MoveOrCopyIntegrationEvent,
+                ASC.Files.Worker.IntegrationEvents.EventHandling.MoveOrCopyIntegrationEventHandler>(),
+            eventBus.SubscribeAsync<DuplicateIntegrationEvent,
+                ASC.Files.Worker.IntegrationEvents.EventHandling.DuplicateIntegrationEventHandler>(),
+            eventBus.SubscribeAsync<BulkDownloadIntegrationEvent,
+                ASC.Files.Worker.IntegrationEvents.EventHandling.BulkDownloadIntegrationEventHandler>(),
+            eventBus.SubscribeAsync<MarkAsReadIntegrationEvent,
+                ASC.Files.Worker.IntegrationEvents.EventHandling.MarkAsReadIntegrationEventHandler>(),
+            eventBus.SubscribeAsync<EmptyTrashIntegrationEvent,
+                ASC.Files.Worker.IntegrationEvents.EventHandling.EmptyTrashIntegrationEventHandler>(),
+            eventBus.SubscribeAsync<FormFillingReportIntegrationEvent,
+                ASC.Files.Worker.IntegrationEvents.EventHandling.FormFillingReportIntegrationEventHandler>(),
+            eventBus.SubscribeAsync<RoomNotifyIntegrationEvent,
+                ASC.Files.Worker.IntegrationEvents.EventHandling.RoomNotifyIntegrationEventHandler>(),
+            eventBus.SubscribeAsync<CreateRoomTemplateIntegrationEvent,
+                ASC.Files.Core.RoomTemplates.Events.RoomTemplatesIntegrationEventHandler>(),
+            eventBus.SubscribeAsync<CreateRoomFromTemplateIntegrationEvent,
+                ASC.Files.Core.RoomTemplates.Events.RoomTemplatesIntegrationEventHandler>(),
+            eventBus.SubscribeAsync<DataStorageEncryptionIntegrationEvent,
+                ASC.Files.Worker.IntegrationEvents.EventHandling.DataStorageEncryptionIntegrationEventHandler>(),
+            eventBus.SubscribeAsync<CustomerOperationsReportIntegrationEvent,
+                ASC.Files.Worker.IntegrationEvents.EventHandling.CustomerOperationsReportIntegrationEventHandler>(),
 
-        // --- ASC.Web.Studio event handlers ---
-        await eventBus.SubscribeAsync<RemovePortalIntegrationEvent,
-            ASC.Web.Studio.IntegrationEvents.RemovePortalIntegrationEventHandler>();
-        await eventBus.SubscribeAsync<MigrationParseIntegrationEvent,
-            ASC.Migration.Core.Core.MigrationIntegrationEventHandler>();
-        await eventBus.SubscribeAsync<MigrationIntegrationEvent,
-            ASC.Migration.Core.Core.MigrationIntegrationEventHandler>();
-        await eventBus.SubscribeAsync<MigrationCancelIntegrationEvent,
-            ASC.Migration.Core.Core.MigrationIntegrationEventHandler>();
-        await eventBus.SubscribeAsync<MigrationClearIntegrationEvent,
-            ASC.Migration.Core.Core.MigrationIntegrationEventHandler>();
-        await eventBus.SubscribeAsync<EventDataIntegrationEvent, EventDataIntegrationEventHandler>();
+            // --- ASC.Web.Studio event handlers ---
+            eventBus.SubscribeAsync<RemovePortalIntegrationEvent,
+                ASC.Web.Studio.IntegrationEvents.RemovePortalIntegrationEventHandler>(),
+            eventBus.SubscribeAsync<MigrationParseIntegrationEvent,
+                ASC.Migration.Core.Core.MigrationIntegrationEventHandler>(),
+            eventBus.SubscribeAsync<MigrationIntegrationEvent,
+                ASC.Migration.Core.Core.MigrationIntegrationEventHandler>(),
+            eventBus.SubscribeAsync<MigrationCancelIntegrationEvent,
+                ASC.Migration.Core.Core.MigrationIntegrationEventHandler>(),
+            eventBus.SubscribeAsync<MigrationClearIntegrationEvent,
+                ASC.Migration.Core.Core.MigrationIntegrationEventHandler>(),
+            eventBus.SubscribeAsync<EventDataIntegrationEvent, EventDataIntegrationEventHandler>(),
 
-        // --- ASC.Data.Backup.Worker event handlers ---
-        await eventBus.SubscribeAsync<BackupRequestIntegrationEvent,
-        ASC.Data.Backup.IntegrationEvents.EventHandling.BackupRequestedIntegrationEventHandler>();
-        await eventBus.SubscribeAsync<BackupRestoreRequestIntegrationEvent,
-        ASC.Data.Backup.IntegrationEvents.EventHandling.BackupRestoreRequestedIntegrationEventHandler>();
-        await eventBus.SubscribeAsync<IntegrationEvent,
-        ASC.Data.Backup.IntegrationEvents.EventHandling.BackupDeleteScheldureRequestedIntegrationEventHandler>();
+            // --- ASC.Data.Backup.Worker event handlers ---
+            eventBus.SubscribeAsync<BackupRequestIntegrationEvent,
+                ASC.Data.Backup.IntegrationEvents.EventHandling.BackupRequestedIntegrationEventHandler>(),
+            eventBus.SubscribeAsync<BackupRestoreRequestIntegrationEvent,
+                ASC.Data.Backup.IntegrationEvents.EventHandling.BackupRestoreRequestedIntegrationEventHandler>(),
+            eventBus.SubscribeAsync<IntegrationEvent,
+                ASC.Data.Backup.IntegrationEvents.EventHandling.BackupDeleteScheldureRequestedIntegrationEventHandler>(),
 
-        // --- ASC.Notify event handlers ---
-        await eventBus.SubscribeAsync<NotifyInvokeSendMethodRequestedIntegrationEvent,
-            ASC.Notify.IntegrationEvents.EventHandling.NotifyInvokeSendMethodRequestedIntegrationEventHandler>();
-        await eventBus.SubscribeAsync<NotifySendMessageRequestedIntegrationEvent,
-            ASC.Notify.IntegrationEvents.EventHandling.NotifySendMessageRequestedIntegrationEventHandler>();
+            // --- ASC.Notify event handlers ---
+            eventBus.SubscribeAsync<NotifyInvokeSendMethodRequestedIntegrationEvent,
+                ASC.Notify.IntegrationEvents.EventHandling.NotifyInvokeSendMethodRequestedIntegrationEventHandler>(),
+            eventBus.SubscribeAsync<NotifySendMessageRequestedIntegrationEvent,
+                ASC.Notify.IntegrationEvents.EventHandling.NotifySendMessageRequestedIntegrationEventHandler>(),
 
-        // --- ASC.Studio.Notify event handlers ---
-        await eventBus.SubscribeAsync<NotifyItemIntegrationEvent,
-            ASC.Web.Studio.IntegrationEvents.NotifyItemIntegrationEventHandler>();
+            // --- ASC.Studio.Notify event handlers ---
+            eventBus.SubscribeAsync<NotifyItemIntegrationEvent,
+                ASC.Web.Studio.IntegrationEvents.NotifyItemIntegrationEventHandler>(),
 
-        // --- ASC.AI.Worker event handlers ---
-        await eventBus.SubscribeAsync<VectorizationIntegrationEvent,
-            ASC.AI.Worker.Handlers.VectorizationIntegrationEventHandler>();
-        await eventBus.SubscribeAsync<MessageExportIntegrationEvent,
-            ASC.AI.Worker.Handlers.MessageExportIntegrationEventHandler>();
-        await eventBus.SubscribeAsync<ChatExportIntegrationEvent,
-            ASC.AI.Worker.Handlers.ChatExportIntegrationEventHandler>();
-        await eventBus.SubscribeAsync<ChatDeletionIntegrationEvent,
-            ASC.AI.Worker.Handlers.ChatDeletionIntegrationEventHandler>();
+            // --- ASC.AI.Worker event handlers ---
+            eventBus.SubscribeAsync<VectorizationIntegrationEvent,
+                ASC.AI.Worker.Handlers.VectorizationIntegrationEventHandler>(),
+            eventBus.SubscribeAsync<MessageExportIntegrationEvent,
+                ASC.AI.Worker.Handlers.MessageExportIntegrationEventHandler>(),
+            eventBus.SubscribeAsync<ChatExportIntegrationEvent,
+                ASC.AI.Worker.Handlers.ChatExportIntegrationEventHandler>(),
+            eventBus.SubscribeAsync<ChatDeletionIntegrationEvent,
+                ASC.AI.Worker.Handlers.ChatDeletionIntegrationEventHandler>());
     }
 }
