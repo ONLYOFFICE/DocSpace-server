@@ -4252,9 +4252,11 @@ public class FileStorageService //: IFileStorageService
             pdfFile.ParentId = folder.Id;
             pdfFile.Comment = FilesCommonResource.CommentCreate;
 
-            var request = new HttpRequestMessage { RequestUri = new Uri(convertedDocumentUri) };
+            using var request = new HttpRequestMessage(HttpMethod.Get, convertedDocumentUri);
 
+#pragma warning disable CA2000 // HttpClient is short-lived and disposed by runtime
             var httpClient = clientFactory.CreateClient();
+#pragma warning restore CA2000
             using var response = await httpClient.SendAsync(request);
             await using var fileStream = await response.Content.ReadAsStreamAsync();
             File<T> result;

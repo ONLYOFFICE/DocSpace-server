@@ -711,11 +711,7 @@ public class GoogleCloudStorage(TempStream tempStream,
             totalBytes = Convert.ToString((chunkNumber - 1) * defaultChunkSize + chunkLength);
         }
 
-        var request = new HttpRequestMessage
-        {
-            RequestUri = new Uri(uploadUri),
-            Method = HttpMethod.Put
-        };
+        using var request = new HttpRequestMessage(HttpMethod.Put, uploadUri);
         request.Content = new StreamContent(stream);
         request.Content.Headers.ContentRange = new ContentRangeHeaderValue(Convert.ToInt64(bytesRangeStart),
                                                                Convert.ToInt64(bytesRangeEnd),
@@ -729,7 +725,9 @@ public class GoogleCloudStorage(TempStream tempStream,
 
             try
             {
+                #pragma warning disable CA2000 // Dispose objects before losing scope
                 var httpClient = _clientFactory.CreateClient();
+                #pragma warning restore CA2000 // Dispose objects before losing scope
                 using var response = await httpClient.SendAsync(request);
 
                 break;

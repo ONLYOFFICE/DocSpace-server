@@ -51,9 +51,9 @@ public class ExecuteFileCreationAndSharingCommand : AsyncCommand<ExecuteFileCrea
     {
         var configuration = await ApiHelper.GetConfigurationAsync(settings.Email, settings.Password);
         
-        var filesApi = new FilesApi(configuration);
-        var foldersApi = new FoldersApi(configuration);
-        var sharingApi = new SharingApi(configuration);
+        using var filesApi = new FilesApi(configuration);
+        using var foldersApi = new FoldersApi(configuration);
+        using var sharingApi = new SharingApi(configuration);
         
         var system = new Faker().System;
         var token = CancellationToken.None;
@@ -79,7 +79,7 @@ public class ExecuteFileCreationAndSharingCommand : AsyncCommand<ExecuteFileCrea
                 var j = 0;
                 foreach (var i in Enumerable.Range(1, iterations1))
                 {
-                    tasks.Add(CreateAndShareFile(filesApi, sharingApi, system, userFolder, user2, token));
+                    tasks.Add(CreateAndShareFile(user2));
                     j++;
                     if (j == 100)
                     {
@@ -89,7 +89,7 @@ public class ExecuteFileCreationAndSharingCommand : AsyncCommand<ExecuteFileCrea
                     }
                 }
 
-                async Task CreateAndShareFile(FilesApi filesApi, SharingApi sharingApi, Bogus.DataSets.System system, int userFolder, Guid guid, CancellationToken token)
+                async Task CreateAndShareFile(Guid guid)
                 {
                     var file = (await filesApi.CreateFileAsync(userFolder, new CreateFileJsonElement(system.FileName("docx")), cancellationToken: token)).Response;
 

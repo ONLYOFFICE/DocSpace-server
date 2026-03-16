@@ -53,7 +53,7 @@ namespace ASC.AI.Api
                 uri += Request.QueryString.Value;
             }
             
-            var request = new HttpRequestMessage(new HttpMethod(Request.Method), uri);
+            using var request = new HttpRequestMessage(new HttpMethod(Request.Method), uri);
             switch (provider.Type)
             {
                 case ProviderType.Anthropic:
@@ -69,7 +69,9 @@ namespace ASC.AI.Api
                     break;
             }
 
+            #pragma warning disable CA2000
             var client = httpClientFactory.CreateClient();
+            #pragma warning restore CA2000
             client.BaseAddress = new Uri(provider.Url.EndsWith('/') ? provider.Url : provider.Url + '/');
 
             if (Request.ContentLength is > 0)
@@ -102,7 +104,10 @@ namespace ASC.AI.Api
         {
             var key = await aiGateway.GetKeyAsync();
 
-            var client = httpClientFactory.CreateClient();
+            #pragma warning disable CA2000
+            using var client = httpClientFactory.CreateClient();
+            #pragma warning restore CA2000
+            
             var baseUrl = aiGateway.Url;
             client.BaseAddress = new Uri(baseUrl.EndsWith('/') ? baseUrl : baseUrl + '/');
 
@@ -112,7 +117,7 @@ namespace ASC.AI.Api
                 uri += Request.QueryString.Value;
             }
 
-            var request = new HttpRequestMessage(new HttpMethod(Request.Method), uri);
+            using var request = new HttpRequestMessage(new HttpMethod(Request.Method), uri);
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", key);
 
             if (Request.ContentLength is > 0)

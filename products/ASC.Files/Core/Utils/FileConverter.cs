@@ -343,10 +343,8 @@ public class FileConverter(
 
         var uriTuple = await documentServiceConnector.GetConvertedUriAsync(fileUri, file.ConvertedExtension, toExtension, docKey, password, CultureInfo.CurrentUICulture.Name, thumbnail, spreadsheetLayout, options, false, toForm);
         var convertUri = uriTuple.ConvertedDocumentUri;
-        var request = new HttpRequestMessage
-        {
-            RequestUri = new Uri(convertUri)
-        };
+        using var request = new HttpRequestMessage();
+        request.RequestUri = new Uri(convertUri);
 
         var httpClient = clientFactory.CreateClient(nameof(DocumentService));
         var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
@@ -534,10 +532,8 @@ public class FileConverter(
         newFile.Comment = string.Format(FilesCommonResource.CommentConvert, file.Title);
         newFile.ThumbnailStatus = Thumbnail.Waiting;
 
-        var request = new HttpRequestMessage
-        {
-            RequestUri = new Uri(convertedFileUrl)
-        };
+        using var request = new HttpRequestMessage();
+        request.RequestUri = new Uri(convertedFileUrl);
 
         var httpClient = clientFactory.CreateClient(nameof(DocumentService));
 
@@ -641,10 +637,8 @@ public class FileConverter(
         newFile.ConvertedType = null;
         newFile.ThumbnailStatus = Thumbnail.Waiting;
 
-        var request = new HttpRequestMessage
-        {
-            RequestUri = new Uri(convertedFileUrl)
-        };
+        using var request = new HttpRequestMessage();
+        request.RequestUri = new Uri(convertedFileUrl);
 
         var httpClient = clientFactory.CreateClient(nameof(DocumentService));
 

@@ -603,69 +603,65 @@ public class DocumentServiceTrackerHelper(
             {
                 case MailMergeType.AttachDocx:
                 case MailMergeType.AttachPdf:
-                    var requestDownload = new HttpRequestMessage
                     {
-                        RequestUri = new Uri(documentServiceConnector.ReplaceDocumentAddress(fileData.Url))
-                    };
+                        using var requestDownload = new HttpRequestMessage();
+                        requestDownload.RequestUri = new Uri(documentServiceConnector.ReplaceDocumentAddress(fileData.Url));
 
-                    using (var responseDownload = await httpClient.SendAsync(requestDownload))
-                    {
-                        if (!responseDownload.IsSuccessStatusCode)
+                        using (var responseDownload = await httpClient.SendAsync(requestDownload))
                         {
-                            throw new Exception($"{FilesCommonResource.ErrorMessage_DocServiceException} {responseDownload.StatusCode}");
-                        }
-
-                        await using (var streamDownload = await responseDownload.Content.ReadAsStreamAsync())
-                        await using (var downloadStream = new ResponseStream(streamDownload, streamDownload.Length))
-                        {
-                            const int bufferSize = 2048;
-                            var buffer = new byte[bufferSize];
-                            int readed;
-                            attach = new MemoryStream();
-                            while ((readed = await downloadStream.ReadAsync(buffer.AsMemory(0, bufferSize))) > 0)
+                            if (!responseDownload.IsSuccessStatusCode)
                             {
-                                await attach.WriteAsync(buffer.AsMemory(0, readed));
+                                throw new Exception($"{FilesCommonResource.ErrorMessage_DocServiceException} {responseDownload.StatusCode}");
                             }
 
-                            attach.Position = 0;
+                            await using (var streamDownload = await responseDownload.Content.ReadAsStreamAsync())
+                            await using (var downloadStream = new ResponseStream(streamDownload, streamDownload.Length))
+                            {
+                                const int bufferSize = 2048;
+                                var buffer = new byte[bufferSize];
+                                int readed;
+                                attach = new MemoryStream();
+                                while ((readed = await downloadStream.ReadAsync(buffer.AsMemory(0, bufferSize))) > 0)
+                                {
+                                    await attach.WriteAsync(buffer.AsMemory(0, readed));
+                                }
+
+                                attach.Position = 0;
+                            }
                         }
-                    }
 
-                    if (string.IsNullOrEmpty(fileData.MailMerge.Title))
-                    {
-                        fileData.MailMerge.Title = "Attach";
-                    }
+                        if (string.IsNullOrEmpty(fileData.MailMerge.Title))
+                        {
+                            fileData.MailMerge.Title = "Attach";
+                        }
 
-                    var attachExt = fileData.MailMerge.Type == MailMergeType.AttachDocx ? ".docx" : ".pdf";
-                    var curExt = FileUtility.GetFileExtension(fileData.MailMerge.Title);
-                    if (curExt != attachExt)
-                    {
-                        fileData.MailMerge.Title += attachExt;
-                    }
+                        var attachExt = fileData.MailMerge.Type == MailMergeType.AttachDocx ? ".docx" : ".pdf";
+                        var curExt = FileUtility.GetFileExtension(fileData.MailMerge.Title);
+                        if (curExt != attachExt)
+                        {
+                            fileData.MailMerge.Title += attachExt;
+                        }
 
-                    break;
+                        break;
+                    }
 
                 case MailMergeType.Html:
-                    var httpRequest = new HttpRequestMessage
                     {
-                        RequestUri = new Uri(documentServiceConnector.ReplaceDocumentAddress(fileData.Url))
-                    };
+                        using var httpRequest = new HttpRequestMessage();
+                        httpRequest.RequestUri = new Uri(documentServiceConnector.ReplaceDocumentAddress(fileData.Url));
 
-                    using (var httpResponse = await httpClient.SendAsync(httpRequest))
-                    {
+                        using var httpResponse = await httpClient.SendAsync(httpRequest);
                         if (!httpResponse.IsSuccessStatusCode)
                         {
                             throw new Exception($"{FilesCommonResource.ErrorMessage_DocServiceException} {httpResponse.StatusCode}");
                         }
 
-                        await using (var stream = await httpResponse.Content.ReadAsStreamAsync())
-                        {
-                            using var reader = new StreamReader(stream, Encoding.GetEncoding(Encoding.UTF8.WebName));
-                            message = await reader.ReadToEndAsync();
-                        }
-                    }
+                        await using var stream = await httpResponse.Content.ReadAsStreamAsync();
+                        using var reader = new StreamReader(stream, Encoding.GetEncoding(Encoding.UTF8.WebName));
+                        message = await reader.ReadToEndAsync();
 
-                    break;
+                        break;
+                    }
             }
 
             using (var mailMergeTask =
@@ -725,10 +721,8 @@ public class DocumentServiceTrackerHelper(
             var path = $@"save_crash\{DateTime.UtcNow:yyyy_MM_dd}\{userId}_{fileName}";
 
             var store = await globalStore.GetStoreAsync();
-            var request = new HttpRequestMessage
-            {
-                RequestUri = new Uri(downloadUri)
-            };
+            using var request = new HttpRequestMessage();
+            request.RequestUri = new Uri(downloadUri);
 
             var httpClient = clientFactory.CreateClient(nameof(ASC.Files.Core.Helpers.DocumentService));
             using var response = await httpClient.SendAsync(request);
@@ -771,10 +765,8 @@ public class DocumentServiceTrackerHelper(
         try
         {
             var fileDao = daoFactory.GetFileDao<T>();
-            var request = new HttpRequestMessage
-            {
-                RequestUri = new Uri(differenceUrl)
-            };
+            using var request = new HttpRequestMessage();
+            request.RequestUri = new Uri(differenceUrl);
 
             var httpClient = clientFactory.CreateClient(nameof(ASC.Files.Core.Helpers.DocumentService));
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);

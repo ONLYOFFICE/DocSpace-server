@@ -78,10 +78,14 @@ public partial class McpService(
             ConnectionTimeout = TimeSpan.FromSeconds(30)
         };
         
-        var transport = new HttpClientTransport(options, httpClientFactory.CreateClient());
+#pragma warning disable CA2000
+        var httpClient = httpClientFactory.CreateClient();
+#pragma warning restore CA2000
         
+        await using var transport = new HttpClientTransport(options, httpClient);
+
         await ThrowIfNotConnectAsync(transport);
-        
+
         var server = await mcpDao.AddServerAsync(tenantId, endpoint, name, headers, description, ConnectionType.Direct, iconBase64);
         
         messageService.Send(MessageAction.ServerCreated, MessageTarget.Create(server.Id), server.Name);
@@ -157,9 +161,13 @@ public partial class McpService(
             TransportMode = HttpTransportMode.AutoDetect,
             ConnectionTimeout = TimeSpan.FromSeconds(30)
         };
-            
-        var transport = new HttpClientTransport(options, httpClientFactory.CreateClient());
-            
+        
+#pragma warning disable CA2000
+        var httpClient = httpClientFactory.CreateClient();
+#pragma warning restore CA2000
+        
+        await using var transport = new HttpClientTransport(options, httpClient);
+
         await ThrowIfNotConnectAsync(transport);
 
         var updatedServer1 = await mcpDao.UpdateServerAsync(server, updateIcon, iconBase64);

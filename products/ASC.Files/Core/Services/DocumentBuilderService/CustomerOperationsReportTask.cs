@@ -61,8 +61,11 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
 
         using var request = new HttpRequestMessage();
         request.RequestUri = fileUri;
-
-        using var httpClient = clientFactory.CreateClient();
+        
+#pragma warning disable CA2000
+        var httpClient = clientFactory.CreateClient();
+#pragma warning restore CA2000
+        
         using var response = await httpClient.SendAsync(request);
         await using var stream = await response.Content.ReadAsStreamAsync();
 

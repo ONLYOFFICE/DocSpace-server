@@ -100,7 +100,9 @@ public static class ServiceCollectionExtension
                         FactoryHardTimeout = TimeSpan.FromSeconds(5)
                     }
                 })
+#pragma warning disable CA2000 // MemoryCache is owned and disposed by FusionCache
                 .WithMemoryCache(new MemoryCache(new MemoryCacheOptions { ExpirationScanFrequency = TimeSpan.FromSeconds(10) }))
+#pragma warning restore CA2000
                 .WithRegisteredLogger();
 
             if (connection != null)
@@ -143,7 +145,9 @@ public static class ServiceCollectionExtension
                         SkipDistributedCacheWrite = true
                     }
                 })
+#pragma warning disable CA2000 // MemoryCache is owned and disposed by FusionCache
                 .WithMemoryCache(new MemoryCache(new MemoryCacheOptions()))
+#pragma warning restore CA2000
                 .WithRegisteredLogger();
 
             if (connection != null)
