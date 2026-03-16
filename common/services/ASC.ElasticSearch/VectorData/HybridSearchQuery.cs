@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2026
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,7 +27,13 @@
 #nullable enable
 namespace ASC.ElasticSearch.VectorData;
 
-public class VectorSearchOptions<TRecord> where TRecord: class
+public class HybridSearchQuery<TRecord> where TRecord: class
 {
+    public required Expression<Func<TRecord, object>> VectorField { get; init; }
+    public required float[] Vector { get; init; }
+    public required string LexicalQuery { get; init; }
+    public required IReadOnlyCollection<Expression<Func<TRecord, object>>> LexicalFields { get; init; }
+    public required int Top { get; init; }
+    public int? SemanticK { get; init; }
     public Expression<Func<TRecord, bool>>? Filter { get; init; }
 }

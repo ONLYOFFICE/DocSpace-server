@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Text.Json;
+
 #nullable enable
 namespace ASC.ElasticSearch.VectorData;
 
@@ -36,6 +38,13 @@ internal sealed class OpenSearchFilterTranslator<T>(Inferrer inferrer)
         _recordParameter = filter.Parameters[0];
 
         return TranslateExpression(filter.Body);
+    }
+
+    public JsonElement TranslateToJsonElement(Expression<Func<T, bool>> filter)
+    {
+        _recordParameter = filter.Parameters[0];
+
+        return JsonSerializer.SerializeToElement(TranslateExpressionToObject(filter.Body));
     }
 
     private QueryContainer TranslateExpression(Expression node)
@@ -52,6 +61,20 @@ internal sealed class OpenSearchFilterTranslator<T>(Inferrer inferrer)
         };
     }
 
+    private object TranslateExpressionToObject(Expression node)
+    {
+        return node switch
+        {
+            BinaryExpression { NodeType: ExpressionType.Equal } equal =>
+                TranslateEqualToObject(equal.Left, equal.Right),
+            BinaryExpression { NodeType: ExpressionType.AndAlso } andAlso =>
+                TranslateAndAlsoToObject(andAlso.Left, andAlso.Right),
+            BinaryExpression { NodeType: ExpressionType.OrElse } orElse =>
+                TranslateOrElseToObject(orElse.Left, orElse.Right),
+            _ => throw new NotSupportedException($"Unsupported expression: {node.NodeType}")
+        };
+    }
+
     private QueryContainer TranslateEqual(Expression left, Expression right)
     {
         if (TryGetPropertyInfo(left, out var propertyInfo) && TryGetValue(right, out var value))
@@ -64,6 +87,21 @@ internal sealed class OpenSearchFilterTranslator<T>(Inferrer inferrer)
         {
             var field = inferrer.Field(propertyInfo);
             return new MatchQuery { Field = field, Query = value2?.ToString() };
+        }
+
+        throw new NotSupportedException("Invalid equality expression");
+    }
+
+    private object TranslateEqualToObject(Expression left, Expression right)
+    {
+        if (TryGetPropertyInfo(left, out var propertyInfo) && TryGetValue(right, out var value))
+        {
+            return CreateMatchObject(propertyInfo, value);
+        }
+
+        if (TryGetPropertyInfo(right, out propertyInfo) && TryGetValue(left, out var value2))
+        {
+            return CreateMatchObject(propertyInfo, value2);
         }
 
         throw new NotSupportedException("Invalid equality expression");
@@ -141,6 +179,54 @@ internal sealed class OpenSearchFilterTranslator<T>(Inferrer inferrer)
         return new BoolQuery
         {
             Should = [TranslateExpression(left), TranslateExpression(right)]
+        };
+    }
+
+    private object TranslateAndAlsoToObject(Expression left, Expression right)
+    {
+        return new Dictionary<string, object?>
+        {
+            ["bool"] = new Dictionary<string, object?>
+            {
+                ["must"] =
+                new[]
+                {
+                    TranslateExpressionToObject(left),
+                    TranslateExpressionToObject(right)
+                }
+            }
+        };
+    }
+
+    private object TranslateOrElseToObject(Expression left, Expression right)
+    {
+        return new Dictionary<string, object?>
+        {
+            ["bool"] = new Dictionary<string, object?>
+            {
+                ["should"] =
+                new[]
+                {
+                    TranslateExpressionToObject(left),
+                    TranslateExpressionToObject(right)
+                }
+            }
+        };
+    }
+
+    private Dictionary<string, object?> CreateMatchObject(PropertyInfo propertyInfo, object? value)
+    {
+        var field = inferrer.Field(propertyInfo);
+
+        return new Dictionary<string, object?>
+        {
+            ["match"] = new Dictionary<string, object?>
+            {
+                [field] = new Dictionary<string, object?>
+                {
+                    ["query"] = value?.ToString()
+                }
+            }
         };
     }
 }

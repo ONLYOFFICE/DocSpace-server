@@ -30,7 +30,7 @@ namespace ASC.AI.Core.Tools.Retrieval;
 public class KnowledgeSearchTool(KnowledgeSearchEngine searchEngine)
 {
     public const string Name = "docspace_knowledge_search";
-    private const string Description = "Search the DocSpace knowledge base using semantic search to find relevant information from documents and resources stored in the workspace. Finds content based on meaning and context, not just exact keyword matches. Use for questions about company policies, procedures, reports, documentation, and other organizational knowledge stored in DocSpace.";
+    private const string Description = "Search the DocSpace knowledge base using hybrid lexical and semantic search to find relevant information from documents and resources stored in the workspace. Finds content by combining exact keywords, document titles, and contextual meaning. Use for questions about company policies, procedures, reports, documentation, and other organizational knowledge stored in DocSpace.";
     
     private static AIFunctionFactoryOptions FactoryOptions => new()
     {
@@ -42,7 +42,7 @@ public class KnowledgeSearchTool(KnowledgeSearchEngine searchEngine)
     {
         return AIFunctionFactory.Create(Function, FactoryOptions);
         
-        async Task<ToolResponse<List<KnowledgeSearchResult>>> Function([Description("Search query")] string query)
+        async Task<ToolResponse<List<KnowledgeSearchResult>>> Function([Description("Search query. Include important keywords, names, and natural-language intent for hybrid lexical and semantic retrieval.")] string query)
         {
             try
             {

@@ -25,6 +25,11 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 #nullable enable
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
+using HttpMethod = OpenSearch.Net.HttpMethod;
+
 namespace ASC.ElasticSearch.VectorData;
 
 public class VectorStoreCollection<TRecord>(
@@ -87,14 +92,7 @@ public class VectorStoreCollection<TRecord>(
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         EnsureClientConfigured();
-
-        ArgumentNullException.ThrowIfNull(propertySelector);
-        ArgumentNullException.ThrowIfNull(vector);
-
-        if (top <= 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(top), @"Top must be greater than 0.");
-        }
+        ValidateSearchArguments(propertySelector, vector, top);
         
         var query = new KnnQuery
         {
@@ -120,6 +118,71 @@ public class VectorStoreCollection<TRecord>(
         foreach (var hit in response.Hits)
         {
             yield return hit.Source;
+        }
+    }
+
+    public async IAsyncEnumerable<TRecord> HybridSearchAsync(
+        HybridSearchQuery<TRecord> searchQuery,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        EnsureClientConfigured();
+        ValidateHybridSearchQuery(searchQuery);
+
+        var vectorField = ResolveFieldName(searchQuery.VectorField);
+        var resolvedLexicalFields = searchQuery.LexicalFields
+            .Select(ResolveFieldName)
+            .ToArray();
+        
+        var resolvedSemanticK = searchQuery.SemanticK ?? searchQuery.Top;
+
+        var lexicalSearchQuery = HybridSearchQueryDefinition.CreateMultiMatch(searchQuery.LexicalQuery, resolvedLexicalFields);
+        var semanticQuery = HybridSearchQueryDefinition.CreateKnn(vectorField, searchQuery.Vector, resolvedSemanticK);
+
+        if (searchQuery.Filter != null)
+        {
+            var translator = new OpenSearchFilterTranslator<TRecord>(openSearchClient!.Infer);
+            var filter = translator.TranslateToJsonElement(searchQuery.Filter);
+            lexicalSearchQuery = HybridSearchQueryDefinition.CreateBool(lexicalSearchQuery, filter);
+            semanticQuery = HybridSearchQueryDefinition.CreateBool(semanticQuery, filter);
+        }
+
+        var query = HybridSearchQueryDefinition.CreateHybrid(lexicalSearchQuery, semanticQuery);
+
+        var request = new HybridSearchRequest
+        {
+            Size = searchQuery.Top,
+            Query = query
+        };
+        
+        var requestParameters = new SearchRequestParameters
+        {
+            QueryString = new Dictionary<string, object>
+            {
+                ["search_pipeline"] = Client.HybridSearchPipelineName
+            }
+        };
+
+        var response = await OperationHandler.RunAsync<SearchResponse<TRecord>, OpenSearchClientException>(
+            name,
+            "hybrid_search",
+            async () => await ((IOpenSearchClient)openSearchClient!).LowLevel.DoRequestAsync<SearchResponse<TRecord>>(
+                HttpMethod.POST,
+                $"/{Uri.EscapeDataString(name)}/_search",
+                cancellationToken,
+                PostData.String(JsonSerializer.Serialize(request)),
+                requestParameters));
+
+        if (response.Hits == null)
+        {
+            yield break;
+        }
+
+        foreach (var hit in response.Hits)
+        {
+            if (hit.Source != null)
+            {
+                yield return hit.Source;
+            }
         }
     }
 
@@ -185,5 +248,173 @@ public class VectorStoreCollection<TRecord>(
         {
             throw new InvalidOperationException("OpenSearch is not configured. Check the OpenSearch connection settings.");
         }
+    }
+
+    private static void ValidateSearchArguments(Expression<Func<TRecord, object>> propertySelector, float[] vector, int top)
+    {
+        ArgumentNullException.ThrowIfNull(propertySelector);
+        ArgumentNullException.ThrowIfNull(vector);
+
+        if (top <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(top), @"Top must be greater than 0.");
+        }
+    }
+
+    private static void ValidateHybridSearchQuery(HybridSearchQuery<TRecord> searchQuery)
+    {
+        ArgumentNullException.ThrowIfNull(searchQuery);
+        ValidateSearchArguments(searchQuery.VectorField, searchQuery.Vector, searchQuery.Top);
+        ArgumentException.ThrowIfNullOrWhiteSpace(searchQuery.LexicalQuery);
+        ArgumentNullException.ThrowIfNull(searchQuery.LexicalFields);
+
+        if (searchQuery.LexicalFields.Count <= 0)
+        {
+            throw new ArgumentException(@"At least one lexical field must be specified.", nameof(searchQuery.LexicalFields));
+        }
+
+        if (searchQuery.SemanticK is <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(searchQuery.SemanticK), @"SemanticK must be greater than 0.");
+        }
+    }
+
+    private string ResolveFieldName(Expression<Func<TRecord, object>> selector)
+    {
+        var property = selector.Body switch
+        {
+            MemberExpression { Member: PropertyInfo propertyInfo } => propertyInfo,
+            UnaryExpression { NodeType: ExpressionType.Convert, Operand: MemberExpression { Member: PropertyInfo propertyInfo } } => propertyInfo,
+            _ => throw new NotSupportedException("Only direct property selectors are supported.")
+        };
+
+        return openSearchClient!.Infer.Field(property);
+    }
+
+    private sealed class HybridSearchRequest
+    {
+        [JsonPropertyName("size")]
+        public required int Size { get; init; }
+
+        [JsonPropertyName("query")]
+        public required HybridSearchQueryDefinition Query { get; init; }
+    }
+
+    private sealed class HybridSearchQueryDefinition
+    {
+        [JsonPropertyName("hybrid")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public HybridQueryDefinition? Hybrid { get; init; }
+
+        [JsonPropertyName("bool")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public HybridBoolQueryDefinition? Bool { get; init; }
+
+        [JsonPropertyName("multi_match")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public HybridMultiMatchQueryDefinition? MultiMatch { get; init; }
+
+        [JsonPropertyName("knn")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public HybridKnnQueryDefinition? Knn { get; init; }
+
+        public static HybridSearchQueryDefinition CreateHybrid(params HybridSearchQueryDefinition[] queries)
+        {
+            return new HybridSearchQueryDefinition
+            {
+                Hybrid = new HybridQueryDefinition
+                {
+                    Queries = queries
+                }
+            };
+        }
+
+        public static HybridSearchQueryDefinition CreateBool(HybridSearchQueryDefinition query, JsonElement filter)
+        {
+            return new HybridSearchQueryDefinition
+            {
+                Bool = new HybridBoolQueryDefinition
+                {
+                    Must = [query],
+                    Filter = [filter]
+                }
+            };
+        }
+
+        public static HybridSearchQueryDefinition CreateMultiMatch(string query, string[] fields)
+        {
+            return new HybridSearchQueryDefinition
+            {
+                MultiMatch = new HybridMultiMatchQueryDefinition
+                {
+                    Query = query,
+                    Fields = fields
+                }
+            };
+        }
+
+        public static HybridSearchQueryDefinition CreateKnn(string field, float[] vector, int k)
+        {
+            return new HybridSearchQueryDefinition
+            {
+                Knn = HybridKnnQueryDefinition.Create(field, vector, k)
+            };
+        }
+    }
+
+    private sealed class HybridQueryDefinition
+    {
+        [JsonPropertyName("queries")]
+        public required HybridSearchQueryDefinition[] Queries { get; init; }
+    }
+
+    private sealed class HybridBoolQueryDefinition
+    {
+        [JsonPropertyName("must")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public HybridSearchQueryDefinition[]? Must { get; init; }
+
+        [JsonPropertyName("filter")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public JsonElement[]? Filter { get; init; }
+    }
+
+    private sealed class HybridMultiMatchQueryDefinition
+    {
+        [JsonPropertyName("query")]
+        public required string Query { get; init; }
+
+        [JsonPropertyName("fields")]
+        public required string[] Fields { get; init; }
+    }
+
+    private sealed class HybridKnnQueryDefinition
+    {
+        [JsonExtensionData]
+        public Dictionary<string, JsonElement> Fields { get; init; } = [];
+
+        public static HybridKnnQueryDefinition Create(string field, float[] vector, int k)
+        {
+            return new HybridKnnQueryDefinition
+            {
+                Fields = new Dictionary<string, JsonElement>
+                {
+                    [field] = JsonSerializer.SerializeToElement(new HybridKnnFieldDefinition
+                    {
+                        Vector = vector,
+                        K = k
+                    })
+                }
+            };
+        }
+    }
+
+    private sealed class HybridKnnFieldDefinition
+    {
+        [JsonPropertyName("vector")]
+        public required float[] Vector { get; init; }
+
+        [JsonPropertyName("k")]
+        public required int K { get; init; }
     }
 }

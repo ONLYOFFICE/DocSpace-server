@@ -24,13 +24,43 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
+using HttpMethod = OpenSearch.Net.HttpMethod;
+
 namespace ASC.ElasticSearch;
 
 [Singleton]
 public class Client(ILogger<Client> logger, Settings settings)
 {
+    public const string HybridSearchPipelineName = "vector-hybrid-rrf";
+
     private volatile OpenSearchClient _client;
     private static readonly Lock _locker = new();
+    private const string AttachmentPipelineName = "attachments";
+    private static readonly HybridSearchPipelineDefinition _hybridSearchPipelineBody = new()
+    {
+        Description = "Post processor for hybrid RRF search",
+        PhaseResultsProcessors =
+        [
+            new PhaseResultsProcessorDefinition
+            {
+                ScoreRankerProcessor = new ScoreRankerProcessorDefinition
+                {
+                    Combination = new ScoreCombinationDefinition
+                    {
+                        Technique = "rrf",
+                        RankConstant = 40,
+                        Parameters = new ScoreCombinationParameters
+                        {
+                            Weights = [0.45, 0.55]
+                        }
+                    }
+                }
+            }
+        ]
+    };
 
     public OpenSearchClient Instance
     {
@@ -91,19 +121,26 @@ public class Client(ILogger<Client> logger, Settings settings)
                 try
                 {
                     var client = new OpenSearchClient(connectionSettings);
-                    if (Ping(client))
+                    if (!Ping(client))
                     {
-                        client.Ingest.PutPipeline("attachments", p =>
-                            p.Processors(pp =>
-                                pp.Attachment<Attachment>(a =>
+                        return client;
+                    }
+
+                    client.Ingest.PutPipeline(AttachmentPipelineName, p =>
+                        p.Processors(pp =>
+                            pp.Attachment<Attachment>(a =>
                                     a.Field("document.data")
                                         .TargetField("document.attachment")
                                         .IndexedCharacters(-1))
-                                    .Remove<Document>(x =>
-                                        x.Field("document.data"))));
+                                .Remove<Document>(x =>
+                                    x.Field("document.data"))));
+                    
+                    ((IOpenSearchClient)client).LowLevel.DoRequest<VoidResponse>(
+                        HttpMethod.PUT,
+                        $"/_search/pipeline/{Uri.EscapeDataString(HybridSearchPipelineName)}",
+                        PostData.String(JsonSerializer.Serialize(_hybridSearchPipelineBody)));
 
-                        _client = client;
-                    }
+                    _client = client;
 
                     return client;
 
@@ -135,5 +172,44 @@ public class Client(ILogger<Client> logger, Settings settings)
         logger.DebugPing(result.DebugInformation);
 
         return result.IsValid;
+    }
+
+    private sealed class HybridSearchPipelineDefinition
+    {
+        [JsonPropertyName("description")]
+        public required string Description { get; init; }
+
+        [JsonPropertyName("phase_results_processors")]
+        public required PhaseResultsProcessorDefinition[] PhaseResultsProcessors { get; init; }
+    }
+
+    private sealed class PhaseResultsProcessorDefinition
+    {
+        [JsonPropertyName("score-ranker-processor")]
+        public required ScoreRankerProcessorDefinition ScoreRankerProcessor { get; init; }
+    }
+
+    private sealed class ScoreRankerProcessorDefinition
+    {
+        [JsonPropertyName("combination")]
+        public required ScoreCombinationDefinition Combination { get; init; }
+    }
+
+    private sealed class ScoreCombinationDefinition
+    {
+        [JsonPropertyName("technique")]
+        public required string Technique { get; init; }
+
+        [JsonPropertyName("rank_constant")]
+        public required int RankConstant { get; init; }
+
+        [JsonPropertyName("parameters")]
+        public required ScoreCombinationParameters Parameters { get; init; }
+    }
+
+    private sealed class ScoreCombinationParameters
+    {
+        [JsonPropertyName("weights")]
+        public required double[] Weights { get; init; }
     }
 }

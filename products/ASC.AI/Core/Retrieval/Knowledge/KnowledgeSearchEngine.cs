@@ -33,6 +33,9 @@ public class KnowledgeSearchEngine(
     EmbeddingGeneratorFactory embeddingGeneratorFactory,
     FilesLinkUtility filesLinkUtility)
 {
+    private const int ResultCount = 5;
+    private const int SemanticCandidates = 100;
+
     public async Task<List<KnowledgeSearchResult>> SearchAsync(Folder<int> agent, string query)
     {
         query = query.Trim();
@@ -46,16 +49,18 @@ public class KnowledgeSearchEngine(
 
         var collection = vectorStore.GetCollection<Chunk>(Chunk.IndexName, null);
         var roomId = agent.Id;
-        var searchOptions = new VectorSearchOptions<Chunk>
+        var searchQuery = new HybridSearchQuery<Chunk>
         {
+            VectorField = x => x.Embedding,
+            Vector = embedding.Vector.ToArray(),
+            LexicalQuery = query,
+            LexicalFields = [x => x.Title, x => x.TextEmbedding],
+            Top = ResultCount,
+            SemanticK = SemanticCandidates,
             Filter = x => x.TenantId == tenantId && x.RoomId == roomId
         };
 
-        return await collection.SearchAsync(
-            x => x.Embedding,
-            embedding.Vector.ToArray(),
-            5,
-            searchOptions)
+        return await collection.HybridSearchAsync(searchQuery)
             .Select(x => new KnowledgeSearchResult
             {
                 FileId = x.FileId,
