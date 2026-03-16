@@ -36,6 +36,8 @@ public enum Provider
 
 public class InstallerOptionsAction(string region, string nameConnectionString)
 {
+    private static Lazy<ServerVersion> _lazyServerVersion;
+
     public void OptionsAction(IServiceProvider sp, DbContextOptionsBuilder optionsBuilder)
     {
         var configuration = new ConfigurationExtension(sp.GetRequiredService<IConfiguration>());
@@ -59,7 +61,7 @@ public class InstallerOptionsAction(string region, string nameConnectionString)
                 var mysqlVersionString = sp.GetRequiredService<IConfiguration>()["mysqlServerVersion"];
                 var serverVersion = !string.IsNullOrEmpty(mysqlVersionString)
                     ? ServerVersion.Parse(mysqlVersionString)
-                    : ServerVersion.AutoDetect(connectionString.ConnectionString);
+                    : GetOrDetectServerVersion(connectionString.ConnectionString);
 
                 optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
                 optionsBuilder.UseMySql(connectionString.ConnectionString, serverVersion, providerOptions =>
@@ -86,6 +88,14 @@ public class InstallerOptionsAction(string region, string nameConnectionString)
                 });
                 break;
         }
+    }
+
+    private static ServerVersion GetOrDetectServerVersion(string connectionString)
+    {
+        _lazyServerVersion ??= new Lazy<ServerVersion>(
+            () => ServerVersion.AutoDetect(connectionString));
+
+        return _lazyServerVersion.Value;
     }
 }
 

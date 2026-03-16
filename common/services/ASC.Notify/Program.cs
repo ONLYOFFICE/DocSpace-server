@@ -68,8 +68,9 @@ try
 
     var eventBus = ((IApplicationBuilder)app).ApplicationServices.GetRequiredService<IEventBus>();
 
-    await eventBus.SubscribeAsync<NotifyInvokeSendMethodRequestedIntegrationEvent, NotifyInvokeSendMethodRequestedIntegrationEventHandler>();
-    await eventBus.SubscribeAsync<NotifySendMessageRequestedIntegrationEvent, NotifySendMessageRequestedIntegrationEventHandler>();
+    await Task.WhenAll(
+        eventBus.SubscribeAsync<NotifyInvokeSendMethodRequestedIntegrationEvent, NotifyInvokeSendMethodRequestedIntegrationEventHandler>(),
+        eventBus.SubscribeAsync<NotifySendMessageRequestedIntegrationEvent, NotifySendMessageRequestedIntegrationEventHandler>());
 
     logger.Info("Starting web host ({applicationContext})...", AppName);
     await app.RunWithTasksAsync(awaitTasks: false);
