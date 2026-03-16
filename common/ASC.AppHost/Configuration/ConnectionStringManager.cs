@@ -24,7 +24,11 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Diagnostics.CodeAnalysis;
+
 using Aspire.Hosting.JavaScript;
+
+using Microsoft.Extensions.DependencyInjection;
 
 using MySqlConnector;
 
@@ -238,19 +242,32 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         return this;
     }
 
+    [Experimental("ASPIREINTERACTION001")]
     public ConnectionStringManager AddApiTest()
     {
         var docspaceOwnerEmail = builder.Configuration["OWNER_EMAIL"] ?? "test@example.com";
         var coreMachineKey = builder.Configuration["core:machinekey"] ?? "test-machine-key";
         
         var playwrightTestsPath = Path.Combine(basePath, "test", "api");
-
+        
+        var parameter = builder.AddParameter("bug-id")    
+            .WithCustomInput(p => new()
+            {
+                InputType = InputType.Text,
+                Name = p.Name,
+                Placeholder = "-- grep \"BUG ${id}\"",
+                EnableDescriptionMarkdown = p.EnableDescriptionMarkdown,
+                Value = "--"
+            });
+        
         ApiTestResource = builder.AddJavaScriptApp("playwright-tests", playwrightTestsPath, "test")
+            .WithArgs(parameter)
             .WithNpm()
             .WithEnvironment("MACHINEKEY", coreMachineKey)
             .WithEnvironment("PKEY", "PKEY")
             .WithEnvironment("LOCAL_PORTAL_DOMAIN", $"localhost:{Constants.AppHostPort.ToString()}")
-            .WithEnvironment("DOCSPACE_OWNER_EMAIL", docspaceOwnerEmail);
+            .WithEnvironment("DOCSPACE_OWNER_EMAIL", docspaceOwnerEmail)
+            .WithExplicitStart();
         
         _parameters = new Dictionary<string, string>()
         { 
