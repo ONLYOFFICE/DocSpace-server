@@ -116,6 +116,24 @@ public class ThumbnailSettings
         set;
     }
 
+    public int MaxConcurrentProcessing
+    {
+        get => field != 0 ? field : 4;
+        set;
+    }
+
+    public long ImageMagickMemoryLimit
+    {
+        get => field != 0 ? field : 256L * 1024L * 1024L;
+        set;
+    }
+
+    public int ImageMagickThreadLimit
+    {
+        get => field != 0 ? field : 2;
+        set;
+    }
+
     public IEnumerable<ThumbnailSize> Sizes { get; set; }
 
     #endregion
