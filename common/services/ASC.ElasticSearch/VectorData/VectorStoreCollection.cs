@@ -25,8 +25,6 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 #nullable enable
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
 using HttpMethod = OpenSearch.Net.HttpMethod;
 
@@ -129,36 +127,29 @@ public class VectorStoreCollection<TRecord>(
         ValidateHybridSearchQuery(searchQuery);
 
         var vectorField = ResolveFieldName(searchQuery.VectorField);
-        var resolvedLexicalFields = searchQuery.LexicalFields
+        var lexicalFields = searchQuery.LexicalFields
             .Select(ResolveFieldName)
             .ToArray();
         
-        var resolvedSemanticK = searchQuery.SemanticK ?? searchQuery.Top;
+        var k = searchQuery.K ?? searchQuery.Top;
 
-        var lexicalSearchQuery = HybridSearchQueryDefinition.CreateMultiMatch(searchQuery.LexicalQuery, resolvedLexicalFields);
-        var semanticQuery = HybridSearchQueryDefinition.CreateKnn(vectorField, searchQuery.Vector, resolvedSemanticK);
+        var builder = new HybridSearchRequestBuilder(searchQuery.Top)
+            .AddMultiMatch(searchQuery.LexicalQuery, lexicalFields)
+            .AddKnn(vectorField, searchQuery.Vector, k);
 
         if (searchQuery.Filter != null)
         {
             var translator = new OpenSearchFilterTranslator<TRecord>(openSearchClient!.Infer);
-            var filter = translator.TranslateToJsonElement(searchQuery.Filter);
-            lexicalSearchQuery = HybridSearchQueryDefinition.CreateBool(lexicalSearchQuery, filter);
-            semanticQuery = HybridSearchQueryDefinition.CreateBool(semanticQuery, filter);
+            builder.WithFilter(translator.TranslateToJsonElement(searchQuery.Filter));
         }
 
-        var query = HybridSearchQueryDefinition.CreateHybrid(lexicalSearchQuery, semanticQuery);
-
-        var request = new HybridSearchRequest
-        {
-            Size = searchQuery.Top,
-            Query = query
-        };
+        var request = builder.Build();
         
         var requestParameters = new SearchRequestParameters
         {
             QueryString = new Dictionary<string, object>
             {
-                ["search_pipeline"] = Client.HybridSearchPipelineName
+                ["search_pipeline"] = HybridSearchPipeline.Name
             }
         };
 
@@ -270,12 +261,12 @@ public class VectorStoreCollection<TRecord>(
 
         if (searchQuery.LexicalFields.Count <= 0)
         {
-            throw new ArgumentException(@"At least one lexical field must be specified.", nameof(searchQuery.LexicalFields));
+            throw new ArgumentException(@"At least one lexical field must be specified.", nameof(searchQuery));
         }
 
-        if (searchQuery.SemanticK is <= 0)
+        if (searchQuery.K is <= 0)
         {
-            throw new ArgumentOutOfRangeException(nameof(searchQuery.SemanticK), @"SemanticK must be greater than 0.");
+            throw new ArgumentOutOfRangeException(nameof(searchQuery), @"K must be greater than 0.");
         }
     }
 
@@ -284,11 +275,75 @@ public class VectorStoreCollection<TRecord>(
         var property = selector.Body switch
         {
             MemberExpression { Member: PropertyInfo propertyInfo } => propertyInfo,
-            UnaryExpression { NodeType: ExpressionType.Convert, Operand: MemberExpression { Member: PropertyInfo propertyInfo } } => propertyInfo,
+            UnaryExpression 
+            { 
+                NodeType: ExpressionType.Convert, Operand: MemberExpression 
+                { 
+                    Member: PropertyInfo propertyInfo 
+                } 
+            } => propertyInfo,
             _ => throw new NotSupportedException("Only direct property selectors are supported.")
         };
 
         return openSearchClient!.Infer.Field(property);
+    }
+
+    private sealed class HybridSearchRequestBuilder(int size)
+    {
+        private readonly List<HybridSearchQueryNode> _queries = [];
+        private JsonElement? _filter;
+
+        public HybridSearchRequestBuilder AddMultiMatch(string query, string[] fields)
+        {
+            _queries.Add(new HybridSearchQueryNode
+            {
+                MultiMatch = new HybridMultiMatchNode { Query = query, Fields = fields }
+            });
+
+            return this;
+        }
+
+        public HybridSearchRequestBuilder AddKnn(string field, float[] vector, int k)
+        {
+            _queries.Add(new HybridSearchQueryNode
+            {
+                Knn = new HybridKnnNode
+                {
+                    Fields = new Dictionary<string, JsonElement>
+                    {
+                        [field] = JsonSerializer.SerializeToElement(new HybridKnnFieldNode { Vector = vector, K = k })
+                    }
+                }
+            });
+
+            return this;
+        }
+
+        public HybridSearchRequestBuilder WithFilter(JsonElement filter)
+        {
+            _filter = filter;
+
+            return this;
+        }
+
+        public HybridSearchRequest Build()
+        {
+            var queries = _filter.HasValue
+                ? _queries.Select(q => new HybridSearchQueryNode
+                {
+                    Bool = new HybridBoolNode { Must = [q], Filter = [_filter.Value] }
+                }).ToArray()
+                : _queries.ToArray();
+
+            return new HybridSearchRequest
+            {
+                Size = size,
+                Query = new HybridSearchQueryNode
+                {
+                    Hybrid = new HybridNode { Queries = queries }
+                }
+            };
+        }
     }
 
     private sealed class HybridSearchRequest
@@ -297,89 +352,46 @@ public class VectorStoreCollection<TRecord>(
         public required int Size { get; init; }
 
         [JsonPropertyName("query")]
-        public required HybridSearchQueryDefinition Query { get; init; }
+        public required HybridSearchQueryNode Query { get; init; }
     }
 
-    private sealed class HybridSearchQueryDefinition
+    private sealed class HybridSearchQueryNode
     {
         [JsonPropertyName("hybrid")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public HybridQueryDefinition? Hybrid { get; init; }
+        public HybridNode? Hybrid { get; init; }
 
         [JsonPropertyName("bool")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public HybridBoolQueryDefinition? Bool { get; init; }
+        public HybridBoolNode? Bool { get; init; }
 
         [JsonPropertyName("multi_match")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public HybridMultiMatchQueryDefinition? MultiMatch { get; init; }
+        public HybridMultiMatchNode? MultiMatch { get; init; }
 
         [JsonPropertyName("knn")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public HybridKnnQueryDefinition? Knn { get; init; }
-
-        public static HybridSearchQueryDefinition CreateHybrid(params HybridSearchQueryDefinition[] queries)
-        {
-            return new HybridSearchQueryDefinition
-            {
-                Hybrid = new HybridQueryDefinition
-                {
-                    Queries = queries
-                }
-            };
-        }
-
-        public static HybridSearchQueryDefinition CreateBool(HybridSearchQueryDefinition query, JsonElement filter)
-        {
-            return new HybridSearchQueryDefinition
-            {
-                Bool = new HybridBoolQueryDefinition
-                {
-                    Must = [query],
-                    Filter = [filter]
-                }
-            };
-        }
-
-        public static HybridSearchQueryDefinition CreateMultiMatch(string query, string[] fields)
-        {
-            return new HybridSearchQueryDefinition
-            {
-                MultiMatch = new HybridMultiMatchQueryDefinition
-                {
-                    Query = query,
-                    Fields = fields
-                }
-            };
-        }
-
-        public static HybridSearchQueryDefinition CreateKnn(string field, float[] vector, int k)
-        {
-            return new HybridSearchQueryDefinition
-            {
-                Knn = HybridKnnQueryDefinition.Create(field, vector, k)
-            };
-        }
+        public HybridKnnNode? Knn { get; init; }
     }
 
-    private sealed class HybridQueryDefinition
+    private sealed class HybridNode
     {
         [JsonPropertyName("queries")]
-        public required HybridSearchQueryDefinition[] Queries { get; init; }
+        public required HybridSearchQueryNode[] Queries { get; init; }
     }
 
-    private sealed class HybridBoolQueryDefinition
+    private sealed class HybridBoolNode
     {
         [JsonPropertyName("must")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public HybridSearchQueryDefinition[]? Must { get; init; }
+        public HybridSearchQueryNode[]? Must { get; init; }
 
         [JsonPropertyName("filter")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public JsonElement[]? Filter { get; init; }
     }
 
-    private sealed class HybridMultiMatchQueryDefinition
+    private sealed class HybridMultiMatchNode
     {
         [JsonPropertyName("query")]
         public required string Query { get; init; }
@@ -388,28 +400,13 @@ public class VectorStoreCollection<TRecord>(
         public required string[] Fields { get; init; }
     }
 
-    private sealed class HybridKnnQueryDefinition
+    private sealed class HybridKnnNode
     {
         [JsonExtensionData]
         public Dictionary<string, JsonElement> Fields { get; init; } = [];
-
-        public static HybridKnnQueryDefinition Create(string field, float[] vector, int k)
-        {
-            return new HybridKnnQueryDefinition
-            {
-                Fields = new Dictionary<string, JsonElement>
-                {
-                    [field] = JsonSerializer.SerializeToElement(new HybridKnnFieldDefinition
-                    {
-                        Vector = vector,
-                        K = k
-                    })
-                }
-            };
-        }
     }
 
-    private sealed class HybridKnnFieldDefinition
+    private sealed class HybridKnnFieldNode
     {
         [JsonPropertyName("vector")]
         public required float[] Vector { get; init; }

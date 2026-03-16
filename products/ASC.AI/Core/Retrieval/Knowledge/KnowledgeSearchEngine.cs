@@ -56,7 +56,7 @@ public class KnowledgeSearchEngine(
             LexicalQuery = query,
             LexicalFields = [x => x.Title, x => x.TextEmbedding],
             Top = ResultCount,
-            SemanticK = SemanticCandidates,
+            K = SemanticCandidates,
             Filter = x => x.TenantId == tenantId && x.RoomId == roomId
         };
 

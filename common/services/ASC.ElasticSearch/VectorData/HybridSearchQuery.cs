@@ -34,6 +34,6 @@ public class HybridSearchQuery<TRecord> where TRecord: class
     public required string LexicalQuery { get; init; }
     public required IReadOnlyCollection<Expression<Func<TRecord, object>>> LexicalFields { get; init; }
     public required int Top { get; init; }
-    public int? SemanticK { get; init; }
+    public int? K { get; init; }
     public Expression<Func<TRecord, bool>>? Filter { get; init; }
 }
