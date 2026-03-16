@@ -106,13 +106,17 @@ public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IVa
             return false;
         }
 
-        try
+        if (DatabaseType?.ToLowerInvariant() == "sqlite")
         {
-            if (DatabaseType?.ToLowerInvariant() == "sqlite" && !File.Exists(ValidateSqlitePath(SqliteFilePath, Configuration)))
+            var path = ValidateSqlitePath(SqliteFilePath, Configuration);
+            if (!File.Exists(path))
             {
                 return false;
             }
+        }
 
+        try
+        {
             await using var connection = CreateConnection();
             await connection.OpenAsync();
             return connection.State == ConnectionState.Open;
@@ -190,18 +194,22 @@ public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IVa
             throw new ArgumentException("SQLite file name is not configured.");
         }
 
-        if (fileName != Path.GetFileName(fileName))
-        {
-            throw new ArgumentException("SQLite file name must not contain path separators.");
-        }
-
         var storageRoot = configuration["$STORAGE_ROOT"];
         if (string.IsNullOrWhiteSpace(storageRoot))
         {
             throw new InvalidOperationException("$STORAGE_ROOT is not configured.");
         }
 
-        return Path.Combine(storageRoot, fileName);
+        var fullPath = Path.GetFullPath(Path.Combine(storageRoot, fileName));
+        var normalizedRoot = Path.GetFullPath(storageRoot);
+
+        if (!fullPath.StartsWith(normalizedRoot + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)
+            && !fullPath.Equals(normalizedRoot, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new UnauthorizedAccessException("SQLite path is outside the storage root.");
+        }
+
+        return fullPath;
     }
 
     private DbConnection CreateMySqlConnection()
