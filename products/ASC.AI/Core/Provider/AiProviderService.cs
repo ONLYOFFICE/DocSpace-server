@@ -35,7 +35,9 @@ public class AiProviderService(
     UserManager userManager,
     IDistributedLockProvider distributedLockProvider,
     ModelClientFactory modelClientFactory,
-    MessageService messageService)
+    MessageService messageService,
+    AiGateway aiGateway,
+    ILogger<AiProviderService> logger)
 {
     public async Task<AiProvider> AddProviderAsync(string? title, string? url, string key, ProviderType type)
     {
@@ -178,10 +180,30 @@ public class AiProviderService(
             var client = modelClientFactory.Create(provider.Type, provider.Url, provider.Key);
             var models = await GetFilteredModelsAsync(client, provider.Type, scope);
 
+            Dictionary<string, AiChatPrice>? priceMap = null;
+            if (provider.Type == ProviderType.PortalAi)
+            {
+                try
+                {
+                    var prices = await aiGateway.GetPricesAsync();
+                    priceMap = prices.Chat.ToDictionary(p => p.Id, p => new AiChatPrice
+                    {
+                        Prompt = p.Price.Prompt * 1_000_000,
+                        Completion = p.Price.Completion * 1_000_000
+                    });
+                }
+                catch(Exception e)
+                {
+                    // If prices can't be fetched, continue without them
+                    logger.ErrorWithException(e);
+                }
+            }
+
             return models.Select(m => new ModelData
             {
                 Provider = provider,
-                ModelId = m.Id
+                ModelId = m.Id,
+                Price = priceMap?.GetValueOrDefault(m.Id)
             });
         });
     }

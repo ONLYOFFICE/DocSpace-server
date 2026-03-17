@@ -48,6 +48,11 @@ public class ModelDto
     /// </summary>
     /// <example>gpt-4o</example>
     public required string ModelId { get; init; }
+
+    /// <summary>
+    /// The pricing information for the model (per 1M tokens). Only available for the System AI provider.
+    /// </summary>
+    public AiChatPrice? Price { get; init; }
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
