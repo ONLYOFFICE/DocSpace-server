@@ -33,6 +33,7 @@ import lombok.Data;
 import lombok.SneakyThrows;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -68,12 +69,13 @@ public class AuthorizationFormConfiguration {
    * @param http the {@link HttpSecurity} object used to configure security settings.
    * @return the constructed {@link SecurityFilterChain}.
    */
-  @Bean
+  @Order(1)
   @SneakyThrows
   @RateLimiter(name = "globalRateLimiter")
-  SecurityFilterChain configureSecurityFilterChain(HttpSecurity http) {
-    return http.authorizeHttpRequests(
-            authorizeRequests -> authorizeRequests.anyRequest().permitAll())
+  @Bean("authorizationSecurityFilterChain")
+  SecurityFilterChain authorizationSecurityFilterChain(HttpSecurity http) {
+    return http.securityMatcher("/oauth2/**", "/.well-known/**", "/connect/**", "/login/**")
+        .authorizeHttpRequests(authorizeRequests -> authorizeRequests.anyRequest().permitAll())
         .logout(AbstractHttpConfigurer::disable)
         .csrf(AbstractHttpConfigurer::disable)
         .cors(c -> c.configurationSource(corsConfigurationSource()))

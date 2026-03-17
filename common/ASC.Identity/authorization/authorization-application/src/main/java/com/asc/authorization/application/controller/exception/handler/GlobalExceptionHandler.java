@@ -46,7 +46,7 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
  * 7807 {@link ProblemDetail} response.
  */
 @Slf4j
-@ControllerAdvice
+@ControllerAdvice("authorizationGlobalExceptionHandler")
 public class GlobalExceptionHandler {
   private static final URI ERROR_TYPE_URI =
       URI.create("https://api.onlyoffice.com/docspace/api-backend/get-started/basic-concepts");
