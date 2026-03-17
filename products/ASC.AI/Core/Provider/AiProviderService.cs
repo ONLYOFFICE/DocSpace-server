@@ -181,11 +181,13 @@ public class AiProviderService(
             var models = await GetFilteredModelsAsync(client, provider.Type, scope);
 
             Dictionary<string, AiChatPrice>? priceMap = null;
+            CurrencyInfo? currency = null;
             if (provider.Type == ProviderType.PortalAi)
             {
                 try
                 {
                     var prices = await aiGateway.GetPricesAsync();
+                    currency = prices.Currency;
                     priceMap = prices.Chat.ToDictionary(p => p.Id, p => new AiChatPrice
                     {
                         Prompt = p.Price.Prompt * 1_000_000,
@@ -203,7 +205,8 @@ public class AiProviderService(
             {
                 Provider = provider,
                 ModelId = m.Id,
-                Price = priceMap?.GetValueOrDefault(m.Id)
+                Price = priceMap?.GetValueOrDefault(m.Id),
+                Currency = priceMap != null ? currency : null
             });
         });
     }

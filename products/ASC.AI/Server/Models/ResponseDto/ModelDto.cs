@@ -53,6 +53,11 @@ public class ModelDto
     /// The pricing information for the model (per 1M tokens). Only available for the System AI provider.
     /// </summary>
     public AiChatPrice? Price { get; init; }
+
+    /// <summary>
+    /// The currency of the price. Only available for the System AI provider.
+    /// </summary>
+    public CurrencyInfo? Currency { get; init; }
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
