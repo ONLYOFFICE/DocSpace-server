@@ -321,7 +321,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
                     <image>
-                        <name>onlyoffice-identity-minified:${project.version}</name>
+                        <name>identity-minified:${project.version}</name>
                     </image>
                     <excludeDevtools>true</excludeDevtools>
                     <layers>
