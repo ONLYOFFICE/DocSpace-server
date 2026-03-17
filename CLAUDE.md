@@ -74,9 +74,21 @@ dotnet run --project .aspire/AppHost  # Run via Aspire orchestration
 ### Style (enforced via `.editorconfig`)
 - **Indentation**: spaces (no tabs)
 - **`var` usage**: preferred (`csharp_style_var_*` = true with warning)
-- **Usings**: `ImplicitUsings` enabled; system directives sorted first, separated into groups
+- **Usings**: `ImplicitUsings` enabled; system directives sorted first, separated into groups. **All `using` directives must be placed in `GlobalUsings.cs`** (one per project), never in individual `.cs` files.
 - **XML docs**: `<summary>`, `<remarks>`, `<example>` on API models; `GenerateDocumentationFile=True`
 - **License header**: AGPL 3.0 header required on all source files
+
+### Logging
+- **Always use source-generated logging** via `[LoggerMessage]` attribute on `partial` methods in a dedicated `static partial class` (e.g., `*Logger`).
+- Never use string interpolation or `ILogger.LogInformation(...)` directly — always define `LoggerMessage`-attributed extension methods.
+- Example pattern:
+```csharp
+public static partial class FooLogger
+{
+    [LoggerMessage(LogLevel.Information, "Found {count} items")]
+    public static partial void InfoFoundItems(this ILogger<FooService> logger, int count);
+}
+```
 
 ### API Patterns
 - API versioning via `Asp.Versioning`
