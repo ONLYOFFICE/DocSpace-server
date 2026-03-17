@@ -172,18 +172,18 @@ public class AiSettingsService(
         var vectorizationEnabledTask = aiSettingsStore.IsVectorizationEnabledAsync();
 
         var needResetProvidersTask = providerService.NeedResetProvidersAsync();
-        var aiStatus = accessibility.GetStatusAsync();
+        var aiStatusTask = accessibility.GetStatusAsync();
 
         var docSpaceMcpServer = systemMcpConfig.Servers.Values.FirstOrDefault(
             x => x.Type == ServerType.DocSpace);
 
         await Task.WhenAll(
-            webSearchSettingsTask, 
-            webSearchEnabledTask, 
-            vectorizationSettingsTask, 
-            vectorizationEnabledTask, 
-            needResetProvidersTask, 
-            aiStatus
+            webSearchSettingsTask,
+            webSearchEnabledTask,
+            vectorizationSettingsTask,
+            vectorizationEnabledTask,
+            needResetProvidersTask,
+            aiStatusTask
             );
 
         var webSearchNeedReset = (await webSearchSettingsTask).NeedReset;
@@ -192,8 +192,9 @@ public class AiSettingsService(
         var vectorizationNeedReset = (await vectorizationSettingsTask).NeedReset;
         var vectorizationEnabled = !vectorizationNeedReset && (await vectorizationEnabledTask);
 
+        var aiStatus = await aiStatusTask;
         var needResetProviders = await needResetProvidersTask;
-        var aiReady = !needResetProviders && (await aiStatus).Enabled;
+        var aiReady = (aiStatus.GatewayEnabled || !needResetProviders) && aiStatus.Enabled;
 
         return new AiSettings
         {
@@ -205,7 +206,8 @@ public class AiSettingsService(
             AiReadyNeedReset = needResetProviders,
             EmbeddingModel = vectorizationGlobalSettings.Model.Id,
             ModelAliases = aiSettingsStore.GetModelAliases(),
-            PortalMcpServerId = docSpaceMcpServer?.Id
+            PortalMcpServerId = docSpaceMcpServer?.Id,
+            SystemAiEnabled = aiStatus.GatewayEnabled,
         };
     }
     
