@@ -131,14 +131,19 @@ public abstract class DIAttribute : Attribute
 
 public class DIHelper
 {
-    private readonly Dictionary<DIAttributeType, List<string>> _services = new()
+    private readonly Dictionary<DIAttributeType, HashSet<(Type, Type)>> _services = new()
     {
         { DIAttributeType.Singleton, [] },
         { DIAttributeType.Scope, [] },
         { DIAttributeType.Transient, [] }
     };
-    private readonly List<string> _added = [];
+    private readonly HashSet<(Type Service, Type Implementation)> _added = [];
+    private readonly Dictionary<Type, DIAttribute[]> _attributeCache = [];
+    private readonly object _scanLock = new();
     private IServiceCollection _serviceCollection;
+
+    private static readonly MethodInfo _registerDistributedTaskMethod =
+        typeof(DIHelper).GetMethod(nameof(RegisterDistributedTask))!;
 
     readonly HashSet<string> _visited = [];
 
@@ -157,25 +162,28 @@ public class DIHelper
 
     private void Scan(Assembly assembly)
     {
-        var assemblyName = assembly.GetName();
-        if (!CheckAssemblyName(assemblyName) || _visited.Contains(assemblyName.FullName))
+        lock (_scanLock)
         {
-            return;
-        }
+            var assemblyName = assembly.GetName();
+            if (!CheckAssemblyName(assemblyName) || _visited.Contains(assemblyName.FullName))
+            {
+                return;
+            }
 
-        _visited.Add(assembly.FullName);
+            _visited.Add(assembly.FullName);
 
-        var types = assembly.GetTypes().Where(t => t.GetCustomAttributes<DIAttribute>().Any());
+            var types = assembly.GetTypes().Where(t => GetDiAttributes(t).Length > 0);
 
-        foreach (var a in types)
-        {
-            TryAdd(a);
-        }
+            foreach (var a in types)
+            {
+                TryAdd(a);
+            }
 
-        var references = assembly.GetReferencedAssemblies();
-        foreach (var reference in references.Where(r => CheckAssemblyName(r) && !_visited.Contains(r.FullName)))
-        {
-            Assembly.Load(reference);
+            var references = assembly.GetReferencedAssemblies();
+            foreach (var reference in references.Where(r => CheckAssemblyName(r) && !_visited.Contains(r.FullName)))
+            {
+                Assembly.Load(reference);
+            }
         }
     }
 
@@ -212,7 +220,7 @@ public class DIHelper
             }
             else if (service.IsGenericTypeDefinition)
             {
-                var attributes = service.GetCustomAttributes<DIAttribute>();
+                var attributes = GetDiAttributes(service);
                 foreach (var attr in attributes)
                 {
                     if (attr.GenericArguments == null || attr.GenericArguments.Length == 0)
@@ -226,22 +234,18 @@ public class DIHelper
             }
         }
 
-        var serviceName = $"{service}{implementation}";
-
-        if (_added.Contains(serviceName))
+        if (!_added.Add((service, implementation)))
         {
             return;
         }
-
-        _added.Add(serviceName);
 
         di ??= serviceGenericTypeDefinition != null && (
             serviceGenericTypeDefinition == typeof(IConfigureOptions<>) ||
             serviceGenericTypeDefinition == typeof(IPostConfigureOptions<>) ||
             serviceGenericTypeDefinition == typeof(IOptionsMonitor<>)
             ) && implementation != null ?
-            implementation.GetCustomAttributes<DIAttribute>().FirstOrDefault() :
-            service.GetCustomAttributes<DIAttribute>().FirstOrDefault();
+            GetDiAttributes(implementation).FirstOrDefault() :
+            GetDiAttributes(service).FirstOrDefault();
 
         if (!service.IsInterface || implementation != null)
         {
@@ -404,31 +408,28 @@ public class DIHelper
 
     private bool Register(DIAttribute c, Type service, Type implementation = null)
     {
+        var interfaces = service.GetInterfaces();
         if (service.IsSubclassOf(typeof(ControllerBase)) ||
-            service.GetInterfaces().Contains(typeof(IResourceFilter)) ||
-            service.GetInterfaces().Contains(typeof(IDictionary<string, string>)))
+            Array.IndexOf(interfaces, typeof(IResourceFilter)) >= 0 ||
+            Array.IndexOf(interfaces, typeof(IDictionary<string, string>)) >= 0)
         {
             return true;
         }
 
-        var serviceName = $"{service}{implementation}";
-
-        if (!_services[c.DiAttributeType].Contains(serviceName))
+        if (!_services[c.DiAttributeType].Add((service, implementation)))
         {
-            if (service.IsSubclassOf(typeof(DistributedTask)))
-            {
-                var mi = typeof(DIHelper).GetMethod("RegisterDistributedTask");
-                var fooRef = mi.MakeGenericMethod(service);
-                fooRef.Invoke(this, null);
-            }
-
-            c.TryAdd(_serviceCollection, service, implementation);
-            _services[c.DiAttributeType].Add(serviceName);
-
-            return true;
+            return false;
         }
 
-        return false;
+        if (service.IsSubclassOf(typeof(DistributedTask)))
+        {
+            var fooRef = _registerDistributedTaskMethod.MakeGenericMethod(service);
+            fooRef.Invoke(this, null);
+        }
+
+        c.TryAdd(_serviceCollection, service, implementation);
+
+        return true;
     }
 
     public void RegisterDistributedTask<T>() where T : DistributedTask
@@ -436,5 +437,16 @@ public class DIHelper
         _serviceCollection.TryAddSingleton(Channel.CreateUnbounded<T>());
         _serviceCollection.TryAddSingleton(svc => svc.GetRequiredService<Channel<T>>().Writer);
         _serviceCollection.TryAddTransient<DistributedTaskQueue<T>>();
+    }
+
+    private DIAttribute[] GetDiAttributes(Type type)
+    {
+        if (!_attributeCache.TryGetValue(type, out var attrs))
+        {
+            attrs = type.GetCustomAttributes<DIAttribute>().ToArray();
+            _attributeCache[type] = attrs;
+        }
+
+        return attrs;
     }
 }

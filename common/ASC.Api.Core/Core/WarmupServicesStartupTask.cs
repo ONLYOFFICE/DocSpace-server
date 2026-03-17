@@ -78,6 +78,7 @@ public class WarmupServicesStartupTask(IServiceCollection services, IServiceProv
     static IEnumerable<Type> GetServices(IServiceCollection services)
     {
         return services
+            .Where(descriptor => descriptor.Lifetime == ServiceLifetime.Singleton)
             .Where(descriptor => descriptor.ImplementationType != typeof(WarmupServicesStartupTask))
             .Where(descriptor => !descriptor.ServiceType.ContainsGenericParameters)
             .Select(descriptor => descriptor.ServiceType)

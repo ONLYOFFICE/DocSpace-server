@@ -1453,7 +1453,7 @@ public class FileSecurity(
                 }
                 break;
             case FolderType.USER:
-                if (isOutsider || action == FilesSecurityActions.Lock)
+                if (isOutsider)
                 {
                     return false;
                 }
@@ -1765,7 +1765,7 @@ public class FileSecurity(
                 }
                 break;
             case FolderType.DefaultTemplates:
-                if (action is not (FilesSecurityActions.Read or FilesSecurityActions.Rename))
+                if (action is not (FilesSecurityActions.Read or FilesSecurityActions.Rename or FilesSecurityActions.Download))
                 {
                     return false;
                 }

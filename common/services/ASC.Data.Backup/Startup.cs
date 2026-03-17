@@ -24,8 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Data.Backup.Core.Quota;
-using ASC.Files.Core.Core;
+using ASC.Data.Backup.Extensions;
 
 namespace ASC.Data.Backup;
 
@@ -33,7 +32,7 @@ public class Startup : BaseStartup
 {
     public Startup(IConfiguration configuration) : base(configuration)
     {
-        if (configuration.GetSection("RabbitMQ").GetChildren().Any() && 
+        if (configuration.GetSection("RabbitMQ").GetChildren().Any() &&
             String.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
         {
             configuration["RabbitMQ:ClientProvidedName"] = Program.AppName;
@@ -42,34 +41,15 @@ public class Startup : BaseStartup
 
     public override async Task ConfigureServices(WebApplicationBuilder builder)
     {
-        var services = builder.Services;
         await base.ConfigureServices(builder);
 
-        var maxRequestLimit = 1024L * 1024L * 1024L;
-        services.Configure<KestrelServerOptions>(options =>
-        {
-            options.Limits.MaxRequestBodySize = maxRequestLimit;
-        });
-        services.Configure<FormOptions>(x =>
-        {
-            x.MultipartBodyLengthLimit = maxRequestLimit;
-        });
-
-        services.AddBaseDbContextPool<BackupsContext>();
-        services.AddBaseDbContextPool<FilesDbContext>();
-        services.RegisterQuotaFeature();
-        services.RegisterFreeBackupQuotaFeature();
+        builder.Services.AddBackupServices();
     }
 
     public override void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
         base.Configure(app, env);
 
-        app.MapWhen(
-            context => context.Request.Path.ToString().EndsWith("backupFileUpload.ashx"),
-            appBranch =>
-            {
-                appBranch.UseBackupFileUploadHandler();
-            });
+        app.UseBackupMiddleware();
     }
 }

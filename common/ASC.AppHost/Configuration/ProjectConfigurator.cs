@@ -180,6 +180,8 @@ public class ProjectConfigurator(
         var path = Path.Combine("..", "ASC.Socket.IO");
         var port = Constants.SocketIoPort;
         
+        var redisEnabled = connectionManager.Redis != null;
+
         if (isDocker)
         {
             var resourceBuilder = builder
@@ -190,6 +192,7 @@ public class ProjectConfigurator(
                 .WithEnvironment("API_HOST", new UriBuilder(Uri.UriSchemeHttp, Constants.OpenRestyContainer, Constants.RestyPort).ToString())
                 .WithEnvironment("Redis:Hosts:0:Host", () => ConnectionStringManager.SubstituteLocalhost(connectionManager.Redis?.Host) ?? string.Empty)
                 .WithEnvironment("Redis:Hosts:0:Port", () => connectionManager.Redis?.Port ?? string.Empty)
+                .WithEnvironment("REDIS_ENABLED", redisEnabled.ToString().ToLower())
                 .WithHttpEndpoint(port, port, isProxied: false)
                 .WithHttpHealthCheck("/health")
                 .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
@@ -204,10 +207,11 @@ public class ProjectConfigurator(
                 .WithEnvironment("NODE_ENV", "development")
                 .WithEnvironment("Redis:Hosts:0:Host", () => connectionManager.Redis?.Host ?? string.Empty)
                 .WithEnvironment("Redis:Hosts:0:Port", () => connectionManager.Redis?.Port ?? string.Empty)
+                .WithEnvironment("REDIS_ENABLED", redisEnabled.ToString().ToLower())
                 .WithHttpEndpoint(targetPort: port)
                 .WithHttpHealthCheck("/health")
                 .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
-            
+
             connectionManager.AddWaitFor(resourceBuilder);
         }
 

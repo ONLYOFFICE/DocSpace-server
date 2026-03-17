@@ -5759,6 +5759,69 @@
         ]
       }
     },
+    "/api/2.0/settings/authservice/externaldb/test": {
+      "post": {
+        "tags": [
+          "Settings / Authorization"
+        ],
+        "summary": "Test external database connection",
+        "description": "Tests an external database connection with the provided settings without saving them.",
+        "operationId": "testExternalDatabaseConnection",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExternalDatabaseSettings"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Connection test result with Success flag and optional Error message",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConnectionTestResultWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
     "/api/2.0/settings": {
       "get": {
         "tags": [
@@ -9895,6 +9958,7 @@
             "in": "query",
             "description": "The list of module identifiers for which to retrieve the security settings.",
             "style": "deepObject",
+            "explode": true,
             "schema": {
               "type": "array",
               "items": {
@@ -13939,6 +14003,29 @@
             "description": "The authorization key title.",
             "nullable": true,
             "example": "API key"
+          },
+          "type": {
+            "type": "string",
+            "description": "The field type: \"text\", \"password\", \"select\", \"toggle\".",
+            "nullable": true
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The list of options for \"select\" type fields.",
+            "nullable": true
+          },
+          "dependsOn": {
+            "type": "string",
+            "description": "The name of another key this field depends on for visibility.",
+            "nullable": true
+          },
+          "dependsOnValue": {
+            "type": "string",
+            "description": "The value of ASC.Web.Studio.UserControls.Management.AuthKey.DependsOn key that makes this field visible.",
+            "nullable": true
           }
         },
         "additionalProperties": false,
@@ -14914,6 +15001,59 @@
         "properties": {
           "response": {
             "$ref": "#/components/schemas/ConfirmDto"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
+      "ConnectionTestResult": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ConnectionTestResultWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/ConnectionTestResult"
           },
           "count": {
             "type": "integer",
@@ -16551,6 +16691,43 @@
           }
         ],
         "x-enum-type": "integer"
+      },
+      "ExternalDatabaseSettings": {
+        "type": "object",
+        "properties": {
+          "databaseType": {
+            "type": "string",
+            "nullable": true
+          },
+          "dbHost": {
+            "type": "string",
+            "nullable": true
+          },
+          "dbPort": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "dbName": {
+            "type": "string",
+            "nullable": true
+          },
+          "dbUser": {
+            "type": "string",
+            "nullable": true
+          },
+          "dbPassword": {
+            "type": "string",
+            "nullable": true
+          },
+          "dbSsl": {
+            "type": "boolean"
+          },
+          "sqliteFilePath": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
       },
       "FeatureUsedDto": {
         "required": [
@@ -21483,6 +21660,10 @@
           },
           "defaultFolderType": {
             "$ref": "#/components/schemas/FolderType"
+          },
+          "externalDbEnabled": {
+            "type": "boolean",
+            "description": "Specifies if an external database is connected for storing form results."
           }
         },
         "additionalProperties": false,

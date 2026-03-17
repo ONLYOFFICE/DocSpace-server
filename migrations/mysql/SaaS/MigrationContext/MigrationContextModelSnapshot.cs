@@ -4611,6 +4611,18 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("quota")
                         .HasDefaultValueSql("'-2'");
 
+                    b.Property<bool>("SaveFormAsXLSX")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("save_form_as_xlsx")
+                        .HasDefaultValueSql("0");
+
+                    b.Property<bool>("SendFormToExternalDB")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("send_form_to_external_db")
+                        .HasDefaultValueSql("0");
+
                     b.Property<string>("Watermark")
                         .HasColumnType("json")
                         .HasColumnName("watermark")

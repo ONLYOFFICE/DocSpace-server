@@ -5655,6 +5655,16 @@
               },
               "rootRoomType": {
                 "$ref": "#/components/schemas/RoomType"
+              },
+              "saveFormAsXLSX": {
+                "type": "boolean",
+                "description": "Specifies whether to save form data as XLSX file.",
+                "nullable": true
+              },
+              "sendFormToExternalDB": {
+                "type": "boolean",
+                "description": "Specifies whether to send form data to external database.",
+                "nullable": true
               }
             }
           }
@@ -7373,6 +7383,16 @@
           },
           "chatSettings": {
             "$ref": "#/components/schemas/ChatSettings"
+          },
+          "sendFormToExternalDB": {
+            "type": "boolean",
+            "description": "Specifies whether to send form data to external database.",
+            "nullable": true
+          },
+          "saveFormAsXLSX": {
+            "type": "boolean",
+            "description": "Specifies whether to save form data as XLSX file.",
+            "nullable": true
           }
         },
         "additionalProperties": false,

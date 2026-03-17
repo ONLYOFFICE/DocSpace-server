@@ -318,13 +318,23 @@ public abstract class BaseStartup
 
                     httpContext.Request.Body.Position = 0;
 
-                    var json = new StreamReader(httpContext.Request.Body).ReadToEndAsync().Result;
+                    var json = new StreamReader(httpContext.Request.Body).ReadToEndAsync().Result?.Trim();
 
-                    var userInvitationsDto = JsonSerializer.Deserialize<EmailInvitationsDto>(json, _serializerOptions);
-
-                    if (userInvitationsDto?.Invitations != null)
+                    try
                     {
-                        invitationsCount = userInvitationsDto.Invitations.Count(x => !string.IsNullOrEmpty(x.Email));
+                        if (!string.IsNullOrEmpty(json))
+                        {
+                            var userInvitationsDto = JsonSerializer.Deserialize<EmailInvitationsDto>(json, _serializerOptions);
+
+                            if (userInvitationsDto?.Invitations != null)
+                            {
+                                invitationsCount = userInvitationsDto.Invitations.Count(x => !string.IsNullOrEmpty(x.Email));
+                            }
+                        }
+                    }
+                    catch (JsonException)
+                    {
+                        // Invalid JSON in request body, treat as 0 invitations
                     }
 
                     httpContext.Request.Body.Position = 0;
@@ -520,11 +530,14 @@ public abstract class BaseStartup
 
         services.RegisterQueue<ResizeWorkerItem>(2);
 
-        services
-            .AddStartupTask<WarmupServicesStartupTask>()
-            .AddStartupTask<WarmupProtobufStartupTask>()
-            .AddStartupTask<WarmupBaseDbContextStartupTask>()
-            .TryAddSingleton(services);
+        if (!builder.Environment.IsDevelopment())
+        {
+            services
+                .AddStartupTask<WarmupServicesStartupTask>()
+                .AddStartupTask<WarmupProtobufStartupTask>()
+                .AddStartupTask<WarmupBaseDbContextStartupTask>()
+                .TryAddSingleton(services);
+        }
 
         services.AddTransient<DistributedTaskProgress>();
     }
