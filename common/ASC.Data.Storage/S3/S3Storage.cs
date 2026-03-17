@@ -615,51 +615,86 @@ public class S3Storage(TempStream tempStream,
         var objToDel = obj.Where(x =>
             Wildcard.IsMatch(pattern, Path.GetFileName(x.Key))
             && (recursive || !x.Key.Remove(0, makedPath.Length).Contains('/'))
-            );
+            ).ToList();
+
+        if (objToDel.Count == 0)
+        {
+            return;
+        }
 
         var client = GetClient();
+        var keysToDel = new List<KeyVersion>();
+        long quotaUsed = 0;
+
         foreach (var s3Object in objToDel)
         {
             await RecycleAsync(client, domain, s3Object.Key);
 
-            var deleteRequest = new DeleteObjectRequest
-            {
-                BucketName = _bucket,
-                Key = s3Object.Key
-            };
-
-            await client.DeleteObjectAsync(deleteRequest);
+            keysToDel.Add(new KeyVersion { Key = s3Object.Key });
 
             if (QuotaController != null)
             {
                 if (string.IsNullOrEmpty(QuotaController.ExcludePattern) ||
                     !Path.GetFileName(s3Object.Key).StartsWith(QuotaController.ExcludePattern))
                 {
-                    await QuotaUsedDeleteAsync(domain, s3Object.Size.GetValueOrDefault(), ownerId);
+                    quotaUsed += s3Object.Size.GetValueOrDefault();
                 }
             }
+        }
+
+        foreach (var chunk in keysToDel.Chunk(1000))
+        {
+            var deleteRequest = new DeleteObjectsRequest
+            {
+                BucketName = _bucket,
+                Objects = [.. chunk]
+            };
+
+            await client.DeleteObjectsAsync(deleteRequest);
+        }
+
+        if (quotaUsed > 0)
+        {
+            await QuotaUsedDeleteAsync(domain, quotaUsed, ownerId);
         }
     }
 
     public override async Task DeleteFilesAsync(string domain, string path, DateTime fromDate, DateTime toDate)
     {
         var obj = await GetS3ObjectsAsync(domain, path);
-        var objToDel = obj.Where(x => x.LastModified >= fromDate && x.LastModified <= toDate);
+        var objToDel = obj.Where(x => x.LastModified >= fromDate && x.LastModified <= toDate).ToList();
+
+        if (objToDel.Count == 0)
+        {
+            return;
+        }
 
         var client = GetClient();
+        var keysToDel = new List<KeyVersion>();
+        long quotaUsed = 0;
+
         foreach (var s3Object in objToDel)
         {
             await RecycleAsync(client, domain, s3Object.Key);
 
-            var deleteRequest = new DeleteObjectRequest
+            keysToDel.Add(new KeyVersion { Key = s3Object.Key });
+            quotaUsed += s3Object.Size.GetValueOrDefault();
+        }
+
+        foreach (var chunk in keysToDel.Chunk(1000))
+        {
+            var deleteRequest = new DeleteObjectsRequest
             {
                 BucketName = _bucket,
-                Key = s3Object.Key
+                Objects = [.. chunk]
             };
 
-            await client.DeleteObjectAsync(deleteRequest);
+            await client.DeleteObjectsAsync(deleteRequest);
+        }
 
-            await QuotaUsedDeleteAsync(domain, s3Object.Size.GetValueOrDefault());
+        if (quotaUsed > 0)
+        {
+            await QuotaUsedDeleteAsync(domain, quotaUsed);
         }
     }
 
