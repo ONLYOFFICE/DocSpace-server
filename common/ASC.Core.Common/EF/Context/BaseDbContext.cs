@@ -36,6 +36,8 @@ public enum Provider
 
 public class InstallerOptionsAction(string region, string nameConnectionString)
 {
+    private static Lazy<ServerVersion> _lazyServerVersion;
+
     public void OptionsAction(IServiceProvider sp, DbContextOptionsBuilder optionsBuilder)
     {
         var configuration = new ConfigurationExtension(sp.GetRequiredService<IConfiguration>());
@@ -59,7 +61,7 @@ public class InstallerOptionsAction(string region, string nameConnectionString)
                 var mysqlVersionString = sp.GetRequiredService<IConfiguration>()["mysqlServerVersion"];
                 var serverVersion = !string.IsNullOrEmpty(mysqlVersionString)
                     ? ServerVersion.Parse(mysqlVersionString)
-                    : ServerVersion.AutoDetect(connectionString.ConnectionString);
+                    : GetOrDetectServerVersion(connectionString.ConnectionString);
 
                 optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
                 optionsBuilder.UseMySql(connectionString.ConnectionString, serverVersion, providerOptions =>
@@ -86,6 +88,14 @@ public class InstallerOptionsAction(string region, string nameConnectionString)
                 });
                 break;
         }
+    }
+
+    private static ServerVersion GetOrDetectServerVersion(string connectionString)
+    {
+        _lazyServerVersion ??= new Lazy<ServerVersion>(
+            () => ServerVersion.AutoDetect(connectionString));
+
+        return _lazyServerVersion.Value;
     }
 }
 
@@ -122,10 +132,19 @@ public class BaseDbContext(DbContextOptions options) : DbContext(options)
 }
 public static class BaseDbContextExtension
 {
+    private const int DefaultPoolSize = 1024;
+    private static int? _cachedPoolSize;
+
     public static IServiceCollection AddBaseDbContextPool<T>(this IServiceCollection services, string region = "current", string nameConnectionString = "default") where T : DbContext
     {
+        _cachedPoolSize ??= services
+            .FirstOrDefault(d => d.ServiceType == typeof(IConfiguration))
+            ?.ImplementationInstance is IConfiguration cfg
+            ? cfg.GetValue("core:dbContextPoolSize", DefaultPoolSize)
+            : DefaultPoolSize;
+
         var installerOptionsAction = new InstallerOptionsAction(region, nameConnectionString);
-        services.AddPooledDbContextFactory<T>(installerOptionsAction.OptionsAction);
+        services.AddPooledDbContextFactory<T>(installerOptionsAction.OptionsAction, _cachedPoolSize.Value);
 
         return services;
     }

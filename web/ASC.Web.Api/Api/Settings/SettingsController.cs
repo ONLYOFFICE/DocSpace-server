@@ -64,7 +64,8 @@ public partial class SettingsController(
     UsersQuotaSyncOperation usersQuotaSyncOperation,
     CustomQuota customQuota,
     UserSocketManager userSocketManager,
-    QuotaSocketManager quotaSocketManager)
+    QuotaSocketManager quotaSocketManager,
+    ExternalDatabaseClient externalDatabaseClient)
     : BaseSettingsController(fusionCache, webItemManager)
 {
     [GeneratedRegex("^[a-z0-9]([a-z0-9-.]){1,253}[a-z0-9]$")]
@@ -180,6 +181,7 @@ public partial class SettingsController(
             settings.InvitationLimit = await userInvitationLimitHelper.GetLimit();
             settings.MaxImageUploadSize = setupInfo.MaxImageUploadSize;
             settings.DefaultFolderType = (await settingsManager.LoadForCurrentUserAsync<StudioDefaultPageSettings>()).DefaultFolderType;
+            settings.ExternalDbEnabled = externalDatabaseClient.IsEnabled();
         }
         else
         {
@@ -1135,9 +1137,29 @@ public partial class SettingsController(
             {
                 await userSocketManager.ConnectTelegram(tenantId, authContext.CurrentAccount.ID);
             }
+
+            if (consumer is ExternalDatabaseProvider externalDbProvider)
+            {
+                await userSocketManager.UpdateExternalDbSettingsAsync(tenantId, externalDbProvider.IsEnabled());
+            }
         }
 
         return changed;
+    }
+
+    /// <remarks>
+    /// Tests an external database connection with the provided settings without saving them.
+    /// </remarks>
+    /// <summary>Test external database connection</summary>
+    /// <path>api/2.0/settings/authservice/externaldb/test</path>
+    [Tags("Settings / Authorization")]
+    [SwaggerResponse(200, "Connection test result with Success flag and optional Error message", typeof(ConnectionTestResult))]
+    [HttpPost("authservice/externaldb/test")]
+    public async Task<ConnectionTestResult> TestExternalDatabaseConnection(ExternalDatabaseSettings inDto)
+    {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        return await ExternalDatabaseProvider.TestConnectionAsync(inDto, configuration);
     }
 
     /// <remarks>

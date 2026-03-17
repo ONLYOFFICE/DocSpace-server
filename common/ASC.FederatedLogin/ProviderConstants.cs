@@ -42,4 +42,5 @@ public static class ProviderConstants
     public const string Microsoft = "microsoft";
     public const string Zoom = "zoom";
     public const string Weixin = "weixin";
+    public const string ExternalDB = "externaldb";
 }

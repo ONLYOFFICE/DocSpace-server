@@ -25,8 +25,6 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 #nullable enable
-using ASC.Common.Threading;
-
 namespace ASC.AI.Core.Export;
 
 [Singleton(GenericArguments = [typeof(MessageExportTask), typeof(MessageExportTaskData)])]

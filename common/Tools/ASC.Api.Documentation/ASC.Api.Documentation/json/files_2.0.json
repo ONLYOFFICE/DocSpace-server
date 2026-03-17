@@ -625,6 +625,72 @@
         ]
       }
     },
+    "/api/2.0/files/file/{fileId}/xlsx": {
+      "post": {
+        "tags": [
+          "Files / Files"
+        ],
+        "summary": "Generate XLSX report",
+        "description": "Triggers asynchronous XLSX report generation for the specified form file.",
+        "operationId": "generateXlsx",
+        "parameters": [
+          {
+            "name": "fileId",
+            "in": "path",
+            "description": "The file unique identifier.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "XLSX report generation has been queued"
+          },
+          "403": {
+            "description": "You do not have enough permissions to perform this action"
+          },
+          "404": {
+            "description": "Form file not found"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
     "/api/2.0/files/file/{fileId}/log": {
       "get": {
         "tags": [
@@ -1328,6 +1394,15 @@
               "type": "integer",
               "format": "int32",
               "example": 1
+            }
+          },
+          {
+            "name": "ReturnSingleOperation",
+            "in": "query",
+            "description": "Specifies whether to return only the current operation",
+            "schema": {
+              "type": "boolean",
+              "example": false
             }
           }
         ],
@@ -2573,7 +2648,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FormResultsArrayWrapper"
+                  "$ref": "#/components/schemas/FormSubmissionsWrapper"
                 }
               }
             }
@@ -3290,6 +3365,7 @@
             "in": "query",
             "description": "Specifies whether to search for a specific file extension in the \"Recent\" folder.",
             "style": "deepObject",
+            "explode": true,
             "schema": {
               "type": "array",
               "items": {
@@ -11384,6 +11460,7 @@
             "in": "query",
             "description": "The filter by room type.",
             "style": "deepObject",
+            "explode": true,
             "schema": {
               "type": "array",
               "items": {
@@ -21636,6 +21713,16 @@
               },
               "rootRoomType": {
                 "$ref": "#/components/schemas/RoomType"
+              },
+              "saveFormAsXLSX": {
+                "type": "boolean",
+                "description": "Specifies whether to save form data as XLSX file.",
+                "nullable": true
+              },
+              "sendFormToExternalDB": {
+                "type": "boolean",
+                "description": "Specifies whether to send form data to external database.",
+                "nullable": true
               }
             }
           }
@@ -21777,6 +21864,16 @@
               },
               "rootRoomType": {
                 "$ref": "#/components/schemas/RoomType"
+              },
+              "saveFormAsXLSX": {
+                "type": "boolean",
+                "description": "Specifies whether to save form data as XLSX file.",
+                "nullable": true
+              },
+              "sendFormToExternalDB": {
+                "type": "boolean",
+                "description": "Specifies whether to send form data to external database.",
+                "nullable": true
               }
             }
           }
@@ -22183,48 +22280,34 @@
         "description": "The form filling status.",
         "x-enum-type": "integer"
       },
-      "FormResultsArrayWrapper": {
+      "FormMetadata": {
         "type": "object",
         "properties": {
-          "response": {
+          "key": {
+            "type": "string",
+            "description": "The form field key.",
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "description": "The form field type.",
+            "nullable": true
+          },
+          "format": {
+            "type": "string",
+            "description": "The form field format.",
+            "nullable": true
+          },
+          "possibleValues": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/FormResultsDto"
-            }
-          },
-          "count": {
-            "type": "integer",
-            "description": "The total number of items in the response",
-            "format": "int32"
-          },
-          "links": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "href": {
-                  "type": "string",
-                  "description": "URL of the link"
-                },
-                "action": {
-                  "type": "string",
-                  "description": "Action associated with the link"
-                }
-              }
+              "type": "string"
             },
-            "description": "List of links related to the response"
-          },
-          "status": {
-            "type": "integer",
-            "description": "HTTP status code of the response",
-            "format": "int32"
-          },
-          "statusCode": {
-            "type": "integer",
-            "description": "HTTP status code of the response (duplicate of status)",
-            "format": "int32"
+            "description": "The list of possible values for the form field.",
+            "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "FormResultsDto": {
         "type": "object",
@@ -22404,6 +22487,68 @@
         },
         "additionalProperties": false,
         "description": "The form role parameters."
+      },
+      "FormSubmissionsDto": {
+        "type": "object",
+        "properties": {
+          "metadata": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FormMetadata"
+            },
+            "description": "The form field metadata.",
+            "nullable": true
+          },
+          "submissions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FormResultsDto"
+            },
+            "description": "All submissions.",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "FormSubmissionsWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/FormSubmissionsDto"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
       },
       "FormsItemArrayWrapper": {
         "type": "object",
@@ -27243,6 +27388,16 @@
           },
           "chatSettings": {
             "$ref": "#/components/schemas/ChatSettings"
+          },
+          "sendFormToExternalDB": {
+            "type": "boolean",
+            "description": "Specifies whether to send form data to external database.",
+            "nullable": true
+          },
+          "saveFormAsXLSX": {
+            "type": "boolean",
+            "description": "Specifies whether to save form data as XLSX file.",
+            "nullable": true
           }
         },
         "additionalProperties": false,

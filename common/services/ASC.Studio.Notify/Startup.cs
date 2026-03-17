@@ -24,7 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Text.Encodings.Web;
+using ASC.Studio.Notify.Extensions;
 
 namespace ASC.Studio.Notify;
 
@@ -33,7 +33,7 @@ public class Startup : BaseWorkerStartup
     public Startup(IConfiguration configuration, IHostEnvironment hostEnvironment)
         : base(configuration, hostEnvironment)
     {
-        if (configuration.GetSection("RabbitMQ").GetChildren().Any() && 
+        if (configuration.GetSection("RabbitMQ").GetChildren().Any() &&
             String.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
         {
             configuration["RabbitMQ:ClientProvidedName"] = Program.AppName;
@@ -44,13 +44,6 @@ public class Startup : BaseWorkerStartup
     {
         await base.ConfigureServices(builder);
 
-        var services = builder.Services;
-        services.AddHttpClient();
-        services.AddHostedService<ServiceLauncher>();
-        services.AddScoped<IWebItem, ProductEntryPoint>();
-        services.AddBaseDbContextPool<FilesDbContext>();
-        services.AddActivePassiveHostedService<NotifySchedulerService>(Configuration, "StudioNotifySchedulerService");
-        services.RegisterQuotaFeature();
-        services.AddScoped(_ => UrlEncoder.Default);
+        builder.Services.AddStudioNotifyServices(Configuration);
     }
 }

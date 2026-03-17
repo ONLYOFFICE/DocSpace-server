@@ -275,6 +275,16 @@ public class Folder<T> : FileEntry<T>, IFolder
     public bool SettingsDenyDownload { get; set; }
 
     /// <summary>
+    /// Specifies if form data should be sent to external database.
+    /// </summary>
+    public bool SettingsSendFormToExternalDB { get; set; }
+
+    /// <summary>
+    /// Specifies if form data should be saved as XLSX file.
+    /// </summary>
+    public bool SettingsSaveFormAsXLSX { get; set; }
+
+    /// <summary>
     /// The folder used space.
     /// </summary>
     public long Counter { get; set; }

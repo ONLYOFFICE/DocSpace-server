@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.AI.Worker.Extensions;
+
 var options = new WebApplicationOptions
 {
     Args = args,
@@ -69,12 +71,7 @@ try
 
     var eventBus = sp.GetRequiredService<IEventBus>();
     
-    await eventBus.SubscribeAsync<VectorizationIntegrationEvent, VectorizationIntegrationEventHandler>();
-
-    await eventBus.SubscribeAsync<MessageExportIntegrationEvent, MessageExportIntegrationEventHandler>();
-    await eventBus.SubscribeAsync<ChatExportIntegrationEvent, ChatExportIntegrationEventHandler>();
-
-    await eventBus.SubscribeAsync<ChatDeletionIntegrationEvent, ChatDeletionIntegrationEventHandler>();
+    await eventBus.SubscribeAiWorkerEvents();
 
     logger.Info("Starting web host ({applicationContext})...", AppName);
 

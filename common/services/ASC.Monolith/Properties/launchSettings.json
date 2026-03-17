@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json.schemastore.org/launchsettings.json",
+  "profiles": {
+    "http": {
+      "commandName": "Project",
+      "launchBrowser": false,
+      "applicationUrl": "http://localhost:5027",
+      "launchUrl": "http://localhost:5027",
+      "environmentVariables": {
+        "$STORAGE_ROOT": "../../../../Data",
+        "log__name": "monolith",
+        "log__dir": "../../../../Logs",
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

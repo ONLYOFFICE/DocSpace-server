@@ -371,6 +371,21 @@ public abstract class EditorController<T>(
     {
         return await fileStorageService.ProtectUsersAsync(inDto.FileId);
     }
+
+    /// <remarks>
+    /// Triggers asynchronous XLSX report generation for the specified form file.
+    /// </remarks>
+    /// <summary>Generate XLSX report</summary>
+    /// <path>api/2.0/files/file/{fileId}/xlsx</path>
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "XLSX report generation has been queued")]
+    [SwaggerResponse(403, "You do not have enough permissions to perform this action")]
+    [SwaggerResponse(404, "Form file not found")]
+    [HttpPost("{fileId}/xlsx")]
+    public async Task GenerateXlsx(FileIdRequestDto<int> inDto)
+    {
+        await fileStorageService.GenerateXlsxAsync(inDto.FileId);
+    }
 }
 
 public class EditorController(FilesLinkUtility filesLinkUtility,

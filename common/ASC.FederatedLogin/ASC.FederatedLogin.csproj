@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <PackageReference Include="DotNetOpenAuth.Ultimate" />
+    <PackageReference Include="Microsoft.Data.Sqlite" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" />
     <PackageReference Include="TweetinviAPI" />
   </ItemGroup>

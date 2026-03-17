@@ -237,9 +237,9 @@ public abstract class FilesController<T>(
     [HttpDelete("file/{fileId}")]
     public async IAsyncEnumerable<FileOperationDto> DeleteFile(DeleteRequestDto<T> inDto)
     {
-        await fileOperationsManager.Publish([], [inDto.FileId], false, !inDto.File.DeleteAfter, inDto.File.Immediately);
+        var taskId = await fileOperationsManager.Publish([], [inDto.FileId], false, !inDto.File.DeleteAfter, inDto.File.Immediately);
 
-        foreach (var e in await fileOperationsManager.GetOperationResults())
+        foreach (var e in await fileOperationsManager.GetOperationResults(inDto.ReturnSingleOperation ? taskId : null))
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
@@ -637,7 +637,7 @@ public abstract class FilesController<T>(
     [SwaggerResponse(200, "Form submission results were successfully retrieved")]
     [SwaggerResponse(403, "You do not have enough permissions to perform this action")]
     [HttpGet("file/{fileId}/submissions")]
-    public IAsyncEnumerable<FormResultsDto> GetFormSubmissions(FileIdRequestDto<int> inDto)
+    public Task<FormSubmissionsDto> GetFormSubmissions(FileIdRequestDto<int> inDto)
     {
         return fileStorageService.GetSubmissionsByFormId(inDto.FileId);
     }
