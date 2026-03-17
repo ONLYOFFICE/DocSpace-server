@@ -64,7 +64,10 @@ public class AiSettingsService(
                     set = true;
                 }
                 break;
-            
+            case EngineType.PortalAi:
+                settings.Config = null;
+                set = true;
+                break;
             case EngineType.None:
                 settings.Config = null;
                 break;

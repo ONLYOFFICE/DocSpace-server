@@ -35,7 +35,10 @@ public enum EngineType
     None,
 
     [Description("Exa")]
-    Exa
+    Exa,
+
+    [Description("PortalAi")]
+    PortalAi
 }
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
