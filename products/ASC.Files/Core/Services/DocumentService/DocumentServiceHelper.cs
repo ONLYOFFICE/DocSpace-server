@@ -596,6 +596,12 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             result.CanStartFilling = true;
             return result;
         }
+
+        if (properties.FormFilling.StartFillingPreparing)
+        {
+            return result;
+        }
+
         var linkedId = await linkDao.GetLinkedAsync(file.Id);
         var formDraft = !Equals(linkedId, default(T)) ? await fileDao.GetFileAsync(linkedId) : (await entryManager.GetFillFormDraftAsync(file, rootFolder.Id)).file;
 

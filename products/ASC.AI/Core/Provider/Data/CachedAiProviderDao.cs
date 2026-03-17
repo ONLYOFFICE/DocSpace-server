@@ -116,8 +116,21 @@ public class CachedAiProviderDao(
     {
         var cacheKey = GetDefaultProviderCacheKey(tenantId);
 
-        var result = await cache.GetOrSetAsync(cacheKey,
-            async _ => await providerDao.GetDefaultProviderAsync(tenantId), _cacheExpiration);
+        var cached = await cache.TryGetAsync<DefaultAiProvider>(cacheKey);
+        DefaultAiProvider? result;
+
+        if (cached.HasValue)
+        {
+            result = cached.Value;
+        }
+        else
+        {
+            result = await providerDao.GetDefaultProviderAsync(tenantId);
+            if (result != null)
+            {
+                await cache.SetAsync(cacheKey, result, _cacheExpiration);
+            }
+        }
 
         if (result is not { ProviderId: AiGateway.ProviderId } || await gateway.IsEnabledAsync())
         {
@@ -132,8 +145,19 @@ public class CachedAiProviderDao(
     {
         var cacheKey = GetFirstProviderCacheKey(tenantId);
 
-        return await cache.GetOrSetAsync(cacheKey,
-            async _ => await providerDao.GetFirstProviderIdAsync(tenantId), _cacheExpiration);
+        var cached = await cache.TryGetAsync<int>(cacheKey);
+        if (cached.HasValue)
+        {
+            return cached.Value;
+        }
+
+        var result = await providerDao.GetFirstProviderIdAsync(tenantId);
+        if (result != null)
+        {
+            await cache.SetAsync(cacheKey, result, _cacheExpiration);
+        }
+
+        return result;
     }
 
     private static string GetDefaultProviderCacheKey(int tenantId)
