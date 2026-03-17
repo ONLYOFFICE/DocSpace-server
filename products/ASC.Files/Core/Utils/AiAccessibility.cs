@@ -51,26 +51,17 @@ public class AiAccessibility(
         return new AiStatus { Enabled = await HasProvidersAsync(tenantId), GatewayEnabled = false };
     }
 
-    public async Task<bool> IsVectorizationEnabledAsync<T>(Folder<T> agent)
+    public async Task<bool> IsVectorizationEnabledAsync()
     {
-        if (agent == null)
-        {
-            return false;
-        }
-
-        if (agent.SettingsChatProviderId == AiGateway.ProviderId)
-        {
-            return await aiGateway.IsEnabledAsync();
-        }
-        
         var tenantId = tenantManager.GetCurrentTenantId();
-        if (!await HasProvidersAsync(tenantId))
-        {
-            return false;
-        }
-        
         var settings = await settingsManager.LoadAsync<EncryptedVectorizationSettings>(tenantId);
-        return settings.ProviderType != EmbeddingProviderType.None;
+
+        return settings.ProviderType switch
+        {
+            EmbeddingProviderType.PortalAi => await aiGateway.IsEnabledAsync(),
+            EmbeddingProviderType.None => false,
+            _ => await HasProvidersAsync(tenantId)
+        };
     }
     
     private async Task<bool> HasProvidersAsync(int tenantId)

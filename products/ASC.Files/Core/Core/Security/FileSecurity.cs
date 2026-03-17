@@ -1193,7 +1193,7 @@ public class FileSecurity(
                 return false;
             }
 
-            if (action is FilesSecurityActions.Vectorization && !await aiAccessibility.IsVectorizationEnabledAsync(room))
+            if (action is FilesSecurityActions.Vectorization && !await aiAccessibility.IsVectorizationEnabledAsync())
             {
                 return false;
             }
@@ -1270,7 +1270,7 @@ public class FileSecurity(
                 }
                 
                 if (action is FilesSecurityActions.CopyTo or FilesSecurityActions.MoveTo or FilesSecurityActions.Create &&
-                    !await aiAccessibility.IsVectorizationEnabledAsync(room))
+                    !await aiAccessibility.IsVectorizationEnabledAsync())
                 {
                     return false;
                 }
