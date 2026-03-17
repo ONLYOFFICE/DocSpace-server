@@ -40,11 +40,19 @@ public class EmbeddingGeneratorFactory(
     {
         var settings = await settingsManager.LoadAsync<EncryptedVectorizationSettings>();
 
+        var providerType = settings.ProviderType;
+        if (providerType == EmbeddingProviderType.None
+            && !settings.IsConfigured
+            && await gateway.IsEnabledAsync())
+        {
+            providerType = EmbeddingProviderType.PortalAi;
+        }
+
         string url;
         string key;
         string modelId;
 
-        switch (settings.ProviderType)
+        switch (providerType)
         {
             case EmbeddingProviderType.PortalAi:
                 url = gateway.Url;

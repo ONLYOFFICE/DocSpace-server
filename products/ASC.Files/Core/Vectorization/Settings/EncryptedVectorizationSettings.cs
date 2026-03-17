@@ -48,13 +48,15 @@ public class EncryptedVectorizationSettings : ISettings<EncryptedVectorizationSe
     public DateTime LastModified { get; set; }
     public EmbeddingProviderType ProviderType { get; init; }
     public string Key { get; set; }
-    
+    public bool IsConfigured { get; init; }
+
     public EncryptedVectorizationSettings GetDefault()
     {
         return new EncryptedVectorizationSettings
         {
             ProviderType = EmbeddingProviderType.None,
-            Key = null
+            Key = null,
+            IsConfigured = false
         };
     }
 }

@@ -56,7 +56,13 @@ public class AiAccessibility(
         var tenantId = tenantManager.GetCurrentTenantId();
         var settings = await settingsManager.LoadAsync<EncryptedVectorizationSettings>(tenantId);
 
-        return settings.ProviderType switch
+        var providerType = settings.ProviderType;
+        if (providerType == EmbeddingProviderType.None && !settings.IsConfigured)
+        {
+            providerType = EmbeddingProviderType.PortalAi;
+        }
+
+        return providerType switch
         {
             EmbeddingProviderType.PortalAi => await aiGateway.IsEnabledAsync(),
             EmbeddingProviderType.None => false,
