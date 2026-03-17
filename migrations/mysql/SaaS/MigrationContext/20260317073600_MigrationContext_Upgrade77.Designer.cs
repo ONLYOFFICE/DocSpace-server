@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     [DbContext(typeof(MigrationContext))]
-    [Migration("20260307131644_MigrationContext_Upgrade76")]
-    partial class MigrationContext_Upgrade76
+    [Migration("20260317073600_MigrationContext_Upgrade77")]
+    partial class MigrationContext_Upgrade77
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -4613,6 +4613,18 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("quota")
                         .HasDefaultValueSql("'-2'");
+
+                    b.Property<bool>("SaveFormAsXLSX")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("save_form_as_xlsx")
+                        .HasDefaultValueSql("0");
+
+                    b.Property<bool>("SendFormToExternalDB")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("send_form_to_external_db")
+                        .HasDefaultValueSql("0");
 
                     b.Property<string>("Watermark")
                         .HasColumnType("json")
