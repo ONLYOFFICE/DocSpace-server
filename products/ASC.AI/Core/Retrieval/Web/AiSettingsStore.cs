@@ -99,7 +99,7 @@ public class AiSettingsStore(
             ProviderType = vectorizationSettings.Type
         };
 
-        if (vectorizationSettings.Type != EmbeddingProviderType.None)
+        if (vectorizationSettings.Type is not EmbeddingProviderType.None and not EmbeddingProviderType.PortalAi)
         {
             settings.Key = await instanceCrypto.EncryptAsync(vectorizationSettings.Key);
         }
@@ -110,12 +110,12 @@ public class AiSettingsStore(
     public async Task<VectorizationSettings> GetVectorizationSettingsAsync()
     {
         var settings = await settingsManager.LoadAsync<EncryptedVectorizationSettings>();
-        if (settings.ProviderType == EmbeddingProviderType.None)
+        if (settings.ProviderType is EmbeddingProviderType.None or EmbeddingProviderType.PortalAi)
         {
             return new VectorizationSettings {
-                
-                Type = settings.ProviderType, 
-                Key = null 
+
+                Type = settings.ProviderType,
+                Key = null
             };
         }
 

@@ -36,7 +36,10 @@ public enum EmbeddingProviderType
     OpenAi,
 
     [Description("OpenRouter")]
-    OpenRouter
+    OpenRouter,
+
+    [Description("PortalAi")]
+    PortalAi
 }
 
 public class EncryptedVectorizationSettings : ISettings<EncryptedVectorizationSettings>

@@ -102,42 +102,50 @@ public class AiSettingsService(
         var set = false;
         var settings = await aiSettingsStore.GetVectorizationSettingsAsync();
         
-        if (type == EmbeddingProviderType.None)
+        switch (type)
         {
-            settings.Type = type;
-            settings.Key = null;
-        }
-        else
-        {
-            ArgumentException.ThrowIfNullOrEmpty(key);
-            
-            var url = type switch
-            {
-                EmbeddingProviderType.OpenAi => VectorizationGlobalSettings.OpenAiBaseUrl,
-                EmbeddingProviderType.OpenRouter => VectorizationGlobalSettings.OpenRouterBaseUrl,
-                _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
-            };
-            
-            var client = modelClientFactory.Create(type, url, key);
-
-            try
-            {
-                await client.PingAsync();
-            }
-            catch (HttpRequestException httpException)
-            {
-                if (httpException.StatusCode is HttpStatusCode.Unauthorized)
+            case EmbeddingProviderType.None:
+                settings.Type = type;
+                settings.Key = null;
+                break;
+            case EmbeddingProviderType.PortalAi:
+                settings.Type = type;
+                settings.Key = null;
+                set = true;
+                break;
+            default:
                 {
-                    throw new ArgumentException(ErrorMessages.InvalidKey);
-                }
+                    ArgumentException.ThrowIfNullOrEmpty(key);
 
-                throw;
-            }
-            
-            settings.Type = type;
-            settings.Key = key;
-            
-            set = true;
+                    var url = type switch
+                    {
+                        EmbeddingProviderType.OpenAi => VectorizationGlobalSettings.OpenAiBaseUrl,
+                        EmbeddingProviderType.OpenRouter => VectorizationGlobalSettings.OpenRouterBaseUrl,
+                        _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+                    };
+
+                    var client = modelClientFactory.Create(type, url, key);
+
+                    try
+                    {
+                        await client.PingAsync();
+                    }
+                    catch (HttpRequestException httpException)
+                    {
+                        if (httpException.StatusCode is HttpStatusCode.Unauthorized)
+                        {
+                            throw new ArgumentException(ErrorMessages.InvalidKey);
+                        }
+
+                        throw;
+                    }
+
+                    settings.Type = type;
+                    settings.Key = key;
+
+                    set = true;
+                    break;
+                }
         }
 
         await aiSettingsStore.SetVectorizationSettingsAsync(settings);
