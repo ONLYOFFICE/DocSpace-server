@@ -24,8 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Data.Storage.Encryption.IntegrationEvents.Events;
-using ASC.Files.Worker.IntegrationEvents.EventHandling;
+using ASC.Files.Worker.Extensions;
 
 using NLog;
 
@@ -72,22 +71,7 @@ try
 
     var eventBus = sp.GetRequiredService<IEventBus>();
 
-    await Task.WhenAll(
-        eventBus.SubscribeAsync<ThumbnailRequestedIntegrationEvent, ThumbnailRequestedIntegrationEventHandler>(),
-        eventBus.SubscribeAsync<RoomIndexExportIntegrationEvent, RoomIndexExportIntegrationEventHandler>(),
-        eventBus.SubscribeAsync<DeleteIntegrationEvent, DeleteIntegrationEventHandler>(),
-        eventBus.SubscribeAsync<MoveOrCopyIntegrationEvent, MoveOrCopyIntegrationEventHandler>(),
-        eventBus.SubscribeAsync<DuplicateIntegrationEvent, DuplicateIntegrationEventHandler>(),
-        eventBus.SubscribeAsync<BulkDownloadIntegrationEvent, BulkDownloadIntegrationEventHandler>(),
-        eventBus.SubscribeAsync<MarkAsReadIntegrationEvent, MarkAsReadIntegrationEventHandler>(),
-        eventBus.SubscribeAsync<EmptyTrashIntegrationEvent, EmptyTrashIntegrationEventHandler>(),
-        eventBus.SubscribeAsync<FormFillingReportIntegrationEvent, FormFillingReportIntegrationEventHandler>(),
-        eventBus.SubscribeAsync<ExternalDbFormSubmissionIntegrationEvent, ExternalDbFormSubmissionIntegrationEventHandler>(),
-        eventBus.SubscribeAsync<RoomNotifyIntegrationEvent, RoomNotifyIntegrationEventHandler>(),
-        eventBus.SubscribeAsync<CreateRoomTemplateIntegrationEvent, RoomTemplatesIntegrationEventHandler>(),
-        eventBus.SubscribeAsync<CreateRoomFromTemplateIntegrationEvent, RoomTemplatesIntegrationEventHandler>(),
-        eventBus.SubscribeAsync<DataStorageEncryptionIntegrationEvent, DataStorageEncryptionIntegrationEventHandler>(),
-        eventBus.SubscribeAsync<CustomerOperationsReportIntegrationEvent, CustomerOperationsReportIntegrationEventHandler>());
+    await eventBus.SubscribeFilesWorkerEvents();
 
     sp.GetRequiredService<FileTrackerHelper>().Subscribe();
 

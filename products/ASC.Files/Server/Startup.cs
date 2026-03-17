@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Data.Storage;
+using ASC.Files.Extensions;
 
 namespace ASC.Files;
 
@@ -32,7 +33,7 @@ public class Startup : BaseStartup
 {
     public Startup(IConfiguration configuration) : base(configuration)
     {
-        if (configuration.GetSection("RabbitMQ").GetChildren().Any() && 
+        if (configuration.GetSection("RabbitMQ").GetChildren().Any() &&
             String.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
         {
             configuration["RabbitMQ:ClientProvidedName"] = Program.AppName;
@@ -49,43 +50,14 @@ public class Startup : BaseStartup
 
         await base.ConfigureServices(builder);
 
-        services.AddBaseDbContextPool<FilesDbContext>();
-        services.AddBaseDbContextPool<BackupsContext>();
-        services.RegisterQuotaFeature();
-        services.AddScoped<IWebItem, ProductEntryPoint>();
-        services.AddDocumentServiceHttpClient(_configuration);
-
-        services.RegisterQueue<AsyncTaskData<int>>();
-        services.RegisterQueue<AsyncTaskData<string>>();
-        services.RegisterFreeBackupQuotaFeature();
-        services.AddStartupTask<CheckPdfStartupTask>()
-           .TryAddSingleton(services);
+        services.AddFilesServerServices(_configuration);
     }
 
     public override void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
         base.Configure(app, env);
 
-        app.MapWhen(
-                context => context.Request.Path.ToString().EndsWith("filehandler.ashx", StringComparison.OrdinalIgnoreCase),
-            appBranch =>
-            {
-                appBranch.UseFileHandler();
-            });
-
-        app.MapWhen(
-                context => context.Request.Path.ToString().EndsWith("ChunkedUploader.ashx", StringComparison.OrdinalIgnoreCase),
-            appBranch =>
-            {
-                appBranch.UseChunkedUploaderHandler();
-            });
-
-        app.MapWhen(
-                context => context.Request.Path.ToString().EndsWith("DocuSignHandler.ashx", StringComparison.OrdinalIgnoreCase),
-            appBranch =>
-            {
-                appBranch.UseDocuSignHandler();
-            });
+        app.UseFilesServerMiddleware();
 
         app.UseEndpoints(endpoints =>
         {

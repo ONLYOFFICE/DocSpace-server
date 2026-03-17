@@ -26,21 +26,26 @@
 
 namespace ASC.Files.Core.Core;
 
-public class CheckPdfStartupTask(IServiceProvider provider) : IStartupTask
+public class CheckPdfStartupTask(IServiceProvider provider, ILogger<CheckPdfStartupTask> logger) : IStartupTaskNotAwaitable
 {
     public async Task ExecuteAsync(CancellationToken cancellationToken = default)
     {
-        var tenantService = provider.GetService<ITenantService>();
+        await Task.Yield();
 
-        var tenants = await tenantService.GetTenantsAsync((DateTime)default);
-        var t = Task.Run(async () =>
+        try
         {
+            var tenantService = provider.GetService<ITenantService>();
+
+            var tenants = await tenantService.GetTenantsAsync((DateTime)default);
+
             await using var scope = provider.CreateAsyncScope();
             var checkPdfExecutor = scope.ServiceProvider.GetService<CheckPdfExecutor>();
             await checkPdfExecutor.CheckPdf(tenants);
-
-        }, cancellationToken);
-        _ = t.ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            logger.ErrorCheckPdfStartupTaskFailed(ex);
+        }
     }
 
 }

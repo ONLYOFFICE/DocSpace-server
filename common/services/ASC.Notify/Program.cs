@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Notify.Extensions;
+
 using NLog;
 
 var options = new WebApplicationOptions
@@ -68,9 +70,7 @@ try
 
     var eventBus = ((IApplicationBuilder)app).ApplicationServices.GetRequiredService<IEventBus>();
 
-    await Task.WhenAll(
-        eventBus.SubscribeAsync<NotifyInvokeSendMethodRequestedIntegrationEvent, NotifyInvokeSendMethodRequestedIntegrationEventHandler>(),
-        eventBus.SubscribeAsync<NotifySendMessageRequestedIntegrationEvent, NotifySendMessageRequestedIntegrationEventHandler>());
+    await eventBus.SubscribeNotifyEvents();
 
     logger.Info("Starting web host ({applicationContext})...", AppName);
     await app.RunWithTasksAsync(awaitTasks: false);
