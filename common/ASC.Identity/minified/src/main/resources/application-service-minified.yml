@@ -1,11 +1,11 @@
 grpc:
   client:
     registrationService:
-      address: ${GRPC_CLIENT_REGISTRATION_ADDRESS:in-process:identity-minified}
-      negotiation-type: ${GRPC_CLIENT_REGISTRATION_NEGOTIATION_TYPE:plaintext}
+      address: in-process:identity-minified
+      negotiation-type: plaintext
     authorizationService:
-      address: ${GRPC_CLIENT_AUTHORIZATION_ADDRESS:in-process:identity-minified}
-      negotiation-type: ${GRPC_CLIENT_AUTHORIZATION_NEGOTIATION_TYPE:plaintext}
+      address: in-process:identity-minified
+      negotiation-type: plaintext
   server:
     in-process-name: identity-minified
     port: ${GRPC_SERVER_PORT:-1}
