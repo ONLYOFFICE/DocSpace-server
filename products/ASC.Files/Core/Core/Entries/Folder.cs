@@ -265,8 +265,19 @@ public class Folder<T> : FileEntry<T>, IFolder
     /// </summary>
     public RoomDataLifetime SettingsLifetime { get; set; }
     
+    /// <summary>
+    /// The chat provider ID configured for the folder.
+    /// </summary>
     public int SettingsChatProviderId { get; set; }
+
+    /// <summary>
+    /// The chat parameters configured for the folder.
+    /// </summary>
     public ChatParameters SettingsChatParameters { get; set; }
+
+    /// <summary>
+    /// The chat provider type configured for the folder.
+    /// </summary>
     public ProviderType? ChatProviderType { get; set; }
     
     /// <summary>

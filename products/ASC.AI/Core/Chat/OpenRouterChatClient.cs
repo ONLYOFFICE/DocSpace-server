@@ -155,26 +155,33 @@ public class OpenRouterChatClient(IChatClient innerClient) : IChatClient
     }
 }
 
-sealed class ReasoningArrayAccumulator
+internal sealed class ReasoningArrayAccumulator
 {
     public const string Key = nameof(ReasoningArrayAccumulator);
 
     private readonly ArrayBufferWriter<byte> _buffer = new();
+    private bool _finalised;
 
     public void Write(ReadOnlySpan<byte> rawJson)
     {
+        if (_finalised)
+        {
+            throw new InvalidOperationException("Cannot write after the accumulator has been finalised by a call to Read().");
+        }
+
         _buffer.Write(_buffer.WrittenCount > 0 ? ","u8 : "["u8);
         _buffer.Write(rawJson);
     }
 
     public ReadOnlySpan<byte> Read()
     {
-        if (_buffer.WrittenCount == 0 || _buffer.WrittenSpan[^1] == (byte)']')
+        if (_finalised || _buffer.WrittenCount == 0)
         {
             return _buffer.WrittenSpan;
         }
 
         _buffer.Write("]"u8);
+        _finalised = true;
 
         return _buffer.WrittenSpan;
     }
@@ -186,7 +193,7 @@ sealed class ReasoningArrayAccumulator
 [JsonDerivedType(typeof(EncryptedReasoningDetail), "reasoning.encrypted")]
 public abstract class ReasoningDetail;
 
-public class TextReasoningDetail : ReasoningDetail
+public sealed class TextReasoningDetail : ReasoningDetail
 {
     [JsonPropertyName("text")]
     public string? Text { get; set; }
@@ -195,13 +202,13 @@ public class TextReasoningDetail : ReasoningDetail
     public string? Signature { get; set; }
 }
 
-public class SummaryReasoningDetail : ReasoningDetail
+public sealed class SummaryReasoningDetail : ReasoningDetail
 {
     [JsonPropertyName("summary")]
     public string? Summary { get; set; }
 }
 
-public class EncryptedReasoningDetail : ReasoningDetail
+public sealed class EncryptedReasoningDetail : ReasoningDetail
 {
     [JsonPropertyName("data")]
     public string? Data { get; set; }
