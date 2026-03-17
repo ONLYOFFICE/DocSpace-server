@@ -377,7 +377,8 @@ public class DocumentServiceTrackerHelper(
             userId = Guid.Empty;
         }
 
-        var fileStable = await daoFactory.GetFileDao<T>().GetFileStableAsync(fileId);
+        var fileDao = daoFactory.GetFileDao<T>();
+        var fileStable = await fileDao.GetFileStableAsync(fileId);
 
         var docKey = await documentServiceHelper.GetDocKeyAsync(fileStable);
         if (!fileData.Key.Equals(docKey))
@@ -487,6 +488,16 @@ public class DocumentServiceTrackerHelper(
         {
             await fileTracker.RemoveAsync(fileId);
             await socketManager.StopEditAsync(fileId);
+
+            if (fileStable?.IsForm == true)
+            {
+                var properties = await fileDao.GetProperties(fileId);
+                if (properties?.FormFilling is { StartFillingPreparing: true })
+                {
+                    properties.FormFilling.StartFillingPreparing = false;
+                    await fileDao.SaveProperties(fileId, properties);
+                }
+            }
         }
 
         if (file == null)
