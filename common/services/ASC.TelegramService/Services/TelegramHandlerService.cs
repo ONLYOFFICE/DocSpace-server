@@ -166,8 +166,10 @@ public class TelegramHandlerService(
 
         _clients[tenantId].CancellationTokenSource = cts;
 
+#pragma warning disable CA2000
         var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, cancellationToken);
-
+#pragma warning restore CA2000
+        
         client.StartReceiving(
             updateHandler: (botClient, update, ct) => HandleUpdate(botClient, update, tenantId, ct),
             errorHandler: (botClient, exception, ct) => HandleErrorAsync(exception, tenantId, linkedCts),

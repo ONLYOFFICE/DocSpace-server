@@ -66,7 +66,7 @@ public class SmtpSender(
             {
                 await BuildSmtpSettingsAsync(coreConfiguration);
 
-                var mail = BuildMailMessage(m);
+                using var mail = BuildMailMessage(m);
 
                 _logger.DebugSmtpSender(_host, _port, _ssl, _credentials != null);
 

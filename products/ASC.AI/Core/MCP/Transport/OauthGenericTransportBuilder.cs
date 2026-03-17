@@ -48,22 +48,25 @@ public class OauthGenericTransportBuilder(
             OauthProvider = connection.OauthProvider,
             Token = connection.Settings.OauthCredentials
         };
-        
+
+        // CA2000: OauthMessageHandler, HttpClient, and HttpClientTransport all owned by MCP client
+#pragma warning disable CA2000
         var oauthHandler = new OauthMessageHandler(
             httpMessageHandlerFactory.CreateHandler(),
             mcpDao,
             context,
             oauthTokenHelper);
-        
+
         var client = new HttpClient(oauthHandler);
 
         var transportOptions = new HttpClientTransportOptions
         {
-            Name = connection.Name, 
-            Endpoint = new Uri(connection.Endpoint), 
+            Name = connection.Name,
+            Endpoint = new Uri(connection.Endpoint),
             TransportMode = HttpTransportMode.AutoDetect
         };
-        
+
         return ValueTask.FromResult(new HttpClientTransport(transportOptions, client));
+#pragma warning restore CA2000
     }
 }

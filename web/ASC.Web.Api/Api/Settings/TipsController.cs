@@ -61,7 +61,7 @@ public class TipsController(
             try
             {
                 var tenant = tenantManager.GetCurrentTenant();
-                var request = new HttpRequestMessage
+                using var request = new HttpRequestMessage
                 {
                     RequestUri = new Uri($"{setupInfo.TipsAddress}/tips/deletereaded")
                 };
@@ -73,8 +73,9 @@ public class TipsController(
                 };
                 var body = JsonSerializer.Serialize(data);//todo check
                 request.Content = new StringContent(body);
-
+#pragma warning disable CA2000
                 var httpClient = clientFactory.CreateClient();
+#pragma warning restore CA2000
                 using var response = await httpClient.SendAsync(request);
 
             }

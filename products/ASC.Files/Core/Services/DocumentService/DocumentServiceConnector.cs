@@ -225,11 +225,7 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
                     ? filesLinkUtility.DocServiceApiUrl
                     : baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.DocServiceApiUrl);
 
-                var request = new HttpRequestMessage
-                {
-                    RequestUri = new Uri(requestUri),
-                    Method = HttpMethod.Head
-                };
+                using var request = new HttpRequestMessage(HttpMethod.Head, requestUri);
 
                 using var httpClient = await filesLinkUtility.GetDocServiceSslVerificationAsync()
                     ? clientFactory.CreateClient()
@@ -310,12 +306,10 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
 
             try
             {
-                var request1 = new HttpRequestMessage
-                {
-                    RequestUri = new Uri(convertedFileUri)
-                };
-
-                using var httpClient = clientFactory.CreateClient();
+                using var request1 = new HttpRequestMessage(HttpMethod.Get, convertedFileUri);
+#pragma warning disable CA2000
+                var httpClient = clientFactory.CreateClient();
+#pragma warning restore CA2000
                 using var response = await httpClient.SendAsync(request1);
 
                 if (response.StatusCode != HttpStatusCode.OK)

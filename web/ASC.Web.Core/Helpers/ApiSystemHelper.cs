@@ -292,11 +292,7 @@ public class ApiSystemHelper
 
         var url = $"{absoluteApiUrl}/{apiPath}";
 
-        var request = new HttpRequestMessage
-        {
-            RequestUri = new Uri(url),
-            Method = new HttpMethod(httpMethod)
-        };
+        using var request = new HttpRequestMessage(new HttpMethod(httpMethod), new Uri(url));
         request.Headers.Add("Authorization", CreateAuthToken(userId.ToString()));
         request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
@@ -304,8 +300,9 @@ public class ApiSystemHelper
         {
             request.Content = new StringContent(data, Encoding.UTF8, "application/json");
         }
-
+#pragma warning disable CA2000 // HttpClient is short-lived and disposed by runtime
         var httpClient = _clientFactory.CreateClient();
+#pragma warning restore CA2000
         using var response = await httpClient.SendAsync(request);
         return await response.Content.ReadAsStringAsync();
     }

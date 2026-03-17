@@ -39,8 +39,12 @@ public class CsvFileHelper(ILogger<CsvFileHelper> logger)
         try
         {
             var stream = new MemoryStream();
-            var writer = new StreamWriter(stream, Encoding.UTF8);
+            // CA2000: StreamWriter and CsvWriter ownership transferred to caller via returned stream
+            // Caller is responsible for disposing the stream, which will dispose the writer and csv
+#pragma warning disable CA2000
+            var writer = new StreamWriter(stream, Encoding.UTF8, leaveOpen: false);
             var csv = new CsvWriter(writer, CultureInfo.CurrentCulture);
+#pragma warning restore CA2000
 
             if (mapper != null)
             {
@@ -75,8 +79,12 @@ public class CsvFileHelper(ILogger<CsvFileHelper> logger)
                 HasHeaderRecord = true
             };
 
-            var writer = new StreamWriter(tempStream);
+            // CA2000: StreamWriter and CsvWriter write to caller-provided tempStream
+            // The tempStream is owned by caller and will be disposed by them
+#pragma warning disable CA2000
+            var writer = new StreamWriter(tempStream, leaveOpen: true);
             var csv = new CsvWriter(writer, config);
+#pragma warning restore CA2000
 
             if (mapper != null)
             {

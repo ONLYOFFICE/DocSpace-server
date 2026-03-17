@@ -88,6 +88,7 @@ public class EventBusActiveMQ : IEventBus, IDisposable
         if (_consumers.TryRemove(eventName, out var consumer))
         {
             await consumer.CloseAsync();
+            consumer.Dispose();
         }
 
         if (_subsManager.IsEmpty)
