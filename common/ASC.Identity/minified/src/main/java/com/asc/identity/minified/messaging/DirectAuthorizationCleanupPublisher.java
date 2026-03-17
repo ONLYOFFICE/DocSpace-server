@@ -48,13 +48,8 @@ import org.springframework.transaction.annotation.Transactional;
  * in minified deployments.
  */
 @Slf4j
-@Component
 @Profile("minified")
-@RequiredArgsConstructor
 public class DirectAuthorizationCleanupPublisher {
-  private final JpaAuthorizationRepository jpaAuthorizationRepository;
-  private final JpaConsentRepository jpaConsentRepository;
-
   /**
    * Minified-specific publisher that performs immediate cleanup when a single client is removed.
    *
