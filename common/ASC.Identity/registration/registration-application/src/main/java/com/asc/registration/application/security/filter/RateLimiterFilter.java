@@ -56,8 +56,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * and headers are included in the response to indicate the remaining tokens and reset time.
  */
 @Slf4j
-@Component
 @RequiredArgsConstructor
+@Component("registrationRateLimiterFilter")
 public class RateLimiterFilter extends OncePerRequestFilter {
   /** HTTP response header for remaining rate limit tokens. */
   private static final String X_RATE_REMAINING = "X-Ratelimit-Remaining";
