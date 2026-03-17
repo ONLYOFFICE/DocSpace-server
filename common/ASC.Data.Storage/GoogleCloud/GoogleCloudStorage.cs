@@ -725,9 +725,9 @@ public class GoogleCloudStorage(TempStream tempStream,
 
             try
             {
-                #pragma warning disable CA2000 // Dispose objects before losing scope
+#pragma warning disable CA2000 
                 var httpClient = _clientFactory.CreateClient();
-                #pragma warning restore CA2000 // Dispose objects before losing scope
+#pragma warning restore CA2000
                 using var response = await httpClient.SendAsync(request);
 
                 break;

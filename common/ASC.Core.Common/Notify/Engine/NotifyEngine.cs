@@ -67,12 +67,8 @@ public class NotifyEngine(Context context,
 
         lock (SendMethods)
         {
-            // CA2000: Temporary SendMethodWrapper created only for comparison, disposed immediately
-#pragma warning disable CA2000
-            var wrapper = new SendMethodWrapper(method, null, _logger);
-#pragma warning restore CA2000
+            using var wrapper = new SendMethodWrapper(method, null, _logger);
             SendMethods.Remove(wrapper);
-            wrapper.Dispose();
         }
     }
 
