@@ -3753,13 +3753,12 @@ public class FileStorageService //: IFileStorageService
         {
             entries.AddRange(items);
         }
-
-        var tags = entries.Select(entry => Tag.Favorite(authContext.CurrentAccount.ID, entry));
-
-        await tagDao.RemoveTagsAsync(tags);
-
+        
+        var tags = await tagDao.GetTagsAsync(authContext.CurrentAccount.ID, [TagType.Favorite], entries).ToListAsync();
+        
         foreach (var entry in entries)
-        {
+        {            
+            await tagDao.RemoveTagsAsync(entry, tags.Where(r=> r.EntryType == entry.FileEntryType && Equals(r.EntryId, entry.Id)).Select(r=> r.Id));    
             await socketManager.RemoveFromFavoritesAsync(entry, [authContext.CurrentAccount.ID]);
             await filesMessageService.SendAsync(MessageAction.FileRemovedFromFavorite, entry, entry.Title);
         }
@@ -3819,15 +3818,13 @@ public class FileStorageService //: IFileStorageService
         }
 
         var tags = await tagDao.GetTagsAsync(authContext.CurrentAccount.ID, [TagType.Recent], entries).ToListAsync();
-
-        await tagDao.RemoveTagsAsync(tags);
-
         var users = new[] { authContext.CurrentAccount.ID };
-
-        var tasks = new List<Task>(entries.Count);
+        var tasks = new List<Task>(entries.Count * 2);
 
         foreach (var e in entries)
         {
+            tasks.Add(tagDao.RemoveTagsAsync(e, tags.Where(r=> r.EntryType == e.FileEntryType && Equals(r.EntryId, e.Id)).Select(r=> r.Id)));
+
             switch (e)
             {
                 case File<T> file:
