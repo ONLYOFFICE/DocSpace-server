@@ -1,16 +1,45 @@
 # Remove the line below if you want to inherit .editorconfig settings from higher directories
 root = true
 
+#### Global defaults ####
+[*]
+charset = utf-8
+indent_style = space
+indent_size = 4
+tab_width = 4
+end_of_line = crlf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# XML-based project files
+[*.{csproj,vbproj,vcxproj,vcxproj.filters,proj,projitems,shproj,props,targets}]
+indent_size = 2
+
+# XML/config files
+[*.{xml,config,nuspec,resx,ruleset,vsixmanifest,vsct,DotSettings}]
+indent_size = 2
+
+# JSON/YAML files
+[*.{json,jsonc}]
+indent_size = 2
+
+[*.{yml,yaml}]
+indent_size = 2
+
+# Markdown files
+[*.md]
+trim_trailing_whitespace = false
+
+# Shell scripts
+[*.sh]
+end_of_line = lf
+
+# Solution files
+[*.sln]
+indent_style = tab
+
 # C# files
 [*.cs]
-
-#### Core EditorConfig Options ####
-
-# Indentation and spacing
-indent_style = space
-
-# New line preferences
-insert_final_newline = false
 
 #### .NET Coding Conventions ####
 
@@ -19,22 +48,44 @@ dotnet_separate_import_directive_groups = true
 dotnet_sort_system_directives_first = true
 
 # this. and Me. preferences
+dotnet_style_qualification_for_field = false:silent
+dotnet_style_qualification_for_property = false:silent
+dotnet_style_qualification_for_method = false:silent
+dotnet_style_qualification_for_event = false:silent
 
 # Language keywords vs BCL types preferences
+dotnet_style_predefined_type_for_locals_parameters_members = true:suggestion
+dotnet_style_predefined_type_for_member_access = true:suggestion
 
 # Parentheses preferences
+dotnet_style_parentheses_in_arithmetic_binary_operators = always_for_clarity:silent
+dotnet_style_parentheses_in_other_binary_operators = always_for_clarity:silent
+dotnet_style_parentheses_in_relational_binary_operators = always_for_clarity:silent
+dotnet_style_parentheses_in_other_operators = always_for_clarity:silent
 
 # Modifier preferences
+dotnet_style_require_accessibility_modifiers = for_non_interface_members:warning
+dotnet_style_readonly_field = true:warning
 
 # Expression-level preferences
-
-# Field preferences
+dotnet_style_object_initializer = true:suggestion
+dotnet_style_collection_initializer = true:suggestion
+dotnet_style_explicit_tuple_names = true:suggestion
+dotnet_style_prefer_inferred_tuple_names = true:suggestion
+dotnet_style_prefer_inferred_anonymous_type_member_names = true:suggestion
+dotnet_style_prefer_auto_properties = true:suggestion
+dotnet_style_prefer_conditional_expression_over_assignment = true:suggestion
+dotnet_style_prefer_conditional_expression_over_return = true:suggestion
+dotnet_style_prefer_compound_assignment = true:suggestion
+dotnet_style_prefer_simplified_interpolation = true:suggestion
+dotnet_style_prefer_simplified_boolean_expressions = true:suggestion
+dotnet_style_coalesce_expression = true:suggestion
+dotnet_style_null_propagation = true:suggestion
+dotnet_style_prefer_is_null_check_over_reference_equality_method = true:suggestion
+dotnet_style_operator_placement_when_wrapping = beginning_of_line
 
 # Parameter preferences
-
-# Suppression preferences
-
-# New line preferences
+dotnet_code_quality_unused_parameters = all:warning
 
 #### C# Coding Conventions ####
 
@@ -50,10 +101,15 @@ csharp_style_expression_bodied_operators = false:silent
 csharp_style_expression_bodied_properties = true:silent
 csharp_style_expression_bodied_indexers = true:silent
 csharp_style_expression_bodied_accessors = true:silent
+csharp_style_expression_bodied_lambdas = true:silent
+csharp_style_expression_bodied_local_functions = false:silent
 
 # Pattern matching preferences
 csharp_style_pattern_matching_over_is_with_cast_check = true:suggestion
 csharp_style_pattern_matching_over_as_with_null_check = true:suggestion
+csharp_style_prefer_switch_expression = true:suggestion
+csharp_style_prefer_pattern_matching = true:silent
+csharp_style_prefer_not_pattern = true:suggestion
 
 # Null-checking preferences
 csharp_style_conditional_delegate_call = true:suggestion
@@ -63,23 +119,24 @@ csharp_preferred_modifier_order = public,private,protected,internal,static,exter
 
 # Code-block preferences
 csharp_prefer_braces = true:warning
-csharp_prefer_simple_using_statement = false:silent
+csharp_prefer_simple_using_statement = true:suggestion
+csharp_style_namespace_declarations = file_scoped:warning
 
 # Expression-level preferences
-csharp_prefer_simple_default_expression = false:silent
+csharp_prefer_simple_default_expression = true:suggestion
 csharp_style_deconstructed_variable_declaration = true:suggestion
 csharp_style_inlined_variable_declaration = true:suggestion
 csharp_style_pattern_local_over_anonymous_function = true:suggestion
-csharp_style_prefer_index_operator = false:suggestion
-csharp_style_prefer_range_operator = false:suggestion
+csharp_style_prefer_index_operator = true:suggestion
+csharp_style_prefer_range_operator = true:suggestion
 csharp_style_throw_expression = true:suggestion
 csharp_style_unused_value_assignment_preference = discard_variable:suggestion
 csharp_style_unused_value_expression_statement_preference = discard_variable:suggestion
+csharp_style_implicit_object_creation_when_type_is_apparent = true:suggestion
+csharp_prefer_static_local_function = true:suggestion
 
 # 'using' directive preferences
 csharp_using_directive_placement = outside_namespace:warning
-
-# New line preferences
 
 #### C# Formatting Rules ####
 
@@ -130,15 +187,7 @@ csharp_preserve_single_line_statements = true
 
 #### Naming styles ####
 
-# Naming rules
-
-dotnet_naming_rule.private_field_should_be_begin_with_underscore.severity = warning
-dotnet_naming_rule.private_field_should_be_begin_with_underscore.symbols = private_field
-dotnet_naming_rule.private_field_should_be_begin_with_underscore.style = begin_with_underscore
-
-dotnet_naming_rule.public_field_should_be_begin_without_underscore.severity = warning
-dotnet_naming_rule.public_field_should_be_begin_without_underscore.symbols = public_field
-dotnet_naming_rule.public_field_should_be_begin_without_underscore.style = pascal_case
+# Naming rules (ordered by priority — higher priority first)
 
 dotnet_naming_rule.interface_should_be_begins_with_i.severity = warning
 dotnet_naming_rule.interface_should_be_begins_with_i.symbols = interface
@@ -152,50 +201,46 @@ dotnet_naming_rule.types_should_be_pascal_case.severity = warning
 dotnet_naming_rule.types_should_be_pascal_case.symbols = types
 dotnet_naming_rule.types_should_be_pascal_case.style = pascal_case
 
+dotnet_naming_rule.public_field_should_be_begin_without_underscore.severity = warning
+dotnet_naming_rule.public_field_should_be_begin_without_underscore.symbols = public_field
+dotnet_naming_rule.public_field_should_be_begin_without_underscore.style = pascal_case
+
+dotnet_naming_rule.private_field_should_be_begin_with_underscore.severity = warning
+dotnet_naming_rule.private_field_should_be_begin_with_underscore.symbols = private_field
+dotnet_naming_rule.private_field_should_be_begin_with_underscore.style = begin_with_underscore
+
 # Symbol specifications
 
 dotnet_naming_symbols.interface.applicable_kinds = interface
 dotnet_naming_symbols.interface.applicable_accessibilities = public, internal, private, protected, protected_internal, private_protected
-dotnet_naming_symbols.interface.required_modifiers = 
-
-dotnet_naming_symbols.private_field.applicable_kinds = field
-dotnet_naming_symbols.private_field.applicable_accessibilities = private, protected, private_protected
-dotnet_naming_symbols.private_field.required_modifiers = 
 
 dotnet_naming_symbols.constant_fields.applicable_kinds = field
+dotnet_naming_symbols.constant_fields.applicable_accessibilities = public, internal, private, protected, protected_internal, private_protected
 dotnet_naming_symbols.constant_fields.required_modifiers = const
-
-dotnet_naming_symbols.public_field.applicable_kinds = field
-dotnet_naming_symbols.public_field.applicable_accessibilities = public, internal, protected_internal
-dotnet_naming_symbols.public_field.required_modifiers = 
 
 dotnet_naming_symbols.types.applicable_kinds = class, struct, interface, enum, property
 dotnet_naming_symbols.types.applicable_accessibilities = public, internal, private, protected, protected_internal, private_protected
-dotnet_naming_symbols.types.required_modifiers = 
+
+dotnet_naming_symbols.public_field.applicable_kinds = field
+dotnet_naming_symbols.public_field.applicable_accessibilities = public, internal, protected_internal
+
+dotnet_naming_symbols.private_field.applicable_kinds = field
+dotnet_naming_symbols.private_field.applicable_accessibilities = private, protected, private_protected
 
 # Naming styles
 
-dotnet_naming_style.pascal_case.required_prefix = 
-dotnet_naming_style.pascal_case.required_suffix = 
-dotnet_naming_style.pascal_case.word_separator = 
 dotnet_naming_style.pascal_case.capitalization = pascal_case
 
 dotnet_naming_style.begins_with_i.required_prefix = I
-dotnet_naming_style.begins_with_i.required_suffix = 
-dotnet_naming_style.begins_with_i.word_separator = 
 dotnet_naming_style.begins_with_i.capitalization = pascal_case
 
 dotnet_naming_style.begin_with_underscore.required_prefix = _
-dotnet_naming_style.begin_with_underscore.required_suffix = 
-dotnet_naming_style.begin_with_underscore.word_separator = 
 dotnet_naming_style.begin_with_underscore.capitalization = camel_case
 
-csharp_style_expression_bodied_lambdas = true:silent
-csharp_style_expression_bodied_local_functions = false:silent
-csharp_prefer_static_local_function = true:suggestion
-csharp_style_prefer_switch_expression = true:suggestion
-csharp_style_prefer_pattern_matching = true:silent
-csharp_style_prefer_not_pattern = true:suggestion
+#### Analyzers ####
+
+# Remove unnecessary using directives (enforces global usings usage)
+dotnet_diagnostic.IDE0005.severity = warning
 dotnet_diagnostic.CA1001.severity = warning
 dotnet_diagnostic.CA1805.severity = warning
 dotnet_diagnostic.CA1841.severity = warning
@@ -203,37 +248,5 @@ dotnet_diagnostic.SYSLIB1006.severity = silent
 dotnet_diagnostic.SYSLIB1015.severity = silent
 
 [*.{cs,vb}]
-dotnet_style_operator_placement_when_wrapping = beginning_of_line
-tab_width = 4
-indent_size = 4
-end_of_line = crlf
-dotnet_style_coalesce_expression = true:suggestion
-dotnet_style_null_propagation = true:suggestion
-dotnet_style_prefer_is_null_check_over_reference_equality_method = true:silent
-dotnet_style_prefer_auto_properties = true:silent
-dotnet_style_object_initializer = true:suggestion
-dotnet_style_collection_initializer = true:suggestion
-dotnet_style_prefer_simplified_boolean_expressions = true:suggestion
-dotnet_style_prefer_conditional_expression_over_assignment = true:suggestion
-dotnet_style_prefer_conditional_expression_over_return = true:suggestion
-dotnet_style_explicit_tuple_names = true:suggestion
-dotnet_style_prefer_inferred_tuple_names = true:suggestion
-dotnet_style_prefer_inferred_anonymous_type_member_names = true:suggestion
-dotnet_style_prefer_compound_assignment = true:suggestion
-dotnet_style_prefer_simplified_interpolation = true:suggestion
-dotnet_style_readonly_field = true:warning
-dotnet_style_predefined_type_for_locals_parameters_members = true:silent
-dotnet_style_predefined_type_for_member_access = true:silent
-dotnet_style_require_accessibility_modifiers = for_non_interface_members:silent
-dotnet_code_quality_unused_parameters = all:warning
-dotnet_style_parentheses_in_arithmetic_binary_operators = always_for_clarity:silent
-dotnet_style_parentheses_in_other_binary_operators = always_for_clarity:silent
-dotnet_style_parentheses_in_relational_binary_operators = always_for_clarity:silent
-dotnet_style_parentheses_in_other_operators = always_for_clarity:silent
-dotnet_style_qualification_for_field = false:silent
-dotnet_style_qualification_for_property = false:silent
-dotnet_style_qualification_for_method = false:silent
-dotnet_style_qualification_for_event = false:silent
-
 
 file_header_template = (c) Copyright Ascensio System SIA 2009-2026\n\nThis program is a free software product.\nYou can redistribute it and/or modify it under the terms\nof the GNU Affero General Public License (AGPL) version 3 as published by the Free Software\nFoundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended\nto the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of\nany third-party rights.\n\nThis program is distributed WITHOUT ANY WARRANTY, without even the implied warranty\nof MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see\nthe GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html\n\nYou can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.\n\nThe  interactive user interfaces in modified source and object code versions of the Program must\ndisplay Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.\n\nPursuant to Section 7(b) of the License you must retain the original Product logo when\ndistributing the program. Pursuant to Section 7(e) we decline to grant you any rights under\ntrademark law for use of our trademarks.\n\nAll the Product's GUI elements, including illustrations and icon sets, as well as technical writing\ncontent are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0\nInternational. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
