@@ -704,13 +704,13 @@ public class S3Storage(TempStream tempStream,
         var dstkey = MakePath(newDomain, newDir);
         //List files from src
         var client = GetClient();
-        var request = new ListObjectsRequest
+        var request = new ListObjectsV2Request
         {
             BucketName = _bucket,
             Prefix = srckey
         };
 
-        var response = await client.ListObjectsAsync(request);
+        var response = await client.ListObjectsV2Async(request);
 
         if (response.S3Objects == null)
         {
@@ -985,8 +985,8 @@ public class S3Storage(TempStream tempStream,
     public override async Task<bool> IsDirectoryAsync(string domain, string path)
     {
         var client = GetClient();
-        var request = new ListObjectsRequest { BucketName = _bucket, Prefix = MakePath(domain, path) };
-        var response = await client.ListObjectsAsync(request);
+        var request = new ListObjectsV2Request { BucketName = _bucket, Prefix = MakePath(domain, path), MaxKeys = 1 };
+        var response = await client.ListObjectsV2Async(request);
 
         return response.S3Objects != null && response.S3Objects.Count > 0;
     }
@@ -1072,9 +1072,9 @@ public class S3Storage(TempStream tempStream,
         var dstkey = MakePath(newDomain, newDir);
         //List files from src
         var client = GetClient();
-        var request = new ListObjectsRequest { BucketName = _bucket, Prefix = srckey };
+        var request = new ListObjectsV2Request { BucketName = _bucket, Prefix = srckey };
 
-        var response = await client.ListObjectsAsync(request);
+        var response = await client.ListObjectsV2Async(request);
 
         if (response.S3Objects == null)
         {
@@ -1327,7 +1327,7 @@ public class S3Storage(TempStream tempStream,
     private async Task<IEnumerable<S3Object>> GetS3ObjectsByPathAsync(string domain, string path)
     {
         var client = GetClient();
-        var request = new ListObjectsRequest
+        var request = new ListObjectsV2Request
         {
             BucketName = _bucket,
             Prefix = path,
@@ -1335,15 +1335,15 @@ public class S3Storage(TempStream tempStream,
         };
 
         var objects = new List<S3Object>();
-        ListObjectsResponse response;
+        ListObjectsV2Response response;
         do
         {
-            response = await client.ListObjectsAsync(request);
+            response = await client.ListObjectsV2Async(request);
             if (response.S3Objects != null)
             {
                 objects.AddRange(response.S3Objects.Where(entry => CheckKey(domain, entry.Key)));
             }
-            request.Marker = response.NextMarker;
+            request.ContinuationToken = response.NextContinuationToken;
         } while (response.IsTruncated.GetValueOrDefault());
         return objects;
     }
