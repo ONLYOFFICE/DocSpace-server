@@ -36,7 +36,8 @@ public class AiGateway(
     ITariffService tariffService,
     UserManager userManager,
     AuthContext authContext,
-    SettingsManager settingsManager)
+    SettingsManager settingsManager,
+    CoreBaseSettings coreSettings)
 {
     public const int ProviderId = -1;
     public const string ProviderTitle = "ONLYOFFICE AI";
@@ -46,10 +47,12 @@ public class AiGateway(
 
     private AiGatewaySettings Settings => _settings ??= 
         configuration.GetSection("ai:gateway").Get<AiGatewaySettings>() ?? new AiGatewaySettings();
+    
+    public bool Configured => !coreSettings.Standalone && !string.IsNullOrEmpty(Settings.Url) && !string.IsNullOrEmpty(Settings.Secret);
 
     public async Task<bool> IsEnabledAsync()
     {
-        if (string.IsNullOrEmpty(Url) || string.IsNullOrEmpty(Settings?.Secret))
+        if (!Configured)
         {
             return false;
         }

@@ -52,7 +52,7 @@ public class AiProviderDao(
             await using var context = await dbContextFactory.CreateDbContextAsync();
             await using var transaction = await context.Database.BeginTransactionAsync();
 
-            isFirstProvider = !await gateway.IsEnabledAsync() && !await context.HasProvidersAsync(tenantId);
+            isFirstProvider = !gateway.Configured && !await context.HasProvidersAsync(tenantId);
 
             dbProvider = new DbAiProvider
             {
@@ -98,7 +98,7 @@ public class AiProviderDao(
 
     public async Task<AiProvider?> GetProviderAsync(int tenantId, int id)
     {
-        if (await gateway.IsEnabledAsync() && id == AiGateway.ProviderId)
+        if (gateway.Configured && id == AiGateway.ProviderId)
         {
             return await CreateGatewayProviderAsync(includeCredentials: true);
         }
@@ -124,7 +124,7 @@ public class AiProviderDao(
     {
         var defaultProviderId = (await GetDefaultProviderAsync(tenantId))?.ProviderId;
 
-        if (await gateway.IsEnabledAsync() && offset == 0)
+        if (gateway.Configured && offset == 0)
         {
             var gatewayProvider = await CreateGatewayProviderAsync();
             gatewayProvider.IsDefault = defaultProviderId == gatewayProvider.Id;
@@ -173,12 +173,10 @@ public class AiProviderDao(
 
     public async Task<int> GetProvidersTotalCountAsync(int tenantId)
     {
-        var task = gateway.IsEnabledAsync();
-        
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var count = await dbContext.GetProvidersTotalCountAsync(tenantId);
 
-        if (await task)
+        if (gateway.Configured)
         {
             count++;
         }
@@ -276,20 +274,6 @@ public class AiProviderDao(
             return result;
         }
 
-        if (!await gateway.IsEnabledAsync())
-        {
-            var strategy = dbContext.Database.CreateExecutionStrategy();
-
-            await strategy.ExecuteAsync(async () =>
-            {
-                await using var context = await dbContextFactory.CreateDbContextAsync();
-                await context.DeleteDefaultProvidersByProviderIdsAsync(tenantId, new HashSet<int> { AiGateway.ProviderId });
-                await context.SaveChangesAsync();
-            });
-
-            return null;
-        }
-
         result.ProviderTitle = AiGateway.ProviderTitle;
 
         return result;
@@ -297,7 +281,7 @@ public class AiProviderDao(
 
     public async Task<int?> GetFirstProviderIdAsync(int tenantId)
     {
-        if (await gateway.IsEnabledAsync())
+        if (gateway.Configured)
         {
             return AiGateway.ProviderId;
         }
