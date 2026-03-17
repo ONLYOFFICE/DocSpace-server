@@ -968,14 +968,21 @@ public class S3Storage(TempStream tempStream,
     public override async Task<long> GetFileSizeAsync(string domain, string path)
     {
         var client = GetClient();
-        var request = new ListObjectsRequest { BucketName = _bucket, Prefix = MakePath(domain, path) };
-        var response = await client.ListObjectsAsync(request);
-        if (response.S3Objects != null && response.S3Objects.Count > 0)
+        var request = new GetObjectMetadataRequest
         {
-            return response.S3Objects[0].Size.GetValueOrDefault();
-        }
+            BucketName = _bucket,
+            Key = MakePath(domain, path)
+        };
 
-        throw new FileNotFoundException("file not found", path);
+        try
+        {
+            var response = await client.GetObjectMetadataAsync(request);
+            return response.ContentLength;
+        }
+        catch (AmazonS3Exception ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            throw new FileNotFoundException("file not found", path);
+        }
     }
 
     public override async Task<long> GetDirectorySizeAsync(string domain, string path)
