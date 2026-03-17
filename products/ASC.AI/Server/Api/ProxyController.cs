@@ -69,9 +69,9 @@ namespace ASC.AI.Api
                     break;
             }
 
-            #pragma warning disable CA2000
+#pragma warning disable CA2000
             var client = httpClientFactory.CreateClient();
-            #pragma warning restore CA2000
+#pragma warning restore CA2000
             client.BaseAddress = new Uri(provider.Url.EndsWith('/') ? provider.Url : provider.Url + '/');
 
             if (Request.ContentLength is > 0)
@@ -104,9 +104,9 @@ namespace ASC.AI.Api
         {
             var key = await aiGateway.GetKeyAsync();
 
-            #pragma warning disable CA2000
-            using var client = httpClientFactory.CreateClient();
-            #pragma warning restore CA2000
+#pragma warning disable CA2000
+            var client = httpClientFactory.CreateClient();
+#pragma warning restore CA2000
             
             var baseUrl = aiGateway.Url;
             client.BaseAddress = new Uri(baseUrl.EndsWith('/') ? baseUrl : baseUrl + '/');

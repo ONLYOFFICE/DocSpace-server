@@ -12,8 +12,8 @@
     <AssemblyVersion>3.6.0</AssemblyVersion>
     <ProductVersion>3.6.0</ProductVersion>
     <Copyright>(c) Ascensio System SIA. All rights reserved</Copyright>
-      <EnableNETAnalyzers>true</EnableNETAnalyzers>
-      <AnalysisLevel>latest</AnalysisLevel>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisLevel>latest</AnalysisLevel>
   </PropertyGroup>
   <!-- Release configuration properties -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
