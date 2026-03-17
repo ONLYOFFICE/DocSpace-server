@@ -62,12 +62,15 @@ public class FormFillingReportCreator(
 
     public async Task ExportToExternalDbAsync(int fileId, int originalFormId, int originalFormVersion, int resultFormNumber, string formsDataUrl)
     {
+#pragma warning disable CA2000 // HttpClient is short-lived and disposed by runtime
         var httpClient = clientFactory.CreateClient();
-        using var response = await httpClient.SendAsync(new HttpRequestMessage
+#pragma warning restore CA2000
+        using var exportRequest = new HttpRequestMessage
         {
             RequestUri = new Uri(formsDataUrl),
             Method = HttpMethod.Get
-        });
+        };
+        using var response = await httpClient.SendAsync(exportRequest);
 
         response.EnsureSuccessStatusCode();
         var data = await response.Content.ReadAsStringAsync();
@@ -169,13 +172,11 @@ public class FormFillingReportCreator(
         int resultFormNumber,
         string url)
     {
-        var request = new HttpRequestMessage
-        {
-            RequestUri = new Uri(url),
-            Method = HttpMethod.Get
-        };
+        using var request = new HttpRequestMessage(HttpMethod.Get, url);
 
+#pragma warning disable CA2000 // HttpClient is short-lived and disposed by runtime
         var httpClient = clientFactory.CreateClient();
+#pragma warning restore CA2000
         using var response = await httpClient.SendAsync(request);
         response.EnsureSuccessStatusCode();
         var data = await response.Content.ReadAsStringAsync();

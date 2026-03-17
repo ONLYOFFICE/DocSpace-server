@@ -76,7 +76,7 @@ public partial class GetFolderCommand : AsyncCommand<GetFolderCommand.Settings>,
     
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings, CancellationToken cancellationToken)
     {
-        var foldersApi = new FoldersApi(await ApiHelper.GetConfigurationAsync(settings.Email, settings.Password));
+        using var foldersApi = new FoldersApi(await ApiHelper.GetConfigurationAsync(settings.Email, settings.Password));
         var token = CancellationToken.None;
         
         var rootFolder = (await foldersApi.GetRootFoldersAsync(cancellationToken: token)).Response;

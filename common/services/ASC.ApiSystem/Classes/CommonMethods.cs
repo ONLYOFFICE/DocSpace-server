@@ -109,17 +109,15 @@ public class CommonMethods(
             return url;
         }
 
-        var request = new HttpRequestMessage
-        {
-            Method = httpMethod,
-            RequestUri = new Uri(url)
-        };
+        using var request = new HttpRequestMessage(httpMethod, url);
 
         request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
         try
         {
+#pragma warning disable CA2000
             var httpClient = clientFactory.CreateClient();
+#pragma warning restore CA2000
             using var response = await httpClient.SendAsync(request);
 
             log.LogDebug($"SendMethod {apiMethod} result = {response.StatusCode}");
@@ -347,14 +345,12 @@ public class CommonMethods(
                 ? configuration["hcaptcha:verify-url"] ?? "https://api.hcaptcha.com/siteverify"
                 : configuration["recaptcha:verify-url"] ?? "https://www.recaptcha.net/recaptcha/api/siteverify";
 
-            var request = new HttpRequestMessage
-            {
-                RequestUri = new Uri(url),
-                Method = HttpMethod.Post,
-                Content = new StringContent(data, Encoding.UTF8, "application/x-www-form-urlencoded")
-            };
+            using var request = new HttpRequestMessage(HttpMethod.Post, new Uri(url));
+            request.Content = new StringContent(data, Encoding.UTF8, "application/x-www-form-urlencoded");
 
+#pragma warning disable CA2000
             var httpClient = clientFactory.CreateClient();
+#pragma warning restore CA2000
             using var httpClientResponse = await httpClient.SendAsync(request);
             var resp = await httpClientResponse.Content.ReadAsStringAsync();
             var recaptchData = JsonSerializer.Deserialize<Web.Core.RecaptchData>(resp, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
@@ -363,8 +359,6 @@ public class CommonMethods(
             {
                 return true;
             }
-
-
 
             log.LogDebug("Recaptcha error: {0}", resp);
 

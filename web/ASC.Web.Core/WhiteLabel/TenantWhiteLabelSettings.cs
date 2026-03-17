@@ -768,7 +768,7 @@ public class TenantWhiteLabelSettingsHelper(
         {
             var size = GetSize(WhiteLabelLogoType.Notification);
 
-            var svg = new SKSvg();
+            using var svg = new SKSvg();
 
             using (var stream = new MemoryStream(logoData))
             {

@@ -189,8 +189,10 @@ public class FirstTimeTenantSettings(
 
         try
         {
+            #pragma warning disable CA2000 // Dispose objects before losing scope
             var httpClient = clientFactory.CreateClient();
-
+            #pragma warning restore CA2000
+            
             var amiToken = await GetResponseString(httpClient, HttpMethod.Put, setupInfo.AmiTokenUrl, new Dictionary<string, string> { { "X-aws-ec2-metadata-token-ttl-seconds", "21600" } });
             var amiId = await GetResponseString(httpClient, HttpMethod.Get, setupInfo.AmiMetaUrl, new Dictionary<string, string> { { "X-aws-ec2-metadata-token", amiToken } });
 
@@ -210,11 +212,7 @@ public class FirstTimeTenantSettings(
             return null;
         }
 
-        var request = new HttpRequestMessage
-        {
-            RequestUri = new Uri(requestUrl),
-            Method = method
-        };
+        using var request = new HttpRequestMessage(method, requestUrl);
 
         foreach (var header in headers)
         {
@@ -251,10 +249,8 @@ public class FirstTimeTenantSettings(
                 return;
             }
 
-            var request = new HttpRequestMessage
-            {
-                RequestUri = new Uri(url)
-            };
+            using var request = new HttpRequestMessage(HttpMethod.Get, url);
+            
             var values = new NameValueCollection
                     {
                         { "type", "sendsubscription" },
@@ -263,8 +259,9 @@ public class FirstTimeTenantSettings(
                     };
             var data = JsonSerializer.Serialize(values);
             request.Content = new StringContent(data);
-
+#pragma warning disable CA2000
             var httpClient = clientFactory.CreateClient();
+#pragma warning restore CA2000
             using var response = await httpClient.SendAsync(request);
 
             logger.DebugSubscribeResponse(response);//toto write

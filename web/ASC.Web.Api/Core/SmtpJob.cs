@@ -91,7 +91,7 @@ public class SmtpJob : DistributedTaskProgress
 
             var fromAddress = new MailboxAddress(_smtpSettings.SenderDisplayName, _smtpSettings.SenderAddress);
 
-            var mimeMessage = new MimeMessage
+            using var mimeMessage = new MimeMessage
             {
                 Subject = WebstudioNotifyPatternResource.subject_smtp_test
             };
