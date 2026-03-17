@@ -702,30 +702,29 @@ public class S3Storage(TempStream tempStream,
     {
         var srckey = MakePath(srcDomain, srcDir);
         var dstkey = MakePath(newDomain, newDir);
-        //List files from src
-        var client = GetClient();
-        var request = new ListObjectsV2Request
-        {
-            BucketName = _bucket,
-            Prefix = srckey
-        };
 
-        var response = await client.ListObjectsV2Async(request);
+        var s3Objects = (await GetS3ObjectsByPathAsync(srcDomain, srckey)).ToList();
 
-        if (response.S3Objects == null)
+        if (s3Objects.Count == 0)
         {
             return;
         }
 
-        foreach (var s3Object in response.S3Objects)
-        {
-            await CopyFileAsync(client, s3Object.Key, s3Object.Key.Replace(srckey, dstkey), newDomain);
+        var client = GetClient();
 
-            await client.DeleteObjectAsync(new DeleteObjectRequest
+        await Parallel.ForEachAsync(s3Objects,
+            new ParallelOptions { MaxDegreeOfParallelism = 3 },
+            async (s3Object, _) => await CopyFileAsync(client, s3Object.Key, s3Object.Key.Replace(srckey, dstkey), newDomain));
+
+        foreach (var chunk in s3Objects.Select(o => new KeyVersion { Key = o.Key }).Chunk(1000))
+        {
+            var deleteRequest = new DeleteObjectsRequest
             {
                 BucketName = _bucket,
-                Key = s3Object.Key
-            });
+                Objects = [.. chunk]
+            };
+
+            await client.DeleteObjectsAsync(deleteRequest);
         }
     }
 
@@ -1070,23 +1069,23 @@ public class S3Storage(TempStream tempStream,
     {
         var srckey = MakePath(srcDomain, srcdir);
         var dstkey = MakePath(newDomain, newDir);
-        //List files from src
-        var client = GetClient();
-        var request = new ListObjectsV2Request { BucketName = _bucket, Prefix = srckey };
 
-        var response = await client.ListObjectsV2Async(request);
+        var s3Objects = (await GetS3ObjectsByPathAsync(srcDomain, srckey)).ToList();
 
-        if (response.S3Objects == null)
+        if (s3Objects.Count == 0)
         {
             return;
         }
 
-        foreach (var s3Object in response.S3Objects)
-        {
-            await CopyFileAsync(client, s3Object.Key, s3Object.Key.Replace(srckey, dstkey), newDomain);
+        var client = GetClient();
 
-            await QuotaUsedAddAsync(newDomain, s3Object.Size.GetValueOrDefault());
-        }
+        await Parallel.ForEachAsync(s3Objects,
+            new ParallelOptions { MaxDegreeOfParallelism = 3 },
+            async (s3Object, _) =>
+            {
+                await CopyFileAsync(client, s3Object.Key, s3Object.Key.Replace(srckey, dstkey), newDomain);
+                await QuotaUsedAddAsync(newDomain, s3Object.Size.GetValueOrDefault());
+            });
     }
 
     public override Task<IDataStore> ConfigureAsync(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props, IDataStoreValidator dataStoreValidator)
