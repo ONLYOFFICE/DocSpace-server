@@ -75,7 +75,7 @@ dotnet run --project .aspire/AppHost  # Run via Aspire orchestration
 - **Indentation**: 4 spaces (no tabs); 2 spaces for XML/JSON/YAML
 - **`var` usage**: preferred everywhere (`csharp_style_var_*` = true:warning)
 - **Namespaces**: file-scoped (`namespace Foo;`) — enforced with warning
-- **Usings**: `ImplicitUsings` enabled; system directives sorted first, separated into groups; placement outside namespace. Common namespaces should be in `GlobalUsings.cs` — unnecessary per-file usings flagged by `IDE0005` (warning)
+- **Usings**: `ImplicitUsings` enabled; system directives sorted first, separated into groups. **All `using` directives must be placed in `GlobalUsings.cs`** (one per project), never in individual `.cs` files.
 - **Braces**: always required (`csharp_prefer_braces` = true:warning)
 - **`using` statements**: prefer simple form (`using var x = ...`)
 - **Object creation**: prefer target-typed `new()` when type is apparent
@@ -88,6 +88,18 @@ dotnet run --project .aspire/AppHost  # Run via Aspire orchestration
 - **XML docs**: `<summary>`, `<remarks>`, `<example>` on API models; `GenerateDocumentationFile=True`
 - **License header**: AGPL 3.0 header required on all source files
 - **Line endings**: CRLF; `insert_final_newline = true`; trailing whitespace trimmed
+
+### Logging
+- **Always use source-generated logging** via `[LoggerMessage]` attribute on `partial` methods in a dedicated `static partial class` (e.g., `*Logger`).
+- Never use string interpolation or `ILogger.LogInformation(...)` directly — always define `LoggerMessage`-attributed extension methods.
+- Example pattern:
+```csharp
+public static partial class FooLogger
+{
+    [LoggerMessage(LogLevel.Information, "Found {count} items")]
+    public static partial void InfoFoundItems(this ILogger<FooService> logger, int count);
+}
+```
 
 ### API Patterns
 - API versioning via `Asp.Versioning`

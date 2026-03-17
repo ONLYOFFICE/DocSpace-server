@@ -530,11 +530,14 @@ public abstract class BaseStartup
 
         services.RegisterQueue<ResizeWorkerItem>(2);
 
-        services
-            .AddStartupTask<WarmupServicesStartupTask>()
-            .AddStartupTask<WarmupProtobufStartupTask>()
-            .AddStartupTask<WarmupBaseDbContextStartupTask>()
-            .TryAddSingleton(services);
+        if (!builder.Environment.IsDevelopment())
+        {
+            services
+                .AddStartupTask<WarmupServicesStartupTask>()
+                .AddStartupTask<WarmupProtobufStartupTask>()
+                .AddStartupTask<WarmupBaseDbContextStartupTask>()
+                .TryAddSingleton(services);
+        }
 
         services.AddTransient<DistributedTaskProgress>();
     }

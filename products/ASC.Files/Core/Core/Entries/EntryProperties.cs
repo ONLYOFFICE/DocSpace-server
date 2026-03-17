@@ -84,6 +84,11 @@ public class FormFillingProperties<T>
     /// </summary>
     public bool StartFilling { get; set; }
 
+    /// <summary>
+    /// Specifies if the form filling has started but the file is still being saved by the document editor. Filling and editing are not allowed until cleared.
+    /// </summary>
+    public bool StartFillingPreparing { get; set; }
+
     public Guid StartedByUserId { get; set; }
     /// <summary>
     /// The form title.

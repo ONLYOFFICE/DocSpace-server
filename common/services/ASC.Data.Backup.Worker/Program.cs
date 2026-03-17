@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Data.Backup.Worker.Extensions;
+
 using NLog;
 
 var options = new WebApplicationOptions
@@ -66,10 +68,7 @@ try
 
     var eventBus = ((IApplicationBuilder)app).ApplicationServices.GetRequiredService<IEventBus>();
 
-    await Task.WhenAll(
-        eventBus.SubscribeAsync<BackupRequestIntegrationEvent, BackupRequestedIntegrationEventHandler>(),
-        eventBus.SubscribeAsync<BackupRestoreRequestIntegrationEvent, BackupRestoreRequestedIntegrationEventHandler>(),
-        eventBus.SubscribeAsync<IntegrationEvent, BackupDeleteScheldureRequestedIntegrationEventHandler>());
+    await eventBus.SubscribeBackupWorkerEvents();
 
     logger.Info("Starting web host ({applicationContext})...", AppName);
     await app.RunWithTasksAsync();
