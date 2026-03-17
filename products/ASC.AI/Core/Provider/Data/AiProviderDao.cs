@@ -96,11 +96,11 @@ public class AiProviderDao(
         };
     }
 
-    public async Task<AiProvider?> GetProviderAsync(int tenantId, int id)
+    public async Task<AiProvider?> GetProviderAsync(int tenantId, int id, bool forceSystemProvider = false)
     {
         if (gateway.Configured && id == AiGateway.ProviderId)
         {
-            return await CreateGatewayProviderAsync(includeCredentials: true);
+            return await CreateGatewayProviderAsync(includeCredentials: true, force: forceSystemProvider);
         }
 
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
@@ -290,14 +290,14 @@ public class AiProviderDao(
         return await dbContext.GetFirstProviderIdAsync(tenantId);
     }
 
-    private async Task<AiProvider> CreateGatewayProviderAsync(bool includeCredentials = false)
+    private async Task<AiProvider> CreateGatewayProviderAsync(bool includeCredentials = false, bool force = false)
     {
         return new AiProvider
         {
             Id = AiGateway.ProviderId,
             Title = AiGateway.ProviderTitle,
             Url = includeCredentials ? gateway.Url : string.Empty,
-            Key = includeCredentials ? await gateway.GetKeyAsync() : string.Empty,
+            Key = includeCredentials ? await gateway.GetKeyAsync(force) : string.Empty,
             Type = ProviderType.PortalAi
         };
     }

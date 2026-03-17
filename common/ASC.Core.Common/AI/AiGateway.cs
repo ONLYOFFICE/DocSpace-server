@@ -61,9 +61,9 @@ public class AiGateway(
         return settings.EnabledServices != null && settings.EnabledServices.Contains(TenantWalletService.AITools);
     }
     
-    public async Task<string> GetKeyAsync()
+    public async Task<string> GetKeyAsync(bool force = false)
     {
-        if (!await IsEnabledAsync())
+        if (!force && !await IsEnabledAsync())
         {
             throw new InvalidOperationException("AI Gateway is not enabled");
         }

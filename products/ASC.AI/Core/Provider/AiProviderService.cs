@@ -167,14 +167,14 @@ public class AiProviderService(
 
     public async Task<IEnumerable<ModelData>> GetModelsAsync(int providerId, Scope? scope)
     {
-        var provider = await GetProviderAsync(providerId);
+        var provider = await GetProviderAsync(providerId, forceSystemProvider: true);
         if (provider.NeedReset)
         {
             return [];
         }
 
-        return await ExecuteProviderRequestAsync(provider.Type, async () => 
-        { 
+        return await ExecuteProviderRequestAsync(provider.Type, async () =>
+        {
             var client = modelClientFactory.Create(provider.Type, provider.Url, provider.Key);
             var models = await GetFilteredModelsAsync(client, provider.Type, scope);
 
@@ -186,9 +186,9 @@ public class AiProviderService(
         });
     }
 
-    public async Task<AiProvider> GetProviderAsync(int providerId)
+    public async Task<AiProvider> GetProviderAsync(int providerId, bool forceSystemProvider = false)
     {
-        var provider = await providerDao.GetProviderAsync(tenantManager.GetCurrentTenantId(), providerId);
+        var provider = await providerDao.GetProviderAsync(tenantManager.GetCurrentTenantId(), providerId, forceSystemProvider);
 
         return provider ?? throw new ItemNotFoundException(ErrorMessages.ProviderNotFound);
     }
@@ -225,7 +225,7 @@ public class AiProviderService(
             return null;
         }
 
-        var firstProvider = await providerDao.GetProviderAsync(tenantId, firstProviderId.Value);
+        var firstProvider = await providerDao.GetProviderAsync(tenantId, firstProviderId.Value, forceSystemProvider: true);
         if (firstProvider == null || firstProvider.NeedReset)
         {
             return null;

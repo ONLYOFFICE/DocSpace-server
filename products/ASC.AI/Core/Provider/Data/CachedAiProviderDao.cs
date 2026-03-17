@@ -55,9 +55,9 @@ public class CachedAiProviderDao(
         return result;
     }
 
-    public Task<AiProvider?> GetProviderAsync(int tenantId, int id)
+    public Task<AiProvider?> GetProviderAsync(int tenantId, int id, bool forceSystemProvider = false)
     {
-        return providerDao.GetProviderAsync(tenantId, id);
+        return providerDao.GetProviderAsync(tenantId, id, forceSystemProvider);
     }
 
     public IAsyncEnumerable<AiProvider> GetProvidersAsync(int tenantId, int offset, int limit)
