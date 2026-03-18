@@ -50,7 +50,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
     public ConnectionStringManager AddMySql(bool withDbGate = false)
     {
         var mysqlResourceBuilder = builder.AddMySql("mysql")
-            .WithLifetime(ContainerLifetime.Persistent);
+            .WithDataVolume("docspace-mysql-data");
 
         if (withDbGate)
         {
@@ -94,7 +94,6 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
     {
         RabbitMqResource = builder
             .AddRabbitMQ("messaging")
-            .WithLifetime(ContainerLifetime.Persistent)
             .WithManagementPlugin();
 
         builder.Eventing.Subscribe(RabbitMqResource.Resource, async (ConnectionStringAvailableEvent _, CancellationToken ct) =>
@@ -115,8 +114,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         RedisResource = builder
             .AddRedis("cache")
             .WithPassword(null)
-            .WithoutHttpsCertificate()
-            .WithLifetime(ContainerLifetime.Persistent);
+            .WithoutHttpsCertificate();
 #pragma warning restore ASPIRECERTIFICATES001
 
         if (withRedisInsight)
@@ -154,7 +152,6 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
     {
         McpResource = builder
             .AddContainer(Constants.DocSpaceMcpContainer, "onlyoffice/docspace-mcp")
-            .WithLifetime(ContainerLifetime.Persistent)
             .WithEnvironment("DOCSPACE_INTERNAL", "true")
             .WithEnvironment("DOCSPACE_TRANSPORT", "http")
             .WithEnvironment("DOCSPACE_HOST", "0.0.0.0")
