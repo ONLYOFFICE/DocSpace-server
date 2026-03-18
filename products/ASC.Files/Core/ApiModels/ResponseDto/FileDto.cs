@@ -276,7 +276,8 @@ public class FileDtoHelper(
     UserManager userManager,
     IUrlShortener urlShortener,
     FileSharing fileSharing,
-    AiAccessibility aiAccessibility)
+    AiAccessibility aiAccessibility,
+    FileTrackerHelper fileTracker)
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, fileSharing, urlShortener)
 {
     private readonly EmployeeDtoHelper _employeeWrapperHelper = employeeWrapperHelper;
@@ -516,7 +517,7 @@ public class FileDtoHelper(
             {
                 if (properties.FormFilling.StartFilling)
                 {
-                    var isPreparing = properties.FormFilling.StartFillingPreparing;
+                    var isPreparing = await fileTracker.IsEditingAsync(file.Id);
                     result.IsFillingPreparing = isPreparing;
 
                     result.Security[FileSecurity.FilesSecurityActions.StartFilling] = false;

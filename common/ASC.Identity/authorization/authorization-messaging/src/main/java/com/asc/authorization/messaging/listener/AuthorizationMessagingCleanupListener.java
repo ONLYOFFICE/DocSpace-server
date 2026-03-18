@@ -40,6 +40,7 @@ import org.slf4j.MDC;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.support.AmqpHeaders;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
@@ -53,6 +54,8 @@ import org.springframework.transaction.support.TransactionTemplate;
  * <p>This component listens to RabbitMQ messages on a specified queue, parses the {@link
  * ClientRemovedEvent}, and performs cleanup operations by deleting associated authorizations and
  * consents for the client.
+ *
+ * <p>This listener is only loaded when RabbitMQ client classes are available on the classpath.
  */
 @Slf4j
 @Component
@@ -60,6 +63,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 @RabbitListener(
     queues = "asc_identity_authorization_${spring.application.region}_queue",
     containerFactory = "rabbitSingleManualContainerFactory")
+@ConditionalOnClass(name = "com.rabbitmq.client.Connection")
 public class AuthorizationMessagingCleanupListener {
   /** Transaction manager for handling database transactions. */
   private final PlatformTransactionManager transactionManager;

@@ -116,7 +116,7 @@ public class AppleIdLoginProvider : BaseLoginProvider<AppleIdLoginProvider>
 
     private string GenerateSecret()
     {
-        using var ecdsa = ECDsa.Create();
+        var ecdsa = ECDsa.Create();
 
         ecdsa.ImportPkcs8PrivateKey(Convert.FromBase64String(PrivateKey), out _);
 

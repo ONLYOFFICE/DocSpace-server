@@ -25,7 +25,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-package com.asc.registration.application.exception.handler;
+package com.asc.registration.application.controller.exception.handler;
 
 import com.asc.common.core.domain.exception.DomainNotFoundException;
 import com.asc.registration.core.domain.exception.ClientDomainException;
@@ -48,19 +48,20 @@ import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 /**
- * GlobalExceptionHandler is a centralized exception handler that intercepts and processes various
- * exceptions thrown during application execution. Each handler method constructs a standardized RFC
- * 7807 {@link ProblemDetail} response.
+ * RegistrationGlobalExceptionHandler is a centralized exception handler that intercepts and
+ * processes various exceptions thrown during application execution for the registration APIs.
+ *
+ * <p>Each handler method constructs a standardized RFC 7807 {@link ProblemDetail} response.
  */
 @Slf4j
-@ControllerAdvice
-public class GlobalExceptionHandler {
+@RestControllerAdvice(basePackages = "com.asc.registration.application.controller")
+public class RegistrationGlobalExceptionHandler {
   private static final URI ERROR_TYPE_URI =
       URI.create("https://api.onlyoffice.com/docspace/api-backend/get-started/basic-concepts");
 

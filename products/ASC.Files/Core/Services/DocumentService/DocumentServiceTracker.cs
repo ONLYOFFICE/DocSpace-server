@@ -488,16 +488,6 @@ public class DocumentServiceTrackerHelper(
         {
             await fileTracker.RemoveAsync(fileId);
             await socketManager.StopEditAsync(fileId);
-
-            if (fileStable?.IsForm == true)
-            {
-                var properties = await fileDao.GetProperties(fileId);
-                if (properties?.FormFilling is { StartFillingPreparing: true })
-                {
-                    properties.FormFilling.StartFillingPreparing = false;
-                    await fileDao.SaveProperties(fileId, properties);
-                }
-            }
         }
 
         if (file == null)

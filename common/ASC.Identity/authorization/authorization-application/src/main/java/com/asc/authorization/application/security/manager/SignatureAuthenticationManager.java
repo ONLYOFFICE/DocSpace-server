@@ -28,9 +28,10 @@
 package com.asc.authorization.application.security.manager;
 
 import java.util.List;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Primary;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
@@ -46,14 +47,20 @@ import org.springframework.stereotype.Component;
  * authentication attempt fails.
  */
 @Slf4j
-@Component
-@RequiredArgsConstructor
+@Primary
+@Component("authorizationSignatureAuthenticationManager")
 public class SignatureAuthenticationManager implements AuthenticationManager {
   /** Error message logged when no provider supports the authentication type. */
   private static final String UNSUPPORTED_ERROR =
       "Authentication type is not supported by any authentication provider";
 
   private final List<AuthenticationProvider> providers;
+
+  public SignatureAuthenticationManager(
+      @Qualifier("authorizationSignatureAuthenticationProvider")
+          AuthenticationProvider signatureProvider) {
+    this.providers = List.of(signatureProvider);
+  }
 
   /**
    * Attempts to authenticate the provided authentication object using the configured providers.
