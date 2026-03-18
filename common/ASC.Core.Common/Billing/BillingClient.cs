@@ -255,11 +255,7 @@ public class BillingClient
     {
         var url = _configuration.Url + method;
 
-        var request = new HttpRequestMessage
-        {
-            RequestUri = new Uri(url),
-            Method = HttpMethod.Post
-        };
+        using var request = new HttpRequestMessage(HttpMethod.Post, new Uri(url));
 
         if (!string.IsNullOrEmpty(_configuration.Key))
         {

@@ -51,9 +51,12 @@ public class RedisHeartBeatFactory(IRedisDatabase database) : IHeartBeatFactory
             throw new HeartBeatExistsException();
         }
         
+        // CA2000: PeriodicTimer is owned and disposed by RedisHeartBeat (see RedisHeartBeat.DisposeAsync)
+#pragma warning disable CA2000
         var timer = StartPulseLoop(database, key, id, timeout, pulseInterval, cancellationToken);
-        
+
         return new RedisHeartBeat(key, id, database, timer);
+#pragma warning restore CA2000
     }
     
     private static PeriodicTimer StartPulseLoop(

@@ -123,8 +123,9 @@ public class AiGateway(
         }
 
         request.Content = content;
-
+#pragma warning disable CA2000 // HttpClient is short-lived and disposed by runtime
         var httpClient = httpClientFactory.CreateClient();
+#pragma warning restore CA2000
         using var response = await httpClient.SendAsync(request);
         response.EnsureSuccessStatusCode();
 

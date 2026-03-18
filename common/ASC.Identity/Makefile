@@ -1,13 +1,14 @@
 BASE_IMAGE = identity-base:latest
 REGISTRATION_IMAGE = registration-service:latest
 AUTHORIZATION_IMAGE = authorization-service:latest
+MINIFIED_IMAGE = identity-minified:latest
 
 REGISTRATION_JAR = registration-container.jar
 AUTHORIZATION_JAR = authorization-container.jar
 TEMP_BUILDER_REG = temp-jar-builder-reg:latest
 TEMP_BUILDER_AUTH = temp-jar-builder-auth:latest
 
-.PHONY: all base registration authorization clean prune summary sizes help
+.PHONY: all base registration authorization minified clean prune summary sizes help
 
 all: base registration authorization sizes
 
@@ -65,6 +66,14 @@ authorization:
 		-f Dockerfile.service .
 	@echo "Authorization image built: $(AUTHORIZATION_IMAGE)"
 	@docker images $(AUTHORIZATION_IMAGE) --format "Size: {{.Size}}"
+
+minified:
+	@echo "Building minified identity service..."
+	docker build \
+		-t $(MINIFIED_IMAGE) \
+		-f Dockerfile.minified .
+	@echo "Minified image built: $(MINIFIED_IMAGE)"
+	@docker images $(MINIFIED_IMAGE) --format "Size: {{.Size}}"
 
 sizes:
 	@BASE_BYTES=$$(docker inspect --format='{{.Size}}' $(BASE_IMAGE) 2>/dev/null || echo "0"); \

@@ -1616,14 +1616,6 @@ public class FileSecurity(
                         var properties = await cacheFileDao.GetProperties(file.Id);
                         var formFilling = properties?.FormFilling;
 
-                        if (formFilling is { StartFilling: true, StartFillingPreparing: true })
-                        {
-                            if (action is FilesSecurityActions.FillForms or FilesSecurityActions.Edit)
-                            {
-                                return false;
-                            }
-                        }
-
                         var userHasFullAccess = await HasFullAccessAsync(e, userId, isGuest, isRoom, isUser);
                         var shareRecord = await GetShareRecordAsync(room, userId, isDocSpaceAdmin, shares);
                         var formShareRecord = await GetCurrentShareAsync(file, userId, isDocSpaceAdmin, shares);

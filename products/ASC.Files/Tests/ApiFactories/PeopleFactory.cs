@@ -36,6 +36,7 @@ public class PeopleFactory : WebApplicationFactory<PeopleProgram>, IAsyncLifetim
     public ProfilesApi  ProfilesApi { get; private set; } = null!;
     public UserStatusApi  UserStatusApi { get; private set; } = null!;
     public GroupApi  GroupApi { get; private set; } = null!;
+    public PhotosApi  PhotosApi { get; private set; } = null!;
     
     protected override IHost CreateHost(IHostBuilder builder)
     {
@@ -55,7 +56,8 @@ public class PeopleFactory : WebApplicationFactory<PeopleProgram>, IAsyncLifetim
         ProfilesApi = new ProfilesApi(HttpClient, configuration);
         GroupApi = new GroupApi(HttpClient, configuration);
         UserStatusApi = new UserStatusApi(HttpClient, configuration);
-
+        PhotosApi = new PhotosApi(HttpClient, configuration);
+        
         return ValueTask.CompletedTask;
     }
 }

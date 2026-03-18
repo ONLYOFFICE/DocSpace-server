@@ -42,6 +42,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -52,9 +53,12 @@ import org.springframework.http.HttpMethod;
  * Configuration class for setting up distributed rate limiting using Bucket4j and Redis. This
  * configuration is activated when the property `bucket4j.enabled` is set to `true`. It provides
  * beans for managing the Redis connection, Bucket4j proxy manager, and bucket configurations.
+ *
+ * <p>This configuration is only loaded when Redis classes are available on the classpath.
  */
 @Configuration
 @RequiredArgsConstructor
+@ConditionalOnClass(RedisClient.class)
 @EnableConfigurationProperties(Bucket4jConfiguration.class)
 @ConditionalOnProperty(prefix = "bucket4j", name = "enabled", havingValue = "true")
 public class DistributedRateLimiterAutoconfigurationConfiguration {

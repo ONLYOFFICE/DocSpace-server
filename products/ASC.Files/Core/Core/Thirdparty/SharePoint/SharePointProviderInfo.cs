@@ -98,7 +98,9 @@ public class SharePointProviderInfo(ILogger<SharePointProviderInfo> logger,
             var personalPath = string.Concat("/personal/", authData.Login.Replace('@', '_').Replace('.', '_').ToLower());
             SpRootFolderId = string.Concat(personalPath, "/Documents");
 
+#pragma warning disable CA2000 // SecureString not used, commented code below
             var ss = new SecureString();
+#pragma warning restore CA2000
             foreach (var p in authData.Password)
             {
                 ss.AppendChar(p);
@@ -169,7 +171,9 @@ public class SharePointProviderInfo(ILogger<SharePointProviderInfo> logger,
             return null;
         }
 
+#pragma warning disable CA2000 // Stream ownership transferred to caller via tempBuffer
         var fileInfo = File.OpenBinaryDirect(_clientContext, (string)id);
+#pragma warning restore CA2000
         _clientContext.ExecuteQuery();
 
         var tempBuffer = tempStream.Create();

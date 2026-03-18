@@ -311,7 +311,7 @@ public class AccountingClient
             uriBuilder.Query = query.ToString();
         }
 
-        var request = new HttpRequestMessage
+        using var request = new HttpRequestMessage
         {
             RequestUri = uriBuilder.Uri,
             Method = httpMethod

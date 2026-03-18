@@ -79,11 +79,13 @@ public class EmbeddingGeneratorFactory(
         ArgumentException.ThrowIfNullOrEmpty(key);
 
         var credential = new ApiKeyCredential(key);
+#pragma warning disable CA2000 // HttpClient is owned by HttpClientPipelineTransport
         var options = new OpenAIClientOptions
         {
             Endpoint = new Uri(url),
             Transport = new HttpClientPipelineTransport(httpClientFactory.CreateClient())
         };
+#pragma warning restore CA2000
         
         var client = new OpenAIClient(credential, options);
 

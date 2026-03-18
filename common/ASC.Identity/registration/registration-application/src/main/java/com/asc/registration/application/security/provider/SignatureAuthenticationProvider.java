@@ -33,8 +33,8 @@ import com.asc.registration.application.security.authentication.BasicSignatureTo
 import com.asc.registration.application.security.authentication.BasicSignatureTokenPrincipal;
 import com.asc.registration.application.security.service.SignatureService;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
@@ -51,10 +51,14 @@ import org.springframework.stereotype.Component;
  * signature or credentials are invalid, an {@link AuthenticationException} is thrown.
  */
 @Slf4j
-@Component
-@RequiredArgsConstructor
+@Component("registrationSignatureAuthenticationProvider")
 public class SignatureAuthenticationProvider implements AuthenticationProvider {
   private final SignatureService signatureService;
+
+  public SignatureAuthenticationProvider(
+      @Qualifier("registrationSignatureService") SignatureService signatureService) {
+    this.signatureService = signatureService;
+  }
 
   /**
    * Authenticates the provided request using a signature token.

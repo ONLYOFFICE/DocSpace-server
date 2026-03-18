@@ -54,16 +54,14 @@ public class ExaWebSearchEngine(HttpClient httpClient, ExaConfig config) : IWebS
             }
         };
 
-        var request = new HttpRequestMessage(HttpMethod.Post, "https://api.exa.ai/search")
-        {
-            Content = new StringContent(
-                JsonSerializer.Serialize(requestBody, JsonSerializerOptions.Web), 
-                Encoding.UTF8, 
-                "application/json")
-        };
-        
+        using var request = new HttpRequestMessage(HttpMethod.Post, "https://api.exa.ai/search");
+        request.Content = new StringContent(
+            JsonSerializer.Serialize(requestBody, JsonSerializerOptions.Web),
+            Encoding.UTF8,
+            "application/json");
+
         request.Headers.Add("x-api-key", config.ApiKey);
-        
+
         try
         {
             var response = await httpClient.SendAsync(request, cancellationToken);
@@ -100,16 +98,14 @@ public class ExaWebSearchEngine(HttpClient httpClient, ExaConfig config) : IWebS
             Text = new Text { MaxCharacters = query.MaxCharacters }
         };
         
-        var request = new HttpRequestMessage(HttpMethod.Post, "https://api.exa.ai/contents")
-        {
-            Content = new StringContent(
-                JsonSerializer.Serialize(requestBody, JsonSerializerOptions.Web), 
-                Encoding.UTF8, 
-                "application/json")
-        };
-        
+        using var request = new HttpRequestMessage(HttpMethod.Post, "https://api.exa.ai/contents");
+        request.Content = new StringContent(
+            JsonSerializer.Serialize(requestBody, JsonSerializerOptions.Web),
+            Encoding.UTF8,
+            "application/json");
+
         request.Headers.Add("x-api-key", config.ApiKey);
-        
+
         try
         {
             var response = await httpClient.SendAsync(request, cancellationToken);
