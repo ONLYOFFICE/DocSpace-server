@@ -73,6 +73,7 @@ public class S3Storage(TempStream tempStream,
 
     private EncryptionMethod _encryptionMethod = EncryptionMethod.None;
     private string _encryptionKey;
+    private readonly object _clientLock = new();
     private IAmazonS3 _client;
 
     public Uri GetUriInternal(string path)
@@ -1831,25 +1832,19 @@ public class S3Storage(TempStream tempStream,
 
     private IAmazonS3 GetClient()
     {
-        if (_client != null)
+        lock (_clientLock)
         {
-            return _client;
+            return _client ??= GetEncryptionClient() ?? CreateS3Client();
         }
+    }
 
-        var encryptionClient = GetEncryptionClient();
-
-        if (encryptionClient != null)
-        {
-            _client = encryptionClient;
-            return _client;
-        }
-
-        var cfg = new AmazonS3Config { MaxErrorRetry = 3 };
+    private AmazonS3Client CreateS3Client()
+    {
+        var cfg = new AmazonS3Config { MaxErrorRetry = 3, UseHttp = _useHttp };
 
         if (!string.IsNullOrEmpty(_serviceurl))
         {
             cfg.ServiceURL = _serviceurl;
-
             cfg.ForcePathStyle = _forcepathstyle;
         }
         else
@@ -1857,10 +1852,7 @@ public class S3Storage(TempStream tempStream,
             cfg.RegionEndpoint = RegionEndpoint.GetBySystemName(_region);
         }
 
-        cfg.UseHttp = _useHttp;
-
-        _client = new AmazonS3Client(_accessKeyId, _secretAccessKeyId, cfg);
-        return _client;
+        return new AmazonS3Client(_accessKeyId, _secretAccessKeyId, cfg);
     }
 
     private class ResponseStreamWrapper(GetObjectResponse response) : Stream
