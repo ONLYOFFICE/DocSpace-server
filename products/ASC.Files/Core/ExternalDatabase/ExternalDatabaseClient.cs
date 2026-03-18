@@ -281,7 +281,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
             results.Add(row);
         }
 
-        return System.Text.Json.JsonSerializer.Serialize(results);
+        return JsonSerializer.Serialize(results);
     }
 
     public Task InsertDataAsync(string tableName, Dictionary<string, object> data)

@@ -43,7 +43,7 @@ public class Startup
         _diHelper = new DIHelper();
         _corsOrigin = _configuration["core:cors"];
         if (configuration.GetSection("RabbitMQ").GetChildren().Any() && 
-            String.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
+            string.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
         {
             configuration["RabbitMQ:ClientProvidedName"] = Program.AppName;
         }

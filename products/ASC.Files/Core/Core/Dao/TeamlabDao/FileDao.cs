@@ -2556,7 +2556,7 @@ internal class FileDao(
         {
             if (!_currentTenantStore.TryGetValue(tenantId.Value, out var result))
             {
-                result = await (await globalStore.GetStoreAsync(tenantId.Value)).IsDirectoryAsync(string.Empty, String.Empty);
+                result = await (await globalStore.GetStoreAsync(tenantId.Value)).IsDirectoryAsync(string.Empty, string.Empty);
                 _currentTenantStore.TryAdd(tenantId.Value, result);
             }
 

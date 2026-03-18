@@ -76,7 +76,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             .WithReference(MySqlDatabaseResource)
             .WaitFor(MySqlDatabaseResource);
 
-        var isStandalone = String.Compare(builder.Configuration["APP_HOSTING_STANDALONE"], "true", StringComparison.OrdinalIgnoreCase) == 0;
+        var isStandalone = string.Compare(builder.Configuration["APP_HOSTING_STANDALONE"], "true", StringComparison.OrdinalIgnoreCase) == 0;
 
         if (isStandalone)
         {
@@ -181,17 +181,12 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
 
     public ConnectionStringManager AddEditors()
     {
-        var image = "onlyoffice/documentserver";
-
-        switch (builder.Configuration["APP_EDITION"])
+        var image = builder.Configuration["APP_EDITION"] switch
         {
-            case "enterprise":
-                image = "onlyoffice/documentserver-ee";
-                break;
-            case "developer":
-                image = "onlyoffice/documentserver-de";
-                break;
-        }
+            "enterprise" => "onlyoffice/documentserver-ee",
+            "developer" => "onlyoffice/documentserver-de",
+            _ => "onlyoffice/documentserver"
+        };
 
         EditorResource = builder
             .AddContainer(Constants.EditorsContainer, image, "latest")

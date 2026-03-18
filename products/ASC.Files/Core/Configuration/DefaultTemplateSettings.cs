@@ -130,7 +130,7 @@ public class DefaultTemplateSettingsHelper(IServiceProvider serviceProvider,
 
         if (fileId != null)
         {
-            var template = await checkAndCopyFile();
+            var template = await CheckAndCopyFile();
             setting.SelectedFile = template.Id;
         }
         else
@@ -149,20 +149,21 @@ public class DefaultTemplateSettingsHelper(IServiceProvider serviceProvider,
 
         return settings;
 
-        async Task<File<int>> checkAndCopyFile()
+        async Task<File<int>> CheckAndCopyFile()
         {
             FileEntry file = fileId.Value.ValueKind switch
             {
                 JsonValueKind.String => await fileThirdPartyDao.GetFileAsync(fileId.Value.GetString()),
                 JsonValueKind.Number => await fileDao.GetFileAsync(fileId.Value.GetInt32()),
-                _ => throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound),
+                _ => throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound)
             };
 
             if (file == null)
             {
                 throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
             }
-            else if (Path.GetExtension(file.Title) != extension)
+
+            if (Path.GetExtension(file.Title) != extension)
             {
                 throw new InvalidOperationException(FilesCommonResource.ErrorMessage_NotSupportedFormat);
             }
@@ -171,7 +172,7 @@ public class DefaultTemplateSettingsHelper(IServiceProvider serviceProvider,
             {
                 JsonValueKind.String => await fileThirdPartyDao.CopyFileAsync(fileId.Value.GetString(), await folderDao.GetFolderIDDefaultTemplatesAsync(true)),
                 JsonValueKind.Number => await fileDao.CopyFileAsync(fileId.Value.GetInt32(), await folderDao.GetFolderIDDefaultTemplatesAsync(true)),
-                _ => throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound),
+                _ => throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound)
             };
         }
     }
@@ -251,7 +252,7 @@ public class DefaultTemplateSettingsHelper(IServiceProvider serviceProvider,
         var path = await globalStore.GetNewDocTemplatePath(storeTemplate, new CultureInfo("en-US"));
         var extensions = await storeTemplate.ListFilesRelativeAsync("", path, "*", false)
             .Where(f => FileUtility.GetFileTypeByFileName(f) is not (FileType.Audio or FileType.Video or FileType.Image))
-            .Select(f => FileUtility.GetFileExtension(f)).Distinct()
+            .Select(FileUtility.GetFileExtension).Distinct()
             .ToListAsync();
 
         return extensions;

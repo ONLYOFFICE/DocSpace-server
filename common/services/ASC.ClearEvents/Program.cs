@@ -67,7 +67,7 @@ try
     {
         containerBuilder.Register(context.Configuration, false);
 
-        if (String.IsNullOrEmpty(context.Configuration["RabbitMQ:ClientProvidedName"]))
+        if (string.IsNullOrEmpty(context.Configuration["RabbitMQ:ClientProvidedName"]))
         {
             context.Configuration["RabbitMQ:ClientProvidedName"] = AppName;
         }

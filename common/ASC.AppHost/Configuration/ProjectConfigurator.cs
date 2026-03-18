@@ -69,7 +69,7 @@ public class ProjectConfigurator(
             project.WithEnvironment("core:hosting:singletonMode", true.ToString());
         }
 
-        var isStandalone = String.Compare(builder.Configuration["APP_HOSTING_STANDALONE"], "true", StringComparison.OrdinalIgnoreCase) == 0;
+        var isStandalone = string.Compare(builder.Configuration["APP_HOSTING_STANDALONE"], "true", StringComparison.OrdinalIgnoreCase) == 0;
 
         project.WithEnvironment("core:base-domain", isStandalone ? "localhost" : "")
             .WithEnvironment("ai:mcp:0:endpoint", new UriBuilder(Uri.UriSchemeHttp, "localhost", Constants.DocSpaceMcpPort) + "mcp");
@@ -134,7 +134,7 @@ public class ProjectConfigurator(
         }
 
 
-        var isStandalone = String.Compare(builder.Configuration["APP_HOSTING_STANDALONE"], "true", StringComparison.OrdinalIgnoreCase) == 0;
+        var isStandalone = string.Compare(builder.Configuration["APP_HOSTING_STANDALONE"], "true", StringComparison.OrdinalIgnoreCase) == 0;
 
         resourceBuilder.WithEnvironment("core:base-domain", isStandalone ? "localhost" : "");
 

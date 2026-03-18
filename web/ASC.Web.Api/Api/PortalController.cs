@@ -649,7 +649,7 @@ public class PortalController(
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var alias = inDto.Alias;
-        if (string.IsNullOrEmpty(alias) || alias.Any(Char.IsWhiteSpace))
+        if (string.IsNullOrEmpty(alias) || alias.Any(char.IsWhiteSpace))
         {
             throw new ArgumentException(nameof(alias));
         }

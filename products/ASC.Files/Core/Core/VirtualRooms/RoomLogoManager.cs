@@ -363,7 +363,7 @@ public class RoomLogoManager(
                     var size = parts[0];
                     var iconName = parts[1];
 
-                    using var stream = assembly.GetManifestResourceStream(res);
+                    await using var stream = assembly.GetManifestResourceStream(res);
                     if (stream == null)
                     {
                         continue;

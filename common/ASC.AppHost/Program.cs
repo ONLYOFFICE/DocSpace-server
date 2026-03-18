@@ -27,8 +27,8 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
 var basePath = Path.GetFullPath(Path.Combine("..", "..", ".."));
-var isDocker = String.Compare(builder.Configuration["Docker"], "true", StringComparison.OrdinalIgnoreCase) == 0;
-var skipClient = String.Compare(builder.Configuration["SKIP_CLIENT"], "true", StringComparison.OrdinalIgnoreCase) == 0;
+var isDocker = string.Compare(builder.Configuration["Docker"], "true", StringComparison.OrdinalIgnoreCase) == 0;
+var skipClient = string.Compare(builder.Configuration["SKIP_CLIENT"], "true", StringComparison.OrdinalIgnoreCase) == 0;
 
 var connectionManager = new ConnectionStringManager(builder, basePath)
    

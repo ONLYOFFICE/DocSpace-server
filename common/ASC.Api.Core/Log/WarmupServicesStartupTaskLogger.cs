@@ -38,5 +38,5 @@ internal static partial class WarmupServicesStartupTaskLogger
     public static partial void TraceWarmupFinished(this ILogger<WarmupServicesStartupTask> logger, int processed, int successed, int failed, double processedTime);
 
     [LoggerMessage(LogLevel.Debug, "#{index} Failed proccessed {serviceTitle} service")]
-    public static partial void DebugWarmupFailed(this ILogger<WarmupServicesStartupTask> logger, int index, String serviceTitle, Exception error);
+    public static partial void DebugWarmupFailed(this ILogger<WarmupServicesStartupTask> logger, int index, string serviceTitle, Exception error);
 }

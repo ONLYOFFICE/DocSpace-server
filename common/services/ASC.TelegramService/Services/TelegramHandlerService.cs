@@ -191,11 +191,11 @@ public class TelegramHandlerService(
 
     private readonly int[] _stopErrorCodes = [
         401, // Unathorized
-        409, // Keys Conflict
+        409 // Keys Conflict
     ];
 
     private readonly int[] _silentErrorCodes = [
-        502,
+        502
     ];
 
     private Task HandleErrorAsync(Exception exception, int tenantId, CancellationTokenSource cts)

@@ -228,7 +228,7 @@ public class FormFillingReportCreator(
             });
         }
 
-        return (fromData, fromMetaData);
+        return (fromData, fromMetaData: fromMetaData);
     }
 
     private (SubmitFormsData Data, List<FormMetadata> MetaData)ParseSubmitAndMetadata(string json)
@@ -242,8 +242,8 @@ public class FormFillingReportCreator(
         {
             return (new SubmitFormsData
             {
-                FormsData = Enumerable.Empty<FormsItemData>()
-            }, new List<FormMetadata>());
+                FormsData = []
+            }, []);
         }
 
         var formsDataList = new List<FormsItemData>(formsArray.GetArrayLength());
