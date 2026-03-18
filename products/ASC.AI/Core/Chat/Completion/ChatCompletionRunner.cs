@@ -41,13 +41,12 @@ public class ChatCompletionRunner(
     IServiceScopeFactory serviceScopeFactory)
 {
     public async Task<ChatCompletionGenerator> StartNewChatAsync(
-        int roomId, string message, IEnumerable<JsonElement>? files = null, ChatReasoningEffort? reasoningEffort = null)
+        int roomId, string message, IEnumerable<JsonElement>? files = null)
     {
         ArgumentException.ThrowIfNullOrEmpty(message);
 
         var context = await contextBuilder.BuildAsync(roomId);
         context.ChatId = Guid.NewGuid();
-        context.ClientOptions.ReasoningEffort = reasoningEffort;
 
         var attachments = await GetAttachmentsAsync(context, files).ToListAsync();
         
@@ -92,7 +91,7 @@ public class ChatCompletionRunner(
     }
 
     public async Task<ChatCompletionGenerator> StartChatAsync(
-        Guid chatId, string message, IEnumerable<JsonElement>? files = null, ChatReasoningEffort? reasoningEffort = null)
+        Guid chatId, string message, IEnumerable<JsonElement>? files = null)
     {
         ArgumentException.ThrowIfNullOrEmpty(message);
 
@@ -103,11 +102,10 @@ public class ChatCompletionRunner(
         {
             throw new ItemNotFoundException("Chat not found");
         }
-        
+
         var context = await contextBuilder.BuildAsync(chat.RoomId);
         context.Chat = chat;
         context.ChatId = chat.Id;
-        context.ClientOptions.ReasoningEffort = reasoningEffort;
 
         var attachments = await GetAttachmentsAsync(context, files).ToListAsync();
         
