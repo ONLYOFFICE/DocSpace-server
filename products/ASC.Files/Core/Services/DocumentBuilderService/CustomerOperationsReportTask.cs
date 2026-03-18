@@ -261,7 +261,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
         return sb.ToString();
     }
 
-    record PropertyValue(string Value, string Format, string Halign = null);
+    private record PropertyValue(string Value, string Format, string Halign = null);
 }
 
 public record CustomerOperationsReportTaskData(

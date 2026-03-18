@@ -86,7 +86,7 @@ public class FileDeleteOperation : ComposeFileOperation<FileDeleteOperationData<
     }
 }
 
-class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
+internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
 {
     private int _trashId;
     private readonly bool _ignoreException;

@@ -74,7 +74,7 @@ public class AutoCleanTrashService(
         {
             await using var scope = _scopeFactory.CreateAsyncScope();
             var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
-            tenantManager.SetCurrentTenant(new Tenant(tenantUser.TenantId, String.Empty));
+            tenantManager.SetCurrentTenant(new Tenant(tenantUser.TenantId, string.Empty));
 
             var authManager = scope.ServiceProvider.GetRequiredService<AuthManager>();
             var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
@@ -160,7 +160,7 @@ static file class Queries
 
 }
 
-class TenantUserSettings
+internal class TenantUserSettings
 {
     public int TenantId { get; init; }
     public Guid UserId { get; init; }

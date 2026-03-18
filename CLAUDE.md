@@ -72,11 +72,22 @@ dotnet run --project .aspire/AppHost  # Run via Aspire orchestration
 - **Custom attributes**: `[Singleton]`, `[Scope]`, `[DefaultRoute]`, `[ControllerName]`
 
 ### Style (enforced via `.editorconfig`)
-- **Indentation**: spaces (no tabs)
-- **`var` usage**: preferred (`csharp_style_var_*` = true with warning)
+- **Indentation**: 4 spaces (no tabs); 2 spaces for XML/JSON/YAML
+- **`var` usage**: preferred everywhere (`csharp_style_var_*` = true:warning)
+- **Namespaces**: file-scoped (`namespace Foo;`) — enforced with warning
 - **Usings**: `ImplicitUsings` enabled; system directives sorted first, separated into groups. **All `using` directives must be placed in `GlobalUsings.cs`** (one per project), never in individual `.cs` files.
+- **Braces**: always required (`csharp_prefer_braces` = true:warning)
+- **`using` statements**: prefer simple form (`using var x = ...`)
+- **Object creation**: prefer target-typed `new()` when type is apparent
+- **Default expressions**: prefer `default` over `default(T)`
+- **Index/Range**: prefer `^1` and `..` operators
+- **Null checks**: prefer `is null` / `is not null` over `ReferenceEquals`
+- **Access modifiers**: explicit modifiers required (warning)
+- **Readonly fields**: enforced with warning
+- **Private fields**: `_camelCase`; public fields / constants / types: `PascalCase`; interfaces: `IName`
 - **XML docs**: `<summary>`, `<remarks>`, `<example>` on API models; `GenerateDocumentationFile=True`
 - **License header**: AGPL 3.0 header required on all source files
+- **Line endings**: CRLF; `insert_final_newline = true`; trailing whitespace trimmed
 
 ### Logging
 - **Always use source-generated logging** via `[LoggerMessage]` attribute on `partial` methods in a dedicated `static partial class` (e.g., `*Logger`).

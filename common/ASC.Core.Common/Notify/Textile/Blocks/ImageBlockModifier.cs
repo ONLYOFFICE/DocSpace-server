@@ -46,7 +46,7 @@ public class ImageBlockModifier : BlockModifier
         return line;
     }
 
-    string ImageFormatMatchEvaluator(Match m)
+    private string ImageFormatMatchEvaluator(Match m)
     {
         var atts = BlockAttributesParser.ParseBlockAttributes(m.Groups["atts"].Value, "img");
         if (m.Groups["algn"].Length > 0)

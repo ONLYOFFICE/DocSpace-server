@@ -165,7 +165,7 @@ public class DocumentServiceTrackerHelper(
 {
     public string GetCallbackUrl<T>(T fileId, int? tenantId = null)
     {
-        var queryParams = HttpUtility.ParseQueryString(String.Empty);
+        var queryParams = HttpUtility.ParseQueryString(string.Empty);
 
         queryParams[FilesLinkUtility.Action] = "track";
         queryParams[FilesLinkUtility.FileId] = fileId.ToString();

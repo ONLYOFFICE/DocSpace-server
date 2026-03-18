@@ -28,6 +28,6 @@ namespace ASC.AI.Core.Provider.Model;
 
 public interface IModelClient
 {
-    public Task PingAsync();
-    public Task<IEnumerable<ModelInfo>> ListModelsAsync(Scope? scope = null);
+    Task PingAsync();
+    Task<IEnumerable<ModelInfo>> ListModelsAsync(Scope? scope = null);
 }

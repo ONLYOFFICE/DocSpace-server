@@ -37,7 +37,6 @@ global using System.Text.RegularExpressions;
 global using System.Threading.Channels;
 global using System.Web.Http.Filters;
 
-global using ASC.Api.Core;
 global using ASC.Api.Core.Auth;
 global using ASC.Api.Core.Core;
 global using ASC.Api.Core.Extensions;

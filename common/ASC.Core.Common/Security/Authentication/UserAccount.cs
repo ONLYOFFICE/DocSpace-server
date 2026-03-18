@@ -26,7 +26,7 @@
 
 namespace ASC.Core.Security.Authentication;
 
-class UserAccount(UserInfo info, int tenant, UserFormatter userFormatter) : MarshalByRefObject, IUserAccount
+internal class UserAccount(UserInfo info, int tenant, UserFormatter userFormatter) : MarshalByRefObject, IUserAccount
 {
     public Guid ID { get; private set; } = info.Id;
     public string Name { get; private set; } = userFormatter.GetUserName(info);

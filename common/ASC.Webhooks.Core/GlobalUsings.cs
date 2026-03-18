@@ -27,7 +27,6 @@
 global using System.ComponentModel;
 global using System.ComponentModel.DataAnnotations;
 
-global using ASC.Api.Core.Extensions;
 global using ASC.Common;
 global using ASC.Common.Caching;
 global using ASC.Core;

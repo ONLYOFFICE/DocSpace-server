@@ -26,10 +26,8 @@
 
 using System.Text.Encodings.Web;
 
-using ASC.EventBus.Abstractions;
 using ASC.Files.Core.Core;
 using ASC.Files.Core.EF;
-using ASC.Notify.IntegrationEvents.EventHandling;
 
 namespace ASC.Notify.Extensions;
 

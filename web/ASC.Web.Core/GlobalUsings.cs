@@ -44,7 +44,6 @@ global using System.Text.RegularExpressions;
 global using System.Web;
 global using System.Xml;
 
-global using ASC.Api.Core.Extensions;
 global using ASC.AuditTrail.Repositories;
 global using ASC.Common;
 global using ASC.Common.Caching;
@@ -135,5 +134,4 @@ global using Twilio.Types;
 
 global using ZiggyCreatures.Caching.Fusion;
 
-global using JsonIgnoreAttribute = System.Text.Json.Serialization.JsonIgnoreAttribute;
 global using SecurityContext = ASC.Core.SecurityContext;
