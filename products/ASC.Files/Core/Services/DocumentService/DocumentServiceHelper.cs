@@ -597,12 +597,13 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             return result;
         }
 
-        if (properties.FormFilling.StartFillingPreparing)
+        var originalFormId = !Equals(properties.FormFilling.OriginalFormId, default(T)) ? properties.FormFilling.OriginalFormId : file.Id;
+        var linkedId = await linkDao.GetLinkedAsync(originalFormId);
+        if (Equals(linkedId, default(T)) && await fileTracker.IsEditingAsync(originalFormId))
         {
             return result;
         }
 
-        var linkedId = await linkDao.GetLinkedAsync(file.Id);
         var formDraft = !Equals(linkedId, default(T)) ? await fileDao.GetFileAsync(linkedId) : (await entryManager.GetFillFormDraftAsync(file, rootFolder.Id)).file;
 
         result.CanFill = true;
