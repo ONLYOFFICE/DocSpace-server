@@ -3509,7 +3509,7 @@ public class FileSecurity(
         }
     }
 
-    async Task<FileShareRecord<T>> GetShareRecordAsync<T>(Folder<T> room, Guid userId, bool isDocSpaceAdmin, IEnumerable<FileShareRecord<T>> shares)
+    private async Task<FileShareRecord<T>> GetShareRecordAsync<T>(Folder<T> room, Guid userId, bool isDocSpaceAdmin, IEnumerable<FileShareRecord<T>> shares)
     {
         var cachedRecords = GetCachedRecords<T>();
         var cacheKey = GetCacheKey(room.Id, userId);

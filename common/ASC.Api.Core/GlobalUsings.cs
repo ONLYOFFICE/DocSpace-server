@@ -98,7 +98,6 @@ global using ASC.EventBus.Serializers;
 global using ASC.MessagingSystem.Core;
 global using ASC.MessagingSystem.EF.Context;
 global using ASC.MessagingSystem.EF.Model;
-global using ASC.Notify.Engine;
 global using ASC.People.ApiModels.ResponseDto;
 global using ASC.Security.Cryptography;
 global using ASC.Web.Api.Models;

@@ -136,7 +136,7 @@ public class FactoryIndexerFolder(ILoggerProvider options,
     }
 }
 
-class FolderTenant
+internal class FolderTenant
 {
     public DbTenant DbTenant { get; init; }
     public DbFolder DbFolder { get; init; }

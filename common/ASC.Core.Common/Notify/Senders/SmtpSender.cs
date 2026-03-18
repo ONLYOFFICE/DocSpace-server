@@ -44,7 +44,7 @@ public class SmtpSender(
     private bool _ssl;
     private ICredentials _credentials;
     private SaslMechanism _saslMechanism;
-    const int NetworkTimeout = 30000;
+    private const int NetworkTimeout = 30000;
 
     public virtual void Init(IDictionary<string, string> properties)
     {

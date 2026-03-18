@@ -358,7 +358,7 @@ public class GlobalStore(StorageFactory storageFactory, TenantManager tenantMana
                 var fileDao = serviceProvider.GetRequiredService<IFileDao<int>>();
                 var file = await fileDao.GetFileAsync(templateSetting.SelectedFile.Value);
 
-                return new DocTemplate()
+                return new DocTemplate
                 {
                     Title = file.Title,
                     FileExtension = extension,
@@ -376,7 +376,7 @@ public class GlobalStore(StorageFactory storageFactory, TenantManager tenantMana
         var filePath = $"{path}{FileConstant.NewDocFileName}{extension}";
 
         return await storeTemplate.IsFileAsync("", filePath)
-            ? new DocTemplate()
+            ? new DocTemplate
             {
                 Title = Path.GetFileNameWithoutExtension(filePath),
                 FileExtension = extension,

@@ -305,7 +305,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         var dbType = Provider.DatabaseType.ToLowerInvariant();
         // SQLite only: MySQL DDL (CREATE TABLE) causes an implicit commit,
         // making it impossible to wrap CREATE TABLE + INSERT in one atomic transaction.
-        DbTransaction? tx = dbType == "sqlite" ? await connection.BeginTransactionAsync() : null;
+        var tx = dbType == "sqlite" ? await connection.BeginTransactionAsync() : null;
 
         try
         {

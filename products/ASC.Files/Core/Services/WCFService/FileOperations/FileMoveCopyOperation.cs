@@ -97,7 +97,7 @@ public class FileMoveCopyOperation : ComposeFileOperation<FileMoveCopyOperationD
     }
 }
 
-class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
+internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
 {
     private readonly bool _copy;
     private readonly int _daoFolderId;

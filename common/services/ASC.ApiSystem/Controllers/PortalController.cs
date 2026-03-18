@@ -990,7 +990,7 @@ public class PortalController(
         }
     }
 
-    record TenantWrapper(string PortalName, string PortalLink);
+    private record TenantWrapper(string PortalName, string PortalLink);
     
     private async Task<List<TenantWrapper>> GetTenantsByThirdPartyProfileAsync(LoginProfile  profile)
     {

@@ -33,7 +33,7 @@ public class UserInvitationLimitHelper(
     QuotaSocketManager quotaSocketManager,
     IFusionCache hybridCache)
 {
-    class InvitationLimitData
+    private class InvitationLimitData
     {
         public int Limit { get; set; }
         public DateTime Expiration { get; set; }

@@ -30,43 +30,43 @@ public interface IThirdPartyStorage
     bool IsOpened { get; }
     AuthScheme AuthScheme { get; }
 
-    public void Open(AuthData authData);
-    public void Close();
-    public Task<long> GetMaxUploadSizeAsync();
-    public Task<bool> CheckAccessAsync();
-    public Task<Stream> GetThumbnailAsync(string fileId, uint width, uint height);
+    void Open(AuthData authData);
+    void Close();
+    Task<long> GetMaxUploadSizeAsync();
+    Task<bool> CheckAccessAsync();
+    Task<Stream> GetThumbnailAsync(string fileId, uint width, uint height);
 }
 
 public interface IThirdPartyItemStorage<TItem> : IThirdPartyStorage
 {
-    public Task<List<TItem>> GetItemsAsync(string folderId);
-    public Task DeleteItemAsync(TItem item);
+    Task<List<TItem>> GetItemsAsync(string folderId);
+    Task DeleteItemAsync(TItem item);
 }
 
 public interface IGoogleDriveItemStorage<TItem> : IThirdPartyItemStorage<TItem>
 {
-    public Task<List<TItem>> GetItemsAsync(string folderId, bool? folder);
+    Task<List<TItem>> GetItemsAsync(string folderId, bool? folder);
 }
 
 public interface IThirdPartyFileStorage<TFile> : IThirdPartyStorage
 {
-    public Task<TFile> GetFileAsync(string fileId);
-    public Task<TFile> CreateFileAsync(Stream fileStream, string title, string parentId);
-    public Task<Stream> DownloadStreamAsync(TFile file, int offset = 0);
-    public Task<TFile> MoveFileAsync(string fileId, string newFileName, string toFolderId);
-    public Task<TFile> CopyFileAsync(string fileId, string newFileName, string toFolderId);
-    public Task<TFile> RenameFileAsync(string fileId, string newName);
-    public Task<TFile> SaveStreamAsync(string fileId, Stream fileStream);
-    public Task<long> GetFileSizeAsync(TFile file);
+    Task<TFile> GetFileAsync(string fileId);
+    Task<TFile> CreateFileAsync(Stream fileStream, string title, string parentId);
+    Task<Stream> DownloadStreamAsync(TFile file, int offset = 0);
+    Task<TFile> MoveFileAsync(string fileId, string newFileName, string toFolderId);
+    Task<TFile> CopyFileAsync(string fileId, string newFileName, string toFolderId);
+    Task<TFile> RenameFileAsync(string fileId, string newName);
+    Task<TFile> SaveStreamAsync(string fileId, Stream fileStream);
+    Task<long> GetFileSizeAsync(TFile file);
 }
 
 public interface IThirdPartyFolderStorage<TFolder> : IThirdPartyStorage
 {
-    public Task<TFolder> GetFolderAsync(string folderId);
-    public Task<TFolder> CreateFolderAsync(string title, string parentId);
-    public Task<TFolder> MoveFolderAsync(string folderId, string newFolderName, string toFolderId);
-    public Task<TFolder> CopyFolderAsync(string folderId, string newFolderName, string toFolderId);
-    public Task<TFolder> RenameFolderAsync(string folderId, string newName);
+    Task<TFolder> GetFolderAsync(string folderId);
+    Task<TFolder> CreateFolderAsync(string title, string parentId);
+    Task<TFolder> MoveFolderAsync(string folderId, string newFolderName, string toFolderId);
+    Task<TFolder> CopyFolderAsync(string folderId, string newFolderName, string toFolderId);
+    Task<TFolder> RenameFolderAsync(string folderId, string newName);
 }
 
 [Transient]

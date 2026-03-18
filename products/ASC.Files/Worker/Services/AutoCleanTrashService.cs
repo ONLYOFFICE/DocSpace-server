@@ -160,7 +160,7 @@ static file class Queries
 
 }
 
-class TenantUserSettings
+internal class TenantUserSettings
 {
     public int TenantId { get; init; }
     public Guid UserId { get; init; }

@@ -145,7 +145,7 @@ public class DIHelper
     private static readonly MethodInfo _registerDistributedTaskMethod =
         typeof(DIHelper).GetMethod(nameof(RegisterDistributedTask))!;
 
-    readonly HashSet<string> _visited = [];
+    private readonly HashSet<string> _visited = [];
 
     public void Scan()
     {

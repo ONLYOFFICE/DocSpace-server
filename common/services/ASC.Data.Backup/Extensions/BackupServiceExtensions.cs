@@ -27,9 +27,6 @@
 using ASC.Data.Backup.Core.Quota;
 using ASC.Files.Core.Core;
 
-using Microsoft.AspNetCore.Http.Features;
-using Microsoft.AspNetCore.Server.Kestrel.Core;
-
 namespace ASC.Data.Backup.Extensions;
 
 public static class BackupServiceExtensions

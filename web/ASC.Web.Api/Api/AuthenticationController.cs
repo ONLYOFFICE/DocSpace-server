@@ -721,14 +721,14 @@ public class AuthenticationController(
     }
 }
 
-class UserInfoWrapper
+internal class UserInfoWrapper
 {
     public UserInfo UserInfo { get; set; }
     public LoginType LoginType { get; set; }
     public string Provider { get; set; }
 }
 
-enum LoginType
+internal enum LoginType
 {
     EmailAndPassword,
     EmailAndPasswordHash,

@@ -129,52 +129,52 @@ public interface IFolder
     /// <summary>
     /// The folder type.
     /// </summary>
-    public FolderType FolderType { get; set; }
+    FolderType FolderType { get; set; }
 
     /// <summary>
     /// The root folder type of the folder.
     /// </summary>
-    public FolderType RootFolderType { get; set; }
+    FolderType RootFolderType { get; set; }
 
     /// <summary>
     /// The ID of the user who created the root folder of the folder.
     /// </summary>
-    public Guid RootCreateBy { get; set; }
+    Guid RootCreateBy { get; set; }
 
     /// <summary>
     /// The number of files in the folder.
     /// </summary>
-    public int FilesCount { get; set; }
+    int FilesCount { get; set; }
 
     /// <summary>
     /// The number of folders in the folder.
     /// </summary>
-    public int FoldersCount { get; set; }
+    int FoldersCount { get; set; }
 
     /// <summary>
     /// Specifies if the folder can be shared or not.
     /// </summary>
-    public bool Shareable { get; set; }
+    bool Shareable { get; set; }
 
     /// <summary>
     /// The number of files in the folder that the user has not seen yet.
     /// </summary>
-    public int NewForMe { get; set; }
+    int NewForMe { get; set; }
 
     /// <summary>
     /// The URL to the folder.
     /// </summary>
-    public string FolderUrl { get; set; }
+    string FolderUrl { get; set; }
 
     /// <summary>
     /// Specifies if the folder is pinned to the top of the list or not.
     /// </summary>
-    public bool Pinned { get; set; }
+    bool Pinned { get; set; }
 
     /// <summary>
     /// The collection of folder tags.
     /// </summary>
-    public IEnumerable<Tag> Tags { get; set; }
+    IEnumerable<Tag> Tags { get; set; }
 
     /// <summary>
     /// Indicates whether the folder represents a room.

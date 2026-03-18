@@ -198,7 +198,7 @@ public class TelegramHandlerService(
         502,
     ];
 
-    Task HandleErrorAsync(Exception exception, int tenantId, CancellationTokenSource cts)
+    private Task HandleErrorAsync(Exception exception, int tenantId, CancellationTokenSource cts)
     {
         string message;
         if (exception is ApiRequestException apiException)

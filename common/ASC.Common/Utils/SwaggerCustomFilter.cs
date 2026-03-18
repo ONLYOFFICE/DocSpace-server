@@ -130,7 +130,7 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
                     Type = JsonSchemaType.Integer,
                     Example = SwaggerSchemaCustomAttribute.DefaultIntExample
                 },
-                new OpenApiSchema()
+                new OpenApiSchema
                 {
                     Type = JsonSchemaType.String,
                     Example = SwaggerSchemaCustomAttribute.DefaultStringExample
