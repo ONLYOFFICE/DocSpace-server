@@ -38,6 +38,9 @@ namespace ASC.FederatedLogin.DatabaseProviders;
 public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IValidateKeysProvider, IConsumerKeyMetadataProvider
 {
     public string DatabaseType => this["databaseType"] ?? "mysql";
+
+    public ExternalDatabaseType DatabaseTypeEnum =>
+        ExternalDatabaseTypeExtensions.TryParse(DatabaseType, ignoreCase: true, out var t) ? t : ExternalDatabaseType.MySql;
     public string Host => this["dbHost"];
     public string Port => this["dbPort"] ?? "3306";
     public string Database => this["dbName"];
@@ -53,12 +56,12 @@ public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IVa
             return false;
         }
 
-        return DatabaseType.ToLowerInvariant() switch
+        return DatabaseTypeEnum switch
         {
-            "mysql" => !string.IsNullOrWhiteSpace(Host) &&
-                       !string.IsNullOrWhiteSpace(Database) &&
-                       !string.IsNullOrWhiteSpace(User),
-            "sqlite" => IsSqliteAllowed && !string.IsNullOrWhiteSpace(SqliteFilePath),
+            ExternalDatabaseType.MySql => !string.IsNullOrWhiteSpace(Host) &&
+                                          !string.IsNullOrWhiteSpace(Database) &&
+                                          !string.IsNullOrWhiteSpace(User),
+            ExternalDatabaseType.Sqlite => IsSqliteAllowed && !string.IsNullOrWhiteSpace(SqliteFilePath),
             _ => false
         };
     }
@@ -106,7 +109,7 @@ public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IVa
             return false;
         }
 
-        if (DatabaseType?.ToLowerInvariant() == "sqlite")
+        if (DatabaseTypeEnum == ExternalDatabaseType.Sqlite)
         {
             var path = ValidateSqlitePath(SqliteFilePath, Configuration);
             if (!File.Exists(path))
@@ -134,7 +137,7 @@ public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IVa
     {
         try
         {
-            if (settings.DatabaseType?.ToLowerInvariant() == "sqlite" &&
+            if (settings.DatabaseTypeEnum == ExternalDatabaseType.Sqlite &&
                 !File.Exists(ValidateSqlitePath(settings.SqliteFilePath, configuration)))
             {
                 return ConnectionTestResult.Failure("SQLite file not found.");
@@ -169,20 +172,20 @@ public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IVa
 
     public DbConnection CreateConnection()
     {
-        return DatabaseType?.ToLowerInvariant() switch
+        return DatabaseTypeEnum switch
         {
-            "mysql" => CreateMySqlConnection(),
-            "sqlite" => CreateSqliteConnection(ValidateSqlitePath(SqliteFilePath, Configuration)),
+            ExternalDatabaseType.MySql => CreateMySqlConnection(),
+            ExternalDatabaseType.Sqlite => CreateSqliteConnection(ValidateSqlitePath(SqliteFilePath, Configuration)),
             _ => throw new NotSupportedException($"Database type '{DatabaseType}' is not supported yet.")
         };
     }
 
     public static DbConnection CreateConnection(ExternalDatabaseSettings settings, IConfiguration configuration)
     {
-        return settings.DatabaseType?.ToLowerInvariant() switch
+        return settings.DatabaseTypeEnum switch
         {
-            "mysql" => CreateMySqlConnection(settings),
-            "sqlite" => CreateSqliteConnection(ValidateSqlitePath(settings.SqliteFilePath, configuration)),
+            ExternalDatabaseType.MySql => CreateMySqlConnection(settings),
+            ExternalDatabaseType.Sqlite => CreateSqliteConnection(ValidateSqlitePath(settings.SqliteFilePath, configuration)),
             _ => throw new NotSupportedException($"Database type '{settings.DatabaseType}' is not supported yet.")
         };
     }
@@ -219,7 +222,8 @@ public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IVa
             Server = Host,
             Database = Database,
             UserID = User,
-            Password = Password
+            Password = Password,
+            AllowPublicKeyRetrieval = true
         };
 
         builder.Port = uint.TryParse(Port, out var port) ? port : 3306;
@@ -240,7 +244,8 @@ public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IVa
             UserID = settings.User,
             Password = settings.Password,
             Port = (uint)settings.Port,
-            SslMode = settings.UseSsl ? MySqlSslMode.Preferred : MySqlSslMode.None
+            SslMode = settings.UseSsl ? MySqlSslMode.Preferred : MySqlSslMode.None,
+            AllowPublicKeyRetrieval = true
         };
 
         return new MySqlConnection(builder.ConnectionString);
