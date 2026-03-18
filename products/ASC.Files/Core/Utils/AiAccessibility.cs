@@ -61,12 +61,14 @@ public class AiAccessibility(
         {
             providerType = EmbeddingProviderType.PortalAi;
         }
+        
+        var gatewayEnabled = await aiGateway.IsEnabledAsync();
 
         return providerType switch
         {
-            EmbeddingProviderType.PortalAi => await aiGateway.IsEnabledAsync(),
+            EmbeddingProviderType.PortalAi => gatewayEnabled,
             EmbeddingProviderType.None => false,
-            _ => await HasProvidersAsync(tenantId)
+            _ => gatewayEnabled || await HasProvidersAsync(tenantId)
         };
     }
     
