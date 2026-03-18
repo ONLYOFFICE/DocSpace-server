@@ -24,9 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Data.Backup.Core.Quota;
-using ASC.Files.Core.Core;
-using ASC.Web.Files.Utils;
+using ASC.Data.Backup.Worker.Extensions;
 
 namespace ASC.Data.Backup.Worker;
 
@@ -34,7 +32,7 @@ public class Startup : BaseStartup
 {
     public Startup(IConfiguration configuration) : base(configuration)
     {
-        if (configuration.GetSection("RabbitMQ").GetChildren().Any() && 
+        if (configuration.GetSection("RabbitMQ").GetChildren().Any() &&
             String.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
         {
             configuration["RabbitMQ:ClientProvidedName"] = Program.AppName;
@@ -43,27 +41,8 @@ public class Startup : BaseStartup
 
     public override async Task ConfigureServices(WebApplicationBuilder builder)
     {
-        var services = builder.Services;
         await base.ConfigureServices(builder);
 
-        services.RegisterQueue<BackupProgressItem>(5, 60 * 60 * 24);
-        services.RegisterQueue<RestoreProgressItem>(5, 60 * 60 * 24);
-        services.RegisterQueue<TransferProgressItem>(5, 60 * 60 * 24);
-        services.RegisterQueue<AsyncTaskData<int>>();
-        services.RegisterQueue<AsyncTaskData<string>>();
-
-        services.AddHostedService<BackupListenerService>();
-        services.AddHostedService<BackupCleanerTempFileService>();
-
-        services.AddHostedService<BackupWorkerService>();
-        services.AddActivePassiveHostedService<BackupCleanerService>(_configuration);
-        services.AddActivePassiveHostedService<BackupSchedulerService>(_configuration);
-
-        services.AddBaseDbContextPool<BackupsContext>();
-        services.AddBaseDbContextPool<FilesDbContext>();
-        services.RegisterQuotaFeature();
-        services.RegisterFreeBackupQuotaFeature();
-
-        services.AddBackupSchedulerServiceResiliencePipeline();
+        builder.Services.AddBackupWorkerServices(_configuration);
     }
 }

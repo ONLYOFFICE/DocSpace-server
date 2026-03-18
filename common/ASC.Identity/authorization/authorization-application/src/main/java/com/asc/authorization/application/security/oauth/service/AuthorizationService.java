@@ -46,12 +46,14 @@ import com.asc.common.utilities.crypto.HashingService;
 import jakarta.servlet.http.Cookie;
 import java.util.Arrays;
 import java.util.Optional;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.MDC;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
@@ -79,7 +81,6 @@ import org.springframework.web.context.request.ServletRequestAttributes;
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class AuthorizationService
     implements OAuth2AuthorizationService, AuthorizationCleanupService {
   @Value("${spring.application.region}")
@@ -89,11 +90,11 @@ public class AuthorizationService
 
   private final Environment environment;
 
-  private final RabbitTemplate rpcRabbitTemplate;
-
   private final SecurityConfigurationProperties securityConfigurationProperties;
   private final PlatformTransactionManager transactionManager;
-  private final MessageConverter messageConverter;
+
+  @Nullable private final RabbitTemplate rpcRabbitTemplate;
+  @Nullable private final MessageConverter messageConverter;
 
   private final AuthorizationMapper authorizationMapper;
   private final EncryptionService encryptionService;
@@ -104,7 +105,42 @@ public class AuthorizationService
   private final RegisteredClientAccessibilityService registeredClientAccessibilityRepository;
   private final RegisteredClientRepository registeredClientRepository;
 
+  @Autowired
+  public AuthorizationService(
+      Environment environment,
+      SecurityConfigurationProperties securityConfigurationProperties,
+      PlatformTransactionManager transactionManager,
+      @Autowired(required = false) @Qualifier("rpcRabbitTemplate") RabbitTemplate rpcRabbitTemplate,
+      @Autowired(required = false) MessageConverter messageConverter,
+      AuthorizationMapper authorizationMapper,
+      EncryptionService encryptionService,
+      HashingService hashingService,
+      JpaConsentRepository jpaConsentRepository,
+      JpaAuthorizationRepository jpaAuthorizationRepository,
+      RegisteredClientAccessibilityService registeredClientAccessibilityRepository,
+      RegisteredClientRepository registeredClientRepository) {
+    this.environment = environment;
+    this.securityConfigurationProperties = securityConfigurationProperties;
+    this.transactionManager = transactionManager;
+    this.rpcRabbitTemplate = rpcRabbitTemplate;
+    this.messageConverter = messageConverter;
+    this.authorizationMapper = authorizationMapper;
+    this.encryptionService = encryptionService;
+    this.hashingService = hashingService;
+    this.jpaConsentRepository = jpaConsentRepository;
+    this.jpaAuthorizationRepository = jpaAuthorizationRepository;
+    this.registeredClientAccessibilityRepository = registeredClientAccessibilityRepository;
+    this.registeredClientRepository = registeredClientRepository;
+  }
+
   private void saveRemote(SaveAuthorizationMessage authorizationMessage, String targetRegion) {
+    if (rpcRabbitTemplate == null || messageConverter == null) {
+      log.warn(
+          "RabbitMQ not available, cannot save authorization to remote region: {}", targetRegion);
+      throw new AuthorizationPersistenceException(
+          "RabbitMQ not available for remote region communication");
+    }
+
     try {
       MDC.put("id", authorizationMessage.getId());
       MDC.put("registered_client_id", authorizationMessage.getRegisteredClientId());
@@ -343,6 +379,13 @@ public class AuthorizationService
    */
   private Optional<AuthorizationEntity> fetchFromRemoteRegion(
       String hashedToken, String targetRegion) {
+    if (rpcRabbitTemplate == null || messageConverter == null) {
+      log.warn(
+          "RabbitMQ not available, cannot fetch authorization from remote region: {}",
+          targetRegion);
+      return Optional.empty();
+    }
+
     try {
       MDC.put("token", hashedToken);
       MDC.put("region", targetRegion);

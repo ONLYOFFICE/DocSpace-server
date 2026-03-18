@@ -96,12 +96,11 @@ public abstract class PeopleControllerBase(
             files = new Uri(_httpContextAccessor.HttpContext.Request.GetDisplayUrl()).GetLeftPart(UriPartial.Authority) + "/" + files.TrimStart('/');
         }
 
-        var request = new HttpRequestMessage
-        {
-            RequestUri = new Uri(files)
-        };
+        using var request = new HttpRequestMessage(HttpMethod.Get, files);
 
+#pragma warning disable CA2000
         var httpClient = _httpClientFactory.CreateClient();
+#pragma warning restore CA2000
         using var response = await httpClient.SendAsync(request);
         var imageByteArray = await response.Content.ReadAsByteArrayAsync();
 

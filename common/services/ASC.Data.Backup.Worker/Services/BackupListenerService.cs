@@ -27,7 +27,7 @@
 namespace ASC.Data.Backup.Services;
 
 [Singleton]
-internal sealed class BackupListenerService(ICacheNotify<DeleteSchedule> cacheDeleteSchedule,
+public sealed class BackupListenerService(ICacheNotify<DeleteSchedule> cacheDeleteSchedule,
         IServiceScopeFactory scopeFactory)
     : IHostedService
 {

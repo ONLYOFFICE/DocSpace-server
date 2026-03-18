@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.ApiSystem.Extensions;
+
 namespace ASC.ApiSystem;
 
 public class Startup
@@ -145,9 +147,6 @@ public class Startup
         services.AddSingleton(Channel.CreateUnbounded<SocketData>());
         services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Reader);
         services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Writer);
-        services.AddScoped<AuthHandler>();
-        services.AddScoped<ApiSystemAuthHandler>();
-        services.AddScoped<ApiSystemBasicAuthHandler>();
         services.AddScoped(_ => UrlEncoder.Default);
 
         services.AddBillingHttpClient();
@@ -156,12 +155,7 @@ public class Startup
         services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Reader);
         services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Writer);
 
-        services
-            .AddAuthentication()
-            .AddScheme<AuthenticationSchemeOptions, AuthHandler>("auth:allowskip:default", _ => { })
-            .AddScheme<AuthenticationSchemeOptions, AuthHandler>("auth:allowskip:registerportal", _ => { })
-            .AddScheme<AuthenticationSchemeOptions, ApiSystemAuthHandler>("auth:portal", _ => { })
-            .AddScheme<AuthenticationSchemeOptions, ApiSystemBasicAuthHandler>("auth:portalbasic", _ => { });
+        services.AddApiSystemAuthServices();
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

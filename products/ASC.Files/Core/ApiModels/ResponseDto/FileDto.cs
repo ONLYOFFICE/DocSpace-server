@@ -181,6 +181,12 @@ public class FileDto<T> : FileEntryDto<T>
     public bool? StartFilling { get; set; }
 
     /// <summary>
+    /// Specifies if the form filling has started but the file is still being saved by the document editor. Filling and editing are not allowed.
+    /// </summary>
+    /// <example>false</example>
+    public bool? IsFillingPreparing { get; set; }
+
+    /// <summary>
     /// The InProcess folder ID of the file.
     /// </summary>
     /// <example>10</example>
@@ -270,8 +276,9 @@ public class FileDtoHelper(
     UserManager userManager,
     IUrlShortener urlShortener,
     FileSharing fileSharing,
-    AiAccessibility aiAccessibility)
-    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, fileSharing, urlShortener) 
+    AiAccessibility aiAccessibility,
+    FileTrackerHelper fileTracker)
+    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, fileSharing, urlShortener)
 {
     private readonly EmployeeDtoHelper _employeeWrapperHelper = employeeWrapperHelper;
 
@@ -510,10 +517,23 @@ public class FileDtoHelper(
             {
                 if (properties.FormFilling.StartFilling)
                 {
-                    result.Security[FileSecurity.FilesSecurityActions.FillForms] = true;
-                    result.Security[FileSecurity.FilesSecurityActions.StopFilling] = true;
+                    var isPreparing = await fileTracker.IsEditingAsync(file.Id);
+                    result.IsFillingPreparing = isPreparing;
+
                     result.Security[FileSecurity.FilesSecurityActions.StartFilling] = false;
                     result.Security[FileSecurity.FilesSecurityActions.Lock] = false;
+
+                    if (isPreparing)
+                    {
+                        result.Security[FileSecurity.FilesSecurityActions.FillForms] = false;
+                        result.Security[FileSecurity.FilesSecurityActions.Edit] = false;
+                        result.Security[FileSecurity.FilesSecurityActions.StopFilling] = false;
+                    }
+                    else
+                    {
+                        result.Security[FileSecurity.FilesSecurityActions.FillForms] = true;
+                        result.Security[FileSecurity.FilesSecurityActions.StopFilling] = true;
+                    }
                 }
                 else
                 {

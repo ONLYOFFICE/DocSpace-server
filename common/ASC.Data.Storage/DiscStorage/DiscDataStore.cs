@@ -103,7 +103,10 @@ public class DiscDataStore(
 
         if (File.Exists(target))
         {
+            // CA2000: Stream ownership transferred to caller who is responsible for disposal
+#pragma warning disable CA2000
             return withDescription ? await _crypt.GetReadStreamAsync(target) : File.OpenRead(target);
+#pragma warning restore CA2000
         }
 
         throw new FileNotFoundException("File not found", Path.GetFullPath(target));

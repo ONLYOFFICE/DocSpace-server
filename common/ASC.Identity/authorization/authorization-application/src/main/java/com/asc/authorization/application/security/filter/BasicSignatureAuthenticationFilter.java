@@ -43,8 +43,8 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.Optional;
 import java.util.regex.Pattern;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -61,8 +61,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * result in redirections with appropriate error codes.
  */
 @Slf4j
-@Component
-@RequiredArgsConstructor
+@Component("authorizationBasicSignatureAuthenticationFilter")
 public class BasicSignatureAuthenticationFilter extends OncePerRequestFilter {
   /** Pattern for matching the OAuth2 authorization endpoint. */
   private static final Pattern AUTHORIZE_PATTERN = Pattern.compile("/oauth2/authorize");
@@ -74,6 +73,18 @@ public class BasicSignatureAuthenticationFilter extends OncePerRequestFilter {
   private final SecurityUtils securityUtils;
   private final AuthenticationManager authenticationManager;
   private final SecurityConfigurationProperties securityConfigProperties;
+
+  public BasicSignatureAuthenticationFilter(
+      HttpUtils httpUtils,
+      SecurityUtils securityUtils,
+      @Qualifier("authorizationSignatureAuthenticationManager")
+          AuthenticationManager authenticationManager,
+      SecurityConfigurationProperties securityConfigProperties) {
+    this.httpUtils = httpUtils;
+    this.securityUtils = securityUtils;
+    this.authenticationManager = authenticationManager;
+    this.securityConfigProperties = securityConfigProperties;
+  }
 
   /**
    * Filters incoming requests, replacing anonymous authentication with actual authentication.

@@ -93,7 +93,7 @@ public class RadicaleClient(ILogger<RadicaleClient> logger)
             }
 
             var method = new HttpMethod(davRequest.Method);
-            var request = new HttpRequestMessage(method, davRequest.Url);
+            using var request = new HttpRequestMessage(method, davRequest.Url);
 
             if (davRequest.Data != null)
             {

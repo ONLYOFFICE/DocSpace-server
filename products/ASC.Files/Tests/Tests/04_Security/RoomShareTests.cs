@@ -919,6 +919,27 @@ public class RoomShareTests(
         response.Response.Should().Contain(r=> r.SharedToUser.Id == myguest.Id && r.Access == FileShare.Read);
     }
     
+    [Fact]
+    [Trait("Category", "Bug")]
+    [Trait("Bug", "79366")]
+    public async Task GuestWhoDoesNotBelongToMe_GetPhoto_ReturnEmpty()
+    {
+        await _filesClient.Authenticate(Initializer.Owner);
+        
+        var guest = await Initializer.InviteContact(EmployeeType.Guest);
+        var roomAdmin = await Initializer.InviteContact(EmployeeType.RoomAdmin);
+        
+        await _peopleClient.Authenticate(roomAdmin);
+        
+        var exception = await Assert.ThrowsAsync<ApiException>(async () =>  await _photosApi.GetMemberPhotoAsync(guest.Id.ToString(), cancellationToken: TestContext.Current.CancellationToken));
+        exception.ErrorCode.Should().Be(403);
+        
+        var roomAdminGuest = await Initializer.InviteContact(EmployeeType.Guest, roomAdmin);
+        var photo = (await _photosApi.GetMemberPhotoAsync(roomAdminGuest.Id.ToString(), cancellationToken: TestContext.Current.CancellationToken)).Response;
+        
+        photo.Should().NotBeNull();
+    }
+    
     [Theory]
     [MemberData(nameof(ValidRoomTypesForShare))]
     public async Task CreateInviteLinkInRoom_UseLinkByOwner_ReturnsOnlyOwner(RoomType roomType)

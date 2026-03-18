@@ -173,11 +173,8 @@ public static class DocumentService
             { FilesLinkUtility.ShardKey, documentRevisionId }
         });
 
-        var request = new HttpRequestMessage
-        {
-            RequestUri = new Uri(documentConverterUrl),
-            Method = HttpMethod.Post
-        };
+
+        using var request = new HttpRequestMessage(HttpMethod.Post, documentConverterUrl);
         request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
         var httpClient = clientFactory.CreateClient(GetHttpClientName(sslVerification));
@@ -267,11 +264,7 @@ public static class DocumentService
         }
 
         using var cancellationTokenSource = new CancellationTokenSource(commandTimeout);
-        var request = new HttpRequestMessage
-        {
-            RequestUri = new Uri(documentTrackerUrl),
-            Method = HttpMethod.Post
-        };
+        using var request = new HttpRequestMessage(HttpMethod.Post, documentTrackerUrl);
 
         var httpClient = clientFactory.CreateClient(GetHttpClientName(sslVerification));
 
@@ -377,14 +370,9 @@ public static class DocumentService
             { FilesLinkUtility.ShardKey, requestKey }
         });
 
-        var request = new HttpRequestMessage
-        {
-            RequestUri = new Uri(docbuilderUrl),
-            Method = HttpMethod.Post
-        };
-
+        using var request = new HttpRequestMessage(HttpMethod.Post, docbuilderUrl);
         var httpClient = clientFactory.CreateClient(GetHttpClientName(sslVerification));
-
+        
         var body = new BuilderBody
         {
             Async = isAsync,
@@ -452,10 +440,8 @@ public static class DocumentService
 
     private static async Task<bool> InternalHealthcheckRequestAsync(string healthcheckUrl, IHttpClientFactory clientFactory)
     {
-        var request = new HttpRequestMessage
-        {
-            RequestUri = new Uri(healthcheckUrl)
-        };
+        using var request = new HttpRequestMessage();
+        request.RequestUri = new Uri(healthcheckUrl);
 
         var httpClient = clientFactory.CreateClient("customHttpClient");
         httpClient.Timeout = TimeSpan.FromMilliseconds(Timeout);
@@ -1073,11 +1059,6 @@ public static class DocumentServiceHttpClientExtension
             }
         };
 
-        var customHttpMessageHandler = new HttpClientHandler
-        {
-            ServerCertificateCustomValidationCallback = (_, _, _, _) => true
-        };
-
         services.AddHttpClient(GetHttpClientName(sslVerification: true))
                 .SetHandlerLifetime(TimeSpan.FromMinutes(5))
                 .AddResilienceHandler(ResiliencePipelineName, builder =>
@@ -1088,7 +1069,10 @@ public static class DocumentServiceHttpClientExtension
 
         services.AddHttpClient(GetHttpClientName(sslVerification: false))
                 .SetHandlerLifetime(TimeSpan.FromMinutes(5))
-                .ConfigurePrimaryHttpMessageHandler(_ => customHttpMessageHandler)
+                .ConfigurePrimaryHttpMessageHandler(_ => new HttpClientHandler
+                {
+                    ServerCertificateCustomValidationCallback = (_, _, _, _) => true
+                })
                 .AddResilienceHandler(ResiliencePipelineName, builder =>
                 {
                     builder.AddTimeout(policyTimeout);
@@ -1096,7 +1080,10 @@ public static class DocumentServiceHttpClientExtension
                 });
 
         services.AddHttpClient(CustomSslVerificationClient)
-                .ConfigurePrimaryHttpMessageHandler(_ => customHttpMessageHandler);
+                .ConfigurePrimaryHttpMessageHandler(_ => new HttpClientHandler
+                {
+                    ServerCertificateCustomValidationCallback = (_, _, _, _) => true
+                });
 
         services.AddResiliencePipeline<string, LicenseValidationResult>(LicenseResiliencePipelineName, pipelineBuilder =>
         {

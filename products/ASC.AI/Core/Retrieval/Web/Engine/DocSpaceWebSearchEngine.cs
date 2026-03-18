@@ -48,16 +48,14 @@ public class DocSpaceWebSearchEngine(HttpClient client, DocSpaceWebSearchConfig 
             MaxTextCharacters = 3000
         };
         
-        var request = new HttpRequestMessage(HttpMethod.Post, $"{config.BaseUrl}/search")
-        {
-            Content = new StringContent(
-                JsonSerializer.Serialize(requestBody, JsonSerializerOptions.Web), 
-                Encoding.UTF8, 
-                "application/json")
-        };
-        
+        using var request = new HttpRequestMessage(HttpMethod.Post, $"{config.BaseUrl}/search");
+        request.Content = new StringContent(
+            JsonSerializer.Serialize(requestBody, JsonSerializerOptions.Web),
+            Encoding.UTF8,
+            "application/json");
+
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", config.ApiKey);
-        
+
         var response = await client.SendAsync(request, cancellationToken);
         response.EnsureSuccessStatusCode();
         
@@ -83,16 +81,14 @@ public class DocSpaceWebSearchEngine(HttpClient client, DocSpaceWebSearchConfig 
             Url = query.Url
         };
         
-        var request = new HttpRequestMessage(HttpMethod.Post, $"{config.BaseUrl}/contents")
-        {
-            Content = new StringContent(
-                JsonSerializer.Serialize(requestBody, JsonSerializerOptions.Web), 
-                Encoding.UTF8, 
-                "application/json")
-        };
-        
+        using var request = new HttpRequestMessage(HttpMethod.Post, $"{config.BaseUrl}/contents");
+        request.Content = new StringContent(
+            JsonSerializer.Serialize(requestBody, JsonSerializerOptions.Web),
+            Encoding.UTF8,
+            "application/json");
+
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", config.ApiKey);
-        
+
         var response = await client.SendAsync(request, cancellationToken);
         response.EnsureSuccessStatusCode();
         

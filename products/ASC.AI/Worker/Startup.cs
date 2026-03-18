@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.AI.Worker.Extensions;
+
 namespace ASC.AI.Worker;
 
 public class Startup : BaseWorkerStartup
@@ -31,7 +33,7 @@ public class Startup : BaseWorkerStartup
     public Startup(IConfiguration configuration, IHostEnvironment hostEnvironment)
         : base(configuration, hostEnvironment)
     {
-        if (configuration.GetSection("RabbitMQ").GetChildren().Any() && 
+        if (configuration.GetSection("RabbitMQ").GetChildren().Any() &&
             String.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
         {
             configuration["RabbitMQ:ClientProvidedName"] = Program.AppName;
@@ -41,27 +43,13 @@ public class Startup : BaseWorkerStartup
     public override async Task ConfigureServices(WebApplicationBuilder builder)
     {
         var services = builder.Services;
-        
+
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
         services.AddMemoryCache();
 
         await base.ConfigureServices(builder);
-        
-        services.AddBaseDbContextPool<AiDbContext>();
-        services.AddBaseDbContextPool<FilesDbContext>();
-        
-        services.RegisterQuotaFeature();
-        
-        services.RegisterQueue<VectorizationTask>();
 
-        services.RegisterQueue<MessageExportTask>();
-        services.RegisterQueue<ChatExportTask>();
-        services.RegisterQueue<AsyncTaskData<int>>();
-        services.RegisterQueue<AsyncTaskData<string>>();
-        services.RegisterQueue<ChatDeletionTask>();
-        
-        services.AddActivePassiveHostedService<OrphanAttachmentCleanerService>(Configuration);
-        services.AddActivePassiveHostedService<DeletedChatCleanerService>(Configuration);
+        services.AddAiWorkerServices(Configuration);
     }
 }

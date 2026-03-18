@@ -51,8 +51,8 @@ public class CreateFolderWithFilesDepthCommand : AsyncCommand<CreateFolderWithFi
     {
         var configuration = await ApiHelper.GetConfigurationAsync(settings.Email, settings.Password);
         
-        var filesApi = new FilesApi(configuration);
-        var foldersApi = new FoldersApi(configuration);
+        using var filesApi = new FilesApi(configuration);
+        using var foldersApi = new FoldersApi(configuration);
         
         var system = new Faker().System;
         var token = CancellationToken.None;

@@ -39,6 +39,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
@@ -47,6 +48,8 @@ import org.springframework.stereotype.Component;
  *
  * <p>This component handles RPC requests to fetch client information from a remote region during
  * token introspection. It is only active in the "saas" profile for multi-region deployments.
+ *
+ * <p>This listener is only loaded when RabbitMQ client classes are available on the classpath.
  */
 @Slf4j
 @Component
@@ -55,6 +58,7 @@ import org.springframework.stereotype.Component;
 @RabbitListener(
     queues = "asc_identity_client_rpc_${spring.application.region}_queue",
     containerFactory = "rabbitRpcContainerFactory")
+@ConditionalOnClass(name = "com.rabbitmq.client.Connection")
 public class ClientRegistrationMessagingRPCListener {
   private final ClientQueryRepository clientQueryRepository;
   private final ClientDataMapper clientMapper;

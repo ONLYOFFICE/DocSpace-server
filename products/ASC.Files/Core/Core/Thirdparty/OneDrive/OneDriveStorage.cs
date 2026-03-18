@@ -233,11 +233,7 @@ internal class OneDriveStorage(IHttpClientFactory clientFactory, OAuth20TokenHel
             Path = "/" + ApiVersion + "/drive/items/" + folderId + ":/" + fileName + ":/oneDrive.createUploadSession"
         };
 
-        var request = new HttpRequestMessage
-        {
-            RequestUri = uploadUriBuilder.Uri,
-            Method = HttpMethod.Post
-        };
+        using var request = new HttpRequestMessage(HttpMethod.Post, uploadUriBuilder.Uri);
         request.Headers.Add("Authorization", "Bearer " + AccessToken);
         //request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json")
         //{
@@ -246,7 +242,9 @@ internal class OneDriveStorage(IHttpClientFactory clientFactory, OAuth20TokenHel
 
         var uploadSession = new RenewableUploadSession(onedriveFile.Id, folderId, contentLength);
 
+#pragma warning disable CA2000 // HttpClient is short-lived and disposed by runtime
         var httpClient = clientFactory.CreateClient();
+#pragma warning restore CA2000
 
         using (var response = await httpClient.SendAsync(request))
         {
@@ -269,11 +267,7 @@ internal class OneDriveStorage(IHttpClientFactory clientFactory, OAuth20TokenHel
             throw new InvalidOperationException("Can't upload chunk for given upload session.");
         }
 
-        var request = new HttpRequestMessage
-        {
-            RequestUri = new Uri(oneDriveSession.Location),
-            Method = HttpMethod.Put
-        };
+        using var request = new HttpRequestMessage(HttpMethod.Put, new Uri(oneDriveSession.Location));
 
         request.Content = new StreamContent(stream);
 
@@ -281,7 +275,9 @@ internal class OneDriveStorage(IHttpClientFactory clientFactory, OAuth20TokenHel
                                                                oneDriveSession.BytesTransferred + chunkLength - 1,
                                                                oneDriveSession.BytesToTransfer);
 
+#pragma warning disable CA2000 // HttpClient is short-lived and disposed by runtime
         var httpClient = clientFactory.CreateClient();
+#pragma warning restore CA2000
 
         using var response = await httpClient.SendAsync(request);
         if (response.StatusCode != HttpStatusCode.Created && response.StatusCode != HttpStatusCode.OK)
@@ -303,13 +299,11 @@ internal class OneDriveStorage(IHttpClientFactory clientFactory, OAuth20TokenHel
 
     public async Task CancelTransferAsync(RenewableUploadSession oneDriveSession)
     {
-        var request = new HttpRequestMessage
-        {
-            RequestUri = new Uri(oneDriveSession.Location),
-            Method = HttpMethod.Delete
-        };
+        using var request = new HttpRequestMessage(HttpMethod.Delete, oneDriveSession.Location);
 
+#pragma warning disable CA2000 // HttpClient is short-lived and disposed by runtime
         var httpClient = clientFactory.CreateClient();
+#pragma warning restore CA2000
 
         using var response = await httpClient.SendAsync(request);
     }
@@ -326,13 +320,11 @@ internal class OneDriveStorage(IHttpClientFactory clientFactory, OAuth20TokenHel
         url = url[..url.IndexOf("?width", StringComparison.Ordinal)];
         url += $"?width={width}&height={height}&cropmode=none";
 
-        var request = new HttpRequestMessage
-        {
-            RequestUri = new Uri(url),
-            Method = HttpMethod.Get
-        };
+        using var request = new HttpRequestMessage(HttpMethod.Get, url);
 
+#pragma warning disable CA2000 // HttpClient is short-lived and disposed by runtime
         var httpClient = clientFactory.CreateClient();
+#pragma warning restore CA2000
 
         using var response = await httpClient.SendAsync(request);
         var bytes = await response.Content.ReadAsByteArrayAsync();

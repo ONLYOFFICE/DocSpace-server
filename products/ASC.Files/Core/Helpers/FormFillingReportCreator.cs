@@ -36,8 +36,7 @@ public class FormFillingReportCreator(
     AuthContext authContext,
     IEventBus eventBus,
     FactoryIndexerForm factoryIndexerForm,
-    FactoryIndexerFormMetadata factoryIndexerFormMetadata,
-    ILogger<FormFillingReportCreator> logger)
+    FactoryIndexerFormMetadata factoryIndexerFormMetadata)
 {
 
     public async Task UpdateFormFillingReport<T>(int originalFormId, int originalFormVersion, int roomId, int resultFormNumber, string formsDataUrl, File<T> formsDataFile, bool sendFormToExternalDB, bool settingsSaveFormAsXLSX)
@@ -63,12 +62,15 @@ public class FormFillingReportCreator(
 
     public async Task ExportToExternalDbAsync(int fileId, int originalFormId, int originalFormVersion, int resultFormNumber, string formsDataUrl)
     {
+#pragma warning disable CA2000 // HttpClient is short-lived and disposed by runtime
         var httpClient = clientFactory.CreateClient();
-        using var response = await httpClient.SendAsync(new HttpRequestMessage
+#pragma warning restore CA2000
+        using var exportRequest = new HttpRequestMessage
         {
             RequestUri = new Uri(formsDataUrl),
             Method = HttpMethod.Get
-        });
+        };
+        using var response = await httpClient.SendAsync(exportRequest);
 
         response.EnsureSuccessStatusCode();
         var data = await response.Content.ReadAsStringAsync();
@@ -170,13 +172,11 @@ public class FormFillingReportCreator(
         int resultFormNumber,
         string url)
     {
-        var request = new HttpRequestMessage
-        {
-            RequestUri = new Uri(url),
-            Method = HttpMethod.Get
-        };
+        using var request = new HttpRequestMessage(HttpMethod.Get, url);
 
+#pragma warning disable CA2000 // HttpClient is short-lived and disposed by runtime
         var httpClient = clientFactory.CreateClient();
+#pragma warning restore CA2000
         using var response = await httpClient.SendAsync(request);
         response.EnsureSuccessStatusCode();
         var data = await response.Content.ReadAsStringAsync();
@@ -336,9 +336,9 @@ public class FormFillingReportCreator(
             var name = NormalizeColumnName(field.Key);
             var (type, enumValues) = field.Type switch
             {
-                "checkBox" => (DbColumnType.Boolean, (IReadOnlyList<string>?)null),
+                "checkBox" => (DbColumnType.Boolean, (IReadOnlyList<string>)null),
                 "dateTime" => (DbColumnType.Date, null),
-                "comboBox" or "dropDownList" or "radio" => (DbColumnType.Enum, (IReadOnlyList<string>?)field.PossibleValues),
+                "comboBox" or "dropDownList" or "radio" => (DbColumnType.Enum, (IReadOnlyList<string>)field.PossibleValues),
                 _ => (DbColumnType.Text, null)
             };
             yield return new DbColumnDefinition(name, type, enumValues);
@@ -401,7 +401,7 @@ public class FormFillingReportCreator(
         return name.ToLower();
     }
 
-    private static object? ConvertFieldValue(string? value, FormMetadata meta)
+    private static object ConvertFieldValue(string value, FormMetadata meta)
     {
         if (string.IsNullOrEmpty(value))
         {
@@ -416,7 +416,7 @@ public class FormFillingReportCreator(
         };
     }
 
-    private static DateTime? ParseDate(string value, string? format)
+    private static DateTime? ParseDate(string value, string format)
     {
         if (string.IsNullOrWhiteSpace(format))
         {

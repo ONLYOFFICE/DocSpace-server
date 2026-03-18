@@ -46,8 +46,8 @@ import org.springframework.transaction.annotation.Transactional;
  * objects using a {@link ConsentMapper}.
  */
 @Slf4j
-@Service
 @RequiredArgsConstructor
+@Service("authorizationConsentService")
 public class ConsentService implements OAuth2AuthorizationConsentService {
   private final JpaConsentRepository jpaConsentRepository;
   private final ConsentMapper consentMapper;

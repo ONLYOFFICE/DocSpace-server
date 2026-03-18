@@ -46,6 +46,7 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
     private readonly string _deadLetterQueueName;
 
     private readonly Task _initializeTask;
+    private readonly SemaphoreSlim _consumeSemaphore = new(1, 1);
 
     private static ConcurrentDictionary<Guid, byte[]> _rejectedEvents;
 
@@ -240,12 +241,23 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
     {
         _logger.TraceStartingBasicConsume();
 
-        if (_consumerChannel != null)
+        if (_consumerChannel == null)
         {
-            if (!String.IsNullOrEmpty(_consumerTag))
-            {
-                _logger.TraceConsumerTagExist(_consumerTag);
+            _logger.ErrorStartBasicConsumeCantCall();
+            return;
+        }
 
+        if (!string.IsNullOrEmpty(_consumerTag))
+        {
+            _logger.TraceConsumerTagExist(_consumerTag);
+            return;
+        }
+
+        await _consumeSemaphore.WaitAsync();
+        try
+        {
+            if (!string.IsNullOrEmpty(_consumerTag))
+            {
                 return;
             }
 
@@ -258,9 +270,9 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
                 autoAck: false,
                 consumer: consumer);
         }
-        else
+        finally
         {
-            _logger.ErrorStartBasicConsumeCantCall();
+            _consumeSemaphore.Release();
         }
     }
 

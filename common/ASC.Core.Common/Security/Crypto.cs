@@ -52,7 +52,7 @@ public static class Crypto
 
     public static string GetV(string data, int keyno, bool reverse)
     {
-        var hasher = Aes.Create();
+        using var hasher = Aes.Create();
         hasher.Key = keyno == 1 ? GetSK1(false) : GetSK2(false);
         hasher.IV = new byte[hasher.BlockSize >> 3];
 
@@ -81,7 +81,7 @@ public static class Crypto
 
     internal static byte[] GetV(byte[] data, int keyno, bool reverse)
     {
-        var hasher = Aes.Create();
+        using var hasher = Aes.Create();
         hasher.Key = keyno == 1 ? GetSK1(false) : GetSK2(false);
         hasher.IV = new byte[hasher.BlockSize >> 3];
 

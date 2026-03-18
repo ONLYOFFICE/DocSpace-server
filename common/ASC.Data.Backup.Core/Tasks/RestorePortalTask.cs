@@ -409,7 +409,8 @@ public class RestorePortalTask(DbFactory dbFactory,
             return [];
         }
 
-        var restoreInfo = XElement.Load(new StreamReader(stream));
+        using var reader = new StreamReader(stream);
+        var restoreInfo = XElement.Load(reader);
 
         return restoreInfo.Elements("file").Select(BackupFileInfo.FromXElement).ToList();
     }

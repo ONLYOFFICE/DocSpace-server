@@ -1331,7 +1331,8 @@ public class TariffService(
     {
         try
         {
-            return await hybridCache.GetOrDefaultAsync<T>(key, token: new CancellationTokenSource(TimeSpan.FromSeconds(5)).Token);
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+            return await hybridCache.GetOrDefaultAsync<T>(key, token: cts.Token);
         }
         catch (Exception e)
         {

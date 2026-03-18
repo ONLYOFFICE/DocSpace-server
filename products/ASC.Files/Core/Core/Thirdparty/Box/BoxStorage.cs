@@ -140,7 +140,9 @@ internal class BoxStorage(TempStream tempStream) : IThirdPartyStorage<BoxFile, B
 
         if (offset == 0)
         {
+#pragma warning disable CA2000 // ResponseStream ownership transferred to caller
             return file.Size.HasValue ? new ResponseStream(stream, file.Size.Value) : stream;
+#pragma warning restore CA2000
         }
 
         var tempBuffer = tempStream.Create();

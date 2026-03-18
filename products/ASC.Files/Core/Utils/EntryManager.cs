@@ -1452,7 +1452,7 @@ public class EntryManager(IDaoFactory daoFactory,
             else
             {
 
-                var request = new HttpRequestMessage
+                using var request = new HttpRequestMessage
                 {
                     RequestUri = new Uri(downloadUri)
                 };

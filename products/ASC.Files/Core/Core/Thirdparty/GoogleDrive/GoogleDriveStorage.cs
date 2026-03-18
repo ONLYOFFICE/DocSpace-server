@@ -83,6 +83,7 @@ internal class GoogleDriveStorage(
             TokenType = "Bearer"
         };
 
+#pragma warning disable CA2000 // GoogleAuthorizationCodeFlow is owned by UserCredential
         var apiCodeFlow = new GoogleAuthorizationCodeFlow(new GoogleAuthorizationCodeFlow.Initializer
         {
             ClientSecrets = new ClientSecrets
@@ -92,6 +93,7 @@ internal class GoogleDriveStorage(
             },
             Scopes = [DriveService.Scope.Drive]
         });
+#pragma warning restore CA2000
 
         _driveService = new DriveService(new BaseClientService.Initializer
         {
@@ -192,15 +194,13 @@ internal class GoogleDriveStorage(
             downloadArg = $"{file.Id}/export?mimeType={HttpUtility.UrlEncode(requiredMimeType)}";
         }
 
-        var request = new HttpRequestMessage
-        {
-            RequestUri = new Uri(GoogleLoginProvider.GoogleUrlFile + downloadArg),
-            Method = HttpMethod.Get
-        };
+        using var request = new HttpRequestMessage(HttpMethod.Get, GoogleLoginProvider.GoogleUrlFile + downloadArg);
 
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AccessToken);
 
+#pragma warning disable CA2000 // HttpClient is short-lived and disposed by runtime
         var httpClient = clientFactory.CreateClient();
+#pragma warning restore CA2000
         var response = await httpClient.SendAsync(request, completionOption);
         return response;
     }
@@ -325,18 +325,16 @@ internal class GoogleDriveStorage(
             body = !string.IsNullOrEmpty(titleData + parentData) ? "{" + titleData + parentData + "}" : "";
         }
 
-        var request = new HttpRequestMessage
-        {
-            RequestUri = new Uri(GoogleLoginProvider.GoogleUrlFileUpload + fileId + "?uploadType=resumable"),
-            Method = new HttpMethod(method)
-        };
+        using var request = new HttpRequestMessage(new HttpMethod(method), GoogleLoginProvider.GoogleUrlFileUpload + fileId + "?uploadType=resumable");
 
         request.Headers.Add("X-Upload-Content-Type", MimeMapping.GetMimeMapping(driveFile.Name));
         request.Headers.Add("X-Upload-Content-Length", contentLength.ToString(CultureInfo.InvariantCulture));
         request.Headers.Add("Authorization", "Bearer " + AccessToken);
         request.Content = new StringContent(body, Encoding.UTF8, "application/json");
 
+#pragma warning disable CA2000 // HttpClient is short-lived and disposed by runtime
         var httpClient = clientFactory.CreateClient();
+#pragma warning restore CA2000
         using var response = await httpClient.SendAsync(request);
 
         if (!response.IsSuccessStatusCode)
@@ -362,11 +360,7 @@ internal class GoogleDriveStorage(
             throw new InvalidOperationException("Can't upload chunk for given upload session.");
         }
 
-        var request = new HttpRequestMessage
-        {
-            RequestUri = new Uri(googleDriveSession.Location),
-            Method = HttpMethod.Put
-        };
+        using var request = new HttpRequestMessage(HttpMethod.Put, new Uri(googleDriveSession.Location));
         request.Headers.Add("Authorization", "Bearer " + AccessToken);
         request.Content = new StreamContent(stream);
         if (googleDriveSession.BytesToTransfer > 0)
@@ -395,7 +389,9 @@ internal class GoogleDriveStorage(
                                                bytesToTransfer - 1);
             }
         }
+#pragma warning disable CA2000 // HttpClient is short-lived and disposed by runtime
         var httpClient = clientFactory.CreateClient();
+#pragma warning restore CA2000
         HttpResponseMessage response;
 
         try
@@ -408,27 +404,29 @@ internal class GoogleDriveStorage(
             throw;
         }
 
-        if (response.StatusCode != HttpStatusCode.Created && response.StatusCode != HttpStatusCode.OK)
+        using (response)
         {
-            googleDriveSession.BytesTransferred += chunkLength;
-
-            var locationHeader = response.Headers.Location;
-
-            if (locationHeader != null)
+            if (response.StatusCode != HttpStatusCode.Created && response.StatusCode != HttpStatusCode.OK)
             {
-                googleDriveSession.Location = locationHeader.ToString();
+                googleDriveSession.BytesTransferred += chunkLength;
+
+                var locationHeader = response.Headers.Location;
+
+                if (locationHeader != null)
+                {
+                    googleDriveSession.Location = locationHeader.ToString();
+                }
             }
+            else
+            {
+                googleDriveSession.BytesTransferred += chunkLength;
+                googleDriveSession.Status = RenewableUploadSessionStatus.Completed;
 
-        }
-        else
-        {
-            googleDriveSession.BytesTransferred += chunkLength;
-            googleDriveSession.Status = RenewableUploadSessionStatus.Completed;
+                var responseString = await response.Content.ReadAsStringAsync();
+                var responseJson = JObject.Parse(responseString);
 
-            var responseString = await response.Content.ReadAsStringAsync();
-            var responseJson = JObject.Parse(responseString);
-
-            googleDriveSession.FileId = responseJson.Value<string>("id");
+                googleDriveSession.FileId = responseJson.Value<string>("id");
+            }
         }
     }
 
