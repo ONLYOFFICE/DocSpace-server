@@ -55,22 +55,17 @@ public class AiSettingsStore(
     public async Task<WebSearchSettings> GetWebSearchSettingsAsync()
     {
         var webSearchSettingsRaw = await settingsManager.LoadAsync<EncryptedWebSearchSettings>();
-
-        if (webSearchSettingsRaw.Type == EngineType.None
-            && !webSearchSettingsRaw.IsConfigured
-            && await aiGateway.IsEnabledAsync())
-        {
-            return new WebSearchSettings
-            {
-                Enabled = true,
-                Type = EngineType.PortalAi
-            };
-        }
+        var type = await NormalizeSystemTypeAsync(
+            webSearchSettingsRaw.Type,
+            EngineType.None,
+            EngineType.PortalAi,
+            webSearchSettingsRaw.IsConfigured);
 
         var webSearchSettings = new WebSearchSettings 
         { 
-            Enabled = webSearchSettingsRaw.Enabled, 
-            Type = webSearchSettingsRaw.Type
+            Enabled = type != EngineType.None
+                && (webSearchSettingsRaw.Enabled || !webSearchSettingsRaw.IsConfigured),
+            Type = type
         };
 
         if (webSearchSettingsRaw.Config == null)
@@ -99,15 +94,15 @@ public class AiSettingsStore(
     public async Task<bool> IsWebSearchEnabledAsync()
     {
         var tenantId = tenantManager.GetCurrentTenantId();
-
         var webSearchSettingsRaw = await settingsManager.LoadAsync<EncryptedWebSearchSettings>(tenantId);
+        var type = await NormalizeSystemTypeAsync(
+            webSearchSettingsRaw.Type,
+            EngineType.None,
+            EngineType.PortalAi,
+            webSearchSettingsRaw.IsConfigured);
 
-        if (webSearchSettingsRaw.Enabled && webSearchSettingsRaw.Type != EngineType.None)
-        {
-            return true;
-        }
-
-        return !webSearchSettingsRaw.IsConfigured && await aiGateway.IsEnabledAsync();
+        return type != EngineType.None
+            && (webSearchSettingsRaw.Enabled || !webSearchSettingsRaw.IsConfigured);
     }
     
     public async Task SetVectorizationSettingsAsync(VectorizationSettings vectorizationSettings)
@@ -129,15 +124,11 @@ public class AiSettingsStore(
     public async Task<VectorizationSettings> GetVectorizationSettingsAsync()
     {
         var settings = await settingsManager.LoadAsync<EncryptedVectorizationSettings>();
-
-        var providerType = settings.ProviderType;
-
-        if (providerType == EmbeddingProviderType.None
-            && !settings.IsConfigured
-            && await aiGateway.IsEnabledAsync())
-        {
-            providerType = EmbeddingProviderType.PortalAi;
-        }
+        var providerType = await NormalizeSystemTypeAsync(
+            settings.ProviderType,
+            EmbeddingProviderType.None,
+            EmbeddingProviderType.PortalAi,
+            settings.IsConfigured);
 
         if (providerType is EmbeddingProviderType.None or EmbeddingProviderType.PortalAi)
         {
@@ -162,7 +153,7 @@ public class AiSettingsStore(
 
         return new VectorizationSettings
         {
-            Type = settings.ProviderType,
+            Type = providerType,
             Key = key,
             NeedReset = reset
         };
@@ -171,17 +162,30 @@ public class AiSettingsStore(
     public async Task<bool> IsVectorizationEnabledAsync()
     {
         var settings = await settingsManager.LoadAsync<EncryptedVectorizationSettings>();
-
-        if (settings.ProviderType != EmbeddingProviderType.None)
-        {
-            return true;
-        }
-
-        return !settings.IsConfigured && await aiGateway.IsEnabledAsync();
+        return await NormalizeSystemTypeAsync(
+            settings.ProviderType,
+            EmbeddingProviderType.None,
+            EmbeddingProviderType.PortalAi,
+            settings.IsConfigured) != EmbeddingProviderType.None;
     }
 
     public IReadOnlyDictionary<string, string> GetModelAliases()
     {
         return aiConfiguration.GetModelAliases();
+    }
+
+    private async Task<T> NormalizeSystemTypeAsync<T>(T type, T noneType, T systemType, bool isConfigured)
+        where T : struct, Enum
+    {
+        var gatewayEnabled = await aiGateway.IsEnabledAsync();
+
+        if (type.Equals(systemType))
+        {
+            return gatewayEnabled ? type : noneType;
+        }
+
+        return !isConfigured && type.Equals(noneType) && gatewayEnabled
+            ? systemType
+            : type;
     }
 }
