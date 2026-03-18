@@ -148,7 +148,12 @@ public class CachedAiProviderDao(
         var cached = await cache.TryGetAsync<int>(cacheKey);
         if (cached.HasValue)
         {
-            return cached.Value;
+            if (cached.Value != AiGateway.ProviderId || await gateway.IsEnabledAsync())
+            {
+                return cached.Value;
+            }
+
+            await InvalidateFirstProviderCacheAsync(tenantId);
         }
 
         var result = await providerDao.GetFirstProviderIdAsync(tenantId);

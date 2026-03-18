@@ -281,13 +281,15 @@ public class AiProviderDao(
 
     public async Task<int?> GetFirstProviderIdAsync(int tenantId)
     {
-        if (gateway.Configured)
+        if (gateway.Configured && await gateway.IsEnabledAsync())
         {
             return AiGateway.ProviderId;
         }
 
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-        return await dbContext.GetFirstProviderIdAsync(tenantId);
+
+        return await dbContext.GetFirstProviderIdAsync(tenantId)
+            ?? (gateway.Configured ? AiGateway.ProviderId : null);
     }
 
     private async Task<AiProvider> CreateGatewayProviderAsync(bool includeCredentials = false, bool force = false)
