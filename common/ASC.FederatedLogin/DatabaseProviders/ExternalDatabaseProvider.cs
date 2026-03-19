@@ -116,26 +116,26 @@ public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IVa
             return false;
         }
 
+        var dbType = DatabaseTypeEnum;
+        DbConnection connection;
+
+        if (dbType == ExternalDatabaseType.Sqlite)
+        {
+            var path = ValidateSqlitePath(SqliteFilePath, await GetSqliteBasePathAsync());
+            if (!File.Exists(path))
+            {
+                return false;
+            }
+
+            connection = CreateSqliteConnection(path);
+        }
+        else
+        {
+            connection = CreateMySqlConnection();
+        }
+
         try
         {
-            var dbType = DatabaseTypeEnum;
-            DbConnection connection;
-
-            if (dbType == ExternalDatabaseType.Sqlite)
-            {
-                var path = ValidateSqlitePath(SqliteFilePath, await GetSqliteBasePathAsync());
-                if (!File.Exists(path))
-                {
-                    return false;
-                }
-
-                connection = CreateSqliteConnection(path);
-            }
-            else
-            {
-                connection = CreateMySqlConnection();
-            }
-
             await using (connection)
             {
                 await connection.OpenAsync();
