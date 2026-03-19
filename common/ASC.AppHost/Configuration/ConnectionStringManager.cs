@@ -239,36 +239,36 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
     {
         var docspaceOwnerEmail = builder.Configuration["OWNER_EMAIL"] ?? "test@example.com";
         var coreMachineKey = builder.Configuration["core:machinekey"] ?? "test-machine-key";
-        
-        var playwrightTestsPath = Path.Combine(basePath, "test", "api");
-        
-        var parameter = builder.AddParameter("bug-id")    
+
+        var playwrightTestsPath = Path.Combine(basePath, "tests", "api-tests");
+
+        var parameter = builder.AddParameter("bug-id")
             .WithCustomInput(p => new()
             {
                 InputType = InputType.Text,
                 Name = p.Name,
-                Placeholder = "-- grep \"BUG ${id}\"",
+                Placeholder = "\"BUG ${id}\"",
                 EnableDescriptionMarkdown = p.EnableDescriptionMarkdown,
-                Value = "--"
+                Value = "\"BUG ${id}\""
             });
-        
+
         ApiTestResource = builder.AddJavaScriptApp("playwright-tests", playwrightTestsPath, "test")
-            .WithArgs(parameter)
             .WithNpm()
+            .WithArgs("--", "--grep", parameter)
             .WithEnvironment("MACHINEKEY", coreMachineKey)
             .WithEnvironment("PKEY", "PKEY")
             .WithEnvironment("LOCAL_PORTAL_DOMAIN", $"localhost:{Constants.AppHostPort.ToString()}")
             .WithEnvironment("DOCSPACE_OWNER_EMAIL", docspaceOwnerEmail)
             .WithExplicitStart();
-        
+
         _parameters = new Dictionary<string, string>()
-        { 
+        {
             { "web:autotest:secret-email", docspaceOwnerEmail },
             { "core:machinekey", coreMachineKey },
             { "auth:allowskip:default", true.ToString() },
             { "auth:allowskip:registerportal", true.ToString() }
         };
-        
+
         return this;
     }
 
@@ -306,7 +306,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         {
             resourceBuilder.WaitFor(OpensearchResource);
         }
-        
+
         if (includeMailPit && MailResource != null)
         {
             resourceBuilder.WaitFor(MailResource);
@@ -380,7 +380,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
                 .WithEnvironment("elastic:Port", () => Constants.OpensearchPort.ToString())
                 .WithEnvironment("elastic:Threads", () => "1");
         }
-        
+
         if (_parameters != null)
         {
             foreach (var parameter in _parameters)
