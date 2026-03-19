@@ -59,7 +59,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         ValidateTableName(tableName);
         var provider = Provider;
         var dbType = provider.DatabaseTypeEnum;
-        await using var connection = provider.CreateConnection();
+        await using var connection = await provider.CreateConnectionAsync(dbType);
         await connection.OpenAsync();
         await SetupSqliteAsync(connection, dbType);
 
@@ -122,7 +122,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         ValidateTableName(tableName);
         var provider = Provider;
         var dbType = provider.DatabaseTypeEnum;
-        await using var connection = provider.CreateConnection();
+        await using var connection = await provider.CreateConnectionAsync(dbType);
         await connection.OpenAsync();
         await SetupSqliteAsync(connection, dbType);
 
@@ -147,7 +147,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         ValidateTableName(tableName);
         var provider = Provider;
         var dbType = provider.DatabaseTypeEnum;
-        await using var connection = provider.CreateConnection();
+        await using var connection = await provider.CreateConnectionAsync(dbType);
         await connection.OpenAsync();
         await SetupSqliteAsync(connection, dbType);
 
@@ -259,7 +259,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         var pageOffset = Math.Max(0, offset);
         sql.Append($" LIMIT {pageSize} OFFSET {pageOffset}");
 
-        await using var connection = provider.CreateConnection();
+        await using var connection = await provider.CreateConnectionAsync(dbType);
         await connection.OpenAsync();
         await SetupSqliteAsync(connection, dbType);
 
@@ -307,7 +307,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
 
         var provider = Provider;
         var dbType = provider.DatabaseTypeEnum;
-        await using var connection = provider.CreateConnection();
+        await using var connection = await provider.CreateConnectionAsync(dbType);
         await connection.OpenAsync();
         await SetupSqliteAsync(connection, dbType);
 
@@ -372,7 +372,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
             }
             var provider = Provider;
             var dbType = provider.DatabaseTypeEnum;
-            await using var connection = provider.CreateConnection();
+            await using var connection = await provider.CreateConnectionAsync(dbType);
             await connection.OpenAsync();
             await SetupSqliteAsync(connection, dbType);
 

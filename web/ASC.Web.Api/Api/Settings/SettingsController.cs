@@ -44,6 +44,7 @@ public partial class SettingsController(
     CoreBaseSettings coreBaseSettings,
     CommonLinkUtility commonLinkUtility,
     IConfiguration configuration,
+    StorageFactory storageFactory,
     SetupInfo setupInfo,
     ExternalResourceSettings externalResourceSettings,
     ExternalResourceSettingsHelper externalResourceSettingsHelper,
@@ -1159,7 +1160,7 @@ public partial class SettingsController(
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        return await ExternalDatabaseProvider.TestConnectionAsync(inDto, configuration);
+        return await ExternalDatabaseProvider.TestConnectionAsync(inDto, storageFactory, tenantManager.GetCurrentTenantId());
     }
 
     /// <remarks>

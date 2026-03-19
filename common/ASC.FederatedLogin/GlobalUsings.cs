@@ -49,6 +49,8 @@ global using ASC.Core.Common.EF.Context;
 global using ASC.Core.Common.EF.Model;
 global using ASC.Core.Common.Notify;
 global using ASC.Core.Common.Notify.Telegram;
+global using ASC.Data.Storage;
+global using ASC.Data.Storage.DiscStorage;
 global using ASC.FederatedLogin;
 global using ASC.FederatedLogin.Helpers;
 global using ASC.FederatedLogin.LoginProviders;

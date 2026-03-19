@@ -37,6 +37,10 @@ namespace ASC.FederatedLogin.DatabaseProviders;
 [Scope]
 public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IValidateKeysProvider, IConsumerKeyMetadataProvider
 {
+    private StorageFactory? _storageFactory;
+
+    private const string ExternalDbModule = "externaldb";
+
     public string DatabaseType => this["databaseType"] ?? "mysql";
 
     public ExternalDatabaseType DatabaseTypeEnum =>
@@ -90,6 +94,7 @@ public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IVa
         IConfiguration configuration,
         ICacheNotify<ConsumerCacheItem> cache,
         ConsumerFactory consumerFactory,
+        StorageFactory storageFactory,
         string name,
         int order,
         bool paid,
@@ -98,7 +103,9 @@ public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IVa
         : base(tenantManager, coreBaseSettings, coreSettings,
               configuration, cache, consumerFactory,
               name, order, paid, props, additional)
-    { }
+    {
+        _storageFactory = storageFactory;
+    }
     public Task<bool> ValidateKeysAsync()
         => ValidateConnectionAsync();
 
@@ -109,20 +116,31 @@ public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IVa
             return false;
         }
 
-        if (DatabaseTypeEnum == ExternalDatabaseType.Sqlite)
-        {
-            var path = ValidateSqlitePath(SqliteFilePath, Configuration);
-            if (!File.Exists(path))
-            {
-                return false;
-            }
-        }
-
         try
         {
-            await using var connection = CreateConnection();
-            await connection.OpenAsync();
-            return connection.State == ConnectionState.Open;
+            var dbType = DatabaseTypeEnum;
+            DbConnection connection;
+
+            if (dbType == ExternalDatabaseType.Sqlite)
+            {
+                var path = ValidateSqlitePath(SqliteFilePath, await GetSqliteBasePathAsync());
+                if (!File.Exists(path))
+                {
+                    return false;
+                }
+
+                connection = CreateSqliteConnection(path);
+            }
+            else
+            {
+                connection = CreateMySqlConnection();
+            }
+
+            await using (connection)
+            {
+                await connection.OpenAsync();
+                return connection.State == ConnectionState.Open;
+            }
         }
         catch
         {
@@ -133,21 +151,35 @@ public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IVa
     public Task<bool> TestConnectionAsync()
         => ValidateConnectionAsync();
 
-    public static async Task<ConnectionTestResult> TestConnectionAsync(ExternalDatabaseSettings settings, IConfiguration configuration)
+    public static async Task<ConnectionTestResult> TestConnectionAsync(ExternalDatabaseSettings settings, StorageFactory storageFactory, int tenantId)
     {
         try
         {
-            if (settings.DatabaseTypeEnum == ExternalDatabaseType.Sqlite &&
-                !File.Exists(ValidateSqlitePath(settings.SqliteFilePath, configuration)))
+            DbConnection connection;
+
+            if (settings.DatabaseTypeEnum == ExternalDatabaseType.Sqlite)
             {
-                return ConnectionTestResult.Failure("SQLite file not found.");
+                var basePath = await GetSqliteBasePathAsync(storageFactory, tenantId);
+                var path = ValidateSqlitePath(settings.SqliteFilePath, basePath);
+                if (!File.Exists(path))
+                {
+                    return ConnectionTestResult.Failure("SQLite file not found.");
+                }
+
+                connection = CreateSqliteConnection(path);
+            }
+            else
+            {
+                connection = CreateMySqlConnection(settings);
             }
 
-            await using var connection = CreateConnection(settings, configuration);
-            await connection.OpenAsync();
-            return connection.State == ConnectionState.Open
-                ? ConnectionTestResult.Ok()
-                : ConnectionTestResult.Failure("Connection did not open.");
+            await using (connection)
+            {
+                await connection.OpenAsync();
+                return connection.State == ConnectionState.Open
+                    ? ConnectionTestResult.Ok()
+                    : ConnectionTestResult.Failure("Connection did not open.");
+            }
         }
         catch (Exception ex)
         {
@@ -170,46 +202,46 @@ public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IVa
         };
     }
 
-    public DbConnection CreateConnection()
+    public Task<DbConnection> CreateConnectionAsync() => CreateConnectionAsync(DatabaseTypeEnum);
+
+    public async Task<DbConnection> CreateConnectionAsync(ExternalDatabaseType dbType)
     {
-        return DatabaseTypeEnum switch
+        return dbType switch
         {
             ExternalDatabaseType.MySql => CreateMySqlConnection(),
-            ExternalDatabaseType.Sqlite => CreateSqliteConnection(ValidateSqlitePath(SqliteFilePath, Configuration)),
+            ExternalDatabaseType.Sqlite => CreateSqliteConnection(ValidateSqlitePath(SqliteFilePath, await GetSqliteBasePathAsync())),
             _ => throw new NotSupportedException($"Database type '{DatabaseType}' is not supported yet.")
         };
     }
 
-    public static DbConnection CreateConnection(ExternalDatabaseSettings settings, IConfiguration configuration)
+    private async Task<string> GetSqliteBasePathAsync()
     {
-        return settings.DatabaseTypeEnum switch
-        {
-            ExternalDatabaseType.MySql => CreateMySqlConnection(settings),
-            ExternalDatabaseType.Sqlite => CreateSqliteConnection(ValidateSqlitePath(settings.SqliteFilePath, configuration)),
-            _ => throw new NotSupportedException($"Database type '{settings.DatabaseType}' is not supported yet.")
-        };
+        var tenantId = TenantManager.GetCurrentTenantId();
+        return await GetSqliteBasePathAsync(_storageFactory!, tenantId);
     }
 
-    private static string ValidateSqlitePath(string fileName, IConfiguration configuration)
+    private static async Task<string> GetSqliteBasePathAsync(StorageFactory storageFactory, int tenantId)
+    {
+        var store = (DiscDataStore)await storageFactory.GetStorageAsync(tenantId, ExternalDbModule, controller: null);
+        var basePath = store.GetPhysicalPath("", "");
+        Directory.CreateDirectory(basePath);
+        return basePath;
+    }
+
+    private static string ValidateSqlitePath(string fileName, string basePath)
     {
         if (string.IsNullOrWhiteSpace(fileName))
         {
             throw new ArgumentException("SQLite file name is not configured.");
         }
 
-        var storageRoot = configuration["$STORAGE_ROOT"];
-        if (string.IsNullOrWhiteSpace(storageRoot))
-        {
-            throw new InvalidOperationException("$STORAGE_ROOT is not configured.");
-        }
+        var fullPath = Path.GetFullPath(Path.Combine(basePath, fileName));
+        var normalizedBase = Path.TrimEndingDirectorySeparator(Path.GetFullPath(basePath));
 
-        var fullPath = Path.GetFullPath(Path.Combine(storageRoot, fileName));
-        var normalizedRoot = Path.GetFullPath(storageRoot);
-
-        if (!fullPath.StartsWith(normalizedRoot + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)
-            && !fullPath.Equals(normalizedRoot, StringComparison.OrdinalIgnoreCase))
+        if (!fullPath.StartsWith(normalizedBase + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)
+            && !fullPath.Equals(normalizedBase, StringComparison.OrdinalIgnoreCase))
         {
-            throw new UnauthorizedAccessException("SQLite path is outside the storage root.");
+            throw new UnauthorizedAccessException("SQLite path is outside the allowed directory.");
         }
 
         return fullPath;
