@@ -234,42 +234,35 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         return this;
     }
 
-    [Experimental("ASPIREINTERACTION001")]
-    public ConnectionStringManager AddApiTest()
+    public void AddApiTest()
     {
         var docspaceOwnerEmail = builder.Configuration["OWNER_EMAIL"] ?? "test@example.com";
         var coreMachineKey = builder.Configuration["core:machinekey"] ?? "test-machine-key";
 
         var playwrightTestsPath = Path.Combine(basePath, "tests", "api-tests");
 
-        var parameter = builder.AddParameter("bug-id")
-            .WithCustomInput(p => new()
-            {
-                InputType = InputType.Text,
-                Name = p.Name,
-                Placeholder = "\"BUG ${id}\"",
-                EnableDescriptionMarkdown = p.EnableDescriptionMarkdown,
-                Value = "\"BUG ${id}\""
-            });
-
-        ApiTestResource = builder.AddJavaScriptApp("playwright-tests", playwrightTestsPath, "test")
+        ApiTestResource = builder
+            .AddJavaScriptApp("playwright-tests", playwrightTestsPath, "test")
             .WithNpm()
-            .WithArgs("--", "--grep", parameter)
             .WithEnvironment("MACHINEKEY", coreMachineKey)
             .WithEnvironment("PKEY", "PKEY")
             .WithEnvironment("LOCAL_PORTAL_DOMAIN", $"localhost:{Constants.AppHostPort.ToString()}")
             .WithEnvironment("DOCSPACE_OWNER_EMAIL", docspaceOwnerEmail)
             .WithExplicitStart();
 
-        _parameters = new Dictionary<string, string>()
+        var bugId =  builder.Configuration["BUG_ID"];
+        if (!string.IsNullOrEmpty(bugId))
+        {
+            ApiTestResource.WithArgs("--", "--grep", $"BUG {bugId}");
+        }
+
+        _parameters = new Dictionary<string, string>
         {
             { "web:autotest:secret-email", docspaceOwnerEmail },
             { "core:machinekey", coreMachineKey },
             { "auth:allowskip:default", true.ToString() },
             { "auth:allowskip:registerportal", true.ToString() }
         };
-
-        return this;
     }
 
     public void AddWaitFor<T>(
