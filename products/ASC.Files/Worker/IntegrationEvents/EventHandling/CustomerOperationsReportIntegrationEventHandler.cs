@@ -64,6 +64,7 @@ public class CustomerOperationsReportIntegrationEventHandler(
                 var data = new CustomerOperationsReportTaskData(
                     @event.Headers,
                     @event.ServiceName,
+                    @event.WriteOffServiceQuota,
                     @event.StartDate,
                     @event.EndDate,
                     @event.ParticipantName,

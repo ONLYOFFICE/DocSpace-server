@@ -55,9 +55,9 @@ public class CachedAiProviderDao(
         return result;
     }
 
-    public Task<AiProvider?> GetProviderAsync(int tenantId, int id)
+    public Task<AiProvider?> GetProviderAsync(int tenantId, int id, bool forceSystemProvider = false)
     {
-        return providerDao.GetProviderAsync(tenantId, id);
+        return providerDao.GetProviderAsync(tenantId, id, forceSystemProvider);
     }
 
     public IAsyncEnumerable<AiProvider> GetProvidersAsync(int tenantId, int offset, int limit)
@@ -148,7 +148,12 @@ public class CachedAiProviderDao(
         var cached = await cache.TryGetAsync<int>(cacheKey);
         if (cached.HasValue)
         {
-            return cached.Value;
+            if (cached.Value != AiGateway.ProviderId || await gateway.IsEnabledAsync())
+            {
+                return cached.Value;
+            }
+
+            await InvalidateFirstProviderCacheAsync(tenantId);
         }
 
         var result = await providerDao.GetFirstProviderIdAsync(tenantId);

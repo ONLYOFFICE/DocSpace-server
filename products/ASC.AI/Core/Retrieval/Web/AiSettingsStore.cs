@@ -31,14 +31,16 @@ public class AiSettingsStore(
     SettingsManager settingsManager,
     InstanceCrypto instanceCrypto,
     TenantManager tenantManager,
-    AiConfiguration aiConfiguration)
+    AiConfiguration aiConfiguration,
+    AiGateway aiGateway)
 {
     public async Task SetWebSearchSettingsAsync(WebSearchSettings webSearchSettings)
     {
         var encryptedSettings = new EncryptedWebSearchSettings
         {
-            Enabled = webSearchSettings.Enabled, 
-            Type = webSearchSettings.Type
+            Enabled = webSearchSettings.Enabled,
+            Type = webSearchSettings.Type,
+            IsConfigured = true
         };
 
         if (webSearchSettings.Config != null)
@@ -53,11 +55,17 @@ public class AiSettingsStore(
     public async Task<WebSearchSettings> GetWebSearchSettingsAsync()
     {
         var webSearchSettingsRaw = await settingsManager.LoadAsync<EncryptedWebSearchSettings>();
+        var type = await NormalizeSystemTypeAsync(
+            webSearchSettingsRaw.Type,
+            EngineType.None,
+            EngineType.PortalAi,
+            webSearchSettingsRaw.IsConfigured);
 
-        var webSearchSettings = new WebSearchSettings
-        {
-            Enabled = webSearchSettingsRaw.Enabled, 
-            Type = webSearchSettingsRaw.Type
+        var webSearchSettings = new WebSearchSettings 
+        { 
+            Enabled = type != EngineType.None
+                && (webSearchSettingsRaw.Enabled || !webSearchSettingsRaw.IsConfigured),
+            Type = type
         };
 
         if (webSearchSettingsRaw.Config == null)
@@ -86,20 +94,26 @@ public class AiSettingsStore(
     public async Task<bool> IsWebSearchEnabledAsync()
     {
         var tenantId = tenantManager.GetCurrentTenantId();
-        
         var webSearchSettingsRaw = await settingsManager.LoadAsync<EncryptedWebSearchSettings>(tenantId);
-        
-        return webSearchSettingsRaw.Enabled && webSearchSettingsRaw.Type != EngineType.None;
+        var type = await NormalizeSystemTypeAsync(
+            webSearchSettingsRaw.Type,
+            EngineType.None,
+            EngineType.PortalAi,
+            webSearchSettingsRaw.IsConfigured);
+
+        return type != EngineType.None
+            && (webSearchSettingsRaw.Enabled || !webSearchSettingsRaw.IsConfigured);
     }
     
     public async Task SetVectorizationSettingsAsync(VectorizationSettings vectorizationSettings)
     {
         var settings = new EncryptedVectorizationSettings
         {
-            ProviderType = vectorizationSettings.Type
+            ProviderType = vectorizationSettings.Type,
+            IsConfigured = true
         };
 
-        if (vectorizationSettings.Type != EmbeddingProviderType.None)
+        if (vectorizationSettings.Type is not EmbeddingProviderType.None and not EmbeddingProviderType.PortalAi)
         {
             settings.Key = await instanceCrypto.EncryptAsync(vectorizationSettings.Key);
         }
@@ -110,12 +124,18 @@ public class AiSettingsStore(
     public async Task<VectorizationSettings> GetVectorizationSettingsAsync()
     {
         var settings = await settingsManager.LoadAsync<EncryptedVectorizationSettings>();
-        if (settings.ProviderType == EmbeddingProviderType.None)
+        var providerType = await NormalizeSystemTypeAsync(
+            settings.ProviderType,
+            EmbeddingProviderType.None,
+            EmbeddingProviderType.PortalAi,
+            settings.IsConfigured);
+
+        if (providerType is EmbeddingProviderType.None or EmbeddingProviderType.PortalAi)
         {
-            return new VectorizationSettings {
-                
-                Type = settings.ProviderType, 
-                Key = null 
+            return new VectorizationSettings
+            {
+                Type = providerType,
+                Key = null
             };
         }
 
@@ -133,7 +153,7 @@ public class AiSettingsStore(
 
         return new VectorizationSettings
         {
-            Type = settings.ProviderType,
+            Type = providerType,
             Key = key,
             NeedReset = reset
         };
@@ -142,11 +162,30 @@ public class AiSettingsStore(
     public async Task<bool> IsVectorizationEnabledAsync()
     {
         var settings = await settingsManager.LoadAsync<EncryptedVectorizationSettings>();
-        return settings.ProviderType != EmbeddingProviderType.None;
+        return await NormalizeSystemTypeAsync(
+            settings.ProviderType,
+            EmbeddingProviderType.None,
+            EmbeddingProviderType.PortalAi,
+            settings.IsConfigured) != EmbeddingProviderType.None;
     }
 
     public IReadOnlyDictionary<string, string> GetModelAliases()
     {
         return aiConfiguration.GetModelAliases();
+    }
+
+    private async Task<T> NormalizeSystemTypeAsync<T>(T type, T noneType, T systemType, bool isConfigured)
+        where T : struct, Enum
+    {
+        var gatewayEnabled = await aiGateway.IsEnabledAsync();
+
+        if (type.Equals(systemType))
+        {
+            return gatewayEnabled ? type : noneType;
+        }
+
+        return !isConfigured && type.Equals(noneType) && gatewayEnabled
+            ? systemType
+            : type;
     }
 }

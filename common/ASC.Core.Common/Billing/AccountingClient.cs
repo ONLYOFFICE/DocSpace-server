@@ -218,9 +218,14 @@ public class AccountingClient
             queryParams.Add("orderType", filter.OrderType.Value.ToString());
         }
 
-        var path = string.IsNullOrEmpty(filter.ServiceName)
-            ? $"/customer/{portalId}/operations"
-            : $"/customer/{portalId}/quota-detail/{filter.ServiceName}";
+        if (!string.IsNullOrEmpty(filter.ServiceName))
+        {
+            queryParams.Add("serviceName", filter.ServiceName);
+        }
+
+        var path = filter.WriteOffServiceQuota && !string.IsNullOrEmpty(filter.ServiceName)
+            ? $"/customer/{portalId}/quota-detail/{filter.ServiceName}"
+            : $"/customer/{portalId}/operations";
 
         return await RequestAsync<Report>(HttpMethod.Get, path, queryParams);
     }
@@ -297,7 +302,10 @@ public class AccountingClient
 
             foreach (string key in queryParams)
             {
-                query[key] = queryParams[key];
+                foreach (var value in queryParams.GetValues(key) ?? [])
+                {
+                    query.Add(key, value);
+                }
             }
 
             uriBuilder.Query = query.ToString();
@@ -477,6 +485,10 @@ public class OperationFilter
     /// </summary>
     public string ServiceName { get; set; }
     /// <summary>
+    /// Write-off of the quota for the service
+    /// </summary>
+    public bool WriteOffServiceQuota { get; set; }
+    /// <summary>
     /// The start date of the period to filter operations from (inclusive).
     /// </summary>
     public DateTime? UtcStartDate { get; init; }
@@ -566,7 +578,7 @@ public class Balance
     /// <summary>
     /// The account name.
     /// </summary>
-    /// <example>aitools</example>
+    /// <example>account name</example>
     public string AccountName { get; init; }
     /// <summary>
     /// The account currency.
@@ -664,7 +676,7 @@ public class Session
 }
 
 /// <summary>
-/// Represents a service information.
+/// Represents service information.
 /// </summary>
 public class ServiceInfo
 {
