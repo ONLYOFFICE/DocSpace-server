@@ -26,7 +26,6 @@
 
 using System.Text.Encodings.Web;
 
-using ASC.EventBus.Abstractions;
 using ASC.Web.Studio.IntegrationEvents;
 
 namespace ASC.Studio.Notify.Extensions;

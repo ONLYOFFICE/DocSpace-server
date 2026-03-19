@@ -27,7 +27,7 @@
 namespace ASC.Core.Caching;
 
 [Scope(typeof(IQuotaService))]
-class CachedQuotaService() : IQuotaService
+internal class CachedQuotaService() : IQuotaService
 {
     private readonly DbQuotaService _service;
     private readonly IFusionCache _cache;

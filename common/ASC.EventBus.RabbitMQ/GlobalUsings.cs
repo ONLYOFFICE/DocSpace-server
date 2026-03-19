@@ -34,8 +34,6 @@ global using ASC.EventBus.Extensions;
 global using ASC.EventBus.RabbitMQ.Log;
 global using ASC.EventBus.Serializers;
 
-global using Autofac;
-
 global using Microsoft.Extensions.Logging;
 
 global using Polly;

@@ -35,7 +35,7 @@ public record DataStorageEncryptionIntegrationEvent : IntegrationEvent
     }
 
     public DataStorageEncryptionIntegrationEvent(EncryptionSettings encryptionSettings,
-                                                     String serverRootPath,
+                                                     string serverRootPath,
                                                      Guid createBy,
                                                      int tenantId) : base(createBy, tenantId)
     {

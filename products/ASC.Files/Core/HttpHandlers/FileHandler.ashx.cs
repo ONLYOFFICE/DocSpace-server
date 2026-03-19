@@ -163,7 +163,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             return;
         }
 
-        if (String.IsNullOrEmpty(filename))
+        if (string.IsNullOrEmpty(filename))
         {
             var ext = await compressToArchive.GetExt(context.Request.Query["ext"]);
             filename = FileConstant.DownloadTitle + ext;

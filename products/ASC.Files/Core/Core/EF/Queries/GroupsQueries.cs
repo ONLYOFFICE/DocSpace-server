@@ -54,7 +54,7 @@ public partial class FilesDbContext
 
 }
 
-static partial class GroupsQueries
+internal static partial class GroupsQueries
 {
     public static readonly Func<FilesDbContext, int, int, Task<DbFilesGroup>> GroupForUpdateAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

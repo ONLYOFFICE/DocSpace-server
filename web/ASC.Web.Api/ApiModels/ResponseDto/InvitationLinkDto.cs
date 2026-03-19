@@ -92,7 +92,7 @@ public class InvitationLinkDtoHelper(
             return default;
         }
 
-        var result = new InvitationLinkDto()
+        var result = new InvitationLinkDto
         {
             Id = source.Id,
             EmployeeType = source.EmployeeType,

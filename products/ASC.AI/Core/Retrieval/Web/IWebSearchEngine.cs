@@ -28,7 +28,7 @@ namespace ASC.AI.Core.Retrieval.Web;
 
 public interface IWebSearchEngine
 {
-    public Task<IEnumerable<WebSearchResult>> SearchAsync(SearchQuery query, CancellationToken cancellationToken = default);
+    Task<IEnumerable<WebSearchResult>> SearchAsync(SearchQuery query, CancellationToken cancellationToken = default);
 
-    public Task<WebSearchResult?> GetPageContentAsync(PageContentQuery query, CancellationToken cancellationToken = default);
+    Task<WebSearchResult?> GetPageContentAsync(PageContentQuery query, CancellationToken cancellationToken = default);
 }

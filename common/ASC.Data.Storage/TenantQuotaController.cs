@@ -182,7 +182,7 @@ public class TenantQuotaController(TenantManager tenantManager, AuthContext auth
     public enum QuotaCheckResult
     {
         Ok,
-        QuotaExceeded,
+        QuotaExceeded
     }
     private async Task SetTenantQuotaRowAsync(string module, string domain, long size, string dataTag, bool exchange, Guid userId)
     {

@@ -31,7 +31,7 @@ public class EasyBibHelper : Consumer
 {
     public ILogger Logger { get; set; }
 
-    static readonly string _searchBookUrl = "https://worldcat.citation-api.com/query?search=",
+    private static readonly string _searchBookUrl = "https://worldcat.citation-api.com/query?search=",
                     _searchJournalUrl = "https://crossref.citation-api.com/query?search=",
                     _searchWebSiteUrl = "https://web.citation-api.com/query?search=",
                     _easyBibStyles = "https://api.citation-api.com/2.1/rest/styles";

@@ -28,7 +28,7 @@ using Constants = ASC.Core.Configuration.Constants;
 
 namespace ASC.Core.Notify;
 
-class TelegramSenderSink(INotifySender sender) : Sink
+internal class TelegramSenderSink(INotifySender sender) : Sink
 {
     private readonly string _senderName = Constants.NotifyTelegramSenderSysName;
     private readonly INotifySender _sender = sender ?? throw new ArgumentNullException(nameof(sender));

@@ -26,7 +26,7 @@
 
 namespace ASC.Core.Notify;
 
-class DirectSubscriptionProvider : ISubscriptionProvider
+internal class DirectSubscriptionProvider : ISubscriptionProvider
 {
     private readonly IRecipientProvider _recipientProvider;
     private readonly SubscriptionManager _subscriptionManager;

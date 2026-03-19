@@ -145,7 +145,7 @@ public class EditHistory(ILogger<EditHistory> logger,
 /// <summary>
 /// The data list of the file changes.
 /// </summary>
-class ChangesDataList
+internal class ChangesDataList
 {
     /// <summary>
     /// The current server version number.
@@ -161,7 +161,7 @@ class ChangesDataList
 /// <summary>
 /// The data item of the file changes.
 /// </summary>
-class ChangesData
+internal class ChangesData
 {
     /// <summary>
     /// The date when the file change was created.
@@ -182,7 +182,7 @@ class ChangesData
 /// <summary>
 /// The parameters of the user who changed the file.
 /// </summary>
-class ChangesUserData
+internal class ChangesUserData
 {
     /// <summary>
     /// The user ID.

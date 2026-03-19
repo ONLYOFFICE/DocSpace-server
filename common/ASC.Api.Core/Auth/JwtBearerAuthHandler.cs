@@ -109,7 +109,7 @@ public class JwtBearerAuthHandler(
 
         var subject = validatedToken.Subject;
 
-        if (String.IsNullOrEmpty(subject) || !Guid.TryParse(subject, out var userId))
+        if (string.IsNullOrEmpty(subject) || !Guid.TryParse(subject, out var userId))
         {
             throw new AuthenticationException("Claim 'sub' is not present in JWT");
         }
