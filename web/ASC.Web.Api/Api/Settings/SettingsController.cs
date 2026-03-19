@@ -1160,6 +1160,11 @@ public partial class SettingsController(
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
+        if (inDto.DatabaseTypeEnum == ExternalDatabaseType.Sqlite && !coreBaseSettings.Standalone)
+        {
+            return ConnectionTestResult.Failure(Resource.ConsumersExternalDbSqliteStandaloneOnly);
+        }
+
         return await ExternalDatabaseProvider.TestConnectionAsync(inDto, storageFactory, tenantManager.GetCurrentTenantId());
     }
 

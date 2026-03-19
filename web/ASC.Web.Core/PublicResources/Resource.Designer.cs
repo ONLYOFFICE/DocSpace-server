@@ -797,6 +797,14 @@ namespace ASC.Web.Core.PublicResources {
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to SQLite is only available in Standalone installations..
+        /// </summary>
+        public static string ConsumersExternalDbSqliteStandaloneOnly {
+            get {
+                return ResourceManager.GetString("ConsumersExternalDbSqliteStandaloneOnly", resourceCulture);
+            }
+        }
+        /// <summary>
         ///   Looks up a localized string similar to Host.
         /// </summary>
         public static string ConsumersdbHost {
