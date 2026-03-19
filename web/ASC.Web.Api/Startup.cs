@@ -24,9 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Data.Backup.Core.Quota;
-
-using Microsoft.Extensions.DependencyInjection.Extensions;
+using ASC.Web.Api.Extensions;
 
 namespace ASC.Web.Api;
 
@@ -34,8 +32,8 @@ public class Startup : BaseStartup
 {
     public Startup(IConfiguration configuration) : base(configuration)
     {
-        if (configuration.GetSection("RabbitMQ").GetChildren().Any() && 
-            String.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
+        if (configuration.GetSection("RabbitMQ").GetChildren().Any() &&
+            string.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
         {
             configuration["RabbitMQ:ClientProvidedName"] = Program.AppName;
         }
@@ -45,64 +43,13 @@ public class Startup : BaseStartup
     {
         await base.ConfigureServices(builder);
 
-        var services = builder.Services;
-        if (!_configuration.GetValue<bool>("disableLdapNotifyService"))
-        {
-            services.AddHostedService<LdapNotifyService>();
-        }
-
-        services.AddBaseDbContextPool<FilesDbContext>();
-        services.AddBaseDbContextPool<BackupsContext>();
-        services.RegisterQuotaFeature();
-        services.RegisterFreeBackupQuotaFeature();
-        services.RegisterQueue<LdapOperationJob>();
-        services.RegisterQueue<SmtpJob>();
-        services.RegisterQueue<UsersQuotaSyncJob>();
-
-        services.AddStartupTask<CspStartupTask>()
-                   .TryAddSingleton(services);
-
-        services.AddActivePassiveHostedService<NotifySchedulerService>(_configuration, "WebApiNotifySchedulerService");
-        services.AddDocumentServiceHttpClient(_configuration);
+        builder.Services.AddWebApiServices(_configuration);
     }
 
     public override void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
         base.Configure(app, env);
 
-        app.MapWhen(
-            context => context.Request.Path.ToString().EndsWith("logoUploader.ashx"),
-            appBranch =>
-            {
-                appBranch.UseLogoUploader();
-            });
-
-        app.MapWhen(
-            context => context.Request.Path.ToString().EndsWith("logo.ashx"),
-            appBranch =>
-            {
-                appBranch.UseLogoHandler();
-            });
-
-        app.MapWhen(
-            context => context.Request.Path.ToString().EndsWith("payment.ashx"),
-            appBranch =>
-            {
-                appBranch.UseAccountHandler();
-            });
-
-        app.MapWhen(
-            context => context.Request.Path.ToString().StartsWith(UrlShortRewriter.BasePath),
-            appBranch =>
-            {
-                appBranch.UseUrlShortRewriter();
-            });
-
-        app.MapWhen(
-            context => context.Request.Path.ToString().EndsWith("migrationFileUpload.ashx"),
-            appBranch =>
-            {
-                appBranch.UseMigrationFileUploadHandler();
-            });
+        app.UseWebApiMiddleware();
     }
 }

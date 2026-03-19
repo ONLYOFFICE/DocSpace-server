@@ -52,7 +52,10 @@ public class DocSpaceTransportBuilder(
             }
         };
 
+        // CA2000: HttpClient and HttpClientTransport owned by MCP client
+#pragma warning disable CA2000
         var transport = new HttpClientTransport(options, httpClientFactory.CreateClient());
+#pragma warning restore CA2000
         return ValueTask.FromResult(transport);
     }
 }

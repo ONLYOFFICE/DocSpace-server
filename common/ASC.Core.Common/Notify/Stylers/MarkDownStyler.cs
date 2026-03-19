@@ -29,7 +29,7 @@ namespace ASC.Notify.Textile;
 [Scope]
 public partial class MarkDownStyler : IPatternStyler
 {
-    static readonly Regex _velocityArguments = new(NVelocityPatternFormatter.NoStylePreffix + "(?<arg>.*?)" + NVelocityPatternFormatter.NoStyleSuffix, RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
+    private static readonly Regex _velocityArguments = new(NVelocityPatternFormatter.NoStylePreffix + "(?<arg>.*?)" + NVelocityPatternFormatter.NoStyleSuffix, RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
 
     public Task ApplyFormatingAsync(NoticeMessage message)
     {

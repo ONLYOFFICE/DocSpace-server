@@ -115,9 +115,9 @@ public abstract class BaseStartup
             options.KnownIPNetworks.Clear();
             options.KnownProxies.Clear();
 
-            var knownProxies = _configuration.GetSection("core:hosting:forwardedHeadersOptions:knownProxies").Get<List<String>>();
-            var knownNetworks = _configuration.GetSection("core:hosting:forwardedHeadersOptions:knownNetworks").Get<List<String>>();
-            var allowedHosts = _configuration.GetSection("core:hosting:forwardedHeadersOptions:allowedHosts").Get<List<String>>();
+            var knownProxies = _configuration.GetSection("core:hosting:forwardedHeadersOptions:knownProxies").Get<List<string>>();
+            var knownNetworks = _configuration.GetSection("core:hosting:forwardedHeadersOptions:knownNetworks").Get<List<string>>();
+            var allowedHosts = _configuration.GetSection("core:hosting:forwardedHeadersOptions:allowedHosts").Get<List<string>>();
 
             if (allowedHosts is { Count: > 0 })
             {
@@ -152,8 +152,8 @@ public abstract class BaseStartup
         {
             bool EnableNoLimiter(IPAddress address)
             {
-                var knownNetworks = _configuration.GetSection("core:hosting:rateLimiterOptions:knownNetworks").Get<List<String>>();
-                var knownIPAddresses = _configuration.GetSection("core:hosting:rateLimiterOptions:knownIPAddresses").Get<List<String>>();
+                var knownNetworks = _configuration.GetSection("core:hosting:rateLimiterOptions:knownNetworks").Get<List<string>>();
+                var knownIPAddresses = _configuration.GetSection("core:hosting:rateLimiterOptions:knownIPAddresses").Get<List<string>>();
 
                 if (knownIPAddresses is { Count: > 0 })
                 {
@@ -221,7 +221,7 @@ public abstract class BaseStartup
 
                     userId ??= remoteIpAddress.ToInvariantString();
 
-                    if (String.Compare(httpContext?.Request.Method, "GET", StringComparison.OrdinalIgnoreCase) == 0)
+                    if (string.Compare(httpContext?.Request.Method, "GET", StringComparison.OrdinalIgnoreCase) == 0)
                     {
                         permitLimit = 50;
                         partitionKey = $"cr_read_{userId}";
@@ -257,8 +257,8 @@ public abstract class BaseStartup
                         var partitionKey = $"fw_post_put_{userId}";
                         var permitLimit = 10000;
 
-                        if (!(String.Compare(httpContext?.Request.Method, "POST", StringComparison.OrdinalIgnoreCase) == 0 ||
-                              String.Compare(httpContext?.Request.Method, "PUT", StringComparison.OrdinalIgnoreCase) == 0))
+                        if (!(string.Compare(httpContext?.Request.Method, "POST", StringComparison.OrdinalIgnoreCase) == 0 ||
+                              string.Compare(httpContext?.Request.Method, "PUT", StringComparison.OrdinalIgnoreCase) == 0))
                         {
                             return RateLimitPartition.GetNoLimiter("no_limiter");
                         }
@@ -530,11 +530,14 @@ public abstract class BaseStartup
 
         services.RegisterQueue<ResizeWorkerItem>(2);
 
-        services
-            .AddStartupTask<WarmupServicesStartupTask>()
-            .AddStartupTask<WarmupProtobufStartupTask>()
-            .AddStartupTask<WarmupBaseDbContextStartupTask>()
-            .TryAddSingleton(services);
+        if (!builder.Environment.IsDevelopment())
+        {
+            services
+                .AddStartupTask<WarmupServicesStartupTask>()
+                .AddStartupTask<WarmupProtobufStartupTask>()
+                .AddStartupTask<WarmupBaseDbContextStartupTask>()
+                .TryAddSingleton(services);
+        }
 
         services.AddTransient<DistributedTaskProgress>();
     }

@@ -33,7 +33,7 @@ namespace ASC.Common.Threading;
 public class DistributedTask
 {
     [JsonInclude]
-    protected string _exeption = String.Empty;
+    protected string _exeption = string.Empty;
 
     [JsonIgnore]
     public Func<DistributedTask, Task> Publication { get; set; }

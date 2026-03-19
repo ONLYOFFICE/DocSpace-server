@@ -57,8 +57,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * policies based on the HTTP method of the request.
  */
 @Slf4j
-@Component
 @RequiredArgsConstructor
+@Component("authorizationRateLimiterFilter")
 public class RateLimiterFilter extends OncePerRequestFilter {
   private static final String SIGNATURE_COOKIE = "x-signature";
 

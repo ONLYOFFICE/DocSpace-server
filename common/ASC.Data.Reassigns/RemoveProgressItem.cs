@@ -276,7 +276,7 @@ public record RemoveProgressItemScope(
     ILoggerProvider Options,
     IdentityClient Client);
 
-class UsageSpaceWrapper
+internal class UsageSpaceWrapper
 {
     public long DocsSpace { get; set; }
     public long MailSpace { get; set; }

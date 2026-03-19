@@ -981,6 +981,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Name = "storage",
                             Price = 0.14m,
                             ProductId = "1011",
+                            ServiceName = "disk-storage",
                             Visible = true,
                             Wallet = true
                         },

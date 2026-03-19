@@ -24,9 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.AI.Core.Chat.Tool;
-
-using AiDbContext = ASC.AI.Core.Database.AiDbContext;
+using ASC.AI.Extensions;
 
 namespace ASC.AI;
 
@@ -35,7 +33,7 @@ public class Startup : BaseStartup
     public Startup(IConfiguration configuration) : base(configuration)
     {
         if (configuration.GetSection("RabbitMQ").GetChildren().Any() &&
-            String.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
+            string.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
         {
             configuration["RabbitMQ:ClientProvidedName"] = Program.AppName;
         }
@@ -51,12 +49,6 @@ public class Startup : BaseStartup
 
         await base.ConfigureServices(builder);
 
-        services.AddBaseDbContextPool<AiDbContext>();
-        services.AddBaseDbContextPool<FilesDbContext>();
-
-        services.RegisterQuotaFeature();
-
-        services.AddSingleton<IToolPermissionRequester, RedisToolPermissionRequester>();
-        services.AddSingleton<IToolPermissionProvider, RedisToolPermissionProvider>();
+        services.AddAiServerServices();
     }
 }

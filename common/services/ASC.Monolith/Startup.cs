@@ -24,11 +24,23 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.ApiSystem.Extensions;
+using ASC.Data.Backup.Extensions;
+using ASC.Data.Backup.Worker.Extensions;
+using ASC.Files.Extensions;
+using ASC.Files.Worker.Extensions;
+using ASC.Notify.Extensions;
+using ASC.People.Extensions;
+using ASC.Studio.Notify.Extensions;
+using ASC.TelegramService.Extensions;
+using ASC.Web.Api.Extensions;
+using ASC.Web.Studio.Extensions;
+
 namespace ASC.Monolith;
 
 /// <summary>
 /// Combined startup that merges all DocSpace .NET services into a single process.
-/// Inherits BaseStartup for API services and manually registers worker services.
+/// Inherits BaseStartup for API services and delegates module registrations to shared extension methods.
 /// </summary>
 public class Startup : BaseStartup
 {
@@ -51,209 +63,34 @@ public class Startup : BaseStartup
         // === BaseStartup: core DI, auth, rate limiting, health checks, etc. ===
         await base.ConfigureServices(builder);
 
-        // === Tool permission: Redis or In-memory ===
-        if (ASC.Api.Core.Extensions.ServiceCollectionExtension.IsRedisEnabled(_configuration))
-        {
-            services.AddSingleton<IToolPermissionRequester, RedisToolPermissionRequester>();
-            services.AddSingleton<IToolPermissionProvider, RedisToolPermissionProvider>();
-        }
-        else
+        // === Monolith-specific: Tool permission fallback (Redis or In-memory) ===
+        if (!ASC.Api.Core.Extensions.ServiceCollectionExtension.IsRedisEnabled(_configuration))
         {
             services.AddSingleton<IToolPermissionRequester, InMemoryToolPermissionRequester>();
             services.AddSingleton<IToolPermissionProvider, InMemoryToolPermissionProvider>();
         }
 
-        // === DbContexts (union of all services) ===
-        services.AddBaseDbContextPool<FilesDbContext>();
-        services.AddBaseDbContextPool<BackupsContext>();
-        services.AddBaseDbContextPool<NotifyDbContext>();
-        services.AddBaseDbContextPool<AiDbContext>();
+        // === Service registrations (shared with standalone services) ===
+        services.AddWebApiServices(_configuration);
+        services.AddWebStudioServices(_configuration);
+        services.AddFilesServerServices(_configuration);
+        services.AddFilesWorkerServices(_configuration);
+        services.AddPeopleServices();
+        services.AddAiServerServices();
+        services.AddAiWorkerServices(_configuration);
+        services.AddBackupServices();
+        services.AddBackupWorkerServices(_configuration);
+        services.AddNotifyServices(_configuration);
+        services.AddStudioNotifyServices(_configuration);
+        services.AddTelegramServices(_configuration);
 
-        // === Quota ===
-        services.RegisterQuotaFeature();
-        services.RegisterFreeBackupQuotaFeature();
-
-        // === Kestrel limits (backup needs 1GB) ===
-        var maxRequestLimit = 1024L * 1024L * 1024L;
-        services.Configure<KestrelServerOptions>(options =>
-        {
-            options.Limits.MaxRequestBodySize = maxRequestLimit;
-        });
-        services.Configure<FormOptions>(x =>
-        {
-            x.MultipartBodyLengthLimit = maxRequestLimit;
-        });
-
-        // === Document service HTTP client (used by Web.Api, Files) ===
-        services.AddDocumentServiceHttpClient(_configuration);
-
-        // ======================================================================
-        // ASC.Web.Api services
-        // ======================================================================
-        if (!_configuration.GetValue<bool>("disableLdapNotifyService"))
-        {
-            services.AddHostedService<LdapNotifyService>();
-        }
-
-        services.RegisterQueue<LdapOperationJob>();
-        services.RegisterQueue<SmtpJob>();
-        services.RegisterQueue<UsersQuotaSyncJob>();
-        services.AddStartupTask<CspStartupTask>().TryAddSingleton(services);
-        services.AddActivePassiveHostedService<NotifySchedulerService>(_configuration, "WebApiNotifySchedulerService");
-
-        // ======================================================================
-        // ASC.Web.Studio services
-        // ======================================================================
-        services.AddHostedService<WorkerService>();
-        services.TryAddSingleton(new ConcurrentQueue<WebhookRequestIntegrationEvent>());
-
-        services.AddSingleton(Channel.CreateUnbounded<EventData>());
-        services.AddSingleton(svc => svc.GetRequiredService<Channel<EventData>>().Reader);
-        services.AddSingleton(svc => svc.GetRequiredService<Channel<EventData>>().Writer);
-        services.AddScoped<EventDataIntegrationEventHandler>();
-        services.AddSingleton<MessageSenderService>();
-        services.AddHostedService<MessageSenderService>();
-
-        services.RegisterQueue<RemovePortalOperation>();
-        services.RegisterQueue<MigrationOperation>(timeUntilUnregisterInSeconds: 60 * 60 * 24);
-        services.AddActivePassiveHostedService<TopUpWalletService>(_configuration);
-        services.AddActivePassiveHostedService<RenewSubscriptionService>(_configuration);
-        services.AddWebhookSenderHttpClient(_configuration);
-
-        // ======================================================================
-        // ASC.Files/Server services
-        // ======================================================================
-        services.AddScoped<IWebItem, ProductEntryPoint>();
-        services.RegisterQueue<AsyncTaskData<int>>();
-        services.RegisterQueue<AsyncTaskData<string>>();
-        services.AddStartupTask<CheckPdfStartupTask>().TryAddSingleton(services);
-
-        // ======================================================================
-        // ASC.Files/Worker services (background jobs)
-        // ======================================================================
-        if (!Enum.TryParse<ElasticLaunchType>(_configuration["elastic:mode"], true, out var elasticLaunchType))
-        {
-            elasticLaunchType = ElasticLaunchType.Inclusive;
-        }
-
-        if (elasticLaunchType != ElasticLaunchType.Disabled)
-        {
-            services.AddHostedService<ElasticSearchIndexService>();
-        }
-
-        if (elasticLaunchType != ElasticLaunchType.Exclusive)
-        {
-            services.AddActivePassiveHostedService<FileConverterService<int>>(_configuration);
-            services.AddActivePassiveHostedService<FileConverterService<string>>(_configuration);
-            services.AddActivePassiveHostedService<PushNotificationService<int>>(_configuration);
-            services.AddActivePassiveHostedService<PushNotificationService<string>>(_configuration);
-            services.AddHostedService<ThumbnailBuilderService>();
-            services.AddActivePassiveHostedService<AutoCleanTrashService>(_configuration);
-            services.AddActivePassiveHostedService<AutoDeletePersonalFolderService>(_configuration);
-            services.AddActivePassiveHostedService<AutoDeactivateExpiredApiKeysService>(_configuration);
-            services.AddActivePassiveHostedService<DeleteExpiredService>(_configuration);
-            services.AddActivePassiveHostedService<CleanupLifetimeExpiredService>(_configuration);
-            services.AddActivePassiveHostedService<FrozenThumbnailProcessingService>(_configuration);
-            services.AddSingleton(typeof(INotifyQueueManager<>), typeof(RoomNotifyQueueManager<>));
-
-            if (_configuration["core:base-domain"] == "localhost" && !string.IsNullOrEmpty(_configuration["license:file:path"]))
-            {
-                services.AddActivePassiveHostedService<RefreshLicenseService>(_configuration);
-            }
-        }
-
-        services.RegisterQueue<RoomIndexExportTask>();
-        services.RegisterQueue<FileDeleteOperation>(10);
-        services.RegisterQueue<FileMoveCopyOperation>(10);
-        services.RegisterQueue<FileDuplicateOperation>(10);
-        services.RegisterQueue<FileDownloadOperation>(10, timeUntilUnregisterInSeconds: 60 * 2);
-        services.RegisterQueue<FileMarkAsReadOperation>(10);
-        services.RegisterQueue<FormFillingReportTask>();
-        services.RegisterQueue<CreateRoomTemplateOperation>();
-        services.RegisterQueue<CreateRoomFromTemplateOperation>();
-        services.RegisterQueue<EncryptionOperation>(timeUntilUnregisterInSeconds: 60 * 60 * 24);
-        services.RegisterQueue<CustomerOperationsReportTask>();
-
-        services.AddSingleton(Channel.CreateUnbounded<FileData<int>>());
-        services.AddSingleton(svc => svc.GetRequiredService<Channel<FileData<int>>>().Reader);
-        services.AddSingleton(svc => svc.GetRequiredService<Channel<FileData<int>>>().Writer);
-
-        // ======================================================================
-        // ASC.People/Server services
-        // ======================================================================
-        services.RegisterQueue<RemoveProgressItem>();
-        services.RegisterQueue<DeletePersonalFolderProgressItem>();
-        services.RegisterQueue<UpdateUserTypeProgressItem>();
-        services.RegisterQueue<ReassignProgressItem>();
-
-        // ======================================================================
-        // ASC.AI/Server + Worker services
-        // ======================================================================
-        services.RegisterQueue<VectorizationTask>();
-        services.RegisterQueue<MessageExportTask>();
-        services.RegisterQueue<ChatExportTask>();
-        services.RegisterQueue<ChatDeletionTask>();
-        services.AddActivePassiveHostedService<OrphanAttachmentCleanerService>(_configuration);
-        services.AddActivePassiveHostedService<DeletedChatCleanerService>(_configuration);
-
-        // ======================================================================
-        // ASC.Data.Backup services
-        // ======================================================================
-        // (DbContexts and quota already registered above)
-
-        // ======================================================================
-        // ASC.Data.Backup.Worker services (background jobs)
-        // ======================================================================
-        services.RegisterQueue<BackupProgressItem>(5, 60 * 60 * 24);
-        services.RegisterQueue<RestoreProgressItem>(5, 60 * 60 * 24);
-        services.RegisterQueue<TransferProgressItem>(5, 60 * 60 * 24);
-        services.AddHostedService<BackupListenerService>();
-        services.AddHostedService<BackupCleanerTempFileService>();
-        services.AddHostedService<BackupWorkerService>();
-        services.AddActivePassiveHostedService<BackupCleanerService>(_configuration);
-        services.AddActivePassiveHostedService<BackupSchedulerService>(_configuration);
-        services.AddBackupSchedulerServiceResiliencePipeline();
-
-        // ======================================================================
-        // ASC.Notify services (background worker)
-        // ======================================================================
-        services.AddActivePassiveHostedService<ASC.Notify.Services.NotifySenderService>(_configuration);
-        services.AddActivePassiveHostedService<NotifyCleanerService>(_configuration);
-        services.AddScoped(_ => UrlEncoder.Default);
-
-        // ======================================================================
-        // ASC.Studio.Notify services (background worker)
-        // ======================================================================
-        services.AddHostedService<ServiceLauncher>();
-        services.AddActivePassiveHostedService<NotifySchedulerService>(_configuration, "StudioNotifySchedulerService");
-
-        // ======================================================================
-        // ASC.TelegramService
-        // ======================================================================
-        services.AddActivePassiveHostedService<TelegramListenerService>(_configuration);
-
-        // ======================================================================
-        // ASC.ClearEvents
-        // ======================================================================
+        // === ASC.ClearEvents ===
         services.AddHostedService<ClearEventsService>();
 
-        // ======================================================================
-        // ASC.ApiSystem authentication schemes
-        // ======================================================================
-        services.AddScoped<AuthHandler>();
-        services.AddScoped<ApiSystemAuthHandler>();
-        services.AddScoped<ApiSystemBasicAuthHandler>();
+        // === ASC.ApiSystem authentication schemes ===
+        services.AddApiSystemAuthServices();
 
-        services
-            .AddAuthentication()
-            .AddScheme<AuthenticationSchemeOptions, AuthHandler>("auth:allowskip:default", _ => { })
-            .AddScheme<AuthenticationSchemeOptions, AuthHandler>("auth:allowskip:registerportal", _ => { })
-            .AddScheme<AuthenticationSchemeOptions, ApiSystemAuthHandler>("auth:portal", _ => { })
-            .AddScheme<AuthenticationSchemeOptions, ApiSystemBasicAuthHandler>("auth:portalbasic", _ => { });
-
-        // ======================================================================
-        // Controllers: add application parts from all API service assemblies
-        // ======================================================================
+        // === Controllers: add application parts from all API service assemblies ===
         services.AddControllers()
             .AddApplicationPart(typeof(ASC.Web.Api.Startup).Assembly)
             .AddApplicationPart(typeof(ASC.Web.Studio.Startup).Assembly)
@@ -270,60 +107,10 @@ public class Startup : BaseStartup
     {
         base.Configure(app, env);
 
-        // --- ASC.Web.Api middleware ---
-        app.MapWhen(
-            context => context.Request.Path.ToString().EndsWith("logoUploader.ashx"),
-            appBranch => appBranch.UseLogoUploader());
-
-        app.MapWhen(
-            context => context.Request.Path.ToString().EndsWith("logo.ashx"),
-            appBranch => appBranch.UseLogoHandler());
-
-        app.MapWhen(
-            context => context.Request.Path.ToString().EndsWith("payment.ashx"),
-            appBranch => appBranch.UseAccountHandler());
-
-        app.MapWhen(
-            context => context.Request.Path.ToString().StartsWith(UrlShortRewriter.BasePath),
-            appBranch => appBranch.UseUrlShortRewriter());
-
-        app.MapWhen(
-            context => context.Request.Path.ToString().EndsWith("migrationFileUpload.ashx"),
-            appBranch => appBranch.UseMigrationFileUploadHandler());
-
-        // --- ASC.Web.Studio middleware ---
-        if (OpenApiEnabled && _configuration.GetValue<bool>("openApi:enableUI"))
-        {
-            var endpoints = new Dictionary<string, string>();
-            _configuration.Bind("openApi:endpoints", endpoints);
-            app.UseOpenApiUI(endpoints);
-        }
-
-        app.MapWhen(
-            context => context.Request.Path.ToString().EndsWith("ssologin.ashx"),
-            appBranch => appBranch.UseSsoHandler());
-
-        app.MapWhen(
-            context => context.Request.Path.ToString().EndsWith("login.ashx"),
-            appBranch => appBranch.UseLoginHandler());
-
-        // --- ASC.Files middleware ---
-        app.MapWhen(
-            context => context.Request.Path.ToString().EndsWith("filehandler.ashx", StringComparison.OrdinalIgnoreCase),
-            appBranch => appBranch.UseFileHandler());
-
-        app.MapWhen(
-            context => context.Request.Path.ToString().EndsWith("ChunkedUploader.ashx", StringComparison.OrdinalIgnoreCase),
-            appBranch => appBranch.UseChunkedUploaderHandler());
-
-        app.MapWhen(
-            context => context.Request.Path.ToString().EndsWith("DocuSignHandler.ashx", StringComparison.OrdinalIgnoreCase),
-            appBranch => appBranch.UseDocuSignHandler());
-
-        // --- ASC.Data.Backup middleware ---
-        app.MapWhen(
-            context => context.Request.Path.ToString().EndsWith("backupFileUpload.ashx"),
-            appBranch => appBranch.UseBackupFileUploadHandler());
+        app.UseWebApiMiddleware();
+        app.UseWebStudioMiddleware(_configuration);
+        app.UseFilesServerMiddleware();
+        app.UseBackupMiddleware();
 
         // --- Endpoints ---
         app.UseEndpoints(endpoints =>
@@ -341,75 +128,12 @@ public class Startup : BaseStartup
     {
         var eventBus = serviceProvider.GetRequiredService<IEventBus>();
 
-        // --- ASC.Files.Worker event handlers ---
-        await eventBus.SubscribeAsync<ThumbnailRequestedIntegrationEvent,
-            ASC.Files.Worker.IntegrationEvents.EventHandling.ThumbnailRequestedIntegrationEventHandler>();
-        await eventBus.SubscribeAsync<RoomIndexExportIntegrationEvent,
-            ASC.Files.Worker.IntegrationEvents.EventHandling.RoomIndexExportIntegrationEventHandler>();
-        await eventBus.SubscribeAsync<DeleteIntegrationEvent,
-            ASC.Files.Worker.IntegrationEvents.EventHandling.DeleteIntegrationEventHandler>();
-        await eventBus.SubscribeAsync<MoveOrCopyIntegrationEvent,
-            ASC.Files.Worker.IntegrationEvents.EventHandling.MoveOrCopyIntegrationEventHandler>();
-        await eventBus.SubscribeAsync<DuplicateIntegrationEvent,
-            ASC.Files.Worker.IntegrationEvents.EventHandling.DuplicateIntegrationEventHandler>();
-        await eventBus.SubscribeAsync<BulkDownloadIntegrationEvent,
-            ASC.Files.Worker.IntegrationEvents.EventHandling.BulkDownloadIntegrationEventHandler>();
-        await eventBus.SubscribeAsync<MarkAsReadIntegrationEvent,
-            ASC.Files.Worker.IntegrationEvents.EventHandling.MarkAsReadIntegrationEventHandler>();
-        await eventBus.SubscribeAsync<EmptyTrashIntegrationEvent,
-            ASC.Files.Worker.IntegrationEvents.EventHandling.EmptyTrashIntegrationEventHandler>();
-        await eventBus.SubscribeAsync<FormFillingReportIntegrationEvent,
-            ASC.Files.Worker.IntegrationEvents.EventHandling.FormFillingReportIntegrationEventHandler>();
-        await eventBus.SubscribeAsync<RoomNotifyIntegrationEvent,
-            ASC.Files.Worker.IntegrationEvents.EventHandling.RoomNotifyIntegrationEventHandler>();
-        await eventBus.SubscribeAsync<CreateRoomTemplateIntegrationEvent,
-            ASC.Files.Core.RoomTemplates.Events.RoomTemplatesIntegrationEventHandler>();
-        await eventBus.SubscribeAsync<CreateRoomFromTemplateIntegrationEvent,
-            ASC.Files.Core.RoomTemplates.Events.RoomTemplatesIntegrationEventHandler>();
-        await eventBus.SubscribeAsync<DataStorageEncryptionIntegrationEvent,
-            ASC.Files.Worker.IntegrationEvents.EventHandling.DataStorageEncryptionIntegrationEventHandler>();
-        await eventBus.SubscribeAsync<CustomerOperationsReportIntegrationEvent,
-            ASC.Files.Worker.IntegrationEvents.EventHandling.CustomerOperationsReportIntegrationEventHandler>();
-
-        // --- ASC.Web.Studio event handlers ---
-        await eventBus.SubscribeAsync<RemovePortalIntegrationEvent,
-            ASC.Web.Studio.IntegrationEvents.RemovePortalIntegrationEventHandler>();
-        await eventBus.SubscribeAsync<MigrationParseIntegrationEvent,
-            ASC.Migration.Core.Core.MigrationIntegrationEventHandler>();
-        await eventBus.SubscribeAsync<MigrationIntegrationEvent,
-            ASC.Migration.Core.Core.MigrationIntegrationEventHandler>();
-        await eventBus.SubscribeAsync<MigrationCancelIntegrationEvent,
-            ASC.Migration.Core.Core.MigrationIntegrationEventHandler>();
-        await eventBus.SubscribeAsync<MigrationClearIntegrationEvent,
-            ASC.Migration.Core.Core.MigrationIntegrationEventHandler>();
-        await eventBus.SubscribeAsync<EventDataIntegrationEvent, EventDataIntegrationEventHandler>();
-
-        // --- ASC.Data.Backup.Worker event handlers ---
-        await eventBus.SubscribeAsync<BackupRequestIntegrationEvent,
-        ASC.Data.Backup.IntegrationEvents.EventHandling.BackupRequestedIntegrationEventHandler>();
-        await eventBus.SubscribeAsync<BackupRestoreRequestIntegrationEvent,
-        ASC.Data.Backup.IntegrationEvents.EventHandling.BackupRestoreRequestedIntegrationEventHandler>();
-        await eventBus.SubscribeAsync<IntegrationEvent,
-        ASC.Data.Backup.IntegrationEvents.EventHandling.BackupDeleteScheldureRequestedIntegrationEventHandler>();
-
-        // --- ASC.Notify event handlers ---
-        await eventBus.SubscribeAsync<NotifyInvokeSendMethodRequestedIntegrationEvent,
-            ASC.Notify.IntegrationEvents.EventHandling.NotifyInvokeSendMethodRequestedIntegrationEventHandler>();
-        await eventBus.SubscribeAsync<NotifySendMessageRequestedIntegrationEvent,
-            ASC.Notify.IntegrationEvents.EventHandling.NotifySendMessageRequestedIntegrationEventHandler>();
-
-        // --- ASC.Studio.Notify event handlers ---
-        await eventBus.SubscribeAsync<NotifyItemIntegrationEvent,
-            ASC.Web.Studio.IntegrationEvents.NotifyItemIntegrationEventHandler>();
-
-        // --- ASC.AI.Worker event handlers ---
-        await eventBus.SubscribeAsync<VectorizationIntegrationEvent,
-            ASC.AI.Worker.Handlers.VectorizationIntegrationEventHandler>();
-        await eventBus.SubscribeAsync<MessageExportIntegrationEvent,
-            ASC.AI.Worker.Handlers.MessageExportIntegrationEventHandler>();
-        await eventBus.SubscribeAsync<ChatExportIntegrationEvent,
-            ASC.AI.Worker.Handlers.ChatExportIntegrationEventHandler>();
-        await eventBus.SubscribeAsync<ChatDeletionIntegrationEvent,
-            ASC.AI.Worker.Handlers.ChatDeletionIntegrationEventHandler>();
+        await Task.WhenAll(
+            eventBus.SubscribeFilesWorkerEvents(),
+            eventBus.SubscribeWebStudioEvents(),
+            eventBus.SubscribeBackupWorkerEvents(),
+            eventBus.SubscribeNotifyEvents(),
+            eventBus.SubscribeStudioNotifyEvents(),
+            eventBus.SubscribeAiWorkerEvents());
     }
 }

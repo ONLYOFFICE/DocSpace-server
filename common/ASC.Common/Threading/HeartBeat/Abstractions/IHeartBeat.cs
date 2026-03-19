@@ -28,5 +28,5 @@ namespace ASC.Common.Threading.HeartBeat.Abstractions;
 
 public interface IHeartBeat : IAsyncDisposable
 {
-    public ValueTask StopAsync();
+    ValueTask StopAsync();
 }

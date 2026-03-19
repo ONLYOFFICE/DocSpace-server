@@ -29,5 +29,5 @@ namespace ASC.Files.Core.Text;
 
 public interface ITextExtractor
 {
-    public Task<string?> ExtractAsync(Memory<byte> content);
+    Task<string?> ExtractAsync(Memory<byte> content);
 }

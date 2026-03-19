@@ -34,6 +34,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.amqp.core.AmqpTemplate;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.stereotype.Component;
 
 /**
@@ -43,6 +44,8 @@ import org.springframework.stereotype.Component;
  * <p>This publisher broadcasts user client removal events to the authorization messaging system
  * using the exchange defined in {@link AuthorizationMessagingConfiguration#ENTRY_EXCHANGE}.
  *
+ * <p>This publisher is only loaded when RabbitMQ classes are available on the classpath.
+ *
  * @see AuthorizationMessagePublisher
  * @see UserClientsRemovedEvent
  * @see AuthorizationMessagingConfiguration
@@ -50,6 +53,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@ConditionalOnClass(name = "com.rabbitmq.client.Connection")
 public class RabbitUserClientsRemoveMessagePublisher
     implements AuthorizationMessagePublisher<UserClientsRemovedEvent> {
 

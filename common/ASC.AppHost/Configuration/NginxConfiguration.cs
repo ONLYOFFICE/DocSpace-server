@@ -109,7 +109,7 @@ public static class NginxConfiguration
             { "SERVICE_LOGIN", $"http://{Constants.HostDockerInternal}:5011" },
             { "SERVICE_SDK", $"http://{Constants.HostDockerInternal}:5099" },
             { "DASHBOARDS_CONTAINER_NAME", $"http://{Constants.HostDockerInternal}:5601" },
-            { "DNS_NAMESERVER", "127.0.0.11" },
+            { "DNS_NAMESERVER", "127.0.0.11" }
         };
     }
 }

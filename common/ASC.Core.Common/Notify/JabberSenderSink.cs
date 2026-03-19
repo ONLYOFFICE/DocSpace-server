@@ -28,7 +28,7 @@ using Constants = ASC.Core.Configuration.Constants;
 
 namespace ASC.Core.Notify;
 
-class JabberSenderSink(INotifySender sender) : Sink
+internal class JabberSenderSink(INotifySender sender) : Sink
 {
     private static readonly string _senderName = Constants.NotifyMessengerSenderSysName;
     private readonly INotifySender _sender = sender ?? throw new ArgumentNullException(nameof(sender));
