@@ -1,25 +1,25 @@
 // (c) Copyright Ascensio System SIA 2009-2026
-// 
+//
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
+//
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
+//
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-// 
+//
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -181,6 +181,12 @@ public class FileDto<T> : FileEntryDto<T>
     public bool? StartFilling { get; set; }
 
     /// <summary>
+    /// Specifies if the form filling has started but the file is still being saved by the document editor. Filling and editing are not allowed.
+    /// </summary>
+    /// <example>false</example>
+    public bool? IsFillingPreparing { get; set; }
+
+    /// <summary>
     /// The InProcess folder ID of the file.
     /// </summary>
     /// <example>10</example>
@@ -270,20 +276,21 @@ public class FileDtoHelper(
     UserManager userManager,
     IUrlShortener urlShortener,
     FileSharing fileSharing,
-    AiAccessibility aiAccessibility)
-    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, fileSharing, urlShortener) 
+    AiAccessibility aiAccessibility,
+    FileTrackerHelper fileTracker)
+    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, fileSharing, urlShortener)
 {
     private readonly EmployeeDtoHelper _employeeWrapperHelper = employeeWrapperHelper;
 
     public async Task<FileDto<T>> GetAsync<T>(File<T> file, string order = null, TimeSpan? expiration = null, IFolder contextFolder = null, AiStatus aiStatus = null)
     {
         var result = await GetFileWrapperAsync(file, order, expiration, contextFolder);
-        
+
         result.ViewAccessibility = await fileUtility.GetAccessibility(file);
         result.AvailableShareRights =  (await _fileSecurity.GetAccesses(file)).ToDictionary(r => r.Key, r => r.Value.Select(v => v.ToStringFast()));
         result.VectorizationStatus = file.VectorizationStatus;
         aiStatus ??= await aiAccessibility.GetStatusAsync();
-        
+
         if (contextFolder == null)
         {
             var referer = httpContextAccessor.HttpContext?.Request.Headers.Referer.FirstOrDefault();
@@ -340,7 +347,7 @@ public class FileDtoHelper(
 
             foreach (var action in forbiddenActions)
             {
-                result.Security[action] = false;   
+                result.Security[action] = false;
             }
 
             result.Locked = false;
@@ -350,7 +357,7 @@ public class FileDtoHelper(
 
             var myId = await _globalFolderHelper.GetFolderMyAsync<T>();
             result.OriginTitle = Equals(result.OriginId, myId) ? FilesUCResource.MyFiles : result.OriginTitle;
-            
+
             if (Equals(result.OriginRoomId, myId))
             {
                 result.OriginRoomTitle = FilesUCResource.MyFiles;
@@ -360,10 +367,10 @@ public class FileDtoHelper(
                 result.OriginRoomTitle = result.OriginTitle;
             }
         }
-        
+
         var currentUserId = authContext.CurrentAccount.ID;
         if (file.RootFolderType == FolderType.USER && authContext.IsAuthenticated && !Equals(file.RootCreateBy, currentUserId))
-        {                   
+        {
             switch (contextFolder)
             {
                 case { FolderType: FolderType.Favorites }:
@@ -386,7 +393,7 @@ public class FileDtoHelper(
                         canReadParent = await _fileSecurity.CanReadAsync(parent);
                         parent.SecurityByUsers[currentUserId][FileSecurity.FilesSecurityActions.Read] = canReadParent;
                     }
-                    
+
                     if (!canReadParent)
                     {
                         result.FolderId = folderShareAsync;
@@ -396,11 +403,11 @@ public class FileDtoHelper(
                     {
                         result.OriginRoomTitle = FilesUCResource.SharedForMe;
                     }
-                    
+
                     break;
             }
         }
-        
+
         if (fileUtility.CanImageView(file.PureTitle))
         {
             try
@@ -419,7 +426,7 @@ public class FileDtoHelper(
                 // ignored
             }
         }
-        
+
         if (aiStatus is { Enabled: false})
         {
             if (result.Security.ContainsKey(FileSecurity.FilesSecurityActions.AskAi))
@@ -475,7 +482,7 @@ public class FileDtoHelper(
         {
             Task<T> linkedIdTask;
             Task<EntryProperties<T>> propertiesTask;
-            
+
             if (file.FormInfo != null)
             {
                 linkedIdTask = Task.FromResult(file.FormInfo.LinkedId);
@@ -486,7 +493,7 @@ public class FileDtoHelper(
                 linkedIdTask = _daoFactory.GetLinkDao<T>().GetLinkedAsync(file.Id);
                 propertiesTask = fileDao.GetProperties(file.Id);
             }
-            
+
             var currentFolderTask = folderDao.GetFolderAsync(file.ParentId);
             await Task.WhenAll(linkedIdTask, propertiesTask, currentFolderTask);
 
@@ -505,15 +512,28 @@ public class FileDtoHelper(
             }
 
             if (currentRoom is { FolderType: FolderType.FillingFormsRoom }
-                && properties != null && properties.FormFilling != null
+                && properties is { FormFilling: not null }
                 && currentFolder.FolderType is not (FolderType.FormFillingFolderInProgress or FolderType.FormFillingFolderDone))
             {
                 if (properties.FormFilling.StartFilling)
                 {
-                    result.Security[FileSecurity.FilesSecurityActions.FillForms] = true;
-                    result.Security[FileSecurity.FilesSecurityActions.StopFilling] = true;
+                    var isPreparing = await fileTracker.IsEditingAsync(file.Id);
+                    result.IsFillingPreparing = isPreparing;
+
                     result.Security[FileSecurity.FilesSecurityActions.StartFilling] = false;
                     result.Security[FileSecurity.FilesSecurityActions.Lock] = false;
+
+                    if (isPreparing)
+                    {
+                        result.Security[FileSecurity.FilesSecurityActions.FillForms] = false;
+                        result.Security[FileSecurity.FilesSecurityActions.Edit] = false;
+                        result.Security[FileSecurity.FilesSecurityActions.StopFilling] = false;
+                    }
+                    else
+                    {
+                        result.Security[FileSecurity.FilesSecurityActions.FillForms] = true;
+                        result.Security[FileSecurity.FilesSecurityActions.StopFilling] = true;
+                    }
                 }
                 else
                 {
@@ -633,26 +653,26 @@ public class FileDtoHelper(
             {
                 order = await breadCrumbsManager.GetBreadCrumbsOrderAsync(file.ParentId);
             }
-            
+
             result.Order = !string.IsNullOrEmpty(order) ? string.Join('.', order, file.Order) : file.Order.ToString();
         }
-        
+
         try
         {
             var externalMediaAccess = file.ShareRecord is { SubjectType: SubjectType.PrimaryExternalLink or SubjectType.ExternalLink };
-            
+
             if (externalMediaAccess)
             {
                 result.IsLinkExpired = file.ShareRecord.Options?.IsExpired;
                 result.RequestToken = await _externalShare.CreateShareKeyAsync(file.ShareRecord.Subject);
                 result.External = Equals(file.ShareRecord.EntryId, file.Id);
-                
+
                 var expirationDate = file.ShareRecord?.Options?.ExpirationDate;
                 if (expirationDate != null && expirationDate != DateTime.MinValue)
                 {
                     result.ExpirationDate = _apiDateTimeHelper.Get(expirationDate);
                 }
-                
+
                 var parents = await folderDao.GetParentFoldersAsync(result.FolderId).ToListAsync();
                 var parent = parents.Count >= 2 ? parents[^2] : null;
                 if (!await _fileSecurity.CanReadAsync(parent))
@@ -660,18 +680,18 @@ public class FileDtoHelper(
                     result.FolderId = await _globalFolderHelper.GetFolderShareAsync<T>();
                     result.RootFolderType = FolderType.SHARE;
                 }
-            
+
                 var room = parents.FirstOrDefault(f => f.IsRoom);
                 if (room != null)
                 {
                     result.OwnedBy = await _employeeWrapperHelper.GetAsync(room.CreateBy);
                 }
             }
-            
+
             result.ViewUrl = _externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileDownloadUrl(file.Id)), result.RequestToken);
             result.WebUrl = _externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id, file.Version, externalMediaAccess)), result.RequestToken);
             result.ThumbnailStatus = file.ThumbnailStatus;
-            
+
             var cacheKey = Math.Abs(result.Updated.GetHashCode());
 
             if (file.ThumbnailStatus == Thumbnail.Created)

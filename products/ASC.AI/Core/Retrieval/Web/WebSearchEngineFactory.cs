@@ -31,6 +31,8 @@ public class WebSearchEngineFactory(IHttpClientFactory httpClientFactory)
 {
     public IWebSearchEngine Create(EngineConfig config)
     {
+        // CA2000: HttpClient ownership transferred to search engine instances
+#pragma warning disable CA2000
         return config switch
         {
             DocSpaceWebSearchConfig docSpaceConfig => new DocSpaceWebSearchEngine(httpClientFactory.CreateClient(),
@@ -38,5 +40,6 @@ public class WebSearchEngineFactory(IHttpClientFactory httpClientFactory)
             ExaConfig exaConfig => new ExaWebSearchEngine(httpClientFactory.CreateClient(), exaConfig),
             _ => throw new ArgumentException("Invalid engine config")
         };
+#pragma warning restore CA2000
     }
 }

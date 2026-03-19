@@ -28,14 +28,12 @@ global using System.Collections;
 global using System.ComponentModel;
 global using System.Text.Json;
 
-global using ASC.Api.Core.Extensions;
 global using ASC.AuditTrail.Log;
 global using ASC.AuditTrail.Mappers;
 global using ASC.AuditTrail.Models;
 global using ASC.AuditTrail.Models.Mappings;
 global using ASC.AuditTrail.Types;
 global using ASC.Common;
-global using ASC.Common.Mapping;
 global using ASC.Common.Utils;
 global using ASC.Core;
 global using ASC.Core.Common;

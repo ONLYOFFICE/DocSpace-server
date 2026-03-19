@@ -36,8 +36,6 @@ global using ASC.EventBus.Exceptions;
 global using ASC.EventBus.Extensions;
 global using ASC.EventBus.Serializers;
 
-global using Autofac;
-
 global using Microsoft.Extensions.Logging;
 
 global using Polly;

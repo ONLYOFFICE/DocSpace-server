@@ -61,7 +61,6 @@ global using ASC.Core.Common.EF.Model;
 global using ASC.Core.Common.EF.Model.Ai;
 global using ASC.Core.Common.Settings;
 global using ASC.Core.Notify.Socket;
-global using ASC.Core.Tenants;
 global using ASC.Core.Users;
 
 global using ASC.EventBus.Abstractions;

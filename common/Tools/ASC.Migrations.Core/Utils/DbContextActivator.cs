@@ -28,18 +28,13 @@ using Microsoft.Extensions.Configuration;
 
 namespace ASC.Migrations.Core.Utils;
 
-public class DbContextActivator
+public class DbContextActivator(IServiceProvider serviceProvider)
 {
-    private readonly IServiceProvider _serviceProvider;
-
-    public DbContextActivator(IServiceProvider serviceProvider)
-    {
-        _serviceProvider = serviceProvider;
-    }
-
     public DbContext CreateInstance(Type contextType, ProviderInfo provider, ConfigurationInfo configurationInfo = ConfigurationInfo.SaaS, bool skipConnection = false)
     {
-        var scope = _serviceProvider.CreateScope();
+#pragma warning disable CA2000
+        var scope = serviceProvider.CreateScope();
+#pragma warning restore CA2000
         var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
         configuration["testAssembly"] = $"ASC.Migrations.{provider.Provider}.{configurationInfo}";
         configuration["ConnectionStrings:default:name"] = "default";

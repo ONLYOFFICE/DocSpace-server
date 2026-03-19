@@ -61,7 +61,7 @@ public class ChatTools(
             );
         }
 
-        if (knowledgeHasFiles && await aiAccessibility.IsVectorizationEnabledAsync(agent))
+        if (knowledgeHasFiles && await aiAccessibility.IsVectorizationEnabledAsync())
         {
             var knowledgeFunc = knowledgeSearchTool.Init(agent);
             var knowledgeWrapper = ToWrapper(agent.Id, knowledgeFunc);
@@ -73,7 +73,7 @@ public class ChatTools(
             return (holder, error);
         }
 
-        var config = await GetWebConfigAsync(agent);
+        var config = await GetWebConfigAsync();
         if (config == null)
         {
             return (holder, error);
@@ -95,24 +95,30 @@ public class ChatTools(
         return (holder, error);
     }
 
-    private async Task<EngineConfig?> GetWebConfigAsync(Folder<int> agent)
+    private async Task<EngineConfig?> GetWebConfigAsync()
     {
-        if (agent.SettingsChatProviderId == AiGateway.ProviderId && await aiGateway.IsEnabledAsync())
-        {
-            return new DocSpaceWebSearchConfig 
-            { 
-                BaseUrl = aiGateway.Url, 
-                ApiKey = await aiGateway.GetKeyAsync() 
-            };
-        }
-        
-        if (!await aiSettingsStore.IsWebSearchEnabledAsync())
+        var settings = await aiSettingsStore.GetWebSearchSettingsAsync();
+
+        if (!settings.Enabled || settings.Type == EngineType.None)
         {
             return null;
         }
-        
-        var settings = await aiSettingsStore.GetWebSearchSettingsAsync();
-        return settings is not { Enabled: true, Type: not EngineType.None, Config: not null } ? null : settings.Config;
+
+        if (settings.Type != EngineType.PortalAi)
+        {
+            return settings.Config;
+        }
+
+        if (!await aiGateway.IsEnabledAsync())
+        {
+            return null;
+        }
+
+        return new DocSpaceWebSearchConfig
+        {
+            BaseUrl = aiGateway.Url,
+            ApiKey = await aiGateway.GetKeyAsync()
+        };
     }
 
     private static ToolWrapper ToWrapper(int roomId, AIFunction tool)

@@ -27,6 +27,6 @@
 namespace ASC.Files.Core.Core.Thirdparty;
 internal interface IErrorItem
 {
-    public string Error { get; }
-    public string ErrorId { get; }
+    string Error { get; }
+    string ErrorId { get; }
 }

@@ -43,9 +43,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -63,13 +63,20 @@ import org.springframework.web.context.request.ServletRequestAttributes;
  * details. It also publishes audit logs for successful authentications.
  */
 @Slf4j
-@Component
-@RequiredArgsConstructor
+@Component("authorizationSignatureAuthenticationProvider")
 public class SignatureAuthenticationProvider implements AuthenticationProvider {
   private final SignatureService signatureService;
   private final GrpcRegisteredClientService registeredClientService;
-
   private final SecurityConfigurationProperties configurationProperties;
+
+  public SignatureAuthenticationProvider(
+      @Qualifier("authorizationSignatureService") SignatureService signatureService,
+      GrpcRegisteredClientService registeredClientService,
+      SecurityConfigurationProperties configurationProperties) {
+    this.signatureService = signatureService;
+    this.registeredClientService = registeredClientService;
+    this.configurationProperties = configurationProperties;
+  }
 
   /**
    * Authenticates the provided request using an ASC signature.

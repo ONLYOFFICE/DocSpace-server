@@ -24,8 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.MessagingSystem;
-using ASC.MessagingSystem.Data;
+using ASC.Web.Studio.Extensions;
 
 using NLog;
 
@@ -69,13 +68,7 @@ try
 
     var eventBus = ((IApplicationBuilder)app).ApplicationServices.GetRequiredService<IEventBus>();
 
-    await Task.WhenAll(
-        eventBus.SubscribeAsync<RemovePortalIntegrationEvent, RemovePortalIntegrationEventHandler>(),
-        eventBus.SubscribeAsync<MigrationParseIntegrationEvent, MigrationIntegrationEventHandler>(),
-        eventBus.SubscribeAsync<MigrationIntegrationEvent, MigrationIntegrationEventHandler>(),
-        eventBus.SubscribeAsync<MigrationCancelIntegrationEvent, MigrationIntegrationEventHandler>(),
-        eventBus.SubscribeAsync<MigrationClearIntegrationEvent, MigrationIntegrationEventHandler>(),
-        eventBus.SubscribeAsync<EventDataIntegrationEvent, EventDataIntegrationEventHandler>());
+    await eventBus.SubscribeWebStudioEvents();
 
     logger.Info("Starting web host ({applicationContext})...", AppName);
     await app.RunWithTasksAsync();

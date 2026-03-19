@@ -45,8 +45,11 @@ public class InMemoryHeartBeatFactory : IHeartBeatFactory
             throw new HeartBeatExistsException();
         }
 
+        // CA2000: PeriodicTimer is owned and disposed by InMemoryHeartBeat (see InMemoryHeartBeat.DisposeAsync)
+#pragma warning disable CA2000
         var timer = StartPulseLoop(key, timeout, pulseInterval, cancellationToken);
         var heartBeat = new InMemoryHeartBeat(key, timer);
+#pragma warning restore CA2000
 
         return ValueTask.FromResult<IHeartBeat>(heartBeat);
     }

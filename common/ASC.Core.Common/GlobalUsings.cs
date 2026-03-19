@@ -50,7 +50,6 @@ global using System.Text.Json;
 global using System.Text.Json.Serialization;
 global using System.Text.RegularExpressions;
 global using System.Web;
-global using System.Xml;
 
 global using Amazon;
 global using Amazon.Runtime;
@@ -64,7 +63,6 @@ global using ASC.Common;
 global using ASC.Common.Caching;
 global using ASC.Common.Log;
 global using ASC.Common.Logging;
-global using ASC.Common.Mapping;
 global using ASC.Common.Module;
 global using ASC.Common.Notify.Engine;
 global using ASC.Common.Notify.Patterns;

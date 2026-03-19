@@ -261,7 +261,9 @@ public class Builder<T>(
         using var request = new HttpRequestMessage();
         request.RequestUri = new Uri(thumbnailUrl);
 
+#pragma warning disable CA2000 // HttpClient is short-lived and disposed by runtime
         var httpClient = clientFactory.CreateClient();
+#pragma warning restore CA2000
         using var response = await httpClient.SendAsync(request);
         await using (var stream = await response.Content.ReadAsStreamAsync())
         {

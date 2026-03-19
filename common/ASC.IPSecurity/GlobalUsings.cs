@@ -29,7 +29,6 @@ global using System.Net.Sockets;
 global using System.Security.Cryptography;
 
 global using ASC.Common;
-global using ASC.Common.Mapping;
 global using ASC.Core;
 global using ASC.Core.Common.EF.Context;
 global using ASC.Core.Common.EF.Model;

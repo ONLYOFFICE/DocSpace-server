@@ -41,6 +41,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.listener.RabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.support.converter.*;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -52,11 +53,14 @@ import tools.jackson.databind.json.JsonMapper;
  *
  * <p>This class reads properties prefixed with "spring.cloud.messaging.rabbitmq" from the
  * application configuration and sets up the necessary beans.
+ *
+ * <p>This configuration is only loaded when RabbitMQ classes are available on the classpath.
  */
 @Slf4j
 @Setter
 @Getter
 @Configuration
+@ConditionalOnClass(name = "com.rabbitmq.client.Connection")
 @ConfigurationProperties(prefix = "spring.cloud.messaging.rabbitmq")
 public class RabbitListenerContainerFactoryConfiguration {
   private int prefetch = 500;

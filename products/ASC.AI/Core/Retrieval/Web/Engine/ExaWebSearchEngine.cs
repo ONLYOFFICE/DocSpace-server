@@ -54,16 +54,14 @@ public class ExaWebSearchEngine(HttpClient httpClient, ExaConfig config) : IWebS
             }
         };
 
-        var request = new HttpRequestMessage(HttpMethod.Post, "https://api.exa.ai/search")
-        {
-            Content = new StringContent(
-                JsonSerializer.Serialize(requestBody, JsonSerializerOptions.Web), 
-                Encoding.UTF8, 
-                "application/json")
-        };
-        
+        using var request = new HttpRequestMessage(HttpMethod.Post, "https://api.exa.ai/search");
+        request.Content = new StringContent(
+            JsonSerializer.Serialize(requestBody, JsonSerializerOptions.Web),
+            Encoding.UTF8,
+            "application/json");
+
         request.Headers.Add("x-api-key", config.ApiKey);
-        
+
         try
         {
             var response = await httpClient.SendAsync(request, cancellationToken);
@@ -100,16 +98,14 @@ public class ExaWebSearchEngine(HttpClient httpClient, ExaConfig config) : IWebS
             Text = new Text { MaxCharacters = query.MaxCharacters }
         };
         
-        var request = new HttpRequestMessage(HttpMethod.Post, "https://api.exa.ai/contents")
-        {
-            Content = new StringContent(
-                JsonSerializer.Serialize(requestBody, JsonSerializerOptions.Web), 
-                Encoding.UTF8, 
-                "application/json")
-        };
-        
+        using var request = new HttpRequestMessage(HttpMethod.Post, "https://api.exa.ai/contents");
+        request.Content = new StringContent(
+            JsonSerializer.Serialize(requestBody, JsonSerializerOptions.Web),
+            Encoding.UTF8,
+            "application/json");
+
         request.Headers.Add("x-api-key", config.ApiKey);
-        
+
         try
         {
             var response = await httpClient.SendAsync(request, cancellationToken);
@@ -152,7 +148,7 @@ public class ExaWebSearchEngine(HttpClient httpClient, ExaConfig config) : IWebS
     }
 }
 
-class ExaSearchRequest
+internal class ExaSearchRequest
 {
     public required string Query { get; init; }
     public string Type { get; init; } = "auto";
@@ -160,24 +156,24 @@ class ExaSearchRequest
     public required Contents Contents { get; init; }
 }
 
-class Contents
+internal class Contents
 {
     public required Text Text { get; init; }
     public string? Livecrawl { get; init; } = "preferred";
 }
 
-class Text
+internal class Text
 {
     public int? MaxCharacters { get; init; }
 }
 
-class ExaSearchResponse
+internal class ExaSearchResponse
 {
     public required List<ExaSearchResult> Results { get; init; } = [];
     public string? Context { get; init; }
 }
 
-class ExaSearchResult
+internal class ExaSearchResult
 {
     public string? Title { get; init; }
     public string? Url { get; init; }
@@ -185,7 +181,7 @@ class ExaSearchResult
     public required string Text { get; init; }
 }
 
-class ExaCrawlRequest
+internal class ExaCrawlRequest
 {
     public required List<string> Urls { get; init; }
     public required Text Text { get; init; }

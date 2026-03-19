@@ -421,7 +421,7 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
         _consumerChannel.Dispose();
 
         _consumerChannel = await CreateConsumerChannelAsync();
-        _consumerTag = String.Empty;
+        _consumerTag = string.Empty;
 
         await StartBasicConsumeAsync();
 

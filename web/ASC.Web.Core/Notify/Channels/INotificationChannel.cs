@@ -28,6 +28,6 @@ namespace ASC.Web.Core.Notify.Channels;
 
 public interface INotificationChannel
 {
-    public string Name { get; }
-    public bool IsEnabled { get; }
+    string Name { get; }
+    bool IsEnabled { get; }
 }

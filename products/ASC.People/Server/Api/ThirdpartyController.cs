@@ -397,12 +397,12 @@ public class ThirdpartyController(
 
     private async Task SaveContactImage(Guid userID, string url)
     {
-        var request = new HttpRequestMessage
-        {
-            RequestUri = new Uri(url)
-        };
+        using var request = new HttpRequestMessage(HttpMethod.Get, url);
 
+        #pragma warning disable CA2000
         var httpClient = httpClientFactory.CreateClient();
+        #pragma warning restore CA2000
+        
         using var response = await httpClient.SendAsync(request);
         var bytes = await response.Content.ReadAsByteArrayAsync();
 

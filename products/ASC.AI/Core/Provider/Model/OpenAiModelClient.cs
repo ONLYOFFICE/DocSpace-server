@@ -57,9 +57,9 @@ public class OpenAiModelClient(HttpClient httpClient, string url, string apiKey)
     
     private async Task<HttpResponseMessage> SendRequestAsync(string endpoint, HttpCompletionOption completionOption)
     {
-        var request = new HttpRequestMessage(HttpMethod.Get, endpoint);
+        using var request = new HttpRequestMessage(HttpMethod.Get, endpoint);
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
-        
+
         return (await httpClient.SendAsync(request, completionOption)).EnsureSuccessStatusCode();
     }
     
