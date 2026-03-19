@@ -258,7 +258,8 @@ public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IVa
             Port = uint.TryParse(Port, out var port) ? port : 3306,
             SslMode = bool.TryParse(UseSsl, out var useSsl) && useSsl
                 ? MySqlSslMode.Preferred
-                : MySqlSslMode.None
+                : MySqlSslMode.None,
+            AllowPublicKeyRetrieval = true
         };
 
         return new MySqlConnection(builder.ConnectionString);
