@@ -29,6 +29,10 @@ global using Aspire.Hosting.ApplicationModel;
 
 global using ASC.AppHost.Configuration;
 
+global using Aspire.Hosting.JavaScript;
+
 global using Microsoft.Extensions.DependencyInjection;
+
+global using MySqlConnector;
 
 global using Projects;

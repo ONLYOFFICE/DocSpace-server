@@ -26,10 +26,6 @@
 
 #pragma warning disable ASPIREINTERACTION001
 
-using Aspire.Hosting.JavaScript;
-
-using MySqlConnector;
-
 namespace ASC.AppHost.Configuration;
 
 public record RedisConfig(string Host, string Port, string? Password = null);
