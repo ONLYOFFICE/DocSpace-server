@@ -1339,9 +1339,9 @@
     <value>Подключение к базе данных</value>
   </data>
   <data name="ConsumersExternalDbDescription" xml:space="preserve">
-    <value>Сохраняйте результаты для форм во внешней базе данных, такой как MySQL или SQLite.</value>
+    <value>Сохраняйте результаты заполнения форм во внешней базе данных, такой как MySQL или SQLite.</value>
   </data>
   <data name="ConsumersExternalDbInstruction" xml:space="preserve">
-    <value>Подключите внешнюю базу данных для хранения результатов для форм.</value>
+    <value>Подключите внешнюю базу данных для хранения результатов заполнения форм.</value>
   </data>
 </root>
