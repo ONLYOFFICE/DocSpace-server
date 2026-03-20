@@ -26,11 +26,7 @@
 
 #pragma warning disable ASPIREINTERACTION001
 
-using System.Diagnostics.CodeAnalysis;
-
 using Aspire.Hosting.JavaScript;
-
-using Microsoft.Extensions.DependencyInjection;
 
 using MySqlConnector;
 
