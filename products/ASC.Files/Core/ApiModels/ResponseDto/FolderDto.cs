@@ -395,9 +395,14 @@ public class FolderDtoHelper(
 
         if (folder.SettingsChatParameters != null)
         {
-            if (folder.SettingsChatProviderId == AiGateway.ProviderId && !aiStatus.GatewayEnabled)
+            if (folder.SettingsChatProviderId == AiGateway.ProviderId)
             {
-                folder.SettingsChatProviderId = 0;
+                folder.ChatProviderType = ProviderType.PortalAi;
+
+                if (!aiStatus.GatewayEnabled)
+                {
+                    folder.SettingsChatProviderId = 0;
+                }
             }
 
             var modelId = folder.SettingsChatProviderId == 0 ? null : folder.SettingsChatParameters.ModelId;
