@@ -44,7 +44,7 @@ public class SmtpSender(
     private bool _ssl;
     private ICredentials _credentials;
     private SaslMechanism _saslMechanism;
-    const int NetworkTimeout = 30000;
+    private const int NetworkTimeout = 30000;
 
     public virtual void Init(IDictionary<string, string> properties)
     {
@@ -66,7 +66,7 @@ public class SmtpSender(
             {
                 await BuildSmtpSettingsAsync(coreConfiguration);
 
-                var mail = BuildMailMessage(m);
+                using var mail = BuildMailMessage(m);
 
                 _logger.DebugSmtpSender(_host, _port, _ssl, _credentials != null);
 

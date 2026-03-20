@@ -26,7 +26,7 @@
 
 namespace ASC.Core.Caching;
 
-class AzRecordStore : IEnumerable<AzRecord>
+internal class AzRecordStore : IEnumerable<AzRecord>
 {
     private readonly Dictionary<string, List<AzRecord>> _byObjectId = new();
 

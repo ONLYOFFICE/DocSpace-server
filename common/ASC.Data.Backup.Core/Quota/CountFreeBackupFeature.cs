@@ -74,10 +74,20 @@ public class CountFreeBackupStatistic(IServiceProvider serviceProvider) : ITenan
         var tenantManager = serviceProvider.GetService<TenantManager>();
         var backupRepository = serviceProvider.GetService<BackupRepository>();
         var tenantId = tenantManager.GetCurrentTenantId();
-        var to = DateTime.UtcNow.AddSeconds(1);
-        var from = to.AddMonths(-1);
+        var (from, to) = BackupPeriodHelper.GetCurrentMonthRange();
         var result = await backupRepository.GetBackupsCountAsync(tenantId, false, from, to);
         return result;
+    }
+}
+
+public static class BackupPeriodHelper
+{
+    public static (DateTime From, DateTime To) GetCurrentMonthRange()
+    {
+        var now = DateTime.UtcNow;
+        var from = new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc);
+        var to = now.AddSeconds(1);
+        return (from, to);
     }
 }
 

@@ -97,7 +97,7 @@ public class CustomerServiceQuotaRequestDto: PaymentInformationRequestDto
     /// <summary>
     /// The service name.
     /// </summary>
-    /// <example>aitools</example>
+    /// <example>backup</example>
     [FromQuery(Name = "serviceName")]
     public string ServiceName { get; set; }
 }
@@ -179,7 +179,7 @@ public class BuyWalletServiceRequestDto
     /// <summary>
     /// The service name.
     /// </summary>
-    /// <example>aitools</example>
+    /// <example>backup</example>
     public string ServiceName { get; set; }
 }
 

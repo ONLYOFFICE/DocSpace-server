@@ -34,7 +34,8 @@ public class CoverRequestDto
     /// <summary>
     /// The cover color.
     /// </summary>
-    /// <example>#FF0000</example>
+    /// <example>FF0000</example>
+    [RegularExpression(@"^([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$", ErrorMessage = "Color must be a valid hex color (e.g., FF0000 or FFF)")]
     public string Color { get; set; }
 
     /// <summary>

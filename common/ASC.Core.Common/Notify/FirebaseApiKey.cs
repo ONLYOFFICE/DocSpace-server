@@ -26,7 +26,7 @@
 
 namespace ASC.Core.Common.Notify;
 
-class FirebaseApiKey(IConfiguration configuration)
+internal class FirebaseApiKey(IConfiguration configuration)
 {
     public string Type => "service_account";
 

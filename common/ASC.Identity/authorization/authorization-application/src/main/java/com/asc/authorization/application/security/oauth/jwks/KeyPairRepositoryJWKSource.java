@@ -52,13 +52,15 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.MDC;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.cache.CacheManager;
@@ -79,7 +81,6 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class KeyPairRepositoryJWKSource
     implements JWKSource<SecurityContext>, OAuth2TokenCustomizer<JwtEncodingContext> {
   private static final ThreadLocal<KeyPair> remoteKeyPairHolder = new ThreadLocal<>();
@@ -92,8 +93,8 @@ public class KeyPairRepositoryJWKSource
   private final Environment environment;
   private final RegisteredClientConfigurationProperties registeredClientConfiguration;
 
-  private final RabbitTemplate rpcRabbitTemplate;
-  private final MessageConverter messageConverter;
+  @Nullable private final RabbitTemplate rpcRabbitTemplate;
+  @Nullable private final MessageConverter messageConverter;
 
   private final KeyPairMapper keyPairMapper;
 
@@ -106,6 +107,26 @@ public class KeyPairRepositoryJWKSource
   private static Duration rotationPeriod;
   private static Duration deprecationPeriod;
 
+  @Autowired
+  public KeyPairRepositoryJWKSource(
+      CacheManager cacheManager,
+      Environment environment,
+      RegisteredClientConfigurationProperties registeredClientConfiguration,
+      @Autowired(required = false) @Qualifier("rpcRabbitTemplate") RabbitTemplate rpcRabbitTemplate,
+      @Autowired(required = false) MessageConverter messageConverter,
+      KeyPairMapper keyPairMapper,
+      KeyPairService keyPairService,
+      EncryptionService encryptionService) {
+    this.cacheManager = cacheManager;
+    this.environment = environment;
+    this.registeredClientConfiguration = registeredClientConfiguration;
+    this.rpcRabbitTemplate = rpcRabbitTemplate;
+    this.messageConverter = messageConverter;
+    this.keyPairMapper = keyPairMapper;
+    this.keyPairService = keyPairService;
+    this.encryptionService = encryptionService;
+  }
+
   /**
    * Initializes key rotation and deprecation periods based on the registered client configuration.
    */
@@ -115,6 +136,18 @@ public class KeyPairRepositoryJWKSource
         Duration.ofMinutes(registeredClientConfiguration.getAccessTokenMinutesTTL() * 4L);
     deprecationPeriod =
         Duration.ofMinutes(registeredClientConfiguration.getAccessTokenMinutesTTL());
+  }
+
+  /**
+   * Indicates whether RabbitMQ-based remote key retrieval is available.
+   *
+   * <p>RabbitMQ is optional in the minified profile, so both the {@link RabbitTemplate} and {@link
+   * MessageConverter} may be {@code null}. This helper keeps the null-check logic in one place.
+   *
+   * @return {@code true} if both messaging collaborators are available; otherwise {@code false}.
+   */
+  private boolean isRemoteMessagingAvailable() {
+    return rpcRabbitTemplate != null && messageConverter != null;
   }
 
   /**
@@ -205,6 +238,11 @@ public class KeyPairRepositoryJWKSource
    * @return the key pair from the remote region, or null if not available
    */
   private KeyPair fetchFromRemoteRegion(String region) {
+    if (!isRemoteMessagingAvailable()) {
+      log.warn("RabbitMQ not available, cannot fetch key pair from remote region: {}", region);
+      return null;
+    }
+
     try {
       log.debug("Fetching key pair from remote region: {}", region);
 

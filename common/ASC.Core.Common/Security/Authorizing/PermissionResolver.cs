@@ -29,7 +29,7 @@ using Constants = ASC.Core.Configuration.Constants;
 namespace ASC.Core.Security.Authorizing;
 
 [Scope(typeof(IPermissionResolver))]
-class PermissionResolver(AzManager azManager) : IPermissionResolver
+internal class PermissionResolver(AzManager azManager) : IPermissionResolver
 {
     private readonly AzManager _azManager = azManager ?? throw new ArgumentNullException(nameof(azManager));
 

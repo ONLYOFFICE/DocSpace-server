@@ -122,7 +122,7 @@ public class KafkaCacheNotify<T> : IDisposable, ICacheNotify<T> where T : new()
         Task.Run(async () => await ActionAsync(channelName));
     }
 
-    async Task ActionAsync(string channelName)
+    private async Task ActionAsync(string channelName)
     {
         var conf = new ConsumerConfig(_clientConfig) { GroupId = Guid.NewGuid().ToString() };
 

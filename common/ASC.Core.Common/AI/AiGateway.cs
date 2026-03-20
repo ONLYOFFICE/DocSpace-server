@@ -36,7 +36,8 @@ public class AiGateway(
     ITariffService tariffService,
     UserManager userManager,
     AuthContext authContext,
-    SettingsManager settingsManager)
+    SettingsManager settingsManager,
+    CoreBaseSettings coreSettings)
 {
     public const int ProviderId = -1;
     public const string ProviderTitle = "ONLYOFFICE AI";
@@ -46,10 +47,12 @@ public class AiGateway(
 
     private AiGatewaySettings Settings => _settings ??= 
         configuration.GetSection("ai:gateway").Get<AiGatewaySettings>() ?? new AiGatewaySettings();
+    
+    public bool Configured => !coreSettings.Standalone && !string.IsNullOrEmpty(Settings.Url) && !string.IsNullOrEmpty(Settings.Secret);
 
     public async Task<bool> IsEnabledAsync()
     {
-        if (string.IsNullOrEmpty(Url) || string.IsNullOrEmpty(Settings?.Secret))
+        if (!Configured)
         {
             return false;
         }
@@ -58,9 +61,9 @@ public class AiGateway(
         return settings.EnabledServices != null && settings.EnabledServices.Contains(TenantWalletService.AITools);
     }
     
-    public async Task<string> GetKeyAsync()
+    public async Task<string> GetKeyAsync(bool force = false)
     {
-        if (!await IsEnabledAsync())
+        if (!force && !await IsEnabledAsync())
         {
             throw new InvalidOperationException("AI Gateway is not enabled");
         }
@@ -120,8 +123,9 @@ public class AiGateway(
         }
 
         request.Content = content;
-
+#pragma warning disable CA2000 // HttpClient is short-lived and disposed by runtime
         var httpClient = httpClientFactory.CreateClient();
+#pragma warning restore CA2000
         using var response = await httpClient.SendAsync(request);
         response.EnsureSuccessStatusCode();
 

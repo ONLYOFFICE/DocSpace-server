@@ -27,11 +27,11 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
 var basePath = Path.GetFullPath(Path.Combine("..", "..", ".."));
-var isDocker = String.Compare(builder.Configuration["Docker"], "true", StringComparison.OrdinalIgnoreCase) == 0;
-var skipClient = String.Compare(builder.Configuration["SKIP_CLIENT"], "true", StringComparison.OrdinalIgnoreCase) == 0;
+var isDocker = string.Compare(builder.Configuration["Docker"], "true", StringComparison.OrdinalIgnoreCase) == 0;
+var skipClient = string.Compare(builder.Configuration["SKIP_CLIENT"], "true", StringComparison.OrdinalIgnoreCase) == 0;
 
 var connectionManager = new ConnectionStringManager(builder, basePath)
-    .AddRabbitMq()
+   
     .AddEditors();
 
 var configurator = new ProjectConfigurator(builder, connectionManager, basePath, isDocker);
@@ -39,21 +39,17 @@ var configurator = new ProjectConfigurator(builder, connectionManager, basePath,
 switch (builder.Configuration["DOTNET_LAUNCH_PROFILE"])
 {
     case "preview":
-        connectionManager.AddMySql()
-                         .AddRedis();
+        connectionManager
+            .AddMySql();
+
         configurator
-            .AddProject<ASC_Files>(Constants.FilesPort)
-            .AddProject<ASC_Files_Worker>(Constants.FilesWorkerPort)
-            .AddProject<ASC_People>(Constants.PeoplePort)
-            .AddProject<ASC_Web_Api>(Constants.WebApiPort)
-            .AddProject<ASC_Web_Studio>(Constants.WebstudioPort)
-            .AddProject<ASC_AI>(Constants.AiPort)
-            .AddProject<ASC_AI_Worker>(Constants.AiWorkerPort)
+            .AddProject<ASC_Monolith>(Constants.MonolithPort)
             .AddSocketIO();
 
         break;
     case "frontend-dev":
         connectionManager.AddMySql(withDbGate: true)
+            .AddRabbitMq()
             .AddRedis()
             .AddMailPit()
             .AddMcpServer();
@@ -78,6 +74,7 @@ switch (builder.Configuration["DOTNET_LAUNCH_PROFILE"])
         break;
     default:
         connectionManager.AddMySql(withDbGate: true)
+            .AddRabbitMq()
             .AddRedis(withRedisInsight: true)
             .AddMcpServer()
             .AddOpensearch()
@@ -114,6 +111,7 @@ if (!skipClient)
     startPackages = builder.AddJavaScriptApp("onlyoffice-client", clientBasePath, "start").WithPnpm();
 }
 
-NginxConfiguration.ConfigureOpenResty(builder, basePath, clientBasePath, startPackages, isDocker);
+var isPreview = builder.Configuration["DOTNET_LAUNCH_PROFILE"] == "preview";
+NginxConfiguration.ConfigureOpenResty(builder, basePath, clientBasePath, startPackages, isDocker, isPreview);
 
 await builder.Build().RunAsync();

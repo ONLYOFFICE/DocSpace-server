@@ -68,14 +68,13 @@ public class Recaptcha(SetupInfo setupInfo, IHttpClientFactory clientFactory)
 
             var data = $"secret={privateKey}&remoteip={ip}&response={response}";
 
-            var request = new HttpRequestMessage
-            {
-                RequestUri = new Uri(verifyUrl),
-                Method = HttpMethod.Post,
-                Content = new StringContent(data, Encoding.UTF8, "application/x-www-form-urlencoded")
-            };
+            using var request = new HttpRequestMessage(HttpMethod.Post, verifyUrl);
+            request.Content = new StringContent(data, Encoding.UTF8, "application/x-www-form-urlencoded");
 
+            #pragma warning disable CA2000 // HttpClient is short-lived and disposed by runtime
             var httpClient = clientFactory.CreateClient();
+            #pragma warning restore CA2000
+            
             using var httpClientResponse = await httpClient.SendAsync(request);
             var resp = await httpClientResponse.Content.ReadAsStringAsync();
             var recaptchData = JsonSerializer.Deserialize<RecaptchData>(resp, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });

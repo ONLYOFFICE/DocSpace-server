@@ -39,7 +39,6 @@ public abstract class RedisToolPermissionResolverBase
     }
 }
 
-[Singleton(typeof(IToolPermissionRequester))]
 public class RedisToolPermissionRequester(
     IRedisClient redisClient,
     IFusionCache cache) : RedisToolPermissionResolverBase, IToolPermissionRequester
@@ -79,7 +78,6 @@ public class RedisToolPermissionRequester(
     }
 }
 
-[Singleton(typeof(IToolPermissionProvider))]
 public class RedisToolPermissionProvider(
     IRedisClient redisClient,
     IFusionCache cache) : RedisToolPermissionResolverBase, IToolPermissionProvider

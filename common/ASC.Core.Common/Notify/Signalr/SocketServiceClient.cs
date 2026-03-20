@@ -56,7 +56,10 @@ public class SocketServiceClient(
             return;
         }
 
+        // CA2000: HttpRequestMessage is disposed by HttpClient.SendAsync in SocketService.ExecuteAsync
+#pragma warning disable CA2000
         var request = GenerateRequest(method, data);
+#pragma warning restore CA2000
         if (await channelWriter.WaitToWriteAsync())
         {
             var tenant = tenantId ?? _tenantManager.GetCurrentTenantId();
@@ -125,13 +128,18 @@ public class SocketService(
                 {
                     try
                     {
-
+#pragma warning disable CA2000
                         var httpClient = clientFactory.CreateClient();
+#pragma warning restore CA2000
                         await httpClient.SendAsync(socketData.RequestMessage, HttpCompletionOption.ResponseHeadersRead, stoppingToken);
                     }
                     catch (Exception e)
                     {
                         logger.ErrorService(e);
+                    }
+                    finally
+                    {
+                        socketData.RequestMessage.Dispose();
                     }
 
                 }

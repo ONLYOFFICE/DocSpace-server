@@ -88,7 +88,7 @@ public sealed class BackupSchedulerService(
 
             try
             {
-                tenantManager.SetCurrentTenant(new Tenant(schedule.TenantId, String.Empty));
+                tenantManager.SetCurrentTenant(new Tenant(schedule.TenantId, string.Empty));
 
                 var tariff = await tariffService.GetTariffAsync(schedule.TenantId);
 

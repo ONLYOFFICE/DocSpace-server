@@ -35,11 +35,18 @@ import org.apache.logging.log4j.util.Strings;
 import org.slf4j.MDC;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.stereotype.Component;
 
+/**
+ * RabbitMQ message publisher for audit events.
+ *
+ * <p>This publisher is only loaded when RabbitMQ classes are available on the classpath.
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@ConditionalOnClass(name = "com.rabbitmq.client.Connection")
 public class RabbitAuthorizationAuditMessagePublisher implements AuditMessagePublisher {
   @Value("${spring.application.region}")
   private String region;

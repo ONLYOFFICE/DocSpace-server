@@ -31,7 +31,8 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 /// </summary>
 /// <example>
 /// {
-///   "innerServices": [{"title": "File Storage", "size": 1073741824}]
+///   "innerServices": [{"title": "File Storage", "size": 1073741824}],
+///   "serviceName": "backup"
 /// }
 /// </example>
 public class WalletServiceDto : QuotaDto
@@ -40,7 +41,13 @@ public class WalletServiceDto : QuotaDto
     /// The list of inner services.
     /// </summary>
     /// <example>[{"title": "File Storage", "size": 1073741824}]</example>
-    public List<QuotaDto> InnerServices { get; set; }
+    public List<WalletServiceDto> InnerServices { get; set; }
+
+    /// <summary>
+    /// The service name.
+    /// </summary>
+    /// <example>backup</example>
+    public string ServiceName { get; set; }
 }
 
 /// <summary>

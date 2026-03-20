@@ -29,7 +29,7 @@ using System.Threading.Channels;
 namespace ASC.Notify.Model;
 
 [Transient]
-class NotifyClientImpl(
+internal class NotifyClientImpl(
         ILoggerProvider loggerFactory,
         NotifyEngine notifyEngine,
         IServiceProvider serviceProvider,

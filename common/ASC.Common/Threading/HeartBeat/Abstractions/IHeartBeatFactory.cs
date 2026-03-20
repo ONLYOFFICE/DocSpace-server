@@ -28,7 +28,7 @@ namespace ASC.Common.Threading.HeartBeat.Abstractions;
 
 public interface IHeartBeatFactory
 {
-    public ValueTask<IHeartBeat> CreateAsync(
+    ValueTask<IHeartBeat> CreateAsync(
         string key, 
         TimeSpan timeout, 
         TimeSpan pulseInterval, 

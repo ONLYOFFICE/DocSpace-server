@@ -24,8 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.FederatedLogin.DatabaseProviders;
-
+#nullable enable
 namespace ASC.Files.Core.ExternalDatabase;
 
 public enum DbColumnType { Text, Integer, Boolean, Date, DateTime, Enum }
@@ -282,7 +281,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
             results.Add(row);
         }
 
-        return System.Text.Json.JsonSerializer.Serialize(results);
+        return JsonSerializer.Serialize(results);
     }
 
     public Task InsertDataAsync(string tableName, Dictionary<string, object> data)
@@ -306,7 +305,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         var dbType = Provider.DatabaseType.ToLowerInvariant();
         // SQLite only: MySQL DDL (CREATE TABLE) causes an implicit commit,
         // making it impossible to wrap CREATE TABLE + INSERT in one atomic transaction.
-        DbTransaction? tx = dbType == "sqlite" ? await connection.BeginTransactionAsync() : null;
+        var tx = dbType == "sqlite" ? await connection.BeginTransactionAsync() : null;
 
         try
         {

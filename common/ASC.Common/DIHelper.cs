@@ -1,25 +1,25 @@
 ﻿// (c) Copyright Ascensio System SIA 2009-2026
-// 
+//
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
+//
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
+//
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-// 
+//
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -131,16 +131,21 @@ public abstract class DIAttribute : Attribute
 
 public class DIHelper
 {
-    private readonly Dictionary<DIAttributeType, List<string>> _services = new()
+    private readonly Dictionary<DIAttributeType, HashSet<(Type, Type)>> _services = new()
     {
         { DIAttributeType.Singleton, [] },
         { DIAttributeType.Scope, [] },
         { DIAttributeType.Transient, [] }
     };
-    private readonly List<string> _added = [];
+    private readonly HashSet<(Type Service, Type Implementation)> _added = [];
+    private readonly Dictionary<Type, DIAttribute[]> _attributeCache = [];
+    private readonly Lock _scanLock = new();
     private IServiceCollection _serviceCollection;
 
-    readonly HashSet<string> _visited = [];
+    private static readonly MethodInfo _registerDistributedTaskMethod =
+        typeof(DIHelper).GetMethod(nameof(RegisterDistributedTask))!;
+
+    private readonly HashSet<string> _visited = [];
 
     public void Scan()
     {
@@ -157,25 +162,28 @@ public class DIHelper
 
     private void Scan(Assembly assembly)
     {
-        var assemblyName = assembly.GetName();
-        if (!CheckAssemblyName(assemblyName) || _visited.Contains(assemblyName.FullName))
+        lock (_scanLock)
         {
-            return;
-        }
+            var assemblyName = assembly.GetName();
+            if (!CheckAssemblyName(assemblyName) || _visited.Contains(assemblyName.FullName))
+            {
+                return;
+            }
 
-        _visited.Add(assembly.FullName);
+            _visited.Add(assembly.FullName);
 
-        var types = assembly.GetTypes().Where(t => t.GetCustomAttributes<DIAttribute>().Any());
+            var types = assembly.GetTypes().Where(t => GetDiAttributes(t).Length > 0);
 
-        foreach (var a in types)
-        {
-            TryAdd(a);
-        }
+            foreach (var a in types)
+            {
+                TryAdd(a);
+            }
 
-        var references = assembly.GetReferencedAssemblies();
-        foreach (var reference in references.Where(r => CheckAssemblyName(r) && !_visited.Contains(r.FullName)))
-        {
-            Assembly.Load(reference);
+            var references = assembly.GetReferencedAssemblies();
+            foreach (var reference in references.Where(r => CheckAssemblyName(r) && !_visited.Contains(r.FullName)))
+            {
+                Assembly.Load(reference);
+            }
         }
     }
 
@@ -212,7 +220,7 @@ public class DIHelper
             }
             else if (service.IsGenericTypeDefinition)
             {
-                var attributes = service.GetCustomAttributes<DIAttribute>();
+                var attributes = GetDiAttributes(service);
                 foreach (var attr in attributes)
                 {
                     if (attr.GenericArguments == null || attr.GenericArguments.Length == 0)
@@ -226,22 +234,18 @@ public class DIHelper
             }
         }
 
-        var serviceName = $"{service}{implementation}";
-
-        if (_added.Contains(serviceName))
+        if (!_added.Add((service, implementation)))
         {
             return;
         }
-
-        _added.Add(serviceName);
 
         di ??= serviceGenericTypeDefinition != null && (
             serviceGenericTypeDefinition == typeof(IConfigureOptions<>) ||
             serviceGenericTypeDefinition == typeof(IPostConfigureOptions<>) ||
             serviceGenericTypeDefinition == typeof(IOptionsMonitor<>)
             ) && implementation != null ?
-            implementation.GetCustomAttributes<DIAttribute>().FirstOrDefault() :
-            service.GetCustomAttributes<DIAttribute>().FirstOrDefault();
+            GetDiAttributes(implementation).FirstOrDefault() :
+            GetDiAttributes(service).FirstOrDefault();
 
         if (!service.IsInterface || implementation != null)
         {
@@ -404,31 +408,28 @@ public class DIHelper
 
     private bool Register(DIAttribute c, Type service, Type implementation = null)
     {
+        var interfaces = service.GetInterfaces();
         if (service.IsSubclassOf(typeof(ControllerBase)) ||
-            service.GetInterfaces().Contains(typeof(IResourceFilter)) ||
-            service.GetInterfaces().Contains(typeof(IDictionary<string, string>)))
+            Array.IndexOf(interfaces, typeof(IResourceFilter)) >= 0 ||
+            Array.IndexOf(interfaces, typeof(IDictionary<string, string>)) >= 0)
         {
             return true;
         }
 
-        var serviceName = $"{service}{implementation}";
-
-        if (!_services[c.DiAttributeType].Contains(serviceName))
+        if (!_services[c.DiAttributeType].Add((service, implementation)))
         {
-            if (service.IsSubclassOf(typeof(DistributedTask)))
-            {
-                var mi = typeof(DIHelper).GetMethod("RegisterDistributedTask");
-                var fooRef = mi.MakeGenericMethod(service);
-                fooRef.Invoke(this, null);
-            }
-
-            c.TryAdd(_serviceCollection, service, implementation);
-            _services[c.DiAttributeType].Add(serviceName);
-
-            return true;
+            return false;
         }
 
-        return false;
+        if (service.IsSubclassOf(typeof(DistributedTask)))
+        {
+            var fooRef = _registerDistributedTaskMethod.MakeGenericMethod(service);
+            fooRef.Invoke(this, null);
+        }
+
+        c.TryAdd(_serviceCollection, service, implementation);
+
+        return true;
     }
 
     public void RegisterDistributedTask<T>() where T : DistributedTask
@@ -436,5 +437,16 @@ public class DIHelper
         _serviceCollection.TryAddSingleton(Channel.CreateUnbounded<T>());
         _serviceCollection.TryAddSingleton(svc => svc.GetRequiredService<Channel<T>>().Writer);
         _serviceCollection.TryAddTransient<DistributedTaskQueue<T>>();
+    }
+
+    private DIAttribute[] GetDiAttributes(Type type)
+    {
+        if (!_attributeCache.TryGetValue(type, out var attrs))
+        {
+            attrs = type.GetCustomAttributes<DIAttribute>().ToArray();
+            _attributeCache[type] = attrs;
+        }
+
+        return attrs;
     }
 }

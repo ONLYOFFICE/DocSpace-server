@@ -79,7 +79,7 @@ public enum WhiteLabelLogoType
     DiagramEditor = 15,
 
     [Description("Diagram editor embed")]
-    DiagramEditorEmbed = 16,
+    DiagramEditorEmbed = 16
 }
 
 public static class WhiteLabelLogoTypeHelper

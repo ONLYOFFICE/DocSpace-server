@@ -65,7 +65,6 @@ global using ASC.Core.Tenants;
 global using ASC.Core.Users;
 global using ASC.MessagingSystem.Core;
 global using ASC.Notify;
-global using ASC.Notify.Engine;
 global using ASC.Notify.Model;
 global using ASC.Notify.Patterns;
 global using ASC.Notify.Recipients;

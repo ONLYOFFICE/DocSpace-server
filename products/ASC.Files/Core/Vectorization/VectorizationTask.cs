@@ -121,7 +121,7 @@ public class VectorizationTask : DistributedTaskProgress
             }
 
             await collection.EnsureCollectionExistsAsync(CancellationToken);
-            var embeddingGenerator = await generatorFactory.CreateAsync(room.SettingsChatProviderId);
+            var embeddingGenerator = await generatorFactory.CreateAsync();
 
             var textChunks = await fileProcessor.GetTextChunksAsync(file, splitterSettings);
 
