@@ -120,6 +120,12 @@ public class AiSettingsDto
     /// </summary>
     /// <example>generate_presentation</example>
     public required string GeneratePresentationToolName { get; init; }
+
+    /// <summary>
+    /// Indicates whether the system-level AI provider is enabled.
+    /// </summary>
+    /// <example>true</example>
+    public bool SystemAiEnabled { get; init; }
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,

@@ -81,13 +81,13 @@ public class TenantQuota
     /// <summary>
     /// The service name.
     /// </summary>
-    /// <example>space</example>
+    /// <example>backup</example>
     public string ServiceName { get; set; }
 
     /// <summary>
     /// The service group.
     /// </summary>
-    /// <example>ai</example>
+    /// <example>services</example>
     public string ServiceGroup { get; set; }
 
     /// <summary>
@@ -700,7 +700,7 @@ public class TenantQuota
     }
     public string GetPaymentId()
     {
-        return Wallet && !string.IsNullOrEmpty(ServiceName) ? ServiceName : ProductId;
+        return string.IsNullOrEmpty(ProductId) ? ServiceName : ProductId;
     }
 
     internal string GetFeature(string name)

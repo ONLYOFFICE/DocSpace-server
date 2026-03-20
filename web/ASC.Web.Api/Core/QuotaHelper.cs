@@ -84,10 +84,12 @@ public class QuotaHelper(
             }
             
             var quotaDto = await ToQuotaDto(quota, userType, false, enabledWalletServices);
+            var walletServiceDto = quotaDto.MapToWalletServiceDto();
+            walletServiceDto.ServiceName = quota.ServiceName;
 
             if (quota.Visible)
             {
-                dict.Add(quota.Name, quotaDto.MapToWalletServiceDto());
+                dict.Add(quota.Name, walletServiceDto);
                 continue;
             }
 
@@ -95,11 +97,11 @@ public class QuotaHelper(
             {
                 if (dict[quota.ServiceGroup].InnerServices == null)
                 {
-                    dict[quota.ServiceGroup].InnerServices = [quotaDto];
+                    dict[quota.ServiceGroup].InnerServices = [walletServiceDto];
                 }
                 else
                 {
-                    dict[quota.ServiceGroup].InnerServices.Add(quotaDto);
+                    dict[quota.ServiceGroup].InnerServices.Add(walletServiceDto);
                 }
             }
         }

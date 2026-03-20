@@ -36,31 +36,43 @@ public class EmbeddingGeneratorFactory(
     InstanceCrypto instanceCrypto,
     VectorizationGlobalSettings vectorizationGlobalSettings)
 {
-    public async Task<IEmbeddingGenerator<string, Embedding<float>>> CreateAsync(int providerId)
+    public async Task<IEmbeddingGenerator<string, Embedding<float>>> CreateAsync()
     {
+        var settings = await settingsManager.LoadAsync<EncryptedVectorizationSettings>();
+
+        var providerType = settings.ProviderType;
+        if (providerType == EmbeddingProviderType.None
+            && !settings.IsConfigured
+            && await gateway.IsEnabledAsync())
+        {
+            providerType = EmbeddingProviderType.PortalAi;
+        }
+
         string url;
         string key;
         string modelId;
 
-        if (providerId == AiGateway.ProviderId)
+        switch (providerType)
         {
-            url = gateway.Url;
-            key = await gateway.GetKeyAsync();
-            modelId = vectorizationGlobalSettings.Model.Id;
-        }
-        else
-        {
-            var settings = await settingsManager.LoadAsync<EncryptedVectorizationSettings>();
-
-            (url, modelId) = settings.ProviderType switch
-            {
-                EmbeddingProviderType.OpenAi => (VectorizationGlobalSettings.OpenAiBaseUrl, vectorizationGlobalSettings.Model.Id),
-                EmbeddingProviderType.OpenRouter => (VectorizationGlobalSettings.OpenRouterBaseUrl, $"openai/{vectorizationGlobalSettings.Model.Id}"),
-                EmbeddingProviderType.None => throw new InvalidOperationException("Vectorization settings are not configured"),
-                _ => throw new ArgumentOutOfRangeException()
-            };
-
-            key = await instanceCrypto.DecryptAsync(settings.Key);
+            case EmbeddingProviderType.PortalAi:
+                url = gateway.Url;
+                key = await gateway.GetKeyAsync();
+                modelId = vectorizationGlobalSettings.Model.Id;
+                break;
+            case EmbeddingProviderType.OpenAi:
+                url = VectorizationGlobalSettings.OpenAiBaseUrl;
+                key = await instanceCrypto.DecryptAsync(settings.Key);
+                modelId = vectorizationGlobalSettings.Model.Id;
+                break;
+            case EmbeddingProviderType.OpenRouter:
+                url = VectorizationGlobalSettings.OpenRouterBaseUrl;
+                key = await instanceCrypto.DecryptAsync(settings.Key);
+                modelId = $"openai/{vectorizationGlobalSettings.Model.Id}";
+                break;
+            case EmbeddingProviderType.None:
+                throw new InvalidOperationException("Vectorization settings are not configured");
+            default:
+                throw new ArgumentOutOfRangeException();
         }
 
         ArgumentException.ThrowIfNullOrEmpty(url);
