@@ -99,15 +99,14 @@ public class IdentityClient(MachinePseudoKeys machinePseudoKeys,
         {
 
             var jwt = await GenerateJwtTokenAsync(true, userId);
+#pragma warning disable CA2000
             var httpClient = httpClientFactory.CreateClient();
-
-            var request = new HttpRequestMessage
-            {
-                RequestUri = new Uri(Url + "api/2.0/clients"),
-                Method = HttpMethod.Delete
-            };
+#pragma warning restore CA2000
+            
+            using var request = new HttpRequestMessage(HttpMethod.Delete, Url + "api/2.0/clients");
+            
             request.Headers.Add("x-signature", jwt);
-            var response = await httpClient.SendAsync(request);
+            using var response = await httpClient.SendAsync(request);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -121,15 +120,13 @@ public class IdentityClient(MachinePseudoKeys machinePseudoKeys,
         if (!string.IsNullOrEmpty(Url))
         {
             var jwt = await GenerateJwtTokenAsync(true, Guid.Empty);
+#pragma warning disable CA2000
             var httpClient = httpClientFactory.CreateClient();
-
-            var request = new HttpRequestMessage
-            {
-                RequestUri = new Uri(Url + "api/2.0/clients/tenant"),
-                Method = HttpMethod.Delete
-            };
+#pragma warning restore CA2000
+            
+            using var request = new HttpRequestMessage(HttpMethod.Delete, (Url + "api/2.0/clients/tenant"));
             request.Headers.Add("x-signature", jwt);
-            var response = await httpClient.SendAsync(request);
+            using var response = await httpClient.SendAsync(request);
 
             if (!response.IsSuccessStatusCode && throwIfNotSuccess)
             {

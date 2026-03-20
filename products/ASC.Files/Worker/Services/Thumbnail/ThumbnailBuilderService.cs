@@ -33,6 +33,8 @@ public class ThumbnailBuilderService(IServiceScopeFactory serviceScopeFactory,
         ChannelReader<FileData<int>> channelReader)
     : BackgroundService
 {
+    private readonly SemaphoreSlim _processingSemaphore = new(settings.MaxConcurrentProcessing);
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         logger.InformationThumbnailWorkerRunnig();
@@ -64,6 +66,7 @@ public class ThumbnailBuilderService(IServiceScopeFactory serviceScopeFactory,
             {
                 await foreach (var fileData in reader.ReadAllAsync(stoppingToken))
                 {
+                    await _processingSemaphore.WaitAsync(stoppingToken);
                     try
                     {
                         await using var scope = serviceScopeFactory.CreateAsyncScope();
@@ -79,12 +82,14 @@ public class ThumbnailBuilderService(IServiceScopeFactory serviceScopeFactory,
                     {
                         logger.ErrorWithException(e);
                     }
+                    finally
+                    {
+                        _processingSemaphore.Release();
+                    }
                 }
             }, stoppingToken));
         }
 
         await Task.WhenAll(tasks);
     }
-
-
 }

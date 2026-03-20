@@ -34,6 +34,7 @@ import org.apache.logging.log4j.util.Strings;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.stereotype.Component;
 
 /**
@@ -42,10 +43,13 @@ import org.springframework.stereotype.Component;
  * <p>This component listens to messages in the dead-letter queue and attempts to reprocess them up
  * to a maximum number of retries. If the retry count is exceeded, the message is logged as a
  * failure.
+ *
+ * <p>This listener is only loaded when RabbitMQ client classes are available on the classpath.
  */
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@ConditionalOnClass(name = "com.rabbitmq.client.Connection")
 public class AuthorizationMessagingCleanupRetryListener {
   private final RabbitTemplate rabbitTemplate;
 

@@ -226,7 +226,7 @@ public class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationD
     }
 }
 
-class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
+internal class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
 {
     private readonly Dictionary<T, (string, string)> _files;
     private readonly IDictionary<string, StringValues> _headers;

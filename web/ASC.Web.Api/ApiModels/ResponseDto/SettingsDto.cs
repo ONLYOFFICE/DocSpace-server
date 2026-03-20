@@ -294,5 +294,6 @@ public class SettingsDto
     /// <summary>
     /// Specifies if an external database is connected for storing form results.
     /// </summary>
+    /// <example>true</example>
     public bool ExternalDbEnabled { get; set; }
 }

@@ -24,11 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Threading.Channels;
-
-using ASC.Common.Threading;
-using ASC.MessagingSystem.Data;
-using ASC.Web.Studio.Wallet;
+using ASC.Web.Studio.Extensions;
 
 namespace ASC.Web.Studio;
 
@@ -36,8 +32,8 @@ public class Startup : BaseStartup
 {
     public Startup(IConfiguration configuration) : base(configuration)
     {
-        if (configuration.GetSection("RabbitMQ").GetChildren().Any() && 
-            String.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
+        if (configuration.GetSection("RabbitMQ").GetChildren().Any() &&
+            string.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
         {
             configuration["RabbitMQ:ClientProvidedName"] = Program.AppName;
         }
@@ -47,12 +43,7 @@ public class Startup : BaseStartup
     {
         base.Configure(app, env);
 
-        if (OpenApiEnabled && _configuration.GetValue<bool>("openApi:enableUI"))
-        {
-            var endpoints = new Dictionary<string, string>();
-            _configuration.Bind("openApi:endpoints", endpoints);
-            app.UseOpenApiUI(endpoints);
-        }
+        app.UseWebStudioMiddleware(_configuration);
 
         app.UseRouting();
 
@@ -62,47 +53,12 @@ public class Startup : BaseStartup
         {
             endpoints.InitializeHttpHandlers();
         });
-
-        app.MapWhen(
-              context => context.Request.Path.ToString().EndsWith("ssologin.ashx"),
-              appBranch =>
-              {
-                  appBranch.UseSsoHandler();
-              });
-
-        app.MapWhen(
-            context => context.Request.Path.ToString().EndsWith("login.ashx"),
-            appBranch =>
-            {
-                appBranch.UseLoginHandler();
-            });
     }
 
     public override async Task ConfigureServices(WebApplicationBuilder builder)
     {
         await base.ConfigureServices(builder);
 
-        var services = builder.Services;
-        services.AddMemoryCache();
-        services.AddBaseDbContextPool<FilesDbContext>();
-        services.RegisterQuotaFeature();
-        services.AddHttpClient();
-        services.AddHostedService<WorkerService>();
-        services.TryAddSingleton(new ConcurrentQueue<WebhookRequestIntegrationEvent>());
-
-        services.AddSingleton(Channel.CreateUnbounded<EventData>());
-        services.AddSingleton(svc => svc.GetRequiredService<Channel<EventData>>().Reader);
-        services.AddSingleton(svc => svc.GetRequiredService<Channel<EventData>>().Writer);
-        services.AddScoped<EventDataIntegrationEventHandler>();
-        services.AddSingleton<MessageSenderService>();
-        services.AddHostedService<MessageSenderService>();
-
-        services.RegisterQueue<RemovePortalOperation>();
-        services.RegisterQueue<MigrationOperation>(timeUntilUnregisterInSeconds: 60 * 60 * 24);
-
-        services.AddActivePassiveHostedService<TopUpWalletService>(_configuration);
-        services.AddActivePassiveHostedService<RenewSubscriptionService>(_configuration);
-
-        services.AddWebhookSenderHttpClient(_configuration);
+        builder.Services.AddWebStudioServices(_configuration);
     }
 }

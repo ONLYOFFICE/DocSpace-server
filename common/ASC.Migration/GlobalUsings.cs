@@ -38,10 +38,8 @@ global using ASC.Common.Security.Authentication;
 global using ASC.Common.Threading;
 global using ASC.Common.Web;
 global using ASC.Core;
-global using ASC.Core.Common.Core;
 global using ASC.Core.Common.Quota;
 global using ASC.Core.Common.Quota.Features;
-global using ASC.Core.Common.Users;
 global using ASC.Core.Users;
 global using ASC.Data.Storage;
 global using ASC.Data.Storage.DataOperators;
@@ -63,7 +61,6 @@ global using ASC.Web.Core;
 global using ASC.Web.Core.Users;
 global using ASC.Web.Files.Classes;
 global using ASC.Web.Files.Services.WCFService;
-global using ASC.Web.Files.Utils;
 
 global using DotNetOpenAuth.Messaging;
 

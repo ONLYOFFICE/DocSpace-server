@@ -1137,6 +1137,11 @@ public partial class SettingsController(
             {
                 await userSocketManager.ConnectTelegram(tenantId, authContext.CurrentAccount.ID);
             }
+
+            if (consumer is ExternalDatabaseProvider externalDbProvider)
+            {
+                await userSocketManager.UpdateExternalDbSettingsAsync(tenantId, externalDbProvider.IsEnabled());
+            }
         }
 
         return changed;

@@ -508,7 +508,7 @@ public class BackupController(
     }
 
     /// <remarks>
-    /// Returns the number of backups for a period of time. The default is one month.
+    /// Returns the number of backups for a period of time. The default is the current calendar month.
     /// </remarks>
     /// <summary>Get the number of backups</summary>
     /// <path>api/2.0/backup/getbackupscount</path>
@@ -522,8 +522,9 @@ public class BackupController(
     {
         var tenantId = tenantManager.GetCurrentTenantId();
 
-        var to = dto.To ?? DateTime.UtcNow.AddSeconds(1);
-        var from = dto.From ?? to.AddMonths(-1);
+        var (defaultFrom, defaultTo) = BackupPeriodHelper.GetCurrentMonthRange();
+        var to = dto.To ?? defaultTo;
+        var from = dto.From ?? defaultFrom;
 
         if (from > to)
         {

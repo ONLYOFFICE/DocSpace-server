@@ -36,9 +36,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Optional;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -54,11 +54,16 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * updated; otherwise, the request is rejected.
  */
 @Slf4j
-@Component
-@RequiredArgsConstructor
+@Component("registrationBasicSignatureAuthenticationFilter")
 public class BasicSignatureAuthenticationFilter extends OncePerRequestFilter {
   private static final String SIGNATURE_COOKIE = "x-signature";
   private final AuthenticationManager authenticationManager;
+
+  public BasicSignatureAuthenticationFilter(
+      @Qualifier("registrationSignatureAuthenticationManager")
+          AuthenticationManager authenticationManager) {
+    this.authenticationManager = authenticationManager;
+  }
 
   /**
    * Performs filtering of incoming HTTP requests to authenticate requests containing the signature

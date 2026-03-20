@@ -24,7 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.TelegramService.Services;
+using ASC.TelegramService.Extensions;
 
 namespace ASC.TelegramService;
 
@@ -32,8 +32,8 @@ public class Startup : BaseStartup
 {
     public Startup(IConfiguration configuration) : base(configuration)
     {
-        if (configuration.GetSection("RabbitMQ").GetChildren().Any() && 
-            String.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
+        if (configuration.GetSection("RabbitMQ").GetChildren().Any() &&
+            string.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
         {
             configuration["RabbitMQ:ClientProvidedName"] = Program.AppName;
         }
@@ -41,9 +41,8 @@ public class Startup : BaseStartup
 
     public override async Task ConfigureServices(WebApplicationBuilder builder)
     {
-        var services = builder.Services;
         await base.ConfigureServices(builder);
 
-        services.AddActivePassiveHostedService<TelegramListenerService>(_configuration);
+        builder.Services.AddTelegramServices(_configuration);
     }
 }

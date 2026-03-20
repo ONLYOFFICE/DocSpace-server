@@ -140,12 +140,15 @@ public class TelegramHelper(
             return new TelegramBotClient(token);
         }
 
-        var httpClient = new HttpClient(new HttpClientHandler {
+#pragma warning disable CA2000 // HttpClient and handler are owned by TelegramBotClient
+        var handler = new HttpClientHandler {
             UseProxy = true,
             Proxy = new WebProxy(proxy)
-        });
+        };
+        var httpClient = new HttpClient(handler);
 
         return new TelegramBotClient(token, httpClient);
+#pragma warning restore CA2000
     }
 }
 

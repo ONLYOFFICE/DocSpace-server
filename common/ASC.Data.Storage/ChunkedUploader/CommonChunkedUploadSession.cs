@@ -110,7 +110,7 @@ public class CommonChunkedUploadSession(long bytesTotal) : ICloneable
                         newItems.Add(item.Key, value.ToString());
                         break;
                     case JsonValueKind.Number:
-                        newItems.Add(item.Key, Int32.Parse(value.ToString()));
+                        newItems.Add(item.Key, int.Parse(value.ToString()));
                         break;
                     case JsonValueKind.Array:
                         newItems.Add(item.Key, value.EnumerateArray().Select(o => o.ToString()).ToList());

@@ -27,7 +27,7 @@
 namespace ASC.Core.Data;
 
 [Scope]
-class DbQuotaService(IDbContextFactory<CoreDbContext> dbContextManager, TenantQuotaMapper tenantQuotaMapper) : IQuotaService
+internal class DbQuotaService(IDbContextFactory<CoreDbContext> dbContextManager, TenantQuotaMapper tenantQuotaMapper) : IQuotaService
 {
     public async Task<IEnumerable<TenantQuota>> GetTenantQuotasAsync()
     {

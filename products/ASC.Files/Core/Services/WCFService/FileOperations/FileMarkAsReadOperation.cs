@@ -64,7 +64,7 @@ public class FileMarkAsReadOperation : ComposeFileOperation<FileMarkAsReadOperat
     }
 }
 
-class FileMarkAsReadOperation<T> : FileOperation<FileMarkAsReadOperationData<T>, T>
+internal class FileMarkAsReadOperation<T> : FileOperation<FileMarkAsReadOperationData<T>, T>
 {
     private readonly IDictionary<string, StringValues> _headers;
     public override FileOperationType FileOperationType { get; set; } = FileOperationType.MarkAsRead;

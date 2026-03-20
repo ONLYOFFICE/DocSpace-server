@@ -39,8 +39,5 @@ public enum TenantWalletService
     Backup = -12,
 
     [Description("AITools")]
-    AITools = -13,
-
-    [Description("WebSearch")]
-    WebSearch = -14
+    AITools = -13
 }

@@ -109,7 +109,7 @@ public class JwtBearerAuthHandler(
 
         var subject = validatedToken.Subject;
 
-        if (String.IsNullOrEmpty(subject) || !Guid.TryParse(subject, out var userId))
+        if (string.IsNullOrEmpty(subject) || !Guid.TryParse(subject, out var userId))
         {
             throw new AuthenticationException("Claim 'sub' is not present in JWT");
         }
@@ -164,8 +164,9 @@ public class JwtBearerAuthHandler(
         {
             _ = new JwtSecurityTokenHandler()
                                  .ValidateToken(token, validationParameters, out var rawValidatedToken);
-
+#pragma warning disable CA2000
             var httpClient = httpClientFactory.CreateClient();
+#pragma warning restore CA2000
 
             var response = await httpClient.IntrospectTokenAsync(new TokenIntrospectionRequest
             {

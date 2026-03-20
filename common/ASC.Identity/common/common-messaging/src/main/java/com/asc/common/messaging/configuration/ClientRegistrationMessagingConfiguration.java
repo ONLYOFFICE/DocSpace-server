@@ -29,6 +29,7 @@ package com.asc.common.messaging.configuration;
 
 import org.springframework.amqp.core.*;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -40,8 +41,11 @@ import org.springframework.context.annotation.Profile;
  * <p>This configuration defines exchanges, queues, and bindings for handling client retrieval RPC
  * requests in a multi-region SaaS environment. It enables cross-region client lookups for token
  * introspection.
+ *
+ * <p>This configuration is only loaded when RabbitMQ classes are available on the classpath.
  */
 @Configuration
+@ConditionalOnClass(Queue.class)
 public class ClientRegistrationMessagingConfiguration {
   @Value("${spring.application.region}")
   private String region;

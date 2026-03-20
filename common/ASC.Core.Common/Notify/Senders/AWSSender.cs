@@ -131,7 +131,7 @@ public class AWSSender : SmtpSender, IDisposable
             _semaphore.Release();
         }
 
-        var message = BuildMailMessage(m);
+        using var message = BuildMailMessage(m);
 
         using var ms = new MemoryStream();
         await message.WriteToAsync(ms);

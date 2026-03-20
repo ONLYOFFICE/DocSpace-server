@@ -27,7 +27,7 @@
 namespace ASC.Data.Backup.Services;
 
 [Singleton]
-internal sealed class BackupCleanerService(
+public sealed class BackupCleanerService(
     BackupConfigurationService backupConfigurationService,
     ILogger<BackupCleanerService> logger,
     IServiceScopeFactory scopeFactory)

@@ -1,0 +1,260 @@
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <statusListener class="ch.qos.logback.core.status.NopStatusListener" />
+
+    <!-- General Spring Properties -->
+    <springProperty scope="context" name="applicationContext" source="spring.application.name"/>
+    <timestamp key="startupTime" datePattern="yyyy/MM/dd'T'HH.mm.ss"/>
+    <define name="randomString" class="com.asc.common.autoconfigurations.cloudwatch.CloudWatchAppenderRandomPropertyDefiner"/>
+
+    <!-- Dev / default profiles: human-readable console logs -->
+    <springProfile name="default,development,dev,d">
+        <condition class="com.asc.common.autoconfigurations.condition.PropertyIsNotDefinedCondition">
+            <key>LOG_FILE_PATH</key>
+        </condition>
+        <if>
+            <then>
+                <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+                    <encoder>
+                        <pattern>%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m %X %n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}</pattern>
+                        <charset>utf8</charset>
+                    </encoder>
+                </appender>
+
+                <appender name="CONSOLE_ASYNC" class="net.logstash.logback.appender.LoggingEventAsyncDisruptorAppender">
+                    <appender-ref ref="CONSOLE" />
+                </appender>
+            </then>
+        </if>
+    </springProfile>
+
+    <springProfile name="default,development,dev,d">
+        <condition class="com.asc.common.autoconfigurations.condition.PropertyIsDefinedCondition">
+            <key>LOG_FILE_PATH</key>
+        </condition>
+        <if>
+            <then>
+                <appender name="JSON_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+                    <file>${LOG_FILE_PATH}</file>
+                    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                        <fileNamePattern>
+                            ${LOG_FILE_PATH}.%d{yyyy-MM-dd}
+                        </fileNamePattern>
+                        <maxHistory>30</maxHistory>
+                    </rollingPolicy>
+                    <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                        <includeContext>false</includeContext>
+                        <customFields>{"applicationContext":"${applicationContext}", "instanceId":"${HOSTNAME}"}</customFields>
+                        <fieldNames>
+                            <level>level</level>
+                            <logger>sourceContext</logger>
+                            <timestamp>date</timestamp>
+                            <thread>threadId</thread>
+                            <levelValue>[ignore]</levelValue>
+                        </fieldNames>
+                        <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+                            <rootCauseFirst>true</rootCauseFirst>
+                            <maxDepthPerThrowable>4</maxDepthPerThrowable>
+                            <shortenedClassNameLength>25</shortenedClassNameLength>
+                        </throwableConverter>
+                    </encoder>
+                </appender>
+            </then>
+        </if>
+    </springProfile>
+
+    <springProfile name="staging,stage,s">
+        <condition class="com.asc.common.autoconfigurations.condition.PropertyIsNotDefinedCondition">
+            <key>LOG_FILE_PATH</key>
+        </condition>
+        <if>
+            <then>
+                <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+                    <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                        <includeContext>false</includeContext>
+                        <customFields>{"applicationContext":"${applicationContext}", "instanceId":"${HOSTNAME}"}</customFields>
+                        <fieldNames>
+                            <level>level</level>
+                            <logger>sourceContext</logger>
+                            <timestamp>date</timestamp>
+                            <thread>threadId</thread>
+                            <levelValue>[ignore]</levelValue>
+                        </fieldNames>
+                        <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+                            <rootCauseFirst>true</rootCauseFirst>
+                            <maxDepthPerThrowable>4</maxDepthPerThrowable>
+                            <shortenedClassNameLength>25</shortenedClassNameLength>
+                        </throwableConverter>
+                    </encoder>
+                </appender>
+
+                <appender name="JSON_CONSOLE_ASYNC" class="net.logstash.logback.appender.LoggingEventAsyncDisruptorAppender">
+                    <appender-ref ref="JSON_CONSOLE" />
+                </appender>
+            </then>
+        </if>
+    </springProfile>
+
+    <springProfile name="staging,stage,s">
+        <condition class="com.asc.common.autoconfigurations.condition.PropertyIsDefinedCondition">
+            <key>LOG_FILE_PATH</key>
+        </condition>
+        <if>
+            <then>
+                <appender name="JSON_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+                    <file>${LOG_FILE_PATH}</file>
+                    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                        <fileNamePattern>
+                            ${LOG_FILE_PATH}.%d{yyyy-MM-dd}
+                        </fileNamePattern>
+                        <maxHistory>30</maxHistory>
+                    </rollingPolicy>
+                    <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                        <includeContext>false</includeContext>
+                        <customFields>{"applicationContext":"${applicationContext}", "instanceId":"${HOSTNAME}"}</customFields>
+                        <fieldNames>
+                            <level>level</level>
+                            <logger>sourceContext</logger>
+                            <timestamp>date</timestamp>
+                            <thread>threadId</thread>
+                            <levelValue>[ignore]</levelValue>
+                        </fieldNames>
+                        <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+                            <rootCauseFirst>true</rootCauseFirst>
+                            <maxDepthPerThrowable>4</maxDepthPerThrowable>
+                            <shortenedClassNameLength>25</shortenedClassNameLength>
+                        </throwableConverter>
+                    </encoder>
+                </appender>
+            </then>
+        </if>
+    </springProfile>
+
+    <springProfile name="production,prod,p">
+        <condition class="com.asc.common.autoconfigurations.condition.PropertyIsNotDefinedCondition">
+            <key>LOG_FILE_PATH</key>
+        </condition>
+        <if>
+            <then>
+                <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+                    <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                        <includeContext>false</includeContext>
+                        <customFields>{"applicationContext":"${applicationContext}", "instanceId":"${HOSTNAME}"}</customFields>
+                        <fieldNames>
+                            <level>level</level>
+                            <logger>sourceContext</logger>
+                            <timestamp>date</timestamp>
+                            <thread>threadId</thread>
+                            <levelValue>[ignore]</levelValue>
+                        </fieldNames>
+                        <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+                            <rootCauseFirst>true</rootCauseFirst>
+                            <maxDepthPerThrowable>4</maxDepthPerThrowable>
+                            <shortenedClassNameLength>25</shortenedClassNameLength>
+                        </throwableConverter>
+                    </encoder>
+                </appender>
+
+                <appender name="JSON_CONSOLE_ASYNC" class="net.logstash.logback.appender.LoggingEventAsyncDisruptorAppender">
+                    <appender-ref ref="JSON_CONSOLE" />
+                </appender>
+            </then>
+        </if>
+    </springProfile>
+
+    <springProfile name="production,prod,p">
+        <condition class="com.asc.common.autoconfigurations.condition.PropertyIsDefinedCondition">
+            <key>LOG_FILE_PATH</key>
+        </condition>
+        <if>
+            <then>
+                <appender name="JSON_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+                    <file>${LOG_FILE_PATH}</file>
+                    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                        <fileNamePattern>
+                            ${LOG_FILE_PATH}.%d{yyyy-MM-dd}
+                        </fileNamePattern>
+                        <maxHistory>30</maxHistory>
+                    </rollingPolicy>
+                    <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                        <includeContext>false</includeContext>
+                        <customFields>{"applicationContext":"${applicationContext}", "instanceId":"${HOSTNAME}"}</customFields>
+                        <fieldNames>
+                            <level>level</level>
+                            <logger>sourceContext</logger>
+                            <timestamp>date</timestamp>
+                            <thread>threadId</thread>
+                            <levelValue>[ignore]</levelValue>
+                        </fieldNames>
+                        <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+                            <rootCauseFirst>true</rootCauseFirst>
+                            <maxDepthPerThrowable>4</maxDepthPerThrowable>
+                            <shortenedClassNameLength>25</shortenedClassNameLength>
+                        </throwableConverter>
+                    </encoder>
+                </appender>
+            </then>
+        </if>
+    </springProfile>
+
+    <!-- Suppress Hibernate batch processing logs -->
+    <logger name="org.hibernate.orm.jdbc.batch" level="OFF" />
+
+    <!-- Suppress Deadlock logs -->
+    <logger name="java.sql.BatchUpdateException" level="OFF" />
+    <logger name="org.hibernate.engine" level="OFF" />
+
+    <springProfile name="default,development,dev,d">
+        <condition class="com.asc.common.autoconfigurations.condition.PropertyIsDefinedCondition">
+            <key>LOG_FILE_PATH</key>
+        </condition>
+        <if>
+            <then>
+                <root level="DEBUG">
+                    <appender-ref ref="JSON_FILE"/>
+                </root>
+            </then>
+            <else>
+                <root level="DEBUG">
+                    <appender-ref ref="CONSOLE_ASYNC"/>
+                </root>
+            </else>
+        </if>
+    </springProfile>
+
+    <springProfile name="staging,stage,s">
+        <condition class="com.asc.common.autoconfigurations.condition.PropertyIsDefinedCondition">
+            <key>LOG_FILE_PATH</key>
+        </condition>
+        <if>
+            <then>
+                <root level="INFO">
+                    <appender-ref ref="JSON_FILE"/>
+                </root>
+            </then>
+            <else>
+                <root level="INFO">
+                    <appender-ref ref="JSON_CONSOLE_ASYNC"/>
+                </root>
+            </else>
+        </if>
+    </springProfile>
+
+    <springProfile name="production,prod,p">
+        <condition class="com.asc.common.autoconfigurations.condition.PropertyIsDefinedCondition">
+            <key>LOG_FILE_PATH</key>
+        </condition>
+        <if>
+            <then>
+                <root level="ERROR">
+                    <appender-ref ref="JSON_FILE"/>
+                </root>
+            </then>
+            <else>
+                <root level="ERROR">
+                    <appender-ref ref="JSON_CONSOLE_ASYNC"/>
+                </root>
+            </else>
+        </if>
+    </springProfile>
+</configuration>

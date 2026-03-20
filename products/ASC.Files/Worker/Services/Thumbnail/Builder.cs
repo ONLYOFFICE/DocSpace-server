@@ -157,13 +157,12 @@ public class Builder<T>(
 
     private async Task MakeThumbnailFromVideo(IFileDao<T> fileDao, File<T> file)
     {
-        var streamFile = await fileDao.GetFileStreamAsync(file);
-
         var thumbPath = tempPath.GetTempFileName("jpg");
         var tempFilePath = tempPath.GetTempFileName(Path.GetExtension(file.Title));
 
         try
         {
+            await using (var streamFile = await fileDao.GetFileStreamAsync(file))
             await using (var fileStream = new FileStream(tempFilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.Read))
             {
                 await streamFile.CopyToAsync(fileStream);
@@ -262,7 +261,9 @@ public class Builder<T>(
         using var request = new HttpRequestMessage();
         request.RequestUri = new Uri(thumbnailUrl);
 
+#pragma warning disable CA2000 // HttpClient is short-lived and disposed by runtime
         var httpClient = clientFactory.CreateClient();
+#pragma warning restore CA2000
         using var response = await httpClient.SendAsync(request);
         await using (var stream = await response.Content.ReadAsStreamAsync())
         {
@@ -370,22 +371,42 @@ public class Builder<T>(
     {
         using var sourceImg = new MagickImage(stream);
 
+        var sortedSizes = settings.Sizes
+            .OrderByDescending(s => (long)s.Width * s.Height)
+            .ToList();
+
+        if (sortedSizes.Count == 0)
+        {
+            return;
+        }
+
+        // Generate the largest thumbnail from the original image
+        var largest = sortedSizes[0];
+        using var downsized = (MagickImage)GetImageThumbnail(sourceImg, largest.Width, largest.Height);
+        await SaveThumbnailAsync(downsized, fileDao, file, largest.Width, largest.Height);
+
+        var remaining = sortedSizes.Skip(1).ToList();
+
+        if (remaining.Count == 0)
+        {
+            return;
+        }
+
+        // Generate smaller thumbnails from the already downsized image
         if (_dataStore is DiscDataStore)
         {
-            foreach (var w in settings.Sizes)
+            foreach (var w in remaining)
             {
-                await CropAsync(sourceImg, fileDao, file, w.Width, w.Height);
+                await CropAsync(downsized, fileDao, file, w.Width, w.Height);
             }
         }
         else
         {
-            await Parallel.ForEachAsync(settings.Sizes, new ParallelOptions { MaxDegreeOfParallelism = 3 }, async (w, _) =>
+            await Parallel.ForEachAsync(remaining, new ParallelOptions { MaxDegreeOfParallelism = 3 }, async (w, _) =>
             {
-                await CropAsync(sourceImg, fileDao, file, w.Width, w.Height);
+                await CropAsync(downsized, fileDao, file, w.Width, w.Height);
             });
         }
-
-        GC.Collect();
     }
 
     private async ValueTask CropAsync(
@@ -395,34 +416,44 @@ public class Builder<T>(
         uint width,
         uint height)
     {
-        var targetImg = GetImageThumbnail(sourceImg, width, height);
+        using var targetImg = GetImageThumbnail(sourceImg, width, height);
+        await SaveThumbnailAsync(targetImg, fileDao, file, width, height);
+    }
+
+    private async ValueTask SaveThumbnailAsync(
+        IMagickImage image,
+        IFileDao<T> fileDao,
+        File<T> file,
+        uint width,
+        uint height)
+    {
         await using var targetStream = tempStream.Create();
 
         switch (global.ThumbnailExtension)
         {
             case ThumbnailExtension.bmp:
-                await targetImg.WriteAsync(targetStream, MagickFormat.Bmp);
+                await image.WriteAsync(targetStream, MagickFormat.Bmp);
                 break;
             case ThumbnailExtension.gif:
-                await targetImg.WriteAsync(targetStream, MagickFormat.Gif);
+                await image.WriteAsync(targetStream, MagickFormat.Gif);
                 break;
             case ThumbnailExtension.jpg:
-                await targetImg.WriteAsync(targetStream, MagickFormat.Jpg);
+                await image.WriteAsync(targetStream, MagickFormat.Jpg);
                 break;
             case ThumbnailExtension.png:
-                await targetImg.WriteAsync(targetStream, MagickFormat.Png);
+                await image.WriteAsync(targetStream, MagickFormat.Png);
                 break;
             case ThumbnailExtension.pbm:
-                await targetImg.WriteAsync(targetStream, MagickFormat.Pbm);
+                await image.WriteAsync(targetStream, MagickFormat.Pbm);
                 break;
             case ThumbnailExtension.tiff:
-                await targetImg.WriteAsync(targetStream, MagickFormat.Tiff);
+                await image.WriteAsync(targetStream, MagickFormat.Tiff);
                 break;
             case ThumbnailExtension.tga:
-                await targetImg.WriteAsync(targetStream, MagickFormat.Tga);
+                await image.WriteAsync(targetStream, MagickFormat.Tga);
                 break;
             case ThumbnailExtension.webp:
-                await targetImg.WriteAsync(targetStream, MagickFormat.WebP);
+                await image.WriteAsync(targetStream, MagickFormat.WebP);
                 break;
         }
 

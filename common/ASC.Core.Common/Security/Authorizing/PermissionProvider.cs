@@ -27,7 +27,7 @@
 namespace ASC.Core.Security.Authorizing;
 
 [Scope(typeof(IPermissionProvider))]
-class PermissionProvider(AuthorizationManager authorizationManager) : IPermissionProvider
+internal class PermissionProvider(AuthorizationManager authorizationManager) : IPermissionProvider
 {
     public async Task<IEnumerable<Ace>> GetAclAsync(ISubject subject, IAction action, ISecurityObjectId objectId, ISecurityObjectProvider secObjProvider)
     {

@@ -28,9 +28,9 @@
 package com.asc.registration.application.security.manager;
 
 import java.util.List;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -43,12 +43,17 @@ import org.springframework.stereotype.Component;
  * providers.
  */
 @Slf4j
-@Component
-@RequiredArgsConstructor
+@Component("registrationSignatureAuthenticationManager")
 public class SignatureAuthenticationManager implements AuthenticationManager {
   private static final String UNSUPPORTED_ERROR =
       "Authentication type is not supported by any authentication provider";
   private final List<AuthenticationProvider> providers;
+
+  public SignatureAuthenticationManager(
+      @Qualifier("registrationSignatureAuthenticationProvider")
+          AuthenticationProvider signatureProvider) {
+    this.providers = List.of(signatureProvider);
+  }
 
   /**
    * Attempts to authenticate the provided authentication object using the configured providers.
