@@ -37,7 +37,7 @@ public class ChatClientFactory(
     public IChatClient Create(ChatClientOptions options, ToolHolder? toolHolder = null)
     {
         ArgumentNullException.ThrowIfNull(options);
-        
+
         if (string.IsNullOrEmpty(options.Endpoint))
         {
             throw new ArgumentException("Endpoint is not configured");
