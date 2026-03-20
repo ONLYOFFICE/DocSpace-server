@@ -221,19 +221,20 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
     public async Task<FileDto<T>> UpdateFileAsync<T>(T fileId, string title, int lastVersion)
     {
         title = title?.Trim();
+        File<T> file = null;
 
         if (!string.IsNullOrEmpty(title))
         {
-            await _fileStorageService.FileRenameAsync(fileId, title);
+            file = await _fileStorageService.FileRenameAsync(fileId, title);
         }
 
         if (lastVersion <= 0)
         {
-            return await GetFileInfoAsync(fileId);
+            return await GetFileInfoAsync(file != null ? file.Id : fileId);
         }
 
         var result = await _fileStorageService.UpdateToVersionAsync(fileId, lastVersion);
-        var file = result.Key;
+        file = result.Key;
 
         return await GetFileInfoAsync(file.Id);
     }
