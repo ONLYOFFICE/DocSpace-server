@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     [DbContext(typeof(MigrationContext))]
-    [Migration("20260318102008_MigrationContext_Upgrade77")]
-    partial class MigrationContext_Upgrade77
+    [Migration("20260320073329_MigrationContext_Upgrade78")]
+    partial class MigrationContext_Upgrade78
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -984,6 +984,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Name = "storage",
                             Price = 0.14m,
                             ProductId = "1011",
+                            ServiceName = "disk-storage",
                             Visible = true,
                             Wallet = true
                         },
