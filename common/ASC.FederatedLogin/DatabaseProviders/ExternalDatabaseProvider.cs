@@ -224,7 +224,6 @@ public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IVa
     {
         var store = (DiscDataStore)await storageFactory.GetStorageAsync(tenantId, ExternalDbModule, controller: null);
         var basePath = store.GetPhysicalPath("", "");
-        Directory.CreateDirectory(basePath);
         return basePath;
     }
 

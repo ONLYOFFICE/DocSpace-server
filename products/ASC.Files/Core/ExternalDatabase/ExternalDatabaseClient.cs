@@ -186,8 +186,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         int offset = 0)
     {
         ValidateTableName(tableName);
-        var provider = Provider;
-        var dbType = provider.DatabaseTypeEnum;
+        var dbType = Provider.DatabaseTypeEnum;
         var q = dbType == ExternalDatabaseType.MySql ? '`' : '"';
 
         var selectList = selectColumns?.ToList();
@@ -259,7 +258,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         var pageOffset = Math.Max(0, offset);
         sql.Append($" LIMIT {pageSize} OFFSET {pageOffset}");
 
-        await using var connection = await provider.CreateConnectionAsync(dbType);
+        await using var connection = await Provider.CreateConnectionAsync(dbType);
         await connection.OpenAsync();
         await SetupSqliteAsync(connection, dbType);
 
@@ -370,9 +369,8 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
             {
                 throw new ArgumentException("Data dictionary is empty.", nameof(data));
             }
-            var provider = Provider;
-            var dbType = provider.DatabaseTypeEnum;
-            await using var connection = await provider.CreateConnectionAsync(dbType);
+            var dbType = Provider.DatabaseTypeEnum;
+            await using var connection = await Provider.CreateConnectionAsync(dbType);
             await connection.OpenAsync();
             await SetupSqliteAsync(connection, dbType);
 
