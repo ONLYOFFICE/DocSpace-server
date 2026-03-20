@@ -1296,4 +1296,52 @@
   <data name="WhatsNewSubscriptionName" xml:space="preserve">
     <value>Новенькое</value>
   </data>
+  <data name="AccountingCustomerOperationServiceDesc_chat" xml:space="preserve">
+    <value>Чат</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_fetch" xml:space="preserve">
+    <value>Веб-краулинг</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_search" xml:space="preserve">
+    <value>Веб-поиск</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-tools" xml:space="preserve">
+    <value>Кредиты ИИ</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_fetch" xml:space="preserve">
+    <value>Источники</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_search" xml:space="preserve">
+    <value>Результаты</value>
+  </data>
+  <data name="ConsumersdatabaseType" xml:space="preserve">
+    <value>Тип базы данных</value>
+  </data>
+  <data name="ConsumersdbHost" xml:space="preserve">
+    <value>Хост</value>
+  </data>
+  <data name="ConsumersdbName" xml:space="preserve">
+    <value>Имя базы данных</value>
+  </data>
+  <data name="ConsumersdbPassword" xml:space="preserve">
+    <value>Пароль</value>
+  </data>
+  <data name="ConsumersdbPort" xml:space="preserve">
+    <value>Порт</value>
+  </data>
+  <data name="ConsumersdbSsl" xml:space="preserve">
+    <value>Использовать SSL</value>
+  </data>
+  <data name="ConsumersdbUser" xml:space="preserve">
+    <value>Пользователь</value>
+  </data>
+  <data name="ConsumersExternalDb" xml:space="preserve">
+    <value>Подключение к базе данных</value>
+  </data>
+  <data name="ConsumersExternalDbDescription" xml:space="preserve">
+    <value>Сохраняйте результаты для форм во внешней базе данных, такой как MySQL или SQLite.</value>
+  </data>
+  <data name="ConsumersExternalDbInstruction" xml:space="preserve">
+    <value>Подключите внешнюю базу данных для хранения результатов для форм.</value>
+  </data>
 </root>

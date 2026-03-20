@@ -265,13 +265,13 @@
     <value>Обновлены настройки пользовательской навигации</value>
   </data>
   <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
-    <value>ИИ-агенты [{0}]. Установить пользовательскую квоту хранения для ИИ-агентов: {1}</value>
+    <value>ИИ-агенты [{0}]. Установить пользовательскую квоту хранилища для ИИ-агентов: {1}</value>
   </data>
   <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
-    <value>ИИ-агенты [{0}]. Установить квоту хранения по умолчанию для ИИ-агентов: {1}</value>
+    <value>ИИ-агенты [{0}]. Установить квоту хранилища по умолчанию для ИИ-агентов: {1}</value>
   </data>
   <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
-    <value>ИИ-агенты [{0}]. Отключена квота хранения для агентов ИИ</value>
+    <value>ИИ-агенты [{0}]. Отключена квота хранилища для ИИ-агентов</value>
   </data>
   <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
     <value>Комнаты [{0}]. Установлена пользовательская квота хранилища для комнат: {1}</value>
@@ -1160,5 +1160,32 @@
   </data>
   <data name="WhiteLabelSettingsLogoTextUpdated" xml:space="preserve">
     <value>Обновлено название бренда</value>
+  </data>
+  <data name="BackupCancelled" xml:space="preserve">
+    <value>Резервное копирование отменено</value>
+  </data>
+  <data name="DocumentsDefaultTemplatesSettingsUpdated" xml:space="preserve">
+    <value>Обновлены настройки шаблона по умолчанию: {0}</value>
+  </data>
+  <data name="FileNotSavedDueToRoomQuota" xml:space="preserve">
+    <value>Комнаты [{0}]. Файл не сохранен: {1} — превышена квота хранилища для комнаты.</value>
+  </data>
+  <data name="FileNotSavedDueToUserQuota" xml:space="preserve">
+    <value>Пользователи [{0}]. Файл не сохранен: {1} — превышена квота хранилища для пользователя.</value>
+  </data>
+  <data name="FileSavedButRoomQuotaExceeded" xml:space="preserve">
+    <value>Комнаты [{0}]. Обновлен файл: {1}, превышающий квоту хранилища для комнаты.</value>
+  </data>
+  <data name="FileSavedButUserQuotaExceeded" xml:space="preserve">
+    <value>Пользователи [{0}]. Обновлен файл: {1}, превышающий квоту хранилища для пользователя.</value>
+  </data>
+  <data name="RestoreCancelled" xml:space="preserve">
+    <value>Восстановление отменено</value>
+  </data>
+  <data name="RestoreStarted" xml:space="preserve">
+    <value>Восстановление началось</value>
+  </data>
+  <data name="ScheduledBackupDeleted" xml:space="preserve">
+    <value>Запланированное резервное копирование отменено</value>
   </data>
 </root>
