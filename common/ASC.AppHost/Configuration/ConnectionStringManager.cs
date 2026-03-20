@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+#pragma warning disable ASPIREINTERACTION001
+
 using System.Diagnostics.CodeAnalysis;
 
 using Aspire.Hosting.JavaScript;
@@ -241,6 +243,8 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
 
         var playwrightTestsPath = Path.Combine(basePath, "tests", "api-tests");
 
+        var currentBugId = builder.Configuration["BUG_ID"];
+
         ApiTestResource = builder
             .AddJavaScriptApp("playwright-tests", playwrightTestsPath, "test")
             .WithNpm()
@@ -250,11 +254,72 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             .WithEnvironment("DOCSPACE_OWNER_EMAIL", docspaceOwnerEmail)
             .WithExplicitStart();
 
-        var bugId =  builder.Configuration["BUG_ID"];
-        if (!string.IsNullOrEmpty(bugId))
+        if (!string.IsNullOrEmpty(currentBugId))
         {
-            ApiTestResource.WithArgs("--", "--grep", $"BUG {bugId}");
+            ApiTestResource.WithArgs("--", "--grep", $"BUG {currentBugId}");
         }
+
+        ApiTestResource.WithCommand(
+            name: "run-with-bug-id",
+            displayName: "Run with BUG ID",
+            executeCommand: async context =>
+            {
+                var interactionService = context.ServiceProvider
+                    .GetRequiredService<IInteractionService>();
+                var commandService = context.ServiceProvider
+                    .GetRequiredService<ResourceCommandService>();
+
+                var result = await interactionService.PromptInputAsync(
+                    title: "Enter BUG ID",
+                    message : "Provide the BUG ID to run specific tests (e.g., 12345)",
+                    input: new InteractionInput
+                    {
+                        InputType = InputType.Text,
+                        Name = "BUG ID",
+                        Placeholder = "Enter BUG ID number",
+                        Value = currentBugId ?? ""
+                    },
+                    cancellationToken: context.CancellationToken);
+
+                if (result.Canceled)
+                {
+                    return CommandResults.Success();
+                }
+
+                var bugId = result.Data.Value?.Trim();
+
+                await commandService.ExecuteCommandAsync(
+                    resourceId: context.ResourceName,
+                    commandName: "resource-stop",
+                    cancellationToken: context.CancellationToken);
+
+                await Task.Delay(500, context.CancellationToken);
+
+                ApiTestResource
+                    .WithArgs(c=> c.Args.Clear());
+
+                if (!string.IsNullOrEmpty(bugId))
+                {
+                    ApiTestResource.WithArgs("run", "test", "--", "--grep", $"BUG {bugId}");
+                }
+                else
+                {
+                    ApiTestResource.WithArgs("run", "test");
+                }
+
+                await commandService.ExecuteCommandAsync(
+                    resourceId: context.ResourceName,
+                    commandName: "resource-start",
+                    cancellationToken: context.CancellationToken);
+
+                return CommandResults.Success();
+            },
+            commandOptions: new CommandOptions
+            {
+                IconName = "TestBeaker",
+                IconVariant = IconVariant.Filled,
+                Description = "Restart tests with a specific BUG ID filter"
+            });
 
         _parameters = new Dictionary<string, string>
         {

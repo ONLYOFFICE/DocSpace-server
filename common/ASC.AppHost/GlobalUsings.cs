@@ -24,6 +24,11 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+global using Aspire.Hosting;
+global using Aspire.Hosting.ApplicationModel;
+
 global using ASC.AppHost.Configuration;
+
+global using Microsoft.Extensions.DependencyInjection;
 
 global using Projects;
