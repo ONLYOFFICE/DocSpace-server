@@ -114,17 +114,19 @@ public class MailMergeTaskRunner(SetupInfo setupInfo, SecurityContext securityCo
                                          mailMergeTask.MessageId,
                                          mailMergeTask.AttachTitle);
 
-        var request = new HttpRequestMessage
-        {
-            RequestUri = new Uri(baseCommonLinkUtility.GetFullAbsolutePath(apiUrlAttach)),
-            Method = HttpMethod.Post
-        };
+
+       using var request = new HttpRequestMessage(HttpMethod.Post, baseCommonLinkUtility.GetFullAbsolutePath(apiUrlAttach));
+        
         request.Headers.Add("Authorization", await securityContext.AuthenticateMeAsync(securityContext.CurrentAccount.ID));
         request.Content.Headers.ContentType = new MediaTypeHeaderValue(mailMergeTask.AttachTitle);
         request.Content = new StreamContent(mailMergeTask.Attach);
 
         string responseAttachString;
+        
+        // CA2000: HttpRequestMessage and HttpClient disposed by HttpClient.SendAsync and using statement
+#pragma warning disable CA2000
         var httpClient = clientFactory.CreateClient();
+#pragma warning restore CA2000
         using var response = await httpClient.SendAsync(request);
         await using (var stream = await response.Content.ReadAsStreamAsync())
         {

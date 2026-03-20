@@ -140,13 +140,13 @@ public abstract class SmsProvider : Consumer
             var url = SendMessageUrl();
             url = url.Replace("{phone}", number).Replace("{text}", HttpUtility.UrlEncode(message));
 
-            var request = new HttpRequestMessage
-            {
-                RequestUri = new Uri(url)
-            };
+            using var request = new HttpRequestMessage(HttpMethod.Get, url);
             request.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/x-www-form-urlencoded");
 
+#pragma warning disable CA2000
             var httpClient = ClientFactory.CreateClient();
+#pragma warning restore CA2000
+            
             httpClient.Timeout = TimeSpan.FromMilliseconds(15000);
 
             using var response = await httpClient.SendAsync(request);
@@ -218,13 +218,12 @@ public class SmscProvider : SmsProvider, IValidateKeysProvider
             {
                 var url = GetBalanceUrl();
 
-                var request = new HttpRequestMessage
-                {
-                    RequestUri = new Uri(url)
-                };
+                using var request = new HttpRequestMessage(HttpMethod.Get, url);
                 request.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/x-www-form-urlencoded");
 
+#pragma warning disable CA2000
                 var httpClient = ClientFactory.CreateClient();
+#pragma warning restore CA2000
                 httpClient.Timeout = TimeSpan.FromMilliseconds(1000);
 
                 using var response = await httpClient.SendAsync(request);

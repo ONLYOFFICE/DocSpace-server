@@ -28,14 +28,14 @@ namespace ASC.ElasticSearch;
 
 public interface ISearchItem
 {
-    public int Id { get; set; }
-    public int TenantId { get; set; }
-    public string IndexName { get; }
+    int Id { get; set; }
+    int TenantId { get; set; }
+    string IndexName { get; }
 
-    public Expression<Func<ISearchItem, object[]>> GetSearchContentFields(SearchSettingsHelper searchSettings);
+    Expression<Func<ISearchItem, object[]>> GetSearchContentFields(SearchSettingsHelper searchSettings);
 }
 
 public interface ISearchItemDocument : ISearchItem
 {
-    public Document Document { get; set; }
+    Document Document { get; set; }
 }

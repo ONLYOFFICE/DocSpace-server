@@ -28,5 +28,5 @@ namespace ASC.AI.Core.Utils;
 
 public interface IFaviconService
 {
-    public string GetFaviconUrl(string domain, uint size = 16);
+    string GetFaviconUrl(string domain, uint size = 16);
 }

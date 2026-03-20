@@ -35,7 +35,10 @@ public enum EngineType
     None,
 
     [Description("Exa")]
-    Exa
+    Exa,
+
+    [Description("PortalAi")]
+    PortalAi
 }
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
@@ -51,14 +54,16 @@ public class EncryptedWebSearchSettings : ISettings<EncryptedWebSearchSettings>
     public bool Enabled { get; set; }
     public EngineType Type { get; set; }
     public string? Config { get; set; }
-    
+    public bool IsConfigured { get; set; }
+
     public EncryptedWebSearchSettings GetDefault()
     {
         return new EncryptedWebSearchSettings
         {
             Enabled = false,
             Type = EngineType.None,
-            Config = null
+            Config = null,
+            IsConfigured = false
         };
     }
 

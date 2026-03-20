@@ -28,5 +28,5 @@ namespace ASC.Common.Security;
 
 public interface IRuleData
 {
-    public string Key { get; }
+    string Key { get; }
 }

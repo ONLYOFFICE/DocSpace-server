@@ -27,7 +27,6 @@
 using System.Threading.Channels;
 
 using ASC.Common.Threading;
-using ASC.EventBus.Abstractions;
 using ASC.MessagingSystem;
 using ASC.MessagingSystem.Data;
 using ASC.Web.Studio.Wallet;

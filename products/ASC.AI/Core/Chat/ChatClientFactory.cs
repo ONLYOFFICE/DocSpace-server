@@ -56,17 +56,23 @@ public class ChatClientFactory(
                 }
             case ProviderType.Anthropic:
                 {
+                    // CA2000: HttpClient and AnthropicClient owned by AI library
+#pragma warning disable CA2000
                     var client = new AnthropicClient(
                         new APIAuthentication(options.Key), httpClientFactory.CreateClient()).Messages;
+#pragma warning restore CA2000
 
                     builder = client.AsBuilder();
                     break;
                 }
             case ProviderType.GoogleAi:
                 {
+                    // CA2000: GoogleAiChatClient owned by AI library
+#pragma warning disable CA2000
                     var googleAi = new GoogleAI(apiKey: options.Key, httpClientFactory: httpClientFactory);
 
                     var generationConfig = new GenerationConfig();
+#pragma warning restore CA2000
 
                     if (options.ReasoningEffort is { } effort and not ChatReasoningEffort.None)
                     {
@@ -102,8 +108,10 @@ public class ChatClientFactory(
                 {
                     var openAiClient = CreateOpenAiClient(options);
                     var chatClient = openAiClient.GetChatClient(options.ModelId);
-
+// CA2000: DeepSeekChatClient wraps chat client, ownership transferred
+#pragma warning disable CA2000
                     builder = new OpenRouterChatClient(chatClient.AsIChatClient()).AsBuilder();
+#pragma warning restore CA2000
                     break;
                 }
             default:
@@ -176,11 +184,15 @@ public class ChatClientFactory(
     private OpenAIClient CreateOpenAiClient(ChatClientOptions options)
     {
         var credential = new ApiKeyCredential(options.Key);
+        
+        // CA2000: HttpClient owned by OpenAI client via HttpClientPipelineTransport
+#pragma warning disable CA2000
         var clientOptions = new OpenAIClientOptions
         {
             Endpoint = new Uri(options.Endpoint),
             Transport = new HttpClientPipelineTransport(httpClientFactory.CreateClient())
         };
+#pragma warning restore CA2000
 
         return new OpenAIClient(credential, clientOptions);
     }

@@ -53,7 +53,7 @@ public class AiProviderDao(
             await using var context = await dbContextFactory.CreateDbContextAsync();
             await using var transaction = await context.Database.BeginTransactionAsync();
 
-            isFirstProvider = !await gateway.IsEnabledAsync() && !await context.HasProvidersAsync(tenantId);
+            isFirstProvider = !gateway.Configured && !await context.HasProvidersAsync(tenantId);
 
             dbProvider = new DbAiProvider
             {
@@ -97,11 +97,11 @@ public class AiProviderDao(
         };
     }
 
-    public async Task<AiProvider?> GetProviderAsync(int tenantId, int id)
+    public async Task<AiProvider?> GetProviderAsync(int tenantId, int id, bool forceSystemProvider = false)
     {
-        if (await gateway.IsEnabledAsync() && id == AiGateway.ProviderId)
+        if (gateway.Configured && id == AiGateway.ProviderId)
         {
-            return await CreateGatewayProviderAsync(includeCredentials: true);
+            return await CreateGatewayProviderAsync(includeCredentials: true, force: forceSystemProvider);
         }
 
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
@@ -125,7 +125,7 @@ public class AiProviderDao(
     {
         var defaultProviderId = (await GetDefaultProviderAsync(tenantId))?.ProviderId;
 
-        if (await gateway.IsEnabledAsync() && offset == 0)
+        if (gateway.Configured && offset == 0)
         {
             var gatewayProvider = await CreateGatewayProviderAsync();
             gatewayProvider.IsDefault = defaultProviderId == gatewayProvider.Id;
@@ -174,12 +174,10 @@ public class AiProviderDao(
 
     public async Task<int> GetProvidersTotalCountAsync(int tenantId)
     {
-        var task = gateway.IsEnabledAsync();
-        
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var count = await dbContext.GetProvidersTotalCountAsync(tenantId);
 
-        if (await task)
+        if (gateway.Configured)
         {
             count++;
         }
@@ -274,24 +272,10 @@ public class AiProviderDao(
 
         if (result.ProviderId == AiGateway.ProviderId)
         {
-            if (!await gateway.IsEnabledAsync())
-            {
-                var strategy = dbContext.Database.CreateExecutionStrategy();
-
-                await strategy.ExecuteAsync(async () =>
-                {
-                    await using var context = await dbContextFactory.CreateDbContextAsync();
-                    await context.DeleteDefaultProvidersByProviderIdsAsync(tenantId, new HashSet<int> { AiGateway.ProviderId });
-                    await context.SaveChangesAsync();
-                });
-
-                return null;
-            }
-
             result.ProviderTitle = AiGateway.ProviderTitle;
             result.ProviderType = ProviderType.PortalAi;
         }
-
+        
         if (result.ProviderType.HasValue)
         {
             result.DefaultModel = aiConfiguration.ResolveModelId(result.ProviderType.Value, result.DefaultModel);
@@ -302,23 +286,25 @@ public class AiProviderDao(
 
     public async Task<int?> GetFirstProviderIdAsync(int tenantId)
     {
-        if (await gateway.IsEnabledAsync())
+        if (gateway.Configured && await gateway.IsEnabledAsync())
         {
             return AiGateway.ProviderId;
         }
 
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-        return await dbContext.GetFirstProviderIdAsync(tenantId);
+
+        return await dbContext.GetFirstProviderIdAsync(tenantId)
+            ?? (gateway.Configured ? AiGateway.ProviderId : null);
     }
 
-    private async Task<AiProvider> CreateGatewayProviderAsync(bool includeCredentials = false)
+    private async Task<AiProvider> CreateGatewayProviderAsync(bool includeCredentials = false, bool force = false)
     {
         return new AiProvider
         {
             Id = AiGateway.ProviderId,
             Title = AiGateway.ProviderTitle,
             Url = includeCredentials ? gateway.Url : string.Empty,
-            Key = includeCredentials ? await gateway.GetKeyAsync() : string.Empty,
+            Key = includeCredentials ? await gateway.GetKeyAsync(force) : string.Empty,
             Type = ProviderType.PortalAi
         };
     }

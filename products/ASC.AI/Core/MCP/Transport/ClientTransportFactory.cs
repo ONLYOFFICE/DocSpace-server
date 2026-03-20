@@ -60,6 +60,9 @@ public class ClientTransportFactory(
             ConnectionTimeout = TimeSpan.FromSeconds(5)
         };
 
+        // CA2000: HttpClient owned by HttpClientTransport
+#pragma warning disable CA2000
         return new HttpClientTransport(options, clientFactory.CreateClient());
+#pragma warning restore CA2000
     }
 }

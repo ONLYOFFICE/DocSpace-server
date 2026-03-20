@@ -25,10 +25,6 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Data.Backup.Core.Quota;
-using ASC.Data.Backup.IntegrationEvents.EventHandling;
-using ASC.Data.Backup.Services;
-using ASC.EventBus.Abstractions;
-using ASC.EventBus.Events;
 using ASC.Files.Core.Core;
 using ASC.Web.Files.Utils;
 

@@ -26,7 +26,7 @@
 
 namespace ASC.Notify.Sinks;
 
-class DispatchSink(string senderName, DispatchEngine dispatcher) : Sink
+internal class DispatchSink(string senderName, DispatchEngine dispatcher) : Sink
 {
     private readonly DispatchEngine _dispatcher = dispatcher ?? throw new ArgumentNullException(nameof(dispatcher));
 

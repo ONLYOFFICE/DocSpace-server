@@ -26,7 +26,7 @@
 
 namespace ASC.Core.Caching;
 
-class UserGroupRefStore(IDictionary<string, UserGroupRef> refs) : IDictionary<string, UserGroupRef>
+internal class UserGroupRefStore(IDictionary<string, UserGroupRef> refs) : IDictionary<string, UserGroupRef>
 {
     private ILookup<Guid, UserGroupRef> _index;
     private bool _changed = true;

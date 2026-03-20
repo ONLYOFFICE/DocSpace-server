@@ -67,7 +67,8 @@ public class NotifyEngine(Context context,
 
         lock (SendMethods)
         {
-            SendMethods.Remove(new SendMethodWrapper(method, null, _logger));
+            using var wrapper = new SendMethodWrapper(method, null, _logger);
+            SendMethods.Remove(wrapper);
         }
     }
 

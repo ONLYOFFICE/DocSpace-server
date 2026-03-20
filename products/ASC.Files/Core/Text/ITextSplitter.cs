@@ -28,5 +28,5 @@ namespace ASC.Files.Core.Text;
 
 public interface ITextSplitter
 {
-    public List<string> Split(string text, int maxTokensPerChunk, float chunkOverlap);
+    List<string> Split(string text, int maxTokensPerChunk, float chunkOverlap);
 }

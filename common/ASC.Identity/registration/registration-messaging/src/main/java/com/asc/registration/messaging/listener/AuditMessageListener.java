@@ -38,15 +38,21 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
-/** RabbitClientAuditMessageListener listens for audit messages from RabbitMQ and processes them. */
+/**
+ * RabbitClientAuditMessageListener listens for audit messages from RabbitMQ and processes them.
+ *
+ * <p>This listener is only loaded when RabbitMQ client classes are available on the classpath.
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@ConditionalOnClass(name = "com.rabbitmq.client.Connection")
 public class AuditMessageListener {
   private final AuditCreateCommandHandler auditCreateCommandHandler;
   private final RabbitAuditDataMapper auditDataMapper;

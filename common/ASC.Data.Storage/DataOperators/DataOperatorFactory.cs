@@ -32,7 +32,10 @@ public static class DataOperatorFactory
     {
         var writer = await getter.GetWriteOperatorAsync(storageBasePath, title, userId);
 
-        writer = writer ?? new ZipWriteOperator(tempStream, Path.Combine(tempFolder, title));
+        // CA2000: ZipWriteOperator ownership transferred to caller who is responsible for disposal
+#pragma warning disable CA2000
+        writer ??= new ZipWriteOperator(tempStream, Path.Combine(tempFolder, title));
+#pragma warning restore CA2000
 
         writer.CancellationToken = token;
 
