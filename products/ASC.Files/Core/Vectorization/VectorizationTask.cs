@@ -77,6 +77,14 @@ public class VectorizationTask : DistributedTaskProgress
 
             var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
             await securityContext.AuthenticateMeWithoutCookieAsync(_userId);
+            
+            var settingsManager = scope.ServiceProvider.GetRequiredService<SettingsManager>();
+            
+            var aiAccessSettings = await settingsManager.LoadAsync<TenantAiAccessSettings>();
+            if (!aiAccessSettings.Enabled)
+            {
+                throw new SecurityException(FilesCommonResource.ErrorMessage_AiServicesDisabled);
+            }
 
             socketManager = scope.ServiceProvider.GetRequiredService<SocketManager>();
             var daoFactory = scope.ServiceProvider.GetRequiredService<IDaoFactory>();

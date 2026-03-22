@@ -57,16 +57,18 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
     public async Task CreateTableIfNotExistsAsync(string tableName, IEnumerable<DbColumnDefinition> columns)
     {
         ValidateTableName(tableName);
-        await using var connection = Provider.CreateConnection();
+        var provider = Provider;
+        var dbType = provider.DatabaseTypeEnum;
+        await using var connection = await provider.CreateConnectionAsync(dbType);
         await connection.OpenAsync();
-        await SetupSqliteAsync(connection);
+        await SetupSqliteAsync(connection, dbType);
 
         await using var cmd = connection.CreateCommand();
-        cmd.CommandText = Provider.DatabaseType.ToLowerInvariant() switch
+        cmd.CommandText = dbType switch
         {
-            "mysql" => BuildMySqlCreateTable(tableName, columns),
-            "sqlite" => BuildSqliteCreateTable(tableName, columns),
-            _ => throw new NotSupportedException($"Database type '{Provider.DatabaseType}' is not supported yet.")
+            ExternalDatabaseType.MySql => BuildMySqlCreateTable(tableName, columns),
+            ExternalDatabaseType.Sqlite => BuildSqliteCreateTable(tableName, columns),
+            _ => throw new NotSupportedException($"Database type '{provider.DatabaseType}' is not supported yet.")
         };
         await cmd.ExecuteNonQueryAsync();
     }
@@ -118,16 +120,18 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
     public async Task<bool> TableExistsAsync(string tableName)
     {
         ValidateTableName(tableName);
-        await using var connection = Provider.CreateConnection();
+        var provider = Provider;
+        var dbType = provider.DatabaseTypeEnum;
+        await using var connection = await provider.CreateConnectionAsync(dbType);
         await connection.OpenAsync();
-        await SetupSqliteAsync(connection);
+        await SetupSqliteAsync(connection, dbType);
 
         await using var cmd = connection.CreateCommand();
-        cmd.CommandText = Provider.DatabaseType.ToLowerInvariant() switch
+        cmd.CommandText = dbType switch
         {
-            "mysql" => "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME=@tableName",
-            "sqlite" => "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name=@tableName",
-            _ => throw new NotSupportedException($"Database type '{Provider.DatabaseType}' is not supported yet.")
+            ExternalDatabaseType.MySql => "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME=@tableName",
+            ExternalDatabaseType.Sqlite => "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name=@tableName",
+            _ => throw new NotSupportedException($"Database type '{provider.DatabaseType}' is not supported yet.")
         };
         var param = cmd.CreateParameter();
         param.ParameterName = "@tableName";
@@ -141,16 +145,18 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
     public async Task<long> CountAsync(string tableName)
     {
         ValidateTableName(tableName);
-        await using var connection = Provider.CreateConnection();
+        var provider = Provider;
+        var dbType = provider.DatabaseTypeEnum;
+        await using var connection = await provider.CreateConnectionAsync(dbType);
         await connection.OpenAsync();
-        await SetupSqliteAsync(connection);
+        await SetupSqliteAsync(connection, dbType);
 
         await using var cmd = connection.CreateCommand();
-        cmd.CommandText = Provider.DatabaseType.ToLowerInvariant() switch
+        cmd.CommandText = dbType switch
         {
-            "mysql" => $"SELECT COUNT(*) FROM `{tableName}`",
-            "sqlite" => $"SELECT COUNT(*) FROM \"{tableName}\"",
-            _ => throw new NotSupportedException($"Database type '{Provider.DatabaseType}' is not supported yet.")
+            ExternalDatabaseType.MySql => $"SELECT COUNT(*) FROM `{tableName}`",
+            ExternalDatabaseType.Sqlite => $"SELECT COUNT(*) FROM \"{tableName}\"",
+            _ => throw new NotSupportedException($"Database type '{provider.DatabaseType}' is not supported yet.")
         };
 
         var result = await cmd.ExecuteScalarAsync();
@@ -180,8 +186,8 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         int offset = 0)
     {
         ValidateTableName(tableName);
-        var dbType = Provider.DatabaseType.ToLowerInvariant();
-        var q = dbType == "mysql" ? '`' : '"';
+        var dbType = Provider.DatabaseTypeEnum;
+        var q = dbType == ExternalDatabaseType.MySql ? '`' : '"';
 
         var selectList = selectColumns?.ToList();
         if (selectList is { Count: > 0 })
@@ -252,9 +258,9 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         var pageOffset = Math.Max(0, offset);
         sql.Append($" LIMIT {pageSize} OFFSET {pageOffset}");
 
-        await using var connection = Provider.CreateConnection();
+        await using var connection = await Provider.CreateConnectionAsync(dbType);
         await connection.OpenAsync();
-        await SetupSqliteAsync(connection);
+        await SetupSqliteAsync(connection, dbType);
 
         await using var cmd = connection.CreateCommand();
         cmd.CommandText = sql.ToString();
@@ -298,14 +304,15 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
             throw new ArgumentException("Data dictionary is empty.", nameof(data));
         }
 
-        await using var connection = Provider.CreateConnection();
+        var provider = Provider;
+        var dbType = provider.DatabaseTypeEnum;
+        await using var connection = await provider.CreateConnectionAsync(dbType);
         await connection.OpenAsync();
-        await SetupSqliteAsync(connection);
+        await SetupSqliteAsync(connection, dbType);
 
-        var dbType = Provider.DatabaseType.ToLowerInvariant();
         // SQLite only: MySQL DDL (CREATE TABLE) causes an implicit commit,
         // making it impossible to wrap CREATE TABLE + INSERT in one atomic transaction.
-        var tx = dbType == "sqlite" ? await connection.BeginTransactionAsync() : null;
+        DbTransaction? tx = dbType == ExternalDatabaseType.Sqlite ? await connection.BeginTransactionAsync() : null;
 
         try
         {
@@ -313,15 +320,15 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
             createCmd.Transaction = tx;
             createCmd.CommandText = dbType switch
             {
-                "mysql" => BuildMySqlCreateTable(tableName, columns),
-                "sqlite" => BuildSqliteCreateTable(tableName, columns),
-                _ => throw new NotSupportedException($"Database type '{Provider.DatabaseType}' is not supported yet.")
+                ExternalDatabaseType.MySql => BuildMySqlCreateTable(tableName, columns),
+                ExternalDatabaseType.Sqlite => BuildSqliteCreateTable(tableName, columns),
+                _ => throw new NotSupportedException($"Database type '{provider.DatabaseType}' is not supported yet.")
             };
             await createCmd.ExecuteNonQueryAsync();
 
             await using var insertCmd = connection.CreateCommand();
             insertCmd.Transaction = tx;
-            insertCmd.CommandText = BuildInsertSql(tableName, data.Keys, keyColumn);
+            insertCmd.CommandText = BuildInsertSql(tableName, data.Keys, keyColumn, dbType);
             foreach (var kvp in data)
             {
                 var param = insertCmd.CreateParameter();
@@ -362,12 +369,13 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
             {
                 throw new ArgumentException("Data dictionary is empty.", nameof(data));
             }
-            await using var connection = Provider.CreateConnection();
+            var dbType = Provider.DatabaseTypeEnum;
+            await using var connection = await Provider.CreateConnectionAsync(dbType);
             await connection.OpenAsync();
-            await SetupSqliteAsync(connection);
+            await SetupSqliteAsync(connection, dbType);
 
             await using var cmd = connection.CreateCommand();
-            cmd.CommandText = BuildInsertSql(tableName, data.Keys, keyColumn);
+            cmd.CommandText = BuildInsertSql(tableName, data.Keys, keyColumn, dbType);
 
             foreach (var kvp in data)
             {
@@ -386,16 +394,16 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         }
     }
 
-    private string BuildInsertSql(string tableName, IEnumerable<string> keys, string? keyColumn)
+    private static string BuildInsertSql(string tableName, IEnumerable<string> keys, string? keyColumn, ExternalDatabaseType dbType)
     {
         var keyList = keys.ToList();
         var parameters = string.Join(", ", keyList.Select(k => $"@{k}"));
 
-        return Provider.DatabaseType.ToLowerInvariant() switch
+        return dbType switch
         {
-            "mysql" => BuildMySqlInsert(tableName, keyList, parameters, keyColumn),
-            "sqlite" => BuildSqliteInsert(tableName, keyList, parameters, keyColumn),
-            _ => throw new NotSupportedException($"Database type '{Provider.DatabaseType}' is not supported yet.")
+            ExternalDatabaseType.MySql => BuildMySqlInsert(tableName, keyList, parameters, keyColumn),
+            ExternalDatabaseType.Sqlite => BuildSqliteInsert(tableName, keyList, parameters, keyColumn),
+            _ => throw new NotSupportedException($"Database type '{dbType.ToStringFast()}' is not supported yet.")
         };
     }
 
@@ -416,9 +424,9 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         return sql.ToString();
     }
 
-    private async Task SetupSqliteAsync(DbConnection connection)
+    private static async Task SetupSqliteAsync(DbConnection connection, ExternalDatabaseType dbType)
     {
-        if (Provider.DatabaseType?.ToLowerInvariant() != "sqlite")
+        if (dbType != ExternalDatabaseType.Sqlite)
         {
             return;
         }
