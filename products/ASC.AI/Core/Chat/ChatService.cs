@@ -110,20 +110,28 @@ public class ChatService(
         return chat;
     }
 
-    public async Task<UserChatSettings> SetUserChatsSettingsAsync(int roomId, bool? webSearchEnabled = false)
+    public async Task<UserChatSettings> SetUserChatsSettingsAsync(
+        int roomId,
+        bool? webSearchEnabled = null,
+        ChatReasoningEffort? reasoningEffort = null)
     {
         await ThrowIfNotAccessAsync(roomId);
 
         var tenantId = tenantManager.GetCurrentTenantId();
         var userId = authContext.CurrentAccount.ID;
-        
+
         var settings = await chatDao.GetUserChatSettingsAsync(tenantId, roomId, userId);
 
         if (webSearchEnabled.HasValue)
         {
             settings.WebSearchEnabled = webSearchEnabled.Value;
         }
-        
+
+        if (reasoningEffort.HasValue)
+        {
+            settings.ReasoningEffort = reasoningEffort.Value;
+        }
+
         return await chatDao.SetUserChatSettingsAsync(tenantId, roomId, userId, settings);
     }
 

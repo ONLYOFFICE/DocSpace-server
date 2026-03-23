@@ -171,7 +171,8 @@ static file class Queries
                         {
                             ProviderId = x.dp.ProviderId,
                             DefaultModel = x.dp.DefaultModel,
-                            ProviderTitle = provider != null ? provider.Title : null
+                            ProviderTitle = provider != null ? provider.Title : null,
+                            ProviderType = provider != null ? provider.Type : null
                         })
                     .FirstOrDefault());
 
