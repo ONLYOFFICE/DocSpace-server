@@ -21,5 +21,10 @@
             <groupId>com.asc</groupId>
             <artifactId>authorization-data</artifactId>
         </dependency>
+        <dependency>
+          <groupId>org.mockito</groupId>
+          <artifactId>mockito-junit-jupiter</artifactId>
+          <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>

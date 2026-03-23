@@ -65,16 +65,18 @@
         <grpc.version>1.74.0</grpc.version>
         <grpc.starter.version>3.1.0.RELEASE</grpc.starter.version>
         <jsystemd.version>3.1.1</jsystemd.version>
-        <junit.version>5.12.2</junit.version>
+        <junit.jupiter.version>6.0.1</junit.jupiter.version>
         <lettuce.version>6.8.0.RELEASE</lettuce.version>
         <logback.gelf.version>5.0.1</logback.gelf.version>
         <logback.logstash.version>7.4</logback.logstash.version>
-        <mockito.version>5.18.0</mockito.version>
+        <mockito.version>5.20.0</mockito.version>
         <mysql.connector.version>9.5.0</mysql.connector.version>
         <resilience4j.version>2.3.0</resilience4j.version>
         <shedlock.version>6.9.2</shedlock.version>
         <spring.oauth2.server.version>7.0.0</spring.oauth2.server.version>
         <springdoc.version>2.8.6</springdoc.version>
+        <spring.jcl.version>6.2.17</spring.jcl.version>
+        <testcontainers.version>2.0.2</testcontainers.version>
         <os.maven.plugin.version>1.7.1</os.maven.plugin.version>
         <protobuf.maven.plugin.version>0.6.1</protobuf.maven.plugin.version>
         <winsw.maven.plugin.version>0.1.10</winsw.maven.plugin.version>
@@ -216,21 +218,44 @@
 
         <!-- Testing Dependencies -->
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.testcontainers</groupId>
+          <artifactId>testcontainers-junit-jupiter</artifactId>
+          <version>${testcontainers.version}</version>
+          <scope>test</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.testcontainers</groupId>
+          <artifactId>testcontainers-rabbitmq</artifactId>
+          <version>${testcontainers.version}</version>
+          <scope>test</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.testcontainers</groupId>
+          <artifactId>testcontainers-mysql</artifactId>
+          <version>${testcontainers.version}</version>
+          <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>${junit.version}</version>
+            <version>${junit.jupiter.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <version>${junit.version}</version>
+            <version>${junit.jupiter.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-params</artifactId>
-            <version>${junit.version}</version>
+            <version>${junit.jupiter.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -264,6 +289,9 @@
                 <version>${maven.surefire.plugin.version}</version>
                 <configuration>
                     <argLine>-XX:+EnableDynamicAgentLoading</argLine>
+                    <environmentVariables>
+                        <TESTCONTAINERS_RYUK_DISABLED>true</TESTCONTAINERS_RYUK_DISABLED>
+                    </environmentVariables>
                 </configuration>
             </plugin>
             <plugin>
