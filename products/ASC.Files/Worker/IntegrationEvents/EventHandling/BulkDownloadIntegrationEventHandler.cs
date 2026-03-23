@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.EventBus.Exceptions;
+
 namespace ASC.Files.Worker.IntegrationEvents.EventHandling;
 
 [Scope]
@@ -43,6 +45,12 @@ public class BulkDownloadIntegrationEventHandler(
             logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
             await tenantManager.SetCurrentTenantAsync(@event.TenantId);
             await securityContext.AuthenticateMeWithoutCookieAsync(await authManager.GetAccountByIDAsync(@event.TenantId, @event.CreateBy), session: @event.CreateBy);
+
+            if (!@event.Redelivered && await fileOperationsManager.IsTooBusy())
+            {
+                throw new IntegrationEventRejectExeption(@event.Id);
+            }
+
             await fileOperationsManager.Enqueue(@event.TaskId, @event.ThirdPartyData, @event.Data);
         }
     }

@@ -119,6 +119,12 @@ public class FileOperationsManagerHolder<T> where T : FileOperation
         }
     }
 
+    public async Task<bool> IsTooBusy()
+    {
+        var instanceTasks = await _tasks.GetAllTasks(DistributedTaskQueue<T>.INSTANCE_ID);
+        return _tasks.MaxThreadsCount < instanceTasks.Count;
+    }
+
     internal T GetService()
     {
         return _serviceProvider.GetService<T>();
@@ -243,6 +249,11 @@ public abstract class FileOperationsManager<T>(
     public async Task<List<FileOperationResult>> CancelOperations(string id = null)
     {
         return await _fileOperationsManagerHolder.CancelOperations(await GetUserIdAsync(), id);
+    }
+
+    public async Task<bool> IsTooBusy()
+    {
+        return await _fileOperationsManagerHolder.IsTooBusy();
     }
 
     public async Task Enqueue<T1, T2>(string taskId, T1 thirdPartyData, T2 data)
