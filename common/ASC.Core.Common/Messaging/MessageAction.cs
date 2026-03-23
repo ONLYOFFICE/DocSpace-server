@@ -987,6 +987,12 @@ public enum MessageAction
     [Description("AI default provider set")]
     AIDefaultProviderSet = 6096,
 
+    [Description("AI access enabled")]
+    AIAccessEnabled = 6097,
+
+    [Description("AI access disabled")]
+    AIAccessDisabled = 6098,
+
     #endregion
 
     #region others

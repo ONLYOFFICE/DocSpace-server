@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2026
+// (c) Copyright Ascensio System SIA 2009-2026
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,46 +24,25 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-#nullable enable
-namespace ASC.FederatedLogin.DatabaseProviders;
+namespace ASC.Api.Core.Middleware;
 
-[EnumExtensions]
-public enum ExternalDatabaseType { MySql, Sqlite }
-
-public record ConnectionTestResult(bool Success, string? Error = null)
+[Scope]
+public class AiFeatureFilter(ILogger<AiFeatureFilter> logger, SettingsManager settingsManager) : IAsyncResourceFilter
 {
-    public static ConnectionTestResult Ok() => new(true);
-    public static ConnectionTestResult Failure(string error) => new(false, error);
+    public async Task OnResourceExecutionAsync(ResourceExecutingContext context, ResourceExecutionDelegate next)
+    {
+        if (context.ActionDescriptor is ControllerActionDescriptor controllerActionDescriptor
+            && controllerActionDescriptor.EndpointMetadata.OfType<AiFeatureAttribute>().Any())
+        {
+            var aiAccessSettings = await settingsManager.LoadAsync<TenantAiAccessSettings>();
+            if (!aiAccessSettings.Enabled)
+            {
+                context.Result = new StatusCodeResult((int)HttpStatusCode.Forbidden);
+                logger.WarningAiAccessDisabled(context.HttpContext.Request.Url());
+                return;
+            }
+        }
+
+        await next();
+    }
 }
-#nullable disable
-
-public class ExternalDatabaseSettings
-{
-    [JsonPropertyName("databaseType")]
-    public string DatabaseType { get; set; }
-
-    public ExternalDatabaseType? DatabaseTypeEnum =>
-        ExternalDatabaseTypeExtensions.TryParse(DatabaseType, ignoreCase: true, out var t) ? t : null;
-
-    [JsonPropertyName("dbHost")]
-    public string Host { get; set; }
-
-    [JsonPropertyName("dbPort")]
-    public int Port { get; set; }
-
-    [JsonPropertyName("dbName")]
-    public string DatabaseName { get; set; }
-
-    [JsonPropertyName("dbUser")]
-    public string User { get; set; }
-
-    [JsonPropertyName("dbPassword")]
-    public string Password { get; set; }
-
-    [JsonPropertyName("dbSsl")]
-    public bool UseSsl { get; set; }
-
-    [JsonPropertyName("sqliteFilePath")]
-    public string SqliteFilePath { get; set; }
-}
-

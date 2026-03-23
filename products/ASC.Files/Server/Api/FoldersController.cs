@@ -458,7 +458,8 @@ public class FoldersControllerCommon(
     FileDtoHelper fileDtoHelper,
     UserManager userManager,
     SecurityContext securityContext,
-    FilesSettingsHelper filesSettingsHelper)
+    FilesSettingsHelper filesSettingsHelper,
+    SettingsManager settingsManager)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <remarks>
@@ -629,6 +630,7 @@ public class FoldersControllerCommon(
 
     private async IAsyncEnumerable<int> GetRootFoldersIdsAsync(bool withoutTrash)
     {
+        var aiAccessSettingsTask = settingsManager.LoadAsync<TenantAiAccessSettings>();
         var isOutsider = await userManager.IsOutsiderAsync(securityContext.CurrentAccount.ID);
 
         if (isOutsider)
@@ -657,6 +659,11 @@ public class FoldersControllerCommon(
 
         yield return await globalFolderHelper.FolderVirtualRoomsAsync;
         yield return await globalFolderHelper.FolderArchiveAsync;
-        yield return await globalFolderHelper.FolderAiAgentsAsync;
+
+        var aiAccessSettings = await aiAccessSettingsTask;
+        if (aiAccessSettings.Enabled)
+        {
+            yield return await globalFolderHelper.FolderAiAgentsAsync;
+        }
     }
 }
