@@ -46,6 +46,13 @@ public class RoomContentRequestDto
     public string SubjectId { get; set; }
 
     /// <summary>
+    /// The filter by room owner ID.
+    /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
+    [FromQuery(Name = "subjectOwnerId")]
+    public string SubjectOwnerId { get; set; }
+
+    /// <summary>
     /// The room search area (Active, Archive, Any, Recent by links).
     /// </summary>
     /// <example>1</example>
@@ -85,6 +92,7 @@ public class RoomContentRequestDto
     /// </summary>
     /// <example>1</example>
     [FromQuery(Name = "subjectFilter")]
+    [Obsolete("Use SubjectOwnerId instead")]
     public SubjectFilter? SubjectFilter { get; set; }
 
     /// <summary>

@@ -39,6 +39,13 @@ namespace ASC.AI.Models.RequestDto
         public string? SubjectId { get; set; }
 
         /// <summary>
+        /// The filter by room owner ID.
+        /// </summary>
+        /// <example>00000000-0000-0000-0000-000000000000</example>
+        [FromQuery(Name = "subjectOwnerId")]
+        public string? SubjectOwnerId { get; set; }
+
+        /// <summary>
         /// Specifies whether to search by tags or not.
         /// </summary>
         /// <example>false</example>
@@ -64,6 +71,7 @@ namespace ASC.AI.Models.RequestDto
         /// </summary>
         /// <example>0</example>
         [FromQuery(Name = "subjectFilter")]
+        [Obsolete("Use SubjectOwnerId instead")]
         public SubjectFilter? SubjectFilter { get; set; }
 
         /// <summary>
