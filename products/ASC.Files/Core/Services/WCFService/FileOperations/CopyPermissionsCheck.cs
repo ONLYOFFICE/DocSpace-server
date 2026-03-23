@@ -28,7 +28,7 @@ namespace ASC.Files.Core.Services.WCFService.FileOperations;
 
 [Scope(GenericArguments = [typeof(int)])]
 [Scope(GenericArguments = [typeof(string)])]
-public class CopyPermissionsCheck<T>(IFileDao<T> fileDao, PermissionCheckStarter<T, int> intPermissionManager, PermissionCheckStarter<T, string> stringPermissionManager) 
+public class CopyPermissionsCheck<T>(IFileDao<T> fileDao, PermissionCheckStarter<T, int> intPermissionManager, PermissionCheckStarter<T, string> stringPermissionManager)
     : IPermissionsChecker<FileMoveCopyOperationData<T>, T>,  IPermissionsChecker<FileOperationData<T>, T>
 {
     public async Task RunPermissionCheckAsync(FileOperationData<T> data)
@@ -65,10 +65,10 @@ public class PermissionCheckStarter<T, TTo>(
     IFolderDao<T> folderDao,
     IFileDao<TTo> ttoFileDao,
     IFolderDao<TTo> ttoFolderDao,
-    FileSecurity security, 
-    LockerManager lockerManager, 
-    FileTrackerHelper fileTracker, 
-    FileUtility fileUtility, 
+    FileSecurity security,
+    LockerManager lockerManager,
+    FileTrackerHelper fileTracker,
+    FileUtility fileUtility,
     SettingsManager settingsManager,
     UserManager userManager,
     TenantManager tenantManager,
@@ -128,7 +128,7 @@ public class PermissionCheckStarter<T, TTo>(
             errorMsg = FilesCommonResource.ErrorMessage_SecurityException_Create;
             if (check)
             {
-                throw new SecurityException(errorMsg); 
+                throw new SecurityException(errorMsg);
             }
 
             return errorMsg;
@@ -285,11 +285,11 @@ public class PermissionCheckStarter<T, TTo>(
     }
 
     public async Task<string> CheckFoldersPermissionsAsync(
-        Folder<T> folder, 
+        Folder<T> folder,
         Folder<TTo> toFolder,
         bool copy,
         FileConflictResolveType resolveType,
-        bool check = false) 
+        bool check = false)
     {
         string errorMsg;
 
@@ -515,7 +515,7 @@ public class PermissionCheckStarter<T, TTo>(
 
         return null;
     }
-        
+
     public async Task<string> CheckFilesPermissionsAsync(
         File<T> file,
         Folder<TTo> toFolder,
@@ -523,7 +523,6 @@ public class PermissionCheckStarter<T, TTo>(
         FileConflictResolveType resolveType,
         bool check = false)
     {
-        var checkPermissions = true;
         var parentFolders = await ttoFolderDao.GetParentFoldersAsync(toFolder.Id).ToListAsync();
 
         string errorMsg = null;
@@ -539,7 +538,7 @@ public class PermissionCheckStarter<T, TTo>(
             return errorMsg;
         }
 
-        errorMsg = await CheckFilesSecurityPermissionsAsync([file], checkPermissions);
+        errorMsg = await CheckFilesSecurityPermissionsAsync([file]);
 
         if (toFolder.FolderType == FolderType.VirtualRooms || toFolder.RootFolderType == FolderType.Archive)
         {
@@ -563,7 +562,7 @@ public class PermissionCheckStarter<T, TTo>(
             return errorMsg;
         }
 
-        if (!copy && checkPermissions && !await security.CanMoveAsync(file))
+        if (!copy && !await security.CanMoveAsync(file))
         {
             errorMsg = FilesCommonResource.ErrorMessage_SecurityException_MoveFile;
             if (check)
@@ -574,7 +573,7 @@ public class PermissionCheckStarter<T, TTo>(
             return errorMsg;
         }
 
-        if (checkPermissions && file.RootFolderType != FolderType.TRASH && !await security.CanDownloadAsync(file))
+        if (file.RootFolderType != FolderType.TRASH && !await security.CanDownloadAsync(file))
         {
             errorMsg = FilesCommonResource.ErrorMessage_SecurityException;
             if (check)
@@ -695,13 +694,6 @@ public class PermissionCheckStarter<T, TTo>(
         }
 
         return null;
-
-        string ErrorMessageSecurityExceptionMoveFile(string msg)
-        {
-            return check ? 
-                throw new SecurityException(msg) : 
-                msg;
-        }
     }
 
     public async Task<string> CheckFilesSecurityPermissionsAsync(IEnumerable<File<T>> files, bool checkPermissions = true)

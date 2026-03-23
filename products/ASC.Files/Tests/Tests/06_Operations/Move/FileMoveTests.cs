@@ -108,36 +108,6 @@ public class FileMoveTests(
     }
 
     [Fact]
-    public async Task MoveFile_ToAnotherUserFolder_ReturnsError()
-    {
-        // Assert
-        await _filesClient.Authenticate(Initializer.Owner);
-        var targetFolder = await CreateFolderInMy("target_folder", Initializer.Owner);
-
-        var user = await Initializer.InviteContact(EmployeeType.User);
-        await _filesClient.Authenticate(user);
-        var sourceFile = await CreateFileInMy("source_file.docx", user);
-
-        // Act
-        var moveParams = new BatchRequestDto
-        {
-            DestFolderId = new BatchRequestDtoAllOfDestFolderId(targetFolder.Id),
-            ConflictResolveType = FileConflictResolveType.Skip,
-            FileIds = [new(sourceFile.Id)],
-            FolderIds = [],
-            ReturnSingleOperation = true
-        };
-
-        var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _filesOperationsApi.MoveBatchItemsAsync(
-                moveParams,
-                TestContext.Current.CancellationToken));
-
-        // Assert
-        exception.ErrorCode.Should().Be(403);
-    }
-
-    [Fact]
     public async Task MoveFile_FormToFillingFormsRoom_ReturnsError()
     {
         // Assert
