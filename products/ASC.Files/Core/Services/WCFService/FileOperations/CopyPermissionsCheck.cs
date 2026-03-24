@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2026
+// (c) Copyright Ascensio System SIA 2009-2026
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -45,9 +45,9 @@ public class CopyPermissionsCheck<T>(IFileDao<T> fileDao, PermissionCheckStarter
 
     public async Task RunPermissionCheckAsync(FileMoveCopyOperationData<T> data)
     {
-        if (!int.TryParse(data.DestFolderId, out var i))
+        if (!DestFolderIdRouteHelper.TryGetIntId(data.DestFolderId, out var i, out var s))
         {
-            await stringPermissionManager.CheckCopyDataAsync(data, data.DestFolderId);
+            await stringPermissionManager.CheckCopyDataAsync(data, s);
         }
         else
         {
@@ -537,8 +537,6 @@ public class PermissionCheckStarter<T, TTo>(
 
             return errorMsg;
         }
-
-        errorMsg = await CheckFilesSecurityPermissionsAsync([file]);
 
         if (toFolder.FolderType == FolderType.VirtualRooms || toFolder.RootFolderType == FolderType.Archive)
         {

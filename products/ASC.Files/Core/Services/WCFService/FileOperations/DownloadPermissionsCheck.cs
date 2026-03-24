@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2026
+// (c) Copyright Ascensio System SIA 2009-2026
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,6 +34,11 @@ public class DownloadPermissionsCheck<T>(FileSecurity security, IFileDao<T> file
     public async Task RunPermissionCheckAsync(FileDownloadOperationData<T> data)
     {
         var entriesPathId = new ItemNameValueCollection<T>();
+
+        if (!data.Files.Any() && !data.Folders.Any())
+        {
+            return;
+        }
 
         if (data.Files.Any())
         {

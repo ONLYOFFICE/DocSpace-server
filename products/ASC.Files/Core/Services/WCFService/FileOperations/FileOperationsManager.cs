@@ -590,17 +590,19 @@ public class FileDeleteOperationsManager(
         var thirdPartyData = new FileDeleteOperationData<string>(folders.Item2, files.Item2, versions, tenantId, userId, GetHttpHeaders(), sessionSnapshot, holdResult, ignoreException, immediately, isEmptyTrash);
         
         var permissionsCheckInternal = _serviceProvider.GetService<DeletePermissionsCheck<int>>();
-        await permissionsCheckInternal.RunPermissionCheckAsync(data);
-        
         var permissionsCheckThirdParty = _serviceProvider.GetService<DeletePermissionsCheck<string>>();
-        await permissionsCheckThirdParty.RunPermissionCheckAsync(thirdPartyData);
+
+        var internalPermissionCheckTask = permissionsCheckInternal.RunPermissionCheckAsync(data);
+        var thirdPartyPermissionCheckTask = permissionsCheckThirdParty.RunPermissionCheckAsync(thirdPartyData);
+        
+        await Task.WhenAll(internalPermissionCheckTask, thirdPartyPermissionCheckTask);
         
         var op = _serviceProvider.GetService<FileDeleteOperation>();
         op.Init(holdResult);
         var taskId = await _fileOperationsManagerHolder.Publish(op);
 
         IntegrationEvent toPublish;
-        if (isEmptyTrash)
+        if (isEmptyTrash)   
         {
             toPublish = new EmptyTrashIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
             {

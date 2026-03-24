@@ -112,11 +112,9 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
     public FileMoveCopyOperation(IServiceProvider serviceProvider, FileMoveCopyOperationData<T> data)
         : base(serviceProvider, data)
     {
-        var toFolderId = data.DestFolderId;
-
-        if (!int.TryParse(data.DestFolderId, out var i))
+        if (!DestFolderIdRouteHelper.TryGetIntId(data.DestFolderId, out var i, out var s))
         {
-            _thirdPartyFolderId = toFolderId;
+            _thirdPartyFolderId = s;
         }
         else
         {

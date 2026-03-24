@@ -194,7 +194,7 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
 
             T canCalculate = default;
 
-            var errorMsg = await permissionsManager.CheckFolderPermissionsAsync([folder], _immediately, _ignoreException);
+            var errorMsg = await permissionsManager.CheckFolderPermissionsAsync([folder], _immediately, _ignoreException, checkPermissions: checkPermissions);
             if (errorMsg != null)
             {
                 if (!_ignoreException && checkPermissions && !canDelete)

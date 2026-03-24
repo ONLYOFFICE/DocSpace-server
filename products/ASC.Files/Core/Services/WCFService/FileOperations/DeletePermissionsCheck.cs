@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2026
+// (c) Copyright Ascensio System SIA 2009-2026
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -56,7 +56,7 @@ public class DeletePermissionsCheck<T>(IFileDao<T> fileDao, IFolderDao<T> folder
         foreach (var folderId in data)
         {
             var folder = await folderDao.GetFolderAsync(folderId);
-            await CheckFolderPermissionsAsync([folder], immediately, ignoreException, true);
+            await CheckFolderPermissionsAsync([folder], immediately, ignoreException, checkPermissions: true, throwException: true);
         }
     }
 
@@ -106,7 +106,7 @@ public class DeletePermissionsCheck<T>(IFileDao<T> fileDao, IFolderDao<T> folder
         return null;
     }
 
-    public async Task<string> CheckFolderPermissionsAsync(IEnumerable<Folder<T>> folders, bool immediately, bool ignoreException, bool throwException = false)
+    public async Task<string> CheckFolderPermissionsAsync(IEnumerable<Folder<T>> folders, bool immediately, bool ignoreException, bool checkPermissions = true, bool throwException = false)
     {
         foreach (var folder in folders)
         {
@@ -119,9 +119,8 @@ public class DeletePermissionsCheck<T>(IFileDao<T> fileDao, IFolderDao<T> folder
                 return throwException ? throw new FileNotFoundException(errorMsg) : errorMsg;
             }
 
-            var canDelete = await security.CanDeleteAsync(folder);
-            var checkPermissions = !folder.IsRoom || !canDelete;
-            if ((!immediately && folder.IsRoom) || (!ignoreException && checkPermissions && !canDelete))
+            var canDelete = checkPermissions ? await security.CanDeleteAsync(folder) : true;
+            if ((!immediately && folder.IsRoom) || (!ignoreException && !canDelete))
             {
                 errorMsg = FilesCommonResource.ErrorMessage_SecurityException_DeleteFolder;
 

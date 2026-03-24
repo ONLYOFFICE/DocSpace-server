@@ -60,9 +60,6 @@ public class FileCopyTests(
 
         // Assert
         copiedFile.Should().NotBeNull();
-        // copiedFile.Id.Should().NotBe(sourceFile.Id);
-        // copiedFile.Title.Should().Be(sourceFile.Title);
-        // copiedFile.FolderId.Should().Be(targetFolderId);
 
         // Verify the copied file exists in the destination folder
         var folderContent = (await _foldersApi.GetFolderByFolderIdAsync(targetFolder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
@@ -123,10 +120,6 @@ public class FileCopyTests(
 
         // Assert
         copiedFile.Should().NotBeNull();
-
-        // copiedFile.Id.Should().NotBe(sourceFile.Id);
-        // copiedFile.Title.Should().Be(newFileName);
-        // copiedFile.FolderId.Should().Be(targetFolderId);
     }
 
     [Fact]
