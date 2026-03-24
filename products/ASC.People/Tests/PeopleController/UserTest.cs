@@ -121,7 +121,7 @@ public class UserTest(PeopleFactory peopleFactory, WepApiFactory apiFactory) : B
 
     [Fact]
     [Trait("Category", "Bug")]
-    [Trait("Bug", "80124")]
+    [Trait("Bug", "80474")]
     public async Task PromoteUserToDocspaceAdmin_ByDocspaceAdmin_ShouldThrowAccessDenied()
     {
         await _peopleClient.Authenticate(Initializer.Owner);
@@ -140,4 +140,27 @@ public class UserTest(PeopleFactory peopleFactory, WepApiFactory apiFactory) : B
         exception.ErrorCode.Should().Be(403);
     }
 
+    [Fact]
+    [Trait("Category", "Bug")]
+    [Trait("Bug", "80478")]
+    public async Task PromoteGuestToUser_ByRoomAdmin_ShouldThrowAccessDenied()
+    {
+        await _peopleClient.Authenticate(Initializer.Owner);
+
+        var roomAdmin1 = await Initializer.InviteContact(EmployeeType.RoomAdmin);
+        var roomAdmin2 = await Initializer.InviteContact(EmployeeType.RoomAdmin);
+
+        await _peopleClient.Authenticate(roomAdmin1);
+        var guest = await Initializer.InviteContact(EmployeeType.Guest);
+
+        await _peopleClient.Authenticate(roomAdmin2);
+
+        var exception = await Assert.ThrowsAsync<ApiException>(async () =>
+            await _userTypeApi.UpdateUserTypeAsync(
+                EmployeeType.User,
+                new UpdateMembersRequestDto([guest.Id]),
+                TestContext.Current.CancellationToken));
+
+        exception.ErrorCode.Should().Be(403);
+    }
 }
