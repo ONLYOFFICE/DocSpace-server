@@ -47,6 +47,7 @@ public final class ValidationErrorCodeResponse {
   public static final String ERROR_PATTERN = "ErrorPattern";
   public static final String ERROR_WRONG_URL = "ErrorWrongURL";
   public static final String EMPTY_FIELD_ERROR = "EmptyFieldError";
+  public static final String ERROR_INVALID_SCOPE = "ErrorInvalidScope";
 
   private static final Set<String> EMPTY_CONSTRAINTS = Set.of("NotEmpty", "NotNull", "NotBlank");
   private static final Set<String> SIZE_CONSTRAINTS = Set.of("Size", "Min", "Max");
