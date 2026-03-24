@@ -28,8 +28,6 @@ package com.asc.registration.application;
 
 import com.asc.common.application.proto.AuthorizationServiceGrpc;
 import com.asc.registration.application.service.ConsentService;
-import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
-import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariables;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.persistence.autoconfigure.EntityScan;
@@ -48,57 +46,49 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 @Testcontainers
 @ActiveProfiles({"test", "saas"})
+@Import(RegistrationTestBeanConfiguration.class)
 @EnabledIfSystemProperty(named = "RUN_INTEGRATION_TESTS", matches = "true")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Import(RegistrationTestBeanConfiguration.class)
-@DisabledIfEnvironmentVariables({
-    @DisabledIfEnvironmentVariable(named = "SPRING_PROFILES_ACTIVE", matches = "production"),
-    @DisabledIfEnvironmentVariable(named = "SPRING_PROFILES_ACTIVE", matches = "prod"),
-    @DisabledIfEnvironmentVariable(named = "SPRING_PROFILES_ACTIVE", matches = "staging"),
-    @DisabledIfEnvironmentVariable(named = "SPRING_PROFILES_ACTIVE", matches = "development"),
-    @DisabledIfEnvironmentVariable(named = "SPRING_PROFILES_ACTIVE", matches = "dev")
-})
 public class RegistrationServiceSaasIT extends AbstractRegistrationServiceIT {
+  static MySQLContainer<?> mysql = RegistrationTestContainers.mysql();
+  static GenericContainer<?> redis = RegistrationTestContainers.redis();
+  static RabbitMQContainer rabbitmq = RegistrationTestContainers.rabbitmq();
+  static LocalStackContainer localstack = RegistrationTestContainers.localstack();
 
-    static LocalStackContainer localstack = RegistrationTestContainers.localstack();
-    static MySQLContainer<?> mysql = RegistrationTestContainers.mysql();
-    static RabbitMQContainer rabbitmq = RegistrationTestContainers.rabbitmq();
-    static GenericContainer<?> redis = RegistrationTestContainers.redis();
+  static {
+    localstack.start();
+    mysql.start();
+    rabbitmq.start();
+    redis.start();
+    RegistrationTestContainers.createDynamoDbTable(localstack);
+  }
 
-    static {
-        localstack.start();
-        mysql.start();
-        rabbitmq.start();
-        redis.start();
-        RegistrationTestContainers.createDynamoDbTable(localstack);
-    }
+  @DynamicPropertySource
+  static void configureProperties(DynamicPropertyRegistry registry) {
+    RegistrationTestContainers.configureMySql(registry, mysql);
+    RegistrationTestContainers.configureRabbitMq(registry, rabbitmq);
+    RegistrationTestContainers.configureRedis(registry, redis);
+    RegistrationTestContainers.configureDynamoDb(registry, localstack);
+  }
 
-    @DynamicPropertySource
-    static void configureProperties(DynamicPropertyRegistry registry) {
-        RegistrationTestContainers.configureMySql(registry, mysql);
-        RegistrationTestContainers.configureRabbitMq(registry, rabbitmq);
-        RegistrationTestContainers.configureRedis(registry, redis);
-        RegistrationTestContainers.configureDynamoDb(registry, localstack);
-    }
+  @EntityScan(basePackages = {"com.asc.registration.data", "com.asc.common.data"})
+  @SpringBootApplication(scanBasePackages = {"com.asc.registration", "com.asc.common"})
+  @EnableJpaRepositories(basePackages = {"com.asc.registration.data", "com.asc.common.data"})
+  static class TestApplication {}
 
-    @SpringBootApplication(scanBasePackages = {"com.asc.registration", "com.asc.common"})
-    @EntityScan(basePackages = {"com.asc.registration.data", "com.asc.common.data"})
-    @EnableJpaRepositories(basePackages = {"com.asc.registration.data", "com.asc.common.data"})
-    static class TestApplication {}
+  @MockitoBean private ConsentService consentService;
 
-    @MockitoBean
-    private ConsentService consentService;
+  @MockitoBean
+  private AuthorizationServiceGrpc.AuthorizationServiceBlockingStub authorizationServiceClient;
 
-    @MockitoBean
-    private AuthorizationServiceGrpc.AuthorizationServiceBlockingStub authorizationServiceClient;
+  @Override
+  protected ConsentService getConsentService() {
+    return consentService;
+  }
 
-    @Override
-    protected ConsentService getConsentService() {
-        return consentService;
-    }
-
-    @Override
-    protected AuthorizationServiceGrpc.AuthorizationServiceBlockingStub getAuthorizationServiceClient() {
-        return authorizationServiceClient;
-    }
+  @Override
+  protected AuthorizationServiceGrpc.AuthorizationServiceBlockingStub
+      getAuthorizationServiceClient() {
+    return authorizationServiceClient;
+  }
 }

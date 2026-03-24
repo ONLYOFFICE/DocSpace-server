@@ -57,104 +57,96 @@ import org.springframework.context.annotation.Bean;
 
 @TestConfiguration
 public class RegistrationTestBeanConfiguration {
+  @Bean
+  public ClientDomainService clientDomainService() {
+    return new CoreClientDomainService();
+  }
 
-    @Bean
-    public ClientDomainService clientDomainService() {
-        return new CoreClientDomainService();
-    }
+  @Bean
+  public ClientDataMapper clientDataMapper() {
+    return new ClientDataMapper();
+  }
 
-    @Bean
-    public ClientDataMapper clientDataMapper() {
-        return new ClientDataMapper();
-    }
+  @Bean
+  public ScopeDataMapper scopeDataMapper() {
+    return new ScopeDataMapper();
+  }
 
-    @Bean
-    public ScopeDataMapper scopeDataMapper() {
-        return new ScopeDataMapper();
-    }
+  @Bean
+  public ClientCreateCommandHandler clientCreateCommandHandler(
+      ClientCommandRepository clientCommandRepository,
+      ClientDomainService clientDomainService,
+      EncryptionService encryptionService,
+      ClientDataMapper clientDataMapper) {
+    return new ClientCreateCommandHandler(
+        clientCommandRepository, clientDomainService, encryptionService, clientDataMapper);
+  }
 
-    @Bean
-    public ClientCreateCommandHandler clientCreateCommandHandler(
-            ClientCommandRepository clientCommandRepository,
-            ClientDomainService clientDomainService,
-            EncryptionService encryptionService,
-            ClientDataMapper clientDataMapper) {
-        return new ClientCreateCommandHandler(
-            clientCommandRepository,
-            clientDomainService,
-            encryptionService,
-            clientDataMapper);
-    }
+  @Bean
+  public ClientQueryHandler clientQueryHandler(
+      ClientQueryRepository clientQueryRepository,
+      ClientCacheService clientCacheService,
+      EncryptionService encryptionService,
+      ClientDataMapper clientDataMapper) {
+    return new ClientQueryHandler(
+        clientQueryRepository, clientCacheService, encryptionService, clientDataMapper);
+  }
 
-    @Bean
-    public ClientQueryHandler clientQueryHandler(
-            ClientQueryRepository clientQueryRepository,
-            ClientCacheService clientCacheService,
-            EncryptionService encryptionService,
-            ClientDataMapper clientDataMapper) {
-        return new ClientQueryHandler(
-            clientQueryRepository,
-            clientCacheService,
-            encryptionService,
-            clientDataMapper);
-    }
+  @Bean
+  public ClientUpdateCommandHandler clientUpdateCommandHandler(
+      ClientCommandRepository clientCommandRepository,
+      ClientQueryRepository clientQueryRepository,
+      ClientDomainService clientDomainService,
+      EncryptionService encryptionService,
+      AuthorizationMessagePublisher<ClientRemovedEvent> authorizationMessagePublisher,
+      ClientDataMapper clientDataMapper,
+      RetryExecutor retryExecutor) {
+    return new ClientUpdateCommandHandler(
+        clientCommandRepository,
+        clientQueryRepository,
+        clientDomainService,
+        encryptionService,
+        authorizationMessagePublisher,
+        clientDataMapper,
+        retryExecutor);
+  }
 
-    @Bean
-    public ClientUpdateCommandHandler clientUpdateCommandHandler(
-            ClientCommandRepository clientCommandRepository,
-            ClientQueryRepository clientQueryRepository,
-            ClientDomainService clientDomainService,
-            EncryptionService encryptionService,
-            AuthorizationMessagePublisher<ClientRemovedEvent> authorizationMessagePublisher,
-            ClientDataMapper clientDataMapper,
-            RetryExecutor retryExecutor) {
-        return new ClientUpdateCommandHandler(
-            clientCommandRepository,
-            clientQueryRepository,
-            clientDomainService,
-            encryptionService,
-            authorizationMessagePublisher,
-            clientDataMapper,
-            retryExecutor);
-    }
+  @Bean
+  public ScopeQueryHandler scopeQueryHandler(
+      ScopeQueryRepository scopeQueryRepository, ScopeDataMapper scopeDataMapper) {
+    return new ScopeQueryHandler(scopeQueryRepository, scopeDataMapper);
+  }
 
-    @Bean
-    public ScopeQueryHandler scopeQueryHandler(
-            ScopeQueryRepository scopeQueryRepository,
-            ScopeDataMapper scopeDataMapper) {
-        return new ScopeQueryHandler(scopeQueryRepository, scopeDataMapper);
-    }
+  @Bean
+  public ClientApplicationService clientApplicationService(
+      Validator validator,
+      ClientCacheService clientCacheService,
+      AuthorizationMessagePublisher<TenantClientsRemovedEvent> tenantClientsRemovedPublisher,
+      AuthorizationMessagePublisher<UserClientsRemovedEvent> userClientsRemovedPublisher,
+      AuthorizationMessagePublisher<ClientCacheTenantRemoveEvent> clientCacheTenantRemovePublisher,
+      ClientCreateCommandHandler clientCreateCommandHandler,
+      ClientUpdateCommandHandler clientUpdateCommandHandler,
+      ClientQueryHandler clientQueryHandler) {
+    return new CoreClientApplicationService(
+        validator,
+        clientCacheService,
+        tenantClientsRemovedPublisher,
+        userClientsRemovedPublisher,
+        clientCacheTenantRemovePublisher,
+        clientCreateCommandHandler,
+        clientUpdateCommandHandler,
+        clientQueryHandler);
+  }
 
-    @Bean
-    public ClientApplicationService clientApplicationService(
-            Validator validator,
-            ClientCacheService clientCacheService,
-            AuthorizationMessagePublisher<TenantClientsRemovedEvent> tenantClientsRemovedPublisher,
-            AuthorizationMessagePublisher<UserClientsRemovedEvent> userClientsRemovedPublisher,
-            AuthorizationMessagePublisher<ClientCacheTenantRemoveEvent> clientCacheTenantRemovePublisher,
-            ClientCreateCommandHandler clientCreateCommandHandler,
-            ClientUpdateCommandHandler clientUpdateCommandHandler,
-            ClientQueryHandler clientQueryHandler) {
-        return new CoreClientApplicationService(
-            validator,
-            clientCacheService,
-            tenantClientsRemovedPublisher,
-            userClientsRemovedPublisher,
-            clientCacheTenantRemovePublisher,
-            clientCreateCommandHandler,
-            clientUpdateCommandHandler,
-            clientQueryHandler);
-    }
+  @Bean
+  public ScopeApplicationService scopeApplicationService(
+      ScopeCacheService scopeCacheService, ScopeQueryHandler scopeQueryHandler) {
+    return new CoreScopeApplicationService(scopeCacheService, scopeQueryHandler);
+  }
 
-    @Bean
-    public ScopeApplicationService scopeApplicationService(
-            ScopeCacheService scopeCacheService,
-            ScopeQueryHandler scopeQueryHandler) {
-        return new CoreScopeApplicationService(scopeCacheService, scopeQueryHandler);
-    }
-
-    @Bean
-    public ScopeCacheInitializer scopeCacheInitializer(ScopeApplicationService scopeApplicationService) {
-        return new ScopeCacheInitializer(scopeApplicationService);
-    }
+  @Bean
+  public ScopeCacheInitializer scopeCacheInitializer(
+      ScopeApplicationService scopeApplicationService) {
+    return new ScopeCacheInitializer(scopeApplicationService);
+  }
 }

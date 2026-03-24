@@ -46,6 +46,7 @@ import java.util.Date;
 import java.util.Objects;
 import java.util.regex.Pattern;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
@@ -81,11 +82,11 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class AuthorizationServiceIT {
   static class TestSignatureGenerator {
-    private static final String DEFAULT_USER_ID = "66faa6e4-f133-11ea-b126-00ffeec8b4ea";
+    private static final String DEFAULT_TENANT_ID = "1";
     private static final String DEFAULT_USER_NAME = "Administrator";
     private static final String DEFAULT_USER_EMAIL = "admin@admin.admin";
-    private static final String DEFAULT_TENANT_ID = "1";
     private static final String DEFAULT_TENANT_URL = "http://localhost:8092";
+    private static final String DEFAULT_USER_ID = "66faa6e4-f133-11ea-b126-00ffeec8b4ea";
 
     private final byte[] signingKey;
 
@@ -137,14 +138,13 @@ public class AuthorizationServiceIT {
 
   @LocalServerPort int randomServerPort;
 
-  @SpringBootApplication(scanBasePackages = {"com.asc.authorization", "com.asc.common"})
   @EntityScan(basePackages = {"com.asc.authorization.data", "com.asc.common.data"})
+  @SpringBootApplication(scanBasePackages = {"com.asc.authorization", "com.asc.common"})
   @EnableJpaRepositories(basePackages = {"com.asc.authorization.data", "com.asc.common.data"})
   static class TestApplication {}
 
   @Container
-  static MySQLContainer<?> mysql =
-      new MySQLContainer<>("mysql:8.0").withInitScript("init.sql");
+  static MySQLContainer<?> mysql = new MySQLContainer<>("mysql:8.0").withInitScript("init.sql");
 
   @Container static RabbitMQContainer rabbitmq = new RabbitMQContainer("rabbitmq:3.11-management");
 
@@ -376,6 +376,7 @@ public class AuthorizationServiceIT {
   }
 
   @Nested
+  @DisplayName("Authorization state lifecycle")
   class AuthorizationStateIT {
     private static final String CLIENT_ID = "state-client-id";
 
@@ -404,6 +405,7 @@ public class AuthorizationServiceIT {
   }
 
   @Nested
+  @DisplayName("Authorization consent lifecycle")
   class AuthorizationConsentIT {
     private static final String CLIENT_ID = "consent-client-id";
 
@@ -447,6 +449,7 @@ public class AuthorizationServiceIT {
   }
 
   @Nested
+  @DisplayName("Authorization token lifecycle")
   class AuthorizationTokenIT {
     private static final String CLIENT_ID = "token-client-id";
 

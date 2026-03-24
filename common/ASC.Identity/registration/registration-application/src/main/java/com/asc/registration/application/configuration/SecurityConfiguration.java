@@ -61,8 +61,7 @@ public class SecurityConfiguration {
   private final SignatureAuthenticationProvider signatureAuthenticationProvider;
 
   public SecurityConfiguration(
-      @Qualifier("registrationRateLimiterFilter")
-          Optional<RateLimiterFilter> rateLimiterFilter,
+      @Qualifier("registrationRateLimiterFilter") Optional<RateLimiterFilter> rateLimiterFilter,
       @Qualifier("registrationBasicSignatureAuthenticationFilter")
           BasicSignatureAuthenticationFilter basicSignatureAuthenticationFilter,
       @Qualifier("registrationSignatureAuthenticationProvider")
@@ -84,19 +83,22 @@ public class SecurityConfiguration {
   SecurityFilterChain registrationSecurityFilterChain(HttpSecurity http) throws Exception {
     var httpSecurity =
         http.authorizeHttpRequests(
-            authorizeRequests ->
-                authorizeRequests
-                    .requestMatchers(checkManagementPort())
-                    .permitAll()
-                    .requestMatchers(
-                        String.format("%s/clients/*/public/info", webApi), "/docs**", "/health/**")
-                    .permitAll()
-                    .anyRequest()
-                    .authenticated())
-        .addFilterAt(basicSignatureAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-        .authenticationProvider(signatureAuthenticationProvider)
-        .csrf(AbstractHttpConfigurer::disable)
-        .cors(AbstractHttpConfigurer::disable);
+                authorizeRequests ->
+                    authorizeRequests
+                        .requestMatchers(checkManagementPort())
+                        .permitAll()
+                        .requestMatchers(
+                            String.format("%s/clients/*/public/info", webApi),
+                            "/docs**",
+                            "/health/**")
+                        .permitAll()
+                        .anyRequest()
+                        .authenticated())
+            .addFilterAt(
+                basicSignatureAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+            .authenticationProvider(signatureAuthenticationProvider)
+            .csrf(AbstractHttpConfigurer::disable)
+            .cors(AbstractHttpConfigurer::disable);
 
     rateLimiterFilter.ifPresent(
         filter -> httpSecurity.addFilterAfter(filter, UsernamePasswordAuthenticationFilter.class));
