@@ -3,14 +3,28 @@ REGISTRATION_IMAGE = registration-service:latest
 AUTHORIZATION_IMAGE = authorization-service:latest
 MINIFIED_IMAGE = identity-minified:latest
 
+MAVEN_FMT_SKIP = -Dfmt.skip=true
+MAVEN_BATCH = -B
+
 REGISTRATION_JAR = registration-container.jar
 AUTHORIZATION_JAR = authorization-container.jar
 TEMP_BUILDER_REG = temp-jar-builder-reg:latest
 TEMP_BUILDER_AUTH = temp-jar-builder-auth:latest
 
-.PHONY: all base registration authorization minified clean prune summary sizes help
+.PHONY: all test integration-tests test-all base registration authorization minified clean prune summary sizes help
 
 all: base registration authorization sizes
+
+test:
+	@echo "Running unit tests..."
+	mvn $(MAVEN_BATCH) test $(MAVEN_FMT_SKIP)
+
+integration-tests:
+	@echo "Running integration tests..."
+	mvn $(MAVEN_BATCH) test $(MAVEN_FMT_SKIP) -DRUN_INTEGRATION_TESTS=true -Dtest="*IT" -Dsurefire.failIfNoSpecifiedTests=false
+
+test-all: test integration-tests
+	@echo "All tests completed."
 
 base: $(REGISTRATION_JAR) $(AUTHORIZATION_JAR)
 	@echo "Building shared base image..."
