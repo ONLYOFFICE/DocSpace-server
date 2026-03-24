@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     [DbContext(typeof(MigrationContext))]
-    [Migration("20260323112442_MigrationContext_Upgrade78")]
-    partial class MigrationContext_Upgrade78
+    [Migration("20260324074941_MigrationContext_Upgrade79")]
+    partial class MigrationContext_Upgrade79
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -4661,6 +4661,10 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("user_id")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<sbyte?>("ReasoningEffort")
+                        .HasColumnType("tinyint")
+                        .HasColumnName("reasoning_effort");
 
                     b.Property<bool>("WebSearchEnabled")
                         .ValueGeneratedOnAdd()
