@@ -95,7 +95,7 @@ public class CreateClientRequest implements Serializable {
   /**
    * The name of the client. The client name length is expected to be between 3 and 256 characters.
    */
-  @NotEmpty
+  @NotEmpty(message = "client name must not be empty")
   @Size(
       min = 3,
       max = 256,
@@ -118,7 +118,7 @@ public class CreateClientRequest implements Serializable {
   /**
    * The logo of the client in base64 format. The client logo is expected to be passed as base64.
    */
-  @NotEmpty
+  @NotEmpty(message = "client logo must not be empty")
   @Pattern(
       regexp = "^data:image\\/(?:png|jpeg|jpg|svg\\+xml);base64,.*.{1,}",
       message = "client logo is expected to be passed as base64")
@@ -140,7 +140,7 @@ public class CreateClientRequest implements Serializable {
 
   /** The website URL of the client. The website URL is expected to be passed as a URL. */
   @JsonProperty("website_url")
-  @NotEmpty
+  @NotEmpty(message = "website url must not be empty")
   @Pattern(
       regexp =
           "^(https?://)?([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$",
@@ -150,7 +150,7 @@ public class CreateClientRequest implements Serializable {
 
   /** The terms URL of the client. The terms URL is expected to be passed as a URL. */
   @JsonProperty("terms_url")
-  @NotEmpty
+  @NotEmpty(message = "terms url must not be empty")
   @Pattern(
       regexp =
           "^(https?://)?([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$",
@@ -160,7 +160,7 @@ public class CreateClientRequest implements Serializable {
 
   /** The policy URL of the client. The policy URL is expected to be passed as a URL. */
   @JsonProperty("policy_url")
-  @NotEmpty
+  @NotEmpty(message = "policy url must not be empty")
   @Pattern(
       regexp =
           "^(https?://)?([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$",
@@ -170,7 +170,7 @@ public class CreateClientRequest implements Serializable {
 
   /** The redirect URIs for the client. */
   @JsonProperty("redirect_uris")
-  @NotNull
+  @NotNull(message = "redirect uris must not be null")
   @URLCollection
   @Size(
       min = 1,
@@ -183,7 +183,7 @@ public class CreateClientRequest implements Serializable {
 
   /** The allowed origins for the client. */
   @JsonProperty("allowed_origins")
-  @NotNull
+  @NotNull(message = "allowed origins must not be null")
   @URLCollection
   @Size(
       min = 1,
@@ -197,7 +197,7 @@ public class CreateClientRequest implements Serializable {
    * URL.
    */
   @JsonProperty("logout_redirect_uri")
-  @NotEmpty
+  @NotEmpty(message = "logout redirect uri must not be empty")
   @Pattern(
       regexp =
           "^(https?://)?([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$",
