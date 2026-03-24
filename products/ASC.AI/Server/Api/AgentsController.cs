@@ -45,7 +45,8 @@ public class AgentsController(
     AiProviderService aiProviderService,
     ILogger<AgentsController> logger,
     ApiDateTimeHelper apiDateTimeHelper,
-    RootNewItemsDtoHelper rootNewItemsDtoHelper)
+    RootNewItemsDtoHelper rootNewItemsDtoHelper,
+    FileSecurity fileSecurity)
     : ControllerBase
 {
     /// <remarks>
@@ -199,6 +200,17 @@ public class AgentsController(
     [HttpDelete("agents/{id}")]
     public async Task<FileOperationDto> DeleteAgent(DeleteRoomRequestDto<int> inDto)
     {
+        var agent = await fileStorageService.GetFolderAsync(inDto.Id);
+        if (agent is not { FolderType: FolderType.AiRoom })
+        {
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
+
+        if (!await fileSecurity.CanDeleteAsync(agent))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
         await fileDeleteOperationsManager.Publish([inDto.Id], [], false, !inDto.DeleteRoom.DeleteAfter, true);
 
         return await fileOperationDtoHelper.GetAsync((await fileDeleteOperationsManager.GetOperationResults()).FirstOrDefault());
