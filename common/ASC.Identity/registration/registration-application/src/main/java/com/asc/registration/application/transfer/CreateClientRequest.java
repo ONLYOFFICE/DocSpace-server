@@ -31,10 +31,7 @@ import com.asc.common.utilities.validation.LogoSize;
 import com.asc.common.utilities.validation.URLCollection;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import java.io.Serializable;
 import java.util.Set;
 import lombok.AllArgsConstructor;
@@ -95,7 +92,7 @@ public class CreateClientRequest implements Serializable {
   /**
    * The name of the client. The client name length is expected to be between 3 and 256 characters.
    */
-  @NotEmpty(message = "client name must not be empty")
+  @NotBlank(message = "client name must not be empty")
   @Size(
       min = 3,
       max = 256,
@@ -118,7 +115,7 @@ public class CreateClientRequest implements Serializable {
   /**
    * The logo of the client in base64 format. The client logo is expected to be passed as base64.
    */
-  @NotEmpty(message = "client logo must not be empty")
+  @NotBlank(message = "client logo must not be empty")
   @Pattern(
       regexp = "^data:image\\/(?:png|jpeg|jpg|svg\\+xml);base64,.*.{1,}",
       message = "client logo is expected to be passed as base64")
@@ -140,7 +137,7 @@ public class CreateClientRequest implements Serializable {
 
   /** The website URL of the client. The website URL is expected to be passed as a URL. */
   @JsonProperty("website_url")
-  @NotEmpty(message = "website url must not be empty")
+  @NotBlank(message = "website url must not be empty")
   @Pattern(
       regexp =
           "^(https?://)?([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$",
@@ -150,7 +147,7 @@ public class CreateClientRequest implements Serializable {
 
   /** The terms URL of the client. The terms URL is expected to be passed as a URL. */
   @JsonProperty("terms_url")
-  @NotEmpty(message = "terms url must not be empty")
+  @NotBlank(message = "terms url must not be empty")
   @Pattern(
       regexp =
           "^(https?://)?([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$",
@@ -160,7 +157,7 @@ public class CreateClientRequest implements Serializable {
 
   /** The policy URL of the client. The policy URL is expected to be passed as a URL. */
   @JsonProperty("policy_url")
-  @NotEmpty(message = "policy url must not be empty")
+  @NotBlank(message = "policy url must not be empty")
   @Pattern(
       regexp =
           "^(https?://)?([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$",
@@ -197,7 +194,7 @@ public class CreateClientRequest implements Serializable {
    * URL.
    */
   @JsonProperty("logout_redirect_uri")
-  @NotEmpty(message = "logout redirect uri must not be empty")
+  @NotBlank(message = "logout redirect uri must not be empty")
   @Pattern(
       regexp =
           "^(https?://)?([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$",
