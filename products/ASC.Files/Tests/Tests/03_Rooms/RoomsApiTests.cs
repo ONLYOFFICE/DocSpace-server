@@ -293,6 +293,56 @@ public class RoomsApiTests(
         adminOwnedRooms.Folders.Should().HaveCount(1);
     }
 
+    [Fact]
+    public async Task GetRoomsFolderByOwnerId_ReturnsFilteredRooms()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var roomAdmin = await Initializer.InviteContact(EmployeeType.RoomAdmin);
+
+        // Create an owner room and share it
+        var ownerRoom = await CreateCustomRoom("Owner room " + Guid.NewGuid().ToString()[..8]);
+        await _roomsApi.SetRoomSecurityAsync(ownerRoom.Id, new RoomInvitationRequest
+        {
+            Invitations =
+            [
+                new RoomInvitation { Id = roomAdmin.Id, Access = FileShare.Read }
+            ]
+        }, TestContext.Current.CancellationToken);
+
+        await _filesClient.Authenticate(roomAdmin);
+        var adminRoom = CreateCustomRoom("Admin room" + Guid.NewGuid().ToString()[..8]);
+
+        // Act
+        var ownerMemberRooms = (await _roomsApi.GetRoomsFolderAsync(
+            type: [RoomType.CustomRoom], subjectId: Initializer.Owner.Id.ToString(),
+            cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var adminMemberRooms = (await _roomsApi.GetRoomsFolderAsync(
+            type: [RoomType.CustomRoom], subjectId: roomAdmin.Id.ToString(),
+            cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        var ownerOwnedRooms = (await _roomsApi.GetRoomsFolderAsync(
+            type: [RoomType.CustomRoom], subjectOwnerId: Initializer.Owner.Id.ToString(),
+            cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var adminOwnedRooms = (await _roomsApi.GetRoomsFolderAsync(
+            type: [RoomType.CustomRoom], subjectOwnerId: roomAdmin.Id.ToString(),
+            cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        ownerMemberRooms.Should().NotBeNull();
+        ownerMemberRooms.Folders.Should().HaveCount(1);
+
+        adminMemberRooms.Should().NotBeNull();
+        adminMemberRooms.Folders.Should().HaveCount(2);
+
+
+        ownerOwnedRooms.Should().NotBeNull();
+        ownerOwnedRooms.Folders.Should().HaveCount(1);
+
+        adminOwnedRooms.Should().NotBeNull();
+        adminOwnedRooms.Folders.Should().HaveCount(1);
+    }
+
     // [Fact]
     // public async Task SetRoomSecurity_InviteUser_AccessGranted()
     // {
