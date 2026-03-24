@@ -116,5 +116,73 @@
             <artifactId>springdoc-openapi-starter-webmvc-api</artifactId>
             <version>${springdoc.version}</version>
         </dependency>
+
+        <!-- Testing Dependencies -->
+        <dependency>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-test</artifactId>
+          <scope>test</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.testcontainers</groupId>
+          <artifactId>testcontainers-junit-jupiter</artifactId>
+          <version>${testcontainers.version}</version>
+          <scope>test</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.testcontainers</groupId>
+          <artifactId>testcontainers-rabbitmq</artifactId>
+          <version>${testcontainers.version}</version>
+          <scope>test</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.testcontainers</groupId>
+          <artifactId>testcontainers-mysql</artifactId>
+          <version>${testcontainers.version}</version>
+          <scope>test</scope>
+        </dependency>
+        <dependency>
+          <groupId>com.mysql</groupId>
+          <artifactId>mysql-connector-j</artifactId>
+          <version>${mysql.connector.version}</version>
+          <scope>test</scope>
+        </dependency>
+
+        <!-- Spring JCL bridge (required for Spring test context when commons-logging is removed) -->
+        <dependency>
+          <groupId>org.springframework</groupId>
+          <artifactId>spring-jcl</artifactId>
+          <version>${spring.jcl.version}</version>
+          <scope>test</scope>
+        </dependency>
+
+        <!-- Registration data access for integration tests (provides repositories) -->
+        <dependency>
+          <groupId>com.asc</groupId>
+          <artifactId>registration-data</artifactId>
+          <scope>test</scope>
+        </dependency>
+
+        <!-- Common messaging for integration tests (provides real message publishers) -->
+        <dependency>
+          <groupId>com.asc</groupId>
+          <artifactId>common-messaging</artifactId>
+          <scope>test</scope>
+        </dependency>
+
+        <!-- Registration messaging for integration tests (provides event listeners) -->
+        <dependency>
+          <groupId>com.asc</groupId>
+          <artifactId>registration-messaging</artifactId>
+          <scope>test</scope>
+        </dependency>
+
+        <!-- LocalStack for DynamoDB integration tests (SaaS profile) -->
+        <dependency>
+          <groupId>org.testcontainers</groupId>
+          <artifactId>testcontainers-localstack</artifactId>
+          <version>${testcontainers.version}</version>
+          <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>

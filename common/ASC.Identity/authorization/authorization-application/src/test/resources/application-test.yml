@@ -3,7 +3,6 @@ server:
   servlet:
     session:
       tracking-modes: cookie
-
 spring:
   main:
     banner-mode: off
@@ -42,7 +41,6 @@ spring:
   threads:
     virtual:
       enabled: true
-
 grpc:
   server:
     port: -1
@@ -50,7 +48,6 @@ grpc:
     registrationService:
       address: in-process:test
       negotiation-type: plaintext
-
 management:
   endpoint:
     health:
@@ -71,7 +68,6 @@ management:
       enabled: true
     readinessState:
       enabled: true
-
 logging:
   level:
     root: WARN

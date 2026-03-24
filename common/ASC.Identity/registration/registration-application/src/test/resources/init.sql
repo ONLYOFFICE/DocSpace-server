@@ -1,4 +1,3 @@
--- ShedLock table
 DROP TABLE IF EXISTS identity_shedlock;
 CREATE TABLE identity_shedlock (
     name VARCHAR(64) NOT NULL,
@@ -8,7 +7,6 @@ CREATE TABLE identity_shedlock (
     PRIMARY KEY (name)
 );
 
--- Certs table
 DROP TABLE IF EXISTS identity_certs;
 CREATE TABLE identity_certs (
     id varchar(36) not null,
@@ -19,7 +17,6 @@ CREATE TABLE identity_certs (
     primary key (id)
 ) engine=InnoDB;
 
--- Drop all if exist
 DROP TABLE IF EXISTS identity_authorizations CASCADE;
 DROP TABLE IF EXISTS identity_client_authentication_methods CASCADE;
 DROP TABLE IF EXISTS identity_client_redirect_uris CASCADE;
@@ -30,7 +27,6 @@ DROP TABLE IF EXISTS identity_consents CASCADE;
 DROP TABLE IF EXISTS identity_clients CASCADE;
 DROP TABLE IF EXISTS identity_scopes CASCADE;
 
--- Create table for identity clients
 CREATE TABLE identity_clients (
     client_id varchar(36) not null,
     tenant_id BIGINT not null,
@@ -62,7 +58,6 @@ ALTER TABLE identity_clients
     ADD CONSTRAINT UK_client_secret
     UNIQUE (client_secret);
 
--- Create table for identity scopes
 CREATE TABLE identity_scopes (
     name varchar(255) not null,
     `group` varchar(255) not null,
@@ -70,7 +65,6 @@ CREATE TABLE identity_scopes (
     primary key (name)
 ) engine=InnoDB;
 
--- Create table for identity authorizations (with denormalization applied)
 CREATE TABLE identity_authorizations (
     id varchar(255),
     registered_client_id varchar(36) not null,
@@ -110,28 +104,24 @@ ALTER TABLE identity_authorizations
     ADD CONSTRAINT UK_id
     UNIQUE (id);
 
--- Create table for client authentication methods
 CREATE TABLE identity_client_authentication_methods (
     client_id varchar(36) not null,
     authentication_method enum('client_secret_post', 'none') not null,
     index idx_client_authentication_methods_client_id (client_id)
 ) engine=InnoDB;
 
--- Create table for client redirect URIs
 CREATE TABLE identity_client_redirect_uris (
     client_id varchar(36) not null,
     redirect_uri tinytext not null,
     index idx_identity_client_redirect_uris_client_id (client_id)
 ) engine=InnoDB;
 
--- Create table for client allowed origins
 CREATE TABLE identity_client_allowed_origins (
     client_id varchar(36) not null,
     allowed_origin tinytext not null,
     index idx_identity_client_allowed_origins_client_id (client_id)
 ) engine=InnoDB;
 
--- Create table for identity client scopes
 CREATE TABLE identity_client_scopes (
     client_id varchar(36) not null,
     scope_name varchar(255) not null,
@@ -139,7 +129,6 @@ CREATE TABLE identity_client_scopes (
     index idx_identity_client_scopes_scope_name (scope_name)
 ) engine=InnoDB;
 
--- Create table for identity consents
 CREATE TABLE identity_consents (
     registered_client_id varchar(36) not null,
     principal_id varchar(255) not null,
@@ -148,7 +137,6 @@ CREATE TABLE identity_consents (
     primary key (registered_client_id, principal_id)
 ) engine=InnoDB;
 
--- Create join table for consent scopes (with denormalization: scope_name -> scopes)
 CREATE TABLE identity_consent_scopes (
     registered_client_id varchar(36) not null,
     principal_id varchar(255) not null,
@@ -163,7 +151,6 @@ ALTER TABLE identity_consent_scopes
     REFERENCES identity_consents(registered_client_id, principal_id)
     ON DELETE CASCADE;
 
--- Audit table
 CREATE TABLE IF NOT EXISTS audit_events (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     initiator VARCHAR(255),
@@ -179,7 +166,6 @@ CREATE TABLE IF NOT EXISTS audit_events (
     description TEXT
 ) engine=InnoDB;
 
--- Login events table
 CREATE TABLE login_events (
     id bigint auto_increment primary key,
     login varchar(200) not null,
@@ -197,3 +183,15 @@ CREATE TABLE login_events (
 
 CREATE INDEX idx_login_events_user_id ON login_events(user_id);
 CREATE INDEX idx_login_events_tenant_id ON login_events(tenant_id);
+
+INSERT INTO identity_scopes (name, `group`, `type`) VALUES
+('openid', 'identity', 'openid'),
+('profile', 'identity', 'openid'),
+('email', 'identity', 'openid'),
+('files:read', 'files', 'resource'),
+('files:write', 'files', 'resource'),
+('accounts:read', 'accounts', 'resource'),
+('accounts:write', 'accounts', 'resource'),
+('rooms:read', 'rooms', 'resource'),
+('rooms:write', 'rooms', 'resource');
+

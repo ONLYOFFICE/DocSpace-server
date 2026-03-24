@@ -144,7 +144,7 @@ public class AuthorizationServiceIT {
 
   @Container
   static MySQLContainer<?> mysql =
-      new MySQLContainer<>("mysql:8.0").withInitScript("init-shedlock.sql");
+      new MySQLContainer<>("mysql:8.0").withInitScript("init.sql");
 
   @Container static RabbitMQContainer rabbitmq = new RabbitMQContainer("rabbitmq:3.11-management");
 
