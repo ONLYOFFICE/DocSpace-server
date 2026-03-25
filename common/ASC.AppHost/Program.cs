@@ -111,7 +111,8 @@ if (!skipClient)
     startPackages = builder.AddJavaScriptApp("onlyoffice-client", clientBasePath, "start").WithPnpm();
     builder.AddJavaScriptApp("onlyoffice-storybook", Path.Combine(clientBasePath, "libs", "ui-kit"), "storybook")
         .WithPnpm(false)
-        .WithEnvironment("STORYBOOK_PROXY", "true");
+        .WithEnvironment("STORYBOOK_PROXY", "true")
+        .WithEnvironment("BROWSER", "none");
 }
 
 var isPreview = builder.Configuration["DOTNET_LAUNCH_PROFILE"] == "preview";
