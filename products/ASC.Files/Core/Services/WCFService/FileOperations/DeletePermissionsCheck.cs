@@ -56,7 +56,7 @@ public class DeletePermissionsCheck<T>(IFileDao<T> fileDao, IFolderDao<T> folder
         foreach (var folderId in data)
         {
             var folder = await folderDao.GetFolderAsync(folderId);
-            await CheckFolderPermissionsAsync([folder], immediately, ignoreException, checkPermissions: true, throwException: true);
+            await CheckFolderPermissionsAsync([folder], immediately, ignoreException, throwException: true);
         }
     }
 
@@ -106,7 +106,7 @@ public class DeletePermissionsCheck<T>(IFileDao<T> fileDao, IFolderDao<T> folder
         return null;
     }
 
-    public async Task<string> CheckFolderPermissionsAsync(IEnumerable<Folder<T>> folders, bool immediately, bool ignoreException, bool checkPermissions = true, bool throwException = false)
+    public async Task<string> CheckFolderPermissionsAsync(IEnumerable<Folder<T>> folders, bool immediately, bool ignoreException, bool throwException = false)
     {
         foreach (var folder in folders)
         {
@@ -115,15 +115,18 @@ public class DeletePermissionsCheck<T>(IFileDao<T> fileDao, IFolderDao<T> folder
             if (folder == null)
             {
                 errorMsg = FilesCommonResource.ErrorMessage_FolderNotFound;
-
                 return throwException ? throw new FileNotFoundException(errorMsg) : errorMsg;
             }
 
-            var canDelete = checkPermissions ? await security.CanDeleteAsync(folder) : true;
-            if ((!immediately && folder.IsRoom) || (!ignoreException && !canDelete))
+            if (!immediately && folder.IsRoom)
             {
                 errorMsg = FilesCommonResource.ErrorMessage_SecurityException_DeleteFolder;
+                return throwException ? throw new SecurityException(errorMsg) : errorMsg;
+            }
 
+            if (!ignoreException && !await security.CanDeleteAsync(folder))
+            {
+                errorMsg = FilesCommonResource.ErrorMessage_SecurityException_DeleteFolder;
                 return throwException ? throw new SecurityException(errorMsg) : errorMsg;
             }
         }

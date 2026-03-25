@@ -592,6 +592,9 @@ public class FileDeleteOperationsManager(
         var permissionsCheckInternal = _serviceProvider.GetService<DeletePermissionsCheck<int>>();
         var permissionsCheckThirdParty = _serviceProvider.GetService<DeletePermissionsCheck<string>>();
 
+        // Intentional pre-check (fail-fast): validate permissions before enqueueing background delete.
+        // We still re-fetch/re-check inside FileDeleteOperation.DoJob to mitigate TOCTOU
+        // (state/permissions/locks can change between enqueue time and execution time).
         var internalPermissionCheckTask = permissionsCheckInternal.RunPermissionCheckAsync(data);
         var thirdPartyPermissionCheckTask = permissionsCheckThirdParty.RunPermissionCheckAsync(thirdPartyData);
         

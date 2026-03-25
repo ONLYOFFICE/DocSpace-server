@@ -186,6 +186,8 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
         {
             CancellationToken.ThrowIfCancellationRequested();
 
+            // Intentional re-read: must use current folder state at execution time (TOCTOU mitigation).
+            // Pre-check was done before enqueue, but permissions/locks/existence may have changed.
             var folder = await FolderDao.GetFolderAsync(folderId);
             var isRoom = folder.IsRoom;
 
@@ -194,7 +196,7 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
 
             T canCalculate = default;
 
-            var errorMsg = await permissionsManager.CheckFolderPermissionsAsync([folder], _immediately, _ignoreException, checkPermissions: checkPermissions);
+            var errorMsg = await permissionsManager.CheckFolderPermissionsAsync([folder], _immediately, _ignoreException);
             if (errorMsg != null)
             {
                 if (!_ignoreException && checkPermissions && !canDelete)
@@ -420,6 +422,8 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
         {
             CancellationToken.ThrowIfCancellationRequested();
 
+            // Intentional re-read: must use current file state at execution time (TOCTOU mitigation).
+            // Pre-check was done before enqueue, but permissions/locks/existence may have changed.
             var file = await FileDao.GetFileAsync(fileId);
             var errorMsg = await security.CheckFilePermissionsAsync([file], false, checkPermissions);
             if (errorMsg == FilesCommonResource.ErrorMessage_FileNotFound)
