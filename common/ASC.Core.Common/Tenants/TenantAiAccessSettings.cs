@@ -24,19 +24,45 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Provider.Data;
+namespace ASC.Core.Tenants;
 
-public class DefaultAiProvider
+/// <summary>
+/// The tenant-level settings for enabling or disabling all AI functionality in DocSpace.
+/// </summary>
+/// <remarks>
+/// When AI is disabled for a tenant, all AI-related features are turned off:
+/// the AI Agents folder is hidden from root folder listings, AI status checks
+/// return disabled immediately, and AI chat endpoints become inaccessible.
+/// AI is enabled by default for backward compatibility.
+/// Only users with the DocSpaceAdmin role (EditPortalSettings permission) can change this setting.
+/// </remarks>
+[Scope]
+[Serializable]
+public class TenantAiAccessSettings : ISettings<TenantAiAccessSettings>
 {
-    public int ProviderId { get; set; }
-    public required string DefaultModel { get; set; }
-    public string? ProviderTitle { get; set; }
-    public ProviderType? ProviderType { get; set; }
-}
+    /// <summary>
+    /// Specifies whether AI functionality is enabled for the tenant.
+    /// When set to <c>false</c>, all AI features (chat, agents, vectorization) are disabled tenant-wide.
+    /// </summary>
+    /// <example>true</example>
+    public bool Enabled { get; set; }
 
-[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
-    PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
-public static partial class DefaultAiProviderMapper
-{
-    public static partial DefaultAiProvider Map(this DbDefaultAiProvider source);
+    /// <summary>
+    /// The settings ID.
+    /// </summary>
+    public static Guid ID => new("{C74A278F-0936-47FF-915E-619622770504}");
+
+    public TenantAiAccessSettings GetDefault()
+    {
+        return new TenantAiAccessSettings
+        {
+            Enabled = true
+        };
+    }
+
+    /// <summary>
+    /// The timestamp indicating when the settings were last modified.
+    /// </summary>
+    /// <example>1990-01-01T00:00:00Z</example>
+    public DateTime LastModified { get; set; }
 }

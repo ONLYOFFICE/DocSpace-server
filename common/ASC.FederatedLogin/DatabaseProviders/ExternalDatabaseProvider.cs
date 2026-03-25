@@ -37,7 +37,14 @@ namespace ASC.FederatedLogin.DatabaseProviders;
 [Scope]
 public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IValidateKeysProvider, IConsumerKeyMetadataProvider
 {
+    private StorageFactory? _storageFactory;
+
+    private const string ExternalDbModule = "externaldb";
+
     public string DatabaseType => this["databaseType"] ?? "mysql";
+
+    public ExternalDatabaseType DatabaseTypeEnum =>
+        ExternalDatabaseTypeExtensions.TryParse(DatabaseType, ignoreCase: true, out var t) ? t : ExternalDatabaseType.MySql;
     public string Host => this["dbHost"];
     public string Port => this["dbPort"] ?? "3306";
     public string Database => this["dbName"];
@@ -53,19 +60,21 @@ public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IVa
             return false;
         }
 
-        return DatabaseType.ToLowerInvariant() switch
+        return DatabaseTypeEnum switch
         {
-            "mysql" => !string.IsNullOrWhiteSpace(Host) &&
-                       !string.IsNullOrWhiteSpace(Database) &&
-                       !string.IsNullOrWhiteSpace(User),
-            "sqlite" => !string.IsNullOrWhiteSpace(SqliteFilePath),
+            ExternalDatabaseType.MySql => !string.IsNullOrWhiteSpace(Host) &&
+                                          !string.IsNullOrWhiteSpace(Database) &&
+                                          !string.IsNullOrWhiteSpace(User),
+            ExternalDatabaseType.Sqlite => IsSqliteAllowed && !string.IsNullOrWhiteSpace(SqliteFilePath),
             _ => false
         };
     }
 
+    private bool IsSqliteAllowed => CoreBaseSettings.Standalone;
+
     public AuthKeyMetadata GetKeyMetadata(string key) => key switch
     {
-        "databaseType"   => new() { Order = 0, Type = "select",   Options = ["mysql", "sqlite"] },
+        "databaseType"   => new() { Order = 0, Type = "select",   Options = IsSqliteAllowed ? ["mysql", "sqlite"] : ["mysql"] },
         "dbHost"         => new() { Order = 1, DependsOn = "databaseType", DependsOnValue = "mysql" },
         "dbPort"         => new() { Order = 2, Type = "number", DependsOn = "databaseType", DependsOnValue = "mysql" },
         "dbName"         => new() { Order = 3, DependsOn = "databaseType", DependsOnValue = "mysql" },
@@ -85,6 +94,7 @@ public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IVa
         IConfiguration configuration,
         ICacheNotify<ConsumerCacheItem> cache,
         ConsumerFactory consumerFactory,
+        StorageFactory storageFactory,
         string name,
         int order,
         bool paid,
@@ -93,7 +103,9 @@ public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IVa
         : base(tenantManager, coreBaseSettings, coreSettings,
               configuration, cache, consumerFactory,
               name, order, paid, props, additional)
-    { }
+    {
+        _storageFactory = storageFactory;
+    }
     public Task<bool> ValidateKeysAsync()
         => ValidateConnectionAsync();
 
@@ -104,16 +116,31 @@ public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IVa
             return false;
         }
 
-        if (DatabaseType?.ToLowerInvariant() == "sqlite" && !File.Exists(SqliteFilePath))
+        var dbType = DatabaseTypeEnum;
+        DbConnection connection;
+
+        if (dbType == ExternalDatabaseType.Sqlite)
         {
-            return false;
+            var path = ValidateSqlitePath(SqliteFilePath, await GetSqliteBasePathAsync());
+            if (!File.Exists(path))
+            {
+                return false;
+            }
+
+            connection = CreateSqliteConnection(path);
+        }
+        else
+        {
+            connection = CreateMySqlConnection();
         }
 
         try
         {
-            await using var connection = CreateConnection();
-            await connection.OpenAsync();
-            return connection.State == ConnectionState.Open;
+            await using (connection)
+            {
+                await connection.OpenAsync();
+                return connection.State == ConnectionState.Open;
+            }
         }
         catch
         {
@@ -124,20 +151,35 @@ public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IVa
     public Task<bool> TestConnectionAsync()
         => ValidateConnectionAsync();
 
-    public static async Task<ConnectionTestResult> TestConnectionAsync(ExternalDatabaseSettings settings, IConfiguration configuration)
+    public static async Task<ConnectionTestResult> TestConnectionAsync(ExternalDatabaseSettings settings, StorageFactory storageFactory, int tenantId)
     {
         try
         {
-            if (settings.DatabaseType?.ToLowerInvariant() == "sqlite" && !File.Exists(settings.SqliteFilePath))
+            DbConnection connection;
+
+            if (settings.DatabaseTypeEnum == ExternalDatabaseType.Sqlite)
             {
-                return ConnectionTestResult.Failure("SQLite file not found.");
+                var basePath = await GetSqliteBasePathAsync(storageFactory, tenantId);
+                var path = ValidateSqlitePath(settings.SqliteFilePath, basePath);
+                if (!File.Exists(path))
+                {
+                    return ConnectionTestResult.Failure("SQLite file not found.");
+                }
+
+                connection = CreateSqliteConnection(path);
+            }
+            else
+            {
+                connection = CreateMySqlConnection(settings);
             }
 
-            await using var connection = CreateConnection(settings, configuration);
-            await connection.OpenAsync();
-            return connection.State == ConnectionState.Open
-                ? ConnectionTestResult.Ok()
-                : ConnectionTestResult.Failure("Connection did not open.");
+            await using (connection)
+            {
+                await connection.OpenAsync();
+                return connection.State == ConnectionState.Open
+                    ? ConnectionTestResult.Ok()
+                    : ConnectionTestResult.Failure("Connection did not open.");
+            }
         }
         catch (Exception ex)
         {
@@ -160,41 +202,40 @@ public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IVa
         };
     }
 
-    public DbConnection CreateConnection()
+    public Task<DbConnection> CreateConnectionAsync() => CreateConnectionAsync(DatabaseTypeEnum);
+
+    public async Task<DbConnection> CreateConnectionAsync(ExternalDatabaseType dbType)
     {
-        return DatabaseType?.ToLowerInvariant() switch
+        return dbType switch
         {
-            "mysql" => CreateMySqlConnection(),
-            "sqlite" => CreateSqliteConnection(ValidateSqlitePath(SqliteFilePath, Configuration)),
+            ExternalDatabaseType.MySql => CreateMySqlConnection(),
+            ExternalDatabaseType.Sqlite => CreateSqliteConnection(ValidateSqlitePath(SqliteFilePath, await GetSqliteBasePathAsync())),
             _ => throw new NotSupportedException($"Database type '{DatabaseType}' is not supported yet.")
         };
     }
 
-    public static DbConnection CreateConnection(ExternalDatabaseSettings settings, IConfiguration configuration)
+    private async Task<string> GetSqliteBasePathAsync()
     {
-        return settings.DatabaseType?.ToLowerInvariant() switch
-        {
-            "mysql" => CreateMySqlConnection(settings),
-            "sqlite" => CreateSqliteConnection(ValidateSqlitePath(settings.SqliteFilePath, configuration)),
-            _ => throw new NotSupportedException($"Database type '{settings.DatabaseType}' is not supported yet.")
-        };
+        var tenantId = TenantManager.GetCurrentTenantId();
+        return await GetSqliteBasePathAsync(_storageFactory!, tenantId);
     }
 
-    private static string ValidateSqlitePath(string filePath, IConfiguration configuration)
+    private static async Task<string> GetSqliteBasePathAsync(StorageFactory storageFactory, int tenantId)
     {
-        if (string.IsNullOrWhiteSpace(filePath))
+        var store = (DiscDataStore)await storageFactory.GetStorageAsync(tenantId, ExternalDbModule, controller: null);
+        var basePath = store.GetPhysicalPath("", "");
+        return basePath;
+    }
+
+    private static string ValidateSqlitePath(string fileName, string basePath)
+    {
+        if (string.IsNullOrWhiteSpace(fileName))
         {
-            throw new ArgumentException("SQLite file path is not configured.");
+            throw new ArgumentException("SQLite file name is not configured.");
         }
 
-        var allowedBasePath = configuration["files:externalDatabase:allowedBasePath"];
-        if (string.IsNullOrWhiteSpace(allowedBasePath))
-        {
-            throw new InvalidOperationException("files:externalDatabase:allowedBasePath is not configured.");
-        }
-
-        var fullPath = Path.GetFullPath(filePath);
-        var normalizedBase = Path.GetFullPath(allowedBasePath);
+        var fullPath = Path.GetFullPath(Path.Combine(basePath, fileName));
+        var normalizedBase = Path.TrimEndingDirectorySeparator(Path.GetFullPath(basePath));
 
         if (!fullPath.StartsWith(normalizedBase + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)
             && !fullPath.Equals(normalizedBase, StringComparison.OrdinalIgnoreCase))
@@ -216,7 +257,8 @@ public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IVa
             Port = uint.TryParse(Port, out var port) ? port : 3306,
             SslMode = bool.TryParse(UseSsl, out var useSsl) && useSsl
                 ? MySqlSslMode.Preferred
-                : MySqlSslMode.None
+                : MySqlSslMode.None,
+            AllowPublicKeyRetrieval = true
         };
 
         return new MySqlConnection(builder.ConnectionString);
@@ -231,7 +273,8 @@ public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IVa
             UserID = settings.User,
             Password = settings.Password,
             Port = (uint)settings.Port,
-            SslMode = settings.UseSsl ? MySqlSslMode.Preferred : MySqlSslMode.None
+            SslMode = settings.UseSsl ? MySqlSslMode.Preferred : MySqlSslMode.None,
+            AllowPublicKeyRetrieval = true
         };
 
         return new MySqlConnection(builder.ConnectionString);
