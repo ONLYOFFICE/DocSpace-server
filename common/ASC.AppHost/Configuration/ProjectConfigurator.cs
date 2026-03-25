@@ -87,7 +87,7 @@ public class ProjectConfigurator(
 
                 break;
         }
-
+        
         connectionManager.AddBaseConfig(project, isDocker);
         connectionManager.AddWaitFor(project);
     }
@@ -147,7 +147,7 @@ public class ProjectConfigurator(
                 .WithHttpEndpoint(projectPort, projectPort)
                 .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
         }
-
+        
         connectionManager.AddBaseConfig(resourceBuilder, isDocker);
         connectionManager.AddWaitFor(resourceBuilder);
 
