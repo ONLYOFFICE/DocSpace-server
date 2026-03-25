@@ -39,8 +39,13 @@ import com.asc.registration.service.ports.output.repository.ScopeQueryRepository
 import com.asc.registration.service.transfer.response.ScopeResponse;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -63,19 +68,21 @@ public class ScopeQueryHandlerTest {
         ScopeResponse.builder().name("test-scope").group("test-group").type("test-type").build();
   }
 
-  @Test
-  public void whenScopeIsFound_thenReturnScopeResponse() {
+  @ParameterizedTest
+  @MethodSource("scopeFoundCases")
+  public void whenScopeIsFound_thenReturnScopeResponse(
+      String scopeName,
+      Function<ScopeResponse, String> expectedExtractor,
+      Function<ScopeResponse, String> actualExtractor) {
     when(queryRepository.findByName(anyString())).thenReturn(Optional.of(scope));
     when(dataMapper.toScopeResponse(any(Scope.class))).thenReturn(scopeResponse);
 
-    var response = scopeQueryHandler.getScope("test-scope");
+    var response = scopeQueryHandler.getScope(scopeName);
 
-    verify(queryRepository, times(1)).findByName("test-scope");
+    verify(queryRepository, times(1)).findByName(scopeName);
     verify(dataMapper, times(1)).toScopeResponse(any(Scope.class));
 
-    assertEquals(scopeResponse.getName(), response.getName());
-    assertEquals(scopeResponse.getGroup(), response.getGroup());
-    assertEquals(scopeResponse.getType(), response.getType());
+    assertEquals(expectedExtractor.apply(scopeResponse), actualExtractor.apply(response));
   }
 
   @Test
@@ -99,8 +106,55 @@ public class ScopeQueryHandlerTest {
     verify(dataMapper, times(1)).toScopeResponse(any(Scope.class));
 
     assertEquals(1, response.size());
-    assertEquals(scopeResponse.getName(), response.iterator().next().getName());
-    assertEquals(scopeResponse.getGroup(), response.iterator().next().getGroup());
-    assertEquals(scopeResponse.getType(), response.iterator().next().getType());
+    var firstResponse = response.iterator().next();
+    scopeFieldExtractors()
+        .forEach(
+            arguments -> {
+              var expectedExtractor = (Function<ScopeResponse, String>) arguments.get()[0];
+              var actualExtractor = (Function<ScopeResponse, String>) arguments.get()[1];
+              assertEquals(
+                  expectedExtractor.apply(scopeResponse), actualExtractor.apply(firstResponse));
+            });
+  }
+
+  static Stream<Arguments> scopeFoundCases() {
+    return Stream.of(
+        Arguments.of(
+            "test-scope",
+            (Function<ScopeResponse, String>) ScopeResponse::getName,
+            (Function<ScopeResponse, String>) ScopeResponse::getName),
+        Arguments.of(
+            "test-scope",
+            (Function<ScopeResponse, String>) ScopeResponse::getGroup,
+            (Function<ScopeResponse, String>) ScopeResponse::getGroup),
+        Arguments.of(
+            "test-scope",
+            (Function<ScopeResponse, String>) ScopeResponse::getType,
+            (Function<ScopeResponse, String>) ScopeResponse::getType),
+        Arguments.of(
+            "other-scope",
+            (Function<ScopeResponse, String>) ScopeResponse::getName,
+            (Function<ScopeResponse, String>) ScopeResponse::getName),
+        Arguments.of(
+            "other-scope",
+            (Function<ScopeResponse, String>) ScopeResponse::getGroup,
+            (Function<ScopeResponse, String>) ScopeResponse::getGroup),
+        Arguments.of(
+            "other-scope",
+            (Function<ScopeResponse, String>) ScopeResponse::getType,
+            (Function<ScopeResponse, String>) ScopeResponse::getType));
+  }
+
+  static Stream<Arguments> scopeFieldExtractors() {
+    return Stream.of(
+        Arguments.of(
+            (Function<ScopeResponse, String>) ScopeResponse::getName,
+            (Function<ScopeResponse, String>) ScopeResponse::getName),
+        Arguments.of(
+            (Function<ScopeResponse, String>) ScopeResponse::getGroup,
+            (Function<ScopeResponse, String>) ScopeResponse::getGroup),
+        Arguments.of(
+            (Function<ScopeResponse, String>) ScopeResponse::getType,
+            (Function<ScopeResponse, String>) ScopeResponse::getType));
   }
 }
