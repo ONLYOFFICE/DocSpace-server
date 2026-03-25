@@ -61,6 +61,12 @@ public class ChatSettingsDto
     public ChatMultimodalSettingsDto Multimodal { get; init; }
 
     /// <summary>
+    /// Indicates whether the model supports extended thinking mode.
+    /// </summary>
+    /// <example>false</example>
+    public bool Thinking { get; init; }
+
+    /// <summary>
     /// Indicates whether this is an internal AI gateway provider.
     /// </summary>
     /// <example>false</example>

@@ -34,7 +34,8 @@ public class DbUserChatSettings : BaseEntity
     public int RoomId { get; set; }
     public Guid UserId { get; set; }
     public bool WebSearchEnabled { get; set; }
-    
+    public int? ReasoningEffort { get; set; }
+
     public DbTenant Tenant { get; set; }
     public User User { get; set; }
     public DbFolder Room { get; set; }
@@ -83,6 +84,10 @@ public static class DbUserChatSettingsExtensions
             entity.Property(e => e.WebSearchEnabled)
                 .HasColumnName("web_search_enabled")
                 .HasDefaultValue(true);
+
+            entity.Property(e => e.ReasoningEffort)
+                .HasColumnName("reasoning_effort")
+                .HasColumnType("tinyint");
         });
     }
 }
