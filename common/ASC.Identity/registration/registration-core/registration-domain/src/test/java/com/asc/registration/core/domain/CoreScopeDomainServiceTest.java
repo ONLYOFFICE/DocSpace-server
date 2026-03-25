@@ -60,19 +60,6 @@ class CoreScopeDomainServiceTest {
     when(scope.getType()).thenReturn("permission");
   }
 
-  @Test
-  void whenScopeIsCreated_thenEventIsGenerated() {
-    var event = service.createScope(audit, scope);
-
-    verify(scope, times(1)).getName();
-    verify(scope, times(1)).getGroup();
-    verify(scope, times(1)).getType();
-
-    assertNotNull(event);
-    assertEquals("read", event.getScope().getName());
-    assertNotNull(event.getEventAt());
-  }
-
   abstract static class ScopeUpdateCommand {
     private final String updatedValue;
 
@@ -121,6 +108,19 @@ class CoreScopeDomainServiceTest {
             },
             (BiConsumer<Scope, ArgumentCaptor<String>>)
                 (scope, captor) -> verify(scope).updateType(captor.capture())));
+  }
+
+  @Test
+  void whenScopeIsCreated_thenEventIsGenerated() {
+    var event = service.createScope(audit, scope);
+
+    verify(scope, times(1)).getName();
+    verify(scope, times(1)).getGroup();
+    verify(scope, times(1)).getType();
+
+    assertNotNull(event);
+    assertEquals("read", event.getScope().getName());
+    assertNotNull(event.getEventAt());
   }
 
   @ParameterizedTest
