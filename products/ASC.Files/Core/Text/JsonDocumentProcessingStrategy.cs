@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 #nullable enable
+
 using System.Runtime.CompilerServices;
 using System.Text.Json.Nodes;
 
@@ -96,45 +97,50 @@ public class JsonDocumentProcessingStrategy : IDocumentProcessingStrategy
 
     private static IEnumerable<JsonObject> SplitJson(JsonObject jsonData, ChunkerSettings settings)
     {
-        var chunks = new List<JsonObject> { new JsonObject() };
-        SplitObject(jsonData, Array.Empty<string>(), chunks, settings);
+        var chunks = new List<JsonObject> { new() };
+        var currentChunkSize = 0;
+        SplitObject(jsonData, [], chunks, ref currentChunkSize, settings);
 
-        foreach (var chunk in chunks)
+        foreach (var chunk in chunks.Where(chunk => chunk.Count > 0))
         {
-            if (chunk.Count > 0)
-            {
-                yield return chunk;
-            }
+            yield return chunk;
         }
     }
 
     private static void SplitObject(
         JsonObject data,
-        IReadOnlyList<string> currentPath,
+        List<string> currentPath,
         IList<JsonObject> chunks,
+        ref int currentChunkSize,
         ChunkerSettings settings)
     {
         foreach (var property in data)
         {
-            var propertyPath = AppendPath(currentPath, property.Key);
+            currentPath.Add(property.Key);
             var currentChunk = chunks[^1];
-            var candidateSize = GetCandidateSize(currentChunk, propertyPath, property.Value, settings);
+
+            SetPathValue(currentChunk, currentPath, property.Value);
+            var candidateSize = GetChunkSize(currentChunk, settings);
 
             if (candidateSize <= settings.MaxTokensPerChunk)
             {
-                SetPathValue(currentChunk, propertyPath, property.Value);
+                currentChunkSize = candidateSize;
+                currentPath.RemoveAt(currentPath.Count - 1);
                 continue;
             }
 
+            RemovePathValue(currentChunk, currentPath);
+
             if (property.Value is JsonObject { Count: > 0 } nestedObject)
             {
-                var currentChunkSize = GetChunkSize(currentChunk, settings);
                 if (currentChunk.Count > 0 && currentChunkSize >= GetMinChunkSize(settings))
                 {
                     chunks.Add(new JsonObject());
+                    currentChunkSize = 0;
                 }
 
-                SplitObject(nestedObject, propertyPath, chunks, settings);
+                SplitObject(nestedObject, currentPath, chunks, ref currentChunkSize, settings);
+                currentPath.RemoveAt(currentPath.Count - 1);
                 continue;
             }
 
@@ -144,12 +150,16 @@ public class JsonDocumentProcessingStrategy : IDocumentProcessingStrategy
                 currentChunk = chunks[^1];
             }
 
-            SetPathValue(currentChunk, propertyPath, property.Value);
+            SetPathValue(currentChunk, currentPath, property.Value);
+            currentChunkSize = GetChunkSize(currentChunk, settings);
 
-            if (GetChunkSize(currentChunk, settings) > settings.MaxTokensPerChunk)
+            if (currentChunkSize > settings.MaxTokensPerChunk)
             {
                 chunks.Add(new JsonObject());
+                currentChunkSize = 0;
             }
+
+            currentPath.RemoveAt(currentPath.Count - 1);
         }
     }
 
@@ -196,11 +206,13 @@ public class JsonDocumentProcessingStrategy : IDocumentProcessingStrategy
             JsonValueKind.Object => NormalizeObject(element),
             JsonValueKind.Array => NormalizeArray(element),
             JsonValueKind.Null => null,
+            JsonValueKind.String => JsonValue.Create(element.GetString()!),
+            JsonValueKind.True or JsonValueKind.False => JsonValue.Create(element.GetBoolean()),
             _ => JsonNode.Parse(element.GetRawText())
         };
     }
 
-    private static void SetPathValue(JsonObject root, IReadOnlyList<string> path, JsonNode? value)
+    private static void SetPathValue(JsonObject root, List<string> path, JsonNode? value)
     {
         if (path.Count == 0)
         {
@@ -222,16 +234,39 @@ public class JsonDocumentProcessingStrategy : IDocumentProcessingStrategy
         current[path[^1]] = value?.DeepClone();
     }
 
-    private static int GetCandidateSize(
-        JsonObject currentChunk,
-        IReadOnlyList<string> path,
-        JsonNode? value,
-        ChunkerSettings settings)
+    private static void RemovePathValue(JsonObject root, List<string> path)
     {
-        var candidate = (JsonObject)currentChunk.DeepClone();
-        SetPathValue(candidate, path, value);
+        if (path.Count == 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(path));
+        }
 
-        return settings.TokenCounter(Serialize(candidate));
+        var ancestors = new JsonObject[path.Count];
+        ancestors[0] = root;
+
+        for (var index = 0; index < path.Count - 1; index++)
+        {
+            if (ancestors[index][path[index]] is not JsonObject child)
+            {
+                return;
+            }
+
+            ancestors[index + 1] = child;
+        }
+
+        ancestors[path.Count - 1].Remove(path[^1]);
+
+        for (var index = path.Count - 2; index >= 0; index--)
+        {
+            if (ancestors[index + 1].Count == 0)
+            {
+                ancestors[index].Remove(path[index]);
+            }
+            else
+            {
+                break;
+            }
+        }
     }
 
     private static int GetChunkSize(JsonObject chunk, ChunkerSettings settings)
@@ -242,14 +277,6 @@ public class JsonDocumentProcessingStrategy : IDocumentProcessingStrategy
     private static int GetMinChunkSize(ChunkerSettings settings)
     {
         return Math.Max(settings.MaxTokensPerChunk - Math.Max(settings.MaxTokensPerChunk / 10, 1), 1);
-    }
-
-    private static List<string> AppendPath(IReadOnlyList<string> path, string segment)
-    {
-        var nextPath = new List<string>(path.Count + 1);
-        nextPath.AddRange(path);
-        nextPath.Add(segment);
-        return nextPath;
     }
 
     private static string Serialize(JsonObject value)
