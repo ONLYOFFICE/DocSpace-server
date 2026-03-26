@@ -414,6 +414,11 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:change-invitation-limit-value", value);
   }
 
+  function changeWebPlugin({ room, webPluginName, enabled } = {}) {
+    logger.info(`changed web plugin in room ${room}, webPluginName ${webPluginName}, enabled ${enabled}`);
+    filesIO.to(room).emit("s:change-web-plugin", { webPluginName, enabled });
+  }
+
   function updateHistory({ room, id, type } = {}) {
     logger.info(`update ${type} history ${id} in room ${room}`);
     filesIO.to(room).emit("s:update-history", { id, type });
@@ -607,6 +612,7 @@ module.exports = (io) => {
     markAsNewFiles,
     markAsNewFolders,
     changeInvitationLimitValue,
+    changeWebPlugin,
     updateHistory,
     logoutSession,
     changeMyType,
