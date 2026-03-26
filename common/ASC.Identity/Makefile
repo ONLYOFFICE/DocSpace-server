@@ -11,7 +11,7 @@ AUTHORIZATION_JAR = authorization-container.jar
 TEMP_BUILDER_REG = temp-jar-builder-reg:latest
 TEMP_BUILDER_AUTH = temp-jar-builder-auth:latest
 
-.PHONY: all test integration-tests test-all base registration authorization minified clean prune summary sizes help
+.PHONY: all test integration-tests minified-tests test-all base registration authorization minified clean prune summary sizes help
 
 all: base registration authorization sizes
 
@@ -23,7 +23,13 @@ integration-tests:
 	@echo "Running integration tests..."
 	mvn $(MAVEN_BATCH) test $(MAVEN_FMT_SKIP) -DRUN_INTEGRATION_TESTS=true -Dtest="*IT" -Dsurefire.failIfNoSpecifiedTests=false
 
-test-all: test integration-tests
+minified-tests:
+	@echo "Building dependencies..."
+	@mvn $(MAVEN_BATCH) install -pl minified -am -P minified $(MAVEN_FMT_SKIP) -DskipTests -q
+	@echo "Running minified integration tests..."
+	cd minified && mvn $(MAVEN_BATCH) test $(MAVEN_FMT_SKIP) -DRUN_INTEGRATION_TESTS=true
+
+test-all: test integration-tests minified-tests
 	@echo "All tests completed."
 
 base: $(REGISTRATION_JAR) $(AUTHORIZATION_JAR)
