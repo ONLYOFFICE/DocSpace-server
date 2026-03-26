@@ -180,6 +180,11 @@ public interface IFolder
     /// Indicates whether the folder represents a room.
     /// </summary>
     bool IsRoom { get; }
+
+    /// <summary>
+    /// Indicates whether the folder represents an AI agent.
+    /// </summary>
+    bool IsAgent { get; }
 }
 
 /// <summary>
@@ -336,6 +341,8 @@ public class Folder<T> : FileEntry<T>, IFolder
     public bool IsRoot => FolderType == RootFolderType;
 
     public bool IsRoom => this.FolderType.IsRoom();
+
+    public bool IsAgent => this.FolderType.IsAgent();
 }
 
 [Scope]
