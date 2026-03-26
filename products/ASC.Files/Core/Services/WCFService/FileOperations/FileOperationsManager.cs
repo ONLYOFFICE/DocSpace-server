@@ -37,6 +37,7 @@ public class FileOperationsManagerHolder<T> where T : FileOperation
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly DistributedTaskQueue<T> _tasks;
+    private readonly SemaphoreSlim _busyCheckLock = new(1, 1);
 
     public FileOperationsManagerHolder(IDistributedTaskQueueFactory queueFactory, NotifyConfiguration notifyConfiguration, IServiceProvider serviceProvider)
     {
@@ -118,6 +119,20 @@ public class FileOperationsManagerHolder<T> where T : FileOperation
         if (operations.Any(o => o.Status <= DistributedTaskStatus.Running))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_ManyDownloads);
+        }
+    }
+
+    public async Task<bool> IsTooBusy()
+    {
+        await _busyCheckLock.WaitAsync();
+        try
+        {
+            var instanceTasks = await _tasks.GetAllTasks(DistributedTaskQueue<T>.INSTANCE_ID);
+            return _tasks.MaxThreadsCount < instanceTasks.Count;
+        }
+        finally
+        {
+            _busyCheckLock.Release();
         }
     }
 
@@ -245,6 +260,11 @@ public abstract class FileOperationsManager<T>(
     public async Task<List<FileOperationResult>> CancelOperations(string id = null)
     {
         return await _fileOperationsManagerHolder.CancelOperations(await GetUserIdAsync(), id);
+    }
+
+    public async Task<bool> IsTooBusy()
+    {
+        return await _fileOperationsManagerHolder.IsTooBusy();
     }
 
     public async Task Enqueue<T1, T2>(string taskId, T1 thirdPartyData, T2 data)
