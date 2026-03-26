@@ -72,7 +72,7 @@ public class FolderDeleteTests(
                 folder.Id,
                 new DeleteFolder(false, true),
                 TestContext.Current.CancellationToken));
-        
+
         exception.ErrorCode.Should().Be(403);
     }
 }
