@@ -29,11 +29,25 @@ namespace ASC.AI.Core.Chat.Data;
 public class UserChatSettings
 {
     public bool WebSearchEnabled { get; set; } = true;
+    public ChatReasoningEffort ReasoningEffort { get; set; }
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
     PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
 public static partial class UserChatSettingsMapper
 {
-    public static partial UserChatSettings Map(this DbUserChatSettings source);
+    [MapperIgnoreTarget(nameof(UserChatSettings.ReasoningEffort))]
+    private static partial UserChatSettings MapInternal(DbUserChatSettings source);
+
+    public static UserChatSettings Map(this DbUserChatSettings source)
+    {
+        var result = MapInternal(source);
+
+        if (source.ReasoningEffort is { } value && Enum.IsDefined((ChatReasoningEffort)value))
+        {
+            result.ReasoningEffort = (ChatReasoningEffort)value;
+        }
+
+        return result;
+    }
 }

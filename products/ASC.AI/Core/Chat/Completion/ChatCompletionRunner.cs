@@ -84,7 +84,7 @@ public class ChatCompletionRunner(
         Guid chatId, string message, IEnumerable<JsonElement>? files = null)
     {
         ArgumentException.ThrowIfNullOrEmpty(message);
-        
+
         var tenantId = tenantManager.GetCurrentTenantId();
 
         var chat = await chatHistory.GetChatAsync(tenantId, chatId);
@@ -92,7 +92,7 @@ public class ChatCompletionRunner(
         {
             throw new ItemNotFoundException("Chat not found");
         }
-        
+
         var context = await contextBuilder.BuildAsync(chat.RoomId);
         context.Chat = chat;
         context.ChatId = chat.Id;

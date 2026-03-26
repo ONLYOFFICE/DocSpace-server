@@ -395,38 +395,41 @@ public class FolderDtoHelper(
 
         if (folder.SettingsChatParameters != null)
         {
-            if (folder.SettingsChatProviderId == AiGateway.ProviderId && !aiStatus.GatewayEnabled)
+            if (folder.SettingsChatProviderId == AiGateway.ProviderId)
             {
-                folder.SettingsChatProviderId = 0;
+                folder.ChatProviderType = ProviderType.PortalAi;
+
+                if (!aiStatus.GatewayEnabled)
+                {
+                    folder.SettingsChatProviderId = 0;
+                }
             }
 
             var modelId = folder.SettingsChatProviderId == 0 ? null : folder.SettingsChatParameters.ModelId;
-            ChatMultimodalSettingsDto multimodal = null;
-            string modelAlias = null;
+            var model = modelId != null && folder.ChatProviderType.HasValue
+                ? aiConfiguration.GetModel(folder.ChatProviderType.Value, modelId)
+                : null;
 
-            if (modelId != null)
+            ChatMultimodalSettingsDto multimodal = null;
+            if (model?.Multimodal?.Image != null)
             {
-                modelAlias = aiConfiguration.GetModelAlias(modelId);
-                var multimodalSettings = aiConfiguration.GetMultimodalSettings(modelId);
-                if (multimodalSettings?.Image != null)
+                multimodal = new ChatMultimodalSettingsDto
                 {
-                    multimodal = new ChatMultimodalSettingsDto
+                    Image = new ChatImageMultimodalSettingsDto
                     {
-                        Image = new ChatImageMultimodalSettingsDto
-                        {
-                            Formats = multimodalSettings.Image.Formats
-                        }
-                    };
-                }
+                        Formats = model.Multimodal.Image.Formats
+                    }
+                };
             }
 
             result.ChatSettings = new ChatSettingsDto
             {
                 ProviderId = folder.SettingsChatProviderId,
                 ModelId = modelId,
-                ModelAlias = modelAlias,
+                ModelAlias = model?.Alias,
                 Prompt = folder.SettingsChatParameters.Prompt,
-                Multimodal = multimodal
+                Multimodal = multimodal,
+                Thinking = model?.Thinking ?? false
             };
         }
 

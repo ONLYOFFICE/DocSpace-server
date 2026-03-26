@@ -61,6 +61,7 @@ public class WebPlugin
 public class WebPluginManager(
     CoreBaseSettings coreBaseSettings,
     SettingsManager settingsManager,
+    QuotaSocketManager quotaSocketManager,
     InstanceCrypto instanceCrypto,
     WebPluginConfigSettings webPluginConfigSettings,
     StorageFactory storageFactory,
@@ -442,6 +443,8 @@ public class WebPluginManager(
         var tag = CacheExtention.GetWebPluginsTag(webPlugin.System ? Tenant.DefaultTenant : tenantId);
 
         await _cache.RemoveByTagAsync(tag);
+
+        await quotaSocketManager.ChangeWebPlugin(webPlugin.Name, enabled);
 
         return webPlugin;
     }
