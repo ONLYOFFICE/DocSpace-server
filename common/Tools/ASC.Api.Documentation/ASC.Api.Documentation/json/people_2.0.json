@@ -2441,24 +2441,26 @@
             "multipart/form-data": {
               "schema": {
                 "required": [
-                  "formCollection"
+                  "File"
                 ],
                 "type": "object",
                 "properties": {
-                  "formCollection": {
-                    "type": "array",
-                    "items": {
-                      "$ref": "#/components/schemas/KeyValuePairStringStringValues"
-                    },
+                  "File": {
+                    "type": "string",
                     "description": "The image data.",
-                    "example": {
-                      "file": "photo.jpg"
-                    }
+                    "format": "binary",
+                    "example": "{\"file\": \"photo.jpg\"}"
+                  },
+                  "Autosave": {
+                    "type": "boolean"
                   }
                 }
               },
               "encoding": {
-                "formCollection": {
+                "File": {
+                  "style": "form"
+                },
+                "Autosave": {
                   "style": "form"
                 }
               }
@@ -6930,7 +6932,7 @@
         ],
         "summary": "Start updating user type",
         "description": "Starts updating the type of the user or guest when reassigning rooms and shared files.",
-        "operationId": "starUserTypetUpdate",
+        "operationId": "startUserTypeUpdate",
         "requestBody": {
           "content": {
             "application/json": {
@@ -8778,22 +8780,6 @@
         },
         "additionalProperties": false,
         "description": "The request parameters for inviting users."
-      },
-      "KeyValuePairStringStringValues": {
-        "type": "object",
-        "properties": {
-          "key": {
-            "type": "string",
-            "nullable": true
-          },
-          "value": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "additionalProperties": false
       },
       "LinkAccountRequestDto": {
         "type": "object",

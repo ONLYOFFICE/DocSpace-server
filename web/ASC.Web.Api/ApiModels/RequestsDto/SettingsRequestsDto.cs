@@ -153,3 +153,26 @@ public class TenantBannerSettingsDto
     /// <example>true</example>
     public bool Hidden { get; set; }
 }
+
+/// <summary>
+/// The request parameters for managing the tenant-level AI access settings.
+/// </summary>
+/// <remarks>
+/// Controls whether all AI functionality (chat, agents, vectorization) is available for the current tenant.
+/// When disabled, the AI Agents folder is hidden from root folder listings and AI status checks return disabled immediately.
+/// Only DocSpaceAdmin users can modify this setting.
+/// </remarks>
+/// <example>
+/// {
+///   "aiEnabled": false
+/// }
+/// </example>
+public class TenantAiAccessSettingsDto
+{
+    /// <summary>
+    /// Specifies whether AI functionality is enabled for the tenant.
+    /// Set to <c>true</c> to enable all AI features or <c>false</c> to disable them tenant-wide.
+    /// </summary>
+    /// <example>false</example>
+    public bool Enabled { get; set; }
+}

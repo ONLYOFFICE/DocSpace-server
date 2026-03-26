@@ -331,7 +331,10 @@ public class ChatDao(IDbContextFactory<AiDbContext> dbContextFactory)
                 TenantId = tenantId,
                 RoomId = roomId,
                 UserId = userId,
-                WebSearchEnabled = settings.WebSearchEnabled
+                WebSearchEnabled = settings.WebSearchEnabled,
+                ReasoningEffort = settings.ReasoningEffort is ChatReasoningEffort.None
+                    ? null
+                    : (int)settings.ReasoningEffort
             };
 
             await context.UserChatSettings.AddOrUpdateAsync(dbSettings);
