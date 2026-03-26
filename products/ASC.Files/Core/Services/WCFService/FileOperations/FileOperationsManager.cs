@@ -37,6 +37,7 @@ public class FileOperationsManagerHolder<T> where T : FileOperation
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly DistributedTaskQueue<T> _tasks;
+    private readonly SemaphoreSlim _busyCheckLock = new(1, 1);
 
     public FileOperationsManagerHolder(IDistributedTaskQueueFactory queueFactory, NotifyConfiguration notifyConfiguration, IServiceProvider serviceProvider)
     {
@@ -123,8 +124,16 @@ public class FileOperationsManagerHolder<T> where T : FileOperation
 
     public async Task<bool> IsTooBusy()
     {
-        var instanceTasks = await _tasks.GetAllTasks(DistributedTaskQueue<T>.INSTANCE_ID);
-        return _tasks.MaxThreadsCount < instanceTasks.Count;
+        await _busyCheckLock.WaitAsync();
+        try
+        {
+            var instanceTasks = await _tasks.GetAllTasks(DistributedTaskQueue<T>.INSTANCE_ID);
+            return _tasks.MaxThreadsCount < instanceTasks.Count;
+        }
+        finally
+        {
+            _busyCheckLock.Release();
+        }
     }
 
     internal T GetService()
