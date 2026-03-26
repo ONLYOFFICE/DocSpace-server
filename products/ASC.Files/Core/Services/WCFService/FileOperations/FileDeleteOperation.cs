@@ -196,7 +196,8 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
 
             T canCalculate = default;
 
-            var errorMsg = await permissionsManager.CheckFolderPermissionsAsync([folder], _immediately, _ignoreException);
+            var errorMsg = await permissionsManager.CheckFolderPermissionsAsync(
+                [folder], _immediately, checkPermissions, !_ignoreException);
             if (errorMsg != null)
             {
                 if (!_ignoreException && checkPermissions && !canDelete)
@@ -318,7 +319,7 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
                     else
                     {
                         var files = await FileDao.GetFilesAsync(folder.Id, new OrderBy(SortedByType.AZ, true), FilterType.FilesOnly, false, Guid.Empty, string.Empty, null, false, withSubfolders: true).ToListAsync();
-                        
+
                         if (folder.FolderType is FolderType.FormFillingFolderInProgress or FolderType.FormFillingFolderDone)
                         {
                             await FolderDao.ChangeFolderTypeAsync(folder, FolderType.DEFAULT);

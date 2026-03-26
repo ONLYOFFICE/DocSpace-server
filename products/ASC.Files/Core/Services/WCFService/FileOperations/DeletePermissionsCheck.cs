@@ -28,7 +28,7 @@ namespace ASC.Files.Core.Services.WCFService.FileOperations;
 
 [Scope(GenericArguments = [typeof(int)])]
 [Scope(GenericArguments = [typeof(string)])]
-public class DeletePermissionsCheck<T>(IFileDao<T> fileDao, IFolderDao<T> folderDao, LockerManager lockerManager, FileTrackerHelper fileTracker, FileSecurity security) 
+public class DeletePermissionsCheck<T>(IFileDao<T> fileDao, IFolderDao<T> folderDao, LockerManager lockerManager, FileTrackerHelper fileTracker, FileSecurity security)
     : IPermissionsChecker<FileDeleteOperationData<T>, T>
 {
     public async Task RunPermissionCheckAsync(FileDeleteOperationData<T> data)
@@ -39,7 +39,7 @@ public class DeletePermissionsCheck<T>(IFileDao<T> fileDao, IFolderDao<T> folder
         }
         else
         {
-            await CheckFolderAsync(data.Folders.ToList(), data.IgnoreException, data.Immediately);
+            await CheckFolderAsync(data.Folders.ToList(), data.Immediately);
             await CheckFilesAsync(data.Files.ToList());
         }
     }
@@ -51,12 +51,12 @@ public class DeletePermissionsCheck<T>(IFileDao<T> fileDao, IFolderDao<T> folder
         await CheckVersionPermissionsAsync(file, versions, true);
     }
 
-    private async Task CheckFolderAsync(List<T> data, bool ignoreException, bool immediately)
+    private async Task CheckFolderAsync(List<T> data, bool immediately)
     {
         foreach (var folderId in data)
         {
             var folder = await folderDao.GetFolderAsync(folderId);
-            await CheckFolderPermissionsAsync([folder], immediately, ignoreException, throwException: true);
+            await CheckFolderPermissionsAsync([folder], immediately, throwException: true);
         }
     }
 
@@ -68,13 +68,13 @@ public class DeletePermissionsCheck<T>(IFileDao<T> fileDao, IFolderDao<T> folder
             await CheckFilePermissionsAsync([file], false, true, true);
         }
     }
-    
+
     public async Task<string> CheckFilePermissionsAsync(IEnumerable<File<T>> files, bool folder, bool checkPermissions, bool throwException = false)
     {
         foreach (var file in files)
         {
             string errorMsg;
-            
+
             if (file == null)
             {
                 errorMsg = FilesCommonResource.ErrorMessage_FileNotFound;
@@ -102,16 +102,20 @@ public class DeletePermissionsCheck<T>(IFileDao<T> fileDao, IFolderDao<T> folder
                 return throwException ? throw new SecurityException(errorMsg) : errorMsg;
             }
         }
-        
+
         return null;
     }
 
-    public async Task<string> CheckFolderPermissionsAsync(IEnumerable<Folder<T>> folders, bool immediately, bool ignoreException, bool throwException = false)
+    public async Task<string> CheckFolderPermissionsAsync(
+        IEnumerable<Folder<T>> folders,
+        bool immediately,
+        bool checkPermissions = true,
+        bool throwException = false)
     {
         foreach (var folder in folders)
         {
             string errorMsg;
-            
+
             if (folder == null)
             {
                 errorMsg = FilesCommonResource.ErrorMessage_FolderNotFound;
@@ -124,13 +128,13 @@ public class DeletePermissionsCheck<T>(IFileDao<T> fileDao, IFolderDao<T> folder
                 return throwException ? throw new SecurityException(errorMsg) : errorMsg;
             }
 
-            if (!ignoreException && !await security.CanDeleteAsync(folder))
+            if (checkPermissions && !await security.CanDeleteAsync(folder))
             {
                 errorMsg = FilesCommonResource.ErrorMessage_SecurityException_DeleteFolder;
                 return throwException ? throw new SecurityException(errorMsg) : errorMsg;
             }
         }
-        
+
         return null;
     }
 
@@ -161,7 +165,7 @@ public class DeletePermissionsCheck<T>(IFileDao<T> fileDao, IFolderDao<T> folder
                 }
             }
         }
-        
+
         errorMsg = await CheckFilePermissionsAsync([file], false, true, throwException);
         return errorMsg;
     }
