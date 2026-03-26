@@ -30,7 +30,7 @@ namespace ASC.Files.Worker.IntegrationEvents.EventHandling;
 
 [Scope]
 public class BulkDownloadIntegrationEventHandler(
-    ILogger<BulkDownloadIntegrationEvent> logger,
+    ILogger<BulkDownloadIntegrationEventHandler> logger,
     FileOperationsManager<FileDownloadOperation> fileOperationsManager,
     TenantManager tenantManager,
     SecurityContext securityContext,
