@@ -1153,7 +1153,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Insert into table {TableName} failed", tableName);
+            logger.ErrorInsertFailed(ex, tableName);
             throw;
         }
     }
@@ -1215,4 +1215,10 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
 
         return $"INSERT INTO \"{tableName}\" ({columns}) VALUES ({parameters}) ON CONFLICT(\"{keyColumn}\") DO UPDATE SET {updateParts};";
     }
+}
+
+internal static partial class ExternalDatabaseClientLogger
+{
+    [LoggerMessage(LogLevel.Error, "Insert into table {TableName} failed")]
+    public static partial void ErrorInsertFailed(this ILogger<ExternalDatabaseClient> logger, Exception exception, string tableName);
 }
