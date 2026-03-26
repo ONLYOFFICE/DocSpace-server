@@ -24,14 +24,16 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.People.Extensions;
+
 namespace ASC.People;
 
 public class Startup : BaseStartup
 {
     public Startup(IConfiguration configuration) : base(configuration)
     {
-        if (configuration.GetSection("RabbitMQ").GetChildren().Any() && 
-            String.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
+        if (configuration.GetSection("RabbitMQ").GetChildren().Any() &&
+            string.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
         {
             configuration["RabbitMQ:ClientProvidedName"] = Program.AppName;
         }
@@ -41,14 +43,6 @@ public class Startup : BaseStartup
     {
         await base.ConfigureServices(builder);
 
-        var services = builder.Services;
-        services.AddBaseDbContextPool<FilesDbContext>();
-        services.RegisterQuotaFeature();
-
-        services.RegisterQueue<UsersQuotaSyncJob>();
-        services.RegisterQueue<RemoveProgressItem>();
-        services.RegisterQueue<DeletePersonalFolderProgressItem>();
-        services.RegisterQueue<UpdateUserTypeProgressItem>();
-        services.RegisterQueue<ReassignProgressItem>();
+        builder.Services.AddPeopleServices();
     }
 }

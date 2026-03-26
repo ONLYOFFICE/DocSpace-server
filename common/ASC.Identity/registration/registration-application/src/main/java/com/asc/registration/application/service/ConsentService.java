@@ -50,8 +50,8 @@ import org.springframework.stereotype.Service;
  *   <li>Combine the data into a paginated response containing enriched consent information.
  * </ul>
  */
-@Service
 @RequiredArgsConstructor
+@Service("registrationConsentService")
 public class ConsentService {
   private final GrpcAuthorizationService grpcAuthorizationService;
   private final ClientApplicationService clientApplicationService;

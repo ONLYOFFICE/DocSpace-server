@@ -981,6 +981,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Name = "storage",
                             Price = 0.14m,
                             ProductId = "1011",
+                            ServiceName = "disk-storage",
                             Visible = true,
                             Wallet = true
                         },
@@ -4657,6 +4658,10 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("user_id")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<sbyte?>("ReasoningEffort")
+                        .HasColumnType("tinyint")
+                        .HasColumnName("reasoning_effort");
 
                     b.Property<bool>("WebSearchEnabled")
                         .ValueGeneratedOnAdd()

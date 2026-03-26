@@ -104,7 +104,7 @@ public class WhitelabelController(
 
             foreach (var l in inDto.Logo)
             {
-                var key = Int32.Parse(l.Key);
+                var key = int.Parse(l.Key);
 
                 logoDict.Add(key, new KeyValuePair<string, string>(l.Value.Light, l.Value.Dark));
             }

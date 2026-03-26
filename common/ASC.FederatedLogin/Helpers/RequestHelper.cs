@@ -36,13 +36,13 @@ public class RequestHelper(IHttpClientFactory httpClientFactory)
             throw new ArgumentNullException(nameof(uri));
         }
 
-        var request = new HttpRequestMessage
+        using var request = new HttpRequestMessage
         {
             RequestUri = new Uri(uri),
             Method = new HttpMethod(method)
         };
 
-        var httpClient = httpClientFactory.CreateClient();
+        using var httpClient = httpClientFactory.CreateClient();
         httpClient.Timeout = TimeSpan.FromMilliseconds(timeout);
 
         if (headers != null)

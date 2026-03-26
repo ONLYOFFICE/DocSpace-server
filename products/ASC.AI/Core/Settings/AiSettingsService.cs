@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.MessagingSystem.Core;
-
 namespace ASC.AI.Core.Settings;
 
 [Scope]
@@ -66,7 +64,10 @@ public class AiSettingsService(
                     set = true;
                 }
                 break;
-            
+            case EngineType.PortalAi:
+                settings.Config = null;
+                set = true;
+                break;
             case EngineType.None:
                 settings.Config = null;
                 break;
@@ -104,42 +105,50 @@ public class AiSettingsService(
         var set = false;
         var settings = await aiSettingsStore.GetVectorizationSettingsAsync();
         
-        if (type == EmbeddingProviderType.None)
+        switch (type)
         {
-            settings.Type = type;
-            settings.Key = null;
-        }
-        else
-        {
-            ArgumentException.ThrowIfNullOrEmpty(key);
-            
-            var url = type switch
-            {
-                EmbeddingProviderType.OpenAi => VectorizationGlobalSettings.OpenAiBaseUrl,
-                EmbeddingProviderType.OpenRouter => VectorizationGlobalSettings.OpenRouterBaseUrl,
-                _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
-            };
-            
-            var client = modelClientFactory.Create(type, url, key);
-
-            try
-            {
-                await client.PingAsync();
-            }
-            catch (HttpRequestException httpException)
-            {
-                if (httpException.StatusCode is HttpStatusCode.Unauthorized)
+            case EmbeddingProviderType.None:
+                settings.Type = type;
+                settings.Key = null;
+                break;
+            case EmbeddingProviderType.PortalAi:
+                settings.Type = type;
+                settings.Key = null;
+                set = true;
+                break;
+            default:
                 {
-                    throw new ArgumentException(ErrorMessages.InvalidKey);
-                }
+                    ArgumentException.ThrowIfNullOrEmpty(key);
 
-                throw;
-            }
-            
-            settings.Type = type;
-            settings.Key = key;
-            
-            set = true;
+                    var url = type switch
+                    {
+                        EmbeddingProviderType.OpenAi => VectorizationGlobalSettings.OpenAiBaseUrl,
+                        EmbeddingProviderType.OpenRouter => VectorizationGlobalSettings.OpenRouterBaseUrl,
+                        _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+                    };
+
+                    var client = modelClientFactory.Create(type, url, key);
+
+                    try
+                    {
+                        await client.PingAsync();
+                    }
+                    catch (HttpRequestException httpException)
+                    {
+                        if (httpException.StatusCode is HttpStatusCode.Unauthorized)
+                        {
+                            throw new ArgumentException(ErrorMessages.InvalidKey);
+                        }
+
+                        throw;
+                    }
+
+                    settings.Type = type;
+                    settings.Key = key;
+
+                    set = true;
+                    break;
+                }
         }
 
         await aiSettingsStore.SetVectorizationSettingsAsync(settings);
@@ -174,18 +183,18 @@ public class AiSettingsService(
         var vectorizationEnabledTask = aiSettingsStore.IsVectorizationEnabledAsync();
 
         var needResetProvidersTask = providerService.NeedResetProvidersAsync();
-        var aiStatus = accessibility.GetStatusAsync();
+        var aiStatusTask = accessibility.GetStatusAsync();
 
         var docSpaceMcpServer = systemMcpConfig.Servers.Values.FirstOrDefault(
             x => x.Type == ServerType.DocSpace);
 
         await Task.WhenAll(
-            webSearchSettingsTask, 
-            webSearchEnabledTask, 
-            vectorizationSettingsTask, 
-            vectorizationEnabledTask, 
-            needResetProvidersTask, 
-            aiStatus
+            webSearchSettingsTask,
+            webSearchEnabledTask,
+            vectorizationSettingsTask,
+            vectorizationEnabledTask,
+            needResetProvidersTask,
+            aiStatusTask
             );
 
         var webSearchNeedReset = (await webSearchSettingsTask).NeedReset;
@@ -194,8 +203,9 @@ public class AiSettingsService(
         var vectorizationNeedReset = (await vectorizationSettingsTask).NeedReset;
         var vectorizationEnabled = !vectorizationNeedReset && (await vectorizationEnabledTask);
 
+        var aiStatus = await aiStatusTask;
         var needResetProviders = await needResetProvidersTask;
-        var aiReady = !needResetProviders && (await aiStatus).Enabled;
+        var aiReady = (aiStatus.GatewayEnabled || !needResetProviders) && aiStatus.Enabled;
 
         return new AiSettings
         {
@@ -207,7 +217,8 @@ public class AiSettingsService(
             AiReadyNeedReset = needResetProviders,
             EmbeddingModel = vectorizationGlobalSettings.Model.Id,
             ModelAliases = aiSettingsStore.GetModelAliases(),
-            PortalMcpServerId = docSpaceMcpServer?.Id
+            PortalMcpServerId = docSpaceMcpServer?.Id,
+            SystemAiEnabled = aiStatus.GatewayEnabled,
         };
     }
     

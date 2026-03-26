@@ -44,7 +44,7 @@ public class KnowledgeSearchEngine(
         
         var tenantId = tenantManager.GetCurrentTenantId();
 
-        var generator = await embeddingGeneratorFactory.CreateAsync(agent.SettingsChatProviderId);
+        var generator = await embeddingGeneratorFactory.CreateAsync();
         var embedding = await generator.GenerateAsync(query);
 
         var collection = vectorStore.GetCollection<Chunk>(Chunk.IndexName, null);

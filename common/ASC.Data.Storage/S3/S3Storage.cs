@@ -1,25 +1,25 @@
 // (c) Copyright Ascensio System SIA 2009-2026
-// 
+//
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
+//
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
+//
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-// 
+//
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -43,7 +43,7 @@ public class S3Storage(TempStream tempStream,
         IQuotaService quotaService,
         UserManager userManager,
         CustomQuota customQuota)
-    : BaseStorage(tempStream, tenantManager, pathUtils, emailValidationKeyProvider, httpContextAccessor, factory, options, clientFactory, tenantQuotaFeatureStatHelper, quotaSocketManager, settingsManager, quotaService, userManager, customQuota)
+    : BaseStorage(tempStream, tenantManager, pathUtils, emailValidationKeyProvider, httpContextAccessor, factory, options, clientFactory, tenantQuotaFeatureStatHelper, quotaSocketManager, settingsManager, quotaService, userManager, customQuota), IDisposable
 {
     public override bool IsSupportCdnUri => true;
     public static long ChunkSize => 1000 * 1024 * 1024;
@@ -73,6 +73,8 @@ public class S3Storage(TempStream tempStream,
 
     private EncryptionMethod _encryptionMethod = EncryptionMethod.None;
     private string _encryptionKey;
+    private readonly object _clientLock = new();
+    private IAmazonS3 _client;
 
     public Uri GetUriInternal(string path)
     {
@@ -148,7 +150,7 @@ public class S3Storage(TempStream tempStream,
             pUrlRequest.ResponseHeaderOverrides = headersOverrides;
         }
 
-        using var client = GetClient();
+        var client = GetClient();
 
         return Task.FromResult(MakeUri(client.GetPreSignedURL(pUrlRequest)));
     }
@@ -254,7 +256,7 @@ public class S3Storage(TempStream tempStream,
 
         try
         {
-            using var client = GetClient();
+            var client = GetClient();
             return new ResponseStreamWrapper(await client.GetObjectAsync(request));
         }
         catch (AmazonS3Exception ex)
@@ -304,7 +306,7 @@ public class S3Storage(TempStream tempStream,
                 await QuotaController.QuotaUsedCheckAsync(buffered.Length, ownerId);
             }
 
-            using var client = GetClient();
+            var client = GetClient();
             using var uploader = new TransferUtility(client);
             var mime = string.IsNullOrEmpty(contentType)
                 ? MimeMapping.GetMimeMapping(Path.GetFileName(path))
@@ -396,7 +398,7 @@ public class S3Storage(TempStream tempStream,
             Key = MakePath(domain, path)
         };
 
-        using var s3 = GetClient();
+        var s3 = GetClient();
         if (s3 is not IAmazonS3Encryption)
         {
             request.ServerSideEncryptionMethod = GetServerSideEncryptionMethod(out var kmsKeyId);
@@ -434,7 +436,7 @@ public class S3Storage(TempStream tempStream,
 
         try
         {
-            using var s3 = GetClient();
+            var s3 = GetClient();
             var response = await s3.UploadPartAsync(request);
 
             return response.ETag;
@@ -469,11 +471,9 @@ public class S3Storage(TempStream tempStream,
 
         try
         {
-            using (var s3 = GetClient())
-            {
-                await s3.CompleteMultipartUploadAsync(request);
-                //    await InvalidateCloudFrontAsync(MakePath(domain, path));
-            }
+            var s3 = GetClient();
+            await s3.CompleteMultipartUploadAsync(request);
+            //    await InvalidateCloudFrontAsync(MakePath(domain, path));
 
             if (QuotaController != null)
             {
@@ -505,7 +505,7 @@ public class S3Storage(TempStream tempStream,
             UploadId = uploadId
         };
 
-        using var s3 = GetClient();
+        var s3 = GetClient();
         await s3.AbortMultipartUploadAsync(request);
     }
 
@@ -534,7 +534,7 @@ public class S3Storage(TempStream tempStream,
 
     public override async Task DeleteAsync(string domain, string path)
     {
-        using var client = GetClient();
+        var client = GetClient();
         var key = MakePath(domain, path);
         var size = await GetFileSizeAsync(domain, path);
 
@@ -590,16 +590,14 @@ public class S3Storage(TempStream tempStream,
             return;
         }
 
-        using (var client = GetClient())
+        var client = GetClient();
+        var deleteRequest = new DeleteObjectsRequest
         {
-            var deleteRequest = new DeleteObjectsRequest
-            {
-                BucketName = _bucket,
-                Objects = keysToDel.Select(key => new KeyVersion { Key = key }).ToList()
-            };
+            BucketName = _bucket,
+            Objects = keysToDel.Select(key => new KeyVersion { Key = key }).ToList()
+        };
 
-            await client.DeleteObjectsAsync(deleteRequest);
-        }
+        await client.DeleteObjectsAsync(deleteRequest);
 
         if (quotaUsed > 0)
         {
@@ -618,51 +616,86 @@ public class S3Storage(TempStream tempStream,
         var objToDel = obj.Where(x =>
             Wildcard.IsMatch(pattern, Path.GetFileName(x.Key))
             && (recursive || !x.Key.Remove(0, makedPath.Length).Contains('/'))
-            );
+            ).ToList();
 
-        using var client = GetClient();
+        if (objToDel.Count == 0)
+        {
+            return;
+        }
+
+        var client = GetClient();
+        var keysToDel = new List<KeyVersion>();
+        long quotaUsed = 0;
+
         foreach (var s3Object in objToDel)
         {
             await RecycleAsync(client, domain, s3Object.Key);
 
-            var deleteRequest = new DeleteObjectRequest
-            {
-                BucketName = _bucket,
-                Key = s3Object.Key
-            };
-
-            await client.DeleteObjectAsync(deleteRequest);
+            keysToDel.Add(new KeyVersion { Key = s3Object.Key });
 
             if (QuotaController != null)
             {
                 if (string.IsNullOrEmpty(QuotaController.ExcludePattern) ||
                     !Path.GetFileName(s3Object.Key).StartsWith(QuotaController.ExcludePattern))
                 {
-                    await QuotaUsedDeleteAsync(domain, s3Object.Size.GetValueOrDefault(), ownerId);
+                    quotaUsed += s3Object.Size.GetValueOrDefault();
                 }
             }
+        }
+
+        foreach (var chunk in keysToDel.Chunk(1000))
+        {
+            var deleteRequest = new DeleteObjectsRequest
+            {
+                BucketName = _bucket,
+                Objects = [.. chunk]
+            };
+
+            await client.DeleteObjectsAsync(deleteRequest);
+        }
+
+        if (quotaUsed > 0)
+        {
+            await QuotaUsedDeleteAsync(domain, quotaUsed, ownerId);
         }
     }
 
     public override async Task DeleteFilesAsync(string domain, string path, DateTime fromDate, DateTime toDate)
     {
         var obj = await GetS3ObjectsAsync(domain, path);
-        var objToDel = obj.Where(x => x.LastModified >= fromDate && x.LastModified <= toDate);
+        var objToDel = obj.Where(x => x.LastModified >= fromDate && x.LastModified <= toDate).ToList();
 
-        using var client = GetClient();
+        if (objToDel.Count == 0)
+        {
+            return;
+        }
+
+        var client = GetClient();
+        var keysToDel = new List<KeyVersion>();
+        long quotaUsed = 0;
+
         foreach (var s3Object in objToDel)
         {
             await RecycleAsync(client, domain, s3Object.Key);
 
-            var deleteRequest = new DeleteObjectRequest
+            keysToDel.Add(new KeyVersion { Key = s3Object.Key });
+            quotaUsed += s3Object.Size.GetValueOrDefault();
+        }
+
+        foreach (var chunk in keysToDel.Chunk(1000))
+        {
+            var deleteRequest = new DeleteObjectsRequest
             {
                 BucketName = _bucket,
-                Key = s3Object.Key
+                Objects = [.. chunk]
             };
 
-            await client.DeleteObjectAsync(deleteRequest);
+            await client.DeleteObjectsAsync(deleteRequest);
+        }
 
-            await QuotaUsedDeleteAsync(domain, s3Object.Size.GetValueOrDefault());
+        if (quotaUsed > 0)
+        {
+            await QuotaUsedDeleteAsync(domain, quotaUsed);
         }
     }
 
@@ -670,30 +703,29 @@ public class S3Storage(TempStream tempStream,
     {
         var srckey = MakePath(srcDomain, srcDir);
         var dstkey = MakePath(newDomain, newDir);
-        //List files from src
-        using var client = GetClient();
-        var request = new ListObjectsRequest
-        {
-            BucketName = _bucket,
-            Prefix = srckey
-        };
 
-        var response = await client.ListObjectsAsync(request);
+        var s3Objects = (await GetS3ObjectsByPathAsync(srcDomain, srckey)).ToList();
 
-        if (response.S3Objects == null)
+        if (s3Objects.Count == 0)
         {
             return;
         }
 
-        foreach (var s3Object in response.S3Objects)
-        {
-            await CopyFileAsync(client, s3Object.Key, s3Object.Key.Replace(srckey, dstkey), newDomain);
+        var client = GetClient();
 
-            await client.DeleteObjectAsync(new DeleteObjectRequest
+        await Parallel.ForEachAsync(s3Objects,
+            new ParallelOptions { MaxDegreeOfParallelism = 3 },
+            async (s3Object, _) => await CopyFileAsync(client, s3Object.Key, s3Object.Key.Replace(srckey, dstkey), newDomain));
+
+        foreach (var chunk in s3Objects.Select(o => new KeyVersion { Key = o.Key }).Chunk(1000))
+        {
+            var deleteRequest = new DeleteObjectsRequest
             {
                 BucketName = _bucket,
-                Key = s3Object.Key
-            });
+                Objects = [.. chunk]
+            };
+
+            await client.DeleteObjectsAsync(deleteRequest);
         }
     }
 
@@ -707,7 +739,7 @@ public class S3Storage(TempStream tempStream,
         var dstKey = MakePath(newDomain, newPath);
         var size = await GetFileSizeAsync(srcDomain, srcPath);
 
-        using var client = GetClient();
+        var client = GetClient();
         await CopyFileAsync(client, srcKey, dstKey, newDomain, S3MetadataDirective.REPLACE);
         await DeleteAsync(srcDomain, srcPath);
 
@@ -737,7 +769,7 @@ public class S3Storage(TempStream tempStream,
 
     public override async Task<string> SavePrivateAsync(string domain, string path, Stream stream, DateTime expires, CancellationToken token = default)
     {
-        using var client = GetClient();
+        var client = GetClient();
         using var uploader = new TransferUtility(client);
         var objectKey = MakePath(domain, path);
         var (buffered, isNew) = await _tempStream.TryGetBufferedAsync(stream);
@@ -772,7 +804,7 @@ public class S3Storage(TempStream tempStream,
             }
         }
 
-        //Get presigned url                
+        //Get presigned url
         var pUrlRequest = new GetPreSignedUrlRequest
         {
             BucketName = _bucket,
@@ -789,7 +821,7 @@ public class S3Storage(TempStream tempStream,
 
     public override async Task DeleteExpiredAsync(string domain, string path, TimeSpan oldThreshold)
     {
-        using var client = GetClient();
+        var client = GetClient();
         var s3Obj = await GetS3ObjectsAsync(domain, path);
         foreach (var s3Object in s3Obj)
         {
@@ -921,7 +953,7 @@ public class S3Storage(TempStream tempStream,
 
     public override async Task<bool> IsFileAsync(string domain, string path)
     {
-        using var client = GetClient();
+        var client = GetClient();
         try
         {
             var getObjectMetadataRequest = new GetObjectMetadataRequest
@@ -952,11 +984,11 @@ public class S3Storage(TempStream tempStream,
 
     public override async Task<bool> IsDirectoryAsync(string domain, string path)
     {
-        using var client = GetClient();
-        var request = new ListObjectsRequest { BucketName = _bucket, Prefix = MakePath(domain, path) };
-        var response = await client.ListObjectsAsync(request);
+        var client = GetClient();
+        var request = new ListObjectsV2Request { BucketName = _bucket, Prefix = MakePath(domain, path), MaxKeys = 1 };
+        var response = await client.ListObjectsV2Async(request);
 
-        return response.S3Objects != null && response.S3Objects.Count > 0;
+        return response.S3Objects is { Count: > 0 };
     }
 
     public override async Task DeleteDirectoryAsync(string domain, string path)
@@ -970,15 +1002,22 @@ public class S3Storage(TempStream tempStream,
 
     public override async Task<long> GetFileSizeAsync(string domain, string path)
     {
-        using var client = GetClient();
-        var request = new ListObjectsRequest { BucketName = _bucket, Prefix = MakePath(domain, path) };
-        var response = await client.ListObjectsAsync(request);
-        if (response.S3Objects != null && response.S3Objects.Count > 0)
+        var client = GetClient();
+        var request = new GetObjectMetadataRequest
         {
-            return response.S3Objects[0].Size.GetValueOrDefault();
-        }
+            BucketName = _bucket,
+            Key = MakePath(domain, path)
+        };
 
-        throw new FileNotFoundException("file not found", path);
+        try
+        {
+            var response = await client.GetObjectMetadataAsync(request);
+            return response.ContentLength;
+        }
+        catch (AmazonS3Exception ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            throw new FileNotFoundException("file not found", path);
+        }
     }
 
     public override async Task<long> GetDirectorySizeAsync(string domain, string path)
@@ -1019,7 +1058,7 @@ public class S3Storage(TempStream tempStream,
         var srcKey = MakePath(srcDomain, srcpath);
         var dstKey = MakePath(newDomain, newPath);
         var size = await GetFileSizeAsync(srcDomain, srcpath);
-        using var client = GetClient();
+        var client = GetClient();
         await CopyFileAsync(client, srcKey, dstKey, newDomain, S3MetadataDirective.REPLACE);
 
         await QuotaUsedAddAsync(newDomain, size);
@@ -1031,23 +1070,23 @@ public class S3Storage(TempStream tempStream,
     {
         var srckey = MakePath(srcDomain, srcdir);
         var dstkey = MakePath(newDomain, newDir);
-        //List files from src
-        using var client = GetClient();
-        var request = new ListObjectsRequest { BucketName = _bucket, Prefix = srckey };
 
-        var response = await client.ListObjectsAsync(request);
+        var s3Objects = (await GetS3ObjectsByPathAsync(srcDomain, srckey)).ToList();
 
-        if (response.S3Objects == null)
+        if (s3Objects.Count == 0)
         {
             return;
         }
 
-        foreach (var s3Object in response.S3Objects)
-        {
-            await CopyFileAsync(client, s3Object.Key, s3Object.Key.Replace(srckey, dstkey), newDomain);
+        var client = GetClient();
 
-            await QuotaUsedAddAsync(newDomain, s3Object.Size.GetValueOrDefault());
-        }
+        await Parallel.ForEachAsync(s3Objects,
+            new ParallelOptions { MaxDegreeOfParallelism = 3 },
+            async (s3Object, _) =>
+            {
+                await CopyFileAsync(client, s3Object.Key, s3Object.Key.Replace(srckey, dstkey), newDomain);
+                await QuotaUsedAddAsync(newDomain, s3Object.Size.GetValueOrDefault());
+            });
     }
 
     public override Task<IDataStore> ConfigureAsync(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props, IDataStoreValidator dataStoreValidator)
@@ -1287,8 +1326,8 @@ public class S3Storage(TempStream tempStream,
 
     private async Task<IEnumerable<S3Object>> GetS3ObjectsByPathAsync(string domain, string path)
     {
-        using var client = GetClient();
-        var request = new ListObjectsRequest
+        var client = GetClient();
+        var request = new ListObjectsV2Request
         {
             BucketName = _bucket,
             Prefix = path,
@@ -1296,15 +1335,15 @@ public class S3Storage(TempStream tempStream,
         };
 
         var objects = new List<S3Object>();
-        ListObjectsResponse response;
+        ListObjectsV2Response response;
         do
         {
-            response = await client.ListObjectsAsync(request);
+            response = await client.ListObjectsV2Async(request);
             if (response.S3Objects != null)
             {
                 objects.AddRange(response.S3Objects.Where(entry => CheckKey(domain, entry.Key)));
             }
-            request.Marker = response.NextMarker;
+            request.ContinuationToken = response.NextContinuationToken;
         } while (response.IsTruncated.GetValueOrDefault());
         return objects;
     }
@@ -1477,7 +1516,7 @@ public class S3Storage(TempStream tempStream,
         destinationKey += ext;
         var (uploadId, eTags, partNumber) = await InitiateConcatAsync(destinationDomain, destinationKey, token: token).ConfigureAwait(false);
 
-        using var s3 = GetClient();
+        var s3 = GetClient();
         var destinationPath = MakePath(destinationDomain, destinationKey);
 
         const int blockSize = 512;
@@ -1533,7 +1572,7 @@ public class S3Storage(TempStream tempStream,
     {
         var (uploadId, eTags, partNumber) = await InitiateConcatAsync(destinationDomain, destinationKey);
 
-        using var s3 = GetClient();
+        var s3 = GetClient();
         var obj = await s3.GetObjectMetadataAsync(_bucket, pathFile);
 
         destinationKey = MakePath(destinationDomain, destinationKey);
@@ -1576,7 +1615,7 @@ public class S3Storage(TempStream tempStream,
         queue.TryDequeue(out var ext);
         destinationKey += ext;
         var (uploadId, eTags, partNumber) = await InitiateConcatAsync(destinationDomain, destinationKey, token: token).ConfigureAwait(false);
-        using var s3 = GetClient();
+        var s3 = GetClient();
         var destinationPath = MakePath(destinationDomain, destinationKey);
 
         const int blockSize = 512;
@@ -1651,7 +1690,7 @@ public class S3Storage(TempStream tempStream,
 
     public async Task AddEndAsync(string domain, string key, bool last = false)
     {
-        using var s3 = GetClient();
+        var s3 = GetClient();
         var path = MakePath(domain, key);
         var blockSize = 512;
 
@@ -1698,7 +1737,7 @@ public class S3Storage(TempStream tempStream,
 
     public async Task ReloadFileAsync(string domain, string key, bool removeFirstBlock, bool last = false)
     {
-        using var s3 = GetClient();
+        var s3 = GetClient();
         var path = MakePath(domain, key);
 
         var (uploadId, eTags, _) = await InitiateConcatAsync(domain, key, removeFirstBlock, last);
@@ -1715,7 +1754,7 @@ public class S3Storage(TempStream tempStream,
 
     public async Task<(string uploadId, List<PartETag> eTags, int partNumber)> InitiateConcatAsync(string domain, string key, bool removeFirstBlock = false, bool lastInit = false, CancellationToken token = default)
     {
-        using var s3 = GetClient();
+        var s3 = GetClient();
 
         key = MakePath(domain, key);
 
@@ -1793,27 +1832,25 @@ public class S3Storage(TempStream tempStream,
 
     private IAmazonS3 GetClient()
     {
-        var encryptionClient = GetEncryptionClient();
-
-        if (encryptionClient != null)
+        lock (_clientLock)
         {
-            return encryptionClient;
+            return _client ??= GetEncryptionClient() ?? CreateS3Client();
         }
+    }
 
-        var cfg = new AmazonS3Config { MaxErrorRetry = 3 };
+    private AmazonS3Client CreateS3Client()
+    {
+        var cfg = new AmazonS3Config { MaxErrorRetry = 3, UseHttp = _useHttp };
 
         if (!string.IsNullOrEmpty(_serviceurl))
         {
             cfg.ServiceURL = _serviceurl;
-
             cfg.ForcePathStyle = _forcepathstyle;
         }
         else
         {
             cfg.RegionEndpoint = RegionEndpoint.GetBySystemName(_region);
         }
-
-        cfg.UseHttp = _useHttp;
 
         return new AmazonS3Client(_accessKeyId, _secretAccessKeyId, cfg);
     }
@@ -1979,7 +2016,7 @@ public class S3Storage(TempStream tempStream,
 
     public override async Task<string> GetFileEtagAsync(string domain, string path)
     {
-        using var client = GetClient();
+        var client = GetClient();
 
         var getObjectMetadataRequest = new GetObjectMetadataRequest
         {
@@ -1990,6 +2027,12 @@ public class S3Storage(TempStream tempStream,
         var el = await client.GetObjectMetadataAsync(getObjectMetadataRequest);
 
         return el.ETag;
+    }
+
+    public void Dispose()
+    {
+        _client?.Dispose();
+        _client = null;
     }
 
     private enum EncryptionMethod

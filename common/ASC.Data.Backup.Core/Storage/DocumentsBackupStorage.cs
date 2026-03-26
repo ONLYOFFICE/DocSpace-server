@@ -112,7 +112,7 @@ public class DocumentsBackupStorage(SetupInfo setupInfo,
 
     public Task<string> GetPublicLinkAsync(string storagePath)
     {
-        return Task.FromResult(String.Empty);
+        return Task.FromResult(string.Empty);
     }
 
     private async Task<T> UploadAsync<T>(T folderId, string localPath, CancellationToken token)

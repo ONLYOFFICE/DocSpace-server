@@ -31,11 +31,13 @@ public class ModelClientFactory(IHttpClientFactory httpClientFactory)
 {
     public IModelClient Create(ProviderType type, string url, string apiKey)
     {
+        // CA2000: HttpClient ownership transferred to model client classes which manage their lifecycle
+#pragma warning disable CA2000
         return type switch
         {
-            ProviderType.OpenAi or ProviderType.OpenAiCompatible or ProviderType.DeepSeek or ProviderType.XAi => 
+            ProviderType.OpenAi or ProviderType.OpenAiCompatible or ProviderType.DeepSeek or ProviderType.XAi =>
                 new OpenAiModelClient(httpClientFactory.CreateClient(), url, apiKey),
-            ProviderType.TogetherAi => 
+            ProviderType.TogetherAi =>
                 new TogetherAiModelClient(httpClientFactory.CreateClient(), url, apiKey),
             ProviderType.Anthropic =>
                 new AnthropicModelClient(httpClientFactory.CreateClient(), url, apiKey),
@@ -47,17 +49,21 @@ public class ModelClientFactory(IHttpClientFactory httpClientFactory)
                 new GoogleModelClient(httpClientFactory, apiKey),
             _ => throw new ArgumentOutOfRangeException(nameof(type))
         };
+#pragma warning restore CA2000
     }
 
     public IModelClient Create(EmbeddingProviderType type, string url, string apiKey)
     {
+        // CA2000: HttpClient ownership transferred to model client classes which manage their lifecycle
+#pragma warning disable CA2000
         return type switch
         {
-            EmbeddingProviderType.OpenAi => 
+            EmbeddingProviderType.OpenAi =>
                 new OpenAiModelClient(httpClientFactory.CreateClient(), url, apiKey),
-            EmbeddingProviderType.OpenRouter => 
+            EmbeddingProviderType.OpenRouter =>
                 new OpenRouterModelClient(httpClientFactory.CreateClient(), url, apiKey),
             _ => throw new ArgumentOutOfRangeException(nameof(type))
         };
+#pragma warning restore CA2000
     }
 }

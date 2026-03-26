@@ -176,6 +176,15 @@ public class MyTypeScriptAxiosClientCodegen extends TypeScriptAxiosClientCodegen
         return objs;
     }
 
+    @Override
+    public void postProcessParameter(CodegenParameter parameter) {
+        super.postProcessParameter(parameter);
+
+        if ("deepObject".equals(parameter.style) && Boolean.TRUE.equals(parameter.isExplode)) {
+            parameter.isCollectionFormatMulti = true;
+        }
+    }
+
     
     public Map<String, Object> postProcessSupportingFileData(Map<String, Object> objs) {
         super.postProcessSupportingFileData(objs);

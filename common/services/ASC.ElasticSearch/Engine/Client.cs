@@ -54,11 +54,14 @@ public class Client(ILogger<Client> logger, Settings settings)
                 }
 
                 var uri = new Uri($"{settings.Scheme}://{settings.Host}:{settings.Port}");
+                // CA2000: SingleNodeConnectionPool and ConnectionSettings are owned by ElasticClient which will dispose them
+#pragma warning disable CA2000
                 var connectionSettings = new ConnectionSettings(new SingleNodeConnectionPool(uri))
                     .TransferEncodingChunked()
                     .RequestTimeout(TimeSpan.FromMinutes(5))
                     .MaximumRetries(10)
                     .ThrowExceptions();
+#pragma warning restore CA2000
 
                 if (settings.Authentication != null)
                 {

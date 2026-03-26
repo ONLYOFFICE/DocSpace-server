@@ -55,6 +55,7 @@ public class BaseTest(
     
     protected readonly GroupApi _groupApi = peopleFactory.GroupApi;
     protected readonly UserStatusApi _userStatusApi = peopleFactory.UserStatusApi;
+    protected readonly PhotosApi _photosApi = peopleFactory.PhotosApi;
     
     protected readonly CommonSettingsApi _commonSettingsApi = apiFactory.CommonSettingsApi;
     protected readonly DocSpace.API.SDK.Api.Settings.QuotaApi _settingsQuotaApi = apiFactory.SettingsQuotaApi;

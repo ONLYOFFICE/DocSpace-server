@@ -61,8 +61,11 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
 
         using var request = new HttpRequestMessage();
         request.RequestUri = fileUri;
-
-        using var httpClient = clientFactory.CreateClient();
+        
+#pragma warning disable CA2000
+        var httpClient = clientFactory.CreateClient();
+#pragma warning restore CA2000
+        
         using var response = await httpClient.SendAsync(request);
         await using var stream = await response.Content.ReadAsStreamAsync();
 
@@ -149,6 +152,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
             var filter = new OperationFilter
             {
                 ServiceName = taskData.ServiceName,
+                WriteOffServiceQuota = taskData.WriteOffServiceQuota,
                 UtcStartDate = utcStartDate,
                 UtcEndDate = utcEndDate,
                 ParticipantName = taskData.ParticipantName,
@@ -257,12 +261,13 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
         return sb.ToString();
     }
 
-    record PropertyValue(string Value, string Format, string Halign = null);
+    private record PropertyValue(string Value, string Format, string Halign = null);
 }
 
 public record CustomerOperationsReportTaskData(
     IDictionary<string, string> Headers,
     string ServiceName,
+    bool WriteOffServiceQuota,
     DateTime? StartDate,
     DateTime? EndDate,
     string ParticipantName,

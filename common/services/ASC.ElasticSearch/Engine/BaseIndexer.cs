@@ -644,7 +644,7 @@ public abstract class BaseIndexer<T>(Client client,
     }
 }
 
-static class CamelCaseExtension
+internal static class CamelCaseExtension
 {
     internal static string ToLowerCamelCase(this string str)
     {

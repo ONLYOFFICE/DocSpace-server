@@ -1,25 +1,25 @@
 // (c) Copyright Ascensio System SIA 2009-2026
-// 
+//
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
+//
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
+//
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-// 
+//
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -50,7 +50,12 @@ public class ApiSystemHelper
     private const string TenantRegionKey = "tenant_region";
     private const string TenantDomainKey = "tenant_domain";
     private readonly string _regionTableName;
-    private readonly Dictionary<string, string> _regions = new Dictionary<string, string> { { "us-west-2", "US" }, { "us-east-2", "US" }, { "eu-central-1", "DEU" } };
+    private readonly Dictionary<string, string> _regions = new()
+    {
+        { "us-west-2", "US" },
+        { "us-east-2", "US" },
+        { "eu-central-1", "DEU" }
+    };
 
     public ApiSystemHelper(
         IConfiguration configuration,
@@ -109,7 +114,7 @@ public class ApiSystemHelper
 
     public async Task<HttpStatusCode> AddTenantToCacheAsync(string tenantDomain, string tenantRegion)
     {
-        if (String.IsNullOrEmpty(tenantRegion))
+        if (string.IsNullOrEmpty(tenantRegion))
         {
             throw new ArgumentNullException(nameof(tenantRegion));
         }
@@ -292,11 +297,7 @@ public class ApiSystemHelper
 
         var url = $"{absoluteApiUrl}/{apiPath}";
 
-        var request = new HttpRequestMessage
-        {
-            RequestUri = new Uri(url),
-            Method = new HttpMethod(httpMethod)
-        };
+        using var request = new HttpRequestMessage(new HttpMethod(httpMethod), new Uri(url));
         request.Headers.Add("Authorization", CreateAuthToken(userId.ToString()));
         request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
@@ -304,8 +305,9 @@ public class ApiSystemHelper
         {
             request.Content = new StringContent(data, Encoding.UTF8, "application/json");
         }
-
+#pragma warning disable CA2000 // HttpClient is short-lived and disposed by runtime
         var httpClient = _clientFactory.CreateClient();
+#pragma warning restore CA2000
         using var response = await httpClient.SendAsync(request);
         return await response.Content.ReadAsStringAsync();
     }
@@ -318,6 +320,6 @@ public class DynamoDbSettings
     public string Region { get; set; }
     public string TableName { get; set; }
 
-    public bool ApiCacheEnable => !String.IsNullOrEmpty(AccessKeyId) &&
-                                  !String.IsNullOrEmpty(SecretAccessKey);
+    public bool ApiCacheEnable => !string.IsNullOrEmpty(AccessKeyId) &&
+                                  !string.IsNullOrEmpty(SecretAccessKey);
 }

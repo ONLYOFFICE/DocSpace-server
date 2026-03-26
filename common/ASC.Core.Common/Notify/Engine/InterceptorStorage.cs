@@ -26,7 +26,7 @@
 
 namespace ASC.Notify.Engine;
 
-class InterceptorStorage
+internal class InterceptorStorage
 {
     private readonly string _callContextPrefix = "InterceptorStorage.CALLCONTEXT_KEY." + Guid.NewGuid();
     private readonly Lock _syncRoot = new();

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -1352,5 +1352,8 @@
   </data>
   <data name="ConsumerssqliteFilePath" xml:space="preserve">
     <value>SQLite file path</value>
+  </data>
+  <data name="ConsumersExternalDbSqliteStandaloneOnly" xml:space="preserve">
+    <value>SQLite is only available in Standalone installations.</value>
   </data>
 </root>

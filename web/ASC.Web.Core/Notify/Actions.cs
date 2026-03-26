@@ -1,25 +1,25 @@
 // (c) Copyright Ascensio System SIA 2009-2026
-// 
+//
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
+//
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
+//
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-// 
+//
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -32,7 +32,7 @@ namespace ASC.Web.Studio.Core.Notify;
 public sealed class PortalDeactivateNotifyAction(StudioNotifyHelper studioNotifyHelper, DisplayUserSettingsHelper displayUserSettingsHelper, TenantManager tenantManager) : NotifyAction(tenantManager)
 {
     public override string ID => "portal_deactivate";
-    
+
     public override List<Pattern> Patterns
     {
         get =>
@@ -41,7 +41,7 @@ public sealed class PortalDeactivateNotifyAction(StudioNotifyHelper studioNotify
             new TelegramPattern(() => WebstudioNotifyPatternResource.pattern_portal_deactivate_tg)
         ];
     }
-    
+
     public void Init(UserInfo user, string deactivateUrl, string activateUrl)
     {
         var culture = GetCulture(user);
@@ -71,7 +71,7 @@ public sealed class PortalDeleteNotifyAction(StudioNotifyHelper studioNotifyHelp
             new TelegramPattern(() => WebstudioNotifyPatternResource.pattern_portal_delete_tg)
         ];
     }
-    
+
     public void Init(UserInfo user, string url, bool showAutoRenewText)
     {
         var culture = GetCulture(user);
@@ -100,7 +100,7 @@ public sealed class PortalDeleteSuccessV1NotifyAction(StudioNotifyHelper studioN
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_portal_delete_success_v1, () => WebstudioNotifyPatternResource.pattern_portal_delete_success_v1)
         ];
     }
-    
+
     public void Init(UserInfo user, string url)
     {
         var culture = GetCulture(user);
@@ -130,7 +130,7 @@ public sealed class PortalDeletedToSupportNotifyAction(DisplayUserSettingsHelper
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_portal_deleted_to_support, () => WebstudioNotifyPatternResource.pattern_portal_deleted_to_support)
         ];
     }
-    
+
     public void Init(UserInfo user, string tenantDomain,  CustomerInfo customerInfo)
     {
         Tags =
@@ -157,14 +157,14 @@ public sealed class ProfileDeleteNotifyAction(CommonLinkUtility commonLinkUtilit
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_profile_delete, () => WebstudioNotifyPatternResource.pattern_profile_delete)
         ];
     }
-    
+
     public async Task Init(UserInfo user)
     {
         var confirmationUrl = commonLinkUtility.GetConfirmationEmailUrl(user.Email, ConfirmType.ProfileRemove, authContext.CurrentAccount.ID, authContext.CurrentAccount.ID);
         var culture = GetCulture(user);
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonRemoveProfile", culture);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
-        
+
         Tags =
         [
             TagValues.OrangeButton(orangeButtonText, await urlShortener.GetShortenLinkAsync(confirmationUrl)),
@@ -186,12 +186,12 @@ public sealed class ProfileHasDeletedItselfNotifyAction(DisplayUserSettingsHelpe
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_profile_has_deleted_itself, () => WebstudioNotifyPatternResource.pattern_profile_has_deleted_itself)
         ];
     }
-    
+
     public async Task Init(UserInfo user, string culture)
     {
         var userName = user.DisplayUserName(displayUserSettingsHelper);
         var userLink = await GetUserProfileLinkAsync(user.Id);
-        
+
         Tags =
         [
             new TagValue(CommonTags.FromUserName, userName),
@@ -199,7 +199,7 @@ public sealed class ProfileHasDeletedItselfNotifyAction(DisplayUserSettingsHelpe
             new TagValue(CommonTags.Culture, culture)
         ];
     }
-    
+
     private async Task<string> GetUserProfileLinkAsync(Guid userId)
     {
         return commonLinkUtility.GetFullAbsolutePath(await commonLinkUtility.GetUserProfileAsync(userId));
@@ -218,7 +218,7 @@ public sealed class ReassignsCompletedNotifyAction(DisplayUserSettingsHelper dis
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_reassigns_completed, () => WebstudioNotifyPatternResource.pattern_reassigns_completed)
         ];
     }
-    
+
     public async Task Init(Guid recipientId, UserInfo fromUser, UserInfo toUser)
     {
         Tags =
@@ -230,7 +230,7 @@ public sealed class ReassignsCompletedNotifyAction(DisplayUserSettingsHelper dis
             new TagValue(CommonTags.ToUserLink, await GetUserProfileLinkAsync(toUser.Id))
         ];
     }
-    
+
     private async Task<string> GetUserProfileLinkAsync(Guid userId)
     {
         return commonLinkUtility.GetFullAbsolutePath(await commonLinkUtility.GetUserProfileAsync(userId));
@@ -249,7 +249,7 @@ public sealed class ReassignsFailedNotifyAction(DisplayUserSettingsHelper displa
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_reassigns_failed, () => WebstudioNotifyPatternResource.pattern_reassigns_failed)
         ];
     }
-    
+
     public async Task Init(Guid recipientId, UserInfo fromUser, UserInfo toUser, string message)
     {
         Tags =
@@ -262,7 +262,7 @@ public sealed class ReassignsFailedNotifyAction(DisplayUserSettingsHelper displa
             new TagValue(CommonTags.Message, message)
         ];
     }
-    
+
     private async Task<string> GetUserProfileLinkAsync(Guid userId)
     {
         return commonLinkUtility.GetFullAbsolutePath(await commonLinkUtility.GetUserProfileAsync(userId));
@@ -281,7 +281,7 @@ public sealed class RemoveUserDataCompletedNotifyAction(DisplayUserSettingsHelpe
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_remove_user_data_completed, () => WebstudioNotifyPatternResource.pattern_remove_user_data_completed)
         ];
     }
-    
+
     public async Task Init(Guid recipientId, UserInfo user, string fromUserName, long docsSpace, long crmSpace, long mailSpace, long talkSpace)
     {
         Tags =
@@ -295,7 +295,7 @@ public sealed class RemoveUserDataCompletedNotifyAction(DisplayUserSettingsHelpe
             new TagValue("TalkSpace", FileSizeComment.FilesSizeToString(talkSpace))
         ];
     }
-    
+
     private async Task<string> GetUserProfileLinkAsync(Guid userId)
     {
         return commonLinkUtility.GetFullAbsolutePath(await commonLinkUtility.GetUserProfileAsync(userId));
@@ -314,7 +314,7 @@ public sealed class RemoveUserDataCompletedCustomModeNotifyAction(DisplayUserSet
             new EmailPattern(() => CustomModeResource.subject_remove_user_data_completed_custom_mode, () => CustomModeResource.pattern_remove_user_data_completed_custom_mode)
         ];
     }
-    
+
     public async Task Init(Guid recipientId, UserInfo user, string fromUserName, long docsSpace, long crmSpace, long mailSpace, long talkSpace)
     {
         Tags =
@@ -328,7 +328,7 @@ public sealed class RemoveUserDataCompletedCustomModeNotifyAction(DisplayUserSet
             new TagValue("TalkSpace", FileSizeComment.FilesSizeToString(talkSpace))
         ];
     }
-    
+
     private async Task<string> GetUserProfileLinkAsync(Guid userId)
     {
         return commonLinkUtility.GetFullAbsolutePath(await commonLinkUtility.GetUserProfileAsync(userId));
@@ -347,7 +347,7 @@ public sealed class RemoveUserDataFailedNotifyAction(DisplayUserSettingsHelper d
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_remove_user_data_failed, () => WebstudioNotifyPatternResource.pattern_remove_user_data_failed)
         ];
     }
-    
+
     public async Task Init(Guid recipientId, UserInfo user, string fromUserName, string message)
     {
         Tags =
@@ -358,7 +358,7 @@ public sealed class RemoveUserDataFailedNotifyAction(DisplayUserSettingsHelper d
             new TagValue(CommonTags.Message, message)
         ];
     }
-    
+
     private async Task<string> GetUserProfileLinkAsync(Guid userId)
     {
         return commonLinkUtility.GetFullAbsolutePath(await commonLinkUtility.GetUserProfileAsync(userId));
@@ -377,11 +377,11 @@ public sealed class ConfirmOwnerChangeNotifyAction(DisplayUserSettingsHelper dis
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_confirm_owner_change, () => WebstudioNotifyPatternResource.pattern_confirm_owner_change)
         ];
     }
-    
+
     public void Init(UserInfo owner, UserInfo newOwner, string confirmOwnerUpdateUrl)
-    {        
+    {
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonConfirmPortalOwnerUpdate", owner.GetCulture());
-        
+
         Tags =
         [
             TagValues.OrangeButton(orangeButtonText, confirmOwnerUpdateUrl),
@@ -403,14 +403,14 @@ public sealed class ActivateEmailNotifyAction(DisplayUserSettingsHelper displayU
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_activate_email, () => WebstudioNotifyPatternResource.pattern_activate_email)
         ];
     }
-    
+
     public async Task Init(UserInfo user, string email)
-    {        
+    {
         var confirmationUrl = commonLinkUtility.GetConfirmationEmailUrl(email, ConfirmType.EmailActivation, null, user.Id);
         var shortLink = await urlShortener.GetShortenLinkAsync(confirmationUrl);
 
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonActivateEmail", GetCulture(user));
-        
+
         Tags =
         [
             new TagValue(CommonTags.InviteLink, shortLink),
@@ -433,15 +433,15 @@ public sealed class EmailChangeV115NotifyAction(CommonLinkUtility commonLinkUtil
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_change_email_v115, () => WebstudioNotifyPatternResource.pattern_change_email_v115)
         ];
     }
-    
+
     public async Task Init(UserInfo user, string email, DateTime auditEventDate)
-    {        
+    {
         var postfix = auditEventDate.ToString("s", CultureInfo.InvariantCulture);
 
         var confirmationUrl = commonLinkUtility.GetConfirmationEmailUrl(email, ConfirmType.EmailChange, postfix, user.Id);
 
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonChangeEmail", GetCulture(user));
-        
+
         Tags =
         [
             TagValues.OrangeButton(orangeButtonText, await urlShortener.GetShortenLinkAsync(confirmationUrl)),
@@ -463,9 +463,9 @@ public sealed class UserMessageToAdminNotifyAction(TenantManager tenantManager) 
             new TelegramPattern(() => WebstudioNotifyPatternResource.pattern_for_admin_notify_tg)
         ];
     }
-    
+
     public void Init(string email, string message, string culture)
-    {        
+    {
         List<ITagValue> tags =
         [
             new TagValue(CommonTags.Body, message),
@@ -476,10 +476,10 @@ public sealed class UserMessageToAdminNotifyAction(TenantManager tenantManager) 
         {
             tags.Add(new TagValue(CommonTags.Culture, culture));
         }
-        
+
         Tags = tags;
     }
-};
+}
 
 [Scope]
 public sealed class UserMessageToSalesNotifyAction(TenantManager tenantManager) : NotifyAction(tenantManager)
@@ -493,17 +493,17 @@ public sealed class UserMessageToSalesNotifyAction(TenantManager tenantManager) 
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_for_sales_notify, () => WebstudioNotifyPatternResource.pattern_for_sales_notify)
         ];
     }
-    
+
     public void Init(string email, string userName, string message)
-    {        
+    {
         Tags = [
-            
+
             new TagValue(CommonTags.Body, message),
             new TagValue(CommonTags.UserEmail, email),
             new TagValue(CommonTags.UserName, userName)
         ];
     }
-};
+}
 
 [Scope]
 public sealed class PasswordChangeV115NotifyAction(CommonLinkUtility commonLinkUtility, TenantManager tenantManager, IUrlShortener urlShortener) : NotifyAction(tenantManager)
@@ -517,15 +517,15 @@ public sealed class PasswordChangeV115NotifyAction(CommonLinkUtility commonLinkU
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_change_password_v115, () => WebstudioNotifyPatternResource.pattern_change_password_v115)
         ];
     }
-    
+
     public async Task Init(UserInfo userInfo, DateTime auditEventDate)
-    {        
+    {
         var hash = auditEventDate.ToString("s", CultureInfo.InvariantCulture);
 
         var confirmationUrl = commonLinkUtility.GetConfirmationEmailUrl(userInfo.Email, ConfirmType.PasswordChange, hash, userInfo.Id);
 
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonChangePassword", GetCulture(userInfo));
-        
+
         Tags =
         [
             TagValues.OrangeButton(orangeButtonText, await urlShortener.GetShortenLinkAsync(confirmationUrl))
@@ -545,9 +545,9 @@ public sealed class PasswordChangedNotifyAction(CommonLinkUtility commonLinkUtil
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_password_changed, () => WebstudioNotifyPatternResource.pattern_password_changed)
         ];
     }
-    
+
     public void Init(UserInfo userInfo, AuditEvent auditEvent)
-    {        
+    {
         var cultureInfo = GetCulture(userInfo);
 
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonOpenDocSpace", cultureInfo);
@@ -559,7 +559,7 @@ public sealed class PasswordChangedNotifyAction(CommonLinkUtility commonLinkUtil
         {
             location = auditEvent.Country + ", " + auditEvent.City;
         }
-        
+
         Tags =
         [
             new TagValue(CommonTags.UserName, userInfo.FirstName.HtmlEncode()),
@@ -588,15 +588,15 @@ public sealed class PasswordSetNotifyAction(CommonLinkUtility commonLinkUtility,
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_set_password, () => WebstudioNotifyPatternResource.pattern_set_password)
         ];
     }
-    
+
     public async Task Init(UserInfo userInfo, DateTime auditEventDate)
-    {        
+    {
         var hash = auditEventDate.ToString("s", CultureInfo.InvariantCulture);
 
         var confirmationUrl = commonLinkUtility.GetConfirmationEmailUrl(userInfo.Email, ConfirmType.PasswordChange, hash, userInfo.Id);
 
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonSetPassword", GetCulture(userInfo));
-        
+
         Tags =
         [
             TagValues.OrangeButton(orangeButtonText, await urlShortener.GetShortenLinkAsync(confirmationUrl))
@@ -616,14 +616,14 @@ public sealed class PhoneChangeNotifyAction(CommonLinkUtility commonLinkUtility,
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_change_phone, () => WebstudioNotifyPatternResource.pattern_change_phone)
         ];
     }
-    
+
     public async Task Init(UserInfo userInfo)
-    {        
+    {
         var confirmationUrl = commonLinkUtility.GetConfirmationEmailUrl(userInfo.Email.ToLower(), ConfirmType.PhoneActivation);
 
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonChangePhone", GetCulture(userInfo));
-        
-        Tags = 
+
+        Tags =
         [
             TagValues.OrangeButton(orangeButtonText, await urlShortener.GetShortenLinkAsync(confirmationUrl))
         ];
@@ -642,14 +642,14 @@ public sealed class TfaChangeNotifyAction(CommonLinkUtility commonLinkUtility, T
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_change_tfa, () => WebstudioNotifyPatternResource.pattern_change_tfa)
         ];
     }
-    
+
     public void Init(UserInfo userInfo)
-    {        
+    {
         var confirmationUrl = commonLinkUtility.GetFullAbsolutePath(string.Empty);
 
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonChangeTfa", GetCulture(userInfo));
-        
-        Tags = 
+
+        Tags =
         [
             TagValues.OrangeButton(orangeButtonText, confirmationUrl)
         ];
@@ -684,9 +684,9 @@ public sealed class JoinUsersNotifyAction(CommonLinkUtility commonLinkUtility, I
             new JabberPattern(() => WebstudioNotifyPatternResource.pattern_join)
         ];
     }
-    
+
     public async Task Init(string email, EmployeeType emplType, string culture)
-    {        
+    {
         var inviteUrl = commonLinkUtility.GetConfirmationEmailUrl(email, ConfirmType.EmpInvite, (int)emplType + "trust") + $"&emplType={(int)emplType}";
         var shortLink = await urlShortener.GetShortenLinkAsync(inviteUrl);
 
@@ -702,7 +702,7 @@ public sealed class JoinUsersNotifyAction(CommonLinkUtility commonLinkUtility, I
         {
             tags.Add(new TagValue(CommonTags.Culture, culture));
         }
-        
+
         Tags = tags;
     }
 }
@@ -719,7 +719,7 @@ public sealed class MigrationPortalStartNotifyAction(TenantManager tenantManager
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_migration_start, () => WebstudioNotifyPatternResource.pattern_migration_start)
         ];
     }
-    
+
     public void Init(string region)
     {
         Tags =
@@ -773,7 +773,7 @@ public sealed class MigrationPortalServerFailureNotifyAction(CommonLinkUtility c
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_migration_error, () => WebstudioNotifyPatternResource.pattern_migration_server_failure)
         ];
     }
-    
+
     public void Init(string region, string url)
     {
         var args = new List<ITagValue>
@@ -804,7 +804,7 @@ public sealed class PortalRenameNotifyAction(DisplayUserSettingsHelper displayUs
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_portal_rename, () => WebstudioNotifyPatternResource.pattern_portal_rename)
         ];
     }
-    
+
     public void Init(UserInfo u, string oldVirtualRootPath)
     {
         Tags = [
@@ -826,14 +826,14 @@ public sealed class SaasGuestActivationV115NotifyAction(StudioNotifyHelper studi
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_guest_activation_v115, () => WebstudioNotifyPatternResource.pattern_saas_guest_activation_v115)
         ];
     }
-    
+
     public async Task Init(UserInfo newUserInfo)
-    {        
+    {
         var confirmationUrl = await GenerateActivationConfirmUrlAsync(newUserInfo);
         var culture = GetCulture(newUserInfo);
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccept", culture);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
-        
+
         Tags = [
             new TagValue(CommonTags.ActivateUrl, confirmationUrl),
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
@@ -843,7 +843,7 @@ public sealed class SaasGuestActivationV115NotifyAction(StudioNotifyHelper studi
             new TagValue(CommonTags.Footer, "social")
         ];
     }
-    
+
     private async Task<string> GenerateActivationConfirmUrlAsync(UserInfo user)
     {
         var confirmUrl = commonLinkUtility.GetConfirmationEmailUrl(user.Email, ConfirmType.Activation, user.Id, user.Id);
@@ -864,14 +864,14 @@ public sealed class EnterpriseGuestActivationV10NotifyAction(StudioNotifyHelper 
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_enterprise_guest_activation_v10, () => WebstudioNotifyPatternResource.pattern_enterprise_guest_activation_v10)
         ];
     }
-    
+
     public async Task Init(UserInfo newUserInfo)
-    {        
+    {
         var confirmationUrl = await GenerateActivationConfirmUrlAsync(newUserInfo);
         var culture = GetCulture(newUserInfo);
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccept", culture);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
-        
+
         Tags = [
             new TagValue(CommonTags.ActivateUrl, confirmationUrl),
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
@@ -881,7 +881,7 @@ public sealed class EnterpriseGuestActivationV10NotifyAction(StudioNotifyHelper 
             new TagValue(CommonTags.Footer, null)
         ];
     }
-    
+
     private async Task<string> GenerateActivationConfirmUrlAsync(UserInfo user)
     {
         var confirmUrl = commonLinkUtility.GetConfirmationEmailUrl(user.Email, ConfirmType.Activation, user.Id, user.Id);
@@ -902,14 +902,14 @@ public sealed class EnterpriseWhitelabelGuestActivationV10NotifyAction(StudioNot
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_enterprise_whitelabel_guest_activation_v10, () => WebstudioNotifyPatternResource.pattern_enterprise_whitelabel_guest_activation_v10)
         ];
     }
-    
+
     public async Task Init(UserInfo newUserInfo)
-    {        
+    {
         var confirmationUrl = await GenerateActivationConfirmUrlAsync(newUserInfo);
         var culture = GetCulture(newUserInfo);
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccept", culture);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
-        
+
         Tags = [
             new TagValue(CommonTags.ActivateUrl, confirmationUrl),
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
@@ -919,7 +919,7 @@ public sealed class EnterpriseWhitelabelGuestActivationV10NotifyAction(StudioNot
             new TagValue(CommonTags.Footer, null)
         ];
     }
-    
+
     private async Task<string> GenerateActivationConfirmUrlAsync(UserInfo user)
     {
         var confirmUrl = commonLinkUtility.GetConfirmationEmailUrl(user.Email, ConfirmType.Activation, user.Id, user.Id);
@@ -940,14 +940,14 @@ public sealed class OpensourceGuestActivationV11NotifyAction(StudioNotifyHelper 
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_opensource_guest_activation_v11, () => WebstudioNotifyPatternResource.pattern_opensource_guest_activation_v11)
         ];
     }
-    
+
     public async Task Init(UserInfo newUserInfo)
-    {        
+    {
         var confirmationUrl = await GenerateActivationConfirmUrlAsync(newUserInfo);
         var culture = GetCulture(newUserInfo);
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccept", culture);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
-        
+
         Tags = [
             new TagValue(CommonTags.ActivateUrl, confirmationUrl),
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
@@ -957,7 +957,7 @@ public sealed class OpensourceGuestActivationV11NotifyAction(StudioNotifyHelper 
             new TagValue(CommonTags.Footer, "opensource")
         ];
     }
-    
+
     private async Task<string> GenerateActivationConfirmUrlAsync(UserInfo user)
     {
         var confirmUrl = commonLinkUtility.GetConfirmationEmailUrl(user.Email, ConfirmType.Activation, user.Id, user.Id);
@@ -978,7 +978,7 @@ public sealed class SaasGuestWelcomeV1NotifyAction(StudioNotifyHelper studioNoti
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_guest_welcome_v1, () => WebstudioNotifyPatternResource.pattern_saas_guest_welcome_v1)
         ];
     }
-    
+
     public void Init(UserInfo newUserInfo)
     {
         var culture = GetCulture(newUserInfo);
@@ -1007,7 +1007,7 @@ public sealed class SaasGuestWelcomeV1NotifyAction(StudioNotifyHelper studioNoti
             new TagValue(CommonTags.Footer, "social")
         ];
     }
-    
+
     private string GetMyStaffLink()
     {
         return commonLinkUtility.GetFullAbsolutePath(commonLinkUtility.GetMyStaff());
@@ -1026,7 +1026,7 @@ public sealed class EnterpriseGuestWelcomeV1NotifyAction(StudioNotifyHelper stud
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_enterprise_guest_welcome_v1, () => WebstudioNotifyPatternResource.pattern_enterprise_guest_welcome_v1)
         ];
     }
-    
+
     public void Init(UserInfo newUserInfo)
     {
         var culture = GetCulture(newUserInfo);
@@ -1055,7 +1055,7 @@ public sealed class EnterpriseGuestWelcomeV1NotifyAction(StudioNotifyHelper stud
             new TagValue(CommonTags.Footer, null)
         ];
     }
-    
+
     private string GetMyStaffLink()
     {
         return commonLinkUtility.GetFullAbsolutePath(commonLinkUtility.GetMyStaff());
@@ -1074,7 +1074,7 @@ public sealed class EnterpriseWhitelabelGuestWelcomeV1NotifyAction(StudioNotifyH
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_enterprise_whitelabel_guest_welcome_v1, () => WebstudioNotifyPatternResource.pattern_enterprise_whitelabel_guest_welcome_v1)
         ];
     }
-    
+
     public void Init(UserInfo newUserInfo)
     {
         var culture = GetCulture(newUserInfo);
@@ -1103,7 +1103,7 @@ public sealed class EnterpriseWhitelabelGuestWelcomeV1NotifyAction(StudioNotifyH
             new TagValue(CommonTags.Footer, null)
         ];
     }
-    
+
     private string GetMyStaffLink()
     {
         return commonLinkUtility.GetFullAbsolutePath(commonLinkUtility.GetMyStaff());
@@ -1122,7 +1122,7 @@ public sealed class OpensourceGuestWelcomeV1NotifyAction (StudioNotifyHelper stu
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_opensource_guest_welcome_v1, () => WebstudioNotifyPatternResource.pattern_opensource_guest_welcome_v1)
         ];
     }
-    
+
     public void Init(UserInfo newUserInfo)
     {
         var culture = GetCulture(newUserInfo);
@@ -1151,7 +1151,7 @@ public sealed class OpensourceGuestWelcomeV1NotifyAction (StudioNotifyHelper stu
             new TagValue(CommonTags.Footer, "opensource")
         ];
     }
-    
+
     private string GetMyStaffLink()
     {
         return commonLinkUtility.GetFullAbsolutePath(commonLinkUtility.GetMyStaff());
@@ -1170,9 +1170,9 @@ public sealed class SaasCustomModeRegDataNotifyAction(TenantManager tenantManage
             new EmailPattern(() => CustomModeResource.subject_saas_custom_mode_reg_data, () => CustomModeResource.pattern_saas_custom_mode_reg_data)
         ];
     }
-    
+
     public void Init(UserInfo u)
-    {        
+    {
         Tags = [
             new TagValue(CommonTags.UserName, u.FirstName.HtmlEncode()),
             new TagValue(CommonTags.UserLastName, u.LastName.HtmlEncode()),
@@ -1197,9 +1197,9 @@ public sealed class StorageEncryptionStartNotifyAction(TenantManager tenantManag
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_storage_encryption_start, () => WebstudioNotifyPatternResource.pattern_storage_encryption_start)
         ];
     }
-    
+
     public void Init(UserInfo u, string serverRootPath)
-    {        
+    {
         Tags = [
             new TagValue(CommonTags.UserName, u.FirstName.HtmlEncode()),
             new TagValue(CommonTags.PortalUrl, serverRootPath)
@@ -1219,9 +1219,9 @@ public sealed class StorageEncryptionSuccessNotifyAction(TenantManager tenantMan
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_storage_encryption_success, () => WebstudioNotifyPatternResource.pattern_storage_encryption_success)
         ];
     }
-    
+
     public void Init(UserInfo u, string serverRootPath)
-    {        
+    {
         Tags = [
             new TagValue(CommonTags.UserName, u.FirstName.HtmlEncode()),
             new TagValue(CommonTags.PortalUrl, serverRootPath)
@@ -1241,9 +1241,9 @@ public sealed class StorageEncryptionErrorNotifyAction(TenantManager tenantManag
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_storage_encryption_error, () => WebstudioNotifyPatternResource.pattern_storage_encryption_error)
         ];
     }
-    
+
     public void Init(UserInfo u, string serverRootPath)
-    {        
+    {
         Tags = [
             new TagValue(CommonTags.UserName, u.FirstName.HtmlEncode()),
             new TagValue(CommonTags.PortalUrl, serverRootPath)
@@ -1263,9 +1263,9 @@ public sealed class StorageDecryptionStartNotifyAction(TenantManager tenantManag
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_storage_decryption_start, () => WebstudioNotifyPatternResource.pattern_storage_decryption_start)
         ];
     }
-    
+
     public void Init(UserInfo u, string serverRootPath)
-    {        
+    {
         Tags = [
             new TagValue(CommonTags.UserName, u.FirstName.HtmlEncode()),
             new TagValue(CommonTags.PortalUrl, serverRootPath)
@@ -1285,9 +1285,9 @@ public sealed class StorageDecryptionSuccessNotifyAction(TenantManager tenantMan
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_storage_decryption_success, () => WebstudioNotifyPatternResource.pattern_storage_decryption_success)
         ];
     }
-    
+
     public void Init(UserInfo u, string serverRootPath)
-    {        
+    {
         Tags = [
             new TagValue(CommonTags.UserName, u.FirstName.HtmlEncode()),
             new TagValue(CommonTags.PortalUrl, serverRootPath)
@@ -1307,9 +1307,9 @@ public sealed class StorageDecryptionErrorNotifyAction(TenantManager tenantManag
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_storage_decryption_error, () => WebstudioNotifyPatternResource.pattern_storage_decryption_error)
         ];
     }
-    
+
     public void Init(UserInfo u, string serverRootPath)
-    {        
+    {
         Tags = [
             new TagValue(CommonTags.UserName, u.FirstName.HtmlEncode()),
             new TagValue(CommonTags.PortalUrl, serverRootPath)
@@ -1329,14 +1329,14 @@ public sealed class SaasRoomInviteNotifyAction(StudioNotifyHelper studioNotifyHe
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_room_invite, () => WebstudioNotifyPatternResource.pattern_saas_room_invite)
         ];
     }
-    
+
     public void Init(string culture, string roomTitle, string confirmationUrl)
-    {         
+    {
         var cultureInfo = string.IsNullOrEmpty(culture) ? GetCulture(null) : new CultureInfo(culture);
 
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccept", cultureInfo);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", cultureInfo);
-        
+
         Tags = [
             new TagValue(CommonTags.Message, roomTitle),
             new TagValue(CommonTags.InviteLink, confirmationUrl),
@@ -1359,14 +1359,14 @@ public sealed class SaasAgentInviteNotifyAction(StudioNotifyHelper studioNotifyH
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_agent_invite, () => WebstudioNotifyPatternResource.pattern_saas_agent_invite)
         ];
     }
-    
+
     public void Init(string culture, string roomTitle, string confirmationUrl)
-    {         
+    {
         var cultureInfo = string.IsNullOrEmpty(culture) ? GetCulture(null) : new CultureInfo(culture);
 
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccept", cultureInfo);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", cultureInfo);
-        
+
         Tags = [
             new TagValue(CommonTags.Message, roomTitle),
             new TagValue(CommonTags.InviteLink, confirmationUrl),
@@ -1389,13 +1389,13 @@ public sealed class SaasRoomInviteExistingUserNotifyAction(StudioNotifyHelper st
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_room_invite_existing_user, () => WebstudioNotifyPatternResource.pattern_saas_room_invite_existing_user)
         ];
     }
-    
+
     public void Init(UserInfo user, string roomTitle, string roomUrl)
-    {         
+    {
         var cultureInfo = GetCulture(user);
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonJoinRoom", cultureInfo);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", cultureInfo);
-        
+
         Tags = [
             new TagValue(CommonTags.Message, roomTitle),
             new TagValue(CommonTags.InviteLink, roomUrl),
@@ -1418,13 +1418,13 @@ public sealed class SaasAgentInviteExistingUserNotifyAction(StudioNotifyHelper s
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_agent_invite_existing_user, () => WebstudioNotifyPatternResource.pattern_saas_agent_invite_existing_user)
         ];
     }
-    
+
     public void Init(UserInfo user, string roomTitle, string roomUrl)
-    {         
+    {
         var cultureInfo = GetCulture(user);
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonJoinAgent", cultureInfo);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", cultureInfo);
-        
+
         Tags = [
             new TagValue(CommonTags.Message, roomTitle),
             new TagValue(CommonTags.InviteLink, roomUrl),
@@ -1447,16 +1447,16 @@ public sealed class SaasDocSpaceInviteNotifyAction(StudioNotifyHelper studioNoti
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_docspace_invite, () => WebstudioNotifyPatternResource.pattern_saas_docspace_invite)
         ];
     }
-    
+
     public void Init(string confirmationUrl, string culture = "")
-    {        
+    {
         var cultureInfo = string.IsNullOrEmpty(culture) ? GetCulture(null) : new CultureInfo(culture);
 
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccept", cultureInfo);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", cultureInfo);
-        
+
         Tags = [
-            
+
             new TagValue(CommonTags.InviteLink, confirmationUrl),
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours, true),
@@ -1478,14 +1478,14 @@ public sealed class SaasDocSpaceRegistrationNotifyAction(StudioNotifyHelper stud
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_docspace_registration, () => WebstudioNotifyPatternResource.pattern_saas_docspace_registration)
         ];
     }
-    
+
     public void Init(string confirmationUrl, string culture = "")
-    {        
+    {
         var cultureInfo = string.IsNullOrEmpty(culture) ? GetCulture(null) : new CultureInfo(culture);
 
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonRegister", cultureInfo);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", cultureInfo);
-        
+
         Tags = [
             new TagValue(CommonTags.InviteLink, confirmationUrl),
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
@@ -1507,9 +1507,9 @@ public sealed class SaasAdminActivationV1NotifyAction(StudioNotifyHelper studioN
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_admin_activation_v1, () => WebstudioNotifyPatternResource.pattern_saas_admin_activation_v1)
         ];
     }
-    
+
     public async Task Init(UserInfo u)
-    {        
+    {
         var culture = GetCulture(u);
 
         ITagValue orangeButton = new TagValue("OrangeButton", "");
@@ -1522,7 +1522,7 @@ public sealed class SaasAdminActivationV1NotifyAction(StudioNotifyHelper studioN
         }
 
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
-        
+
         Tags = [
             new TagValue(CommonTags.UserName, u.FirstName.HtmlEncode()),
             orangeButton,
@@ -1545,9 +1545,9 @@ public sealed class EnterpriseAdminActivationV1NotifyAction(StudioNotifyHelper s
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_enterprise_admin_activation_v1, () => WebstudioNotifyPatternResource.pattern_enterprise_admin_activation_v1)
         ];
     }
-    
+
     public async Task Init(UserInfo u)
-    {        
+    {
         var culture = GetCulture(u);
 
         ITagValue orangeButton = new TagValue("OrangeButton", "");
@@ -1560,7 +1560,7 @@ public sealed class EnterpriseAdminActivationV1NotifyAction(StudioNotifyHelper s
         }
 
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
-        
+
         Tags = [
             new TagValue(CommonTags.UserName, u.FirstName.HtmlEncode()),
             orangeButton,
@@ -1583,9 +1583,9 @@ public sealed class EnterpriseWhitelabelAdminActivationV1NotifyAction(StudioNoti
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_enterprise_whitelabel_admin_activation_v1, () => WebstudioNotifyPatternResource.pattern_enterprise_whitelabel_admin_activation_v1)
         ];
     }
-    
+
     public async Task Init(UserInfo u)
-    {        
+    {
         var culture = GetCulture(u);
 
         ITagValue orangeButton = new TagValue("OrangeButton", "");
@@ -1598,7 +1598,7 @@ public sealed class EnterpriseWhitelabelAdminActivationV1NotifyAction(StudioNoti
         }
 
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
-        
+
         Tags = [
             new TagValue(CommonTags.UserName, u.FirstName.HtmlEncode()),
             orangeButton,
@@ -1621,9 +1621,9 @@ public sealed class OpensourceAdminActivationV1NotifyAction(StudioNotifyHelper s
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_opensource_admin_activation_v1, () => WebstudioNotifyPatternResource.pattern_opensource_admin_activation_v1)
         ];
     }
-    
+
     public async Task Init(UserInfo u)
-    {        
+    {
         var culture = GetCulture(u);
 
         ITagValue orangeButton = new TagValue("OrangeButton", "");
@@ -1636,7 +1636,7 @@ public sealed class OpensourceAdminActivationV1NotifyAction(StudioNotifyHelper s
         }
 
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
-        
+
         Tags = [
             new TagValue(CommonTags.UserName, u.FirstName.HtmlEncode()),
             orangeButton,
@@ -1659,12 +1659,12 @@ public sealed class SaasAdminWelcomeV1NotifyAction(CommonLinkUtility commonLinkU
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_admin_welcome_v1, () => WebstudioNotifyPatternResource.pattern_saas_admin_welcome_v1)
         ];
     }
-    
+
     public void Init(UserInfo newUserInfo)
-    {        
+    {
         var culture = GetCulture(newUserInfo);
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonUpgrade", culture);
-        
+
         Tags = [
             new TagValue(CommonTags.Footer, "common"),
             new TagValue(CommonTags.UserName, newUserInfo.FirstName.HtmlEncode()),
@@ -1732,8 +1732,8 @@ public sealed class DocsTipsNotifyAction(UserManager userManager, StudioNotifyHe
         ];
     }
 
-    public void Init(  
-        CultureInfo culture, 
+    public void Init(
+        CultureInfo culture,
         UserInfo u,
         Func<CultureInfo, string> orangeButtonText,
         string orangeButtonUrl,
@@ -1815,9 +1815,9 @@ public sealed class SaasUserWelcomeV1NotifyAction(StudioNotifyHelper studioNotif
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_user_welcome_v1, () => WebstudioNotifyPatternResource.pattern_saas_user_welcome_v1)
         ];
     }
-    
+
     public void Init(UserInfo newUserInfo)
-    {        
+    {
         var culture = GetCulture(newUserInfo);
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonCollaborate", culture);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
@@ -1828,7 +1828,7 @@ public sealed class SaasUserWelcomeV1NotifyAction(StudioNotifyHelper studioNotif
         var img4 = studioNotifyHelper.GetNotificationImageUrl("chatgpt.png");
 
         var url1 = externalResourceSettingsHelper.Helpcenter.GetRegionalFullEntry("userguides", culture);
-        
+
         Tags = [
             new TagValue(CommonTags.UserName, newUserInfo.FirstName.HtmlEncode()),
             new TagValue(CommonTags.MyStaffLink, GetMyStaffLink()),
@@ -1843,7 +1843,7 @@ public sealed class SaasUserWelcomeV1NotifyAction(StudioNotifyHelper studioNotif
             new TagValue(CommonTags.Footer, "social")
         ];
     }
-    
+
     private string GetMyStaffLink()
     {
         return commonLinkUtility.GetFullAbsolutePath(commonLinkUtility.GetMyStaff());
@@ -1862,9 +1862,9 @@ public sealed class EnterpriseUserWelcomeV1NotifyAction(StudioNotifyHelper studi
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_enterprise_user_welcome_v1, () => WebstudioNotifyPatternResource.pattern_enterprise_user_welcome_v1)
         ];
     }
-    
+
     public void Init(UserInfo newUserInfo)
-    {        
+    {
         var culture = GetCulture(newUserInfo);
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonCollaborate", culture);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
@@ -1875,7 +1875,7 @@ public sealed class EnterpriseUserWelcomeV1NotifyAction(StudioNotifyHelper studi
         var img4 = studioNotifyHelper.GetNotificationImageUrl("chatgpt.png");
 
         var url1 = externalResourceSettingsHelper.Helpcenter.GetRegionalFullEntry("userguides", culture);
-        
+
         Tags = [
             new TagValue(CommonTags.UserName, newUserInfo.FirstName.HtmlEncode()),
             new TagValue(CommonTags.MyStaffLink, GetMyStaffLink()),
@@ -1890,7 +1890,7 @@ public sealed class EnterpriseUserWelcomeV1NotifyAction(StudioNotifyHelper studi
             new TagValue(CommonTags.Footer, null)
         ];
     }
-    
+
     private string GetMyStaffLink()
     {
         return commonLinkUtility.GetFullAbsolutePath(commonLinkUtility.GetMyStaff());
@@ -1909,9 +1909,9 @@ public sealed class EnterpriseWhitelabelUserWelcomeV1NotifyAction(StudioNotifyHe
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_enterprise_whitelabel_user_welcome_v1, () => WebstudioNotifyPatternResource.pattern_enterprise_whitelabel_user_welcome_v1)
         ];
     }
-    
+
     public void Init(UserInfo newUserInfo)
-    {        
+    {
         var culture = GetCulture(newUserInfo);
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonCollaborate", culture);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
@@ -1922,7 +1922,7 @@ public sealed class EnterpriseWhitelabelUserWelcomeV1NotifyAction(StudioNotifyHe
         var img4 = studioNotifyHelper.GetNotificationImageUrl("chatgpt.png");
 
         var url1 = externalResourceSettingsHelper.Helpcenter.GetRegionalFullEntry("userguides", culture);
-        
+
         Tags = [
             new TagValue(CommonTags.UserName, newUserInfo.FirstName.HtmlEncode()),
             new TagValue(CommonTags.MyStaffLink, GetMyStaffLink()),
@@ -1937,7 +1937,7 @@ public sealed class EnterpriseWhitelabelUserWelcomeV1NotifyAction(StudioNotifyHe
             new TagValue(CommonTags.Footer, null)
         ];
     }
-    
+
     private string GetMyStaffLink()
     {
         return commonLinkUtility.GetFullAbsolutePath(commonLinkUtility.GetMyStaff());
@@ -1956,9 +1956,9 @@ public sealed class EnterpriseWhitelabelUserWelcomeCustomModeV1NotifyAction(Stud
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_enterprise_whitelabel_user_welcome_v1, () => WebstudioNotifyPatternResource.pattern_saas_user_welcome_v3)
         ];
     }
-    
+
     public void Init(UserInfo newUserInfo)
-    {        
+    {
         var culture = GetCulture(newUserInfo);
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonCollaborate", culture);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
@@ -1969,7 +1969,7 @@ public sealed class EnterpriseWhitelabelUserWelcomeCustomModeV1NotifyAction(Stud
         var img4 = studioNotifyHelper.GetNotificationImageUrl("chatgpt.png");
 
         var url1 = externalResourceSettingsHelper.Helpcenter.GetRegionalFullEntry("userguides", culture);
-        
+
         Tags = [
             new TagValue(CommonTags.UserName, newUserInfo.FirstName.HtmlEncode()),
             new TagValue(CommonTags.MyStaffLink, GetMyStaffLink()),
@@ -1984,7 +1984,7 @@ public sealed class EnterpriseWhitelabelUserWelcomeCustomModeV1NotifyAction(Stud
             new TagValue(CommonTags.Footer, null)
         ];
     }
-    
+
     private string GetMyStaffLink()
     {
         return commonLinkUtility.GetFullAbsolutePath(commonLinkUtility.GetMyStaff());
@@ -2003,9 +2003,9 @@ public sealed class OpensourceUserWelcomeV1NotifyAction(StudioNotifyHelper studi
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_opensource_user_welcome_v1, () => WebstudioNotifyPatternResource.pattern_opensource_user_welcome_v1)
         ];
     }
-    
+
     public void Init(UserInfo newUserInfo)
-    {        
+    {
         var culture = GetCulture(newUserInfo);
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonCollaborate", culture);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
@@ -2016,7 +2016,7 @@ public sealed class OpensourceUserWelcomeV1NotifyAction(StudioNotifyHelper studi
         var img4 = studioNotifyHelper.GetNotificationImageUrl("chatgpt.png");
 
         var url1 = externalResourceSettingsHelper.Helpcenter.GetRegionalFullEntry("userguides", culture);
-        
+
         Tags = [
             new TagValue(CommonTags.UserName, newUserInfo.FirstName.HtmlEncode()),
             new TagValue(CommonTags.MyStaffLink, GetMyStaffLink()),
@@ -2031,8 +2031,8 @@ public sealed class OpensourceUserWelcomeV1NotifyAction(StudioNotifyHelper studi
             new TagValue(CommonTags.Footer, "opensource")
         ];
     }
-    
-    
+
+
     private string GetMyStaffLink()
     {
         return commonLinkUtility.GetFullAbsolutePath(commonLinkUtility.GetMyStaff());
@@ -2051,14 +2051,14 @@ public sealed class SaasUserActivationV1NotifyAction(StudioNotifyHelper studioNo
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_user_activation_v1, () => WebstudioNotifyPatternResource.pattern_saas_user_activation_v1)
         ];
     }
-    
+
     public async Task Init(UserInfo newUserInfo)
-    {        
+    {
         var confirmationUrl = await GenerateActivationConfirmUrlAsync(newUserInfo);
         var culture = GetCulture(newUserInfo);
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccept", culture);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
-        
+
         Tags = [
             new TagValue(CommonTags.ActivateUrl, confirmationUrl),
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
@@ -2068,7 +2068,7 @@ public sealed class SaasUserActivationV1NotifyAction(StudioNotifyHelper studioNo
             new TagValue(CommonTags.Footer, "social")
         ];
     }
-    
+
     private async Task<string> GenerateActivationConfirmUrlAsync(UserInfo user)
     {
         var confirmUrl = commonLinkUtility.GetConfirmationEmailUrl(user.Email, ConfirmType.Activation, user.Id, user.Id);
@@ -2089,14 +2089,14 @@ public sealed class EnterpriseUserActivationV1NotifyAction(StudioNotifyHelper st
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_enterprise_user_activation_v1, () => WebstudioNotifyPatternResource.pattern_enterprise_user_activation_v1)
         ];
     }
-    
+
     public async Task Init(UserInfo newUserInfo)
-    {        
+    {
         var confirmationUrl = await GenerateActivationConfirmUrlAsync(newUserInfo);
         var culture = GetCulture(newUserInfo);
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccept", culture);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
-        
+
         Tags = [
             new TagValue(CommonTags.ActivateUrl, confirmationUrl),
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
@@ -2106,8 +2106,8 @@ public sealed class EnterpriseUserActivationV1NotifyAction(StudioNotifyHelper st
             new TagValue(CommonTags.Footer, null)
         ];
     }
-    
-    
+
+
     private async Task<string> GenerateActivationConfirmUrlAsync(UserInfo user)
     {
         var confirmUrl = commonLinkUtility.GetConfirmationEmailUrl(user.Email, ConfirmType.Activation, user.Id, user.Id);
@@ -2128,14 +2128,14 @@ public sealed class EnterpriseWhitelabelUserActivationV1NotifyAction(StudioNotif
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_enterprise_whitelabel_user_activation_v1, () => WebstudioNotifyPatternResource.pattern_enterprise_whitelabel_user_activation_v1)
         ];
     }
-    
+
     public async Task Init(UserInfo newUserInfo)
-    {        
+    {
         var confirmationUrl = await GenerateActivationConfirmUrlAsync(newUserInfo);
         var culture = GetCulture(newUserInfo);
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccept", culture);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
-        
+
         Tags = [
             new TagValue(CommonTags.ActivateUrl, confirmationUrl),
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
@@ -2145,7 +2145,7 @@ public sealed class EnterpriseWhitelabelUserActivationV1NotifyAction(StudioNotif
             new TagValue(CommonTags.Footer, null)
         ];
     }
-    
+
     private async Task<string> GenerateActivationConfirmUrlAsync(UserInfo user)
     {
         var confirmUrl = commonLinkUtility.GetConfirmationEmailUrl(user.Email, ConfirmType.Activation, user.Id, user.Id);
@@ -2166,14 +2166,14 @@ public sealed class OpensourceUserActivationV1NotifyAction(StudioNotifyHelper st
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_opensource_user_activation_v1, () => WebstudioNotifyPatternResource.pattern_opensource_user_activation_v1)
         ];
     }
-    
+
     public async Task Init(UserInfo newUserInfo)
-    {        
+    {
         var confirmationUrl = await GenerateActivationConfirmUrlAsync(newUserInfo);
         var culture = GetCulture(newUserInfo);
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccept", culture);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
-        
+
         Tags = [
             new TagValue(CommonTags.ActivateUrl, confirmationUrl),
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
@@ -2183,7 +2183,7 @@ public sealed class OpensourceUserActivationV1NotifyAction(StudioNotifyHelper st
             new TagValue(CommonTags.Footer, "opensource")
         ];
     }
-    
+
     private async Task<string> GenerateActivationConfirmUrlAsync(UserInfo user)
     {
         var confirmUrl = commonLinkUtility.GetConfirmationEmailUrl(user.Email, ConfirmType.Activation, user.Id, user.Id);
@@ -2195,8 +2195,8 @@ public sealed class OpensourceUserActivationV1NotifyAction(StudioNotifyHelper st
 public abstract class BasePeriodicNotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService, TenantManager manager) : NotifyAction(manager)
 {
     public async Task Init(
-        CultureInfo culture, 
-        UserInfo u, 
+        CultureInfo culture,
+        UserInfo u,
         TenantQuota rquota,
         Func<CultureInfo, string> orangeButtonText,
         Func<CultureInfo, string> orangeButtonText1,
@@ -2277,10 +2277,10 @@ public abstract class BasePeriodicNotifyAction(UserManager userManager, StudioNo
             new TagValue(CommonTags.Footer, await userManager.IsDocSpaceAdminAsync(u) ? "common" : "social")
         ];
     }
-    
+
     public async Task Init(
-        CultureInfo culture, 
-        UserInfo u, 
+        CultureInfo culture,
+        UserInfo u,
         TenantQuota rquota,
         Func<CultureInfo, string> orangeButtonText,
         Func<CultureInfo, string> orangeButtonUrl,
@@ -2383,16 +2383,16 @@ public sealed class RoomsActivityNotifyAction(TenantManager tenantManager) : Not
             new TelegramPattern(() => WebstudioNotifyPatternResource.pattern_rooms_activity)
         ];
     }
-    
+
     public void Init(DateTime scheduleDate, WhatsNewType whatsNewType, HashSet<string> userActivities)
-    {        
+    {
         Tags = [
                 new TagValue(CommonTags.Activities, userActivities),
                 new TagValue(CommonTags.Date, DateToString(scheduleDate, whatsNewType)),
                 new TagValue(CommonTags.Priority, 1)
         ];
     }
-    
+
     private static string DateToString(DateTime d, WhatsNewType type)
     {
         d = type == WhatsNewType.DailyFeed ? d.AddDays(-1) : d.AddHours(-1);
@@ -2414,16 +2414,16 @@ public sealed class SendWhatsNewNotifyAction(TenantManager tenantManager) : Noti
             new TelegramPattern(() => WebstudioNotifyPatternResource.pattern_send_whats_new)
         ];
     }
-    
+
     public void Init(DateTime scheduleDate, WhatsNewType whatsNewType, HashSet<string> userActivities)
-    {        
+    {
         Tags = [
             new TagValue(CommonTags.Activities, userActivities),
             new TagValue(CommonTags.Date, DateToString(scheduleDate, whatsNewType)),
             new TagValue(CommonTags.Priority, 1)
         ];
     }
-    
+
     private static string DateToString(DateTime d, WhatsNewType type)
     {
         d = type == WhatsNewType.DailyFeed ? d.AddDays(-1) : d.AddHours(-1);
@@ -2906,7 +2906,7 @@ public sealed class AdminNotifyAction(TenantManager tenantManager) : NotifyActio
             //new EmailPattern("admin_notify", () => WebstudioNotifyPatternResource.subject_admin_notify, () => WebstudioNotifyPatternResource.pattern_admin_notify)
         ];
     }
-};
+}
 
 [Scope]
 public sealed class SelfProfileUpdatedNotifyAction(TenantManager tenantManager) : NotifyAction(tenantManager)

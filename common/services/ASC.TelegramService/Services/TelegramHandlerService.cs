@@ -166,8 +166,10 @@ public class TelegramHandlerService(
 
         _clients[tenantId].CancellationTokenSource = cts;
 
+#pragma warning disable CA2000
         var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, cancellationToken);
-
+#pragma warning restore CA2000
+        
         client.StartReceiving(
             updateHandler: (botClient, update, ct) => HandleUpdate(botClient, update, tenantId, ct),
             errorHandler: (botClient, exception, ct) => HandleErrorAsync(exception, tenantId, linkedCts),
@@ -189,14 +191,14 @@ public class TelegramHandlerService(
 
     private readonly int[] _stopErrorCodes = [
         401, // Unathorized
-        409, // Keys Conflict
+        409 // Keys Conflict
     ];
 
     private readonly int[] _silentErrorCodes = [
-        502,
+        502
     ];
 
-    Task HandleErrorAsync(Exception exception, int tenantId, CancellationTokenSource cts)
+    private Task HandleErrorAsync(Exception exception, int tenantId, CancellationTokenSource cts)
     {
         string message;
         if (exception is ApiRequestException apiException)

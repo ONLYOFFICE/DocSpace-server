@@ -31,10 +31,11 @@ import com.asc.registration.application.security.filter.BasicSignatureAuthentica
 import com.asc.registration.application.security.filter.RateLimiterFilter;
 import com.asc.registration.application.security.provider.SignatureAuthenticationProvider;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -47,7 +48,6 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
-@RequiredArgsConstructor
 public class SecurityConfiguration {
   @Value("${server.port}")
   private int serverPort;
@@ -59,6 +59,17 @@ public class SecurityConfiguration {
   private final BasicSignatureAuthenticationFilter basicSignatureAuthenticationFilter;
   private final SignatureAuthenticationProvider signatureAuthenticationProvider;
 
+  public SecurityConfiguration(
+      @Qualifier("registrationRateLimiterFilter") RateLimiterFilter rateLimiterFilter,
+      @Qualifier("registrationBasicSignatureAuthenticationFilter")
+          BasicSignatureAuthenticationFilter basicSignatureAuthenticationFilter,
+      @Qualifier("registrationSignatureAuthenticationProvider")
+          SignatureAuthenticationProvider signatureAuthenticationProvider) {
+    this.rateLimiterFilter = rateLimiterFilter;
+    this.basicSignatureAuthenticationFilter = basicSignatureAuthenticationFilter;
+    this.signatureAuthenticationProvider = signatureAuthenticationProvider;
+  }
+
   /**
    * Configures the security filter chain for HTTP requests.
    *
@@ -66,8 +77,9 @@ public class SecurityConfiguration {
    * @return the SecurityFilterChain object representing the configured security filter chain
    * @throws Exception if an error occurs during configuration
    */
-  @Bean
-  SecurityFilterChain configureSecurityFilterChain(HttpSecurity http) throws Exception {
+  @Order(2)
+  @Bean("registrationSecurityFilterChain")
+  SecurityFilterChain registrationSecurityFilterChain(HttpSecurity http) throws Exception {
     return http.authorizeHttpRequests(
             authorizeRequests ->
                 authorizeRequests

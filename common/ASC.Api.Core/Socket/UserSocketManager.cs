@@ -151,6 +151,12 @@ public class UserSocketManager(ITariffService tariffService,
         }
     }
 
+    public async Task UpdateExternalDbSettingsAsync(int tenantId, bool enabled)
+    {
+        _ = await _tenantManager.SetCurrentTenantAsync(tenantId);
+        await MakeRequest("external-db-settings", new { tenantId, externalDbEnabled = enabled });
+    }
+
     public async Task ConnectTelegram(int tenantId, Guid userId)
     {
         _ = await _tenantManager.SetCurrentTenantAsync(tenantId);

@@ -53,7 +53,8 @@ const secret = config.get("core").machinekey + new Date().getTime();
 const secretCookieParser = cookieParser(secret);
 const baseCookieParser = cookieParser();
 
-const redisOptions = config.get("Redis");
+const redisEnabled = process.env.REDIS_ENABLED !== "false";
+const redisOptions = redisEnabled ? config.get("Redis") : null;
 
 let store;
 let redisClient;

@@ -24,19 +24,26 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-
+#nullable enable
 namespace ASC.FederatedLogin.DatabaseProviders;
+
+[EnumExtensions]
+public enum ExternalDatabaseType { MySql, Sqlite }
 
 public record ConnectionTestResult(bool Success, string? Error = null)
 {
     public static ConnectionTestResult Ok() => new(true);
     public static ConnectionTestResult Failure(string error) => new(false, error);
 }
+#nullable disable
 
 public class ExternalDatabaseSettings
 {
     [JsonPropertyName("databaseType")]
     public string DatabaseType { get; set; }
+
+    public ExternalDatabaseType? DatabaseTypeEnum =>
+        ExternalDatabaseTypeExtensions.TryParse(DatabaseType, ignoreCase: true, out var t) ? t : null;
 
     [JsonPropertyName("dbHost")]
     public string Host { get; set; }

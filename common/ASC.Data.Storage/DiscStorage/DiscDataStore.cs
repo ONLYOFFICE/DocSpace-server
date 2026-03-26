@@ -103,7 +103,10 @@ public class DiscDataStore(
 
         if (File.Exists(target))
         {
+            // CA2000: Stream ownership transferred to caller who is responsible for disposal
+#pragma warning disable CA2000
             return withDescription ? await _crypt.GetReadStreamAsync(target) : File.OpenRead(target);
+#pragma warning restore CA2000
         }
 
         throw new FileNotFoundException("File not found", Path.GetFullPath(target));
@@ -346,8 +349,7 @@ public class DiscDataStore(
         var targetDir = GetTarget(domain, folderPath);
         if (Directory.Exists(targetDir))
         {
-            var entries = Directory.GetFiles(targetDir, pattern, recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
-            foreach (var entry in entries)
+            foreach (var entry in Directory.EnumerateFiles(targetDir, pattern, recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly))
             {
                 var size = await _crypt.GetFileSizeAsync(entry);
                 File.Delete(entry);
@@ -368,8 +370,7 @@ public class DiscDataStore(
         var targetDir = GetTarget(domain, folderPath);
         if (Directory.Exists(targetDir))
         {
-            var entries = Directory.GetFiles(targetDir, "*", SearchOption.AllDirectories);
-            foreach (var entry in entries)
+            foreach (var entry in Directory.EnumerateFiles(targetDir, "*", SearchOption.AllDirectories))
             {
                 var fileInfo = new FileInfo(entry);
                 if (fileInfo.LastWriteTime >= fromDate && fileInfo.LastWriteTime <= toDate)
@@ -482,7 +483,7 @@ public class DiscDataStore(
             return;
         }
 
-        var entries = Directory.GetFiles(targetDir, "*.*", SearchOption.AllDirectories);
+        var entries = Directory.EnumerateFiles(targetDir, "*.*", SearchOption.AllDirectories);
         var size = await entries.Where(r =>
         {
             if (QuotaController == null || string.IsNullOrEmpty(QuotaController.ExcludePattern))
@@ -493,10 +494,6 @@ public class DiscDataStore(
         }
         ).ToAsyncEnumerable()
             .Select(async (string r, CancellationToken _) => await _crypt.GetFileSizeAsync(r)).SumAsync();
-
-        var subDirs = Directory.GetDirectories(targetDir, "*", SearchOption.AllDirectories).ToList();
-        subDirs.Reverse();
-        subDirs.ForEach(subdir => Directory.Delete(subdir, true));
 
         Directory.Delete(targetDir, true);
 
@@ -553,8 +550,7 @@ public class DiscDataStore(
             return;
         }
 
-        var entries = Directory.GetFiles(targetDir, "*.*", SearchOption.TopDirectoryOnly);
-        foreach (var entry in entries)
+        foreach (var entry in Directory.EnumerateFiles(targetDir, "*.*", SearchOption.TopDirectoryOnly))
         {
             var finfo = new FileInfo(entry);
             if (DateTime.UtcNow - finfo.CreationTimeUtc > oldThreshold)
@@ -661,8 +657,7 @@ public class DiscDataStore(
 
         if (Directory.Exists(target))
         {
-            var entries = Directory.GetFiles(target, "*.*", SearchOption.AllDirectories);
-            size = await entries
+            size = await Directory.EnumerateFiles(target, "*.*", SearchOption.AllDirectories)
                 .ToAsyncEnumerable()
                 .Select(async (string entry, CancellationToken _) => await _crypt.GetFileSizeAsync(entry))
                 .SumAsync();

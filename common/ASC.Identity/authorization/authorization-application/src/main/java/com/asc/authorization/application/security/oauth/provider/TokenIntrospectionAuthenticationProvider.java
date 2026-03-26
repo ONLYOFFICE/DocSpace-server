@@ -35,17 +35,15 @@ import com.asc.common.service.transfer.message.ClientRetrievedEvent;
 import com.asc.common.service.transfer.message.RetrieveClientMessage;
 import com.asc.common.utilities.crypto.EncryptionService;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import lombok.RequiredArgsConstructor;
+import java.util.*;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.MDC;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.env.Environment;
@@ -72,7 +70,6 @@ import org.springframework.util.CollectionUtils;
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class TokenIntrospectionAuthenticationProvider implements AuthenticationProvider {
   private static final TypeDescriptor OBJECT_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(Object.class);
   private static final TypeDescriptor LIST_STRING_TYPE_DESCRIPTOR =
@@ -82,12 +79,28 @@ public class TokenIntrospectionAuthenticationProvider implements AuthenticationP
   private String region;
 
   private final Environment environment;
-  private final RabbitTemplate rpcRabbitTemplate;
-  private final MessageConverter messageConverter;
+  @Nullable private final RabbitTemplate rpcRabbitTemplate;
+  @Nullable private final MessageConverter messageConverter;
 
   private final EncryptionService encryptionService;
   private final OAuth2AuthorizationService authorizationService;
   private final RegisteredClientRepository registeredClientRepository;
+
+  @Autowired
+  public TokenIntrospectionAuthenticationProvider(
+      Environment environment,
+      @Autowired(required = false) @Qualifier("rpcRabbitTemplate") RabbitTemplate rpcRabbitTemplate,
+      @Autowired(required = false) MessageConverter messageConverter,
+      EncryptionService encryptionService,
+      OAuth2AuthorizationService authorizationService,
+      RegisteredClientRepository registeredClientRepository) {
+    this.environment = environment;
+    this.rpcRabbitTemplate = rpcRabbitTemplate;
+    this.messageConverter = messageConverter;
+    this.encryptionService = encryptionService;
+    this.authorizationService = authorizationService;
+    this.registeredClientRepository = registeredClientRepository;
+  }
 
   /**
    * Maps a {@link ClientRetrievedEvent} to a {@link RegisteredClient}.
@@ -137,6 +150,11 @@ public class TokenIntrospectionAuthenticationProvider implements AuthenticationP
    *     remote region returns no result or the request fails
    */
   private Optional<RegisteredClient> fetchRemoteClient(String clientId, String targetRegion) {
+    if (rpcRabbitTemplate == null || messageConverter == null) {
+      log.warn("RabbitMQ not available, cannot fetch client from remote region: {}", targetRegion);
+      return Optional.empty();
+    }
+
     try {
       MDC.put("client_id", clientId);
       MDC.put("region", targetRegion);

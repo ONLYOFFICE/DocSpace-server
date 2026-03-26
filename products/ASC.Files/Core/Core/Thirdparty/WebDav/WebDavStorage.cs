@@ -52,7 +52,9 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
         _baseUri = new UriBuilder(uri.Scheme, uri.Host, uri.Port).Uri;
         _absolutePath = HttpUtility.UrlDecode(uri.AbsolutePath).Trim('/');
 
+#pragma warning disable CA2000 // HttpClient is owned by WebDavClient
         var httpClient = httpClientFactory.CreateClient();
+#pragma warning restore CA2000
 
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic",
             Convert.ToBase64String(Encoding.ASCII.GetBytes($"{authData.Login}:{authData.Password}")));
@@ -387,13 +389,15 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
             return response;
         }
 
-        var client = new HttpClient(
-            new HttpClientHandler
-            {
-                Credentials = new NetworkCredential(_authData.Login, _authData.Password)
-            });
+#pragma warning disable CA2000 // HttpClient and handler are owned by WebDavClient
+        var handler = new HttpClientHandler
+        {
+            Credentials = new NetworkCredential(_authData.Login, _authData.Password)
+        };
+        var client = new HttpClient(handler);
 
         _client = new WebDavClient(client);
+#pragma warning restore CA2000
 
         return await action();
     }
