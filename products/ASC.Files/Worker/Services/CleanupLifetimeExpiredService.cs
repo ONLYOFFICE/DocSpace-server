@@ -27,7 +27,7 @@
 namespace ASC.Files.Worker.Services;
 
 [Singleton]
-internal class CleanupLifetimeExpiredService(
+public class CleanupLifetimeExpiredService(
     IServiceScopeFactory scopeFactory,
     IConfiguration configuration,
     ILogger<CleanupLifetimeExpiredService> logger)

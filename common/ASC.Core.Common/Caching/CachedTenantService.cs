@@ -27,7 +27,7 @@
 namespace ASC.Core.Caching;
 
 [Singleton]
-class TenantServiceCache
+internal class TenantServiceCache
 {
     private const string Key = "tenants";
     private readonly TimeSpan _cacheExpiration;
@@ -154,7 +154,7 @@ class TenantServiceCache
 }
 
 [Scope(typeof(ITenantService))]
-class CachedTenantService : ITenantService
+internal class CachedTenantService : ITenantService
 {
     private readonly DbTenantService _service;
     private readonly ICacheNotify<TenantCacheItem> _cacheNotifyItem;

@@ -44,14 +44,11 @@ global using System.Text.Json.Serialization;
 global using System.Text.RegularExpressions;
 global using System.Threading.Channels;
 global using System.Web;
-global using System.Xml.Linq;
-global using System.Xml.XPath;
 
 global using ASC.Api.Core.Extensions;
 global using ASC.Common;
 global using ASC.Common.Caching;
 global using ASC.Common.Log;
-global using ASC.Common.Mapping.PrimitiveTypeConverters;
 global using ASC.Common.Security;
 global using ASC.Common.Security.Authorizing;
 global using ASC.Common.Threading;

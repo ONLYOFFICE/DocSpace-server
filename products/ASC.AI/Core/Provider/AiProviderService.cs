@@ -35,7 +35,9 @@ public class AiProviderService(
     UserManager userManager,
     IDistributedLockProvider distributedLockProvider,
     ModelClientFactory modelClientFactory,
-    MessageService messageService)
+    MessageService messageService,
+    AiGateway aiGateway,
+    ILogger<AiProviderService> logger)
 {
     public async Task<AiProvider> AddProviderAsync(string? title, string? url, string key, ProviderType type)
     {
@@ -167,28 +169,51 @@ public class AiProviderService(
 
     public async Task<IEnumerable<ModelData>> GetModelsAsync(int providerId, Scope? scope)
     {
-        var provider = await GetProviderAsync(providerId);
+        var provider = await GetProviderAsync(providerId, forceSystemProvider: true);
         if (provider.NeedReset)
         {
             return [];
         }
 
-        return await ExecuteProviderRequestAsync(provider.Type, async () => 
-        { 
+        return await ExecuteProviderRequestAsync(provider.Type, async () =>
+        {
             var client = modelClientFactory.Create(provider.Type, provider.Url, provider.Key);
             var models = await GetFilteredModelsAsync(client, provider.Type, scope);
+
+            Dictionary<string, AiChatPrice>? priceMap = null;
+            CurrencyInfo? currency = null;
+            if (provider.Type == ProviderType.PortalAi)
+            {
+                try
+                {
+                    var prices = await aiGateway.GetPricesAsync();
+                    currency = prices.Currency;
+                    priceMap = prices.Chat.ToDictionary(p => p.Id, p => new AiChatPrice
+                    {
+                        Prompt = p.Price.Prompt * 1_000_000,
+                        Completion = p.Price.Completion * 1_000_000
+                    });
+                }
+                catch(Exception e)
+                {
+                    // If prices can't be fetched, continue without them
+                    logger.ErrorWithException(e);
+                }
+            }
 
             return models.Select(m => new ModelData
             {
                 Provider = provider,
-                ModelId = m.Id
+                ModelId = m.Id,
+                Price = priceMap?.GetValueOrDefault(m.Id),
+                Currency = priceMap != null ? currency : null
             });
         });
     }
 
-    public async Task<AiProvider> GetProviderAsync(int providerId)
+    public async Task<AiProvider> GetProviderAsync(int providerId, bool forceSystemProvider = false)
     {
-        var provider = await providerDao.GetProviderAsync(tenantManager.GetCurrentTenantId(), providerId);
+        var provider = await providerDao.GetProviderAsync(tenantManager.GetCurrentTenantId(), providerId, forceSystemProvider);
 
         return provider ?? throw new ItemNotFoundException(ErrorMessages.ProviderNotFound);
     }
@@ -225,7 +250,7 @@ public class AiProviderService(
             return null;
         }
 
-        var firstProvider = await providerDao.GetProviderAsync(tenantId, firstProviderId.Value);
+        var firstProvider = await providerDao.GetProviderAsync(tenantId, firstProviderId.Value, forceSystemProvider: true);
         if (firstProvider == null || firstProvider.NeedReset)
         {
             return null;

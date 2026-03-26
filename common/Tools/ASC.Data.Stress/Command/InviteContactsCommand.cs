@@ -49,7 +49,7 @@ public class InviteContactsCommand : AsyncCommand<InviteContactsCommand.Settings
         var factory = serviceProvider.GetRequiredService<IHttpClientFactory>();
         
         var configuration = await ApiHelper.GetConfigurationAsync(settings.Email, settings.Password);
-        var  usersApi = new UsersApi(configuration);
+        using var usersApi = new UsersApi(configuration);
         
         var token = CancellationToken.None;
         await AnsiConsole.Progress()

@@ -25,7 +25,6 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Common.IntegrationEvents.Events;
-using ASC.Core.Common.Notify.Model;
 
 using Constants = ASC.Core.Configuration.Constants;
 

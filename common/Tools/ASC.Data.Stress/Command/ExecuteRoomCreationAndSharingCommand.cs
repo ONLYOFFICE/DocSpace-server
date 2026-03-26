@@ -59,8 +59,8 @@ public class ExecuteRoomCreationAndSharingCommand : AsyncCommand<ExecuteRoomCrea
     {
         var configuration = await ApiHelper.GetConfigurationAsync(settings.Email, settings.Password);
         
-        var roomsApi = new RoomsApi(configuration);
-        var profilesApi = new ProfilesApi(configuration);
+        using var roomsApi = new RoomsApi(configuration);
+        using var profilesApi = new ProfilesApi(configuration);
         var secondUser = (await profilesApi.GetProfileByEmailAsync(settings.SecondUserEmail, cancellationToken: cancellationToken)).Response;
         
         var system = new Faker().System;

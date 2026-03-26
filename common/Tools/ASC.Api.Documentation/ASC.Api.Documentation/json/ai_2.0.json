@@ -3672,6 +3672,20 @@
         "additionalProperties": false,
         "description": "The agent new item's information."
       },
+      "AiChatPrice": {
+        "type": "object",
+        "properties": {
+          "prompt": {
+            "type": "number",
+            "format": "double"
+          },
+          "completion": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
       "AiProviderArrayWrapper": {
         "type": "object",
         "properties": {
@@ -3907,6 +3921,11 @@
             "description": "The tool name used by the AI assistant to launch presentation creation in the editor.",
             "nullable": true,
             "example": "generate_presentation"
+          },
+          "systemAiEnabled": {
+            "type": "boolean",
+            "description": "Indicates whether the system-level AI provider is enabled.",
+            "example": true
           }
         },
         "additionalProperties": false,
@@ -4073,6 +4092,42 @@
         "additionalProperties": false,
         "description": "The multimodal settings for the chat model."
       },
+      "ChatReasoningEffort": {
+        "oneOf": [
+          {
+            "enum": [
+              "None",
+              "Low",
+              "Medium",
+              "High",
+              "XHigh"
+            ],
+            "type": "string",
+            "description": "[]",
+            "example": "None"
+          },
+          {
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "type": "integer",
+            "description": "[]",
+            "example": 0,
+            "x-enum-varnames": [
+              "None",
+              "Low",
+              "Medium",
+              "High",
+              "XHigh"
+            ]
+          }
+        ],
+        "x-enum-type": "integer"
+      },
       "ChatSettings": {
         "type": "object",
         "properties": {
@@ -4133,6 +4188,11 @@
           },
           "multimodal": {
             "$ref": "#/components/schemas/ChatMultimodalSettingsDto"
+          },
+          "thinking": {
+            "type": "boolean",
+            "description": "Indicates whether the model supports extended thinking mode.",
+            "example": false
           },
           "internal": {
             "type": "boolean",
@@ -4379,6 +4439,24 @@
         "additionalProperties": false,
         "description": "Request parameters for creating a new AI provider."
       },
+      "CurrencyInfo": {
+        "required": [
+          "code",
+          "symbol"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "nullable": true
+          },
+          "symbol": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "DefaultProviderDto": {
         "required": [
           "defaultModel"
@@ -4562,25 +4640,28 @@
             "enum": [
               "None",
               "OpenAi",
-              "OpenRouter"
+              "OpenRouter",
+              "PortalAi"
             ],
             "type": "string",
-            "description": "[None - None, OpenAi - OpenAi, OpenRouter - OpenRouter]",
+            "description": "[None - None, OpenAi - OpenAi, OpenRouter - OpenRouter, PortalAi - PortalAi]",
             "example": "None"
           },
           {
             "enum": [
               0,
               1,
-              2
+              2,
+              3
             ],
             "type": "integer",
-            "description": "[0 - None, 1 - OpenAi, 2 - OpenRouter]",
+            "description": "[0 - None, 1 - OpenAi, 2 - OpenRouter, 3 - PortalAi]",
             "example": 0,
             "x-enum-varnames": [
               "None",
               "OpenAi",
-              "OpenRouter"
+              "OpenRouter",
+              "PortalAi"
             ]
           }
         ],
@@ -4662,23 +4743,26 @@
           {
             "enum": [
               "None",
-              "Exa"
+              "Exa",
+              "PortalAi"
             ],
             "type": "string",
-            "description": "[None - None, Exa - Exa]",
+            "description": "[None - None, Exa - Exa, PortalAi - PortalAi]",
             "example": "None"
           },
           {
             "enum": [
               0,
-              1
+              1,
+              2
             ],
             "type": "integer",
-            "description": "[0 - None, 1 - Exa]",
+            "description": "[0 - None, 1 - Exa, 2 - PortalAi]",
             "example": 0,
             "x-enum-varnames": [
               "None",
-              "Exa"
+              "Exa",
+              "PortalAi"
             ]
           }
         ],
@@ -5655,6 +5739,16 @@
               },
               "rootRoomType": {
                 "$ref": "#/components/schemas/RoomType"
+              },
+              "saveFormAsXLSX": {
+                "type": "boolean",
+                "description": "Specifies whether to save form data as XLSX file.",
+                "nullable": true
+              },
+              "sendFormToExternalDB": {
+                "type": "boolean",
+                "description": "Specifies whether to send form data to external database.",
+                "nullable": true
               }
             }
           }
@@ -6620,6 +6714,12 @@
             "description": "The model identifier as recognized by the AI provider (e.g., \"gpt-4o\", \"claude-sonnet-4-20250514\").",
             "nullable": true,
             "example": "gpt-4o"
+          },
+          "price": {
+            "$ref": "#/components/schemas/AiChatPrice"
+          },
+          "currency": {
+            "$ref": "#/components/schemas/CurrencyInfo"
           }
         },
         "additionalProperties": false,
@@ -7112,6 +7212,9 @@
             "description": "Indicates whether the AI assistant is allowed to perform web searches when generating responses.",
             "nullable": true,
             "example": true
+          },
+          "reasoningEffort": {
+            "$ref": "#/components/schemas/ChatReasoningEffort"
           }
         },
         "additionalProperties": false,
@@ -7373,6 +7476,16 @@
           },
           "chatSettings": {
             "$ref": "#/components/schemas/ChatSettings"
+          },
+          "sendFormToExternalDB": {
+            "type": "boolean",
+            "description": "Specifies whether to send form data to external database.",
+            "nullable": true
+          },
+          "saveFormAsXLSX": {
+            "type": "boolean",
+            "description": "Specifies whether to save form data as XLSX file.",
+            "nullable": true
           }
         },
         "additionalProperties": false,
@@ -7499,6 +7612,9 @@
             "type": "boolean",
             "description": "Indicates whether the AI assistant is allowed to perform web searches when generating responses in this room.",
             "example": true
+          },
+          "reasoningEffort": {
+            "$ref": "#/components/schemas/ChatReasoningEffort"
           }
         },
         "additionalProperties": false,

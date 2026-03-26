@@ -163,7 +163,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             return;
         }
 
-        if (String.IsNullOrEmpty(filename))
+        if (string.IsNullOrEmpty(filename))
         {
             var ext = await compressToArchive.GetExt(context.Request.Query["ext"]);
             filename = FileConstant.DownloadTitle + ext;
@@ -1061,7 +1061,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                 context.Response.Headers.Append("Content-Disposition", ContentDispositionUtil.GetHeaderValue(".jpeg", true));
 
                 await using var stream = await fileDao.GetFileStreamAsync(file);
-                var processedImage = new MagickImage(stream);
+                using var processedImage = new MagickImage(stream);
                 processedImage.Crop(width, height);
 
                 await processedImage.WriteAsync(context.Response.Body, MagickFormat.Jpeg);
@@ -1380,13 +1380,12 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
         file.ParentId = folder.Id;
         file.Comment = FilesCommonResource.CommentCreate;
 
-        var request = new HttpRequestMessage
-        {
-            RequestUri = new Uri(fileUri)
-        };
+        using var request = new HttpRequestMessage(HttpMethod.Get, fileUri);
 
         var fileDao = daoFactory.GetFileDao<T>();
+#pragma warning disable CA2000 // HttpClient is short-lived and disposed by runtime
         var httpClient = clientFactory.CreateClient();
+#pragma warning restore CA2000
         using var response = await httpClient.SendAsync(request);
         await using var fileStream = await response.Content.ReadAsStreamAsync();
 

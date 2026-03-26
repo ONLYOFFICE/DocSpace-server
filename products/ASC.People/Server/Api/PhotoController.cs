@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2026
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -152,7 +152,7 @@ public class PhotoController(
     {
         var user = await GetUserInfoAsync(inDto.UserId);
 
-        if (_userManager.IsSystemUser(user.Id))
+        if (_userManager.IsSystemUser(user.Id) || !await _userManager.CanUserViewAnotherUserAsync(securityContext.CurrentAccount.ID, user.Id))
         {
             throw new SecurityException();
         }
@@ -212,11 +212,11 @@ public class PhotoController(
     public async Task<FileUploadResultDto> UploadMemberPhoto(UploadMemberPhotoRequestDto inDto)
     {
         var result = new FileUploadResultDto();
-        var autosave = bool.Parse(inDto.FormCollection["Autosave"]);
+        var autosave = inDto.Autosave;
 
         try
         {
-            if (inDto.FormCollection.Files.Count != 0)
+            if (inDto.File != null)
             {
                 var user = await GetUserInfoAsync(inDto.UserId);
 
@@ -227,7 +227,7 @@ public class PhotoController(
 
                 await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(user.Id), Constants.Action_EditUser);
 
-                var userPhoto = inDto.FormCollection.Files[0];
+                var userPhoto = inDto.File;
 
                 if (userPhoto.Length > setupInfo.MaxImageUploadSize)
                 {

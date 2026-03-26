@@ -43,6 +43,12 @@ public class AiAccessibility(
     {
         var tenantId = tenantManager.GetCurrentTenantId();
         
+        var aiAccessSettings = await settingsManager.LoadAsync<TenantAiAccessSettings>(tenantId);
+        if (!aiAccessSettings.Enabled)
+        {
+            return new AiStatus { Enabled = false, GatewayEnabled = false };
+        }
+
         if (await aiGateway.IsEnabledAsync())
         {
             return new AiStatus { Enabled = true, GatewayEnabled = true };
@@ -51,26 +57,25 @@ public class AiAccessibility(
         return new AiStatus { Enabled = await HasProvidersAsync(tenantId), GatewayEnabled = false };
     }
 
-    public async Task<bool> IsVectorizationEnabledAsync<T>(Folder<T> agent)
+    public async Task<bool> IsVectorizationEnabledAsync()
     {
-        if (agent == null)
-        {
-            return false;
-        }
-
-        if (agent.SettingsChatProviderId == AiGateway.ProviderId)
-        {
-            return await aiGateway.IsEnabledAsync();
-        }
-        
         var tenantId = tenantManager.GetCurrentTenantId();
-        if (!await HasProvidersAsync(tenantId))
+        var settings = await settingsManager.LoadAsync<EncryptedVectorizationSettings>(tenantId);
+
+        var providerType = settings.ProviderType;
+        if (providerType == EmbeddingProviderType.None && !settings.IsConfigured)
         {
-            return false;
+            providerType = EmbeddingProviderType.PortalAi;
         }
         
-        var settings = await settingsManager.LoadAsync<EncryptedVectorizationSettings>(tenantId);
-        return settings.ProviderType != EmbeddingProviderType.None;
+        var gatewayEnabled = await aiGateway.IsEnabledAsync();
+
+        return providerType switch
+        {
+            EmbeddingProviderType.PortalAi => gatewayEnabled,
+            EmbeddingProviderType.None => false,
+            _ => gatewayEnabled || await HasProvidersAsync(tenantId)
+        };
     }
     
     private async Task<bool> HasProvidersAsync(int tenantId)

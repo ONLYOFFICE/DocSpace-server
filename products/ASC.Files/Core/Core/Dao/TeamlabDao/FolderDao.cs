@@ -556,7 +556,9 @@ internal class FolderDao(
                     Quota = folder.SettingsQuota,
                     Lifetime = folder.SettingsLifetime.Map(),
                     ChatProviderId = folder.SettingsChatProviderId,
-                    ChatParameters = folder.SettingsChatParameters
+                    ChatParameters = folder.SettingsChatParameters,
+                    SaveFormAsXLSX = folder.SettingsSaveFormAsXLSX,
+                    SendFormToExternalDB = folder.SettingsSendFormToExternalDB
                 };
             }
 
@@ -601,7 +603,9 @@ internal class FolderDao(
                     Quota = folder.SettingsQuota,
                     Lifetime = folder.SettingsLifetime.Map(),
                     ChatProviderId = folder.SettingsChatProviderId,
-                    ChatParameters = folder.SettingsChatParameters
+                    ChatParameters = folder.SettingsChatParameters,
+                    SaveFormAsXLSX = folder.SettingsSaveFormAsXLSX,
+                    SendFormToExternalDB = folder.SettingsSendFormToExternalDB
                 };
             }
 
@@ -1225,7 +1229,7 @@ internal class FolderDao(
         return folder.Id;
     }
 
-    public async Task<int> UpdateFolderAsync(Folder<int> folder, string newTitle, long newQuota, bool indexing, bool denyDownload, RoomDataLifetime lifeTime, WatermarkSettings watermark, string color, string cover, ChatSettings chatSettings = null)
+    public async Task<int> UpdateFolderAsync(Folder<int> folder, string newTitle, long newQuota, bool indexing, bool denyDownload, RoomDataLifetime lifeTime, WatermarkSettings watermark, string color, string cover, ChatSettings chatSettings = null, bool? sendFormToExternalDB = null, bool? saveFormAsXLSX = null)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
@@ -1276,6 +1280,16 @@ internal class FolderDao(
             {
                 toUpdate.Settings.Cover = cover;
             }
+        }
+
+        if (sendFormToExternalDB.HasValue)
+        {
+            toUpdate.Settings.SendFormToExternalDB = sendFormToExternalDB.Value;
+        }
+
+        if (saveFormAsXLSX.HasValue)
+        {
+            toUpdate.Settings.SaveFormAsXLSX = saveFormAsXLSX.Value;
         }
 
         filesDbContext.Update(toUpdate);
@@ -1865,7 +1879,16 @@ internal class FolderDao(
                         select rs.Indexing).FirstOrDefault() && f.EntryId == r.Id && f.TenantId == tenantId && f.EntryType == FileEntryType.Folder
                     select f.Order
                 ).FirstOrDefault(),
-                Settings = filesDbContext.RoomSettings.Where(x => x.TenantId == tenantId && x.RoomId == r.Id).Distinct().FirstOrDefault()
+                Settings = filesDbContext.RoomSettings.Where(x => x.TenantId == tenantId && x.RoomId == r.Id).Distinct().FirstOrDefault(),
+                ChatProviderType = r.FolderType == FolderType.AiRoom
+                    ? filesDbContext.RoomSettings
+                        .Where(rs => rs.TenantId == tenantId && rs.RoomId == r.Id)
+                        .Join(filesDbContext.AiProviders,
+                            rs => rs.ChatProviderId,
+                            p => p.Id,
+                            (rs, p) => (ProviderType?)p.Type)
+                        .FirstOrDefault()
+                    : null
             });
     }
 
@@ -2287,6 +2310,8 @@ public class DbFolderQuery
     public List<SubjectType> UserShared { get; set; }
     public bool ParentShared { get; set; }
     public int Order { get; set; }
+
+    public ProviderType? ChatProviderType { get; set; }
 
     public DbFolder Origin { get; set; }
     public DbFolder OriginRoom { get; set; }

@@ -1,25 +1,25 @@
 // (c) Copyright Ascensio System SIA 2009-2026
-// 
+//
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
+//
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
+//
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-// 
+//
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -71,7 +71,7 @@ public class FileSharingAceHelper(
         var folder = entry as Folder<T>;
         var file = entry as File<T>;
         var room = folder is { IsRoom: true } ? folder : null;
-        
+
         if (!aceWrappers.TrueForAll(r => r.Id == authContext.CurrentAccount.ID && r.Access == FileShare.None) &&
             !await aceWrappers.ToAsyncEnumerable().AnyAsync(async (r,_) =>
             {
@@ -82,7 +82,7 @@ public class FileSharingAceHelper(
                     var entryRoom = await cachedFolderDao.GetParentFoldersAsync(folder != null ? folder.Id : entry.ParentId).FirstOrDefaultAsync(f => f.IsRoom, cancellationToken: _);
                     roomType = entryRoom?.FolderType;
                 }
-                
+
                 return roomType == FolderType.PublicRoom && r.SubjectType == SubjectType.PrimaryExternalLink && r.Access == FileShare.Read;
             }) &&
             !beforeOwnerChange &&
@@ -252,10 +252,10 @@ public class FileSharingAceHelper(
                 {
                     throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
                 }
-                
-                if (room.RootId is int root && 
-                    root != await globalFolderHelper.FolderRoomTemplatesAsync && 
-                    (!FileSecurity.AvailableUserAccesses.TryGetValue(currentUserType, out var userAccesses) || 
+
+                if (room.RootId is int root &&
+                    root != await globalFolderHelper.FolderRoomTemplatesAsync &&
+                    (!FileSecurity.AvailableUserAccesses.TryGetValue(currentUserType, out var userAccesses) ||
                      !userAccesses.Contains(w.Access)))
                 {
                     throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
@@ -408,11 +408,11 @@ public class FileSharingAceHelper(
                 var shortenLink = await urlShortener.GetShortenLinkAsync(link);
 
                 await studioNotifyService.SendEmailRoomInviteAsync(
-                    w.Email, 
-                    entry.Title, 
-                    shortenLink, 
-                    entry is IFolder { FolderType: FolderType.AiRoom }, 
-                    culture, 
+                    w.Email,
+                    entry.Title,
+                    shortenLink,
+                    entry is IFolder { FolderType: FolderType.AiRoom },
+                    culture,
                     true);
             }
             else
@@ -492,7 +492,7 @@ public class FileSharingAceHelper(
                     {
                         await socketManager.AddToSharedAsync(entry, users: tags);
                     }
-                    
+
                     var usersShares = await fileSecurity.GetPureSharesAsync(entry, ShareFilterType.User, null, null).Select(r => r.Subject).ToListAsync();
                     usersWithoutRight = usersWithoutRight.Except(usersShares).ToList();
                 }
@@ -552,13 +552,13 @@ public class FileSharingAceHelper(
         var currentId = authContext.CurrentAccount.ID;
         var entryType = entry.FileEntryType;
         var tagDao = daoFactory.GetTagDao<T>();
-        
+
         var tagRecent = await tagDao.GetTagsAsync(entry.Id, entry.FileEntryType, TagType.RecentByLink).ToListAsync();
         List<Tag> tags = [Tag.Favorite(currentId, entry), Tag.Recent(currentId, entry), ..tagRecent];
 
         var currentShare = await fileSecurity.GetSharesAsync(entry, [currentId]);
         var currentShareIsNullOrEmpty = currentShare == null || !currentShare.Any();
-        
+
         if (!currentShareIsNullOrEmpty || entry is Folder<T>)
         {
             var defaultShare = entry.RootFolderType == FolderType.USER
@@ -607,8 +607,8 @@ public class FileSharingHelper(
         if (entry == null)
         {
             return false;
-        }        
-        
+        }
+
         if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
         {
             return false;
@@ -629,7 +629,7 @@ public class FileSharingHelper(
         {
             return true;
         }
-        
+
 
         return entry.RootFolderType == FolderType.Privacy
                && entry is File<T>
@@ -960,7 +960,7 @@ public class FileSharing(
         var meAce = result.Find(ace => ace.Id == authContext.CurrentAccount.ID);
         result.Remove(meAce);
 
-        result.Sort((x, y) => String.CompareOrdinal(x.SubjectName, y.SubjectName));
+        result.Sort((x, y) => string.CompareOrdinal(x.SubjectName, y.SubjectName));
 
         if (ownerAce != null)
         {

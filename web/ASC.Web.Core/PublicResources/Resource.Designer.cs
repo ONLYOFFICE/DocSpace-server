@@ -762,8 +762,119 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Facebook.
+        ///   Looks up a localized string similar to Database connection.
         /// </summary>
+        public static string ConsumersExternalDb {
+            get {
+                return ResourceManager.GetString("ConsumersExternalDb", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Store form results in an external database such as MySQL or SQLite..
+        /// </summary>
+        public static string ConsumersExternalDbDescription {
+            get {
+                return ResourceManager.GetString("ConsumersExternalDbDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Connect an external database to store form results..
+        /// </summary>
+        public static string ConsumersExternalDbInstruction {
+            get {
+                return ResourceManager.GetString("ConsumersExternalDbInstruction", resourceCulture);
+            }
+        }
+        /// <summary>
+        ///   Looks up a localized string similar to Database type.
+        /// </summary>
+        public static string ConsumersdatabaseType {
+            get {
+                return ResourceManager.GetString("ConsumersdatabaseType", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to SQLite is only available in Standalone installations..
+        /// </summary>
+        public static string ConsumersExternalDbSqliteStandaloneOnly {
+            get {
+                return ResourceManager.GetString("ConsumersExternalDbSqliteStandaloneOnly", resourceCulture);
+            }
+        }
+        /// <summary>
+        ///   Looks up a localized string similar to Host.
+        /// </summary>
+        public static string ConsumersdbHost {
+            get {
+                return ResourceManager.GetString("ConsumersdbHost", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Port.
+        /// </summary>
+        public static string ConsumersdbPort {
+            get {
+                return ResourceManager.GetString("ConsumersdbPort", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Database name.
+        /// </summary>
+        public static string ConsumersdbName {
+            get {
+                return ResourceManager.GetString("ConsumersdbName", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to User.
+        /// </summary>
+        public static string ConsumersdbUser {
+            get {
+                return ResourceManager.GetString("ConsumersdbUser", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Password.
+        /// </summary>
+        public static string ConsumersdbPassword {
+            get {
+                return ResourceManager.GetString("ConsumersdbPassword", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Use SSL.
+        /// </summary>
+        public static string ConsumersdbSsl {
+            get {
+                return ResourceManager.GetString("ConsumersdbSsl", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Test connection.
+        /// </summary>
+        public static string ConsumersExternalDbTestConnection {
+            get {
+                return ResourceManager.GetString("ConsumersExternalDbTestConnection", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to SQLite file path.
+        /// </summary>
+        public static string ConsumerssqliteFilePath {
+            get {
+                return ResourceManager.GetString("ConsumerssqliteFilePath", resourceCulture);
+            }
+        }
         public static string ConsumersFacebook {
             get {
                 return ResourceManager.GetString("ConsumersFacebook", resourceCulture);

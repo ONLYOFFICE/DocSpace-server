@@ -590,6 +590,12 @@ module.exports = (io) => {
     filesIO.to(data.room).emit(`s:quota_exceeded`, { data });
   }
 
+  function externalDbSettings({ tenantId, externalDbEnabled } = {}) {
+    var room = `${tenantId}-external-db-settings`;
+    logger.info(`external db settings changed in room ${room}, enabled: ${externalDbEnabled}`);
+    filesIO.to(room).emit("s:external-db-settings", { externalDbEnabled });
+  }
+
   return {
     startEdit,
     stopEdit,
@@ -633,6 +639,7 @@ module.exports = (io) => {
     exportChat,
     changeAccessRightsForFile,
     changeAccessRightsForFolder,
-    quotaExceeded
+    quotaExceeded,
+    externalDbSettings
   };
 };

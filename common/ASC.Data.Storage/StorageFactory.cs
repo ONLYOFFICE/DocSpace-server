@@ -106,9 +106,10 @@ public class StorageFactory(IServiceProvider serviceProvider,
     StorageFactoryConfig storageFactoryConfig,
     SettingsManager settingsManager,
     StorageSettingsHelper storageSettingsHelper,
-    CoreBaseSettings coreBaseSettings)
+    CoreBaseSettings coreBaseSettings) : IDisposable
 {
     private const string DefaultTenantName = "default";
+    private readonly List<IDisposable> _disposables = [];
 
     public async Task<IDataStore> GetStorageAsync(int tenant, string module, string region = "current")
     {
@@ -203,9 +204,26 @@ public class StorageFactory(IServiceProvider serviceProvider,
             }
         }
 
-        return (await ((IDataStore)ActivatorUtilities.CreateInstance(serviceProvider, instanceType))
+        var store = (await ((IDataStore)ActivatorUtilities.CreateInstance(serviceProvider, instanceType))
             .ConfigureAsync(tenantPath, handler, moduleElement, props, validator))
             .SetQuotaController(moduleElement.Count ? controller : null
             /*don't count quota if specified on module*/);
+
+        if (store is IDisposable disposable)
+        {
+            _disposables.Add(disposable);
+        }
+
+        return store;
+    }
+
+    public void Dispose()
+    {
+        foreach (var disposable in _disposables)
+        {
+            disposable.Dispose();
+        }
+
+        _disposables.Clear();
     }
 }

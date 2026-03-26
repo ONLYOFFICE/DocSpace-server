@@ -413,7 +413,7 @@ public class EditorConfiguration<T>(
         var recentId = await globalFolderHelper.FolderRecentAsync;
         var recent = await folderDao.GetFolderAsync(recentId);
 
-        var (entries, _) = await entryManager.GetEntriesAsync(recent, null, 0, 10, [filter], false, Guid.Empty, Guid.Empty, String.Empty, null, false, false, new OrderBy(SortedByType.LastOpened, false));
+        var (entries, _) = await entryManager.GetEntriesAsync(recent, null, 0, 10, [filter], false, Guid.Empty, Guid.Empty, string.Empty, null, false, false, new OrderBy(SortedByType.LastOpened, false));
 
         var files = entries
             .Cast<File<int>>()

@@ -27,7 +27,7 @@
 namespace ASC.Data.Backup.Worker;
 
 [Singleton]
-internal sealed class BackupWorkerService(
+public sealed class BackupWorkerService(
     BackupWorker backupWorker,
     BackupConfigurationService backupConfigurationService,
     NotifyConfiguration notifyConfiguration)

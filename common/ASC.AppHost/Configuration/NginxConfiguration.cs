@@ -33,10 +33,11 @@ public static class NginxConfiguration
         string basePath,
         string clientBasePath,
         IResourceBuilder<ExecutableResource>? startPackages,
-        bool isDocker)
+        bool isDocker,
+        bool isPreview = false)
     {
         var isArm64 = System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture == System.Runtime.InteropServices.Architecture.Arm64;
-        
+
         var openResty = builder.AddContainer(Constants.OpenRestyContainer, "openresty/openresty", "1.27.1.2-10-alpine" + (isArm64 ? "-arm64" : ""))
             .WithBindMount(Path.Combine(basePath, "buildtools", "config", "nginx"), "/etc/nginx/conf.d/")
             .WithBindMount(Path.Combine(basePath, "buildtools", "config", "nginx", "includes"), "/etc/nginx/includes/")
@@ -51,8 +52,8 @@ public static class NginxConfiguration
         {
             openResty.WaitFor(startPackages);
         }
-        
-        var serviceUrls = GetServiceUrls(isDocker);
+
+        var serviceUrls = GetServiceUrls(isDocker, isPreview);
 
         foreach (var (key, value) in serviceUrls)
         {
@@ -67,7 +68,21 @@ public static class NginxConfiguration
         return openResty;
     }
 
-    private static Dictionary<string, string> GetServiceUrls(bool isDocker)
+    private static string BackendUrl<TProject>(int port, bool isDocker, bool isPreview) where TProject : IProjectMetadata, new()
+    {
+        if (isPreview)
+        {
+            return isDocker
+                ? $"http://{ProjectConfigurator.GetProjectName<ASC_Monolith>()}:{Constants.MonolithPort}"
+                : $"http://{Constants.HostDockerInternal}:{Constants.MonolithPort}";
+        }
+
+        return isDocker
+            ? $"http://{ProjectConfigurator.GetProjectName<TProject>()}:{port}"
+            : $"http://{Constants.HostDockerInternal}:{port}";
+    }
+
+    private static Dictionary<string, string> GetServiceUrls(bool isDocker, bool isPreview = false)
     {
         return new Dictionary<string, string>
         {
@@ -76,54 +91,25 @@ public static class NginxConfiguration
             { "DOCUMENT_SERVER_URL_EXTERNAL", $"http://{Constants.EditorsContainer}" },
             { "DOCUMENT_CONTAINER_NAME", $"http://{Constants.EditorsContainer}" },
             { "SERVICE_MANAGEMENT", $"http://{Constants.HostDockerInternal}:5015" },
-            {
-                "SERVICE_PEOPLE_SERVER", isDocker
-                    ? $"http://{ProjectConfigurator.GetProjectName<ASC_People>()}:{Constants.PeoplePort}"
-                    : $"http://{Constants.HostDockerInternal}:{Constants.PeoplePort}"
-            },
-            {
-                "SERVICE_FILES", isDocker
-                    ? $"http://{ProjectConfigurator.GetProjectName<ASC_Files>()}:{Constants.FilesPort}"
-                    : $"http://{Constants.HostDockerInternal}:{Constants.FilesPort}"
-            },
-            {
-                "SERVICE_API", isDocker
-                    ? $"http://{ProjectConfigurator.GetProjectName<ASC_Web_Api>()}:{Constants.WebApiPort}"
-                    : $"http://{Constants.HostDockerInternal}:{Constants.WebApiPort}"
-            },
-            {
-                "SERVICE_API_SYSTEM", isDocker
-                    ? $"http://{ProjectConfigurator.GetProjectName<ASC_ApiSystem>()}:{Constants.ApiSystemPort}"
-                    : $"http://{Constants.HostDockerInternal}:{Constants.ApiSystemPort}"
-            },
-            {
-                "SERVICE_BACKUP", isDocker
-                    ? $"http://{ProjectConfigurator.GetProjectName<ASC_Data_Backup>()}:{Constants.BackupPort}"
-                    : $"http://{Constants.HostDockerInternal}:{Constants.BackupPort}"
-            },
-            {
-                "SERVICE_STUDIO", isDocker
-                    ? $"http://{ProjectConfigurator.GetProjectName<ASC_Web_Studio>()}:{Constants.WebstudioPort}"
-                    : $"http://{Constants.HostDockerInternal}:{Constants.WebstudioPort}"
-            },
-            {
-                "SERVICE_AI", isDocker
-                    ? $"http://{ProjectConfigurator.GetProjectName<ASC_AI>()}:{Constants.AiPort}"
-                    : $"http://{Constants.HostDockerInternal}:{Constants.AiPort}"
-            },
-            //{ "sockjs_node_env", $"http://{Constants.HostDockerInternal}:5001" },
+            { "SERVICE_PEOPLE_SERVER", BackendUrl<ASC_People>(Constants.PeoplePort, isDocker, isPreview) },
+            { "SERVICE_FILES", BackendUrl<ASC_Files>(Constants.FilesPort, isDocker, isPreview) },
+            { "SERVICE_API", BackendUrl<ASC_Web_Api>(Constants.WebApiPort, isDocker, isPreview) },
+            { "SERVICE_API_SYSTEM", BackendUrl<ASC_ApiSystem>(Constants.ApiSystemPort, isDocker, isPreview) },
+            { "SERVICE_BACKUP", BackendUrl<ASC_Data_Backup>(Constants.BackupPort, isDocker, isPreview) },
+            { "SERVICE_STUDIO", BackendUrl<ASC_Web_Studio>(Constants.WebstudioPort, isDocker, isPreview) },
+            { "SERVICE_AI", BackendUrl<ASC_AI>(Constants.AiPort, isDocker, isPreview) },
+            { "SERVICE_API_CACHE", BackendUrl<ASC_Web_Api>(Constants.MonolithPort, isDocker, isPreview) },
+            { "SERVICE_HELTHCHECKS", BackendUrl<ASC_Web_Api>(5033, isDocker, isPreview) },
+            { "SERVICE_MIGRATION", BackendUrl<ASC_Web_Studio>(5034, isDocker, isPreview) },
             { "SERVICE_PLUGINS", $"http://{Constants.HostDockerInternal}:5014" },
             { "SERVICE_IDENTITY_API", $"http://{Constants.IdentityRegistrationContainer}:{Constants.IdentityRegistrationPort}" },
             { "SERVICE_IDENTITY", $"http://{Constants.IdentityAuthorizationContainer}:{Constants.IdentityAuthorizationPort}" },
             { "SERVICE_SSOAUTH", $"http://{Constants.HostDockerInternal}:9834" },
             { "SERVICE_SOCKET", $"http://{Constants.HostDockerInternal}:9899" },
-            { "SERVICE_API_CACHE", $"http://{Constants.HostDockerInternal}:5100" },
-            { "SERVICE_HELTHCHECKS", $"http://{Constants.HostDockerInternal}:5033" },
             { "SERVICE_LOGIN", $"http://{Constants.HostDockerInternal}:5011" },
-            { "SERVICE_MIGRATION", $"http://{Constants.HostDockerInternal}:5034" },
             { "SERVICE_SDK", $"http://{Constants.HostDockerInternal}:5099" },
             { "DASHBOARDS_CONTAINER_NAME", $"http://{Constants.HostDockerInternal}:5601" },
-            { "DNS_NAMESERVER", "127.0.0.11" },
+            { "DNS_NAMESERVER", "127.0.0.11" }
         };
     }
 }

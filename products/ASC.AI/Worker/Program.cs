@@ -69,12 +69,7 @@ try
 
     var eventBus = sp.GetRequiredService<IEventBus>();
     
-    await eventBus.SubscribeAsync<VectorizationIntegrationEvent, VectorizationIntegrationEventHandler>();
-
-    await eventBus.SubscribeAsync<MessageExportIntegrationEvent, MessageExportIntegrationEventHandler>();
-    await eventBus.SubscribeAsync<ChatExportIntegrationEvent, ChatExportIntegrationEventHandler>();
-
-    await eventBus.SubscribeAsync<ChatDeletionIntegrationEvent, ChatDeletionIntegrationEventHandler>();
+    await eventBus.SubscribeAiWorkerEvents();
 
     logger.Info("Starting web host ({applicationContext})...", AppName);
 

@@ -54,12 +54,12 @@ public class ProviderManager(ConsumerFactory consumerFactory)
     public static readonly List<string> InviteExceptProviders =
     [
         ProviderConstants.Twitter,
-        ProviderConstants.AppleId,
+        ProviderConstants.AppleId
     ];
 
     public static readonly List<string> DummyEmailProviders =
     [
-        ProviderConstants.Weixin,
+        ProviderConstants.Weixin
     ];
 
     public static List<string> GetSortedAuthProviders(string geoInfoKey)

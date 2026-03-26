@@ -27,9 +27,9 @@
 namespace ASC.Core.Common.Quota;
 public interface ITenantQuotaFeatureChecker
 {
-    public Task CheckUsed(TenantQuota value);
+    Task CheckUsed(TenantQuota value);
 
-    public string GetExceptionMessage(long size);
+    string GetExceptionMessage(long size);
 }
 
 

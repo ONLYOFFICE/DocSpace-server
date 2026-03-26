@@ -47,7 +47,7 @@ import org.springframework.stereotype.Component;
  * into a strongly typed object. It supports deserialization of claims using Jackson with support
  * for Java 8 time features.
  */
-@Component
+@Component("authorizationSignatureService")
 public class SignatureService {
   private final JwtDecoder jwtDecoder;
   private final ObjectMapper objectMapper;

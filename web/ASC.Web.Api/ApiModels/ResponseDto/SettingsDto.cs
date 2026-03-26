@@ -238,6 +238,13 @@ public class SettingsDto
     public bool DisplayBanners { get; set; }
 
     /// <summary>
+    /// Specifies whether AI functionality (chat, agents, vectorization) is enabled for the current tenant.
+    /// When <c>false</c>, all AI features are disabled and the AI Agents folder is hidden.
+    /// </summary>
+    /// <example>true</example>
+    public bool AiEnabled { get; set; }
+
+    /// <summary>
     /// The user name validation regex.
     /// </summary>
     /// <example>^[a-zA-Z0-9_]{3,20}$</example>
@@ -290,4 +297,10 @@ public class SettingsDto
     /// </summary>
     /// <example>DEFAULT</example>
     public FolderType DefaultFolderType { get; set; }
+
+    /// <summary>
+    /// Specifies if an external database is connected for storing form results.
+    /// </summary>
+    /// <example>true</example>
+    public bool ExternalDbEnabled { get; set; }
 }
