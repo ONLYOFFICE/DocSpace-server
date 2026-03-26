@@ -42,7 +42,7 @@ public class FoldersMoveTests(
     public async Task MoveFolder_ArchiveRoom_ReturnsError()
     {
         // Arrange
-        //await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Initializer.Owner);
         var sourceFolder = await CreateFillingFormsRoom("source_room_folder");
         var targetFolder = await CreateFolderInMy("target_archive_folder", Initializer.Owner);
         targetFolder.RootFolderType = FolderType.Archive;
@@ -70,7 +70,7 @@ public class FoldersMoveTests(
     public async Task MoveFolder_UnarchiveRoom_ReturnsError()
     {
         // Arrange
-        //await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Initializer.Owner);
         var sourceFolder = await CreateFillingFormsRoom("source_room_folder");
         var targetFolder = await CreateFolderInMy("target_unarchive_folder", Initializer.Owner);
 
