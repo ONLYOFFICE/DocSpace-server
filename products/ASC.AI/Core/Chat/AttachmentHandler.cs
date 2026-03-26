@@ -341,7 +341,7 @@ public class AttachmentHandler(
         }
         catch (Exception e)
         {
-            logger.ErrorFormDataToolsFailed(e, intFile.Id);
+            logger.WarnFormDataToolsFailed(e, intFile.Id);
             return (null, null);
         }
     }
@@ -375,5 +375,5 @@ public class AttachmentHandler(
 internal static partial class AttachmentHandlerLogger
 {
     [LoggerMessage(LogLevel.Warning, "Failed to initialize form data tools for file {FileId}")]
-    public static partial void ErrorFormDataToolsFailed(this ILogger logger, Exception exception, int fileId);
+    public static partial void WarnFormDataToolsFailed(this ILogger logger, Exception exception, int fileId);
 }
