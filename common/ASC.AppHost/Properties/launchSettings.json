@@ -15,6 +15,21 @@
         "DOTNET_RESOURCE_SERVICE_ENDPOINT_URL": "http://localhost:20013"
       }
     },
+    "test": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "applicationUrl": "http://0.0.0.0:15208",
+      "environmentVariables": {
+        "Docker": "false",
+        "APP_HOSTING_STANDALONE": "true",
+        "DOTNET_ENVIRONMENT": "Development",
+        "ASPIRE_ALLOW_UNSECURED_TRANSPORT": "true",
+        "DOTNET_DASHBOARD_OTLP_ENDPOINT_URL": "http://localhost:19085",
+        "DOTNET_RESOURCE_SERVICE_ENDPOINT_URL": "http://localhost:20013",
+        "BUG_ID": ""
+      }
+    },
     "preview": {
       "commandName": "Project",
       "dotnetRunMessages": true,
@@ -45,6 +60,6 @@
         "DOTNET_RESOURCE_SERVICE_ENDPOINT_URL": "http://localhost:20013",
         "Logging__LogLevel__Default": "Information"
       }
-    } 
+    }
   }
 }

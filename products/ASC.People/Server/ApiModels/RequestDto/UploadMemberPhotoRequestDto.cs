@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2026
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -42,6 +42,9 @@ public class UploadMemberPhotoRequestDto
     /// The image data.
     /// </summary>
     /// <example>{"file": "photo.jpg"}</example>
-    [FromForm(Name = "formCollection")]
-    public required IFormCollection FormCollection { get; set; }
+    [FromForm]
+    public required IFormFile File { get; set; }
+
+    [FromForm(Name = "Autosave")]
+    public bool Autosave { get; set; }
 }

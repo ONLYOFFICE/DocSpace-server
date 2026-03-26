@@ -1,25 +1,25 @@
 ﻿// (c) Copyright Ascensio System SIA 2009-2026
-// 
+//
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
+//
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
+//
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-// 
+//
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -41,21 +41,22 @@ public class PeopleFactory: WebApplicationFactory<PeopleProgram>, IAsyncLifetime
     private Respawner _respawner = null!;
     private readonly List<string> _tablesToBackup = ["files_folder", "files_folder_tree", "core_user", "core_usersecurity", "files_bunch_objects" ];
     private readonly List<string> _tablesToIgnore = ["core_acl", "core_settings", "core_subscription", "core_subscriptionmethod", "core_usergroup", "login_events", "tenants_tenants", "tenants_quota", "webstudio_settings" ];
-    
+
     public HttpClient HttpClient { get; private set;} = null!;
     public ProfilesApi ProfilesApi { get; private set;} = null!;
     public GroupApi GroupApi { get; private set; } = null!;
+    public UserTypeApi UserTypeApi { get; private set; } = null!;
 
     public PeopleFactory()
-    {        
+    {
         var config = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json")
             .AddEnvironmentVariables()
             .Build();
-        
+
         var containers = config.GetSection("containers").Get<List<Container>>() ?? [];
-        
+
         var postgresSqlContainer = containers.FirstOrDefault(r => r.Name == "postgres") ?? new Container
         {
             Name = "postgres",
@@ -63,7 +64,7 @@ public class PeopleFactory: WebApplicationFactory<PeopleProgram>, IAsyncLifetime
             Tag = "17.2"
         };
         _postgresSqlContainer = new PostgreSqlBuilder($"{postgresSqlContainer.Image}:{postgresSqlContainer.Tag}").Build();
-        
+
         var redisContainer = containers.FirstOrDefault(r => r.Name == "redis") ?? new Container
         {
             Name = "redis",
@@ -74,36 +75,36 @@ public class PeopleFactory: WebApplicationFactory<PeopleProgram>, IAsyncLifetime
 
         var rabbitMqContainer = containers.FirstOrDefault(r => r.Name == "rabbitmq") ?? new Container
         {
-            Name = "rabbitmq", 
-            Image = "rabbitmq", 
+            Name = "rabbitmq",
+            Image = "rabbitmq",
             Tag = "3.13"
         };
-        
+
         _rabbitMqContainer = new RabbitMqBuilder($"{rabbitMqContainer.Image}:{rabbitMqContainer.Tag}").Build();
 
         var openSearchContainer = containers.FirstOrDefault(r => r.Name == "opensearch") ?? new Container
         {
-            Name = "opensearch", 
-            Image = "opensearchproject/opensearch", 
+            Name = "opensearch",
+            Image = "opensearchproject/opensearch",
             Tag = "2.18.0"
         };
-        
+
         _openSearchContainer = new OpenSearchBuilder($"{openSearchContainer.Image}:{openSearchContainer.Tag}")
             .WithSecurityEnabled(false)
             .Build();
 
         var mysqlContainer = containers.FirstOrDefault(r => r.Name == "mysql") ?? new Container
         {
-            Name = "mysql", 
-            Image = "mysql", 
+            Name = "mysql",
+            Image = "mysql",
             Tag = "8.4.3"
         };
-        
+
         _mySqlContainer = new MySqlBuilder($"{mysqlContainer.Image}:{mysqlContainer.Tag}").Build();
-        
+
         _providerInfo = GetProviderInfo(config.GetValue<Provider>("dbProviderType"));
     }
-    
+
     protected override IHost CreateHost(IHostBuilder builder)
     {
         builder.ConfigureHostConfiguration(configBuilder =>
@@ -111,7 +112,7 @@ public class PeopleFactory: WebApplicationFactory<PeopleProgram>, IAsyncLifetime
             Initializer.InitSettings(_providerInfo, _redisContainer.GetConnectionString(), _rabbitMqContainer.GetConnectionString(), $"{_openSearchContainer.Hostname}:{_openSearchContainer.GetMappedPublicPort(9200)}");
             configBuilder.AddInMemoryCollection(Initializer.GlobalSettings);
         });
-        
+
         return base.CreateHost(builder);
     }
 
@@ -123,39 +124,40 @@ public class PeopleFactory: WebApplicationFactory<PeopleProgram>, IAsyncLifetime
             services.AddBaseDbContext<MigrationContext>();
             using var scope = services.BuildServiceProvider().CreateScope();
             scope.ServiceProvider.GetRequiredService<MigrationContext>().Database.Migrate();
-            
+
             BackupTables().Wait();
         });
     }
-    
+
     internal async Task ResetDatabaseAsync()
     {
         await _respawner.ResetAsync(_dbconnection);
-        
+
         var script = _providerInfo.Provider switch
         {
             Provider.MySql => "INSERT INTO {0} SELECT * FROM {1};",
             Provider.PostgreSql => "INSERT INTO {0} SELECT * FROM {1};SELECT setval('{0}_id_seq', (SELECT MAX(id) FROM {0})+1);",
             _ => ""
         };
-        
+
         await ExecuteScriptAsync(script);
     }
 
     public async ValueTask InitializeAsync()
     {
         await StartAllContainersAsync(_providerInfo.Provider == Provider.MySql ? _mySqlContainer : _postgresSqlContainer, _redisContainer, _rabbitMqContainer, _openSearchContainer);
-        
+
         _dbconnection =  _providerInfo.Provider == Provider.MySql ?  new MySqlConnection(_mySqlContainer.GetConnectionString()) : new NpgsqlConnection(_postgresSqlContainer.GetConnectionString());
 
         HttpClient = CreateClient();
         var configuration = new Configuration { BasePath = HttpClient.BaseAddress!.ToString().TrimEnd('/') };
         ProfilesApi = new ProfilesApi(HttpClient, configuration);
         GroupApi = new GroupApi(HttpClient, configuration);
+        UserTypeApi = new UserTypeApi(HttpClient, configuration);
 
         var tablesToIgnore = _tablesToIgnore.Select(t => new Table(t)).ToList();
         tablesToIgnore.AddRange(_tablesToBackup.Select(r=> new Table(MakeCopyTableName(r))));
-        
+
         await _dbconnection.OpenAsync();
         _respawner = await Respawner.CreateAsync(_dbconnection, new RespawnerOptions
         {
@@ -179,11 +181,11 @@ public class PeopleFactory: WebApplicationFactory<PeopleProgram>, IAsyncLifetime
             await ExecuteScriptAsync(script);
         }
     }
-    
+
     private async Task ExecuteScriptAsync(string scriptTemplate)
     {
         var backupScript = new StringBuilder();
-                
+
         foreach (var table in _tablesToBackup)
         {
             backupScript.AppendFormat(scriptTemplate, table, MakeCopyTableName(table));
@@ -203,7 +205,7 @@ public class PeopleFactory: WebApplicationFactory<PeopleProgram>, IAsyncLifetime
     {
         return $"{tableName}_copy";
     }
-    
+
     private static async Task StartAllContainersAsync(params IContainer[] containers)
     {
         var tasks = containers.Select(r => r.StartAsync()).ToArray();

@@ -793,7 +793,11 @@ public class FileStorageService //: IFileStorageService
             folder,
             folder.Title);
 
-        await webhookManager.PublishAsync(WebhookTrigger.RoomCreated, folder);
+        await webhookManager.PublishAsync(
+            folder.IsAgent
+                ? WebhookTrigger.AgentCreated
+                : WebhookTrigger.RoomCreated,
+            folder);
 
         if (folder.ParentId is int parent && parent == await globalFolderHelper.FolderRoomTemplatesAsync)
         {
@@ -1075,7 +1079,7 @@ public class FileStorageService //: IFileStorageService
 
         if (!canEdit)
         {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_RenameFolder);
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
         if (folder.RootFolderType == FolderType.TRASH)
@@ -1099,7 +1103,7 @@ public class FileStorageService //: IFileStorageService
 
         await socketManager.UpdateFolderAsync(folder);
 
-        await webhookManager.PublishAsync(isRoom ? WebhookTrigger.RoomUpdated : WebhookTrigger.FolderUpdated, folder);
+        await webhookManager.PublishAsync(isRoom ? folder.IsAgent ? WebhookTrigger.AgentUpdated : WebhookTrigger.RoomUpdated : WebhookTrigger.FolderUpdated, folder);
 
         return folder;
     }
@@ -1370,7 +1374,12 @@ public class FileStorageService //: IFileStorageService
 
         await socketManager.UpdateFolderAsync(folder);
 
-        await webhookManager.PublishAsync(isRoom ? WebhookTrigger.RoomUpdated : WebhookTrigger.FolderUpdated, folder);
+        await webhookManager.PublishAsync(isRoom
+            ? folder.IsAgent
+                ? WebhookTrigger.AgentUpdated
+                : WebhookTrigger.RoomUpdated
+            : WebhookTrigger.FolderUpdated,
+            folder);
 
         return folder;
     }
@@ -1440,7 +1449,11 @@ public class FileStorageService //: IFileStorageService
                     renamedFolder,
                     renamedFolder.Title);
 
-                await webhookManager.PublishAsync(WebhookTrigger.RoomUpdated, renamedFolder);
+                await webhookManager.PublishAsync(
+                    renamedFolder.IsAgent
+                        ? WebhookTrigger.AgentUpdated
+                        : WebhookTrigger.RoomUpdated,
+                    renamedFolder);
             }
             else
             {
@@ -1655,22 +1668,22 @@ public class FileStorageService //: IFileStorageService
 
                 if (!string.IsNullOrWhiteSpace(docTemplate?.ThumbnailPath))
                 {
-                foreach (var size in thumbnailSettings.Sizes)
-                {
+                    foreach (var size in thumbnailSettings.Sizes)
+                    {
                         var pathThumb = $"{docTemplate.ThumbnailPath}{fileExt.Trim('.')}.{size.Width}x{size.Height}.{global.ThumbnailExtension}";
 
-                    if (!await storeTemplate.IsFileAsync("", pathThumb))
-                    {
-                        break;
-                    }
+                        if (!await storeTemplate.IsFileAsync("", pathThumb))
+                        {
+                            break;
+                        }
 
-                    await using (var streamThumb = await storeTemplate.GetReadStreamAsync("", pathThumb, 0))
-                    {
-                        await (await globalStore.GetStoreAsync()).SaveAsync(fileDao.GetUniqThumbnailPath(file, size.Width, size.Height), streamThumb);
-                    }
+                        await using (var streamThumb = await storeTemplate.GetReadStreamAsync("", pathThumb, 0))
+                        {
+                            await (await globalStore.GetStoreAsync()).SaveAsync(fileDao.GetUniqThumbnailPath(file, size.Width, size.Height), streamThumb);
+                        }
 
-                    counter++;
-                }
+                        counter++;
+                    }
                 }
 
                 if (thumbnailSettings.Sizes.Count() == counter)

@@ -84,6 +84,7 @@ public static class WebhooksPayloadExtension
 
                 entity.Property(e => e.Trigger)
                     .HasColumnName("trigger")
+                    .HasColumnType("bigint")
                     .IsRequired();
 
                 entity.Property(e => e.Uid)
@@ -154,6 +155,7 @@ public static class WebhooksPayloadExtension
 
                 entity.Property(e => e.Trigger)
                     .HasColumnName("trigger")
+                    .HasColumnType("bigint")
                     .IsRequired();
 
                 entity.Property(e => e.Uid)

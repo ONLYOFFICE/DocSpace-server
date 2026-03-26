@@ -28,6 +28,8 @@
 package com.asc.registration.application.controller.exception.handler;
 
 import com.asc.common.core.domain.exception.DomainNotFoundException;
+import com.asc.registration.application.transfer.ValidationErrorCodeResponse;
+import com.asc.registration.application.transfer.ValidationErrorResponse;
 import com.asc.registration.core.domain.exception.ClientDomainException;
 import com.asc.registration.service.exception.ExceededClientsPerResourceException;
 import io.github.resilience4j.ratelimiter.RequestNotPermitted;
@@ -35,15 +37,14 @@ import io.grpc.StatusRuntimeException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ValidationException;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.MessageSourceResolvable;
-import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.validation.FieldError;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -127,39 +128,87 @@ public class RegistrationGlobalExceptionHandler {
 
   /**
    * Handles {@link MethodArgumentNotValidException} exceptions resulting from failed validation of
-   * method arguments.
+   * method arguments. Returns a {@link ProblemDetail} with an additional "errors" property
+   * containing field-specific validation errors.
    *
    * @param e the {@link MethodArgumentNotValidException} containing validation error details.
    * @param request the {@link HttpServletRequest} associated with the current request.
-   * @return a {@link ProblemDetail} that includes the concatenated validation error messages.
+   * @return a {@link ProblemDetail} with field-specific errors in the "errors" property.
    */
   @ExceptionHandler(value = {MethodArgumentNotValidException.class})
   public ProblemDetail handleValidationException(
       MethodArgumentNotValidException e, HttpServletRequest request) {
-    var errors =
-        e.getAllErrors().stream()
-            .map(DefaultMessageSourceResolvable::getDefaultMessage)
-            .collect(Collectors.joining(", "));
-    return createProblemDetail(HttpStatus.BAD_REQUEST, errors, request.getRequestURI());
+    var fieldErrors = new ArrayList<ValidationErrorResponse.FieldError>();
+
+    for (var error : e.getBindingResult().getAllErrors()) {
+      String fieldName;
+      var constraintCode = error.getCode();
+      if (error instanceof FieldError fe) {
+        fieldName = ValidationErrorCodeResponse.normalizeFieldName(fe.getField());
+      } else {
+        fieldName = error.getObjectName();
+      }
+
+      var message = error.getDefaultMessage();
+      fieldErrors.add(
+          new ValidationErrorResponse.FieldError(
+              fieldName,
+              ValidationErrorCodeResponse.getErrorCode(constraintCode, message),
+              message));
+    }
+
+    var problemDetail =
+        createProblemDetail(HttpStatus.BAD_REQUEST, "Validation failed", request.getRequestURI());
+    problemDetail.setProperty("errors", fieldErrors);
+    return problemDetail;
   }
 
   /**
    * Handles {@link HandlerMethodValidationException} exceptions arising from method-level
-   * validation failures.
+   * validation failures. Returns a {@link ProblemDetail} with an additional "errors" property
+   * containing field-specific validation errors.
    *
    * @param e the {@link HandlerMethodValidationException} containing details about the validation
    *     errors.
    * @param request the {@link HttpServletRequest} associated with the current request.
-   * @return a {@link ProblemDetail} that includes the concatenated error messages.
+   * @return a {@link ProblemDetail} with field-specific errors in the "errors" property.
    */
   @ExceptionHandler(value = HandlerMethodValidationException.class)
   public ProblemDetail handleValidationException(
       HandlerMethodValidationException e, HttpServletRequest request) {
-    var errors =
-        e.getAllErrors().stream()
-            .map(MessageSourceResolvable::getDefaultMessage)
-            .collect(Collectors.joining(", "));
-    return createProblemDetail(HttpStatus.BAD_REQUEST, errors, request.getRequestURI());
+    var fieldErrors = new ArrayList<ValidationErrorResponse.FieldError>();
+
+    for (var paramResult : e.getValueResults()) {
+      var paramName = paramResult.getMethodParameter().getParameterName();
+      var fieldName =
+          paramName != null ? ValidationErrorCodeResponse.normalizeFieldName(paramName) : "unknown";
+
+      for (var error : paramResult.getResolvableErrors()) {
+        String constraintCode = null;
+        if (error instanceof FieldError fe) {
+          constraintCode = fe.getCode();
+        } else if (error.getCodes() != null && error.getCodes().length > 0) {
+          var code = error.getCodes()[0];
+          if (code.contains(".")) {
+            constraintCode = code.substring(0, code.indexOf('.'));
+          } else {
+            constraintCode = code;
+          }
+        }
+
+        var message = error.getDefaultMessage();
+        fieldErrors.add(
+            new ValidationErrorResponse.FieldError(
+                fieldName,
+                ValidationErrorCodeResponse.getErrorCode(constraintCode, message),
+                message));
+      }
+    }
+
+    var problemDetail =
+        createProblemDetail(HttpStatus.BAD_REQUEST, "Validation failed", request.getRequestURI());
+    problemDetail.setProperty("errors", fieldErrors);
+    return problemDetail;
   }
 
   /**

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2026
+// (c) Copyright Ascensio System SIA 2009-2026
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -87,7 +87,8 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
 
         SortTagGroups(result);
         EnumCleaner.Clean(result);
-
+        FixMultipartFormData(result);
+        RemoveFormCollectionSchema(result);
         ApplyDeepObjectStyle(result);
 
         var options = new JsonSerializerOptions
@@ -101,7 +102,7 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
         progress?.Invoke(100);
     }
 
-    static JsonObject LoadJson(string path)
+    private static JsonObject LoadJson(string path)
     {
         try
         {
@@ -113,7 +114,7 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
         }
     }
 
-    static void MergeOpenapiFile( JsonObject target, JsonObject source, HashSet<string> usedOperationIds, string fileName)
+    private static void MergeOpenapiFile( JsonObject target, JsonObject source, HashSet<string> usedOperationIds, string fileName)
     {
         MergePaths(target, source, usedOperationIds, fileName);
         MergeTags(target, source);
@@ -122,7 +123,7 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
         MergeXTagGroups(target, source);
     }
 
-    static void MergePaths(JsonObject target, JsonObject source, HashSet<string> usedOperationIds, string fileName)
+    private static void MergePaths(JsonObject target, JsonObject source, HashSet<string> usedOperationIds, string fileName)
     {
         if (!source.TryGetPropertyValue("paths", out var sourcePathsNode))
         {
@@ -167,7 +168,7 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
         }
     }
 
-    static void CollectOperationIds(JsonObject pathObj, HashSet<string> set)
+    private static void CollectOperationIds(JsonObject pathObj, HashSet<string> set)
     {
         if (!pathObj.TryGetPropertyValue("paths", out var pathsNode))
         {
@@ -180,7 +181,7 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
         }
     }
 
-    static void CollectOperationIdsFromPath(JsonObject pathObj, HashSet<string> set, string file, string path)
+    private static void CollectOperationIdsFromPath(JsonObject pathObj, HashSet<string> set, string file, string path)
     {
         foreach (var method in pathObj)
         {
@@ -208,7 +209,7 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
         }
     }
 
-    static void CheckOperationId(JsonObject methodObj, HashSet<string> set, string fileName, string path)
+    private static void CheckOperationId(JsonObject methodObj, HashSet<string> set, string fileName, string path)
     {
         if (!methodObj.TryGetPropertyValue("operationId", out var opNode))
         {
@@ -230,7 +231,7 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
         set.Add(opId);
     }
 
-    static void MergeTags(JsonObject target, JsonObject source)
+    private static void MergeTags(JsonObject target, JsonObject source)
     {
         if (!source.TryGetPropertyValue("tags", out var srcTagsNode))
         {
@@ -262,7 +263,7 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
         }
     }
 
-    static void MergeXTagGroups(JsonObject target, JsonObject source)
+    private static void MergeXTagGroups(JsonObject target, JsonObject source)
     {
         if (!source.TryGetPropertyValue("x-tagGroups", out var sourceNode))
         {
@@ -310,7 +311,7 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
         }
     }
 
-    static void SortTagGroups(JsonObject root)
+    private static void SortTagGroups(JsonObject root)
     {
         if (!root.TryGetPropertyValue("x-tagGroups", out var node))
         {
@@ -348,7 +349,7 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
         }
     }
 
-    static void MergeComponents(JsonObject target, JsonObject source, string fileName)
+    private static void MergeComponents(JsonObject target, JsonObject source, string fileName)
     {
         if (!source.TryGetPropertyValue("components", out var srcCompNode))
         {
@@ -393,7 +394,7 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
         }
     }
 
-    static void MergeServers(JsonObject target, JsonObject source)
+    private static void MergeServers(JsonObject target, JsonObject source)
     {
         if (!source.TryGetPropertyValue("servers", out var srcNode))
         {
@@ -432,7 +433,7 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
         }
     }
 
-    static void ApplyDeepObjectStyle(JsonObject root)
+    private static void ApplyDeepObjectStyle(JsonObject root)
     {
         if (!root.TryGetPropertyValue("paths", out var pathsNode))
         {
@@ -483,7 +484,107 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
         }
     }
 
-    static bool IsObjectSchema(JsonNode schemaNode, JsonObject? components)
+    private static void FixMultipartFormData(JsonObject root)
+    {
+        if (!root.TryGetPropertyValue("paths", out var pathsNode))
+        {
+            return;
+        }
+
+        foreach (var path in pathsNode!.AsObject())
+        {
+            foreach (var method in path.Value!.AsObject())
+            {
+                if (method.Value is not JsonObject methodObj)
+                {
+                    continue;
+                }
+
+                if (!methodObj.TryGetPropertyValue("requestBody", out var requestBodyNode))
+                {
+                    continue;
+                }
+
+                var requestBody = requestBodyNode as JsonObject;
+                if (requestBody == null)
+                {
+                    continue;
+                }
+
+                if (!requestBody.TryGetPropertyValue("content", out var contentNode))
+                {
+                    continue;
+                }
+
+                var content = contentNode as JsonObject;
+                if (content == null)
+                {
+                    continue;
+                }
+
+                if (!content.TryGetPropertyValue("multipart/form-data", out var multipartNode))
+                {
+                    continue;
+                }
+
+                var multipart = multipartNode as JsonObject;
+                if (multipart == null)
+                {
+                    continue;
+                }
+
+                var schema = multipart["schema"] as JsonObject;
+                if (schema == null)
+                {
+                    continue;
+                }
+
+                if (!schema.TryGetPropertyValue("properties", out var propsNode))
+                {
+                    continue;
+                }
+
+                var props = propsNode as JsonObject;
+                if (props == null || !props.ContainsKey("FormCollection"))
+                {
+                    continue;
+                }
+
+                multipart["schema"] = new JsonObject
+                {
+                    ["type"] = "object",
+                    ["properties"] = new JsonObject
+                    {
+                        ["File"] = new JsonObject
+                        {
+                            ["type"] = "string",
+                            ["format"] = "binary",
+                            ["description"] = "The image data."
+                        }
+                    }
+                };
+
+                multipart["encoding"] = new JsonObject
+                {
+                    ["File"] = new JsonObject
+                    {
+                        ["style"] = "form"
+                    }
+                };
+            }
+        }
+    }
+    private static void RemoveFormCollectionSchema(JsonObject root)
+    {
+        if (root["components"]?["schemas"] is not JsonObject schemas)
+        {
+            return;
+        }
+
+        schemas.Remove("KeyValuePairStringStringValues");
+    }
+
+    private static bool IsObjectSchema(JsonNode schemaNode, JsonObject? components)
     {
         if (schemaNode is not JsonObject schemaObj)
         {
@@ -513,7 +614,7 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
         return false;
     }
 
-    static bool JsonDeepEquals(JsonNode a, JsonNode b)
+    private static bool JsonDeepEquals(JsonNode a, JsonNode b)
     {
         return a.ToJsonString() == b.ToJsonString();
     }
