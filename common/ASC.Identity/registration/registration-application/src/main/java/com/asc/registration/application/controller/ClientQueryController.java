@@ -274,8 +274,8 @@ public class ClientQueryController {
       @AuthenticationPrincipal BasicSignatureTokenPrincipal principal,
       @Parameter(description = "Pagination limit", required = true, example = "1")
           @RequestParam(value = "limit", defaultValue = "30")
-          @Min(value = 1)
-          @Max(value = 50)
+          @Min(value = 1, message = "limit must be at least 1")
+          @Max(value = 50, message = "limit must be at most 50")
           int limit,
       @Parameter(
               description = "ID of the last retrieved client",
@@ -522,8 +522,8 @@ public class ClientQueryController {
       @AuthenticationPrincipal BasicSignatureTokenPrincipal principal,
       @Parameter(description = "Pagination limit", required = true, example = "1")
           @RequestParam(value = "limit")
-          @Min(value = 1)
-          @Max(value = 50)
+          @Min(value = 1, message = "limit must be at least 1")
+          @Max(value = 50, message = "limit must be at most 50")
           int limit,
       @Parameter(
               description = "ID of the last retrieved client",
@@ -620,8 +620,8 @@ public class ClientQueryController {
       @AuthenticationPrincipal BasicSignatureTokenPrincipal principal,
       @Parameter(description = "Pagination limit", required = true, example = "1")
           @RequestParam(value = "limit")
-          @Min(value = 1)
-          @Max(value = 50)
+          @Min(value = 1, message = "limit must be at least 1")
+          @Max(value = 50, message = "limit must be at most 50")
           int limit,
       @Parameter(
               description = "Date of the last retrieved consent",
