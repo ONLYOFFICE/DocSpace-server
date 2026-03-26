@@ -696,6 +696,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         {
             sql.Append($" GROUP BY {string.Join(", ", groupByParts)} ORDER BY result DESC LIMIT 1000");
         }
+        // No GROUP BY → aggregate returns exactly one row; LIMIT is intentionally omitted.
 
         await using var connection = await provider.CreateConnectionAsync(dbType);
         await connection.OpenAsync();
