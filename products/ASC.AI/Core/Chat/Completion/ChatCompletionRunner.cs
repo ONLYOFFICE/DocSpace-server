@@ -52,19 +52,9 @@ public class ChatCompletionRunner(
         
         var userMessage = FormatUserMessage(message, attachments);
 
-        var content = ChatPromptTemplate.GetPrompt(
-            context.Instruction, 
-            context.ResultStorageId, 
-            context.Agent.Id,
-            context.Agent.Title,
-            context.User.FirstName,
-            context.User.Email,
-            context.Tools.ContainsSystemTool(SystemToolType.KnowledgeSearch),
-            context.Tools.ContainsSystemTool(SystemToolType.WebSearch));
-        
         var messages = new List<ChatMessage>
         {
-            new(ChatRole.System, content),
+            BuildSystemMessage(context),
             userMessage
         };
         
@@ -109,17 +99,7 @@ public class ChatCompletionRunner(
 
         var attachments = await GetAttachmentsAsync(context, files).ToListAsync();
         
-        var systemPrompt = ChatPromptTemplate.GetPrompt(
-            context.Instruction, 
-            context.ResultStorageId, 
-            context.Agent.Id,
-            context.Agent.Title,
-            context.User.FirstName,
-            context.User.Email,
-            context.Tools.ContainsSystemTool(SystemToolType.KnowledgeSearch),
-            context.Tools.ContainsSystemTool(SystemToolType.WebSearch));
-        
-        var systemMessage = new ChatMessage(ChatRole.System, systemPrompt);
+        var systemMessage = BuildSystemMessage(context);
         
         var userMessage = FormatUserMessage(message, attachments);
 
@@ -149,6 +129,20 @@ public class ChatCompletionRunner(
             attachmentHandler);
     }
 
+    private static ChatMessage BuildSystemMessage(ChatExecutionContext context) =>
+        new(ChatRole.System, ChatPromptTemplate.GetPrompt(
+            context.Instruction,
+            context.ResultStorageId,
+            context.Agent.Id,
+            context.Agent.Title,
+            context.User.FirstName,
+            context.User.Email,
+            context.Tools.ContainsSystemTool(SystemToolType.KnowledgeSearch),
+            context.Tools.ContainsSystemTool(SystemToolType.WebSearch),
+            context.Tools.ContainsSystemTool(SystemToolType.FormDataQuery) ||
+            context.Tools.ContainsSystemTool(SystemToolType.FormDataAggregate) ||
+            context.Tools.ContainsSystemTool(SystemToolType.FormDataSelfJoin)));
+
     private async IAsyncEnumerable<AttachmentMessageContent> GetAttachmentsAsync(
         ChatExecutionContext context, 
         IEnumerable<JsonElement>? files)
@@ -169,9 +163,21 @@ public class ChatCompletionRunner(
                 failedEntries.Add(result.File);
             }
 
-            if (result.DynamicTool != null && !context.Tools.ContainsSystemTool(SystemToolType.FormDataQuery))
+            if (result.DynamicTools != null)
             {
-                context.Tools.AddTool(SystemToolType.FormDataQuery, result.DynamicTool);
+                foreach (var dynamicTool in result.DynamicTools)
+                {
+                    var toolType = dynamicTool.Context.Name == AggregateFormDataTool.Name
+                        ? SystemToolType.FormDataAggregate
+                        : dynamicTool.Context.Name == SelfJoinFormDataTool.Name
+                            ? SystemToolType.FormDataSelfJoin
+                            : SystemToolType.FormDataQuery;
+
+                    if (!context.Tools.ContainsSystemTool(toolType))
+                    {
+                        context.Tools.AddTool(toolType, dynamicTool);
+                    }
+                }
             }
 
             if (result.Content != null)

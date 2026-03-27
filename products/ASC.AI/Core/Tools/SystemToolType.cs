@@ -34,5 +34,7 @@ public enum SystemToolType
     GeneratePresentation,
     GenerateDocx,
     GenerateForm,
-    FormDataQuery
+    FormDataQuery,
+    FormDataAggregate,
+    FormDataSelfJoin
 }
