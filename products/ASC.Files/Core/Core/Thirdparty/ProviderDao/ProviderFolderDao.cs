@@ -625,8 +625,8 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
             if (subjectOwnerId != Guid.Empty)
             {
                 q = excludeSubject
-                    ? q.Where(a => a != null && a.UserId != subjectId)
-                    : q.Where(f => f != null && f.UserId == subjectId);
+                    ? q.Where(a => a != null && a.UserId != subjectOwnerId)
+                    : q.Where(f => f != null && f.UserId == subjectOwnerId);
             }
         }
 
