@@ -81,18 +81,19 @@ public static class ChatPromptTemplate
         </tool_calling_guidelines>
         {0}
         {1}
+        {2}
         <context>
-        The current date is: {2}
+        The current date is: {3}
         The current result storage:
-         - folderId: {3}
+         - folderId: {4}
          - name: Result Storage
         The current agent:
-         - agentId: {4}
-         - name: {5}
-        The current user's name is: {6}
-        The current user's email is: {7}
+         - agentId: {5}
+         - name: {6}
+        The current user's name is: {7}
+        The current user's email is: {8}
         </context>
-        {8}
+        {9}
         """;
     
     private const string KnowledgeSearchRules = 
@@ -152,6 +153,28 @@ public static class ChatPromptTemplate
         - You can combine knowledge base results with web search for comprehensive answers
         Remember: **DEFAULT ACTION = SEARCH KNOWLEDGE BASE. Always search first, answer second.**
         </knowledge_search_tool_usage_rules>
+        """;
+
+    private static readonly string FormDataRules =
+        $"""
+        ### Form data analysis rules
+        A form submission dataset is attached. You MUST call a tool to answer — never guess or summarize from memory.
+        **NEVER paginate through all rows with `{FormDataQueryTool.Name}` to analyse data in memory.** The table may be very large; fetching rows in a loop is prohibited. If a question cannot be answered with the available tools, explain the limitation to the user.
+        - Call `{AggregateFormDataTool.Name}` for ANY counting, grouping, or statistics question — it analyses ALL rows server-side with no row limit.
+          - Use `groupByDatePart` (YEAR/MONTH/WEEK/DAYOFYEAR/QUARTER) to group a date column by a calendar period — e.g. WEEK gives per-week counts.
+          - Use `datePartFilters` to restrict rows by a calendar period — e.g. `"col_date MONTH IN 6,7,8"` for summer months only. **To filter by multiple values of the same period (e.g. two years), use `IN` not two separate `=` filters: `"col_date YEAR IN 2025,2026"` — two `=` filters for the same column are ANDed and always return empty.**
+          - Use `dateDiffFilter` to restrict by elapsed days between two date columns — e.g. `"col_start col_submitted < 7"`.
+          - Use `secondGroupByColumn` (with optional `secondGroupByDatePart`) for two-dimensional breakdowns — e.g. group by category AND date month.
+          - Call it multiple times when a question requires several independent breakdowns.
+        - Call `{FormDataQueryTool.Name}` to retrieve specific rows — use it when the question asks **who** or **which records** (e.g. "who violated", "list employees that..."). It supports `datePartFilters` and `dateDiffFilter` to filter without fetching all rows. Do NOT use `{AggregateFormDataTool.Name}` when the answer requires showing individual records.
+        - A complex question may require several tool calls (e.g. one per year). Make all of them before writing the final answer.
+        - **Do NOT use SUM on date/datetime columns** — that sums the numeric representation of dates, not durations. To compute elapsed days per record use `dateDiffFilter` for filtering; to compute total duration across records use `COUNT` of records (if each record = fixed period) or call `{FormDataQueryTool.Name}` for a small set and compute client-side.
+        - Use only column names and enum values from the schema in the attached context.
+        - Regular filters are plain strings: "col_status = value", "col_age > 25", "col_name IS NULL".
+        - **Column names must be plain strings — never wrap them in quotes.** Wrong: `"col_date"`. Correct: `col_date`.
+        - **`groupByColumn` must be a column name from the schema, NOT a date-part keyword.** Wrong: `groupByColumn="YEAR"`. Correct: `groupByColumn="col_date", groupByDatePart="YEAR"`.
+        - **`dateDiffFilter` format is `"col_a col_b OPERATOR days"` — two plain column names, then operator, then integer. Column order does not matter.** Do NOT include the word DATEDIFF. Wrong: `"col_a DATEDIFF col_b < 7"`. Correct: `"col_a col_b < 7"`. Do NOT put date-diff expressions into `filters` — use the dedicated `dateDiffFilter` parameter.
+        - Call `{SelfJoinFormDataTool.Name}` to compare pairs of records against each other. Use when asked about: overlapping date ranges ("which records overlap in time"), concurrent events, scheduling conflicts, same value shared by multiple records ("who submitted on the same date"), or any question of the form "find pairs where...". joinConditions format: "left_col OPERATOR right_col" (left from record A, right from record B, operators: =, !=, <, >, <=, >=). Overlap example: joinConditions=["col_start_date <= col_end_date", "col_end_date >= col_start_date"]. To compare date parts across rows use joinConditions format: "col_a YEAR = col_b YEAR" — the date-part keyword is a separate token, do NOT append it as a suffix to the column name (wrong: "col_a_YEAR = col_b_YEAR"). Do NOT put cross-row date-part comparisons in datePartFilters. Always use plain column names from the schema in joinConditions — do NOT use prefixes (a_, b_) or suffixes (_YEAR, _MONTH) that appear in tool result columns.
         """;
 
     private const string WebSearchRules =
@@ -215,31 +238,34 @@ public static class ChatPromptTemplate
         """;
     
     public static string GetPrompt(
-        string? instruction, 
+        string? instruction,
         int resultStorageId,
         int agentId,
         string agentName,
-        string userName, 
+        string userName,
         string userEmail,
         bool knowledgeSearch,
-        bool webSearch) 
-    { 
+        bool webSearch,
+        bool formData = false)
+    {
         var date = DateTime.UtcNow.ToString("D");
-        
+
         var knowledgeSearchRules = knowledgeSearch ? KnowledgeSearchRules : string.Empty;
         var webSearchRules = webSearch ? WebSearchRules : string.Empty;
+        var formDataRules = formData ? FormDataRules : string.Empty;
         var userPrompt = string.IsNullOrEmpty(instruction) ? string.Empty : string.Format(UserPromptTemplate, instruction);
-        
+
         return string.Format(
-            SystemPromptTemplate, 
-            knowledgeSearchRules, 
-            webSearchRules, 
-            date, 
-            resultStorageId, 
+            SystemPromptTemplate,
+            knowledgeSearchRules,
+            webSearchRules,
+            formDataRules,
+            date,
+            resultStorageId,
             agentId,
             agentName,
-            userName, 
-            userEmail, 
+            userName,
+            userEmail,
             userPrompt);
     }
 }
