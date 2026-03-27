@@ -54,17 +54,7 @@ public class DynamicCorsPolicyResolver(
             var apiBaseUrl = setupInfo.WebApiBaseUrl;
             if (Uri.IsWellFormedUriString(apiBaseUrl, UriKind.Relative))
             {
-                var request = _context?.Request;
-                if (request != null)
-                {
-                    var baseUri = $"{request.Scheme}://{request.Host}";
-                    apiBaseUrl = baseUri + "/" + apiBaseUrl.TrimStart('~', '/');
-                }
-                else
-                {
-                    apiBaseUrl = linkUtility.GetFullAbsolutePath(apiBaseUrl);
-                }
-
+                apiBaseUrl = linkUtility.GetFullAbsolutePath(apiBaseUrl);
             }
             return apiBaseUrl;
         }

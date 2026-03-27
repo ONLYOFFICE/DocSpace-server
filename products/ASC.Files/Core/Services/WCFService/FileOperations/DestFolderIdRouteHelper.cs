@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2026
+// (c) Copyright Ascensio System SIA 2009-2026
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,34 +24,39 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.EventBus.Exceptions;
+namespace ASC.Files.Core.Services.WCFService.FileOperations;
 
-namespace ASC.Files.Worker.IntegrationEvents.EventHandling;
-
-[Scope]
-public class BulkDownloadIntegrationEventHandler(
-    ILogger<BulkDownloadIntegrationEventHandler> logger,
-    FileOperationsManager<FileDownloadOperation> fileOperationsManager,
-    TenantManager tenantManager,
-    SecurityContext securityContext,
-    AuthManager authManager)
-    : IIntegrationEventHandler<BulkDownloadIntegrationEvent>
+internal static class DestFolderIdRouteHelper
 {
-    public async Task Handle(BulkDownloadIntegrationEvent @event)
+    public static bool TryGetIntId(string destFolderId, out int intId, out string stringId)
     {
-        CustomSynchronizationContext.CreateContext();
-        using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
+        var normalized = Normalize(destFolderId);
+
+        if (int.TryParse(normalized, out intId))
         {
-            logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
-
-            if (!@event.Redelivered && await fileOperationsManager.IsTooBusy())
-            {
-                throw new IntegrationEventRejectExeption(@event.Id);
-            }
-
-            await tenantManager.SetCurrentTenantAsync(@event.TenantId);
-            await securityContext.AuthenticateMeWithoutCookieAsync(await authManager.GetAccountByIDAsync(@event.TenantId, @event.CreateBy), session: @event.CreateBy);
-            await fileOperationsManager.Enqueue(@event.TaskId, @event.ThirdPartyData, @event.Data);
+            stringId = null;
+            return true;
         }
+
+        stringId = normalized;
+        return false;
+    }
+
+    private static string Normalize(string destFolderId)
+    {
+        if (destFolderId == null)
+        {
+            return null;
+        }
+
+        var normalized = destFolderId.Trim();
+
+        if (normalized.Length >= 2 && normalized[0] == '"' && normalized[^1] == '"')
+        {
+            normalized = normalized[1..^1];
+        }
+
+        return normalized;
     }
 }
+

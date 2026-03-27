@@ -110,7 +110,7 @@ public abstract class BaseStartup
         
         services.Configure<ForwardedHeadersOptions>(options =>
         {
-            options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+            options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
             options.ForwardLimit = null;
             options.KnownIPNetworks.Clear();
             options.KnownProxies.Clear();
@@ -121,7 +121,6 @@ public abstract class BaseStartup
 
             if (allowedHosts is { Count: > 0 })
             {
-                options.ForwardedHeaders |= ForwardedHeaders.XForwardedHost;
                 options.AllowedHosts = allowedHosts;
             }
 
