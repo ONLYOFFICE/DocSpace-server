@@ -57,8 +57,6 @@ public class MyCSharpClientCodegen extends CSharpClientCodegen {
             }
         }
 
-        String packageFolder = sourceFolder + File.separator + packageName;
-
         supportingFiles.removeIf(f -> f.getTemplateFile().equals("git_push.sh.mustache") || 
             f.getTemplateFile().equals("appveyor.mustache") ||
             f.getDestinationFilename().equals(".openapi-generator-ignore")
