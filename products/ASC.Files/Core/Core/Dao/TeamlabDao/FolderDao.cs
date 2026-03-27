@@ -923,6 +923,7 @@ internal class FolderDao(
 
             await filesDbContext.DeleteAuditReferencesAsync(folderId, FileEntryType.Folder);
             await filesDbContext.DeleteChatsAsync(folderId);
+            await filesDbContext.DeleteRoomGroupRefByFolderIdsAsync(tenantId, subfolders);
 
             await context.SaveChangesAsync();
             await tx.CommitAsync();
@@ -1881,7 +1882,16 @@ internal class FolderDao(
                         select rs.Indexing).FirstOrDefault() && f.EntryId == r.Id && f.TenantId == tenantId && f.EntryType == FileEntryType.Folder
                     select f.Order
                 ).FirstOrDefault(),
-                Settings = filesDbContext.RoomSettings.Where(x => x.TenantId == tenantId && x.RoomId == r.Id).Distinct().FirstOrDefault()
+                Settings = filesDbContext.RoomSettings.Where(x => x.TenantId == tenantId && x.RoomId == r.Id).Distinct().FirstOrDefault(),
+                ChatProviderType = r.FolderType == FolderType.AiRoom
+                    ? filesDbContext.RoomSettings
+                        .Where(rs => rs.TenantId == tenantId && rs.RoomId == r.Id)
+                        .Join(filesDbContext.AiProviders,
+                            rs => rs.ChatProviderId,
+                            p => p.Id,
+                            (rs, p) => (ProviderType?)p.Type)
+                        .FirstOrDefault()
+                    : null
             });
     }
 
@@ -2319,6 +2329,8 @@ public class DbFolderQuery
     public List<SubjectType> UserShared { get; set; }
     public bool ParentShared { get; set; }
     public int Order { get; set; }
+
+    public ProviderType? ChatProviderType { get; set; }
 
     public DbFolder Origin { get; set; }
     public DbFolder OriginRoom { get; set; }

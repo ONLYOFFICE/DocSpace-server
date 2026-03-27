@@ -27,6 +27,7 @@
 namespace ASC.AI.Core.Chat.Completion;
 
 [JsonDerivedType(typeof(TextCompletion))]
+[JsonDerivedType(typeof(ReasoningCompletion))]
 [JsonDerivedType(typeof(ToolCallCompletion))]
 [JsonDerivedType(typeof(ToolResultCompletion))]
 [JsonDerivedType(typeof(ErrorCompletion))]

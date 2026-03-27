@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core.Services.WCFService.FileOperations;
+
 namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
 [Singleton(GenericArguments = [typeof(FileDeleteOperation)])]
@@ -35,6 +37,7 @@ public class FileOperationsManagerHolder<T> where T : FileOperation
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly DistributedTaskQueue<T> _tasks;
+    private readonly SemaphoreSlim _busyCheckLock = new(1, 1);
 
     public FileOperationsManagerHolder(IDistributedTaskQueueFactory queueFactory, NotifyConfiguration notifyConfiguration, IServiceProvider serviceProvider)
     {
@@ -116,6 +119,20 @@ public class FileOperationsManagerHolder<T> where T : FileOperation
         if (operations.Any(o => o.Status <= DistributedTaskStatus.Running))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_ManyDownloads);
+        }
+    }
+
+    public async Task<bool> IsTooBusy()
+    {
+        await _busyCheckLock.WaitAsync();
+        try
+        {
+            var instanceTasks = await _tasks.GetAllTasks(DistributedTaskQueue<T>.INSTANCE_ID);
+            return _tasks.MaxThreadsCount < instanceTasks.Count;
+        }
+        finally
+        {
+            _busyCheckLock.Release();
         }
     }
 
@@ -245,6 +262,11 @@ public abstract class FileOperationsManager<T>(
         return await _fileOperationsManagerHolder.CancelOperations(await GetUserIdAsync(), id);
     }
 
+    public async Task<bool> IsTooBusy()
+    {
+        return await _fileOperationsManagerHolder.IsTooBusy();
+    }
+
     public async Task Enqueue<T1, T2>(string taskId, T1 thirdPartyData, T2 data)
         where T1 : FileOperationData<string>
         where T2 : FileOperationData<int>
@@ -345,14 +367,20 @@ public class FileDownloadOperationsManager(
         {
             return null;
         }
-
-        var op = _serviceProvider.GetService<FileDownloadOperation>();
-        op.Init(true);
-        var taskId = await _fileOperationsManagerHolder.Publish(op);
-
+        
         var data = new FileDownloadOperationData<int>(folderIntIds, fileIntIds, tenantId, userId, GetHttpHeaders(), sessionSnapshot, baseUri);
         var thirdPartyData = new FileDownloadOperationData<string>(folderStringIds, fileStringIds, tenantId, userId, GetHttpHeaders(), sessionSnapshot, baseUri);
 
+        var permissionsCheck = _serviceProvider.GetService<DownloadPermissionsCheck<int>>();
+        await permissionsCheck.RunPermissionCheckAsync(data);
+        
+        var permissionsCheckThirdParty = _serviceProvider.GetService<DownloadPermissionsCheck<string>>();
+        await permissionsCheckThirdParty.RunPermissionCheckAsync(thirdPartyData);
+        
+        var op = _serviceProvider.GetService<FileDownloadOperation>();
+        op.Init(true);
+        var taskId = await _fileOperationsManagerHolder.Publish(op);
+        
         await _eventBus.PublishAsync(new BulkDownloadIntegrationEvent(await GetUserIdAsync(), tenantId)
         {
             TaskId = taskId,
@@ -372,7 +400,10 @@ public class FileMoveCopyOperationsManager(
     TenantManager tenantManager,
     FileOperationsManagerHolder<FileMoveCopyOperation> fileOperationsManagerHolder,
     ExternalShare externalShare,
-    IServiceProvider serviceProvider) : FileOperationsManager<FileMoveCopyOperation>(httpContextAccessor, eventBus, authContext, fileOperationsManagerHolder, externalShare, serviceProvider)
+    IServiceProvider serviceProvider, 
+    CopyPermissionsCheck<int> dataPermissionChecker, 
+    CopyPermissionsCheck<string> thirdPartyDataPermissionChecker) 
+    : FileOperationsManager<FileMoveCopyOperation>(httpContextAccessor, eventBus, authContext, fileOperationsManagerHolder, externalShare, serviceProvider)
 {
     public async Task<string> Publish(
         List<JsonElement> folderIds,
@@ -406,14 +437,18 @@ public class FileMoveCopyOperationsManager(
             await GetContent(folderIntIds, fileIntIds);
             await GetContent(folderStringIds, fileStringIds);
         }
-
-        var op = _serviceProvider.GetService<FileMoveCopyOperation>();
-        op.Init(holdResult, copy);
-        var taskId = await _fileOperationsManagerHolder.Publish(op);
-
+        
         var data = new FileMoveCopyOperationData<int>(folderIntIds, fileIntIds, tenantId, userId, destFolderId, copy, resolveType, toFillOut, holdResult, GetHttpHeaders(), sessionSnapshot);
         var thirdPartyData = new FileMoveCopyOperationData<string>(folderStringIds, fileStringIds, tenantId, userId, destFolderId, copy, resolveType, toFillOut, holdResult, GetHttpHeaders(), sessionSnapshot);
 
+        var dataTask = dataPermissionChecker.RunPermissionCheckAsync(data);
+        var thirdPartyDataTask = thirdPartyDataPermissionChecker.RunPermissionCheckAsync(thirdPartyData);
+        await Task.WhenAll(dataTask, thirdPartyDataTask);
+        
+        var op = _serviceProvider.GetService<FileMoveCopyOperation>();
+        op.Init(holdResult, copy);
+        var taskId = await _fileOperationsManagerHolder.Publish(op);
+        
         await _eventBus.PublishAsync(new MoveOrCopyIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
         {
             TaskId = taskId,
@@ -445,6 +480,7 @@ public class FileMoveCopyOperationsManager(
     }
 }
 
+
 [Scope(typeof(FileOperationsManager<FileDuplicateOperation>))]
 public class FileDuplicateOperationsManager(
     IHttpContextAccessor httpContextAccessor,
@@ -453,7 +489,10 @@ public class FileDuplicateOperationsManager(
     TenantManager tenantManager,
     FileOperationsManagerHolder<FileDuplicateOperation> fileOperationsManagerHolder,
     ExternalShare externalShare,
-    IServiceProvider serviceProvider) : FileOperationsManager<FileDuplicateOperation>(httpContextAccessor, eventBus, authContext, fileOperationsManagerHolder, externalShare, serviceProvider)
+    IServiceProvider serviceProvider,
+    CopyPermissionsCheck<int> dataPermissionChecker, 
+    CopyPermissionsCheck<string> thirdPartyDataPermissionChecker) 
+    : FileOperationsManager<FileDuplicateOperation>(httpContextAccessor, eventBus, authContext, fileOperationsManagerHolder, externalShare, serviceProvider)
 {
     public async Task<string> Publish(
         List<JsonElement> folderIds,
@@ -474,14 +513,19 @@ public class FileDuplicateOperationsManager(
         {
             return null;
         }
-
-        var op = _serviceProvider.GetService<FileDuplicateOperation>();
-        op.Init(true);
-        var taskId = await _fileOperationsManagerHolder.Publish(op);
-
+        
         var data = new FileOperationData<int>(folderIntIds, fileIntIds, tenantId, userId, GetHttpHeaders(), sessionSnapshot);
         var thirdPartyData = new FileOperationData<string>(folderStringIds, fileStringIds, tenantId, userId, GetHttpHeaders(), sessionSnapshot);
 
+        var dataTask = dataPermissionChecker.RunPermissionCheckAsync(data);
+        var thirdPartyDataTask = thirdPartyDataPermissionChecker.RunPermissionCheckAsync(thirdPartyData);
+        
+        await Task.WhenAll(dataTask, thirdPartyDataTask);
+        
+        var op = _serviceProvider.GetService<FileDuplicateOperation>();
+        op.Init(true);
+        var taskId = await _fileOperationsManagerHolder.Publish(op);
+        
         await _eventBus.PublishAsync(new DuplicateIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
         {
             TaskId = taskId,
@@ -501,7 +545,8 @@ public class FileDeleteOperationsManager(
     TenantManager tenantManager,
     FileOperationsManagerHolder<FileDeleteOperation> fileOperationsManagerHolder,
     ExternalShare externalShare,
-    IServiceProvider serviceProvider) : FileOperationsManager<FileDeleteOperation>(httpContextAccessor, eventBus, authContext, fileOperationsManagerHolder, externalShare, serviceProvider)
+    IServiceProvider serviceProvider) 
+    : FileOperationsManager<FileDeleteOperation>(httpContextAccessor, eventBus, authContext, fileOperationsManagerHolder, externalShare, serviceProvider)
 {
     public Task<string> Publish<T>(
         List<T> folders,
@@ -561,14 +606,26 @@ public class FileDeleteOperationsManager(
         var userId = _authContext.CurrentAccount.ID;
         var sessionSnapshot = await _externalShare.TakeSessionSnapshotAsync();
 
+        var data = new FileDeleteOperationData<int>(folders.Item1, files.Item1, versions, tenantId, userId, GetHttpHeaders(), sessionSnapshot, holdResult, ignoreException, immediately, isEmptyTrash);
+        var thirdPartyData = new FileDeleteOperationData<string>(folders.Item2, files.Item2, versions, tenantId, userId, GetHttpHeaders(), sessionSnapshot, holdResult, ignoreException, immediately, isEmptyTrash);
+        
+        var permissionsCheckInternal = _serviceProvider.GetService<DeletePermissionsCheck<int>>();
+        var permissionsCheckThirdParty = _serviceProvider.GetService<DeletePermissionsCheck<string>>();
+
+        // Intentional pre-check (fail-fast): validate permissions before enqueueing background delete.
+        // We still re-fetch/re-check inside FileDeleteOperation.DoJob to mitigate TOCTOU
+        // (state/permissions/locks can change between enqueue time and execution time).
+        var internalPermissionCheckTask = permissionsCheckInternal.RunPermissionCheckAsync(data);
+        var thirdPartyPermissionCheckTask = permissionsCheckThirdParty.RunPermissionCheckAsync(thirdPartyData);
+        
+        await Task.WhenAll(internalPermissionCheckTask, thirdPartyPermissionCheckTask);
+        
         var op = _serviceProvider.GetService<FileDeleteOperation>();
         op.Init(holdResult);
         var taskId = await _fileOperationsManagerHolder.Publish(op);
 
-        var data = new FileDeleteOperationData<int>(folders.Item1, files.Item1, versions, tenantId, userId, GetHttpHeaders(), sessionSnapshot, holdResult, ignoreException, immediately, isEmptyTrash);
-        var thirdPartyData = new FileDeleteOperationData<string>(folders.Item2, files.Item2, versions, tenantId, userId, GetHttpHeaders(), sessionSnapshot, holdResult, ignoreException, immediately, isEmptyTrash);
         IntegrationEvent toPublish;
-        if (isEmptyTrash)
+        if (isEmptyTrash)   
         {
             toPublish = new EmptyTrashIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
             {

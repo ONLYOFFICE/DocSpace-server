@@ -24,8 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-var builder = DistributedApplication.CreateBuilder(args);
+#pragma warning disable ASPIREINTERACTION001
 
+var builder = DistributedApplication.CreateBuilder(args);
+IResourceBuilder<JavaScriptAppResource>? playwright = null;
 var basePath = Path.GetFullPath(Path.Combine("..", "..", ".."));
 var isDocker = string.Compare(builder.Configuration["Docker"], "true", StringComparison.OrdinalIgnoreCase) == 0;
 var skipClient = string.Compare(builder.Configuration["SKIP_CLIENT"], "true", StringComparison.OrdinalIgnoreCase) == 0;
@@ -36,7 +38,8 @@ var connectionManager = new ConnectionStringManager(builder, basePath)
 
 var configurator = new ProjectConfigurator(builder, connectionManager, basePath, isDocker);
 
-switch (builder.Configuration["DOTNET_LAUNCH_PROFILE"])
+var launchProfile = builder.Configuration["DOTNET_LAUNCH_PROFILE"];
+switch (launchProfile)
 {
     case "preview":
         connectionManager
@@ -53,7 +56,7 @@ switch (builder.Configuration["DOTNET_LAUNCH_PROFILE"])
             .AddRedis()
             .AddMailPit()
             .AddMcpServer();
-        
+
         configurator
             .AddProject<ASC_Files>(Constants.FilesPort)
             .AddProject<ASC_Files_Worker>(Constants.FilesWorkerPort)
@@ -73,12 +76,18 @@ switch (builder.Configuration["DOTNET_LAUNCH_PROFILE"])
 
         break;
     default:
-        connectionManager.AddMySql(withDbGate: true)
+        connectionManager
+            .AddMySql(withDbGate: true)
             .AddRabbitMq()
             .AddRedis(withRedisInsight: true)
             .AddMcpServer()
             .AddOpensearch()
             .AddMailPit();
+
+        if (launchProfile == "test")
+        {
+            connectionManager.AddApiTest();
+        }
         
         configurator
             .AddProject<ASC_Files>(Constants.FilesPort)
@@ -99,6 +108,7 @@ switch (builder.Configuration["DOTNET_LAUNCH_PROFILE"])
             .AddSsoAuth()
             .AddWebDav()
             .AddIdentity();
+
         break;
 }
 
@@ -112,6 +122,8 @@ if (!skipClient)
 }
 
 var isPreview = builder.Configuration["DOTNET_LAUNCH_PROFILE"] == "preview";
-NginxConfiguration.ConfigureOpenResty(builder, basePath, clientBasePath, startPackages, isDocker, isPreview);
+var openresty = NginxConfiguration.ConfigureOpenResty(builder, basePath, clientBasePath, startPackages, isDocker, isPreview);
+
+playwright?.WaitFor(openresty);
 
 await builder.Build().RunAsync();

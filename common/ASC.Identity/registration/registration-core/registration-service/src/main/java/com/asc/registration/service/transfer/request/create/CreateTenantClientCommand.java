@@ -29,10 +29,7 @@ package com.asc.registration.service.transfer.request.create;
 
 import com.asc.common.utilities.validation.URLCollection;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import java.io.Serializable;
 import java.util.Set;
 import lombok.AllArgsConstructor;
@@ -56,7 +53,7 @@ public class CreateTenantClientCommand implements Serializable {
   private long tenantId;
 
   /** The name of the client. Must not be empty and should be between 3 and 256 characters. */
-  @NotEmpty(message = "client name must not be empty")
+  @NotBlank(message = "client name must not be empty")
   @Size(
       min = 3,
       max = 256,

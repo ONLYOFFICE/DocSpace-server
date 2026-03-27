@@ -64,7 +64,9 @@ public class ChatController(
     public async Task<IActionResult> StartNewChatAsync(StartNewChatRequestDto inDto)
     {
         var generator = await chatCompletionRunner.StartNewChatAsync(
-            inDto.RoomId, inDto.Body.Message, inDto.Body.Files);
+            inDto.RoomId,
+            inDto.Body.Message,
+            inDto.Body.Files);
 
         var source = generator.GenerateCompletionAsync(Request.HttpContext.RequestAborted);
 
@@ -92,7 +94,9 @@ public class ChatController(
     public async Task<IActionResult> ContinueChatAsync(ContinueChatRequestDto inDto)
     {
         var generator = await chatCompletionRunner.StartChatAsync(
-            inDto.ChatId, inDto.Body.Message, inDto.Body.Files);
+            inDto.ChatId,
+            inDto.Body.Message,
+            inDto.Body.Files);
 
         var source = generator.GenerateCompletionAsync(Request.HttpContext.RequestAborted);
 
@@ -278,7 +282,7 @@ public class ChatController(
     [HttpPut("rooms/{roomId}/chats/config")]
     public async Task<UserChatSettingsDto> SetUserChatsSettingsAsync(SetUserChatsSettingsRequestDto inDto)
     {
-        var settings = await chatService.SetUserChatsSettingsAsync(inDto.RoomId, inDto.Body.WebSearchEnabled);
+        var settings = await chatService.SetUserChatsSettingsAsync(inDto.RoomId, inDto.Body.WebSearchEnabled, inDto.Body.ReasoningEffort);
         return settings.MapToDto();
     }
     

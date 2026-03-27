@@ -65,6 +65,13 @@ public class QuotaSocketManager(
         await MakeRequest("change-invitation-limit-value", new { room, value });
     }
 
+    public async Task ChangeWebPlugin(string webPluginName, bool enabled)
+    {
+        var room = GetQuotaRoom();
+
+        await MakeRequest("change-web-plugin", new { room, webPluginName, enabled });
+    }
+
     public async Task LogoutSession(Guid userId, int loginEventId = 0, string redirectUrl = null)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();

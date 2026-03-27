@@ -33,19 +33,23 @@ namespace ASC.Core.Common.AI;
 public class AiConfiguration
 {
     public int MaxImageSize { get; private set; }
-    
+
     private readonly FrozenDictionary<ProviderType, ProviderSettingsData> _settings;
     private readonly FrozenDictionary<(ProviderType, string), ModelSettings> _modelsByProvider;
-    private readonly FrozenDictionary<string, MultimodalSettings> _multimodalByModelId;
+    private readonly FrozenDictionary<(ProviderType, string), string> _modelIdMigrations;
     private readonly FrozenDictionary<string, string> _aliasByModelId;
+    private readonly FrozenDictionary<string, EffortSettingsData> _effortSettings;
 
     public AiConfiguration(IConfiguration configuration, CoreBaseSettings coreBaseSettings)
     {
         var section = configuration.GetSection("ai");
         var providers = section.GetSection("providers").Get<List<ProviderSettingsData>>() ?? [];
         var maxImgSize = section.GetSection("maxImageSize").Get<int>();
-        
+        var effort = section.GetSection("effort").Get<Dictionary<string, EffortSettingsData>>() ?? [];
+
         MaxImageSize = maxImgSize > 0 ? maxImgSize : 0;
+        _effortSettings = effort.ToFrozenDictionary(e => 
+            e.Key, e => e.Value, StringComparer.OrdinalIgnoreCase);
 
         _settings = coreBaseSettings.Standalone
             ? providers.ToFrozenDictionary(p => p.Type)
@@ -53,7 +57,7 @@ public class AiConfiguration
                 .ToFrozenDictionary(p => p.Type);
 
         var modelsByProvider = new Dictionary<(ProviderType, string), ModelSettings>();
-        var multimodalByModelId = new Dictionary<string, MultimodalSettings>();
+        var modelIdMigrations = new Dictionary<(ProviderType, string), string>();
         var aliasByModelId = new Dictionary<string, string>();
 
         foreach (var provider in _settings.Values)
@@ -66,18 +70,22 @@ public class AiConfiguration
             foreach (var model in provider.Models)
             {
                 modelsByProvider[(provider.Type, model.Id)] = model;
+                aliasByModelId.TryAdd(model.Id, model.Alias);
 
-                if (model.Multimodal != null)
+                if (model.Replaces == null)
                 {
-                    multimodalByModelId.TryAdd(model.Id, model.Multimodal);
+                    continue;
                 }
 
-                aliasByModelId.TryAdd(model.Id, model.Alias);
+                foreach (var previousId in model.Replaces)
+                {
+                    modelIdMigrations[(provider.Type, previousId)] = model.Id;
+                }
             }
         }
 
         _modelsByProvider = modelsByProvider.ToFrozenDictionary();
-        _multimodalByModelId = multimodalByModelId.ToFrozenDictionary();
+        _modelIdMigrations = modelIdMigrations.ToFrozenDictionary();
         _aliasByModelId = aliasByModelId.ToFrozenDictionary();
     }
 
@@ -103,18 +111,18 @@ public class AiConfiguration
         return _modelsByProvider.GetValueOrDefault((type, modelId));
     }
 
-    public MultimodalSettings? GetMultimodalSettings(string modelId)
+    public string ResolveModelId(ProviderType type, string modelId)
     {
-        return _multimodalByModelId.GetValueOrDefault(modelId);
-    }
-
-    public string? GetModelAlias(string modelId)
-    {
-        return _aliasByModelId.GetValueOrDefault(modelId);
+        return _modelIdMigrations.GetValueOrDefault((type, modelId), modelId);
     }
 
     public IReadOnlyDictionary<string, string> GetModelAliases()
     {
         return _aliasByModelId;
+    }
+
+    public EffortSettingsData? GetEffortSettings(string effortName)
+    {
+        return _effortSettings.GetValueOrDefault(effortName);
     }
 }

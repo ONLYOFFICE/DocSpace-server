@@ -83,8 +83,8 @@ import lombok.*;
 @Schema(description = "Request to update an existing tenant client")
 public class UpdateClientRequest implements Serializable {
   /** The name of the client. This field must not be blank. */
+  @NotBlank(message = "client name must not be empty")
   @Schema(description = "The name of the client", example = "Updated Client")
-  @NotBlank
   private String name;
 
   /** The description of the client. */
@@ -99,7 +99,7 @@ public class UpdateClientRequest implements Serializable {
    * The logo of the client in base64 format. The client logo is expected to be passed as base64.
    * This field must not be blank.
    */
-  @NotBlank
+  @NotBlank(message = "client logo must not be empty")
   @Pattern(
       regexp = "^data:image\\/(?:png|jpeg|jpg|svg\\+xml);base64,.*.{1,}",
       message = "client logo is expected to be passed as base64")
