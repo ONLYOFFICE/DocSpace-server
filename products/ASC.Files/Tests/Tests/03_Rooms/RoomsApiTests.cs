@@ -24,7 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Files.Core.Security;
 using ASC.Files.Tests.ApiFactories;
 
 namespace ASC.Files.Tests.Tests._03_Rooms;
@@ -261,7 +260,7 @@ public class RoomsApiTests(
         }, TestContext.Current.CancellationToken);
 
         await _filesClient.Authenticate(roomAdmin);
-        var adminRoom = CreateCustomRoom("Admin room" + Guid.NewGuid().ToString()[..8]);
+        await CreateCustomRoom("Admin room" + Guid.NewGuid().ToString()[..8]);
 
         // Act
         var ownerMemberRooms = (await _roomsApi.GetRoomsFolderAsync(
@@ -311,7 +310,7 @@ public class RoomsApiTests(
         }, TestContext.Current.CancellationToken);
 
         await _filesClient.Authenticate(roomAdmin);
-        var adminRoom = CreateCustomRoom("Admin room" + Guid.NewGuid().ToString()[..8]);
+        await CreateCustomRoom("Admin room" + Guid.NewGuid().ToString()[..8]);
 
         // Act
         var ownerMemberRooms = (await _roomsApi.GetRoomsFolderAsync(
