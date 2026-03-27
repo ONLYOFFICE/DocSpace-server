@@ -921,6 +921,7 @@ internal class FolderDao(
 
             await filesDbContext.DeleteAuditReferencesAsync(folderId, FileEntryType.Folder);
             await filesDbContext.DeleteChatsAsync(folderId);
+            await filesDbContext.DeleteRoomGroupRefByFolderIdsAsync(tenantId, subfolders);
 
             await context.SaveChangesAsync();
             await tx.CommitAsync();
