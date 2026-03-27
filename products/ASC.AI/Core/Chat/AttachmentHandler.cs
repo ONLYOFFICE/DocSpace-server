@@ -31,7 +31,7 @@ public class AttachmentResult
     public required FileEntry File { get; init; }
     public AttachmentMessageContent? Content { get; init; }
     public bool Success { get; init; }
-    public ToolWrapper? DynamicTool { get; init; }
+    public IReadOnlyList<ToolWrapper>? DynamicTools { get; init; }
 }
 
 [Scope]
@@ -49,7 +49,9 @@ public class AttachmentHandler(
     ILogger<AttachmentHandler> logger,
     FormFillingReportCreator formFillingReportCreator,
     ExternalDatabaseClient externalDatabaseClient,
-    FormDataQueryTool formDataQueryTool)
+    FormDataQueryTool formDataQueryTool,
+    AggregateFormDataTool aggregateFormDataTool,
+    SelfJoinFormDataTool selfJoinFormDataTool)
 {
     private static int? _maxAttachmentsCount;
     private int MaxAttachmentsCount => _maxAttachmentsCount ??= configuration.GetValue("ai:maxAttachmentsCount", 5);
@@ -238,11 +240,11 @@ public class AttachmentHandler(
             };
         }
 
-        ToolWrapper? formTool = null;
+        IReadOnlyList<ToolWrapper>? formTools = null;
         if (file.IsForm)
         {
-            var (formData, tool) = await TryGetFormDataAsync(file);
-            formTool = tool;
+            var (formData, tools) = await TryGetFormDataAsync(file);
+            formTools = tools;
             if (formData != null)
             {
                 content += formData;
@@ -253,7 +255,7 @@ public class AttachmentHandler(
         {
             File = file,
             Success = true,
-            DynamicTool = formTool,
+            DynamicTools = formTools,
             Content = new TextAttachmentMessageContent
             {
                 Id = JsonSerializer.SerializeToElement(file.Id),
@@ -277,7 +279,7 @@ public class AttachmentHandler(
         };
     }
 
-    private async Task<(string? contextText, ToolWrapper? tool)> TryGetFormDataAsync<T>(File<T> file)
+    private async Task<(string? contextText, IReadOnlyList<ToolWrapper>? tools)> TryGetFormDataAsync<T>(File<T> file)
     {
         if (file is not File<int> intFile)
         {
@@ -298,35 +300,59 @@ public class AttachmentHandler(
             return (null, null);
         }
 
-        var tableName = FormFillingReportCreator.GetTableName(intFile.Id, intFile.Version);
-        if (!await externalDatabaseClient.TableExistsAsync(tableName))
+        try
         {
+            var tableName = FormFillingReportCreator.GetTableName(intFile.Id, intFile.Version);
+            if (!await externalDatabaseClient.TableExistsAsync(tableName))
+            {
+                return (null, null);
+            }
+
+            var rowCount = await externalDatabaseClient.CountAsync(tableName);
+            var columns = await formFillingReportCreator.GetColumnDefinitionsAsync(intFile.Id, intFile.Version);
+            var columnList = columns.ToList();
+
+            var queryTool = await formDataQueryTool.InitAsync(intFile.Id, tableName, rowCount, columnList);
+            var aggregateTool = await aggregateFormDataTool.InitAsync(intFile.Id, tableName, columnList);
+            var selfJoinTool = await selfJoinFormDataTool.InitAsync(intFile.Id, tableName, columnList);
+
+            if (queryTool == null && aggregateTool == null && selfJoinTool == null)
+            {
+                return (null, null);
+            }
+
+            var tools = new List<ToolWrapper>(3);
+            if (queryTool != null)
+            {
+                tools.Add(new ToolWrapper { Tool = queryTool, Context = new ToolContext { Name = queryTool.Name, AutoInvoke = true } });
+            }
+            if (aggregateTool != null)
+            {
+                tools.Add(new ToolWrapper { Tool = aggregateTool, Context = new ToolContext { Name = aggregateTool.Name, AutoInvoke = true } });
+            }
+            if (selfJoinTool != null)
+            {
+                tools.Add(new ToolWrapper { Tool = selfJoinTool, Context = new ToolContext { Name = selfJoinTool.Name, AutoInvoke = true } });
+            }
+
+            var contextText = FormatFormDataFromExternalDb(tableName, rowCount, columnList);
+
+            return (contextText, tools);
+        }
+        catch (Exception e)
+        {
+            logger.WarnFormDataToolsFailed(e, intFile.Id);
             return (null, null);
         }
-
-        var rowCount = await externalDatabaseClient.CountAsync(tableName);
-        var columns = await formFillingReportCreator.GetColumnDefinitionsAsync(intFile.Id, intFile.Version);
-        var columnList = columns.ToList();
-
-        var tool = await formDataQueryTool.InitAsync(intFile.Id, tableName, rowCount, columnList);
-        if (tool == null)
-        {
-            return (null, null);
-        }
-
-        var toolWrapper = new ToolWrapper
-        {
-            Tool = tool,
-            Context = new ToolContext { Name = tool.Name, AutoInvoke = true }
-        };
-
-        return (FormatFormDataFromExternalDb(tableName, rowCount, columnList), toolWrapper);
     }
 
-    private static string FormatFormDataFromExternalDb(string tableName, long rowCount, IEnumerable<DbColumnDefinition> columns)
+    private static string FormatFormDataFromExternalDb(
+        string tableName,
+        long rowCount,
+        IEnumerable<DbColumnDefinition> columns)
     {
         var sb = new StringBuilder();
-        sb.AppendLine($"\n\n##Form Submissions ({rowCount} total, stored in external database)");
+        sb.AppendLine($"\n\n## Form Submissions ({rowCount} total, stored in external database)");
         sb.AppendLine($"Table: {tableName}");
         sb.AppendLine("Schema:");
         foreach (var col in columns)
@@ -338,7 +364,16 @@ public class AttachmentHandler(
             }
             sb.AppendLine();
         }
-        sb.AppendLine($"\nUse the '{FormDataQueryTool.Name}' tool to query this data using structured filters and column selection.");
+
+        sb.AppendLine($"\nUse '{AggregateFormDataTool.Name}' for counts, distributions, and statistics.");
+        sb.AppendLine($"Use '{FormDataQueryTool.Name}' to retrieve specific rows with filters.");
+        sb.AppendLine($"Use '{SelfJoinFormDataTool.Name}' to compare pairs of records (overlapping dates, concurrent events).");
         return sb.ToString();
     }
+}
+
+internal static partial class AttachmentHandlerLogger
+{
+    [LoggerMessage(LogLevel.Warning, "Failed to initialize form data tools for file {FileId}")]
+    public static partial void WarnFormDataToolsFailed(this ILogger logger, Exception exception, int fileId);
 }

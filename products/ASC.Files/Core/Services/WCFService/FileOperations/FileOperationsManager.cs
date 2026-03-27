@@ -33,7 +33,7 @@ namespace ASC.Web.Files.Services.WCFService.FileOperations;
 [Singleton(GenericArguments = [typeof(FileMarkAsReadOperation)])]
 [Singleton(GenericArguments = [typeof(FileDuplicateOperation)])]
 [Singleton(GenericArguments = [typeof(FileDownloadOperation)])]
-public class FileOperationsManagerHolder<T> where T : FileOperation
+public class FileOperationsManagerHolder<T> : IDisposable where T : FileOperation
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly DistributedTaskQueue<T> _tasks;
@@ -44,6 +44,11 @@ public class FileOperationsManagerHolder<T> where T : FileOperation
         _serviceProvider = serviceProvider;
         _tasks = queueFactory.CreateQueue<T>();
         notifyConfiguration.Configure();
+    }
+
+    public void Dispose()
+    {
+        _busyCheckLock?.Dispose();
     }
 
     public async Task<List<FileOperationResult>> GetOperationResults(Guid userId, string id = null)
