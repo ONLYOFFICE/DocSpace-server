@@ -204,8 +204,8 @@ internal abstract class BaseTagDao<T>(
         var folderDao = daoFactory.GetFolderDao<int>();
         var folderThirdPartyDao = daoFactory.GetFolderDao<string>();
 
-        var rooms = await folderDao.GetRoomsAsync([await globalFolder.GetFolderVirtualRoomsAsync(daoFactory)], null, new List<string> { tagInfo.Name }, Guid.Empty, null, false, false, false, ProviderFilter.None, SubjectFilter.Owner, null, QuotaFilter.All).ToListAsync();
-        var thirdPartyRooms = await folderThirdPartyDao.GetProviderBasedRoomsAsync(SearchArea.Active, null, new List<string> { tagInfo.Name }, Guid.Empty, null, false, false, ProviderFilter.None, SubjectFilter.Owner, null).ToListAsync();
+        var rooms = await folderDao.GetRoomsAsync([await globalFolder.GetFolderVirtualRoomsAsync(daoFactory)], null, new List<string> { tagInfo.Name }, Guid.Empty, null, false, false, false, ProviderFilter.None, null, Guid.Empty, null, QuotaFilter.All).ToListAsync();
+        var thirdPartyRooms = await folderThirdPartyDao.GetProviderBasedRoomsAsync(SearchArea.Active, null, new List<string> { tagInfo.Name }, Guid.Empty, null, false, false, ProviderFilter.None, null, Guid.Empty, null).ToListAsync();
 
         var tasks = rooms.Select(room => socketManager.UpdateFolderAsync(room))
              .Concat(thirdPartyRooms.Select(room => socketManager.UpdateFolderAsync(room)));
@@ -597,8 +597,8 @@ internal abstract class BaseTagDao<T>(
             var folderDao = daoFactory.GetFolderDao<int>();
             var folderThirdPartyDao = daoFactory.GetFolderDao<string>();
 
-            var rooms = await folderDao.GetRoomsAsync([await globalFolder.GetFolderVirtualRoomsAsync(daoFactory)], null, new List<string> { tag.Name }, Guid.Empty, null, false, false, false, ProviderFilter.None, SubjectFilter.Owner, null, QuotaFilter.All).ToListAsync();
-            var thirdPartyRooms = await folderThirdPartyDao.GetProviderBasedRoomsAsync(SearchArea.Active, null, new List<string> { tag.Name }, Guid.Empty, null, false, false, ProviderFilter.None, SubjectFilter.Owner, null).ToListAsync();
+            var rooms = await folderDao.GetRoomsAsync([await globalFolder.GetFolderVirtualRoomsAsync(daoFactory)], null, new List<string> { tag.Name }, Guid.Empty, null, false, false, false, ProviderFilter.None, null, Guid.Empty, null, QuotaFilter.All).ToListAsync();
+            var thirdPartyRooms = await folderThirdPartyDao.GetProviderBasedRoomsAsync(SearchArea.Active, null, new List<string> { tag.Name }, Guid.Empty, null, false, false, ProviderFilter.None, null, Guid.Empty, null).ToListAsync();
 
             await filesDbContext.DeleteTagLinksByTagIdAsync(tenantId, id);
             await filesDbContext.DeleteTagByIdAsync(tenantId, id);
