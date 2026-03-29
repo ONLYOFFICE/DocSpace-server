@@ -1446,7 +1446,7 @@ public class FileSecurity(
                     return false;
                 }
 
-                var myTrashId = await globalFolder.GetFolderTrashAsync(daoFactory);
+                var myTrashId = await globalFolder.GetFolderTrashAsync(daoFactory, userId);
                 if (!Equals(myTrashId, 0))
                 {
                     return Equals(e.RootId, myTrashId) && (folder == null || action != FilesSecurityActions.Delete || !Equals(e.Id, myTrashId));
