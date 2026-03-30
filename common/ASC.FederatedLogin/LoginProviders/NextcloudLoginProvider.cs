@@ -39,6 +39,10 @@ public class NextcloudLoginProvider : BaseLoginProvider<NextcloudLoginProvider>
     public override string ClientSecret => this["nextcloudClientSecret"];
     public override string Scopes => "";
 
+    public override bool IsEnabled =>
+        !string.IsNullOrWhiteSpace(this["nextcloudBaseUrl"]) &&
+        base.IsEnabled;
+
     private readonly RequestHelper _requestHelper;
     private readonly JsonSerializerOptions _jsonSerializerOptions = new() { PropertyNameCaseInsensitive = true };
 
@@ -67,28 +71,33 @@ public class NextcloudLoginProvider : BaseLoginProvider<NextcloudLoginProvider>
 
     private LoginProfile RequestProfile(string accessToken)
     {
-        var responseJson = _requestHelper.PerformRequest(new Uri(BaseUrl, "/ocs/v2.php/cloud/user").ToString(), headers: new Dictionary<string, string> {
-            { "Authorization", "Bearer " + accessToken },
-            { "OCS-APIRequest", "true" },
-            { "Accept", "application/json" }
-        });
+        try
+        {
+            var responseJson = _requestHelper.PerformRequest(new Uri(BaseUrl, "/ocs/v2.php/cloud/user").ToString(), headers: new Dictionary<string, string> {
+                { "Authorization", "Bearer " + accessToken },
+                { "OCS-APIRequest", "true" },
+                { "Accept", "application/json" }
+            });
 
-        var response = JsonSerializer.Deserialize<NextcloudApiResponse<NextcloudUser>>(responseJson, _jsonSerializerOptions);
+            var response = JsonSerializer.Deserialize<NextcloudApiResponse<NextcloudUser>>(responseJson, _jsonSerializerOptions);
 
-        return ProfileFromNextcloud(response.Ocs.Data);
+            return ProfileFromNextcloud(response.Ocs.Data);
+        }
+        catch (Exception ex)
+        {
+            return new LoginProfile(ex);
+        }
     }
 
     private static LoginProfile ProfileFromNextcloud(NextcloudUser nextcloudUser)
     {
-        var profile = new LoginProfile
+        return new LoginProfile
         {
             Id = nextcloudUser.Id,
             Provider = ProviderConstants.Nextcloud,
             EMail = nextcloudUser.Email,
             DisplayName = nextcloudUser.DisplayName
-        };
-
-        return profile;
+        };;
     }
 
     private class NextcloudApiResponse<T>
