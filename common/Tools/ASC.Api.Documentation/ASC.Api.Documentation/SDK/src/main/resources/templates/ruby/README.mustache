@@ -1,0 +1,188 @@
+# {{{gemName}}}
+
+The ONLYOFFICE DocSpace SDK for Ruby is a library that provides tools for integrating and managing DocSpace features within your applications. It simplifies interaction with the DocSpace API by offering ready-to-use methods and models.
+
+{{#infoUrl}}
+For more information, please visit [{{{infoUrl}}}]({{{infoUrl}}})
+{{/infoUrl}}
+
+### Building
+
+To build the Ruby gem, run the following command:
+
+```bash
+gem build {{{gemName}}}.gemspec
+```
+
+### Consuming
+
+To use the generated SDK in your project, choose one of the following options.
+
+#### From published gem (recommended)
+
+Add this to your `Gemfile`:
+
+```ruby
+gem '{{{gemName}}}', '~> {{{gemVersion}}}'
+```
+
+Then run:
+
+```bash
+bundle install
+```
+
+#### From local build
+
+```bash
+gem install ./{{{gemName}}}-{{{gemVersion}}}.gem
+```
+
+#### From Git
+
+```ruby
+gem '{{{gemName}}}', git: 'https://{{gitHost}}/{{gitUserId}}{{^gitUserId}}YOUR_GIT_USERNAME{{/gitUserId}}/{{gitRepoId}}{{^gitRepoId}}YOUR_GIT_REPO{{/gitRepoId}}.git'
+```
+
+## Getting Started
+
+Please follow the [building](#building) instruction and then run the following Ruby code:
+
+```ruby
+# Load the gem
+require '{{{gemName}}}'
+{{#apiInfo}}{{#apis}}{{#-first}}{{#operations}}{{#operation}}{{#-first}}{{#hasAuthMethods}}
+# Setup authorization
+{{{moduleName}}}.configure do |config|{{#authMethods}}{{#isBasic}}{{#isBasicBasic}}
+  # Configure HTTP basic authorization: {{{name}}}
+  config.username = 'YOUR_USERNAME'
+  config.password = 'YOUR_PASSWORD'{{/isBasicBasic}}{{#isBasicBearer}}
+  # Configure Bearer authorization{{#bearerFormat}} ({{{.}}}){{/bearerFormat}}: {{{name}}}
+  config.access_token = 'YOUR_BEARER_TOKEN'
+  # Configure a proc to get access tokens in lieu of the static access_token configuration
+  config.access_token_getter = -> { 'YOUR TOKEN GETTER PROC' } {{/isBasicBearer}}{{/isBasic}}{{#isApiKey}}
+  # Configure API key authorization: {{{name}}}
+  config.api_key['{{{keyParamName}}}'] = 'YOUR API KEY'
+  # Uncomment the following line to set a prefix for the API key, e.g. 'Bearer' (defaults to nil)
+  # config.api_key_prefix['{{{keyParamName}}}'] = 'Bearer'{{/isApiKey}}{{#isOAuth}}
+  # Configure OAuth2 access token for authorization: {{{name}}}
+  config.access_token = 'YOUR ACCESS TOKEN'
+  # Configure a proc to get access tokens in lieu of the static access_token configuration
+  config.access_token_getter = -> { 'YOUR TOKEN GETTER PROC' } {{/isOAuth}}
+  {{#isFaraday}}
+  # Configure faraday connection
+  config.configure_faraday_connection { |connection| 'YOUR CONNECTION CONFIG PROC' }
+  {{/isFaraday}}
+  {{#isHttpx}}
+  # Configure httpx session
+  config.configure_session { |session| 'YOUR CONNECTION CONFIG PROC' }
+  {{/isHttpx}}
+{{/authMethods}}end
+{{/hasAuthMethods}}
+
+api_instance = {{{moduleName}}}::{{{classname}}}.new
+{{#requiredParams}}
+{{{paramName}}} = {{{vendorExtensions.x-ruby-example}}} # {{{dataType}}} | {{{description}}}
+{{/requiredParams}}
+{{#optionalParams}}{{#-first}}
+opts = {
+{{/-first}}
+  {{{paramName}}}: {{{vendorExtensions.x-ruby-example}}}{{^-last}},{{/-last}} # {{{dataType}}} | {{{description}}}
+{{#-last}}
+}
+{{/-last}}{{/optionalParams}}
+
+begin
+{{#summary}}  # {{{.}}}
+{{/summary}}  {{#returnType}}result = {{/returnType}}api_instance.{{{operationId}}}{{#hasParams}}({{#requiredParams}}{{{paramName}}}{{^-last}}, {{/-last}}{{/requiredParams}}{{#optionalParams}}{{#-last}}{{#hasRequiredParams}}, {{/hasRequiredParams}}opts{{/-last}}{{/optionalParams}}){{/hasParams}}{{#returnType}}
+  p result{{/returnType}}
+rescue {{{moduleName}}}::ApiError => e
+  puts "Exception when calling {{classname}}->{{{operationId}}}: #{e}"
+end
+{{/-first}}{{/operation}}{{/operations}}{{/-first}}{{/apis}}{{/apiInfo}}
+```
+
+## Documentation For Authorization
+
+{{^authMethods}}Endpoints do not require authorization.{{/authMethods}}
+{{#hasAuthMethods}}Authentication schemes defined for the API:{{/hasAuthMethods}}
+{{#authMethods}}
+<a id="{{name}}"></a>
+### {{{name}}}
+
+{{#isApiKey}}
+- **Type**: API key
+- **API key parameter name**: {{{keyParamName}}}
+- **Location**: {{#isKeyInQuery}}URL query string{{/isKeyInQuery}}{{#isKeyInHeader}}HTTP header{{/isKeyInHeader}}{{#isKeyInCookie}}Cookie{{/isKeyInCookie}}
+{{/isApiKey}}
+{{#isBasic}}
+{{#isBasicBasic}}
+- **Type**: HTTP basic authentication
+{{/isBasicBasic}}
+{{#isBasicBearer}}
+- **Type**: Bearer authentication{{#bearerFormat}} ({{{.}}}){{/bearerFormat}}
+{{/isBasicBearer}}
+{{#isHttpSignature}}
+- **Type**: HTTP signature authentication
+{{/isHttpSignature}}
+{{/isBasic}}
+{{#isOAuth}}
+- **Type**: OAuth
+- **Flow**: {{{flow}}}
+- **Authorization URL**: {{x-authorizationUrl}}
+- **Token Url**: {{x-tokenUrl}}
+- **Scopes**: {{^scopes}}N/A{{/scopes}}
+{{#scopes}} - **{{{scope}}}**: {{{description}}}
+{{/scopes}}
+{{/isOAuth}}
+{{#isOpenId}}
+- **Type**: OpenId Connect
+- **OpenId Connect URL**: {{x-openIdConnectUrl}}
+{{#scopes}} - **{{{scope}}}**: {{{description}}}
+{{/scopes}}
+{{/isOpenId}}
+
+{{/authMethods}}
+
+### Documentation for API Endpoints
+
+All URIs are relative to *https://your-docspace.onlyoffice.com*
+
+### API Endpoints tables:
+
+{{#customApis}}
+<details>
+  <summary>{{folder}}</summary>
+
+  <table>
+    <tbody>
+      <tr>
+        <th>Method</th>
+        <th>HTTP request</th>
+        <th>Description</th>
+      </tr>
+      {{#apis}}
+      <tr>
+        <td colspan="3" style="text-align: center;"><strong>{{x-classname}}</strong></td>
+      </tr>
+      {{#operations.operation}}
+      <tr>
+        <td><a href="{{apiDocPath}}{{classname}}.md#{{operationId}}"><strong>{{operationId}}</strong></a></td>
+        <td><strong>{{httpMethod}}</strong> {{path}}</td>
+        <td>{{{summary}}}</td>
+      </tr>
+      {{/operations.operation}}
+      {{/apis}}
+    </tbody>
+  </table>
+
+</details>
+{{/customApis}}
+
+### Documentation For Models
+
+<details><summary>Models list</summary>
+
+{{#models}}{{#model}} - [{{moduleName}}::{{classname}}]({{modelDocPath}}{{classname}}.md)
+{{/model}}{{/models}}
+</details>
