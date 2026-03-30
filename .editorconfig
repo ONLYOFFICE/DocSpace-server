@@ -251,6 +251,9 @@ dotnet_diagnostic.CA2000.severity = warning
 # IDE0068: Use recommended dispose pattern (detects missing using)
 dotnet_diagnostic.IDE0068.severity = warning
 
+# CS0612: Type or member is obsolete
+dotnet_diagnostic.CS0612.severity = silent
+
 [*.{cs,vb}]
 
 

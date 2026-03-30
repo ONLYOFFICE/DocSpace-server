@@ -2452,7 +2452,9 @@
                     "example": "{\"file\": \"photo.jpg\"}"
                   },
                   "Autosave": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "description": "Specifies whether to autosave a photo or not.",
+                    "example": true
                   }
                 }
               },

@@ -11479,6 +11479,15 @@
             }
           },
           {
+            "name": "subjectOwnerId",
+            "in": "query",
+            "description": "The filter by room owner ID.",
+            "schema": {
+              "type": "string",
+              "example": "00000000-0000-0000-0000-000000000000"
+            }
+          },
+          {
             "name": "searchArea",
             "in": "query",
             "description": "The room search area (Active, Archive, Any, Recent by links).",

@@ -25776,10 +25776,13 @@
               "RoomCopied",
               "FormSubmit",
               "FormFilledOut",
-              "FormStopped"
+              "FormStopped",
+              "AgentCreated",
+              "AgentUpdated",
+              "AgentDeleted"
             ],
             "type": "string",
-            "description": "[All - *, UserCreated - user.created, UserInvited - user.invited, UserUpdated - user.updated, UserDeleted - user.deleted, GroupCreated - group.created, GroupUpdated - group.updated, GroupDeleted - group.deleted, FileCreated - file.created, FileUploaded - file.uploaded, FileUpdated - file.updated, FileTrashed - file.trashed, FileDeleted - file.deleted, FileRestored - file.restored, FileCopied - file.copied, FileMoved - file.moved, FolderCreated - folder.created, FolderUpdated - folder.updated, FolderTrashed - folder.trashed, FolderDeleted - folder.deleted, FolderRestored - folder.restored, FolderCopied - folder.copied, FolderMoved - folder.moved, RoomCreated - room.created, RoomUpdated - room.updated, RoomArchived - room.archived, RoomDeleted - room.deleted, RoomRestored - room.restored, RoomCopied - room.copied, FormSubmit - form.submit, FormFilledOut - form.filled.out, FormStopped - form.stopped]",
+            "description": "[All - *, UserCreated - user.created, UserInvited - user.invited, UserUpdated - user.updated, UserDeleted - user.deleted, GroupCreated - group.created, GroupUpdated - group.updated, GroupDeleted - group.deleted, FileCreated - file.created, FileUploaded - file.uploaded, FileUpdated - file.updated, FileTrashed - file.trashed, FileDeleted - file.deleted, FileRestored - file.restored, FileCopied - file.copied, FileMoved - file.moved, FolderCreated - folder.created, FolderUpdated - folder.updated, FolderTrashed - folder.trashed, FolderDeleted - folder.deleted, FolderRestored - folder.restored, FolderCopied - folder.copied, FolderMoved - folder.moved, RoomCreated - room.created, RoomUpdated - room.updated, RoomArchived - room.archived, RoomDeleted - room.deleted, RoomRestored - room.restored, RoomCopied - room.copied, FormSubmit - form.submit, FormFilledOut - form.filled.out, FormStopped - form.stopped, AgentCreated - agent.created, AgentUpdated - agent.updated, AgentDeleted - agent.deleted]",
             "example": "All"
           },
           {
@@ -25852,7 +25855,10 @@
               "RoomCopied",
               "FormSubmit",
               "FormFilledOut",
-              "FormStopped"
+              "FormStopped",
+              "AgentCreated",
+              "AgentUpdated",
+              "AgentDeleted"
             ]
           }
         ],

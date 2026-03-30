@@ -96,7 +96,8 @@ public class AgentsController(
             tagNames,
             inDto.ExcludeSubject ?? false,
             ProviderFilter.None,
-            inDto.SubjectFilter ?? SubjectFilter.Owner,
+            inDto.SubjectFilter,
+            inDto.SubjectOwnerId,
             quotaFilter: inDto.QuotaFilter ?? QuotaFilter.All,
             storageFilter: StorageFilter.None);
 

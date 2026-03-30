@@ -58,6 +58,15 @@
             }
           },
           {
+            "name": "subjectOwnerId",
+            "in": "query",
+            "description": "The filter by room owner ID.",
+            "schema": {
+              "type": "string",
+              "example": "00000000-0000-0000-0000-000000000000"
+            }
+          },
+          {
             "name": "withoutTags",
             "in": "query",
             "description": "Specifies whether to search by tags or not.",
@@ -2704,6 +2713,8 @@
             "description": "The unique identifier of the AI chat message to export.",
             "required": true,
             "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
               "type": "integer",
               "format": "int32",
               "example": 1

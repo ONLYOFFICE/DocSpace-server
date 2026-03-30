@@ -750,16 +750,21 @@ public class GlobalFolder(
 
     public async ValueTask<int> GetFolderTrashAsync(IDaoFactory daoFactory)
     {
+        return await GetFolderTrashAsync(daoFactory, authContext.CurrentAccount.ID);
+    }
+
+    public async ValueTask<int> GetFolderTrashAsync(IDaoFactory daoFactory, Guid userId)
+    {
         var id = 0;
         if (await IsOutsiderAsync)
         {
             return id;
         }
 
-        var cacheKey = $"trash/{tenantManager.GetCurrentTenant().Id}/{authContext.CurrentAccount.ID}";
+        var cacheKey = $"trash/{tenantManager.GetCurrentTenant().Id}/{userId}";
         if (!TrashFolderCache.TryGetValue(cacheKey, out var trashFolderId))
         {
-            id = authContext.IsAuthenticated ? await daoFactory.GetFolderDao<int>().GetFolderIDTrashAsync(true) : 0;
+            id = authContext.IsAuthenticated ? await daoFactory.GetFolderDao<int>().GetFolderIDTrashAsync(true, userId) : 0;
             TrashFolderCache[cacheKey] = id;
         }
         else
