@@ -157,24 +157,48 @@ public static class ChatPromptTemplate
 
     private static readonly string FormDataRules =
         $"""
+        <form_data_rules>
         ### Form data analysis rules
         A form submission dataset is attached. You MUST call a tool to answer — never guess or summarize from memory.
-        **NEVER paginate through all rows with `{FormDataQueryTool.Name}` to analyse data in memory.** The table may be very large; fetching rows in a loop is prohibited. If a question cannot be answered with the available tools, explain the limitation to the user.
+
+        #### Tool selection
         - Call `{AggregateFormDataTool.Name}` for ANY counting, grouping, or statistics question — it analyses ALL rows server-side with no row limit.
-          - Use `groupByDatePart` (YEAR/MONTH/WEEK/DAYOFYEAR/QUARTER) to group a date column by a calendar period — e.g. WEEK gives per-week counts.
-          - Use `datePartFilters` to restrict rows by a calendar period — e.g. `"col_date MONTH IN 6,7,8"` for summer months only. **To filter by multiple values of the same period (e.g. two years), use `IN` not two separate `=` filters: `"col_date YEAR IN 2025,2026"` — two `=` filters for the same column are ANDed and always return empty.**
-          - Use `dateDiffFilter` to restrict by elapsed days between two date columns — e.g. `"col_start col_submitted < 7"`.
-          - Use `secondGroupByColumn` (with optional `secondGroupByDatePart`) for two-dimensional breakdowns — e.g. group by category AND date month.
+          - Use `groupByDatePart` (YEAR/MONTH/WEEK/DAYOFYEAR/QUARTER) to group a date column by a calendar period.
+          - Use `datePartFilters` to restrict rows by a calendar period. **To filter by multiple values of the same period use `IN`, not two separate `=` filters: `"col_date YEAR IN 2025,2026"` — two `=` filters for the same column are ANDed and always return empty.**
+          - Use `dateDiffFilter` to restrict by elapsed days between two date columns.
+          - Use `secondGroupByColumn` (with optional `secondGroupByDatePart`) for two-dimensional breakdowns.
           - Call it multiple times when a question requires several independent breakdowns.
-        - Call `{FormDataQueryTool.Name}` to retrieve specific rows — use it when the question asks **who** or **which records** (e.g. "who violated", "list employees that..."). It supports `datePartFilters` and `dateDiffFilter` to filter without fetching all rows. Do NOT use `{AggregateFormDataTool.Name}` when the answer requires showing individual records.
-        - A complex question may require several tool calls (e.g. one per year). Make all of them before writing the final answer.
-        - **Do NOT use SUM on date/datetime columns** — that sums the numeric representation of dates, not durations. To compute elapsed days per record use `dateDiffFilter` for filtering; to compute total duration across records use `COUNT` of records (if each record = fixed period) or call `{FormDataQueryTool.Name}` for a small set and compute client-side.
-        - Use only column names and enum values from the schema in the attached context.
-        - Regular filters are plain strings: "col_status = value", "col_age > 25", "col_name IS NULL".
-        - **Column names must be plain strings — never wrap them in quotes.** Wrong: `"col_date"`. Correct: `col_date`.
+        - Call `{FormDataQueryTool.Name}` to retrieve specific rows — use it when the question asks **who** or **which records**. Do NOT use `{AggregateFormDataTool.Name}` when the answer requires showing individual records.
+        - Call `{SelfJoinFormDataTool.Name}` to find pairs of records: overlapping date ranges, scheduling conflicts, same value shared by multiple records, or any "find pairs where..." question.
+        - A complex question may require several tool calls. Make all of them before writing the final answer.
+        - **NEVER paginate** through all rows with `{FormDataQueryTool.Name}` to compute statistics — use `{AggregateFormDataTool.Name}` instead.
+
+        #### Column names
+        - Use column names exactly as listed in the schema. **Column names are plain strings — never wrap them in quotes.** Wrong: `"col_date"`. Correct: `col_date`.
+
+        #### Array parameters
+        - **Parameters `selectColumns`, `filters`, `datePartFilters`, `joinConditions`, `displayColumns` must be JSON arrays, never a JSON-encoded string.** Wrong: `selectColumns="[\"col_a\",\"col_b\"]"`. Correct: `selectColumns=["col_a","col_b"]`.
+        - **Each array element is a single condition — never join multiple conditions with AND inside one string.** Wrong: `datePartFilters=["col_date MONTH IN 6,7 AND col_date YEAR = 2025"]`. Correct: `datePartFilters=["col_date MONTH IN 6,7", "col_date YEAR = 2025"]`.
+
+        #### Regular filters
+        - Format: `"column_name OPERATOR value"`. Operators: `=`, `!=`, `<`, `>`, `<=`, `>=`, `LIKE`, `NOT LIKE`, `IS NULL`, `IS NOT NULL`. Examples: `"col_status = approved"`, `"col_age > 25"`, `"col_name IS NULL"`. Column-to-column comparison: `"col_start < col_end"`.
+        - Do NOT put date-diff or date-part expressions in `filters` — use the dedicated parameters below.
+
+        #### Date-part filters
+        - Format: `"column_name DATE_PART OPERATOR value[,v2,...]"`. DATE_PART: YEAR, MONTH, WEEK, DAYOFYEAR, QUARTER. Examples: `"col_date YEAR = 2024"`, `"col_date MONTH IN 6,7,8"`.
+
+        #### Date-diff filter
+        - **Format: `"col_a col_b OPERATOR days"` — two plain column names, then operator, then integer. Column order does not matter.** Wrong: `"DATEDIFF(col_start, col_end) < 7"`. Correct: `"col_start col_end < 7"`.
+
+        #### Grouping
         - **`groupByColumn` must be a column name from the schema, NOT a date-part keyword.** Wrong: `groupByColumn="YEAR"`. Correct: `groupByColumn="col_date", groupByDatePart="YEAR"`.
-        - **`dateDiffFilter` format is `"col_a col_b OPERATOR days"` — two plain column names, then operator, then integer. Column order does not matter.** Do NOT include the word DATEDIFF. Wrong: `"col_a DATEDIFF col_b < 7"`. Correct: `"col_a col_b < 7"`. Do NOT put date-diff expressions into `filters` — use the dedicated `dateDiffFilter` parameter.
-        - Call `{SelfJoinFormDataTool.Name}` to compare pairs of records against each other. Use when asked about: overlapping date ranges ("which records overlap in time"), concurrent events, scheduling conflicts, same value shared by multiple records ("who submitted on the same date"), or any question of the form "find pairs where...". joinConditions format: "left_col OPERATOR right_col" (left from record A, right from record B, operators: =, !=, <, >, <=, >=). Overlap example: joinConditions=["col_start_date <= col_end_date", "col_end_date >= col_start_date"]. To compare date parts across rows use joinConditions format: "col_a YEAR = col_b YEAR" — the date-part keyword is a separate token, do NOT append it as a suffix to the column name (wrong: "col_a_YEAR = col_b_YEAR"). Do NOT put cross-row date-part comparisons in datePartFilters. Always use plain column names from the schema in joinConditions — do NOT use prefixes (a_, b_) or suffixes (_YEAR, _MONTH) that appear in tool result columns.
+        - **Do NOT use SUM on date/datetime columns** — use COUNT or `dateDiffFilter` instead.
+
+        #### Self-join conditions
+        - Each `joinConditions` entry format: `"left_col OPERATOR right_col"` (left = record A, right = record B). Operators: `=`, `!=`, `<`, `>`, `<=`, `>=`. **Use plain column names — do NOT add `a_`/`b_` prefixes** (those appear only in results). Wrong: `"a_col_start <= b_col_end"`. Correct: `"col_start <= col_end"`.
+        - Overlap pattern: `joinConditions=["col_start <= col_end", "col_end >= col_start"]`.
+        - Date-part cross-row comparison — date part is a separate token. Wrong: `"col_date_YEAR = col_date_YEAR"`. Correct: `"col_date YEAR = col_date YEAR"`. These go in `joinConditions`, NOT in `datePartFilters`.
+        </form_data_rules>
         """;
 
     private const string WebSearchRules =

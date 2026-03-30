@@ -27,8 +27,9 @@
 namespace ASC.AI.Core.Tools.Retrieval;
 
 /// <summary>
-/// Tolerates weak models that pass a bare string instead of a one-element array
-/// for IEnumerable&lt;string&gt; parameters — e.g. "col = 1" instead of ["col = 1"].
+/// Tolerates models that pass a bare string instead of a one-element array
+/// for IEnumerable&lt;string&gt; parameters — e.g. "col = 1" instead of ["col = 1"],
+/// or a JSON-encoded array string instead of a real array — e.g. "[\"col_a\",\"col_b\"]" instead of ["col_a","col_b"].
 /// </summary>
 internal sealed class FlexibleStringArrayJsonConverter : JsonConverter<IEnumerable<string>>
 {
@@ -38,7 +39,28 @@ internal sealed class FlexibleStringArrayJsonConverter : JsonConverter<IEnumerab
     {
         if (reader.TokenType == JsonTokenType.String)
         {
-            return [reader.GetString()!];
+            var raw = reader.GetString()!;
+
+            // Some models pass the entire array as a JSON-encoded string
+            // e.g. "[\"col_a\", \"col_b\"]" instead of ["col_a", "col_b"].
+            var trimmed = raw.AsSpan().Trim();
+            if (trimmed.Length >= 2 && trimmed[0] == '[' && trimmed[^1] == ']')
+            {
+                try
+                {
+                    var parsed = JsonSerializer.Deserialize<List<string>>(trimmed, options);
+                    if (parsed is not null)
+                    {
+                        return parsed;
+                    }
+                }
+                catch (JsonException)
+                {
+                    // not valid JSON array — fall through to treat as single string
+                }
+            }
+
+            return [raw];
         }
 
         var list = new List<string>();
@@ -85,7 +107,7 @@ internal static class FormDataToolHelpers
 
     /// <summary>
     /// Normalises raw <c>filters</c> strings, routing misplaced date-part and date-diff expressions
-    /// to their correct parameters so weak models can still get results despite formatting mistakes.
+    /// to their correct parameters so models can still get results despite formatting mistakes.
     /// </summary>
     /// <returns>
     /// <c>normal</c> — plain column/value filters;<br/>
