@@ -4549,7 +4549,8 @@ public class FileStorageService //: IFileStorageService
         }
         else
         {
-            await tagDao.RemoveTagsAsync(tag);
+            var tags = await tagDao.GetTagsAsync(authContext.CurrentAccount.ID, [TagType.Pin], [room]).ToListAsync();
+            await tagDao.RemoveTagsAsync(room, tags.Select(r=> r.Id));
         }
 
         room.Pinned = pin;
