@@ -31,6 +31,7 @@ namespace ASC.Migration.Core.Migrators;
 public abstract class Migrator(
     SecurityContext securityContext,
     UserManager userManager,
+    UserPhotoManager userPhotoManager,
     TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
     QuotaSocketManager quotaSocketManager,
     FileStorageService fileStorageService,
@@ -47,6 +48,7 @@ public abstract class Migrator(
     protected SecurityContext SecurityContext { get; } = securityContext;
     protected UserSocketManager SocketManager { get; } = socketManager;
     protected UserManager UserManager { get; } = userManager;
+    protected UserPhotoManager UserPhotoManager { get; } = userPhotoManager;
     private TenantQuotaFeatureStatHelper TenantQuotaFeatureStatHelper { get; } = tenantQuotaFeatureStatHelper;
     private QuotaSocketManager QuotaSocketManager { get; } = quotaSocketManager;
     private FileStorageService FileStorageService { get; } = fileStorageService;
@@ -217,7 +219,7 @@ public abstract class Migrator(
                         {
                             await fs.CopyToAsync(ms);
                         }
-                        await UserManager.SaveUserPhotoAsync(user.Info.Id, ms.ToArray());
+                        await UserPhotoManager.SaveOrUpdatePhoto(user.Info.Id, ms.ToArray());
                     }
                 }
                 if (saved.Equals(Constants.LostUser))
@@ -344,10 +346,12 @@ public abstract class Migrator(
                 {
                     newFolder = await FileStorageService.CreateRoomAsync(folder.Title, folder.Private ? RoomType.EditingRoom : RoomType.CustomRoom, false, false, null, 0, null, false, null, null, null, null, null);
 
-                    var owner = MigrationInfo.Users[folder.Owner];
-                    if (owner.UserType is EmployeeType.DocSpaceAdmin or EmployeeType.RoomAdmin && newFolder.CreateBy != owner.Info.Id)
+                    if (MigrationInfo.Users.TryGetValue(folder.Owner, out var owner))
                     {
-                        await FileStorageService.ChangeOwnerAsync([newFolder.Id], [], owner.Info.Id).ToListAsync();
+                        if (owner.UserType is EmployeeType.DocSpaceAdmin or EmployeeType.RoomAdmin && newFolder.CreateBy != owner.Info.Id)
+                        {
+                            await FileStorageService.ChangeOwnerAsync([newFolder.Id], [], owner.Info.Id).ToListAsync();
+                        }
                     }
 
                     Log(string.Format(MigrationResource.CreateShareRoom, newFolder.Title));
@@ -538,6 +542,14 @@ public abstract class Migrator(
         }
         var folder = storage.Folders.FirstOrDefault(f => f.Id == security.EntryId);
         return folder?.Level ?? 0;
+    }
+
+    public async Task SaveLogAsync()
+    {
+        if (MigrationLogger != null)
+        {
+            await MigrationLogger.SaveLogAsync();
+        }
     }
 
     public async ValueTask DisposeAsync()

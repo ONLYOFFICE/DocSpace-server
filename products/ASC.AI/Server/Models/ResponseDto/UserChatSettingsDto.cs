@@ -26,16 +26,26 @@
 
 namespace ASC.AI.Models.ResponseDto;
 
+/// <summary>
+/// The user chat settings.
+/// </summary>
 public class UserChatSettingsDto
 {
     /// <summary>
     /// Indicates whether the AI assistant is allowed to perform web searches when generating responses in this room.
     /// </summary>
+    /// <example>true</example>
     public bool WebSearchEnabled { get; init; }
+
+    /// <summary>
+    /// The reasoning effort level for the AI model.
+    /// Controls how much reasoning the model applies when generating responses in this room.
+    /// </summary>
+    /// <example>None</example>
+    public ChatReasoningEffort ReasoningEffort { get; init; }
 }
 
-[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
-    PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
 public static partial class UserChatSettingsDtoMapper
 {
     public static partial UserChatSettingsDto MapToDto(this UserChatSettings source);

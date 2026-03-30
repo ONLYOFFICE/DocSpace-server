@@ -49,7 +49,7 @@ namespace ASC.Migrations.MySql.Migrations.CoreDb
 
                 b.Property<decimal>("Price")
                     .ValueGeneratedOnAdd()
-                    .HasColumnType("decimal(15,9)")
+                    .HasColumnType("decimal(10,4)")
                     .HasColumnName("price")
                     .HasDefaultValueSql("'0.00'");
 

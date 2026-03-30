@@ -1,25 +1,25 @@
 // (c) Copyright Ascensio System SIA 2009-2026
-// 
+//
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
+//
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
+//
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-// 
+//
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -153,10 +153,8 @@ public class TariffService(
                             {
                                 throw new BillingNotFoundException($"Payment {tariff.Id} not found. Only wallet payments available");
                             }
-                            else
-                            {
-                                await AddInitialQuotaAsync(asynctariff, tenantId);
-                            }
+
+                            await AddInitialQuotaAsync(asynctariff, tenantId);
                         }
 
                         if (asynctariff.Id == tariff.Id)
@@ -423,6 +421,11 @@ public class TariffService(
         return $"{tenantId}:accounting:balance";
     }
 
+    internal static string GetAccountingServiceQuotaCacheKey(int tenantId, string serviceName)
+    {
+        return $"{tenantId}:accounting:{serviceName}:quota";
+    }
+
 
     private async Task ClearCacheAsync(int tenantId)
     {
@@ -668,7 +671,7 @@ public class TariffService(
 
         foreach (var q in quotas)
         {
-            if (q.State.HasValue && q.State.Value == QuotaState.Overdue)
+            if (q.State is QuotaState.Overdue)
             {
                 tariff.OverdueQuotas ??= [];
                 tariff.OverdueQuotas.Add(q);
@@ -768,7 +771,7 @@ public class TariffService(
     {
         try
         {
-            if (nextQuantity.HasValue && nextQuantity.Value < 0)
+            if (nextQuantity is < 0)
             {
                 return false;
             }
@@ -1164,6 +1167,11 @@ public class TariffService(
 
     public async Task<Balance> GetCustomerBalanceAsync(int tenantId, bool refresh = false)
     {
+        if (!accountingClient.Configured)
+        {
+            return null;
+        }
+
         var cacheKey = GetAccountingBalanceCacheKey(tenantId);
 
         var balance = refresh ? null : await GetFromCache<Balance>(cacheKey);
@@ -1182,19 +1190,57 @@ public class TariffService(
                 return balance.IsDefault() ? null : balance;
             }
 
-            if (accountingClient.Configured)
+            try
             {
-                try
-                {
-                    var portalId = await coreSettings.GetKeyAsync(tenantId);
-                    balance = await accountingClient.GetCustomerBalanceAsync(portalId, true);
-                    await hybridCache.SetAsync(cacheKey, balance, TimeSpan.FromMinutes(10));
-                }
-                catch (Exception error)
-                {
-                    LogError(error, tenantId.ToString());
-                    await hybridCache.SetAsync(cacheKey, new Balance(), TimeSpan.FromMinutes(10));
-                }
+                var portalId = await coreSettings.GetKeyAsync(tenantId);
+                balance = await accountingClient.GetCustomerBalanceAsync(portalId, true);
+                await hybridCache.SetAsync(cacheKey, balance, TimeSpan.FromMinutes(10));
+            }
+            catch (Exception error)
+            {
+                LogError(error, tenantId.ToString());
+                await hybridCache.SetAsync(cacheKey, new Balance(), TimeSpan.FromMinutes(10));
+            }
+        }
+
+        return balance;
+    }
+
+    public async Task<Balance> GetCustomerServiceQuotaAsync(int tenantId, string serviceName, bool refresh = false)
+    {
+        if (!accountingClient.Configured)
+        {
+            return null;
+        }
+
+        var cacheKey = GetAccountingServiceQuotaCacheKey(tenantId, serviceName);
+
+        var balance = refresh ? null : await GetFromCache<Balance>(cacheKey);
+
+        if (balance != null)
+        {
+            return balance.IsDefault() ? null : balance;
+        }
+
+        await using (await distributedLockProvider.TryAcquireLockAsync($"{cacheKey}_lock"))
+        {
+            balance = refresh ? null : await GetFromCache<Balance>(cacheKey);
+
+            if (balance != null)
+            {
+                return balance.IsDefault() ? null : balance;
+            }
+
+            try
+            {
+                var portalId = await coreSettings.GetKeyAsync(tenantId);
+                balance = await accountingClient.GetCustomerServiceQuotaAsync(portalId, serviceName, true);
+                await hybridCache.SetAsync(cacheKey, balance, TimeSpan.FromMinutes(10));
+            }
+            catch (Exception error)
+            {
+                LogError(error, tenantId.ToString());
+                await hybridCache.SetAsync(cacheKey, new Balance(), TimeSpan.FromMinutes(10));
             }
         }
 
@@ -1229,12 +1275,21 @@ public class TariffService(
         return true;
     }
 
-    public async Task<Report> GetCustomerOperationsAsync(int tenantId, DateTime utcStartDate, DateTime utcEndDate, string participantName, bool? credit, bool? debit, int? offset, int? limit)
+    public async Task<ServicePayment> MakeServicePaymentAsync(int tenantId, string serviceName, int quantity, string customerParticipantName, Dictionary<string, string> metadata = null)
+    {
+        var portalId = await coreSettings.GetKeyAsync(tenantId);
+        var result = await accountingClient.MakeServicePaymentAsync(portalId, serviceName, quantity, customerParticipantName, metadata);
+        await hybridCache.RemoveAsync(GetAccountingServiceQuotaCacheKey(tenantId, serviceName));
+        await hybridCache.RemoveAsync(GetAccountingBalanceCacheKey(tenantId));
+        return result;
+    }
+
+    public async Task<Report> GetCustomerOperationsAsync(int tenantId, OperationFilter filter)
     {
         try
         {
             var portalId = await coreSettings.GetKeyAsync(tenantId);
-            return await accountingClient.GetCustomerOperationsAsync(portalId, utcStartDate, utcEndDate, participantName, credit, debit, offset, limit);
+            return await accountingClient.GetCustomerOperationsAsync(portalId, filter);
         }
         catch (Exception error)
         {
@@ -1274,7 +1329,8 @@ public class TariffService(
     {
         try
         {
-            return await hybridCache.GetOrDefaultAsync<T>(key, token: new CancellationTokenSource(TimeSpan.FromSeconds(5)).Token);
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+            return await hybridCache.GetOrDefaultAsync<T>(key, token: cts.Token);
         }
         catch (Exception e)
         {

@@ -34,6 +34,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.time.Duration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
@@ -50,11 +51,14 @@ import org.springframework.data.redis.serializer.RedisSerializer;
  * <p>This configuration provides a {@link RedisCacheManager} bean with pre-configured cache
  * settings for application-wide caching needs.
  *
+ * <p>This configuration is only loaded when Redis classes are available on the classpath.
+ *
  * @see RedisCacheManager
  * @see RedisCacheConfiguration
  */
 @Configuration
 @EnableCaching
+@ConditionalOnClass(RedisConnectionFactory.class)
 public class CacheManagerConfiguration {
   /**
    * Creates a custom ObjectMapper for Redis serialization with type information.

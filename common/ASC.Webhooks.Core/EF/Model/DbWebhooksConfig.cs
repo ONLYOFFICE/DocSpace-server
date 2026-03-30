@@ -38,7 +38,7 @@ public class DbWebhooksConfig : BaseEntity
     public bool Enabled { get; set; }
     public bool SSL { get; set; }
     public WebhookTrigger Triggers { get; set; }
-    [MaxLength(36)]
+    [MaxLength(255)]
     public string TargetId { get; set; }
 
     public Guid? CreatedBy { get; set; }
@@ -117,12 +117,13 @@ public static class WebhooksConfigExtension
 
                 entity.Property(e => e.Triggers)
                     .HasColumnName("triggers")
+                    .HasColumnType("bigint")
                     .IsRequired();
 
                 entity.Property(e => e.TargetId)
                     .IsRequired(false)
                     .HasColumnName("target_id")
-                    .HasColumnType("varchar(36)")
+                    .HasColumnType("varchar(255)")
                     .HasCharSet("utf8")
                     .UseCollation("utf8_general_ci");
 
@@ -217,12 +218,13 @@ public static class WebhooksConfigExtension
 
                 entity.Property(e => e.Triggers)
                     .HasColumnName("triggers")
+                    .HasColumnType("bigint")
                     .IsRequired();
 
                 entity.Property(e => e.TargetId)
                     .IsRequired(false)
                     .HasColumnName("target_id")
-                    .HasMaxLength(36)
+                    .HasMaxLength(255)
                     .HasColumnType("character varying");
 
                 entity.Property(e => e.CreatedBy)

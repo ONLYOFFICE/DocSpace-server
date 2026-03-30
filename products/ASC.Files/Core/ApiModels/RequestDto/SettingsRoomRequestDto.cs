@@ -34,11 +34,13 @@ public class SettingsRoom
     /// <summary>
     /// Specifies whether to create the room with indexing.
     /// </summary>
+    /// <example>true</example>
     public bool? Indexing { get; set; }
 
     /// <summary>
     /// Specifies whether to deny downloads from the room.
     /// </summary>
+    /// <example>false</example>
     public bool? DenyDownload { get; set; }
 }
 
@@ -50,6 +52,7 @@ public class SettingsRoomRequestDto<T>
     /// <summary>
     /// The room ID.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "id")]
     public required T Id { get; set; }
 

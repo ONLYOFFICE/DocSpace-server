@@ -34,31 +34,37 @@ public class FillingFormResultDto<T>
     /// <summary>
     /// The filling form number.
     /// </summary>
+    /// <example>1</example>
     public required int FormNumber { get; set; }
 
     /// <summary>
     /// The file with the completed forms.
     /// </summary>
+    /// <example>{"id": 10, "title": "completed_form.pdf"}</example>
     public FileDto<T> CompletedForm { get; set; }
 
     /// <summary>
     /// The file with the original forms.
     /// </summary>
+    /// <example>{"id": 5, "title": "form_template.pdf"}</example>
     public FileDto<T> OriginalForm { get; set; }
 
     /// <summary>
     /// The manager who is filling the form.
     /// </summary>
+    /// <example>{"displayName": "John Doe"}</example>
     public EmployeeFullDto Manager { get; set; }
 
     /// <summary>
     /// The room ID where filling the form.
     /// </summary>
+    /// <example>123</example>
     public required T RoomId { get; set; }
 
     /// <summary>
     /// Specifies if the manager who fills the form is a room member or not.
     /// </summary>
+    /// <example>true</example>
     public bool IsRoomMember { get; set; }
 
 }

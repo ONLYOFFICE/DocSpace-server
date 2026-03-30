@@ -36,41 +36,49 @@ public class DocumentBuilderTaskDto
     /// <summary>
     /// The Document Builder task ID.
     /// </summary>
+    /// <example>task-123-456</example>
     public required string Id { get; set; }
 
     /// <summary>
     /// The error message occurred during the document building process.
     /// </summary>
+    /// <example>Build failed</example>
     public required string Error { get; set; }
 
     /// <summary>
     /// The progress percentage of the document building process.
     /// </summary>
+    /// <example>75</example>
     public required int Percentage { get; set; }
 
     /// <summary>
     /// Specifies whether the document building process is completed or not.
     /// </summary>
+    /// <example>false</example>
     public required bool IsCompleted { get; set; }
 
     /// <summary>
     /// The status of the document building process.
     /// </summary>
+    /// <example>0</example>
     public required DistributedTaskStatus Status { get; set; }
 
     /// <summary>
     /// The result file ID.
     /// </summary>
+    /// <example>123</example>
     public required object ResultFileId { get; set; }
 
     /// <summary>
     /// The result file name.
     /// </summary>
+    /// <example>result.docx</example>
     public required string ResultFileName { get; set; }
 
     /// <summary>
     /// The result file URL.
     /// </summary>
+    /// <example>http://localhost/files/result.docx</example>
     public required string ResultFileUrl { get; set; }
 
     public static DocumentBuilderTaskDto Get<TId, TData>(DocumentBuilderTask<TId, TData> task)

@@ -1,25 +1,25 @@
 // (c) Copyright Ascensio System SIA 2009-2026
-// 
+//
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
+//
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
+//
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-// 
+//
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -173,11 +173,8 @@ public static class DocumentService
             { FilesLinkUtility.ShardKey, documentRevisionId }
         });
 
-        var request = new HttpRequestMessage
-        {
-            RequestUri = new Uri(documentConverterUrl),
-            Method = HttpMethod.Post
-        };
+
+        using var request = new HttpRequestMessage(HttpMethod.Post, documentConverterUrl);
         request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
         var httpClient = clientFactory.CreateClient(GetHttpClientName(sslVerification));
@@ -267,11 +264,7 @@ public static class DocumentService
         }
 
         using var cancellationTokenSource = new CancellationTokenSource(commandTimeout);
-        var request = new HttpRequestMessage
-        {
-            RequestUri = new Uri(documentTrackerUrl),
-            Method = HttpMethod.Post
-        };
+        using var request = new HttpRequestMessage(HttpMethod.Post, documentTrackerUrl);
 
         var httpClient = clientFactory.CreateClient(GetHttpClientName(sslVerification));
 
@@ -377,12 +370,7 @@ public static class DocumentService
             { FilesLinkUtility.ShardKey, requestKey }
         });
 
-        var request = new HttpRequestMessage
-        {
-            RequestUri = new Uri(docbuilderUrl),
-            Method = HttpMethod.Post
-        };
-
+        using var request = new HttpRequestMessage(HttpMethod.Post, docbuilderUrl);
         var httpClient = clientFactory.CreateClient(GetHttpClientName(sslVerification));
 
         var body = new BuilderBody
@@ -452,10 +440,8 @@ public static class DocumentService
 
     private static async Task<bool> InternalHealthcheckRequestAsync(string healthcheckUrl, IHttpClientFactory clientFactory)
     {
-        var request = new HttpRequestMessage
-        {
-            RequestUri = new Uri(healthcheckUrl)
-        };
+        using var request = new HttpRequestMessage();
+        request.RequestUri = new Uri(healthcheckUrl);
 
         var httpClient = clientFactory.CreateClient("customHttpClient");
         httpClient.Timeout = TimeSpan.FromMilliseconds(Timeout);
@@ -895,7 +881,7 @@ public static class DocumentService
 
         /// <summary>
         /// The encrypted signature added to the ONLYOFFICE Docs config in the form of a token.
-        /// </summary>        
+        /// </summary>
         public string Token { get; set; }
 
         /// <summary>
@@ -940,17 +926,20 @@ public static class DocumentService
         /// <summary>
         /// The type of the file for the source viewed or edited document.
         /// </summary>
+        /// <example>docx</example>
         [JsonPropertyName("filetype")]
         public required string FileType { get; set; }
 
         /// <summary>
         /// The encrypted signature added to the config in the form of a token.
         /// </summary>
+        /// <example>token</example>
         public string Token { get; set; }
 
         /// <summary>
         /// The absolute URL where the source viewed or edited document is stored.
         /// </summary>
+        /// <example>https://example.com/file.docx</example>
         [Url]
         public required string Url { get; set; }
     }
@@ -1064,15 +1053,7 @@ public static class DocumentServiceHttpClientExtension
                             .Handle<TimeoutRejectedException>()
                             .HandleResult(response => !response.IsSuccessStatusCode),
 
-            DelayGenerator = args =>
-            {
-                return ValueTask.FromResult<TimeSpan?>(delay[args.AttemptNumber]);
-            }
-        };
-
-        var customHttpMessageHandler = new HttpClientHandler
-        {
-            ServerCertificateCustomValidationCallback = (_, _, _, _) => true
+            DelayGenerator = args => ValueTask.FromResult<TimeSpan?>(delay[args.AttemptNumber])
         };
 
         services.AddHttpClient(GetHttpClientName(sslVerification: true))
@@ -1085,7 +1066,10 @@ public static class DocumentServiceHttpClientExtension
 
         services.AddHttpClient(GetHttpClientName(sslVerification: false))
                 .SetHandlerLifetime(TimeSpan.FromMinutes(5))
-                .ConfigurePrimaryHttpMessageHandler(_ => customHttpMessageHandler)
+                .ConfigurePrimaryHttpMessageHandler(_ => new HttpClientHandler
+                {
+                    ServerCertificateCustomValidationCallback = (_, _, _, _) => true
+                })
                 .AddResilienceHandler(ResiliencePipelineName, builder =>
                 {
                     builder.AddTimeout(policyTimeout);
@@ -1093,7 +1077,10 @@ public static class DocumentServiceHttpClientExtension
                 });
 
         services.AddHttpClient(CustomSslVerificationClient)
-                .ConfigurePrimaryHttpMessageHandler(_ => customHttpMessageHandler);
+                .ConfigurePrimaryHttpMessageHandler(_ => new HttpClientHandler
+                {
+                    ServerCertificateCustomValidationCallback = (_, _, _, _) => true
+                });
 
         services.AddResiliencePipeline<string, LicenseValidationResult>(LicenseResiliencePipelineName, pipelineBuilder =>
         {

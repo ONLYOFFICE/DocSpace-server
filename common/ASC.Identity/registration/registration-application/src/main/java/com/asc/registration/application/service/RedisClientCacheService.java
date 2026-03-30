@@ -36,6 +36,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -45,11 +46,14 @@ import org.springframework.stereotype.Service;
  * <p>The cache is automatically populated and evicted based on domain events processed
  * transactionally, ensuring consistency across multiple application instances.
  *
+ * <p>This service is only loaded when Redis classes are available on the classpath.
+ *
  * @see ClientCacheService
  * @see Client
  */
 @Slf4j
 @Service
+@ConditionalOnClass(RedisTemplate.class)
 public class RedisClientCacheService implements ClientCacheService {
   private static final String CACHE_KEY_SEPARATOR = ":";
   private static final String CACHE_KEY_TENANT_CLIENT_SEPARATOR = "_";

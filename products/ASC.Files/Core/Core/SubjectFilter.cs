@@ -26,6 +26,7 @@
 
 namespace ASC.Files.Core.Core;
 
+[Obsolete]
 public enum SubjectFilter
 {
     [Description("Owner")]

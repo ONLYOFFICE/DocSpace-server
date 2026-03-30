@@ -34,40 +34,48 @@ public class FirebaseDto
     /// <summary>
     /// The Firebase API key.
     /// </summary>
+    /// <example>AIzaSyDxK9L3j4H8mN2pQ5rS6tU7vW8xY9zA1bC</example>
     public required string ApiKey { get; set; }
 
     /// <summary>
     /// The Firebase authentication domain.
     /// </summary>
+    /// <example>myapp-12345.firebaseapp.com</example>
     public required string AuthDomain { get; set; }
 
     /// <summary>
     /// The Firebase project ID.
     /// </summary>
+    /// <example>myapp-12345</example>
     public required string ProjectId { get; set; }
 
     /// <summary>
     /// The Firebase storage bucket.
     /// </summary>
+    /// <example>myapp-12345.appspot.com</example>
     public required string StorageBucket { get; set; }
 
     /// <summary>
     /// The Firebase messaging sender ID.
     /// </summary>
+    /// <example>123456789012</example>
     public required string MessagingSenderId { get; set; }
 
     /// <summary>
     /// The Firebase application ID.
     /// </summary>
+    /// <example>1:123456789012:web:a1b2c3d4e5f6g7h8</example>
     public required string AppId { get; set; }
 
     /// <summary>
     /// The Firebase measurement ID.
     /// </summary>
+    /// <example>G-ABCD123456</example>
     public required string MeasurementId { get; set; }
 
     /// <summary>
     /// The Firebase database URL.
     /// </summary>
+    /// <example>https://myapp-12345.firebaseio.com</example>
     public required string DatabaseURL { get; set; }
 }

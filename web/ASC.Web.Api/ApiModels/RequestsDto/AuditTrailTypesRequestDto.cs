@@ -34,12 +34,14 @@ public class AuditTrailTypesRequestDto
     /// <summary>
     /// The type of product related to the audit trail.
     /// </summary>
+    /// <example>Documents</example>
     [FromQuery(Name = "productType")]
     public ProductType? ProductType { get; set; }
 
     /// <summary>
     /// The location associated with the audit trail.
     /// </summary>
+    /// <example>Files</example>
     [FromQuery(Name = "moduleType")]
     public LocationType? LocationType { get; set; }
 }

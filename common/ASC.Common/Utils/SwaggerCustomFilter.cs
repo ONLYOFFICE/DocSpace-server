@@ -1,25 +1,25 @@
 ﻿// (c) Copyright Ascensio System SIA 2009-2026
-// 
+//
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
+//
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
+//
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-// 
+//
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -55,7 +55,7 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
         {
             return;
         }
-        
+
         if (schema.Enum is { Count: > 0 } && context.Type is { IsEnum: true })
         {
             UpdateSchema(context.Type, openApiSchema);
@@ -69,23 +69,6 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
 
         UpdateSchema(propertyInfo.PropertyType, openApiSchema);
 
-        var swaggerSchemaCustomAttribute = propertyInfo.GetCustomAttributes(true).OfType<SwaggerSchemaCustomAttribute>().FirstOrDefault();
-
-        if (swaggerSchemaCustomAttribute != null)
-        {
-            if (swaggerSchemaCustomAttribute.Example != null)
-            {
-                openApiSchema.Example = GetExample(swaggerSchemaCustomAttribute.Example);
-            }
-        }
-        else
-        {
-            var example = GenerateFakeData(propertyInfo);
-            if (example != null)
-            {
-                openApiSchema.Example = example;
-            }
-        }
     }
 
     private IOpenApiSchema UpdateSchema(Type checkType, OpenApiSchema result)
@@ -96,55 +79,7 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
             checkType = nullableType;
         }
 
-        if (checkType == typeof(int))
-        {
-            result.Example = SwaggerSchemaCustomAttribute.DefaultIntExample;
-        }
-        else if (checkType == typeof(long) || checkType == typeof(ulong))
-        {
-            result.Example = 1234;
-        }
-        else if (checkType == typeof(string))
-        {
-            result.Example = SwaggerSchemaCustomAttribute.DefaultStringExample;
-        }
-        else if (checkType == typeof(bool))
-        {
-            result.Example = true;
-        }
-        else if (checkType == typeof(double))
-        {
-            result.Example = -8.5;
-        }
-        else if (checkType == typeof(DateTime))
-        {
-            result.Example = new DateTimeOffset(2008, 4, 10, 06, 30, 00, TimeSpan.FromHours(4));
-        }
-        else if (checkType == typeof(Guid))
-        {
-            result.Example = "75a5f745-f697-4418-b38d-0fe0d277e258";
-        }
-        else if (checkType.IsClosedTypeOf(typeof(IDictionary<,>)))
-        {
-            var array = new JsonArray();
-            if (checkType.IsGenericType)
-            {
-                var dictSchema = new JsonObject();
-                for (var index = 0; index < checkType.GenericTypeArguments.Length; index++)
-                {
-                    var t = checkType.GenericTypeArguments[index];
-                    var arraySchema = UpdateSchema(t, new OpenApiSchema());
-                    if (arraySchema is { Example: not null })
-                    {
-                        dictSchema.Add(index == 0 ? "key" : "value", arraySchema.Example);
-                    }
-                }
-
-                array.Add(dictSchema);
-            }
-            result.Example = array;
-        }
-        else if (typeof(IEnumerable).IsAssignableFrom(checkType))
+        if (typeof(IEnumerable).IsAssignableFrom(checkType))
         {
             var array = new JsonArray();
 
@@ -195,7 +130,7 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
                     Type = JsonSchemaType.Integer,
                     Example = SwaggerSchemaCustomAttribute.DefaultIntExample
                 },
-                new OpenApiSchema()
+                new OpenApiSchema
                 {
                     Type = JsonSchemaType.String,
                     Example = SwaggerSchemaCustomAttribute.DefaultStringExample
@@ -211,15 +146,16 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
             var enumDescriptionDataString = new JsonArray();
             var enumVarNames = new JsonArray();
             var enumDataInt = new List<JsonNode>();
+            var enumDataLong = new List<JsonNode>();
             var enumDescriptionInt = new List<string>();
+            var enumDescriptionLong = new List<string>();
             var enumType = "integer";
 
             var jsonConverterAttr = checkType.GetCustomAttributesData() .FirstOrDefault(a => a.AttributeType == typeof(JsonConverterAttribute));
             if (jsonConverterAttr != null)
             {
                 if (jsonConverterAttr.ConstructorArguments.Count > 0 &&
-                    jsonConverterAttr.ConstructorArguments[0].Value is Type converterType &&
-                    converterType.IsGenericType &&
+                    jsonConverterAttr.ConstructorArguments[0].Value is Type { IsGenericType: true } converterType &&
                     converterType.GetGenericTypeDefinition() == typeof(JsonStringEnumConverter<>))
                 {
                     enumType = "string";
@@ -231,20 +167,41 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
             {
                 var value = checkType.GetMember(enumValue.ToString())[0];
                 var enumAttribute = value.GetCustomAttributes<DescriptionAttribute>().FirstOrDefault();
+
+                enumVarNames.Add(enumValue.ToString());
+
+                enumDataString.Add(enumValue.ToString());
+
+                try
+                {
+                    enumDataInt.Add(Convert.ToInt32(enumValue));
+                }
+                catch (OverflowException)
+                {
+                    enumDataLong.Add(Convert.ToInt64(enumValue));
+                }
+
+
                 if (enumAttribute != null)
                 {
-                    enumDataString.Add(enumValue.ToString());
-                    enumVarNames.Add(enumValue.ToString());
                     enumDescriptionDataString.Add(enumAttribute.Description);
-                    enumDataInt.Add(Convert.ToInt32(enumValue));
                     enumDescriptionString.Add($"{enumValue} - {enumAttribute.Description}");
-                    enumDescriptionInt.Add($"{Convert.ToInt32(enumValue)} - {enumAttribute.Description}");
+
+                    try
+                    {
+                        enumDescriptionInt.Add($"{Convert.ToInt32(enumValue)} - {enumAttribute.Description}");
+                    }
+                    catch (OverflowException)
+                    {
+                        enumDescriptionLong.Add($"{Convert.ToInt64(enumValue)} - {enumAttribute.Description}");
+                    }
+
                 }
             }
 
             if (enumDataString.Count > 0)
             {
-                result.OneOf = new List<IOpenApiSchema>
+                var oneOf = new List<IOpenApiSchema>
                 {
                     new OpenApiSchema
                     {
@@ -252,8 +209,12 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
                         Type = JsonSchemaType.String,
                         Description = $"[{string.Join(", ", enumDescriptionString)}]",
                         Example = enumDataString[0]
-                    },
-                    new OpenApiSchema
+                    }
+                };
+
+                if (enumDataInt.Count > 0)
+                {
+                    oneOf.Add(new OpenApiSchema
                     {
                         Enum = enumDataInt,
                         Type = JsonSchemaType.Integer,
@@ -261,26 +222,32 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
                         Example = enumDataInt[0],
                         Extensions = new Dictionary<string, IOpenApiExtension>
                         {
-                            ["x-enum-varnames"] = new JsonNodeExtension(enumVarNames),
-                            ["x-enum-descriptions"] = new JsonNodeExtension(enumDescriptionDataString)
+                            ["x-enum-varnames"] = new JsonNodeExtension(enumVarNames)
                         }
-                    }
-                };
+                    });
+                }
+                else
+                {
+                    oneOf.Add(new OpenApiSchema
+                    {
+                        Enum = enumDataLong,
+                        Type = JsonSchemaType.Integer,
+                        Description = $"[{string.Join(", ", enumDescriptionLong)}]",
+                        Example = enumDescriptionLong[0],
+                        Extensions = new Dictionary<string, IOpenApiExtension>
+                        {
+                            ["x-enum-varnames"] = new JsonNodeExtension(enumVarNames)
+                        }
+                    });
+                }
+
+                result.OneOf = oneOf;
                 result.Enum = null;
                 result.Type = null;
                 result.Format = null;
-                result.Extensions = result.Extensions ?? new Dictionary<string, IOpenApiExtension>();
+                result.Extensions ??= new Dictionary<string, IOpenApiExtension>();
                 result.Extensions["x-enum-type"] = new JsonNodeExtension(enumType);
             }
-        }
-        else if (checkType == typeof(object))
-        {
-            // result.Example = new JsonArray
-            // {
-            //     ["int"] = SwaggerSchemaCustomAttribute.DefaultIntExample,
-            //     ["string"] = SwaggerSchemaCustomAttribute.DefaultStringExample,
-            //     ["boolean"] = true
-            // };
         }
         else if (checkType == typeof(TimeSpan))
         {
@@ -290,64 +257,7 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
 
         return result;
     }
-    private JsonNode GetExample(object exampleValue)
-    {
-        return exampleValue switch
-        {
-            string str => str,
-            int _int => _int,
-            long _long => _long,
-            bool _bool => _bool,
-            double _double => _double,
-            DateTime _dateTime => _dateTime,
-            Guid _guid => _guid,
-            _ => null
-        };
-    }
-    private JsonNode GenerateFakeData(PropertyInfo propertyInfo)
-    {
-        switch (propertyInfo.Name)
-        {
-            case "Name":
-                return "John Doe";
-            case "Email":
-                return "example@onlyoffice.com";
-            case "FirstName":
-                return "John";
-            case "LastName":
-                return "Doe";
-            case "Location":
-                return "001 Schroeder Run, New Tabithaport, Colombia";
-            case "Password":
-                return "P@ssw0rd123";
-            case "Extension":
-            case "Ext":
-            case "FileExtension":
-                return ".txt";
-            case "Title":
-                return "SampleFile";
-            case "Id":
-            case "FileId":
-            case "FolderId":
-            case "RoomId":
-            case "InstanceId":
-            case "UserId":
-            case "ProductId":
-                if (propertyInfo.PropertyType == typeof(string))
-                {
-                    return "1";
-                }
 
-                if (propertyInfo.PropertyType == typeof(int))
-                {
-                    return 1;
-                }
-
-                return "00000000-0000-0000-0000-000000000000";
-            default:
-                return null;
-        }
-    }
     private static bool IsSimpleType(Type type)
     {
         return type.IsPrimitive ||

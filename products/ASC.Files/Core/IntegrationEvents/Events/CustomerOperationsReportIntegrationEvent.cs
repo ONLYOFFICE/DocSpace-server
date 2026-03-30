@@ -37,16 +37,24 @@ public record CustomerOperationsReportIntegrationEvent : IntegrationEvent
         Guid createBy,
         int tenantId,
         string baseUri,
+        string serviceName,
+        bool writeOffServiceQuota,
         DateTime? startDate = null,
         DateTime? endDate = null,
         string participantName = null,
         bool? credit = null,
         bool? debit = null,
+        OperationType? types = null,
+        OperationStatus? status = null,
+        string orderBy = null,
+        OperationOrderType? orderType = null,
         IDictionary<string, string> headers = null,
         bool terminate = false)
     : base(createBy, tenantId)
     {
         BaseUri = baseUri;
+        ServiceName = serviceName;
+        WriteOffServiceQuota = writeOffServiceQuota;
         StartDate = startDate;
         EndDate = endDate;
         ParticipantName = participantName;
@@ -54,6 +62,10 @@ public record CustomerOperationsReportIntegrationEvent : IntegrationEvent
         Debit = debit;
         Headers = headers;
         Terminate = terminate;
+        Types = types;
+        Status = status;
+        OrderBy = orderBy;
+        OrderType = orderType;
     }
 
     [ProtoMember(1)]
@@ -79,4 +91,22 @@ public record CustomerOperationsReportIntegrationEvent : IntegrationEvent
 
     [ProtoMember(8)]
     public bool Terminate { get; set; }
+
+    [ProtoMember(9)]
+    public string ServiceName { get; set; }
+
+    [ProtoMember(10)]
+    public OperationType? Types { get; set; }
+
+    [ProtoMember(11)]
+    public OperationStatus? Status { get; set; }
+
+    [ProtoMember(12)]
+    public string OrderBy { get; set; }
+
+    [ProtoMember(13)]
+    public OperationOrderType? OrderType  { get; set; }
+
+    [ProtoMember(14)]
+    public bool WriteOffServiceQuota { get; set; }
 }

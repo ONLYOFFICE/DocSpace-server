@@ -44,6 +44,7 @@ public partial class SettingsController(
     CoreBaseSettings coreBaseSettings,
     CommonLinkUtility commonLinkUtility,
     IConfiguration configuration,
+    StorageFactory storageFactory,
     SetupInfo setupInfo,
     ExternalResourceSettings externalResourceSettings,
     ExternalResourceSettingsHelper externalResourceSettingsHelper,
@@ -64,7 +65,8 @@ public partial class SettingsController(
     UsersQuotaSyncOperation usersQuotaSyncOperation,
     CustomQuota customQuota,
     UserSocketManager userSocketManager,
-    QuotaSocketManager quotaSocketManager)
+    QuotaSocketManager quotaSocketManager,
+    ExternalDatabaseClient externalDatabaseClient)
     : BaseSettingsController(fusionCache, webItemManager)
 {
     [GeneratedRegex("^[a-z0-9]([a-z0-9-.]){1,253}[a-z0-9]$")]
@@ -139,6 +141,7 @@ public partial class SettingsController(
             settings.LimitedAccessSpace = (await settingsManager.LoadAsync<TenantAccessSpaceSettings>()).LimitedAccessSpace;
             settings.LimitedAccessDevToolsForUsers = (await settingsManager.LoadAsync<TenantDevToolsAccessSettings>()).LimitedAccessForUsers;
             settings.DisplayBanners = coreBaseSettings.Standalone ? !(await settingsManager.LoadAsync<TenantBannerSettings>()).Hidden : true;
+            settings.AiEnabled = (await settingsManager.LoadAsync<TenantAiAccessSettings>()).Enabled;
 
             settings.Firebase = new FirebaseDto
             {
@@ -180,6 +183,7 @@ public partial class SettingsController(
             settings.InvitationLimit = await userInvitationLimitHelper.GetLimit();
             settings.MaxImageUploadSize = setupInfo.MaxImageUploadSize;
             settings.DefaultFolderType = (await settingsManager.LoadForCurrentUserAsync<StudioDefaultPageSettings>()).DefaultFolderType;
+            settings.ExternalDbEnabled = externalDatabaseClient.IsEnabled();
         }
         else
         {
@@ -272,7 +276,9 @@ public partial class SettingsController(
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Quota")]
     [SwaggerResponse(200, "Message about the result of saving the user quota settings", typeof(TenantUserQuotaSettings))]
+    [SwaggerResponse(400, "The entered quota value is invalid or greater than the total storage size")]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("userquotasettings")]
     public async Task<TenantUserQuotaSettings> SaveUserQuotaSettings(QuotaSettingsRequestsDto inDto)
     {
@@ -280,7 +286,7 @@ public partial class SettingsController(
 
         if (!inDto.DefaultQuota.TryGetInt64(out var quota))
         {
-            throw new Exception(Resource.UserQuotaGreaterPortalError);
+            throw new ArgumentException(Resource.UserQuotaGreaterPortalError);
         }
 
         var tenant = tenantManager.GetCurrentTenant();
@@ -289,7 +295,7 @@ public partial class SettingsController(
 
         if (maxTotalSize < quota)
         {
-            throw new Exception(Resource.UserQuotaGreaterPortalError);
+            throw new ArgumentException(Resource.UserQuotaGreaterPortalError);
         }
         var tenantQuotaSetting = await settingsManager.LoadAsync<TenantQuotaSettings>();
         if (coreBaseSettings.Standalone)
@@ -298,7 +304,7 @@ public partial class SettingsController(
             {
                 if (tenantQuotaSetting.Quota < quota)
                 {
-                    throw new Exception(Resource.UserQuotaGreaterPortalError);
+                    throw new ArgumentException(Resource.UserQuotaGreaterPortalError);
                 }
             }
         }
@@ -1133,9 +1139,34 @@ public partial class SettingsController(
             {
                 await userSocketManager.ConnectTelegram(tenantId, authContext.CurrentAccount.ID);
             }
+
+            if (consumer is ExternalDatabaseProvider externalDbProvider)
+            {
+                await userSocketManager.UpdateExternalDbSettingsAsync(tenantId, externalDbProvider.IsEnabled());
+            }
         }
 
         return changed;
+    }
+
+    /// <remarks>
+    /// Tests an external database connection with the provided settings without saving them.
+    /// </remarks>
+    /// <summary>Test external database connection</summary>
+    /// <path>api/2.0/settings/authservice/externaldb/test</path>
+    [Tags("Settings / Authorization")]
+    [SwaggerResponse(200, "Connection test result with Success flag and optional Error message", typeof(ConnectionTestResult))]
+    [HttpPost("authservice/externaldb/test")]
+    public async Task<ConnectionTestResult> TestExternalDatabaseConnection(ExternalDatabaseSettings inDto)
+    {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        if (inDto.DatabaseTypeEnum == ExternalDatabaseType.Sqlite && !coreBaseSettings.Standalone)
+        {
+            return ConnectionTestResult.Failure(Resource.ConsumersExternalDbSqliteStandaloneOnly);
+        }
+
+        return await ExternalDatabaseProvider.TestConnectionAsync(inDto, storageFactory, tenantManager.GetCurrentTenantId());
     }
 
     /// <remarks>
@@ -1245,6 +1276,49 @@ public partial class SettingsController(
         await settingsManager.SaveAsync(settings);
 
         messageService.Send(MessageAction.BannerSettingsChanged);
+
+        return settings;
+    }
+
+    /// <summary>
+    /// Get the AI access settings for the portal
+    /// </summary>
+    /// <remarks>
+    /// Returns the current portal-level AI access settings that control whether all AI functionality
+    /// (chat, agents, vectorization) is available for the portal. AI is enabled by default.
+    /// </remarks>
+    /// <path>api/2.0/settings/ai-access</path>
+    [Tags("Settings / Common settings")]
+    [SwaggerResponse(200, "AI access settings", typeof(TenantAiAccessSettings))]
+    [HttpGet("ai-access")]
+    public async Task<TenantAiAccessSettings> GetTenantAiAccessSettings()
+    {
+        return await settingsManager.LoadAsync<TenantAiAccessSettings>();
+    }
+
+    /// <summary>
+    /// Set the AI access for the portal
+    /// </summary>
+    /// <remarks>
+    /// Updates the portal-level AI access settings. When AI is disabled, all AI features are turned off:
+    /// the AI Agents folder is hidden from root folder listings, AI status checks immediately return disabled,
+    /// and AI chat endpoints become inaccessible. Only users with the DocSpaceAdmin role
+    /// (EditPortalSettings permission) can change this setting.
+    /// </remarks>
+    /// <path>api/2.0/settings/ai-access</path>
+    [Tags("Settings / Common settings")]
+    [SwaggerResponse(200, "Updated AI access settings", typeof(TenantAiAccessSettings))]
+    [SwaggerResponse(403, "You don't have enough permission to change the AI access settings")]
+    [HttpPost("ai-access")]
+    public async Task<TenantAiAccessSettings> SetTenantAiAccessSettings(TenantAiAccessSettingsDto inDto)
+    {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        var settings = new TenantAiAccessSettings { Enabled = inDto.Enabled };
+
+        await settingsManager.SaveAsync(settings);
+
+        messageService.Send(inDto.Enabled ? MessageAction.AIAccessEnabled : MessageAction.AIAccessDisabled);
 
         return settings;
     }

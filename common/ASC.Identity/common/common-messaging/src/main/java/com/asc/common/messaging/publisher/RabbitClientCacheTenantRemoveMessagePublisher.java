@@ -34,6 +34,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.amqp.core.AmqpTemplate;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
@@ -49,6 +50,8 @@ import org.springframework.stereotype.Component;
  * <p>This implementation is only active in the SaaS profile where multi-region cache invalidation
  * is required.
  *
+ * <p>This publisher is only loaded when RabbitMQ classes are available on the classpath.
+ *
  * @see AuthorizationMessagePublisher
  * @see ClientCacheTenantRemoveEvent
  * @see ClientCacheMessagingConfiguration
@@ -57,6 +60,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Profile("saas")
 @RequiredArgsConstructor
+@ConditionalOnClass(name = "com.rabbitmq.client.Connection")
 public class RabbitClientCacheTenantRemoveMessagePublisher
     implements AuthorizationMessagePublisher<ClientCacheTenantRemoveEvent> {
   /** The AMQP client used to send messages to RabbitMQ. */

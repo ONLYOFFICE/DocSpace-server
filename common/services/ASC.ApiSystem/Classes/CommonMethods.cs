@@ -93,11 +93,13 @@ public class CommonMethods(
     private async Task<string> CallSendMethod(string requestUriScheme, string apiMethod, HttpMethod httpMethod, Tenant tenant, ConfirmType confirmType, bool skipAndReturnUrl)
     {
         var validationKey = emailValidationKeyProvider.GetEmailKey(tenant.OwnerId.ToString() + confirmType, tenant.Id);
-
+        var domain = tenant.GetTenantDomain(coreSettings);
+        var port = httpContextAccessor.HttpContext?.Request.Host.Port ?? 80;
+        
         var url = string.Format("{0}{1}{2}{3}{4}?userid={5}&key={6}",
                             requestUriScheme,
                             Uri.SchemeDelimiter,
-                            tenant.GetTenantDomain(coreSettings),
+                            domain == "localhost" && port != 80 ? $"{domain}:{port}" : domain,
                             commonConstants.WebApiBaseUrl,
                             apiMethod,
                             tenant.OwnerId.ToString(),
@@ -109,18 +111,16 @@ public class CommonMethods(
             return url;
         }
 
-        var request = new HttpRequestMessage
-        {
-            Method = httpMethod,
-            RequestUri = new Uri(url)
-        };
+        using var request = new HttpRequestMessage(httpMethod, url);
 
         request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
         try
         {
+#pragma warning disable CA2000
             var httpClient = clientFactory.CreateClient();
-            using var response = await httpClient.SendAsync(request);
+#pragma warning restore CA2000
+            using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
 
             log.LogDebug($"SendMethod {apiMethod} result = {response.StatusCode}");
 
@@ -347,14 +347,12 @@ public class CommonMethods(
                 ? configuration["hcaptcha:verify-url"] ?? "https://api.hcaptcha.com/siteverify"
                 : configuration["recaptcha:verify-url"] ?? "https://www.recaptcha.net/recaptcha/api/siteverify";
 
-            var request = new HttpRequestMessage
-            {
-                RequestUri = new Uri(url),
-                Method = HttpMethod.Post,
-                Content = new StringContent(data, Encoding.UTF8, "application/x-www-form-urlencoded")
-            };
+            using var request = new HttpRequestMessage(HttpMethod.Post, new Uri(url));
+            request.Content = new StringContent(data, Encoding.UTF8, "application/x-www-form-urlencoded");
 
+#pragma warning disable CA2000
             var httpClient = clientFactory.CreateClient();
+#pragma warning restore CA2000
             using var httpClientResponse = await httpClient.SendAsync(request);
             var resp = await httpClientResponse.Content.ReadAsStringAsync();
             var recaptchData = JsonSerializer.Deserialize<Web.Core.RecaptchData>(resp, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
@@ -363,8 +361,6 @@ public class CommonMethods(
             {
                 return true;
             }
-
-
 
             log.LogDebug("Recaptcha error: {0}", resp);
 

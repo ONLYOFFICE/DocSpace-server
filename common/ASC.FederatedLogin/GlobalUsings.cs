@@ -48,6 +48,8 @@ global using ASC.Core.Common.EF.Context;
 global using ASC.Core.Common.EF.Model;
 global using ASC.Core.Common.Notify;
 global using ASC.Core.Common.Notify.Telegram;
+global using ASC.Data.Storage;
+global using ASC.Data.Storage.DiscStorage;
 global using ASC.FederatedLogin;
 global using ASC.FederatedLogin.Helpers;
 global using ASC.FederatedLogin.LoginProviders;
@@ -64,6 +66,8 @@ global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.Logging;
 global using Microsoft.IdentityModel.Tokens;
+
+global using NetEscapades.EnumGenerators;
 
 global using Newtonsoft.Json.Linq;
 

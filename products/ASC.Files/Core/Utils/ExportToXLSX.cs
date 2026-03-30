@@ -30,7 +30,7 @@ namespace ASC.Web.Files.Utils;
 
 [Transient]
 public class ExportToXLSX(
-    ILogger<CsvFileUploader> logger,
+    ILogger<ExportToXLSX> logger,
     IServiceProvider serviceProvider,
     TenantManager tenantManager,
     IEventBus eventBus,
@@ -39,23 +39,22 @@ public class ExportToXLSX(
     AuthContext authContext)
 {
 
-    public async Task UpdateXlsxReport(int roomId, int originalFormId)
+    public async Task UpdateXlsxReport(int roomId, int originalFormId, int originalFormVersion)
     {
         try
         {
             var tenantId = tenantManager.GetCurrentTenantId();
             var userId = authContext.CurrentAccount.ID;
 
-            var task = serviceProvider.GetService<FormFillingReportTask>();
-
             var commonLinkUtility = serviceProvider.GetService<CommonLinkUtility>();
             var baseUri = commonLinkUtility.ServerRootPath;
-            task.Init(baseUri, tenantId, userId, null);
 
-            _ = await documentBuilderTaskManager.StartTask(task, false);
+            var statusTask = serviceProvider.GetService<FormFillingReportTask>();
+            statusTask.Init(baseUri, tenantId, userId, null);
+            _ = await documentBuilderTaskManager.StartTask(statusTask, false);
 
             var headers = MessageSettings.GetHttpHeaders(httpContextAccessor?.HttpContext?.Request);
-            var evt = new FormFillingReportIntegrationEvent(userId, tenantId, roomId, originalFormId, baseUri, headers: headers != null
+            var evt = new FormFillingReportIntegrationEvent(userId, tenantId, roomId, originalFormId, originalFormVersion, baseUri, headers: headers != null
                 ? headers.ToDictionary(x => x.Key, x => x.Value.ToString())
                 : []);
 
@@ -63,10 +62,8 @@ public class ExportToXLSX(
         }
         catch (Exception ex)
         {
-            logger.ErrorWhileUploading(ex);
+            logger.ErrorWhileGeneratingXlsx(ex);
             throw;
         }
     }
-
-
 }

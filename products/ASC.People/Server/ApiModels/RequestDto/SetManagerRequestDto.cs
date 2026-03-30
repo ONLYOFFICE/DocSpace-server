@@ -34,6 +34,7 @@ public class SetManagerRequest
     /// <summary>
     /// The user ID.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     public required Guid UserId { get; set; }
 }
 
@@ -45,12 +46,14 @@ public class SetManagerRequestDto
     /// <summary>
     /// The group ID.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "id")]
     public required Guid Id { get; set; }
 
     /// <summary>
     /// The request for setting a group manager.
     /// </summary>
+    /// <example>{"userId":"00000000-0000-0000-0000-000000000000"}</example>
     [FromBody]
     public required SetManagerRequest SetManager { get; set; }
 }

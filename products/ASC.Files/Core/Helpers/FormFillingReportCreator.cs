@@ -1,25 +1,25 @@
 ﻿// (c) Copyright Ascensio System SIA 2009-2026
-// 
+//
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
+//
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
+//
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-// 
+//
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -29,23 +29,63 @@ namespace ASC.Files.Core.Helpers;
 [Scope]
 public class FormFillingReportCreator(
     ExportToXLSX exportToXLSX,
+    ExternalDatabaseClient externalDatabaseClient,
     IDaoFactory daoFactory,
     IHttpClientFactory clientFactory,
     TenantManager tenantManager,
-    FactoryIndexerForm factoryIndexerForm)
+    AuthContext authContext,
+    IEventBus eventBus,
+    FactoryIndexerForm factoryIndexerForm,
+    FactoryIndexerFormMetadata factoryIndexerFormMetadata)
 {
 
-    private static readonly JsonSerializerOptions _options = new()
+    public async Task UpdateFormFillingReport<T>(int originalFormId, int originalFormVersion, int roomId, int resultFormNumber, string formsDataUrl, File<T> formsDataFile, bool sendFormToExternalDB, bool settingsSaveFormAsXLSX)
     {
-        Converters = { new BoolToStringConverter() },
-        AllowTrailingCommas = true,
-        PropertyNameCaseInsensitive = true
-    };
+        await GetSubmitFormsData(formsDataFile, originalFormId, originalFormVersion, roomId, resultFormNumber, formsDataUrl);
 
-    public async Task UpdateFormFillingReport<T>(int originalFormId, int roomId, int resultFormNumber, string formsDataUrl, File<T> formsDataFile)
+        if (sendFormToExternalDB && externalDatabaseClient.IsEnabled())
+        {
+            var fileId = formsDataFile.Id is int id ? id : 0;
+            var userId = authContext.CurrentAccount.ID;
+            var tenantId = tenantManager.GetCurrentTenantId();
+
+            await eventBus.PublishAsync(new ExternalDbFormSubmissionIntegrationEvent(
+                userId, tenantId, originalFormId, originalFormVersion,
+                roomId, fileId, resultFormNumber, formsDataUrl));
+        }
+
+        if (settingsSaveFormAsXLSX)
+        {
+            await exportToXLSX.UpdateXlsxReport(roomId, originalFormId, originalFormVersion);
+        }
+    }
+
+    public async Task ExportToExternalDbAsync(int fileId, int originalFormId, int originalFormVersion, int resultFormNumber, string formsDataUrl)
     {
-        await GetSubmitFormsData(formsDataFile, originalFormId, roomId, resultFormNumber, formsDataUrl);
-        await exportToXLSX.UpdateXlsxReport(roomId, originalFormId);
+#pragma warning disable CA2000 // HttpClient is short-lived and disposed by runtime
+        var httpClient = clientFactory.CreateClient();
+#pragma warning restore CA2000
+        using var exportRequest = new HttpRequestMessage
+        {
+            RequestUri = new Uri(formsDataUrl),
+            Method = HttpMethod.Get
+        };
+        using var response = await httpClient.SendAsync(exportRequest);
+
+        response.EnsureSuccessStatusCode();
+        var data = await response.Content.ReadAsStringAsync();
+        var parsed = ParseSubmitAndMetadata(data);
+
+        parsed.Data.FormsData = parsed.Data.FormsData
+            .Where(f => f.Type != "picture" && f.Type != "signature")
+            .ToList();
+
+        var tableName = GetTableName(originalFormId, originalFormVersion);
+        var normalizedMeta = NormalizeMetadata(parsed.MetaData).ToList();
+        var columnDefinitions = BuildColumnDefinitions(normalizedMeta).ToList();
+        var rowData = BuildRowData(parsed.Data, normalizedMeta, fileId);
+
+        await externalDatabaseClient.CreateTableAndUpsertAsync(tableName, columnDefinitions, rowData, keyColumn: "form_id");
     }
 
     public async Task<IEnumerable<FormsItemData>> GetFormsFields(int folderId)
@@ -59,6 +99,11 @@ public class FormFillingReportCreator(
 
         var fileDao = daoFactory.GetFileDao<int>();
         var file = await fileDao.GetFilesAsync([folderId], FilterType.Pdf, false, Guid.Empty, null, null, false).FirstOrDefaultAsync();
+        if (file == null)
+        {
+            return [];
+        }
+
         var (success, result) = await factoryIndexerForm.TrySelectAsync(r => r.Where(s => s.Id, file.Id));
 
         if (success)
@@ -69,10 +114,10 @@ public class FormFillingReportCreator(
         return [];
     }
 
-    public async Task<IEnumerable<DbFormsItemDataSearch>> GetFormFillingResults(int roomId, int originalFormId)
+    public async Task<IEnumerable<DbFormsItemDataSearch>> GetFormFillingResults(int roomId, int originalFormId, int originalFormVersion)
     {
         factoryIndexerForm.Refresh();
-        var (success, result) = await factoryIndexerForm.TrySelectAsync(r => r.Where(s => s.RoomId, roomId).Where(s => s.OriginalFormId, originalFormId));
+        var (success, result) = await factoryIndexerForm.TrySelectAsync(r => r.Where(s => s.RoomId, roomId).Where(s => s.OriginalFormId, originalFormId).Where(s => s.OriginalFormVersion, originalFormVersion));
 
         if (success)
         {
@@ -92,16 +137,48 @@ public class FormFillingReportCreator(
         return [];
     }
 
-    private async Task GetSubmitFormsData<T>(File<T> formsDataFile, int originalFormId, int roomId, int resultFormNumber, string url)
-    {
-        var request = new HttpRequestMessage
-        {
-            RequestUri = new Uri(url),
-            Method = HttpMethod.Get
-        };
+    public static string GetTableName(int originalFormId, int originalFormVersion)
+        => $"form_{originalFormId}_v{originalFormVersion}";
 
+    public async Task<IEnumerable<DbColumnDefinition>> GetColumnDefinitionsAsync(int originalFormId, int originalFormVersion)
+    {
+        factoryIndexerFormMetadata.Refresh();
+        var (metaSuccess, metaResult) = await factoryIndexerFormMetadata.TrySelectAsync(r =>
+            r.Where(s => s.OriginalFormId, originalFormId)
+             .Where(s => s.OriginalFormVersion, originalFormVersion));
+
+        var metadata = metaSuccess ? metaResult.FirstOrDefault()?.Metadata ?? [] : [];
+        return BuildColumnDefinitions(NormalizeMetadata(metadata));
+    }
+
+    public async Task<(IEnumerable<FormMetadata> Metadata, IEnumerable<SubmitFormsData> Submissions)> GetFormSnapshotAsync(int roomId, int originalFormId, int originalFormVersion)
+    {
+        factoryIndexerFormMetadata.Refresh();
+        var (metaSuccess, metaResult) = await factoryIndexerFormMetadata.TrySelectAsync(r =>
+            r.Where(s => s.OriginalFormId, originalFormId)
+             .Where(s => s.OriginalFormVersion, originalFormVersion));
+
+        var metadata = metaSuccess ? metaResult.FirstOrDefault()?.Metadata ?? [] : [];
+        var submissions = await GetFormFillingResults(roomId, originalFormId, originalFormVersion);
+
+        return (metadata, submissions);
+    }
+
+    private async Task<(SubmitFormsData fromData, List<FormMetadata> fromMetaData)> GetSubmitFormsData<T>(
+        File<T> formsDataFile,
+        int originalFormId,
+        int originalFormVersion,
+        int roomId,
+        int resultFormNumber,
+        string url)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Get, url);
+
+#pragma warning disable CA2000 // HttpClient is short-lived and disposed by runtime
         var httpClient = clientFactory.CreateClient();
+#pragma warning restore CA2000
         using var response = await httpClient.SendAsync(request);
+        response.EnsureSuccessStatusCode();
         var data = await response.Content.ReadAsStringAsync();
 
         var formNumber = new List<FormsItemData>
@@ -113,8 +190,14 @@ public class FormFillingReportCreator(
             }
         };
 
-        var fromData = JsonSerializer.Deserialize<SubmitFormsData>(data, _options);
-        fromData.FormsData = fromData.FormsData.Where(f => f.Type != "picture" && f.Type != "signature").ToList();
+        var parsed = ParseSubmitAndMetadata(data);
+
+        var fromData = parsed.Data;
+        var fromMetaData = parsed.MetaData;
+
+        fromData.FormsData = fromData.FormsData
+            .Where(f => f.Type != "picture" && f.Type != "signature")
+            .ToList();
 
         var now = DateTime.UtcNow;
         var tenantId = tenantManager.GetCurrentTenantId();
@@ -127,13 +210,231 @@ public class FormFillingReportCreator(
                 TenantId = tenantId,
                 ParentId = parentId,
                 OriginalFormId = originalFormId,
+                OriginalFormVersion = originalFormVersion,
                 RoomId = roomId,
                 CreateOn = now,
                 FormsData = formNumber.Concat(fromData.FormsData)
             };
 
             _ = factoryIndexerForm.IndexAsync(searchItems);
+            _ = factoryIndexerFormMetadata.IndexAsync(new DbFormsMetadataSearch
+            {
+                Id = DbFormsMetadataSearch.ComputeId(originalFormId, originalFormVersion),
+                TenantId = tenantId,
+                OriginalFormId = originalFormId,
+                OriginalFormVersion = originalFormVersion,
+                RoomId = roomId,
+                Metadata = fromMetaData
+            });
         }
+
+        return (fromData, fromMetaData: fromMetaData);
+    }
+
+    private (SubmitFormsData Data, List<FormMetadata> MetaData)ParseSubmitAndMetadata(string json)
+    {
+        using var document = JsonDocument.Parse(json);
+
+        var root = document.RootElement;
+
+        if (!root.TryGetProperty("formsdata", out var formsArray) ||
+            formsArray.ValueKind != JsonValueKind.Array)
+        {
+            return (new SubmitFormsData
+            {
+                FormsData = []
+            }, []);
+        }
+
+        var formsDataList = new List<FormsItemData>(formsArray.GetArrayLength());
+        var metaDataList = new List<FormMetadata>(formsArray.GetArrayLength());
+
+        foreach (var form in formsArray.EnumerateArray())
+        {
+            var key = form.TryGetProperty("key", out var keyProp)
+                ? keyProp.GetString()
+                : null;
+
+            var type = form.TryGetProperty("type", out var typeProp)
+                ? typeProp.GetString()
+                : null;
+
+            var tag = form.TryGetProperty("tag", out var tagProp)
+                ? tagProp.GetString()
+                : null;
+
+            var value = form.TryGetProperty("value", out var valueProp)
+                ? valueProp.ToString()
+                : null;
+
+            formsDataList.Add(new FormsItemData
+            {
+                Key = key,
+                Tag = tag,
+                Value = value,
+                Type = type
+            });
+
+            var metadata = new FormMetadata
+            {
+                Key = key ?? "",
+                Type = type ?? "",
+                Format = form.TryGetProperty("format", out var formatProp)
+                    ? formatProp.GetString()
+                    : null
+            };
+
+            if (form.TryGetProperty("options", out var optionsProp) &&
+                optionsProp.ValueKind == JsonValueKind.Array)
+            {
+                var possibleValues = new List<string>();
+
+                foreach (var option in optionsProp.EnumerateArray())
+                {
+                    if (option.ValueKind == JsonValueKind.Object &&
+                        option.TryGetProperty("value", out var valProp))
+                    {
+                        possibleValues.Add(valProp.ToString());
+                    }
+                    else
+                    {
+                        possibleValues.Add(option.ToString());
+                    }
+                }
+
+                metadata.PossibleValues = possibleValues;
+            }
+
+            metaDataList.Add(metadata);
+        }
+
+        return (
+            new SubmitFormsData
+            {
+                FormsData = formsDataList
+            },
+            metaDataList
+        );
+    }
+
+    private static IEnumerable<FormMetadata> NormalizeMetadata(IEnumerable<FormMetadata> metaData)
+    {
+        return metaData
+            .GroupBy(m => m.Type == "radio"
+                ? $"radio::{NormalizeColumnName(m.Key)}"
+                : NormalizeColumnName(m.Key))
+            .Select(g => g.First());
+    }
+
+    private static IEnumerable<DbColumnDefinition> BuildColumnDefinitions(IEnumerable<FormMetadata> metaData)
+    {
+        yield return new DbColumnDefinition("form_id", DbColumnType.Integer, IsPrimaryKey: true);
+        yield return new DbColumnDefinition("created_on", DbColumnType.DateTime);
+
+        foreach (var field in metaData)
+        {
+            var name = NormalizeColumnName(field.Key);
+            var (type, enumValues) = field.Type switch
+            {
+                "checkBox" => (DbColumnType.Boolean, (IReadOnlyList<string>)null),
+                "dateTime" => (DbColumnType.Date, null),
+                "comboBox" or "dropDownList" or "radio" => (DbColumnType.Enum, (IReadOnlyList<string>)field.PossibleValues),
+                _ => (DbColumnType.Text, null)
+            };
+            yield return new DbColumnDefinition(name, type, enumValues);
+        }
+    }
+
+    private static Dictionary<string, object> BuildRowData(SubmitFormsData data, IEnumerable<FormMetadata> metaData, int formId)
+    {
+        var result = new Dictionary<string, object>
+        {
+            ["form_id"] = formId,
+            ["created_on"] = DateTime.UtcNow
+        };
+
+        var metaByKey = metaData.ToDictionary(m => NormalizeColumnName(m.Key));
+
+        foreach (var item in data.FormsData)
+        {
+            var column = NormalizeColumnName(item.Key);
+            if (!metaByKey.TryGetValue(column, out var meta))
+            {
+                continue;
+            }
+            result[column] = ConvertFieldValue(item.Value, meta) ?? DBNull.Value;
+        }
+
+        return result;
+    }
+
+    private static string NormalizeColumnName(string key)
+    {
+        if (string.IsNullOrEmpty(key))
+        {
+            return "col_field";
+        }
+
+        // Transliterate any Unicode script to ASCII (Cyrillic, Chinese, Japanese, Korean, Arabic, etc.)
+        var transliterated = AnyAscii.Transliteration.Transliterate(key);
+
+        // Replace any character that is not alphanumeric or underscore with underscore
+        var name = Regex.Replace(transliterated, @"[^a-zA-Z0-9_]", "_");
+
+        // Collapse consecutive underscores and strip leading/trailing ones
+        name = Regex.Replace(name, @"_+", "_").Trim('_');
+
+        if (name.Length == 0)
+        {
+            return "col_field";
+        }
+
+        // col_ prefix guarantees the name never collides with any SQL reserved word
+        name = "col_" + name;
+
+        // Truncate to 64 characters (MySQL/PostgreSQL identifier limit)
+        if (name.Length > 64)
+        {
+            name = name[..64].TrimEnd('_');
+        }
+
+        return name.ToLower();
+    }
+
+    private static object ConvertFieldValue(string value, FormMetadata meta)
+    {
+        if (string.IsNullOrEmpty(value))
+        {
+            return null;
+        }
+
+        return meta.Type switch
+        {
+            "checkBox" => bool.TryParse(value, out var b) ? b : value,
+            "dateTime" => ParseDate(value, meta.Format),
+            _ => value
+        };
+    }
+
+    private static DateTime? ParseDate(string value, string format)
+    {
+        if (string.IsNullOrWhiteSpace(format))
+        {
+            return DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out var d) ? d : null;
+        }
+
+        var dotNetFormat = format
+            .Replace("DD", "dd")
+            .Replace("YYYY", "yyyy")
+            .Replace("YY", "yy")
+            .Replace("mm", "MM");
+
+        if (DateTime.TryParseExact(value, dotNetFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out var dt))
+        {
+            return dt;
+        }
+
+        return DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out var fallback) ? fallback : null;
     }
 
     public class BoolToStringConverter : JsonConverter<string>

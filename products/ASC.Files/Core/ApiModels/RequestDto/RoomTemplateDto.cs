@@ -34,57 +34,68 @@ public class RoomTemplateDto
     /// <summary>
     /// The room template ID.
     /// </summary>
+    /// <example>1</example>
     public required int RoomId { get; set; }
 
     /// <summary>
     /// The room template title.
     /// </summary>
+    /// <example>My Document</example>
     public string Title { get; set; }
 
     /// <summary>
     /// The room template logo.
     /// </summary>
+    /// <example>{"tmpFile": "temp_logo.png", "x": 0, "y": 0, "width": 100, "height": 100}</example>
     public LogoRequest Logo { get; set; }
 
     /// <summary>
     /// Specifies whether to copy room logo or not.
     /// </summary>
+    /// <example>true</example>
     public bool CopyLogo { get; set; }
 
     /// <summary>
     /// The collection of email addresses of users with whom to share a room.
     /// </summary>
+    /// <example>["user1@example.com", "user2@example.com"]</example>
     public List<string> Share { get; set; }
 
     /// <summary>
     /// The collection of groups with whom to share a room.
     /// </summary>
+    /// <example>["00000000-0000-0000-0000-000000000000"]</example>
     public List<Guid> Groups { get; set; }
 
     /// <summary>
     /// Specifies whether the room template is public or not.
     /// </summary>
+    /// <example>true</example>
     public bool Public { get; set; }
 
     /// <summary>
     /// The collection of tags.
     /// </summary>
+    /// <example>["tag1", "tag2"]</example>
     public IEnumerable<string> Tags { get; set; }
 
     /// <summary>
     /// The color of the room template.
     /// </summary>
+    /// <example>#FF0000</example>
     [StringLength(6)]
     public string Color { get; set; }
 
     /// <summary>
     /// The cover of the room template.
     /// </summary>
+    /// <example>cover1</example>
     [StringLength(50)]
     public string Cover { get; set; }
 
     /// <summary>
     /// Room quota
     /// </summary>
+    /// <example>10485760</example>
     public long? Quota { get; set; }
 }

@@ -61,8 +61,11 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
 
         using var request = new HttpRequestMessage();
         request.RequestUri = fileUri;
-
-        using var httpClient = clientFactory.CreateClient();
+        
+#pragma warning disable CA2000
+        var httpClient = clientFactory.CreateClient();
+#pragma warning restore CA2000
+        
         using var response = await httpClient.SendAsync(request);
         await using var stream = await response.Content.ReadAsStreamAsync();
 
@@ -106,8 +109,8 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
         CultureInfo.CurrentCulture = usertCulture;
         CultureInfo.CurrentUICulture = usertCulture;
 
-        var utcStartDate = taskData.StartDate != null ? tenantUtil.DateTimeToUtc(taskData.StartDate.Value) : tenant.CreationDateTime;
-        var utcEndDate = taskData.EndDate != null ? tenantUtil.DateTimeToUtc(taskData.EndDate.Value) : DateTime.UtcNow;
+        var utcStartDate = tenantUtil.DateTimeToUtc(taskData.StartDate ?? tenant.CreationDateTime);
+        var utcEndDate = tenantUtil.DateTimeToUtc(taskData.EndDate ?? DateTime.UtcNow);
 
         var script = await DocumentBuilderScriptHelper.ReadTemplateFromEmbeddedResource(ScriptName) ?? throw new Exception("Template not found");
 
@@ -146,7 +149,27 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
         {
             await writer.WriteAsync(scriptParts[0]);
 
-            var partialRecords = GetCustomerOperationsReportDataAsync(tariffService, tenantUtil, displayUserSettingsHelper, tenant.Id, utcStartDate, utcEndDate, taskData.ParticipantName, taskData.Credit, taskData.Debit);
+            var filter = new OperationFilter
+            {
+                ServiceName = taskData.ServiceName,
+                WriteOffServiceQuota = taskData.WriteOffServiceQuota,
+                UtcStartDate = utcStartDate,
+                UtcEndDate = utcEndDate,
+                ParticipantName = taskData.ParticipantName,
+                Credit = taskData.Credit,
+                Debit = taskData.Debit,
+                Types = taskData.Types,
+                Status = taskData.Status,
+                OrderBy = taskData.OrderBy,
+                OrderType = taskData.OrderType
+            };
+
+            var partialRecords = GetCustomerOperationsReportDataAsync(
+                tariffService,
+                tenantUtil,
+                displayUserSettingsHelper,
+                tenant.Id,
+                filter);
 
             if (partialRecords != null)
             {
@@ -163,14 +186,22 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
         return (scriptFilePath, tempFileName, outputFileName);
     }
 
-    private static async IAsyncEnumerable<List<Operation>> GetCustomerOperationsReportDataAsync(TariffService tariffService, TenantUtil tenantUtil, DisplayUserSettingsHelper displayUserSettingsHelper, int tenantId, DateTime utcStartDate, DateTime utcEndDate, string participantName, bool? credit, bool? debit)
+    private static async IAsyncEnumerable<List<Operation>> GetCustomerOperationsReportDataAsync(
+        TariffService tariffService,
+        TenantUtil tenantUtil,
+        DisplayUserSettingsHelper displayUserSettingsHelper,
+        int tenantId,
+        OperationFilter filter)
     {
         var offset = 0;
         var limit = 1000;
 
         while (true)
         {
-            var report = await tariffService.GetCustomerOperationsAsync(tenantId, utcStartDate, utcEndDate, participantName, credit, debit, offset, limit);
+            filter.Offset = offset;
+            filter.Limit = limit;
+
+            var report = await tariffService.GetCustomerOperationsAsync(tenantId, filter);
 
             if (report?.Collection == null)
             {
@@ -182,20 +213,16 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
 
             foreach (var operation in report.Collection)
             {
-                var (description, unitOfMeasurement) = GetServiceDescAndUOM(operation.Service);
+                var (description, unitOfMeasurement, quantity) = WalletServiceDescriptionManager.GetServiceDescriptionAndUom(operation, filter.ServiceName, operation.Metadata);
 
                 operation.Description = description;
-                operation.Details = operation.Metadata != null && operation.Metadata.TryGetValue(BillingClient.MetadataDetails, out var details) ? details : string.Empty;
+                operation.Details = WalletServiceDescriptionManager.GetServiceDetails(operation.Metadata);
                 operation.ServiceUnit = unitOfMeasurement;
+                operation.Quantity = quantity;
                 operation.Date = tenantUtil.DateTimeFromUtc(operation.Date);
                 operation.ParticipantDisplayName = operation.ParticipantName != null && participantDisplayNames.TryGetValue(operation.ParticipantName, out var value)
                     ? value
                     : operation.ParticipantName;
-
-                if (string.IsNullOrEmpty(operation.Service))
-                {
-                    operation.Quantity = 0;
-                }
             }
 
             yield return report.Collection;
@@ -234,24 +261,20 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
         return sb.ToString();
     }
 
-    private static (string, string) GetServiceDescAndUOM(string serviceName)
-    {
-        // for testing purposes
-        if (serviceName != null && serviceName.StartsWith("disk-storage"))
-        {
-            serviceName = "disk-storage";
-        }
-
-        if (string.IsNullOrEmpty(serviceName))
-        {
-            serviceName = "top-up";
-        }
-
-        return (Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceDesc_{serviceName}"),
-            Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceUOM_{serviceName}"));
-    }
-
-    record PropertyValue(string Value, string Format, string Halign = null);
+    private record PropertyValue(string Value, string Format, string Halign = null);
 }
 
-public record CustomerOperationsReportTaskData(IDictionary<string, string> Headers, DateTime? StartDate, DateTime? EndDate, string ParticipantName, bool? Credit, bool? Debit);
+public record CustomerOperationsReportTaskData(
+    IDictionary<string, string> Headers,
+    string ServiceName,
+    bool WriteOffServiceQuota,
+    DateTime? StartDate,
+    DateTime? EndDate,
+    string ParticipantName,
+    bool? Credit,
+    bool? Debit,
+    OperationType? Types,
+    OperationStatus? Status,
+    string OrderBy,
+    OperationOrderType? OrderType
+);

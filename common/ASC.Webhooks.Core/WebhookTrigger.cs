@@ -29,7 +29,7 @@ namespace ASC.Webhooks.Core;
 /// <summary>
 /// The webhook trigger type.
 /// </summary>
-public enum WebhookTrigger
+public enum WebhookTrigger : long
 {
     [Description("*")]
     All = 0,
@@ -139,11 +139,37 @@ public enum WebhookTrigger
     RoomRestored = 67108864,
 
     [Description("room.copied")]
-    RoomCopied = 134217728
+    RoomCopied = 134217728,
 
     #endregion
 
-    //remaining possible values: 268435456, 536870912, 1073741824
+
+    #region Forms
+
+    [Description("form.submit")]
+    FormSubmit = 268435456,
+
+    [Description("form.filled.out")]
+    FormFilledOut = 536870912,
+
+    [Description("form.stopped")]
+    FormStopped = 1073741824,
+
+    #endregion
+
+
+    #region Agent
+
+    [Description("agent.created")]
+    AgentCreated = 2147483648,
+
+    [Description("agent.updated")]
+    AgentUpdated = 4294967296,
+
+    [Description("agent.deleted")]
+    AgentDeleted = 8589934592,
+
+    #endregion
 }
 
 

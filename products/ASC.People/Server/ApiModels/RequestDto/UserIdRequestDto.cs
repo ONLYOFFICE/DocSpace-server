@@ -34,6 +34,7 @@ public class UserIdRequestDto
     /// <summary>
     /// The user ID.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "userid")]
     public required Guid UserId { get; set; }
 }

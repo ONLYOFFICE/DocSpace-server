@@ -36,66 +36,79 @@ public class ExternalShareDto
     /// <summary>
     /// The external data status.
     /// </summary>
+    /// <example>0</example>
     public required Status Status { get; set; }
 
     /// <summary>
     /// The external data ID.
     /// </summary>
-    public required string Id { get; set; }
+    /// <example>123</example>
+    public string Id { get; set; }
 
     /// <summary>
     /// The external data title.
     /// </summary>
-    public required string Title { get; set; }
+    /// <example>Shared Document</example>
+    public string Title { get; set; }
 
     /// <summary>
     /// The type of the external data.
     /// </summary>
+    /// <example>0</example>
     public FileEntryType? Type { get; set; }
 
     /// <summary>
     /// The tenant ID.
     /// </summary>
+    /// <example>1</example>
     public required int TenantId { get; set; }
 
     /// <summary>
     /// The unique identifier of the shared entity.
     /// </summary>
+    /// <example>456</example>
     public string EntityId { get; set; }
 
     /// <summary>
     /// The title of the shared entity.
     /// </summary>
+    /// <example>Entity Title</example>
     public string EntityTitle { get; set; }
 
     /// <summary>
     /// The entry type of the external data.
     /// </summary>
+    /// <example>0</example>
     public FileEntryType? EntityType { get; set; }
 
     /// <summary>
     /// Indicates whether the entity represents a room.
     /// </summary>
+    /// <example>false</example>
     public bool? IsRoom { get; set; }
 
     /// <summary>
     /// Specifies whether to share the external data or not.
     /// </summary>
+    /// <example>true</example>
     public required bool Shared { get; set; }
 
     /// <summary>
     /// The link ID of the external data.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     public required Guid LinkId { get; set; }
 
     /// <summary>
     /// Specifies whether the user is authenticated or not.
     /// </summary>
+    /// <example>true</example>
     public required bool IsAuthenticated { get; set; }
 
     /// <summary>
     /// The room ID of the external data.
     /// </summary>
+    /// <example>false</example>
     public bool IsRoomMember { get; set; }
 }
 

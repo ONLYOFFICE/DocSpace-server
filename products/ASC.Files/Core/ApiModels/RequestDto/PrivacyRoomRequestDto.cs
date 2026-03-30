@@ -34,5 +34,6 @@ public class PrivacyRoomEnableRequestDto
     /// <summary>
     /// Specifies whether to enable the Private Room settings or not.
     /// </summary>
+    /// <example>true</example>
     public bool Enable { get; set; }
 }

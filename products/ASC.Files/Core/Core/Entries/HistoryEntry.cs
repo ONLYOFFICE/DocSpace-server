@@ -105,7 +105,7 @@ public record HistoryEntry
             return _groupId = HashCode.Combine(Action.Id, InitiatorId, new DateTime(Date.Year, Date.Month, Date.Day, Date.Hour, Date.Minute, 0), Data?.GetId() ?? 0);
         }
 
-        return _groupId = HashCode.Combine(Action.Id, InitiatorId, Date, Data?.GetId() ?? 0, Random.Shared.Next(Int32.MaxValue));
+        return _groupId = HashCode.Combine(Action.Id, InitiatorId, Date, Data?.GetId() ?? 0, Random.Shared.Next(int.MaxValue));
     }
 }
 
@@ -133,15 +133,31 @@ public abstract record HistoryData
     /// <summary>
     /// The history data ID.
     /// </summary>
+    /// <example>0</example>
     public virtual int GetId() => 0;
 
     /// <summary>
     /// The name of the action initiator.
     /// </summary>
+    /// <example>John Doe</example>
     public virtual string InitiatorName => null;
 }
 
 /// <summary>
 /// The action performed on the file.
 /// </summary>
-public record HistoryAction(MessageAction Id, string Key);
+public record HistoryAction(MessageAction Id, string Key)
+{
+    /// <summary>
+    /// The action performed on the file.
+    /// </summary>
+    /// <example>FileUploaded</example>
+    public MessageAction Id { get; init; } = Id;
+    
+    
+    /// <summary>
+    /// The action performed on the file.
+    /// </summary>
+    /// <example>fileUploaded</example>   
+    public string Key { get; init; } = Key;
+}

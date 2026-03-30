@@ -248,7 +248,8 @@ internal class ProviderFileDao(
     {
         return await SaveFileAsync(file, fileStream);
     }
-    public async Task<File<string>> SaveFileAsync(File<string> file, Stream fileStream)
+
+    public async Task<File<string>> SaveFileAsync(File<string> file, Stream fileStream, Guid chatId = default)
     {
         ArgumentNullException.ThrowIfNull(file);
 
@@ -417,9 +418,9 @@ internal class ProviderFileDao(
         throw new NotImplementedException();
     }
 
-    public async Task<File<int>> CopyFileAsync(string fileId, int toFolderId)
+    public async Task<File<int>> CopyFileAsync(string fileId, int toFolderId, Guid chatId)
     {
-        return await PerformCrossDaoFileCopyAsync(fileId, toFolderId, false);
+        return await PerformCrossDaoFileCopyAsync(fileId, toFolderId, false, chatId);
     }
 
     public async Task<File<string>> CopyFileAsync(string fileId, string toFolderId)

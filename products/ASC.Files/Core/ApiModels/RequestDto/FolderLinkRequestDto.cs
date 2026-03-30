@@ -34,43 +34,51 @@ public class FolderLinkRequest
     /// <summary>
     /// The folder link ID.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     public Guid LinkId { get; set; }
 
     /// <summary>
     /// The link sharing rights.
     /// </summary>
+    /// <example>1</example>
     public FileShare Access { get; set; }
 
     /// <summary>
     /// The link expiration date.
     /// </summary>
+    /// <example>2021-01-01T00:00:00Z</example>
     public ApiDateTime ExpirationDate { get; set; }
 
     /// <summary>
     /// The link name.
     /// </summary>
+    /// <example>My Document</example>
     [StringLength(255)]
     public string Title { get; set; }
 
     /// <summary>
     /// The link password.
     /// </summary>
+    /// <example>p@ssw0rd</example>
     [StringLength(255)]
     public string Password { get; set; }
 
     /// <summary>
     /// Specifies if downloading the file from the link is disabled or not.
     /// </summary>
+    /// <example>false</example>
     public bool DenyDownload { get; set; }
 
     /// <summary>
     /// The link scope, whether it is internal or not.
     /// </summary>
+    /// <example>false</example>
     public bool Internal { get; set; }
 
     /// <summary>
     /// Specifies whether the folder link is primary or not.
     /// </summary>
+    /// <example>true</example>
     public bool Primary { get; set; }
 }
 
@@ -82,6 +90,7 @@ public class FolderLinkRequestDto<T>
     /// <summary>
     /// The folder ID.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "id")]
     public required T Id { get; set; }
 

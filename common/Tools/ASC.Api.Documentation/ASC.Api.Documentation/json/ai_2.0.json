@@ -54,7 +54,16 @@
             "description": "The filter by user ID.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "00000000-0000-0000-0000-000000000000"
+            }
+          },
+          {
+            "name": "subjectOwnerId",
+            "in": "query",
+            "description": "The filter by room owner ID.",
+            "schema": {
+              "type": "string",
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           },
           {
@@ -63,7 +72,7 @@
             "description": "Specifies whether to search by tags or not.",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           },
           {
@@ -72,7 +81,7 @@
             "description": "The tags in the serialized format.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "ai,assistant"
             }
           },
           {
@@ -81,7 +90,7 @@
             "description": "Specifies whether to exclude search by user or group ID.",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           },
           {
@@ -90,7 +99,8 @@
             "description": "The filter by user (Owner - 0, Member - 1).",
             "schema": {
               "$ref": "#/components/schemas/SubjectFilter"
-            }
+            },
+            "example": 0
           },
           {
             "name": "quotaFilter",
@@ -98,7 +108,8 @@
             "description": "The filter by quota (All - 0, Default - 1, Custom - 2).",
             "schema": {
               "$ref": "#/components/schemas/QuotaFilter"
-            }
+            },
+            "example": 0
           },
           {
             "name": "count",
@@ -109,7 +120,7 @@
               "minimum": 1,
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 25
             }
           },
           {
@@ -119,7 +130,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 0
             }
           },
           {
@@ -128,7 +139,7 @@
             "description": "Specifies the field by which the room content should be sorted.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "DateAndTime"
             }
           },
           {
@@ -137,7 +148,8 @@
             "description": "The order in which the results are sorted.",
             "schema": {
               "$ref": "#/components/schemas/SortOrder"
-            }
+            },
+            "example": 1
           },
           {
             "name": "filterValue",
@@ -145,7 +157,7 @@
             "description": "The text filter value used to refine search or query operations.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "my agent"
             }
           }
         ],
@@ -338,7 +350,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1
+              "example": "file-id"
             }
           }
         ],
@@ -414,7 +426,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1
+              "example": 10
             }
           }
         ],
@@ -672,7 +684,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1
+              "example": 42
             }
           }
         ],
@@ -750,7 +762,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1
+              "example": 42
             }
           },
           {
@@ -760,7 +772,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 0
             }
           },
           {
@@ -770,7 +782,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 100
             }
           }
         ],
@@ -843,7 +855,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -921,7 +933,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           },
           {
@@ -931,7 +943,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 0
             }
           },
           {
@@ -941,7 +953,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 100
             }
           }
         ],
@@ -1011,7 +1023,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -1090,7 +1102,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -1158,7 +1170,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -1221,7 +1233,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -1294,7 +1306,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 1
             }
           }
         ],
@@ -1360,7 +1372,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "call_abc123"
             }
           }
         ],
@@ -1431,7 +1443,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1
+              "example": 42
             }
           }
         ],
@@ -1513,7 +1525,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1
+              "example": 42
             }
           }
         ],
@@ -1713,7 +1725,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 0
             }
           },
           {
@@ -1723,7 +1735,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 100
             }
           }
         ],
@@ -2034,7 +2046,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 0
             }
           },
           {
@@ -2044,7 +2056,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 100
             }
           }
         ],
@@ -2111,7 +2123,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1
+              "example": 42
             }
           }
         ],
@@ -2196,7 +2208,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1
+              "example": 42
             }
           }
         ],
@@ -2267,7 +2279,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1
+              "example": 42
             }
           }
         ],
@@ -2344,7 +2356,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1
+              "example": 42
             }
           },
           {
@@ -2355,7 +2367,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -2437,7 +2449,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1
+              "example": 42
             }
           },
           {
@@ -2448,7 +2460,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -2521,7 +2533,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1
+              "example": 42
             }
           },
           {
@@ -2532,12 +2544,12 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
         "requestBody": {
-          "description": "OAuth authorization parameters.",
+          "description": "The request body containing additional data necessary for connecting to the server,\r\nsuch as authentication or operation-specific information.",
           "content": {
             "application/json": {
               "schema": {
@@ -2619,7 +2631,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1
+              "example": 42
             }
           },
           {
@@ -2630,7 +2642,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -2701,9 +2713,11 @@
             "description": "The unique identifier of the AI chat message to export.",
             "required": true,
             "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 1
             }
           }
         ],
@@ -2791,6 +2805,9 @@
               }
             }
           },
+          "400": {
+            "description": "Invalid connection data or provider with this name already exists"
+          },
           "403": {
             "description": "You don't have enough permission to manage providers"
           },
@@ -2843,7 +2860,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 0
             }
           },
           {
@@ -2853,7 +2870,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 100
             }
           }
         ],
@@ -3002,6 +3019,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Invalid connection data or provider with this name already exists"
           },
           "403": {
             "description": "You don't have enough permission to manage providers"
@@ -3604,18 +3624,15 @@
             },
             "description": "Optional HTTP headers to include with every request to the MCP server (e.g., authentication tokens or API keys).",
             "nullable": true,
-            "example": [
-              {
-                "key": "some text",
-                "value": "some text"
-              }
-            ]
+            "example": {
+              "Authorization": "Bearer token123"
+            }
           },
           "icon": {
             "type": "string",
             "description": "Optional Base64-encoded icon image for the server. Used as the visual identifier in the UI.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://example.com/icon.png"
           }
         },
         "additionalProperties": false,
@@ -3637,7 +3654,7 @@
             "description": "Set of unique identifiers of MCP servers to associate with the room. A maximum of 5 servers can be assigned per room.",
             "nullable": true,
             "example": [
-              "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "00000000-0000-0000-0000-000000000000"
             ]
           }
         },
@@ -3666,6 +3683,20 @@
         "additionalProperties": false,
         "description": "The agent new item's information."
       },
+      "AiChatPrice": {
+        "type": "object",
+        "properties": {
+          "prompt": {
+            "type": "number",
+            "format": "double"
+          },
+          "completion": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
       "AiProviderArrayWrapper": {
         "type": "object",
         "properties": {
@@ -3677,6 +3708,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -3685,20 +3717,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -3721,7 +3758,7 @@
             "type": "string",
             "description": "AI provider display title.",
             "nullable": true,
-            "example": "SampleFile"
+            "example": "OpenAI"
           },
           "type": {
             "$ref": "#/components/schemas/ProviderType"
@@ -3730,7 +3767,7 @@
             "type": "string",
             "description": "API endpoint URL for the AI provider.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://api.openai.com/v1"
           },
           "createdOn": {
             "$ref": "#/components/schemas/ApiDateTime"
@@ -3741,7 +3778,7 @@
           "needReset": {
             "type": "boolean",
             "description": "Indicates whether the provider's API key needs to be reset.",
-            "example": true
+            "example": false
           },
           "isDefault": {
             "type": "boolean",
@@ -3760,6 +3797,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -3768,20 +3806,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -3793,6 +3836,7 @@
           "generateFormToolName",
           "generatePresentationToolName",
           "knowledgeSearchToolName",
+          "modelAliases",
           "webCrawlingToolName",
           "webSearchToolName"
         ],
@@ -3806,7 +3850,7 @@
           "webSearchNeedReset": {
             "type": "boolean",
             "description": "Indicates whether the web search API key needs to be reconfigured.",
-            "example": true
+            "example": false
           },
           "vectorizationEnabled": {
             "type": "boolean",
@@ -3816,7 +3860,7 @@
           "vectorizationNeedReset": {
             "type": "boolean",
             "description": "Indicates whether the embedding provider API key needs to be reconfigured.",
-            "example": true
+            "example": false
           },
           "aiReady": {
             "type": "boolean",
@@ -3826,59 +3870,77 @@
           "aiReadyNeedReset": {
             "type": "boolean",
             "description": "Indicates whether the AI provider API key needs to be reconfigured.",
-            "example": true
+            "example": false
           },
           "portalMcpServerId": {
             "type": "string",
             "description": "The unique identifier of the portal-level MCP server, if configured.",
             "format": "uuid",
             "nullable": true,
-            "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "embeddingModel": {
             "type": "string",
             "description": "The name of the embedding model used for document vectorization.",
             "nullable": true,
-            "example": "some text"
+            "example": "text-embedding-3-small"
+          },
+          "modelAliases": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Mapping of model identifiers to human-readable aliases.",
+            "nullable": true,
+            "example": {
+              "gpt-5.2": "GPT-5.2",
+              "claude-sonnet-4-20250514": "Claude Sonnet 4"
+            }
           },
           "knowledgeSearchToolName": {
             "type": "string",
             "description": "The tool name used by the AI assistant for knowledge base search.",
             "nullable": true,
-            "example": "some text"
+            "example": "knowledge_search"
           },
           "webSearchToolName": {
             "type": "string",
             "description": "The tool name used by the AI assistant for web search.",
             "nullable": true,
-            "example": "some text"
+            "example": "web_search"
           },
           "webCrawlingToolName": {
             "type": "string",
             "description": "The tool name used by the AI assistant for web page crawling.",
             "nullable": true,
-            "example": "some text"
+            "example": "web_crawling"
           },
           "generateDocxToolName": {
             "type": "string",
             "description": "The tool name used by the AI to launch docx creation in the editor.",
             "nullable": true,
-            "example": "some text"
+            "example": "generate_docx"
           },
           "generateFormToolName": {
             "type": "string",
             "description": "The tool name used by the AI assistant to launch form creation in the editor.",
             "nullable": true,
-            "example": "some text"
+            "example": "generate_form"
           },
           "generatePresentationToolName": {
             "type": "string",
             "description": "The tool name used by the AI assistant to launch presentation creation in the editor.",
             "nullable": true,
-            "example": "some text"
+            "example": "generate_presentation"
+          },
+          "systemAiEnabled": {
+            "type": "boolean",
+            "description": "Indicates whether the system-level AI provider is enabled.",
+            "example": true
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "The AI module settings."
       },
       "AiSettingsWrapper": {
         "type": "object",
@@ -3888,6 +3950,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -3896,20 +3959,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -3922,7 +3990,7 @@
             "description": "The time in UTC format.",
             "format": "date-time",
             "readOnly": true,
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "2018-01-01T00:00:00.0000000Z"
           },
           "timeZoneOffset": {
             "type": "string",
@@ -3946,6 +4014,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -3954,20 +4023,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -3985,7 +4059,7 @@
             "type": "string",
             "description": "The display title of the chat session.",
             "nullable": true,
-            "example": "SampleFile"
+            "example": "Project discussion"
           },
           "createdOn": {
             "$ref": "#/components/schemas/ApiDateTime"
@@ -3997,33 +4071,149 @@
             "$ref": "#/components/schemas/EmployeeDto"
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "The chat session information."
+      },
+      "ChatImageMultimodalSettingsDto": {
+        "type": "object",
+        "properties": {
+          "formats": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The supported image formats.",
+            "nullable": true,
+            "example": [
+              ".jpeg",
+              ".gif"
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "description": "The image multimodal settings for the chat model."
+      },
+      "ChatMultimodalSettingsDto": {
+        "type": "object",
+        "properties": {
+          "image": {
+            "$ref": "#/components/schemas/ChatImageMultimodalSettingsDto"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The multimodal settings for the chat model."
+      },
+      "ChatReasoningEffort": {
+        "oneOf": [
+          {
+            "enum": [
+              "None",
+              "Low",
+              "Medium",
+              "High",
+              "XHigh"
+            ],
+            "type": "string",
+            "description": "[]",
+            "example": "None"
+          },
+          {
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "type": "integer",
+            "description": "[]",
+            "example": 0,
+            "x-enum-varnames": [
+              "None",
+              "Low",
+              "Medium",
+              "High",
+              "XHigh"
+            ]
+          }
+        ],
+        "x-enum-type": "integer"
       },
       "ChatSettings": {
         "type": "object",
         "properties": {
           "providerId": {
             "type": "integer",
+            "description": "The provider ID.",
             "format": "int32",
-            "example": 1234
+            "example": 1
           },
           "modelId": {
             "type": "string",
+            "description": "The model ID.",
             "nullable": true,
-            "example": "some text"
+            "example": "gpt-4"
           },
           "prompt": {
             "type": "string",
+            "description": "The prompt.",
             "nullable": true,
-            "example": "some text"
+            "example": "Please analyze this document"
           },
           "internal": {
             "type": "boolean",
+            "description": "Specifies whether the provider is internal or not.",
             "readOnly": true,
-            "example": true
+            "example": false
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "The chat settings."
+      },
+      "ChatSettingsDto": {
+        "type": "object",
+        "properties": {
+          "providerId": {
+            "type": "integer",
+            "description": "The AI provider ID.",
+            "format": "int32",
+            "example": 1
+          },
+          "modelId": {
+            "type": "string",
+            "description": "The AI model ID used for chat completions.",
+            "nullable": true,
+            "example": "gpt-5.2"
+          },
+          "modelAlias": {
+            "type": "string",
+            "description": "The AI model display alias.",
+            "nullable": true,
+            "example": "GPT-5.2"
+          },
+          "prompt": {
+            "type": "string",
+            "description": "The system prompt for the chat.",
+            "nullable": true,
+            "example": "You are a helpful assistant."
+          },
+          "multimodal": {
+            "$ref": "#/components/schemas/ChatMultimodalSettingsDto"
+          },
+          "thinking": {
+            "type": "boolean",
+            "description": "Indicates whether the model supports extended thinking mode.",
+            "example": false
+          },
+          "internal": {
+            "type": "boolean",
+            "description": "Indicates whether this is an internal AI gateway provider.",
+            "readOnly": true,
+            "example": false
+          }
+        },
+        "additionalProperties": false,
+        "description": "The chat settings parameters."
       },
       "ChatWrapper": {
         "type": "object",
@@ -4033,6 +4223,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -4041,20 +4232,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -4069,7 +4265,7 @@
             "type": "string",
             "description": "OAuth authorization code received from the provider's redirect. Used to exchange for access and refresh tokens.",
             "nullable": true,
-            "example": "some text"
+            "example": "abc123def456"
           }
         },
         "additionalProperties": false,
@@ -4085,7 +4281,13 @@
             "type": "string",
             "description": "The user message to append to the conversation.",
             "nullable": true,
-            "example": "some text"
+            "example": "Summarize this document for me"
+          },
+          "contextFolderId": {
+            "type": "integer",
+            "description": "The optional collection of file identifiers to attach as context for the AI model.",
+            "format": "int32",
+            "example": 123
           },
           "files": {
             "type": "array",
@@ -4101,8 +4303,14 @@
                 }
               ]
             },
-            "description": "The optional collection of file identifiers to attach as context for the AI model.",
-            "nullable": true
+            "description": "The list of attached files.",
+            "nullable": true,
+            "example": [
+              {
+                "id": 1,
+                "type": "file"
+              }
+            ]
           }
         },
         "additionalProperties": false,
@@ -4121,14 +4329,14 @@
             "type": "string",
             "description": "The room name.",
             "nullable": true,
-            "example": "SampleFile"
+            "example": "My AI Agent Room"
           },
           "quota": {
             "type": "integer",
             "description": "The room quota.",
             "format": "int64",
             "nullable": true,
-            "example": 1234
+            "example": 10485760
           },
           "indexing": {
             "type": "boolean",
@@ -4140,7 +4348,7 @@
             "type": "boolean",
             "description": "Specifies whether to deny downloads from the room.",
             "nullable": true,
-            "example": true
+            "example": false
           },
           "lifetime": {
             "$ref": "#/components/schemas/RoomDataLifetimeDto"
@@ -4159,7 +4367,8 @@
             "description": "The list of tags.",
             "nullable": true,
             "example": [
-              "some text"
+              "ai",
+              "assistant"
             ]
           },
           "color": {
@@ -4168,7 +4377,7 @@
             "type": "string",
             "description": "The room color.",
             "nullable": true,
-            "example": "some text"
+            "example": "FF6600"
           },
           "cover": {
             "maxLength": 50,
@@ -4176,12 +4385,12 @@
             "type": "string",
             "description": "The room cover.",
             "nullable": true,
-            "example": "some text"
+            "example": "cover1.jpg"
           },
           "private": {
             "type": "boolean",
             "description": "Specifies whether the room to be created is private or not.",
-            "example": true
+            "example": false
           },
           "share": {
             "type": "array",
@@ -4189,7 +4398,13 @@
               "$ref": "#/components/schemas/FileShareParams"
             },
             "description": "The collection of sharing parameters.",
-            "nullable": true
+            "nullable": true,
+            "example": [
+              {
+                "shareId": "user@example.com",
+                "access": 1
+              }
+            ]
           },
           "chatSettings": {
             "$ref": "#/components/schemas/ChatSettings"
@@ -4217,23 +4432,41 @@
             "type": "string",
             "description": "The display title for the AI provider.",
             "nullable": true,
-            "example": "SampleFile"
+            "example": "OpenAI Provider"
           },
           "url": {
             "type": "string",
             "description": "The API endpoint URL for the AI provider. Required for OpenAiCompatible type; optional for other types that have default URLs.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://api.openai.com/v1"
           },
           "key": {
             "type": "string",
             "description": "The authentication API key for the AI provider.",
             "nullable": true,
-            "example": "some text"
+            "example": "sk-example-key-123"
           }
         },
         "additionalProperties": false,
         "description": "Request parameters for creating a new AI provider."
+      },
+      "CurrencyInfo": {
+        "required": [
+          "code",
+          "symbol"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "nullable": true
+          },
+          "symbol": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
       },
       "DefaultProviderDto": {
         "required": [
@@ -4245,19 +4478,19 @@
             "type": "integer",
             "description": "AI provider identifier.",
             "format": "int32",
-            "example": 1234
+            "example": 1
           },
           "defaultModel": {
             "type": "string",
             "description": "Default model identifier used with this provider.",
             "nullable": true,
-            "example": "some text"
+            "example": "gpt-4o"
           },
           "providerTitle": {
             "type": "string",
             "description": "AI provider title.",
             "nullable": true,
-            "example": "some text"
+            "example": "OpenAI"
           }
         },
         "additionalProperties": false,
@@ -4271,6 +4504,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -4279,20 +4513,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -4303,7 +4542,7 @@
           "deleteAfter": {
             "type": "boolean",
             "description": "Specifies whether to delete a room after the editing session is finished or not.",
-            "example": true
+            "example": false
           }
         },
         "additionalProperties": false,
@@ -4325,7 +4564,7 @@
             "description": "Set of unique identifiers of MCP servers to remove from the room. Associated connections and tool configurations will also be cleaned up.",
             "nullable": true,
             "example": [
-              "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "00000000-0000-0000-0000-000000000000"
             ]
           }
         },
@@ -4348,7 +4587,7 @@
             "description": "Set of unique identifiers of the MCP servers to permanently remove. All room associations and connection data will also be deleted.",
             "nullable": true,
             "example": [
-              "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "00000000-0000-0000-0000-000000000000"
             ]
           }
         },
@@ -4386,13 +4625,6 @@
               "Completed",
               "Canceled",
               "Failted"
-            ],
-            "x-enum-descriptions": [
-              "Created",
-              "Running",
-              "Completed",
-              "Canceled",
-              "Failted"
             ]
           }
         ],
@@ -4407,20 +4639,44 @@
             "description": "The email address.",
             "format": "email",
             "nullable": true,
-            "example": "example@onlyoffice.com"
+            "example": "user@example.com"
           }
         },
         "additionalProperties": false,
         "description": "The email invitation parameters."
       },
       "EmbeddingProviderType": {
-        "enum": [
-          0,
-          1,
-          2
+        "oneOf": [
+          {
+            "enum": [
+              "None",
+              "OpenAi",
+              "OpenRouter",
+              "PortalAi"
+            ],
+            "type": "string",
+            "description": "[None - None, OpenAi - OpenAi, OpenRouter - OpenRouter, PortalAi - PortalAi]",
+            "example": "None"
+          },
+          {
+            "enum": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "type": "integer",
+            "description": "[0 - None, 1 - OpenAi, 2 - OpenRouter, 3 - PortalAi]",
+            "example": 0,
+            "x-enum-varnames": [
+              "None",
+              "OpenAi",
+              "OpenRouter",
+              "PortalAi"
+            ]
+          }
         ],
-        "type": "integer",
-        "format": "int32"
+        "x-enum-type": "integer"
       },
       "EmployeeDto": {
         "type": "object",
@@ -4429,7 +4685,7 @@
             "type": "string",
             "description": "The user ID.",
             "format": "uuid",
-            "example": "{00000000-0000-0000-0000-000000000000}"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "displayName": {
             "type": "string",
@@ -4447,37 +4703,37 @@
             "type": "string",
             "description": "The user avatar.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://example.com/avatar.jpg"
           },
           "avatarOriginal": {
             "type": "string",
             "description": "The user original size avatar.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://example.com/avatar_original.jpg"
           },
           "avatarMax": {
             "type": "string",
             "description": "The user maximum size avatar.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://example.com/avatar_max.jpg"
           },
           "avatarMedium": {
             "type": "string",
             "description": "The user medium size avatar.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://example.com/avatar_medium.jpg"
           },
           "avatarSmall": {
             "type": "string",
             "description": "The user small size avatar.",
             "nullable": true,
-            "example": "url to small avatar"
+            "example": "https://example.com/avatar_small.jpg"
           },
           "profileUrl": {
             "type": "string",
             "description": "The user profile URL.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://example.com/profile/user123"
           },
           "hasAvatar": {
             "type": "boolean",
@@ -4487,19 +4743,41 @@
           "isAnonim": {
             "type": "boolean",
             "description": "Specifies if the user is anonymous or not.",
-            "example": true
+            "example": false
           }
         },
         "additionalProperties": false,
         "description": "The user parameters."
       },
       "EngineType": {
-        "enum": [
-          0,
-          1
+        "oneOf": [
+          {
+            "enum": [
+              "None",
+              "Exa",
+              "PortalAi"
+            ],
+            "type": "string",
+            "description": "[None - None, Exa - Exa, PortalAi - PortalAi]",
+            "example": "None"
+          },
+          {
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "description": "[0 - None, 1 - Exa, 2 - PortalAi]",
+            "example": 0,
+            "x-enum-varnames": [
+              "None",
+              "Exa",
+              "PortalAi"
+            ]
+          }
         ],
-        "type": "integer",
-        "format": "int32"
+        "x-enum-type": "integer"
       },
       "ExportChatRequestBodyInteger": {
         "required": [
@@ -4512,13 +4790,13 @@
             "type": "integer",
             "description": "The identifier of the destination folder where the exported document will be saved.",
             "format": "int32",
-            "example": 1
+            "example": 123
           },
           "title": {
             "type": "string",
             "description": "The file name (without extension) to use for the exported document.",
             "nullable": true,
-            "example": "SampleFile"
+            "example": "Chat Export"
           }
         },
         "additionalProperties": false,
@@ -4535,13 +4813,13 @@
             "type": "integer",
             "description": "The identifier of the destination folder where the exported document will be saved.",
             "format": "int32",
-            "example": 1
+            "example": 123
           },
           "title": {
             "type": "string",
             "description": "The file name (without extension) to use for the exported document.",
             "nullable": true,
-            "example": "SampleFile"
+            "example": "Message Export"
           }
         },
         "additionalProperties": false,
@@ -4554,7 +4832,7 @@
             "type": "string",
             "description": "The file entry title.",
             "nullable": true,
-            "example": "Some titile.txt/ Some title"
+            "example": "Some title.txt"
           },
           "access": {
             "$ref": "#/components/schemas/FileShare"
@@ -4578,14 +4856,14 @@
           "parentShared": {
             "type": "boolean",
             "description": "Indicates whether the parent entity is shared.",
-            "example": true
+            "example": false
           },
           "shortWebUrl": {
             "type": "string",
             "description": "The short Web URL.",
             "format": "uri",
             "nullable": true,
-            "example": "some text"
+            "example": "http://localhost/s/abc123"
           },
           "created": {
             "$ref": "#/components/schemas/ApiDateTime"
@@ -4612,32 +4890,32 @@
             "type": "boolean",
             "description": "Specifies if the file entry provider is specified or not.",
             "nullable": true,
-            "example": true
+            "example": false
           },
           "providerKey": {
             "type": "string",
             "description": "The provider key of the file entry.",
             "nullable": true,
-            "example": "some text"
+            "example": "google-drive"
           },
           "providerId": {
             "type": "integer",
             "description": "The provider ID of the file entry.",
             "format": "int32",
             "nullable": true,
-            "example": 1234
+            "example": 1
           },
           "order": {
             "type": "string",
             "description": "The order of the file entry.",
             "nullable": true,
-            "example": "some text"
+            "example": 1
           },
           "isFavorite": {
             "type": "boolean",
             "description": "Specifies if the file is a favorite or not.",
             "nullable": true,
-            "example": true
+            "example": false
           },
           "fileEntryType": {
             "$ref": "#/components/schemas/FileEntryType"
@@ -4671,31 +4949,31 @@
                 "type": "integer",
                 "description": "The root folder ID of the file entry.",
                 "format": "int32",
-                "example": 1234
+                "example": 1
               },
               "originId": {
                 "type": "integer",
                 "description": "The origin ID of the file entry.",
                 "format": "int32",
-                "example": 1234
+                "example": 12
               },
               "originRoomId": {
                 "type": "integer",
                 "description": "The origin room ID of the file entry.",
                 "format": "int32",
-                "example": 1234
+                "example": 22
               },
               "originTitle": {
                 "type": "string",
                 "description": "The origin title of the file entry.",
                 "nullable": true,
-                "example": "some text"
+                "example": "Original Title"
               },
               "originRoomTitle": {
                 "type": "string",
                 "description": "The origin room title of the file entry.",
                 "nullable": true,
-                "example": "some text"
+                "example": "Original Room"
               },
               "canShare": {
                 "type": "boolean",
@@ -4729,11 +5007,10 @@
                 "additionalProperties": false,
                 "description": "A dictionary representing the sharing settings for the file entry.",
                 "nullable": true,
-                "example": [
-                  {
-                    "value": 1234
-                  }
-                ]
+                "example": {
+                  "ExternalLink": 1,
+                  "InvitationLink": 2
+                }
               },
               "security": {
                 "type": "object",
@@ -4871,11 +5148,11 @@
                 "additionalProperties": false,
                 "description": "The actions that can be performed with the file entry.",
                 "nullable": true,
-                "example": [
-                  {
-                    "value": true
-                  }
-                ]
+                "example": {
+                  "Read": true,
+                  "Edit": false,
+                  "Delete": false
+                }
               },
               "availableShareRights": {
                 "type": "object",
@@ -4914,25 +5191,24 @@
                 "additionalProperties": false,
                 "description": "The available external rights of the file entry.",
                 "nullable": true,
-                "example": [
-                  {
-                    "value": [
-                      "some text"
-                    ]
-                  }
-                ]
+                "example": {
+                  "ExternalLink": [
+                    "Read",
+                    "Edit"
+                  ]
+                }
               },
               "requestToken": {
                 "type": "string",
                 "description": "The request token of the file entry.",
                 "nullable": true,
-                "example": "some text"
+                "example": "token-abc-123"
               },
               "external": {
                 "type": "boolean",
                 "description": "Specifies if the folder can be accessed via an external link or not.",
                 "nullable": true,
-                "example": true
+                "example": false
               },
               "expirationDate": {
                 "$ref": "#/components/schemas/ApiDateTime"
@@ -4941,7 +5217,7 @@
                 "type": "boolean",
                 "description": "Indicates whether the shareable link associated with the file or folder has expired.",
                 "nullable": true,
-                "example": true
+                "example": false
               }
             }
           }
@@ -4971,10 +5247,6 @@
             "x-enum-varnames": [
               "Folder",
               "File"
-            ],
-            "x-enum-descriptions": [
-              "Folder",
-              "File"
             ]
           }
         ],
@@ -4996,7 +5268,7 @@
             "type": "string",
             "description": "The file operation ID.",
             "nullable": true,
-            "example": "1"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "Operation": {
             "$ref": "#/components/schemas/FileOperationType"
@@ -5011,13 +5283,13 @@
             "type": "string",
             "description": "The file operation error message.",
             "nullable": true,
-            "example": ""
+            "example": "File not found."
           },
           "processed": {
             "type": "string",
             "description": "The file operation processing status.",
             "nullable": true,
-            "example": "1"
+            "example": 1
           },
           "finished": {
             "type": "boolean",
@@ -5029,7 +5301,7 @@
             "description": "The file operation URL.",
             "format": "uri",
             "nullable": true,
-            "example": "some text"
+            "example": "http://localhost/download"
           },
           "files": {
             "type": "array",
@@ -5037,7 +5309,13 @@
               "$ref": "#/components/schemas/FileEntryBaseDto"
             },
             "description": "The list of files of the file operation.",
-            "nullable": true
+            "nullable": true,
+            "example": [
+              {
+                "id": 10,
+                "title": "document.docx"
+              }
+            ]
           },
           "folders": {
             "type": "array",
@@ -5045,7 +5323,13 @@
               "$ref": "#/components/schemas/FileEntryBaseDto"
             },
             "description": "The list of folders of the file operation.",
-            "nullable": true
+            "nullable": true,
+            "example": [
+              {
+                "id": 20,
+                "title": "My Folder"
+              }
+            ]
           },
           "status": {
             "$ref": "#/components/schemas/DistributedTaskStatus"
@@ -5094,16 +5378,6 @@
               "Import",
               "Convert",
               "Duplicate"
-            ],
-            "x-enum-descriptions": [
-              "Move",
-              "Copy",
-              "Delete",
-              "Download",
-              "MarkAsRead",
-              "Import",
-              "Convert",
-              "Duplicate"
             ]
           }
         ],
@@ -5118,6 +5392,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -5126,20 +5401,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -5196,20 +5476,6 @@
               "RoomManager",
               "Editing",
               "ContentCreator"
-            ],
-            "x-enum-descriptions": [
-              "None",
-              "Read and write",
-              "Read",
-              "Restrict",
-              "Varies",
-              "Review",
-              "Comment",
-              "Fill forms",
-              "Custom filter",
-              "Room manager",
-              "Editing",
-              "Content creator"
             ]
           }
         ],
@@ -5228,7 +5494,7 @@
                 "type": "string",
                 "description": "The ID of the user to whom the file will be shared.",
                 "format": "uuid",
-                "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+                "example": "00000000-0000-0000-0000-000000000000"
               },
               "access": {
                 "$ref": "#/components/schemas/FileShare"
@@ -5252,7 +5518,13 @@
               "$ref": "#/components/schemas/FileEntryBaseDto"
             },
             "description": "The list of files in the folder.",
-            "nullable": true
+            "nullable": true,
+            "example": [
+              {
+                "id": 10,
+                "title": "document.docx"
+              }
+            ]
           },
           "folders": {
             "type": "array",
@@ -5260,7 +5532,13 @@
               "$ref": "#/components/schemas/FileEntryBaseDto"
             },
             "description": "The list of folders in the folder.",
-            "nullable": true
+            "nullable": true,
+            "example": [
+              {
+                "id": 20,
+                "title": "My Folder"
+              }
+            ]
           },
           "current": {
             "$ref": "#/components/schemas/FolderDtoInteger"
@@ -5292,7 +5570,7 @@
             "type": "integer",
             "description": "The new element index in the folder.",
             "format": "int32",
-            "example": 1234
+            "example": 0
           }
         },
         "additionalProperties": false,
@@ -5306,6 +5584,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -5314,20 +5593,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -5368,12 +5652,12 @@
                 "type": "integer",
                 "description": "The new element index in the folder.",
                 "format": "int32",
-                "example": 1234
+                "example": 0
               },
               "mute": {
                 "type": "boolean",
                 "description": "Specifies if the folder notifications are enabled or not.",
-                "example": true
+                "example": false
               },
               "tags": {
                 "type": "array",
@@ -5383,7 +5667,8 @@
                 "description": "The list of tags of the folder.",
                 "nullable": true,
                 "example": [
-                  "some text"
+                  "tag1",
+                  "tag2"
                 ]
               },
               "logo": {
@@ -5392,7 +5677,7 @@
               "pinned": {
                 "type": "boolean",
                 "description": "Specifies if the folder is pinned or not.",
-                "example": true
+                "example": false
               },
               "roomType": {
                 "$ref": "#/components/schemas/RoomType"
@@ -5400,7 +5685,7 @@
               "private": {
                 "type": "boolean",
                 "description": "Specifies if the folder is private or not.",
-                "example": true
+                "example": false
               },
               "indexing": {
                 "type": "boolean",
@@ -5410,7 +5695,7 @@
               "denyDownload": {
                 "type": "boolean",
                 "description": "Specifies if the folder can be downloaded or not.",
-                "example": true
+                "example": false
               },
               "lifetime": {
                 "$ref": "#/components/schemas/RoomDataLifetimeDto"
@@ -5425,46 +5710,56 @@
                 "type": "boolean",
                 "description": "Specifies if the folder is placed in the room or not.",
                 "nullable": true,
-                "example": true
+                "example": false
               },
               "quotaLimit": {
                 "type": "integer",
                 "description": "The folder quota limit.",
                 "format": "int64",
                 "nullable": true,
-                "example": 1234
+                "example": 1073741824
               },
               "isCustomQuota": {
                 "type": "boolean",
                 "description": "Specifies if the folder room has a custom quota or not.",
                 "nullable": true,
-                "example": true
+                "example": false
               },
               "usedSpace": {
                 "type": "integer",
                 "description": "How much folder space is used (counter).",
                 "format": "int64",
                 "nullable": true,
-                "example": 1234
+                "example": 524288000
               },
               "passwordProtected": {
                 "type": "boolean",
                 "description": "Specifies if the folder is password protected or not.",
                 "nullable": true,
-                "example": true
+                "example": false
               },
               "expired": {
                 "type": "boolean",
                 "description": "Specifies if an external link to the folder is expired or not.",
                 "nullable": true,
-                "example": true,
+                "example": false,
                 "deprecated": true
               },
               "chatSettings": {
-                "$ref": "#/components/schemas/ChatSettings"
+                "$ref": "#/components/schemas/ChatSettingsDto"
               },
               "rootRoomType": {
                 "$ref": "#/components/schemas/RoomType"
+              },
+              "saveFormAsXLSX": {
+                "type": "boolean",
+                "description": "Specifies whether to save form data as XLSX file.",
+                "nullable": true
+              },
+              "sendFormToExternalDB": {
+                "type": "boolean",
+                "description": "Specifies whether to send form data to external database.",
+                "nullable": true
               }
             }
           }
@@ -5483,6 +5778,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -5491,20 +5787,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -5517,6 +5818,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -5525,20 +5827,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -5646,37 +5953,6 @@
               "ResultStorage",
               "AiAgents",
               "DefaultTemplates"
-            ],
-            "x-enum-descriptions": [
-              "Default",
-              "Coomon",
-              "Bunch",
-              "Trash",
-              "User",
-              "Share",
-              "Projects",
-              "Favourites",
-              "Recent",
-              "Templates",
-              "Privacy",
-              "Virtual rooms",
-              "Filling forms room",
-              "Editing room",
-              "Custom room",
-              "Archive",
-              "Thirdparty backup",
-              "Public room",
-              "Ready form folder",
-              "In process form folder",
-              "Form filling folder done",
-              "Form filling folder in progress",
-              "Virtual Data Room",
-              "Room templates folder",
-              "AI Room",
-              "Knowledge",
-              "Result storage",
-              "AI Agents",
-              "Default Templates"
             ]
           }
         ],
@@ -5694,23 +5970,19 @@
         "properties": {
           "icon48": {
             "type": "string",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           },
           "icon32": {
             "type": "string",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           },
           "icon24": {
             "type": "string",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           },
           "icon16": {
             "type": "string",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -5728,31 +6000,31 @@
             "type": "string",
             "description": "The original logo.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://portal.example.com/logo/original.png"
           },
           "large": {
             "type": "string",
             "description": "The large logo.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://portal.example.com/logo/large.png"
           },
           "medium": {
             "type": "string",
             "description": "The medium logo.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://portal.example.com/logo/medium.png"
           },
           "small": {
             "type": "string",
             "description": "The small logo.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://portal.example.com/logo/small.png"
           },
           "color": {
             "type": "string",
             "description": "The logo color.",
             "nullable": true,
-            "example": "some text"
+            "example": "#4781D1"
           },
           "cover": {
             "$ref": "#/components/schemas/LogoCover"
@@ -5772,13 +6044,13 @@
             "type": "string",
             "description": "The logo cover ID.",
             "nullable": true,
-            "example": "1"
+            "example": "default_cover"
           },
           "data": {
             "type": "string",
             "description": "The logo cover data.",
             "nullable": true,
-            "example": "some text"
+            "example": "base64-image-data..."
           }
         },
         "additionalProperties": false,
@@ -5791,29 +6063,31 @@
             "type": "string",
             "description": "The path to the temporary image file.",
             "nullable": true,
-            "example": "some text"
+            "example": "/tmp/logo.png"
           },
           "x": {
             "type": "integer",
             "description": "The X coordinate of the rectangle starting point.",
             "format": "int32",
-            "example": 1234
+            "example": 0
           },
           "y": {
             "type": "integer",
             "description": "The Y coordinate of the rectangle starting point.",
             "format": "int32",
-            "example": 1234
+            "example": 0
           },
           "width": {
             "type": "integer",
             "description": "The rectangle width.",
-            "format": "int32"
+            "format": "int32",
+            "example": 100
           },
           "height": {
             "type": "integer",
             "description": "The rectangle height.",
-            "format": "int32"
+            "format": "int32",
+            "example": 100
           }
         },
         "additionalProperties": false,
@@ -5830,6 +6104,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -5838,20 +6113,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -5869,19 +6149,19 @@
             "type": "string",
             "description": "Display name of the MCP server.",
             "nullable": true,
-            "example": "John Doe"
+            "example": "DocSpace Tools"
           },
           "description": {
             "type": "string",
             "description": "Human-readable description of the server's purpose and capabilities.",
             "nullable": true,
-            "example": "some text"
+            "example": "Provides document management tools"
           },
           "endpoint": {
             "type": "string",
             "description": "Base URL of the MCP server endpoint.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://mcp.example.com/sse"
           },
           "serverType": {
             "$ref": "#/components/schemas/ServerType"
@@ -5893,12 +6173,9 @@
             },
             "description": "HTTP headers sent with every request to the server (e.g., authentication tokens).",
             "nullable": true,
-            "example": [
-              {
-                "key": "some text",
-                "value": "some text"
-              }
-            ]
+            "example": {
+              "Authorization": "Bearer token123"
+            }
           },
           "enabled": {
             "type": "boolean",
@@ -5911,7 +6188,7 @@
           "needReset": {
             "type": "boolean",
             "description": "Indicates whether the server requires a configuration reset due to connectivity or credential issues.",
-            "example": true
+            "example": false
           }
         },
         "additionalProperties": false,
@@ -5928,6 +6205,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -5936,20 +6214,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -5967,7 +6250,7 @@
             "type": "string",
             "description": "Display name of the MCP server.",
             "nullable": true,
-            "example": "John Doe"
+            "example": "DocSpace Tools"
           },
           "serverType": {
             "$ref": "#/components/schemas/ServerType"
@@ -5983,7 +6266,7 @@
           "needReset": {
             "type": "boolean",
             "description": "Indicates whether the server requires a configuration reset due to connectivity or credential issues.",
-            "example": true
+            "example": false
           }
         },
         "additionalProperties": false,
@@ -5997,6 +6280,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -6005,20 +6289,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -6034,6 +6323,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -6042,20 +6332,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -6076,7 +6371,7 @@
             "type": "string",
             "description": "Display name of the MCP server.",
             "nullable": true,
-            "example": "John Doe"
+            "example": "DocSpace Tools"
           },
           "serverType": {
             "$ref": "#/components/schemas/ServerType"
@@ -6092,7 +6387,7 @@
           "needReset": {
             "type": "boolean",
             "description": "Indicates whether the server requires a configuration reset due to connectivity or credential issues.",
-            "example": true
+            "example": false
           }
         },
         "additionalProperties": false,
@@ -6106,6 +6401,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -6114,20 +6410,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -6140,6 +6441,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -6148,20 +6450,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -6177,6 +6484,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -6185,20 +6493,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -6213,7 +6526,7 @@
             "type": "string",
             "description": "Name of the tool as reported by the MCP server.",
             "nullable": true,
-            "example": "John Doe"
+            "example": "search_documents"
           },
           "enabled": {
             "type": "boolean",
@@ -6235,6 +6548,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -6243,20 +6557,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -6269,22 +6588,48 @@
           }
         },
         "additionalProperties": false,
+        "description": "The base class for message content blocks.",
         "x-derived": true,
         "x-derived-types": [
           "TextContentDto",
           "ToolContentDto",
-          "AttachmentContentDto"
+          "AttachmentContentDto",
+          "DataContentDto"
         ]
       },
       "MessageContentType": {
-        "enum": [
-          0,
-          1,
-          2
+        "oneOf": [
+          {
+            "enum": [
+              "Text",
+              "Tool",
+              "Attachment",
+              "Data"
+            ],
+            "type": "string",
+            "description": "[Text - Text, Tool - Tool, Attachment - Attachment]",
+            "example": "Text"
+          },
+          {
+            "enum": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "type": "integer",
+            "description": "[0 - Text, 1 - Tool, 2 - Attachment]",
+            "example": 0,
+            "x-enum-varnames": [
+              "Text",
+              "Tool",
+              "Attachment",
+              "Data"
+            ]
+          }
         ],
-        "type": "integer",
         "description": "The type of content block within a chat message.",
-        "format": "int32"
+        "x-enum-type": "integer"
       },
       "MessageDto": {
         "type": "object",
@@ -6293,7 +6638,7 @@
             "type": "integer",
             "description": "The unique identifier of the message.",
             "format": "int64",
-            "example": "00000000-0000-0000-0000-000000000000"
+            "example": 42
           },
           "role": {
             "$ref": "#/components/schemas/Role"
@@ -6310,7 +6655,8 @@
             "$ref": "#/components/schemas/ApiDateTime"
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "The chat message information."
       },
       "ModelArrayWrapper": {
         "type": "object",
@@ -6323,6 +6669,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -6331,20 +6678,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -6360,22 +6712,29 @@
             "type": "integer",
             "description": "The unique identifier of the AI provider that offers this model.",
             "format": "int32",
-            "example": 1234
+            "example": 1
           },
           "providerTitle": {
             "type": "string",
             "description": "The human-readable display name of the AI provider (e.g., \"OpenAI\", \"Anthropic\").",
             "nullable": true,
-            "example": "some text"
+            "example": "OpenAI"
           },
           "modelId": {
             "type": "string",
             "description": "The model identifier as recognized by the AI provider (e.g., \"gpt-4o\", \"claude-sonnet-4-20250514\").",
             "nullable": true,
-            "example": "some text"
+            "example": "gpt-4o"
+          },
+          "price": {
+            "$ref": "#/components/schemas/AiChatPrice"
+          },
+          "currency": {
+            "$ref": "#/components/schemas/CurrencyInfo"
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "The AI model information."
       },
       "NewItemsAgentNewItemsArrayWrapper": {
         "type": "object",
@@ -6388,6 +6747,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -6396,20 +6756,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -6447,6 +6812,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -6455,28 +6821,30 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
       },
       "ProviderSettingsDto": {
-        "required": [
-          "url"
-        ],
         "type": "object",
         "properties": {
           "type": {
@@ -6486,26 +6854,59 @@
             "type": "string",
             "description": "Default API endpoint URL for the provider type.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://api.openai.com/v1"
           }
         },
         "additionalProperties": false,
         "description": "Available AI provider type settings."
       },
       "ProviderType": {
-        "enum": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7,
-          8
+        "oneOf": [
+          {
+            "enum": [
+              "PortalAi",
+              "OpenAi",
+              "TogetherAi",
+              "OpenAiCompatible",
+              "Anthropic",
+              "OpenRouter",
+              "DeepSeek",
+              "XAi",
+              "GoogleAi"
+            ],
+            "type": "string",
+            "description": "[PortalAi - PortalAi, OpenAi - OpenAi, TogetherAi - TogetherAi, OpenAiCompatible - OpenAiCompatible, Anthropic - Anthropic, OpenRouter - OpenRouter, DeepSeek - DeepSeek, XAi - XAi, GoogleAi - GoogleAi]",
+            "example": "PortalAi"
+          },
+          {
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8
+            ],
+            "type": "integer",
+            "description": "[0 - PortalAi, 1 - OpenAi, 2 - TogetherAi, 3 - OpenAiCompatible, 4 - Anthropic, 5 - OpenRouter, 6 - DeepSeek, 7 - XAi, 8 - GoogleAi]",
+            "example": 0,
+            "x-enum-varnames": [
+              "PortalAi",
+              "OpenAi",
+              "TogetherAi",
+              "OpenAiCompatible",
+              "Anthropic",
+              "OpenRouter",
+              "DeepSeek",
+              "XAi",
+              "GoogleAi"
+            ]
+          }
         ],
-        "type": "integer",
-        "format": "int32"
+        "x-enum-type": "integer"
       },
       "QuotaFilter": {
         "oneOf": [
@@ -6532,11 +6933,6 @@
               "All",
               "Default",
               "Custom"
-            ],
-            "x-enum-descriptions": [
-              "All",
-              "Default",
-              "Custom"
             ]
           }
         ],
@@ -6559,7 +6955,9 @@
             "description": "The set of AI provider identifiers to delete.",
             "nullable": true,
             "example": [
-              1234
+              1,
+              2,
+              3
             ]
           }
         },
@@ -6577,19 +6975,38 @@
             "type": "string",
             "description": "The new display name for the chat session (maximum 255 characters).",
             "nullable": true,
-            "example": "John Doe"
+            "example": "Project Discussion"
           }
         },
         "additionalProperties": false,
         "description": "Parameters for renaming an AI chat session."
       },
       "Role": {
-        "enum": [
-          0,
-          1
+        "oneOf": [
+          {
+            "enum": [
+              "User",
+              "Assistant"
+            ],
+            "type": "string",
+            "description": "[User - User, Assistant - Assistant]",
+            "example": "User"
+          },
+          {
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "description": "[0 - User, 1 - Assistant]",
+            "example": 0,
+            "x-enum-varnames": [
+              "User",
+              "Assistant"
+            ]
+          }
         ],
-        "type": "integer",
-        "format": "int32"
+        "x-enum-type": "integer"
       },
       "RoomDataLifetimeDto": {
         "type": "object",
@@ -6609,7 +7026,7 @@
             "description": "Specifies the time period value of the room data lifetime.",
             "format": "int32",
             "nullable": true,
-            "example": 1234
+            "example": 33
           },
           "enabled": {
             "type": "boolean",
@@ -6643,11 +7060,6 @@
             "description": "[0 - Day, 1 - Month, 2 - Year]",
             "example": 0,
             "x-enum-varnames": [
-              "Day",
-              "Month",
-              "Year"
-            ],
-            "x-enum-descriptions": [
               "Day",
               "Month",
               "Year"
@@ -6691,14 +7103,6 @@
               "PublicRoom",
               "VirtualDataRoom",
               "AiRoom"
-            ],
-            "x-enum-descriptions": [
-              "Form filling room",
-              "Collaboration room",
-              "Custom room",
-              "Public room",
-              "Virtual data room",
-              "AI Room"
             ]
           }
         ],
@@ -6733,12 +7137,6 @@
               "DocSpace",
               "Github",
               "Box"
-            ],
-            "x-enum-descriptions": [
-              "Custom",
-              "DocSpace",
-              "Github",
-              "Box"
             ]
           }
         ],
@@ -6754,14 +7152,14 @@
             "type": "integer",
             "description": "AI provider identifier.",
             "format": "int32",
-            "example": 1234
+            "example": 1
           },
           "defaultModel": {
             "maxLength": 255,
             "type": "string",
             "description": "Default model identifier to use with this provider.",
             "nullable": true,
-            "example": "some text"
+            "example": "gpt-4"
           }
         },
         "additionalProperties": false,
@@ -6777,7 +7175,7 @@
             "type": "string",
             "description": "The API key for the selected embedding provider. Pass null to keep the existing key unchanged.",
             "nullable": true,
-            "example": "some text"
+            "example": "sk-example-key-123"
           }
         },
         "additionalProperties": false,
@@ -6797,7 +7195,8 @@
             "description": "List of tool names to disable. Tools not included in this list will remain enabled. Pass an empty list to enable all tools.",
             "nullable": true,
             "example": [
-              "some text"
+              "tool1",
+              "tool2"
             ]
           }
         },
@@ -6824,6 +7223,9 @@
             "description": "Indicates whether the AI assistant is allowed to perform web searches when generating responses.",
             "nullable": true,
             "example": true
+          },
+          "reasoningEffort": {
+            "$ref": "#/components/schemas/ChatReasoningEffort"
           }
         },
         "additionalProperties": false,
@@ -6844,7 +7246,7 @@
             "type": "string",
             "description": "The API key for the selected web search engine. Pass null to keep the existing key unchanged.",
             "nullable": true,
-            "example": "some text"
+            "example": "search-api-key-123"
           }
         },
         "additionalProperties": false,
@@ -6872,10 +7274,6 @@
             "x-enum-varnames": [
               "Ascending",
               "Descending"
-            ],
-            "x-enum-descriptions": [
-              "Ascending",
-              "Descending"
             ]
           }
         ],
@@ -6892,7 +7290,14 @@
             "type": "string",
             "description": "The initial user message to send to the AI assistant.",
             "nullable": true,
-            "example": "some text"
+            "example": "Hello, can you help me with this document?"
+          },
+          "contextFolderId": {
+            "type": "integer",
+            "description": "The optional collection of file identifiers to attach as context for the AI model.",
+            "format": "int32",
+            "nullable": true,
+            "example": 123
           },
           "files": {
             "type": "array",
@@ -6908,8 +7313,14 @@
                 }
               ]
             },
-            "description": "The optional collection of file identifiers to attach as context for the AI model.",
-            "nullable": true
+            "description": "The list of attached files.",
+            "nullable": true,
+            "example": [
+              {
+                "id": 1,
+                "type": "file"
+              }
+            ]
           }
         },
         "additionalProperties": false,
@@ -6937,10 +7348,6 @@
             "x-enum-varnames": [
               "Owner",
               "Member"
-            ],
-            "x-enum-descriptions": [
-              "Owner",
-              "Member"
             ]
           }
         ],
@@ -6957,13 +7364,34 @@
         "description": "Parameters for the tool execution permission decision."
       },
       "ToolExecutionDecision": {
-        "enum": [
-          0,
-          1,
-          2
+        "oneOf": [
+          {
+            "enum": [
+              "Allow",
+              "AlwaysAllow",
+              "Deny"
+            ],
+            "type": "string",
+            "description": "[Allow - Allow, AlwaysAllow - AlwaysAllow, Deny - Deny]",
+            "example": "Allow"
+          },
+          {
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "description": "[0 - Allow, 1 - AlwaysAllow, 2 - Deny]",
+            "example": 0,
+            "x-enum-varnames": [
+              "Allow",
+              "AlwaysAllow",
+              "Deny"
+            ]
+          }
         ],
-        "type": "integer",
-        "format": "int32"
+        "x-enum-type": "integer"
       },
       "UpdateProviderBody": {
         "type": "object",
@@ -6972,19 +7400,19 @@
             "type": "string",
             "description": "The new display title for the AI provider. If null, the title is not changed.",
             "nullable": true,
-            "example": "SampleFile"
+            "example": "Updated Provider"
           },
           "url": {
             "type": "string",
             "description": "The new API endpoint URL for the AI provider. If null, the URL is not changed.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://api.openai.com/v1"
           },
           "key": {
             "type": "string",
             "description": "The new authentication API key for the AI provider. If null, the key is not changed.",
             "nullable": true,
-            "example": "some text"
+            "example": "sk-example-key-123"
           }
         },
         "additionalProperties": false,
@@ -6999,14 +7427,14 @@
             "type": "string",
             "description": "The room title.",
             "nullable": true,
-            "example": "SampleFile"
+            "example": "My Document"
           },
           "quota": {
             "type": "integer",
             "description": "The room quota.",
             "format": "int64",
             "nullable": true,
-            "example": 1234
+            "example": 10485760
           },
           "indexing": {
             "type": "boolean",
@@ -7037,7 +7465,8 @@
             "description": "The list of tags.",
             "nullable": true,
             "example": [
-              "some text"
+              "tag1",
+              "tag2"
             ]
           },
           "color": {
@@ -7046,7 +7475,7 @@
             "type": "string",
             "description": "The room color.",
             "nullable": true,
-            "example": "some text"
+            "example": "#FF5733"
           },
           "cover": {
             "maxLength": 50,
@@ -7054,10 +7483,20 @@
             "type": "string",
             "description": "The room cover.",
             "nullable": true,
-            "example": "some text"
+            "example": "cover1"
           },
           "chatSettings": {
             "$ref": "#/components/schemas/ChatSettings"
+          },
+          "sendFormToExternalDB": {
+            "type": "boolean",
+            "description": "Specifies whether to send form data to external database.",
+            "nullable": true
+          },
+          "saveFormAsXLSX": {
+            "type": "boolean",
+            "description": "Specifies whether to save form data as XLSX file.",
+            "nullable": true
           }
         },
         "additionalProperties": false,
@@ -7081,13 +7520,18 @@
               ]
             },
             "description": "The list of room IDs.",
-            "nullable": true
+            "nullable": true,
+            "example": [
+              1,
+              2,
+              3
+            ]
           },
           "quota": {
             "type": "integer",
             "description": "The room quota.",
             "format": "int64",
-            "example": 1234
+            "example": 10485760
           }
         },
         "additionalProperties": false,
@@ -7111,7 +7555,12 @@
               ]
             },
             "description": "The list of room IDs.",
-            "nullable": true
+            "nullable": true,
+            "example": [
+              1,
+              2,
+              3
+            ]
           }
         },
         "additionalProperties": false,
@@ -7125,21 +7574,21 @@
             "type": "string",
             "description": "New display name for the server. Only letters, numbers, underscores, and hyphens are allowed. Maximum 128 characters.",
             "nullable": true,
-            "example": "John Doe"
+            "example": "Updated MCP Server"
           },
           "description": {
             "maxLength": 255,
             "type": "string",
             "description": "New human-readable description of the server's purpose. Maximum 255 characters.",
             "nullable": true,
-            "example": "some text"
+            "example": "Updated server description"
           },
           "endpoint": {
             "type": "string",
             "description": "New base URL of the MCP server endpoint. If changed, the system will re-verify connectivity before saving.",
             "format": "uri",
             "nullable": true,
-            "example": "some text"
+            "example": "https://mcp.example.com/sse"
           },
           "headers": {
             "type": "object",
@@ -7148,12 +7597,9 @@
             },
             "description": "New HTTP headers to include with every request. If changed alongside the endpoint, connectivity is re-verified.",
             "nullable": true,
-            "example": [
-              {
-                "key": "some text",
-                "value": "some text"
-              }
-            ]
+            "example": {
+              "Authorization": "Bearer token123"
+            }
           },
           "updateIcon": {
             "type": "boolean",
@@ -7164,7 +7610,7 @@
             "type": "string",
             "description": "New Base64-encoded icon image for the server, or null to remove the existing icon. Only applied when UpdateIcon is true.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://example.com/icon.png"
           }
         },
         "additionalProperties": false,
@@ -7177,9 +7623,13 @@
             "type": "boolean",
             "description": "Indicates whether the AI assistant is allowed to perform web searches when generating responses in this room.",
             "example": true
+          },
+          "reasoningEffort": {
+            "$ref": "#/components/schemas/ChatReasoningEffort"
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "The user chat settings."
       },
       "UserChatSettingsWrapper": {
         "type": "object",
@@ -7189,6 +7639,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -7197,20 +7648,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -7224,10 +7680,11 @@
           "needReset": {
             "type": "boolean",
             "description": "Indicates whether the embedding provider API key needs to be reconfigured.",
-            "example": true
+            "example": false
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "The vectorization settings."
       },
       "VectorizationSettingsWrapper": {
         "type": "object",
@@ -7237,6 +7694,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -7245,20 +7703,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -7279,7 +7742,9 @@
             "description": "The set of file identifiers to submit for vectorization.",
             "nullable": true,
             "example": [
-              1234
+              101,
+              102,
+              103
             ]
           }
         },
@@ -7317,13 +7782,6 @@
               "UserIpAdress",
               "CurrentDate",
               "RoomName"
-            ],
-            "x-enum-descriptions": [
-              "User name",
-              "User email",
-              "User ip adress",
-              "Current date",
-              "Room name"
             ]
           }
         ],
@@ -7347,37 +7805,37 @@
             "type": "string",
             "description": "The watermark text.",
             "nullable": true,
-            "example": "some text"
+            "example": "Confidential"
           },
           "rotate": {
             "type": "integer",
             "description": "The watermark text and image rotate.",
             "format": "int32",
-            "example": 1234
+            "example": 45
           },
           "imageScale": {
             "type": "integer",
             "description": "The watermark image scale.",
             "format": "int32",
-            "example": 1234
+            "example": 100
           },
           "imageUrl": {
             "type": "string",
             "description": "The watermark image url.",
             "nullable": true,
-            "example": "some text"
+            "example": "http://localhost/watermark.png"
           },
           "imageHeight": {
             "type": "number",
             "description": "The watermark image height.",
             "format": "double",
-            "example": -8.5
+            "example": 100.0
           },
           "imageWidth": {
             "type": "number",
             "description": "The watermark image width.",
             "format": "double",
-            "example": -8.5
+            "example": 200.0
           }
         },
         "additionalProperties": false,
@@ -7401,37 +7859,37 @@
             "type": "string",
             "description": "The watermark text.",
             "nullable": true,
-            "example": "some text"
+            "example": "Confidential"
           },
           "rotate": {
             "type": "integer",
             "description": "The watermark text and image rotate angle.",
             "format": "int32",
-            "example": 1234
+            "example": -45
           },
           "imageScale": {
             "type": "integer",
             "description": "The watermark image scale.",
             "format": "int32",
-            "example": 1234
+            "example": 100
           },
           "imageUrl": {
             "type": "string",
             "description": "The path to the temporary image file.",
             "nullable": true,
-            "example": "some text"
+            "example": "/tmp/watermark.png"
           },
           "imageHeight": {
             "type": "number",
             "description": "The watermark image height.",
             "format": "double",
-            "example": -8.5
+            "example": 100.0
           },
           "imageWidth": {
             "type": "number",
             "description": "The watermark image width.",
             "format": "double",
-            "example": -8.5
+            "example": 200.0
           }
         },
         "additionalProperties": false,
@@ -7451,10 +7909,11 @@
           "needReset": {
             "type": "boolean",
             "description": "Indicates whether the web search API key needs to be reconfigured.",
-            "example": true
+            "example": false
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "The web search settings."
       },
       "WebSearchSettingsWrapper": {
         "type": "object",
@@ -7464,6 +7923,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -7472,20 +7932,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }

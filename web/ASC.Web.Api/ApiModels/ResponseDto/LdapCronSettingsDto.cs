@@ -29,11 +29,17 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 /// <summary>
 /// The LDAP cron settings.
 /// </summary>
+/// <example>
+/// {
+///   "cron": "example value"
+/// }
+/// </example>
 public class LdapCronSettingsDto
 {
     /// <summary>
     /// The LDAP cron settings expression.
     /// </summary>
+    /// <example>0 0 * * *</example>
     public string Cron { get; set; }
 }
 

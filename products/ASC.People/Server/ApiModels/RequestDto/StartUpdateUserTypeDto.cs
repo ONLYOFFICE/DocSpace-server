@@ -34,15 +34,18 @@ public class StartUpdateUserTypeDto
     /// <summary>
     /// The new user type.
     /// </summary>
+    /// <example>1</example>
     public EmployeeType Type { get; set; }
 
     /// <summary>
     /// The user ID.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     public Guid UserId { get; set; }
 
     /// <summary>
     /// The user ID to reassign.
     /// </summary>
+    /// <example>11111111-1111-1111-1111-111111111111</example>
     public Guid? ReassignUserId { get; set; }
 }

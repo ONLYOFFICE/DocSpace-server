@@ -35,17 +35,20 @@ public class UpdateApiKeyRequest
     /// <summary>
     /// The new name for the API key.
     /// </summary>
+    /// <example>Updated API Key</example>
     [StringLength(30, ErrorMessage = "Incorrect name. Length must be less than 30")]
-    public String Name { get; set; }
+    public string Name { get; set; }
 
     /// <summary>
     /// The new list of permissions for the API key.
     /// </summary>
-    public List<String> Permissions { get; set; }
+    /// <example>["read", "write", "delete"]</example>
+    public List<string> Permissions { get; set; }
 
     /// <summary>
     /// Indicates whether the API key should be active or not.
     /// </summary>
+    /// <example>true</example>
     public bool? IsActive { get; set; }
 }
 
@@ -57,12 +60,14 @@ public class UpdateApiKeyRequestDto
     /// <summary>
     /// The unique identifier of the API key to update.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "keyId")]
     public required Guid KeyId { get; set; }
 
     /// <summary>
     /// The request parameters for updating an existing API key.
     /// </summary>
+    /// <example>{"name":"Updated Key","permissions":["read"],"isActive":true}</example>
     [FromBody]
     public required UpdateApiKeyRequest Changed { get; set; }
 }

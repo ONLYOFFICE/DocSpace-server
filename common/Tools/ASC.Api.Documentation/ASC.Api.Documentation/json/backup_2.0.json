@@ -532,7 +532,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -743,7 +743,7 @@
             "description": "Specifies if a dump will be created or not.",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           }
         ],
@@ -767,7 +767,7 @@
           "Backup"
         ],
         "summary": "Get the number of backups",
-        "description": "Returns the number of backups for a period of time. The default is one month.",
+        "description": "Returns the number of backups for a period of time. The default is the current calendar month.",
         "operationId": "getBackupsCount",
         "parameters": [
           {
@@ -777,7 +777,7 @@
             "schema": {
               "type": "string",
               "format": "date-time",
-              "example": "2008-04-10T06:30:00.0000000+04:00"
+              "example": "2025-01-01T00:00:00Z"
             }
           },
           {
@@ -787,7 +787,7 @@
             "schema": {
               "type": "string",
               "format": "date-time",
-              "example": "2008-04-10T06:30:00.0000000+04:00"
+              "example": "2025-12-31T23:59:59Z"
             }
           },
           {
@@ -796,7 +796,7 @@
             "description": "Specifies if the backups are paid or not.",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           }
         ],
@@ -921,12 +921,18 @@
               "$ref": "#/components/schemas/ItemKeyValuePairObjectObject"
             },
             "description": "The backup storage parameters.",
-            "nullable": true
+            "nullable": true,
+            "example": [
+              {
+                "key": "path",
+                "value": "/backup"
+              }
+            ]
           },
           "dump": {
             "type": "boolean",
             "description": "Specifies if a dump will be created or not.",
-            "example": true
+            "example": false
           }
         },
         "additionalProperties": false,
@@ -944,29 +950,34 @@
         "properties": {
           "id": {
             "type": "string",
+            "description": "The backup ID.",
             "format": "uuid",
             "example": "00000000-0000-0000-0000-000000000000"
           },
           "fileName": {
             "type": "string",
+            "description": "The backup file name.",
             "nullable": true,
-            "example": "some text"
+            "example": "tenant-backup"
           },
           "storageType": {
             "$ref": "#/components/schemas/BackupStorageType"
           },
           "createdOn": {
             "type": "string",
+            "description": "The backup creation date.",
             "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "2026-03-01T02:15:00Z"
           },
           "expiresOn": {
             "type": "string",
+            "description": "The backup expiration date.",
             "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "2026-03-31T02:15:00Z"
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "The backup history parameters."
       },
       "BackupHistoryRecordArrayWrapper": {
         "type": "object",
@@ -979,6 +990,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -987,20 +999,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -1030,14 +1047,10 @@
               "EveryDay",
               "EveryWeek",
               "EveryMonth"
-            ],
-            "x-enum-descriptions": [
-              "Every day",
-              "Every week",
-              "Every month"
             ]
           }
         ],
+        "description": "The backup period type.",
         "x-enum-type": "integer"
       },
       "BackupProgress": {
@@ -1045,32 +1058,36 @@
         "properties": {
           "isCompleted": {
             "type": "boolean",
-            "example": true
+            "description": "Specifies if the backup is completed or not.",
+            "example": false
           },
           "progress": {
             "type": "integer",
+            "description": "The backup progress in percentage.",
             "format": "int32",
-            "example": 1234
+            "example": 50
           },
           "error": {
             "type": "string",
-            "nullable": true,
-            "example": "some text"
+            "description": "The backup error message.",
+            "nullable": true
           },
           "warning": {
             "type": "string",
-            "nullable": true,
-            "example": "some text"
+            "description": "The backup warning message.",
+            "nullable": true
           },
           "link": {
             "type": "string",
+            "description": "The backup link.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://example.com/backup/task_123"
           },
           "tenantId": {
             "type": "integer",
+            "description": "The tenant ID.",
             "format": "int32",
-            "example": 1234
+            "example": 1
           },
           "backupProgressEnum": {
             "$ref": "#/components/schemas/BackupProgressEnum"
@@ -1080,11 +1097,13 @@
           },
           "taskId": {
             "type": "string",
+            "description": "The task ID.",
             "nullable": true,
-            "example": "some text"
+            "example": "task_123"
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "The backup progress parameters."
       },
       "BackupProgressEnum": {
         "oneOf": [
@@ -1111,14 +1130,10 @@
               "Backup",
               "Restore",
               "Transfer"
-            ],
-            "x-enum-descriptions": [
-              "Backup",
-              "Restore",
-              "Transfer"
             ]
           }
         ],
+        "description": "The backup progress type",
         "x-enum-type": "integer"
       },
       "BackupProgressWrapper": {
@@ -1129,6 +1144,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -1137,20 +1153,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -1165,7 +1186,7 @@
             "type": "string",
             "description": "The backup ID.",
             "nullable": true,
-            "example": "some text"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "storageType": {
             "$ref": "#/components/schemas/BackupStorageType"
@@ -1176,7 +1197,13 @@
               "$ref": "#/components/schemas/ItemKeyValuePairObjectObject"
             },
             "description": "The backup storage parameters.",
-            "nullable": true
+            "nullable": true,
+            "example": [
+              {
+                "key": "path",
+                "value": "/backup"
+              }
+            ]
           },
           "notify": {
             "type": "boolean",
@@ -1186,7 +1213,7 @@
           "dump": {
             "type": "boolean",
             "description": "Specifies if a dump will be created or not.",
-            "example": true
+            "example": false
           }
         },
         "additionalProperties": false,
@@ -1204,14 +1231,20 @@
               "$ref": "#/components/schemas/ItemKeyValuePairObjectObject"
             },
             "description": "The backup storage parameters.",
-            "nullable": true
+            "nullable": true,
+            "example": [
+              {
+                "key": "path",
+                "value": "/backup"
+              }
+            ]
           },
           "backupsStored": {
             "type": "integer",
             "description": "The maximum number of the stored backup copies.",
             "format": "int32",
             "nullable": true,
-            "example": 1234
+            "example": 5
           },
           "cronParams": {
             "$ref": "#/components/schemas/Cron"
@@ -1219,7 +1252,7 @@
           "dump": {
             "type": "boolean",
             "description": "Specifies if a dump will be created or not.",
-            "example": true
+            "example": false
           }
         },
         "additionalProperties": false,
@@ -1245,6 +1278,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -1253,20 +1287,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -1305,17 +1344,10 @@
               "Local",
               "DataStore",
               "ThirdPartyConsumer"
-            ],
-            "x-enum-descriptions": [
-              "Documents",
-              "Thridparty documents",
-              "Custom cloud",
-              "Local",
-              "Data store",
-              "Thirdparty consumer"
             ]
           }
         ],
+        "description": "The backup storage type.",
         "x-enum-type": "integer"
       },
       "BooleanWrapper": {
@@ -1326,6 +1358,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -1334,20 +1367,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -1383,16 +1421,19 @@
           },
           "hour": {
             "type": "integer",
+            "description": "The time of the day to start the backup process.",
             "format": "int32",
-            "example": 1234
+            "example": 0
           },
           "day": {
             "type": "integer",
+            "description": "The day of the week to start the backup process.",
             "format": "int32",
-            "example": 1234
+            "example": 0
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "The backup cron parameters."
       },
       "DistributedTaskStatus": {
         "oneOf": [
@@ -1425,13 +1466,6 @@
               "Completed",
               "Canceled",
               "Failted"
-            ],
-            "x-enum-descriptions": [
-              "Created",
-              "Running",
-              "Completed",
-              "Canceled",
-              "Failted"
             ]
           }
         ],
@@ -1445,6 +1479,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -1453,20 +1488,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -1502,34 +1542,33 @@
               "type": "string",
               "nullable": true
             },
-            "nullable": true,
-            "example": [
-              {
-                "key": "some text",
-                "value": "some text"
-              }
-            ]
+            "description": "The backup storage parameters.",
+            "nullable": true
           },
           "cronParams": {
             "$ref": "#/components/schemas/CronParams"
           },
           "backupsStored": {
             "type": "integer",
+            "description": "The maximum number of the stored backup copies.",
             "format": "int32",
             "nullable": true,
-            "example": 1234
+            "example": 5
           },
           "lastBackupTime": {
             "type": "string",
+            "description": "The date and time when the last backup was reated.",
             "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "2026-01-01T00:00:00Z"
           },
           "dump": {
             "type": "boolean",
+            "description": "Specifies if a dump will be created or not.",
             "example": false
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "The backup schedule parameters."
       },
       "ScheduleWrapper": {
         "type": "object",
@@ -1539,6 +1578,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -1547,20 +1587,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }

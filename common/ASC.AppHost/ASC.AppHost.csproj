@@ -1,4 +1,4 @@
-<Project Sdk="Aspire.AppHost.Sdk/13.1.0">
+<Project Sdk="Aspire.AppHost.Sdk/13.2.0">
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
@@ -8,12 +8,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Aspire.Hosting.AppHost" />
+        <PackageReference Include="Aspire.Hosting.JavaScript" />
         <PackageReference Include="Aspire.Hosting.MySql" />
-        <PackageReference Include="Aspire.Hosting.NodeJs" />
         <PackageReference Include="Aspire.Hosting.RabbitMQ" />
         <PackageReference Include="Aspire.Hosting.Redis" />
         <PackageReference Include="CommunityToolkit.Aspire.Hosting.MailPit" />
+        <PackageReference Include="CommunityToolkit.Aspire.Hosting.McpInspector" />
         <PackageReference Include="CommunityToolkit.Aspire.Hosting.MySql.Extensions" />
     </ItemGroup>
 
@@ -27,6 +27,7 @@
       <ProjectReference Include="..\services\ASC.Notify\ASC.Notify.csproj" />
       <ProjectReference Include="..\services\ASC.Studio.Notify\ASC.Studio.Notify.csproj" />
       <ProjectReference Include="..\services\ASC.TelegramService\ASC.TelegramService.csproj" />
+      <ProjectReference Include="..\services\ASC.Monolith\ASC.Monolith.csproj" />
       <ProjectReference Include="..\Tools\ASC.Migration.Runner\ASC.Migration.Runner.csproj" />
       <ProjectReference Include="..\..\products\ASC.Files\Server\ASC.Files.csproj" />
       <ProjectReference Include="..\..\products\ASC.Files\Worker\ASC.Files.Worker.csproj" />

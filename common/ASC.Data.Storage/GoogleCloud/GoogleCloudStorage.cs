@@ -137,7 +137,7 @@ public class GoogleCloudStorage(TempStream tempStream,
         using var storage = await GetStorageAsync();
 
         using var stream = new MemoryStream(Encoding.UTF8.GetBytes(_json ?? ""));
-        var preSignedUrl = await (await FromCredentialStreamAsync(stream)).SignAsync(_bucket, MakePath(domain, path), expire, HttpMethod.Get);
+        var preSignedUrl = await FromCredential(CredentialFactory.FromStream<GoogleCredential>(stream)).SignAsync(_bucket, MakePath(domain, path), expire, HttpMethod.Get);
 
         return MakeUri(preSignedUrl);
     }
@@ -638,7 +638,7 @@ public class GoogleCloudStorage(TempStream tempStream,
 
         using var mStream = new MemoryStream(Encoding.UTF8.GetBytes(_json ?? ""));
         var signDuration = expires.Date == DateTime.MinValue ? expires.TimeOfDay : expires.Subtract(DateTime.UtcNow);
-        var preSignedUrl = await (await FromCredentialStreamAsync(mStream, token))
+        var preSignedUrl = await FromCredential(CredentialFactory.FromStream<GoogleCredential>(stream))
             .SignAsync(RequestTemplate.FromBucket(_bucket).WithObjectName(MakePath(domain, path)), Options.FromDuration(signDuration), token);
 
         //TODO: CNAME!
@@ -711,11 +711,7 @@ public class GoogleCloudStorage(TempStream tempStream,
             totalBytes = Convert.ToString((chunkNumber - 1) * defaultChunkSize + chunkLength);
         }
 
-        var request = new HttpRequestMessage
-        {
-            RequestUri = new Uri(uploadUri),
-            Method = HttpMethod.Put
-        };
+        using var request = new HttpRequestMessage(HttpMethod.Put, uploadUri);
         request.Content = new StreamContent(stream);
         request.Content.Headers.ContentRange = new ContentRangeHeaderValue(Convert.ToInt64(bytesRangeStart),
                                                                Convert.ToInt64(bytesRangeEnd),
@@ -729,7 +725,9 @@ public class GoogleCloudStorage(TempStream tempStream,
 
             try
             {
+#pragma warning disable CA2000 
                 var httpClient = _clientFactory.CreateClient();
+#pragma warning restore CA2000
                 using var response = await httpClient.SendAsync(request);
 
                 break;

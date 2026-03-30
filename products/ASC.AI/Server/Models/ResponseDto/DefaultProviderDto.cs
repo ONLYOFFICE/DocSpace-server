@@ -34,16 +34,19 @@ public class DefaultProviderDto
     /// <summary>
     /// AI provider identifier.
     /// </summary>
+    /// <example>1</example>
     public int ProviderId { get; init; }
 
     /// <summary>
     /// Default model identifier used with this provider.
     /// </summary>
+    /// <example>gpt-4o</example>
     public required string DefaultModel { get; init; }
 
     /// <summary>
     /// AI provider title.
     /// </summary>
+    /// <example>OpenAI</example>
     public string? ProviderTitle { get; init; }
 }
 

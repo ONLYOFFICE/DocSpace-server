@@ -36,7 +36,10 @@ namespace ASC.Files.Tests.Data;
 
 public static class Initializer
 {
-    public static readonly User Owner = new("test@example.com", "11111111");
+    public static readonly User Owner = new("test@example.com", "11111111")
+    {
+        Id = Guid.Parse("66faa6e4-f133-11ea-b126-00ffeec8b4ef")
+    };
     
     private static bool _initialized;
 

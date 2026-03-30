@@ -34,12 +34,14 @@ public class SetServerStatusRequestDto
     /// <summary>
     /// Unique identifier of the MCP server whose status is being changed.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "id")]
     public Guid Id { get; set; }
 
     /// <summary>
     /// New status value.
     /// </summary>
+    /// <example>{"enabled": true}</example>
     [FromBody]
     public required SetServerStatusRequestBody Body { get; set; }
 }
@@ -52,5 +54,6 @@ public class SetServerStatusRequestBody
     /// <summary>
     /// Set to true to enable the server (making it available for room assignment), or false to disable it.
     /// </summary>
+    /// <example>true</example>
     public bool Enabled { get; set; }
 }

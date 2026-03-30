@@ -106,7 +106,7 @@ public class CustomTagsService(
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
-        if (names.Count == 0)
+        if (names == null || names.Count == 0)
         {
             return;
         }
@@ -190,7 +190,7 @@ public class CustomTagsService(
     {
         if (!await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID))
         {
-            var rooms = await fileSecurity.GetVirtualRoomsAsync(null, Guid.Empty, string.Empty, false, false, SearchArea.Active, false, [], false, ProviderFilter.None, SubjectFilter.Member, QuotaFilter.All, StorageFilter.None);
+            var rooms = await fileSecurity.GetVirtualRoomsAsync(null, Guid.Empty, string.Empty, false, false, SearchArea.Active, false, [], false, ProviderFilter.None, null, Guid.Empty, QuotaFilter.All, StorageFilter.None);
             var tags = rooms.SelectMany(r => r.Tags)
                 .Where(r => r.Type == tagType).Select(r => r.Name).Distinct();
 

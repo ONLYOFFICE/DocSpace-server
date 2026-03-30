@@ -34,36 +34,43 @@ public class CheckConversionRequestDto<T>
     /// <summary>
     /// The file ID to check conversion proccess.
     /// </summary>
+    /// <example>1</example>
     public T FileId { get; set; }
 
     /// <summary>
     /// Specifies if the conversion process is synchronous or not.
     /// </summary>
+    /// <example>false</example>
     public bool Sync { get; set; }
 
     /// <summary>
     /// Specifies whether to start a conversion process or not.
     /// </summary>
+    /// <example>true</example>
     public bool StartConvert { get; set; }
 
     /// <summary>
     /// The file version that is converted.
     /// </summary>
+    /// <example>1</example>
     public int Version { get; set; }
 
     /// <summary>
     /// The password of the converted file.
     /// </summary>
+    /// <example>password123</example>
     public string Password { get; set; }
 
     /// <summary>
     /// The conversion output type.
     /// </summary>
+    /// <example>pdf</example>
     public string OutputType { get; set; }
 
     /// <summary>
     /// Specifies whether to create a new file if it exists or not.
     /// </summary>
+    /// <example>false</example>
     public bool CreateNewIfExist { get; set; }
 }
 
@@ -75,12 +82,14 @@ public class StartConversionRequestDto<T>
     /// <summary>
     /// The file ID to start conversion proccess.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "fileId")]
     public required T FileId { get; set; }
 
     /// <summary>
     /// The parameters for checking file conversion.
     /// </summary>
+    /// <example>{"fileId": "1", "sync": false, "startConvert": true, "version": 1, "password": "password123", "outputType": "pdf", "createNewIfExist": false}</example>
     [FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)]
     public CheckConversionRequestDto<T> CheckConversion { get; set; }
 }
@@ -93,12 +102,14 @@ public class CheckConversionStatusRequestDto<T>
     /// <summary>
     /// The file ID to check conversion status.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "fileId")]
     public required T FileId { get; set; }
 
     /// <summary>
     /// Specifies whether a conversion operation is started or not.
     /// </summary>
+    /// <example>false</example>
     [FromQuery(Name = "start")]
     public bool Start { get; set; }
 }

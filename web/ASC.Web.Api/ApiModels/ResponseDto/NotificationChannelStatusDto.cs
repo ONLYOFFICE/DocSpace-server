@@ -29,11 +29,17 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 /// <summary>
 /// The notification channel settings.
 /// </summary>
+/// <example>
+/// {
+///   "channels": [{"name": "email", "isActive": true}]
+/// }
+/// </example>
 public class NotificationChannelStatusDto
 {
     /// <summary>
     /// The list of notification channels.
     /// </summary>
+    /// <example>[{"name": "email", "isActive": true}]</example>
     public List<NotificationChannelDto> Channels { get; set; } = [];
 }
 
@@ -45,10 +51,12 @@ public class NotificationChannelDto
     /// <summary>
     /// The notification channel name.
     /// </summary>
+    /// <example>Email</example>
     public required string Name { get; set; }
 
     /// <summary>
     /// Specifies whether the notification channel is enabled.
     /// </summary>
+    /// <example>true</example>
     public required bool IsEnabled { get; set; }
 }

@@ -1,25 +1,25 @@
 // (c) Copyright Ascensio System SIA 2009-2026
-// 
+//
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
+//
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
+//
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-// 
+//
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -28,6 +28,7 @@ using System.Text.Json;
 
 using ASC.Core.Common;
 using ASC.FederatedLogin;
+using ASC.FederatedLogin.LoginProviders;
 using ASC.FederatedLogin.Profile;
 using ASC.Files.Core.Helpers;
 using ASC.Files.Core.Utils;
@@ -59,6 +60,7 @@ public class PortalController(
         QuotaUsageManager quotaUsageManager,
         PasswordSettingsManager passwordSettingsManager,
         LoginProfileTransport loginProfileTransport,
+        ProviderManager providerManager,
         AccountLinker accountLinker,
         DocumentServiceLicense documentServiceLicense,
         CsvFileHelper csvFileHelper,
@@ -75,6 +77,7 @@ public class PortalController(
     /// <remarks>
     /// Test API.
     /// </remarks>
+    /// <summary>Test API.</summary>
     /// <path>apisystem/portal/test</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [SwaggerResponse(200, "Portal api works")]
@@ -157,10 +160,14 @@ public class PortalController(
             return BadRequest(error);
         }
 
-        (var portalName, error) = await GetRandomPortalName();
+        var portalName =  (coreBaseSettings.Standalone ? (model.PortalName ?? "") : string.Empty).Trim();
         if (string.IsNullOrEmpty(portalName))
         {
-            return BadRequest(error ?? "PortalName is required");
+            (portalName, error) = await GetRandomPortalName();
+            if (string.IsNullOrEmpty(portalName))
+            {
+                return BadRequest(error ?? "PortalName is required");
+            }
         }
 
         model.PortalName = portalName;
@@ -375,18 +382,26 @@ public class PortalController(
         }
 
         LoginProfile loginProfile = null;
+        var autoGenaratedEmail = false;
         if (!string.IsNullOrEmpty(model.ThirdPartyProfile))
         {
             try
             {
                 var profile = await loginProfileTransport.FromPureTransport(model.ThirdPartyProfile);
-                if (profile != null && string.IsNullOrEmpty(profile.AuthorizationError))
+                if (profile != null && string.IsNullOrWhiteSpace(profile.AuthorizationError))
                 {
                     loginProfile = profile;
-                    if (!string.IsNullOrEmpty(loginProfile.EMail))
+
+                    model.Email = loginProfile.EMail;
+
+                    if (string.IsNullOrWhiteSpace(model.Email) &&
+                        ProviderManager.DummyEmailProviders.Contains(loginProfile.Provider) &&
+                        providerManager.GetLoginProvider(loginProfile.Provider) is IDummyEmailProvider provider)
                     {
-                        model.Email = loginProfile.EMail;
+                        model.Email = provider.GenerateEmail(loginProfile);
+                        autoGenaratedEmail = true;
                     }
+
                     if (!string.IsNullOrEmpty(loginProfile.FirstName))
                     {
                         model.FirstName = loginProfile.FirstName;
@@ -403,7 +418,7 @@ public class PortalController(
             }
         }
 
-        if (string.IsNullOrEmpty(model.Email))
+        if (string.IsNullOrWhiteSpace(model.Email))
         {
             return BadRequest(new
             {
@@ -503,7 +518,7 @@ public class PortalController(
             Calls = model.Calls,
             HostedRegion = model.Region,
             LimitedAccessSpace = model.LimitedAccessSpace,
-            ActivationStatus = EmployeeActivationStatus.Activated // register as activated !!!
+            ActivationStatus = autoGenaratedEmail ? EmployeeActivationStatus.AutoGenerated : EmployeeActivationStatus.Activated // register as activated !!!
         };
 
         if (!string.IsNullOrEmpty(model.AffiliateId))
@@ -591,7 +606,7 @@ public class PortalController(
 
         if (!string.IsNullOrEmpty(model.PasswordHash))
         {
-            sendCongratulationsAddress = await commonMethods.SendCongratulations(scheme, t, model.SkipWelcome);
+            sendCongratulationsAddress = autoGenaratedEmail ? null : await commonMethods.SendCongratulations(scheme, t, model.SkipWelcome);
             isFirst = sendCongratulationsAddress != null;
         }
         else if (coreBaseSettings.Standalone)
@@ -975,8 +990,8 @@ public class PortalController(
         }
     }
 
-    record TenantWrapper(string PortalName, string PortalLink);
-    
+    private record TenantWrapper(string PortalName, string PortalLink);
+
     private async Task<List<TenantWrapper>> GetTenantsByThirdPartyProfileAsync(LoginProfile  profile)
     {
         var result = new List<TenantWrapper>();
@@ -986,12 +1001,21 @@ public class PortalController(
         }
 
         var linkedProfiles = await accountLinker.GetLinkedObjectsByHashIdAsync(profile.HashId);
-        var userIds = new List<Guid>();
+        var userIds = new HashSet<Guid>();
         foreach (var profileId in linkedProfiles)
         {
             if (Guid.TryParse(profileId, out var userId))
             {
                 userIds.Add(userId);
+            }
+        }
+
+        if (!string.IsNullOrEmpty(profile.EMail))
+        {
+            var byEmail = await hostedSolution.FindUsersAsync(profile.EMail, EmployeeActivationStatus.Activated);
+            foreach (var userInfo in byEmail)
+            {
+                userIds.Add(userInfo.Id);
             }
         }
 
@@ -1047,9 +1071,9 @@ public class PortalController(
         userQuota ??= [];
 
         var totalUsers = userQuota.Count;
-        var portalUsers = userQuota.Where(u => Guid.TryParse(u.Key, out _)).Count();
+        var portalUsers = userQuota.Count(u => Guid.TryParse(u.Key, out _));
         var externalUsers = totalUsers - portalUsers;
-        var licenseTypeByUsers = license != null && license.DSConnections == 0 && license.DSUsersCount > 0;
+        var licenseTypeByUsers = license is { DSConnections: 0, DSUsersCount: > 0 };
 
         return Ok(new
         {
@@ -1183,7 +1207,7 @@ public class PortalController(
 
         return (portalName, null);
     }
-    
+
     private async Task ValidateTenantAliasAsync(string alias)
     {
         // size

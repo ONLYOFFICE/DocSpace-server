@@ -414,6 +414,11 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:change-invitation-limit-value", value);
   }
 
+  function changeWebPlugin({ room, webPluginName, enabled } = {}) {
+    logger.info(`changed web plugin in room ${room}, webPluginName ${webPluginName}, enabled ${enabled}`);
+    filesIO.to(room).emit("s:change-web-plugin", { webPluginName, enabled });
+  }
+
   function updateHistory({ room, id, type } = {}) {
     logger.info(`update ${type} history ${id} in room ${room}`);
     filesIO.to(room).emit("s:update-history", { id, type });
@@ -585,6 +590,12 @@ module.exports = (io) => {
     filesIO.to(data.room).emit(`s:quota_exceeded`, { data });
   }
 
+  function externalDbSettings({ tenantId, externalDbEnabled } = {}) {
+    var room = `${tenantId}-external-db-settings`;
+    logger.info(`external db settings changed in room ${room}, enabled: ${externalDbEnabled}`);
+    filesIO.to(room).emit("s:external-db-settings", { externalDbEnabled });
+  }
+
   return {
     startEdit,
     stopEdit,
@@ -601,6 +612,7 @@ module.exports = (io) => {
     markAsNewFiles,
     markAsNewFolders,
     changeInvitationLimitValue,
+    changeWebPlugin,
     updateHistory,
     logoutSession,
     changeMyType,
@@ -627,6 +639,7 @@ module.exports = (io) => {
     exportChat,
     changeAccessRightsForFile,
     changeAccessRightsForFolder,
-    quotaExceeded
+    quotaExceeded,
+    externalDbSettings
   };
 };

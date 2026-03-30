@@ -52,6 +52,7 @@ public class PortalController(
     CookiesManager cookiesManager,
     SecurityContext securityContext,
     SettingsManager settingsManager,
+    IDistributedLockProvider distributedLockProvider,
     IMobileAppInstallRegistrator mobileAppInstallRegistrator,
     TenantExtra tenantExtra,
     IConfiguration configuration,
@@ -207,17 +208,20 @@ public class PortalController(
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
-        var existedInvitationLink = await userManager.GetInvitationLinkAsync(inDto.EmployeeType);
-        if (existedInvitationLink != null)
+        await using (await distributedLockProvider.TryAcquireFairLockAsync($"invitationlink_{tenant.Id}"))
         {
-            throw new ArgumentException("link with the same EmployeeType already exists");
+            var existedInvitationLink = await userManager.GetInvitationLinkAsync(inDto.EmployeeType);
+            if (existedInvitationLink != null)
+            {
+                throw new ArgumentException("link with the same EmployeeType already exists");
+            }
+
+            var invitationLink = await userManager.CreateInvitationLinkAsync(inDto.EmployeeType, expiration, inDto.MaxUseCount);
+
+            var result = await invitationLinkDtoHelper.GetAsync(invitationLink, tenant.Alias, currentUserId);
+
+            return result;
         }
-
-        var invitationLink = await userManager.CreateInvitationLinkAsync(inDto.EmployeeType, expiration, inDto.MaxUseCount);
-
-        var result = await invitationLinkDtoHelper.GetAsync(invitationLink, tenant.Alias, currentUserId);
-
-        return result;
     }
 
     /// <remarks>
@@ -569,12 +573,10 @@ public class PortalController(
         inDto.Url = inDto.Url.Replace("&amp;", "&");
         inDto.Url = WebUtility.UrlEncode(inDto.Url);
 
-        var request = new HttpRequestMessage
-        {
-            RequestUri = new Uri(string.Format(configuration["bookmarking:thumbnail-url"], inDto.Url))
-        };
-
+        using var request = new HttpRequestMessage(HttpMethod.Get, string.Format(configuration["bookmarking:thumbnail-url"], inDto.Url));
+#pragma warning disable CA2000
         var httpClient = clientFactory.CreateClient();
+#pragma warning restore CA2000
         using var response = await httpClient.SendAsync(request);
         var bytes = await response.Content.ReadAsByteArrayAsync();
 
@@ -647,7 +649,7 @@ public class PortalController(
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var alias = inDto.Alias;
-        if (string.IsNullOrEmpty(alias) || alias.Any(Char.IsWhiteSpace))
+        if (string.IsNullOrEmpty(alias) || alias.Any(char.IsWhiteSpace))
         {
             throw new ArgumentException(nameof(alias));
         }

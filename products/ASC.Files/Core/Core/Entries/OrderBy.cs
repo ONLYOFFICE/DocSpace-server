@@ -81,12 +81,14 @@ public class OrderBy(SortedByType sortedByType, bool isAsc)
     /// <summary>
     /// Specifies if the order is ascending.
     /// </summary>
+    /// <example>true</example>
     [JsonPropertyName("is_asc")]
     public bool IsAsc { get; init; } = isAsc;
 
     /// <summary>
     /// The parameters by which the files will be sorted.
     /// </summary>
+    /// <example>DateAndTimeCreation</example>
     [JsonPropertyName("property")]
     public SortedByType SortedBy { get; set; } = sortedByType;
 }

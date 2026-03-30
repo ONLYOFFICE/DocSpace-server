@@ -100,18 +100,18 @@ public class UserFormatter : IComparer<UserInfo>
         int result;
         if (format == DisplayUserNameFormat.FirstLast)
         {
-            result = String.Compare(x.FirstName, y.FirstName, StringComparison.OrdinalIgnoreCase);
+            result = string.Compare(x.FirstName, y.FirstName, StringComparison.OrdinalIgnoreCase);
             if (result == 0)
             {
-                result = String.Compare(x.LastName, y.LastName, StringComparison.OrdinalIgnoreCase);
+                result = string.Compare(x.LastName, y.LastName, StringComparison.OrdinalIgnoreCase);
             }
         }
         else
         {
-            result = String.Compare(x.LastName, y.LastName, StringComparison.OrdinalIgnoreCase);
+            result = string.Compare(x.LastName, y.LastName, StringComparison.OrdinalIgnoreCase);
             if (result == 0)
             {
-                result = String.Compare(x.FirstName, y.FirstName, StringComparison.OrdinalIgnoreCase);
+                result = string.Compare(x.FirstName, y.FirstName, StringComparison.OrdinalIgnoreCase);
             }
         }
 
@@ -155,7 +155,7 @@ public class UserFormatter : IComparer<UserInfo>
             formatString = "{1}{0}";
         }
 
-        return string.Format(formatString, firstName, lastName);
+        return string.Format(formatString, firstName, lastName).Trim();
     }
 
     private static bool IsChineseText(string text)

@@ -1,25 +1,25 @@
 ﻿// (c) Copyright Ascensio System SIA 2009-2026
-// 
+//
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
+//
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
+//
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-// 
+//
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -98,7 +98,11 @@ public class RoomLogoManager(
 
         await SaveLogo(tempFile, x, y, width, height, room, folderDao);
 
-        await webhookManager.PublishAsync(WebhookTrigger.RoomUpdated, room);
+        await webhookManager.PublishAsync(
+            room.IsAgent
+                ? WebhookTrigger.AgentUpdated
+                : WebhookTrigger.RoomUpdated,
+            room);
 
         return room;
     }
@@ -198,7 +202,7 @@ public class RoomLogoManager(
             if (EnableAudit)
             {
                 await filesMessageService.SendAsync(MessageAction.RoomLogoDeleted, room, room.Title);
-                await webhookManager.PublishAsync(WebhookTrigger.RoomUpdated, room);
+                await webhookManager.PublishAsync(room.IsAgent ? WebhookTrigger.AgentUpdated : WebhookTrigger.RoomUpdated, room);
             }
         }
         catch (Exception e)
@@ -322,26 +326,63 @@ public class RoomLogoManager(
     }
 
     private static readonly ConcurrentDictionary<string, string> _covers = new();
+    private static readonly ConcurrentDictionary<string, ConcurrentDictionary<string, string>> _coversBySize = new();
     public static async Task<ConcurrentDictionary<string, string>> GetCoversAsync()
+    {
+        var coversBySize = await GetCoversBySizeAsync();
+
+        foreach (var (icon, sizes) in coversBySize)
+        {
+            if (sizes.TryGetValue("default", out var svg))
+            {
+                _covers.TryAdd(icon, svg);
+            }
+        }
+
+        return _covers;
+    }
+
+    public static async Task<ConcurrentDictionary<string, ConcurrentDictionary<string, string>>> GetCoversBySizeAsync()
     {
         try
         {
             await _semaphore.WaitAsync();
-            if (_covers.IsEmpty)
+
+            if (_coversBySize.IsEmpty)
             {
                 var assembly = Assembly.GetExecutingAssembly();
                 var assemblyName = assembly.GetName().Name;
-                var coverNameSpace = $"{assemblyName}.Covers.";
-                foreach (var f in assembly.GetManifestResourceNames().Where(r => r.StartsWith(coverNameSpace)))
+                var coversRoot = $"{assemblyName}.Covers.";
+
+                foreach (var res in assembly.GetManifestResourceNames()
+                             .Where(r => r.StartsWith(coversRoot)))
                 {
-                    var img = assembly.GetManifestResourceStream(f);
-                    if (img != null)
+                    var relative = res.Substring(coversRoot.Length);
+                    var parts = relative.Split('.');
+
+                    if (parts.Length < 3)
                     {
-                        using var memoryStream = new MemoryStream();
-                        await img.CopyToAsync(memoryStream);
-                        var r = (Path.GetFileNameWithoutExtension(f).Substring(coverNameSpace.Length), Encoding.UTF8.GetString(memoryStream.ToArray()));
-                        _covers.TryAdd(r.Item1, r.Item2);
+                        continue;
                     }
+                    var size = parts[0];
+                    var iconName = parts[1];
+
+                    await using var stream = assembly.GetManifestResourceStream(res);
+                    if (stream == null)
+                    {
+                        continue;
+                    }
+
+                    using var ms = new MemoryStream();
+                    await stream.CopyToAsync(ms);
+                    var svg = Encoding.UTF8.GetString(ms.ToArray());
+
+                    var sizes = _coversBySize.GetOrAdd(
+                        iconName,
+                        _ => new ConcurrentDictionary<string, string>()
+                    );
+
+                    sizes[size] = svg;
                 }
             }
         }
@@ -350,7 +391,7 @@ public class RoomLogoManager(
             _semaphore.Release();
         }
 
-        return _covers;
+        return _coversBySize;
     }
 
     public async Task<Folder<T>> ChangeCoverAsync<T>(T id, string color, string cover)
@@ -387,7 +428,7 @@ public class RoomLogoManager(
                     await filesMessageService.SendAsync(MessageAction.RoomCoverChanged, room, room.Title);
                 }
 
-                await webhookManager.PublishAsync(WebhookTrigger.RoomUpdated, room);
+                await webhookManager.PublishAsync(room.IsAgent ? WebhookTrigger.AgentUpdated : WebhookTrigger.RoomUpdated, room);
             }
         }
 
@@ -612,7 +653,7 @@ public class RoomLogoManager(
 
     private static string ProcessFolderId<T>(T id)
     {
-        ArgumentNullException.ThrowIfNull(id, nameof(id));
+        ArgumentNullException.ThrowIfNull(id);
 
         return id.GetType() != typeof(string)
             ? id.ToString()

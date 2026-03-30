@@ -34,5 +34,6 @@ public class WordpressSaveRequestDto
     /// <summary>
     /// The authorization code for saving WordPress information.
     /// </summary>
+    /// <example>wp_auth_code_123</example>
     public string Code { get; set; }
 }

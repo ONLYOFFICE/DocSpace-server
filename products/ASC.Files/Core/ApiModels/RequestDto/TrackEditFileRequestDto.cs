@@ -34,24 +34,28 @@ public class TrackEditFileRequestDto<T>
     /// <summary>
     /// The file ID to track editing changes.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "fileId")]
     public required T FileId { get; set; }
 
     /// <summary>
     /// The tab ID to track editing changes.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromQuery(Name = "tabId")]
     public Guid TabId { get; set; }
 
     /// <summary>
     /// The document key for tracking changes.
     /// </summary>
+    /// <example>abc123</example>
     [FromQuery(Name = "docKeyForTrack")]
     public string DocKeyForTrack { get; set; }
 
     /// <summary>
     /// Specifies whether to finish file tracking or not.
     /// </summary>
+    /// <example>true</example>
     [FromQuery(Name = "isFinish")]
     public bool IsFinish { get; set; }
 }

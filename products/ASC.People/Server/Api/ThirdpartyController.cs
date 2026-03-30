@@ -39,6 +39,7 @@ public class ThirdpartyController(
     ILogger<ThirdpartyController> logger,
     AccountLinker accountLinker,
     CoreBaseSettings coreBaseSettings,
+    CustomNamingPeople customNamingPeople,
     DisplayUserSettingsHelper displayUserSettingsHelper,
     IHttpClientFactory httpClientFactory,
     MobileDetector mobileDetector,
@@ -166,14 +167,6 @@ public class ThirdpartyController(
     [HttpPost("signup")]
     public async Task<EmployeeDto> SignupThirdPartyAccount(SignupAccountRequestDto inDto)
     {
-        var passwordHash = inDto.PasswordHash;
-        var mustChangePassword = false;
-        if (string.IsNullOrEmpty(passwordHash))
-        {
-            passwordHash = UserManagerWrapper.GeneratePassword();
-            mustChangePassword = true;
-        }
-
         var thirdPartyProfile = await loginProfileTransport.FromTransport(inDto.SerializedProfile);
         if (!string.IsNullOrEmpty(thirdPartyProfile.AuthorizationError))
         {
@@ -186,19 +179,31 @@ public class ThirdpartyController(
             return null;
         }
 
-        if (string.IsNullOrEmpty(thirdPartyProfile.EMail))
+        var email = thirdPartyProfile.EMail;
+        var autoGenaratedEmail = false;
+
+        if (string.IsNullOrWhiteSpace(email) &&
+            ProviderManager.DummyEmailProviders.Contains(thirdPartyProfile.Provider)&&
+            providerManager.GetLoginProvider(thirdPartyProfile.Provider) is IDummyEmailProvider provider)
+        {
+            email = provider.GenerateEmail(thirdPartyProfile);
+            autoGenaratedEmail = true;
+        }
+
+        if (string.IsNullOrWhiteSpace(email))
         {
             throw new Exception(Resource.ErrorNotCorrectEmail);
         }
 
         var model = emailValidationKeyModelHelper.GetModel();
-        var linkData = await invitationService.GetLinkDataAsync(inDto.Key, inDto.Email, null, inDto.EmployeeType ?? EmployeeType.RoomAdmin, model?.UiD);
+        var linkData = await invitationService.GetLinkDataAsync(inDto.Key, null, null, inDto.EmployeeType ?? EmployeeType.RoomAdmin, model?.UiD);
 
         if (!linkData.IsCorrect)
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_InvintationLink);
         }
 
+        var passwordHash = UserManagerWrapper.GeneratePassword();
         var employeeType = linkData.EmployeeType;
         var quotaLimit = false;
 
@@ -212,15 +217,16 @@ public class ThirdpartyController(
                 var invitedByEmail = linkData.LinkType == InvitationLinkType.Individual;
 
                 (user, quotaLimit) = await CreateNewUser(
-                    GetFirstName(inDto, thirdPartyProfile),
-                    GetLastName(inDto, thirdPartyProfile),
-                    GetEmailAddress(inDto, thirdPartyProfile),
+                    thirdPartyProfile.FirstName,
+                    thirdPartyProfile.LastName,
+                    email,
                     passwordHash,
                     employeeType,
                     false,
                     invitedByEmail,
                     inDto.Culture,
-                    model?.UiD);
+                    model?.UiD,
+                    autoGenaratedEmail);
 
                 var messageAction = employeeType == EmployeeType.RoomAdmin ? MessageAction.UserCreatedViaInvite : MessageAction.GuestCreatedViaInvite;
                 messageService.Send(MessageInitiator.System, messageAction, MessageTarget.Create(user.Id), description: user.DisplayUserName(false, displayUserSettingsHelper));
@@ -234,7 +240,7 @@ public class ThirdpartyController(
 
                 await webhookManager.PublishAsync(WebhookTrigger.UserCreated, user);
 
-                if (mustChangePassword)
+                if (!autoGenaratedEmail)
                 {
                     await studioNotifyService.UserPasswordChangeAsync(user, true);
                 }
@@ -289,8 +295,14 @@ public class ThirdpartyController(
         if (!string.IsNullOrEmpty(profile.EMail))
         {
             var user = await userManager.GetUserByEmailAsync(profile.EMail);
-            if (user.Id != Core.Users.Constants.LostUser.Id)
+            if (user.Id != Core.Users.Constants.LostUser.Id && user.Status != EmployeeStatus.Terminated)
             {
+                if (user.ActivationStatus != EmployeeActivationStatus.Activated)
+                {
+                    var msg = await customNamingPeople.Substitute<Resource>("ErrorEmailAlreadyExists");
+                    throw new InvalidOperationException(msg);
+                }
+
                 var linkedProfiles = await accountLinker.GetLinkedProfilesAsync(user.Id.ToString(), profile.Provider);
                 if (!linkedProfiles.Any())
                 {
@@ -321,7 +333,7 @@ public class ThirdpartyController(
     }
 
     private async Task<(UserInfo, bool)> CreateNewUser(string firstName, string lastName, string email, string passwordHash, EmployeeType employeeType, bool fromInviteLink,
-        bool inviteByEmail, string cultureName, Guid? invitedBy)
+        bool inviteByEmail, string cultureName, Guid? invitedBy, bool autoGenaratedEmail)
     {
         if (SetupInfo.IsSecretEmail(email))
         {
@@ -345,9 +357,14 @@ public class ThirdpartyController(
             user.CreatedBy = invitedBy;
         }
 
-        user.FirstName = string.IsNullOrEmpty(firstName) ? UserControlsCommonResource.UnknownFirstName : firstName;
-        user.LastName = string.IsNullOrEmpty(lastName) ? UserControlsCommonResource.UnknownLastName : lastName;
+        user.FirstName = string.IsNullOrWhiteSpace(firstName) ? UserControlsCommonResource.UnknownFirstName : firstName;
+        user.LastName = string.IsNullOrWhiteSpace(lastName) ? UserControlsCommonResource.UnknownLastName : lastName;
         user.Email = email;
+
+        if (autoGenaratedEmail)
+        {
+            user.ActivationStatus = EmployeeActivationStatus.AutoGenerated;
+        }
 
         if (coreBaseSettings.EnabledCultures.Find(c => string.Equals(c.Name, cultureName, StringComparison.InvariantCultureIgnoreCase)) != null)
         {
@@ -355,10 +372,10 @@ public class ThirdpartyController(
         }
 
         var quotaLimit = false;
-
+        var notify = !autoGenaratedEmail;
         try
         {
-            user = await userManagerWrapper.AddUserAsync(user, passwordHash, true, true, employeeType, fromInviteLink, updateExising: inviteByEmail);
+            user = await userManagerWrapper.AddUserAsync(user, passwordHash, true, notify, employeeType, fromInviteLink, updateExising: inviteByEmail);
             if (employeeType is EmployeeType.Guest)
             {
                 await socketManager.AddGuestAsync(user);
@@ -371,7 +388,7 @@ public class ThirdpartyController(
         catch (TenantQuotaException)
         {
             quotaLimit = true;
-            user = await userManagerWrapper.AddUserAsync(user, passwordHash, true, true, EmployeeType.User, fromInviteLink, updateExising: inviteByEmail);
+            user = await userManagerWrapper.AddUserAsync(user, passwordHash, true, notify, EmployeeType.User, fromInviteLink, updateExising: inviteByEmail);
             await socketManager.AddUserAsync(user);
         }
 
@@ -380,67 +397,16 @@ public class ThirdpartyController(
 
     private async Task SaveContactImage(Guid userID, string url)
     {
-        var request = new HttpRequestMessage
-        {
-            RequestUri = new Uri(url)
-        };
+        using var request = new HttpRequestMessage(HttpMethod.Get, url);
 
+        #pragma warning disable CA2000
         var httpClient = httpClientFactory.CreateClient();
+        #pragma warning restore CA2000
+        
         using var response = await httpClient.SendAsync(request);
         var bytes = await response.Content.ReadAsByteArrayAsync();
 
         await userPhotoManager.SaveOrUpdatePhoto(userID, bytes);
-    }
-
-    private string GetEmailAddress(SignupAccountRequestDto inDto)
-    {
-        if (!string.IsNullOrEmpty(inDto.Email))
-        {
-            return inDto.Email.Trim();
-        }
-
-        return string.Empty;
-    }
-
-    private string GetEmailAddress(SignupAccountRequestDto inDto, LoginProfile account)
-    {
-        return string.IsNullOrEmpty(account.EMail) ? GetEmailAddress(inDto) : account.EMail;
-    }
-
-    private string GetFirstName(SignupAccountRequestDto inDto)
-    {
-        var value = string.Empty;
-        if (!string.IsNullOrEmpty(inDto.FirstName))
-        {
-            value = inDto.FirstName.Trim();
-        }
-
-        return HtmlUtil.GetText(value);
-    }
-
-    private string GetFirstName(SignupAccountRequestDto inDto, LoginProfile account)
-    {
-        var value = GetFirstName(inDto);
-
-        return string.IsNullOrEmpty(value) ? account.FirstName : value;
-    }
-
-    private string GetLastName(SignupAccountRequestDto inDto)
-    {
-        var value = string.Empty;
-        if (!string.IsNullOrEmpty(inDto.LastName))
-        {
-            value = inDto.LastName.Trim();
-        }
-
-        return HtmlUtil.GetText(value);
-    }
-
-    private string GetLastName(SignupAccountRequestDto inDto, LoginProfile account)
-    {
-        var value = GetLastName(inDto);
-
-        return string.IsNullOrEmpty(value) ? account.LastName : value;
     }
 
     private static string GetMeaningfulProviderName(string providerName)

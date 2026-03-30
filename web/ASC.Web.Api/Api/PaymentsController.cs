@@ -1,29 +1,30 @@
 ﻿// (c) Copyright Ascensio System SIA 2009-2026
-// 
+//
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
+//
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
+//
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-// 
+//
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Common.AI;
 using ASC.Files.Core.ApiModels.ResponseDto;
 using ASC.Files.Core.IntegrationEvents.Events;
 using ASC.Files.Core.Services.DocumentBuilderService;
@@ -56,13 +57,15 @@ public class PaymentController(
     StudioNotifyService studioNotifyService,
     PermissionContext permissionContext,
     TenantUtil tenantUtil,
+    AiGateway aiGateway,
     ApiDateTimeHelper apiDateTimeHelper,
     EmployeeDtoHelper employeeWrapperHelper,
     DisplayUserSettingsHelper displayUserSettingsHelper,
     IEventBus eventBus,
     CommonLinkUtility commonLinkUtility,
     DocumentBuilderTaskManager<CustomerOperationsReportTask, int, CustomerOperationsReportTaskData> documentBuilderTaskManager,
-    IServiceProvider serviceProvider)
+    IServiceProvider serviceProvider,
+    WalletStaticProvider walletStaticProvider)
     : ControllerBase
 {
     private readonly int _maxCount = 10;
@@ -79,7 +82,7 @@ public class PaymentController(
     [SwaggerResponse(200, "The URL to the payment page", typeof(Uri))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPut("url")]
-    public async Task<Uri> GetPaymentUrl(PaymentUrlRequestsDto inDto)
+    public async Task<Uri> GetPaymentUrl(PaymentUrlRequestDto inDto)
     {
         await DemandAdminAsync();
 
@@ -306,7 +309,7 @@ public class PaymentController(
 
         var quantity = new Dictionary<string, int> { { productName, productQty.Value } };
 
-        var result = await tariffService.PaymentChangeAsync(tenant.Id, quantity, inDto.ProductQuantityType, defaultCurrency, false, securityContext.CurrentAccount.ID.ToString(), null);
+        var result = await tariffService.PaymentChangeAsync(tenant.Id, quantity, inDto.ProductQuantityType, defaultCurrency, false, securityContext.CurrentAccount.ID.ToString());
 
         if (result)
         {
@@ -405,7 +408,7 @@ public class PaymentController(
     [SwaggerResponse(200, "The URL to the payment account", typeof(string))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("account")]
-    public async Task<string> GetPaymentAccount(PaymentUrlRequestDto inDto)
+    public async Task<string> GetPaymentAccount(PaymentAccountRequestDto inDto)
     {
         if (!tariffService.IsConfigured())
         {
@@ -521,11 +524,10 @@ public class PaymentController(
     /// Get wallet service
     /// </summary>
     /// <path>api/2.0/portal/payment/walletservice</path>
-    /// <collection>list</collection>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "Wallet service", typeof(QuotaDto))]
+    [SwaggerResponse(200, "Wallet service", typeof(WalletServiceDto))]
     [HttpGet("walletservice")]
-    public async Task<QuotaDto> GetWalletService(GetWalletServiceRequestDto inDto)
+    public async Task<WalletServiceDto> GetWalletService(GetWalletServiceRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -536,7 +538,10 @@ public class PaymentController(
             throw new ItemNotFoundException();
         }
 
-        return await tariffHelper.ToQuotaDtoAsync(quota, false);
+        var quotaDto = await tariffHelper.ToQuotaDtoAsync(quota, false);
+        var walletServiceDto = quotaDto.MapToWalletServiceDto();
+        walletServiceDto.ServiceName = quota.ServiceName;
+        return walletServiceDto;
     }
 
     /// <remarks>
@@ -760,17 +765,18 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Returns the report of customer operations from the accounting service.
+    /// Returns the service quota from the accounting service.
     /// </remarks>
     /// <summary>
-    /// Get the customer operations
+    /// Get the service quota
     /// </summary>
-    /// <path>api/2.0/portal/payment/customer/operations</path>
+    /// <path>api/2.0/portal/payment/customer/servicequota</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The customer operations", typeof(ReportDto))]
+    [SwaggerResponse(200, "The service quota", typeof(Balance))]
     [SwaggerResponse(403, "No permissions to perform this action")]
-    [HttpGet("customer/operations")]
-    public async Task<ReportDto> GetCustomerOperations(CustomerOperationsRequestDto inDto)
+    [SwaggerResponse(404, "Service could not be found")]
+    [HttpGet("customer/servicequota")]
+    public async Task<Balance> GetCustomerServiceQuota(CustomerServiceQuotaRequestDto inDto)
     {
         await DemandAdminAsync();
 
@@ -787,10 +793,67 @@ public class PaymentController(
             return null;
         }
 
-        var utcStartDate = tenantUtil.DateTimeToUtc(inDto.StartDate);
-        var utcEndDate = tenantUtil.DateTimeToUtc(inDto.EndDate);
-        var report = await tariffService.GetCustomerOperationsAsync(tenant.Id, utcStartDate, utcEndDate, inDto.ParticipantName, inDto.Credit, inDto.Debit, inDto.Offset, inDto.Limit);
+        await CheckWalletServiceName(inDto.ServiceName);
 
+        var result = await tariffService.GetCustomerServiceQuotaAsync(tenant.Id, inDto.ServiceName, inDto.Refresh);
+        return result;
+    }
+
+    /// <remarks>
+    /// Returns the report of customer operations from the accounting service.
+    /// </remarks>
+    /// <summary>
+    /// Get the customer operations
+    /// </summary>
+    /// <path>api/2.0/portal/payment/customer/operations</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The customer operations", typeof(ReportDto))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(404, "Service could not be found")]
+    [HttpGet("customer/operations")]
+    public async Task<ReportDto> GetCustomerOperations([FromQuery]CustomerOperationsRequestDto inDto)
+    {
+        await DemandAdminAsync();
+
+        if (!tariffService.IsConfigured())
+        {
+            return null;
+        }
+
+        var tenant = tenantManager.GetCurrentTenant();
+
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+        if (customerInfo == null)
+        {
+            return null;
+        }
+
+        if (!string.IsNullOrEmpty(inDto.ServiceName))
+        {
+            await CheckWalletServiceName(inDto.ServiceName);
+        }
+
+        var utcStartDate = tenantUtil.DateTimeToUtc(inDto.StartDate ?? tenant.CreationDateTime);
+        var utcEndDate = tenantUtil.DateTimeToUtc(inDto.EndDate ?? DateTime.UtcNow);
+
+        var filter = new OperationFilter
+        {
+            ServiceName = inDto.ServiceName,
+            WriteOffServiceQuota = inDto.WriteOffServiceQuota,
+            UtcStartDate = utcStartDate,
+            UtcEndDate = utcEndDate,
+            ParticipantName = inDto.ParticipantName,
+            Credit = inDto.Credit,
+            Debit = inDto.Debit,
+            Offset = inDto.Offset,
+            Limit = inDto.Limit,
+            Types = inDto.Types,
+            Status = inDto.Status,
+            OrderBy = inDto.OrderBy,
+            OrderType = inDto.OrderType
+        };
+
+        var report = await tariffService.GetCustomerOperationsAsync(tenant.Id, filter);
         if (report == null)
         {
             return null;
@@ -798,7 +861,7 @@ public class PaymentController(
 
         var participantDisplayNames = await report.GetParticipantDisplayNamesAsync(displayUserSettingsHelper);
 
-        return new ReportDto(report, apiDateTimeHelper, participantDisplayNames);
+        return new ReportDto(report, apiDateTimeHelper, participantDisplayNames, filter.ServiceName);
     }
 
     /// <remarks>
@@ -810,6 +873,8 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/customer/operationsreport</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "Ok", typeof(DocumentBuilderTaskDto))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(404, "Service could not be found")]
     [HttpPost("customer/operationsreport")]
     public async Task<DocumentBuilderTaskDto> CreateCustomerOperationsReport(CustomerOperationsReportRequestDto inDto)
     {
@@ -828,7 +893,12 @@ public class PaymentController(
             return null;
         }
 
-        inDto = inDto ?? new CustomerOperationsReportRequestDto();
+        inDto ??= new CustomerOperationsReportRequestDto();
+
+        if (!string.IsNullOrEmpty(inDto.ServiceName))
+        {
+            await CheckWalletServiceName(inDto.ServiceName);
+        }
 
         var userId = securityContext.CurrentAccount.ID;
 
@@ -840,9 +910,25 @@ public class PaymentController(
 
         var taskProgress = await documentBuilderTaskManager.StartTask(task, false);
 
-        var headers = MessageSettings.GetHttpHeaders(Request)?.ToDictionary(x => x.Key, x => x.Value.ToString()) ?? [];
+        var headers = MessageSettings.GetHttpHeaders(Request)?
+            .ToDictionary(x => x.Key, x => x.Value.ToString()) ?? [];
 
-        var evt = new CustomerOperationsReportIntegrationEvent(userId, tenantId, baseUri, inDto.StartDate, inDto.EndDate, inDto.ParticipantName, inDto.Credit, inDto.Debit, headers, false);
+        var evt = new CustomerOperationsReportIntegrationEvent(
+            userId,
+            tenantId,
+            baseUri,
+            inDto.ServiceName,
+            inDto.WriteOffServiceQuota,
+            inDto.StartDate,
+            inDto.EndDate,
+            inDto.ParticipantName,
+            inDto.Credit,
+            inDto.Debit,
+            inDto.Types,
+            inDto.Status,
+            inDto.OrderBy,
+            inDto.OrderType,
+            headers);
 
         await eventBus.PublishAsync(evt);
 
@@ -904,19 +990,18 @@ public class PaymentController(
             return;
         }
 
-        var evt = new CustomerOperationsReportIntegrationEvent(securityContext.CurrentAccount.ID, tenantId, null, terminate: true);
+        var evt = new CustomerOperationsReportIntegrationEvent(securityContext.CurrentAccount.ID, tenantId, null, null, false, terminate: true);
 
         await eventBus.PublishAsync(evt);
     }
 
-    /// <remarks>
-    /// Returns the list of available currencies from the accounting service.
-    /// </remarks>
     /// <summary>
     /// Get currencies from the accounting service
     /// </summary>
+    /// <remarks>
+    /// Returns the list of available currencies from the accounting service.
+    /// </remarks>
     /// <path>api/2.0/portal/payment/accounting/currencies</path>
-    /// <collection>list</collection>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The list of currencies", typeof(List<Currency>))]
@@ -938,12 +1023,12 @@ public class PaymentController(
         return allCurrencies.Where(x => supportedCurrencies.Contains(x.Code)).ToList();
     }
 
-    /// <remarks>
-    /// Returns the wallet auto top-up settings.
-    /// </remarks>
     /// <summary>
-    /// Get wallet auto top-up settings
+    /// Gets the tenant wallet auto top up settings
     /// </summary>
+    /// <remarks>
+    /// Returns the wallet auto top up settings for the current tenant.
+    /// </remarks>
     /// <path>api/2.0/portal/payment/topupsettings</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The wallet auto top up settings", typeof(TenantWalletSettings))]
@@ -957,12 +1042,14 @@ public class PaymentController(
         return result;
     }
 
-    /// <remarks>
-    /// Sets the wallet auto top-up settings.
-    /// </remarks>
     /// <summary>
-    /// Set wallet auto top-up settings
+    /// Set the wallet auto top up settings
     /// </summary>
+    /// <remarks>
+    /// Updates the wallet auto top up settings for the current tenant.
+    /// Requires the tariff service to be configured and the user to be authorized as a payer.
+    /// Returns null if the tariff service is not configured or customer information/balance cannot be retrieved.
+    /// </remarks>
     /// <path>api/2.0/portal/payment/topupsettings</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The wallet auto top up settings", typeof(TenantWalletSettings))]
@@ -983,7 +1070,7 @@ public class PaymentController(
             return null;
         }
 
-        var balance = await tariffService.GetCustomerBalanceAsync(tenant.Id, false);
+        var balance = await tariffService.GetCustomerBalanceAsync(tenant.Id);
         if (balance == null)
         {
             return null;
@@ -1000,15 +1087,16 @@ public class PaymentController(
         return settings;
     }
 
-    /// <remarks>
-    /// Returns the wallet services settings.
-    /// </remarks>
+
     /// <summary>
-    /// Get wallet services settings
+    /// Gets the wallet service settings for the tenant.
     /// </summary>
+    /// <remarks>
+    /// Retrieves configuration settings related to the wallet service associated with the current tenant.
+    /// </remarks>
     /// <path>api/2.0/portal/payment/servicessettings</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The wallet services settings", typeof(TenantWalletServiceSettings))]
+    [SwaggerResponse(200, "The wallet service settings for the tenant", typeof(TenantWalletServiceSettings))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("servicessettings")]
     public async Task<TenantWalletServiceSettings> GetTenantWalletServiceSettings()
@@ -1025,15 +1113,17 @@ public class PaymentController(
         return settings;
     }
 
-    /// <remarks>
-    /// Changes the wallet service state.
-    /// </remarks>
     /// <summary>
-    /// Change wallet service state
+    /// Change tenant wallet service state
     /// </summary>
+    /// <remarks>
+    /// Changes the state of a wallet service for the current tenant.
+    /// Requires permission to edit portal settings and a configured tariff service.
+    /// Adds or removes the specified service from the enabled services list based on the enabled flag.
+    /// </remarks>
     /// <path>api/2.0/portal/payment/servicestate</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The wallet service settings", typeof(TenantWalletServiceSettings))]
+    [SwaggerResponse(200, "The updated tenant wallet service settings", typeof(TenantWalletServiceSettings))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("servicestate")]
     public async Task<TenantWalletServiceSettings> ChangeTenantWalletServiceState(ChangeWalletServiceStateRequestDto inDto)
@@ -1081,6 +1171,208 @@ public class PaymentController(
         return settings;
     }
 
+    /// <summary>
+    /// Purchases a wallet service with the specified quantity.
+    /// </summary>
+    /// <remarks>
+    /// This method processes a payment for a wallet service using the configured payment method.
+    /// Requires the tariff service to be configured and a valid payment method to be set for the customer.
+    /// Rate limiting is applied according to the payments API policy.
+    /// </remarks>
+    /// <path>api/2.0/portal/payment/buywalletservice</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The service payment information", typeof(ServicePayment))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(404, "Service could not be found")]
+    [HttpPost("buywalletservice")]
+    [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
+    public async Task<ServicePayment> BuyWalletService(BuyWalletServiceRequestDto inDto)
+    {
+        if (!tariffService.IsConfigured())
+        {
+            return null;
+        }
+
+        var tenant = tenantManager.GetCurrentTenant();
+
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+        if (customerInfo is not { PaymentMethodStatus: PaymentMethodStatus.Set })
+        {
+            return null;
+        }
+
+        await DemandPayerAsync(customerInfo);
+
+        var walletService = await CheckWalletServiceName(inDto.ServiceName);
+
+        // For now, only ai-tools available for purchasing!
+        if (walletService != TenantWalletService.AITools)
+        {
+            throw new ItemNotFoundException("Service could not be found");
+        }
+
+        var customerParticipantName = securityContext.CurrentAccount.ID.ToString();
+        var details = $"{inDto.ServiceName} {inDto.Quantity}";
+
+        var result = await tariffService.MakeServicePaymentAsync(tenant.Id, inDto.ServiceName, inDto.Quantity, customerParticipantName, metadata: null);
+        if (result != null)
+        {
+            messageService.Send(MessageAction.CustomerOperationPerformed, null, details);
+            await ChangeTenantWalletServiceState(new ChangeWalletServiceStateRequestDto
+            {
+                Service = walletService,
+                Enabled = true
+            });
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Get AI model prices
+    /// </summary>
+    /// <remarks>
+    /// Retrieves the pricing information for AI models including chat, embedding, and web search services.
+    /// The prices are returned in the configured currency and normalized per million tokens.
+    /// Requires administrator permissions to access.
+    /// </remarks>
+    /// <path>api/2.0/portal/payment/aiprices</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "Prices for AI models", typeof(AiPricesResponse))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [HttpGet("ai-prices")]
+    public async Task<AiPricesDto> GetAiPrices()
+    {
+        if (!tariffService.IsConfigured())
+        {
+            return null;
+        }
+
+        await DemandAdminAsync();
+
+        var aiPrices = await aiGateway.GetPricesAsync();
+
+        var providers = aiPrices.Chat.Select(m => m.OwnedBy.ToLower()).Distinct();
+        var icons = new Dictionary<string, string>();
+        foreach (var provider in providers)
+        {
+            icons[provider] = await walletStaticProvider.GetImageAsync(provider);
+        }
+
+        var chat = aiPrices.Chat.Select(model => new AiEntryPricingDto<AiChatPriceDto>
+        {
+            Id = model.Id,
+            Image = icons[model.OwnedBy.ToLower()],
+            Alias = model.Alias,
+            Provider = model.Provider,
+            Price = new AiChatPriceDto
+            {
+                Prompt = model.Price.Prompt * 1_000_000,
+                Completion = model.Price.Completion * 1_000_000
+            }
+        }).ToList();
+
+        var embeddingImage = await walletStaticProvider.GetImageAsync("embedding");
+
+        var embedding = aiPrices.Embedding.Select(e => new AiEntryPricingDto<AiEmbeddingPriceDto>
+        {
+            Id = e.Id,
+            Alias = e.Alias,
+            Provider = e.Provider,
+            Image = embeddingImage,
+            Price = new AiEmbeddingPriceDto { Prompt = e.Price.Prompt * 1_000_000 }
+        }).ToList();
+
+        return new AiPricesDto
+        {
+            Chat = chat,
+            Embedding = embedding,
+            WebSearch = [
+                new AiEntryPricingDto<decimal>
+                {
+                    Id = "search",
+                    Alias = "Web Search",
+                    Image = await walletStaticProvider.GetImageAsync("search"),
+                    Provider = aiPrices.WebSearch.Provider,
+                    Price = aiPrices.WebSearch.Search
+                },
+                new AiEntryPricingDto<decimal>
+                {
+                    Id = "fetch",
+                    Alias = "Web crawling",
+                    Image = await walletStaticProvider.GetImageAsync("crawling"),
+                    Provider = aiPrices.WebSearch.Provider,
+                    Price = aiPrices.WebSearch.Contents
+                }
+            ],
+            Currency = aiPrices.Currency
+        };
+    }
+
+    /// <summary>
+    /// Get restricted AI models
+    /// </summary>
+    /// <remarks>
+    /// Returns the list of AI chat model IDs that are restricted (disabled) for the current tenant.
+    /// Restricted models cannot be used for AI chat conversations by any user within the portal.
+    /// Only DocSpace administrators can access this endpoint.
+    /// </remarks>
+    /// <path>api/2.0/portal/payment/ai-model/restrictions</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The list of restricted AI model IDs", typeof(RestrictedModelsResponse))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [HttpGet("ai-model/restrictions")]
+    public async Task<RestrictedModelsResponse> GetRestrictedAiModels()
+    {
+        if (!tariffService.IsConfigured())
+        {
+            return null;
+        }
+
+        await DemandAdminAsync();
+
+        return await aiGateway.GetRestrictedModelsAsync();
+    }
+
+    /// <summary>
+    /// Set restricted AI models
+    /// </summary>
+    /// <remarks>
+    /// Overwrites the entire set of restricted AI model IDs for the current tenant.
+    /// The request body must contain the complete desired set — to add a restriction, include the new model alongside existing ones;
+    /// to remove one, omit it. An empty set lifts all restrictions. Only the portal payer can perform this action.
+    /// </remarks>
+    /// <path>api/2.0/portal/payment/ai-model/restrictions</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The updated list of restricted AI model IDs", typeof(RestrictedModelsResponse))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [HttpPut("ai-model/restrictions")]
+    public async Task<RestrictedModelsResponse> SetRestrictedAiModels(SetRestrictedAiModelsRequestDto inDto)
+    {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        if (!tariffService.IsConfigured())
+        {
+            return null;
+        }
+
+        var tenant = tenantManager.GetCurrentTenant();
+
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+        if (customerInfo == null)
+        {
+            return null;
+        }
+
+        await DemandPayerAsync(customerInfo);
+
+        var result = await aiGateway.SetRestrictedModelsAsync(inDto.Models);
+
+        messageService.Send(MessageAction.CustomerWalletServicesSettingsUpdated);
+
+        return result;
+    }
+
     private async Task DemandAdminAsync()
     {
         if (!await userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID))
@@ -1123,5 +1415,20 @@ public class PaymentController(
         }
 
         await fusionCache.SetAsync(key, count + 1, TimeSpan.FromMinutes(_expirationMinutes));
+    }
+
+    private async Task<TenantWalletService> CheckWalletServiceName(string serviceName)
+    {
+        var quotaList = await tenantManager.GetTenantQuotasAsync(true, true);
+
+        var selectedQuota = quotaList.FirstOrDefault(x =>
+            x.ServiceName.Equals(serviceName, StringComparison.InvariantCultureIgnoreCase));
+
+        if (selectedQuota != null && Enum.IsDefined(typeof(TenantWalletService), selectedQuota.TenantId))
+        {
+            return (TenantWalletService)selectedQuota.TenantId;
+        }
+
+        throw new ItemNotFoundException("Service could not be found");
     }
 }

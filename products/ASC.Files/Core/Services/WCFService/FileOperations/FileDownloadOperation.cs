@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core.Services.WCFService.FileOperations;
+
 namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
 [ProtoContract]
@@ -224,7 +226,7 @@ public class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationD
     }
 }
 
-class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
+internal class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
 {
     private readonly Dictionary<T, (string, string)> _files;
     private readonly IDictionary<string, StringValues> _headers;
@@ -247,15 +249,8 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
 
         (_entriesPathId, var filesForSend, var folderForSend) = await GetEntriesPathIdAsync(serviceScope);
 
-        if (_entriesPathId == null || _entriesPathId.Count == 0)
-        {
-            if (Files.Count > 0)
-            {
-                throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
-            }
-
-            throw new DirectoryNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
-        }
+        var permissionsManager = serviceScope.ServiceProvider.GetRequiredService<DownloadPermissionsCheck<T>>();
+        await permissionsManager.CheckPermissionsAsync(_entriesPathId, Files);
 
         Total = _entriesPathId.Count + 1;
 
@@ -314,7 +309,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
         return entriesPathId;
     }
 
-    private async Task<(ItemNameValueCollection<T>, IEnumerable<FileEntry<T>>, IEnumerable<FileEntry<T>>)> GetEntriesPathIdAsync(AsyncServiceScope scope)
+    public async Task<(ItemNameValueCollection<T>, IEnumerable<FileEntry<T>>, IEnumerable<FileEntry<T>>)> GetEntriesPathIdAsync(AsyncServiceScope scope)
     {
         var fileMarker = scope.ServiceProvider.GetService<FileMarker>();
         var entriesPathId = new ItemNameValueCollection<T>();

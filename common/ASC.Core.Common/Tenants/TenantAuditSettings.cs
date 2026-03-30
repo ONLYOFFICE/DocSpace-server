@@ -36,11 +36,13 @@ public class TenantAuditSettings : ISettings<TenantAuditSettings>
     /// <summary>
     /// The login history lifetime.
     /// </summary>
+    /// <example>180</example>
     public int LoginHistoryLifeTime { get; init; }
 
     /// <summary>
     /// The audit trail lifetime.
     /// </summary>
+    /// <example>180</example>
     public int AuditTrailLifeTime { get; init; }
     
     public static Guid ID => new("{8337D0FB-AD67-4552-8297-802312E7F503}");
@@ -54,6 +56,10 @@ public class TenantAuditSettings : ISettings<TenantAuditSettings>
         };
     }
 
+    /// <summary>
+    /// The timestamp indicating when the settings were last modified.
+    /// </summary>
+    /// <example>1990-01-01T00:00:00Z</example>
     public DateTime LastModified { get; set; }
 }
 
@@ -65,5 +71,6 @@ public class TenantAuditSettingsWrapper
     /// <summary>
     /// The tenant audit settings parameters.
     /// </summary>
+    /// <example>{"loginHistoryLifeTime": 180, "auditTrailLifeTime": 180}</example>
     public TenantAuditSettings Settings { get; set; }
 }

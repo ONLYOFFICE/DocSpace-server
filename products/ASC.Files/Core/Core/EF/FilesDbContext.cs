@@ -51,12 +51,15 @@ public partial class FilesDbContext(DbContextOptions<FilesDbContext> dbContextOp
     public DbSet<DbFilesAuditReference> FilesAuditReference { get; set; }
     public DbSet<DbUserRelation> UserRelations { get; set; }
     public DbSet<DbFilesFormRoleMapping> FilesFormRoleMapping { get; set; }
+    public DbSet<DbFilesGroup> RoomGroup { get; set; }
+    public DbSet<DbFilesRoomGroup> RoomGroupRef { get; set; }
     public DbSet<DbChat> Chats { get; set; }
     public DbSet<DbChatMessage> ChatMessages { get; set; }
     public DbSet<DbFileVectorization> FileVectorization { get; set; }
     public DbSet<DbUserChatSettings> UserChatSettings { get; set; }
     public DbSet<DbMcpServerSettings> McpServerSettings { get; set; }
     public DbSet<DbAiProvider> AiProviders { get; set; }
+    public DbSet<DbChatMessageAttachment> MessageAttachments { get; set; }
     public DbSet<DbFileKeys> DbFileKeys { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -73,6 +76,8 @@ public partial class FilesDbContext(DbContextOptions<FilesDbContext> dbContextOp
             .AddDbFilesFormRoleMapping()
             .AddDbFilesTagLink()
             .AddDbFilesTag()
+            .AddDbFilesGroup()
+            .AddDbFilesRoomGroup()
             .AddDbDbFilesThirdpartyApp()
             .AddDbFilesLink()
             .AddDbFilesProperties()
@@ -90,6 +95,7 @@ public partial class FilesDbContext(DbContextOptions<FilesDbContext> dbContextOp
             .AddDbUserChatSettings()
             .AddDbMcpServerSettings()
             .AddDbAiProviders()
+            .AddDbChatMessageAttachment()
             .AddDbFileKeys()
             .AddDbFunctions();
     }

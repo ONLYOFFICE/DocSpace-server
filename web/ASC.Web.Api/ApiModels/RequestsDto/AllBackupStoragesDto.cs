@@ -29,6 +29,7 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 /// <summary>
 /// Data Transfer Object representing parameters for querying all backup storages.
 /// </summary>
+
 public class AllBackupStoragesDto
 {
     /// <summary>
@@ -36,6 +37,7 @@ public class AllBackupStoragesDto
     /// This property is used as a parameter in backup-related API requests to specify
     /// if additional details or data dumping is required during the process.
     /// </summary>
+    /// <example>true</example>
     [FromQuery]
     public bool Dump { get; set; }
 }

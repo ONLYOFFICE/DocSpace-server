@@ -36,13 +36,15 @@ public interface IAiProviderDao
         ProviderType type,
         string defaultModel);
 
-    Task<AiProvider?> GetProviderAsync(int tenantId, int id);
+    Task<AiProvider?> GetProviderAsync(int tenantId, int id, bool forceSystemProvider = false);
 
     IAsyncEnumerable<AiProvider> GetProvidersAsync(int tenantId, int offset, int limit);
 
     Task<bool> CanDecryptSomeKeyAsync(int tenantId);
 
     Task<int> GetProvidersTotalCountAsync(int tenantId);
+
+    Task<bool> IsProviderNameExistsAsync(int tenantId, string title, int excludedProviderId = 0);
 
     Task<AiProvider> UpdateProviderAsync(int tenantId, AiProvider provider);
 

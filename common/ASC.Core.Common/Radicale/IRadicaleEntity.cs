@@ -26,7 +26,7 @@
 
 namespace ASC.Common.Radicale;
 
-interface IRadicaleEntity
+internal interface IRadicaleEntity
 {
     string Create(DavRequest davrequest);
     void Update(DavRequest davRequest);

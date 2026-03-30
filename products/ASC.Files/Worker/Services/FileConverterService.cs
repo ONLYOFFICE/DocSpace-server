@@ -32,7 +32,7 @@ namespace ASC.Files.Worker.Services;
 
 [Singleton(GenericArguments = [typeof(int)])]
 [Singleton(GenericArguments = [typeof(string)])]
-internal class FileConverterService<T>(
+public class FileConverterService<T>(
         IServiceScopeFactory scopeFactory,
         ILogger<FileConverterService<T>> logger)
      : ActivePassiveBackgroundService<FileConverterService<T>>(logger, scopeFactory)

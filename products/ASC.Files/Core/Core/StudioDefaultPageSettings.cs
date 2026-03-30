@@ -28,6 +28,10 @@ namespace ASC.Files.Core;
 
 public class StudioDefaultPageSettings : ISettings<StudioDefaultPageSettings>
 {
+    /// <summary>
+    /// Specifies the type of the default folder associated with the settings.
+    /// </summary>
+    /// <example>0</example>
     public FolderType DefaultFolderType { get; init; }
 
     public static Guid ID => new("{F3FF27C5-BDE3-43ae-8DD0-2E8E0D7044F1}");
@@ -36,6 +40,10 @@ public class StudioDefaultPageSettings : ISettings<StudioDefaultPageSettings>
     {
         return new StudioDefaultPageSettings { DefaultFolderType = FolderType.VirtualRooms };
     }
-
+    
+    /// <summary>
+    /// The timestamp indicating when the settings were last modified.
+    /// </summary>
+    /// <example>1990-01-01T00:00:00Z</example>
     public DateTime LastModified { get; set; }
 }

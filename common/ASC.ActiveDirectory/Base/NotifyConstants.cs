@@ -24,7 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Core.Common.Notify.Model;
 using ASC.Web.Core.Utility;
 
 namespace ASC.ActiveDirectory.Base;
@@ -87,7 +86,7 @@ public class LdapActivationNotifyAction(CommonLinkUtility commonLinkUtility, Dis
 
     public async Task Init(UserInfo ldapUserInfo, LdapLocalization resource)
     {                   
-        var confirmLink = commonLinkUtility.GetConfirmationEmailUrl(ldapUserInfo.Email, ConfirmType.EmailActivation);
+        var confirmLink = commonLinkUtility.GetConfirmationEmailUrl(ldapUserInfo.Email, ConfirmType.EmailActivation, null, ldapUserInfo.Id);
         Tags =
         [
             new TagValue(NotifyConstants.TagUserName, ldapUserInfo.DisplayUserName(displayUserSettingsHelper)),

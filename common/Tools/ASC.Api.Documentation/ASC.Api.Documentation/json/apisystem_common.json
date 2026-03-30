@@ -210,7 +210,7 @@
             "description": "The portal name.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "myportal"
             }
           },
           {
@@ -220,7 +220,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 1
             }
           },
           {
@@ -231,7 +231,7 @@
               "maxLength": 255,
               "minLength": 0,
               "type": "string",
-              "example": "some text"
+              "example": "af123456"
             }
           },
           {
@@ -242,7 +242,7 @@
               "maxLength": 255,
               "minLength": 0,
               "type": "string",
-              "example": "some text"
+              "example": "partner123"
             }
           },
           {
@@ -251,7 +251,7 @@
             "description": "The portal campaign.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "personal"
             }
           },
           {
@@ -274,7 +274,7 @@
               "minLength": 0,
               "type": "string",
               "format": "email",
-              "example": "example@onlyoffice.com"
+              "example": "john.doe@example.com"
             }
           },
           {
@@ -284,7 +284,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 0
             }
           },
           {
@@ -295,7 +295,7 @@
               "maxLength": 7,
               "minLength": 0,
               "type": "string",
-              "example": "some text"
+              "example": "en-US"
             }
           },
           {
@@ -317,7 +317,7 @@
               "maxLength": 38,
               "minLength": 0,
               "type": "string",
-              "example": "some text"
+              "example": "files"
             }
           },
           {
@@ -328,7 +328,7 @@
               "maxLength": 30,
               "minLength": 0,
               "type": "string",
-              "example": "P@ssw0rd123"
+              "example": "yourPassword1!"
             }
           },
           {
@@ -337,7 +337,7 @@
             "description": "The password hash.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "VGhpcyBpcyBhIHRlc3Q="
             }
           },
           {
@@ -348,7 +348,7 @@
               "maxLength": 32,
               "minLength": 0,
               "type": "string",
-              "example": "some text"
+              "example": "+15551234567"
             }
           },
           {
@@ -357,7 +357,7 @@
             "description": "The user's response to the CAPTCHA challenge.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "03AGdBq24rvY..."
             }
           },
           {
@@ -366,7 +366,8 @@
             "description": "The type of CAPTCHA validation used.",
             "schema": {
               "$ref": "#/components/schemas/RecaptchaType"
-            }
+            },
+            "example": 0
           },
           {
             "name": "Region",
@@ -376,7 +377,7 @@
               "maxLength": 20,
               "minLength": 0,
               "type": "string",
-              "example": "some text"
+              "example": "us-east"
             }
           },
           {
@@ -385,7 +386,7 @@
             "description": "The portal AWS region.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "us-east-1"
             }
           },
           {
@@ -394,7 +395,8 @@
             "description": "The tenant status.",
             "schema": {
               "$ref": "#/components/schemas/TenantStatus"
-            }
+            },
+            "example": 0
           },
           {
             "name": "SkipWelcome",
@@ -402,7 +404,7 @@
             "description": "Specifies whether to send the welcome email to the user or not.",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           },
           {
@@ -413,7 +415,7 @@
               "maxLength": 255,
               "minLength": 0,
               "type": "string",
-              "example": "some text"
+              "example": "UTC"
             }
           },
           {
@@ -440,7 +442,7 @@
             "description": "The application key.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "app-key-123"
             }
           },
           {
@@ -449,7 +451,7 @@
             "description": "Specifies whether the access to the space management is limited or not.",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           },
           {
@@ -458,7 +460,7 @@
             "description": "The serialized third party profile.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "{\"id\":\"12345\",\"provider\":\"google\"}"
             }
           }
         ],
@@ -647,7 +649,7 @@
             "description": "The portal name.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "myportal"
             }
           },
           {
@@ -657,7 +659,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 1
             }
           },
           {
@@ -668,7 +670,7 @@
               "maxLength": 255,
               "minLength": 0,
               "type": "string",
-              "example": "some text"
+              "example": "af123456"
             }
           },
           {
@@ -679,7 +681,7 @@
               "maxLength": 255,
               "minLength": 0,
               "type": "string",
-              "example": "some text"
+              "example": "partner123"
             }
           },
           {
@@ -688,7 +690,7 @@
             "description": "The portal campaign.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "personal"
             }
           },
           {
@@ -711,7 +713,7 @@
               "minLength": 0,
               "type": "string",
               "format": "email",
-              "example": "example@onlyoffice.com"
+              "example": "john.doe@example.com"
             }
           },
           {
@@ -721,7 +723,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 0
             }
           },
           {
@@ -732,7 +734,7 @@
               "maxLength": 7,
               "minLength": 0,
               "type": "string",
-              "example": "some text"
+              "example": "en-US"
             }
           },
           {
@@ -754,7 +756,7 @@
               "maxLength": 38,
               "minLength": 0,
               "type": "string",
-              "example": "some text"
+              "example": "files"
             }
           },
           {
@@ -765,7 +767,7 @@
               "maxLength": 30,
               "minLength": 0,
               "type": "string",
-              "example": "P@ssw0rd123"
+              "example": "yourPassword1!"
             }
           },
           {
@@ -774,7 +776,7 @@
             "description": "The password hash.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "VGhpcyBpcyBhIHRlc3Q="
             }
           },
           {
@@ -785,7 +787,7 @@
               "maxLength": 32,
               "minLength": 0,
               "type": "string",
-              "example": "some text"
+              "example": "+15551234567"
             }
           },
           {
@@ -794,7 +796,7 @@
             "description": "The user's response to the CAPTCHA challenge.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "03AGdBq24rvY..."
             }
           },
           {
@@ -803,7 +805,8 @@
             "description": "The type of CAPTCHA validation used.",
             "schema": {
               "$ref": "#/components/schemas/RecaptchaType"
-            }
+            },
+            "example": 0
           },
           {
             "name": "Region",
@@ -813,7 +816,7 @@
               "maxLength": 20,
               "minLength": 0,
               "type": "string",
-              "example": "some text"
+              "example": "us-east"
             }
           },
           {
@@ -822,7 +825,7 @@
             "description": "The portal AWS region.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "us-east-1"
             }
           },
           {
@@ -831,7 +834,8 @@
             "description": "The tenant status.",
             "schema": {
               "$ref": "#/components/schemas/TenantStatus"
-            }
+            },
+            "example": 0
           },
           {
             "name": "SkipWelcome",
@@ -839,7 +843,7 @@
             "description": "Specifies whether to send the welcome email to the user or not.",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           },
           {
@@ -850,7 +854,7 @@
               "maxLength": 255,
               "minLength": 0,
               "type": "string",
-              "example": "some text"
+              "example": "UTC"
             }
           },
           {
@@ -877,7 +881,7 @@
             "description": "The application key.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "app-key-123"
             }
           },
           {
@@ -886,7 +890,7 @@
             "description": "Specifies whether the access to the space management is limited or not.",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           },
           {
@@ -895,7 +899,7 @@
             "description": "The serialized third party profile.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "{\"id\":\"12345\",\"provider\":\"google\"}"
             }
           },
           {
@@ -1143,7 +1147,7 @@
               "maxLength": 255,
               "minLength": 0,
               "type": "string",
-              "example": "some text"
+              "example": "myportal"
             }
           },
           {
@@ -1153,7 +1157,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 1
             }
           },
           {
@@ -1164,7 +1168,7 @@
               "maxLength": 255,
               "minLength": 0,
               "type": "string",
-              "example": "some text"
+              "example": "SmtpSettings"
             }
           },
           {
@@ -1173,7 +1177,7 @@
             "description": "The settings parameter value.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "sample value"
             }
           }
         ],
@@ -1391,7 +1395,7 @@
             "type": "string",
             "description": "The host name.",
             "nullable": true,
-            "example": "some text"
+            "example": "example.com"
           }
         },
         "additionalProperties": false,
@@ -1409,6 +1413,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -1417,20 +1422,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -1463,12 +1473,6 @@
               "AndroidV2",
               "iOSV2",
               "hCaptcha"
-            ],
-            "x-enum-descriptions": [
-              "Default",
-              "AndroidV2",
-              "iOSV2",
-              "hCaptcha"
             ]
           }
         ],
@@ -1484,14 +1488,14 @@
             "type": "string",
             "description": "The portal name.",
             "nullable": true,
-            "example": "some text"
+            "example": "myportal"
           },
           "tenantId": {
             "type": "integer",
             "description": "The tenant ID.",
             "format": "int32",
             "nullable": true,
-            "example": 1234
+            "example": 1
           },
           "key": {
             "maxLength": 255,
@@ -1499,13 +1503,13 @@
             "type": "string",
             "description": "The settings parameter key.",
             "nullable": true,
-            "example": "some text"
+            "example": "SmtpSettings"
           },
           "value": {
             "type": "string",
             "description": "The settings parameter value.",
             "nullable": true,
-            "example": "some text"
+            "example": "sample value"
           }
         },
         "additionalProperties": false,
@@ -1518,14 +1522,14 @@
             "type": "string",
             "description": "The portal name.",
             "nullable": true,
-            "example": "some text"
+            "example": "myportal"
           },
           "tenantId": {
             "type": "integer",
             "description": "The tenant ID.",
             "format": "int32",
             "nullable": true,
-            "example": 1234
+            "example": 1
           },
           "affiliateId": {
             "maxLength": 255,
@@ -1533,7 +1537,7 @@
             "type": "string",
             "description": "The affiliate ID.",
             "nullable": true,
-            "example": "some text"
+            "example": "af123456"
           },
           "partnerId": {
             "maxLength": 255,
@@ -1541,13 +1545,13 @@
             "type": "string",
             "description": "The partner ID.",
             "nullable": true,
-            "example": "some text"
+            "example": "partner123"
           },
           "campaign": {
             "type": "string",
             "description": "The portal campaign.",
             "nullable": true,
-            "example": "some text"
+            "example": "personal"
           },
           "firstName": {
             "maxLength": 255,
@@ -1564,13 +1568,13 @@
             "description": "The email address of the portal owner.",
             "format": "email",
             "nullable": true,
-            "example": "example@onlyoffice.com"
+            "example": "john.doe@example.com"
           },
           "industry": {
             "type": "integer",
             "description": "The tenant industry.",
             "format": "int32",
-            "example": 1234
+            "example": 0
           },
           "language": {
             "maxLength": 7,
@@ -1578,7 +1582,7 @@
             "type": "string",
             "description": "The portal language.",
             "nullable": true,
-            "example": "some text"
+            "example": "en-US"
           },
           "lastName": {
             "maxLength": 255,
@@ -1594,7 +1598,7 @@
             "type": "string",
             "description": "The name for the storage module to be configured.",
             "nullable": true,
-            "example": "some text"
+            "example": "files"
           },
           "password": {
             "maxLength": 30,
@@ -1602,13 +1606,13 @@
             "type": "string",
             "description": "The password of the portal owner.",
             "nullable": true,
-            "example": "P@ssw0rd123"
+            "example": "yourPassword1!"
           },
           "passwordHash": {
             "type": "string",
             "description": "The password hash.",
             "nullable": true,
-            "example": "some text"
+            "example": "VGhpcyBpcyBhIHRlc3Q="
           },
           "phone": {
             "maxLength": 32,
@@ -1616,13 +1620,13 @@
             "type": "string",
             "description": "The phone numberr of the portal owner.",
             "nullable": true,
-            "example": "some text"
+            "example": "+15551234567"
           },
           "recaptchaResponse": {
             "type": "string",
             "description": "The user's response to the CAPTCHA challenge.",
             "nullable": true,
-            "example": "some text"
+            "example": "03AGdBq24rvY..."
           },
           "recaptchaType": {
             "$ref": "#/components/schemas/RecaptchaType"
@@ -1633,13 +1637,13 @@
             "type": "string",
             "description": "The portal region.",
             "nullable": true,
-            "example": "some text"
+            "example": "us-east"
           },
           "awsRegion": {
             "type": "string",
             "description": "The portal AWS region.",
             "nullable": true,
-            "example": "some text"
+            "example": "us-east-1"
           },
           "status": {
             "$ref": "#/components/schemas/TenantStatus"
@@ -1647,7 +1651,7 @@
           "skipWelcome": {
             "type": "boolean",
             "description": "Specifies whether to send the welcome email to the user or not.",
-            "example": true
+            "example": false
           },
           "timeZoneName": {
             "maxLength": 255,
@@ -1655,7 +1659,7 @@
             "type": "string",
             "description": "The portal time zone name.",
             "nullable": true,
-            "example": "some text"
+            "example": "UTC"
           },
           "spam": {
             "type": "boolean",
@@ -1671,18 +1675,21 @@
             "type": "string",
             "description": "The application key.",
             "nullable": true,
-            "example": "some text"
+            "example": "app-key-123"
           },
           "limitedAccessSpace": {
             "type": "boolean",
             "description": "Specifies whether the access to the space management is limited or not.",
-            "example": true
+            "example": false
           },
           "thirdPartyProfile": {
             "type": "string",
             "description": "The serialized third party profile.",
             "nullable": true,
-            "example": "some text"
+            "example": {
+              "id": "12345",
+              "provider": "google"
+            }
           }
         },
         "additionalProperties": false,
@@ -1721,15 +1728,6 @@
               "Active",
               "Suspended",
               "RemovePending",
-              "Transfering",
-              "Restoring",
-              "Migrating",
-              "Encryption"
-            ],
-            "x-enum-descriptions": [
-              "Active",
-              "Suspended",
-              "Remove pending",
               "Transfering",
               "Restoring",
               "Migrating",

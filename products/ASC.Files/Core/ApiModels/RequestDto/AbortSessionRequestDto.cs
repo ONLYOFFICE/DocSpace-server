@@ -26,11 +26,22 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// The request parameters for aborting a session.
+/// </summary>
 public class AbortSessionRequestDto<T>
 {
+    /// <summary>
+    /// The session ID.
+    /// </summary>
+    /// <example>session-123-abc</example>
     [FromRoute(Name = "sessionId")]
     public required string SessionId { get; set; }
-    
+
+    /// <summary>
+    /// The folder ID.
+    /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "folderId")]
     public required T FolderId { get; set; }
 }

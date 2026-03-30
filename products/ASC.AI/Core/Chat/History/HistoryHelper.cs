@@ -28,16 +28,13 @@ namespace ASC.AI.Core.Chat.History;
 
 public static class HistoryHelper
 {
-    private static readonly OpenAiHistoryAdapter _openAiHistoryAdapter = new();
-    private static readonly AnthropicHistoryAdapter _anthropicHistoryAdapter = new();
-    
-    public static HistoryAdapter GetAdapter(ProviderType providerType)
+    public static HistoryAdapter GetAdapter(ProviderType providerType, DataContentLoader dataContentLoader)
     {
         if (providerType == ProviderType.Anthropic)
         {
-            return _anthropicHistoryAdapter;
+            return new AnthropicHistoryAdapter(dataContentLoader);
         }
 
-        return _openAiHistoryAdapter;
+        return new OpenAiHistoryAdapter(dataContentLoader);
     }
 }

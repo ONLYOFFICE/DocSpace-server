@@ -1,23 +1,23 @@
 [submodule "sdk/docspace-api-sdk-python"]
 	path = sdk/docspace-api-sdk-python
 	url = https://github.com/ONLYOFFICE/docspace-api-sdk-python.git
-	branch = master
+	branch = develop
 [submodule "sdk/docspace-api-sdk-kotlin"]
 	path = sdk/docspace-api-sdk-kotlin
 	url = https://github.com/ONLYOFFICE/docspace-api-sdk-kotlin.git
-	branch = master
+	branch = develop
 [submodule "sdk/docspace-api-sdk-swift"]
 	path = sdk/docspace-api-sdk-swift
 	url = https://github.com/ONLYOFFICE/docspace-api-sdk-swift.git
-	branch = master
+	branch = develop
 [submodule "sdk/docspace-api-sdk-php"]
 	path = sdk/docspace-api-sdk-php
 	url = https://github.com/ONLYOFFICE/docspace-api-sdk-php.git
-	branch = master
+	branch = develop
 [submodule "sdk/docspace-api-sdk-java"]
 	path = sdk/docspace-api-sdk-java
 	url = https://github.com/ONLYOFFICE/docspace-api-sdk-java.git
-	branch = master
+	branch = develop
 [submodule "sdk/docspace-api-sdk-typescript"]
 	path = sdk/docspace-api-sdk-typescript
 	url = https://github.com/ONLYOFFICE/docspace-api-sdk-typescript.git
@@ -29,7 +29,7 @@
 [submodule "sdk/docspace-api-postman-collections"]
 	path = sdk/docspace-api-postman-collections
 	url = https://github.com/ONLYOFFICE/docspace-api-postman-collections.git
-	branch = master
+	branch = develop
 [submodule "common/resources/DocStore"]
 	path = common/resources/DocStore
 	url = https://github.com/ONLYOFFICE/document-templates

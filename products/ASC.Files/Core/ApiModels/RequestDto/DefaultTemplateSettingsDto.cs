@@ -24,36 +24,51 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Core.ApiModels.RequestDto
+namespace ASC.Files.Core.ApiModels.RequestDto;
+
+/// <summary>
+/// Default templates settings request parameters.
+/// </summary>
+public class DefaultTemplateSettingsRequestDto
 {
     /// <summary>
-    /// Default templates settings request parameters.
+    /// File id to replace template with
     /// </summary>
-    public class DefaultTemplateSettingsRequestDto
-    {
-        /// <summary>
-        /// File id to replace template with (or null to use default template)
-        /// </summary>
-        public int? SelectedFile { get; set; }
-        /// <summary>
-        /// File extension of a template to replace
-        /// </summary>
-        public required string FileExtension { get; set; }
-    }
+    /// <example>1</example>
+    public required JsonElement SelectedFile { get; set; }
+    /// <summary>
+    /// File extension of a template to replace
+    /// </summary>
+    /// <example>.docx</example>
+    public required string FileExtension { get; set; }
+}
+
+/// <summary>
+/// Default templates settings reset request parameters.
+/// </summary>
+public class DefaultTemplateSettingsResetRequestDto
+{
+    /// <summary>
+    /// File extension of a template to reset
+    /// </summary>
+    /// <example>.docx</example>
+    public required string FileExtension { get; set; }
+}
+
+/// <summary>
+/// Default templates settings upload request parameters.
+/// </summary>
+public class DefaultTemplateSettingsUploadRequestDto
+{
+    /// <summary>
+    /// File extension of a template to replace
+    /// </summary>
+    /// <example>.docx</example>
+    public required string FileExtension { get; set; }
 
     /// <summary>
-    /// Default templates settings upload request parameters.
+    /// File to replace template with
     /// </summary>
-    public class DefaultTemplateSettingsUploadRequestDto
-    {
-        /// <summary>
-        /// File extension of a template to replace
-        /// </summary>
-        public required string FileExtension { get; set; }
-
-        /// <summary>
-        /// File to replace template with
-        /// </summary>
-        public required IFormFile File { get; set; }
-    }
+    /// <example>binary file data</example>
+    public required IFormFile File { get; set; }
 }

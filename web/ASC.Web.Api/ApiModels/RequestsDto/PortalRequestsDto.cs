@@ -29,11 +29,17 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 /// <summary>
 /// The request parameters for managing additional tenant information in a portal.
 /// </summary>
+/// <example>
+/// {
+///   "refresh": true
+/// }
+/// </example>
 public class PortalExtraTenantRequestDto
 {
     /// <summary>
     /// Specifies whether to fetch fresh tariff information.
     /// </summary>
+    /// <example>true</example>
     [FromQuery(Name = "refresh")]
     public bool Refresh { get; set; }
 }
@@ -46,6 +52,7 @@ public class PortalPathRequestDto
     /// <summary>
     /// The virtual path for the portal resource access.
     /// </summary>
+    /// <example>/portal/documents</example>
     [FromQuery(Name = "virtualPath")]
     public string VirtualPath { get; set; }
 }
@@ -58,6 +65,7 @@ public class PortalThumbnailRequestDto
     /// <summary>
     /// The URL of the content to generate a thumbnail from.
     /// </summary>
+    /// <example>https://example.com/image.png</example>
     [FromQuery(Name = "url")]
     public string Url { get; set; }
 }
@@ -70,6 +78,7 @@ public class PortalMobileAppRequestDto
     /// <summary>
     /// The target mobile platform or application type.
     /// </summary>
+    /// <example>IosProjects</example>
     [FromQuery(Name = "type")]
     public MobileAppType Type { get; set; }
 }
@@ -82,6 +91,7 @@ public class PortalSettingsRequestDto
     /// <summary>
     /// Specifies whether to include the password hashing configuration in the response.
     /// </summary>
+    /// <example>true</example>
     [FromQuery(Name = "withpassword")]
     public bool? WithPassword { get; set; }
 }

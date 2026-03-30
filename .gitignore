@@ -55,9 +55,10 @@ publish/
 
 .idea
 common/*/docker-entrypoint.py
-/common/Tools/CustomGenerators/target
-/common/Tools/CustomGenerators/openapitools.json
-/common/Tools/CustomGenerators/generated-code
+/common/Tools/ASC.Api.Documentation/ASC.Api.Documentation/SDK/target
+/common/Tools/ASC.Api.Documentation/ASC.Api.Documentation/SDK/openapitools.json
 
 products/ASC.AI/Server/DocStore/
 products/ASC.Files/Server/DocStore/
+common/services/ASC.Monolith/DocStore/
+/.claude/settings.local.json

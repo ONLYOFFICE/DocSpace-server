@@ -24,27 +24,20 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Web.Core.Files;
-
 using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Core.Common.AI;
 
-public class AiGatewaySettings
-{
-    public string Url { get; init; }
-    public string Secret { get; init; }
-    public TimeSpan TokenExpiration { get; init; }
-}
-
 [Scope]
 public class AiGateway(
     IConfiguration configuration,
+    IHttpClientFactory httpClientFactory,
     TenantManager tenantManager,
     ITariffService tariffService,
     UserManager userManager,
     AuthContext authContext,
-    SettingsManager settingsManager)
+    SettingsManager settingsManager,
+    CoreBaseSettings coreSettings)
 {
     public const int ProviderId = -1;
     public const string ProviderTitle = "ONLYOFFICE AI";
@@ -54,10 +47,12 @@ public class AiGateway(
 
     private AiGatewaySettings Settings => _settings ??= 
         configuration.GetSection("ai:gateway").Get<AiGatewaySettings>() ?? new AiGatewaySettings();
+    
+    public bool Configured => !coreSettings.Standalone && !string.IsNullOrEmpty(Settings.Url) && !string.IsNullOrEmpty(Settings.Secret);
 
     public async Task<bool> IsEnabledAsync()
     {
-        if (string.IsNullOrEmpty(Url) || string.IsNullOrEmpty(Settings?.Secret))
+        if (!Configured)
         {
             return false;
         }
@@ -66,13 +61,34 @@ public class AiGateway(
         return settings.EnabledServices != null && settings.EnabledServices.Contains(TenantWalletService.AITools);
     }
     
-    public async Task<string> GetKeyAsync()
+    public async Task<string> GetKeyAsync(bool force = false)
     {
-        if (!await IsEnabledAsync())
+        if (!force && !await IsEnabledAsync())
         {
             throw new InvalidOperationException("AI Gateway is not enabled");
         }
-        
+
+        return await GenerateKeyAsync();
+    }
+
+    public async Task<AiPricesResponse> GetPricesAsync()
+    {
+        return await SendAsync<AiPricesResponse>(HttpMethod.Get, "/prices", authorize: false);
+    }
+
+    public async Task<RestrictedModelsResponse> GetRestrictedModelsAsync()
+    {
+        return await SendAsync<RestrictedModelsResponse>(HttpMethod.Get, "/chat/models/restrictions");
+    }
+
+    public async Task<RestrictedModelsResponse> SetRestrictedModelsAsync(HashSet<string> models)
+    {
+        var content = JsonContent.Create(new SetRestrictedModelsRequest { Models = models });
+        return await SendAsync<RestrictedModelsResponse>(HttpMethod.Put, "/chat/models/restrictions", content);
+    }
+
+    private async Task<string> GenerateKeyAsync()
+    {
         var customerInfo = await tariffService.GetCustomerInfoAsync(tenantManager.GetCurrentTenantId());
         if (customerInfo == null)
         {
@@ -84,15 +100,102 @@ public class AiGateway(
         {
             throw new SecurityException();
         }
-        
+
         var payload = new
         {
-            customerId = customerInfo.PortalId, 
+            customerId = customerInfo.PortalId,
             id = user.Id,
             iat = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
             exp = DateTimeOffset.UtcNow.Add(Settings.TokenExpiration).ToUnixTimeSeconds()
         };
-        
+
         return JsonWebToken.Encode(payload, Settings.Secret);
     }
+    
+    private async Task<T> SendAsync<T>(HttpMethod method, string path, HttpContent content = null, bool authorize = true)
+    {
+        using var request = new HttpRequestMessage(method, $"{Url}{path}");
+
+        if (authorize)
+        {
+            var key = await GenerateKeyAsync();
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", key);
+        }
+
+        request.Content = content;
+#pragma warning disable CA2000 // HttpClient is short-lived and disposed by runtime
+        var httpClient = httpClientFactory.CreateClient();
+#pragma warning restore CA2000
+        using var response = await httpClient.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+
+        return await response.Content.ReadFromJsonAsync<T>();
+    }
+}
+
+public class AiGatewaySettings
+{
+    public string Url { get; init; }
+    public string Secret { get; init; }
+    public TimeSpan TokenExpiration { get; init; }
+}
+
+public record CurrencyInfo
+{
+    public required string Code { get; init; }
+    public required string Symbol { get; init; }
+}
+
+public record AiPricesResponse
+{
+    public required List<AiChatModelPricing> Chat { get; init; }
+    public required List<AiEmbeddingModelPricing> Embedding { get; init; }
+    public required AiWebSearchPricing WebSearch { get; init; }
+    public required CurrencyInfo Currency { get; init; } = new() { Code = "USD", Symbol = "$" };
+}
+
+public record AiChatModelPricing
+{
+    public required string Id { get; init; }
+    public string Alias { get; init; } = "GPT-5.2";
+    public string OwnedBy { get; init; } = "openai";
+    public string Provider { get; init; } = "OpenRouter";
+    public required AiChatPrice Price { get; init; }
+}
+
+public record AiChatPrice
+{
+    public decimal Prompt { get; init; }
+    public decimal Completion { get; init; }
+}
+
+public record AiEmbeddingModelPricing
+{
+    public required string Id { get; init; }
+    public string Alias { get; init; } = "GPT-5.2";
+    public string OwnedBy { get; init; } = "openai";
+    public string Provider { get; init; } = "OpenRouter";
+    public required AiEmbeddingPrice Price { get; init; }
+}
+
+public record AiEmbeddingPrice
+{
+    public decimal Prompt { get; init; }
+}
+
+public record AiWebSearchPricing
+{
+    public string Provider { get; init; } = "Exa";
+    public decimal Search { get; init; }
+    public decimal Contents { get; init; }
+}
+
+public class SetRestrictedModelsRequest
+{
+    public required HashSet<string> Models { get; init; }
+}
+
+public record RestrictedModelsResponse
+{
+    public required List<string> Models { get; init; }
 }

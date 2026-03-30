@@ -31,12 +31,27 @@ public class FormResultsDto
     /// <summary>
     /// The date and time when the form was created.
     /// </summary>
+    /// <example>2025-01-01T00:00:00</example>
     public DateTime CreateOn { get; set; }
 
     /// <summary>
     /// The list of forms data.
     /// </summary>
+    /// <example>[{"key": "field1", "value": "Answer"}]</example>
     public IEnumerable<FormsItemData> FormsData { get; set; }
+}
+
+public class FormSubmissionsDto
+{
+    /// <summary>
+    /// The form field metadata.
+    /// </summary>
+    public IEnumerable<FormMetadata> Metadata { get; set; }
+
+    /// <summary>
+    /// All submissions.
+    /// </summary>
+    public IEnumerable<FormResultsDto> Submissions { get; set; }
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]

@@ -34,6 +34,7 @@ public class GetChatsRequestDto : PaginatedRequestDto
     /// <summary>
     /// The identifier of the room whose AI chat sessions are to be listed.
     /// </summary>
+    /// <example>42</example>
     [FromRoute(Name = "roomId")]
     public int RoomId { get; set; }
 }

@@ -43,7 +43,7 @@ public class FileDuplicateOperation : ComposeFileOperation<FileOperationData<str
     }
 }
 
-class FileDuplicateOperation<T>(IServiceProvider serviceProvider, FileOperationData<T> data) : FileOperation<FileOperationData<T>, T>(serviceProvider, data)
+internal class FileDuplicateOperation<T>(IServiceProvider serviceProvider, FileOperationData<T> data) : FileOperation<FileOperationData<T>, T>(serviceProvider, data)
 {
     private readonly IDictionary<string, string> _headers = data.Headers;
     private CancellationToken _cancellationToken;

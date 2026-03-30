@@ -24,39 +24,39 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-var builder = DistributedApplication.CreateBuilder(args);
+#pragma warning disable ASPIREINTERACTION001
 
+var builder = DistributedApplication.CreateBuilder(args);
+IResourceBuilder<JavaScriptAppResource>? playwright = null;
 var basePath = Path.GetFullPath(Path.Combine("..", "..", ".."));
-var isDocker = String.Compare(builder.Configuration["Docker"], "true", StringComparison.OrdinalIgnoreCase) == 0;
-var skipClient = String.Compare(builder.Configuration["SKIP_CLIENT"], "true", StringComparison.OrdinalIgnoreCase) == 0;
+var isDocker = string.Compare(builder.Configuration["Docker"], "true", StringComparison.OrdinalIgnoreCase) == 0;
+var skipClient = string.Compare(builder.Configuration["SKIP_CLIENT"], "true", StringComparison.OrdinalIgnoreCase) == 0;
 
 var connectionManager = new ConnectionStringManager(builder, basePath)
-    .AddRabbitMq()
+   
     .AddEditors();
 
 var configurator = new ProjectConfigurator(builder, connectionManager, basePath, isDocker);
 
-switch (builder.Configuration["DOTNET_LAUNCH_PROFILE"])
+var launchProfile = builder.Configuration["DOTNET_LAUNCH_PROFILE"];
+switch (launchProfile)
 {
     case "preview":
-        connectionManager.AddMySql()
-                         .AddRedis();
+        connectionManager
+            .AddMySql();
+
         configurator
-            .AddProject<ASC_Files>(Constants.FilesPort)
-            .AddProject<ASC_Files_Worker>(Constants.FilesWorkerPort)
-            .AddProject<ASC_People>(Constants.PeoplePort)
-            .AddProject<ASC_Web_Api>(Constants.WebApiPort)
-            .AddProject<ASC_Web_Studio>(Constants.WebstudioPort)
-            .AddProject<ASC_AI>(Constants.AiPort)
-            .AddProject<ASC_AI_Worker>(Constants.AiWorkerPort)
+            .AddProject<ASC_Monolith>(Constants.MonolithPort)
             .AddSocketIO();
 
         break;
     case "frontend-dev":
         connectionManager.AddMySql(withDbGate: true)
+            .AddRabbitMq()
             .AddRedis()
-            .AddMailPit();
-        
+            .AddMailPit()
+            .AddMcpServer();
+
         configurator
             .AddProject<ASC_Files>(Constants.FilesPort)
             .AddProject<ASC_Files_Worker>(Constants.FilesWorkerPort)
@@ -76,10 +76,18 @@ switch (builder.Configuration["DOTNET_LAUNCH_PROFILE"])
 
         break;
     default:
-        connectionManager.AddMySql(withDbGate: true)
+        connectionManager
+            .AddMySql(withDbGate: true)
+            .AddRabbitMq()
             .AddRedis(withRedisInsight: true)
+            .AddMcpServer()
             .AddOpensearch()
             .AddMailPit();
+
+        if (launchProfile == "test")
+        {
+            connectionManager.AddApiTest();
+        }
         
         configurator
             .AddProject<ASC_Files>(Constants.FilesPort)
@@ -100,6 +108,7 @@ switch (builder.Configuration["DOTNET_LAUNCH_PROFILE"])
             .AddSsoAuth()
             .AddWebDav()
             .AddIdentity();
+
         break;
 }
 
@@ -109,14 +118,12 @@ var clientBasePath = Path.Combine(basePath, "client");
 
 if (!skipClient)
 {
-    var installPackages = builder.AddExecutable("onlyoffice-install-packages", "pnpm", clientBasePath, "install");
-    var buildPackages = builder.AddExecutable("onlyoffice-build-packages", "pnpm", clientBasePath, "build").WaitForCompletion(installPackages);
-
-    startPackages = builder.AddExecutable("onlyoffice-start-packages", "pnpm", clientBasePath, "start").WaitForCompletion(buildPackages);
-    installPackages.WithChildRelationship(buildPackages);
-    buildPackages.WithChildRelationship(startPackages);
+    startPackages = builder.AddJavaScriptApp("onlyoffice-client", clientBasePath, "start").WithPnpm();
 }
 
-NginxConfiguration.ConfigureOpenResty(builder, basePath, clientBasePath, startPackages, isDocker);
+var isPreview = builder.Configuration["DOTNET_LAUNCH_PROFILE"] == "preview";
+var openresty = NginxConfiguration.ConfigureOpenResty(builder, basePath, clientBasePath, startPackages, isDocker, isPreview);
+
+playwright?.WaitFor(openresty);
 
 await builder.Build().RunAsync();

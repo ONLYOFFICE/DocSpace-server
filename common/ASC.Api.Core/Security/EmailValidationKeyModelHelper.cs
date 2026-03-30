@@ -192,7 +192,29 @@ public class EmailValidationKeyModelHelper(
                 break;
 
             case ConfirmType.Activation:
+                userInfo = await userManager.GetUserByEmailAsync(email);
+                if (Equals(userInfo, Constants.LostUser)
+                    || userInfo.Status == EmployeeStatus.Terminated
+                    || userInfo.ActivationStatus != EmployeeActivationStatus.Pending)
+                {
+                    checkKeyResult = ValidationResult.Invalid;
+                    break;
+                }
+
                 checkKeyResult = provider.ValidateEmailKey(email + type + uiD, key, provider.ValidEmailKeyInterval);
+                break;
+
+            case ConfirmType.EmailActivation:
+                userInfo = await userManager.GetUsersAsync(uiD.GetValueOrDefault());
+                if (Equals(userInfo, Constants.LostUser) 
+                    || userInfo.Status == EmployeeStatus.Terminated
+                    || !userInfo.Email.Equals(email, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    checkKeyResult = ValidationResult.Invalid;
+                    break;
+                }
+
+                checkKeyResult = provider.ValidateEmailKey(email + type, key, provider.ValidEmailKeyInterval);
                 break;
 
             case ConfirmType.ProfileRemove:

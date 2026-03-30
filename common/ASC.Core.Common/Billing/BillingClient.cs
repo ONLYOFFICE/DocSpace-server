@@ -39,6 +39,8 @@ public class BillingClient
     internal const string ResiliencePipelineName = "billingResiliencePipeline";
     public const string GetCurrentPaymentsUri = "GetActiveResources";
     public const string MetadataDetails = "details";
+    public const string MetadataType = "type";
+    public const string MetadataModel = "model";
 
     public BillingClient(IConfiguration configuration, IHttpClientFactory httpClientFactory)
     {
@@ -253,11 +255,7 @@ public class BillingClient
     {
         var url = _configuration.Url + method;
 
-        var request = new HttpRequestMessage
-        {
-            RequestUri = new Uri(url),
-            Method = HttpMethod.Post
-        };
+        using var request = new HttpRequestMessage(HttpMethod.Post, new Uri(url));
 
         if (!string.IsNullOrEmpty(_configuration.Key))
         {

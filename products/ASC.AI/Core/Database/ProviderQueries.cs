@@ -46,6 +46,12 @@ public partial class AiDbContext
         return Queries.GetProvidersTotalCountAsync(this, tenantId);
     }
 
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null, PreCompileQuery.DefaultInt])]
+    public Task<bool> IsProviderNameExistsAsync(int tenantId, string title, int excludedProviderId)
+    {
+        return Queries.IsProviderNameExistsAsync(this, tenantId, title, excludedProviderId);
+    }
+
     [PreCompileQuery([PreCompileQuery.DefaultInt])]
     public Task<bool> HasProvidersAsync(int tenantId)
     {
@@ -109,6 +115,10 @@ static file class Queries
         EF.CompileAsyncQuery((AiDbContext ctx, int tenantId) =>
             ctx.Providers.Count(x => x.TenantId == tenantId));
 
+    public static readonly Func<AiDbContext, int, string, int, Task<bool>> IsProviderNameExistsAsync =
+        EF.CompileAsyncQuery((AiDbContext ctx, int tenantId, string title, int excludedProviderId) =>
+            ctx.Providers.Any(x => x.TenantId == tenantId && x.Title == title && x.Id != excludedProviderId));
+
     public static readonly Func<AiDbContext, int, Task<bool>> HasProvidersAsync =
         EF.CompileAsyncQuery((AiDbContext ctx, int tenantId) =>
             ctx.Providers.Any(x => x.TenantId == tenantId));
@@ -161,7 +171,8 @@ static file class Queries
                         {
                             ProviderId = x.dp.ProviderId,
                             DefaultModel = x.dp.DefaultModel,
-                            ProviderTitle = provider != null ? provider.Title : null
+                            ProviderTitle = provider != null ? provider.Title : null,
+                            ProviderType = provider != null ? provider.Type : null
                         })
                     .FirstOrDefault());
 

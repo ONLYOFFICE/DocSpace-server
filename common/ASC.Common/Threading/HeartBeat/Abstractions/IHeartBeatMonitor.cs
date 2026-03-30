@@ -28,5 +28,5 @@ namespace ASC.Common.Threading.HeartBeat.Abstractions;
 
 public interface IHeartBeatMonitor
 {
-    public ValueTask<bool> IsAliveAsync(string key, CancellationToken cancellationToken = default);
+    ValueTask<bool> IsAliveAsync(string key, CancellationToken cancellationToken = default);
 }

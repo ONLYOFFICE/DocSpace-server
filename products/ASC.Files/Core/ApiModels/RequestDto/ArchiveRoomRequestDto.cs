@@ -34,6 +34,7 @@ public class ArchiveRoomRequest
     /// <summary>
     /// Specifies whether to archive a room after the editing session is finished or not.
     /// </summary>
+    /// <example>false</example>
     public bool DeleteAfter { get; set; }
 }
 
@@ -45,12 +46,14 @@ public class ArchiveRoomRequestDto<T>
     /// <summary>
     /// The room ID.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "id")]
     public required T Id { get; set; }
 
     /// <summary>
     /// The parameters for archiving a room.
     /// </summary>
+    /// <example>{"deleteAfter": false}</example>
     [FromBody]
     public ArchiveRoomRequest ArchiveRoom { get; set; }
 }

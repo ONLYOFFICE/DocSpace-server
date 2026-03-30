@@ -34,6 +34,7 @@ public class DeleteWordpressInfoResponse(bool success)
     /// <summary>
     /// Indicates whether the WordPress information deletion was successful.
     /// </summary>
+    /// <example>true</example>
     public bool Success { get; set; } = success;
 
     /// <summary>

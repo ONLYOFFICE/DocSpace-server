@@ -27,6 +27,7 @@
 global using ASC.AI.Core.Database;
 global using ASC.AI.Core.Database.Models;
 global using ASC.AI.Core.Chat.Data;
+global using ASC.AI.Core.Chat.Deletion;
 global using ASC.AI.Core.Chat.History;
 global using ASC.AI.Core.MCP;
 global using ASC.AI.Core.MCP.Auth;
@@ -47,6 +48,7 @@ global using ASC.AI.Core.Utils;
 
 global using ASC.Common;
 global using ASC.Common.Log;
+global using ASC.Common.Threading;
 global using ASC.Common.Threading.DistributedLock.Abstractions;
 global using ASC.Common.Web;
 
@@ -59,11 +61,15 @@ global using ASC.Core.Common.EF.Model;
 global using ASC.Core.Common.EF.Model.Ai;
 global using ASC.Core.Common.Settings;
 global using ASC.Core.Notify.Socket;
-global using ASC.Core.Tenants;
 global using ASC.Core.Users;
+
+global using ASC.EventBus.Abstractions;
+global using ASC.EventBus.Events;
+
 global using ASC.Files.Core;
 global using ASC.Files.Core.Core.AI;
 global using ASC.Files.Core.EF;
+global using ASC.Files.Core.ExternalDatabase;
 global using ASC.Files.Core.Helpers;
 global using ASC.Files.Core.Resources;
 global using ASC.Files.Core.Security;
@@ -83,6 +89,7 @@ global using ASC.MessagingSystem.EF.Model;
 global using ASC.Security.Cryptography;
 
 global using ASC.Web.Core;
+global using ASC.Web.Core.Files;
 global using ASC.Web.Files.Services.WCFService;
 global using ASC.Web.Files.Services.WCFService.FileOperations;
 global using ASC.Web.Files.Utils;
@@ -94,6 +101,7 @@ global using Anthropic.SDK;
 
 global using ModelContextProtocol.Client;
 
+global using Microsoft.AspNetCore.Http;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.AI;
@@ -102,6 +110,9 @@ global using Microsoft.Extensions.Logging;
 
 global using OpenAI;
 
+global using ProtoBuf;
+
+global using System.Buffers;
 global using System.ClientModel;
 global using System.ClientModel.Primitives;
 global using System.ComponentModel;

@@ -105,9 +105,7 @@ public class BaseCommonLinkUtility
             // first, take from current request
             if (_httpContextAccessor?.HttpContext?.Request != null && !serverUriForce)
             {
-                string origin = _httpContextAccessor.HttpContext.Request.Headers[HeaderNames.Origin];
-
-                var u = string.IsNullOrEmpty(origin) ? _httpContextAccessor.HttpContext.Request.Url() : new Uri(origin);
+                var u = _httpContextAccessor.HttpContext.Request.Url();
 
                 ArgumentNullException.ThrowIfNull(u);
 

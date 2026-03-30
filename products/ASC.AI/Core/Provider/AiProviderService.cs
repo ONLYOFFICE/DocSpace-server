@@ -31,16 +31,19 @@ public class AiProviderService(
     IAiProviderDao providerDao,
     TenantManager tenantManager,
     AuthContext authContext,
-    ProviderSettings providerSettings,
+    AiConfiguration aiConfiguration,
     UserManager userManager,
+    IDistributedLockProvider distributedLockProvider,
     ModelClientFactory modelClientFactory,
-    MessageService messageService)
+    MessageService messageService,
+    AiGateway aiGateway,
+    ILogger<AiProviderService> logger)
 {
     public async Task<AiProvider> AddProviderAsync(string? title, string? url, string key, ProviderType type)
     {
         await ThrowIfNotAccessAsync();
 
-        var settings = providerSettings.Get(type);
+        var settings = aiConfiguration.Get(type);
         if (settings == null)
         {
             throw new ArgumentException(ErrorMessages.IncorrectProvider);
@@ -50,8 +53,10 @@ public class AiProviderService(
         ArgumentException.ThrowIfNullOrEmpty(key);
 
         url = string.IsNullOrEmpty(url) ? settings.Url : new Uri(url).ToString();
+        
+        ArgumentException.ThrowIfNullOrEmpty(url);
 
-        var defaultModel = await ExecuteProviderRequestAsync(async () =>
+        var defaultModel = await ExecuteProviderRequestAsync(type, async () =>
         {
             var client = modelClientFactory.Create(type, url, key);
             var models = await GetFilteredModelsAsync(client, type);
@@ -59,8 +64,12 @@ public class AiProviderService(
         });
 
         var tenantId = tenantManager.GetCurrentTenantId();
-        
-        return await providerDao.AddProviderAsync(tenantId, title, url, key, type, defaultModel);
+
+        await using (await distributedLockProvider.TryAcquireFairLockAsync(GetProviderNameLockKey(tenantId)))
+        {
+            await ThrowIfProviderNameExistsAsync(tenantId, title);
+            return await providerDao.AddProviderAsync(tenantId, title, url, key, type, defaultModel);
+        }
     }
     
     public async Task<AiProvider> UpdateProviderAsync(int id, string? title, string? url, string? key)
@@ -68,10 +77,12 @@ public class AiProviderService(
         await ThrowIfNotAccessAsync();
 
         var provider = await GetProviderAsync(id);
+        var titleChanged = false;
 
-        if (!string.IsNullOrEmpty(title))
+        if (!string.IsNullOrEmpty(title) && !string.Equals(title, provider.Title, StringComparison.Ordinal))
         {
             provider.Title = title;
+            titleChanged = true;
         }
 
         var needCheck = false;
@@ -90,7 +101,7 @@ public class AiProviderService(
 
         if (needCheck)
         {
-            await ExecuteProviderRequestAsync(async () =>
+            await ExecuteProviderRequestAsync(provider.Type, async () =>
             {
                 var client = modelClientFactory.Create(provider.Type, provider.Url, provider.Key);
                 await client.PingAsync();
@@ -99,8 +110,17 @@ public class AiProviderService(
         }
 
         var tenantId = tenantManager.GetCurrentTenantId();
-        
-        return await providerDao.UpdateProviderAsync(tenantId, provider);
+
+        if (!titleChanged)
+        {
+            return await providerDao.UpdateProviderAsync(tenantId, provider);
+        }
+
+        await using (await distributedLockProvider.TryAcquireFairLockAsync(GetProviderNameLockKey(tenantId)))
+        {
+            await ThrowIfProviderNameExistsAsync(tenantId, provider.Title, provider.Id);
+            return await providerDao.UpdateProviderAsync(tenantId, provider);
+        }
     }
 
     public async IAsyncEnumerable<AiProvider> GetProvidersAsync(int offset, int limit)
@@ -135,7 +155,9 @@ public class AiProviderService(
     {
         await ThrowIfNotAccessAsync();
         
-        return providerSettings.GetAvailableProviders().ToList();
+        return aiConfiguration.GetAvailableProviders()
+            .Where(x => x.Type != ProviderType.PortalAi)
+            .ToList();
     }
 
     public async Task DeleteProvidersAsync(HashSet<int> ids)
@@ -147,28 +169,51 @@ public class AiProviderService(
 
     public async Task<IEnumerable<ModelData>> GetModelsAsync(int providerId, Scope? scope)
     {
-        var provider = await GetProviderAsync(providerId);
+        var provider = await GetProviderAsync(providerId, forceSystemProvider: true);
         if (provider.NeedReset)
         {
             return [];
         }
 
-        return await ExecuteProviderRequestAsync(async () => 
-        { 
+        return await ExecuteProviderRequestAsync(provider.Type, async () =>
+        {
             var client = modelClientFactory.Create(provider.Type, provider.Url, provider.Key);
             var models = await GetFilteredModelsAsync(client, provider.Type, scope);
+
+            Dictionary<string, AiChatPrice>? priceMap = null;
+            CurrencyInfo? currency = null;
+            if (provider.Type == ProviderType.PortalAi)
+            {
+                try
+                {
+                    var prices = await aiGateway.GetPricesAsync();
+                    currency = prices.Currency;
+                    priceMap = prices.Chat.ToDictionary(p => p.Id, p => new AiChatPrice
+                    {
+                        Prompt = p.Price.Prompt * 1_000_000,
+                        Completion = p.Price.Completion * 1_000_000
+                    });
+                }
+                catch(Exception e)
+                {
+                    // If prices can't be fetched, continue without them
+                    logger.ErrorWithException(e);
+                }
+            }
 
             return models.Select(m => new ModelData
             {
                 Provider = provider,
-                ModelId = m.Id
+                ModelId = m.Id,
+                Price = priceMap?.GetValueOrDefault(m.Id),
+                Currency = priceMap != null ? currency : null
             });
         });
     }
 
-    public async Task<AiProvider> GetProviderAsync(int providerId)
+    public async Task<AiProvider> GetProviderAsync(int providerId, bool forceSystemProvider = false)
     {
-        var provider = await providerDao.GetProviderAsync(tenantManager.GetCurrentTenantId(), providerId);
+        var provider = await providerDao.GetProviderAsync(tenantManager.GetCurrentTenantId(), providerId, forceSystemProvider);
 
         return provider ?? throw new ItemNotFoundException(ErrorMessages.ProviderNotFound);
     }
@@ -205,7 +250,7 @@ public class AiProviderService(
             return null;
         }
 
-        var firstProvider = await providerDao.GetProviderAsync(tenantId, firstProviderId.Value);
+        var firstProvider = await providerDao.GetProviderAsync(tenantId, firstProviderId.Value, forceSystemProvider: true);
         if (firstProvider == null || firstProvider.NeedReset)
         {
             return null;
@@ -221,7 +266,7 @@ public class AiProviderService(
 
         async Task<string?> GetFirstAvailableModelAsync(AiProvider provider)
         {
-            var supportedModels = providerSettings.GetSupportedModels(provider.Type);
+            var supportedModels = aiConfiguration.GetSupportedModels(provider.Type);
             if (supportedModels is { Count: > 0 })
             {
                 return supportedModels.First();
@@ -244,7 +289,7 @@ public class AiProviderService(
     {
         var models = await client.ListModelsAsync(scope);
 
-        var supported = providerSettings.GetSupportedModels(type);
+        var supported = aiConfiguration.GetSupportedModels(type);
         if (supported != null)
         {
             models = models.Where(m => supported.Contains(m.Id));
@@ -261,7 +306,20 @@ public class AiProviderService(
         }
     }
 
-    private static async Task<T> ExecuteProviderRequestAsync<T>(Func<Task<T>> request)
+    private async Task ThrowIfProviderNameExistsAsync(int tenantId, string title, int excludedProviderId = 0)
+    {
+        if (await providerDao.IsProviderNameExistsAsync(tenantId, title, excludedProviderId))
+        {
+            throw new ArgumentException(ErrorMessages.ProviderNameExists);
+        }
+    }
+
+    private static string GetProviderNameLockKey(int tenantId)
+    {
+        return $"ai_provider_name_{tenantId}";
+    }
+
+    private static async Task<T> ExecuteProviderRequestAsync<T>(ProviderType providerType, Func<Task<T>> request)
     {
         try
         {
@@ -269,12 +327,17 @@ public class AiProviderService(
         }
         catch (HttpRequestException httpException)
         {
-            if (httpException.StatusCode is HttpStatusCode.Unauthorized)
+            if (providerType is ProviderType.XAi && httpException.StatusCode is HttpStatusCode.BadRequest 
+                || httpException.StatusCode is HttpStatusCode.Unauthorized)
             {
                 throw new ArgumentException(ErrorMessages.InvalidKey);
             }
 
             throw new ArgumentException(ErrorMessages.InvalidUrl);
+        }
+        catch (Exception)
+        {
+            throw new ArgumentException(ErrorMessages.InvalidKey);
         }
     }
 }

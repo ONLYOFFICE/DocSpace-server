@@ -26,7 +26,7 @@
 
 namespace ASC.FederatedLogin.LoginProviders;
 
-public class WeixinLoginProvider : BaseLoginProvider<WeixinLoginProvider>
+public class WeixinLoginProvider : BaseLoginProvider<WeixinLoginProvider>, IDummyEmailProvider
 {
     public const string ProfileUrl = "https://api.weixin.qq.com/sns/userinfo";
 
@@ -86,6 +86,17 @@ public class WeixinLoginProvider : BaseLoginProvider<WeixinLoginProvider>
         return token is WeixinOAuth20Token weixinOAuth20Token
             ? GetLoginProfile($"{weixinOAuth20Token.AccessToken}&openid={weixinOAuth20Token.UnionId}")
             : GetLoginProfile($"{token?.AccessToken}");
+    }
+
+    public string GenerateEmail(LoginProfile loginProfile)
+    {
+        var domain = CoreBaseSettings.Basedomain;
+        var currentTenant = TenantManager.GetCurrentTenant(false);
+        if (currentTenant != null)
+        {
+            domain = currentTenant.GetTenantDomain(CoreSettings);
+        }
+        return $"{loginProfile.Id}@{domain}";
     }
 
     private LoginProfile RequestProfile(string accessToken)

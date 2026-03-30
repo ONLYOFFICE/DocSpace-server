@@ -50,7 +50,7 @@ public class CardDavItem(Guid iD, string firstName, string lastName, string user
 
     public override string ToString()
     {
-        return String.Format("{0} {1}", FirstName, LastName).Trim();
+        return string.Format("{0} {1}", FirstName, LastName).Trim();
     }
 
     public override int GetHashCode()

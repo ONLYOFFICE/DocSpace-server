@@ -34,66 +34,85 @@ public class RoomContentRequestDto
     /// <summary>
     /// The filter by room type.
     /// </summary>
+    /// <example>1</example>
     [FromQuery(Name = "type")]
     public IEnumerable<RoomType> Type { get; set; }
 
     /// <summary>
     /// The filter by user ID.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromQuery(Name = "subjectId")]
     public string SubjectId { get; set; }
 
     /// <summary>
+    /// The filter by room owner ID.
+    /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
+    [FromQuery(Name = "subjectOwnerId")]
+    public string SubjectOwnerId { get; set; }
+
+    /// <summary>
     /// The room search area (Active, Archive, Any, Recent by links).
     /// </summary>
+    /// <example>1</example>
     [FromQuery(Name = "searchArea")]
     public SearchArea? SearchArea { get; set; }
 
     /// <summary>
     /// Specifies whether to search by tags or not.
     /// </summary>
+    /// <example>false</example>
     [FromQuery(Name = "withoutTags")]
     public bool? WithoutTags { get; set; }
 
     /// <summary>
     /// The tags in the serialized format.
     /// </summary>
+    /// <example>tag1</example>
     [FromQuery(Name = "tags")]
     public string Tags { get; set; }
 
     /// <summary>
     /// Specifies whether to exclude search by user or group ID.
     /// </summary>
+    /// <example>false</example>
     [FromQuery(Name = "excludeSubject")]
     public bool? ExcludeSubject { get; set; }
 
     /// <summary>
     /// The filter by provider name (None, Box, DropBox, GoogleDrive, kDrive, OneDrive, SharePoint, WebDav, Yandex, Storage).
     /// </summary>
+    /// <example>1</example>
     [FromQuery(Name = "provider")]
     public ProviderFilter? Provider { get; set; }
 
     /// <summary>
     /// The filter by user (Owner - 0, Member - 1).
     /// </summary>
+    /// <example>1</example>
     [FromQuery(Name = "subjectFilter")]
+    [Obsolete("Use SubjectOwnerId instead")]
     public SubjectFilter? SubjectFilter { get; set; }
 
     /// <summary>
     /// The filter by quota (All - 0, Default - 1, Custom - 2).
     /// </summary>
+    /// <example>1</example>
     [FromQuery(Name = "quotaFilter")]
     public QuotaFilter? QuotaFilter { get; set; }
 
     /// <summary>
     /// The filter by storage (None - 0, Internal - 1, ThirdParty - 2).
     /// </summary>
+    /// <example>1</example>
     [FromQuery(Name = "storageFilter")]
     public StorageFilter? StorageFilter { get; set; }
 
     /// <summary>
     /// Specifies the maximum number of items to retrieve.
     /// </summary>
+    /// <example>25</example>
     [FromQuery(Name = "count")]
     [Range(1, ApiContext.MaxCount)]
     public int Count { get; set; } = ApiContext.DefaultCount;
@@ -101,24 +120,35 @@ public class RoomContentRequestDto
     /// <summary>
     /// The index from which to start retrieving the room content.
     /// </summary>
+    /// <example>0</example>
     [FromQuery(Name = "startIndex")]
     public int StartIndex { get; set; }
 
     /// <summary>
     /// Specifies the field by which the room content should be sorted.
     /// </summary>
+    /// <example>DateAndTime</example>
     [FromQuery(Name = "sortBy")]
     public string SortBy { get; set; }
 
     /// <summary>
     /// The order in which the results are sorted.
     /// </summary>
+    /// <example>1</example>
     [FromQuery(Name = "sortOrder")]
     public SortOrder SortOrder { get; set; }
 
     /// <summary>
     /// The text filter value used to refine search or query operations.
     /// </summary>
+    /// <example>My Document</example>
     [FromQuery(Name = "filterValue")]
     public string Text { get; set; }
+
+    /// <summary>
+    /// The group ID
+    /// </summary>
+    /// <example>1</example>
+    [FromQuery(Name = "groupId")]
+    public int? GroupId { get; set; }
 }

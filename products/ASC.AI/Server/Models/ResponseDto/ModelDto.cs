@@ -26,22 +26,38 @@
 
 namespace ASC.AI.Models.ResponseDto;
 
+/// <summary>
+/// The AI model information.
+/// </summary>
 public class ModelDto
 {
     /// <summary>
     /// The unique identifier of the AI provider that offers this model.
     /// </summary>
+    /// <example>1</example>
     public int ProviderId { get; init; }
 
     /// <summary>
     /// The human-readable display name of the AI provider (e.g., "OpenAI", "Anthropic").
     /// </summary>
+    /// <example>OpenAI</example>
     public required string ProviderTitle { get; init; }
 
     /// <summary>
     /// The model identifier as recognized by the AI provider (e.g., "gpt-4o", "claude-sonnet-4-20250514").
     /// </summary>
+    /// <example>gpt-4o</example>
     public required string ModelId { get; init; }
+
+    /// <summary>
+    /// The pricing information for the model (per 1M tokens). Only available for the System AI provider.
+    /// </summary>
+    public AiChatPrice? Price { get; init; }
+
+    /// <summary>
+    /// The currency of the price. Only available for the System AI provider.
+    /// </summary>
+    public CurrencyInfo? Currency { get; init; }
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,

@@ -27,7 +27,7 @@
 namespace ASC.Core.Caching;
 
 [Scope]
-class CachedAzService(DbAzService service, IFusionCacheProvider cacheProvider) : IAzService
+internal class CachedAzService(DbAzService service, IFusionCacheProvider cacheProvider) : IAzService
 {
     private readonly DbAzService _service = service ?? throw new ArgumentNullException(nameof(service));
     private readonly IFusionCache _cache = cacheProvider.GetMemoryCache();

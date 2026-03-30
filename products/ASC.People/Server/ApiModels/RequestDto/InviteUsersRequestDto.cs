@@ -34,6 +34,7 @@ public class InviteUsersRequestDto
     /// <summary>
     /// The list of user invitations.
     /// </summary>
+    /// <example>[{"email":"user@example.com","type":1}]</example>
     [MaxEmailInvitations]
     [Required]
     public IEnumerable<UserInvitationRequestDto> Invitations { get; set; }
@@ -41,6 +42,7 @@ public class InviteUsersRequestDto
     /// <summary>
     /// The culture code of invitations.
     /// </summary>
+    /// <example>en-US</example>
     public string Culture { get; set; }
 }
 
@@ -52,5 +54,6 @@ public class UserInvitationRequestDto : EmailInvitationDto
     /// <summary>
     /// The user type.
     /// </summary>
+    /// <example>1</example>
     public EmployeeType Type { get; set; }
 }

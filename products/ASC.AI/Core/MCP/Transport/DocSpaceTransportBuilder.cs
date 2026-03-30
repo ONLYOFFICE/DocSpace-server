@@ -27,24 +27,35 @@
 namespace ASC.AI.Core.MCP.Transport;
 
 public class DocSpaceTransportBuilder(
-    CookiesManager cookiesManager, 
+    CookiesManager cookiesManager,
     CommonLinkUtility commonLinkUtility,
+    IHttpContextAccessor httpContextAccessor,
     IHttpClientFactory httpClientFactory) : ITransportBuilder
 {
     public ValueTask<HttpClientTransport> BuildAsync(McpServerConnection connection)
     {
+        var authorization = cookiesManager.GetCookies(CookiesType.AuthKey);
+
+        if (string.IsNullOrEmpty(authorization))
+        {
+            authorization = httpContextAccessor.HttpContext?.Request.Headers.Authorization.ToString() ?? string.Empty;
+        }
+
         var options = new HttpClientTransportOptions
         {
             Name = connection.Name,
             Endpoint = new Uri(connection.Endpoint),
             AdditionalHeaders = new Dictionary<string, string>
             {
-                {"Referer", commonLinkUtility.GetFullAbsolutePath(string.Empty).TrimEnd('/') + "/"}, 
-                {"Authorization", cookiesManager.GetCookies(CookiesType.AuthKey)}
+                {"Referer", commonLinkUtility.GetFullAbsolutePath(string.Empty).TrimEnd('/') + "/"},
+                {"Authorization", authorization}
             }
         };
-        
+
+        // CA2000: HttpClient and HttpClientTransport owned by MCP client
+#pragma warning disable CA2000
         var transport = new HttpClientTransport(options, httpClientFactory.CreateClient());
+#pragma warning restore CA2000
         return ValueTask.FromResult(transport);
     }
 }

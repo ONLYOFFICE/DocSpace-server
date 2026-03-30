@@ -101,6 +101,11 @@ module.exports = (files) => {
     files.changeInvitationLimitValue(req.body);
     res.end();
   });
+
+  router.post("/change-web-plugin", (req, res) => {
+    files.changeWebPlugin(req.body);
+    res.end();
+  });
   
   router.post("/update-history", (req, res) => {
     files.updateHistory(req.body);
@@ -235,6 +240,11 @@ module.exports = (files) => {
   router.post("/quota_exceeded", (req, res) => {
      files.quotaExceeded(req.body);
      res.end();
+  });
+
+  router.post("/external-db-settings", (req, res) => {
+    files.externalDbSettings(req.body);
+    res.end();
   });
 
   return router;

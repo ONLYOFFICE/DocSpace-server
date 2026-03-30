@@ -257,7 +257,9 @@ public class InsertFileModelBinder : IModelBinder
             bindingContext.ValueProvider = defaultBindingContext.OriginalValueProvider;
         }
 
+#pragma warning disable CA2000 // DTO ownership transferred to model binding
         var result = new InsertFileRequestDto();
+#pragma warning restore CA2000
 
         if (bindingContext.GetBoolValue(nameof(result.CreateNewIfExist), out var createNewIfExist))
         {
@@ -272,6 +274,11 @@ public class InsertFileModelBinder : IModelBinder
         if (bindingContext.GetFirstValue(nameof(result.Title), out var firstValue))
         {
             result.Title = firstValue;
+        }
+
+        if (bindingContext.HttpContext.Request.HasFormContentType)
+        {
+            result.File = bindingContext.HttpContext.Request.Form.Files.FirstOrDefault();
         }
 
         bindingContext.HttpContext.Request.EnableBuffering();
@@ -297,7 +304,9 @@ public class UploadModelBinder : IModelBinder
             bindingContext.ValueProvider = defaultBindingContext.OriginalValueProvider;
         }
 
+#pragma warning disable CA2000 // DTO ownership transferred to model binding
         var result = new UploadRequestDto();
+#pragma warning restore CA2000
 
         if (bindingContext.GetBoolValue(nameof(result.CreateNewIfExist), out var createNewIfExist))
         {

@@ -29,6 +29,7 @@ namespace ASC.AI.Api;
 [Scope]
 [DefaultRoute]
 [ApiController]
+[AiFeature]
 [ControllerName("ai")]
 public class ProviderController(
     AiProviderService providerService,
@@ -46,6 +47,7 @@ public class ProviderController(
     /// <path>api/2.0/ai/providers</path>
     [Tags("AI / Providers")]
     [SwaggerResponse(200, "Created AI provider details", typeof(AiProviderDto))]
+    [SwaggerResponse(400, "Invalid connection data or provider with this name already exists")]
     [SwaggerResponse(403, "You don't have enough permission to manage providers")]
     [HttpPost("providers")]
     [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
@@ -95,6 +97,7 @@ public class ProviderController(
     /// <path>api/2.0/ai/providers/{id}</path>
     [Tags("AI / Providers")]
     [SwaggerResponse(200, "Updated AI provider details", typeof(AiProviderDto))]
+    [SwaggerResponse(400, "Invalid connection data or provider with this name already exists")]
     [SwaggerResponse(403, "You don't have enough permission to manage providers")]
     [SwaggerResponse(404, "The provider with the specified ID was not found")]
     [HttpPut("providers/{id}")]

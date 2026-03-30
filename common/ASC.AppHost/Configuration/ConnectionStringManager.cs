@@ -1,30 +1,30 @@
 // (c) Copyright Ascensio System SIA 2009-2026
-// 
+//
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
+//
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
+//
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-// 
+//
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using MySqlConnector;
+#pragma warning disable ASPIREINTERACTION001
 
 namespace ASC.AppHost.Configuration;
 
@@ -44,16 +44,21 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
     private IResourceBuilder<MailPitContainerResource>? MailResource { get; set; }
     private IResourceBuilder<ContainerResource>? OpensearchResource { get; set; }
 
+    private IResourceBuilder<ContainerResource>? McpResource { get; set; }
+    private IResourceBuilder<JavaScriptAppResource>? ApiTestResource { get; set; }
+    private Dictionary<string, string>? _parameters;
+
+
     public ConnectionStringManager AddMySql(bool withDbGate = false)
     {
         var mysqlResourceBuilder = builder.AddMySql("mysql")
-            .WithLifetime(ContainerLifetime.Persistent);
+            .WithDataVolume("docspace-mysql-data");
 
         if (withDbGate)
         {
             mysqlResourceBuilder = mysqlResourceBuilder.WithDbGate();
         }
-        
+
         MySqlDatabaseResource = mysqlResourceBuilder.AddDatabase("docspace");
 
         builder.Eventing.Subscribe(MySqlDatabaseResource.Resource, async (ConnectionStringAvailableEvent _, CancellationToken ct) =>
@@ -64,16 +69,16 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
                 MySqlConnectionStringBuilder = new MySqlConnectionStringBuilder(connectionString);
             }
         });
-        
+
         var executableName = OperatingSystem.IsWindows() ? "ASC.Migration.Runner.exe" : "ASC.Migration.Runner";
         var path = Path.GetFullPath(Path.Combine("..", "Tools", "ASC.Migration.Runner", "bin", "Debug", executableName));
-        
+
         MigrateResource = builder
             .AddExecutable("migrate", path, Path.GetDirectoryName(path) ?? "")
             .WithReference(MySqlDatabaseResource)
             .WaitFor(MySqlDatabaseResource);
-        
-        var isStandalone = String.Compare(builder.Configuration["APP_HOSTING_STANDALONE"], "true", StringComparison.OrdinalIgnoreCase) == 0;
+
+        var isStandalone = string.Compare(builder.Configuration["APP_HOSTING_STANDALONE"], "true", StringComparison.OrdinalIgnoreCase) == 0;
 
         if (isStandalone)
         {
@@ -83,7 +88,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         {
             MigrateResource.WithEnvironment("standalone", "");
         }
-        
+
         return this;
     }
 
@@ -91,7 +96,6 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
     {
         RabbitMqResource = builder
             .AddRabbitMQ("messaging")
-            .WithLifetime(ContainerLifetime.Persistent)
             .WithManagementPlugin();
 
         builder.Eventing.Subscribe(RabbitMqResource.Resource, async (ConnectionStringAvailableEvent _, CancellationToken ct) =>
@@ -112,15 +116,14 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         RedisResource = builder
             .AddRedis("cache")
             .WithPassword(null)
-            .WithoutHttpsCertificate()
-            .WithLifetime(ContainerLifetime.Persistent);
+            .WithoutHttpsCertificate();
 #pragma warning restore ASPIRECERTIFICATES001
 
         if (withRedisInsight)
         {
             RedisResource = RedisResource.WithRedisInsight();
         }
-        
+
         builder.Eventing.Subscribe(RedisResource.Resource, async (ConnectionStringAvailableEvent _, CancellationToken ct) =>
         {
             var connectionString = await RedisResource.Resource.ConnectionStringExpression.GetValueAsync(ct).ConfigureAwait(false);
@@ -147,21 +150,45 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         return this;
     }
 
+    public ConnectionStringManager AddMcpServer(bool withMcpInspector = false)
+    {
+        McpResource = builder
+            .AddContainer(Constants.DocSpaceMcpContainer, "onlyoffice/docspace-mcp")
+            .WithEnvironment("DOCSPACE_INTERNAL", "true")
+            .WithEnvironment("DOCSPACE_TRANSPORT", "http")
+            .WithEnvironment("DOCSPACE_HOST", "0.0.0.0")
+            .WithEnvironment("DOCSPACE_PORT", Constants.DocSpaceMcpPort.ToString())
+            .WithHttpEndpoint(Constants.DocSpaceMcpPort, Constants.DocSpaceMcpPort);
+
+        if (withMcpInspector)
+        {
+            WithMcpInspector(McpResource);
+        }
+
+        AddWaitFor(McpResource);
+
+        return this;
+    }
+
+    private IResourceBuilder<McpInspectorResource> WithMcpInspector(IResourceBuilder<ContainerResource> mcp) => mcp
+        .ApplicationBuilder.AddMcpInspector("mcp-inspector")
+        .WithMcpServer(mcp)
+        .WithParentRelationship(mcp)
+        .WaitFor(mcp)
+        .WithUrls(x =>
+        {
+            x.Urls[0].DisplayText = "Inspector";
+        });
+
+
     public ConnectionStringManager AddEditors()
     {
-        var image = "onlyoffice/documentserver";
-        
-        switch (builder.Configuration["APP_EDITION"])
+        var image = builder.Configuration["APP_EDITION"] switch
         {
-            case "enterprise":
-                image = "onlyoffice/documentserver-ee";
-                break;
-            case "developer":
-                image = "onlyoffice/documentserver-de";
-                break;
-            default:
-                break;
-        }
+            "enterprise" => "onlyoffice/documentserver-ee",
+            "developer" => "onlyoffice/documentserver-de",
+            _ => "onlyoffice/documentserver"
+        };
 
         EditorResource = builder
             .AddContainer(Constants.EditorsContainer, image, "latest")
@@ -170,7 +197,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             .WithEnvironment("JWT_SECRET", "secret")
             .WithEnvironment("JWT_HEADER", "AuthorizationJwt")
             .WithBindMount(Path.Combine(basePath, "Data"), "/var/www/onlyoffice/Data");
-           
+
 
         return this;
     }
@@ -185,7 +212,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             .WithEnvironment("discovery.type", "single-node")
             .WithEntrypoint("/bin/bash")
             .WithArgs("-c", "opensearch-plugin install ingest-attachment --batch && /usr/share/opensearch/opensearch-docker-entrypoint.sh");
-        
+
         builder.AddContainer("opensearch-dashboard", "opensearchproject/opensearch-dashboards", "2")
             .WithHttpEndpoint(targetPort: 5601)
             .WithEnvironment("OPENSEARCH_HOSTS", $"http://{Constants.OpensearchContainer}:{Constants.OpensearchPort.ToString()}")
@@ -197,8 +224,102 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
     public ConnectionStringManager AddMailPit()
     {
         MailResource = builder.AddMailPit("mailpit");
-        
+
         return this;
+    }
+
+    public void AddApiTest()
+    {
+        var docspaceOwnerEmail = builder.Configuration["OWNER_EMAIL"] ?? "test@example.com";
+        var coreMachineKey = builder.Configuration["core:machinekey"] ?? "test-machine-key";
+
+        var playwrightTestsPath = Path.Combine(basePath, "tests", "api-tests");
+
+        var currentBugId = builder.Configuration["BUG_ID"];
+
+        ApiTestResource = builder
+            .AddJavaScriptApp("playwright-tests", playwrightTestsPath, "test")
+            .WithNpm()
+            .WithEnvironment("MACHINEKEY", coreMachineKey)
+            .WithEnvironment("PKEY", "PKEY")
+            .WithEnvironment("LOCAL_PORTAL_DOMAIN", $"localhost:{Constants.AppHostPort.ToString()}")
+            .WithEnvironment("DOCSPACE_OWNER_EMAIL", docspaceOwnerEmail)
+            .WithExplicitStart();
+
+        if (!string.IsNullOrEmpty(currentBugId))
+        {
+            ApiTestResource.WithArgs("--", "--grep", $"BUG {currentBugId}");
+        }
+
+        ApiTestResource.WithCommand(
+            name: "run-with-bug-id",
+            displayName: "Run with BUG ID",
+            executeCommand: async context =>
+            {
+                var interactionService = context.ServiceProvider
+                    .GetRequiredService<IInteractionService>();
+                var commandService = context.ServiceProvider
+                    .GetRequiredService<ResourceCommandService>();
+
+                var result = await interactionService.PromptInputAsync(
+                    title: "Enter BUG ID",
+                    message : "Provide the BUG ID to run specific tests (e.g., 12345)",
+                    input: new InteractionInput
+                    {
+                        InputType = InputType.Text,
+                        Name = "BUG ID",
+                        Placeholder = "Enter BUG ID number",
+                        Value = currentBugId ?? ""
+                    },
+                    cancellationToken: context.CancellationToken);
+
+                if (result.Canceled)
+                {
+                    return CommandResults.Success();
+                }
+
+                var bugId = result.Data.Value?.Trim();
+
+                await commandService.ExecuteCommandAsync(
+                    resourceId: context.ResourceName,
+                    commandName: "resource-stop",
+                    cancellationToken: context.CancellationToken);
+
+                await Task.Delay(500, context.CancellationToken);
+
+                ApiTestResource
+                    .WithArgs(c=> c.Args.Clear());
+
+                if (!string.IsNullOrEmpty(bugId))
+                {
+                    ApiTestResource.WithArgs("run", "test", "--", "--grep", $"BUG {bugId}");
+                }
+                else
+                {
+                    ApiTestResource.WithArgs("run", "test");
+                }
+
+                await commandService.ExecuteCommandAsync(
+                    resourceId: context.ResourceName,
+                    commandName: "resource-start",
+                    cancellationToken: context.CancellationToken);
+
+                return CommandResults.Success();
+            },
+            commandOptions: new CommandOptions
+            {
+                IconName = "TestBeaker",
+                IconVariant = IconVariant.Filled,
+                Description = "Restart tests with a specific BUG ID filter"
+            });
+
+        _parameters = new Dictionary<string, string>
+        {
+            { "web:autotest:secret-email", docspaceOwnerEmail },
+            { "core:machinekey", coreMachineKey },
+            { "auth:allowskip:default", true.ToString() },
+            { "auth:allowskip:registerportal", true.ToString() }
+        };
     }
 
     public void AddWaitFor<T>(
@@ -235,16 +356,19 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         {
             resourceBuilder.WaitFor(OpensearchResource);
         }
+
         if (includeMailPit && MailResource != null)
         {
             resourceBuilder.WaitFor(MailResource);
         }
+
+        ApiTestResource?.WaitFor((IResourceBuilder<IResource>)resourceBuilder);
     }
 
     public void AddBaseConfig<T>(IResourceBuilder<T> resourceBuilder, bool isDocker) where T : IResourceWithEnvironment, IResourceWithWaitSupport, IResourceWithEndpoints
     {
         resourceBuilder.WithHttpHealthCheck("/health");
-       
+
         resourceBuilder
             .WithEnvironment("openTelemetry:enable", "true")
             .WithEnvironment("files:docservice:url:portal", SubstituteLocalhost("http://localhost") + ":" + Constants.AppHostPort)
@@ -255,13 +379,12 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             resourceBuilder
                 .WithReference(MySqlDatabaseResource, "default:connectionString");
         }
-        
+
         if (MailResource != null)
         {
             resourceBuilder
                 .WithReference(MailResource)
                 .WithEnvironment("core:notify:postman", "mailpit");
-            
         }
 
         if (isDocker)
@@ -278,7 +401,11 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
                 .WithEnvironment("RabbitMQ:Password", () => RabbitMqUri != null ? $"{RabbitMqUri.UserInfo.Split(':')[1]}" : "")
                 .WithEnvironment("RabbitMQ:VirtualHost", () => RabbitMqUri != null ? $"{RabbitMqUri.PathAndQuery}" : "");
         }
-      
+        else
+        {
+            resourceBuilder.WithEnvironment("RabbitMQ:Enabled", "false");
+        }
+
         if (RedisResource != null)
         {
             resourceBuilder
@@ -290,6 +417,10 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
                 resourceBuilder.WithEnvironment("Redis:Password", () => Redis?.Password ?? string.Empty);
             }
         }
+        else
+        {
+            resourceBuilder.WithEnvironment("Redis:Enabled", "false");
+        }
 
         if (OpensearchResource != null)
         {
@@ -299,8 +430,16 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
                 .WithEnvironment("elastic:Port", () => Constants.OpensearchPort.ToString())
                 .WithEnvironment("elastic:Threads", () => "1");
         }
+
+        if (_parameters != null)
+        {
+            foreach (var parameter in _parameters)
+            {
+                resourceBuilder.WithEnvironment(parameter.Key, parameter.Value);
+            }
+        }
     }
-    
+
     public void AddIdentityEnv(IResourceBuilder<ContainerResource>  resourceBuilder)
     {
         resourceBuilder
@@ -324,6 +463,6 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
 
         AddWaitFor(resourceBuilder, includeEditors: false);
     }
-    
+
     public static string? SubstituteLocalhost(string? host) => host?.Replace(KnownHostNames.Localhost, KnownHostNames.DockerDesktopHostBridge);
 }

@@ -36,6 +36,7 @@ public class WorkspaceMigrator : Migrator
     public WorkspaceMigrator(
         SecurityContext securityContext,
         UserManager userManager,
+        UserPhotoManager userPhotoManager,
         TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
         QuotaSocketManager quotaSocketManager,
         FileStorageService fileStorageService,
@@ -46,7 +47,7 @@ public class WorkspaceMigrator : Migrator
         AuthContext authContext,
         DisplayUserSettingsHelper displayUserSettingsHelper,
         UserManagerWrapper userManagerWrapper,
-        UserSocketManager socketManager) : base(securityContext, userManager, tenantQuotaFeatureStatHelper, quotaSocketManager, fileStorageService, globalFolderHelper, serviceProvider, daoFactory, migrationLogger, authContext, displayUserSettingsHelper, userManagerWrapper, socketManager)
+        UserSocketManager socketManager) : base(securityContext, userManager, userPhotoManager, tenantQuotaFeatureStatHelper, quotaSocketManager, fileStorageService, globalFolderHelper, serviceProvider, daoFactory, migrationLogger, authContext, displayUserSettingsHelper, userManagerWrapper, socketManager)
     {
         MigrationInfo = new MigrationInfo { Name = "Workspace" };
     }
@@ -206,7 +207,7 @@ public class WorkspaceMigrator : Migrator
     private async Task ParseUsersAsync(bool reportProgress, int count)
     {
         await using var stream = _dataReader.GetEntry("databases/core/core_user");
-        var data = new DataTable();
+        using var data = new DataTable();
         data.ReadXml(stream);
         var progressStep = (double)30 / count / data.Rows.Count;
         foreach (var row in data.Rows.Cast<DataRow>())
@@ -249,14 +250,14 @@ public class WorkspaceMigrator : Migrator
             if (!u.HasPhoto)
             {
                 await using var streamPhotos = _dataReader.GetEntry("databases/core/core_userphoto");
-                var dataPhotots = new DataTable();
+                using var dataPhotots = new DataTable();
                 dataPhotots.ReadXml(streamPhotos);
                 foreach (var rowPhoto in dataPhotots.Rows.Cast<DataRow>())
                 {
                     if (rowPhoto["userId"].ToString() == key)
                     {
                         var bytes = rowPhoto["photo"] as byte[];
-                        var img = new MagickImage(bytes);
+                        using var img = new MagickImage(bytes);
                         var format = img.Format;
 
                         u.PathToPhoto = Path.Combine(_dataReader.GetFolder(), $"{key}.{CommonPhotoManager.GetImgFormatName(format)}");
@@ -312,7 +313,7 @@ public class WorkspaceMigrator : Migrator
 
         var rootFolders = new List<string>();
         using var streamFolders = _dataReader.GetEntry("databases/files/files_folder");
-        var dataFolders = new DataTable();
+        using var dataFolders = new DataTable();
         dataFolders.ReadXml(streamFolders);
         foreach (var row in dataFolders.Rows.Cast<DataRow>())
         {
@@ -326,7 +327,7 @@ public class WorkspaceMigrator : Migrator
         }
 
         using var streamTree = _dataReader.GetEntry("databases/files/files_folder_tree");
-        var dataTree = new DataTable();
+        using var dataTree = new DataTable();
         dataTree.ReadXml(streamTree);
         var folderTree = new Dictionary<string, int>();
         foreach (var row in dataTree.Rows.Cast<DataRow>())
@@ -342,7 +343,7 @@ public class WorkspaceMigrator : Migrator
         {
             var projectProjects = new Dictionary<string, ValueTuple<string, bool, string>>();
             using var streamProject = _dataReader.GetEntry("databases/projects/projects_projects");
-            var dataProject = new DataTable();
+            using var dataProject = new DataTable();
             dataProject.ReadXml(streamProject);
             foreach (var row in dataProject.Rows.Cast<DataRow>())
             {
@@ -354,9 +355,9 @@ public class WorkspaceMigrator : Migrator
 
             using var streamBunch = _dataReader.GetEntry("databases/files/files_bunch_objects");
 
-            dataProject = new DataTable();
-            dataProject.ReadXml(streamBunch);
-            foreach (var row in dataProject.Rows.Cast<DataRow>())
+            using var dataBunch = new DataTable();
+            dataBunch.ReadXml(streamBunch);
+            foreach (var row in dataBunch.Rows.Cast<DataRow>())
             {
                 if (row["right_node"].ToString().StartsWith("projects/project/"))
                 {
@@ -446,7 +447,7 @@ public class WorkspaceMigrator : Migrator
         }
 
         using var streamFiles = _dataReader.GetEntry("databases/files/files_file");
-        var datafiles = new DataTable();
+        using var datafiles = new DataTable();
         datafiles.ReadXml(streamFiles);
         foreach (var row in datafiles.Rows.Cast<DataRow>())
         {
@@ -484,7 +485,7 @@ public class WorkspaceMigrator : Migrator
     {
         using var streamBunch = _dataReader.GetEntry("databases/files/files_bunch_objects");
 
-        var dataProject = new DataTable();
+        using var dataProject = new DataTable();
         dataProject.ReadXml(streamBunch);
         var mapper = new Dictionary<string, string>();
         foreach (var row in dataProject.Rows.Cast<DataRow>())
@@ -497,7 +498,7 @@ public class WorkspaceMigrator : Migrator
         }
 
         using var streamFiles = _dataReader.GetEntry("databases/projects/projects_project_participant");
-        var datafiles = new DataTable();
+        using var datafiles = new DataTable();
         datafiles.ReadXml(streamFiles);
         var openProjects = new List<int>();
         foreach (var row in datafiles.Rows.Cast<DataRow>())
@@ -537,7 +538,7 @@ public class WorkspaceMigrator : Migrator
     private void DbExtractFilesSecurity(MigrationStorage storage, string createBy)
     {
         using var streamGroup = _dataReader.GetEntry("databases/files/files_security");
-        var data = new DataTable();
+        using var data = new DataTable();
         data.ReadXml(streamGroup);
 
         foreach (var row in data.Rows.Cast<DataRow>())
@@ -570,7 +571,7 @@ public class WorkspaceMigrator : Migrator
     private void ParseGroup()
     {
         using var streamGroup = _dataReader.GetEntry("databases/core/core_group");
-        var dataGroup = new DataTable();
+        using var dataGroup = new DataTable();
         dataGroup.ReadXml(streamGroup);
 
         foreach (var row in dataGroup.Rows.Cast<DataRow>())
@@ -601,7 +602,7 @@ public class WorkspaceMigrator : Migrator
         }
 
         using var streamUserGroup = _dataReader.GetEntry("databases/core/core_usergroup");
-        var dataUserGroup = new DataTable();
+        using var dataUserGroup = new DataTable();
         dataUserGroup.ReadXml(streamUserGroup);
 
         foreach (var row in dataUserGroup.Rows.Cast<DataRow>())

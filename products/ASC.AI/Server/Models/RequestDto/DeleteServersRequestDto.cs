@@ -34,6 +34,7 @@ public class DeleteServersRequestDto
     /// <summary>
     /// Server identifiers to delete.
     /// </summary>
+    /// <example>{"servers": ["00000000-0000-0000-0000-000000000000"]}</example>
     [FromBody]
     public required DeleteServersRequestBody Body { get; init; }
 }
@@ -46,5 +47,6 @@ public class DeleteServersRequestBody
     /// <summary>
     /// Set of unique identifiers of the MCP servers to permanently remove. All room associations and connection data will also be deleted.
     /// </summary>
+    /// <example>["00000000-0000-0000-0000-000000000000"]</example>
     public required HashSet<Guid> Servers { get; init; }
 }

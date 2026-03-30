@@ -373,7 +373,16 @@ static file class FolderQueries
                             ).FirstOrDefault(),
                             Settings = (from f in ctx.RoomSettings
                                         where f.TenantId == tenantId && f.RoomId == r.Id
-                                        select f).FirstOrDefault()
+                                        select f).FirstOrDefault(),
+                            ChatProviderType = r.FolderType == FolderType.AiRoom
+                                ? ctx.RoomSettings
+                                    .Where(rs => rs.TenantId == tenantId && rs.RoomId == r.Id)
+                                    .Join(ctx.AiProviders,
+                                        rs => rs.ChatProviderId,
+                                        p => p.Id,
+                                        (rs, p) => (ProviderType?)p.Type)
+                                    .FirstOrDefault()
+                                : null
                         }
                     ).SingleOrDefault());
 
@@ -407,6 +416,15 @@ static file class FolderQueries
                                  x.EntryType == FileEntryType.Folder &&
                                 ctx.Tree.Any(t => t.FolderId == r.ParentId && t.ParentId == x.InternalEntryId)),
                             Settings = ctx.RoomSettings.Where(x => x.TenantId == tenantId && x.RoomId == r.Id).Distinct().FirstOrDefault(),
+                            ChatProviderType = r.FolderType == FolderType.AiRoom
+                                ? ctx.RoomSettings
+                                    .Where(rs => rs.TenantId == tenantId && rs.RoomId == r.Id)
+                                    .Join(ctx.AiProviders,
+                                        rs => rs.ChatProviderId,
+                                        p => p.Id,
+                                        (rs, p) => (ProviderType?)p.Type)
+                                    .FirstOrDefault()
+                                : null,
                             Order = (
                                 from f in ctx.FileOrder
                                 where (
@@ -481,7 +499,16 @@ static file class FolderQueries
                                     select rs.Indexing).FirstOrDefault() && f.EntryId == r.folder.Id && f.TenantId == tenantId && f.EntryType == FileEntryType.Folder
                                 select f.Order
                             ).FirstOrDefault(),
-                            Settings = ctx.RoomSettings.Where(x => x.TenantId == tenantId && x.RoomId == r.folder.Id).Distinct().FirstOrDefault()
+                            Settings = ctx.RoomSettings.Where(x => x.TenantId == tenantId && x.RoomId == r.folder.Id).Distinct().FirstOrDefault(),
+                            ChatProviderType = r.folder.FolderType == FolderType.AiRoom
+                                ? ctx.RoomSettings
+                                    .Where(rs => rs.TenantId == tenantId && rs.RoomId == r.folder.Id)
+                                    .Join(ctx.AiProviders,
+                                        rs => rs.ChatProviderId,
+                                        p => p.Id,
+                                        (rs, p) => (ProviderType?)p.Type)
+                                    .FirstOrDefault()
+                                : null
                         }
                     ));
 

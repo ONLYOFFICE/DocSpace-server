@@ -113,7 +113,7 @@ public class SmsManager(UserManager userManager,
         }
     }
 
-    public async Task<(bool, string)> ValidateSmsCodeAsync(UserInfo user, string code, bool isEntryPoint = false)
+    public async Task<(bool, string)> ValidateSmsCodeAsync(UserInfo user, string code, bool isEntryPoint = false, bool session = false)
     {
         if (!await studioSmsNotificationSettingsHelper.IsVisibleAndAvailableSettingsAsync() || 
             !await studioSmsNotificationSettingsHelper.TfaEnabledForUserAsync(user.Id))
@@ -147,7 +147,7 @@ public class SmsManager(UserManager userManager,
         if (!securityContext.IsAuthenticated)
         {
             var action = isEntryPoint ? MessageAction.LoginSuccessViaApiSms : MessageAction.LoginSuccessViaSms;
-            token = await cookieManager.AuthenticateMeAndSetCookiesAsync(user.Id, action);
+            token = await cookieManager.AuthenticateMeAndSetCookiesAsync(user.Id, action, session);
         }
 
         if (user.MobilePhoneActivationStatus == MobilePhoneActivationStatus.NotActivated)

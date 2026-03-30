@@ -1,25 +1,25 @@
 ﻿// (c) Copyright Ascensio System SIA 2009-2026
-// 
+//
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
+//
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
+//
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-// 
+//
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -40,16 +40,16 @@ public class EditorControllerInternal(FileStorageService fileStorageService,
         IHttpContextAccessor httpContextAccessor,
         EditorToolCallStateStore editorToolCallStateStore)
         : EditorController<int>(
-            fileStorageService, 
-            documentServiceHelper, 
-            encryptionKeyPairDtoHelper, 
-            settingsManager, 
-            entryManager, 
-            folderDtoHelper, 
-            fileDtoHelper, 
-            configurationConverter, 
-            securityContext, 
-            httpContextAccessor, 
+            fileStorageService,
+            documentServiceHelper,
+            encryptionKeyPairDtoHelper,
+            settingsManager,
+            entryManager,
+            folderDtoHelper,
+            fileDtoHelper,
+            configurationConverter,
+            securityContext,
+            httpContextAccessor,
             editorToolCallStateStore);
 
 [DefaultRoute("file")]
@@ -65,16 +65,16 @@ public class EditorControllerThirdparty(FileStorageService fileStorageService,
         IHttpContextAccessor httpContextAccessor,
         EditorToolCallStateStore editorToolCallStateStore)
         : EditorController<string>(
-            fileStorageService, 
-            documentServiceHelper, 
-            encryptionKeyPairDtoHelper, 
-            settingsManager, 
-            entryManager, 
-            folderDtoHelper, 
-            fileDtoHelper, 
-            configurationConverter, 
-            securityContext, 
-            httpContextAccessor, 
+            fileStorageService,
+            documentServiceHelper,
+            encryptionKeyPairDtoHelper,
+            settingsManager,
+            entryManager,
+            folderDtoHelper,
+            fileDtoHelper,
+            configurationConverter,
+            securityContext,
+            httpContextAccessor,
             editorToolCallStateStore);
 
 public abstract class EditorController<T>(
@@ -191,6 +191,11 @@ public abstract class EditorController<T>(
             };
 
             formOpenSetup.RootFolder = rootFolder;
+
+            if (inDto.Edit && rootFolder.FolderType == FolderType.FillingFormsRoom)
+            {
+                await fileStorageService.ManageFormFilling(file.Id, FormFillingManageAction.Edit);
+            }
         }
         var quotaExceededScope = await documentServiceHelper.CheckCustomQuotaAsync(rootFolder);
 
@@ -224,7 +229,7 @@ public abstract class EditorController<T>(
         {
             result.QuotaExceededScope = quotaExceededScope;
         }
-        if (formOpenSetup != null && formOpenSetup.DisableEmbeddedConfig && result.EditorConfig.Embedded != null)
+        if (formOpenSetup is { DisableEmbeddedConfig: true } && result.EditorConfig.Embedded != null)
         {
             result.EditorConfig.Embedded.EmbedUrl = "";
             result.EditorConfig.Embedded.ShareUrl = "";
@@ -255,9 +260,9 @@ public abstract class EditorController<T>(
             {
                 if (result.Document.Permissions.Copy && !securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))
                 {
-                    result.StartFillingMode = StartFillingMode.ShareToFillOut;
+                    result.StartFillingMode = rootFolder.FolderType == FolderType.FillingFormsRoom ? StartFillingMode.StartFillingFormRoom : StartFillingMode.ShareToFillOut;
                     result.StartFilling = formOpenSetup.CanStartFilling;
-                    result.EditorConfig.Customization.StartFillingForm = new StartFillingForm { Text = FilesCommonResource.StartFillingModeEnum_ShareToFillOut };
+                    result.EditorConfig.Customization.StartFillingForm = new StartFillingForm { Text = rootFolder.FolderType == FolderType.FillingFormsRoom ? FilesCommonResource.StartFillingModeEnum_StartFilling : FilesCommonResource.StartFillingModeEnum_ShareToFillOut };
                 }
             }
 
@@ -281,7 +286,7 @@ public abstract class EditorController<T>(
                 result.GenerationToolCallState = toolCallState.MapToDto();
             }
         }
-        
+
         return result;
     }
 
@@ -357,6 +362,21 @@ public abstract class EditorController<T>(
     public async Task<List<MentionWrapper>> GetProtectedFileUsers(FileIdRequestDto<T> inDto)
     {
         return await fileStorageService.ProtectUsersAsync(inDto.FileId);
+    }
+
+    /// <remarks>
+    /// Triggers asynchronous XLSX report generation for the specified form file.
+    /// </remarks>
+    /// <summary>Generate XLSX report</summary>
+    /// <path>api/2.0/files/file/{fileId}/xlsx</path>
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "XLSX report generation has been queued")]
+    [SwaggerResponse(403, "You do not have enough permissions to perform this action")]
+    [SwaggerResponse(404, "Form file not found")]
+    [HttpPost("{fileId}/xlsx")]
+    public async Task GenerateXlsx(FileIdRequestDto<int> inDto)
+    {
+        await fileStorageService.GenerateXlsxAsync(inDto.FileId);
     }
 }
 
@@ -451,7 +471,7 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
 
             var success = Uri.TryCreate(url, UriKind.RelativeOrAbsolute, out var uri);
 
-            if (uri == null || uri.IsAbsoluteUri && !String.IsNullOrEmpty(uri.Query))
+            if (uri == null || uri.IsAbsoluteUri && !string.IsNullOrEmpty(uri.Query))
             {
                 return false;
             }

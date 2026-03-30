@@ -29,12 +29,25 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 /// <summary>
 /// The wallet service information.
 /// </summary>
+/// <example>
+/// {
+///   "innerServices": [{"title": "File Storage", "size": 1073741824}],
+///   "serviceName": "backup"
+/// }
+/// </example>
 public class WalletServiceDto : QuotaDto
 {
     /// <summary>
     /// The list of inner services.
     /// </summary>
-    public List<QuotaDto> InnerServices { get; set; }
+    /// <example>[{"title": "File Storage", "size": 1073741824}]</example>
+    public List<WalletServiceDto> InnerServices { get; set; }
+
+    /// <summary>
+    /// The service name.
+    /// </summary>
+    /// <example>backup</example>
+    public string ServiceName { get; set; }
 }
 
 /// <summary>
@@ -45,61 +58,73 @@ public class QuotaDto
     /// <summary>
     /// The quota ID.
     /// </summary>
+    /// <example>1</example>
     public required int Id { get; set; }
 
     /// <summary>
     /// The quota title.
     /// </summary>
+    /// <example>Basic Plan</example>
     public required string Title { get; set; }
 
     /// <summary>
     /// The price parameters.
     /// </summary>
+    /// <example>{"value": 99.99, "currencySymbol": "$", "iSOCurrencySymbol": "USD"}</example>
     public required PriceDto Price { get; set; }
 
     /// <summary>
     /// Specifies if the quota is nonprofit or not.
     /// </summary>
+    /// <example>false</example>
     public required bool NonProfit { get; set; }
 
     /// <summary>
     /// Specifies if the quota is free or not.
     /// </summary>
+    /// <example>true</example>
     public required bool Free { get; set; }
 
     /// <summary>
     /// Specifies if the quota is trial or not.
     /// </summary>
+    /// <example>false</example>
     public required bool Trial { get; set; }
 
     /// <summary>
     /// The list of tenant quota features.
     /// </summary>
+    /// <example>[{"id": "00000000-0000-0000-0000-000000000001", "title": "Premium Storage"}]</example>
     public required IEnumerable<TenantQuotaFeatureDto> Features { get; set; }
 
     /// <summary>
     /// The user quota.
     /// </summary>
+    /// <example>{}</example>
     public TenantEntityQuotaSettings UsersQuota { get; set; }
 
     /// <summary>
     /// The room quota.
     /// </summary>
+    /// <example>{}</example>
     public TenantEntityQuotaSettings RoomsQuota { get; set; }
 
     /// <summary>
     /// The ai agent quota.
     /// </summary>
+    /// <example>{}</example>
     public TenantEntityQuotaSettings AiAgentsQuota { get; set; }
 
     /// <summary>
     /// The tenant custom quota.
     /// </summary>
+    /// <example>{}</example>
     public TenantQuotaSettings TenantCustomQuota { get; set; }
 
     /// <summary>
     /// The due date.
     /// </summary>
+    /// <example>2024-01-15T10:30:00Z</example>
     public DateTime? DueDate { get; set; }
 }
 
@@ -111,36 +136,43 @@ public class TenantQuotaFeatureDto : IEquatable<TenantQuotaFeatureDto>
     /// <summary>
     /// The ID of the tenant quota feature.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000001</example>
     public string Id { get; set; }
 
     /// <summary>
     /// The title of the tenant quota feature.
     /// </summary>
+    /// <example>Premium Storage</example>
     public string Title { get; set; }
 
     /// <summary>
     /// The image URL of the tenant quota feature.
     /// </summary>
+    /// <example>/images/premium-storage.png</example>
     public string Image { get; set; }
 
     /// <summary>
     /// The value of the tenant quota feature.
     /// </summary>
+    /// <example>{}</example>
     public object Value { get; set; }
 
     /// <summary>
     /// The type of the tenant quota feature.
     /// </summary>
+    /// <example>Storage</example>
     public string Type { get; set; }
 
     /// <summary>
     /// The used space parameters of the tenant quota feature.
     /// </summary>
+    /// <example>{}</example>
     public FeatureUsedDto Used { get; set; }
 
     /// <summary>
     /// The price title of the tenant quota feature.
     /// </summary>
+    /// <example>$9.99/month</example>
     public string PriceTitle { get; set; }
 
     public bool Equals(TenantQuotaFeatureDto other)
@@ -165,17 +197,19 @@ public class PriceDto
     /// <summary>
     /// The price value.
     /// </summary>
-    [SwaggerSchemaCustom(Example = 10.0)]
+    /// <example>99.99</example>
     public decimal? Value { get; set; }
 
     /// <summary>
     /// The currency symbol.
     /// </summary>
+    /// <example>$</example>
     public string CurrencySymbol { get; set; }
 
     /// <summary>
     /// The three-character ISO 4217 currency symbol.
     /// </summary>
+    /// <example>USD</example>
     public string ISOCurrencySymbol { get; set; }
 }
 
@@ -187,11 +221,13 @@ public class FeatureUsedDto
     /// <summary>
     /// The used space value.
     /// </summary>
+    /// <example>{}</example>
     public required object Value { get; set; }
 
     /// <summary>
     /// The used space title.
     /// </summary>
+    /// <example>50 GB used</example>
     public string Title { get; set; }
 }
 

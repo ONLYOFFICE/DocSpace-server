@@ -33,5 +33,8 @@ public enum SystemToolType
     WebCrawling,
     GeneratePresentation,
     GenerateDocx,
-    GenerateForm
+    GenerateForm,
+    FormDataQuery,
+    FormDataAggregate,
+    FormDataSelfJoin
 }

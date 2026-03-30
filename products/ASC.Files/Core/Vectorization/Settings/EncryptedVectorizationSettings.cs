@@ -29,9 +29,17 @@ namespace ASC.Files.Core.Vectorization.Settings;
 [EnumExtensions]
 public enum EmbeddingProviderType
 {
+    [Description("None")]
     None,
+
+    [Description("OpenAi")]
     OpenAi,
-    OpenRouter
+
+    [Description("OpenRouter")]
+    OpenRouter,
+
+    [Description("PortalAi")]
+    PortalAi
 }
 
 public class EncryptedVectorizationSettings : ISettings<EncryptedVectorizationSettings>
@@ -40,13 +48,15 @@ public class EncryptedVectorizationSettings : ISettings<EncryptedVectorizationSe
     public DateTime LastModified { get; set; }
     public EmbeddingProviderType ProviderType { get; init; }
     public string Key { get; set; }
-    
+    public bool IsConfigured { get; init; }
+
     public EncryptedVectorizationSettings GetDefault()
     {
         return new EncryptedVectorizationSettings
         {
             ProviderType = EmbeddingProviderType.None,
-            Key = null
+            Key = null,
+            IsConfigured = false
         };
     }
 }
