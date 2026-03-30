@@ -3316,7 +3316,7 @@ public class FileStorageService //: IFileStorageService
         return any;
     }
 
-    public async Task ReassignRoomsAsync(Guid user, Guid? reassign)
+    public async Task ChangeRoomsOwnerAsync(Guid user, Guid? reassign)
     {
         var entries = await GetEntriesAsync(await globalFolderHelper.GetFolderVirtualRooms());
         entries.AddRange(await GetEntriesAsync(await globalFolderHelper.GetFolderAiAgentsAsync()));
@@ -3632,6 +3632,21 @@ public class FileStorageService //: IFileStorageService
             _logger.InformationReassignProvider(commonProviderInfo.ProviderId, userFromId, userToId);
             await providerDao.UpdateProviderInfoAsync(commonProviderInfo.ProviderId, null, null, FolderType.DEFAULT, userToId);
         }
+    }
+
+    public async Task ReassignRoomsAsync(Guid userFromId, Guid userToId, bool checkPermission = false)
+    {
+        if (checkPermission)
+        {
+            await DemandPermissionToDeletePersonalDataAsync(userFromId);
+        }
+
+        if (daoFactory.GetFolderDao<int>() is not FolderDao folderDao)
+        {
+            return;
+        }
+
+        await folderDao.ReassignRoomsAsync(userFromId, userToId);
     }
 
     public async Task ReassignRoomsFoldersAsync(Guid userFromId, bool checkPermission = false)

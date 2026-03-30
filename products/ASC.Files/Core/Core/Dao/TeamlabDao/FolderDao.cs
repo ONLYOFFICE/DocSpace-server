@@ -1440,6 +1440,13 @@ internal class FolderDao(
         await filesDbContext.ReassignSpecificFoldersAsync(tenantId, folderIds, newOwnerId);
     }
 
+    public async Task ReassignRoomsAsync(Guid oldOwnerId, Guid newOwnerId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        await filesDbContext.ReassignRoomsAsync(tenantId, oldOwnerId, newOwnerId);
+    }
+
     public async Task ReassignRoomFoldersAsync(Guid oldOwnerId)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
