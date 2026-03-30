@@ -11,7 +11,7 @@ AUTHORIZATION_JAR = authorization-container.jar
 TEMP_BUILDER_REG = temp-jar-builder-reg:latest
 TEMP_BUILDER_AUTH = temp-jar-builder-auth:latest
 
-.PHONY: all test integration-tests minified-tests test-all base registration authorization minified clean prune summary sizes help
+.PHONY: all test integration-tests minified-tests test-all docs base registration authorization minified clean prune summary sizes help
 
 all: base registration authorization sizes
 
@@ -21,7 +21,7 @@ test:
 
 integration-tests:
 	@echo "Running integration tests..."
-	mvn $(MAVEN_BATCH) test $(MAVEN_FMT_SKIP) -DRUN_INTEGRATION_TESTS=true -Dtest="*IT" -Dsurefire.failIfNoSpecifiedTests=false
+	mvn $(MAVEN_BATCH) test $(MAVEN_FMT_SKIP) -DRUN_INTEGRATION_TESTS=true -Dtest='!SpringDocsIT,*IT' -Dsurefire.failIfNoSpecifiedTests=false
 
 minified-tests:
 	@echo "Building dependencies..."
@@ -31,6 +31,15 @@ minified-tests:
 
 test-all: test integration-tests minified-tests
 	@echo "All tests completed."
+
+docs:
+	@echo "Generating authorization OpenAPI JSON"
+	mvn $(MAVEN_BATCH) -pl authorization/authorization-application -am test $(MAVEN_FMT_SKIP) -Dtest=SpringDocsIT -DRUN_DOCS_GENERATION=true -Dsurefire.failIfNoSpecifiedTests=false
+	@echo "Generating registration OpenAPI JSON"
+	mvn $(MAVEN_BATCH) -pl registration/registration-application -am test $(MAVEN_FMT_SKIP) -Dtest=SpringDocsIT -DRUN_DOCS_GENERATION=true -Dsurefire.failIfNoSpecifiedTests=false
+	@echo "OpenAPI files generated:"
+	@echo " docs/identity-authorization-openapi.json"
+	@echo " docs/identity-registration-openapi.json"
 
 base: $(REGISTRATION_JAR) $(AUTHORIZATION_JAR)
 	@echo "Building shared base image..."

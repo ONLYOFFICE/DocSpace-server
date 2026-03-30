@@ -48,7 +48,9 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @ActiveProfiles({"test", "saas"})
 @Import(RegistrationTestBeanConfiguration.class)
 @EnabledIfSystemProperty(named = "RUN_INTEGRATION_TESTS", matches = "true")
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+    classes = RegistrationServiceSaasIT.TestApplication.class)
 public class RegistrationServiceSaasIT extends AbstractRegistrationServiceIT {
   static MySQLContainer<?> mysql = RegistrationTestContainers.mysql();
   static GenericContainer<?> redis = RegistrationTestContainers.redis();

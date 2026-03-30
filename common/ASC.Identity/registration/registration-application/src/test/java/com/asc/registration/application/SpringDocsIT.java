@@ -26,18 +26,26 @@
 
 package com.asc.registration.application;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.asc.common.application.proto.AuthorizationServiceGrpc;
 import com.asc.registration.application.service.ConsentService;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.persistence.autoconfigure.EntityScan;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.web.client.RestClient;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.containers.RabbitMQContainer;
@@ -46,11 +54,13 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Testcontainers
 @ActiveProfiles({"test", "server"})
 @Import(RegistrationTestBeanConfiguration.class)
-@EnabledIfSystemProperty(named = "RUN_INTEGRATION_TESTS", matches = "true")
+@EnabledIfSystemProperty(named = "RUN_DOCS_GENERATION", matches = "true")
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-    classes = RegistrationServiceServerIT.TestApplication.class)
-public class RegistrationServiceServerIT extends AbstractRegistrationServiceIT {
+    classes = SpringDocsIT.TestApplication.class)
+public class SpringDocsIT {
+  @LocalServerPort int serverPort;
+
   static MySQLContainer<?> mysql = RegistrationTestContainers.mysql();
   static GenericContainer<?> redis = RegistrationTestContainers.redis();
   static RabbitMQContainer rabbitmq = RegistrationTestContainers.rabbitmq();
@@ -78,14 +88,40 @@ public class RegistrationServiceServerIT extends AbstractRegistrationServiceIT {
   @MockitoBean
   private AuthorizationServiceGrpc.AuthorizationServiceBlockingStub authorizationServiceClient;
 
-  @Override
-  protected ConsentService getConsentService() {
-    return consentService;
+  private static Path resolveIdentityRoot() {
+    var current = Path.of(System.getProperty("user.dir")).toAbsolutePath();
+
+    while (current != null && !"ASC.Identity".equals(current.getFileName().toString())) {
+      current = current.getParent();
+    }
+
+    if (current == null) {
+      throw new IllegalStateException("Could not resolve ASC.Identity root folder.");
+    }
+
+    return current;
   }
 
-  @Override
-  protected AuthorizationServiceGrpc.AuthorizationServiceBlockingStub
-      getAuthorizationServiceClient() {
-    return authorizationServiceClient;
+  @Test
+  void shouldGenerateAndSaveOpenApiDocument() throws Exception {
+    var client =
+        RestClient.builder()
+            .baseUrl("http://localhost:" + serverPort)
+            .defaultStatusHandler(HttpStatusCode::isError, (req, res) -> {})
+            .build();
+
+    var response = client.get().uri("/docs").retrieve().toEntity(String.class);
+    if (!response.getStatusCode().is2xxSuccessful()) {
+      response = client.get().uri("/v3/api-docs").retrieve().toEntity(String.class);
+    }
+
+    assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
+    assertThat(response.getBody()).isNotBlank();
+    assertThat(response.getBody()).contains("\"openapi\"");
+
+    var outputPath =
+        resolveIdentityRoot().resolve("docs").resolve("identity-registration-openapi.json");
+    Files.createDirectories(outputPath.getParent());
+    Files.writeString(outputPath, response.getBody());
   }
 }

@@ -79,7 +79,9 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Testcontainers
 @ActiveProfiles("test")
 @EnabledIfSystemProperty(named = "RUN_INTEGRATION_TESTS", matches = "true")
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+    classes = AuthorizationServiceIT.TestApplication.class)
 public class AuthorizationServiceIT {
   static class TestSignatureGenerator {
     private static final String DEFAULT_TENANT_ID = "1";
