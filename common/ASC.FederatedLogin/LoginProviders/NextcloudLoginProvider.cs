@@ -29,7 +29,7 @@ using System.Text.Json;
 namespace ASC.FederatedLogin.LoginProviders;
 
 [Scope]
-public class NextcloudLoginProvider : BaseLoginProvider<NextcloudLoginProvider>
+public class NextcloudLoginProvider : BaseLoginProvider<NextcloudLoginProvider>, IDummyEmailProvider
 {
     public Uri BaseUrl => new(this["nextcloudBaseUrl"]);
     public override string AccessTokenUrl => new Uri(BaseUrl, "/apps/oauth2/api/v1/token").ToString();
@@ -87,6 +87,13 @@ public class NextcloudLoginProvider : BaseLoginProvider<NextcloudLoginProvider>
         {
             return new LoginProfile(ex);
         }
+    }
+
+    public string GenerateEmail(LoginProfile loginProfile)
+    {
+        return string.IsNullOrWhiteSpace(loginProfile.EMail)
+            ? $"{loginProfile.Id}@{BaseUrl.Host}"
+            : loginProfile.EMail;
     }
 
     private static LoginProfile ProfileFromNextcloud(NextcloudUser nextcloudUser)
