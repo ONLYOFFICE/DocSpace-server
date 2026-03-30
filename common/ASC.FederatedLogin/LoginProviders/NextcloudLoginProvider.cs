@@ -44,7 +44,7 @@ public class NextcloudLoginProvider : BaseLoginProvider<NextcloudLoginProvider>
         base.IsEnabled;
 
     private readonly RequestHelper _requestHelper;
-    private readonly JsonSerializerOptions _jsonSerializerOptions = new() { PropertyNameCaseInsensitive = true };
+    private static readonly JsonSerializerOptions _jsonSerializerOptions = new() { PropertyNameCaseInsensitive = true };
 
     public NextcloudLoginProvider() { }
     public NextcloudLoginProvider(
