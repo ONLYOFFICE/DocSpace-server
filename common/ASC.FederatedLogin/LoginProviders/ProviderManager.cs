@@ -48,7 +48,8 @@ public class ProviderManager(ConsumerFactory consumerFactory)
         ProviderConstants.Twitter,
         ProviderConstants.Microsoft,
         ProviderConstants.AppleId,
-        ProviderConstants.Weixin
+        ProviderConstants.Weixin,
+        ProviderConstants.Nextcloud,
     ];
 
     public static readonly List<string> InviteExceptProviders =
