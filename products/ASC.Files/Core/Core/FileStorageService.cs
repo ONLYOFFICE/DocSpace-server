@@ -1993,6 +1993,12 @@ public class FileStorageService //: IFileStorageService
         try
         {
             var file = await daoFactory.GetFileDao<T>().GetFileAsync(fileId);
+
+            if (file == null)
+            {
+                throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+            }
+
             FileOptions<T> result = null;
 
             var oldTitle = file.Title;
