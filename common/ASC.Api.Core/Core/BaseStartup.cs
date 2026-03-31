@@ -318,7 +318,8 @@ public abstract class BaseStartup
 
                     httpContext.Request.Body.Position = 0;
 
-                    var json = new StreamReader(httpContext.Request.Body).ReadToEndAsync().Result?.Trim();
+                    using var bodyReader = new StreamReader(httpContext.Request.Body, leaveOpen: true);
+                    var json = bodyReader.ReadToEndAsync().Result?.Trim();
 
                     try
                     {

@@ -2617,7 +2617,7 @@ public class FileStorageService //: IFileStorageService
 
     private async Task<(MemoryStream, MemoryStream)> GetCloneMemoryStreams(Stream stream)
     {
-        var memoryStream = new MemoryStream();
+        await using var memoryStream = new MemoryStream();
         await stream.CopyToAsync(memoryStream);
 
         return (await tempStream.CloneMemoryStream(memoryStream, 300), await tempStream.CloneMemoryStream(memoryStream));
