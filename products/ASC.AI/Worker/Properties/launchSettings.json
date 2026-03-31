@@ -9,7 +9,8 @@
         "$STORAGE_ROOT": "../../../../Data",
         "log__dir": "../../../../Logs",
         "log__name": "ai.service",
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "core__eventBus__subscriptionClientName": "asc_event_bus_ai_worker_queue"
       }
     }
   }
