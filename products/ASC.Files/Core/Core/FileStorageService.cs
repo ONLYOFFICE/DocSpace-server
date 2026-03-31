@@ -1993,6 +1993,12 @@ public class FileStorageService //: IFileStorageService
         try
         {
             var file = await daoFactory.GetFileDao<T>().GetFileAsync(fileId);
+
+            if (file == null)
+            {
+                throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+            }
+
             FileOptions<T> result = null;
 
             var oldTitle = file.Title;
@@ -2160,7 +2166,7 @@ public class FileStorageService //: IFileStorageService
 
         if (file == null)
         {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
         if (!await fileSecurity.CanLockAsync(file))
@@ -2617,7 +2623,7 @@ public class FileStorageService //: IFileStorageService
 
     private async Task<(MemoryStream, MemoryStream)> GetCloneMemoryStreams(Stream stream)
     {
-        var memoryStream = new MemoryStream();
+        await using var memoryStream = new MemoryStream();
         await stream.CopyToAsync(memoryStream);
 
         return (await tempStream.CloneMemoryStream(memoryStream, 300), await tempStream.CloneMemoryStream(memoryStream));

@@ -291,8 +291,7 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
 
         if (@event == null)
         {
-            // anti-pattern https://github.com/LeanKit-Labs/wascally/issues/36
-            await _consumerChannel.BasicNackAsync(eventArgs.DeliveryTag, multiple: false, requeue: true);
+            await _consumerChannel.BasicRejectAsync(eventArgs.DeliveryTag, requeue: false);
 
             _logger.WarningUnknownEvent(eventName);
 
