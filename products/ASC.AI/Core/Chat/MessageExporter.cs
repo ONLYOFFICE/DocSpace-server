@@ -38,18 +38,25 @@ public class MessageExporter(
 {
     public async Task ExportMessageAsync<T>(T folderId, string title, int messageId)
     {
-        var chatId = await chatDao.GetChatIdByMessageAsync(messageId, authContext.CurrentAccount.ID)
+        var chat = await chatDao.GetChatByMessageIdAsync(messageId)
             ?? throw new ItemNotFoundException(ErrorMessages.MessageNotFound);
 
-        await messageExport.PublishAsync(title, chatId, messageId, folderId!.ToString()!, folderId is string);
+        if (chat.UserId != authContext.CurrentAccount.ID)
+        {
+            throw new SecurityException(ErrorMessages.ChatAccessDenied);
+        }
+
+        await messageExport.PublishAsync(title, chat.Id, messageId, folderId!.ToString()!, folderId is string);
     }
 
     public async Task ExportMessagesAsync<T>(T folderId, string title, Guid chatId)
     {
-        var chat = await chatDao.GetChatAsync(tenantManager.GetCurrentTenantId(), chatId);
-        if (chat == null || chat.UserId != authContext.CurrentAccount.ID)
+        var chat = await chatDao.GetChatAsync(tenantManager.GetCurrentTenantId(), chatId)
+            ?? throw new ItemNotFoundException(ErrorMessages.ChatNotFound);
+
+        if (chat.UserId != authContext.CurrentAccount.ID)
         {
-            throw new ItemNotFoundException(ErrorMessages.ChatNotFound);
+            throw new SecurityException(ErrorMessages.ChatAccessDenied);
         }
 
         await chatExport.PublishAsync(title, chat.Id, folderId!.ToString()!, folderId is string);
