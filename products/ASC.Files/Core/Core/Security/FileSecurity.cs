@@ -3658,6 +3658,9 @@ public class FileSecurity(
         AskAi,
 
         [Description("Use chat")]
-        UseChat
+        UseChat,
+
+        [Description("Update xlsx")]
+        UpdateXlsx
     }
 }
