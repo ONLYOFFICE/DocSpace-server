@@ -2166,7 +2166,7 @@ public class FileStorageService //: IFileStorageService
 
         if (file == null)
         {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
         if (!await fileSecurity.CanLockAsync(file))
@@ -5410,7 +5410,7 @@ public class FileStorageService //: IFileStorageService
         return group;
     }
 
-    public async Task<File<int>> GenerateXlsxAsync(int fileId)
+    public async Task<(FormFillingReportTask Task, File<int> Form)> GenerateXlsxAsync(int fileId)
     {
         var fileDao = daoFactory.GetFileDao<int>();
         var folderDao = daoFactory.GetFolderDao<int>();
@@ -5496,12 +5496,12 @@ public class FileStorageService //: IFileStorageService
 
         await entryManager.EnsureFormFillingOutputAsync(form, room, resultsFile, resultFolder, properties, folderDao, fileDao);
 
-        await exportToXLSX.UpdateXlsxReport(room.Id, form.Id, form.Version);
+        var task = await exportToXLSX.UpdateXlsxReport(room.Id, form.Id, form.Version);
 
-        return form;
+        return (task, form);
     }
 
-    public async Task<File<int>> GenerateXlsxByFolderAsync(int folderId)
+    public async Task<(FormFillingReportTask Task, File<int> Form)> GenerateXlsxByFolderAsync(int folderId)
     {
         var fileDao = daoFactory.GetFileDao<int>();
         var folderDao = daoFactory.GetFolderDao<int>();
@@ -5571,9 +5571,14 @@ public class FileStorageService //: IFileStorageService
 
         await entryManager.EnsureFormFillingOutputAsync(form, room, resultsFile, resultFolder, properties, folderDao, fileDao);
 
-        await exportToXLSX.UpdateXlsxReport(room.Id, form.Id, form.Version);
+        var task = await exportToXLSX.UpdateXlsxReport(room.Id, form.Id, form.Version);
 
-        return form;
+        return (task, form);
+    }
+
+    public Task<FormFillingReportTask> GetXlsxTaskAsync(int formId)
+    {
+        return exportToXLSX.GetXlsxTaskAsync(formId);
     }
 
     private async Task CheckRoomAvailability<T>(T roomId)
