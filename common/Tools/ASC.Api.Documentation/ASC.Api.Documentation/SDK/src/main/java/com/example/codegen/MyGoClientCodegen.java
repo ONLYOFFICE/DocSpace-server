@@ -9,10 +9,18 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.openapitools.codegen.SupportingFile;
+import org.openapitools.codegen.CodegenModel;
+import org.openapitools.codegen.CodegenProperty;
 import org.openapitools.codegen.languages.GoClientCodegen;
 import org.openapitools.codegen.model.ApiInfoMap;
+import org.openapitools.codegen.model.ModelsMap;
 import org.openapitools.codegen.model.OperationMap;
 import org.openapitools.codegen.model.OperationsMap;
+import io.swagger.v3.oas.models.servers.Server;
+import io.swagger.v3.oas.models.servers.ServerVariable;
+import io.swagger.v3.oas.models.servers.ServerVariables;
+import org.openapitools.codegen.CodegenOperation;
+import org.openapitools.codegen.model.ModelMap;
 
 public class MyGoClientCodegen extends GoClientCodegen {
 
@@ -45,16 +53,6 @@ public class MyGoClientCodegen extends GoClientCodegen {
     @Override
     public String getHelp() {
         return "Generates a custom Golang client";
-    }
-
-    @Override
-    public String apiFileFolder() {
-        return outputFolder + File.separator + "api";
-    }
-
-    @Override
-    public String modelFileFolder() {
-        return outputFolder + File.separator + "models";
     }
 
     @Override
@@ -100,10 +98,66 @@ public class MyGoClientCodegen extends GoClientCodegen {
             return apiFileFolder() + File.separator + toApiFilename(uniqueTag) + suffix;
         }
 
-        String folderPath = apiFileFolder() + File.separator + tagParts.folderPart;
         String filename = toApiFilename(tagParts.classPart) + suffix;
 
-        return folderPath + File.separator + filename;
+        return apiFileFolder() + File.separator + filename;
+    }
+
+    @Override
+    public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List<ModelMap> allModels) {
+        super.postProcessOperationsWithModels(objs, allModels);
+
+        if (objs != null && objs.getOperations() != null) {
+            OperationMap operationMap = objs.getOperations();
+            List<CodegenOperation> operationList = operationMap.getOperation();
+            if (operationList != null) {
+                for (CodegenOperation op : operationList) { 
+                    if (op.operationId != null) {
+                        String dashedId = toDashCase(op.operationId);
+                        String seealsoUrl = "https://api.onlyoffice.com/docspace/api-backend/usage-api/" + dashedId + "/";
+                        op.vendorExtensions.put("x-seealsoUrl", seealsoUrl);
+                    }
+
+                    if (op.notes != null && !op.notes.isEmpty()) {
+                        String commentedNotes = op.notes
+                            .replace("\r\n", "\n")
+                            .replace("\r", "\n")
+                            .replace("\n", "\n// ");
+                        op.vendorExtensions.put("x-commentedNotes", commentedNotes);
+                    }
+                }
+            }
+        }
+
+        return objs;
+    }
+
+    @Override
+    public ModelsMap postProcessModels(ModelsMap objs) {
+        super.postProcessModels(objs);
+
+        for (ModelMap modelMap : objs.getModels()) {
+            CodegenModel model = modelMap.getModel();
+            for (CodegenProperty prop : model.vars) {
+                if ("version_Changed".equalsIgnoreCase(prop.baseName)) {
+                    prop.name = "VersionChangedField";
+                    prop.baseName = "versionChangedField";
+                    prop.getter = "getVersionChangedField";
+                    prop.setter = "setVersionChangedField";
+                    prop.nameInCamelCase = "versionChangedField";
+                    prop.nameInPascalCase = "VersionChangedField";
+                    prop.nameInSnakeCase = "VERSION_CHANGED_FIELD";
+                }
+            }
+        }
+
+        return objs;
+    }
+
+    private String toDashCase(String input) {
+        return input.replaceAll("([a-z])([A-Z])", "$1-$2")
+                    .replaceAll("([A-Z]+)([A-Z][a-z])", "$1-$2")
+                    .toLowerCase();
     }
 
     private String makeUniqueTag(String tag) {
@@ -138,6 +192,28 @@ public class MyGoClientCodegen extends GoClientCodegen {
         if (Boolean.TRUE.equals(exclude)) {
             apiTestTemplateFiles.clear();
             modelTestTemplateFiles.clear();
+        }
+
+        if (openAPI.getServers() != null && !openAPI.getServers().isEmpty()) {
+            Server server = openAPI.getServers().get(0);
+            ServerVariables serverVars = server.getVariables();
+            if (serverVars != null){
+                ServerVariable baseUrlVar = serverVars.get("baseUrl");
+                if(baseUrlVar != null && "".equals(baseUrlVar.getDefault())){
+                    baseUrlVar.setDefault("http://localhost:8092/");
+                }
+            }
+        }
+
+        Object repositoryUrlObj = additionalProperties.get("repositoryUrl");
+        if (repositoryUrlObj != null) {
+            String packageImportPath = String.valueOf(repositoryUrlObj)
+                .trim()
+                .replaceFirst("^https?://", "")
+                .replaceFirst("\\.git$", "")
+                .replaceFirst("/+$", "");
+
+            additionalProperties.put("packageImportPath", packageImportPath);
         }
     }
 

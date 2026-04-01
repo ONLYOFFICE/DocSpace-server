@@ -15,7 +15,7 @@ import (
     "context"
     "fmt"
 
-    {{packageName}} "{{gitHost}}/{{gitUserId}}/{{gitRepoId}}{{#isGoSubmodule}}/{{packageName}}{{/isGoSubmodule}}"
+    {{packageName}} "{{packageImportPath}}{{#isGoSubmodule}}/{{packageName}}{{/isGoSubmodule}}"
 )
 ```
 
@@ -30,7 +30,7 @@ import (
     "context"
     "fmt"
 
-    {{packageName}} "{{gitHost}}/{{gitUserId}}/{{gitRepoId}}{{#isGoSubmodule}}/{{packageName}}{{/isGoSubmodule}}"
+    {{packageName}} "{{packageImportPath}}{{#isGoSubmodule}}/{{packageName}}{{/isGoSubmodule}}"
 )
 
 func main() {
@@ -89,7 +89,7 @@ func main() {
 - **API key parameter name**: {{{keyParamName}}}
 - **Location**: {{#isKeyInQuery}}URL query string{{/isKeyInQuery}}{{#isKeyInHeader}}HTTP header{{/isKeyInHeader}}{{#isKeyInCookie}}Cookie{{/isKeyInCookie}}
 
-Note, each API key must be added to a map of `map[string]APIKey` where the key is: {{name}} and passed in as the auth context for each request.
+Note, each API key must be added to a map of `map[string]APIKey` where the key is: {{{name}}} and passed in as the auth context for each request.
 
 Example
 
@@ -98,7 +98,7 @@ auth := context.WithValue(
     context.Background(),
     {{packageName}}.ContextAPIKeys,
     map[string]{{packageName}}.APIKey{
-        "{{name}}": {Key: "API_KEY_STRING"},
+        "{{{name}}}": {Key: "API_KEY_STRING"},
     },
 )
 request := client.{{#apiInfo}}{{#apis}}{{#-first}}{{classname}}{{/-first}}{{/apis}}{{/apiInfo}}.{{#apiInfo}}{{#apis}}{{#-first}}{{#operations}}{{#operation}}{{#-first}}{{operationId}}{{/-first}}{{/operation}}{{/operations}}{{/-first}}{{/apis}}{{/apiInfo}}(auth{{#apiInfo}}{{#apis}}{{#-first}}{{#operations}}{{#operation}}{{#-first}}{{#requiredParams}}, /* {{{paramName}}} */{{/requiredParams}}{{/-first}}{{/operation}}{{/operations}}{{/-first}}{{/apis}}{{/apiInfo}})
@@ -138,8 +138,8 @@ _, _, err := request.Execute()
 {{#isOAuth}}
 - **Type**: OAuth
 - **Flow**: {{{flow}}}
-- **Authorization URL**: {{x-authorizationUrl}}
-- **Token URL**: {{x-tokenUrl}}
+- **Authorization URL**: {{{x-authorizationUrl}}}
+- **Token URL**: {{{x-tokenUrl}}}
 - **Scopes**: {{^scopes}}N/A{{/scopes}}
 {{#scopes}} - **{{{scope}}}**: {{{description}}}
 {{/scopes}}
@@ -154,7 +154,7 @@ _, _, err := request.Execute()
 {{/isOAuth}}
 {{#isOpenId}}
 - **Type**: OpenId Connect
-- **OpenId Connect URL**: {{x-openIdConnectUrl}}
+- **OpenId Connect URL**: {{{x-openIdConnectUrl}}}
 {{#scopes}} - **{{{scope}}}**: {{{description}}}
 {{/scopes}}
 {{/isOpenId}}
@@ -169,7 +169,7 @@ All URIs are relative to *https://your-docspace.onlyoffice.com*
 
 {{#customApis}}
 <details>
-  <summary>{{folder}}</summary>
+  <summary>{{{folder}}}</summary>
 
   <table>
     <tbody>
@@ -186,7 +186,7 @@ All URIs are relative to *https://your-docspace.onlyoffice.com*
       <tr>
         <td><a href="{{apiDocPath}}{{classname}}.md#{{operationIdLowerCase}}"><strong>{{operationId}}</strong></a></td>
         <td><strong>{{httpMethod}}</strong> {{path}}</td>
-        <td>{{summary}}</td>
+        <td>{{{summary}}}</td>
       </tr>
       {{/operations.operation}}
       {{/apis}}
@@ -222,5 +222,5 @@ Each of these functions takes a value of the given basic type and returns a poin
 
 ## Author
 
-{{#apiInfo}}{{#apis}}{{#-last}}{{infoEmail}}
+{{#apiInfo}}{{#apis}}{{#-last}}{{{infoEmail}}}
 {{/-last}}{{/apis}}{{/apiInfo}}
