@@ -84,7 +84,9 @@ public class WarmupProtobufStartupTask(ILogger<WarmupProtobufStartupTask> logger
 {
     public Task ExecuteAsync(CancellationToken cancellationToken = default)
     {
-        var aasemblies = AppDomain.CurrentDomain.GetAssemblies().Where(x =>
+        var startTime = TimeProvider.System.GetTimestamp();
+
+        var assemblies = AppDomain.CurrentDomain.GetAssemblies().Where(x =>
         {
             var name = x.GetName().Name;
             return !string.IsNullOrEmpty(name) && name.StartsWith("ASC.");
@@ -92,12 +94,14 @@ public class WarmupProtobufStartupTask(ILogger<WarmupProtobufStartupTask> logger
 
         var redisGeneric = typeof(RedisCacheNotify<>.RedisCachePubSubItem<>);
         var integrationEvent = typeof(IntegrationEvent);
-        var types = aasemblies.SelectMany(r => r.GetTypes().Where(t => t.GetCustomAttribute<ProtoContractAttribute>() != null));
+        var types = assemblies.SelectMany(r => r.GetTypes().Where(t => t.GetCustomAttribute<ProtoContractAttribute>() != null));
         var methodInfo = typeof(Serializer).GetMethod("PrepareSerializer");
         if (methodInfo == null)
         {
             return Task.CompletedTask;
         }
+
+        var typesCount = 0;
 
         foreach (var t in types)
         {
@@ -108,32 +112,28 @@ public class WarmupProtobufStartupTask(ILogger<WarmupProtobufStartupTask> logger
                     continue;
                 }
 
-                MethodInfo genericMethod;
+                var closedType = t.IsGenericType ? t.MakeGenericType(typeof(int)) : t;
 
-                if (t.IsGenericType)
-                {
-                    genericMethod = methodInfo.MakeGenericMethod(t.MakeGenericType(typeof(int)));
-                    genericMethod.Invoke(t.MakeGenericType(typeof(int)), null);
-                }
-                else
-                {                    
-                    genericMethod = methodInfo.MakeGenericMethod(t);
-                    genericMethod.Invoke(null, null);
-                }
+                var genericMethod = methodInfo.MakeGenericMethod(closedType);
+                genericMethod.Invoke(null, null);
 
                 if (!t.IsSubclassOf(integrationEvent))
                 {
-                    var redis = redisGeneric.MakeGenericType(t.IsGenericType ? t.MakeGenericType(typeof(int)) : t, t.IsGenericType ? t.MakeGenericType(typeof(int)) : t);
+                    var redis = redisGeneric.MakeGenericType(closedType, closedType);
                     genericMethod = methodInfo.MakeGenericMethod(redis);
-                    genericMethod.Invoke(t.IsGenericType ? t.MakeGenericType(typeof(int)) : null, null);
+                    genericMethod.Invoke(null, null);
                 }
-                logger.LogTrace("PrepareSerializer:{ProtoBufFullName}", t.FullName);
+
+                typesCount++;
+                logger.TracePrepareSerializer(t.FullName);
             }
             catch (Exception e)
             {
-                logger.LogTrace(e, t.FullName);
+                logger.TracePrepareSerializerFailed(t.FullName, e);
             }
         }
+
+        logger.TraceWarmupProtobufFinished(typesCount, TimeProvider.System.GetElapsedTime(startTime).TotalMilliseconds);
 
         return Task.CompletedTask;
     }
