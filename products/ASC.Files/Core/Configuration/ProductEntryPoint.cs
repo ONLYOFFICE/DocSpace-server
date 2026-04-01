@@ -329,7 +329,7 @@ public class ProductEntryPoint : Product
         var virtualRoomsFolderId = await _globalFolder.GetFolderVirtualRoomsAsync(_daoFactory);
         var aiAgentsFolderId = await _globalFolder.GetFolderAiAgentsAsync(_daoFactory);
 
-        var myRooms = await folderDao.GetRoomsAsync(null, null, null, userId, null, false, false, false, ProviderFilter.None, SubjectFilter.Owner, null, new List<int> { virtualRoomsFolderId, aiAgentsFolderId }).ToListAsync();
+        var myRooms = await folderDao.GetRoomsAsync(null, null, null, userId, null, false, false, false, ProviderFilter.None, SubjectFilter.Owner, Guid.Empty, null, new List<int> { virtualRoomsFolderId, aiAgentsFolderId }).ToListAsync();
 
         foreach (var room in myRooms)
         {
@@ -340,7 +340,7 @@ public class ProductEntryPoint : Product
         {
             var archiveFolderId = await _globalFolder.GetFolderArchiveAsync(_daoFactory);
 
-            var rooms = await folderDao.GetRoomsAsync([archiveFolderId], null, null, Guid.Empty, null, false, false, false, ProviderFilter.None, SubjectFilter.Owner, null).ToListAsync();
+            var rooms = await folderDao.GetRoomsAsync([archiveFolderId], null, null, Guid.Empty, null, false, false, false, ProviderFilter.None, null, Guid.Empty, null).ToListAsync();
 
             foreach (var room in rooms)
             {

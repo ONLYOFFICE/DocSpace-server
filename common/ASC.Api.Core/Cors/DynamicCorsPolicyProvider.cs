@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2026
+// (c) Copyright Ascensio System SIA 2009-2026
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,7 +26,6 @@
 
 using System.Text.Json.Nodes;
 
-using ASC.Api.Core.Cors.Resolvers;
 using ASC.Core.Common.Identity;
 using ASC.Core.Security.Authentication;
 
@@ -35,17 +34,16 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace ASC.Api.Core.Cors;
 
-public class DynamicCorsPolicyResolver(
-    IHttpContextAccessor httpContextAccessor,
+public class DynamicCorsPolicyProvider(
+    IOptions<CorsOptions> options,
     IHttpClientFactory httpClientFactory,
     IdentityClient identityClient,
     CommonLinkUtility linkUtility,
     SetupInfo setupInfo,
     IMemoryCache memoryCache,
-    ILogger<DynamicCorsPolicyResolver> logger)
-    : IDynamicCorsPolicyResolver
+    ILogger<DynamicCorsPolicyProvider> logger) : ICorsPolicyProvider
 {
-    private readonly HttpContext _context = httpContextAccessor?.HttpContext;
+    private readonly CorsOptions _options = options.Value;
 
     private string ApiBaseUrl
     {
@@ -54,31 +52,29 @@ public class DynamicCorsPolicyResolver(
             var apiBaseUrl = setupInfo.WebApiBaseUrl;
             if (Uri.IsWellFormedUriString(apiBaseUrl, UriKind.Relative))
             {
-                var request = _context?.Request;
-                if (request != null)
-                {
-                    var baseUri = $"{request.Scheme}://{request.Host}";
-                    apiBaseUrl = baseUri + "/" + apiBaseUrl.TrimStart('~', '/');
-                }
-                else
-                {
-                    apiBaseUrl = linkUtility.GetFullAbsolutePath(apiBaseUrl);
-                }
-
+                apiBaseUrl = linkUtility.GetFullAbsolutePath(apiBaseUrl);
             }
+
             return apiBaseUrl;
         }
     }
 
-    public async Task<bool> ResolveForOrigin(CorsPolicy policy, StringValues origin)
+    public async Task<CorsPolicy> GetPolicyAsync(HttpContext context, string policyName)
     {
-        logger.DebugCheckOrigin(origin);
+        ArgumentNullException.ThrowIfNull(context);
 
-        var accessToken = _context?.Request.Headers.Authorization.ToString();
+        var policy = _options.GetPolicy(policyName ?? _options.DefaultPolicyName);
+
+        if (policy is null)
+        {
+            return policy;
+        }
+
+        var accessToken = context.Request.Headers.Authorization.ToString();
 
         if (string.IsNullOrEmpty(accessToken) || accessToken.IndexOf("Bearer", 0, StringComparison.Ordinal) == -1)
         {
-            return DefaultResolveForOrigin(policy, origin);
+            return policy;
         }
 
         accessToken = accessToken.Trim();
@@ -86,41 +82,85 @@ public class DynamicCorsPolicyResolver(
 
         var jwtHandler = new JwtSecurityTokenHandler();
 
-        if (jwtHandler.CanReadToken(accessToken))
+        if (!jwtHandler.CanReadToken(accessToken))
         {
-            var origins = await GetOriginsFromOAuth2App(accessToken);
-
-            if (origins == null || !origins.Any())
-            {
-                return DefaultResolveForOrigin(policy, origin);
-            }
-
-            return origins.Any(x => x.Equals(origin, StringComparison.InvariantCultureIgnoreCase));
+            return policy;
         }
 
-        return DefaultResolveForOrigin(policy, origin);
+        var origins = await GetOriginsFromOAuth2AppAsync(accessToken);
+
+        if (origins == null || !origins.Any())
+        {
+            return policy;
+        }
+
+        return BuildOAuthPolicy(policy, origins);
     }
 
-    private bool DefaultResolveForOrigin(CorsPolicy policy, StringValues origin) => policy.AllowAnyOrigin || policy.IsOriginAllowed(origin);
-
-    private async Task<IEnumerable<string>> GetOriginsFromOAuth2App(string accessToken)
+    private static CorsPolicy BuildOAuthPolicy(CorsPolicy basePolicy, IEnumerable<string> oauthOrigins)
     {
-        // Validated token early in JwtBearerAuthHandler
+        var builder = new CorsPolicyBuilder();
+
+        builder.WithOrigins(oauthOrigins.ToArray())
+            .SetIsOriginAllowedToAllowWildcardSubdomains();
+
+        if (basePolicy.AllowAnyHeader)
+        {
+            builder.AllowAnyHeader();
+        }
+        else if (basePolicy.Headers.Count > 0)
+        {
+            builder.WithHeaders(basePolicy.Headers.ToArray());
+        }
+
+        if (basePolicy.AllowAnyMethod)
+        {
+            builder.AllowAnyMethod();
+        }
+        else if (basePolicy.Methods.Count > 0)
+        {
+            builder.WithMethods(basePolicy.Methods.ToArray());
+        }
+
+        if (basePolicy.ExposedHeaders.Count > 0)
+        {
+            builder.WithExposedHeaders(basePolicy.ExposedHeaders.ToArray());
+        }
+
+        if (basePolicy.SupportsCredentials)
+        {
+            builder.AllowCredentials();
+        }
+
+        if (basePolicy.PreflightMaxAge.HasValue)
+        {
+            builder.SetPreflightMaxAge(basePolicy.PreflightMaxAge.Value);
+        }
+
+        return builder.Build();
+    }
+
+    private async Task<IEnumerable<string>> GetOriginsFromOAuth2AppAsync(string accessToken)
+    {
         var token = new JwtSecurityToken(accessToken);
 
         var subject = token.Subject;
 
         if (!Guid.TryParse(subject, out var userId))
         {
-            return new List<string>();
+            return [];
         }
 
-        var claimIdClaim = token.Claims.Single(c => string.Equals(c.Type, "cid", StringComparison.OrdinalIgnoreCase));
-        var clientId = Guid.Parse(claimIdClaim.Value);
+        var cidClaim = token.Claims.SingleOrDefault(c => string.Equals(c.Type, "cid", StringComparison.OrdinalIgnoreCase));
+
+        if (cidClaim is null || !Guid.TryParse(cidClaim.Value, out var clientId))
+        {
+            return [];
+        }
 
         var origins = memoryCache.Get<IEnumerable<string>>(clientId);
 
-        if (origins == null)
+        if (origins is null)
         {
             using var httpClient = httpClientFactory.CreateClient();
 
@@ -132,9 +172,9 @@ public class DynamicCorsPolicyResolver(
 
             var httpResponse = await httpClient.GetStringAsync(requestUri);
 
-            var forecastNode = JsonNode.Parse(httpResponse)!;
+            var responseNode = JsonNode.Parse(httpResponse)!;
 
-            origins = forecastNode!["allowed_origins"]!.AsArray().Select(x => x.GetValue<string>());
+            origins = responseNode["allowed_origins"]?.AsArray().Select(x => x.GetValue<string>()).ToList() ?? [];
 
             memoryCache.Set(clientId, origins, TimeSpan.FromMinutes(15));
         }
@@ -143,5 +183,4 @@ public class DynamicCorsPolicyResolver(
 
         return origins;
     }
-
 }

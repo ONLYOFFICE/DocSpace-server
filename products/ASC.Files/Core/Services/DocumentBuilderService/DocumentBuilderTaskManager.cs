@@ -47,6 +47,13 @@ public class DocumentBuilderTaskManager<T, TId, TData> where T : DocumentBuilder
         return await GetTask(taskId);
     }
 
+    public async Task<T> GetTask(int tenantId, Guid userId, int formId)
+    {
+        var taskId = DocumentBuilderTaskManager.GetTaskId(tenantId, userId, formId);
+
+        return await GetTask(taskId);
+    }
+
     private async Task<T> GetTask(string taskId)
     {
         return await _queue.PeekTask(taskId);
@@ -103,5 +110,10 @@ public static class DocumentBuilderTaskManager
     public static string GetTaskId(int tenantId, Guid userId)
     {
         return $"DocumentBuilderTask_{tenantId}_{userId}";
+    }
+
+    public static string GetTaskId(int tenantId, Guid userId, int formId)
+    {
+        return $"DocumentBuilderTask_{tenantId}_{userId}_{formId}";
     }
 }

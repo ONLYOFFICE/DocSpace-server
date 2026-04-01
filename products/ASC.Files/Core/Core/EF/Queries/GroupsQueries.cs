@@ -52,6 +52,12 @@ public partial class FilesDbContext
         return GroupsQueries.AnyThirdpartyRoomGroupRefAsync(this, tenantId, groupId, roomId);
     }
 
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    public Task<int> DeleteRoomGroupRefByFolderIdsAsync(int tenantId, IEnumerable<int> folderIds)
+    {
+        return GroupsQueries.DeleteRoomGroupRefByFolderIdsAsync(this, tenantId, folderIds);
+    }
+
 }
 
 internal static partial class GroupsQueries
@@ -76,4 +82,11 @@ internal static partial class GroupsQueries
        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
            (FilesDbContext ctx, int tenantId, int groupId, string roomId) =>
                ctx.RoomGroupRef.Any(r => r.TenantId == tenantId && r.GroupId == groupId && r.ThirdpartyRoomId == roomId));
+
+    public static readonly Func<FilesDbContext, int, IEnumerable<int>, Task<int>> DeleteRoomGroupRefByFolderIdsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, IEnumerable<int> folderIds) =>
+                ctx.RoomGroupRef
+                    .Where(r => r.TenantId == tenantId && r.InternalRoomId != null && folderIds.Contains(r.InternalRoomId.Value))
+                    .ExecuteDelete());
 }

@@ -520,6 +520,38 @@ public class FolderDtoHelper(
             }
         }
 
+        if (folder.FolderType == FolderType.FormFillingFolderDone && folder.Id is int doneFolderId)
+        {
+            var fileDao = _daoFactory.GetFileDao<int>();
+            var completedForm = await fileDao
+                .GetFilesAsync(doneFolderId, new OrderBy(SortedByType.DateAndTime, false), FilterType.PdfForm, false, Guid.Empty, null, null, false, count: 1)
+                .FirstOrDefaultAsync();
+
+            var canUpdateXlsx = false;
+            if (completedForm != null)
+            {
+                var completedFormProperties = await fileDao.GetProperties(completedForm.Id);
+                var originalFormId = completedFormProperties?.FormFilling?.OriginalFormId ?? 0;
+                if (originalFormId != 0)
+                {
+                    var originalForm = await fileDao.GetFileAsync(originalFormId);
+                    canUpdateXlsx = originalForm != null && await _fileSecurity.CanEditAsync(originalForm);
+                }
+            }
+
+            result.Security[FileSecurity.FilesSecurityActions.UpdateXlsx] = canUpdateXlsx;
+        }
+        else
+        {
+            result.Security[FileSecurity.FilesSecurityActions.UpdateXlsx] = false;
+        }
+
+        if (folder.FolderType.IsPublicSystemFolder())
+        {
+            result.CreatedBy = EmployeeDto.Default;
+            result.UpdatedBy = EmployeeDto.Default;
+        }
+
         return result;
     }
 
