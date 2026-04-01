@@ -41,7 +41,26 @@ public class IdentityClient(MachinePseudoKeys machinePseudoKeys,
     IHttpClientFactory httpClientFactory,
     IConfiguration configuration)
 {
-    private string Url => configuration["web:identity:url"];
+    private string Url
+    {
+        get
+        {
+            var serverRootPath = baseCommonLinkUtility.ServerRootPath;
+            var authority = configuration["core:oidc:authority"];
+
+            if (string.IsNullOrEmpty(authority))
+            {
+                authority = "/oauth2";
+            }
+
+            if (!Uri.IsWellFormedUriString(authority, UriKind.Absolute))
+            {
+                authority = $"{serverRootPath}{authority}";
+            }
+
+            return authority.TrimEnd('/') + "/";
+        }
+    }
 
     public Task<string> GenerateJwtTokenAsync()
     {

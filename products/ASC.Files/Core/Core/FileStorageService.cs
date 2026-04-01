@@ -1513,7 +1513,7 @@ public class FileStorageService //: IFileStorageService
             : await fileDao.GetFileAsync(fileId);
         if (file == null)
         {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
         if (!await fileSecurity.CanReadAsync(file))
@@ -1993,6 +1993,12 @@ public class FileStorageService //: IFileStorageService
         try
         {
             var file = await daoFactory.GetFileDao<T>().GetFileAsync(fileId);
+
+            if (file == null)
+            {
+                throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+            }
+
             FileOptions<T> result = null;
 
             var oldTitle = file.Title;
@@ -2160,7 +2166,7 @@ public class FileStorageService //: IFileStorageService
 
         if (file == null)
         {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
         if (!await fileSecurity.CanLockAsync(file))
@@ -2617,7 +2623,7 @@ public class FileStorageService //: IFileStorageService
 
     private async Task<(MemoryStream, MemoryStream)> GetCloneMemoryStreams(Stream stream)
     {
-        var memoryStream = new MemoryStream();
+        await using var memoryStream = new MemoryStream();
         await stream.CopyToAsync(memoryStream);
 
         return (await tempStream.CloneMemoryStream(memoryStream, 300), await tempStream.CloneMemoryStream(memoryStream));
@@ -4549,7 +4555,8 @@ public class FileStorageService //: IFileStorageService
         }
         else
         {
-            await tagDao.RemoveTagsAsync(tag);
+            var tags = await tagDao.GetTagsAsync(authContext.CurrentAccount.ID, [TagType.Pin], [room]).ToListAsync();
+            await tagDao.RemoveTagsAsync(room, tags.Select(r=> r.Id));
         }
 
         room.Pinned = pin;
@@ -5403,20 +5410,54 @@ public class FileStorageService //: IFileStorageService
         return group;
     }
 
-    public async Task GenerateXlsxAsync(int formId)
+    public async Task<(FormFillingReportTask Task, File<int> Form)> GenerateXlsxAsync(int fileId)
     {
         var fileDao = daoFactory.GetFileDao<int>();
         var folderDao = daoFactory.GetFolderDao<int>();
 
-        var form = await fileDao.GetFileAsync(formId);
-        if (form == null)
+        var file = await fileDao.GetFileAsync(fileId);
+        if (file == null)
         {
             throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
-        if (!await DocSpaceHelper.IsFormOrCompletedForm(form, daoFactory))
+        var fileProperties = await fileDao.GetProperties(file.Id);
+
+        File<int> form;
+        EntryProperties<int> properties;
+
+        var extension = FileUtility.GetFileExtension(file.Title);
+        if (extension is ".xlsx" or ".csv")
         {
-            throw new InvalidOperationException();
+            var parentFolder = await folderDao.GetFolderAsync(file.ParentId);
+            if (parentFolder?.FolderType != FolderType.FormFillingFolderDone)
+            {
+                throw new InvalidOperationException();
+            }
+
+            var originalFormId = fileProperties?.FormFilling?.OriginalFormId ?? 0;
+            if (originalFormId == 0)
+            {
+                throw new InvalidOperationException();
+            }
+
+            form = await fileDao.GetFileAsync(originalFormId);
+            if (form == null)
+            {
+                throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+            }
+
+            properties = await fileDao.GetProperties(form.Id);
+        }
+        else
+        {
+            if (!await DocSpaceHelper.IsFormOrCompletedForm(file, daoFactory))
+            {
+                throw new InvalidOperationException();
+            }
+
+            form = file;
+            properties = fileProperties;
         }
 
         if (!await fileSecurity.CanEditAsync(form))
@@ -5424,7 +5465,6 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
         }
 
-        var properties = await fileDao.GetProperties(form.Id);
         var formFilling = properties?.FormFilling;
 
         if (formFilling?.StartFilling != true || formFilling.OriginalFormId != form.Id)
@@ -5456,8 +5496,89 @@ public class FileStorageService //: IFileStorageService
 
         await entryManager.EnsureFormFillingOutputAsync(form, room, resultsFile, resultFolder, properties, folderDao, fileDao);
 
-        await exportToXLSX.UpdateXlsxReport(room.Id, form.Id, form.Version);
+        var task = await exportToXLSX.UpdateXlsxReport(room.Id, form.Id, form.Version);
 
+        return (task, form);
+    }
+
+    public async Task<(FormFillingReportTask Task, File<int> Form)> GenerateXlsxByFolderAsync(int folderId)
+    {
+        var fileDao = daoFactory.GetFileDao<int>();
+        var folderDao = daoFactory.GetFolderDao<int>();
+
+        var resultFolder = await folderDao.GetFolderAsync(folderId);
+
+        if (resultFolder == null)
+        {
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
+
+        if (resultFolder.FolderType != FolderType.FormFillingFolderDone)
+        {
+            throw new InvalidOperationException();
+        }
+
+        var completedForm = await fileDao.GetFilesAsync(folderId, new OrderBy(SortedByType.DateAndTime, false), FilterType.PdfForm, false, Guid.Empty, null, null, false, count: 1)
+            .FirstOrDefaultAsync();
+
+        if (completedForm == null)
+        {
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+
+        var completedFormProperties = await fileDao.GetProperties(completedForm.Id);
+        var originalFormId = completedFormProperties?.FormFilling?.OriginalFormId ?? 0;
+
+        if (originalFormId == 0)
+        {
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+
+        var roomId = completedFormProperties.FormFilling.RoomId;
+
+        var formTask = fileDao.GetFileAsync(originalFormId);
+        var roomTask = folderDao.GetFolderAsync(roomId);
+
+        await Task.WhenAll(formTask, roomTask);
+
+        var form = formTask.Result;
+        var room = roomTask.Result;
+
+        if (form == null)
+        {
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+
+        if (room == null || room.FolderType != FolderType.FillingFormsRoom)
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (!await fileSecurity.CanEditAsync(form))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
+        }
+
+        var properties = await fileDao.GetProperties(form.Id);
+        var formFilling = properties?.FormFilling;
+
+        if (formFilling?.StartFilling != true || formFilling.OriginalFormId != form.Id)
+        {
+            throw new InvalidOperationException();
+        }
+
+        var resultsFile = await fileDao.GetFileAsync(formFilling.ResultsFileID);
+
+        await entryManager.EnsureFormFillingOutputAsync(form, room, resultsFile, resultFolder, properties, folderDao, fileDao);
+
+        var task = await exportToXLSX.UpdateXlsxReport(room.Id, form.Id, form.Version);
+
+        return (task, form);
+    }
+
+    public Task<FormFillingReportTask> GetXlsxTaskAsync(int formId)
+    {
+        return exportToXLSX.GetXlsxTaskAsync(formId);
     }
 
     private async Task CheckRoomAvailability<T>(T roomId)

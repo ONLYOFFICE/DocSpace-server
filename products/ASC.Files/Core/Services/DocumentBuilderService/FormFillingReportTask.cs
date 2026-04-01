@@ -98,6 +98,29 @@ public class FormFillingReportTask : DocumentBuilderTask<int, FormFillingReportT
             await fileDao.SaveProperties(_data.OriginalFormId, origProperties);
         }
 
+        var xlsxProperties = new EntryProperties<int>
+        {
+            FormFilling = new FormFillingProperties<int>
+            {
+                StartFilling = false,
+                OriginalFormId = origProperties.FormFilling.OriginalFormId,
+                OriginalFormVersion = origProperties.FormFilling.OriginalFormVersion,
+                RoomId = origProperties.FormFilling.RoomId,
+                ResultsFolderId = origProperties.FormFilling.ResultsFolderId,
+                ResultsFileID = resultFile.Id
+            }
+        };
+        await fileDao.SaveProperties(resultFile.Id, xlsxProperties);
+
+        var socketManager = serviceProvider.GetService<SocketManager>();
+        await socketManager.UpdateFileAsync(resultFile);
+
+        var filesMessageService = serviceProvider.GetService<FilesMessageService>();
+        var headers = _data.Headers != null
+            ? _data.Headers.ToDictionary(x => x.Key, x => new StringValues(x.Value))
+            : [];
+        await filesMessageService.SendAsync(MessageAction.FileUpdated, resultFile, headers: headers);
+
         return resultFile;
     }
 

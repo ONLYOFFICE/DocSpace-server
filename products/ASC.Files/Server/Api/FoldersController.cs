@@ -63,6 +63,7 @@ public class FoldersControllerInternal(
         fileShareDtoHelper,
         apiContext)
 {
+    private readonly FileStorageService _fileStorageServiceInternal = fileStorageService;
     /// <remarks>
     /// Returns the activity history of a folder with a specified identifier.
     /// </remarks>
@@ -125,6 +126,27 @@ public class FoldersControllerInternal(
     public async Task<IEnumerable<FormsItemDto>> GetFolder(FolderIdRequestDto<int> inDto)
     {
         return (await formFillingReportCreator.GetFormsFields(inDto.FolderId)).Select(r => new FormsItemDto(r.Key, r.Type));
+    }
+
+    /// <remarks>
+    /// Triggers asynchronous XLSX report generation for the specified form results folder.
+    /// </remarks>
+    /// <summary>Generate XLSX report by folder</summary>
+    /// <path>api/2.0/files/folder/{folderId}/xlsx</path>
+    [Tags("Files / Folders")]
+    [SwaggerResponse(200, "Ok", typeof(XlsxReportResponseDto))]
+    [SwaggerResponse(403, "You do not have enough permissions to perform this action")]
+    [SwaggerResponse(404, "The required folder was not found")]
+    [HttpPost("folder/{folderId:int}/xlsx")]
+    public async Task<XlsxReportResponseDto> GenerateXlsxByFolder(FolderIdRequestDto<int> inDto)
+    {
+        var (task, form) = await _fileStorageServiceInternal.GenerateXlsxByFolderAsync(inDto.FolderId);
+
+        return new XlsxReportResponseDto
+        {
+            Form = await _fileDtoHelper.GetAsync(form),
+            Task = DocumentBuilderTaskDto.Get(task)
+        };
     }
 }
 

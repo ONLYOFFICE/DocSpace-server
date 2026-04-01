@@ -88,6 +88,12 @@ public partial class AiDbContext
         return Queries.GetMessageAsync(this, messageId, userId);
     }
 
+    [PreCompileQuery([PreCompileQuery.DefaultInt])]
+    public Task<DbChat?> GetChatByMessageIdAsync(int messageId)
+    {
+        return Queries.GetChatByMessageIdAsync(this, messageId);
+    }
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultInt])]
     public Task<DbUserChatSettings?> GetUserChatSettingsAsync(int tenantId, Guid userId, int roomId)
     {
@@ -212,6 +218,13 @@ static file class Queries
                     .Join(ctx.Chats, x => x.ChatId, y => y.Id, (x, y) => new { Message = x, y.UserId })
                     .Where(x => x.UserId == userId)
                     .Select(x => x.Message)
+                    .FirstOrDefault());
+
+    public static readonly Func<AiDbContext, int, Task<DbChat?>> GetChatByMessageIdAsync =
+        EF.CompileAsyncQuery(
+            (AiDbContext ctx, int messageId) =>
+                ctx.Messages.Where(x => x.Id == messageId)
+                    .Join(ctx.Chats, x => x.ChatId, y => y.Id, (x, y) => y)
                     .FirstOrDefault());
 
     public static readonly Func<AiDbContext, int, Guid, int, Task<DbUserChatSettings?>> GetUserChatSettingsAsync =

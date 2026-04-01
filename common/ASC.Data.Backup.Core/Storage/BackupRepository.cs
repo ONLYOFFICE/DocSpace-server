@@ -78,7 +78,7 @@ public class BackupRepository(IDbContextFactory<BackupsContext> dbContextFactory
             backup.Id = Guid.NewGuid();
         });
 
-        var backupContextByNewTenant = creatorDbContext.CreateDbContext<BackupsContext>(region);
+        await using var backupContextByNewTenant = creatorDbContext.CreateDbContext<BackupsContext>(region);
         await backupContextByNewTenant.Backups.AddRangeAsync(backups);
         await backupContextByNewTenant.SaveChangesAsync();
     }
