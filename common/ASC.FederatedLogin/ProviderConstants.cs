@@ -43,4 +43,5 @@ public static class ProviderConstants
     public const string Zoom = "zoom";
     public const string Weixin = "weixin";
     public const string ExternalDB = "externaldb";
+    public const string Nextcloud = "nextcloud";
 }

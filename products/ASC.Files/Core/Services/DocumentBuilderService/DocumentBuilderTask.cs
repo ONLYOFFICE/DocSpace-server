@@ -49,12 +49,17 @@ public abstract class DocumentBuilderTask<TId, TData> : DistributedTaskProgress
 
     public void Init(string baseUri, int tenantId, Guid userId, TData data)
     {
+        Init(baseUri, tenantId, userId, data, DocumentBuilderTaskManager.GetTaskId(tenantId, userId));
+    }
+
+    public void Init(string baseUri, int tenantId, Guid userId, TData data, string taskId)
+    {
         _baseUri = baseUri;
         _tenantId = tenantId;
         _userId = userId;
         _data = data;
 
-        Id = DocumentBuilderTaskManager.GetTaskId(tenantId, userId);
+        Id = taskId;
         Status = DistributedTaskStatus.Created;
 
         ResultFileId = default;

@@ -699,7 +699,7 @@ public class FileDtoHelper(
                 }
 
                 var parents = await folderDao.GetParentFoldersAsync(result.FolderId).ToListAsync();
-                var parent = parents.Count >= 2 ? parents[^2] : null;
+                var parent = parents.LastOrDefault();
                 if (!await _fileSecurity.CanReadAsync(parent))
                 {
                     result.FolderId = await _globalFolderHelper.GetFolderShareAsync<T>();

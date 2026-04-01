@@ -134,15 +134,19 @@ public class FoldersControllerInternal(
     /// <summary>Generate XLSX report by folder</summary>
     /// <path>api/2.0/files/folder/{folderId}/xlsx</path>
     [Tags("Files / Folders")]
-    [SwaggerResponse(200, "Original form file information", typeof(FileDto<int>))]
+    [SwaggerResponse(200, "Ok", typeof(XlsxReportResponseDto))]
     [SwaggerResponse(403, "You do not have enough permissions to perform this action")]
-    [SwaggerResponse(404, "Form results folder not found")]
+    [SwaggerResponse(404, "The required folder was not found")]
     [HttpPost("folder/{folderId:int}/xlsx")]
-    public async Task<FileDto<int>> GenerateXlsxByFolder(FolderIdRequestDto<int> inDto)
+    public async Task<XlsxReportResponseDto> GenerateXlsxByFolder(FolderIdRequestDto<int> inDto)
     {
-        var form = await _fileStorageServiceInternal.GenerateXlsxByFolderAsync(inDto.FolderId);
+        var (task, form) = await _fileStorageServiceInternal.GenerateXlsxByFolderAsync(inDto.FolderId);
 
-        return await _fileDtoHelper.GetAsync(form);
+        return new XlsxReportResponseDto
+        {
+            Form = await _fileDtoHelper.GetAsync(form),
+            Task = DocumentBuilderTaskDto.Get(task)
+        };
     }
 }
 
