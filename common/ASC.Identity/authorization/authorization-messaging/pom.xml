@@ -13,6 +13,7 @@
     <artifactId>authorization-messaging</artifactId>
 
     <dependencies>
+        <!-- Internal Dependencies -->
         <dependency>
             <groupId>com.asc</groupId>
             <artifactId>common-messaging</artifactId>

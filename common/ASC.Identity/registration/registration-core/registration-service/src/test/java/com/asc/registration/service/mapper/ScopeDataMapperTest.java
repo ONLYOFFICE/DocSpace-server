@@ -32,6 +32,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.asc.registration.core.domain.entity.Scope;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 class ScopeDataMapperTest {
   private ScopeDataMapper scopeDataMapper;
@@ -41,14 +43,23 @@ class ScopeDataMapperTest {
     scopeDataMapper = new ScopeDataMapper();
   }
 
-  @Test
-  void whenScopeIsMappedToResponse_thenResponseIsCreated() {
+  @ParameterizedTest
+  @CsvSource({"name", "group", "type"})
+  void whenScopeIsMappedToResponse_thenResponseFieldsAreCreated(String fieldName) {
     var scope = createScope();
     var response = scopeDataMapper.toScopeResponse(scope);
 
     assertNotNull(response);
-    assertEquals(scope.getName(), response.getName());
-    assertEquals(scope.getGroup(), response.getGroup());
+    if ("name".equals(fieldName)) {
+      assertEquals(scope.getName(), response.getName());
+      return;
+    }
+
+    if ("group".equals(fieldName)) {
+      assertEquals(scope.getGroup(), response.getGroup());
+      return;
+    }
+
     assertEquals(scope.getType(), response.getType());
   }
 

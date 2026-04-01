@@ -44,6 +44,8 @@ import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 class ClientDataMapperTest {
   private ClientDataMapper clientDataMapper;
@@ -53,108 +55,22 @@ class ClientDataMapperTest {
     clientDataMapper = new ClientDataMapper();
   }
 
-  @Test
-  void whenCommandIsMappedToDomain_thenDomainClientIsCreated() {
-    var command =
-        CreateTenantClientCommand.builder()
-            .name("Test Client")
-            .description("Test Description")
-            .logo("Test Logo")
-            .websiteUrl("http://test.com")
-            .termsUrl("http://test.com/terms")
-            .policyUrl("http://test.com/policy")
-            .redirectUris(Set.of("http://test.com/redirect"))
-            .allowedOrigins(Set.of("http://test.com"))
-            .logoutRedirectUri("http://test.com/logout")
-            .tenantId(1)
-            .scopes(Set.of("read", "write"))
-            .isPublic(true)
-            .allowPkce(true)
-            .build();
-    var client = clientDataMapper.toDomain(command);
-
-    assertNotNull(client);
-    assertEquals(command.getName(), client.getClientInfo().name());
-    assertEquals(command.getDescription(), client.getClientInfo().description());
-    assertEquals(command.getLogo(), client.getClientInfo().logo());
-    assertEquals(command.getWebsiteUrl(), client.getClientWebsiteInfo().getWebsiteUrl());
-    assertEquals(command.getTermsUrl(), client.getClientWebsiteInfo().getTermsUrl());
-    assertEquals(command.getPolicyUrl(), client.getClientWebsiteInfo().getPolicyUrl());
-    assertEquals(command.getRedirectUris(), client.getClientRedirectInfo().redirectUris());
-    assertEquals(command.getAllowedOrigins(), client.getClientRedirectInfo().allowedOrigins());
-    assertEquals(
-        Set.of(command.getLogoutRedirectUri()),
-        client.getClientRedirectInfo().logoutRedirectUris());
-    assertEquals(new TenantId(command.getTenantId()), client.getClientTenantInfo().tenantId());
-    assertEquals(command.getScopes(), client.getScopes());
-    assertEquals(ClientVisibility.PUBLIC, client.getVisibility());
-    assertTrue(
-        client.getAuthenticationMethods().contains(AuthenticationMethod.DEFAULT_AUTHENTICATION));
-    assertTrue(
-        client.getAuthenticationMethods().contains(AuthenticationMethod.PKCE_AUTHENTICATION));
-  }
-
-  @Test
-  void whenDomainClientIsMappedToResponse_thenResponseIsCreated() {
-    var client = createClient();
-    var response = clientDataMapper.toClientResponse(client);
-
-    assertNotNull(response);
-    assertEquals(client.getClientInfo().name(), response.getName());
-    assertEquals(client.getId().getValue().toString(), response.getClientId());
-    assertEquals(client.getSecret().value(), response.getClientSecret());
-    assertEquals(client.getClientInfo().description(), response.getDescription());
-    assertEquals(client.getClientWebsiteInfo().getWebsiteUrl(), response.getWebsiteUrl());
-    assertEquals(client.getClientWebsiteInfo().getTermsUrl(), response.getTermsUrl());
-    assertEquals(client.getClientWebsiteInfo().getPolicyUrl(), response.getPolicyUrl());
-    assertEquals(client.getClientInfo().logo(), response.getLogo());
-    assertEquals(
-        client.getAuthenticationMethods().size(), response.getAuthenticationMethods().size());
-    assertEquals(client.getClientTenantInfo().tenantId().getValue(), response.getTenant());
-    assertEquals(client.getClientRedirectInfo().redirectUris(), response.getRedirectUris());
-    assertEquals(client.getClientRedirectInfo().allowedOrigins(), response.getAllowedOrigins());
-    assertEquals(
-        client.getClientRedirectInfo().logoutRedirectUris(), response.getLogoutRedirectUri());
-    assertEquals(client.getScopes(), response.getScopes());
-    assertEquals(client.getClientCreationInfo().getCreatedOn(), response.getCreatedOn());
-    assertEquals(client.getClientCreationInfo().getCreatedBy().getValue(), response.getCreatedBy());
-    assertEquals(client.getClientModificationInfo().getModifiedOn(), response.getModifiedOn());
-    assertEquals(
-        client.getClientModificationInfo().getModifiedBy().getValue(), response.getModifiedBy());
-    assertEquals(client.getStatus().equals(ClientStatus.ENABLED), response.isEnabled());
-    assertEquals(client.getVisibility().equals(ClientVisibility.PUBLIC), response.isPublic());
-  }
-
-  @Test
-  void whenDomainClientIsMappedToClientSecret_thenSecretResponseIsCreated() {
-    var client = createClient();
-    var response = clientDataMapper.toClientSecret(client);
-
-    assertNotNull(response);
-    assertEquals(client.getSecret().value(), response.getClientSecret());
-  }
-
-  @Test
-  void whenDomainClientIsMappedToClientInfoResponse_thenInfoResponseIsCreated() {
-    var client = createClient();
-    var response = clientDataMapper.toClientInfoResponse(client);
-
-    assertNotNull(response);
-    assertEquals(client.getClientInfo().name(), response.getName());
-    assertEquals(client.getId().getValue().toString(), response.getClientId());
-    assertEquals(client.getClientInfo().description(), response.getDescription());
-    assertEquals(client.getClientWebsiteInfo().getWebsiteUrl(), response.getWebsiteUrl());
-    assertEquals(client.getClientWebsiteInfo().getTermsUrl(), response.getTermsUrl());
-    assertEquals(client.getClientWebsiteInfo().getPolicyUrl(), response.getPolicyUrl());
-    assertEquals(client.getClientInfo().logo(), response.getLogo());
-    assertEquals(
-        client.getAuthenticationMethods().size(), response.getAuthenticationMethods().size());
-    assertEquals(client.getScopes(), response.getScopes());
-    assertEquals(client.getClientCreationInfo().getCreatedOn(), response.getCreatedOn());
-    assertEquals(client.getClientCreationInfo().getCreatedBy().getValue(), response.getCreatedBy());
-    assertEquals(client.getClientModificationInfo().getModifiedOn(), response.getModifiedOn());
-    assertEquals(
-        client.getClientModificationInfo().getModifiedBy().getValue(), response.getModifiedBy());
+  private static CreateTenantClientCommand createFullCommand() {
+    return CreateTenantClientCommand.builder()
+        .name("Test Client")
+        .description("Test Description")
+        .logo("Test Logo")
+        .websiteUrl("http://test.com")
+        .termsUrl("http://test.com/terms")
+        .policyUrl("http://test.com/policy")
+        .redirectUris(Set.of("http://test.com/redirect"))
+        .allowedOrigins(Set.of("http://test.com"))
+        .logoutRedirectUri("http://test.com/logout")
+        .tenantId(1)
+        .scopes(Set.of("read", "write"))
+        .isPublic(true)
+        .allowPkce(true)
+        .build();
   }
 
   private Client createClient() {
@@ -189,5 +105,204 @@ class ClientDataMapperTest {
         .clientStatus(ClientStatus.ENABLED)
         .clientVisibility(ClientVisibility.PUBLIC)
         .build();
+  }
+
+  @ParameterizedTest
+  @CsvSource({
+    "name",
+    "description",
+    "logo",
+    "websiteUrl",
+    "termsUrl",
+    "policyUrl",
+    "redirectUris",
+    "allowedOrigins",
+    "logoutRedirectUris",
+    "tenantId",
+    "scopes",
+    "visibility"
+  })
+  void whenCommandIsMappedToDomain_thenFieldMatches(String field) {
+    var command = createFullCommand();
+    var client = clientDataMapper.toDomain(command);
+
+    assertNotNull(client);
+    switch (field) {
+      case "name" -> assertEquals(command.getName(), client.getClientInfo().name());
+      case "description" ->
+          assertEquals(command.getDescription(), client.getClientInfo().description());
+      case "logo" -> assertEquals(command.getLogo(), client.getClientInfo().logo());
+      case "websiteUrl" ->
+          assertEquals(command.getWebsiteUrl(), client.getClientWebsiteInfo().getWebsiteUrl());
+      case "termsUrl" ->
+          assertEquals(command.getTermsUrl(), client.getClientWebsiteInfo().getTermsUrl());
+      case "policyUrl" ->
+          assertEquals(command.getPolicyUrl(), client.getClientWebsiteInfo().getPolicyUrl());
+      case "redirectUris" ->
+          assertEquals(command.getRedirectUris(), client.getClientRedirectInfo().redirectUris());
+      case "allowedOrigins" ->
+          assertEquals(
+              command.getAllowedOrigins(), client.getClientRedirectInfo().allowedOrigins());
+      case "logoutRedirectUris" ->
+          assertEquals(
+              Set.of(command.getLogoutRedirectUri()),
+              client.getClientRedirectInfo().logoutRedirectUris());
+      case "tenantId" ->
+          assertEquals(
+              new TenantId(command.getTenantId()), client.getClientTenantInfo().tenantId());
+      case "scopes" -> assertEquals(command.getScopes(), client.getScopes());
+      case "visibility" -> assertEquals(ClientVisibility.PUBLIC, client.getVisibility());
+      default -> throw new IllegalArgumentException("Unknown field: " + field);
+    }
+  }
+
+  @ParameterizedTest
+  @CsvSource({"client_secret_post", "none"})
+  void whenCommandIsMappedToDomain_thenAuthenticationMethodIsPresent(String method) {
+    var command = createFullCommand();
+    var client = clientDataMapper.toDomain(command);
+
+    assertTrue(client.getAuthenticationMethods().contains(AuthenticationMethod.fromMethod(method)));
+  }
+
+  @ParameterizedTest
+  @CsvSource({
+    "name",
+    "clientId",
+    "description",
+    "websiteUrl",
+    "termsUrl",
+    "policyUrl",
+    "logo",
+    "authenticationMethodsSize",
+    "scopes",
+    "createdOn",
+    "createdBy",
+    "modifiedOn",
+    "modifiedBy",
+    "isPublic"
+  })
+  void whenDomainClientIsMapped_thenSharedResponseFieldsMatch(String field) {
+    var client = createClient();
+    var fullResponse = clientDataMapper.toClientResponse(client);
+    var infoResponse = clientDataMapper.toClientInfoResponse(client);
+
+    assertNotNull(fullResponse);
+    assertNotNull(infoResponse);
+
+    switch (field) {
+      case "name" -> {
+        assertEquals(client.getClientInfo().name(), fullResponse.getName());
+        assertEquals(client.getClientInfo().name(), infoResponse.getName());
+      }
+      case "clientId" -> {
+        assertEquals(client.getId().getValue().toString(), fullResponse.getClientId());
+        assertEquals(client.getId().getValue().toString(), infoResponse.getClientId());
+      }
+      case "description" -> {
+        assertEquals(client.getClientInfo().description(), fullResponse.getDescription());
+        assertEquals(client.getClientInfo().description(), infoResponse.getDescription());
+      }
+      case "websiteUrl" -> {
+        assertEquals(client.getClientWebsiteInfo().getWebsiteUrl(), fullResponse.getWebsiteUrl());
+        assertEquals(client.getClientWebsiteInfo().getWebsiteUrl(), infoResponse.getWebsiteUrl());
+      }
+      case "termsUrl" -> {
+        assertEquals(client.getClientWebsiteInfo().getTermsUrl(), fullResponse.getTermsUrl());
+        assertEquals(client.getClientWebsiteInfo().getTermsUrl(), infoResponse.getTermsUrl());
+      }
+      case "policyUrl" -> {
+        assertEquals(client.getClientWebsiteInfo().getPolicyUrl(), fullResponse.getPolicyUrl());
+        assertEquals(client.getClientWebsiteInfo().getPolicyUrl(), infoResponse.getPolicyUrl());
+      }
+      case "logo" -> {
+        assertEquals(client.getClientInfo().logo(), fullResponse.getLogo());
+        assertEquals(client.getClientInfo().logo(), infoResponse.getLogo());
+      }
+      case "authenticationMethodsSize" -> {
+        assertEquals(
+            client.getAuthenticationMethods().size(),
+            fullResponse.getAuthenticationMethods().size());
+        assertEquals(
+            client.getAuthenticationMethods().size(),
+            infoResponse.getAuthenticationMethods().size());
+      }
+      case "scopes" -> {
+        assertEquals(client.getScopes(), fullResponse.getScopes());
+        assertEquals(client.getScopes(), infoResponse.getScopes());
+      }
+      case "createdOn" -> {
+        assertEquals(client.getClientCreationInfo().getCreatedOn(), fullResponse.getCreatedOn());
+        assertEquals(client.getClientCreationInfo().getCreatedOn(), infoResponse.getCreatedOn());
+      }
+      case "createdBy" -> {
+        assertEquals(
+            client.getClientCreationInfo().getCreatedBy().getValue(), fullResponse.getCreatedBy());
+        assertEquals(
+            client.getClientCreationInfo().getCreatedBy().getValue(), infoResponse.getCreatedBy());
+      }
+      case "modifiedOn" -> {
+        assertEquals(
+            client.getClientModificationInfo().getModifiedOn(), fullResponse.getModifiedOn());
+        assertEquals(
+            client.getClientModificationInfo().getModifiedOn(), infoResponse.getModifiedOn());
+      }
+      case "modifiedBy" -> {
+        assertEquals(
+            client.getClientModificationInfo().getModifiedBy().getValue(),
+            fullResponse.getModifiedBy());
+        assertEquals(
+            client.getClientModificationInfo().getModifiedBy().getValue(),
+            infoResponse.getModifiedBy());
+      }
+      case "isPublic" -> {
+        assertEquals(
+            client.getVisibility().equals(ClientVisibility.PUBLIC), fullResponse.isPublic());
+        assertEquals(
+            client.getVisibility().equals(ClientVisibility.PUBLIC), infoResponse.isPublic());
+      }
+      default -> throw new IllegalArgumentException("Unknown field: " + field);
+    }
+  }
+
+  @ParameterizedTest
+  @CsvSource({
+    "clientSecret",
+    "tenant",
+    "redirectUris",
+    "allowedOrigins",
+    "logoutRedirectUri",
+    "enabled"
+  })
+  void whenDomainClientIsMappedToClientResponse_thenExclusiveFieldsMatch(String field) {
+    var client = createClient();
+    var response = clientDataMapper.toClientResponse(client);
+
+    assertNotNull(response);
+    switch (field) {
+      case "clientSecret" -> assertEquals(client.getSecret().value(), response.getClientSecret());
+      case "tenant" ->
+          assertEquals(client.getClientTenantInfo().tenantId().getValue(), response.getTenant());
+      case "redirectUris" ->
+          assertEquals(client.getClientRedirectInfo().redirectUris(), response.getRedirectUris());
+      case "allowedOrigins" ->
+          assertEquals(
+              client.getClientRedirectInfo().allowedOrigins(), response.getAllowedOrigins());
+      case "logoutRedirectUri" ->
+          assertEquals(
+              client.getClientRedirectInfo().logoutRedirectUris(), response.getLogoutRedirectUri());
+      case "enabled" ->
+          assertEquals(client.getStatus().equals(ClientStatus.ENABLED), response.isEnabled());
+      default -> throw new IllegalArgumentException("Unknown field: " + field);
+    }
+  }
+
+  @Test
+  void whenDomainClientIsMappedToClientSecret_thenSecretResponseIsCreated() {
+    var client = createClient();
+    var response = clientDataMapper.toClientSecret(client);
+
+    assertNotNull(response);
+    assertEquals(client.getSecret().value(), response.getClientSecret());
   }
 }

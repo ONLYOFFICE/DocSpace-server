@@ -116,5 +116,22 @@
             <artifactId>springdoc-openapi-starter-webmvc-api</artifactId>
             <version>${springdoc.version}</version>
         </dependency>
+
+        <!-- Testing Dependencies -->
+        <dependency>
+          <groupId>com.asc</groupId>
+          <artifactId>common-messaging</artifactId>
+          <scope>test</scope>
+        </dependency>
+        <dependency>
+          <groupId>com.asc</groupId>
+          <artifactId>registration-data</artifactId>
+          <scope>test</scope>
+        </dependency>
+        <dependency>
+          <groupId>com.asc</groupId>
+          <artifactId>registration-messaging</artifactId>
+          <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>

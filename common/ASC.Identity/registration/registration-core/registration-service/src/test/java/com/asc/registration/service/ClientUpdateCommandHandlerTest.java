@@ -64,8 +64,13 @@ import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.BiConsumer;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -159,6 +164,20 @@ public class ClientUpdateCommandHandlerTest {
         ClientSecretResponse.builder().clientSecret(client.getSecret().value()).build();
   }
 
+  static Stream<Arguments> visibilityCases() {
+    return Stream.of(
+        Arguments.of(
+            true,
+            (BiConsumer<ClientDomainService, Client>)
+                (service, client) ->
+                    verify(service, times(1)).makeClientPublic(any(Audit.class), eq(client))),
+        Arguments.of(
+            false,
+            (BiConsumer<ClientDomainService, Client>)
+                (service, client) ->
+                    verify(service, times(1)).makeClientPrivate(any(Audit.class), eq(client))));
+  }
+
   @Test
   public void whenSecretIsRegenerated_thenNewSecretIsReturned() {
     var command =
@@ -207,51 +226,33 @@ public class ClientUpdateCommandHandlerTest {
         () -> clientUpdateCommandHandler.regenerateSecret(audit, Role.ROLE_ADMIN, command));
   }
 
-  @Test
-  public void whenVisibilityIsChangedToPublic_thenVisibilityIsUpdated() {
+  @ParameterizedTest
+  @MethodSource("visibilityCases")
+  public void whenVisibilityIsChanged_thenVisibilityIsUpdated(
+      boolean isPublic, BiConsumer<ClientDomainService, Client> domainVerifier) {
     var command =
         ChangeTenantClientVisibilityCommand.builder()
             .tenantId(1)
             .clientId(client.getId().getValue().toString())
-            .isPublic(true)
+            .isPublic(isPublic)
             .build();
     var clientUpdatedEvent = mock(ClientUpdatedEvent.class);
 
     when(clientQueryRepository.findByClientIdAndTenantId(any(ClientId.class), any(TenantId.class)))
         .thenReturn(Optional.of(client));
-    when(clientDomainService.makeClientPublic(any(Audit.class), any(Client.class)))
-        .thenReturn(clientUpdatedEvent);
+    if (isPublic) {
+      when(clientDomainService.makeClientPublic(any(Audit.class), any(Client.class)))
+          .thenReturn(clientUpdatedEvent);
+    } else {
+      when(clientDomainService.makeClientPrivate(any(Audit.class), any(Client.class)))
+          .thenReturn(clientUpdatedEvent);
+    }
 
     clientUpdateCommandHandler.changeVisibility(audit, Role.ROLE_ADMIN, command);
 
     verify(clientQueryRepository, times(1))
         .findByClientIdAndTenantId(any(ClientId.class), any(TenantId.class));
-    verify(clientDomainService, times(1)).makeClientPublic(any(Audit.class), any(Client.class));
-    verify(clientCommandRepository, times(1))
-        .changeVisibilityByTenantIdAndClientId(
-            any(ClientEvent.class), any(TenantId.class), any(ClientId.class), anyBoolean());
-  }
-
-  @Test
-  public void whenVisibilityIsChangedToPrivate_thenVisibilityIsUpdated() {
-    var command =
-        ChangeTenantClientVisibilityCommand.builder()
-            .tenantId(1)
-            .clientId(client.getId().getValue().toString())
-            .isPublic(false)
-            .build();
-    var clientUpdatedEvent = mock(ClientUpdatedEvent.class);
-
-    when(clientQueryRepository.findByClientIdAndTenantId(any(ClientId.class), any(TenantId.class)))
-        .thenReturn(Optional.of(client));
-    when(clientDomainService.makeClientPrivate(any(Audit.class), any(Client.class)))
-        .thenReturn(clientUpdatedEvent);
-
-    clientUpdateCommandHandler.changeVisibility(audit, Role.ROLE_ADMIN, command);
-
-    verify(clientQueryRepository, times(1))
-        .findByClientIdAndTenantId(any(ClientId.class), any(TenantId.class));
-    verify(clientDomainService, times(1)).makeClientPrivate(any(Audit.class), any(Client.class));
+    domainVerifier.accept(clientDomainService, client);
     verify(clientCommandRepository, times(1))
         .changeVisibilityByTenantIdAndClientId(
             any(ClientEvent.class), any(TenantId.class), any(ClientId.class), anyBoolean());
