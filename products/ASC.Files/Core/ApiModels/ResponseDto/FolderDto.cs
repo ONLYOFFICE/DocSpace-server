@@ -546,6 +546,12 @@ public class FolderDtoHelper(
             result.Security[FileSecurity.FilesSecurityActions.UpdateXlsx] = false;
         }
 
+        if (folder.FolderType.IsPublicSystemFolder())
+        {
+            result.CreatedBy = EmployeeDto.Default;
+            result.UpdatedBy = EmployeeDto.Default;
+        }
+
         return result;
     }
 
