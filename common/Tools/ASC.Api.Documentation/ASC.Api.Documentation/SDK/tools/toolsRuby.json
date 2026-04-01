@@ -12,6 +12,9 @@
     "moduleName": "DocspaceApiSdk",
     "gemVersion": "3.6.0",
     "gemLicense": "Apache-2.0",
-    "library": "typhoeus"
+    "library": "typhoeus",
+    "gemAuthor": "Ascensio System SIA <integration@onlyoffice.com> (https://www.onlyoffice.com)",
+    "gemHomepage": "https://www.onlyoffice.com",
+    "gemDescription": "A simple Ruby SDK for integrating with the ONLYOFFICE DocSpace API"
   }
 }

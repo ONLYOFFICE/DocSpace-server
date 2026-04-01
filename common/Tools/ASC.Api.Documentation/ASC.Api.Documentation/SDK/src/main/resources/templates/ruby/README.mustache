@@ -80,7 +80,7 @@ require '{{{gemName}}}'
 {{/authMethods}}end
 {{/hasAuthMethods}}
 
-api_instance = {{{moduleName}}}::{{{classname}}}.new
+api_instance = {{{moduleName}}}::{{{x-folder}}}::{{{x-classname}}}.new
 {{#requiredParams}}
 {{{paramName}}} = {{{vendorExtensions.x-ruby-example}}} # {{{dataType}}} | {{{description}}}
 {{/requiredParams}}
@@ -97,7 +97,7 @@ begin
 {{/summary}}  {{#returnType}}result = {{/returnType}}api_instance.{{{operationId}}}{{#hasParams}}({{#requiredParams}}{{{paramName}}}{{^-last}}, {{/-last}}{{/requiredParams}}{{#optionalParams}}{{#-last}}{{#hasRequiredParams}}, {{/hasRequiredParams}}opts{{/-last}}{{/optionalParams}}){{/hasParams}}{{#returnType}}
   p result{{/returnType}}
 rescue {{{moduleName}}}::ApiError => e
-  puts "Exception when calling {{classname}}->{{{operationId}}}: #{e}"
+  puts "Exception when calling {{x-folder}}::{{x-classname}}->{{{operationId}}}: #{e}"
 end
 {{/-first}}{{/operation}}{{/operations}}{{/-first}}{{/apis}}{{/apiInfo}}
 ```
@@ -129,15 +129,15 @@ end
 {{#isOAuth}}
 - **Type**: OAuth
 - **Flow**: {{{flow}}}
-- **Authorization URL**: {{x-authorizationUrl}}
-- **Token Url**: {{x-tokenUrl}}
+- **Authorization URL**: {{{x-authorizationUrl}}}
+- **Token Url**: {{{x-tokenUrl}}}
 - **Scopes**: {{^scopes}}N/A{{/scopes}}
 {{#scopes}} - **{{{scope}}}**: {{{description}}}
 {{/scopes}}
 {{/isOAuth}}
 {{#isOpenId}}
 - **Type**: OpenId Connect
-- **OpenId Connect URL**: {{x-openIdConnectUrl}}
+- **OpenId Connect URL**: {{{x-openIdConnectUrl}}}
 {{#scopes}} - **{{{scope}}}**: {{{description}}}
 {{/scopes}}
 {{/isOpenId}}
@@ -152,7 +152,7 @@ All URIs are relative to *https://your-docspace.onlyoffice.com*
 
 {{#customApis}}
 <details>
-  <summary>{{folder}}</summary>
+  <summary>{{{folder}}}</summary>
 
   <table>
     <tbody>
@@ -163,12 +163,12 @@ All URIs are relative to *https://your-docspace.onlyoffice.com*
       </tr>
       {{#apis}}
       <tr>
-        <td colspan="3" style="text-align: center;"><strong>{{x-classname}}</strong></td>
+        <td colspan="3" style="text-align: center;"><strong>{{{folder}}}::{{{x-classname}}}</strong></td>
       </tr>
       {{#operations.operation}}
       <tr>
-        <td><a href="{{apiDocPath}}{{classname}}.md#{{operationId}}"><strong>{{operationId}}</strong></a></td>
-        <td><strong>{{httpMethod}}</strong> {{path}}</td>
+        <td><a href="{{apiDocPath}}{{classname}}.md#{{operationId}}"><strong>{{{operationId}}}</strong></a></td>
+        <td><strong>{{{httpMethod}}}</strong> {{{path}}}</td>
         <td>{{{summary}}}</td>
       </tr>
       {{/operations.operation}}

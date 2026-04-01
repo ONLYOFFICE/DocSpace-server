@@ -38,12 +38,7 @@ require '{{gemName}}/{{modelPackage}}/{{classFilename}}'
 # APIs
 {{#apiInfo}}
 {{#apis}}
-{{^useAutoload}}
 require '{{importPath}}'
-{{/useAutoload}}
-{{#useAutoload}}
-{{moduleName}}.autoload :{{classname}}, '{{importPath}}'
-{{/useAutoload}}
 {{/apis}}
 {{/apiInfo}}
 

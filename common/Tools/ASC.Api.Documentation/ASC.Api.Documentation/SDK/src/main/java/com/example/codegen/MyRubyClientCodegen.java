@@ -7,11 +7,16 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.openapitools.codegen.CodegenOperation;
 import org.openapitools.codegen.SupportingFile;
 import org.openapitools.codegen.languages.RubyClientCodegen;
 import org.openapitools.codegen.model.ApiInfoMap;
+import org.openapitools.codegen.model.ModelMap;
 import org.openapitools.codegen.model.OperationMap;
 import org.openapitools.codegen.model.OperationsMap;
+import io.swagger.v3.oas.models.servers.Server;
+import io.swagger.v3.oas.models.servers.ServerVariable;
+import io.swagger.v3.oas.models.servers.ServerVariables;
 
 import static org.openapitools.codegen.utils.StringUtils.camelize;
 
@@ -33,7 +38,7 @@ public class MyRubyClientCodegen extends RubyClientCodegen {
     protected String modelDocPath = "docs/";
 
     private final Map<String, TagParts> tagMap = new HashMap<>();
-    private final Map<String, TagParts> classNameToTagParts = new HashMap<>();
+    private final Map<String, TagParts> generatedApiClassNameToTagParts = new HashMap<>();
     private final Map<String, String> seenApiFilenames = new HashMap<>();
 
     private static final Map<String, String> RUBY_SUPPORTING_FILE_NAMES = Map.of(
@@ -104,6 +109,17 @@ public class MyRubyClientCodegen extends RubyClientCodegen {
 
         supportingFiles.clear();
         supportingFiles.addAll(rewritten);
+
+        if (openAPI.getServers() != null && !openAPI.getServers().isEmpty()) {
+            Server server = openAPI.getServers().get(0);
+            ServerVariables serverVars = server.getVariables();
+            if (serverVars != null){
+                ServerVariable baseUrlVar = serverVars.get("baseUrl");
+                if(baseUrlVar != null && "".equals(baseUrlVar.getDefault())){
+                    baseUrlVar.setDefault("http://localhost:8092/");
+                }
+            }
+        }
     }
 
     @Override
@@ -127,13 +143,11 @@ public class MyRubyClientCodegen extends RubyClientCodegen {
 
             String folderPartSanitized = camelize(sanitizeName(folderPart));
             String classPartSanitized = camelize(sanitizeName(classPart));
-
-            boolean duplicate = tagMap.values().stream()
-                .anyMatch(tp -> tp.classPart.equals(classPartSanitized));
-
-            String finalClassPartSanitized = duplicate
-                ? folderPartSanitized + classPartSanitized
-                : classPartSanitized;
+            String finalClassPartSanitized = classPartSanitized;
+            if (finalClassPartSanitized.startsWith(folderPartSanitized)
+                && finalClassPartSanitized.length() > folderPartSanitized.length()) {
+                finalClassPartSanitized = finalClassPartSanitized.substring(folderPartSanitized.length());
+            }
 
             TagParts info = new TagParts(
                 tag,
@@ -142,7 +156,8 @@ public class MyRubyClientCodegen extends RubyClientCodegen {
             );
 
             tagMap.put(sanitized, info);
-            classNameToTagParts.put(finalClassPartSanitized, info);
+            generatedApiClassNameToTagParts.put(sanitized, info);
+            generatedApiClassNameToTagParts.put(camelize(sanitized), info);
         }
 
         return sanitized;
@@ -177,6 +192,54 @@ public class MyRubyClientCodegen extends RubyClientCodegen {
     }
 
     @Override
+    public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List<ModelMap> allModels) {
+        super.postProcessOperationsWithModels(objs, allModels);
+
+        if (objs != null && objs.getOperations() != null) {
+            OperationMap operationMap = objs.getOperations();
+            List<CodegenOperation> operationList = operationMap.getOperation();
+            if (operationList != null) {
+                for (CodegenOperation op : operationList) { 
+                    if (op.operationId != null) {
+                        String dashedId = toDashCase(op.operationId);
+                        String seealsoUrl = "https://api.onlyoffice.com/docspace/api-backend/usage-api/" + dashedId + "/";
+                        op.vendorExtensions.put("x-seealsoUrl", seealsoUrl);
+                    }
+
+                    if (op.notes != null && !op.notes.isEmpty()) {
+                        String commentedNotes = op.notes
+                            .replace("\r\n", "\n")
+                            .replace("\r", "\n")
+                            .replace("\n", "\n// ");
+                        op.vendorExtensions.put("x-commentedNotes", commentedNotes);
+                    }
+                }
+            }
+        }
+
+        if (objs == null || objs.getOperations() == null) {
+            return objs;
+        }
+
+        OperationMap operationMap = objs.getOperations();
+        TagParts tagParts = resolveTagParts(operationMap.getClassname());
+        if (tagParts == null) {
+            return objs;
+        }
+
+        operationMap.put("x-folder", tagParts.folderPart);
+        operationMap.put("x-classname", tagParts.classPart + apiNameSuffix);
+
+        return objs;
+    }
+
+    private String toDashCase(String input) {
+        return input.replaceAll("([a-z])([A-Z])", "$1-$2")
+                    .replaceAll("([A-Z]+)([A-Z][a-z])", "$1-$2")
+                    .toLowerCase();
+    }
+
+    @Override
     public Map<String, Object> postProcessSupportingFileData(Map<String, Object> objs) {
         super.postProcessSupportingFileData(objs);
 
@@ -192,18 +255,7 @@ public class MyRubyClientCodegen extends RubyClientCodegen {
                 continue;
             }
 
-            String className = operationMap.getClassname();
-            if (className != null && className.endsWith(apiNameSuffix)) {
-                className = className.substring(0, className.length() - apiNameSuffix.length());
-            }
-
-            TagParts tagParts = classNameToTagParts.get(className);
-            if (tagParts == null && className != null) {
-                tagParts = tagMap.get(super.sanitizeTag(className));
-            }
-            if (tagParts == null && className != null) {
-                tagParts = classNameToTagParts.get(camelize(className));
-            }
+            TagParts tagParts = resolveTagParts(operationMap.getClassname());
             if (tagParts == null) {
                 continue;
             }
@@ -231,6 +283,27 @@ public class MyRubyClientCodegen extends RubyClientCodegen {
         objs.put("x-openIdConnectUrl", "{{authBaseUrl}}/.well-known/openid-configuration");
 
         return objs;
+    }
+
+    private TagParts resolveTagParts(String classNameWithSuffix) {
+        if (classNameWithSuffix == null) {
+            return null;
+        }
+
+        String className = classNameWithSuffix;
+        if (className.endsWith(apiNameSuffix)) {
+            className = className.substring(0, className.length() - apiNameSuffix.length());
+        }
+
+        TagParts tagParts = generatedApiClassNameToTagParts.get(className);
+        if (tagParts == null) {
+            tagParts = generatedApiClassNameToTagParts.get(camelize(className));
+        }
+        if (tagParts == null) {
+            tagParts = tagMap.get(super.sanitizeTag(className));
+        }
+
+        return tagParts;
     }
 
     private String makeUniqueTag(String tag) {
