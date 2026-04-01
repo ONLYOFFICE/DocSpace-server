@@ -1224,6 +1224,60 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Nextcloud.
+        /// </summary>
+        public static string ConsumersNextcloud {
+            get {
+                return ResourceManager.GetString("ConsumersNextcloud", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enter the URL address of the Nextcloud instance..
+        /// </summary>
+        public static string ConsumersNextcloudBaseUrl {
+            get {
+                return ResourceManager.GetString("ConsumersNextcloudBaseUrl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Client ID.
+        /// </summary>
+        public static string ConsumersNextcloudClientId {
+            get {
+                return ResourceManager.GetString("ConsumersNextcloudClientId", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Client Secret.
+        /// </summary>
+        public static string ConsumersNextcloudClientSecret {
+            get {
+                return ResourceManager.GetString("ConsumersNextcloudClientSecret", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enable the application to sign in to the portal using a Nextcloud account..
+        /// </summary>
+        public static string ConsumersNextcloudDescription {
+            get {
+                return ResourceManager.GetString("ConsumersNextcloudDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enable the application to sign in to the portal using a Nextcloud account..
+        /// </summary>
+        public static string ConsumersNextcloudInstruction {
+            get {
+                return ResourceManager.GetString("ConsumersNextcloudInstruction", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Rackspace Cloud Storage.
         /// </summary>
         public static string ConsumersRackspace {
