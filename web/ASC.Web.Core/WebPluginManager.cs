@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2026
+// (c) Copyright Ascensio System SIA 2009-2026
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -138,10 +138,6 @@ public class WebPluginManager(
         }
 
         var tenantWebPlugins = await GetWebPluginsForTenantAsync(tenantId);
-        if (tenantWebPlugins.Count + 1 > webPluginConfigSettings.MaxCount)
-        {
-            throw new InvalidOperationException(Resource.ErrorWebPluginMaxCount);
-        }
 
         string tempDirToDelete = null;
 
@@ -156,6 +152,15 @@ public class WebPluginManager(
             var (webPlugin, tempPath) = await SafeExtractPluginToTemp(zipFile, tenantId, system);
 
             tempDirToDelete = tempPath;
+
+            if (tenantWebPlugins.Count + 1 > webPluginConfigSettings.MaxCount)
+            {
+                var existingWebPlugin = await GetWebPluginByNameAsync(tenantId, webPlugin.Name);
+                if (existingWebPlugin == null)
+                {
+                    throw new InvalidOperationException(Resource.ErrorWebPluginMaxCount);
+                }
+            }
 
             var storage = await GetPluginStorageAsync(system ? Tenant.DefaultTenant : tenantId);
 
