@@ -242,6 +242,11 @@ module.exports = (files) => {
      res.end();
   });
 
+  router.post("/change-ai-config", (req, res) => {
+    files.changeAiConfig(req.body);
+    res.end();
+  });
+
   router.post("/external-db-settings", (req, res) => {
     files.externalDbSettings(req.body);
     res.end();

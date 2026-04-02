@@ -79,6 +79,13 @@ public class QuotaSocketManager(
         await MakeRequest("logout-session", new { room = $"{tenantId}-{userId}", loginEventId, redirectUrl });
     }
 
+    public async Task ChangeAiConfigAsync()
+    {
+        var room = GetQuotaRoom();
+
+        await MakeRequest("change-ai-config", new { room });
+    }
+
     public async Task EncryptionProgressAsync(int percentage, string error)
     {
         await MakeRequest("encryption-progress", new { room = "storage-encryption", percentage, error }, tenantId: -1);
