@@ -20,7 +20,7 @@ type {{classname}} interface {
 	// {{{nickname}}} {{{summary}}}{{^summary}}executes the operation{{/summary}}
 	{{#notes}}
 	//
-	// {{vendorExtensions.x-commentedNotes}}
+	// {{{vendorExtensions.x-commentedNotes}}}
 	{{/notes}}
 	{{#vendorExtensions.x-seealsoUrl}}
 	//
@@ -64,7 +64,7 @@ type {{#structPrefix}}{{&classname}}{{/structPrefix}}{{^structPrefix}}Api{{/stru
 {{#allParams}}
 {{^isPathParam}}
 {{#description}}
-// {{.}}
+// {{{.}}}
 {{/description}}
 {{#isDeprecated}}
 // Deprecated
@@ -82,7 +82,7 @@ func (r {{#structPrefix}}{{&classname}}{{/structPrefix}}{{^structPrefix}}Api{{/s
 // {{{nickname}}} {{{summary}}}{{^summary}}executes the operation{{/summary}}
 {{#notes}}
 //
-// {{vendorExtensions.x-commentedNotes}}
+// {{{vendorExtensions.x-commentedNotes}}}
 {{/notes}}
 {{#vendorExtensions.x-seealsoUrl}}
 //

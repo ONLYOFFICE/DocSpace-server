@@ -28,11 +28,13 @@ public class MyGoClientCodegen extends GoClientCodegen {
         final String originalTag;
         final String folderPart;
         final String classPart;
+        final String filePart;
 
-        TagParts(String originalTag, String folderPart, String classPart) {
+        TagParts(String originalTag, String folderPart, String classPart, String filePart) {
             this.originalTag = originalTag;
             this.folderPart = folderPart;
             this.classPart = classPart;
+            this.filePart = filePart;
         }
     }
 
@@ -73,11 +75,15 @@ public class MyGoClientCodegen extends GoClientCodegen {
             String finalClassPart = duplicateClass
                 ? folderPartSanitized + classPartSanitized
                 : classPartSanitized;
+            String finalFilePart = parts.length > 1
+                ? folderPartSanitized + classPartSanitized
+                : classPartSanitized;
 
             TagParts info = new TagParts(
                 tag,
                 folderPartSanitized,
-                finalClassPart
+                finalClassPart,
+                finalFilePart
             );
 
             tagMap.put(sanitized, info);
@@ -91,14 +97,15 @@ public class MyGoClientCodegen extends GoClientCodegen {
         String sanitizedTag = sanitizeTag(tag);
         String suffix = apiTemplateFiles().get(templateName);
 
-        String uniqueTag = makeUniqueTag(sanitizedTag);
         TagParts tagParts = tagMap.get(sanitizedTag);
 
         if (tagParts == null) {
+            String uniqueTag = makeUniqueTag(sanitizedTag);
             return apiFileFolder() + File.separator + toApiFilename(uniqueTag) + suffix;
         }
 
-        String filename = toApiFilename(tagParts.classPart) + suffix;
+        String uniqueFilePart = makeUniqueTag(tagParts.filePart);
+        String filename = toApiFilename(uniqueFilePart) + suffix;
 
         return apiFileFolder() + File.separator + filename;
     }
@@ -236,7 +243,7 @@ public class MyGoClientCodegen extends GoClientCodegen {
 
             if (tagParts == null) {
                 String fallback = normalizeTagDisplayName(className == null ? "Default" : className);
-                tagParts = new TagParts(fallback, "Default", fallback);
+                tagParts = new TagParts(fallback, "Default", fallback, fallback);
             }
 
             api.put("x-folder", tagParts.folderPart);
