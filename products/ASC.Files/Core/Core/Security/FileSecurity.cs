@@ -1523,7 +1523,7 @@ public class FileSecurity(
 
                     switch (action)
                     {
-                        case FilesSecurityActions.Read or FilesSecurityActions.Copy:
+                        case FilesSecurityActions.Read:
                         case FilesSecurityActions.CopySharedLink when e.Shared:
                             return true;
                     }
