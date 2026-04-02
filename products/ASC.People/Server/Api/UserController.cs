@@ -2821,7 +2821,9 @@ public class UserControllerAdditional<T>(
 
     private async IAsyncEnumerable<EmployeeFullDto> GetUsers(UsersWithFileEntitySharedRequestDto<T> inDto, FileEntry<T> fileEntry)
     {
-        if (!await fileSecurity.CanReadAsync(fileEntry))
+        var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+
+        if (!await fileSecurity.CanReadAsync(fileEntry) || await userManager.IsGuestAsync(currentUser.Id))
         {
             throw new SecurityException(Resource.ErrorAccessDenied);
         }

@@ -1996,7 +1996,7 @@ public class FileStorageService //: IFileStorageService
 
             if (file == null)
             {
-                throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+                throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
             }
 
             FileOptions<T> result = null;
