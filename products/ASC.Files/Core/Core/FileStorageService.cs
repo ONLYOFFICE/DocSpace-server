@@ -1813,7 +1813,7 @@ public class FileStorageService //: IFileStorageService
 
         if (room is { FolderType: FolderType.PublicRoom })
         {
-            await SetExternalLinkAsync(file, Guid.NewGuid(), FileShare.Read, title ?? FilesCommonResource.DefaultExternalLinkTitle, primary: true);
+            await SetExternalLinkAsync(file, Guid.NewGuid(), file.IsForm ? FileShare.FillForms : FileShare.Read, title ?? FilesCommonResource.DefaultExternalLinkTitle, primary: true);
         }
 
         return file;
