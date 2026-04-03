@@ -80,7 +80,7 @@ public class FileUploadTests(
         resultFile.Title.Should().Be(fileName);
         resultFile.File.Should().NotBeNull();
         resultFile.File.FolderId.Should().Be(myFolder);
-        resultFile.File.ContentLength.Should().Be(FileSizeComment.FilesSizeToString(contentLength));
+        resultFile.File.PureContentLength.Should().Be(contentLength);
         
         var configuration = (await _filesApi.GetFileInfoAsync(resultFile.File.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         var fileStream = await _filesClient.GetStreamAsync(configuration.ViewUrl, TestContext.Current.CancellationToken);
