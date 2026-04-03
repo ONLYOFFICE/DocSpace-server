@@ -46,6 +46,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
 
     private IResourceBuilder<ContainerResource>? McpResource { get; set; }
     private IResourceBuilder<JavaScriptAppResource>? ApiTestResource { get; set; }
+    private IResourceBuilder<JavaScriptAppResource>? E2ETestResource { get; set; }
     private Dictionary<string, string>? _parameters;
 
 
@@ -228,7 +229,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         return this;
     }
 
-    public void AddApiTest()
+    public ConnectionStringManager AddApiTest()
     {
         var docspaceOwnerEmail = builder.Configuration["OWNER_EMAIL"] ?? "test@example.com";
         var coreMachineKey = builder.Configuration["core:machinekey"] ?? "test-machine-key";
@@ -238,7 +239,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         var currentBugId = builder.Configuration["BUG_ID"];
 
         ApiTestResource = builder
-            .AddJavaScriptApp("playwright-tests", playwrightTestsPath, "test")
+            .AddJavaScriptApp("tests-api", playwrightTestsPath, "test")
             .WithNpm()
             .WithEnvironment("MACHINEKEY", coreMachineKey)
             .WithEnvironment("PKEY", "PKEY")
@@ -347,6 +348,36 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             { "auth:allowskip:default", true.ToString() },
             { "auth:allowskip:registerportal", true.ToString() }
         };
+
+        return this;
+    }
+
+    public ConnectionStringManager AddE2ETest()
+    {
+        var docspaceOwnerEmail = builder.Configuration["OWNER_EMAIL"] ?? "test@example.com";
+        var coreMachineKey = builder.Configuration["core:machinekey"] ?? "test-machine-key";
+
+        var playwrightTestsPath = Path.Combine(basePath, "tests", "e2e-tests");
+
+        E2ETestResource = builder
+            .AddJavaScriptApp("tests-e2e", playwrightTestsPath, "testUI")
+            .WithNpm()
+            .WithEnvironment("MACHINEKEY", coreMachineKey)
+            .WithEnvironment("PKEY", "PKEY")
+            .WithEnvironment("LOCAL_PORTAL_DOMAIN", $"localhost:{Constants.AppHostPort.ToString()}")
+            .WithEnvironment("DOCSPACE_OWNER_EMAIL", docspaceOwnerEmail)
+            .WithArgs("--", "--ui", "--ui-host", "0.0.0.0", "--ui-port", Constants.E2ETestsUiPort.ToString())
+            .WithExplicitStart();
+
+        _parameters = new Dictionary<string, string>
+        {
+            { "web:autotest:secret-email", docspaceOwnerEmail },
+            { "core:machinekey", coreMachineKey },
+            { "auth:allowskip:default", true.ToString() },
+            { "auth:allowskip:registerportal", true.ToString() }
+        };
+
+        return this;
     }
 
     public void AddWaitFor<T>(
