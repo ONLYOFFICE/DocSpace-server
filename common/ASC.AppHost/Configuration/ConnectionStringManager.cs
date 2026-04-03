@@ -252,6 +252,33 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         }
 
         ApiTestResource.WithCommand(
+            name: "run-ui",
+            displayName: "Run UI",
+            executeCommand: async context =>
+            {
+                var commandService = context.ServiceProvider
+                    .GetRequiredService<ResourceCommandService>();
+
+                ApiTestResource
+                    .WithHttpEndpoint(Constants.PlaywrightUiPort, Constants.PlaywrightUiPort, "playwright-ui", isProxied: false)
+                    .WithArgs("--", "--ui", "--ui-host", "0.0.0.0", "--ui-port", Constants.PlaywrightUiPort.ToString());
+
+                await commandService.ExecuteCommandAsync(
+                    resourceId: context.ResourceName,
+                    commandName: "resource-start",
+                    cancellationToken: context.CancellationToken);
+
+                return CommandResults.Success();
+            },
+            commandOptions: new CommandOptions
+            {
+                IconName = "TestBeaker",
+                IconVariant = IconVariant.Filled,
+                Description = "Restart tests with a specific BUG ID filter"
+            }
+        );
+
+        ApiTestResource.WithCommand(
             name: "run-with-bug-id",
             displayName: "Run with BUG ID",
             executeCommand: async context =>
