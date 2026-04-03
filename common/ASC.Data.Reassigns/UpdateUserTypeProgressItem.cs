@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2026
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -90,7 +90,7 @@ public class UpdateUserTypeProgressItem : DistributedTaskProgress
             await fileStorageService.DemandPermissionToReassignDataAsync(User, ToUser);
             await SetPercentageAndCheckCancellationAsync(10, true);
 
-            await fileStorageService.ReassignRoomsAsync(User, ToUser);
+            await fileStorageService.ChangeRoomsOwnerAsync(User, ToUser);
             await SetPercentageAndCheckCancellationAsync(40, true);
 
             var currentType = await userManager.GetUserTypeAsync(_userInfo);

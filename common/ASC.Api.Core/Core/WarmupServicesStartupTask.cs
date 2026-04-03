@@ -34,8 +34,8 @@ public class WarmupServicesStartupTask(IServiceCollection services, IServiceProv
     public Task ExecuteAsync(CancellationToken cancellationToken = default)
     {
         var processedFailed = 0;
-        var processedSuccessed = 0;
-        var startTime = DateTime.UtcNow;
+        var processedSucceeded = 0;
+        var startTime = TimeProvider.System.GetTimestamp();
 
         using var scope = provider.CreateScope();
         var logger = scope.ServiceProvider.GetService<ILogger<WarmupServicesStartupTask>>();
@@ -52,7 +52,7 @@ public class WarmupServicesStartupTask(IServiceCollection services, IServiceProv
                 {
                     logger.TraceWarmupTime(service.FullName, totalMilliseconds);
                 }
-                processedSuccessed++;
+                processedSucceeded++;
             }
             catch (Exception ex)
             {
@@ -65,12 +65,12 @@ public class WarmupServicesStartupTask(IServiceCollection services, IServiceProv
             }
         }
 
-        var processed = processedSuccessed + processedFailed;
+        var processed = processedSucceeded + processedFailed;
 
         logger.TraceWarmupFinished(processed,
-            processedSuccessed,
+            processedSucceeded,
             processedFailed,
-            (DateTime.UtcNow - startTime).TotalMilliseconds);
+            TimeProvider.System.GetElapsedTime(startTime).TotalMilliseconds);
 
         return Task.CompletedTask;
     }

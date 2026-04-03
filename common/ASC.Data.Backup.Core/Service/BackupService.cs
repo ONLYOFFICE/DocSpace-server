@@ -593,7 +593,7 @@ public class BackupService(
         new CronExpression(cronParams.ToString());
     }
 
-    private async Task DemandPermissionsBackupAsync()
+    public async Task DemandPermissionsBackupAsync()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 

@@ -33,8 +33,14 @@ import static org.mockito.Mockito.*;
 
 import com.asc.common.core.domain.entity.Audit;
 import com.asc.registration.core.domain.entity.Scope;
+import com.asc.registration.core.domain.event.ScopeEvent;
+import java.util.function.BiConsumer;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 
 class CoreScopeDomainServiceTest {
@@ -54,9 +60,58 @@ class CoreScopeDomainServiceTest {
     when(scope.getType()).thenReturn("permission");
   }
 
+  abstract static class ScopeUpdateCommand {
+    private final String updatedValue;
+
+    protected ScopeUpdateCommand(String updatedValue) {
+      this.updatedValue = updatedValue;
+    }
+
+    public String updatedValue() {
+      return updatedValue;
+    }
+
+    public abstract ScopeEvent execute(CoreScopeDomainService service, Audit audit, Scope scope);
+  }
+
+  static Stream<Arguments> scopeUpdateCases() {
+    return Stream.of(
+        Arguments.of(
+            new ScopeUpdateCommand("admin") {
+              public ScopeEvent execute(CoreScopeDomainService service, Audit audit, Scope scope) {
+                return service.updateScopeGroup(audit, scope, updatedValue());
+              }
+            },
+            (BiConsumer<Scope, ArgumentCaptor<String>>)
+                (scope, captor) -> verify(scope).updateGroup(captor.capture())),
+        Arguments.of(
+            new ScopeUpdateCommand("team") {
+              public ScopeEvent execute(CoreScopeDomainService service, Audit audit, Scope scope) {
+                return service.updateScopeGroup(audit, scope, updatedValue());
+              }
+            },
+            (BiConsumer<Scope, ArgumentCaptor<String>>)
+                (scope, captor) -> verify(scope).updateGroup(captor.capture())),
+        Arguments.of(
+            new ScopeUpdateCommand("role") {
+              public ScopeEvent execute(CoreScopeDomainService service, Audit audit, Scope scope) {
+                return service.updateScopeType(audit, scope, updatedValue());
+              }
+            },
+            (BiConsumer<Scope, ArgumentCaptor<String>>)
+                (scope, captor) -> verify(scope).updateType(captor.capture())),
+        Arguments.of(
+            new ScopeUpdateCommand("permission-type") {
+              public ScopeEvent execute(CoreScopeDomainService service, Audit audit, Scope scope) {
+                return service.updateScopeType(audit, scope, updatedValue());
+              }
+            },
+            (BiConsumer<Scope, ArgumentCaptor<String>>)
+                (scope, captor) -> verify(scope).updateType(captor.capture())));
+  }
+
   @Test
   void whenScopeIsCreated_thenEventIsGenerated() {
-    var captor = ArgumentCaptor.forClass(String.class);
     var event = service.createScope(audit, scope);
 
     verify(scope, times(1)).getName();
@@ -68,33 +123,15 @@ class CoreScopeDomainServiceTest {
     assertNotNull(event.getEventAt());
   }
 
-  @Test
-  void whenScopeGroupIsUpdated_thenEventIsGenerated() {
+  @ParameterizedTest
+  @MethodSource("scopeUpdateCases")
+  void whenScopeIsUpdated_thenEventIsGenerated(
+      ScopeUpdateCommand command, BiConsumer<Scope, ArgumentCaptor<String>> verifier) {
     var captor = ArgumentCaptor.forClass(String.class);
+    var event = command.execute(service, audit, scope);
+    verifier.accept(scope, captor);
 
-    when(scope.getGroup()).thenReturn("admin");
-
-    var event = service.updateScopeGroup(audit, scope, "admin");
-
-    verify(scope).updateGroup(captor.capture());
-
-    assertEquals("admin", captor.getValue());
-    assertNotNull(event);
-    assertEquals("read", event.getScope().getName());
-    assertNotNull(event.getEventAt());
-  }
-
-  @Test
-  void whenScopeTypeIsUpdated_thenEventIsGenerated() {
-    var captor = ArgumentCaptor.forClass(String.class);
-
-    when(scope.getType()).thenReturn("role");
-
-    var event = service.updateScopeType(audit, scope, "role");
-
-    verify(scope).updateType(captor.capture());
-
-    assertEquals("role", captor.getValue());
+    assertEquals(command.updatedValue(), captor.getValue());
     assertNotNull(event);
     assertEquals("read", event.getScope().getName());
     assertNotNull(event.getEventAt());

@@ -64,7 +64,7 @@
     <PackageVersion Include="CsvHelper" Version="33.1.0" />
     <PackageVersion Include="DistributedLock.Redis" Version="1.1.1" />
     <PackageVersion Include="DistributedLock.ZooKeeper" Version="1.0.0" />
-    <PackageVersion Include="DocSpace.API.SDK" Version="3.6.0" />
+    <PackageVersion Include="DocSpace.API.SDK" Version="3.7.0" />
     <PackageVersion Include="DocuSign.eSign.dll" Version="8.4.0" />
     <PackageVersion Include="DotNetOpenAuth.Ultimate" Version="4.3.4.13329" />
     <PackageVersion Include="Dropbox.Api" Version="7.0.0" />

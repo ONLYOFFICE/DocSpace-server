@@ -1710,7 +1710,7 @@ public class S3Storage(TempStream tempStream,
                 buffer = new byte[blockSize - obj.ContentLength % blockSize];
             }
         }
-        var stream = new MemoryStream();
+        await using var stream = new MemoryStream();
         await stream.WriteAsync(buffer);
         stream.Position = 0;
 

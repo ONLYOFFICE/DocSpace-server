@@ -125,7 +125,9 @@ public class CustomTagsService(
     {
         var folder = await daoFactory.GetFolderDao<T>().GetFolderAsync(folderId);
 
-        if (folder.RootFolderType == FolderType.Archive || !await fileSecurity.CanEditRoomAsync(folder))
+        var isDocSpaceAdmin = await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID);
+
+        if (folder.RootFolderType == FolderType.Archive || (!isDocSpaceAdmin && !await fileSecurity.CanEditRoomAsync(folder)))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);
         }
@@ -164,7 +166,9 @@ public class CustomTagsService(
     {
         var folder = await daoFactory.GetFolderDao<T>().GetFolderAsync(folderId);
 
-        if (folder.RootFolderType == FolderType.Archive || !await fileSecurity.CanEditRoomAsync(folder))
+        var isDocSpaceAdmin = await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID);
+
+        if (folder.RootFolderType == FolderType.Archive || (!isDocSpaceAdmin && !await fileSecurity.CanEditRoomAsync(folder)))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);
         }

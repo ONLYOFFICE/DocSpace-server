@@ -268,18 +268,14 @@ public class WarmupBaseDbContextStartupTask(IServiceProvider provider, ILogger<W
                         continue;
                     }
 
-                    var res = q.Invoke(context, paramsToInvoke.ToArray());
-                    if (res is Task task)
+                    await using (context as IAsyncDisposable)
                     {
-                        await task.ConfigureAwait(false);
+                        var res = q.Invoke(context, paramsToInvoke.ToArray());
+                        if (res is Task task)
+                        {
+                            await task.ConfigureAwait(false);
+                        }
                     }
-
-                    var disposeContext = context.GetType().GetMethod("Dispose");
-                    if (disposeContext == null)
-                    {
-                        continue;
-                    }
-                    disposeContext.Invoke(context, null);
                 }
                 catch (Exception e)
                 {

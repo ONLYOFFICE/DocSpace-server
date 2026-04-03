@@ -590,6 +590,11 @@ module.exports = (io) => {
     filesIO.to(data.room).emit(`s:quota_exceeded`, { data });
   }
 
+  function changeAiConfig({ room } = {}) {
+    logger.info(`change ai config in room ${room}`);
+    filesIO.to(room).emit("s:change-ai-config");
+  }
+
   function externalDbSettings({ tenantId, externalDbEnabled } = {}) {
     var room = `${tenantId}-external-db-settings`;
     logger.info(`external db settings changed in room ${room}, enabled: ${externalDbEnabled}`);
@@ -640,6 +645,7 @@ module.exports = (io) => {
     changeAccessRightsForFile,
     changeAccessRightsForFolder,
     quotaExceeded,
+    changeAiConfig,
     externalDbSettings
   };
 };

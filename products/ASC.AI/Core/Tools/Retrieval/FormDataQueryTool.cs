@@ -56,7 +56,7 @@ public class FormDataQueryTool(
         });
 
         async Task<ToolResponse<string>> Function(
-            [Description("Column names to include in the result. Always specify only the columns relevant to the question — do not request all columns unless explicitly needed.")] IEnumerable<string>? selectColumns = null,
+            [Description("Column names to include in the result. Always specify only the columns relevant to the question — do not request all columns unless explicitly needed. Pass as a JSON array: [\"col_a\",\"col_b\"], never as a JSON-encoded string.")] IEnumerable<string>? selectColumns = null,
             [Description("Filter conditions applied with AND. Each filter is a string: \"column_name OPERATOR value\" — e.g. \"col_status = approved\", \"col_age > 25\", \"col_name IS NULL\". Column-to-column comparison is also supported: \"col_start < col_end\". Operators: =, !=, <, >, <=, >=, LIKE, NOT LIKE, IS NULL, IS NOT NULL. Omit the value for IS NULL / IS NOT NULL.")] IEnumerable<string>? filters = null,
             [Description("Primary column to sort results by.")] string? orderByColumn = null,
             [Description("Set to true to sort the primary column in descending order. Default: false.")] bool orderByDescending = false,

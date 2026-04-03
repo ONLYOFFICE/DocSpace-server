@@ -138,8 +138,9 @@ public class SelfJoinFormDataTool(
         var parsed = new List<SelfJoinCondition>();
         var datePart = new List<string>();
 
-        foreach (var cond in joinConditions)
+        foreach (var rawCond in joinConditions)
         {
+            var cond = rawCond.Trim();
             var parts = cond.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
             if (parts.Length >= 3 && FormDataToolHelpers.ValidDateParts.Contains(parts[1]))

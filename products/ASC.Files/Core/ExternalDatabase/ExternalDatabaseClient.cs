@@ -363,6 +363,16 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
             col = col[1..^1].Trim();
         }
 
+        // Strip JSON-array brackets that models sometimes add: ["col_name"] → col_name, ["col_name" → col_name
+        if (col.StartsWith("[\"", StringComparison.Ordinal))
+        {
+            col = col[2..].TrimEnd('"', ']').Trim();
+        }
+        else if (col.StartsWith('[') || col.EndsWith(']'))
+        {
+            col = col.Trim('[', ']').Trim();
+        }
+
         // Strip SQL aliases: "col_employee as a_employee" → "col_employee"
         var asIdx = col.IndexOf(" as ", StringComparison.OrdinalIgnoreCase);
         if (asIdx >= 0)
@@ -755,7 +765,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
             var invalid = selectList.Except(allowedColumns, StringComparer.OrdinalIgnoreCase).ToList();
             if (invalid.Count > 0)
             {
-                throw new UnauthorizedAccessException($"Unknown columns: {string.Join(", ", invalid)}");
+                throw new UnauthorizedAccessException($"Unknown columns: {string.Join(", ", invalid)}. Available: {string.Join(", ", allowedColumns)}");
             }
         }
 
