@@ -194,7 +194,20 @@ public class MyGoClientCodegen extends GoClientCodegen {
                 || "golang_README.mustache".equals(file.getTemplateFile())
         );
         supportingFiles.add(new SupportingFile("golang_README.mustache", "", "README.md"));
+        supportingFiles.add(new SupportingFile("sample.mustache", "samples", "sample.go"));
 
+        supportingFiles.add(new SupportingFile(
+            "AUTHORS.mustache", "", "AUTHORS.md"
+        ));
+
+        supportingFiles.add(new SupportingFile(
+            "LICENSE.mustache", "", "LICENSE"
+        ));
+
+        supportingFiles.add(new SupportingFile(
+            "CHANGELOG.mustache", "", "CHANGELOG.md"
+        ));
+        
         Object exclude = additionalProperties.get("excludeTests");
         if (Boolean.TRUE.equals(exclude)) {
             apiTestTemplateFiles.clear();
@@ -211,6 +224,8 @@ public class MyGoClientCodegen extends GoClientCodegen {
                 }
             }
         }
+
+        supportingFiles.removeIf(f -> f.getTemplateFile().equals("git_push.sh.mustache"));
 
         Object repositoryUrlObj = additionalProperties.get("repositoryUrl");
         if (repositoryUrlObj != null) {

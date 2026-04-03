@@ -51,7 +51,7 @@ public class MyRubyClientCodegen extends RubyClientCodegen {
         super();
 
         this.templateDir = "templates/ruby";
-        this.embeddedTemplateDir = "ruby";
+        this.embeddedTemplateDir = "ruby-client";
 
         additionalProperties.put("apiDocPath", apiDocPath);
         additionalProperties.put("modelDocPath", modelDocPath);
@@ -76,6 +76,21 @@ public class MyRubyClientCodegen extends RubyClientCodegen {
                 && (file.getFolder() == null || file.getFolder().isEmpty())
         );
         supportingFiles.add(new SupportingFile("README.mustache", "", "README.md"));
+        supportingFiles.add(new SupportingFile("sample.mustache", "samples", "sample.rb"));
+
+        supportingFiles.add(new SupportingFile(
+            "AUTHORS.mustache", "", "AUTHORS.md"
+        ));
+
+        supportingFiles.add(new SupportingFile(
+            "LICENSE.mustache", "", "LICENSE"
+        ));
+
+        supportingFiles.add(new SupportingFile(
+            "CHANGELOG.mustache", "", "CHANGELOG.md"
+        ));
+
+        supportingFiles.removeIf(f -> f.getTemplateFile().equals("git_push.sh.mustache"));
 
         apiTestTemplateFiles.clear();
         modelTestTemplateFiles.clear();
@@ -106,6 +121,7 @@ public class MyRubyClientCodegen extends RubyClientCodegen {
 
             rewritten.add(replacement);
         }
+
 
         supportingFiles.clear();
         supportingFiles.addAll(rewritten);
@@ -236,6 +252,7 @@ public class MyRubyClientCodegen extends RubyClientCodegen {
     private String toDashCase(String input) {
         return input.replaceAll("([a-z])([A-Z])", "$1-$2")
                     .replaceAll("([A-Z]+)([A-Z][a-z])", "$1-$2")
+                    .replace('_', '-')
                     .toLowerCase();
     }
 
