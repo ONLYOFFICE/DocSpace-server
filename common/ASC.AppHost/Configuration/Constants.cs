@@ -51,6 +51,7 @@ public static class Constants
     public const int StudioNotifyPort = 5006;
     public const int OpensearchPort = 9200;
     public const int DocSpaceMcpPort = 8000;
+    public const int PlaywrightUiPort = 3333;
 
     public const int TelegramPort = 5050;
     public const int MonolithPort = 5027;
