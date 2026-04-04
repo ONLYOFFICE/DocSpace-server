@@ -43,7 +43,6 @@
         <dependency>
             <groupId>io.lettuce</groupId>
             <artifactId>lettuce-core</artifactId>
-            <version>${lettuce.version}</version>
         </dependency>
 
         <!-- AWS SDK for CloudWatch Logs -->

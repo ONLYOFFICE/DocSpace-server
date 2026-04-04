@@ -28,9 +28,9 @@
 package com.asc.authorization.application.configuration.serialization;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.SerializationException;
+import org.springframework.lang.NonNull;
 
 /**
  * Custom Redis serializer for cache objects using Jackson ObjectMapper.
@@ -45,7 +45,7 @@ public class CacheObjectSerializer implements RedisSerializer<Object> {
     this.objectMapper = objectMapper;
   }
 
-  @NotNull
+  @NonNull
   public byte[] serialize(Object value) throws SerializationException {
     if (value == null) return new byte[0];
 

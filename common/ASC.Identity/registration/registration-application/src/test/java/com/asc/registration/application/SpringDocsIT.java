@@ -32,6 +32,9 @@ import com.asc.common.application.proto.AuthorizationServiceGrpc;
 import com.asc.registration.application.service.ConsentService;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import net.devh.boot.grpc.client.autoconfigure.GrpcClientMetricAutoConfiguration;
+import net.devh.boot.grpc.server.autoconfigure.GrpcServerMetricAutoConfiguration;
+import net.devh.boot.grpc.server.autoconfigure.GrpcServerSecurityAutoConfiguration;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -79,7 +82,13 @@ public class SpringDocsIT {
   }
 
   @EntityScan(basePackages = {"com.asc.registration.data", "com.asc.common.data"})
-  @SpringBootApplication(scanBasePackages = {"com.asc.registration", "com.asc.common"})
+  @SpringBootApplication(
+      scanBasePackages = {"com.asc.registration", "com.asc.common"},
+      exclude = {
+        GrpcServerSecurityAutoConfiguration.class,
+        GrpcServerMetricAutoConfiguration.class,
+        GrpcClientMetricAutoConfiguration.class
+      })
   @EnableJpaRepositories(basePackages = {"com.asc.registration.data", "com.asc.common.data"})
   static class TestApplication {}
 

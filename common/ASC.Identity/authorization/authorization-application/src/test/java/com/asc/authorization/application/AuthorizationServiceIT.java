@@ -45,6 +45,9 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Objects;
 import java.util.regex.Pattern;
+import net.devh.boot.grpc.client.autoconfigure.GrpcClientMetricAutoConfiguration;
+import net.devh.boot.grpc.server.autoconfigure.GrpcServerMetricAutoConfiguration;
+import net.devh.boot.grpc.server.autoconfigure.GrpcServerSecurityAutoConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -141,7 +144,13 @@ public class AuthorizationServiceIT {
   @LocalServerPort int randomServerPort;
 
   @EntityScan(basePackages = {"com.asc.authorization.data", "com.asc.common.data"})
-  @SpringBootApplication(scanBasePackages = {"com.asc.authorization", "com.asc.common"})
+  @SpringBootApplication(
+      scanBasePackages = {"com.asc.authorization", "com.asc.common"},
+      exclude = {
+        GrpcServerSecurityAutoConfiguration.class,
+        GrpcServerMetricAutoConfiguration.class,
+        GrpcClientMetricAutoConfiguration.class
+      })
   @EnableJpaRepositories(basePackages = {"com.asc.authorization.data", "com.asc.common.data"})
   static class TestApplication {}
 

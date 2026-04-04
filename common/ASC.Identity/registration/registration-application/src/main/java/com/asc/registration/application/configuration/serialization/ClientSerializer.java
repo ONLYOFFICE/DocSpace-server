@@ -29,9 +29,9 @@ package com.asc.registration.application.configuration.serialization;
 
 import com.asc.registration.core.domain.entity.Client;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.SerializationException;
+import org.springframework.lang.NonNull;
 
 /**
  * Custom serializer that uses a configured ObjectMapper with Client deserializer.
@@ -46,7 +46,7 @@ public class ClientSerializer implements RedisSerializer<Object> {
     this.objectMapper = objectMapper;
   }
 
-  @NotNull
+  @NonNull
   public byte[] serialize(Object value) throws SerializationException {
     if (value == null) return new byte[0];
 

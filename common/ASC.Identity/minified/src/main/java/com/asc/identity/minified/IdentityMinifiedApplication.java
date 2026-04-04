@@ -27,6 +27,8 @@
 
 package com.asc.identity.minified;
 
+import net.devh.boot.grpc.client.autoconfigure.GrpcClientMetricAutoConfiguration;
+import net.devh.boot.grpc.server.autoconfigure.GrpcServerMetricAutoConfiguration;
 import net.devh.boot.grpc.server.autoconfigure.GrpcServerSecurityAutoConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -65,7 +67,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
       "com.asc.common",
       "com.asc.identity.minified"
     },
-    exclude = {GrpcServerSecurityAutoConfiguration.class})
+    exclude = {GrpcServerSecurityAutoConfiguration.class, GrpcServerMetricAutoConfiguration.class, GrpcClientMetricAutoConfiguration.class})
 public class IdentityMinifiedApplication {
   /**
    * The main method serves as the entry point for the combined Identity Service application.
@@ -73,6 +75,8 @@ public class IdentityMinifiedApplication {
    * @param args command line arguments passed to the application
    */
   public static void main(String[] args) {
+    // TODO: Upgrade the dependency and remove the property
+    System.setProperty("io.grpc.netty.shaded.io.netty.noUnsafe", "true");
     SpringApplication.run(IdentityMinifiedApplication.class, args);
   }
 }
