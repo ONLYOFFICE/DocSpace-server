@@ -93,9 +93,9 @@ public class GrpcAuthorizationService
   public void getConsents(
       GetConsentsRequest request, StreamObserver<GetConsentsResponse> responseObserver) {
     try {
-      ZonedDateTime lastModifiedAt =
+      var lastModifiedAt =
           Optional.of(request.getLastModifiedAt())
-              .filter(value -> !value.isBlank())
+              .filter(v -> !v.isBlank())
               .map(ZonedDateTime::parse)
               .orElse(null);
       var authorizations =
