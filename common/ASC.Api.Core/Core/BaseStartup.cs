@@ -531,6 +531,7 @@ public abstract class BaseStartup
         services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Reader);
         services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Writer);
         services.AddHostedService<SocketService>();
+        services.AddSocketHttpClient(_configuration);
 
         services.RegisterQueue<ResizeWorkerItem>(2);
 
