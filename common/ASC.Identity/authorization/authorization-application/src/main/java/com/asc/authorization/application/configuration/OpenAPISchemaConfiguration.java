@@ -55,7 +55,7 @@ import org.springframework.context.annotation.Configuration;
     info =
         @Info(
             title = "ASC.Identity.Authorization",
-            version = "1.1.1",
+            version = "1.2.0",
             description = "OAuth2 Authorization Server API",
             contact =
                 @Contact(
