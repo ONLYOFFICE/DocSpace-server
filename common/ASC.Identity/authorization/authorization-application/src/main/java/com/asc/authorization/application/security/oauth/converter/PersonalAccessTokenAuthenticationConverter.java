@@ -106,11 +106,9 @@ public final class PersonalAccessTokenAuthenticationConverter implements Authent
 
     var additionalParameters = new HashMap<String, Object>();
     parameters.forEach(
-        (key, value) -> {
-          if (!key.equals(OAuth2ParameterNames.GRANT_TYPE)
-              && !key.equals(OAuth2ParameterNames.SCOPE)) {
-            additionalParameters.put(
-                key, (value.size() == 1) ? value.getFirst() : value.toArray(new String[0]));
+        (k, v) -> {
+          if (!k.equals(OAuth2ParameterNames.GRANT_TYPE) && !k.equals(OAuth2ParameterNames.SCOPE)) {
+            additionalParameters.put(k, (v.size() == 1) ? v.getFirst() : v.toArray(new String[0]));
           }
         });
 
