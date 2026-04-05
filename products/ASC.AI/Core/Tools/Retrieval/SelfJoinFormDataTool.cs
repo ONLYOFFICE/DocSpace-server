@@ -79,12 +79,13 @@ public class SelfJoinFormDataTool(
                 "All column names must be from the schema."
             )] IEnumerable<string> joinConditions,
             [Description(
-                "Columns to include from both records in the result. Use PLAIN column names — do NOT add 'a_'/'b_' prefixes. " +
-                "Each column appears twice: prefixed with 'a_' for record A and 'b_' for record B. " +
-                "Example: [\"col_employee\", \"col_start_date\"] produces a_col_employee, a_col_start_date, b_col_employee, b_col_start_date."
+                "Columns to include from both records in the result. Must be a JSON array of plain column name strings — one name per element. " +
+                "Do NOT add 'a_'/'b_' prefixes. Do NOT pass comma-separated names as one string. " +
+                "Wrong: [\"col_employee, col_start_date\"]. Correct: [\"col_employee\", \"col_start_date\"]. " +
+                "Each column appears twice in output: prefixed with 'a_' for record A and 'b_' for record B."
             )] IEnumerable<string>? displayColumns = null,
             [Description("Maximum number of matching pairs to return (1–500). Default: 100.")] int limit = 100,
-            [Description("Row-level filter conditions applied to both records with AND. Same format as query_form_data filters: \"column_name OPERATOR value\". Example: \"col_year = 2025\". Column-to-column comparison is also supported: \"col_start < col_end\".")] IEnumerable<string>? filters = null,
+            [Description("Row-level filter conditions applied to both records with AND. Format: \"column_name OPERATOR value\". Operators: =, !=, <, >, <=, >=, LIKE, NOT LIKE, IS NULL, IS NOT NULL, IN, NOT IN. Examples: \"col_year = 2025\", \"col_status IN approved,pending\". Column-to-column comparison: \"col_start < col_end\". IMPORTANT: use only PLAIN column names from the schema — never use output-prefixed names like 'a_pk', 'b_pk', 'a_col_employee', 'b_col_employee'. Those prefixes exist only in the result, not as filter columns.")] IEnumerable<string>? filters = null,
             [Description("Date-part filter conditions applied to both records. Format: \"column_name DATE_PART OPERATOR value[,v2,...]\". DATE_PART: YEAR, MONTH, WEEK, QUARTER, DAYOFYEAR. Example: \"col_start_date YEAR = 2025\" to limit to records in 2025.")] IEnumerable<string>? datePartFilters = null)
         {
             try
@@ -206,18 +207,23 @@ public class SelfJoinFormDataTool(
         sb.Append("(3) same value across multiple records — \"submitted on the same date\", \"same employee appears twice\"; ");
         sb.Append("(4) any comparison between two different rows of the form \"find pairs where...\". ");
         sb.Append("DO NOT use query_form_data to fetch all rows for manual comparison — always use this tool instead. ");
-        sb.Append("joinConditions format: \"left_col OPERATOR right_col\" — plain column names only, NO 'a_'/'b_' prefixes. ");
+        sb.Append("RECORD A vs RECORD B: each joinCondition compares a column from record A (left side) against a column from record B (right side). ");
+        sb.Append("Use plain column names — do NOT add 'a_'/'b_' prefixes in joinConditions (those prefixes appear ONLY in output columns). ");
         sb.Append("Operators: =, !=, <, >, <=, >=. ");
-        sb.Append("Overlap example: joinConditions=[\"col_start_date <= col_end_date\", \"col_end_date >= col_start_date\"]. ");
-        sb.Append("To filter results by year/month add datePartFilters: e.g. datePartFilters=[\"col_start_date YEAR = 2025\"]. ");
-        sb.Append("Same-date example: joinConditions=[\"col_submission_date = col_submission_date\"]. ");
+        sb.Append("Overlap — A.start <= B.end AND A.end >= B.start: joinConditions=[\"col_start_date <= col_end_date\", \"col_end_date >= col_start_date\"]. ");
+        sb.Append("Same-date: joinConditions=[\"col_submission_date = col_submission_date\"]. ");
         sb.Append("Different employees same start: joinConditions=[\"col_start_date = col_start_date\", \"col_employee != col_employee\"]. ");
+        sb.Append("To filter by year/month add datePartFilters: e.g. datePartFilters=[\"col_start_date YEAR = 2025\"]. ");
+        sb.Append("NULL awareness: NULL values in join columns will not match any row including other NULLs — pre-filter with IS NOT NULL if needed. ");
+        sb.Append("Scale note: returns at most 500 pairs. On large tables apply filters or datePartFilters first to restrict the pair space. ");
+        sb.Append("Error recovery: if joinConditions is empty after parsing, check that each entry uses format 'plain_col OPERATOR plain_col'. Date-part cross-row: 'col_date YEAR = col_date YEAR' (not 'col_date_YEAR = col_date_YEAR'). ");
         sb.Append("Each result row contains a_pk and b_pk (the pair) plus displayColumns prefixed with a_ and b_. ");
         sb.Append($"Table: '{tableName}'. ");
         sb.Append("Available columns: ");
         sb.Append(string.Join(", ", columns.Select(c =>
         {
-            var desc = $"{c.Name} ({c.Type})";
+            var label = c.Label is not null && c.Label != c.Name ? $" \"{c.Label}\"" : string.Empty;
+            var desc = $"{c.Name}{label} ({c.Type})";
             return c.EnumValues?.Count > 0 ? desc + $" [{string.Join("/", c.EnumValues)}]" : desc;
         })));
         sb.Append('.');

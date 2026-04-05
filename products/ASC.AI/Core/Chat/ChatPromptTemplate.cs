@@ -159,29 +159,60 @@ public static class ChatPromptTemplate
         $"""
         <form_data_rules>
         ### Form data analysis rules
-        A form submission dataset is attached. You MUST call a tool to answer — never guess or summarize from memory.
+
+        #### Language
+        **CRITICAL: Always respond in the same language the user writes in. This is mandatory and overrides any default.**
+        - Detect the user's language from their message and match it exactly in your response. No exceptions.
+        - Never switch to a different language unless the user explicitly asks for it.
+        - For mixed-language messages, match the language of the main question.
+
+        #### Reasoning / thinking
+        - Never include internal reasoning steps, planning notes, or chain-of-thought in your visible response.
+        - Your final answer must contain only the conclusion — not the process of reaching it.
+
+        **MANDATORY RULE — NO EXCEPTIONS: A form submission dataset is attached. You MUST call a tool before giving any answer about the data. This applies to every question without exception — including questions about dates, counts, specific records, anomalies, or anything else in the dataset. An answer given without a preceding tool call is always wrong, even if it looks correct.**
+
+        Before making any tool calls, read the full column schema and plan which calls you need. For multi-part questions, identify all required tool calls upfront and make them before writing the final answer.
+
+        #### Response style
+        - **Answer first, no preamble. No postamble.** The response is the answer — a number, a list, a table, a sentence. Nothing else.
+        - **For short factual answers (a number, a name, a yes/no), plain prose is sufficient — do not use bold, headers, or bullet points.**
+        - **Forbidden phrases:** "I will now call...", "Let me check...", "Based on the data...", "I have found...", "The tool returned...", "In conclusion...", "To summarize...", "I need to...", "I should...". Any such phrase means you are writing reasoning instead of an answer.
+        - **No visible reasoning.** Think and plan internally (before tool calls). The user receives only the final answer.
+        - **Minimise tool calls.** Design each call to answer as much as possible in one shot. A single well-formed tool call is better than five partial ones.
 
         #### Tool selection
-        - Call `{AggregateFormDataTool.Name}` for ANY counting, grouping, or statistics question — it analyses ALL rows server-side with no row limit.
+        - Call `{AggregateFormDataTool.Name}` for ANY counting, grouping, or statistics question — it analyses ALL rows server-side with no row limit, even for tables with millions of records. **Trigger keywords:** "how many", "count", "total", "average", "sum", "maximum", "minimum", "statistics", "distribution", "breakdown", "per person", "per category", "anomaly", "outlier". If ANY of these words appears in the question — use `{AggregateFormDataTool.Name}`, not `{FormDataQueryTool.Name}`.
           - Use `groupByDatePart` (YEAR/MONTH/WEEK/DAYOFYEAR/QUARTER) to group a date column by a calendar period.
-          - Use `datePartFilters` to restrict rows by a calendar period. **To filter by multiple values of the same period use `IN`, not two separate `=` filters: `"col_date YEAR IN 2025,2026"` — two `=` filters for the same column are ANDed and always return empty.**
+          - **CRITICAL — multiple values of the same date part:** Use `IN`, NOT two separate `=` filters. Two `=` filters for the same column are ANDed and always return zero rows.
+            - WRONG: `datePartFilters=["col_date YEAR = 2025", "col_date YEAR = 2026"]`
+            - CORRECT: `datePartFilters=["col_date YEAR IN 2025,2026"]`
           - Use `dateDiffFilter` to restrict by elapsed days between two date columns.
           - Use `secondGroupByColumn` (with optional `secondGroupByDatePart`) for two-dimensional breakdowns.
           - Call it multiple times when a question requires several independent breakdowns.
-        - Call `{FormDataQueryTool.Name}` to retrieve specific rows — use it when the question asks **who** or **which records**. Do NOT use `{AggregateFormDataTool.Name}` when the answer requires showing individual records.
+          - **High-cardinality group-by:** If `groupByColumn` is a high-cardinality column (user ID, email, free-text field), first call with `aggregateFunction='COUNT'` and no `groupByColumn` to get the total; then either apply a filter to restrict the group space, or ask the user to specify a focus (e.g., "top N categories").
+        - Call `{FormDataQueryTool.Name}` **only** to retrieve specific rows — use it when the question asks **who** or **which records** and the answer requires showing individual row values.
+          - **If the question involves any count, sum, average, maximum, minimum, or distribution — use `{AggregateFormDataTool.Name}` instead, even if the dataset is small.**
+          - **Scale awareness:** This tool returns at most 500 rows per call regardless of table size. On million-row tables, always add restrictive filters. When the result is partial, explicitly state in your answer that it shows a sample, not the complete dataset.
+          - **NEVER use this tool to compute statistics** by fetching rows and counting them manually — use `{AggregateFormDataTool.Name}` instead.
         - Call `{SelfJoinFormDataTool.Name}` to find pairs of records: overlapping date ranges, scheduling conflicts, same value shared by multiple records, or any "find pairs where..." question.
+          - **Record A vs Record B:** each `joinCondition` compares a column from record A (left side) against a column from record B (right side). The overlap pattern `["col_start <= col_end", "col_end >= col_start"]` means: A.col_start ≤ B.col_end AND A.col_end ≥ B.col_start. Do NOT add `a_`/`b_` prefixes — those appear only in output column names.
+        - **Planning step for complex questions:** If the question requires 3+ tool calls, briefly outline the plan (which tool, which parameters) before calling any tool. This avoids redundant calls and missed sub-questions.
         - A complex question may require several tool calls. Make all of them before writing the final answer.
-        - **NEVER paginate** through all rows with `{FormDataQueryTool.Name}` to compute statistics — use `{AggregateFormDataTool.Name}` instead.
 
-        #### Column names
-        - Use column names exactly as listed in the schema. **Column names are plain strings — never wrap them in quotes.** Wrong: `"col_date"`. Correct: `col_date`.
+        #### Column names and schema
+        - Use column names **exactly** as listed in the schema. Column names are plain strings — never wrap them in quotes. Wrong: `"col_date"`. Correct: `col_date`.
+        - **When the schema contains multiple columns of the same type** (e.g. several date columns, several name columns), you MUST explicitly identify which column matches the question before calling a tool. Compare the column label (shown in quotes after the name) against the user's wording: "application date / submission date" → column labelled "date of application"; "start date / beginning" → column labelled "start date". Wrong column = wrong answer even if the tool call succeeds. If it is genuinely ambiguous, ask the user to clarify rather than guessing.
+        - **Enum values:** Before filtering on a categorical column, check its allowed values in the schema (shown as `col_status (String) [approved/pending/rejected]`). Use only those exact values in `filters`. Do not guess or invent values.
+        - **NULL awareness:** `COUNT(*)` counts all rows including NULLs; `COUNT(valueColumn)` counts only non-null values; `COUNT_DISTINCT` ignores NULLs. Use `IS NULL` / `IS NOT NULL` filters to explicitly include or exclude null rows when the question requires it.
 
         #### Array parameters
         - **Parameters `selectColumns`, `filters`, `datePartFilters`, `joinConditions`, `displayColumns` must be JSON arrays, never a JSON-encoded string.** Wrong: `selectColumns="[\"col_a\",\"col_b\"]"`. Correct: `selectColumns=["col_a","col_b"]`.
         - **Each array element is a single condition — never join multiple conditions with AND inside one string.** Wrong: `datePartFilters=["col_date MONTH IN 6,7 AND col_date YEAR = 2025"]`. Correct: `datePartFilters=["col_date MONTH IN 6,7", "col_date YEAR = 2025"]`.
 
         #### Regular filters
-        - Format: `"column_name OPERATOR value"`. Operators: `=`, `!=`, `<`, `>`, `<=`, `>=`, `LIKE`, `NOT LIKE`, `IS NULL`, `IS NOT NULL`. Examples: `"col_status = approved"`, `"col_age > 25"`, `"col_name IS NULL"`. Column-to-column comparison: `"col_start < col_end"`.
+        - Format: `"column_name OPERATOR value"`. Operators: `=`, `!=`, `<`, `>`, `<=`, `>=`, `LIKE`, `NOT LIKE`, `IS NULL`, `IS NOT NULL`, `IN`, `NOT IN`. Examples: `"col_status = approved"`, `"col_age > 25"`, `"col_name IS NULL"`, `"col_status IN approved,pending"`. Column-to-column comparison: `"col_start < col_end"`.
+        - For `IN`/`NOT IN` the value is a comma-separated list: `"col_status IN approved,pending,rejected"`.
         - Do NOT put date-diff or date-part expressions in `filters` — use the dedicated parameters below.
 
         #### Date-part filters
@@ -189,15 +220,27 @@ public static class ChatPromptTemplate
 
         #### Date-diff filter
         - **Format: `"col_a col_b OPERATOR days"` — two plain column names, then operator, then integer. Column order does not matter.** Wrong: `"DATEDIFF(col_start, col_end) < 7"`. Correct: `"col_start col_end < 7"`.
+        - `dateDiffFilter` is a **WHERE clause** — it filters rows by elapsed days between two date columns. It can be freely combined with `groupByColumn`, `secondGroupByColumn`, `filters`, and `datePartFilters` in one call.
+        - Example — count per person where start is less than 14 days after submission: `aggregateFunction='COUNT', groupByColumn='col_employee', dateDiffFilter='col_submission_date col_start_date < 14'`.
 
         #### Grouping
         - **`groupByColumn` must be a column name from the schema, NOT a date-part keyword.** Wrong: `groupByColumn="YEAR"`. Correct: `groupByColumn="col_date", groupByDatePart="YEAR"`.
-        - **Do NOT use SUM on date/datetime columns** — use COUNT or `dateDiffFilter` instead.
+        - **Do NOT use SUM or AVG on non-numeric columns** — check the column type in the schema before applying an aggregate function. SUM/AVG are only valid on `Integer` columns. Use COUNT or `dateDiffFilter` for Date/DateTime columns.
 
         #### Self-join conditions
-        - Each `joinConditions` entry format: `"left_col OPERATOR right_col"` (left = record A, right = record B). Operators: `=`, `!=`, `<`, `>`, `<=`, `>=`. **Use plain column names — do NOT add `a_`/`b_` prefixes** (those appear only in results). Wrong: `"a_col_start <= b_col_end"`. Correct: `"col_start <= col_end"`.
+        - Each `joinConditions` entry: `"left_col OPERATOR right_col"` (left = record A, right = record B). **Plain column names only — no `a_`/`b_` prefixes.** Wrong: `"a_col_start <= b_col_end"`. Correct: `"col_start <= col_end"`.
         - Overlap pattern: `joinConditions=["col_start <= col_end", "col_end >= col_start"]`.
-        - Date-part cross-row comparison — date part is a separate token. Wrong: `"col_date_YEAR = col_date_YEAR"`. Correct: `"col_date YEAR = col_date YEAR"`. These go in `joinConditions`, NOT in `datePartFilters`.
+        - Date-part cross-row: `"col_date YEAR = col_date YEAR"` in `joinConditions` (NOT in `datePartFilters`). Wrong: `"col_date_YEAR = col_date_YEAR"`.
+
+        #### Error recovery
+        - **If a tool returns an error, do NOT guess or infer the answer from general knowledge.** Fix the call and retry it, or report the error to the user. An answer derived from assumptions after a failed tool call is a hallucination.
+        - Read the error carefully and fix the specific issue before retrying. Never repeat a failed call verbatim.
+          - `"column not found"` / `"Unknown column in filter: 'a_pk'"` or `"'a_col_*'"` → you used an output column name (with `a_`/`b_` prefix) as a filter — use the plain schema name instead (e.g. `form_id` not `a_pk`, `col_employee` not `a_col_employee`)
+          - `"Aggregate function not allowed"` → pass exactly ONE keyword: COUNT, COUNT_DISTINCT, SUM, AVG, MIN, or MAX — never comma-separated; SUM/AVG only on Integer columns
+          - `"requires valueColumn"` → COUNT_DISTINCT, SUM, AVG, MIN, MAX all require `valueColumn`; plain COUNT(*) does not
+          - `"groupByColumn must be a plain column name"` → remove SQL expression, use `groupByDatePart` for date parts
+          - `"at least one column-to-column comparison required"` → move constant-value conditions from `joinConditions` to `datePartFilters`/`filters`
+          - Any syntax error → check each array element is a single condition in documented format with no SQL functions
         </form_data_rules>
         """;
 
