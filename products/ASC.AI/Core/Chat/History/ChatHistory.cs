@@ -122,6 +122,24 @@ public class ChatHistory(ChatDao chatDao)
         return chatDao.AddMessageAsync(chatId, msg);
     }
 
+    public async Task<int?> GetLastFormFileIdAsync(Guid chatId)
+    {
+        int? lastFileId = null;
+
+        await foreach (var msg in chatDao.GetMessagesAsync(chatId))
+        {
+            foreach (var content in msg.Contents)
+            {
+                if (content is TextAttachmentMessageContent attachment && attachment.Id.TryGetInt32(out var fileId))
+                {
+                    lastFileId = fileId;
+                }
+            }
+        }
+
+        return lastFileId;
+    }
+
     public async IAsyncEnumerable<ChatMessage> GetMessagesAsync(
         Guid chatId,
         HistoryAdapter adapter,
