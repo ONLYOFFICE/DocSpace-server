@@ -182,7 +182,14 @@ public static class ChatPromptTemplate
         - **Minimise tool calls.** Design each call to answer as much as possible in one shot. A single well-formed tool call is better than five partial ones.
 
         #### Tool selection
-        - Call `{AggregateFormDataTool.Name}` for ANY counting, grouping, or statistics question — it analyses ALL rows server-side with no row limit, even for tables with millions of records. **Trigger keywords:** "how many", "count", "total", "average", "sum", "maximum", "minimum", "statistics", "distribution", "breakdown", "per person", "per category", "anomaly", "outlier". If ANY of these words appears in the question — use `{AggregateFormDataTool.Name}`, not `{FormDataQueryTool.Name}`.
+        **FORBIDDEN: never use `{FormDataQueryTool.Name}` to answer a question whose answer is a number, percentage, statistic, or grouped summary. It sees at most 500 rows — the result would be wrong. Use `{AggregateFormDataTool.Name}` instead.**
+
+        - Call `{AggregateFormDataTool.Name}` when the question involves ANY of the following — it analyses ALL rows server-side with no row limit:
+          - **Counting:** "how many", "count", "number of", "total", "how often", "frequency", "how much"
+          - **Math:** "average", "mean", "sum", "maximum", "highest", "minimum", "lowest", "median", "percentage", "percent", "ratio"
+          - **Grouping / distribution:** "statistics", "distribution", "breakdown", "per category", "by type", "group by", "trend", "top N", "ranking", "most", "least", "per person", "anomaly", "outlier"
+          - **Comparison between groups:** "compare", "which category has more/less", "difference between groups"
+          - If ANY of these concepts appears in the question — use `{AggregateFormDataTool.Name}`, not `{FormDataQueryTool.Name}`.
           - Use `groupByDatePart` (YEAR/MONTH/WEEK/DAYOFYEAR/QUARTER) to group a date column by a calendar period.
           - **CRITICAL — multiple values of the same date part:** Use `IN`, NOT two separate `=` filters. Two `=` filters for the same column are ANDed and always return zero rows.
             - WRONG: `datePartFilters=["col_date YEAR = 2025", "col_date YEAR = 2026"]`
@@ -191,16 +198,16 @@ public static class ChatPromptTemplate
           - Use `secondGroupByColumn` (with optional `secondGroupByDatePart`) for two-dimensional breakdowns.
           - Call it multiple times when a question requires several independent breakdowns.
           - **High-cardinality group-by:** If `groupByColumn` is a high-cardinality column (user ID, email, free-text field), first call with `aggregateFunction='COUNT'` and no `groupByColumn` to get the total; then either apply a filter to restrict the group space, or ask the user to specify a focus (e.g., "top N categories").
-        - Call `{FormDataQueryTool.Name}` **only** to retrieve specific rows — use it when the question asks **who** or **which records** and the answer requires showing individual row values.
-          - **If the question involves any count, sum, average, maximum, minimum, or distribution — use `{AggregateFormDataTool.Name}` instead, even if the dataset is small.**
-          - **Scale awareness:** This tool returns at most 500 rows per call regardless of table size. On million-row tables, always add restrictive filters. When the result is partial, explicitly state in your answer that it shows a sample, not the complete dataset.
-          - **NEVER use this tool to compute statistics** by fetching rows and counting them manually — use `{AggregateFormDataTool.Name}` instead.
+        - Call `{FormDataQueryTool.Name}` **only** to retrieve and display specific individual records — when the question asks **who** or **which records** and the answer requires showing raw row values, not a computed result.
+          - **Scale awareness:** returns at most 500 rows regardless of table size. When the result is partial, state explicitly that it shows a sample, not the complete dataset.
+          - **NEVER use this tool to compute statistics** — use `{AggregateFormDataTool.Name}` instead.
         - Call `{SelfJoinFormDataTool.Name}` to find pairs of records: overlapping date ranges, scheduling conflicts, same value shared by multiple records, or any "find pairs where..." question.
           - **Record A vs Record B:** each `joinCondition` compares a column from record A (left side) against a column from record B (right side). The overlap pattern `["col_start <= col_end", "col_end >= col_start"]` means: A.col_start ≤ B.col_end AND A.col_end ≥ B.col_start. Do NOT add `a_`/`b_` prefixes — those appear only in output column names.
         - **Planning step for complex questions:** If the question requires 3+ tool calls, briefly outline the plan (which tool, which parameters) before calling any tool. This avoids redundant calls and missed sub-questions.
         - A complex question may require several tool calls. Make all of them before writing the final answer.
 
         #### Column names and schema
+        - **NEVER invent or guess column names.** Use ONLY the names listed in "Available columns" in the tool description. If no column matches the concept in the question, tell the user — do not fabricate a name.
         - Use column names **exactly** as listed in the schema. Column names are plain strings — never wrap them in quotes. Wrong: `"col_date"`. Correct: `col_date`.
         - **When the schema contains multiple columns of the same type** (e.g. several date columns, several name columns), you MUST explicitly identify which column matches the question before calling a tool. Compare the column label (shown in quotes after the name) against the user's wording: "application date / submission date" → column labelled "date of application"; "start date / beginning" → column labelled "start date". Wrong column = wrong answer even if the tool call succeeds. If it is genuinely ambiguous, ask the user to clarify rather than guessing.
         - **Enum values:** Before filtering on a categorical column, check its allowed values in the schema (shown as `col_status (String) [approved/pending/rejected]`). Use only those exact values in `filters`. Do not guess or invent values.
@@ -233,7 +240,8 @@ public static class ChatPromptTemplate
         - Date-part cross-row: `"col_date YEAR = col_date YEAR"` in `joinConditions` (NOT in `datePartFilters`). Wrong: `"col_date_YEAR = col_date_YEAR"`.
 
         #### Error recovery
-        - **If a tool returns an error, do NOT guess or infer the answer from general knowledge.** Fix the call and retry it, or report the error to the user. An answer derived from assumptions after a failed tool call is a hallucination.
+        - **If a tool returns an error, STOP. Do NOT guess, assume, or produce an answer from general knowledge.** An answer given after a failed tool call — even one that looks plausible — is a hallucination. Fix the call and retry it, or report the error to the user.
+        - **A result of "0" or an empty result after an error is not a valid answer** — it may reflect the failure, not the data. Retry with a corrected call before reporting any result.
         - Read the error carefully and fix the specific issue before retrying. Never repeat a failed call verbatim.
           - `"column not found"` / `"Unknown column in filter: 'a_pk'"` or `"'a_col_*'"` → you used an output column name (with `a_`/`b_` prefix) as a filter — use the plain schema name instead (e.g. `form_id` not `a_pk`, `col_employee` not `a_col_employee`)
           - `"Aggregate function not allowed"` → pass exactly ONE keyword: COUNT, COUNT_DISTINCT, SUM, AVG, MIN, or MAX — never comma-separated; SUM/AVG only on Integer columns
