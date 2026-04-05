@@ -29,7 +29,7 @@ namespace ASC.Files.Core.ExternalDatabase;
 
 public enum DbColumnType { Text, Integer, Boolean, Date, DateTime, Enum }
 
-public record DbColumnDefinition(string Name, DbColumnType Type, IReadOnlyList<string>? EnumValues = null, bool IsPrimaryKey = false);
+public record DbColumnDefinition(string Name, DbColumnType Type, IReadOnlyList<string>? EnumValues = null, bool IsPrimaryKey = false, string? Label = null);
 
 /// <summary>Column filter for structured queries against an external database table.</summary>
 /// <param name="Column">Name of the column to filter on.</param>
@@ -318,7 +318,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
 
     private static readonly HashSet<string> _allowedOperators = new(StringComparer.OrdinalIgnoreCase)
     {
-        "=", "!=", "<>", "<", ">", "<=", ">=", "LIKE", "NOT LIKE", "IS NULL", "IS NOT NULL"
+        "=", "!=", "<>", "<", ">", "<=", ">=", "LIKE", "NOT LIKE", "IS NULL", "IS NOT NULL", "IN", "NOT IN"
     };
 
     private static readonly HashSet<string> _nullaryOperators = new(StringComparer.OrdinalIgnoreCase)
@@ -456,6 +456,12 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
                 throw new UnauthorizedAccessException($"Operator not allowed: {f.Operator}");
             }
 
+            var upperOp = f.Operator.ToUpperInvariant();
+            if ((upperOp is "IN" or "NOT IN") && string.IsNullOrWhiteSpace(f.Value))
+            {
+                throw new ArgumentException($"Operator {f.Operator} requires a comma-separated value list. Example: \"col_status IN approved,pending\".");
+            }
+
             if (f.Value != null && !_nullaryOperators.Contains(f.Operator.ToUpperInvariant()))
             {
                 if (f.Value.Contains('(') || f.Value.Contains(')')
@@ -568,10 +574,16 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
     {
         ValidateTableName(tableName);
 
-        var upperFn = aggregateFunction.ToUpperInvariant();
-        if (!_allowedAggregateFunctions.Contains(upperFn))
+        // Normalize: split by comma, strip quotes/spaces from each token, take the first recognized function.
+        // This tolerates model outputs like "'COUNT', 'SUM'" or "',COUNT'" that contain extra punctuation.
+        var upperFn = aggregateFunction
+            .Split(',')
+            .Select(t => t.Trim().Trim('\'', '"').ToUpperInvariant())
+            .FirstOrDefault(t => _allowedAggregateFunctions.Contains(t));
+
+        if (upperFn is null)
         {
-            throw new UnauthorizedAccessException($"Aggregate function not allowed: {aggregateFunction}");
+            throw new ArgumentException($"Aggregate function not allowed: '{aggregateFunction}'. Pass exactly one keyword: COUNT, COUNT_DISTINCT, SUM, AVG, MIN, or MAX.");
         }
 
         if (upperFn is "COUNT_DISTINCT" or "SUM" or "AVG" or "MIN" or "MAX" && valueColumn is null)
@@ -669,6 +681,16 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
             if (_nullaryOperators.Contains(op))
             {
                 whereParts.Add($"{colQuoted} {op}");
+            }
+            else if (op is "IN" or "NOT IN")
+            {
+                var inParams = (f.Value ?? "").Split(',').Select((v, i) =>
+                {
+                    var pn = $"@w{paramIndex++}";
+                    parameters[pn] = v.Trim();
+                    return pn;
+                }).ToList();
+                whereParts.Add($"{colQuoted} {op} ({string.Join(", ", inParams)})");
             }
             else if (f.Value != null && allowedColumns.Contains(f.Value, StringComparer.OrdinalIgnoreCase))
             {
@@ -805,6 +827,16 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
             if (_nullaryOperators.Contains(op))
             {
                 whereParts.Add($"{colQuoted} {op}");
+            }
+            else if (op is "IN" or "NOT IN")
+            {
+                var inParams = (f.Value ?? "").Split(',').Select((v, i) =>
+                {
+                    var pn = $"@w{paramIndex++}";
+                    parameters[pn] = v.Trim();
+                    return pn;
+                }).ToList();
+                whereParts.Add($"{colQuoted} {op} ({string.Join(", ", inParams)})");
             }
             else if (f.Value != null && allowedColumns.Contains(f.Value, StringComparer.OrdinalIgnoreCase))
             {
@@ -993,6 +1025,18 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
             {
                 whereParts.Add($"{aCol} {op}");
                 whereParts.Add($"{bCol} {op}");
+            }
+            else if (op is "IN" or "NOT IN")
+            {
+                var inParamNames = (f.Value ?? "").Split(',').Select((v, i) =>
+                {
+                    var pn = $"@w{paramIndex++}";
+                    parameters[pn] = v.Trim();
+                    return pn;
+                }).ToList();
+                var inList = string.Join(", ", inParamNames);
+                whereParts.Add($"{aCol} {op} ({inList})");
+                whereParts.Add($"{bCol} {op} ({inList})");
             }
             else if (f.Value != null && allowedColumns.Contains(f.Value, StringComparer.OrdinalIgnoreCase))
             {

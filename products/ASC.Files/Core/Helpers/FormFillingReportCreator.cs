@@ -342,7 +342,8 @@ public class FormFillingReportCreator(
                 "comboBox" or "dropDownList" or "radio" => (DbColumnType.Enum, (IReadOnlyList<string>)field.PossibleValues),
                 _ => (DbColumnType.Text, null)
             };
-            yield return new DbColumnDefinition(name, type, enumValues);
+            var label = string.IsNullOrEmpty(field.Key) ? null : field.Key;
+            yield return new DbColumnDefinition(name, type, enumValues, Label: label);
         }
     }
 
