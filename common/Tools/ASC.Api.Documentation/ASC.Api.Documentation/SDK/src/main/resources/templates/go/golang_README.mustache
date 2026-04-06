@@ -15,7 +15,7 @@ import (
     "context"
     "fmt"
 
-    {{packageName}} "{{packageImportPath}}{{#isGoSubmodule}}/{{packageName}}{{/isGoSubmodule}}"
+    {{packageName}} "{{goModulePath}}{{^goModulePath}}{{packageImportPath}}{{/goModulePath}}{{#isGoSubmodule}}/{{packageName}}{{/isGoSubmodule}}"
 )
 ```
 
@@ -30,7 +30,7 @@ import (
     "context"
     "fmt"
 
-    {{packageName}} "{{packageImportPath}}{{#isGoSubmodule}}/{{packageName}}{{/isGoSubmodule}}"
+    {{packageName}} "{{goModulePath}}{{^goModulePath}}{{packageImportPath}}{{/goModulePath}}{{#isGoSubmodule}}/{{packageName}}{{/isGoSubmodule}}"
 )
 
 func main() {

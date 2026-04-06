@@ -318,6 +318,49 @@ func (o *{{classname}}) Unset{{name}}() {
 
 {{/required}}
 {{/vars}}
+{{#vendorExtensions.x-docspace-handle-string-datetime}}
+func (o *{{{classname}}}) UnmarshalJSON(data []byte) error {
+	// Some DocSpace endpoints return datetime as plain string instead of object.
+	if string(data) == "null" {
+		return nil
+	}
+
+	var asString string
+	if err := json.Unmarshal(data, &asString); err == nil {
+		if asString == "" {
+			return nil
+		}
+
+		layouts := []string{
+			time.RFC3339Nano,
+			time.RFC3339,
+			"2006-01-02 15:04:05",
+			"2006-01-02T15:04:05",
+		}
+
+		for _, layout := range layouts {
+			if parsed, parseErr := time.Parse(layout, asString); parseErr == nil {
+				o.UtcTime = &parsed
+				return nil
+			}
+		}
+
+		// Keep backward compatibility even for unknown string formats.
+		return nil
+	}
+
+	// Fallback to object format: {"utcTime":"...","timeZoneOffset":"..."}
+	type alias {{{classname}}}
+	var aux alias
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+
+	*o = {{{classname}}}(aux)
+	return nil
+}
+
+{{/vendorExtensions.x-docspace-handle-string-datetime}}
 {{#vendorExtensions.x-go-generate-marshal-json}}
 func (o {{classname}}) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
@@ -551,7 +594,8 @@ func (o *{{{classname}}}) UnmarshalJSON(data []byte) (err error) {
 {{#isMap}}
 	var{{{classname}}} := _{{{classname}}}{}
 
-	err = json.Unmarshal(data, &var{{{classname}}})
+	decoder := json.NewDecoder(bytes.NewReader(data))
+	err = decoder.Decode(&var{{{classname}}})
 
 	if err != nil {
 		return err
@@ -603,7 +647,6 @@ func (o *{{{classname}}}) UnmarshalJSON(data []byte) (err error) {
 	var{{{classname}}} := _{{{classname}}}{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&var{{{classname}}})
 
 	if err != nil {
@@ -625,4 +668,3 @@ func (o *{{{classname}}}) UnmarshalJSON(data []byte) (err error) {
 {{/isArray}}
 {{/vendorExtensions.x-go-generate-unmarshal-json}}
 {{>nullable_model}}
-

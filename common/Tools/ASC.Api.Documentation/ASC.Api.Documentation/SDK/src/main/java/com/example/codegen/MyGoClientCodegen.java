@@ -145,6 +145,9 @@ public class MyGoClientCodegen extends GoClientCodegen {
 
         for (ModelMap modelMap : objs.getModels()) {
             CodegenModel model = modelMap.getModel();
+            if ("ApiDateTime".equals(model.classname)) {
+                model.vendorExtensions.put("x-docspace-handle-string-datetime", true);
+            }
             for (CodegenProperty prop : model.vars) {
                 if ("version_Changed".equalsIgnoreCase(prop.baseName)) {
                     prop.name = "VersionChangedField";
@@ -194,7 +197,10 @@ public class MyGoClientCodegen extends GoClientCodegen {
                 || "golang_README.mustache".equals(file.getTemplateFile())
         );
         supportingFiles.add(new SupportingFile("golang_README.mustache", "", "README.md"));
-        supportingFiles.add(new SupportingFile("sample.mustache", "samples", "sample.go"));
+
+        String sampleDir = "samples" + File.separator + "docspace-api-sdk-go-sample";
+        supportingFiles.add(new SupportingFile("sample_main.mustache", sampleDir, "main.go"));
+        supportingFiles.add(new SupportingFile("sample_go.mod.mustache", sampleDir, "go.mod"));
 
         supportingFiles.add(new SupportingFile(
             "AUTHORS.mustache", "", "AUTHORS.md"
@@ -227,15 +233,31 @@ public class MyGoClientCodegen extends GoClientCodegen {
 
         supportingFiles.removeIf(f -> f.getTemplateFile().equals("git_push.sh.mustache"));
 
+        String packageImportPath = null;
         Object repositoryUrlObj = additionalProperties.get("repositoryUrl");
         if (repositoryUrlObj != null) {
-            String packageImportPath = String.valueOf(repositoryUrlObj)
+            packageImportPath = String.valueOf(repositoryUrlObj)
                 .trim()
                 .replaceFirst("^https?://", "")
                 .replaceFirst("\\.git$", "")
                 .replaceFirst("/+$", "");
+        } else if (additionalProperties.get("packageImportPath") != null) {
+            packageImportPath = String.valueOf(additionalProperties.get("packageImportPath")).trim();
+        }
 
+        if (packageImportPath != null && !packageImportPath.isEmpty()) {
             additionalProperties.put("packageImportPath", packageImportPath);
+
+            String version = String.valueOf(additionalProperties.getOrDefault("packageVersion", "0.0.0"));
+            String major = version.replaceFirst("^v", "").split("\\.")[0];
+
+            String goMajorSuffix = "";
+            if (!"0".equals(major) && !"1".equals(major)) {
+                goMajorSuffix = "/v" + major;
+            }
+
+            additionalProperties.put("goMajorSuffix", goMajorSuffix);
+            additionalProperties.put("goModulePath", packageImportPath + goMajorSuffix);
         }
     }
 
