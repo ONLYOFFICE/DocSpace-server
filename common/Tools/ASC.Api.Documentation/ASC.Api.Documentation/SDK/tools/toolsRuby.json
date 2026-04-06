@@ -10,7 +10,7 @@
   "additionalProperties": {
     "gemName": "docspace-api-sdk",
     "moduleName": "DocspaceApiSdk",
-    "gemVersion": "3.6.0",
+    "gemVersion": "3.7.0",
     "gemLicense": "Apache-2.0",
     "library": "typhoeus",
     "gemAuthor": "Ascensio System SIA <integration@onlyoffice.com> (https://www.onlyoffice.com)",
