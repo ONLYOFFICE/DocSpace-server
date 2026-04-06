@@ -160,7 +160,7 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
         {
             return;
         }
-        
+
         Result += $"folder_{tto}{SplitChar}";
 
         var needToMark = new List<FileEntry>();
@@ -268,7 +268,7 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
                                 if (!conflictFolder.ProviderEntry && _resolveType == FileConflictResolveType.Duplicate)
                                 {
                                     conflictFolder.Id = default;
-                                    conflictFolder.Title = await global.GetAvailableTitleAsync(conflictFolder.Title, conflictFolder.ParentId, folderDao.IsExistAsync, FileEntryType.Folder);
+                                    conflictFolder.Title = await folderDao.GetAvailableTitleAsync(conflictFolder.Title, conflictFolder.ParentId);
                                     conflictFolder.Id = await folderDao.SaveFolderAsync(conflictFolder);
                                 }
 
@@ -640,7 +640,7 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
                     }
                 }
             }
-            
+
             await ProgressStep(FolderDao.CanCalculateSubitems(folderId) ? default : folderId);
         }
 
@@ -676,7 +676,7 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
             CancellationToken.ThrowIfCancellationRequested();
 
             var file = await FileDao.GetFileAsync(fileId);
-            
+
             Err = await permissionsManager.CheckFilesPermissionsAsync(file, toFolder, _copy, _resolveType);
 
             var errorMsg = await permissionsManager.CheckFilesSecurityPermissionsAsync([file], checkPermissions);
