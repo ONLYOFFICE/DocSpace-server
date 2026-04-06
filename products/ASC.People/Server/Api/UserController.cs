@@ -49,7 +49,6 @@ public class UserController(
     QueueWorkerReassign queueWorkerReassign,
     QueueWorkerUpdateUserType queueWorkerUpdateUserType,
     QueueWorkerRemove queueWorkerRemove,
-    TenantUtil tenantUtil,
     UserFormatter userFormatter,
     UserManagerWrapper userManagerWrapper,
     WebItemManager webItemManager,
