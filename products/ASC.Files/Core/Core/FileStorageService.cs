@@ -5378,6 +5378,10 @@ public class FileStorageService //: IFileStorageService
     public async Task<RoomGroup> GetGroupInfoAsync(int roomGroupId)
     {
         var group = await daoFactory.GetRoomGroupDao<int>().GetGroupInfoAsync(roomGroupId);
+        if (group == null)
+        {
+            throw new ItemNotFoundException(Resource.ErrorGroupNotFound);
+        }
         return group;
     }
 
@@ -5400,7 +5404,8 @@ public class FileStorageService //: IFileStorageService
 
     public async Task<RoomGroup> ChangeGroupIconAsync(int groupId, string icon)
     {
-        var group = await daoFactory.GetRoomGroupDao<int>().GetGroupInfoAsync(groupId);
+        var group = await GetGroupInfoAsync(groupId);
+
         if (icon != null)
         {
             await RoomLogoManager.ValidateRoomCover(icon);

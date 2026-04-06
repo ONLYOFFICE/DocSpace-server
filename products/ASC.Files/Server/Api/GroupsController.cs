@@ -75,7 +75,7 @@ public class GroupsController(
     [HttpGet("{id:int}")]
     public async Task<RoomGroupDto> GetRoomGroupInfo(RoomGroupIdRequestDto inDto)
     {
-        var group = await GetGroupInfoAsync(inDto.Id).NotFoundIfNull("Group not found");
+        var group = await fileStorageService.GetGroupInfoAsync(inDto.Id);
         return await roomGroupDtoHelper.GetAsync(group, inDto.IncludeMembers);
     }
 
@@ -88,9 +88,9 @@ public class GroupsController(
     [HttpPut("{id:int}")]
     public async Task<RoomGroupDto> UpdateRoomGroup(UpdateRoomGroupRequestDto inDto)
     {
-        var group = await GetGroupInfoAsync(inDto.Id);
-
+        var group = await fileStorageService.GetGroupInfoAsync(inDto.Id);
         group.Name = inDto.UpdateRoom.GroupName ?? group.Name;
+
         await fileStorageService.SaveRoomGroupAsync(group);
 
         if (inDto.UpdateRoom.RoomsToAdd != null)
@@ -162,16 +162,5 @@ public class GroupsController(
         var stringTasks = stringIds.Select(id => fileStorageService.RemoveRoomFromGroupAsync(id, group.Id));
 
         await Task.WhenAll(intTasks.Concat(stringTasks));
-    }
-
-    private async Task<RoomGroup> GetGroupInfoAsync(int id)
-    {
-        var group = await fileStorageService.GetGroupInfoAsync(id);
-        if (group == null)
-        {
-            throw new ItemNotFoundException(Resource.ErrorGroupNotFound);
-        }
-
-        return group;
     }
 }
