@@ -5403,11 +5403,7 @@ public class FileStorageService //: IFileStorageService
         var group = await daoFactory.GetRoomGroupDao<int>().GetGroupInfoAsync(groupId);
         if (icon != null)
         {
-            var covers = await RoomLogoManager.GetCoversAsync();
-            if (icon != "" && !covers.ContainsKey(icon))
-            {
-                throw new ArgumentException(null, nameof(icon));
-            }
+            await RoomLogoManager.ValidateRoomCover(icon);
 
             group.Icon = icon == "" ? null : icon;
             return await SaveRoomGroupAsync(group);

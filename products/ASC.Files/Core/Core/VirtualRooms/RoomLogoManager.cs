@@ -342,6 +342,15 @@ public class RoomLogoManager(
         return _covers;
     }
 
+    public static async Task ValidateRoomCover(string icon)
+    {
+        var covers = await GetCoversAsync();
+        if (icon != "" && !covers.ContainsKey(icon))
+        {
+            throw new ArgumentException(null, nameof(icon));
+        }
+    }
+
     public static async Task<ConcurrentDictionary<string, ConcurrentDictionary<string, string>>> GetCoversBySizeAsync()
     {
         try
@@ -459,11 +468,7 @@ public class RoomLogoManager(
 
         if (cover != null && room.SettingsCover != cover)
         {
-            var covers = await GetCoversAsync();
-            if (cover != "" && !covers.ContainsKey(cover))
-            {
-                throw new ArgumentException(null, nameof(cover));
-            }
+            await ValidateRoomCover(cover);
 
             room.SettingsCover = cover == "" ? null : cover;
             coverChanged = true;
