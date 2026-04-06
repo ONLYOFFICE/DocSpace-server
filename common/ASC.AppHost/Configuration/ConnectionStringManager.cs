@@ -24,7 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using MySqlConnector;
+#pragma warning disable ASPIREINTERACTION001
 
 namespace ASC.AppHost.Configuration;
 
@@ -45,6 +45,9 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
     private IResourceBuilder<ContainerResource>? OpensearchResource { get; set; }
 
     private IResourceBuilder<ContainerResource>? McpResource { get; set; }
+    private IResourceBuilder<JavaScriptAppResource>? ApiTestResource { get; set; }
+    private IResourceBuilder<JavaScriptAppResource>? E2ETestResource { get; set; }
+    private Dictionary<string, string>? _parameters;
 
 
     public ConnectionStringManager AddMySql(bool withDbGate = false)
@@ -226,6 +229,157 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         return this;
     }
 
+    public ConnectionStringManager AddApiTest()
+    {
+        var docspaceOwnerEmail = builder.Configuration["OWNER_EMAIL"] ?? "test@example.com";
+        var coreMachineKey = builder.Configuration["core:machinekey"] ?? "test-machine-key";
+
+        var playwrightTestsPath = Path.Combine(basePath, "tests", "api-tests");
+
+        var currentBugId = builder.Configuration["BUG_ID"];
+
+        ApiTestResource = builder
+            .AddJavaScriptApp("tests-api", playwrightTestsPath, "test")
+            .WithNpm()
+            .WithEnvironment("MACHINEKEY", coreMachineKey)
+            .WithEnvironment("PKEY", "PKEY")
+            .WithEnvironment("LOCAL_PORTAL_DOMAIN", $"localhost:{Constants.AppHostPort.ToString()}")
+            .WithEnvironment("DOCSPACE_OWNER_EMAIL", docspaceOwnerEmail)
+            .WithExplicitStart();
+
+        if (!string.IsNullOrEmpty(currentBugId))
+        {
+            ApiTestResource.WithArgs("--", "--grep", $"BUG {currentBugId}");
+        }
+
+        ApiTestResource.WithCommand(
+            name: "run-ui",
+            displayName: "Run UI",
+            executeCommand: async context =>
+            {
+                var commandService = context.ServiceProvider
+                    .GetRequiredService<ResourceCommandService>();
+
+                ApiTestResource
+                    .WithHttpEndpoint(Constants.PlaywrightUiPort, Constants.PlaywrightUiPort, "playwright-ui", isProxied: false)
+                    .WithArgs("--", "--ui", "--ui-host", "0.0.0.0", "--ui-port", Constants.PlaywrightUiPort.ToString());
+
+                await commandService.ExecuteCommandAsync(
+                    resourceId: context.ResourceName,
+                    commandName: "resource-start",
+                    cancellationToken: context.CancellationToken);
+
+                return CommandResults.Success();
+            },
+            commandOptions: new CommandOptions
+            {
+                IconName = "TestBeaker",
+                IconVariant = IconVariant.Filled,
+                Description = "Restart tests with a specific BUG ID filter"
+            }
+        );
+
+        ApiTestResource.WithCommand(
+            name: "run-with-bug-id",
+            displayName: "Run with BUG ID",
+            executeCommand: async context =>
+            {
+                var interactionService = context.ServiceProvider
+                    .GetRequiredService<IInteractionService>();
+                var commandService = context.ServiceProvider
+                    .GetRequiredService<ResourceCommandService>();
+
+                var result = await interactionService.PromptInputAsync(
+                    title: "Enter BUG ID",
+                    message : "Provide the BUG ID to run specific tests (e.g., 12345)",
+                    input: new InteractionInput
+                    {
+                        InputType = InputType.Text,
+                        Name = "BUG ID",
+                        Placeholder = "Enter BUG ID number",
+                        Value = currentBugId ?? ""
+                    },
+                    cancellationToken: context.CancellationToken);
+
+                if (result.Canceled)
+                {
+                    return CommandResults.Success();
+                }
+
+                var bugId = result.Data.Value?.Trim();
+
+                await commandService.ExecuteCommandAsync(
+                    resourceId: context.ResourceName,
+                    commandName: "resource-stop",
+                    cancellationToken: context.CancellationToken);
+
+                await Task.Delay(500, context.CancellationToken);
+
+                ApiTestResource
+                    .WithArgs(c=> c.Args.Clear());
+
+                if (!string.IsNullOrEmpty(bugId))
+                {
+                    ApiTestResource.WithArgs("run", "test", "--", "--grep", $"BUG {bugId}");
+                }
+                else
+                {
+                    ApiTestResource.WithArgs("run", "test");
+                }
+
+                await commandService.ExecuteCommandAsync(
+                    resourceId: context.ResourceName,
+                    commandName: "resource-start",
+                    cancellationToken: context.CancellationToken);
+
+                return CommandResults.Success();
+            },
+            commandOptions: new CommandOptions
+            {
+                IconName = "TestBeaker",
+                IconVariant = IconVariant.Filled,
+                Description = "Restart tests with a specific BUG ID filter"
+            });
+
+        _parameters = new Dictionary<string, string>
+        {
+            { "web:autotest:secret-email", docspaceOwnerEmail },
+            { "core:machinekey", coreMachineKey },
+            { "auth:allowskip:default", true.ToString() },
+            { "auth:allowskip:registerportal", true.ToString() }
+        };
+
+        return this;
+    }
+
+    public ConnectionStringManager AddE2ETest()
+    {
+        var docspaceOwnerEmail = builder.Configuration["OWNER_EMAIL"] ?? "test@example.com";
+        var coreMachineKey = builder.Configuration["core:machinekey"] ?? "test-machine-key";
+
+        var playwrightTestsPath = Path.Combine(basePath, "tests", "e2e-tests");
+
+        E2ETestResource = builder
+            .AddJavaScriptApp("tests-e2e", playwrightTestsPath, "testUI")
+            .WithNpm()
+            .WithEnvironment("MACHINEKEY", coreMachineKey)
+            .WithEnvironment("PKEY", "PKEY")
+            .WithEnvironment("LOCAL_PORTAL_DOMAIN", $"localhost:{Constants.AppHostPort.ToString()}")
+            .WithEnvironment("DOCSPACE_OWNER_EMAIL", docspaceOwnerEmail)
+            .WithArgs("--", "--ui", "--ui-host", "0.0.0.0", "--ui-port", Constants.E2ETestsUiPort.ToString())
+            .WithExplicitStart();
+
+        _parameters = new Dictionary<string, string>
+        {
+            { "web:autotest:secret-email", docspaceOwnerEmail },
+            { "core:machinekey", coreMachineKey },
+            { "auth:allowskip:default", true.ToString() },
+            { "auth:allowskip:registerportal", true.ToString() }
+        };
+
+        return this;
+    }
+
     public void AddWaitFor<T>(
         IResourceBuilder<T> resourceBuilder,
         bool includeMigrate = true,
@@ -260,10 +414,13 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         {
             resourceBuilder.WaitFor(OpensearchResource);
         }
+
         if (includeMailPit && MailResource != null)
         {
             resourceBuilder.WaitFor(MailResource);
         }
+
+        ApiTestResource?.WaitFor((IResourceBuilder<IResource>)resourceBuilder);
     }
 
     public void AddBaseConfig<T>(IResourceBuilder<T> resourceBuilder, bool isDocker) where T : IResourceWithEnvironment, IResourceWithWaitSupport, IResourceWithEndpoints
@@ -286,7 +443,6 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             resourceBuilder
                 .WithReference(MailResource)
                 .WithEnvironment("core:notify:postman", "mailpit");
-
         }
 
         if (isDocker)
@@ -331,6 +487,14 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
                 .WithEnvironment("elastic:Host", () => (isDocker ? Constants.OpensearchContainer : "localhost"))
                 .WithEnvironment("elastic:Port", () => Constants.OpensearchPort.ToString())
                 .WithEnvironment("elastic:Threads", () => "1");
+        }
+
+        if (_parameters != null)
+        {
+            foreach (var parameter in _parameters)
+            {
+                resourceBuilder.WithEnvironment(parameter.Key, parameter.Value);
+            }
         }
     }
 

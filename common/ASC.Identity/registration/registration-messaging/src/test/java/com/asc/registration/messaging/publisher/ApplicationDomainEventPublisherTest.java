@@ -34,8 +34,9 @@ import com.asc.common.core.domain.entity.Audit;
 import com.asc.common.core.domain.value.enums.AuditCode;
 import com.asc.registration.core.domain.event.ClientEvent;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -52,12 +53,17 @@ public class ApplicationDomainEventPublisherTest {
   void setUp() {
     when(clientEvent.getAudit()).thenReturn(audit);
     when(audit.getUserId()).thenReturn("testUser");
-    when(audit.getAuditCode()).thenReturn(AuditCode.CREATE_CLIENT);
   }
 
-  @Test
-  void whenEventIsPublished_thenApplicationEventIsTriggered() {
+  @ParameterizedTest
+  @EnumSource(
+      value = AuditCode.class,
+      names = {"CREATE_CLIENT", "UPDATE_CLIENT", "REGENERATE_SECRET", "DELETE_CLIENT"})
+  void whenEventIsPublished_thenApplicationEventIsTriggered(AuditCode auditCode) {
+    when(audit.getAuditCode()).thenReturn(auditCode);
+
     publisher.publish(clientEvent);
+
     verify(applicationEventPublisher).publishEvent(clientEvent);
   }
 }

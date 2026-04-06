@@ -65,11 +65,25 @@ public class QuotaSocketManager(
         await MakeRequest("change-invitation-limit-value", new { room, value });
     }
 
+    public async Task ChangeWebPlugin(string webPluginName, bool enabled)
+    {
+        var room = GetQuotaRoom();
+
+        await MakeRequest("change-web-plugin", new { room, webPluginName, enabled });
+    }
+
     public async Task LogoutSession(Guid userId, int loginEventId = 0, string redirectUrl = null)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
 
         await MakeRequest("logout-session", new { room = $"{tenantId}-{userId}", loginEventId, redirectUrl });
+    }
+
+    public async Task ChangeAiConfigAsync()
+    {
+        var room = GetQuotaRoom();
+
+        await MakeRequest("change-ai-config", new { room });
     }
 
     public async Task EncryptionProgressAsync(int percentage, string error)

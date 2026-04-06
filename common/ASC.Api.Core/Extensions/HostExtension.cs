@@ -47,7 +47,12 @@ public static class HostExtension
 
         private async Task RunTasksAsync(CancellationToken cancellationToken = default)
         {
-            await Task.Delay(1, cancellationToken);
+            await Task.Yield();
+
+            var logger = webHost.Services.GetRequiredService<ILoggerFactory>().CreateLogger("ASC.Api.Core.Extensions.HostExtension");
+            var warmupState = webHost.Services.GetService<WarmupState>();
+            warmupState?.StartWarmup();
+            var totalStart = TimeProvider.System.GetTimestamp();
 
             // Load all tasks from DI
             var startupTasks = webHost.Services.GetServices<IStartupTask>();
@@ -55,12 +60,34 @@ public static class HostExtension
             // Execute all the tasks
             foreach (var startupTask in startupTasks)
             {
-                var t = startupTask.ExecuteAsync(cancellationToken);
-                if (startupTask is not IStartupTaskNotAwaitable)
+                var taskName = startupTask.GetType().Name;
+                var taskStart = TimeProvider.System.GetTimestamp();
+
+                try
                 {
-                    await t.ConfigureAwait(false);
+                    var t = startupTask.ExecuteAsync(cancellationToken);
+
+                    if (startupTask is IStartupTaskNotAwaitable)
+                    {
+                        _ = t.ContinueWith(
+                            faulted => logger.ErrorStartupTaskFailed(taskName, faulted.Exception!),
+                            TaskContinuationOptions.OnlyOnFaulted);
+                    }
+                    else
+                    {
+                        await t.ConfigureAwait(false);
+                        logger.InfoStartupTaskCompleted(taskName, TimeProvider.System.GetElapsedTime(taskStart).TotalMilliseconds);
+                    }
+                }
+                catch (Exception ex) when (ex is not OperationCanceledException)
+                {
+                    logger.ErrorStartupTaskFailed(taskName, ex);
                 }
             }
+
+            logger.InfoAllStartupTasksCompleted(TimeProvider.System.GetElapsedTime(totalStart).TotalMilliseconds);
+
+            webHost.Services.GetService<WarmupState>()?.MarkReady();
         }
     }
 }

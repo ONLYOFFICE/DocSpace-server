@@ -1,9 +1,35 @@
 # Change Log
 
+## 3.7.0
+
+### Added
+
+- Added new API methods and enhanced models with additional properties
+- Added tag Rooms / Groups
+
+### Changed
+
+- Updated from System.Text to Newtonsoft
+- Updated SDK OpenAPI specification v3.7.0
+- Updated example values, added email length validation, and adjusted method return types in API models and methods
+
+### Fixed
+
+- Fixed & / ' issues
+- Fixed ApiDateTimeConverter
+- Fixed descriptions
+
+### Improved / Enhanced
+
+- Enhanced API models with detailed parameter descriptions, updated example values, and added validation for required fields
+- .NET 10 update
+
 ## 3.6.0
+
 - Fixed enum formatting and corrected data types in generated models
 - Updated method descriptions and added missing/new fields
 - Regenerated SDK based on OpenAPI specification v3.6.0
 
 ## 3.5.0
+
 - Initial release

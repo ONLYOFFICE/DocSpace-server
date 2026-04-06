@@ -32,10 +32,12 @@ import jakarta.persistence.*;
 import java.time.ZonedDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /** Represents an audit event entity. */
 @Entity
+@Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

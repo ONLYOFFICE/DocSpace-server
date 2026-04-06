@@ -775,7 +775,7 @@ internal class FileDao(
             return 0;
         }
 
-        var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var q = await GetFilesQueryWithFilters(parentId, null, filterType, subjectGroup, subjectId, searchText, searchInContent, withSubfolders, excludeSubject, roomId, extension, filesDbContext, formsItemDto);
         if (additionalFilterOption != AdditionalFilterOption.All)
@@ -802,7 +802,7 @@ internal class FileDao(
 
     public async Task<int> GetSharedFilesCountAsync(int parentId)
     {
-        var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var q = GetSharedFilesQuery(parentId, filesDbContext);
 
@@ -811,7 +811,7 @@ internal class FileDao(
 
     public async IAsyncEnumerable<File<int>> GetSharedFilesAsync(int parentId, int offset = 0, int count = -1)
     {
-        var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var q = GetSharedFilesQuery(parentId, filesDbContext);
 

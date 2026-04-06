@@ -57,7 +57,8 @@ import java.time.ZonedDateTime;
 import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -72,8 +73,6 @@ public class ClientCreateCommandHandlerTest {
 
   private CreateTenantClientCommand command;
   private Audit audit;
-  private Client client;
-  private ClientResponse clientResponse;
 
   @BeforeEach
   public void setUp() {
@@ -100,10 +99,13 @@ public class ClientCreateCommandHandlerTest {
             .name("Test Client")
             .description("Test Description")
             .build();
-    client =
+  }
+
+  private static Client buildClient(String plaintextSecret) {
+    var client =
         Client.Builder.builder()
             .id(new ClientId(UUID.randomUUID()))
-            .secret(new ClientSecret("encryptedSecret"))
+            .secret(new ClientSecret(plaintextSecret))
             .authenticationMethods(Set.of(AuthenticationMethod.DEFAULT_AUTHENTICATION))
             .scopes(Set.of("read", "write"))
             .clientInfo(new ClientInfo("Test Client", "Description", "Logo URL"))
@@ -121,21 +123,26 @@ public class ClientCreateCommandHandlerTest {
             .clientVisibility(ClientVisibility.PRIVATE)
             .build();
     client.initialize(new UserId("creator"));
-    client.encryptSecret(s -> "encryptedSecret");
-    clientResponse =
+    client.encryptSecret(s -> plaintextSecret);
+    return client;
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+      strings = {"encryptedSecret", "another-plain-secret", "1234567890", "secret-with-symbols!@#"})
+  public void whenClientIsCreated_thenReturnClientResponse(String plaintextSecret) {
+    var client = buildClient(plaintextSecret);
+    var clientResponse =
         ClientResponse.builder()
             .clientId(client.getId().getValue().toString())
             .clientSecret(client.getSecret().value())
             .build();
-  }
 
-  @Test
-  public void whenClientIsCreated_thenReturnClientResponse() {
     when(clientDataMapper.toDomain(any(CreateTenantClientCommand.class))).thenReturn(client);
     when(clientDomainService.createClient(any(Audit.class), any(Client.class)))
         .thenReturn(new ClientCreatedEvent(audit, client, ZonedDateTime.now()));
     when(clientDataMapper.toClientResponse(any(Client.class))).thenReturn(clientResponse);
-    when(encryptionService.encrypt(anyString())).thenReturn("encryptedSecret");
+    when(encryptionService.encrypt(anyString())).thenReturn("encrypted-at-rest");
 
     var response = clientCreateCommandHandler.createClient(audit, command);
 
@@ -145,6 +152,6 @@ public class ClientCreateCommandHandlerTest {
     verify(clientCommandRepository, times(1)).saveClient(any(ClientEvent.class), any(Client.class));
     verify(clientDataMapper, times(1)).toClientResponse(any(Client.class));
 
-    assertEquals(client.getSecret().value(), response.getClientSecret());
+    assertEquals(plaintextSecret, response.getClientSecret());
   }
 }

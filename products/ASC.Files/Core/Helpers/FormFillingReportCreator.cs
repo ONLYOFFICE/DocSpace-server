@@ -83,7 +83,8 @@ public class FormFillingReportCreator(
         var tableName = GetTableName(originalFormId, originalFormVersion);
         var normalizedMeta = NormalizeMetadata(parsed.MetaData).ToList();
         var columnDefinitions = BuildColumnDefinitions(normalizedMeta).ToList();
-        var rowData = BuildRowData(parsed.Data, normalizedMeta, fileId);
+        var culture = tenantManager.GetCurrentTenant().GetCulture();
+        var rowData = BuildRowData(parsed.Data, normalizedMeta, fileId, culture);
 
         await externalDatabaseClient.CreateTableAndUpsertAsync(tableName, columnDefinitions, rowData, keyColumn: "form_id");
     }
@@ -337,15 +338,19 @@ public class FormFillingReportCreator(
             var (type, enumValues) = field.Type switch
             {
                 "checkBox" => (DbColumnType.Boolean, (IReadOnlyList<string>)null),
-                "dateTime" => (DbColumnType.Date, null),
+                "dateTime" => (HasTimeComponent(field.Format) ? DbColumnType.DateTime : DbColumnType.Date, null),
                 "comboBox" or "dropDownList" or "radio" => (DbColumnType.Enum, (IReadOnlyList<string>)field.PossibleValues),
                 _ => (DbColumnType.Text, null)
             };
-            yield return new DbColumnDefinition(name, type, enumValues);
+            var label = string.IsNullOrEmpty(field.Key) ? null : field.Key;
+            yield return new DbColumnDefinition(name, type, enumValues, Label: label);
         }
     }
 
-    private static Dictionary<string, object> BuildRowData(SubmitFormsData data, IEnumerable<FormMetadata> metaData, int formId)
+    private static bool HasTimeComponent(string format) =>
+        !string.IsNullOrEmpty(format) && (format.Contains('H') || format.Contains('h'));
+
+    private static Dictionary<string, object> BuildRowData(SubmitFormsData data, IEnumerable<FormMetadata> metaData, int formId, CultureInfo culture)
     {
         var result = new Dictionary<string, object>
         {
@@ -362,7 +367,7 @@ public class FormFillingReportCreator(
             {
                 continue;
             }
-            result[column] = ConvertFieldValue(item.Value, meta) ?? DBNull.Value;
+            result[column] = ConvertFieldValue(item.Value, meta, culture) ?? DBNull.Value;
         }
 
         return result;
@@ -401,7 +406,7 @@ public class FormFillingReportCreator(
         return name.ToLower();
     }
 
-    private static object ConvertFieldValue(string value, FormMetadata meta)
+    private static object ConvertFieldValue(string value, FormMetadata meta, CultureInfo culture)
     {
         if (string.IsNullOrEmpty(value))
         {
@@ -411,16 +416,18 @@ public class FormFillingReportCreator(
         return meta.Type switch
         {
             "checkBox" => bool.TryParse(value, out var b) ? b : value,
-            "dateTime" => ParseDate(value, meta.Format),
+            "dateTime" => ParseDate(value, meta.Format, culture),
             _ => value
         };
     }
 
-    private static DateTime? ParseDate(string value, string format)
+    private static DateTime? ParseDate(string value, string format, CultureInfo culture)
     {
         if (string.IsNullOrWhiteSpace(format))
         {
-            return DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out var d) ? d : null;
+            return DateTime.TryParse(value, culture, DateTimeStyles.None, out var d)
+                || DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out d)
+                ? d : null;
         }
 
         var dotNetFormat = format
@@ -429,12 +436,15 @@ public class FormFillingReportCreator(
             .Replace("YY", "yy")
             .Replace("mm", "MM");
 
-        if (DateTime.TryParseExact(value, dotNetFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out var dt))
+        if (DateTime.TryParseExact(value, dotNetFormat, culture, DateTimeStyles.None, out var dt)
+            || DateTime.TryParseExact(value, dotNetFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
         {
             return dt;
         }
 
-        return DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out var fallback) ? fallback : null;
+        return DateTime.TryParse(value, culture, DateTimeStyles.None, out var fallback)
+            || DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out fallback)
+            ? fallback : null;
     }
 
     public class BoolToStringConverter : JsonConverter<string>

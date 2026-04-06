@@ -5485,8 +5485,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("int")
                         .HasColumnName("tenant_id");
 
-                    b.Property<int>("Triggers")
-                        .HasColumnType("int")
+                    b.Property<long>("Triggers")
+                        .HasColumnType("bigint")
                         .HasColumnName("triggers");
 
                     b.Property<string>("Uri")
@@ -5557,8 +5557,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("int")
                         .HasColumnName("tenant_id");
 
-                    b.Property<int>("Trigger")
-                        .HasColumnType("int")
+                    b.Property<long>("Trigger")
+                        .HasColumnType("bigint")
                         .HasColumnName("trigger");
 
                     b.Property<string>("Uid")

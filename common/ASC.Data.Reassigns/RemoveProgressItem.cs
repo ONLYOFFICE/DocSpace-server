@@ -126,15 +126,20 @@ public class RemoveProgressItem : DistributedTaskProgress
 
             await fileStorageService.ReassignProvidersAsync(UserId, _currentUserId);
 
+            Percentage = 50;
+            await PublishChanges();
+
+            await fileStorageService.ReassignRoomsAsync(UserId, _currentUserId);
+
             Percentage = 60;
             await PublishChanges();
 
-            await fileStorageService.ReassignRoomsFilesAsync(UserId);
+            await fileStorageService.ReassignRoomsFoldersAsync(UserId);
 
             Percentage = 70;
             await PublishChanges();
 
-            await fileStorageService.ReassignRoomsFoldersAsync(UserId);
+            await fileStorageService.ReassignRoomsFilesAsync(UserId);
 
             Percentage = 95;
             await PublishChanges();

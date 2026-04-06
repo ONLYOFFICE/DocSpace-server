@@ -1356,4 +1356,22 @@
   <data name="ConsumersExternalDbSqliteStandaloneOnly" xml:space="preserve">
     <value>SQLite is only available in Standalone installations.</value>
   </data>
+  <data name="ConsumersNextcloud" xml:space="preserve">
+    <value>Nextcloud</value>
+  </data>
+  <data name="ConsumersNextcloudDescription" xml:space="preserve">
+    <value>Enable the application to sign in to the portal using a Nextcloud account.</value>
+  </data>
+  <data name="ConsumersNextcloudInstruction" xml:space="preserve">
+    <value>Enable the application to sign in to the portal using a Nextcloud account.</value>
+  </data>
+  <data name="ConsumersNextcloudBaseUrl" xml:space="preserve">
+    <value>Enter the URL address of the Nextcloud instance.</value>
+  </data>
+  <data name="ConsumersNextcloudClientId" xml:space="preserve">
+    <value>Client ID</value>
+  </data>
+  <data name="ConsumersNextcloudClientSecret" xml:space="preserve">
+    <value>Client Secret</value>
+  </data>
 </root>

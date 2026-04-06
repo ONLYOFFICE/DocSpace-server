@@ -21,15 +21,15 @@ namespace {{packageName}}.{{apiPackage}}.{{x-folder}}
         #region Synchronous Operations
         {{#operation}}
         /// <summary>
-        /// {{summary}}
+        /// {{{summary}}}
         /// </summary>
         {{#notes}}
         /// <remarks>
-        /// {{.}}
+        /// {{{.}}}
         /// </remarks>
         {{/notes}}
         /// <exception cref="{{packageName}}.Client.ApiException">Thrown when fails to make API call</exception>
-        {{#allParams}}/// <param name="{{paramName}}">{{description}}{{^required}} (optional{{#defaultValue}}, default to {{.}}{{/defaultValue}}){{/required}}{{#isDeprecated}} (deprecated){{/isDeprecated}}</param>
+        {{#allParams}}/// <param name="{{paramName}}">{{{description}}}{{^required}} (optional{{#defaultValue}}, default to {{.}}{{/defaultValue}}){{/required}}{{#isDeprecated}} (deprecated){{/isDeprecated}}</param>
         {{/allParams}}/// <seealso href="{{vendorExtensions.x-seealsoUrl}}">REST API Reference for {{operationId}} Operation</seealso>
         /// <returns>{{returnType}}</returns>
         {{#isDeprecated}}
@@ -38,13 +38,13 @@ namespace {{packageName}}.{{apiPackage}}.{{x-folder}}
         {{{returnType}}}{{^returnType}}void{{/returnType}} {{operationId}}({{#allParams}}{{{dataType}}} {{paramName}}{{^required}}{{#optionalMethodArgument}} = default{{/optionalMethodArgument}}{{/required}}{{^-last}}, {{/-last}}{{/allParams}});
 
         /// <summary>
-        /// {{summary}}
+        /// {{{summary}}}
         /// </summary>
         /// <remarks>
-        /// {{notes}}
+        /// {{{notes}}}
         /// </remarks>
         /// <exception cref="{{packageName}}.Client.ApiException">Thrown when fails to make API call</exception>
-        {{#allParams}}/// <param name="{{paramName}}">{{description}}{{^required}} (optional{{#defaultValue}}, default to {{.}}{{/defaultValue}}){{/required}}{{#isDeprecated}} (deprecated){{/isDeprecated}}</param>
+        {{#allParams}}/// <param name="{{paramName}}">{{{description}}}{{^required}} (optional{{#defaultValue}}, default to {{.}}{{/defaultValue}}){{/required}}{{#isDeprecated}} (deprecated){{/isDeprecated}}</param>
         {{/allParams}}/// <seealso href="{{vendorExtensions.x-seealsoUrl}}">REST API Reference for {{operationId}} Operation</seealso>
         /// <returns>ApiResponse of {{returnType}}{{^returnType}}Object(void){{/returnType}}</returns>
         {{#isDeprecated}}
@@ -64,14 +64,14 @@ namespace {{packageName}}.{{apiPackage}}.{{x-folder}}
         #region Asynchronous Operations
         {{#operation}}
         /// <summary>
-        /// {{summary}}
+        /// {{{summary}}}
         /// </summary>
         /// <remarks>
-        /// {{notes}}
+        /// {{{notes}}}
         /// </remarks>
         /// <exception cref="{{packageName}}.Client.ApiException">Thrown when fails to make API call</exception>
         {{#allParams}}
-        /// <param name="{{paramName}}">{{description}}{{^required}} (optional{{#defaultValue}}, default to {{.}}{{/defaultValue}}){{/required}}{{#isDeprecated}} (deprecated){{/isDeprecated}}</param>
+        /// <param name="{{paramName}}">{{{description}}}{{^required}} (optional{{#defaultValue}}, default to {{.}}{{/defaultValue}}){{/required}}{{#isDeprecated}} (deprecated){{/isDeprecated}}</param>
         {{/allParams}}
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <seealso href="{{vendorExtensions.x-seealsoUrl}}">REST API Reference for {{operationId}} Operation</seealso>
@@ -82,14 +82,14 @@ namespace {{packageName}}.{{apiPackage}}.{{x-folder}}
         {{#returnType}}Task<{{{.}}}>{{/returnType}}{{^returnType}}Task{{/returnType}} {{operationId}}Async({{#allParams}}{{{dataType}}} {{paramName}}{{^required}}{{#optionalMethodArgument}} = default{{/optionalMethodArgument}}{{/required}}{{^-last}}, {{/-last}}{{/allParams}}{{#allParams.0}}, {{/allParams.0}}CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// {{summary}}
+        /// {{{summary}}}
         /// </summary>
         /// <remarks>
-        /// {{notes}}
+        /// {{{notes}}}
         /// </remarks>
         /// <exception cref="{{packageName}}.Client.ApiException">Thrown when fails to make API call</exception>
         {{#allParams}}
-        /// <param name="{{paramName}}">{{description}}{{^required}} (optional{{#defaultValue}}, default to {{.}}{{/defaultValue}}){{/required}}{{#isDeprecated}} (deprecated){{/isDeprecated}}</param>
+        /// <param name="{{paramName}}">{{{description}}}{{^required}} (optional{{#defaultValue}}, default to {{.}}{{/defaultValue}}){{/required}}{{#isDeprecated}} (deprecated){{/isDeprecated}}</param>
         {{/allParams}}
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <seealso href="{{vendorExtensions.x-seealsoUrl}}">REST API Reference for {{operationId}} Operation</seealso>
@@ -354,15 +354,15 @@ namespace {{packageName}}.{{apiPackage}}.{{x-folder}}
 
         {{#operation}}
         /// <summary>
-        /// {{summary}}
+        /// {{{summary}}}
         /// </summary>
         {{#notes}}
         /// <remarks>
-        /// {{.}}
+        /// {{{.}}}
         /// </remarks>
         {{/notes}}
         /// <exception cref="{{packageName}}.Client.ApiException">Thrown when fails to make API call</exception>
-        {{#allParams}}/// <param name="{{paramName}}">{{description}}{{^required}} (optional{{#defaultValue}}, default to {{.}}{{/defaultValue}}){{/required}}{{#isDeprecated}} (deprecated){{/isDeprecated}}</param>
+        {{#allParams}}/// <param name="{{paramName}}">{{{description}}}{{^required}} (optional{{#defaultValue}}, default to {{.}}{{/defaultValue}}){{/required}}{{#isDeprecated}} (deprecated){{/isDeprecated}}</param>
         {{/allParams}}/// <seealso href="{{vendorExtensions.x-seealsoUrl}}">REST API Reference for {{operationId}} Operation</seealso>
         /// <returns>{{returnType}}</returns>
         {{#isDeprecated}}
@@ -375,15 +375,15 @@ namespace {{packageName}}.{{apiPackage}}.{{x-folder}}
         }
 
         /// <summary>
-        /// {{summary}}
+        /// {{{summary}}}
         /// </summary>
         {{#notes}}
         /// <remarks>
-        /// {{.}}
+        /// {{{.}}}
         /// </remarks>
         {{/notes}}
         /// <exception cref="{{packageName}}.Client.ApiException">Thrown when fails to make API call</exception>
-        {{#allParams}}/// <param name="{{paramName}}">{{description}}{{^required}} (optional{{#defaultValue}}, default to {{.}}{{/defaultValue}}){{/required}}{{#isDeprecated}} (deprecated){{/isDeprecated}}</param>
+        {{#allParams}}/// <param name="{{paramName}}">{{{description}}}{{^required}} (optional{{#defaultValue}}, default to {{.}}{{/defaultValue}}){{/required}}{{#isDeprecated}} (deprecated){{/isDeprecated}}</param>
         {{/allParams}}/// <seealso href="{{vendorExtensions.x-seealsoUrl}}">REST API Reference for {{operationId}} Operation</seealso>
         /// <returns>ApiResponse of {{returnType}}{{^returnType}}Object(void){{/returnType}}</returns>
         {{#isDeprecated}}
@@ -593,16 +593,16 @@ namespace {{packageName}}.{{apiPackage}}.{{x-folder}}
 
         {{#supportsAsync}}
         /// <summary>
-        /// {{summary}}
+        /// {{{summary}}}
         /// </summary>
         {{#notes}}
         /// <remarks>
-        /// {{.}}
+        /// {{{.}}}
         /// </remarks>
         {{/notes}}
         /// <exception cref="{{packageName}}.Client.ApiException">Thrown when fails to make API call</exception>
         {{#allParams}}
-        /// <param name="{{paramName}}">{{description}}{{^required}} (optional{{#defaultValue}}, default to {{.}}{{/defaultValue}}){{/required}}{{#isDeprecated}} (deprecated){{/isDeprecated}}</param>
+        /// <param name="{{paramName}}">{{{description}}}{{^required}} (optional{{#defaultValue}}, default to {{.}}{{/defaultValue}}){{/required}}{{#isDeprecated}} (deprecated){{/isDeprecated}}</param>
         {{/allParams}}
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <seealso href="{{vendorExtensions.x-seealsoUrl}}">REST API Reference for {{operationId}} Operation</seealso>
@@ -617,16 +617,16 @@ namespace {{packageName}}.{{apiPackage}}.{{x-folder}}
         }
 
         /// <summary>
-        /// {{summary}}
+        /// {{{summary}}}
         /// </summary>
         {{#notes}}
         /// <remarks>
-        /// {{.}}
+        /// {{{.}}}
         /// </remarks>
         {{/notes}}
         /// <exception cref="{{packageName}}.Client.ApiException">Thrown when fails to make API call</exception>
         {{#allParams}}
-        /// <param name="{{paramName}}">{{description}}{{^required}} (optional{{#defaultValue}}, default to {{.}}{{/defaultValue}}){{/required}}{{#isDeprecated}} (deprecated){{/isDeprecated}}</param>
+        /// <param name="{{paramName}}">{{{description}}}{{^required}} (optional{{#defaultValue}}, default to {{.}}{{/defaultValue}}){{/required}}{{#isDeprecated}} (deprecated){{/isDeprecated}}</param>
         {{/allParams}}
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <seealso href="{{vendorExtensions.x-seealsoUrl}}">REST API Reference for {{operationId}} Operation</seealso>

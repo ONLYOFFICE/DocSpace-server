@@ -30,20 +30,20 @@ public class RegisterInstanceDao<T>(
     ILogger<RegisterInstanceDao<T>> logger,
     IDbContextFactory<InstanceRegistrationContext> dbContextFactory) : IRegisterInstanceDao<T> where T : IHostedService
 {
-    private readonly InstanceRegistrationContext _instanceRegistrationContext = dbContextFactory.CreateDbContext();
-
     public async Task AddOrUpdateAsync(InstanceRegistration obj)
     {
-        var inst = await _instanceRegistrationContext.InstanceRegistrations.FindAsync(obj.InstanceRegistrationId);
+        await using var ctx = await dbContextFactory.CreateDbContextAsync();
+
+        var inst = await ctx.InstanceRegistrations.FindAsync(obj.InstanceRegistrationId);
 
         if (inst == null)
         {
-            await _instanceRegistrationContext.AddAsync(obj);
+            await ctx.AddAsync(obj);
         }
         else
         {
-            _instanceRegistrationContext.Entry(inst).CurrentValues.SetValues(obj);
-            _instanceRegistrationContext.Entry(inst).State = EntityState.Modified;
+            ctx.Entry(inst).CurrentValues.SetValues(obj);
+            ctx.Entry(inst).State = EntityState.Modified;
         }
 
         bool saveFailed;
@@ -54,7 +54,7 @@ public class RegisterInstanceDao<T>(
 
             try
             {
-                await _instanceRegistrationContext.SaveChangesAsync();
+                await ctx.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException ex)
             {
@@ -75,23 +75,27 @@ public class RegisterInstanceDao<T>(
 
     public async Task<List<InstanceRegistration>> GetAllAsync(string workerTypeName)
     {
-        return await Queries.InstanceRegistrationsAsync(_instanceRegistrationContext, workerTypeName).ToListAsync();
+        await using var ctx = await dbContextFactory.CreateDbContextAsync();
+
+        return await Queries.InstanceRegistrationsAsync(ctx, workerTypeName).ToListAsync();
     }
 
     public async Task DeleteAsync(string instanceId)
     {
-        var item = await _instanceRegistrationContext.InstanceRegistrations.FindAsync(instanceId);
+        await using var ctx = await dbContextFactory.CreateDbContextAsync();
+
+        var item = await ctx.InstanceRegistrations.FindAsync(instanceId);
 
         if (item == null)
         {
             return;
         }
 
-        _instanceRegistrationContext.InstanceRegistrations.Remove(item);
+        ctx.InstanceRegistrations.Remove(item);
 
         try
         {
-            await _instanceRegistrationContext.SaveChangesAsync();
+            await ctx.SaveChangesAsync();
         }
         catch (DbUpdateConcurrencyException ex)
         {

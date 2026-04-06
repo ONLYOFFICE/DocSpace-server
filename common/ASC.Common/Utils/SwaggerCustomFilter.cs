@@ -146,7 +146,9 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
             var enumDescriptionDataString = new JsonArray();
             var enumVarNames = new JsonArray();
             var enumDataInt = new List<JsonNode>();
+            var enumDataLong = new List<JsonNode>();
             var enumDescriptionInt = new List<string>();
+            var enumDescriptionLong = new List<string>();
             var enumType = "integer";
 
             var jsonConverterAttr = checkType.GetCustomAttributesData() .FirstOrDefault(a => a.AttributeType == typeof(JsonConverterAttribute));
@@ -169,19 +171,37 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
                 enumVarNames.Add(enumValue.ToString());
 
                 enumDataString.Add(enumValue.ToString());
-                enumDataInt.Add(Convert.ToInt32(enumValue));
+
+                try
+                {
+                    enumDataInt.Add(Convert.ToInt32(enumValue));
+                }
+                catch (OverflowException)
+                {
+                    enumDataLong.Add(Convert.ToInt64(enumValue));
+                }
+
 
                 if (enumAttribute != null)
                 {
                     enumDescriptionDataString.Add(enumAttribute.Description);
                     enumDescriptionString.Add($"{enumValue} - {enumAttribute.Description}");
-                    enumDescriptionInt.Add($"{Convert.ToInt32(enumValue)} - {enumAttribute.Description}");
+
+                    try
+                    {
+                        enumDescriptionInt.Add($"{Convert.ToInt32(enumValue)} - {enumAttribute.Description}");
+                    }
+                    catch (OverflowException)
+                    {
+                        enumDescriptionLong.Add($"{Convert.ToInt64(enumValue)} - {enumAttribute.Description}");
+                    }
+
                 }
             }
 
             if (enumDataString.Count > 0)
             {
-                result.OneOf = new List<IOpenApiSchema>
+                var oneOf = new List<IOpenApiSchema>
                 {
                     new OpenApiSchema
                     {
@@ -189,8 +209,12 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
                         Type = JsonSchemaType.String,
                         Description = $"[{string.Join(", ", enumDescriptionString)}]",
                         Example = enumDataString[0]
-                    },
-                    new OpenApiSchema
+                    }
+                };
+
+                if (enumDataInt.Count > 0)
+                {
+                    oneOf.Add(new OpenApiSchema
                     {
                         Enum = enumDataInt,
                         Type = JsonSchemaType.Integer,
@@ -200,8 +224,24 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
                         {
                             ["x-enum-varnames"] = new JsonNodeExtension(enumVarNames)
                         }
-                    }
-                };
+                    });
+                }
+                else
+                {
+                    oneOf.Add(new OpenApiSchema
+                    {
+                        Enum = enumDataLong,
+                        Type = JsonSchemaType.Integer,
+                        Description = $"[{string.Join(", ", enumDescriptionLong)}]",
+                        Example = enumDescriptionLong[0],
+                        Extensions = new Dictionary<string, IOpenApiExtension>
+                        {
+                            ["x-enum-varnames"] = new JsonNodeExtension(enumVarNames)
+                        }
+                    });
+                }
+
+                result.OneOf = oneOf;
                 result.Enum = null;
                 result.Type = null;
                 result.Format = null;

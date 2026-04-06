@@ -304,7 +304,13 @@ public partial class FilesDbContext
         return FolderQueries.ReassignSpecificFoldersAsync(this, tenantId, foldersIds, newOwnerId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, null])]
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultGuid])]
+    public Task<int> ReassignRoomsAsync(int tenantId, Guid oldOwnerId, Guid newOwnerId)
+    {
+        return FolderQueries.ReassignRoomsAsync(this, tenantId, DocSpaceHelper.RoomTypes, oldOwnerId, newOwnerId);
+    }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
     public IAsyncEnumerable<FolderReassignInfo> GetRoomsFoldersReassignInfoAsync(int tenantId, Guid ownerId)
     {
         return FolderQueries.GetRoomsFoldersReassignInfoAsync(this, tenantId, ownerId, DocSpaceHelper.RoomTypes);
@@ -791,6 +797,13 @@ static file class FolderQueries
             (FilesDbContext ctx, int tenantId, IEnumerable<int> foldersIds, Guid newOwnerId) =>
                 ctx.Folders
                     .Where(r => r.TenantId == tenantId && foldersIds.Contains(r.Id))
+                    .ExecuteUpdate(p => p.SetProperty(f => f.CreateBy, newOwnerId)));
+
+    public static readonly Func<FilesDbContext, int, IEnumerable<FolderType>, Guid, Guid, Task<int>> ReassignRoomsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, IEnumerable<FolderType> roomTypes, Guid oldOwnerId, Guid newOwnerId) =>
+                ctx.Folders
+                    .Where(r => r.TenantId == tenantId && roomTypes.Contains(r.FolderType) && r.CreateBy == oldOwnerId)
                     .ExecuteUpdate(p => p.SetProperty(f => f.CreateBy, newOwnerId)));
 
     public static readonly Func<FilesDbContext, int, Guid, IEnumerable<FolderType>, IAsyncEnumerable<FolderReassignInfo>> GetRoomsFoldersReassignInfoAsync =

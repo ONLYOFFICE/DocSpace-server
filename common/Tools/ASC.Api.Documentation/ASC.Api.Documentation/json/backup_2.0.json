@@ -7,7 +7,7 @@
       "url": "https://helpdesk.onlyoffice.com/hc/en-us",
       "email": "support@onlyoffice.com"
     },
-    "version": "3.6.0",
+    "version": "3.7.0",
     "x-scalar-sdk-installation": [
       {
         "lang": "Node",
@@ -767,7 +767,7 @@
           "Backup"
         ],
         "summary": "Get the number of backups",
-        "description": "Returns the number of backups for a period of time. The default is one month.",
+        "description": "Returns the number of backups for a period of time. The default is the current calendar month.",
         "operationId": "getBackupsCount",
         "parameters": [
           {

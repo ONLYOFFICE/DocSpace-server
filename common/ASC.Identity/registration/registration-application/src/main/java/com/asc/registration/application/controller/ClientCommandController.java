@@ -39,6 +39,8 @@ import com.asc.registration.application.security.authentication.BasicSignatureTo
 import com.asc.registration.application.transfer.ChangeClientActivationRequest;
 import com.asc.registration.application.transfer.CreateClientRequest;
 import com.asc.registration.application.transfer.UpdateClientRequest;
+import com.asc.registration.application.transfer.ValidationErrorCodeResponse;
+import com.asc.registration.application.transfer.ValidationErrorResponse;
 import com.asc.registration.service.ports.input.service.ClientApplicationService;
 import com.asc.registration.service.ports.input.service.ScopeApplicationService;
 import com.asc.registration.service.transfer.request.create.CreateTenantClientCommand;
@@ -58,7 +60,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
+import java.net.URI;
+import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -199,7 +202,7 @@ public class ClientCommandController {
             description = "Internal server error occurred",
             content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
       })
-  public ResponseEntity<ClientResponse> createClient(
+  public ResponseEntity<?> createClient(
       HttpServletRequest request,
       @AuthenticationPrincipal BasicSignatureTokenPrincipal principal,
       @RequestBody
@@ -232,12 +235,32 @@ public class ClientCommandController {
           CreateClientRequest command) {
     try {
       setLoggingParameters(principal);
-      if (!scopeApplicationService.getScopes().stream()
-          .map(ScopeResponse::getName)
-          .collect(Collectors.toSet())
-          .containsAll(command.getScopes())) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+      var validScopes =
+          scopeApplicationService.getScopes().stream()
+              .map(ScopeResponse::getName)
+              .collect(Collectors.toSet());
+
+      var invalidScopes =
+          command.getScopes().stream()
+              .filter(scope -> !validScopes.contains(scope))
+              .collect(Collectors.toSet());
+      if (!invalidScopes.isEmpty()) {
+        var problemDetail =
+            ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Validation failed");
+        problemDetail.setType(
+            URI.create(
+                "https://api.onlyoffice.com/docspace/api-backend/get-started/basic-concepts"));
+        problemDetail.setInstance(URI.create(request.getRequestURI()));
+        problemDetail.setProperty(
+            "errors",
+            List.of(
+                new ValidationErrorResponse.FieldError(
+                    "scopes",
+                    ValidationErrorCodeResponse.ERROR_INVALID_SCOPE,
+                    String.format("Invalid scopes: %s", String.join(", ", invalidScopes)))));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problemDetail);
       }
+
       return ResponseEntity.status(HttpStatus.CREATED)
           .body(
               clientApplicationService.createClient(
@@ -582,7 +605,7 @@ public class ClientCommandController {
               required = true,
               example = "6c7cf17b-1bd3-47d5-94c6-be2d3570e168")
           @PathVariable
-          @NotEmpty
+          @NotBlank
           String clientId) {
     try {
       setLoggingParameters(principal);

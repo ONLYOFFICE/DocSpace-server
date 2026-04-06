@@ -225,9 +225,16 @@ public class ChatController(
     [SwaggerResponse(200, "The chat messages were successfully exported to the specified folder")]
     [SwaggerResponse(404, "The chat with the specified ID was not found or does not belong to the current user")]
     [HttpPost("chats/{chatId}/messages/export")]
-    public async Task ExportChatAsync(ExportChatRequestDto<int> inDto)
+    public async Task ExportChatAsync(ExportChatRequestDto inDto)
     {
-        await exporter.ExportMessagesAsync(inDto.Body.FolderId, inDto.Body.Title, inDto.ChatId);
+        if (inDto.Body.FolderId.ValueKind == JsonValueKind.Number)
+        {
+            await exporter.ExportMessagesAsync(inDto.Body.FolderId.GetInt32(), inDto.Body.Title, inDto.ChatId);
+        }
+        else
+        {
+            await exporter.ExportMessagesAsync(inDto.Body.FolderId.GetString(), inDto.Body.Title, inDto.ChatId);
+        }
     }
 
     /// <summary>
