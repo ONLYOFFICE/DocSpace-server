@@ -40,22 +40,14 @@ public class ProviderSettingsData
 
 public class ModelSettings
 {
+    public static readonly FrozenSet<string> SupportedImageFormats =
+        ((HashSet<string>)[".jpeg", ".jpg", ".gif", ".webp", ".png"])
+        .ToFrozenSet(StringComparer.OrdinalIgnoreCase);
+
     public required string Id { get; init; }
     public required string Alias { get; init; }
-    public MultimodalSettings? Multimodal { get; init; }
-    public bool Thinking { get; init; }
+    public required AiModelCapabilities Capabilities { get; init; }
     public HashSet<string>? Replaces { get; init; }
-}
-
-public class MultimodalSettings
-{
-    public bool UrlSupported { get; init; }
-    public ImageMultimodalSettings? Image { get; init; }
-}
-
-public class ImageMultimodalSettings
-{
-    public required HashSet<string> Formats { get; init; }
 }
 
 public class EffortSettingsData

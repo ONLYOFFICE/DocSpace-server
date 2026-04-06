@@ -54,6 +54,7 @@ public class AiModelCapabilities
 {
     public bool Vision { get; set; }
     public bool ToolCalling { get; set; }
+    public bool Thinking { get; set; }
 }
 
 public static class DbAiModelSettingsExtension

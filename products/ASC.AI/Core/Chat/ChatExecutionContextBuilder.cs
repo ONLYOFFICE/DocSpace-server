@@ -91,7 +91,7 @@ public class ChatExecutionContextBuilder(
         var modelSettings = aiConfiguration.GetModel(provider.Type, modelId);
 
         ChatReasoningEffort? reasoningEffort = chatSettings.ReasoningEffort is not ChatReasoningEffort.None
-                                               && modelSettings is { Thinking: true }
+                                               && modelSettings is not null && modelSettings.Capabilities.Thinking
             ? chatSettings.ReasoningEffort
             : null;
 

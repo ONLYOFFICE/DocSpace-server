@@ -66,7 +66,7 @@ public class AttachmentHandler(
 
         var count = 0;
 
-        await foreach (var result in HandleAsync(modelSettings.Multimodal, filesIds, context.ChatId, context.Agent.Id))
+        await foreach (var result in HandleAsync(modelSettings, filesIds, context.ChatId, context.Agent.Id))
         {
             if (count >= MaxAttachmentsCount)
             {
@@ -77,7 +77,7 @@ public class AttachmentHandler(
             yield return result;
         }
 
-        await foreach (var result in HandleAsync(modelSettings.Multimodal, thirdPartyFilesIds, context.ChatId, context.Agent.Id))
+        await foreach (var result in HandleAsync(modelSettings, thirdPartyFilesIds, context.ChatId, context.Agent.Id))
         {
             if (count >= MaxAttachmentsCount)
             {
@@ -104,12 +104,13 @@ public class AttachmentHandler(
     }
 
     private async IAsyncEnumerable<AttachmentResult> HandleAsync<T>(
-        MultimodalSettings? multimodal,
+        ModelSettings modelSettings,
         IEnumerable<T> filesIds,
         Guid chatId,
         int agentId)
     {
         var fileDao = daoFactory.GetFileDao<T>();
+        var hasVision = modelSettings.Capabilities.Vision;
 
         var textFiles = new List<(File<T> File, string Extension)>();
         var mediaFiles = new List<(File<T> File, FileType FileType, string Extension)>();
@@ -126,12 +127,12 @@ public class AttachmentHandler(
 
             if (fileType == FileType.Image)
             {
-                if (multimodal?.Image == null)
+                if (!hasVision)
                 {
                     continue;
                 }
 
-                if (!multimodal.Image.Formats.Contains(extension))
+                if (!ModelSettings.SupportedImageFormats.Contains(extension))
                 {
                     continue;
                 }

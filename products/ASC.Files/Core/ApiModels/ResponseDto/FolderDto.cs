@@ -411,17 +411,18 @@ public class FolderDtoHelper(
                 : null;
 
             ChatMultimodalSettingsDto multimodal = null;
-            if (model?.Multimodal?.Image != null)
+            if (model?.Capabilities is { Vision: true })
             {
                 multimodal = new ChatMultimodalSettingsDto
                 {
                     Image = new ChatImageMultimodalSettingsDto
                     {
-                        Formats = model.Multimodal.Image.Formats
+                        Formats = ModelSettings.SupportedImageFormats
                     }
                 };
             }
 
+#pragma warning disable CS0618 // Obsolete
             result.ChatSettings = new ChatSettingsDto
             {
                 ProviderId = folder.SettingsChatProviderId,
@@ -429,8 +430,10 @@ public class FolderDtoHelper(
                 ModelAlias = model?.Alias,
                 Prompt = folder.SettingsChatParameters.Prompt,
                 Multimodal = multimodal,
-                Thinking = model?.Thinking ?? false
+                Thinking = model?.Capabilities?.Thinking ?? false,
+                Capabilities = model?.Capabilities
             };
+#pragma warning restore CS0618
         }
 
         if (contextFolder is { FolderType: FolderType.Recent } or { FolderType: FolderType.Favorites })
