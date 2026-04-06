@@ -65,7 +65,7 @@ public class FormDataQueryTool(
             [Description("Maximum number of rows to return (1–500). Default: 50.")] int limit = 50,
             [Description("Number of rows to skip for pagination. Default: 0.")] int offset = 0,
             [Description("Date-part filter conditions applied with AND. Each filter is a string: \"column_name DATE_PART OPERATOR value[,v2,...]\". DATE_PART: YEAR, MONTH, WEEK, DAYOFYEAR, QUARTER. Operators: =, !=, <, >, <=, >=, IN. Examples: \"col_date MONTH IN 6,7,8\", \"col_date YEAR = 2024\".")] IEnumerable<string>? datePartFilters = null,
-            [Description("Filter on the absolute difference in days between two date columns. Format: \"col_a col_b OPERATOR days\" — column order does not matter. Example: \"col_start_date col_submission_date < 7\" retrieves rows where the two dates are fewer than 7 days apart.")] string? dateDiffFilter = null)
+            [Description("Filter on the difference between two date/datetime columns. Format: \"col_a col_b OPERATOR value [UNIT]\" — UNIT is optional and defaults to DAYS. Allowed units: DAYS, HOURS, MINUTES. Examples: \"col_start col_submitted < 7\" (fewer than 7 days apart), \"col_start col_submitted < 48 HOURS\" (fewer than 48 hours apart).")] string? dateDiffFilter = null)
         {
             try
             {
