@@ -32,8 +32,10 @@ Gem::Specification.new do |s|
 
   s.add_development_dependency 'rspec', '~> 3.6', '>= 3.6.0'
 
-  s.files         = `find *`.split("\n").uniq.sort.select { |f| !f.empty? }
-  s.test_files    = `find spec/*`.split("\n")
+  s.files         = Dir.glob("**/*", File::FNM_DOTMATCH)
+                       .select { |f| File.file?(f) }
+                       .reject { |f| f.end_with?(".gem") || f.start_with?("pkg/", ".bundle/", "vendor/bundle/") }
+  s.test_files    = s.files.grep(%r{\Aspec/})
   s.executables   = []
   s.require_paths = ["lib"]
 end

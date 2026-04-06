@@ -76,7 +76,9 @@ public class MyRubyClientCodegen extends RubyClientCodegen {
                 && (file.getFolder() == null || file.getFolder().isEmpty())
         );
         supportingFiles.add(new SupportingFile("README.mustache", "", "README.md"));
-        supportingFiles.add(new SupportingFile("sample.mustache", "samples", "sample.rb"));
+        String sampleDir = "samples" + File.separator + "docspace-api-sdk-ruby-sample";
+        supportingFiles.add(new SupportingFile("sample_main.mustache", sampleDir, "main.rb"));
+        supportingFiles.add(new SupportingFile("sample_Gemfile.mustache", sampleDir, "Gemfile"));
 
         supportingFiles.add(new SupportingFile(
             "AUTHORS.mustache", "", "AUTHORS.md"
@@ -279,9 +281,11 @@ public class MyRubyClientCodegen extends RubyClientCodegen {
 
             String folder = tagParts.folderPart;
             String displayClassName = tagParts.classPart + apiNameSuffix;
+            String apiRequirePath = gemName + "/api/" + folder + "/" + toApiFilename(tagParts.classPart);
 
             api.put("x-folder", folder);
             api.put("x-classname", displayClassName);
+            api.put("importPath", apiRequirePath);
 
             folderToApis.computeIfAbsent(folder, key -> new ArrayList<>()).add(api);
         }

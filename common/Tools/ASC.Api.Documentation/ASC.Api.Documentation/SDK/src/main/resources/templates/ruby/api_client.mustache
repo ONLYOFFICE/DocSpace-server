@@ -169,7 +169,14 @@ module {{moduleName}}
         case auth_setting[:in]
         when 'header' then header_params[auth_setting[:key]] = auth_setting[:value]
         when 'query'  then query_params[auth_setting[:key]] = auth_setting[:value]
-        else fail ArgumentError, 'Authentication token must be in `query` or `header`'
+        when 'cookie'
+          cookie = "#{auth_setting[:key]}=#{auth_setting[:value]}"
+          if header_params['Cookie'].nil? || header_params['Cookie'].empty?
+            header_params['Cookie'] = cookie
+          else
+            header_params['Cookie'] = "#{header_params['Cookie']}; #{cookie}"
+          end
+        else fail ArgumentError, 'Authentication token must be in `query`, `header` or `cookie`'
         end
       end
     end

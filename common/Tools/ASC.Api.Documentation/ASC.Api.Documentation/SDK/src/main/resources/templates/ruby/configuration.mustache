@@ -230,7 +230,7 @@ module {{moduleName}}
         '{{name}}' =>
           {
             type: 'api_key',
-            in: {{#isKeyInHeader}}'header'{{/isKeyInHeader}}{{#isKeyInQuery}}'query'{{/isKeyInQuery}},
+            in: {{#isKeyInHeader}}'header'{{/isKeyInHeader}}{{#isKeyInQuery}}'query'{{/isKeyInQuery}}{{#isKeyInCookie}}'cookie'{{/isKeyInCookie}}{{^isKeyInHeader}}{{^isKeyInQuery}}{{^isKeyInCookie}}'header'{{/isKeyInCookie}}{{/isKeyInQuery}}{{/isKeyInHeader}},
             key: '{{keyParamName}}',
             value: api_key_with_prefix('{{keyParamName}}'{{#vendorExtensions.x-auth-id-alias}}, '{{.}}'{{/vendorExtensions.x-auth-id-alias}})
           },
