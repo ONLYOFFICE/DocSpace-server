@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2026
+// (c) Copyright Ascensio System SIA 2009-2026
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,15 +24,19 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Chat;
+namespace ASC.AI.Core.Provider.Data;
 
-public class ChatClientOptions
+public class AiModelSettings
 {
-    public required string Endpoint { get; init; }
-    public required string Key { get; init; }
-    public ProviderType Provider { get; init; }
-    public int ProviderId { get; init; }
     public required string ModelId { get; init; }
-    public ChatReasoningEffort? ReasoningEffort { get; set; }
-    public Dictionary<string, string>? Metadata { get; set; }
+    public string? Alias { get; init; }
+    public bool IsEnabled { get; init; }
+    public AiModelCapabilities? Capabilities { get; init; }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
+    PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class AiModelSettingsMapper
+{
+    public static partial AiModelSettings Map(this DbAiModelSettings source);
 }

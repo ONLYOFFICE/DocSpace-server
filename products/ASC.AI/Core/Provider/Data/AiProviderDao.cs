@@ -275,7 +275,7 @@ public class AiProviderDao(
             result.ProviderTitle = AiGateway.ProviderTitle;
             result.ProviderType = ProviderType.PortalAi;
         }
-        
+
         if (result.ProviderType.HasValue)
         {
             result.DefaultModel = aiConfiguration.ResolveModelId(result.ProviderType.Value, result.DefaultModel);
@@ -295,6 +295,46 @@ public class AiProviderDao(
 
         return await dbContext.GetFirstProviderIdAsync(tenantId)
             ?? (gateway.Configured ? AiGateway.ProviderId : null);
+    }
+
+    public async Task<List<AiModelSettings>> GetModelSettingsAsync(int tenantId, int providerId)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+
+        return await dbContext.GetModelSettingsAsync(tenantId, providerId)
+            .Select(x => x.Map())
+            .ToListAsync();
+    }
+
+    public async Task SaveModelSettingsAsync(int tenantId, int providerId, AiModelSettings settings)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        var strategy = dbContext.Database.CreateExecutionStrategy();
+
+        await strategy.ExecuteAsync(async () =>
+        {
+            await using var context = await dbContextFactory.CreateDbContextAsync();
+
+            var entity = new DbAiModelSettings
+            {
+                TenantId = tenantId,
+                ProviderId = providerId,
+                ModelId = settings.ModelId,
+                Alias = settings.Alias,
+                IsEnabled = settings.IsEnabled,
+                Capabilities = settings.Capabilities ?? new AiModelCapabilities()
+            };
+
+            await context.ModelSettings.AddOrUpdateAsync(entity);
+            await context.SaveChangesAsync();
+        });
+    }
+
+    public async Task DeleteModelSettingsAsync(int tenantId, int providerId, string modelId)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+
+        await dbContext.DeleteModelSettingsAsync(tenantId, providerId, modelId);
     }
 
     private async Task<AiProvider> CreateGatewayProviderAsync(bool includeCredentials = false, bool force = false)

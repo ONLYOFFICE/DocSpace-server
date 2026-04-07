@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2026
+// (c) Copyright Ascensio System SIA 2009-2026
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,15 +24,46 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Chat;
+namespace ASC.AI.Models.ResponseDto;
 
-public class ChatClientOptions
+/// <summary>
+/// AI model settings information.
+/// </summary>
+public class ModelSettingsDto
 {
-    public required string Endpoint { get; init; }
-    public required string Key { get; init; }
-    public ProviderType Provider { get; init; }
-    public int ProviderId { get; init; }
+    /// <summary>
+    /// The model identifier.
+    /// </summary>
+    /// <example>claude-sonnet-4-20250514</example>
     public required string ModelId { get; init; }
-    public ChatReasoningEffort? ReasoningEffort { get; set; }
-    public Dictionary<string, string>? Metadata { get; set; }
+
+    /// <summary>
+    /// The display name for the model.
+    /// </summary>
+    /// <example>Claude Sonnet 4</example>
+    public required string Alias { get; init; }
+
+    /// <summary>
+    /// Whether the model is enabled for use in chat.
+    /// </summary>
+    /// <example>true</example>
+    public bool IsEnabled { get; init; }
+
+    /// <summary>
+    /// Whether the model is recommended (defined in configuration).
+    /// </summary>
+    /// <example>true</example>
+    public bool IsRecommended { get; init; }
+
+    /// <summary>
+    /// The model capabilities.
+    /// </summary>
+    public required AiModelCapabilities Capabilities { get; init; }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
+    PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class ModelSettingsDtoMapper
+{
+    public static partial ModelSettingsDto MapToDto(this ModelSettingsInfo source);
 }

@@ -50,10 +50,27 @@ public class DbAiModelSettings : BaseEntity
     }
 }
 
+/// <summary>
+/// The AI model capabilities.
+/// </summary>
 public class AiModelCapabilities
 {
+    /// <summary>
+    /// Indicates whether the model supports image and vision input.
+    /// </summary>
+    /// <example>true</example>
     public bool Vision { get; set; }
+
+    /// <summary>
+    /// Indicates whether the model supports tool (function) calling.
+    /// </summary>
+    /// <example>true</example>
     public bool ToolCalling { get; set; }
+
+    /// <summary>
+    /// Indicates whether the model supports extended thinking and reasoning.
+    /// </summary>
+    /// <example>false</example>
     public bool Thinking { get; set; }
 }
 

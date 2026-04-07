@@ -165,6 +165,21 @@ public class CachedAiProviderDao(
         return result;
     }
 
+    public Task<List<AiModelSettings>> GetModelSettingsAsync(int tenantId, int providerId)
+    {
+        return providerDao.GetModelSettingsAsync(tenantId, providerId);
+    }
+
+    public Task SaveModelSettingsAsync(int tenantId, int providerId, AiModelSettings settings)
+    {
+        return providerDao.SaveModelSettingsAsync(tenantId, providerId, settings);
+    }
+
+    public Task DeleteModelSettingsAsync(int tenantId, int providerId, string modelId)
+    {
+        return providerDao.DeleteModelSettingsAsync(tenantId, providerId, modelId);
+    }
+
     private static string GetDefaultProviderCacheKey(int tenantId)
     {
         return $"ai:default_provider:{tenantId}";

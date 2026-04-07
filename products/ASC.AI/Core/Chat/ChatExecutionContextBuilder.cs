@@ -34,7 +34,6 @@ public class ChatExecutionContextBuilder(
     TenantManager tenantManager,
     AuthContext authContext,
     AiProviderService providerService,
-    AiConfiguration aiConfiguration,
     ChatTools chatTools,
     UserManager userManager)
 {
@@ -88,7 +87,7 @@ public class ChatExecutionContextBuilder(
         var user = await userTask;
 
         var modelId = agent.SettingsChatParameters.ModelId;
-        var modelSettings = aiConfiguration.GetModel(provider.Type, modelId);
+        var modelSettings = await providerService.GetEffectiveModelSettingsAsync(provider.Type, provider.Id, modelId);
 
         ChatReasoningEffort? reasoningEffort = chatSettings.ReasoningEffort is not ChatReasoningEffort.None
                                                && modelSettings is not null && modelSettings.Capabilities.Thinking
@@ -103,6 +102,7 @@ public class ChatExecutionContextBuilder(
             ClientOptions = new ChatClientOptions
             {
                 Provider = provider.Type,
+                ProviderId = provider.Id,
                 Endpoint = provider.Url,
                 Key = provider.Key,
                 ModelId = modelId,

@@ -56,14 +56,14 @@ public class AiProviderService(
 
         ArgumentException.ThrowIfNullOrEmpty(url);
 
+        var tenantId = tenantManager.GetCurrentTenantId();
+
         var defaultModel = await ExecuteProviderRequestAsync(type, async () =>
         {
             var client = modelClientFactory.Create(type, url, key);
-            var models = await GetFilteredModelsAsync(client, type);
+            var models = await GetFilteredModelsAsync(client, type, tenantId, 0);
             return models.FirstOrDefault()?.Id ?? throw new ArgumentException(ErrorMessages.NoModelsAvailable);
         });
-
-        var tenantId = tenantManager.GetCurrentTenantId();
 
         await using (await distributedLockProvider.TryAcquireFairLockAsync(GetProviderNameLockKey(tenantId)))
         {
@@ -175,39 +175,68 @@ public class AiProviderService(
             return [];
         }
 
-        return await ExecuteProviderRequestAsync(provider.Type, async () =>
-        {
-            var client = modelClientFactory.Create(provider.Type, provider.Url, provider.Key);
-            var models = await GetFilteredModelsAsync(client, provider.Type, scope);
+        var tenantId = tenantManager.GetCurrentTenantId();
 
-            Dictionary<string, AiChatPrice>? priceMap = null;
-            CurrencyInfo? currency = null;
-            if (provider.Type == ProviderType.PortalAi)
+        var client = modelClientFactory.Create(provider.Type, provider.Url, provider.Key);
+        var models = await ExecuteProviderRequestAsync(provider.Type,
+            () => GetFilteredModelsAsync(client, provider.Type, tenantId, provider.Id, scope));
+
+        Dictionary<string, AiChatPrice>? priceMap = null;
+        CurrencyInfo? currency = null;
+        if (provider.Type == ProviderType.PortalAi)
+        {
+            try
             {
-                try
+                var prices = await aiGateway.GetPricesAsync();
+                currency = prices.Currency;
+                priceMap = prices.Chat.ToDictionary(p => p.Id, p => new AiChatPrice
                 {
-                    var prices = await aiGateway.GetPricesAsync();
-                    currency = prices.Currency;
-                    priceMap = prices.Chat.ToDictionary(p => p.Id, p => new AiChatPrice
-                    {
-                        Prompt = p.Price.Prompt * 1_000_000,
-                        Completion = p.Price.Completion * 1_000_000
-                    });
-                }
-                catch(Exception e)
-                {
-                    // If prices can't be fetched, continue without them
-                    logger.ErrorWithException(e);
-                }
+                    Prompt = p.Price.Prompt * 1_000_000,
+                    Completion = p.Price.Completion * 1_000_000
+                });
+            }
+            catch(Exception e)
+            {
+                // If prices can't be fetched, continue without them
+                logger.ErrorWithException(e);
+            }
+        }
+
+        var settingsMap = provider.Type != ProviderType.PortalAi
+            ? (await providerDao.GetModelSettingsAsync(tenantId, provider.Id)).ToDictionary(s => s.ModelId)
+            : null;
+
+        return models.Select(m =>
+        {
+            var configModel = aiConfiguration.GetModel(provider.Type, m.Id);
+            string? alias;
+            AiModelCapabilities? capabilities;
+
+            if (configModel != null)
+            {
+                alias = configModel.Alias;
+                capabilities = configModel.Capabilities;
+            }
+            else if (settingsMap != null && settingsMap.TryGetValue(m.Id, out var dbSettings))
+            {
+                alias = dbSettings.Alias;
+                capabilities = dbSettings.Capabilities;
+            }
+            else
+            {
+                alias = m.Id;
+                capabilities = null;
             }
 
-            return models.Select(m => new ModelData
+            return new ModelData
             {
                 Provider = provider,
                 ModelId = m.Id,
+                Alias = alias,
+                Capabilities = capabilities,
                 Price = priceMap?.GetValueOrDefault(m.Id),
                 Currency = priceMap != null ? currency : null
-            });
+            };
         });
     }
 
@@ -290,15 +319,177 @@ public class AiProviderService(
         }
     }
 
-    private async Task<IEnumerable<ModelInfo>> GetFilteredModelsAsync(IModelClient client, ProviderType type, Scope? scope = null)
+    public async Task<List<ModelSettingsInfo>> GetAllModelsWithSettingsAsync(int providerId)
+    {
+        await ThrowIfNotAccessAsync();
+
+        var provider = await GetProviderAsync(providerId, forceSystemProvider: true);
+        if (provider.NeedReset)
+        {
+            return [];
+        }
+
+        var tenantId = tenantManager.GetCurrentTenantId();
+
+        var client = modelClientFactory.Create(provider.Type, provider.Url, provider.Key);
+        var allModels = await ExecuteProviderRequestAsync(provider.Type, () => client.ListModelsAsync());
+
+        var recommended = aiConfiguration.GetSupportedModels(provider.Type);
+        var dbSettings = provider.Type != ProviderType.PortalAi
+            ? (await providerDao.GetModelSettingsAsync(tenantId, provider.Id)).ToDictionary(s => s.ModelId)
+            : new Dictionary<string, AiModelSettings>();
+
+        var result = new List<ModelSettingsInfo>();
+
+        foreach (var model in allModels)
+        {
+            var isRecommended = recommended?.Contains(model.Id) == true;
+            var configModel = aiConfiguration.GetModel(provider.Type, model.Id);
+            dbSettings.TryGetValue(model.Id, out var dbSetting);
+
+            if (isRecommended)
+            {
+                result.Add(new ModelSettingsInfo
+                {
+                    ModelId = model.Id,
+                    Alias = configModel!.Alias,
+                    IsEnabled = dbSetting == null || dbSetting.IsEnabled,
+                    IsRecommended = true,
+                    Capabilities = configModel.Capabilities
+                });
+            }
+            else
+            {
+                result.Add(new ModelSettingsInfo
+                {
+                    ModelId = model.Id,
+                    Alias = dbSetting?.Alias ?? model.Id,
+                    IsEnabled = dbSetting is { IsEnabled: true },
+                    IsRecommended = false,
+                    Capabilities = dbSetting?.Capabilities ?? new AiModelCapabilities()
+                });
+            }
+        }
+
+        result.Sort((a, b) =>
+        {
+            if (a.IsRecommended != b.IsRecommended)
+            {
+                return a.IsRecommended ? -1 : 1;
+            }
+
+            return 0;
+        });
+
+        return result;
+    }
+
+    public async Task UpdateModelSettingsAsync(int providerId, string modelId, bool isEnabled, string? alias, AiModelCapabilities? capabilities)
+    {
+        await ThrowIfNotAccessAsync();
+
+        var provider = await GetProviderAsync(providerId);
+        if (provider.Type == ProviderType.PortalAi)
+        {
+            throw new ArgumentException(ErrorMessages.IncorrectProvider);
+        }
+
+        var tenantId = tenantManager.GetCurrentTenantId();
+        var configModel = aiConfiguration.GetModel(provider.Type, modelId);
+
+        if (configModel != null)
+        {
+            if (isEnabled)
+            {
+                await providerDao.DeleteModelSettingsAsync(tenantId, provider.Id, modelId);
+            }
+            else
+            {
+                await providerDao.SaveModelSettingsAsync(tenantId, provider.Id, new AiModelSettings
+                {
+                    ModelId = modelId,
+                    IsEnabled = false,
+                    Alias = configModel.Alias,
+                    Capabilities = configModel.Capabilities
+                });
+            }
+        }
+        else
+        {
+            if (!isEnabled)
+            {
+                await providerDao.DeleteModelSettingsAsync(tenantId, provider.Id, modelId);
+            }
+            else
+            {
+                await providerDao.SaveModelSettingsAsync(tenantId, provider.Id, new AiModelSettings
+                {
+                    ModelId = modelId,
+                    IsEnabled = true,
+                    Alias = alias ?? modelId,
+                    Capabilities = capabilities
+                });
+            }
+        }
+    }
+
+    public async Task<ModelSettings?> GetEffectiveModelSettingsAsync(ProviderType type, int providerId, string modelId)
+    {
+        var configModel = aiConfiguration.GetModel(type, modelId);
+        if (configModel != null)
+        {
+            return configModel;
+        }
+
+        var tenantId = tenantManager.GetCurrentTenantId();
+        var dbSettings = await providerDao.GetModelSettingsAsync(tenantId, providerId);
+        var setting = dbSettings.Find(s => s.ModelId == modelId);
+
+        if (setting is not { IsEnabled: true })
+        {
+            return null;
+        }
+
+        return new ModelSettings
+        {
+            Id = setting.ModelId,
+            Alias = setting.Alias ?? setting.ModelId,
+            Capabilities = setting.Capabilities ?? new AiModelCapabilities()
+        };
+    }
+
+    private async Task<IEnumerable<ModelInfo>> GetFilteredModelsAsync(
+        IModelClient client,
+        ProviderType type,
+        int tenantId,
+        int providerId,
+        Scope? scope = null)
     {
         var models = await client.ListModelsAsync(scope);
+        var recommended = aiConfiguration.GetSupportedModels(type);
 
-        var supported = aiConfiguration.GetSupportedModels(type);
-        if (supported != null)
+        if (type == ProviderType.PortalAi || recommended == null)
         {
-            models = models.Where(m => supported.Contains(m.Id));
+            if (recommended != null)
+            {
+                models = models.Where(m => recommended.Contains(m.Id));
+            }
+
+            return models;
         }
+
+        var dbSettings = (await providerDao.GetModelSettingsAsync(tenantId, providerId))
+            .ToDictionary(s => s.ModelId);
+
+        models = models.Where(m =>
+        {
+            if (recommended.Contains(m.Id))
+            {
+                return !dbSettings.TryGetValue(m.Id, out var s) || s.IsEnabled;
+            }
+
+            return dbSettings.TryGetValue(m.Id, out var settings) && settings.IsEnabled;
+        });
 
         return models;
     }

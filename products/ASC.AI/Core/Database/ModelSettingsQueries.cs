@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2026
+// (c) Copyright Ascensio System SIA 2009-2026
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,15 +24,35 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Chat;
+namespace ASC.AI.Core.Database;
 
-public class ChatClientOptions
+public partial class AiDbContext
 {
-    public required string Endpoint { get; init; }
-    public required string Key { get; init; }
-    public ProviderType Provider { get; init; }
-    public int ProviderId { get; init; }
-    public required string ModelId { get; init; }
-    public ChatReasoningEffort? ReasoningEffort { get; set; }
-    public Dictionary<string, string>? Metadata { get; set; }
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    public IAsyncEnumerable<DbAiModelSettings> GetModelSettingsAsync(int tenantId, int providerId)
+    {
+        return Queries.GetModelSettingsAsync(this, tenantId, providerId);
+    }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, null])]
+    public Task DeleteModelSettingsAsync(int tenantId, int providerId, string modelId)
+    {
+        return Queries.DeleteModelSettingsAsync(this, tenantId, providerId, modelId);
+    }
+}
+
+static file class Queries
+{
+    public static readonly Func<AiDbContext, int, int, IAsyncEnumerable<DbAiModelSettings>> GetModelSettingsAsync =
+        EF.CompileAsyncQuery(
+            (AiDbContext ctx, int tenantId, int providerId) =>
+                ctx.ModelSettings
+                    .Where(x => x.TenantId == tenantId && x.ProviderId == providerId));
+
+    public static readonly Func<AiDbContext, int, int, string, Task> DeleteModelSettingsAsync =
+        EF.CompileAsyncQuery(
+            (AiDbContext ctx, int tenantId, int providerId, string modelId) =>
+                ctx.ModelSettings
+                    .Where(x => x.TenantId == tenantId && x.ProviderId == providerId && x.ModelId == modelId)
+                    .ExecuteDelete());
 }

@@ -166,6 +166,53 @@ public class ProviderController(
     }
 
     /// <summary>
+    /// Get all models for a provider with their settings
+    /// </summary>
+    /// <remarks>
+    /// Returns the full list of AI models available from a provider, including both recommended and additional models.
+    /// Each model includes its current settings: enabled state, display alias, and capabilities (vision, tool calling, thinking).
+    /// Recommended models are enabled by default and their alias and capabilities come from configuration.
+    /// Additional models are disabled by default and can be configured by the admin.
+    /// </remarks>
+    /// <path>api/2.0/ai/providers/{providerId}/models</path>
+    /// <collection>list</collection>
+    [Tags("AI / Providers")]
+    [SwaggerResponse(200, "List of models with settings", typeof(List<ModelSettingsDto>))]
+    [SwaggerResponse(403, "You don't have enough permission to manage providers")]
+    [SwaggerResponse(404, "Provider not found")]
+    [HttpGet("providers/{providerId}/models")]
+    public async Task<List<ModelSettingsDto>> GetProviderModelsAsync(GetProviderModelsRequestDto inDto)
+    {
+        var models = await providerService.GetAllModelsWithSettingsAsync(inDto.ProviderId);
+
+        return models.Select(x => x.MapToDto()).ToList();
+    }
+
+    /// <summary>
+    /// Update model settings
+    /// </summary>
+    /// <remarks>
+    /// Updates the settings for a specific model on a provider.
+    /// For recommended models, only the enabled state can be changed; alias and capabilities are managed by configuration.
+    /// For additional (non-recommended) models, the enabled state, display alias, and capabilities can be configured.
+    /// </remarks>
+    /// <path>api/2.0/ai/providers/{providerId}/models/{modelId}</path>
+    [Tags("AI / Providers")]
+    [SwaggerResponse(200, "Model settings updated successfully")]
+    [SwaggerResponse(403, "You don't have enough permission to manage providers")]
+    [SwaggerResponse(404, "Provider not found")]
+    [HttpPut("providers/{providerId}/models/{modelId}")]
+    public async Task UpdateModelSettingsAsync(UpdateModelSettingsRequestDto inDto)
+    {
+        await providerService.UpdateModelSettingsAsync(
+            inDto.ProviderId,
+            inDto.ModelId,
+            inDto.Body.IsEnabled,
+            inDto.Body.Alias,
+            inDto.Body.Capabilities);
+    }
+
+    /// <summary>
     /// Set the default AI provider
     /// </summary>
     /// <remarks>

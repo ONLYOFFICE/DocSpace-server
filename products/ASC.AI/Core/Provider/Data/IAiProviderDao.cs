@@ -55,4 +55,8 @@ public interface IAiProviderDao
     Task<DefaultAiProvider?> GetDefaultProviderAsync(int tenantId);
 
     Task<int?> GetFirstProviderIdAsync(int tenantId);
+
+    Task<List<AiModelSettings>> GetModelSettingsAsync(int tenantId, int providerId);
+    Task SaveModelSettingsAsync(int tenantId, int providerId, AiModelSettings settings);
+    Task DeleteModelSettingsAsync(int tenantId, int providerId, string modelId);
 }
