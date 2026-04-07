@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Locale;
 
 import org.openapitools.codegen.CodegenOperation;
 import org.openapitools.codegen.SupportingFile;
@@ -155,7 +156,7 @@ public class MyRubyClientCodegen extends RubyClientCodegen {
         String sanitized = super.sanitizeTag(tag);
 
         if (!tagMap.containsKey(sanitized)) {
-            String[] parts = tag.split(" / ");
+            String[] parts = tag.split(" / ", 2);
             String folderPart = parts[0];
             String classPart = (parts.length > 1) ? parts[1] : parts[0];
 
@@ -213,8 +214,11 @@ public class MyRubyClientCodegen extends RubyClientCodegen {
     public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List<ModelMap> allModels) {
         super.postProcessOperationsWithModels(objs, allModels);
 
-        if (objs != null && objs.getOperations() != null) {
-            OperationMap operationMap = objs.getOperations();
+        if (objs == null || objs.getOperations() == null) {
+            return objs;
+        }
+        
+        OperationMap operationMap = objs.getOperations();
             List<CodegenOperation> operationList = operationMap.getOperation();
             if (operationList != null) {
                 for (CodegenOperation op : operationList) { 
@@ -228,18 +232,12 @@ public class MyRubyClientCodegen extends RubyClientCodegen {
                         String commentedNotes = op.notes
                             .replace("\r\n", "\n")
                             .replace("\r", "\n")
-                            .replace("\n", "\n// ");
+                            .replace("\n", "\n# ");
                         op.vendorExtensions.put("x-commentedNotes", commentedNotes);
                     }
                 }
             }
-        }
 
-        if (objs == null || objs.getOperations() == null) {
-            return objs;
-        }
-
-        OperationMap operationMap = objs.getOperations();
         TagParts tagParts = resolveTagParts(operationMap.getClassname());
         if (tagParts == null) {
             return objs;
@@ -255,15 +253,21 @@ public class MyRubyClientCodegen extends RubyClientCodegen {
         return input.replaceAll("([a-z])([A-Z])", "$1-$2")
                     .replaceAll("([A-Z]+)([A-Z][a-z])", "$1-$2")
                     .replace('_', '-')
-                    .toLowerCase();
+                    .toLowerCase(Locale.ROOT);
     }
 
     @Override
     public Map<String, Object> postProcessSupportingFileData(Map<String, Object> objs) {
         super.postProcessSupportingFileData(objs);
 
-        ApiInfoMap apiInfo = (ApiInfoMap) objs.get("apiInfo");
-        if (apiInfo == null || apiInfo.getApis() == null) {
+        Object apiInfoObj = objs.get("apiInfo");
+        if (!(apiInfoObj instanceof ApiInfoMap)) {
+            return objs;
+        }
+        
+        ApiInfoMap apiInfo = (ApiInfoMap) apiInfoObj;
+
+        if (apiInfo.getApis() == null) {
             return objs;
         }
 
@@ -328,7 +332,7 @@ public class MyRubyClientCodegen extends RubyClientCodegen {
     }
 
     private String makeUniqueTag(String tag) {
-        String lower = tag.toLowerCase();
+        String lower = tag.toLowerCase(Locale.ROOT);
         if (!seenApiFilenames.containsKey(lower)) {
             seenApiFilenames.put(lower, tag);
             return tag;
