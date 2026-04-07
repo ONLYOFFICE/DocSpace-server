@@ -82,19 +82,24 @@ public class RedisToolPermissionProvider(
     IRedisClient redisClient,
     IFusionCache cache) : RedisToolPermissionResolverBase, IToolPermissionProvider
 {
-    public async Task<CallData?> ProvidePermissionAsync(string callId, ToolExecutionDecision decision)
+    public async Task<CallData?> ProvidePermissionAsync(string callId, ToolExecutionDecision decision, Func<CallData, ValueTask>? beforeConfirm = null)
     {
-        var database = redisClient.GetDefaultDatabase();
-        
-        var channel = new RedisChannel($"{ChannelName}:{callId}", RedisChannel.PatternMode.Auto);
-        await database.PublishAsync(channel, decision);
-        
         var cacheKey = GetCacheKey(callId);
 
         var callData = await cache.GetOrDefaultAsync<CallData>(cacheKey);
 
+        if (callData != null && beforeConfirm != null)
+        {
+            await beforeConfirm(callData);
+        }
+
+        var database = redisClient.GetDefaultDatabase();
+
+        var channel = new RedisChannel($"{ChannelName}:{callId}", RedisChannel.PatternMode.Auto);
+        await database.PublishAsync(channel, decision);
+
         await cache.RemoveAsync(cacheKey);
-        
+
         return callData;
     }
 }
