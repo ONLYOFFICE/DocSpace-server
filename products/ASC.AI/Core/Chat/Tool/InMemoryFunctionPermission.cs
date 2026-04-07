@@ -58,15 +58,21 @@ public class InMemoryToolPermissionRequester(IFusionCache cache) : IToolPermissi
 
 public class InMemoryToolPermissionProvider(IFusionCache cache) : IToolPermissionProvider
 {
-    public async Task<CallData?> ProvidePermissionAsync(string callId, ToolExecutionDecision decision)
+    public async Task<CallData?> ProvidePermissionAsync(string callId, ToolExecutionDecision decision, Func<CallData, ValueTask>? beforeConfirm = null)
     {
+        var cacheKey = $"ai:function:call_data:{callId}";
+        var callData = await cache.GetOrDefaultAsync<CallData>(cacheKey);
+
+        if (callData != null && beforeConfirm != null)
+        {
+            await beforeConfirm(callData);
+        }
+
         if (InMemoryToolPermissionRequester.PendingRequests.TryGetValue(callId, out var completionSource))
         {
             completionSource.TrySetResult(decision);
         }
 
-        var cacheKey = $"ai:function:call_data:{callId}";
-        var callData = await cache.GetOrDefaultAsync<CallData>(cacheKey);
         await cache.RemoveAsync(cacheKey);
 
         return callData;

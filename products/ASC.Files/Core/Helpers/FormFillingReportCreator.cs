@@ -338,7 +338,7 @@ public class FormFillingReportCreator(
             var (type, enumValues) = field.Type switch
             {
                 "checkBox" => (DbColumnType.Boolean, (IReadOnlyList<string>)null),
-                "dateTime" => (DbColumnType.Date, null),
+                "dateTime" => (HasTimeComponent(field.Format) ? DbColumnType.DateTime : DbColumnType.Date, null),
                 "comboBox" or "dropDownList" or "radio" => (DbColumnType.Enum, (IReadOnlyList<string>)field.PossibleValues),
                 _ => (DbColumnType.Text, null)
             };
@@ -346,6 +346,9 @@ public class FormFillingReportCreator(
             yield return new DbColumnDefinition(name, type, enumValues, Label: label);
         }
     }
+
+    private static bool HasTimeComponent(string format) =>
+        !string.IsNullOrEmpty(format) && (format.Contains('H') || format.Contains('h'));
 
     private static Dictionary<string, object> BuildRowData(SubmitFormsData data, IEnumerable<FormMetadata> metaData, int formId, CultureInfo culture)
     {

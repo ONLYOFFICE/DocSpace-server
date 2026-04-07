@@ -127,41 +127,82 @@ public record DatePartFilter(string Column, string DatePart, string Operator, IR
     }
 }
 
-/// <summary>Filter that computes the difference in days between two date columns.</summary>
-/// <param name="StartColumn">The earlier date column (minuend in DATEDIFF).</param>
-/// <param name="EndColumn">The later date column (subtrahend in DATEDIFF).</param>
+/// <summary>Filter that computes the difference between two date/datetime columns.</summary>
+/// <param name="StartColumn">The earlier date column.</param>
+/// <param name="EndColumn">The later date column.</param>
 /// <param name="Operator">Comparison operator: =, !=, &lt;, &gt;, &lt;=, &gt;=.</param>
-/// <param name="Days">Integer number of days to compare against.</param>
-public record DateDiffFilter(string StartColumn, string EndColumn, string Operator, int Days)
+/// <param name="Value">Numeric value to compare against.</param>
+/// <param name="Unit">Time unit for the difference: DAYS (default), HOURS, or MINUTES.</param>
+public record DateDiffFilter(string StartColumn, string EndColumn, string Operator, int Value, string Unit = "DAYS")
 {
     /// <summary>
-    /// Parses a filter string of the form <c>start_col end_col OPERATOR days</c>.
-    /// Example: "col_start_date col_submission_date &lt; 7".
+    /// Parses a filter string of the form <c>start_col end_col OPERATOR value [UNIT]</c>.
+    /// Examples: "col_start_date col_submission_date &lt; 7", "col_start col_end &lt; 48 HOURS".
     /// </summary>
     public static DateDiffFilter Parse(string filter)
     {
         var parts = filter.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
-        // Handle "col_a DATEDIFF col_b OP days" — model included the "DATEDIFF" keyword
-        if (parts.Length == 5 && parts[1].Equals("DATEDIFF", StringComparison.OrdinalIgnoreCase))
+        // Handle "col_a DATEDIFF col_b OP value [UNIT]" — model included the "DATEDIFF" keyword
+        if (parts.Length is 5 or 6 && parts[1].Equals("DATEDIFF", StringComparison.OrdinalIgnoreCase))
         {
-            if (!int.TryParse(parts[4], out var days5))
+            if (!int.TryParse(parts[4], out var val5))
             {
-                throw new ArgumentException($"Invalid DateDiffFilter: days value must be an integer (got: '{parts[4]}'). Example: \"col_start col_end < 7\".");
+                throw new ArgumentException($"Invalid DateDiffFilter: value must be an integer (got: '{parts[4]}'). Example: \"col_start col_end < 48 HOURS\".");
             }
-            return new DateDiffFilter(parts[0], parts[2], parts[3].ToUpperInvariant(), days5);
+            var unit5 = parts.Length == 6 ? parts[5].ToUpperInvariant() : "DAYS";
+            DateDiffUnits.Validate(unit5);
+            return new DateDiffFilter(parts[0], parts[2], parts[3].ToUpperInvariant(), val5, unit5);
         }
 
-        if (parts.Length != 4)
+        if (parts.Length is < 4 or > 5)
         {
-            throw new ArgumentException($"Invalid DateDiffFilter expression (expected 'start_col end_col OPERATOR days'): '{filter}'");
+            throw new ArgumentException($"Invalid DateDiffFilter expression (expected 'start_col end_col OPERATOR value [UNIT]'): '{filter}'");
         }
 
-        if (!int.TryParse(parts[3], out var days))
+        if (!int.TryParse(parts[3], out var value))
         {
-            throw new ArgumentException($"Invalid DateDiffFilter: days value must be an integer (got: '{parts[3]}'). Example: \"col_start col_end < 7\".");
+            throw new ArgumentException($"Invalid DateDiffFilter: value must be an integer (got: '{parts[3]}'). Example: \"col_start col_end < 48 HOURS\".");
         }
-        return new DateDiffFilter(parts[0], parts[1], parts[2].ToUpperInvariant(), days);
+        var unit = parts.Length == 5 ? parts[4].ToUpperInvariant() : "DAYS";
+        DateDiffUnits.Validate(unit);
+        return new DateDiffFilter(parts[0], parts[1], parts[2].ToUpperInvariant(), value, unit);
+    }
+}
+
+/// <summary>Specifies two date/datetime columns whose difference is used as the aggregate value expression.</summary>
+/// <param name="StartColumn">The earlier date column.</param>
+/// <param name="EndColumn">The later date column.</param>
+/// <param name="Unit">Time unit: DAYS (default), HOURS, or MINUTES.</param>
+public record DateDiffAggregate(string StartColumn, string EndColumn, string Unit = "DAYS")
+{
+    /// <summary>
+    /// Parses a string of the form <c>start_col end_col [UNIT]</c>.
+    /// Examples: "col_created col_submitted HOURS", "col_start col_end".
+    /// </summary>
+    public static DateDiffAggregate Parse(string expr)
+    {
+        var parts = expr.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length is < 2 or > 3)
+        {
+            throw new ArgumentException($"Invalid DateDiffAggregate expression (expected 'start_col end_col [UNIT]'): '{expr}'");
+        }
+        var unit = parts.Length == 3 ? parts[2].ToUpperInvariant() : "DAYS";
+        DateDiffUnits.Validate(unit);
+        return new DateDiffAggregate(parts[0], parts[1], unit);
+    }
+}
+
+file static class DateDiffUnits
+{
+    private static readonly HashSet<string> _allowed = new(StringComparer.OrdinalIgnoreCase) { "DAYS", "HOURS", "MINUTES" };
+
+    public static void Validate(string unit)
+    {
+        if (!_allowed.Contains(unit))
+        {
+            throw new ArgumentException($"Invalid date-diff unit '{unit}'. Allowed: DAYS, HOURS, MINUTES.");
+        }
     }
 }
 
@@ -427,11 +468,24 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         };
     }
 
-    private static string BuildDateDiffExpr(string startCol, string endCol, ExternalDatabaseType dbType, char q)
+    private static string BuildDateDiffExpr(string startCol, string endCol, ExternalDatabaseType dbType, char q, string unit = "DAYS")
     {
-        return dbType == ExternalDatabaseType.MySql
-            ? $"ABS(DATEDIFF({q}{startCol}{q}, {q}{endCol}{q}))"
-            : $"ABS(CAST(julianday({q}{startCol}{q}) - julianday({q}{endCol}{q}) AS INTEGER))";
+        if (dbType == ExternalDatabaseType.MySql)
+        {
+            return unit switch
+            {
+                "HOURS"   => $"ABS(TIMESTAMPDIFF(HOUR, {q}{startCol}{q}, {q}{endCol}{q}))",
+                "MINUTES" => $"ABS(TIMESTAMPDIFF(MINUTE, {q}{startCol}{q}, {q}{endCol}{q}))",
+                _         => $"ABS(DATEDIFF({q}{startCol}{q}, {q}{endCol}{q}))"
+            };
+        }
+
+        return unit switch
+        {
+            "HOURS"   => $"ABS(CAST((julianday({q}{endCol}{q}) - julianday({q}{startCol}{q})) * 24 AS INTEGER))",
+            "MINUTES" => $"ABS(CAST((julianday({q}{endCol}{q}) - julianday({q}{startCol}{q})) * 1440 AS INTEGER))",
+            _         => $"ABS(CAST(julianday({q}{endCol}{q}) - julianday({q}{startCol}{q}) AS INTEGER))"
+        };
     }
 
     private static void ValidateFilters(IReadOnlyList<QueryFilter> filters, IReadOnlyCollection<string> allowedColumns)
@@ -570,7 +624,8 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         string? secondGroupByColumn = null,
         string? secondGroupByDatePart = null,
         IEnumerable<DatePartFilter>? datePartFilters = null,
-        DateDiffFilter? dateDiffFilter = null)
+        DateDiffFilter? dateDiffFilter = null,
+        DateDiffAggregate? dateDiffAggregate = null)
     {
         ValidateTableName(tableName);
 
@@ -586,14 +641,26 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
             throw new ArgumentException($"Aggregate function not allowed: '{aggregateFunction}'. Pass exactly one keyword: COUNT, COUNT_DISTINCT, SUM, AVG, MIN, or MAX.");
         }
 
-        if (upperFn is "COUNT_DISTINCT" or "SUM" or "AVG" or "MIN" or "MAX" && valueColumn is null)
+        if (upperFn is "COUNT_DISTINCT" or "SUM" or "AVG" or "MIN" or "MAX" && valueColumn is null && dateDiffAggregate is null)
         {
-            throw new ArgumentException($"{aggregateFunction} requires valueColumn. To count all rows per group use COUNT (without valueColumn).");
+            throw new ArgumentException($"{aggregateFunction} requires either valueColumn or dateDiffValueExpr. To count all rows per group use COUNT (without valueColumn).");
         }
 
         if (valueColumn != null && !allowedColumns.Contains(valueColumn, StringComparer.OrdinalIgnoreCase))
         {
             throw new UnauthorizedAccessException($"Unknown column '{valueColumn}'. Available: {string.Join(", ", allowedColumns)}");
+        }
+
+        if (dateDiffAggregate != null)
+        {
+            if (!allowedColumns.Contains(dateDiffAggregate.StartColumn, StringComparer.OrdinalIgnoreCase))
+            {
+                throw new UnauthorizedAccessException($"Unknown column in dateDiffValueExpr: '{dateDiffAggregate.StartColumn}'. Available: {string.Join(", ", allowedColumns)}");
+            }
+            if (!allowedColumns.Contains(dateDiffAggregate.EndColumn, StringComparer.OrdinalIgnoreCase))
+            {
+                throw new UnauthorizedAccessException($"Unknown column in dateDiffValueExpr: '{dateDiffAggregate.EndColumn}'. Available: {string.Join(", ", allowedColumns)}");
+            }
         }
 
         if (groupByColumn != null && !allowedColumns.Contains(groupByColumn, StringComparer.OrdinalIgnoreCase))
@@ -631,12 +698,16 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         var dbType = provider.DatabaseTypeEnum;
         var q = dbType == ExternalDatabaseType.MySql ? '`' : '"';
 
+        string? innerExpr = dateDiffAggregate != null
+            ? BuildDateDiffExpr(dateDiffAggregate.StartColumn, dateDiffAggregate.EndColumn, dbType, q, dateDiffAggregate.Unit)
+            : valueColumn != null ? $"{q}{valueColumn}{q}" : null;
+
         var aggExpr = upperFn switch
         {
-            "COUNT" when valueColumn is null => "COUNT(*)",
-            "COUNT" => $"COUNT({q}{valueColumn}{q})",
-            "COUNT_DISTINCT" => $"COUNT(DISTINCT {q}{valueColumn}{q})",
-            _ => $"{upperFn}({q}{valueColumn}{q})"
+            "COUNT" when innerExpr is null => "COUNT(*)",
+            "COUNT" => $"COUNT({innerExpr})",
+            "COUNT_DISTINCT" => $"COUNT(DISTINCT {innerExpr})",
+            _ => $"{upperFn}({innerExpr})"
         };
 
         var selectParts = new List<string>();
@@ -715,8 +786,8 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
 
         if (dateDiffFilter != null)
         {
-            var ddExpr = BuildDateDiffExpr(dateDiffFilter.StartColumn, dateDiffFilter.EndColumn, dbType, q);
-            whereParts.Add($"{ddExpr} {dateDiffFilter.Operator} {dateDiffFilter.Days}");
+            var ddExpr = BuildDateDiffExpr(dateDiffFilter.StartColumn, dateDiffFilter.EndColumn, dbType, q, dateDiffFilter.Unit);
+            whereParts.Add($"{ddExpr} {dateDiffFilter.Operator} {dateDiffFilter.Value}");
         }
 
         if (whereParts.Count > 0)
@@ -861,8 +932,8 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
 
         if (dateDiffFilter != null)
         {
-            var ddExpr = BuildDateDiffExpr(dateDiffFilter.StartColumn, dateDiffFilter.EndColumn, dbType, q);
-            whereParts.Add($"{ddExpr} {dateDiffFilter.Operator} {dateDiffFilter.Days}");
+            var ddExpr = BuildDateDiffExpr(dateDiffFilter.StartColumn, dateDiffFilter.EndColumn, dbType, q, dateDiffFilter.Unit);
+            whereParts.Add($"{ddExpr} {dateDiffFilter.Operator} {dateDiffFilter.Value}");
         }
 
         var sql = new StringBuilder($"SELECT {selectPart} FROM {q}{tableName}{q}");

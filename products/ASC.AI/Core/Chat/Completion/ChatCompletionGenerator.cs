@@ -79,7 +79,7 @@ public class ChatCompletionGenerator(
                 {
                     if (context.Chat == null)
                     {
-                        var tempTitle = chatNameGenerator.Generate(context.RawMessage);
+                        var tempTitle = ChatNameGenerator.Generate(context.RawMessage);
 
                         context.Chat = await chatHistory.AddChatAsync(
                             context.TenantId,

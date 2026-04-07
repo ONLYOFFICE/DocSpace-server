@@ -45,11 +45,11 @@ public class EmployeeDto
     /// <example>Mike Zanyatski</example>
     public string DisplayName { get; set; }
 
-    /// <summary>
-    /// The user title.
-    /// </summary>
-    /// <example>Manager</example>
-    public string Title { get; set; }
+    // /// <summary>
+    // /// The user title.
+    // /// </summary>
+    // /// <example>Manager</example>
+    // public string Title { get; set; }
 
     /// <summary>
     /// The user avatar.
@@ -104,7 +104,7 @@ public class EmployeeDto
     {
         Id = Guid.Empty,
         DisplayName = string.Empty,
-        Title = string.Empty,
+        //Title = string.Empty,
         Avatar = string.Empty,
         AvatarOriginal = string.Empty,
         AvatarMax = string.Empty,
@@ -168,10 +168,10 @@ public class EmployeeDtoHelper(
         result.HasAvatar = await _userPhotoManager.UserHasAvatar(userInfo.Id);
         result.IsAnonim = userInfo.Id.Equals(ASC.Core.Configuration.Constants.Guest.ID);
 
-        if (!string.IsNullOrEmpty(userInfo.Title))
-        {
-            result.Title = userInfo.Title;
-        }
+        // if (!string.IsNullOrEmpty(userInfo.Title))
+        // {
+        //     result.Title = userInfo.Title;
+        // }
 
         var cacheKey = Math.Abs(userInfo.LastModified.GetHashCode());
 

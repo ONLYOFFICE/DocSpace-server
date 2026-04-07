@@ -66,7 +66,7 @@ public class ChatCompletionRunner(
             context.Attachments = attachments;
         }
 
-        var client = chatClientFactory.Create(context.ClientOptions, context.Tools);
+        var client = chatClientFactory.Create(context.ClientOptions, authContext.CurrentAccount.ID, context.Tools);
 
         return new ChatCompletionGenerator(
             client,
@@ -128,7 +128,7 @@ public class ChatCompletionRunner(
             context.Attachments = attachments;
         }
 
-        var client = chatClientFactory.Create(context.ClientOptions, context.Tools);
+        var client = chatClientFactory.Create(context.ClientOptions, authContext.CurrentAccount.ID, context.Tools);
 
         return new ChatCompletionGenerator(
             client,

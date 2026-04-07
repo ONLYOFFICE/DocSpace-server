@@ -262,8 +262,7 @@ public class FileConverter(
     IHttpClientFactory clientFactory,
     SocketManager socketManager,
     FileConverterQueue fileConverterQueue,
-    IHttpContextAccessor httpContextAccessor,
-    Global global)
+    IHttpContextAccessor httpContextAccessor)
 {
     public bool EnableAsUploaded => fileUtility.ExtsMustConvert.Count > 0 && !string.IsNullOrEmpty(filesLinkUtility.DocServiceConverterUrl);
 
@@ -632,7 +631,7 @@ public class FileConverter(
             isNewFile = true;
         }
 
-        newFile.Title = await global.GetAvailableTitleAsync(newFileTitle, folder.Id, fileDao.IsExistAsync, FileEntryType.File);
+        newFile.Title = await fileDao.GetAvailableTitleAsync(newFileTitle, folder.Id);
         newFile.ConvertedType = null;
         newFile.ThumbnailStatus = Thumbnail.Waiting;
 
