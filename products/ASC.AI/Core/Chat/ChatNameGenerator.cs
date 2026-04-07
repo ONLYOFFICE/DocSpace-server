@@ -92,7 +92,7 @@ public class ChatNameGenerator(
         }
     }
 
-    public string Generate(string text)
+    public static string Generate(string text)
     {
         return ProcessTitle(text);
     }

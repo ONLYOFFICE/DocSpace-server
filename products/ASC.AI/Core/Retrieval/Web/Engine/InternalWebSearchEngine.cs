@@ -26,7 +26,7 @@
 
 namespace ASC.AI.Core.Retrieval.Web.Engine;
 
-public class DocSpaceWebSearchConfig : EngineConfig
+public class InternalWebSearchConfig : EngineConfig
 {
     public required string BaseUrl { get; init; }
     public required string ApiKey { get; init; }
@@ -37,7 +37,10 @@ public class DocSpaceWebSearchConfig : EngineConfig
     }
 }
 
-public class DocSpaceWebSearchEngine(HttpClient client, DocSpaceWebSearchConfig config) : IWebSearchEngine
+public class InternalWebSearchEngine(
+    HttpClient client,
+    InternalWebSearchConfig config,
+    Dictionary<string, string>? metadata) : IWebSearchEngine
 {
     public async Task<IEnumerable<WebSearchResult>> SearchAsync(SearchQuery query, CancellationToken cancellationToken = default)
     {
@@ -45,7 +48,8 @@ public class DocSpaceWebSearchEngine(HttpClient client, DocSpaceWebSearchConfig 
         {
             Query = query.Query,
             NumResults = query.MaxResults,
-            MaxTextCharacters = 3000
+            MaxTextCharacters = 3000,
+            Metadata = metadata
         };
 
         using var request = new HttpRequestMessage(HttpMethod.Post, $"{config.BaseUrl}/search");
@@ -78,7 +82,8 @@ public class DocSpaceWebSearchEngine(HttpClient client, DocSpaceWebSearchConfig 
     {
         var requestBody = new ContentsRequest
         {
-            Url = query.Url
+            Url = query.Url,
+            Metadata = metadata
         };
 
         using var request = new HttpRequestMessage(HttpMethod.Post, $"{config.BaseUrl}/contents");
@@ -114,12 +119,14 @@ public class SearchRequest
     public required string Query { get; init; }
     public int NumResults { get; init; } = 5;
     public int MaxTextCharacters { get; init; }
+    public Dictionary<string, string>? Metadata { get; init; }
 }
 
 public class ContentsRequest
 {
     public required string Url { get; init; }
     public int? MaxTextCharacters { get; init; }
+    public Dictionary<string, string>? Metadata { get; init; }
 }
 
 public class SearchResponse
