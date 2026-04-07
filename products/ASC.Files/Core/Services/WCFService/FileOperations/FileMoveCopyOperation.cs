@@ -223,7 +223,6 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
         var quotaSocketManager = scope.ServiceProvider.GetService<QuotaSocketManager>();
         var distributedLockProvider = scope.ServiceProvider.GetRequiredService<IDistributedLockProvider>();
         var roomLogoManager = scope.ServiceProvider.GetRequiredService<RoomLogoManager>();
-        var global = scope.ServiceProvider.GetRequiredService<Global>();
         var fileSecurity = scope.ServiceProvider.GetRequiredService<FileSecurity>();
         var notifyClient = scope.ServiceProvider.GetRequiredService<NotifyClient>();
         var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
@@ -250,7 +249,7 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
                     var parentFolderTask = FolderDao.GetFolderAsync(folder.ParentId);
 
                     var files = await FileDao.GetFilesAsync(folder.Id, new OrderBy(SortedByType.AZ, true), FilterType.FilesOnly, false, Guid.Empty, string.Empty, null, false, withSubfolders: true).ToListAsync();
-                    var errorMsg = await permissionsManager.CheckFilesSecurityPermissionsAsync(files, checkPermissions);
+                    var errorMsg = await permissionsManager.CheckFilesSecurityPermissionsAsync(files, false);
 
                     try
                     {
