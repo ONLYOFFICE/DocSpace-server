@@ -25,31 +25,47 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 #nullable enable
+using System.Diagnostics.CodeAnalysis;
+
 using ASC.Core.Common.EF.Model.Ai;
 
 namespace ASC.Core.Common.AI;
 
-[Singleton]
-public class AiModelSettingsResolver(AiConfiguration aiConfiguration)
+public record ResolvedModelSettings : ModelSettings
 {
-    public ModelSettings? Resolve(ProviderType type, string modelId, AiModelSettings? dbSettings)
+    public bool IsEnabled { get; init; }
+
+    [SetsRequiredMembers]
+    public ResolvedModelSettings(ModelSettings settings, bool isEnabled) : base(settings)
     {
-        var configModel = aiConfiguration.GetModel(type, modelId);
+        IsEnabled = isEnabled;
+    }
+}
+
+[Singleton]
+public class AiModelSettingsResolver(AiConfiguration aiConfig)
+{
+    public ResolvedModelSettings? Resolve(ProviderType type, string modelId, AiModelSettings? dbSettings)
+    {
+        var configModel = aiConfig.GetModel(type, modelId);
         if (configModel != null)
         {
-            return configModel;
+            var isEnabled = dbSettings is null || dbSettings.IsEnabled;
+            return new ResolvedModelSettings(configModel, isEnabled);
         }
 
-        if (dbSettings is not { IsEnabled: true })
+        if (dbSettings is null)
         {
             return null;
         }
 
-        return new ModelSettings
+        var settings = new ModelSettings
         {
             Id = dbSettings.ModelId,
             Alias = dbSettings.Alias ?? dbSettings.ModelId,
             Capabilities = dbSettings.Capabilities ?? new AiModelCapabilities()
         };
+
+        return new ResolvedModelSettings(settings, dbSettings.IsEnabled);
     }
 }

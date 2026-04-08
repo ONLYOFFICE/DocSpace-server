@@ -408,13 +408,15 @@ public class FolderDtoHelper(
 
             var modelId = folder.SettingsChatProviderId == 0 ? null : folder.SettingsChatParameters.ModelId;
 
-            ModelSettings model = null;
+            ResolvedModelSettings resolved = null;
             if (modelId != null && folder.ChatProviderType.HasValue)
             {
                 AiModelSettings dbSettings = null;
                 modelSettingsMap?.TryGetValue((folder.SettingsChatProviderId, modelId), out dbSettings);
-                model = modelSettingsResolver.Resolve(folder.ChatProviderType.Value, modelId, dbSettings);
+                resolved = modelSettingsResolver.Resolve(folder.ChatProviderType.Value, modelId, dbSettings);
             }
+
+            var model = resolved is { IsEnabled: true } ? resolved : null;
 
             ChatMultimodalSettingsDto multimodal = null;
             if (model?.Capabilities is { Vision: true })

@@ -1,25 +1,25 @@
 // (c) Copyright Ascensio System SIA 2009-2026
-// 
+//
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
+//
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
+//
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-// 
+//
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -91,8 +91,7 @@ public class FolderContentDtoHelper(
     AuthContext authContext,
     BreadCrumbsManager breadCrumbsManager,
     AiAccessibility accessibility,
-    TenantManager tenantManager,
-    IDbContextFactory<FilesDbContext> dbContextFactory)
+    AiModelSettingsLoader modelSettingsLoader)
 {
     public async Task<FolderContentDto<T>> GetAsync<T>(T folderId, Guid? userIdOrGroupId, Guid? sharedBy, FilterType? filterType, T roomId, bool? searchInContent, bool? withSubFolders, bool? excludeSubject, ApplyFilterOption? applyFilterOption, SearchArea? searchArea, string sortByFilter, SortOrder sortOrder, int startIndex, int limit, string text, string[] extension = null, FormsItemDto formsItemDto = null, Location? location = null)
     {
@@ -107,26 +106,27 @@ public class FolderContentDtoHelper(
     {
         var result = new FolderContentDto<T>
         {
-            PathParts = folderItems.FolderPathParts, 
-            StartIndex = startIndex, 
-            Total = folderItems.Total, 
+            PathParts = folderItems.FolderPathParts,
+            StartIndex = startIndex,
+            Total = folderItems.Total,
             Count = folderItems.Entries.Count
         };
-        
+
         var expiration = TimeSpan.MaxValue;
         if (folderItems.ParentRoom is { SettingsLifetime: not null })
         {
             expiration = DateTime.UtcNow - folderItems.ParentRoom.SettingsLifetime.GetExpirationUtc();
         }
-        
+
         List<FileShareRecord<string>> currentUsersRecords = null;
         if (folderItems.FolderInfo is { FolderType: FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates or FolderType.DefaultTemplates })
         {
             currentUsersRecords = await fileSecurity.GetUserRecordsAsync().ToListAsync();
         }
-        
+
         var aiStatus = await accessibility.GetStatusAsync();
-        var modelSettingsMap = await LoadModelSettingsMapAsync(folderItems.Entries, folderItems.FolderInfo);
+        var modelSettingsMap = await modelSettingsLoader.LoadForEntriesAsync(
+            folderItems.Entries, folderItems.FolderInfo);
 
         if (folderItems.ParentRoom is { FolderType: FolderType.VirtualDataRoom, SettingsIndexing: true })
         {
@@ -162,8 +162,8 @@ public class FolderContentDtoHelper(
             result.Files = filesTask.Result;
             result.Folders = foldersTask.Result;
         }
-        
-        
+
+
         var currentTask = GetFolderDto(folderItems.FolderInfo, contextFolder: folderItems.FolderInfo);
         var isEnableBadges = badgesSettingsHelper.GetEnabledForCurrentUserAsync();
 
@@ -222,7 +222,7 @@ public class FolderContentDtoHelper(
                 yield return await GetFolderDto(r, entriesOrder, contextFolder);
             }
         }
-        
+
         async Task<FileEntryBaseDto> GetFolderDto(FileEntry folderEntry, string entriesOrder = null, IFolder contextFolder = null)
         {
             switch (folderEntry)
@@ -248,20 +248,20 @@ public class FolderContentDtoHelper(
             return null;
         }
     }
-    
+
     private async Task<FolderContentDto<T>> ToFolderContentWrapperAsync<T>(
-        T folderId, 
-        Guid userIdOrGroupId, 
-        Guid sharedBy, 
-        IEnumerable<FilterType> filterTypes, 
-        T roomId, 
-        bool searchInContent, 
-        bool withSubFolders, 
-        bool excludeSubject, 
-        ApplyFilterOption applyFilterOption, 
+        T folderId,
+        Guid userIdOrGroupId,
+        Guid sharedBy,
+        IEnumerable<FilterType> filterTypes,
+        T roomId,
+        bool searchInContent,
+        bool withSubFolders,
+        bool excludeSubject,
+        ApplyFilterOption applyFilterOption,
         string text,
-        string[] extension, 
-        SearchArea searchArea, 
+        string[] extension,
+        SearchArea searchArea,
         FormsItemDto formsItemDto,
         Location? location,
         string sortByFilter,
@@ -276,69 +276,26 @@ public class FolderContentDtoHelper(
         }
 
         var items = await fileStorageService.GetFolderItemsAsync(
-            folderId, 
-            startIndex, 
-            count, 
-            filterTypes, 
-            filterTypes?.FirstOrDefault() == FilterType.ByUser, 
+            folderId,
+            startIndex,
+            count,
+            filterTypes,
+            filterTypes?.FirstOrDefault() == FilterType.ByUser,
             userIdOrGroupId.ToString(),
             sharedBy,
             text,
-            extension, 
-            searchInContent, 
-            withSubFolders, 
-            orderBy, 
+            extension,
+            searchInContent,
+            withSubFolders,
+            orderBy,
             excludeSubject: excludeSubject,
-            roomId: roomId, 
-            applyFilterOption: applyFilterOption, 
-            searchArea: searchArea, 
+            roomId: roomId,
+            applyFilterOption: applyFilterOption,
+            searchArea: searchArea,
             formsItemDto: formsItemDto,
             location: location);
 
         return await GetAsync(folderId, items, startIndex);
     }
 
-    private async Task<Dictionary<(int ProviderId, string ModelId), AiModelSettings>> LoadModelSettingsMapAsync(
-        IReadOnlyCollection<FileEntry> entries,
-        IFolder currentFolder)
-    {
-        var providerIds = new HashSet<int>();
-
-        foreach (var entry in entries)
-        {
-            CollectProviderId(entry, providerIds);
-        }
-
-        CollectProviderId(currentFolder, providerIds);
-
-        if (providerIds.Count == 0)
-        {
-            return null;
-        }
-
-        var tenantId = tenantManager.GetCurrentTenantId();
-
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-
-        return await dbContext
-            .GetAiModelSettingsByProviderIdsAsync(tenantId, providerIds)
-            .ToDictionaryAsync(
-                s => (s.ProviderId, s.ModelId),
-                s => s.Map());
-
-        static void CollectProviderId(object entry, HashSet<int> providerIds)
-        {
-            var providerId = entry switch
-            {
-                Folder<int> f when f.SettingsChatProviderId > 0 && f.ChatProviderType is not ProviderType.PortalAi => f.SettingsChatProviderId,
-                Folder<string> f when f.SettingsChatProviderId > 0 && f.ChatProviderType is not ProviderType.PortalAi => f.SettingsChatProviderId,
-                _ => 0
-            };
-
-            if (providerId > 0)
-            {
-                providerIds.Add(providerId);
-            }
-        }
-    }
 }

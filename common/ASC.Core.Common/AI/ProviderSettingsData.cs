@@ -38,7 +38,7 @@ public class ProviderSettingsData
     public bool Enabled { get; init; }
 }
 
-public class ModelSettings
+public record ModelSettings
 {
     public static readonly FrozenSet<string> SupportedImageFormats =
         ((HashSet<string>)[".jpeg", ".jpg", ".gif", ".webp", ".png"])
