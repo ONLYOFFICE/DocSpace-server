@@ -105,7 +105,7 @@ public class WalletServiceDescriptionManager()
         }
 
         metadata.TryGetValue(BillingClient.MetadataAgentId, out var agentId);
-        metadata.TryGetValue(BillingClient.MetadataAgentId, out var agentTitle);
+        metadata.TryGetValue(BillingClient.MetadataAgentTitle, out var agentTitle);
 
         return (agentId, agentTitle);
     }
