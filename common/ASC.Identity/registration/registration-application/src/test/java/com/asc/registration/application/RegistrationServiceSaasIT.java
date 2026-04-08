@@ -31,6 +31,7 @@ import com.asc.registration.application.service.ConsentService;
 import net.devh.boot.grpc.client.autoconfigure.GrpcClientMetricAutoConfiguration;
 import net.devh.boot.grpc.server.autoconfigure.GrpcServerMetricAutoConfiguration;
 import net.devh.boot.grpc.server.autoconfigure.GrpcServerSecurityAutoConfiguration;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.persistence.autoconfigure.EntityScan;
@@ -45,7 +46,9 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.containers.RabbitMQContainer;
 import org.testcontainers.containers.localstack.LocalStackContainer;
+import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.lifecycle.Startables;
 
 @Testcontainers
 @ActiveProfiles({"test", "saas"})
@@ -55,21 +58,24 @@ import org.testcontainers.junit.jupiter.Testcontainers;
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     classes = RegistrationServiceSaasIT.TestApplication.class)
 public class RegistrationServiceSaasIT extends AbstractRegistrationServiceIT {
-  static MySQLContainer<?> mysql = RegistrationTestContainers.mysql();
-  static GenericContainer<?> redis = RegistrationTestContainers.redis();
-  static RabbitMQContainer rabbitmq = RegistrationTestContainers.rabbitmq();
-  static LocalStackContainer localstack = RegistrationTestContainers.localstack();
+  @Container static final MySQLContainer<?> mysql = RegistrationTestContainers.mysql();
+  @Container static final GenericContainer<?> redis = RegistrationTestContainers.redis();
+  @Container static final RabbitMQContainer rabbitmq = RegistrationTestContainers.rabbitmq();
+  @Container static final LocalStackContainer localstack = RegistrationTestContainers.localstack();
 
-  static {
-    localstack.start();
-    mysql.start();
-    rabbitmq.start();
-    redis.start();
+  private static void startContainers() {
+    Startables.deepStart(mysql, redis, rabbitmq, localstack).join();
+  }
+
+  @BeforeAll
+  static void initializeDynamoDb() {
+    startContainers();
     RegistrationTestContainers.createDynamoDbTable(localstack);
   }
 
   @DynamicPropertySource
   static void configureProperties(DynamicPropertyRegistry registry) {
+    startContainers();
     RegistrationTestContainers.configureMySql(registry, mysql);
     RegistrationTestContainers.configureRabbitMq(registry, rabbitmq);
     RegistrationTestContainers.configureRedis(registry, redis);

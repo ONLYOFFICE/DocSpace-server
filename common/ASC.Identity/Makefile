@@ -2,7 +2,7 @@ BASE_IMAGE = identity-base:latest
 REGISTRATION_IMAGE = registration-service:latest
 AUTHORIZATION_IMAGE = authorization-service:latest
 MINIFIED_IMAGE = identity-minified:latest
-
+MAVEN_NATIVE_PROFILES = $(if $(strip $(SPRING_PROFILES_ACTIVE)),-Dspring.profiles.active=$(SPRING_PROFILES_ACTIVE))
 MAVEN_FMT_SKIP = -Dfmt.skip=true
 MAVEN_BATCH = -B
 
@@ -11,7 +11,7 @@ AUTHORIZATION_JAR = authorization-container.jar
 TEMP_BUILDER_REG = temp-jar-builder-reg:latest
 TEMP_BUILDER_AUTH = temp-jar-builder-auth:latest
 
-.PHONY: all test integration-tests minified-tests test-all docs base registration authorization minified clean prune summary sizes help
+.PHONY: all test integration-tests minified-tests test-all docs check-profile base registration authorization minified native-binary native-binary-registration native-binary-authorization clean prune summary sizes help
 
 all: base registration authorization sizes
 
@@ -40,6 +40,19 @@ docs:
 	@echo "OpenAPI files generated:"
 	@echo " docs/identity-authorization-openapi.json"
 	@echo " docs/identity-registration-openapi.json"
+
+check-profile:
+	@if [ -z "$(SPRING_PROFILES_ACTIVE)" ]; then \
+		echo "ERROR: SPRING_PROFILES_ACTIVE is required and must include 'server' or 'saas'."; \
+		echo "Example: SPRING_PROFILES_ACTIVE=stage,server make native-binary-authorization"; \
+		exit 1; \
+	fi
+	@case ",$(SPRING_PROFILES_ACTIVE)," in \
+		*,server,*|*,saas,*) ;; \
+		*) \
+			echo "ERROR: SPRING_PROFILES_ACTIVE='$(SPRING_PROFILES_ACTIVE)' must include 'server' or 'saas'."; \
+			exit 1 ;; \
+	esac
 
 base: $(REGISTRATION_JAR) $(AUTHORIZATION_JAR)
 	@echo "Building shared base image..."
@@ -126,8 +139,39 @@ sizes:
 		echo "  Images not found. Run 'make all' first."; \
 	fi
 
+native-binary: check-profile native-binary-registration native-binary-authorization
+
+native-binary-registration: check-profile
+	@echo "Installing shared modules..."
+	mvn $(MAVEN_BATCH) install -DskipTests $(MAVEN_FMT_SKIP) \
+		-pl infrastructure/infrastructure-configuration,registration/registration-data -am -q
+	@echo "Compiling registration native binary..."
+	mvn $(MAVEN_BATCH) -Pnative package -DskipTests $(MAVEN_FMT_SKIP) $(MAVEN_NATIVE_PROFILES) \
+		-pl registration/registration-container -am
+	mvn $(MAVEN_BATCH) -Pnative native:compile -DskipTests $(MAVEN_FMT_SKIP) $(MAVEN_NATIVE_PROFILES) \
+		-pl registration/registration-container
+	@mkdir -p bin
+	@BINARY=$$(find registration/registration-container/target -maxdepth 1 -type f -perm +0111 ! -name "*.jar" | head -1); \
+	if [ -z "$$BINARY" ]; then echo "ERROR: native binary not found in registration/registration-container/target/"; exit 1; fi; \
+	cp "$$BINARY" bin/registration-container && echo "Binary: bin/registration-container"
+
+native-binary-authorization: check-profile
+	@echo "Installing shared modules..."
+	mvn $(MAVEN_BATCH) install -DskipTests $(MAVEN_FMT_SKIP) \
+		-pl infrastructure/infrastructure-configuration -am -q
+	@echo "Compiling authorization native binary..."
+	mvn $(MAVEN_BATCH) -Pnative package -DskipTests $(MAVEN_FMT_SKIP) $(MAVEN_NATIVE_PROFILES) \
+		-pl authorization/authorization-container -am
+	mvn $(MAVEN_BATCH) -Pnative native:compile -DskipTests $(MAVEN_FMT_SKIP) $(MAVEN_NATIVE_PROFILES) \
+		-pl authorization/authorization-container
+	@mkdir -p bin
+	@BINARY=$$(find authorization/authorization-container/target -maxdepth 1 -type f -perm +0111 ! -name "*.jar" | head -1); \
+	if [ -z "$$BINARY" ]; then echo "ERROR: native binary not found in authorization/authorization-container/target/"; exit 1; fi; \
+	cp "$$BINARY" bin/authorization-container && echo "Binary: bin/authorization-container"
+
 clean:
 	@rm -f $(REGISTRATION_JAR) $(AUTHORIZATION_JAR)
+	@rm -rf bin/
 	@docker rmi $(TEMP_BUILDER_REG) $(TEMP_BUILDER_AUTH) 2>/dev/null || true
 
 prune: clean

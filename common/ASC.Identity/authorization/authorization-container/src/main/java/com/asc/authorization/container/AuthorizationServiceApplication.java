@@ -34,6 +34,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.persistence.autoconfigure.EntityScan;
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.context.annotation.ImportRuntimeHints;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -47,6 +48,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableCaching
 @EnableScheduling
 @EnableTransactionManagement
+@ImportRuntimeHints(AuthorizationServiceRuntimeHints.class)
 @EntityScan(basePackages = {"com.asc.authorization.data", "com.asc.common.data"})
 @EnableJpaRepositories(basePackages = {"com.asc.authorization.data", "com.asc.common.data"})
 @SpringBootApplication(

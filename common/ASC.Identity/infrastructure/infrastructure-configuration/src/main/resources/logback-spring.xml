@@ -160,7 +160,7 @@
                 <batchSize>${cwBatchSize}</batchSize>
                 <encoder class="net.logstash.logback.encoder.LogstashEncoder">
                     <includeContext>false</includeContext>
-                    <jsonGeneratorDecorator class="net.logstash.logback.decorate.PrettyPrintingJsonGeneratorDecorator"/>
+                    <decorator class="net.logstash.logback.decorate.PrettyPrintingDecorator"/>
                     <customFields>{"applicationContext":"${applicationContext}", "instanceId":"${HOSTNAME}"}</customFields>
                     <fieldNames>
                         <level>level</level>
@@ -269,7 +269,7 @@
                 <batchSize>${cwBatchSize}</batchSize>
                 <encoder class="net.logstash.logback.encoder.LogstashEncoder">
                     <includeContext>false</includeContext>
-                    <jsonGeneratorDecorator class="net.logstash.logback.decorate.PrettyPrintingJsonGeneratorDecorator"/>
+                    <decorator class="net.logstash.logback.decorate.PrettyPrintingDecorator"/>
                     <customFields>{"applicationContext":"${applicationContext}", "instanceId":"${HOSTNAME}"}</customFields>
                     <fieldNames>
                         <level>level</level>

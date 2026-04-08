@@ -24,3 +24,4 @@ reports/
 node_modules/
 dist/
 build/
+docs/

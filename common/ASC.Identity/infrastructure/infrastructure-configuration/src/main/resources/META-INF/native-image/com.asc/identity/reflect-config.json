@@ -1,0 +1,424 @@
+[
+  {
+    "name": "org.hibernate.dialect.MySQLDialect",
+    "allPublicConstructors": true,
+    "allPublicMethods": true
+  },
+  {
+    "name": "org.hibernate.dialect.MariaDBDialect",
+    "allPublicConstructors": true,
+    "allPublicMethods": true
+  },
+  {
+    "name": "org.hibernate.dialect.PostgreSQLDialect",
+    "allPublicConstructors": true,
+    "allPublicMethods": true
+  },
+  {
+    "name": "com.github.benmanes.caffeine.cache.SSMS",
+    "allPublicConstructors": true,
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "com.github.benmanes.caffeine.cache.SSMSW",
+    "allPublicConstructors": true,
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "com.github.benmanes.caffeine.cache.SSSMSW",
+    "allPublicConstructors": true,
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "com.asc.common.autoconfigurations.condition.PropertyIsDefinedCondition",
+    "allPublicConstructors": true,
+    "allPublicMethods": true
+  },
+  {
+    "name": "com.asc.common.autoconfigurations.condition.PropertyIsNotDefinedCondition",
+    "allPublicConstructors": true,
+    "allPublicMethods": true
+  },
+  {
+    "name": "com.asc.common.autoconfigurations.cloudwatch.CloudWatchAppenderRandomPropertyDefiner",
+    "allPublicConstructors": true,
+    "allPublicMethods": true
+  },
+  {
+    "name": "net.logstash.logback.appender.LoggingEventAsyncDisruptorAppender",
+    "allPublicConstructors": true,
+    "allPublicMethods": true
+  },
+  {
+    "name": "net.logstash.logback.decorate.PrettyPrintingDecorator",
+    "allPublicConstructors": true,
+    "allPublicMethods": true
+  },
+  {
+    "name": "net.logstash.logback.encoder.LogstashEncoder",
+    "allPublicConstructors": true,
+    "allPublicMethods": true
+  },
+  {
+    "name": "net.logstash.logback.fieldnames.LogstashFieldNames",
+    "allDeclaredConstructors": true,
+    "allPublicMethods": true
+  },
+  {
+    "name": "net.logstash.logback.stacktrace.ShortenedThrowableConverter",
+    "allPublicConstructors": true,
+    "allPublicMethods": true
+  },
+  {
+    "name": "com.asc.common.autoconfigurations.cloudwatch.CloudWatchAppender",
+    "allPublicConstructors": true,
+    "allPublicMethods": true
+  },
+  {
+    "name": "com.asc.registration.application.security.authentication.BasicSignature",
+    "allPublicConstructors": true,
+    "allDeclaredConstructors": true,
+    "allPublicMethods": true,
+    "allDeclaredFields": true
+  },
+  {
+    "name": "com.asc.authorization.application.security.authentication.BasicSignature",
+    "allPublicConstructors": true,
+    "allDeclaredConstructors": true,
+    "allPublicMethods": true,
+    "allDeclaredFields": true
+  },
+  {
+    "name": "com.asc.common.utilities.validation.LogoSizeValidator",
+    "allDeclaredConstructors": true,
+    "allPublicMethods": true
+  },
+  {
+    "name": "com.asc.common.utilities.validation.URLCollectionValidator",
+    "allDeclaredConstructors": true,
+    "allPublicMethods": true
+  },
+  {
+    "name": "com.asc.common.application.proto.ClientRegistrationServiceGrpc",
+    "allPublicMethods": true,
+    "allDeclaredMethods": true
+  },
+  {
+    "name": "com.asc.common.application.proto.AuthorizationServiceGrpc",
+    "allPublicMethods": true,
+    "allDeclaredMethods": true
+  },
+  {
+    "name": "com.asc.authorization.application.security.oauth.service.GrpcRegisteredClientService",
+    "allDeclaredFields": true
+  },
+  {
+    "name": "com.asc.authorization.application.exception.client.RegisteredClientPermissionException",
+    "allPublicConstructors": true
+  },
+  {
+    "name": "com.asc.registration.core.domain.exception.ClientNotFoundException",
+    "allPublicConstructors": true
+  },
+  {
+    "name": "org.springframework.dao.OptimisticLockingFailureException",
+    "allPublicConstructors": true
+  },
+  {
+    "name": "com.asc.registration.core.domain.entity.Client",
+    "allDeclaredFields": true
+  },
+  {
+    "name": "com.asc.common.core.domain.entity.AggregateRoot",
+    "allDeclaredFields": true
+  },
+  {
+    "name": "com.asc.common.core.domain.entity.BaseEntity",
+    "allDeclaredFields": true
+  },
+  {
+    "name": "com.asc.common.core.domain.value.BaseId",
+    "allDeclaredFields": true
+  },
+  {
+    "name": "com.asc.common.core.domain.value.ClientId",
+    "allDeclaredFields": true
+  },
+  {
+    "name": "com.asc.common.core.domain.value.ClientSecret",
+    "allDeclaredFields": true
+  },
+  {
+    "name": "com.asc.common.core.domain.value.UserId",
+    "allDeclaredFields": true
+  },
+  {
+    "name": "com.asc.common.core.domain.value.TenantId",
+    "allDeclaredFields": true
+  },
+  {
+    "name": "com.asc.registration.core.domain.value.ClientInfo",
+    "allDeclaredFields": true
+  },
+  {
+    "name": "com.asc.registration.core.domain.value.ClientTenantInfo",
+    "allDeclaredFields": true
+  },
+  {
+    "name": "com.asc.registration.core.domain.value.ClientWebsiteInfo",
+    "allDeclaredFields": true
+  },
+  {
+    "name": "com.asc.registration.core.domain.value.ClientRedirectInfo",
+    "allDeclaredFields": true
+  },
+  {
+    "name": "com.asc.registration.core.domain.value.ClientCreationInfo",
+    "allDeclaredFields": true
+  },
+  {
+    "name": "com.asc.registration.core.domain.value.ClientModificationInfo",
+    "allDeclaredFields": true
+  },
+  {
+    "name": "com.asc.common.service.transfer.message.ClientRemovedEvent",
+    "allDeclaredConstructors": true,
+    "allPublicMethods": true,
+    "allDeclaredFields": true
+  },
+  {
+    "name": "com.asc.common.service.transfer.message.ClientCacheRemoveEvent",
+    "allDeclaredConstructors": true,
+    "allPublicMethods": true,
+    "allDeclaredFields": true
+  },
+  {
+    "name": "com.asc.common.service.transfer.message.ClientCacheTenantRemoveEvent",
+    "allDeclaredConstructors": true,
+    "allPublicMethods": true,
+    "allDeclaredFields": true
+  },
+  {
+    "name": "com.asc.common.service.transfer.message.AuditMessage",
+    "allDeclaredConstructors": true,
+    "allPublicMethods": true,
+    "allDeclaredFields": true
+  },
+  {
+    "name": "com.asc.common.service.transfer.message.KeyPairRetrievedEvent",
+    "allDeclaredConstructors": true,
+    "allPublicMethods": true,
+    "allDeclaredFields": true
+  },
+  {
+    "name": "com.asc.common.service.transfer.message.LoginRegisteredEvent",
+    "allDeclaredConstructors": true,
+    "allPublicMethods": true,
+    "allDeclaredFields": true
+  },
+  {
+    "name": "com.asc.common.service.transfer.message.RetrieveAuthorizationMessage",
+    "allDeclaredConstructors": true,
+    "allPublicMethods": true,
+    "allDeclaredFields": true
+  },
+  {
+    "name": "com.asc.common.service.transfer.message.RetrieveKeyPairMessage",
+    "allDeclaredConstructors": true,
+    "allPublicMethods": true,
+    "allDeclaredFields": true
+  },
+  {
+    "name": "com.asc.common.service.transfer.message.SaveAuthorizationMessage",
+    "allDeclaredConstructors": true,
+    "allPublicMethods": true,
+    "allDeclaredFields": true
+  },
+  {
+    "name": "com.asc.common.service.transfer.message.TenantClientsRemovedEvent",
+    "allDeclaredConstructors": true,
+    "allPublicMethods": true,
+    "allDeclaredFields": true
+  },
+  {
+    "name": "com.asc.common.service.transfer.message.UserClientsRemovedEvent",
+    "allDeclaredConstructors": true,
+    "allPublicMethods": true,
+    "allDeclaredFields": true
+  },
+  {
+    "name": "com.asc.common.service.transfer.message.ClientRetrievedEvent",
+    "allDeclaredConstructors": true,
+    "allPublicMethods": true,
+    "allDeclaredFields": true
+  },
+  {
+    "name": "com.asc.common.service.transfer.message.RetrieveClientMessage",
+    "allDeclaredConstructors": true,
+    "allPublicMethods": true,
+    "allDeclaredFields": true
+  },
+  {
+    "name": "java.util.Collections$SingletonList",
+    "allDeclaredConstructors": true,
+    "allDeclaredFields": true,
+    "allPublicMethods": true
+  },
+  {
+    "name": "java.util.Collections$SingletonSet",
+    "allDeclaredConstructors": true,
+    "allDeclaredFields": true,
+    "allPublicMethods": true
+  },
+  {
+    "name": "java.util.Collections$SingletonMap",
+    "allDeclaredConstructors": true,
+    "allDeclaredFields": true,
+    "allPublicMethods": true
+  },
+  {
+    "name": "java.util.Collections$EmptyList",
+    "allDeclaredConstructors": true,
+    "allDeclaredFields": true,
+    "allPublicMethods": true
+  },
+  {
+    "name": "java.util.Collections$EmptySet",
+    "allDeclaredConstructors": true,
+    "allDeclaredFields": true,
+    "allPublicMethods": true
+  },
+  {
+    "name": "java.util.Collections$UnmodifiableRandomAccessList",
+    "allDeclaredConstructors": true,
+    "allDeclaredFields": true,
+    "allPublicMethods": true
+  },
+  {
+    "name": "java.util.Collections$UnmodifiableList",
+    "allDeclaredConstructors": true,
+    "allDeclaredFields": true,
+    "allPublicMethods": true
+  },
+  {
+    "name": "java.util.Collections$UnmodifiableSet",
+    "allDeclaredConstructors": true,
+    "allDeclaredFields": true,
+    "allPublicMethods": true
+  },
+  {
+    "name": "org.springframework.security.jackson2.UnmodifiableListDeserializer",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.springframework.security.jackson2.UnmodifiableSetDeserializer",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.springframework.security.oauth2.server.authorization.jackson2.OAuth2AuthorizationRequestDeserializer",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest",
+    "allDeclaredConstructors": true,
+    "allDeclaredFields": true,
+    "allPublicMethods": true
+  },
+  {
+    "name": "org.springframework.security.oauth2.core.AuthorizationGrantType",
+    "allDeclaredConstructors": true,
+    "allDeclaredFields": true,
+    "allPublicMethods": true
+  },
+  {
+    "name": "org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationResponseType",
+    "allDeclaredConstructors": true,
+    "allDeclaredFields": true,
+    "allPublicMethods": true
+  },
+  {
+    "name": "java.util.LinkedHashMap",
+    "allDeclaredConstructors": true,
+    "allDeclaredFields": true
+  },
+  {
+    "name": "java.util.LinkedHashSet",
+    "allDeclaredConstructors": true,
+    "allDeclaredFields": true
+  },
+  {
+    "name": "java.util.HashSet",
+    "allDeclaredConstructors": true,
+    "allDeclaredFields": true
+  },
+  {
+    "name": "java.util.TreeSet",
+    "allDeclaredConstructors": true,
+    "allDeclaredFields": true
+  },
+  {
+    "name": "java.time.Duration",
+    "allDeclaredConstructors": true,
+    "allDeclaredFields": true,
+    "allPublicMethods": true
+  },
+  {
+    "name": "org.springframework.security.jackson2.CoreJackson2Module",
+    "allPublicConstructors": true,
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.springframework.security.web.jackson2.WebJackson2Module",
+    "allPublicConstructors": true,
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.springframework.security.web.jackson2.WebServletJackson2Module",
+    "allPublicConstructors": true,
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.springframework.security.oauth2.server.authorization.jackson2.UnmodifiableMapDeserializer",
+    "allDeclaredConstructors": true,
+    "allPublicConstructors": true
+  },
+  {
+    "name": "org.springframework.security.authentication.AbstractAuthenticationToken",
+    "allDeclaredConstructors": true,
+    "allDeclaredFields": true,
+    "allPublicMethods": true
+  },
+  {
+    "name": "org.springframework.security.authentication.UsernamePasswordAuthenticationToken",
+    "allDeclaredConstructors": true,
+    "allPublicConstructors": true,
+    "allDeclaredFields": true,
+    "allPublicMethods": true
+  },
+  {
+    "name": "org.springframework.security.jackson2.UsernamePasswordAuthenticationTokenDeserializer",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.springframework.security.jackson2.UsernamePasswordAuthenticationTokenMixin",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "com.asc.authorization.application.security.authentication.TenantAuthority",
+    "allDeclaredConstructors": true,
+    "allDeclaredFields": true,
+    "allPublicMethods": true
+  },
+  {
+    "name": "com.asc.registration.data.client.entity.ClientDynamoEntity",
+    "allDeclaredConstructors": true,
+    "allDeclaredFields": true,
+    "allPublicMethods": true
+  },
+  {
+    "name": "org.springframework.security.core.authority.SimpleGrantedAuthority",
+    "allDeclaredConstructors": true,
+    "allDeclaredFields": true,
+    "allPublicMethods": true
+  }
+]
