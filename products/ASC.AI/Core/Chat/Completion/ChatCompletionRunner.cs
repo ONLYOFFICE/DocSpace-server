@@ -37,7 +37,6 @@ public class ChatCompletionRunner(
     AttachmentHandler attachmentHandler,
     DataContentLoader dataContentLoader,
     SocketManager socketManager,
-    ChatNameGenerator chatNameGenerator,
     IServiceScopeFactory serviceScopeFactory)
 {
     public async Task<ChatCompletionGenerator> StartNewChatAsync(
@@ -74,7 +73,6 @@ public class ChatCompletionRunner(
             socketManager,
             messages,
             chatHistory,
-            chatNameGenerator,
             context,
             serviceScopeFactory,
             attachmentHandler);
@@ -136,7 +134,6 @@ public class ChatCompletionRunner(
             socketManager,
             messages,
             chatHistory,
-            chatNameGenerator,
             context,
             serviceScopeFactory,
             attachmentHandler);
