@@ -1250,6 +1250,41 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         }
     }
 
+    public async Task<long> GetTableCountAsync(string tableName) =>
+        await TableExistsAsync(tableName) ? await CountAsync(tableName) : 0;
+
+    public async Task<IReadOnlySet<int>> GetExistingFormIdsAsync(string tableName)
+    {
+        if (!await TableExistsAsync(tableName))
+        {
+            return new HashSet<int>();
+        }
+
+        ValidateTableName(tableName);
+        var provider = Provider;
+        var dbType = provider.DatabaseTypeEnum;
+        var q = dbType == ExternalDatabaseType.MySql ? '`' : '"';
+
+        await using var connection = await provider.CreateConnectionAsync(dbType);
+        await connection.OpenAsync();
+        await SetupSqliteAsync(connection, dbType);
+
+        await using var cmd = connection.CreateCommand();
+        cmd.CommandText = $"SELECT {q}form_id{q} FROM {q}{tableName}{q};";
+
+        await using var reader = await cmd.ExecuteReaderAsync();
+        var ids = new HashSet<int>();
+        while (await reader.ReadAsync())
+        {
+            if (!reader.IsDBNull(0))
+            {
+                ids.Add(reader.GetInt32(0));
+            }
+        }
+
+        return ids;
+    }
+
     private async Task ExecuteInsertAsync(string tableName, Dictionary<string, object> data, string? keyColumn)
     {
         ValidateTableName(tableName);

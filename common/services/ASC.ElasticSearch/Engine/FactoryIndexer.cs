@@ -95,6 +95,28 @@ public abstract class FactoryIndexer<T>(ILoggerProvider options,
         return (true, result);
     }
 
+    public async Task<(bool Success, long Count)> TryCountAsync(Expression<Func<Selector<T>, Selector<T>>> expression)
+    {
+        var t = serviceProvider.GetService<T>();
+        if (!await SupportAsync(t) || !_indexer.CheckExist(t))
+        {
+            return (false, 0);
+        }
+
+        try
+        {
+            var count = await _indexer.CountAsync(expression);
+
+            return (true, count);
+        }
+        catch (Exception e)
+        {
+            Logger.ErrorSelect(e);
+
+            return (false, 0);
+        }
+    }
+
     public async Task<(bool, List<int>)> TrySelectIdsAsync(Expression<Func<Selector<T>, Selector<T>>> expression)
     {
         List<int> result;
