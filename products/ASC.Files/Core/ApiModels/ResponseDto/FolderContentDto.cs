@@ -90,7 +90,9 @@ public class FolderContentDtoHelper(
     FileSecurityCommon fileSecurityCommon,
     AuthContext authContext,
     BreadCrumbsManager breadCrumbsManager,
-    AiAccessibility accessibility)
+    AiAccessibility accessibility,
+    TenantManager tenantManager,
+    IDbContextFactory<FilesDbContext> dbContextFactory)
 {
     public async Task<FolderContentDto<T>> GetAsync<T>(T folderId, Guid? userIdOrGroupId, Guid? sharedBy, FilterType? filterType, T roomId, bool? searchInContent, bool? withSubFolders, bool? excludeSubject, ApplyFilterOption? applyFilterOption, SearchArea? searchArea, string sortByFilter, SortOrder sortOrder, int startIndex, int limit, string text, string[] extension = null, FormsItemDto formsItemDto = null, Location? location = null)
     {
@@ -124,6 +126,7 @@ public class FolderContentDtoHelper(
         }
         
         var aiStatus = await accessibility.GetStatusAsync();
+        var modelSettingsMap = await LoadModelSettingsMapAsync(folderItems.Entries, folderItems.FolderInfo);
 
         if (folderItems.ParentRoom is { FolderType: FolderType.VirtualDataRoom, SettingsIndexing: true })
         {
@@ -231,7 +234,7 @@ public class FolderContentDtoHelper(
                     {
                         currentUsersRecords = await fileSecurity.GetUserRecordsAsync().ToListAsync();
                     }
-                    return await folderWrapperHelper.GetAsync(fol1, currentUsersRecords, entriesOrder, contextFolder, aiStatus);
+                    return await folderWrapperHelper.GetAsync(fol1, currentUsersRecords, entriesOrder, contextFolder, aiStatus, modelSettingsMap);
                 case Folder<string> fol2:
                     if (currentUsersRecords == null &&
                         fol2.IsRoom &&
@@ -239,7 +242,7 @@ public class FolderContentDtoHelper(
                     {
                         currentUsersRecords = await fileSecurity.GetUserRecordsAsync().ToListAsync();
                     }
-                    return await folderWrapperHelper.GetAsync(fol2, currentUsersRecords, entriesOrder, contextFolder, aiStatus);
+                    return await folderWrapperHelper.GetAsync(fol2, currentUsersRecords, entriesOrder, contextFolder, aiStatus, modelSettingsMap);
             }
 
             return null;
@@ -293,5 +296,49 @@ public class FolderContentDtoHelper(
             location: location);
 
         return await GetAsync(folderId, items, startIndex);
+    }
+
+    private async Task<Dictionary<(int ProviderId, string ModelId), AiModelSettings>> LoadModelSettingsMapAsync(
+        IReadOnlyCollection<FileEntry> entries,
+        IFolder currentFolder)
+    {
+        var providerIds = new HashSet<int>();
+
+        foreach (var entry in entries)
+        {
+            CollectProviderId(entry, providerIds);
+        }
+
+        CollectProviderId(currentFolder, providerIds);
+
+        if (providerIds.Count == 0)
+        {
+            return null;
+        }
+
+        var tenantId = tenantManager.GetCurrentTenantId();
+
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+
+        return await dbContext
+            .GetAiModelSettingsByProviderIdsAsync(tenantId, providerIds)
+            .ToDictionaryAsync(
+                s => (s.ProviderId, s.ModelId),
+                s => s.Map());
+
+        static void CollectProviderId(object entry, HashSet<int> providerIds)
+        {
+            var providerId = entry switch
+            {
+                Folder<int> f when f.SettingsChatProviderId > 0 && f.ChatProviderType is not ProviderType.PortalAi => f.SettingsChatProviderId,
+                Folder<string> f when f.SettingsChatProviderId > 0 && f.ChatProviderType is not ProviderType.PortalAi => f.SettingsChatProviderId,
+                _ => 0
+            };
+
+            if (providerId > 0)
+            {
+                providerIds.Add(providerId);
+            }
+        }
     }
 }

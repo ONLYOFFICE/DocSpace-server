@@ -24,19 +24,29 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Provider.Data;
+namespace ASC.Files.Core.EF;
 
-public class AiModelSettings
+public partial class FilesDbContext
 {
-    public required string ModelId { get; init; }
-    public string? Alias { get; init; }
-    public bool IsEnabled { get; init; }
-    public AiModelCapabilities? Capabilities { get; init; }
+    [PreCompileQuery([PreCompileQuery.DefaultInt])]
+    public Task<bool> AiProviderExistsAsync(int tenantId)
+    {
+        return AiQueries.AiProviderExistsAsync(this, tenantId);
+    }
+
+    public IAsyncEnumerable<DbAiModelSettings> GetAiModelSettingsByProviderIdsAsync(
+        int tenantId,
+        HashSet<int> providerIds)
+    {
+        return AiModelSettings
+            .Where(x => x.TenantId == tenantId && providerIds.Contains(x.ProviderId))
+            .AsAsyncEnumerable();
+    }
 }
 
-[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
-    PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
-public static partial class AiModelSettingsMapper
+static file class AiQueries
 {
-    public static partial AiModelSettings Map(this DbAiModelSettings source);
+    public static readonly Func<FilesDbContext, int, Task<bool>> AiProviderExistsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx, int tenantId) =>
+            ctx.AiProviders.Any(x => x.TenantId == tenantId));
 }

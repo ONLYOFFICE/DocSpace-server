@@ -32,6 +32,7 @@ public class AiProviderService(
     TenantManager tenantManager,
     AuthContext authContext,
     AiConfiguration aiConfiguration,
+    AiModelSettingsResolver modelSettingsResolver,
     UserManager userManager,
     IDistributedLockProvider distributedLockProvider,
     ModelClientFactory modelClientFactory,
@@ -208,32 +209,15 @@ public class AiProviderService(
 
         return models.Select(m =>
         {
-            var configModel = aiConfiguration.GetModel(provider.Type, m.Id);
-            string? alias;
-            AiModelCapabilities? capabilities;
-
-            if (configModel != null)
-            {
-                alias = configModel.Alias;
-                capabilities = configModel.Capabilities;
-            }
-            else if (settingsMap != null && settingsMap.TryGetValue(m.Id, out var dbSettings))
-            {
-                alias = dbSettings.Alias;
-                capabilities = dbSettings.Capabilities;
-            }
-            else
-            {
-                alias = m.Id;
-                capabilities = null;
-            }
+            var dbSettings = settingsMap?.GetValueOrDefault(m.Id);
+            var resolved = modelSettingsResolver.Resolve(provider.Type, m.Id, dbSettings);
 
             return new ModelData
             {
                 Provider = provider,
                 ModelId = m.Id,
-                Alias = alias,
-                Capabilities = capabilities,
+                Alias = resolved?.Alias ?? m.Id,
+                Capabilities = resolved?.Capabilities,
                 Price = priceMap?.GetValueOrDefault(m.Id),
                 Currency = priceMap != null ? currency : null
             };
@@ -435,27 +419,11 @@ public class AiProviderService(
 
     public async Task<ModelSettings?> GetEffectiveModelSettingsAsync(ProviderType type, int providerId, string modelId)
     {
-        var configModel = aiConfiguration.GetModel(type, modelId);
-        if (configModel != null)
-        {
-            return configModel;
-        }
-
         var tenantId = tenantManager.GetCurrentTenantId();
         var dbSettings = await providerDao.GetModelSettingsAsync(tenantId, providerId);
         var setting = dbSettings.Find(s => s.ModelId == modelId);
 
-        if (setting is not { IsEnabled: true })
-        {
-            return null;
-        }
-
-        return new ModelSettings
-        {
-            Id = setting.ModelId,
-            Alias = setting.Alias ?? setting.ModelId,
-            Capabilities = setting.Capabilities ?? new AiModelCapabilities()
-        };
+        return modelSettingsResolver.Resolve(type, modelId, setting);
     }
 
     private async Task<IEnumerable<ModelInfo>> GetFilteredModelsAsync(

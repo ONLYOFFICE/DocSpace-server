@@ -250,7 +250,7 @@ public class FolderDtoHelper(
     FileSharing fileSharing,
     EntryStatusManager entryStatusManager,
     AiAccessibility accessibility,
-    AiConfiguration aiConfiguration)
+    AiModelSettingsResolver modelSettingsResolver)
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, fileSharing, urlShortener)
 {
     private readonly EmployeeDtoHelper _employeeWrapperHelper = employeeWrapperHelper;
@@ -260,7 +260,8 @@ public class FolderDtoHelper(
         List<FileShareRecord<string>> currentUserRecords = null,
         string order = null,
         IFolder contextFolder = null,
-        AiStatus aiStatus = null)
+        AiStatus aiStatus = null,
+        IReadOnlyDictionary<(int ProviderId, string ModelId), AiModelSettings> modelSettingsMap = null)
     {
         var result = await GetFolderWrapperAsync(folder);
         result.ParentId = folder.ParentId;
@@ -406,9 +407,14 @@ public class FolderDtoHelper(
             }
 
             var modelId = folder.SettingsChatProviderId == 0 ? null : folder.SettingsChatParameters.ModelId;
-            var model = modelId != null && folder.ChatProviderType.HasValue
-                ? aiConfiguration.GetModel(folder.ChatProviderType.Value, modelId)
-                : null;
+
+            ModelSettings model = null;
+            if (modelId != null && folder.ChatProviderType.HasValue)
+            {
+                AiModelSettings dbSettings = null;
+                modelSettingsMap?.TryGetValue((folder.SettingsChatProviderId, modelId), out dbSettings);
+                model = modelSettingsResolver.Resolve(folder.ChatProviderType.Value, modelId, dbSettings);
+            }
 
             ChatMultimodalSettingsDto multimodal = null;
             if (model?.Capabilities is { Vision: true })
