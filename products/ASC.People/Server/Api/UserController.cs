@@ -797,18 +797,22 @@ public class UserController(
         }
 
         var relations = await _userManager.GetUserRelationsAsync(currentUser.Id);
+        var users = await inDto.UserIds.ToAsyncEnumerable().Select(async (Guid x, CancellationToken _) => await _userManager.GetUsersAsync(x)).ToListAsync();
 
-        foreach (var userId in inDto.UserIds)
+
+        foreach (var user in users)
         {
-            var user = await _userManager.GetUsersAsync(userId);
             if (user.Equals(Constants.LostUser) ||
                 user.Status == EmployeeStatus.Terminated ||
                 !await _userManager.IsGuestAsync(user) ||
                 !relations.ContainsKey(user.Id))
             {
-                continue;
+                throw new SecurityException(Resource.ErrorAccessDenied);
             }
+        }
 
+        foreach (var user in users)
+        {
             var t1 = _userManager.DeleteUserRelationAsync(currentUser.Id, user.Id);
             var t2 = fileSecurity.RemoveSecuritiesAsync(user.Id, currentUser.Id, SubjectType.User);
 
