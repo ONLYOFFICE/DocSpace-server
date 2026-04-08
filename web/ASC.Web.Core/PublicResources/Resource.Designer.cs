@@ -60,6 +60,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Agent.
+        /// </summary>
+        public static string AccountingCustomerOperationAgent {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationAgent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Contact.
         /// </summary>
         public static string AccountingCustomerOperationContact {

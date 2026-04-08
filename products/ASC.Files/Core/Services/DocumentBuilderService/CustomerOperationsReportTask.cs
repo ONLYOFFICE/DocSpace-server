@@ -92,6 +92,26 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
         return file;
     }
 
+    private static async Task<TenantWalletService?> GetTenantWalletService(TenantManager tenantManager, string serviceName)
+    {
+        if (string.IsNullOrEmpty(serviceName))
+        {
+            return null;
+        }
+
+        var quotaList = await tenantManager.GetTenantQuotasAsync(true, true);
+
+        var selectedQuota = quotaList.FirstOrDefault(x =>
+            x.ServiceName.Equals(serviceName, StringComparison.InvariantCultureIgnoreCase));
+
+        if (selectedQuota != null && Enum.IsDefined(typeof(TenantWalletService), selectedQuota.TenantId))
+        {
+            return (TenantWalletService)selectedQuota.TenantId;
+        }
+
+        return null;
+    }
+
     private static async Task<(string scriptFilePath, string tempFileName, string outputFileName)> GetCustomerOperationsReportData(IServiceProvider serviceProvider, Guid userId, CustomerOperationsReportTaskData taskData)
     {
         var tenantManager = serviceProvider.GetService<TenantManager>();
@@ -118,7 +138,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
         var tempFileName = DocumentBuilderScriptHelper.GetTempFileName(".xlsx");
         var outputFileName = string.Format(Resource.AccountingCustomerOperationsReportName + ".xlsx", utcStartDate.ToShortDateString(), utcEndDate.ToShortDateString());
 
-        var keys = new[] {
+        var keys = new List<string> {
             Resource.AccountingCustomerOperationDate,
             Resource.AccountingCustomerOperationType,
             Resource.AccountingCustomerOperationDetails,
@@ -129,6 +149,13 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
             Resource.AccountingCustomerOperationDebit,
             Resource.AccountingCustomerOperationCurrency
         };
+
+        var tenantWalletService = await GetTenantWalletService(tenantManager, taskData.ServiceName);
+        var addAgentColumn = tenantWalletService is TenantWalletService.AITools;
+        if (addAgentColumn)
+        {
+            keys.Add(Resource.AccountingCustomerOperationAgent);
+        }
 
         var options = new JsonSerializerOptions
         {
@@ -180,7 +207,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
                         continue;
                     }
 
-                    var text = Serialize(records, dateFormat, options);
+                    var text = Serialize(records, dateFormat, options, addAgentColumn);
                     await writer.WriteAsync(text);
                 }
             }
@@ -219,6 +246,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
             foreach (var operation in report.Collection)
             {
                 var (description, unitOfMeasurement, quantity) = WalletServiceDescriptionManager.GetServiceDescriptionAndUom(operation, filter.ServiceName, operation.Metadata);
+                var (agentId, agentTitle) = WalletServiceDescriptionManager.GetAgentInfo(operation.Metadata);
 
                 operation.Description = description;
                 operation.Details = WalletServiceDescriptionManager.GetServiceDetails(operation.Metadata);
@@ -228,6 +256,8 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
                 operation.ParticipantDisplayName = operation.ParticipantName != null && participantDisplayNames.TryGetValue(operation.ParticipantName, out var value)
                     ? value
                     : operation.ParticipantName;
+                operation.AgentId = agentId;
+                operation.AgentTitle = agentTitle;
             }
 
             yield return report.Collection;
@@ -241,7 +271,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
         }
     }
 
-    private static string Serialize(List<Operation> records, string dateFormat, JsonSerializerOptions jsonSerializerOptions)
+    private static string Serialize(List<Operation> records, string dateFormat, JsonSerializerOptions jsonSerializerOptions, bool addAgentColumn)
     {
         var sb = new StringBuilder();
 
@@ -259,6 +289,11 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
                 new(record.Debit.ToString(), "0.0000000000", "right"),
                 new(record.Currency, "@")
             };
+
+            if (addAgentColumn)
+            {
+                properties.Add(new PropertyValue(record.AgentTitle, "@"));
+            }
 
             _ = sb.AppendLine(JsonSerializer.Serialize(properties, jsonSerializerOptions) + ",");
         }

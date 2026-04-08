@@ -1377,4 +1377,7 @@
   <data name="UserAuthenticationFailed" xml:space="preserve">
     <value>User authentication failed</value>
   </data>
+  <data name="AccountingCustomerOperationAgent" xml:space="preserve">
+    <value>Agent</value>
+  </data>
 </root>
