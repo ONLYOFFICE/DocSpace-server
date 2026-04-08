@@ -35,6 +35,12 @@ public partial class AiDbContext
     }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, null])]
+    public Task<DbAiModelSettings?> GetModelSettingAsync(int tenantId, int providerId, string modelId)
+    {
+        return Queries.GetModelSettingAsync(this, tenantId, providerId, modelId);
+    }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, null])]
     public Task DeleteModelSettingsAsync(int tenantId, int providerId, string modelId)
     {
         return Queries.DeleteModelSettingsAsync(this, tenantId, providerId, modelId);
@@ -48,6 +54,12 @@ static file class Queries
             (AiDbContext ctx, int tenantId, int providerId) =>
                 ctx.ModelSettings
                     .Where(x => x.TenantId == tenantId && x.ProviderId == providerId));
+
+    public static readonly Func<AiDbContext, int, int, string, Task<DbAiModelSettings?>> GetModelSettingAsync =
+        EF.CompileAsyncQuery(
+            (AiDbContext ctx, int tenantId, int providerId, string modelId) =>
+                ctx.ModelSettings
+                    .FirstOrDefault(x => x.TenantId == tenantId && x.ProviderId == providerId && x.ModelId == modelId));
 
     public static readonly Func<AiDbContext, int, int, string, Task> DeleteModelSettingsAsync =
         EF.CompileAsyncQuery(

@@ -306,6 +306,15 @@ public class AiProviderDao(
             .ToListAsync();
     }
 
+    public async Task<AiModelSettings?> GetModelSettingAsync(int tenantId, int providerId, string modelId)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+
+        var entity = await dbContext.GetModelSettingAsync(tenantId, providerId, modelId);
+
+        return entity?.Map();
+    }
+
     public async Task SaveModelSettingsAsync(int tenantId, int providerId, AiModelSettings settings)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();

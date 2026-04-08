@@ -170,6 +170,11 @@ public class CachedAiProviderDao(
         return providerDao.GetModelSettingsAsync(tenantId, providerId);
     }
 
+    public Task<AiModelSettings?> GetModelSettingAsync(int tenantId, int providerId, string modelId)
+    {
+        return providerDao.GetModelSettingAsync(tenantId, providerId, modelId);
+    }
+
     public Task SaveModelSettingsAsync(int tenantId, int providerId, AiModelSettings settings)
     {
         return providerDao.SaveModelSettingsAsync(tenantId, providerId, settings);

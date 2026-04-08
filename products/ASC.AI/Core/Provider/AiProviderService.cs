@@ -421,8 +421,7 @@ public class AiProviderService(
     public async Task<ModelSettings?> GetEffectiveModelSettingsAsync(ProviderType type, int providerId, string modelId)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
-        var dbSettings = await providerDao.GetModelSettingsAsync(tenantId, providerId);
-        var setting = dbSettings.Find(s => s.ModelId == modelId);
+        var setting = await providerDao.GetModelSettingAsync(tenantId, providerId, modelId);
         var resolved = modelSettingsResolver.Resolve(type, modelId, setting);
 
         return resolved is { IsEnabled: true } ? resolved : null;
