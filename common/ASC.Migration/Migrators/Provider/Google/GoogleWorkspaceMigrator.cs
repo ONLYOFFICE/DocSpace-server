@@ -80,7 +80,7 @@ public class GoogleWorkspaceMigrator : Migrator
             throw new Exception("Archives must be .zip");
         }
 
-        _takeouts = files.Where(item => item.EndsWith(".zip")).ToArray();
+        _takeouts = files.Where(item => item.EndsWith(".zip")).Order().ToArray();
         MigrationInfo.Files = _takeouts.Select(Path.GetFileName).ToList();
         await ReportProgressAsync(1, "start");
     }
