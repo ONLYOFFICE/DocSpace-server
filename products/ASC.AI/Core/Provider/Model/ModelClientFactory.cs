@@ -42,7 +42,7 @@ public class ModelClientFactory(IHttpClientFactory httpClientFactory)
             ProviderType.Anthropic =>
                 new AnthropicModelClient(httpClientFactory.CreateClient(), url, apiKey),
             ProviderType.PortalAi =>
-                new DocSpaceModelClient(httpClientFactory.CreateClient(), url, apiKey),
+                new InternalModelClient(httpClientFactory.CreateClient(), url, apiKey),
             ProviderType.OpenRouter =>
                 new OpenRouterModelClient(httpClientFactory.CreateClient(), url, apiKey),
             ProviderType.GoogleAi =>

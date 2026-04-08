@@ -31,7 +31,7 @@ public class AiProviderService(
     IAiProviderDao providerDao,
     TenantManager tenantManager,
     AuthContext authContext,
-    AiConfiguration aiConfiguration,
+    AiConfiguration aiConfig,
     AiModelSettingsResolver modelSettingsResolver,
     UserManager userManager,
     IDistributedLockProvider distributedLockProvider,
@@ -44,7 +44,7 @@ public class AiProviderService(
     {
         await ThrowIfNotAccessAsync();
 
-        var settings = aiConfiguration.Get(type);
+        var settings = aiConfig.Get(type);
         if (settings == null)
         {
             throw new ArgumentException(ErrorMessages.IncorrectProvider);
@@ -156,7 +156,7 @@ public class AiProviderService(
     {
         await ThrowIfNotAccessAsync();
 
-        return aiConfiguration.GetAvailableProviders()
+        return aiConfig.GetAvailableProviders()
             .Where(x => x.Type != ProviderType.PortalAi)
             .ToList();
     }
@@ -168,7 +168,7 @@ public class AiProviderService(
         await providerDao.DeleteProviders(tenantManager.GetCurrentTenantId(), ids);
     }
 
-    public async Task<IEnumerable<ModelData>> GetModelsAsync(int providerId, Scope? scope)
+    public async Task<IEnumerable<ModelData>> GetModelsAsync(int providerId)
     {
         var provider = await GetProviderAsync(providerId, forceSystemProvider: true);
         if (provider.NeedReset)
@@ -179,8 +179,7 @@ public class AiProviderService(
         var tenantId = tenantManager.GetCurrentTenantId();
 
         var client = modelClientFactory.Create(provider.Type, provider.Url, provider.Key);
-        var models = await ExecuteProviderRequestAsync(provider.Type,
-            () => GetFilteredModelsAsync(client, provider.Type, tenantId, provider.Id, scope));
+        var models = await ExecuteProviderRequestAsync(provider.Type, client.ListModelsAsync);
 
         Dictionary<string, AiChatPrice>? priceMap = null;
         CurrencyInfo? currency = null;
@@ -198,21 +197,28 @@ public class AiProviderService(
             }
             catch(Exception e)
             {
-                // If prices can't be fetched, continue without them
                 logger.ErrorWithException(e);
             }
         }
 
-        var settingsMap = provider.Type != ProviderType.PortalAi
+        var recommended = aiConfig.GetRecommendedModels(provider.Type);
+        var dbSettings = provider.Type != ProviderType.PortalAi
             ? (await providerDao.GetModelSettingsAsync(tenantId, provider.Id)).ToDictionary(s => s.ModelId)
-            : null;
+            : [];
 
-        return models.Select(m =>
+        var result = new List<ModelData>();
+
+        foreach (var m in models)
         {
-            var dbSettings = settingsMap?.GetValueOrDefault(m.Id);
-            var resolved = modelSettingsResolver.Resolve(provider.Type, m.Id, dbSettings);
+            dbSettings.TryGetValue(m.Id, out var dbSetting);
+            var resolved = modelSettingsResolver.Resolve(provider.Type, m.Id, dbSetting);
 
-            return new ModelData
+            if (!IsVisible(m.Id, resolved))
+            {
+                continue;
+            }
+
+            result.Add(new ModelData
             {
                 Provider = provider,
                 ModelId = m.Id,
@@ -220,8 +226,20 @@ public class AiProviderService(
                 Capabilities = resolved?.Capabilities,
                 Price = priceMap?.GetValueOrDefault(m.Id),
                 Currency = priceMap != null ? currency : null
-            };
-        });
+            });
+        }
+
+        return result;
+
+        bool IsVisible(string modelId, ResolvedModelSettings? resolved)
+        {
+            if (provider.Type == ProviderType.PortalAi || recommended is null)
+            {
+                return recommended is null || recommended.Contains(modelId);
+            }
+
+            return resolved is { IsEnabled: true };
+        }
     }
 
     public async Task<AiProvider> GetProviderAsync(int providerId, bool forceSystemProvider = false)
@@ -284,7 +302,7 @@ public class AiProviderService(
 
         async Task<string?> GetFirstAvailableModelAsync(AiProvider provider)
         {
-            var supportedModels = aiConfiguration.GetSupportedModels(provider.Type);
+            var supportedModels = aiConfig.GetRecommendedModels(provider.Type);
             if (supportedModels is { Count: > 0 })
             {
                 return supportedModels.First();
@@ -316,56 +334,39 @@ public class AiProviderService(
         var tenantId = tenantManager.GetCurrentTenantId();
 
         var client = modelClientFactory.Create(provider.Type, provider.Url, provider.Key);
-        var allModels = await ExecuteProviderRequestAsync(provider.Type, () => client.ListModelsAsync());
+        var models = await ExecuteProviderRequestAsync(provider.Type, client.ListModelsAsync);
 
-        var recommended = aiConfiguration.GetSupportedModels(provider.Type);
         var dbSettings = provider.Type != ProviderType.PortalAi
             ? (await providerDao.GetModelSettingsAsync(tenantId, provider.Id)).ToDictionary(s => s.ModelId)
             : new Dictionary<string, AiModelSettings>();
 
-        var result = new List<ModelSettingsInfo>();
+        return BuildModelSettingsList(models, provider.Type, dbSettings);
+    }
 
-        foreach (var model in allModels)
+    public async Task<List<ModelSettingsInfo>> GetModelsForNewProviderAsync(ProviderType type, string? url, string key)
+    {
+        await ThrowIfNotAccessAsync();
+
+        if (type == ProviderType.PortalAi)
         {
-            var isRecommended = recommended?.Contains(model.Id) == true;
-            var configModel = aiConfiguration.GetModel(provider.Type, model.Id);
-            dbSettings.TryGetValue(model.Id, out var dbSetting);
-
-            if (isRecommended)
-            {
-                result.Add(new ModelSettingsInfo
-                {
-                    ModelId = model.Id,
-                    Alias = configModel!.Alias,
-                    IsEnabled = dbSetting == null || dbSetting.IsEnabled,
-                    IsRecommended = true,
-                    Capabilities = configModel.Capabilities
-                });
-            }
-            else
-            {
-                result.Add(new ModelSettingsInfo
-                {
-                    ModelId = model.Id,
-                    Alias = dbSetting?.Alias ?? model.Id,
-                    IsEnabled = dbSetting is { IsEnabled: true },
-                    IsRecommended = false,
-                    Capabilities = dbSetting?.Capabilities ?? new AiModelCapabilities()
-                });
-            }
+            throw new ArgumentException(ErrorMessages.IncorrectProvider);
         }
 
-        result.Sort((a, b) =>
+        var settings = aiConfig.Get(type);
+        if (settings == null)
         {
-            if (a.IsRecommended != b.IsRecommended)
-            {
-                return a.IsRecommended ? -1 : 1;
-            }
+            throw new ArgumentException(ErrorMessages.IncorrectProvider);
+        }
 
-            return 0;
-        });
+        ArgumentException.ThrowIfNullOrEmpty(key);
 
-        return result;
+        url = string.IsNullOrEmpty(url) ? settings.Url : new Uri(url).ToString();
+        ArgumentException.ThrowIfNullOrEmpty(url);
+
+        var client = modelClientFactory.Create(type, url, key);
+        var models = await ExecuteProviderRequestAsync(type, client.ListModelsAsync);
+
+        return BuildModelSettingsList(models, type, []);
     }
 
     public async Task UpdateModelSettingsAsync(int providerId, string modelId, bool isEnabled, string? alias, AiModelCapabilities? capabilities)
@@ -379,7 +380,7 @@ public class AiProviderService(
         }
 
         var tenantId = tenantManager.GetCurrentTenantId();
-        var configModel = aiConfiguration.GetModel(provider.Type, modelId);
+        var configModel = aiConfig.GetModel(provider.Type, modelId);
 
         if (configModel != null)
         {
@@ -431,11 +432,10 @@ public class AiProviderService(
         IModelClient client,
         ProviderType type,
         int tenantId,
-        int providerId,
-        Scope? scope = null)
+        int providerId)
     {
-        var models = await client.ListModelsAsync(scope);
-        var recommended = aiConfiguration.GetSupportedModels(type);
+        var models = await client.ListModelsAsync();
+        var recommended = aiConfig.GetRecommendedModels(type);
 
         if (type == ProviderType.PortalAi || recommended == null)
         {
@@ -482,6 +482,62 @@ public class AiProviderService(
     private static string GetProviderNameLockKey(int tenantId)
     {
         return $"ai_provider_name_{tenantId}";
+    }
+
+    private List<ModelSettingsInfo> BuildModelSettingsList(
+        IEnumerable<ModelInfo> models,
+        ProviderType type,
+        Dictionary<string, AiModelSettings> dbSettings)
+    {
+        var recommended = aiConfig.GetRecommendedModels(type);
+        var result = new List<ModelSettingsInfo>();
+
+        foreach (var model in models)
+        {
+            var isRecommended = recommended?.Contains(model.Id) == true;
+            dbSettings.TryGetValue(model.Id, out var dbSetting);
+            var resolved = modelSettingsResolver.Resolve(type, model.Id, dbSetting);
+
+            if (resolved != null)
+            {
+                result.Add(new ModelSettingsInfo
+                {
+                    ModelId = model.Id,
+                    Alias = resolved.Alias,
+                    IsEnabled = resolved.IsEnabled,
+                    IsRecommended = isRecommended,
+                    Capabilities = resolved.Capabilities
+                });
+            }
+            else
+            {
+                result.Add(new ModelSettingsInfo
+                {
+                    ModelId = model.Id,
+                    Alias = model.Id,
+                    IsEnabled = false,
+                    IsRecommended = false,
+                    Capabilities = AiModelCapabilities.Empty
+                });
+            }
+        }
+
+        result.Sort((a, b) =>
+        {
+            if (a.IsRecommended != b.IsRecommended)
+            {
+                return a.IsRecommended ? -1 : 1;
+            }
+
+            if (a.IsEnabled != b.IsEnabled)
+            {
+                return a.IsEnabled ? -1 : 1;
+            }
+
+            return 0;
+        });
+
+        return result;
     }
 
     private static async Task<T> ExecuteProviderRequestAsync<T>(ProviderType providerType, Func<Task<T>> request)

@@ -322,7 +322,7 @@ public class AiProviderDao(
                 ModelId = settings.ModelId,
                 Alias = settings.Alias,
                 IsEnabled = settings.IsEnabled,
-                Capabilities = settings.Capabilities ?? new AiModelCapabilities()
+                Capabilities = settings.Capabilities ?? AiModelCapabilities.Empty
             };
 
             await context.ModelSettings.AddOrUpdateAsync(entity);

@@ -55,23 +55,26 @@ public class DbAiModelSettings : BaseEntity
 /// </summary>
 public class AiModelCapabilities
 {
+    [JsonIgnore]
+    public static readonly AiModelCapabilities Empty = new();
+
     /// <summary>
     /// Indicates whether the model supports image and vision input.
     /// </summary>
     /// <example>true</example>
-    public bool Vision { get; set; }
+    public bool Vision { get; init; }
 
     /// <summary>
     /// Indicates whether the model supports tool (function) calling.
     /// </summary>
     /// <example>true</example>
-    public bool ToolCalling { get; set; }
+    public bool ToolCalling { get; init; }
 
     /// <summary>
     /// Indicates whether the model supports extended thinking and reasoning.
     /// </summary>
     /// <example>false</example>
-    public bool Thinking { get; set; }
+    public bool Thinking { get; init; }
 }
 
 public static class DbAiModelSettingsExtension

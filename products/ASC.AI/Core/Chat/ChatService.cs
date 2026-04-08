@@ -96,7 +96,7 @@ public class ChatService(
 
     public Task<IEnumerable<ModelData>> GetModelsAsync(int providerId)
     {
-        return aiProviderService.GetModelsAsync(providerId, Scope.Chat);
+        return aiProviderService.GetModelsAsync(providerId);
     }
 
     public async Task<ChatSession> GetChatAsync(Guid chatId)

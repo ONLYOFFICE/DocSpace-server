@@ -24,48 +24,28 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-#nullable enable
-using System.Diagnostics.CodeAnalysis;
+namespace ASC.AI.Models.RequestDto;
 
-using ASC.Core.Common.EF.Model.Ai;
-
-namespace ASC.Core.Common.AI;
-
-public record ResolvedModelSettings : ModelSettings
+/// <summary>
+/// Request parameters for previewing models available from a provider before saving it.
+/// </summary>
+public class PreviewProviderModelsRequestDto
 {
-    public bool IsEnabled { get; init; }
+    /// <summary>
+    /// The AI provider type (e.g., OpenAi, Anthropic, GoogleAi, DeepSeek, OpenRouter, TogetherAi, XAi, OpenAiCompatible).
+    /// </summary>
+    /// <example>1</example>
+    public ProviderType Type { get; set; }
 
-    [SetsRequiredMembers]
-    public ResolvedModelSettings(ModelSettings settings, bool isEnabled) : base(settings)
-    {
-        IsEnabled = isEnabled;
-    }
-}
+    /// <summary>
+    /// The API endpoint URL. Required for OpenAiCompatible type; optional for other types that have default URLs.
+    /// </summary>
+    /// <example>https://api.openai.com/v1</example>
+    public string? Url { get; set; }
 
-[Singleton]
-public class AiModelSettingsResolver(AiConfiguration aiConfig)
-{
-    public ResolvedModelSettings? Resolve(ProviderType type, string modelId, AiModelSettings? dbSettings)
-    {
-        var configModel = aiConfig.GetModel(type, modelId);
-        if (configModel != null)
-        {
-            var isEnabled = dbSettings is null || dbSettings.IsEnabled;
-            return new ResolvedModelSettings(configModel, isEnabled);
-        }
-
-        if (dbSettings is null)
-        {
-            return null;
-        }
-
-        var settings = new ModelSettings
-        {
-            Id = dbSettings.ModelId,
-            Alias = dbSettings.Alias ?? dbSettings.ModelId,
-            Capabilities = dbSettings.Capabilities ?? AiModelCapabilities.Empty
-        };
-
-        return new ResolvedModelSettings(settings, dbSettings.IsEnabled);
-    }
+    /// <summary>
+    /// The authentication API key for the AI provider.
+    /// </summary>
+    /// <example>sk-example-key-123</example>
+    public required string Key { get; set; }
 }

@@ -48,7 +48,7 @@ public class AiConfiguration
         var effort = section.GetSection("effort").Get<Dictionary<string, EffortSettingsData>>() ?? [];
 
         MaxImageSize = maxImgSize > 0 ? maxImgSize : 0;
-        _effortSettings = effort.ToFrozenDictionary(e => 
+        _effortSettings = effort.ToFrozenDictionary(e =>
             e.Key, e => e.Value, StringComparer.OrdinalIgnoreCase);
 
         _settings = coreBaseSettings.Standalone
@@ -100,7 +100,7 @@ public class AiConfiguration
         return _settings.Values.Where(x => x.Enabled);
     }
 
-    public HashSet<string>? GetSupportedModels(ProviderType type)
+    public HashSet<string>? GetRecommendedModels(ProviderType type)
     {
         var models = _settings.GetValueOrDefault(type)?.Models;
         return models?.Select(m => m.Id).ToHashSet();

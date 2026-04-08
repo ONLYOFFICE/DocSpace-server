@@ -166,6 +166,30 @@ public class ProviderController(
     }
 
     /// <summary>
+    /// Preview models for a new AI provider
+    /// </summary>
+    /// <remarks>
+    /// Connects to the specified AI provider using the provided credentials and returns the available models
+    /// with their default settings. This is used to preview models before saving the provider.
+    /// Recommended models are enabled by default with configuration-defined settings.
+    /// Additional models are disabled by default with empty capabilities.
+    /// </remarks>
+    /// <path>api/2.0/ai/providers/models/preview</path>
+    /// <collection>list</collection>
+    [Tags("AI / Providers")]
+    [SwaggerResponse(200, "List of models with default settings", typeof(List<ModelSettingsDto>))]
+    [SwaggerResponse(400, "Invalid connection data or unsupported provider type")]
+    [SwaggerResponse(403, "You don't have enough permission to manage providers")]
+    [HttpPost("providers/models/preview")]
+    [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
+    public async Task<List<ModelSettingsDto>> PreviewProviderModelsAsync(PreviewProviderModelsRequestDto inDto)
+    {
+        var models = await providerService.GetModelsForNewProviderAsync(inDto.Type, inDto.Url, inDto.Key);
+
+        return models.Select(x => x.MapToDto()).ToList();
+    }
+
+    /// <summary>
     /// Get all models for a provider with their settings
     /// </summary>
     /// <remarks>
