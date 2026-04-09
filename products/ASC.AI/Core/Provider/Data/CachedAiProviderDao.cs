@@ -165,15 +165,16 @@ public class CachedAiProviderDao(
         return result;
     }
 
-    public Task<List<AiModelSettings>> GetModelSettingsAsync(int tenantId, int providerId)
+    public Task<Dictionary<string, AiModelSettings>> GetModelSettingsAsync(int tenantId, int providerId, ProviderType type)
     {
-        return providerDao.GetModelSettingsAsync(tenantId, providerId);
+        return providerDao.GetModelSettingsAsync(tenantId, providerId, type);
     }
 
     public Task<AiModelSettings?> GetModelSettingAsync(int tenantId, int providerId, string modelId)
     {
         return providerDao.GetModelSettingAsync(tenantId, providerId, modelId);
     }
+
 
     public Task SaveModelSettingsAsync(int tenantId, int providerId, AiModelSettings settings)
     {

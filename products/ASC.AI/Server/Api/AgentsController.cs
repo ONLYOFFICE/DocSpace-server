@@ -323,7 +323,7 @@ public class AgentsController(
             return;
         }
 
-        var models = await aiProviderService.GetModelsAsync(chatSettings.ProviderId);
+        var models = await aiProviderService.GetActiveModelsAsync(chatSettings.ProviderId);
 
         if (!models.Any(m => string.Equals(m.ModelId, chatSettings.ModelId, StringComparison.Ordinal)))
         {

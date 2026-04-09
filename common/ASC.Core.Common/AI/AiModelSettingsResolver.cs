@@ -34,11 +34,13 @@ namespace ASC.Core.Common.AI;
 public record ResolvedModelSettings : ModelSettings
 {
     public bool IsEnabled { get; init; }
+    public bool IsRecommended { get; init; }
 
     [SetsRequiredMembers]
-    public ResolvedModelSettings(ModelSettings settings, bool isEnabled) : base(settings)
+    public ResolvedModelSettings(ModelSettings settings, bool isEnabled, bool isRecommended) : base(settings)
     {
         IsEnabled = isEnabled;
+        IsRecommended = isRecommended;
     }
 }
 
@@ -51,12 +53,28 @@ public class AiModelSettingsResolver(AiConfiguration aiConfig)
         if (configModel != null)
         {
             var isEnabled = dbSettings is null || dbSettings.IsEnabled;
-            return new ResolvedModelSettings(configModel, isEnabled);
+            return new ResolvedModelSettings(configModel, isEnabled, isRecommended: true);
         }
+
+        // For custom providers (OpenAiCompatible), models are enabled by default.
+        // Only explicit DB records can disable them or override alias/capabilities.
+        var isCustomProvider = type == ProviderType.OpenAiCompatible;
 
         if (dbSettings is null)
         {
-            return null;
+            if (!isCustomProvider)
+            {
+                return null;
+            }
+
+            var defaultSettings = new ModelSettings
+            {
+                Id = modelId,
+                Alias = modelId,
+                Capabilities = AiModelCapabilities.Empty
+            };
+
+            return new ResolvedModelSettings(defaultSettings, isEnabled: true, isRecommended: false);
         }
 
         var settings = new ModelSettings
@@ -66,6 +84,6 @@ public class AiModelSettingsResolver(AiConfiguration aiConfig)
             Capabilities = dbSettings.Capabilities ?? AiModelCapabilities.Empty
         };
 
-        return new ResolvedModelSettings(settings, dbSettings.IsEnabled);
+        return new ResolvedModelSettings(settings, dbSettings.IsEnabled, isRecommended: false);
     }
 }

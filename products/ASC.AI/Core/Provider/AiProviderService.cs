@@ -168,7 +168,7 @@ public class AiProviderService(
         await providerDao.DeleteProviders(tenantManager.GetCurrentTenantId(), ids);
     }
 
-    public async Task<IEnumerable<ModelData>> GetModelsAsync(int providerId)
+    public async Task<IEnumerable<ModelData>> GetActiveModelsAsync(int providerId)
     {
         var provider = await GetProviderAsync(providerId, forceSystemProvider: true);
         if (provider.NeedReset)
@@ -201,10 +201,7 @@ public class AiProviderService(
             }
         }
 
-        var recommended = aiConfig.GetRecommendedModels(provider.Type);
-        var dbSettings = provider.Type != ProviderType.PortalAi
-            ? (await providerDao.GetModelSettingsAsync(tenantId, provider.Id)).ToDictionary(s => s.ModelId)
-            : [];
+        var dbSettings = await providerDao.GetModelSettingsAsync(tenantId, provider.Id, provider.Type);
 
         var result = new List<ModelData>();
 
@@ -213,7 +210,7 @@ public class AiProviderService(
             dbSettings.TryGetValue(m.Id, out var dbSetting);
             var resolved = modelSettingsResolver.Resolve(provider.Type, m.Id, dbSetting);
 
-            if (!IsVisible(m.Id, resolved))
+            if (resolved is not { IsEnabled: true })
             {
                 continue;
             }
@@ -222,24 +219,14 @@ public class AiProviderService(
             {
                 Provider = provider,
                 ModelId = m.Id,
-                Alias = resolved?.Alias ?? m.Id,
-                Capabilities = resolved?.Capabilities,
+                Alias = resolved.Alias,
+                Capabilities = resolved.Capabilities,
                 Price = priceMap?.GetValueOrDefault(m.Id),
                 Currency = priceMap != null ? currency : null
             });
         }
 
         return result;
-
-        bool IsVisible(string modelId, ResolvedModelSettings? resolved)
-        {
-            if (provider.Type == ProviderType.PortalAi || recommended is null)
-            {
-                return recommended is null || recommended.Contains(modelId);
-            }
-
-            return resolved is { IsEnabled: true };
-        }
     }
 
     public async Task<AiProvider> GetProviderAsync(int providerId, bool forceSystemProvider = false)
@@ -321,7 +308,7 @@ public class AiProviderService(
         }
     }
 
-    public async Task<List<ModelSettingsInfo>> GetAllModelsWithSettingsAsync(int providerId)
+    public async Task<List<ModelSettingsInfo>> GetModelsWithSettingsAsync(int providerId)
     {
         await ThrowIfNotAccessAsync();
 
@@ -336,14 +323,12 @@ public class AiProviderService(
         var client = modelClientFactory.Create(provider.Type, provider.Url, provider.Key);
         var models = await ExecuteProviderRequestAsync(provider.Type, client.ListModelsAsync);
 
-        var dbSettings = provider.Type != ProviderType.PortalAi
-            ? (await providerDao.GetModelSettingsAsync(tenantId, provider.Id)).ToDictionary(s => s.ModelId)
-            : new Dictionary<string, AiModelSettings>();
+        var dbSettings = await providerDao.GetModelSettingsAsync(tenantId, provider.Id, provider.Type);
 
         return BuildModelSettingsList(models, provider.Type, dbSettings);
     }
 
-    public async Task<List<ModelSettingsInfo>> GetModelsForNewProviderAsync(ProviderType type, string? url, string key)
+    public async Task<List<ModelSettingsInfo>> GetPreviewModelsAsync(ProviderType type, string? url, string key)
     {
         await ThrowIfNotAccessAsync();
 
@@ -446,8 +431,7 @@ public class AiProviderService(
             return models;
         }
 
-        var dbSettings = (await providerDao.GetModelSettingsAsync(tenantId, providerId))
-            .ToDictionary(s => s.ModelId);
+        var dbSettings = await providerDao.GetModelSettingsAsync(tenantId, providerId, type);
 
         models = models.Where(m =>
         {
@@ -488,37 +472,21 @@ public class AiProviderService(
         ProviderType type,
         Dictionary<string, AiModelSettings> dbSettings)
     {
-        var recommended = aiConfig.GetRecommendedModels(type);
         var result = new List<ModelSettingsInfo>();
 
         foreach (var model in models)
         {
-            var isRecommended = recommended?.Contains(model.Id) == true;
             dbSettings.TryGetValue(model.Id, out var dbSetting);
             var resolved = modelSettingsResolver.Resolve(type, model.Id, dbSetting);
 
-            if (resolved != null)
+            result.Add(new ModelSettingsInfo
             {
-                result.Add(new ModelSettingsInfo
-                {
-                    ModelId = model.Id,
-                    Alias = resolved.Alias,
-                    IsEnabled = resolved.IsEnabled,
-                    IsRecommended = isRecommended,
-                    Capabilities = resolved.Capabilities
-                });
-            }
-            else
-            {
-                result.Add(new ModelSettingsInfo
-                {
-                    ModelId = model.Id,
-                    Alias = model.Id,
-                    IsEnabled = false,
-                    IsRecommended = false,
-                    Capabilities = AiModelCapabilities.Empty
-                });
-            }
+                ModelId = model.Id,
+                Alias = resolved?.Alias ?? model.Id,
+                IsEnabled = resolved is { IsEnabled: true },
+                IsRecommended = resolved is { IsRecommended: true },
+                Capabilities = resolved?.Capabilities ?? AiModelCapabilities.Empty
+            });
         }
 
         result.Sort((a, b) =>

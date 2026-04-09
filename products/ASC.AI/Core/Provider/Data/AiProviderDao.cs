@@ -297,13 +297,17 @@ public class AiProviderDao(
             ?? (gateway.Configured ? AiGateway.ProviderId : null);
     }
 
-    public async Task<List<AiModelSettings>> GetModelSettingsAsync(int tenantId, int providerId)
+    public async Task<Dictionary<string, AiModelSettings>> GetModelSettingsAsync(int tenantId, int providerId, ProviderType type)
     {
+        if (type == ProviderType.PortalAi)
+        {
+            return [];
+        }
+
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
 
         return await dbContext.GetModelSettingsAsync(tenantId, providerId)
-            .Select(x => x.Map())
-            .ToListAsync();
+            .ToDictionaryAsync(x => x.ModelId, x => x.Map());
     }
 
     public async Task<AiModelSettings?> GetModelSettingAsync(int tenantId, int providerId, string modelId)
