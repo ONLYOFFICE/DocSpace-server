@@ -256,5 +256,14 @@ namespace ASC.AI.Core.Resources {
                 return ResourceManager.GetString("UnavailableServers", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to At least one model must remain enabled.
+        /// </summary>
+        internal static string AllModelsDisabled {
+            get {
+                return ResourceManager.GetString("AllModelsDisabled", resourceCulture);
+            }
+        }
     }
 }

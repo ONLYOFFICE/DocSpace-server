@@ -56,13 +56,10 @@ public class AiModelSettingsResolver(AiConfiguration aiConfig)
             return new ResolvedModelSettings(configModel, isEnabled, isRecommended: true);
         }
 
-        // For custom providers (OpenAiCompatible), models are enabled by default.
-        // Only explicit DB records can disable them or override alias/capabilities.
-        var isCustomProvider = type == ProviderType.OpenAiCompatible;
-
         if (dbSettings is null)
         {
-            if (!isCustomProvider)
+            // For OpenAiCompatible, models are enabled by default. (backward compatibility)
+            if (type != ProviderType.OpenAiCompatible)
             {
                 return null;
             }

@@ -40,7 +40,12 @@ public class AiProviderService(
     AiGateway aiGateway,
     ILogger<AiProviderService> logger)
 {
-    public async Task<AiProvider> AddProviderAsync(string? title, string? url, string key, ProviderType type)
+    public async Task<AiProvider> AddProviderAsync(
+        string? title,
+        string? url,
+        string key,
+        ProviderType type,
+        List<AiModelSettings>? modelSettings = null)
     {
         await ThrowIfNotAccessAsync();
 
@@ -57,6 +62,13 @@ public class AiProviderService(
 
         ArgumentException.ThrowIfNullOrEmpty(url);
 
+        if (type == ProviderType.OpenAiCompatible && modelSettings is not { Count: > 0 })
+        {
+            throw new ArgumentException("Model settings must be specified for OpenAI compatible providers.");
+        }
+
+        var mSettings = ProcessModelSettings(type, modelSettings);
+
         var tenantId = tenantManager.GetCurrentTenantId();
 
         var defaultModel = await ExecuteProviderRequestAsync(type, async () =>
@@ -69,11 +81,16 @@ public class AiProviderService(
         await using (await distributedLockProvider.TryAcquireFairLockAsync(GetProviderNameLockKey(tenantId)))
         {
             await ThrowIfProviderNameExistsAsync(tenantId, title);
-            return await providerDao.AddProviderAsync(tenantId, title, url, key, type, defaultModel);
+            return await providerDao.AddProviderAsync(tenantId, title, url, key, type, defaultModel, mSettings);
         }
     }
 
-    public async Task<AiProvider> UpdateProviderAsync(int id, string? title, string? url, string? key)
+    public async Task<AiProvider> UpdateProviderAsync(
+        int id,
+        string? title,
+        string? url,
+        string? key,
+        List<AiModelSettings>? modelSettings = null)
     {
         await ThrowIfNotAccessAsync();
 
@@ -111,16 +128,17 @@ public class AiProviderService(
         }
 
         var tenantId = tenantManager.GetCurrentTenantId();
+        var mSettings = ProcessModelSettings(provider.Type, modelSettings);
 
         if (!titleChanged)
         {
-            return await providerDao.UpdateProviderAsync(tenantId, provider);
+            return await providerDao.UpdateProviderAsync(tenantId, provider, mSettings);
         }
 
         await using (await distributedLockProvider.TryAcquireFairLockAsync(GetProviderNameLockKey(tenantId)))
         {
             await ThrowIfProviderNameExistsAsync(tenantId, provider.Title, provider.Id);
-            return await providerDao.UpdateProviderAsync(tenantId, provider);
+            return await providerDao.UpdateProviderAsync(tenantId, provider, mSettings);
         }
     }
 
@@ -378,9 +396,7 @@ public class AiProviderService(
                 await providerDao.SaveModelSettingsAsync(tenantId, provider.Id, new AiModelSettings
                 {
                     ModelId = modelId,
-                    IsEnabled = false,
-                    Alias = configModel.Alias,
-                    Capabilities = configModel.Capabilities
+                    IsEnabled = false
                 });
             }
         }
@@ -410,6 +426,41 @@ public class AiProviderService(
         var resolved = modelSettingsResolver.Resolve(type, modelId, setting);
 
         return resolved is { IsEnabled: true } ? resolved : null;
+    }
+
+    private List<AiModelSettings>? ProcessModelSettings(ProviderType type, List<AiModelSettings>? changes)
+    {
+        if (changes is not { Count: > 0 } || type == ProviderType.PortalAi)
+        {
+            return null;
+        }
+
+        var result = new List<AiModelSettings>(changes.Count);
+
+        foreach (var change in changes)
+        {
+            var recommended = aiConfig.GetModel(type, change.ModelId);
+            if (recommended != null)
+            {
+                result.Add(new AiModelSettings
+                {
+                    ModelId = change.ModelId,
+                    IsEnabled = change.IsEnabled
+                });
+            }
+            else
+            {
+                result.Add(new AiModelSettings
+                {
+                    ModelId = change.ModelId,
+                    IsEnabled = change.IsEnabled,
+                    Alias = change.Alias?.Trim(),
+                    Capabilities = change.Capabilities
+                });
+            }
+        }
+
+        return result;
     }
 
     private async Task<IEnumerable<ModelInfo>> GetFilteredModelsAsync(

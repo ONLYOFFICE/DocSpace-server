@@ -53,7 +53,12 @@ public class ProviderController(
     [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
     public async Task<AiProviderDto> AddProviderAsync(CreateProviderRequestDto inDto)
     {
-        var provider = await providerService.AddProviderAsync(inDto.Title, inDto.Url, inDto.Key, inDto.Type);
+        var provider = await providerService.AddProviderAsync(
+            inDto.Title,
+            inDto.Url,
+            inDto.Key,
+            inDto.Type,
+            MapModelSettings(inDto.ModelSettings));
 
         messageService.Send(MessageAction.AIProviderCreated, MessageTarget.Create(provider.Id), provider.Title);
 
@@ -104,7 +109,9 @@ public class ProviderController(
     [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
     public async Task<AiProviderDto> UpdateProviderAsync(UpdateProviderRequestDto inDto)
     {
-        var provider = await providerService.UpdateProviderAsync(inDto.Id, inDto.Body.Title, inDto.Body.Url, inDto.Body.Key);
+        var modelSettings = MapModelSettings(inDto.Body.ModelSettings);
+
+        var provider = await providerService.UpdateProviderAsync(inDto.Id, inDto.Body.Title, inDto.Body.Url, inDto.Body.Key, modelSettings);
 
         messageService.Send(MessageAction.AIProviderUpdated, MessageTarget.Create(provider.Id), provider.Title);
 
@@ -272,5 +279,10 @@ public class ProviderController(
         var result = await providerService.GetDefaultProviderAsync();
 
         return result?.MapToDto();
+    }
+
+    private static List<AiModelSettings>? MapModelSettings(HashSet<ModelSettingsItemDto>? items)
+    {
+        return items is not { Count: > 0 } ? null : items.Select(x => x.Map()).ToList();
     }
 }

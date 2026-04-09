@@ -40,9 +40,10 @@ public class CachedAiProviderDao(
         string url,
         string key,
         ProviderType type,
-        string defaultModel)
+        string defaultModel,
+        List<AiModelSettings>? modelSettings = null)
     {
-        var result = await providerDao.AddProviderAsync(tenantId, title, url, key, type, defaultModel);
+        var result = await providerDao.AddProviderAsync(tenantId, title, url, key, type, defaultModel, modelSettings);
 
         if (!result.IsDefault)
         {
@@ -80,9 +81,9 @@ public class CachedAiProviderDao(
         return providerDao.IsProviderNameExistsAsync(tenantId, title, excludedProviderId);
     }
 
-    public async Task<AiProvider> UpdateProviderAsync(int tenantId, AiProvider provider)
+    public async Task<AiProvider> UpdateProviderAsync(int tenantId, AiProvider provider, List<AiModelSettings>? modelSettings = null)
     {
-        provider = await providerDao.UpdateProviderAsync(tenantId, provider);
+        provider = await providerDao.UpdateProviderAsync(tenantId, provider, modelSettings);
 
         await InvalidateDefaultProviderCacheAsync(tenantId);
 
