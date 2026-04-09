@@ -40,7 +40,7 @@ public class AiConfiguration
     private readonly FrozenDictionary<string, string> _aliasByModelId;
     private readonly FrozenDictionary<string, EffortSettingsData> _effortSettings;
 
-    public AiConfiguration(IConfiguration configuration, CoreBaseSettings coreBaseSettings)
+    public AiConfiguration(IConfiguration configuration)
     {
         var section = configuration.GetSection("ai");
         var providers = section.GetSection("providers").Get<List<ProviderSettingsData>>() ?? [];
@@ -51,10 +51,7 @@ public class AiConfiguration
         _effortSettings = effort.ToFrozenDictionary(e =>
             e.Key, e => e.Value, StringComparer.OrdinalIgnoreCase);
 
-        _settings = coreBaseSettings.Standalone
-            ? providers.ToFrozenDictionary(p => p.Type)
-            : providers.Where(p => p.Type != ProviderType.OpenAiCompatible)
-                .ToFrozenDictionary(p => p.Type);
+        _settings = providers.ToFrozenDictionary(p => p.Type);
 
         var modelsByProvider = new Dictionary<(ProviderType, string), ModelSettings>();
         var modelIdMigrations = new Dictionary<(ProviderType, string), string>();

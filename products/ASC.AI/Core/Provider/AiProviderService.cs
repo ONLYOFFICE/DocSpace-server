@@ -187,13 +187,14 @@ public class AiProviderService(
         return await providerDao.GetProvidersTotalCountAsync(tenantManager.GetCurrentTenantId());
     }
 
-    public async Task<List<ProviderSettingsData>> GetAvailableProvidersAsync()
+    public async Task<IEnumerable<ProviderSettingsData>> GetAvailableProvidersAsync()
     {
         await ThrowIfNotAccessAsync();
 
         return aiConfig.GetAvailableProviders()
             .Where(x => x.Type != ProviderType.PortalAi)
-            .ToList();
+            .OrderBy(x => x.Type == ProviderType.OpenAiCompatible)
+            .ThenBy(x => x.Type.ToStringLowerFast(), StringComparer.Ordinal);
     }
 
     public async Task DeleteProvidersAsync(HashSet<int> ids)
