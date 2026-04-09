@@ -495,7 +495,7 @@ public class AiProviderService(
                 return new ModelSettingsInfo
                 {
                     ModelId = model.Id,
-                    Alias = resolved?.Alias ?? model.Id,
+                    Alias = resolved?.Alias,
                     IsEnabled = resolved is { IsEnabled: true },
                     IsRecommended = resolved is { IsRecommended: true },
                     Capabilities = resolved?.Capabilities ?? AiModelCapabilities.Empty

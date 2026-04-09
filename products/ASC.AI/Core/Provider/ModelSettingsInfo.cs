@@ -29,7 +29,7 @@ namespace ASC.AI.Core.Provider;
 public class ModelSettingsInfo
 {
     public required string ModelId { get; init; }
-    public required string Alias { get; init; }
+    public string? Alias { get; init; }
     public bool IsEnabled { get; init; }
     public bool IsRecommended { get; init; }
     public required AiModelCapabilities Capabilities { get; init; }

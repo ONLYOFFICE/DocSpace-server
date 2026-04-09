@@ -41,7 +41,7 @@ public class ModelSettingsDto
     /// The display name for the model.
     /// </summary>
     /// <example>Claude Sonnet 4</example>
-    public required string Alias { get; init; }
+    public string? Alias { get; init; }
 
     /// <summary>
     /// Whether the model is enabled for use in chat.
