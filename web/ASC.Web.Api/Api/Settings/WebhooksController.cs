@@ -388,7 +388,7 @@ public class WebhooksController(
         IPAddress[] addresses = null;
         try
         {
-            addresses = await Dns.GetHostAddressesAsync(uri);
+            addresses = await Dns.GetHostAddressesAsync(parsedUri.Host);
         }
         catch (Exception)
         {
