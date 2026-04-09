@@ -106,10 +106,10 @@ public class AspireAppFixture : IAsyncLifetime
         // Connect to Redis for cache flush
         _redis = await ConnectionMultiplexer.ConnectAsync($"{redisConnectionString},allowAdmin=true");
 
-        // Create HTTP clients via Aspire
-        FilesHttpClient = _app.CreateHttpClient("onlyoffice-files");
-        PeopleHttpClient = _app.CreateHttpClient("onlyoffice-people");
-        WebApiHttpClient = _app.CreateHttpClient("onlyoffice-web-api");
+        // Create HTTP clients with cookies disabled to avoid stale auth cookies
+        FilesHttpClient = CreateHttpClientNoCookies("onlyoffice-files");
+        PeopleHttpClient = CreateHttpClientNoCookies("onlyoffice-people");
+        WebApiHttpClient = CreateHttpClientNoCookies("onlyoffice-web-api");
 
         // Initialize Files API clients
         var filesConfig = new Configuration { BasePath = FilesHttpClient.BaseAddress!.ToString().TrimEnd('/') };
@@ -195,6 +195,13 @@ public class AspireAppFixture : IAsyncLifetime
     {
         var server = _redis.GetServers()[0];
         await server.FlushAllDatabasesAsync();
+    }
+
+    private HttpClient CreateHttpClientNoCookies(string resourceName)
+    {
+        using var baseClient = _app.CreateHttpClient(resourceName);
+        var handler = new HttpClientHandler { UseCookies = false };
+        return new HttpClient(handler) { BaseAddress = baseClient.BaseAddress };
     }
 
     private static string MakeCopyTableName(string tableName)
