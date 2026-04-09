@@ -26,8 +26,6 @@
 
 extern alias ASCWebApi;
 extern alias ASCPeople;
-using ASC.Files.Tests.ApiFactories;
-
 using MemberRequestDto = ASCPeople::ASC.People.ApiModels.RequestDto.MemberRequestDto;
 using WizardRequestsDto = DocSpace.API.SDK.Model.WizardRequestsDto;
 

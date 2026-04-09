@@ -958,7 +958,7 @@ public class RoomShareTests(
         var shortLink = response.SharedLink.ShareLink;
 
         await _webApiClient.Authenticate(Initializer.Owner);
-        var fullLink = await _webApiClient.GetAsync(shortLink, TestContext.Current.CancellationToken);
+        var fullLink = await _webApiClient.GetAsync(new Uri(shortLink).PathAndQuery, TestContext.Current.CancellationToken);
         var key = HttpUtility.ParseQueryString(fullLink.RequestMessage?.RequestUri?.Query!)["key"];
         await _authenticationApi.CheckConfirmAsync(new EmailValidationKeyModel(key!, uiD: Initializer.Owner.Id, type: ConfirmType.LinkInvite), TestContext.Current.CancellationToken);
 
@@ -994,7 +994,7 @@ public class RoomShareTests(
 
         // User visits the Read link
         await _webApiClient.Authenticate(user);
-        var fullInvitationLink = await _webApiClient.GetAsync(shortInvitationLink, TestContext.Current.CancellationToken);
+        var fullInvitationLink = await _webApiClient.GetAsync(new Uri(shortInvitationLink).PathAndQuery, TestContext.Current.CancellationToken);
         var fullInvitationLinkKey = HttpUtility.ParseQueryString(fullInvitationLink.RequestMessage?.RequestUri?.Query!)["key"];
         await _authenticationApi.CheckConfirmAsync(new EmailValidationKeyModel(fullInvitationLinkKey!, uiD: owner.Id, type: ConfirmType.LinkInvite), TestContext.Current.CancellationToken);
 
@@ -1019,7 +1019,7 @@ public class RoomShareTests(
 
         // User visits the updated link again, but personal rights must remain Read (because the user already exists in the room)
         await _webApiClient.Authenticate(user);
-        var fullUpdatedInvitationLink = await _webApiClient.GetAsync(shortUpdatedInvitationLink, TestContext.Current.CancellationToken);
+        var fullUpdatedInvitationLink = await _webApiClient.GetAsync(new Uri(shortUpdatedInvitationLink).PathAndQuery, TestContext.Current.CancellationToken);
         var fullUpdatedInvitationLinkKey = HttpUtility.ParseQueryString(fullUpdatedInvitationLink.RequestMessage?.RequestUri?.Query!)["key"];
         await _authenticationApi.CheckConfirmAsync(new EmailValidationKeyModel(fullUpdatedInvitationLinkKey!, uiD: owner.Id, type: ConfirmType.LinkInvite), TestContext.Current.CancellationToken);
 

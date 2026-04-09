@@ -33,14 +33,7 @@ var isDocker = string.Compare(builder.Configuration["Docker"], "true", StringCom
 var skipClient = string.Compare(builder.Configuration["SKIP_CLIENT"], "true", StringComparison.OrdinalIgnoreCase) == 0;
 
 var launchProfile = builder.Configuration["DOTNET_LAUNCH_PROFILE"];
-var isIntegrationTest = launchProfile == "integration-test";
-
-var connectionManager = new ConnectionStringManager(builder, basePath);
-
-if (!isIntegrationTest)
-{
-    connectionManager.AddEditors();
-}
+var connectionManager = new ConnectionStringManager(builder, basePath).AddEditors();
 
 var configurator = new ProjectConfigurator(builder, connectionManager, basePath, isDocker);
 switch (launchProfile)
@@ -132,21 +125,18 @@ switch (launchProfile)
         break;
 }
 
-if (!isIntegrationTest)
+IResourceBuilder<ExecutableResource>? startPackages = null;
+
+var clientBasePath = Path.Combine(basePath, "client");
+
+if (!skipClient)
 {
-    IResourceBuilder<ExecutableResource>? startPackages = null;
-
-    var clientBasePath = Path.Combine(basePath, "client");
-
-    if (!skipClient)
-    {
-        startPackages = builder.AddJavaScriptApp("onlyoffice-client", clientBasePath, "start").WithPnpm();
-    }
-
-    var isPreview = builder.Configuration["DOTNET_LAUNCH_PROFILE"] == "preview";
-    var openresty = NginxConfiguration.ConfigureOpenResty(builder, basePath, clientBasePath, startPackages, isDocker, isPreview);
-
-    playwright?.WaitFor(openresty);
+    startPackages = builder.AddJavaScriptApp("onlyoffice-client", clientBasePath, "start").WithPnpm();
 }
+
+var isPreview = builder.Configuration["DOTNET_LAUNCH_PROFILE"] == "preview";
+var openresty = NginxConfiguration.ConfigureOpenResty(builder, basePath, clientBasePath, startPackages, isDocker, isPreview);
+
+playwright?.WaitFor(openresty);
 
 await builder.Build().RunAsync();

@@ -27,8 +27,6 @@
 using System.Reflection;
 using System.Security.Cryptography;
 
-using ASC.Web.Studio.Core;
-
 namespace ASC.Files.Tests.Tests._06_Operations;
 
 [Collection("Test Collection")]

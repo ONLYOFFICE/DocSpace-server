@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using DocSpace.API.SDK.Api.Group;
-
 using GroupApi = DocSpace.API.SDK.Api.Group.GroupApi;
 using SettingsApi = DocSpace.API.SDK.Api.Files.SettingsApi;
 using QuotaApi = DocSpace.API.SDK.Api.Files.QuotaApi;
@@ -79,7 +77,7 @@ public class AspireAppFixture : IAsyncLifetime
 
         // Start Aspire AppHost with integration-test profile
         var appHost = await DistributedApplicationTestingBuilder.CreateAsync<Projects.ASC_AppHost>(
-            ["DOTNET_LAUNCH_PROFILE=integration-test"]);
+            ["DOTNET_LAUNCH_PROFILE=integration-test", "SKIP_CLIENT=true"]);
 
         appHost.Configuration["DOTNET_DASHBOARD_OTLP_ENDPOINT_URL"] = "";
         appHost.Configuration["ASPIRE_DASHBOARD_OTLP_ENDPOINT_URL"] = "";

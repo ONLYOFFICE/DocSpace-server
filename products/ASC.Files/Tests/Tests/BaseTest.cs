@@ -24,11 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Files.Tests.ApiFactories;
-
 using DocSpace.API.SDK.Api.Group;
-using DocSpace.API.SDK.Api.People;
-using DocSpace.API.SDK.Api.Settings;
 
 using QuotaApi = DocSpace.API.SDK.Api.Files.QuotaApi;
 using RoomsApi = DocSpace.API.SDK.Api.Rooms.RoomsApi;
