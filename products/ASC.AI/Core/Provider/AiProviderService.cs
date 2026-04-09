@@ -71,21 +71,25 @@ public class AiProviderService(
 
         var models = await ExecuteProviderRequestAsync(type,
             async() => (await client.ListModelsAsync()).ToList());
-
         if (models.Count == 0)
         {
             throw new ArgumentException(ErrorMessages.NoModelsAvailable);
         }
 
         var mSettings = ProcessModelSettings(type, modelSettings);
+
+        var firstModel = ApplySettings(type, models, [], mSettings).FirstOrDefault();
+        if (firstModel == null)
+        {
+            throw new ArgumentException(ErrorMessages.NoModelsAvailable);
+        }
+
         var tenantId = tenantManager.GetCurrentTenantId();
-        var defaultModelId = await GetFirstAvailableModelIdAsync(type, models,
-            static () => Task.FromResult(new Dictionary<string, AiModelSettings>()), mSettings);
 
         await using (await distributedLockProvider.TryAcquireFairLockAsync(GetProviderNameLockKey(tenantId)))
         {
             await ThrowIfProviderNameExistsAsync(tenantId, title);
-            return await providerDao.AddProviderAsync(tenantId, title, url, key, type, defaultModelId, mSettings);
+            return await providerDao.AddProviderAsync(tenantId, title, url, key, type, firstModel.Id, mSettings);
         }
     }
 
@@ -94,7 +98,7 @@ public class AiProviderService(
         string? title,
         string? url,
         string? key,
-        List<AiModelSettings>? modelSettings = null)
+        List<AiModelSettings>? deltaSettings = null)
     {
         await ThrowIfNotAccessAsync();
 
@@ -122,7 +126,7 @@ public class AiProviderService(
         }
 
         var tenantId = tenantManager.GetCurrentTenantId();
-        var mSettings = ProcessModelSettings(provider.Type, modelSettings);
+        var mSettings = ProcessModelSettings(provider.Type, deltaSettings);
 
         if (needCheck || mSettings is { Count: > 0 })
         {
@@ -130,12 +134,14 @@ public class AiProviderService(
 
             if (mSettings is { Count: > 0 })
             {
+                var currentSettings = providerDao.GetModelSettingsAsync(tenantId, provider.Id, provider.Type);
                 var models = await ExecuteProviderRequestAsync(provider.Type,
                     async () => (await client.ListModelsAsync()).ToList());
 
-                await GetFirstAvailableModelIdAsync(provider.Type, models,
-                    () => providerDao.GetModelSettingsAsync(tenantId, provider.Id, provider.Type),
-                    mSettings);
+                if (!ApplySettings(provider.Type, models, await currentSettings, mSettings).Any())
+                {
+                    throw new ArgumentException(ErrorMessages.NoModelsAvailable);
+                }
             }
             else
             {
@@ -315,33 +321,28 @@ public class AiProviderService(
             return null;
         }
 
-        var defaultModel = await GetFirstAvailableModelAsync(firstProvider);
-        if (defaultModel == null)
+        var mSettings = providerDao.GetModelSettingsAsync(tenantId, firstProvider.Id, firstProvider.Type);
+
+        var client = modelClientFactory.Create(firstProvider.Type, firstProvider.Url, firstProvider.Key);
+        IEnumerable<ModelInfo> models;
+
+        try
+        {
+            models = await client.ListModelsAsync();
+        }
+        catch (Exception e)
+        {
+            logger.ErrorWithException(e);
+            models = [];
+        }
+
+        var firstModel = ApplySettings(firstProvider.Type, models, await mSettings).FirstOrDefault();
+        if (firstModel == null)
         {
             return null;
         }
 
-        return await providerDao.SetDefaultProviderAsync(tenantId, firstProvider, defaultModel);
-
-        async Task<string?> GetFirstAvailableModelAsync(AiProvider provider)
-        {
-            var supportedModels = aiConfig.GetRecommendedModels(provider.Type);
-            if (supportedModels is { Count: > 0 })
-            {
-                return supportedModels.First();
-            }
-
-            try
-            {
-                var client = modelClientFactory.Create(provider.Type, provider.Url, provider.Key);
-                var models = await client.ListModelsAsync();
-                return models.FirstOrDefault()?.Id;
-            }
-            catch
-            {
-                return null;
-            }
-        }
+        return await providerDao.SetDefaultProviderAsync(tenantId, firstProvider, firstModel.Id);
     }
 
     public async Task<IEnumerable<ModelSettingsInfo>> GetModelsWithSettingsAsync(int providerId)
@@ -434,33 +435,29 @@ public class AiProviderService(
         return result;
     }
 
-    private async Task<string> GetFirstAvailableModelIdAsync(
+    private IEnumerable<ModelInfo> ApplySettings(
         ProviderType type,
         IEnumerable<ModelInfo> models,
-        Func<Task<Dictionary<string, AiModelSettings>>> getExistingSettingsAsync,
-        List<AiModelSettings>? newSettings)
+        Dictionary<string, AiModelSettings> currentSettings,
+        List<AiModelSettings>? newSettings = null)
     {
-        var settingsMap = await getExistingSettingsAsync();
-
         if (newSettings is { Count: > 0 })
         {
             foreach (var s in newSettings)
             {
-                settingsMap[s.ModelId] = s;
+                currentSettings[s.ModelId] = s;
             }
         }
 
         foreach (var m in models)
         {
-            settingsMap.TryGetValue(m.Id, out var setting);
+            currentSettings.TryGetValue(m.Id, out var setting);
             var resolved = modelSettingsResolver.Resolve(type, m.Id, setting);
             if (resolved is { IsEnabled: true })
             {
-                return m.Id;
+                yield return m;
             }
         }
-
-        throw new ArgumentException(ErrorMessages.NoModelsAvailable);
     }
 
     private async Task ThrowIfNotAccessAsync()
