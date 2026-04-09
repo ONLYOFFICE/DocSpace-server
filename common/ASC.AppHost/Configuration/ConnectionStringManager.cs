@@ -39,7 +39,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
     private IResourceBuilder<MySqlDatabaseResource>? MySqlDatabaseResource { get; set; }
     private IResourceBuilder<RabbitMQServerResource>? RabbitMqResource { get; set; }
     private IResourceBuilder<RedisResource>? RedisResource { get; set; }
-    private IResourceBuilder<ExecutableResource>? MigrateResource { get; set; }
+    private IResourceBuilder<ProjectResource>? MigrateResource { get; set; }
     private IResourceBuilder<ContainerResource>? EditorResource { get; set; }
     private IResourceBuilder<MailPitContainerResource>? MailResource { get; set; }
     private IResourceBuilder<ContainerResource>? OpensearchResource { get; set; }
@@ -71,24 +71,14 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             }
         });
 
-        var executableName = OperatingSystem.IsWindows() ? "ASC.Migration.Runner.exe" : "ASC.Migration.Runner";
-        var path = Path.GetFullPath(Path.Combine("..", "Tools", "ASC.Migration.Runner", "bin", "Debug", executableName));
-
         MigrateResource = builder
-            .AddExecutable("migrate", path, Path.GetDirectoryName(path) ?? "")
+            .AddProject<ASC_Migration_Runner>("migrate")
             .WithReference(MySqlDatabaseResource)
             .WaitFor(MySqlDatabaseResource);
 
         var isStandalone = string.Compare(builder.Configuration["APP_HOSTING_STANDALONE"], "true", StringComparison.OrdinalIgnoreCase) == 0;
 
-        if (isStandalone)
-        {
-            MigrateResource.WithEnvironment("standalone", "true");
-        }
-        else
-        {
-            MigrateResource.WithEnvironment("standalone", "");
-        }
+        MigrateResource.WithEnvironment("standalone", isStandalone ? "true" : "");
 
         return this;
     }
