@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2026
+// (c) Copyright Ascensio System SIA 2009-2026
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,25 +24,27 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using DocSpace.API.SDK.Api.Settings;
+
 namespace ASC.People.Tests.PeopleController;
 
 [Collection("Test Collection")]
 public class BaseTest(
-    PeopleFactory peopleFactory,
-    WepApiFactory apiFactory
+    AspireAppFixture fixture
     ) : IAsyncLifetime
 {
-    protected readonly HttpClient _peopleClient = peopleFactory.HttpClient;
-    protected readonly HttpClient _apiClient = apiFactory.HttpClient;
-    protected readonly ProfilesApi _profilesApi = peopleFactory.ProfilesApi;
-    protected readonly GroupApi _groupApi = peopleFactory.GroupApi;
-    protected readonly UsersApi _portalUsersApi = apiFactory.PortalUsersApi;
-    protected readonly UserTypeApi _userTypeApi = peopleFactory.UserTypeApi;
-    private readonly Func<Task> _resetDatabase = peopleFactory.ResetDatabaseAsync;
+    protected readonly HttpClient _peopleClient = fixture.PeopleHttpClient;
+    protected readonly HttpClient _apiClient = fixture.WebApiHttpClient;
+    protected readonly ProfilesApi _profilesApi = fixture.ProfilesApi;
+    protected readonly GroupApi _groupApi = fixture.GroupApi;
+    protected readonly UsersApi _portalUsersApi = fixture.PortalUsersApi;
+    protected readonly UserTypeApi _userTypeApi = fixture.UserTypeApi;
+    protected readonly CommonSettingsApi _commonSettingsApi = fixture.CommonSettingsApi;
+    private readonly Func<Task> _resetDatabase = fixture.ResetDatabaseAsync;
 
     public async ValueTask InitializeAsync()
     {
-        await Initializer.InitializeAsync(peopleFactory, apiFactory);
+        await Initializer.InitializeAsync(fixture);
     }
 
     public async ValueTask DisposeAsync()

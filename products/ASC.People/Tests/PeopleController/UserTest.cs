@@ -27,7 +27,7 @@
 namespace ASC.People.Tests.PeopleController;
 
 [Collection("Test Collection")]
-public class UserTest(PeopleFactory peopleFactory, WepApiFactory apiFactory) : BaseTest(peopleFactory, apiFactory)
+public class UserTest(AspireAppFixture fixture) : BaseTest(fixture)
 {
     [Fact]
     [Trait("Category", "Bug")]

@@ -25,7 +25,6 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 using System.Reflection;
 
-using ASC.Files.Tests.ApiFactories;
 
 using QuotaSettingsRequestsDto = DocSpace.API.SDK.Model.QuotaSettingsRequestsDto;
 
@@ -35,11 +34,8 @@ namespace ASC.Files.Tests.Tests._07_Settings;
 [Trait("Category", "Settings")]
 [Trait("Feature", "Quota")]
 public class QuotaTests(
-    FilesApiFactory filesFactory, 
-    WepApiFactory apiFactory, 
-    PeopleFactory peopleFactory,
-    FilesServiceFactory filesServiceProgram) 
-    : BaseTest(filesFactory, apiFactory, peopleFactory, filesServiceProgram)
+    AspireAppFixture fixture)
+    : BaseTest(fixture)
 {
     [Fact]
     public async Task ResetRoomQuota_ValidRoomIds_ResetsQuotaSuccessfully()

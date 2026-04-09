@@ -45,6 +45,17 @@
         "Logging__LogLevel__Default": "Information"
       }
     },
+    "integration-test": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": false,
+      "environmentVariables": {
+        "Docker": "false",
+        "APP_HOSTING_STANDALONE": "true",
+        "DOTNET_ENVIRONMENT": "Development",
+        "ASPIRE_ALLOW_UNSECURED_TRANSPORT": "true"
+      }
+    },
     "frontend-dev": {
       "commandName": "Project",
       "dotnetRunMessages": false,

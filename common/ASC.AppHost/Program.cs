@@ -32,15 +32,33 @@ var basePath = Path.GetFullPath(Path.Combine("..", "..", ".."));
 var isDocker = string.Compare(builder.Configuration["Docker"], "true", StringComparison.OrdinalIgnoreCase) == 0;
 var skipClient = string.Compare(builder.Configuration["SKIP_CLIENT"], "true", StringComparison.OrdinalIgnoreCase) == 0;
 
-var connectionManager = new ConnectionStringManager(builder, basePath)
+var launchProfile = builder.Configuration["DOTNET_LAUNCH_PROFILE"];
+var isIntegrationTest = launchProfile == "integration-test";
 
-    .AddEditors();
+var connectionManager = new ConnectionStringManager(builder, basePath);
+
+if (!isIntegrationTest)
+{
+    connectionManager.AddEditors();
+}
 
 var configurator = new ProjectConfigurator(builder, connectionManager, basePath, isDocker);
-
-var launchProfile = builder.Configuration["DOTNET_LAUNCH_PROFILE"];
 switch (launchProfile)
 {
+    case "integration-test":
+        connectionManager
+            .AddMySql(withDataVolume: false)
+            .AddRabbitMq()
+            .AddRedis()
+            .AddOpensearch(withDashboard: false, fixedPort: false);
+
+        configurator
+            .AddProject<ASC_Files>(Constants.FilesPort)
+            .AddProject<ASC_Files_Worker>(Constants.FilesWorkerPort)
+            .AddProject<ASC_People>(Constants.PeoplePort)
+            .AddProject<ASC_Web_Api>(Constants.WebApiPort);
+
+        break;
     case "preview":
         connectionManager
             .AddMySql();
@@ -114,18 +132,21 @@ switch (launchProfile)
         break;
 }
 
-IResourceBuilder<ExecutableResource>? startPackages = null;
-
-var clientBasePath = Path.Combine(basePath, "client");
-
-if (!skipClient)
+if (!isIntegrationTest)
 {
-    startPackages = builder.AddJavaScriptApp("onlyoffice-client", clientBasePath, "start").WithPnpm();
+    IResourceBuilder<ExecutableResource>? startPackages = null;
+
+    var clientBasePath = Path.Combine(basePath, "client");
+
+    if (!skipClient)
+    {
+        startPackages = builder.AddJavaScriptApp("onlyoffice-client", clientBasePath, "start").WithPnpm();
+    }
+
+    var isPreview = builder.Configuration["DOTNET_LAUNCH_PROFILE"] == "preview";
+    var openresty = NginxConfiguration.ConfigureOpenResty(builder, basePath, clientBasePath, startPackages, isDocker, isPreview);
+
+    playwright?.WaitFor(openresty);
 }
-
-var isPreview = builder.Configuration["DOTNET_LAUNCH_PROFILE"] == "preview";
-var openresty = NginxConfiguration.ConfigureOpenResty(builder, basePath, clientBasePath, startPackages, isDocker, isPreview);
-
-playwright?.WaitFor(openresty);
 
 await builder.Build().RunAsync();

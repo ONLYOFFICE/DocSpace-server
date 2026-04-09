@@ -24,7 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Files.Tests.ApiFactories;
 
 namespace ASC.Files.Tests.Tests._04_Security;
 
@@ -32,13 +31,10 @@ namespace ASC.Files.Tests.Tests._04_Security;
 [Trait("Category", "Security")]
 [Trait("Feature", "Inheritance")]
 public class ShareInheritanceTests(
-    FilesApiFactory filesFactory,
-    WepApiFactory apiFactory,
-    PeopleFactory peopleFactory,
-    FilesServiceFactory filesServiceProgram)
-    : BaseTest(filesFactory, apiFactory, peopleFactory, filesServiceProgram)
+    AspireAppFixture fixture)
+    : BaseTest(fixture)
 {
-    private readonly WepApiFactory _apiFactory = apiFactory;
+    private readonly HttpClient _webApiClient = fixture.WebApiHttpClient;
 
     [Theory]
     [MemberData(nameof(ValidRoomTypesForShare))]
@@ -525,7 +521,7 @@ public class ShareInheritanceTests(
         fileAccessViaRoom.Security.Comment.Should().BeFalse();
         fileAccessViaRoom.Access.Should().Be(FileShare.Read);
 
-        var linkFromRoom = await _apiFactory.HttpClient.GetAsync(fileAccessViaRoom.ShortWebUrl, TestContext.Current.CancellationToken);
+        var linkFromRoom = await _webApiClient.GetAsync(fileAccessViaRoom.ShortWebUrl, TestContext.Current.CancellationToken);
         linkFromRoom.Headers.Location?.OriginalString.Should().Contain(roomSharedTo.RequestToken);
         
         // Folder link access (comment)
@@ -534,7 +530,7 @@ public class ShareInheritanceTests(
         fileAccessViaFolder.Security.Comment.Should().BeTrue();
         fileAccessViaFolder.Access.Should().Be(FileShare.Comment);
 
-        var linkFromFolder = await _apiFactory.HttpClient.GetAsync(fileAccessViaFolder.ShortWebUrl, TestContext.Current.CancellationToken);
+        var linkFromFolder = await _webApiClient.GetAsync(fileAccessViaFolder.ShortWebUrl, TestContext.Current.CancellationToken);
         linkFromFolder.Headers.Location?.OriginalString.Should().Contain(folderSharedTo.RequestToken);
 
         // File link access (editing)
@@ -543,7 +539,7 @@ public class ShareInheritanceTests(
         fileAccessViaFile.Security.Comment.Should().BeTrue();
         fileAccessViaFile.Access.Should().Be(FileShare.Editing);
         
-        var linkFromFile = await _apiFactory.HttpClient.GetAsync(fileAccessViaFile.ShortWebUrl, TestContext.Current.CancellationToken);
+        var linkFromFile = await _webApiClient.GetAsync(fileAccessViaFile.ShortWebUrl, TestContext.Current.CancellationToken);
         linkFromFile.Headers.Location?.OriginalString.Should().Contain(fileSharedTo.RequestToken);
     }
     

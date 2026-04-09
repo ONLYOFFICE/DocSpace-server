@@ -1,4 +1,11 @@
 <Solution>
+  <Folder Name="/migrations/">
+    <Project Path="common/Tools/ASC.Migration.Runner/ASC.Migration.Runner.csproj" />
+    <Project Path="common/Tools/ASC.Migrations.Core/ASC.Migrations.Core.csproj" />
+    <Project Path="migrations/mysql/SaaS/ASC.Migrations.MySql.SaaS.csproj" />
+    <Project Path="migrations/mysql/Standalone/ASC.Migrations.MySql.Standalone.csproj" />
+    <Project Path="migrations/postgre/SaaS/ASC.Migrations.PostgreSql.SaaS.csproj" />
+  </Folder>
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />
     <File Path="Directory.Packages.props" />
@@ -19,11 +26,9 @@
   <Project Path="common/services/ASC.ElasticSearch/ASC.ElasticSearch.csproj" />
   <Project Path="common/services/ASC.Notify/ASC.Notify.csproj" />
   <Project Path="common/services/ASC.Studio.Notify/ASC.Studio.Notify.csproj" />
+  <Project Path="common/ASC.AppHost/ASC.AppHost.csproj" />
   <Project Path="common/Tests/ASC.Core.Common.Tests/ASC.Core.Common.Tests.csproj" />
   <Project Path="common/Tools/ASC.Data.Stress/ASC.Data.Stress.csproj" />
-  <Project Path="common/Tools/ASC.Migrations.Core/ASC.Migrations.Core.csproj" />
-  <Project Path="migrations/mysql/SaaS/ASC.Migrations.MySql.SaaS.csproj" />
-  <Project Path="migrations/postgre/SaaS/ASC.Migrations.PostgreSql.SaaS.csproj" />
   <Project Path="products/ASC.AI/Core/ASC.AI.Core.csproj" />
   <Project Path="products/ASC.AI/Server/ASC.AI.csproj" />
   <Project Path="products/ASC.AI/Worker/ASC.AI.Worker.csproj" />
