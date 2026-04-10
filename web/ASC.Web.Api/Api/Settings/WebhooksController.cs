@@ -44,6 +44,7 @@ public class WebhooksController(
     PasswordSettingsManager passwordSettingsManager,
     IHttpClientFactory clientFactory,
     IConfiguration configuration,
+    ILogger<WebhooksController> logger,
     WebhooksConfigDtoHelper webhooksConfigDtoHelper)
     : BaseSettingsController(fusionCache, webItemManager)
 {
@@ -57,6 +58,7 @@ public class WebhooksController(
     /// <collection>list</collection>
     [Tags("Settings / Webhooks")]
     [SwaggerResponse(200, "List of tenant webhooks with their config parameters", typeof(IAsyncEnumerable<WebhooksConfigWithStatusDto>))]
+    [SwaggerResponse(403, "Access denied")]
     [HttpGet("webhook")]
     public async IAsyncEnumerable<WebhooksConfigWithStatusDto> GetTenantWebhooks()
     {
@@ -77,6 +79,8 @@ public class WebhooksController(
     /// <path>api/2.0/settings/webhook</path>
     [Tags("Settings / Webhooks")]
     [SwaggerResponse(200, "Tenant webhook with its config parameters", typeof(WebhooksConfigDto))]
+    [SwaggerResponse(400, "Invalid or empty parameters")]
+    [SwaggerResponse(403, "Access denied")]
     [HttpPost("webhook")]
     public async Task<WebhooksConfigDto> CreateWebhook(CreateWebhooksConfigRequestsDto inDto)
     {
@@ -100,6 +104,9 @@ public class WebhooksController(
     /// <path>api/2.0/settings/webhook</path>
     [Tags("Settings / Webhooks")]
     [SwaggerResponse(200, "Updated tenant webhook with its config parameters", typeof(WebhooksConfigDto))]
+    [SwaggerResponse(400, "Invalid or empty parameters")]
+    [SwaggerResponse(403, "Access denied")]
+    [SwaggerResponse(404, "Item not found")]
     [HttpPut("webhook")]
     public async Task<WebhooksConfigDto> UpdateWebhook(UpdateWebhooksConfigRequestsDto inDto)
     {
@@ -148,6 +155,9 @@ public class WebhooksController(
     /// <path>api/2.0/settings/webhook/enable</path>
     [Tags("Settings / Webhooks")]
     [SwaggerResponse(200, "Enable or disable tenant webhook", typeof(WebhooksConfigDto))]
+    [SwaggerResponse(400, "Invalid or empty parameters")]
+    [SwaggerResponse(403, "Access denied")]
+    [SwaggerResponse(404, "Item not found")]
     [HttpPut("webhook/enable")]
     public async Task<WebhooksConfigDto> EnableWebhook(UpdateWebhooksConfigRequestsDto inDto)
     {
@@ -189,6 +199,8 @@ public class WebhooksController(
     /// <path>api/2.0/settings/webhook</path>
     [Tags("Settings / Webhooks")]
     [SwaggerResponse(200, "Tenant webhook with its config parameters", typeof(WebhooksConfigDto))]
+    [SwaggerResponse(403, "Access denied")]
+    [SwaggerResponse(404, "Item not found")]
     [HttpDelete("webhook/{id:int}")]
     public async Task<WebhooksConfigDto> RemoveWebhook(IdRequestDto<int> inDto)
     {
@@ -224,6 +236,7 @@ public class WebhooksController(
     /// <collection>list</collection>
     [Tags("Settings / Webhooks")]
     [SwaggerResponse(200, "Logs of the webhook activities", typeof(IAsyncEnumerable<WebhooksLogDto>))]
+    [SwaggerResponse(403, "Access denied")]
     [HttpGet("webhooks/log")]
     public async IAsyncEnumerable<WebhooksLogDto> GetWebhooksLogs(WebhookLogsRequestDto inDto)
     {
@@ -251,6 +264,7 @@ public class WebhooksController(
     [Tags("Settings / Webhooks")]
     [SwaggerResponse(200, "Logs of the webhook activities", typeof(WebhooksLogDto))]
     [SwaggerResponse(400, "Id incorrect")]
+    [SwaggerResponse(403, "Access denied")]
     [SwaggerResponse(404, "Item not found")]
     [HttpPut("webhook/{id:int}/retry")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
@@ -291,6 +305,7 @@ public class WebhooksController(
     /// <collection>list</collection>
     [Tags("Settings / Webhooks")]
     [SwaggerResponse(200, "Logs of the webhook activities", typeof(IAsyncEnumerable<WebhooksLogDto>))]
+    [SwaggerResponse(403, "Access denied")]
     [HttpPut("webhook/retry")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async IAsyncEnumerable<WebhooksLogDto> RetryWebhooks(WebhookRetryRequestsDto inDto)
@@ -376,7 +391,7 @@ public class WebhooksController(
 
         if (!Uri.TryCreate(uri, UriKind.Absolute, out var parsedUri))
         {
-            throw new ArgumentException();
+            throw new ArgumentException("Invalid URI format");
         }
 
         if (IPAddress.TryParse(parsedUri.Host, out _) &&
@@ -385,27 +400,28 @@ public class WebhooksController(
             throw new ArgumentException();
         }
 
-        IPAddress[] addresses = null;
+        IPAddress[] addresses;
         try
         {
             addresses = await Dns.GetHostAddressesAsync(parsedUri.Host);
         }
-        catch (Exception)
+        catch (Exception e)
         {
-            // ignored
+            var errorMsg = $"DNS resolution failed for {parsedUri.Host}";
+            logger.WarningWithException(errorMsg, e);
+            throw new ArgumentException(errorMsg);
         }
 
-        if (addresses != null &&
-            addresses.Any(a => restrictions.Any(r => IPAddressRange.MatchIPs(a.ToString(), r))))
+        if (addresses.Any(a => restrictions.Any(r => IPAddressRange.MatchIPs(a.ToString(), r))))
         {
             throw new ArgumentException();
         }
 
-        var httpClientName = "";
+        var httpClientName = "customHttpClient";
 
         if (Uri.UriSchemeHttps.Equals(parsedUri.Scheme, StringComparison.OrdinalIgnoreCase) && !ssl)
         {
-            httpClientName = "defaultHttpClientSslIgnore";
+            httpClientName = "customHttpClientSslIgnore";
         }
 
         using var httpClient = clientFactory.CreateClient(httpClientName);

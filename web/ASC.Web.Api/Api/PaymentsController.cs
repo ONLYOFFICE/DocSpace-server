@@ -728,6 +728,8 @@ public class PaymentController(
         {
             var description = $"{inDto.Amount} {inDto.Currency}";
             messageService.Send(MessageAction.CustomerWalletToppedUp, description);
+
+            await quotaSocketManager.TopUpWallet(false);
         }
 
         return result;

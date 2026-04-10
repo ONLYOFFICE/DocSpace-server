@@ -72,7 +72,7 @@ public class DynamicCorsPolicyProvider(
 
         var accessToken = context.Request.Headers.Authorization.ToString();
 
-        if (string.IsNullOrEmpty(accessToken) || accessToken.IndexOf("Bearer", 0, StringComparison.Ordinal) == -1)
+        if (string.IsNullOrEmpty(accessToken) || accessToken.IndexOf("Bearer", 0, StringComparison.Ordinal) == -1 || accessToken == "Bearer")
         {
             return policy;
         }
