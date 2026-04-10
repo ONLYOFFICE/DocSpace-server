@@ -27,6 +27,7 @@
 using ASC.Core;
 using ASC.MessagingSystem.Core;
 using ASC.MessagingSystem.EF.Model;
+using ASC.Webhooks.Core.EF.Model;
 
 namespace ASC.Webhooks;
 
@@ -47,9 +48,9 @@ public class WebhookSender(
 
     private const string SignatureHeader = "x-docspace-signature-256";
 
-    public const string WebhookClientName = "webhookClientName ";
-    public const string WebhookClientNameSkipSSL = "webhookClientNameSkipSSL";
-    public const string WebhookPipelineName = "webhookResiliencePipeline";
+    public const string WebhookHttpClient = "webhookHttpClient";
+    public const string WebhookHttpClientSslIgnore = "webhookHttpClientSslIgnore";
+    public const string WebhookResiliencePipeline = "webhookResiliencePipeline";
 
     public static ResiliencePropertyKey<int> RetryCountPropKey = new("retryCount");
     public static ResiliencePropertyKey<string> ErrorMessagePropKey = new("errorMessage");
@@ -72,19 +73,8 @@ public class WebhookSender(
                 return;
             }
 
-            var addresses = await GetHostAddressesAsync(configUri);
-            if (addresses is not { Length: > 0})
+            if (!await CheckWebhookBlacklisted(configUri, entry, dbWorker, messageService))
             {
-                entry.Config.Enabled = false;
-                await dbWorker.UpdateWebhookConfig(entry.Config, true);
-                messageService.SendHeadersMessage(MessageAction.WebhookUpdated, MessageTarget.Create(entry.ConfigId), null, $"{entry.Config.Name} (DNS resolution failed for {configUri.Host})");
-                return;
-            }
-
-            if (IsUriBlacklisted(addresses))
-            {
-                await dbWorker.RemoveWebhookConfigAsync(entry.ConfigId);
-                messageService.SendHeadersMessage(MessageAction.WebhookDeleted, MessageTarget.Create(entry.ConfigId), null, $"{entry.Config.Name} (blacklist)");
                 return;
             }
 
@@ -111,8 +101,8 @@ public class WebhookSender(
             var requestPayload = JsonSerializer.Serialize(webhookPayload, _jsonSerializerOptions);
             string requestHeaders = null;
 
-            var clientName = entry.Config.SSL ? WebhookClientName : WebhookClientNameSkipSSL;
-            var httpClient = clientFactory.CreateClient(clientName);
+            var httpClientName = entry.Config.SSL ? WebhookHttpClient : WebhookHttpClientSslIgnore;
+            var httpClient = clientFactory.CreateClient(httpClientName);
 
             var context = ResilienceContextPool.Shared.Get(cancellationToken);
 
@@ -121,7 +111,7 @@ public class WebhookSender(
                 context.Properties.Set(RetryCountPropKey, 0);
                 context.Properties.Set(ErrorMessagePropKey, "");
 
-                var pipeline = resiliencePipelineProvider.GetPipeline<HttpResponseMessage>(WebhookPipelineName);
+                var pipeline = resiliencePipelineProvider.GetPipeline<HttpResponseMessage>(WebhookResiliencePipeline);
 
                 var response = await pipeline.ExecuteAsync(async context =>
                 {
@@ -223,6 +213,34 @@ public class WebhookSender(
         }
     }
 
+    private async Task<bool> CheckWebhookBlacklisted(Uri configUri, DbWebhooksLog entry, DbWorker dbWorker, MessageService messageService)
+    {
+        if (IPAddress.TryParse(configUri.Host, out var ip) && IsBlacklisted([ip]))
+        {
+            await dbWorker.RemoveWebhookConfigAsync(entry.ConfigId);
+            messageService.SendHeadersMessage(MessageAction.WebhookDeleted, MessageTarget.Create(entry.ConfigId), null, $"{entry.Config.Name} (blacklist)");
+            return false;
+        }
+
+        var addresses = await GetHostAddressesAsync(configUri);
+        if (addresses is not { Length: > 0})
+        {
+            entry.Config.Enabled = false;
+            await dbWorker.UpdateWebhookConfig(entry.Config, true);
+            messageService.SendHeadersMessage(MessageAction.WebhookUpdated, MessageTarget.Create(entry.ConfigId), null, $"{entry.Config.Name} (DNS resolution failed for {configUri.Host})");
+            return false;
+        }
+
+        if (IsBlacklisted(addresses))
+        {
+            await dbWorker.RemoveWebhookConfigAsync(entry.ConfigId);
+            messageService.SendHeadersMessage(MessageAction.WebhookDeleted, MessageTarget.Create(entry.ConfigId), null, $"{entry.Config.Name} (blacklist)");
+            return false;
+        }
+
+        return true;
+    }
+
     private async Task<IPAddress[]> GetHostAddressesAsync(Uri uri)
     {
         IPAddress[] addresses = null;
@@ -237,7 +255,7 @@ public class WebhookSender(
         return addresses;
     }
 
-    private bool IsUriBlacklisted(IPAddress[] addresses)
+    private bool IsBlacklisted(IPAddress[] addresses)
     {
         return addresses.Any(a => settings.Blacklist.Any(r => IPAddressRange.MatchIPs(a.ToString(), r)));
     }
@@ -263,20 +281,22 @@ public static class WebhookSenderExtension
         var lifeTime = TimeSpan.FromMinutes(5);
         var repeatCount = Convert.ToInt32(configuration["webhooks:repeatcount"] ?? "5");
 
-        services.AddHttpClient(WebhookSender.WebhookClientName)
-            .SetHandlerLifetime(lifeTime);
-
-        services.AddHttpClient(WebhookSender.WebhookClientNameSkipSSL)
+        services.AddHttpClient(WebhookSender.WebhookHttpClient)
             .SetHandlerLifetime(lifeTime)
-            .ConfigurePrimaryHttpMessageHandler(_ =>
+            .ConfigurePrimaryHttpMessageHandler(_ => new HttpClientHandler
             {
-                return new HttpClientHandler
-                {
-                    ServerCertificateCustomValidationCallback = (_, _, _, _) => true
-                };
+                AllowAutoRedirect = false
             });
 
-        services.AddResiliencePipeline<string, HttpResponseMessage>(WebhookSender.WebhookPipelineName, pipelineBuilder =>
+        services.AddHttpClient(WebhookSender.WebhookHttpClientSslIgnore)
+            .SetHandlerLifetime(lifeTime)
+            .ConfigurePrimaryHttpMessageHandler(_ => new HttpClientHandler
+            {
+                AllowAutoRedirect = false,
+                ServerCertificateCustomValidationCallback = (_, _, _, _) => true
+            });
+
+        services.AddResiliencePipeline<string, HttpResponseMessage>(WebhookSender.WebhookResiliencePipeline, pipelineBuilder =>
         {
             pipelineBuilder.AddRetry(new RetryStrategyOptions<HttpResponseMessage>
             {

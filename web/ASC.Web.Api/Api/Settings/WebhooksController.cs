@@ -417,11 +417,11 @@ public class WebhooksController(
             throw new ArgumentException();
         }
 
-        var httpClientName = "";
+        var httpClientName = "customHttpClient";
 
         if (Uri.UriSchemeHttps.Equals(parsedUri.Scheme, StringComparison.OrdinalIgnoreCase) && !ssl)
         {
-            httpClientName = "defaultHttpClientSslIgnore";
+            httpClientName = "customHttpClientSslIgnore";
         }
 
         using var httpClient = clientFactory.CreateClient(httpClientName);
