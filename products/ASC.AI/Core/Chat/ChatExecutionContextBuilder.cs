@@ -85,9 +85,22 @@ public class ChatExecutionContextBuilder(
             };
         }
 
-        var toolsTask = chatTools.GetAsync(agent, chatSettings, knowledge.FilesCount > 0, resultStorage.Id, metadata);
+        ToolHolder tools;
+        string? error = null;
 
-        var (tools, error) = await toolsTask;
+        if (mSettings.Capabilities.ToolCalling)
+        {
+            (tools, error) = await chatTools.GetAsync(
+                agent,
+                chatSettings,
+                knowledge.FilesCount > 0,
+                resultStorage.Id,
+                metadata);
+        }
+        else
+        {
+            tools = new ToolHolder();
+        }
 
         ChatReasoningEffort? reasoningEffort = chatSettings.ReasoningEffort is not ChatReasoningEffort.None
                                                && mSettings.Capabilities.Thinking

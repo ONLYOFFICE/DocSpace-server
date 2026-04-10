@@ -61,13 +61,9 @@ public class AttachmentHandler(
         IEnumerable<int> filesIds,
         IEnumerable<string> thirdPartyFilesIds)
     {
-        var modelSettings = context.ModelSettings;
-
-        ArgumentNullException.ThrowIfNull(modelSettings);
-
         var count = 0;
 
-        await foreach (var result in HandleAsync(modelSettings, filesIds, context.ChatId, context.Agent.Id))
+        await foreach (var result in HandleAsync(context.ModelSettings, filesIds, context.ChatId, context.Agent.Id))
         {
             if (count >= MaxAttachmentsCount)
             {
@@ -78,7 +74,7 @@ public class AttachmentHandler(
             yield return result;
         }
 
-        await foreach (var result in HandleAsync(modelSettings, thirdPartyFilesIds, context.ChatId, context.Agent.Id))
+        await foreach (var result in HandleAsync(context.ModelSettings, thirdPartyFilesIds, context.ChatId, context.Agent.Id))
         {
             if (count >= MaxAttachmentsCount)
             {
@@ -105,13 +101,13 @@ public class AttachmentHandler(
     }
 
     private async IAsyncEnumerable<AttachmentResult> HandleAsync<T>(
-        ModelSettings modelSettingsData,
+        ModelSettings modelSettings,
         IEnumerable<T> filesIds,
         Guid chatId,
         int agentId)
     {
         var fileDao = daoFactory.GetFileDao<T>();
-        var hasVision = modelSettingsData.Capabilities.Vision;
+        var hasVision = modelSettings.Capabilities.Vision;
 
         var textFiles = new List<(File<T> File, string Extension)>();
         var mediaFiles = new List<(File<T> File, FileType FileType, string Extension)>();
@@ -166,7 +162,7 @@ public class AttachmentHandler(
 
         foreach (var (file, extension) in textFiles)
         {
-            yield return await HandleTextAsync(fileDao, file, extension);
+            yield return await HandleTextAsync(modelSettings, fileDao, file, extension);
         }
     }
 
@@ -224,7 +220,11 @@ public class AttachmentHandler(
         }
     }
 
-    private async Task<AttachmentResult> HandleTextAsync<T>(IFileDao<T> fileDao, File<T> file, string extension)
+    private async Task<AttachmentResult> HandleTextAsync<T>(
+        ModelSettings modelSettings,
+        IFileDao<T> fileDao,
+        File<T> file,
+        string extension)
     {
         await using var stream = await fileDao.GetFileStreamAsync(file);
 
@@ -243,7 +243,7 @@ public class AttachmentHandler(
         }
 
         IReadOnlyList<ToolWrapper>? formTools = null;
-        if (file.IsForm)
+        if (file.IsForm && modelSettings.Capabilities.ToolCalling)
         {
             var (formData, tools) = await TryGetFormDataAsync(file);
             formTools = tools;
