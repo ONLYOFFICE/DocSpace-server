@@ -426,7 +426,7 @@ public class FolderDtoHelper(
                 }
             }
 
-            ResolvedModelSettings resolved = null;
+            ModelSettings resolved = null;
             if (modelId != null && providerType.HasValue)
             {
                 AiModelSettings dbSettings = null;
@@ -443,7 +443,7 @@ public class FolderDtoHelper(
                 {
                     Image = new ChatImageMultimodalSettingsDto
                     {
-                        Formats = ModelSettings.SupportedImageFormats
+                        Formats = AiConfiguration.SupportedImageFormats
                     }
                 };
             }

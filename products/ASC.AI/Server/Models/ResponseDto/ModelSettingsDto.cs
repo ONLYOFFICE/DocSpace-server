@@ -35,7 +35,7 @@ public class ModelSettingsDto
     /// The model identifier.
     /// </summary>
     /// <example>claude-sonnet-4-20250514</example>
-    public required string ModelId { get; init; }
+    public required string Id { get; init; }
 
     /// <summary>
     /// The display name for the model.
@@ -65,5 +65,5 @@ public class ModelSettingsDto
     PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
 public static partial class ModelSettingsDtoMapper
 {
-    public static partial ModelSettingsDto MapToDto(this ModelSettingsInfo source);
+    public static partial ModelSettingsDto MapToDto(this ModelSettings source);
 }

@@ -56,7 +56,12 @@ public class DbAiModelSettings : BaseEntity
 public class AiModelCapabilities
 {
     [JsonIgnore]
-    public static readonly AiModelCapabilities Empty = new();
+    public static readonly AiModelCapabilities Default = new()
+    {
+        Vision = true,
+        ToolCalling = true,
+        Thinking = true
+    };
 
     /// <summary>
     /// Indicates whether the model supports image and vision input.

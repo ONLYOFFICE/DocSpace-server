@@ -25,63 +25,57 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 #nullable enable
-using System.Diagnostics.CodeAnalysis;
 
 using ASC.Core.Common.EF.Model.Ai;
 
 namespace ASC.Core.Common.AI;
 
-public record ResolvedModelSettings : ModelSettings
+public record ModelSettings
 {
+    public required string Id { get; init; }
+    public required AiModelCapabilities Capabilities { get; init; }
+    public string? Alias { get; init; }
     public bool IsEnabled { get; init; }
     public bool IsRecommended { get; init; }
-
-    [SetsRequiredMembers]
-    public ResolvedModelSettings(ModelSettings settings, bool isEnabled, bool isRecommended) : base(settings)
-    {
-        IsEnabled = isEnabled;
-        IsRecommended = isRecommended;
-    }
 }
 
 [Singleton]
 public class AiModelSettingsResolver(AiConfiguration aiConfig)
 {
-    public ResolvedModelSettings? Resolve(ProviderType type, string modelId, AiModelSettings? dbSettings, bool hasModelSettings)
+    public ModelSettings Resolve(ProviderType type, string modelId, AiModelSettings? dbSettings, bool hasModelSettings)
     {
         var configModel = aiConfig.GetModel(type, modelId);
         if (configModel != null)
         {
-            var isEnabled = dbSettings is null || dbSettings.IsEnabled;
-            return new ResolvedModelSettings(configModel, isEnabled, isRecommended: true);
-        }
-
-        if (dbSettings is null)
-        {
-            // For legacy OpenAiCompatible providers (without model settings),
-            // models are enabled by default. (backward compatibility)
-            if (type != ProviderType.OpenAiCompatible || hasModelSettings)
+            return new ModelSettings
             {
-                return null;
-            }
-
-            var defaultSettings = new ModelSettings
-            {
-                Id = modelId,
-                Alias = modelId,
-                Capabilities = AiModelCapabilities.Empty
+                Id = configModel.Id,
+                Alias = configModel.Alias,
+                Capabilities = configModel.Capabilities,
+                IsEnabled =  dbSettings is null || dbSettings.IsEnabled,
+                IsRecommended = true
             };
-
-            return new ResolvedModelSettings(defaultSettings, isEnabled: true, isRecommended: false);
         }
 
-        var settings = new ModelSettings
+        if (dbSettings is not null)
         {
-            Id = dbSettings.ModelId,
-            Alias = dbSettings.Alias ?? dbSettings.ModelId,
-            Capabilities = dbSettings.Capabilities ?? AiModelCapabilities.Empty
-        };
+            return new ModelSettings
+            {
+                Id = dbSettings.ModelId,
+                Alias = dbSettings.Alias,
+                Capabilities = dbSettings.Capabilities ?? AiModelCapabilities.Default,
+                IsEnabled = dbSettings.IsEnabled
+            };
+        }
 
-        return new ResolvedModelSettings(settings, dbSettings.IsEnabled, isRecommended: false);
+        // For legacy OpenAiCompatible providers (without model settings), models are enabled by default.
+        var enabled = type == ProviderType.OpenAiCompatible && !hasModelSettings;
+
+        return new ModelSettings
+        {
+            Id = modelId,
+            Capabilities = AiModelCapabilities.Default,
+            IsEnabled = enabled
+        };
     }
 }

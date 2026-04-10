@@ -44,7 +44,6 @@ public class AttachmentHandler(
     ITextExtractor textExtractor,
     VectorizationGlobalSettings vectorizationGlobalSettings,
     AiConfiguration aiConfiguration,
-    AiProviderService aiProviderService,
     DataContentLoader dataContentLoader,
     IConfiguration configuration,
     ILogger<AttachmentHandler> logger,
@@ -62,13 +61,7 @@ public class AttachmentHandler(
         IEnumerable<int> filesIds,
         IEnumerable<string> thirdPartyFilesIds)
     {
-        var clientOptions = context.ClientOptions;
-
-        var modelSettings = await aiProviderService.GetEffectiveModelSettingsAsync(
-            clientOptions.Provider,
-            clientOptions.ProviderId,
-            clientOptions.ModelId,
-            clientOptions.HasModelSettings);
+        var modelSettings = context.ModelSettings;
 
         ArgumentNullException.ThrowIfNull(modelSettings);
 
@@ -112,13 +105,13 @@ public class AttachmentHandler(
     }
 
     private async IAsyncEnumerable<AttachmentResult> HandleAsync<T>(
-        ModelSettings modelSettings,
+        ModelSettings modelSettingsData,
         IEnumerable<T> filesIds,
         Guid chatId,
         int agentId)
     {
         var fileDao = daoFactory.GetFileDao<T>();
-        var hasVision = modelSettings.Capabilities.Vision;
+        var hasVision = modelSettingsData.Capabilities.Vision;
 
         var textFiles = new List<(File<T> File, string Extension)>();
         var mediaFiles = new List<(File<T> File, FileType FileType, string Extension)>();
@@ -140,7 +133,7 @@ public class AttachmentHandler(
                     continue;
                 }
 
-                if (!ModelSettings.SupportedImageFormats.Contains(extension))
+                if (!AiConfiguration.SupportedImageFormats.Contains(extension))
                 {
                     continue;
                 }

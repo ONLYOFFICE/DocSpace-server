@@ -177,6 +177,15 @@ namespace ASC.AI.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Model is disabled.
+        /// </summary>
+        internal static string ModelDisabled {
+            get {
+                return ResourceManager.GetString("ModelDisabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No models available for this provider.
         /// </summary>
         internal static string NoModelsAvailable {
@@ -254,15 +263,6 @@ namespace ASC.AI.Core.Resources {
         internal static string UnavailableServers {
             get {
                 return ResourceManager.GetString("UnavailableServers", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to At least one model must remain enabled.
-        /// </summary>
-        internal static string AllModelsDisabled {
-            get {
-                return ResourceManager.GetString("AllModelsDisabled", resourceCulture);
             }
         }
     }

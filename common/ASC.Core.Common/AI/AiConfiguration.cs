@@ -33,9 +33,12 @@ namespace ASC.Core.Common.AI;
 public class AiConfiguration
 {
     public int MaxImageSize { get; private set; }
+    public static readonly FrozenSet<string> SupportedImageFormats =
+        ((HashSet<string>)[".jpeg", ".jpg", ".gif", ".webp", ".png"])
+        .ToFrozenSet(StringComparer.OrdinalIgnoreCase);
 
     private readonly FrozenDictionary<ProviderType, ProviderSettingsData> _settings;
-    private readonly FrozenDictionary<(ProviderType, string), ModelSettings> _modelsByProvider;
+    private readonly FrozenDictionary<(ProviderType, string), ModelSettingsData> _modelsByProvider;
     private readonly FrozenDictionary<(ProviderType, string), string> _modelIdMigrations;
     private readonly FrozenDictionary<string, string> _aliasByModelId;
     private readonly FrozenDictionary<string, EffortSettingsData> _effortSettings;
@@ -53,7 +56,7 @@ public class AiConfiguration
 
         _settings = providers.ToFrozenDictionary(p => p.Type);
 
-        var modelsByProvider = new Dictionary<(ProviderType, string), ModelSettings>();
+        var modelsByProvider = new Dictionary<(ProviderType, string), ModelSettingsData>();
         var modelIdMigrations = new Dictionary<(ProviderType, string), string>();
         var aliasByModelId = new Dictionary<string, string>();
 
@@ -103,7 +106,7 @@ public class AiConfiguration
         return models?.Select(m => m.Id).ToHashSet();
     }
 
-    public ModelSettings? GetModel(ProviderType type, string modelId)
+    public ModelSettingsData? GetModel(ProviderType type, string modelId)
     {
         return _modelsByProvider.GetValueOrDefault((type, modelId));
     }

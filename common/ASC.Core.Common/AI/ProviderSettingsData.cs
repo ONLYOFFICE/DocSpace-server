@@ -34,16 +34,12 @@ public class ProviderSettingsData
     public string? Name { get; init; }
     public ProviderType Type { get; init; }
     public string? Url { get; init; }
-    public List<ModelSettings>? Models { get; init; }
+    public List<ModelSettingsData>? Models { get; init; }
     public bool Enabled { get; init; }
 }
 
-public record ModelSettings
+public record ModelSettingsData
 {
-    public static readonly FrozenSet<string> SupportedImageFormats =
-        ((HashSet<string>)[".jpeg", ".jpg", ".gif", ".webp", ".png"])
-        .ToFrozenSet(StringComparer.OrdinalIgnoreCase);
-
     public required string Id { get; init; }
     public required string Alias { get; init; }
     public required AiModelCapabilities Capabilities { get; init; }

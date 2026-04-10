@@ -183,4 +183,7 @@
   <data name="MessageNotFound" xml:space="preserve">
     <value>Message not found</value>
   </data>
+  <data name="ModelDisabled" xml:space="preserve">
+    <value>Model is disabled</value>
+  </data>
 </root>

@@ -54,22 +54,26 @@ public class ChatExecutionContextBuilder(
 
         var tenantId = tenantManager.GetCurrentTenantId();
         var userId = authContext.CurrentAccount.ID;
+        var modelId = agent.SettingsChatParameters.ModelId;
 
-        var providerTask = providerService.GetProviderAsync(agent.SettingsChatProviderId);
-        var resultStorageTask = folderDao.GetFoldersAsync(agent.Id, FolderType.ResultStorage).FirstAsync();
-        var knowledgeTask = folderDao.GetFoldersAsync(agent.Id, FolderType.Knowledge).FirstAsync();
+        var providerContextTask = providerService.GetProviderContextAsync(agent.SettingsChatProviderId, modelId);
+        var resultStorageTask = folderDao.GetFoldersAsync(agent.Id, FolderType.ResultStorage).FirstAsync().AsTask();
+        var knowledgeTask = folderDao.GetFoldersAsync(agent.Id, FolderType.Knowledge).FirstAsync().AsTask();
         var chatSettingsTask = chatDao.GetUserChatSettingsAsync(tenantId, roomId, userId);
         var userTask = userManager.GetUsersAsync(userId);
 
-        var provider = await providerTask;
-        if (provider == null)
-        {
-            throw new ItemNotFoundException("Provider not found");
-        }
+        await Task.WhenAll(providerContextTask, resultStorageTask, knowledgeTask, chatSettingsTask, userTask);
 
+        var (provider, mSettings) = await providerContextTask;
         var chatSettings = await chatSettingsTask;
         var knowledge = await knowledgeTask;
         var resultStorage = await resultStorageTask;
+        var user = await userTask;
+
+        if (!mSettings.IsEnabled)
+        {
+            throw new ArgumentException(ErrorMessages.ModelDisabled);
+        }
 
         Dictionary<string, string>? metadata = null;
         if (provider.Type is ProviderType.PortalAi)
@@ -84,13 +88,9 @@ public class ChatExecutionContextBuilder(
         var toolsTask = chatTools.GetAsync(agent, chatSettings, knowledge.FilesCount > 0, resultStorage.Id, metadata);
 
         var (tools, error) = await toolsTask;
-        var user = await userTask;
-
-        var modelId = agent.SettingsChatParameters.ModelId;
-        var modelSettings = await providerService.GetEffectiveModelSettingsAsync(provider.Type, provider.Id, modelId, provider.HasModelSettings);
 
         ChatReasoningEffort? reasoningEffort = chatSettings.ReasoningEffort is not ChatReasoningEffort.None
-                                               && modelSettings is not null && modelSettings.Capabilities.Thinking
+                                               && mSettings.Capabilities.Thinking
             ? chatSettings.ReasoningEffort
             : null;
 
@@ -114,7 +114,8 @@ public class ChatExecutionContextBuilder(
             ResultStorageId = resultStorage.Id,
             ChatSettings = chatSettings,
             Tools = tools,
-            Error = error
+            Error = error,
+            ModelSettings = mSettings
         };
 
         return context;
@@ -137,6 +138,7 @@ public class ChatExecutionContext : IAsyncDisposable
     public Guid ChatId { get; set; }
     public ChatSession? Chat { get; set; }
     public string? Error { get; init; }
+    public required ModelSettings ModelSettings { get; init; }
 
     public async ValueTask DisposeAsync()
     {
