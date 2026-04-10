@@ -28,11 +28,9 @@ namespace ASC.People.Tests.PeopleController;
 
 [Collection("Test Collection")]
 public class InvitationLimitTest(
-    PeopleFactory peopleFactory,
-    WepApiFactory apiFactory)
-    : BaseTest(peopleFactory, apiFactory)
+    AspireAppFixture fixture)
+    : BaseTest(fixture)
 {
-    readonly WepApiFactory _apiFactory = apiFactory;
 
     [Fact]
     public async Task InviteUsers_ShouldChangeInvitationLimit()
@@ -40,7 +38,7 @@ public class InvitationLimitTest(
         await _apiClient.Authenticate(Initializer.Owner);
         await _peopleClient.Authenticate(Initializer.Owner);
 
-        var settings = (await _apiFactory.CommonSettingsApi.GetPortalSettingsAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var settings = (await _commonSettingsApi.GetPortalSettingsAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         settings.Should().NotBeNull();
 
@@ -62,7 +60,7 @@ public class InvitationLimitTest(
         wrapper.Should().NotBeNull();
         wrapper.Count.Should().Be(1);
 
-        settings = (await _apiFactory.CommonSettingsApi.GetPortalSettingsAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
+        settings = (await _commonSettingsApi.GetPortalSettingsAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         settings.Should().NotBeNull();
         settings.InvitationLimit.Should().Be(limit == int.MaxValue ? int.MaxValue : limit - 1);

@@ -55,10 +55,14 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
     private Dictionary<string, string>? _parameters;
 
 
-    public ConnectionStringManager AddMySql(bool withDbGate = false)
+    public ConnectionStringManager AddMySql(bool withDbGate = false, bool withDataVolume = true)
     {
-        var mysqlResourceBuilder = builder.AddMySql("mysql")
-            .WithDataVolume("docspace-mysql-data");
+        var mysqlResourceBuilder = builder.AddMySql("mysql");
+
+        if (withDataVolume)
+        {
+            mysqlResourceBuilder = mysqlResourceBuilder.WithDataVolume("docspace-mysql-data");
+        }
 
         if (withDbGate)
         {
@@ -84,6 +88,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         var isStandalone = string.Compare(builder.Configuration["APP_HOSTING_STANDALONE"], "true", StringComparison.OrdinalIgnoreCase) == 0;
 
         MigrateResource.WithEnvironment("standalone", isStandalone ? "true" : "");
+
 
         return this;
     }
@@ -199,21 +204,34 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         return this;
     }
 
-    public ConnectionStringManager AddOpensearch()
+    public ConnectionStringManager AddOpensearch(bool withDashboard = true, bool fixedPort = true)
     {
         OpensearchResource = builder
             .AddContainer(Constants.OpensearchContainer, "opensearchproject/opensearch", "2")
-            .WithHttpEndpoint(port: Constants.OpensearchPort, targetPort: Constants.OpensearchPort)
             .WithEnvironment("DISABLE_INSTALL_DEMO_CONFIG", "true")
             .WithEnvironment("plugins.security.disabled", "true")
             .WithEnvironment("discovery.type", "single-node")
             .WithEntrypoint("/bin/bash")
             .WithArgs("-c", "opensearch-plugin install ingest-attachment --batch && /usr/share/opensearch/opensearch-docker-entrypoint.sh");
 
-        builder.AddContainer("opensearch-dashboard", "opensearchproject/opensearch-dashboards", "2")
-            .WithHttpEndpoint(targetPort: 5601)
-            .WithEnvironment("OPENSEARCH_HOSTS", $"http://{Constants.OpensearchContainer}:{Constants.OpensearchPort.ToString()}")
-            .WithEnvironment("DISABLE_SECURITY_DASHBOARDS_PLUGIN", "true");
+        if (fixedPort)
+        {
+            OpensearchResource = OpensearchResource
+                .WithHttpEndpoint(port: Constants.OpensearchPort, targetPort: Constants.OpensearchPort, name: "http");
+        }
+        else
+        {
+            OpensearchResource = OpensearchResource
+                .WithHttpEndpoint(targetPort: Constants.OpensearchPort, name: "http");
+        }
+
+        if (withDashboard)
+        {
+            builder.AddContainer("opensearch-dashboard", "opensearchproject/opensearch-dashboards", "2")
+                .WithHttpEndpoint(targetPort: 5601)
+                .WithEnvironment("OPENSEARCH_HOSTS", $"http://{Constants.OpensearchContainer}:{Constants.OpensearchPort.ToString()}")
+                .WithEnvironment("DISABLE_SECURITY_DASHBOARDS_PLUGIN", "true");
+        }
 
         return this;
     }
