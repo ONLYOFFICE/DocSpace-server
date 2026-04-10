@@ -58,14 +58,19 @@ public class AggregateFormDataTool(
         async Task<ToolResponse<string>> Function(
             [Description("Exactly one aggregate function keyword. Allowed values: COUNT, COUNT_DISTINCT, SUM, AVG, MIN, MAX. COUNT — counts rows (or non-null values when valueColumn is set). COUNT_DISTINCT — counts unique non-null values (requires valueColumn). SUM, AVG, MIN, MAX — numeric aggregates (require either valueColumn for Integer columns, or dateDiffValueExpr for DateTime columns). Do NOT pass multiple values or comma-separated keywords — exactly one keyword per call.")] string aggregateFunction,
             [Description("Column to apply the aggregate function to. Omit only for plain COUNT(*) or when using dateDiffValueExpr. Required for COUNT_DISTINCT, SUM, AVG, MIN, MAX on Integer columns.")] string? valueColumn = null,
-            [Description("Column to group results by. Must be a plain column name from the schema — e.g. \"col_status\". Do NOT put SQL expressions like DATE_FORMAT() here. For date grouping by YEAR/MONTH/WEEK use groupByDatePart instead.")] string? groupByColumn = null,
+            [Description("Column to group results by. Must be a plain column name from the schema — e.g. \"col_status\". Do NOT put SQL expressions like DATE_FORMAT() here. For date grouping by YEAR/MONTH/WEEK/DAYOFYEAR/QUARTER/DAYOFWEEK use groupByDatePart instead.")] string? groupByColumn = null,
             [Description("Filter conditions applied with AND. Each filter is a string: \"column_name OPERATOR value\" — e.g. \"col_status = approved\", \"col_age > 25\", \"col_status IN approved,pending\". Column-to-column comparison is also supported: \"col_start < col_end\". Operators: =, !=, <, >, <=, >=, LIKE, NOT LIKE, IS NULL, IS NOT NULL, IN, NOT IN. For IN/NOT IN the value is a comma-separated list: \"col_status IN approved,pending,rejected\".")] IEnumerable<string>? filters = null,
-            [Description("Date part to extract from groupByColumn for grouping. Allowed values: YEAR, MONTH, WEEK, DAYOFYEAR, QUARTER. Example: groupByColumn='col_start_date', groupByDatePart='MONTH' groups by calendar month.")] string? groupByDatePart = null,
-            [Description("Second column to include in GROUP BY for two-dimensional breakdowns (e.g. group by category AND date month). Combine with secondGroupByDatePart when the column is a date.")] string? secondGroupByColumn = null,
-            [Description("Date part to extract from secondGroupByColumn. Same allowed values as groupByDatePart: YEAR, MONTH, WEEK, DAYOFYEAR, QUARTER.")] string? secondGroupByDatePart = null,
-            [Description("Date-part filter conditions applied with AND. Each filter is a string: \"column_name DATE_PART OPERATOR value[,v2,...]\". DATE_PART: YEAR, MONTH, WEEK, DAYOFYEAR, QUARTER. Operators: =, !=, <, >, <=, >=, IN. Examples: \"col_start_date MONTH IN 6,7,8\" (summer months), \"col_start_date YEAR >= 2022\".")] IEnumerable<string>? datePartFilters = null,
+            [Description("Date part to extract from groupByColumn for grouping. Allowed values: YEAR, MONTH, WEEK, DAYOFYEAR, QUARTER, DAYOFWEEK. DAYOFWEEK: 1=Sunday, 2=Monday, 3=Tuesday, 4=Wednesday, 5=Thursday, 6=Friday, 7=Saturday. Example: groupByColumn='col_start_date', groupByDatePart='MONTH' groups by calendar month.")] string? groupByDatePart = null,
+            [Description("Second column to include in GROUP BY for two-dimensional breakdowns (e.g. group by category AND date year). Combine with secondGroupByDatePart when the column is a date.")] string? secondGroupByColumn = null,
+            [Description("Date part to extract from secondGroupByColumn. Same allowed values as groupByDatePart: YEAR, MONTH, WEEK, DAYOFYEAR, QUARTER, DAYOFWEEK.")] string? secondGroupByDatePart = null,
+            [Description("Third column to include in GROUP BY for three-dimensional breakdowns (e.g. group by entity AND date year AND date month). Combine with thirdGroupByDatePart when the column is a date.")] string? thirdGroupByColumn = null,
+            [Description("Date part to extract from thirdGroupByColumn. Same allowed values as groupByDatePart: YEAR, MONTH, WEEK, DAYOFYEAR, QUARTER, DAYOFWEEK.")] string? thirdGroupByDatePart = null,
+            [Description("Date-part filter conditions applied with AND. Each filter is a string: \"column_name DATE_PART OPERATOR value[,v2,...]\". DATE_PART: YEAR, MONTH, WEEK, DAYOFYEAR, QUARTER, DAYOFWEEK. Operators: =, !=, <, >, <=, >=, IN. Examples: \"col_start_date MONTH IN 6,7,8\" (summer months), \"col_start_date YEAR >= 2022\", \"col_start_date DAYOFWEEK = 2\" (Mondays).")] IEnumerable<string>? datePartFilters = null,
             [Description("Filter on the difference between two date/datetime columns. Format: \"col_a col_b OPERATOR value [UNIT]\" — UNIT is optional and defaults to DAYS. Allowed units: DAYS, HOURS, MINUTES. Examples: \"col_start col_submitted < 7\" (fewer than 7 days apart), \"col_start col_submitted < 48 HOURS\" (fewer than 48 hours apart).")] string? dateDiffFilter = null,
-            [Description("Use the difference between two DateTime columns as the value for SUM/AVG/MIN/MAX. Format: \"col_a col_b [UNIT]\" — UNIT is optional and defaults to DAYS. Allowed units: DAYS, HOURS, MINUTES. Example: \"col_created col_submitted HOURS\" computes AVG(hours elapsed between creation and submission). Use this instead of valueColumn when aggregating over a time difference.")] string? dateDiffValueExpr = null)
+            [Description("Use the difference between two DateTime columns as the value for SUM/AVG/MIN/MAX. Format: \"col_a col_b [UNIT]\" — UNIT is optional and defaults to DAYS. Allowed units: DAYS, HOURS, MINUTES. Example: \"col_created col_submitted HOURS\" computes AVG(hours elapsed between creation and submission). Use this instead of valueColumn when aggregating over a time difference.")] string? dateDiffValueExpr = null,
+            [Description("Post-aggregation filter on the aggregate result (HAVING clause). Format: 'OPERATOR value' — e.g. '> 5' keeps only groups where the count/sum exceeds 5, '= 0' keeps only groups with zero. Only applies when groupByColumn is set. Operators: =, !=, <, >, <=, >=. Use this instead of fetching all groups and filtering manually.")] string? having = null,
+            [Description("Exclude from results any groupByColumn values that appear in rows matching these filter conditions (generates NOT IN subquery). Use to answer 'which entities had NO records matching X?' — e.g. 'which employees had no records in 2025?'. Format: same as filters — \"column OPERATOR value\". Combine with excludeDatePartFilters for date-based exclusion.")] IEnumerable<string>? excludeFilters = null,
+            [Description("Exclude from results any groupByColumn values that appear in rows matching these date-part conditions (generates NOT IN subquery). Format: same as datePartFilters — \"column DATE_PART OPERATOR value\". Example: excludeDatePartFilters=[\"col_date YEAR = 2025\"] excludes entities that have ANY record in 2025. Combine with excludeFilters for additional conditions.")] IEnumerable<string>? excludeDatePartFilters = null)
         {
             try
             {
@@ -93,7 +98,7 @@ public class AggregateFormDataTool(
                         return new ToolResponse<string>
                         {
                             Error = $"groupByColumn must be a plain column name, not a SQL expression (got: \"{groupByColumn}\"). " +
-                                    "For date grouping use groupByDatePart='YEAR'/'MONTH'/'WEEK'/'QUARTER'/'DAYOFYEAR' together with the column name."
+                                    "For date grouping use groupByDatePart='YEAR'/'MONTH'/'WEEK'/'DAYOFYEAR'/'QUARTER'/'DAYOFWEEK' together with the column name."
                         };
                     }
                 }
@@ -102,7 +107,7 @@ public class AggregateFormDataTool(
                     return new ToolResponse<string>
                     {
                         Error = $"groupByColumn must be a plain column name, not a SQL expression (got: \"{groupByColumn}\"). " +
-                                "For date grouping use groupByDatePart='YEAR'/'MONTH'/'WEEK'/'QUARTER'/'DAYOFYEAR' together with the column name."
+                                "For date grouping use groupByDatePart='YEAR'/'MONTH'/'WEEK'/'DAYOFYEAR'/'QUARTER'/'DAYOFWEEK' together with the column name."
                     };
                 }
 
@@ -114,10 +119,16 @@ public class AggregateFormDataTool(
                 var parsedDatePartFilters = allDatePartFilters.Select(DatePartFilter.Parse);
                 var parsedDateDiffFilter = dateDiffFilter != null ? DateDiffFilter.Parse(dateDiffFilter) : null;
                 var parsedDateDiffAggregate = dateDiffValueExpr != null ? DateDiffAggregate.Parse(dateDiffValueExpr) : null;
+                var (normalExcludeFilters, autoExcludeDatePartFilters, _) = FormDataToolHelpers.ExtractDatePartFilters(excludeFilters);
+                var allExcludeDatePartFilters = (excludeDatePartFilters ?? []).Concat(autoExcludeDatePartFilters);
+                var parsedExcludeFilters = normalExcludeFilters.Select(QueryFilter.Parse);
+                var parsedExcludeDatePartFilters = allExcludeDatePartFilters.Select(DatePartFilter.Parse);
                 var result = await externalDatabaseClient.AggregateAsync(
                     tableName, allowedColumns, aggregateFunction, valueColumn, groupByColumn, parsedFilters,
                     groupByDatePart, secondGroupByColumn, secondGroupByDatePart,
-                    parsedDatePartFilters, parsedDateDiffFilter, parsedDateDiffAggregate);
+                    parsedDatePartFilters, parsedDateDiffFilter, parsedDateDiffAggregate,
+                    havingFilter: having, thirdGroupByColumn: thirdGroupByColumn, thirdGroupByDatePart: thirdGroupByDatePart,
+                    excludeFilters: parsedExcludeFilters, excludeDatePartFilters: parsedExcludeDatePartFilters);
                 return new ToolResponse<string> { Data = result };
             }
             catch (Exception e)
@@ -143,12 +154,13 @@ public class AggregateFormDataTool(
         sb.Append("monthly breakdown (groupByColumn='col_date', groupByDatePart='MONTH', aggregateFunction='COUNT'), ");
         sb.Append("peak week (groupByColumn='col_date', groupByDatePart='WEEK', aggregateFunction='COUNT'), ");
         sb.Append("trend by year for summer only (groupByColumn='col_date', groupByDatePart='YEAR', datePartFilters=['col_date MONTH IN 6,7,8'], aggregateFunction='COUNT'), ");
-        sb.Append("per-person per-month breakdown (groupByColumn='col_employee', secondGroupByColumn='col_date', secondGroupByDatePart='MONTH', aggregateFunction='COUNT'), ");
+        sb.Append("per-entity per-year-month breakdown — ALWAYS include YEAR alongside MONTH to avoid merging the same month across years: (groupByColumn='col_entity', secondGroupByColumn='col_date', secondGroupByDatePart='YEAR', thirdGroupByColumn='col_date', thirdGroupByDatePart='MONTH', aggregateFunction='COUNT'), ");
         sb.Append("late submissions total (dateDiffFilter='col_start col_submitted < 7', aggregateFunction='COUNT'), ");
         sb.Append("who submitted late — group by person with date-diff filter (groupByColumn='col_employee', dateDiffFilter='col_start col_submitted < 7', aggregateFunction='COUNT'), ");
         sb.Append("average processing time in hours (dateDiffValueExpr='col_created col_submitted HOURS', aggregateFunction='AVG'), ");
         sb.Append("average processing time per employee (groupByColumn='col_employee', dateDiffValueExpr='col_created col_submitted HOURS', aggregateFunction='AVG'). ");
         sb.Append("IMPORTANT: dateDiffFilter is a WHERE condition — it can be freely combined with groupByColumn, secondGroupByColumn, filters, and datePartFilters in a single call. ");
+        sb.Append("Set-difference ('entities NOT in subset'): use excludeDatePartFilters/excludeFilters to exclude groupByColumn values that appear in rows matching given conditions — e.g. excludeDatePartFilters=['col_date YEAR = 2025'] returns only entities with NO records in 2025. This avoids manual list comparison. Example: groupByColumn='col_entity', excludeDatePartFilters=['col_date YEAR = 2025'], aggregateFunction='COUNT'. ");
         sb.Append("Available columns: ");
         sb.Append(string.Join(", ", columns.Select(c =>
         {
