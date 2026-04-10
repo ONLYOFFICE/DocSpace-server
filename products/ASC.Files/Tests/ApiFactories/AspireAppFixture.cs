@@ -24,6 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Aspire.Hosting.ApplicationModel;
+
+using Microsoft.Extensions.DependencyInjection;
+
 using GroupApi = DocSpace.API.SDK.Api.Group.GroupApi;
 using SettingsApi = DocSpace.API.SDK.Api.Files.SettingsApi;
 using QuotaApi = DocSpace.API.SDK.Api.Files.QuotaApi;
@@ -33,7 +37,6 @@ namespace ASC.Files.Tests.ApiFactories;
 public class AspireAppFixture : IAsyncLifetime
 {
     private DistributedApplication _app = null!;
-    private ConnectionMultiplexer _redis = null!;
     private DbConnection _dbconnection = null!;
     private Respawner _respawner = null!;
     private Provider _provider;
@@ -99,16 +102,12 @@ public class AspireAppFixture : IAsyncLifetime
 
         // Get connection strings from Aspire resources
         var dbConnectionString = await _app.GetConnectionStringAsync("docspace");
-        var redisConnectionString = await _app.GetConnectionStringAsync("cache");
 
         // Create DB connection for Respawn
         _dbconnection = _provider == Provider.MySql
             ? new MySqlConnection(dbConnectionString)
             : new NpgsqlConnection(dbConnectionString);
         await _dbconnection.OpenAsync();
-
-        // Connect to Redis for cache flush
-        _redis = await ConnectionMultiplexer.ConnectAsync($"{redisConnectionString},allowAdmin=true");
 
         // Create HTTP clients with cookies disabled to avoid stale auth cookies
         FilesHttpClient = CreateHttpClientNoCookies(onlyofficeFiles);
@@ -163,7 +162,7 @@ public class AspireAppFixture : IAsyncLifetime
         };
 
         await ExecuteScriptAsync(script);
-        await FlushRedisAsync();
+        await ClearCacheAsync();
     }
 
     internal async Task BackupTables()
@@ -195,10 +194,10 @@ public class AspireAppFixture : IAsyncLifetime
         await cmd.ExecuteNonQueryAsync();
     }
 
-    private async Task FlushRedisAsync()
+    private async Task ClearCacheAsync()
     {
-        var server = _redis.GetServers()[0];
-        await server.FlushAllDatabasesAsync();
+        var commandService = _app.Services.GetRequiredService<ResourceCommandService>();
+        await commandService.ExecuteCommandAsync("cache", "clear-cache", CancellationToken.None);
     }
 
     private HttpClient CreateHttpClientNoCookies(string resourceName)
@@ -215,7 +214,6 @@ public class AspireAppFixture : IAsyncLifetime
 
     public async ValueTask DisposeAsync()
     {
-        await _redis.DisposeAsync();
         await _dbconnection.DisposeAsync();
         await _app.StopAsync();
         await _app.DisposeAsync();

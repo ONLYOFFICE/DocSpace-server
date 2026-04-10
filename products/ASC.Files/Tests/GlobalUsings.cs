@@ -67,8 +67,6 @@ global using Npgsql;
 global using Respawn;
 global using Respawn.Graph;
 
-global using StackExchange.Redis;
-
 global using Xunit;
 
 global using ASC.Core.Common.EF;
