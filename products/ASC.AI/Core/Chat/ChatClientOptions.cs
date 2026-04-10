@@ -32,6 +32,7 @@ public class ChatClientOptions
     public required string Key { get; init; }
     public ProviderType Provider { get; init; }
     public int ProviderId { get; init; }
+    public bool HasModelSettings { get; init; }
     public required string ModelId { get; init; }
     public ChatReasoningEffort? ReasoningEffort { get; set; }
     public Dictionary<string, string>? Metadata { get; set; }

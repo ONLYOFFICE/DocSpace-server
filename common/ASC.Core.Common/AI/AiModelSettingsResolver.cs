@@ -47,7 +47,7 @@ public record ResolvedModelSettings : ModelSettings
 [Singleton]
 public class AiModelSettingsResolver(AiConfiguration aiConfig)
 {
-    public ResolvedModelSettings? Resolve(ProviderType type, string modelId, AiModelSettings? dbSettings)
+    public ResolvedModelSettings? Resolve(ProviderType type, string modelId, AiModelSettings? dbSettings, bool hasModelSettings)
     {
         var configModel = aiConfig.GetModel(type, modelId);
         if (configModel != null)
@@ -58,8 +58,9 @@ public class AiModelSettingsResolver(AiConfiguration aiConfig)
 
         if (dbSettings is null)
         {
-            // For OpenAiCompatible, models are enabled by default. (backward compatibility)
-            if (type != ProviderType.OpenAiCompatible)
+            // For legacy OpenAiCompatible providers (without model settings),
+            // models are enabled by default. (backward compatibility)
+            if (type != ProviderType.OpenAiCompatible || hasModelSettings)
             {
                 return null;
             }

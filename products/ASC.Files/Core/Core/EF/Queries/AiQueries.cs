@@ -26,6 +26,14 @@
 
 namespace ASC.Files.Core.EF;
 
+public class AiProviderDetails
+{
+    public int ProviderId { get; init; }
+    public ProviderType ProviderType { get; init; }
+    public bool HasModelSettings { get; init; }
+    public DbAiModelSettings ModelSettings { get; init; }
+}
+
 public partial class FilesDbContext
 {
     [PreCompileQuery([PreCompileQuery.DefaultInt])]
@@ -34,13 +42,11 @@ public partial class FilesDbContext
         return AiQueries.AiProviderExistsAsync(this, tenantId);
     }
 
-    public IAsyncEnumerable<DbAiModelSettings> GetAiModelSettingsByProviderIdsAsync(
+    public IAsyncEnumerable<AiProviderDetails> GetAiProvidersWithModelSettingsAsync(
         int tenantId,
         HashSet<int> providerIds)
     {
-        return AiModelSettings
-            .Where(x => x.TenantId == tenantId && providerIds.Contains(x.ProviderId))
-            .AsAsyncEnumerable();
+        return AiQueries.AiProvidersWithModelSettingsAsync(this, tenantId, providerIds);
     }
 }
 
@@ -49,4 +55,25 @@ static file class AiQueries
     public static readonly Func<FilesDbContext, int, Task<bool>> AiProviderExistsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx, int tenantId) =>
             ctx.AiProviders.Any(x => x.TenantId == tenantId));
+
+    public static readonly Func<FilesDbContext, int, HashSet<int>, IAsyncEnumerable<AiProviderDetails>>
+        AiProvidersWithModelSettingsAsync =
+            Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+                (FilesDbContext ctx, int tenantId, HashSet<int> providerIds) =>
+                    ctx.AiProviders
+                        .Where(p => p.TenantId == tenantId && providerIds.Contains(p.Id))
+                        .GroupJoin(
+                            ctx.AiModelSettings,
+                            p => new { p.TenantId, p.Id },
+                            ms => new { ms.TenantId, Id = ms.ProviderId },
+                            (p, settings) => new { Provider = p, Settings = settings })
+                        .SelectMany(
+                            x => x.Settings.DefaultIfEmpty(),
+                            (x, s) => new AiProviderDetails
+                            {
+                                ProviderId = x.Provider.Id,
+                                ProviderType = x.Provider.Type,
+                                HasModelSettings = x.Provider.HasModelSettings,
+                                ModelSettings = s
+                            }));
 }

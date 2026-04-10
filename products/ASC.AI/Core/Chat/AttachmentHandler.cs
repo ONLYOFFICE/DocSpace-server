@@ -67,7 +67,8 @@ public class AttachmentHandler(
         var modelSettings = await aiProviderService.GetEffectiveModelSettingsAsync(
             clientOptions.Provider,
             clientOptions.ProviderId,
-            clientOptions.ModelId);
+            clientOptions.ModelId,
+            clientOptions.HasModelSettings);
 
         ArgumentNullException.ThrowIfNull(modelSettings);
 

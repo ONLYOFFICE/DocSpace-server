@@ -87,7 +87,7 @@ public class ChatExecutionContextBuilder(
         var user = await userTask;
 
         var modelId = agent.SettingsChatParameters.ModelId;
-        var modelSettings = await providerService.GetEffectiveModelSettingsAsync(provider.Type, provider.Id, modelId);
+        var modelSettings = await providerService.GetEffectiveModelSettingsAsync(provider.Type, provider.Id, modelId, provider.HasModelSettings);
 
         ChatReasoningEffort? reasoningEffort = chatSettings.ReasoningEffort is not ChatReasoningEffort.None
                                                && modelSettings is not null && modelSettings.Capabilities.Thinking
@@ -103,6 +103,7 @@ public class ChatExecutionContextBuilder(
             {
                 Provider = provider.Type,
                 ProviderId = provider.Id,
+                HasModelSettings = provider.HasModelSettings,
                 Endpoint = provider.Url,
                 Key = provider.Key,
                 ModelId = modelId,

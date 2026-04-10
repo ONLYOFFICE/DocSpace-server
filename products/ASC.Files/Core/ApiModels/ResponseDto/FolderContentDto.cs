@@ -124,9 +124,13 @@ public class FolderContentDtoHelper(
             currentUsersRecords = await fileSecurity.GetUserRecordsAsync().ToListAsync();
         }
 
-        var aiStatus = await accessibility.GetStatusAsync();
-        var modelSettingsMap = await modelSettingsLoader.LoadForEntriesAsync(
-            folderItems.Entries, folderItems.FolderInfo);
+        var aiStatusTask = accessibility.GetStatusAsync();
+        var modelSettingsResultTask = modelSettingsLoader.LoadForEntriesAsync(folderItems.Entries, folderItems.FolderInfo);
+
+        await Task.WhenAll(aiStatusTask, modelSettingsResultTask);
+
+        var aiStatus = await aiStatusTask;
+        var modelSettingsResult = await modelSettingsResultTask;
 
         if (folderItems.ParentRoom is { FolderType: FolderType.VirtualDataRoom, SettingsIndexing: true })
         {
@@ -234,7 +238,7 @@ public class FolderContentDtoHelper(
                     {
                         currentUsersRecords = await fileSecurity.GetUserRecordsAsync().ToListAsync();
                     }
-                    return await folderWrapperHelper.GetAsync(fol1, currentUsersRecords, entriesOrder, contextFolder, aiStatus, modelSettingsMap);
+                    return await folderWrapperHelper.GetAsync(fol1, currentUsersRecords, entriesOrder, contextFolder, aiStatus, modelSettingsResult);
                 case Folder<string> fol2:
                     if (currentUsersRecords == null &&
                         fol2.IsRoom &&
@@ -242,7 +246,7 @@ public class FolderContentDtoHelper(
                     {
                         currentUsersRecords = await fileSecurity.GetUserRecordsAsync().ToListAsync();
                     }
-                    return await folderWrapperHelper.GetAsync(fol2, currentUsersRecords, entriesOrder, contextFolder, aiStatus, modelSettingsMap);
+                    return await folderWrapperHelper.GetAsync(fol2, currentUsersRecords, entriesOrder, contextFolder, aiStatus, modelSettingsResult);
             }
 
             return null;

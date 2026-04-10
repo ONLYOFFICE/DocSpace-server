@@ -75,6 +75,7 @@ public class DbAiProvider : BaseEntity
 
     public DateTime CreatedOn { get; set; }
     public DateTime ModifiedOn { get; set; }
+    public bool HasModelSettings { get; set; }
 
     public DbTenant Tenant { get; set; }
 
@@ -139,6 +140,10 @@ public static class ModelsProviderExtension
             entity.Property(e => e.ModifiedOn)
                 .HasColumnName("modified_on")
                 .HasColumnType("datetime");
+
+            entity.Property(e => e.HasModelSettings)
+                .HasColumnName("has_model_settings")
+                .HasDefaultValueSql("'0'");
 
             entity.HasIndex(e => new { e.TenantId, e.Id })
                 .HasDatabaseName("IX_tenant_id_id");

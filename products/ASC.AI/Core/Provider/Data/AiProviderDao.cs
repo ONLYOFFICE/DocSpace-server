@@ -64,7 +64,8 @@ public class AiProviderDao(
                 Key = await crypto.EncryptAsync(key),
                 Title = title,
                 CreatedOn = now,
-                ModifiedOn = now
+                ModifiedOn = now,
+                HasModelSettings = true
             };
 
             await context.Providers.AddAsync(dbProvider);

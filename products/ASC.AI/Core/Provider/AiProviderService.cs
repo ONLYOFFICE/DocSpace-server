@@ -78,7 +78,7 @@ public class AiProviderService(
 
         var mSettings = ProcessModelSettings(type, modelSettings);
 
-        var firstModel = ApplySettings(type, models, [], mSettings).FirstOrDefault();
+        var firstModel = ApplySettings(type, models, [], hasModelSettings: true, mSettings).FirstOrDefault();
         if (firstModel == null)
         {
             throw new ArgumentException(ErrorMessages.NoModelsAvailable);
@@ -138,7 +138,7 @@ public class AiProviderService(
                 var models = await ExecuteProviderRequestAsync(provider.Type,
                     async () => (await client.ListModelsAsync()).ToList());
 
-                if (!ApplySettings(provider.Type, models, await currentSettings, mSettings).Any())
+                if (!ApplySettings(provider.Type, models, await currentSettings, provider.HasModelSettings, mSettings).Any())
                 {
                     throw new ArgumentException(ErrorMessages.NoModelsAvailable);
                 }
@@ -250,7 +250,7 @@ public class AiProviderService(
         foreach (var m in models)
         {
             dbSettings.TryGetValue(m.Id, out var dbSetting);
-            var resolved = modelSettingsResolver.Resolve(provider.Type, m.Id, dbSetting);
+            var resolved = modelSettingsResolver.Resolve(provider.Type, m.Id, dbSetting, provider.HasModelSettings);
 
             if (resolved is not { IsEnabled: true })
             {
@@ -336,7 +336,7 @@ public class AiProviderService(
             models = [];
         }
 
-        var firstModel = ApplySettings(firstProvider.Type, models, await mSettings).FirstOrDefault();
+        var firstModel = ApplySettings(firstProvider.Type, models, await mSettings, firstProvider.HasModelSettings).FirstOrDefault();
         if (firstModel == null)
         {
             return null;
@@ -362,7 +362,7 @@ public class AiProviderService(
 
         var dbSettings = await providerDao.GetModelSettingsAsync(tenantId, provider.Id, provider.Type);
 
-        return BuildModelSettings(models, provider.Type, dbSettings);
+        return BuildModelSettings(models, provider.Type, dbSettings, provider.HasModelSettings);
     }
 
     public async Task<IEnumerable<ModelSettingsInfo>> GetPreviewModelsAsync(ProviderType type, string? url, string key)
@@ -388,14 +388,14 @@ public class AiProviderService(
         var client = modelClientFactory.Create(type, url, key);
         var models = await ExecuteProviderRequestAsync(type, client.ListModelsAsync);
 
-        return BuildModelSettings(models, type, []);
+        return BuildModelSettings(models, type, [], hasModelSettings: true);
     }
 
-    public async Task<ModelSettings?> GetEffectiveModelSettingsAsync(ProviderType type, int providerId, string modelId)
+    public async Task<ModelSettings?> GetEffectiveModelSettingsAsync(ProviderType type, int providerId, string modelId, bool hasModelSettings)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
         var setting = await providerDao.GetModelSettingAsync(tenantId, providerId, modelId);
-        var resolved = modelSettingsResolver.Resolve(type, modelId, setting);
+        var resolved = modelSettingsResolver.Resolve(type, modelId, setting, hasModelSettings);
 
         return resolved is { IsEnabled: true } ? resolved : null;
     }
@@ -439,6 +439,7 @@ public class AiProviderService(
         ProviderType type,
         IEnumerable<ModelInfo> models,
         Dictionary<string, AiModelSettings> currentSettings,
+        bool hasModelSettings,
         List<AiModelSettings>? newSettings = null)
     {
         if (newSettings is { Count: > 0 })
@@ -452,7 +453,7 @@ public class AiProviderService(
         foreach (var m in models)
         {
             currentSettings.TryGetValue(m.Id, out var setting);
-            var resolved = modelSettingsResolver.Resolve(type, m.Id, setting);
+            var resolved = modelSettingsResolver.Resolve(type, m.Id, setting, hasModelSettings);
             if (resolved is { IsEnabled: true })
             {
                 yield return m;
@@ -484,13 +485,14 @@ public class AiProviderService(
     private IEnumerable<ModelSettingsInfo> BuildModelSettings(
         IEnumerable<ModelInfo> models,
         ProviderType type,
-        Dictionary<string, AiModelSettings> dbSettings)
+        Dictionary<string, AiModelSettings> dbSettings,
+        bool hasModelSettings)
     {
         return models
             .Select(model =>
             {
                 dbSettings.TryGetValue(model.Id, out var dbSetting);
-                var resolved = modelSettingsResolver.Resolve(type, model.Id, dbSetting);
+                var resolved = modelSettingsResolver.Resolve(type, model.Id, dbSetting, hasModelSettings);
 
                 return new ModelSettingsInfo
                 {

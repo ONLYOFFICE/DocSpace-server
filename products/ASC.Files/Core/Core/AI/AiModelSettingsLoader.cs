@@ -26,12 +26,18 @@
 
 namespace ASC.Files.Core.Core.AI;
 
+public class AiModelSettingsResult
+{
+    public Dictionary<(int ProviderId, string ModelId), AiModelSettings> Settings { get; init; }
+    public Dictionary<int, (ProviderType Type, bool HasModelSettings)> Providers { get; init; }
+}
+
 [Scope]
 public class AiModelSettingsLoader(
     TenantManager tenantManager,
     IDbContextFactory<FilesDbContext> dbContextFactory)
 {
-    public async Task<Dictionary<(int ProviderId, string ModelId), AiModelSettings>> LoadForEntriesAsync(
+    public async Task<AiModelSettingsResult> LoadForEntriesAsync(
         IReadOnlyCollection<FileEntry> entries,
         IFolder currentFolder)
     {
@@ -43,22 +49,13 @@ public class AiModelSettingsLoader(
 
             foreach (var entry in entries)
             {
-                if (entry is Folder<int>
-                    {
-                        FolderType: FolderType.AiRoom,
-                        SettingsChatProviderId: > 0,
-                        ChatProviderType: not ProviderType.PortalAi
-                    } folder)
+                if (entry is Folder<int> { FolderType: FolderType.AiRoom, SettingsChatProviderId: > 0 } folder)
                 {
                     providerIds.Add(folder.SettingsChatProviderId);
                 }
             }
         }
-        else if (currentFolder is Folder<int>
-                 {
-                     SettingsChatProviderId: > 0,
-                     ChatProviderType: not ProviderType.PortalAi
-                 } current)
+        else if (currentFolder is Folder<int> { SettingsChatProviderId: > 0 } current)
         {
             providerIds = [current.SettingsChatProviderId];
         }
@@ -72,10 +69,23 @@ public class AiModelSettingsLoader(
 
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
 
-        return await dbContext
-            .GetAiModelSettingsByProviderIdsAsync(tenantId, providerIds)
-            .ToDictionaryAsync(
-                s => (s.ProviderId, s.ModelId),
-                s => s.Map());
+        var providers = new Dictionary<int, (ProviderType Type, bool HasModelSettings)>();
+        var settings = new Dictionary<(int ProviderId, string ModelId), AiModelSettings>();
+
+        await foreach (var details in dbContext.GetAiProvidersWithModelSettingsAsync(tenantId, providerIds))
+        {
+            providers.TryAdd(details.ProviderId, (details.ProviderType, details.HasModelSettings));
+
+            if (details.ModelSettings is { } ms)
+            {
+                settings[(details.ProviderId, ms.ModelId)] = ms.Map();
+            }
+        }
+
+        return new AiModelSettingsResult
+        {
+            Settings = settings,
+            Providers = providers
+        };
     }
 }
