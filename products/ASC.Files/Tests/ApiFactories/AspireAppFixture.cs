@@ -87,9 +87,15 @@ public class AspireAppFixture : IAsyncLifetime
 
         // Wait for services to be healthy
         var resourceNotifications = _app.ResourceNotifications;
-        await resourceNotifications.WaitForResourceHealthyAsync("onlyoffice-files");
-        await resourceNotifications.WaitForResourceHealthyAsync("onlyoffice-people");
-        await resourceNotifications.WaitForResourceHealthyAsync("onlyoffice-web-api");
+        const string onlyofficeFiles = "onlyoffice-files";
+        const string onlyofficePeople = "onlyoffice-people";
+        const string onlyofficeWebApi = "onlyoffice-web-api";
+
+        var waitForFiles = resourceNotifications.WaitForResourceHealthyAsync(onlyofficeFiles);
+        var waitForPeople = resourceNotifications.WaitForResourceHealthyAsync(onlyofficePeople);
+        var waitForApi = resourceNotifications.WaitForResourceHealthyAsync(onlyofficeWebApi);
+
+        await Task.WhenAll(waitForFiles, waitForPeople, waitForApi);
 
         // Get connection strings from Aspire resources
         var dbConnectionString = await _app.GetConnectionStringAsync("docspace");
@@ -105,9 +111,9 @@ public class AspireAppFixture : IAsyncLifetime
         _redis = await ConnectionMultiplexer.ConnectAsync($"{redisConnectionString},allowAdmin=true");
 
         // Create HTTP clients with cookies disabled to avoid stale auth cookies
-        FilesHttpClient = CreateHttpClientNoCookies("onlyoffice-files");
-        PeopleHttpClient = CreateHttpClientNoCookies("onlyoffice-people");
-        WebApiHttpClient = CreateHttpClientNoCookies("onlyoffice-web-api");
+        FilesHttpClient = CreateHttpClientNoCookies(onlyofficeFiles);
+        PeopleHttpClient = CreateHttpClientNoCookies(onlyofficePeople);
+        WebApiHttpClient = CreateHttpClientNoCookies(onlyofficeWebApi);
 
         // Initialize Files API clients
         var filesConfig = new Configuration { BasePath = FilesHttpClient.BaseAddress!.ToString().TrimEnd('/') };
@@ -209,20 +215,9 @@ public class AspireAppFixture : IAsyncLifetime
 
     public async ValueTask DisposeAsync()
     {
-        if (_redis is not null)
-        {
-            await _redis.DisposeAsync();
-        }
-
-        if (_dbconnection is not null)
-        {
-            await _dbconnection.DisposeAsync();
-        }
-
-        if (_app is not null)
-        {
-            await _app.StopAsync();
-            await _app.DisposeAsync();
-        }
+        await _redis.DisposeAsync();
+        await _dbconnection.DisposeAsync();
+        await _app.StopAsync();
+        await _app.DisposeAsync();
     }
 }
