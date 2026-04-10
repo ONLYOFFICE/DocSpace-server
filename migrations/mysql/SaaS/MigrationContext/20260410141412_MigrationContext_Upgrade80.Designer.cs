@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     [DbContext(typeof(MigrationContext))]
-    [Migration("20260406120746_MigrationContext_Upgrade80")]
+    [Migration("20260410141412_MigrationContext_Upgrade80")]
     partial class MigrationContext_Upgrade80
     {
         /// <inheritdoc />
@@ -1614,6 +1614,12 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Property<DateTime>("CreatedOn")
                         .HasColumnType("datetime")
                         .HasColumnName("created_on");
+
+                    b.Property<bool>("HasModelSettings")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("has_model_settings")
+                        .HasDefaultValueSql("'0'");
 
                     b.Property<string>("Key")
                         .IsRequired()

@@ -10,6 +10,13 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AddColumn<bool>(
+                name: "has_model_settings",
+                table: "ai_providers",
+                type: "tinyint(1)",
+                nullable: false,
+                defaultValueSql: "'0'");
+
             migrationBuilder.CreateTable(
                 name: "ai_model_settings",
                 columns: table => new
@@ -58,6 +65,10 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
         {
             migrationBuilder.DropTable(
                 name: "ai_model_settings");
+
+            migrationBuilder.DropColumn(
+                name: "has_model_settings",
+                table: "ai_providers");
         }
     }
 }
