@@ -32,6 +32,7 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 /// <example>
 /// {
 ///   "enableLdapAuthentication": true,
+///   "disableEmailVerification": true,
 ///   "startTls": true,
 ///   "ssl": true,
 ///   "sendWelcomeEmail": true,
