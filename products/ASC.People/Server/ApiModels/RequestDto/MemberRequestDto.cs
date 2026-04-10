@@ -430,18 +430,6 @@ public class Culture
 }
 
 /// <summary>
-/// The user sex.
-/// </summary>
-public enum SexEnum
-{
-    [Description("Female")]
-    Female = 0,
-
-    [Description("Male")]
-    Male = 1
-}
-
-/// <summary>
 /// The request parameters for updating a photo.
 /// </summary>
 public class UpdatePhotoMemberRequest
