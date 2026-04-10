@@ -55,7 +55,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
     private Dictionary<string, string>? _parameters;
 
 
-    public ConnectionStringManager AddMySql(bool withDbGate = false, bool withMigration = true, bool withDataVolume = true)
+    public ConnectionStringManager AddMySql(bool withDbGate = false, bool withDataVolume = true)
     {
         var mysqlResourceBuilder = builder.AddMySql("mysql");
 
@@ -80,18 +80,15 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             }
         });
 
-        if (withMigration)
-        {
-
-            MigrateResource = builder
+        MigrateResource = builder
             .AddProject<ASC_Migration_Runner>("migrate")
-                .WithReference(MySqlDatabaseResource)
-                .WaitFor(MySqlDatabaseResource);
+            .WithReference(MySqlDatabaseResource)
+            .WaitFor(MySqlDatabaseResource);
 
-            var isStandalone = string.Compare(builder.Configuration["APP_HOSTING_STANDALONE"], "true", StringComparison.OrdinalIgnoreCase) == 0;
+        var isStandalone = string.Compare(builder.Configuration["APP_HOSTING_STANDALONE"], "true", StringComparison.OrdinalIgnoreCase) == 0;
 
         MigrateResource.WithEnvironment("standalone", isStandalone ? "true" : "");
-        }
+
 
         return this;
     }
