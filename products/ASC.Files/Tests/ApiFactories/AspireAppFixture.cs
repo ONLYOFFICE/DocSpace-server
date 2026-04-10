@@ -202,9 +202,13 @@ public class AspireAppFixture : IAsyncLifetime
 
     private HttpClient CreateHttpClientNoCookies(string resourceName)
     {
-        using var baseClient = _app.CreateHttpClient(resourceName);
+        Uri? baseAddress;
+        using (var baseClient = _app.CreateHttpClient(resourceName))
+        {
+            baseAddress = baseClient.BaseAddress;
+        }
         var handler = new HttpClientHandler { UseCookies = false };
-        return new HttpClient(handler) { BaseAddress = baseClient.BaseAddress };
+        return new HttpClient(handler) { BaseAddress = baseAddress };
     }
 
     private static string MakeCopyTableName(string tableName)
@@ -214,8 +218,8 @@ public class AspireAppFixture : IAsyncLifetime
 
     public async ValueTask DisposeAsync()
     {
-        await _dbconnection.DisposeAsync();
         await _app.StopAsync();
+        await _dbconnection.DisposeAsync();
         await _app.DisposeAsync();
     }
 }

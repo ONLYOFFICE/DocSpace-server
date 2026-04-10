@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2026
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -35,7 +35,7 @@ public static class Initializer
     public static readonly User Owner = new("test@example.com", "11111111");
 
     private static bool _initialized;
-    private static DocSpace.API.SDK.Model.PasswordHasher _passwordHasherSettings = null!;
+    private static PasswordHasher _passwordHasherSettings = null!;
     private static AspireAppFixture _fixture = null!;
 
     internal static readonly Faker<MemberRequestDto> FakerMember = new Faker<MemberRequestDto>()
@@ -44,12 +44,20 @@ public static class Initializer
         .RuleFor(x => x.Email, f => f.Person.Email)
         .RuleFor(x => x.Password, f => f.Internet.Password(8, 10));
 
+    private static readonly SemaphoreSlim _initLock = new(1, 1);
+
     public static async Task InitializeAsync(AspireAppFixture fixture)
     {
         _fixture = fixture;
 
-        if (!_initialized)
+        await _initLock.WaitAsync();
+        try
         {
+            if (_initialized)
+            {
+                return;
+            }
+
             var settings = (await fixture.CommonSettingsApi.GetPortalSettingsAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
 
             if (!string.IsNullOrEmpty(settings.WizardToken))
@@ -62,14 +70,12 @@ public static class Initializer
 
                 fixture.WebApiHttpClient.DefaultRequestHeaders.Remove("confirm");
             }
-        }
 
-        if (!_initialized)
-        {
             await fixture.BackupTables();
-        }
 
-        _initialized = true;
+            _initialized = true;
+        }
+        finally { _initLock.Release(); }
     }
 
     internal static async Task<User> InviteContact(EmployeeType employeeType, User? user = null)
