@@ -35,7 +35,6 @@ global using System.Text;
 global using System.Text.Json;
 global using System.Web;
 
-global using ASC.Files.Core.ApiModels.ResponseDto;
 global using ASC.Files.Tests.Data;
 
 global using Aspire.Hosting;
@@ -44,7 +43,6 @@ global using Aspire.Hosting.Testing;
 global using Bogus;
 global using Bogus.DataSets;
 
-global using DocSpace.API.SDK.Api;
 global using DocSpace.API.SDK.Api.Authentication;
 global using DocSpace.API.SDK.Api.Files;
 global using DocSpace.API.SDK.Api.People;
@@ -59,8 +57,6 @@ global using FluentAssertions;
 global using Microsoft.Extensions.Configuration;
 
 global using MySql.Data.MySqlClient;
-
-global using Newtonsoft.Json.Linq;
 
 global using Npgsql;
 
@@ -81,7 +77,6 @@ global using ExternalShareRequestParam = DocSpace.API.SDK.Model.ExternalShareReq
 global using FileLinkRequest = DocSpace.API.SDK.Model.FileLinkRequest;
 global using FileOperationDto = DocSpace.API.SDK.Model.FileOperationDto;
 global using FileShare = DocSpace.API.SDK.Model.FileShare;
-global using FileShareDto = DocSpace.API.SDK.Model.FileShareDto;
 global using FolderType = DocSpace.API.SDK.Model.FolderType;
 global using RoomType = DocSpace.API.SDK.Model.RoomType;
 global using User = ASC.Files.Tests.Data.User;
