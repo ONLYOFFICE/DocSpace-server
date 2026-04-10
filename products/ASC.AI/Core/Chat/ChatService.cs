@@ -34,7 +34,8 @@ public class ChatService(
     FileSecurity fileSecurity,
     TenantManager tenantManager,
     AiProviderService aiProviderService,
-    IEventBus eventBus)
+    IEventBus eventBus,
+    UserManager userManager)
 {
     public async Task<ChatSession> RenameChatAsync(Guid chatId, string title)
     {
@@ -94,9 +95,15 @@ public class ChatService(
         });
     }
 
-    public Task<IEnumerable<ModelData>> GetModelsAsync(int providerId)
+    public async Task<IEnumerable<ModelData>> GetModelsAsync(int providerId)
     {
-        return aiProviderService.GetModelsAsync(providerId, Scope.Chat);
+        var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
+        if (userType is EmployeeType.User or EmployeeType.Guest)
+        {
+            throw new SecurityException();
+        }
+
+        return await aiProviderService.GetModelsAsync(providerId, Scope.Chat);
     }
 
     public async Task<ChatSession> GetChatAsync(Guid chatId)
