@@ -179,6 +179,11 @@ public class RoomLogoManager(
         var folderDao = daoFactory.GetFolderDao<T>();
         var room = await folderDao.GetFolderAsync(id);
 
+        if (room is not { IsRoom: true })
+        {
+            throw new ItemNotFoundException();
+        }
+
         if (!room.SettingsHasLogo)
         {
             return room;

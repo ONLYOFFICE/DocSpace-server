@@ -2227,9 +2227,15 @@ public class UserController(
     [Tags("People / User type")]
     [SwaggerResponse(200, "Update type progress", typeof(TaskProgressResponseDto))]
     [SwaggerResponse(400, "Can not update user type")]
+    [SwaggerResponse(403, "Access denied")]
     [HttpPost("type")]
     public async Task<TaskProgressResponseDto> StartUserTypeUpdate(StartUpdateUserTypeDto inDto)
     {
+        if (inDto.Type is not (EmployeeType.Guest or EmployeeType.User))
+        {
+            throw new ArgumentException($"Can not update to {inDto.Type}");
+        }
+
         await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(inDto.Type), Constants.Action_AddRemoveUser);
 
         if (inDto.Type is EmployeeType.Guest)
@@ -2257,11 +2263,6 @@ public class UserController(
             || user.Id == currentUser.Id)
         {
             throw new ArgumentException($"Can not update type");
-        }
-
-        if (inDto.Type is EmployeeType.RoomAdmin or EmployeeType.DocSpaceAdmin)
-        {
-            throw new ArgumentException($"Can not update to {inDto.Type}");
         }
 
         if (!currentUser.IsOwner(tenant) && userType is EmployeeType.DocSpaceAdmin)

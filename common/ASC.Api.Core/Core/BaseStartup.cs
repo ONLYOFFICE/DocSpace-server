@@ -79,15 +79,17 @@ public abstract class BaseStartup
         services.AddMemoryCache();
 
         services.AddHttpClient();
-        services.AddHttpClient("customHttpClient", _ => { }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
-        services.AddHttpClient("defaultHttpClientSslIgnore", _ => { })
-                .ConfigurePrimaryHttpMessageHandler(_ =>
-                {
-                    return new HttpClientHandler
-                    {
-                        ServerCertificateCustomValidationCallback = (_, _, _, _) => true
-                    };
-                });
+        services.AddHttpClient("customHttpClient", _ => { })
+            .ConfigurePrimaryHttpMessageHandler(_ => new HttpClientHandler
+            {
+                AllowAutoRedirect = false
+            });
+        services.AddHttpClient("customHttpClientSslIgnore", _ => { })
+            .ConfigurePrimaryHttpMessageHandler(_ => new HttpClientHandler
+            {
+                AllowAutoRedirect = false,
+                ServerCertificateCustomValidationCallback = (_, _, _, _) => true
+            });
 
 
         services.AddExceptionHandler<CustomExceptionHandler>();
