@@ -71,7 +71,8 @@ static file class Queries
         EF.CompileAsyncQuery(
             (AiDbContext ctx, int tenantId, int providerId, IEnumerable<string> modelIds) =>
                 ctx.ModelSettings
-                    .Where(x => x.TenantId == tenantId && x.ProviderId == providerId && modelIds.Contains(x.ModelId)));
+                    .Where(x => x.TenantId == tenantId && x.ProviderId == providerId && modelIds.Contains(x.ModelId))
+                    .AsTracking());
 
     public static readonly Func<AiDbContext, int, int, string, Task> DeleteModelSettingsAsync =
         EF.CompileAsyncQuery(
