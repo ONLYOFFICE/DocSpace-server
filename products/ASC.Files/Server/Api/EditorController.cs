@@ -184,6 +184,15 @@ public abstract class EditorController<T>(
                 FolderType.VirtualDataRoom => await documentServiceHelper.GetFormOpenSetupForVirtualDataRoomAsync(file, rootFolder, inDto.EditorType),
                 FolderType.PublicRoom => await documentServiceHelper.GetFormOpenSetupForPublicRoomAsync(file, inDto.EditorType),
                 FolderType.USER => await documentServiceHelper.GetFormOpenSetupForUserFolderAsync(file, inDto.EditorType, inDto.Edit, inDto.Fill),
+                FolderType.DefaultTemplates => new FormOpenSetup<T>
+                {
+                    CanEdit = false,
+                    CanFill = false,
+                    CanStartFilling = false,
+                    EditorType = inDto.EditorType != EditorType.Mobile
+                        ? EditorType.Embedded
+                        : inDto.EditorType
+                },
                 _ => new FormOpenSetup<T>
                 {
                     CanEdit = !inDto.Fill,

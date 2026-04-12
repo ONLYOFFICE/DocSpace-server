@@ -251,7 +251,7 @@ code server/
 VSCode will detect `ASC.Web.sln` automatically via C# Dev Kit. You can also open a filtered solution for faster loading:
 
 - `ASC.Web.sln` — full solution (all projects)
-- `ASC.Web.slnf` — filtered solution (faster load)
+- `ASC.Web.slnx` — XML solution format
 - `ASC.Tests.sln` — test projects only
 - `ASC.Migrations.sln` — migration projects only
 

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2026
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,12 +24,15 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Worker.Log;
-internal static partial class ThumbnailServiceLogger
-{
-    [LoggerMessage(LogLevel.Information, "Thumbnail Service running.")]
-    public static partial void InformationThumbnailServiceRunning(this ILogger logger);
+namespace ASC.Files.Core.Log;
 
-    [LoggerMessage(LogLevel.Information, "Thumbnail Service is stopping.")]
-    public static partial void InformationThumbnailServiceStopping(this ILogger logger);
+internal static partial class FormFillingReportCreatorLogger
+{
+    [LoggerMessage(LogLevel.Warning, "Gap sync: skipped form_id={FormId} for table {TableName} — no FormsData in OpenSearch")]
+    public static partial void WarnGapSyncSkippedNoData(
+        this ILogger<FormFillingReportCreator> logger, int formId, string tableName);
+
+    [LoggerMessage(LogLevel.Error, "Gap sync: failed to upsert form_id={FormId} into table {TableName}")]
+    public static partial void ErrorGapSyncUpsertFailed(
+        this ILogger<FormFillingReportCreator> logger, Exception exception, int formId, string tableName);
 }

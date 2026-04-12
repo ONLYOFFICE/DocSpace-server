@@ -106,6 +106,11 @@ module.exports = (files) => {
     files.changeWebPlugin(req.body);
     res.end();
   });
+
+  router.post("/top-up-wallet", (req, res) => {
+    files.topUpWallet(req.body);
+    res.end();
+  });
   
   router.post("/update-history", (req, res) => {
     files.updateHistory(req.body);

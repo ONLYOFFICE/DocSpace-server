@@ -49,8 +49,14 @@ public class ExternalDbFormSubmissionIntegrationEventHandler(
                     @event.FileId,
                     @event.OriginalFormId,
                     @event.OriginalFormVersion,
+                    @event.RoomId,
                     @event.ResultFormNumber,
                     @event.FormsDataUrl);
+
+                await formFillingReportCreator.ExportMissingFromOpenSearchAsync(
+                    @event.OriginalFormId,
+                    @event.OriginalFormVersion,
+                    @event.RoomId);
             }
             catch (Exception ex)
             {

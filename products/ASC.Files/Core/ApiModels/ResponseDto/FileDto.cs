@@ -709,7 +709,7 @@ public class FileDtoHelper(
                 var room = parents.FirstOrDefault(f => f.IsRoom);
                 if (room != null)
                 {
-                    result.OwnedBy = await _employeeWrapperHelper.GetAsync(room.CreateBy);
+                    result.OwnedBy = authContext.IsAuthenticated ? await _employeeWrapperHelper.GetAsync(room.CreateBy) : null;
                 }
             }
 

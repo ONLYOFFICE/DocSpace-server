@@ -32,13 +32,15 @@ using ChatMessage = Microsoft.Extensions.AI.ChatMessage;
 
 namespace ASC.AI.Core.Chat;
 
-public class OpenRouterChatClient(IChatClient innerClient) : IChatClient
+public class OpenRouterChatClient(IChatClient innerClient, Dictionary<string, string>? metadata = null) : IChatClient
 {
     public Task<ChatResponse> GetResponseAsync(
         IEnumerable<ChatMessage> messages,
         ChatOptions? options = null,
         CancellationToken cancellationToken = new())
     {
+        options = ConfigureOptions(options);
+
         return innerClient.GetResponseAsync(messages, options, cancellationToken);
     }
 
@@ -47,6 +49,8 @@ public class OpenRouterChatClient(IChatClient innerClient) : IChatClient
         ChatOptions? options = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = new())
     {
+        options = ConfigureOptions(options);
+
         List<ChatMessage>? originalMessages;
 
         if (messages is not List<ChatMessage> list)
@@ -152,6 +156,25 @@ public class OpenRouterChatClient(IChatClient innerClient) : IChatClient
         }
 
         return accumulator;
+    }
+
+    private ChatOptions? ConfigureOptions(ChatOptions? options)
+    {
+        if (metadata == null)
+        {
+            return options;
+        }
+
+        options ??= new ChatOptions();
+        options.RawRepresentationFactory = _ =>
+        {
+            var completionOptions = new ChatCompletionOptions();
+            completionOptions.Patch.Set("$.metadata"u8, JsonSerializer.SerializeToUtf8Bytes(metadata));
+
+            return completionOptions;
+        };
+
+        return options;
     }
 }
 

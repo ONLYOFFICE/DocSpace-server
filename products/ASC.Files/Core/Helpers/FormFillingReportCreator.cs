@@ -28,6 +28,7 @@ namespace ASC.Files.Core.Helpers;
 
 [Scope]
 public class FormFillingReportCreator(
+    ILogger<FormFillingReportCreator> logger,
     ExportToXLSX exportToXLSX,
     ExternalDatabaseClient externalDatabaseClient,
     IDaoFactory daoFactory,
@@ -60,7 +61,7 @@ public class FormFillingReportCreator(
         }
     }
 
-    public async Task ExportToExternalDbAsync(int fileId, int originalFormId, int originalFormVersion, int resultFormNumber, string formsDataUrl)
+    public async Task ExportToExternalDbAsync(int fileId, int originalFormId, int originalFormVersion, int roomId, int resultFormNumber, string formsDataUrl)
     {
 #pragma warning disable CA2000 // HttpClient is short-lived and disposed by runtime
         var httpClient = clientFactory.CreateClient();
@@ -77,7 +78,7 @@ public class FormFillingReportCreator(
         var parsed = ParseSubmitAndMetadata(data);
 
         parsed.Data.FormsData = parsed.Data.FormsData
-            .Where(f => f.Type != "picture" && f.Type != "signature")
+            .Where(IsExportableField)
             .ToList();
 
         var tableName = GetTableName(originalFormId, originalFormVersion);
@@ -87,6 +88,89 @@ public class FormFillingReportCreator(
         var rowData = BuildRowData(parsed.Data, normalizedMeta, fileId, culture);
 
         await externalDatabaseClient.CreateTableAndUpsertAsync(tableName, columnDefinitions, rowData, keyColumn: "form_id");
+    }
+
+    public async Task ExportMissingFromOpenSearchAsync(int originalFormId, int originalFormVersion, int roomId)
+    {
+        var tableName = GetTableName(originalFormId, originalFormVersion);
+
+        var dbCount = await externalDatabaseClient.GetTableCountAsync(tableName);
+
+        factoryIndexerForm.Refresh();
+        var (osCountSuccess, osCount) = await factoryIndexerForm.TryCountAsync(r =>
+            r.Where(s => s.RoomId, roomId)
+             .Where(s => s.OriginalFormId, originalFormId)
+             .Where(s => s.OriginalFormVersion, originalFormVersion));
+
+        if (!osCountSuccess || osCount <= dbCount)
+        {
+            return;
+        }
+
+        var existingIds = await externalDatabaseClient.GetExistingFormIdsAsync(tableName);
+
+        var (success, allSubmissions) = await factoryIndexerForm.TrySelectAsync(r =>
+            r.Where(s => s.RoomId, roomId)
+             .Where(s => s.OriginalFormId, originalFormId)
+             .Where(s => s.OriginalFormVersion, originalFormVersion)
+             .Limit(0, BaseIndexer<DbFormsItemDataSearch>.QueryLimit));
+
+        if (!success || allSubmissions.Count == 0)
+        {
+            return;
+        }
+
+        var missing = allSubmissions
+            .Where(item => !existingIds.Contains(item.Id))
+            .ToList();
+
+        if (missing.Count == 0)
+        {
+            return;
+        }
+
+        var (metaSuccess, metaResult) = await factoryIndexerFormMetadata.TrySelectAsync(r =>
+            r.Where(s => s.OriginalFormId, originalFormId)
+             .Where(s => s.OriginalFormVersion, originalFormVersion));
+
+        var rawMetadata = metaSuccess ? metaResult.FirstOrDefault()?.Metadata ?? [] : [];
+        var normalizedMeta = NormalizeMetadata(rawMetadata).ToList();
+        var columnDefinitions = BuildColumnDefinitions(normalizedMeta).ToList();
+
+        if (columnDefinitions.Count == 0)
+        {
+            return;
+        }
+
+        var culture = tenantManager.GetCurrentTenant().GetCulture();
+
+        foreach (var item in missing)
+        {
+            if (item.FormsData == null)
+            {
+                logger.WarnGapSyncSkippedNoData(item.Id, tableName);
+                continue;
+            }
+
+            var filteredData = new SubmitFormsData
+            {
+                FormsData = item.FormsData
+                    .Where(IsExportableField)
+                    .ToList()
+            };
+
+            var rowData = BuildRowData(filteredData, normalizedMeta, item.Id, culture, item.CreateOn);
+
+            try
+            {
+                await externalDatabaseClient.CreateTableAndUpsertAsync(
+                    tableName, columnDefinitions, rowData, keyColumn: "form_id");
+            }
+            catch (Exception ex)
+            {
+                logger.ErrorGapSyncUpsertFailed(ex, item.Id, tableName);
+            }
+        }
     }
 
     public async Task<IEnumerable<FormsItemData>> GetFormsFields(int folderId)
@@ -347,15 +431,17 @@ public class FormFillingReportCreator(
         }
     }
 
+    private static bool IsExportableField(FormsItemData f) => f.Type != "picture" && f.Type != "signature";
+
     private static bool HasTimeComponent(string format) =>
         !string.IsNullOrEmpty(format) && (format.Contains('H') || format.Contains('h'));
 
-    private static Dictionary<string, object> BuildRowData(SubmitFormsData data, IEnumerable<FormMetadata> metaData, int formId, CultureInfo culture)
+    private static Dictionary<string, object> BuildRowData(SubmitFormsData data, IEnumerable<FormMetadata> metaData, int formId, CultureInfo culture, DateTime? createdOn = null)
     {
         var result = new Dictionary<string, object>
         {
             ["form_id"] = formId,
-            ["created_on"] = DateTime.UtcNow
+            ["created_on"] = createdOn ?? DateTime.UtcNow
         };
 
         var metaByKey = metaData.ToDictionary(m => NormalizeColumnName(m.Key));

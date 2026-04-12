@@ -37,8 +37,10 @@ public class FilesControllerInternal(
     ApiContext apiContext,
     FileShareDtoHelper fileShareDtoHelper,
     HistoryApiHelper historyApiHelper,
-    IFusionCache hybridCache)
-    : FilesController<int>(filesControllerHelper,
+    IFusionCache hybridCache,
+    EditHistoryMapper editHistoryMapper)
+    : FilesController<int>(
+        filesControllerHelper,
         fileStorageService,
         fileOperationsManager,
         fileOperationDtoHelper,
@@ -46,7 +48,8 @@ public class FilesControllerInternal(
         fileDtoHelper,
         apiContext,
         fileShareDtoHelper,
-        hybridCache)
+        hybridCache,
+        editHistoryMapper)
 {
     /// <remarks>
     /// Returns the list of actions performed on the file with the specified identifier.
@@ -76,7 +79,8 @@ public class FilesControllerThirdparty(
     FileDtoHelper fileDtoHelper,
     ApiContext apiContext,
     FileShareDtoHelper fileShareDtoHelper,
-    IFusionCache hybridCache)
+    IFusionCache hybridCache,
+    EditHistoryMapper editHistoryMapper)
     : FilesController<string>(filesControllerHelper,
         fileStorageService,
         fileOperationsManager,
@@ -85,18 +89,20 @@ public class FilesControllerThirdparty(
         fileDtoHelper,
         apiContext,
         fileShareDtoHelper,
-        hybridCache);
+        hybridCache,
+        editHistoryMapper);
 
 public abstract class FilesController<T>(
     FilesControllerHelper filesControllerHelper,
-        FileStorageService fileStorageService,
-        FileDeleteOperationsManager fileOperationsManager,
-        FileOperationDtoHelper fileOperationDtoHelper,
-        FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper,
-        ApiContext apiContext,
-        FileShareDtoHelper fileShareDtoHelper,
-        IFusionCache hybridCache)
+    FileStorageService fileStorageService,
+    FileDeleteOperationsManager fileOperationsManager,
+    FileOperationDtoHelper fileOperationDtoHelper,
+    FolderDtoHelper folderDtoHelper,
+    FileDtoHelper fileDtoHelper,
+    ApiContext apiContext,
+    FileShareDtoHelper fileShareDtoHelper,
+    IFusionCache hybridCache,
+    EditHistoryMapper editHistoryMapper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <remarks>
@@ -291,7 +297,7 @@ public abstract class FilesController<T>(
     [HttpGet("file/{fileId}/edit/history")]
     public IAsyncEnumerable<EditHistoryDto> GetEditHistory(FileIdRequestDto<T> inDto)
     {
-        return filesControllerHelper.GetEditHistoryAsync(inDto.FileId);
+        return fileStorageService.GetEditHistoryAsync(inDto.FileId).Select(editHistoryMapper.MapToDto);
     }
 
     /// <remarks>
@@ -369,7 +375,7 @@ public abstract class FilesController<T>(
     [HttpPost("file/{fileId}/restoreversion")]
     public IAsyncEnumerable<EditHistoryDto> RestoreFileVersion(RestoreVersionRequestDto<T> inDto)
     {
-        return filesControllerHelper.RestoreVersionAsync(inDto.FileId, inDto.Version, inDto.Url);
+        return fileStorageService.RestoreVersionAsync(inDto.FileId, inDto.Version, inDto.Url).Select(editHistoryMapper.MapToDto);
     }
 
     /// <remarks>

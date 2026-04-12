@@ -835,6 +835,18 @@ public class Operation
     public string ParticipantDisplayName { get; set; }
 
     /// <summary>
+    /// AI Agent id.
+    /// </summary>
+    /// <example>123</example>
+    public string AgentId { get; set; }
+
+    /// <summary>
+    /// AI Agent name.
+    /// </summary>
+    /// <example>My AI Agent</example>
+    public string AgentTitle { get; set; }
+
+    /// <summary>
     /// Metadata of the operation.
     /// </summary>
     /// <example>{}</example>

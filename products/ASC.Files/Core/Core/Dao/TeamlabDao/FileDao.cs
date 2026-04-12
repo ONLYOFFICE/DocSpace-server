@@ -1081,6 +1081,11 @@ internal class FileDao(
         return await filesDbContext.DbFilesAnyAsync(tenantId, title, category, folderId);
     }
 
+    public async Task<string> GetAvailableTitleAsync(string requestTitle, int parentFolderId)
+    {
+        return await global.GetAvailableTitleAsync(requestTitle, parentFolderId, IsExistAsync, FileEntryType.File);
+    }
+
     public async Task<TTo> MoveFileAsync<TTo>(int fileId, TTo toFolderId, bool deleteLinks = false)
     {
         if (toFolderId is int tId)
@@ -1394,7 +1399,7 @@ internal class FileDao(
         copy.FileStatus = file.FileStatus & ~flagsToRemove;
         copy.EditingBy = file.EditingBy;
         copy.ParentId = toFolderId;
-        copy.Title = await global.GetAvailableTitleAsync(file.Title, toFolderId, IsExistAsync, FileEntryType.File);
+        copy.Title = await GetAvailableTitleAsync(file.Title, toFolderId);
         copy.ConvertedType = file.ConvertedType;
         copy.Comment = FilesCommonResource.CommentCopy;
         copy.Encrypted = file.Encrypted;
