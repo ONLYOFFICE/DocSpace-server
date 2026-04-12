@@ -24,19 +24,20 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Provider.Data;
+namespace ASC.AI.Core.Provider;
 
 public class DefaultAiProvider
 {
-    public int ProviderId { get; set; }
-    public required string DefaultModel { get; set; }
-    public string? ProviderTitle { get; set; }
-    public ProviderType? ProviderType { get; set; }
+    public int ProviderId { get; init; }
+    public required string DefaultModel { get; init; }
+    public string? ProviderTitle { get; init; }
+    public ProviderType ProviderType { get; init; }
+    public string? DefaultModelAlias { get; init; }
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
     PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
-public static partial class DefaultAiProviderMapper
+public static partial class DefaultAiProviderSettingsMapper
 {
-    public static partial DefaultAiProvider Map(this DbDefaultAiProvider source);
+    public static partial DefaultAiProvider Map(this DefaultAiProviderSettings source, string? defaultModelAlias);
 }

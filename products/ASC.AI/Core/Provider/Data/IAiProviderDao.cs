@@ -51,14 +51,12 @@ public interface IAiProviderDao
 
     Task DeleteProviders(int tenantId, HashSet<int> ids);
 
-    Task<DefaultAiProvider> SetDefaultProviderAsync(int tenantId, AiProvider provider, string defaultModel);
+    Task<DefaultAiProviderSettings> SetDefaultProviderAsync(int tenantId, AiProvider provider, string defaultModel);
 
-    Task<DefaultAiProvider?> GetDefaultProviderAsync(int tenantId);
+    Task<DefaultAiProviderSettings?> GetDefaultProviderAsync(int tenantId);
 
     Task<int?> GetFirstProviderIdAsync(int tenantId);
 
     Task<Dictionary<string, AiModelSettings>> GetModelSettingsAsync(int tenantId, int providerId, ProviderType type);
     Task<AiModelSettings?> GetModelSettingAsync(int tenantId, int providerId, string modelId);
-    Task SaveModelSettingsAsync(int tenantId, int providerId, AiModelSettings settings);
-    Task DeleteModelSettingsAsync(int tenantId, int providerId, string modelId);
 }

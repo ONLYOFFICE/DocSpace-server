@@ -240,7 +240,7 @@ public class AiProviderDao(
         });
     }
 
-    public async Task<DefaultAiProvider> SetDefaultProviderAsync(int tenantId, AiProvider provider, string defaultModel)
+    public async Task<DefaultAiProviderSettings> SetDefaultProviderAsync(int tenantId, AiProvider provider, string defaultModel)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var strategy = dbContext.Database.CreateExecutionStrategy();
@@ -260,33 +260,44 @@ public class AiProviderDao(
             await context.SaveChangesAsync();
         });
 
-        return new DefaultAiProvider
+        return new DefaultAiProviderSettings
         {
             ProviderId = provider.Id,
             ProviderTitle = provider.Title,
-            DefaultModel = defaultModel
+            ProviderType = provider.Type,
+            DefaultModel = defaultModel,
+            HasModelSettings = provider.HasModelSettings
         };
     }
 
-    public async Task<DefaultAiProvider?> GetDefaultProviderAsync(int tenantId)
+    public async Task<DefaultAiProviderSettings?> GetDefaultProviderAsync(int tenantId)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
 
-        var result = await dbContext.GetDefaultProviderAsync(tenantId);
-        if (result == null)
+        var queryResult = await dbContext.GetDefaultProviderAsync(tenantId);
+        if (queryResult == null)
         {
             return null;
         }
 
-        if (result.ProviderId == AiGateway.ProviderId)
-        {
-            result.ProviderTitle = AiGateway.ProviderTitle;
-            result.ProviderType = ProviderType.PortalAi;
-        }
+        var providerType = queryResult.ProviderId == AiGateway.ProviderId
+            ? ProviderType.PortalAi
+            : queryResult.ProviderType ?? default;
 
-        if (result.ProviderType.HasValue)
+        var result = new DefaultAiProviderSettings
         {
-            result.DefaultModel = aiConfiguration.ResolveModelId(result.ProviderType.Value, result.DefaultModel);
+            ProviderId = queryResult.ProviderId,
+            DefaultModel = aiConfiguration.ResolveModelId(providerType, queryResult.DefaultModel),
+            ProviderTitle = queryResult.ProviderId == AiGateway.ProviderId
+                ? AiGateway.ProviderTitle
+                : queryResult.ProviderTitle,
+            ProviderType = providerType,
+            HasModelSettings = queryResult.HasModelSettings
+        };
+
+        if (queryResult.DbModelSettings != null)
+        {
+            result.DbModelSettings = queryResult.DbModelSettings.Map();
         }
 
         return result;
@@ -325,37 +336,6 @@ public class AiProviderDao(
         var entity = await dbContext.GetModelSettingAsync(tenantId, providerId, modelId);
 
         return entity?.Map();
-    }
-
-    public async Task SaveModelSettingsAsync(int tenantId, int providerId, AiModelSettings settings)
-    {
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-        var strategy = dbContext.Database.CreateExecutionStrategy();
-
-        await strategy.ExecuteAsync(async () =>
-        {
-            await using var context = await dbContextFactory.CreateDbContextAsync();
-
-            var entity = new DbAiModelSettings
-            {
-                TenantId = tenantId,
-                ProviderId = providerId,
-                ModelId = settings.ModelId,
-                Alias = settings.Alias,
-                IsEnabled = settings.IsEnabled,
-                Capabilities = settings.Capabilities
-            };
-
-            await context.ModelSettings.AddOrUpdateAsync(entity);
-            await context.SaveChangesAsync();
-        });
-    }
-
-    public async Task DeleteModelSettingsAsync(int tenantId, int providerId, string modelId)
-    {
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-
-        await dbContext.DeleteModelSettingsAsync(tenantId, providerId, modelId);
     }
 
     private static async Task SaveModelSettingsInternalAsync(

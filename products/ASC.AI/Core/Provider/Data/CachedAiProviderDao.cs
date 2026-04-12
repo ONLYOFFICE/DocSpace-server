@@ -104,7 +104,7 @@ public class CachedAiProviderDao(
         await InvalidateFirstProviderCacheAsync(tenantId);
     }
 
-    public async Task<DefaultAiProvider> SetDefaultProviderAsync(int tenantId, AiProvider provider, string defaultModel)
+    public async Task<DefaultAiProviderSettings> SetDefaultProviderAsync(int tenantId, AiProvider provider, string defaultModel)
     {
         var result = await providerDao.SetDefaultProviderAsync(tenantId, provider, defaultModel);
 
@@ -113,12 +113,12 @@ public class CachedAiProviderDao(
         return result;
     }
 
-    public async Task<DefaultAiProvider?> GetDefaultProviderAsync(int tenantId)
+    public async Task<DefaultAiProviderSettings?> GetDefaultProviderAsync(int tenantId)
     {
         var cacheKey = GetDefaultProviderCacheKey(tenantId);
 
-        var cached = await cache.TryGetAsync<DefaultAiProvider>(cacheKey);
-        DefaultAiProvider? result;
+        var cached = await cache.TryGetAsync<DefaultAiProviderSettings>(cacheKey);
+        DefaultAiProviderSettings? result;
 
         if (cached.HasValue)
         {
@@ -174,17 +174,6 @@ public class CachedAiProviderDao(
     public Task<AiModelSettings?> GetModelSettingAsync(int tenantId, int providerId, string modelId)
     {
         return providerDao.GetModelSettingAsync(tenantId, providerId, modelId);
-    }
-
-
-    public Task SaveModelSettingsAsync(int tenantId, int providerId, AiModelSettings settings)
-    {
-        return providerDao.SaveModelSettingsAsync(tenantId, providerId, settings);
-    }
-
-    public Task DeleteModelSettingsAsync(int tenantId, int providerId, string modelId)
-    {
-        return providerDao.DeleteModelSettingsAsync(tenantId, providerId, modelId);
     }
 
     private static string GetDefaultProviderCacheKey(int tenantId)

@@ -283,10 +283,20 @@ public class AiProviderService(
         await ThrowIfNotAccessAsync();
 
         var provider = await GetProviderAsync(providerId);
-
         var tenantId = tenantManager.GetCurrentTenantId();
-        var result = await providerDao.SetDefaultProviderAsync(tenantId, provider, defaultModel);
-        result.ProviderTitle = provider.Title;
+
+        var mSettings = await providerDao.GetModelSettingAsync(tenantId, providerId, defaultModel);
+
+        var resolved = modelSettingsResolver.Resolve(provider.Type, defaultModel, mSettings, provider.HasModelSettings);
+        if (!resolved.IsEnabled)
+        {
+            throw new ArgumentException(ErrorMessages.ModelDisabled);
+        }
+
+        var defaultProvider = await providerDao.SetDefaultProviderAsync(tenantId, provider, defaultModel);
+        defaultProvider.ProviderTitle = provider.Title;
+
+        var result = defaultProvider.Map(resolved.Alias);
 
         messageService.Send(MessageAction.AIDefaultProviderSet, MessageTarget.Create(result.ProviderId), provider.Title, defaultModel);
 
@@ -305,7 +315,7 @@ public class AiProviderService(
         var defaultProvider = await providerDao.GetDefaultProviderAsync(tenantId);
         if (defaultProvider != null)
         {
-            return defaultProvider;
+            return defaultProvider.Map(ResolveModelAlias(defaultProvider));
         }
 
         // Auto-set the first provider as default if none is set
@@ -342,7 +352,22 @@ public class AiProviderService(
             return null;
         }
 
-        return await providerDao.SetDefaultProviderAsync(tenantId, firstProvider, firstModel.Id);
+        var result = await providerDao.SetDefaultProviderAsync(tenantId, firstProvider, firstModel.Id);
+
+        return result.Map(ResolveModelAlias(result));
+
+        string? ResolveModelAlias(DefaultAiProviderSettings settings)
+        {
+            var dbSettings = settings.ProviderType == ProviderType.PortalAi
+                ? null
+                : settings.DbModelSettings;
+
+            return modelSettingsResolver.Resolve(
+                settings.ProviderType,
+                settings.DefaultModel,
+                dbSettings,
+                settings.HasModelSettings).Alias;
+        }
     }
 
     public async Task<IEnumerable<ModelSettings>> GetModelsWithSettingsAsync(int providerId)
