@@ -1,0 +1,38 @@
+{{> api_info}}
+
+require 'bundler/setup'
+require '{{{gemName}}}'
+
+{{moduleName}}.configure do |config|
+  config.scheme = 'http'
+  config.host = 'localhost:8092'
+  config.base_path = ''
+end
+
+begin
+  auth_api = {{moduleName}}::Authentication::AuthenticationApi.new
+  auth_request = {{moduleName}}::AuthRequestsDto.new(
+    user_name: 'example@onlyoffice.com',
+    password: '11111111'
+  )
+
+  auth_response = auth_api.authenticate_me(auth_requests_dto: auth_request)
+  token = auth_response.response.token
+
+  {{moduleName}}.configure do |config|
+    config.access_token = token
+  end
+
+  folders_api = {{moduleName}}::Files::FoldersApi.new
+  my_folder = folders_api.get_my_folder
+  parent_folder_id = my_folder.response.current.id
+
+  create_folder_payload = {{moduleName}}::CreateFolder.new(title: 'SDK Sample Folder')
+  created_folder = folders_api.create_folder(parent_folder_id, create_folder_payload)
+
+  puts "Created folder ID: #{created_folder.response.id}"
+rescue {{moduleName}}::ApiError => e
+  puts "API error: #{e}"
+rescue StandardError => e
+  puts "Unexpected error: #{e.message}"
+end
