@@ -191,6 +191,8 @@ public class MyGoClientCodegen extends GoClientCodegen {
     public void processOpts() {
         super.processOpts();
 
+        this.outputFolder = "../../../../../sdk/docspace-api-sdk-go";
+
         supportingFiles.removeIf(file ->
             "README.md".equals(file.getDestinationFilename())
                 || "README.mustache".equals(file.getTemplateFile())
