@@ -1701,7 +1701,8 @@ public class FileSecurity(
                     action is
                         FilesSecurityActions.Convert or
                         FilesSecurityActions.AskAi or
-                        FilesSecurityActions.Embed
+                        FilesSecurityActions.Embed or
+                        FilesSecurityActions.EditAccess
                     )
                 {
                     return false;
