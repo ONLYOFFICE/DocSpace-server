@@ -139,7 +139,7 @@
     <value>Քանակ</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>ԱԲ գործիքներ</value>
+    <value>{0} AI</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Պահուստավորում</value>
@@ -1153,7 +1153,7 @@
     <value>ԱԲ գործակալների թիվը չպետք է գերազանցի {0}-ը</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>ԱԲ գործիքներ</value>
+    <value>{0} AI</value>
   </data>
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
     <value>Միացրեք ԱԲ գործառույթները ձեր DocSpace-ում՝ արտադրողականությունը բարձրացնելու համար։</value>

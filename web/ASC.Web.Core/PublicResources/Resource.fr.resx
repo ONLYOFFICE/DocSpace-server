@@ -139,7 +139,7 @@
     <value>Quantité</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>Outils IA</value>
+    <value>{0} AI</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Sauvegarde</value>
@@ -1153,7 +1153,7 @@
     <value>Le nombre d'agents IA ne doit pas dépasser {0}</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>Outils IA</value>
+    <value>{0} AI</value>
   </data>
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
     <value>Activez les fonctionnalités IA dans votre DocSpace pour améliorer la productivité.</value>

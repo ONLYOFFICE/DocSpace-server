@@ -35,7 +35,7 @@ public class WalletServiceDescriptionManager()
         { "search", "num_results" }
     };
 
-    public static (string, string, int) GetServiceDescriptionAndUom(Operation operation, string filterServiceName, Dictionary<string, string> metadata)
+    public static (string, string, int) GetServiceDescriptionAndUom(Operation operation, string filterServiceName, Dictionary<string, string> metadata, string logoText)
     {
         if (operation == null)
         {
@@ -77,9 +77,10 @@ public class WalletServiceDescriptionManager()
             quantity = 0;
         }
 
-        return (Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceDesc_{serviceName}"),
-            Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceUOM_{serviceName}"),
-            quantity);
+        var description = string.Format(Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceDesc_{serviceName}") ?? "", logoText);
+        var uom = Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceUOM_{serviceName}");
+
+        return (description, uom, quantity);
     }
 
     public static string GetServiceDetails(Dictionary<string, string> metadata)

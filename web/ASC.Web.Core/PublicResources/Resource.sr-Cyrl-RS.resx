@@ -139,7 +139,7 @@
     <value>Колицина</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>AI алати</value>
+    <value>{0} AI</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Бекап</value>
@@ -1153,7 +1153,7 @@
     <value>Број AI агената не сме прећи {0}</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>AI алати</value>
+    <value>{0} AI</value>
   </data>
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
     <value>Омогућите AI функције у вашем DocSpace-у да бисте повећали продуктивност.</value>

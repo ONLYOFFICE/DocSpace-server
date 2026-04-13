@@ -139,7 +139,7 @@
     <value>Množstvo</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>Nástroje AI</value>
+    <value>{0} AI</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Záloha</value>
@@ -1153,7 +1153,7 @@
     <value>Počet agentov AI by nemal prekročiť {0}</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>Nástroje AI</value>
+    <value>{0} AI</value>
   </data>
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
     <value>Aktivujte funkcie AI vo vašom DocSpace a zvýšte produktivitu.</value>

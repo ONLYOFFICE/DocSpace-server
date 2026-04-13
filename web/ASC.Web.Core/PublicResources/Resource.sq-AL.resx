@@ -139,7 +139,7 @@
     <value>Sasia</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>Mjetet AI</value>
+    <value>{0} AI</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Kopje rezervë</value>
@@ -1153,7 +1153,7 @@
     <value>Numri i agjentëve AI nuk duhet të tejkalojë {0}</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>Mjetet AI</value>
+    <value>{0} AI</value>
   </data>
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
     <value>Aktivizoni funksionalitetet AI në DocSpace për të rritur produktivitetin.</value>

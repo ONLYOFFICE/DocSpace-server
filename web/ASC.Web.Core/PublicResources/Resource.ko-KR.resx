@@ -139,7 +139,7 @@
     <value>수량</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>AI 도구</value>
+    <value>{0} AI</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>백업</value>
@@ -1153,7 +1153,7 @@
     <value>에이전트 수는 다음 한도를 초과할 수 없습니다: {0}</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>AI 도구</value>
+    <value>{0} AI</value>
   </data>
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
     <value>DocSpace에서 AI 기능을 활성화하여 생산성을 향상시키세요.</value>

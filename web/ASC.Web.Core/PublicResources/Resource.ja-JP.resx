@@ -139,7 +139,7 @@
     <value>数量</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>AIツール</value>
+    <value>{0} AI</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>バックアップ</value>
@@ -1153,7 +1153,7 @@
     <value>AIエージェントの数は {0} を超えることはできません</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>AIツール</value>
+    <value>{0} AI</value>
   </data>
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
     <value>DocSpaceのAI機能を有効にして生産性を向上させましょう。</value>

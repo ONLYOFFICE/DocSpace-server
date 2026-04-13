@@ -139,7 +139,7 @@
     <value>Məbləğ</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>AI alətləri</value>
+    <value>{0} AI</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Yedəkləmə</value>
@@ -1153,7 +1153,7 @@
     <value>AI agentlərinin sayı {0}-dan çox olmamalıdır</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>AI alətləri</value>
+    <value>{0} AI</value>
   </data>
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
     <value>Məhsuldarlığı artırmaq üçün DocSpace-də AI xüsusiyyətlərini aktivləşdirin.</value>

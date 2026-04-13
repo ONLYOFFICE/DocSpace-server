@@ -139,7 +139,7 @@
     <value>Aantal</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>AI tools</value>
+    <value>{0} AI</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Back-up</value>
@@ -1153,7 +1153,7 @@
     <value>Het aantal AI-agenten mag niet hoger zijn dan {0}</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>AI tools</value>
+    <value>{0} AI</value>
   </data>
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
     <value>Activeer AI-functies in uw DocSpace om de productiviteit te verhogen.</value>
