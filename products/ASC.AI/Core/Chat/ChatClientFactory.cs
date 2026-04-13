@@ -38,7 +38,10 @@ public class ChatClientFactory(
     IToolPermissionRequester toolPermissionRequester,
     AiConfiguration aiConfiguration)
 {
-    public IChatClient Create(ChatClientOptions options, ToolHolder? toolHolder = null)
+    public IChatClient Create(
+        ChatClientOptions options,
+        Guid userId,
+        ToolHolder? toolHolder = null)
     {
         ArgumentNullException.ThrowIfNull(options);
         ArgumentException.ThrowIfNullOrEmpty(options.Endpoint);
@@ -112,7 +115,7 @@ public class ChatClientFactory(
                     var chatClient = openAiClient.GetChatClient(options.ModelId);
                     // CA2000: OpenRouterChatClient wraps a chat client, ownership transferred
 #pragma warning disable CA2000
-                    builder = new OpenRouterChatClient(chatClient.AsIChatClient()).AsBuilder();
+                    builder = new OpenRouterChatClient(chatClient.AsIChatClient(), options.Metadata).AsBuilder();
 #pragma warning restore CA2000
                     break;
                 }
@@ -170,7 +173,8 @@ public class ChatClientFactory(
                 var funcClient = new ManagedFunctionInvokingChatClient(
                     innerClient,
                     toolHolder,
-                    toolPermissionRequester);
+                    toolPermissionRequester,
+                    userId);
 
                 funcClient.MaximumIterationsPerRequest = 32;
                 funcClient.AllowConcurrentInvocation = true;

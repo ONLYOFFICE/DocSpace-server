@@ -1632,6 +1632,11 @@ public class FileSecurity(
                             return hasFullAccessToForm;
                         }
 
+                        if (action == FilesSecurityActions.FillForms)
+                        {
+                            return hasFullAccessToForm || shareRecord is { Share: FileShare.FillForms or FileShare.Editing };
+                        }
+
                     }
 
                     switch (action)
@@ -2388,6 +2393,7 @@ public class FileSecurity(
             {
                 { RootFolderType: FolderType.USER } when entry.CreateBy != userId => true,
                 { RootFolderType: FolderType.VirtualRooms } when !isDocSpaceAdmin => true,
+                Folder<T> { FolderType: FolderType.FillingFormsRoom } when isDocSpaceAdmin => true,
                 _ => false
             };
 

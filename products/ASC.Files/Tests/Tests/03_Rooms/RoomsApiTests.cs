@@ -24,18 +24,14 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Files.Tests.ApiFactories;
 
 namespace ASC.Files.Tests.Tests._03_Rooms;
 
 [Collection("Test Collection")]
 [Trait("Category", "Rooms")]
 public class RoomsApiTests(
-    FilesApiFactory filesFactory,
-    WepApiFactory apiFactory,
-    PeopleFactory peopleFactory,
-    FilesServiceFactory filesServiceProgram)
-    : BaseTest(filesFactory, apiFactory, peopleFactory, filesServiceProgram)
+    AspireAppFixture fixture)
+    : BaseTest(fixture)
 {
     [Fact]
     public async Task CreateRoom_WithValidData_ReturnsNewRoom()
@@ -510,7 +506,7 @@ public class RoomsApiTests(
 
         // Cleanup - Re-enable "Allow inviting guests" setting
         invitationSettings.AllowInvitingGuests = true;
-        await apiFactory.CommonSettingsApi.UpdateInvitationSettingsAsync(invitationSettings,
+        await _commonSettingsApi.UpdateInvitationSettingsAsync(invitationSettings,
             cancellationToken: TestContext.Current.CancellationToken);
     }
 
@@ -575,7 +571,7 @@ public class RoomsApiTests(
 
         // Cleanup - Re-enable "Allow inviting guests" setting
         invitationSettings.AllowInvitingGuests = true;
-        await apiFactory.CommonSettingsApi.UpdateInvitationSettingsAsync(invitationSettings,
+        await _commonSettingsApi.UpdateInvitationSettingsAsync(invitationSettings,
             cancellationToken: TestContext.Current.CancellationToken);
     }
 

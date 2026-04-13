@@ -279,6 +279,39 @@ public class AttachmentHandler(
         };
     }
 
+    public async Task<(IReadOnlyList<ToolWrapper> Tools, string SchemaContext)?> GetFormDataToolsAsync(int fileId)
+    {
+        if (!externalDatabaseClient.IsEnabled())
+        {
+            return null;
+        }
+
+        var fileDao = daoFactory.GetFileDao<int>();
+        var file = await fileDao.GetFileAsync(fileId);
+        if (file == null)
+        {
+            return null;
+        }
+
+        var properties = await fileDao.GetProperties(fileId);
+        var formFilling = properties?.FormFilling;
+
+        if (formFilling?.StartFilling != true || formFilling.OriginalFormId != fileId)
+        {
+            return null;
+        }
+
+        try
+        {
+            return await BuildFormDataToolsAsync(fileId, file.Version);
+        }
+        catch (Exception e)
+        {
+            logger.WarnFormDataToolsFailed(e, fileId);
+            return null;
+        }
+    }
+
     private async Task<(string? contextText, IReadOnlyList<ToolWrapper>? tools)> TryGetFormDataAsync<T>(File<T> file)
     {
         if (file is not File<int> intFile)
@@ -302,48 +335,57 @@ public class AttachmentHandler(
 
         try
         {
-            var tableName = FormFillingReportCreator.GetTableName(intFile.Id, intFile.Version);
-            if (!await externalDatabaseClient.TableExistsAsync(tableName))
+            var result = await BuildFormDataToolsAsync(intFile.Id, intFile.Version);
+            if (result == null)
             {
                 return (null, null);
             }
 
-            var rowCount = await externalDatabaseClient.CountAsync(tableName);
-            var columns = await formFillingReportCreator.GetColumnDefinitionsAsync(intFile.Id, intFile.Version);
-            var columnList = columns.ToList();
-
-            var queryTool = await formDataQueryTool.InitAsync(intFile.Id, tableName, rowCount, columnList);
-            var aggregateTool = await aggregateFormDataTool.InitAsync(intFile.Id, tableName, columnList);
-            var selfJoinTool = await selfJoinFormDataTool.InitAsync(intFile.Id, tableName, columnList);
-
-            if (queryTool == null && aggregateTool == null && selfJoinTool == null)
-            {
-                return (null, null);
-            }
-
-            var tools = new List<ToolWrapper>(3);
-            if (queryTool != null)
-            {
-                tools.Add(new ToolWrapper { Tool = queryTool, Context = new ToolContext { Name = queryTool.Name, AutoInvoke = true } });
-            }
-            if (aggregateTool != null)
-            {
-                tools.Add(new ToolWrapper { Tool = aggregateTool, Context = new ToolContext { Name = aggregateTool.Name, AutoInvoke = true } });
-            }
-            if (selfJoinTool != null)
-            {
-                tools.Add(new ToolWrapper { Tool = selfJoinTool, Context = new ToolContext { Name = selfJoinTool.Name, AutoInvoke = true } });
-            }
-
-            var contextText = FormatFormDataFromExternalDb(tableName, rowCount, columnList);
-
-            return (contextText, tools);
+            return (result.Value.SchemaContext, result.Value.Tools);
         }
         catch (Exception e)
         {
             logger.WarnFormDataToolsFailed(e, intFile.Id);
             return (null, null);
         }
+    }
+
+    private async Task<(IReadOnlyList<ToolWrapper> Tools, string SchemaContext)?> BuildFormDataToolsAsync(int fileId, int version)
+    {
+        var tableName = FormFillingReportCreator.GetTableName(fileId, version);
+        if (!await externalDatabaseClient.TableExistsAsync(tableName))
+        {
+            return null;
+        }
+
+        var rowCount = await externalDatabaseClient.CountAsync(tableName);
+        var columns = await formFillingReportCreator.GetColumnDefinitionsAsync(fileId, version);
+        var columnList = columns.ToList();
+
+        var queryTool = await formDataQueryTool.InitAsync(fileId, tableName, rowCount, columnList);
+        var aggregateTool = await aggregateFormDataTool.InitAsync(fileId, tableName, columnList);
+        var selfJoinTool = await selfJoinFormDataTool.InitAsync(fileId, tableName, columnList);
+
+        if (queryTool == null && aggregateTool == null && selfJoinTool == null)
+        {
+            return null;
+        }
+
+        var tools = new List<ToolWrapper>(3);
+        if (queryTool != null)
+        {
+            tools.Add(new ToolWrapper { Tool = queryTool, Context = new ToolContext { Name = queryTool.Name, AutoInvoke = true } });
+        }
+        if (aggregateTool != null)
+        {
+            tools.Add(new ToolWrapper { Tool = aggregateTool, Context = new ToolContext { Name = aggregateTool.Name, AutoInvoke = true } });
+        }
+        if (selfJoinTool != null)
+        {
+            tools.Add(new ToolWrapper { Tool = selfJoinTool, Context = new ToolContext { Name = selfJoinTool.Name, AutoInvoke = true } });
+        }
+
+        return (tools, FormatFormDataFromExternalDb(tableName, rowCount, columnList));
     }
 
     private static string FormatFormDataFromExternalDb(

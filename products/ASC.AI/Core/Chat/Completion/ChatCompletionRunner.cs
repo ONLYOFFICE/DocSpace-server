@@ -37,7 +37,6 @@ public class ChatCompletionRunner(
     AttachmentHandler attachmentHandler,
     DataContentLoader dataContentLoader,
     SocketManager socketManager,
-    ChatNameGenerator chatNameGenerator,
     IServiceScopeFactory serviceScopeFactory)
 {
     public async Task<ChatCompletionGenerator> StartNewChatAsync(
@@ -66,7 +65,7 @@ public class ChatCompletionRunner(
             context.Attachments = attachments;
         }
 
-        var client = chatClientFactory.Create(context.ClientOptions, context.Tools);
+        var client = chatClientFactory.Create(context.ClientOptions, authContext.CurrentAccount.ID, context.Tools);
 
         return new ChatCompletionGenerator(
             client,
@@ -74,7 +73,6 @@ public class ChatCompletionRunner(
             socketManager,
             messages,
             chatHistory,
-            chatNameGenerator,
             context,
             serviceScopeFactory,
             attachmentHandler);
@@ -104,9 +102,17 @@ public class ChatCompletionRunner(
 
         var attachments = await GetAttachmentsAsync(context, files).ToListAsync();
 
+        string? restoredSchemaContext = null;
+        if (!context.Tools.ContainsSystemTool(SystemToolType.FormDataQuery) &&
+            !context.Tools.ContainsSystemTool(SystemToolType.FormDataAggregate) &&
+            !context.Tools.ContainsSystemTool(SystemToolType.FormDataSelfJoin))
+        {
+            restoredSchemaContext = await RestoreFormDataToolsAsync(context, chat.Id);
+        }
+
         var systemMessage = BuildSystemMessage(context);
 
-        var userMessage = FormatUserMessage(message, attachments);
+        var userMessage = FormatUserMessage(message, attachments, restoredSchemaContext);
 
         var historyAdapter = HistoryHelper.GetAdapter(context.ClientOptions.Provider, dataContentLoader);
         var messages = await chatHistory.GetMessagesAsync(chatId, historyAdapter, systemMessage, userMessage)
@@ -120,7 +126,7 @@ public class ChatCompletionRunner(
             context.Attachments = attachments;
         }
 
-        var client = chatClientFactory.Create(context.ClientOptions, context.Tools);
+        var client = chatClientFactory.Create(context.ClientOptions, authContext.CurrentAccount.ID, context.Tools);
 
         return new ChatCompletionGenerator(
             client,
@@ -128,7 +134,6 @@ public class ChatCompletionRunner(
             socketManager,
             messages,
             chatHistory,
-            chatNameGenerator,
             context,
             serviceScopeFactory,
             attachmentHandler);
@@ -147,6 +152,37 @@ public class ChatCompletionRunner(
             context.Tools.ContainsSystemTool(SystemToolType.FormDataQuery) ||
             context.Tools.ContainsSystemTool(SystemToolType.FormDataAggregate) ||
             context.Tools.ContainsSystemTool(SystemToolType.FormDataSelfJoin)));
+
+    private async Task<string?> RestoreFormDataToolsAsync(ChatExecutionContext context, Guid chatId)
+    {
+        var fileId = await chatHistory.GetLastFormFileIdAsync(chatId);
+        if (fileId == null)
+        {
+            return null;
+        }
+
+        var result = await attachmentHandler.GetFormDataToolsAsync(fileId.Value);
+        if (result == null)
+        {
+            return null;
+        }
+
+        foreach (var tool in result.Value.Tools)
+        {
+            var toolType = tool.Context.Name == AggregateFormDataTool.Name
+                ? SystemToolType.FormDataAggregate
+                : tool.Context.Name == SelfJoinFormDataTool.Name
+                    ? SystemToolType.FormDataSelfJoin
+                    : SystemToolType.FormDataQuery;
+
+            if (!context.Tools.ContainsSystemTool(toolType))
+            {
+                context.Tools.AddTool(toolType, tool);
+            }
+        }
+
+        return result.Value.SchemaContext;
+    }
 
     private async IAsyncEnumerable<AttachmentMessageContent> GetAttachmentsAsync(
         ChatExecutionContext context,
@@ -200,15 +236,21 @@ public class ChatCompletionRunner(
         throw new ArgumentException(string.Format(ErrorMessages.AttachmentProcessFailed, names));
     }
 
-    private static ChatMessage FormatUserMessage(string message, List<AttachmentMessageContent> attachments)
+    private static ChatMessage FormatUserMessage(string message, List<AttachmentMessageContent> attachments, string? schemaContext = null)
     {
-        if (attachments.Count == 0)
+        if (attachments.Count == 0 && schemaContext == null)
         {
             return new ChatMessage(ChatRole.User, message);
         }
 
-        var contents = new List<AIContent>(attachments.Count + 1);
+        var contents = new List<AIContent>(attachments.Count + 2);
         contents.AddRange(attachments.Select(attachment => attachment.ToAiContent()));
+
+        if (schemaContext != null)
+        {
+            contents.Add(new TextContent($"[ACTIVE DATASET — use ONLY these column names for tool calls]{schemaContext}"));
+        }
+
         contents.Add(new TextContent($"##User query: {message}"));
 
         return new ChatMessage { Role = ChatRole.User, Contents = contents };

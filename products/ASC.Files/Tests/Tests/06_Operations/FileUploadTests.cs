@@ -27,20 +27,14 @@
 using System.Reflection;
 using System.Security.Cryptography;
 
-using ASC.Files.Tests.ApiFactories;
-using ASC.Web.Studio.Core;
-
 namespace ASC.Files.Tests.Tests._06_Operations;
 
 [Collection("Test Collection")]
 [Trait("Category", "Operations")]
 [Trait("Feature", "Files")]
 public class FileUploadTests(
-    FilesApiFactory filesFactory, 
-    WepApiFactory apiFactory, 
-    PeopleFactory peopleFactory,
-    FilesServiceFactory filesServiceProgram) 
-    : BaseTest(filesFactory, apiFactory, peopleFactory, filesServiceProgram)
+    AspireAppFixture fixture)
+    : BaseTest(fixture)
 {
     [Fact]
     public async Task UploadFile_ReturnsValidFile()

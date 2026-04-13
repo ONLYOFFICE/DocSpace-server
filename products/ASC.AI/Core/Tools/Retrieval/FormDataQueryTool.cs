@@ -57,7 +57,7 @@ public class FormDataQueryTool(
 
         async Task<ToolResponse<string>> Function(
             [Description("Column names to include in the result. Always specify only the columns relevant to the question — do not request all columns unless explicitly needed. Pass as a JSON array: [\"col_a\",\"col_b\"], never as a JSON-encoded string.")] IEnumerable<string>? selectColumns = null,
-            [Description("Filter conditions applied with AND. Each filter is a string: \"column_name OPERATOR value\" — e.g. \"col_status = approved\", \"col_age > 25\", \"col_name IS NULL\". Column-to-column comparison is also supported: \"col_start < col_end\". Operators: =, !=, <, >, <=, >=, LIKE, NOT LIKE, IS NULL, IS NOT NULL. Omit the value for IS NULL / IS NOT NULL.")] IEnumerable<string>? filters = null,
+            [Description("Filter conditions applied with AND. Each filter is a string: \"column_name OPERATOR value\" — e.g. \"col_status = approved\", \"col_age > 25\", \"col_name IS NULL\", \"col_status IN approved,pending\". Column-to-column comparison is also supported: \"col_start < col_end\". Operators: =, !=, <, >, <=, >=, LIKE, NOT LIKE, IS NULL, IS NOT NULL, IN, NOT IN. For IN/NOT IN the value is a comma-separated list: \"col_status IN approved,pending,rejected\". Omit the value for IS NULL / IS NOT NULL.")] IEnumerable<string>? filters = null,
             [Description("Primary column to sort results by.")] string? orderByColumn = null,
             [Description("Set to true to sort the primary column in descending order. Default: false.")] bool orderByDescending = false,
             [Description("Secondary column to sort by when rows have the same value in orderByColumn.")] string? thenByColumn = null,
@@ -65,7 +65,7 @@ public class FormDataQueryTool(
             [Description("Maximum number of rows to return (1–500). Default: 50.")] int limit = 50,
             [Description("Number of rows to skip for pagination. Default: 0.")] int offset = 0,
             [Description("Date-part filter conditions applied with AND. Each filter is a string: \"column_name DATE_PART OPERATOR value[,v2,...]\". DATE_PART: YEAR, MONTH, WEEK, DAYOFYEAR, QUARTER. Operators: =, !=, <, >, <=, >=, IN. Examples: \"col_date MONTH IN 6,7,8\", \"col_date YEAR = 2024\".")] IEnumerable<string>? datePartFilters = null,
-            [Description("Filter on the absolute difference in days between two date columns. Format: \"col_a col_b OPERATOR days\" — column order does not matter. Example: \"col_start_date col_submission_date < 7\" retrieves rows where the two dates are fewer than 7 days apart.")] string? dateDiffFilter = null)
+            [Description("Filter on the difference between two date/datetime columns. Format: \"col_a col_b OPERATOR value [UNIT]\" — UNIT is optional and defaults to DAYS. Allowed units: DAYS, HOURS, MINUTES. Examples: \"col_start col_submitted < 7\" (fewer than 7 days apart), \"col_start col_submitted < 48 HOURS\" (fewer than 48 hours apart).")] string? dateDiffFilter = null)
         {
             try
             {
@@ -93,16 +93,18 @@ public class FormDataQueryTool(
     {
         var sb = new StringBuilder();
         sb.Append("Retrieve specific rows from form submission data. ");
-        sb.Append("Use this tool when you need to inspect individual submissions — for example, to find records matching certain criteria or to read raw field values. ");
-        sb.Append($"For counting, grouping, or computing statistics prefer '{AggregateFormDataTool.Name}' instead. ");
+        sb.Append("Use ONLY to retrieve and display specific individual records — when the question asks 'which records', 'show me', 'list', 'find the rows'. ");
+        sb.Append($"PROHIBITED for any counting, summing, averaging, grouping, or statistics — use '{AggregateFormDataTool.Name}' for those. ");
+        sb.Append($"Using this tool for statistics gives WRONG ANSWERS because it sees at most {ExternalDatabaseClient.MaxRowsPerRequest} rows out of {rowCount:N0} total. ");
         sb.Append("Always specify selectColumns (only the columns you need) and filters to narrow the result set. ");
         sb.Append($"Returns at most {ExternalDatabaseClient.MaxRowsPerRequest} rows per call. ");
-        sb.Append($"NEVER paginate through all rows to perform analysis or compute statistics in memory — use '{AggregateFormDataTool.Name}' instead. ");
-        sb.Append($"Table: '{tableName}', total rows: {rowCount}. ");
+        sb.Append("NULL awareness: columns may contain NULL values. Use IS NULL / IS NOT NULL filters to explicitly include or exclude nulls. ");
+        sb.Append("Error recovery: if the tool returns a column error, check that all column names match the schema exactly (plain names, no quotes, no aliases). ");
         sb.Append("Available columns: ");
         sb.Append(string.Join(", ", columns.Select(c =>
         {
-            var desc = $"{c.Name} ({c.Type})";
+            var label = c.Label is not null && c.Label != c.Name ? $" \"{c.Label}\"" : string.Empty;
+            var desc = $"{c.Name}{label} ({c.Type})";
             if (c.EnumValues?.Count > 0)
             {
                 desc += $" [{string.Join("/", c.EnumValues)}]";

@@ -49,7 +49,6 @@ public class UserController(
     QueueWorkerReassign queueWorkerReassign,
     QueueWorkerUpdateUserType queueWorkerUpdateUserType,
     QueueWorkerRemove queueWorkerRemove,
-    TenantUtil tenantUtil,
     UserFormatter userFormatter,
     UserManagerWrapper userManagerWrapper,
     WebItemManager webItemManager,
@@ -171,18 +170,18 @@ public class UserController(
         //Set common fields
         user.FirstName = inDto.FirstName;
         user.LastName = inDto.LastName;
-        user.Title = inDto.Title;
+        //user.Title = inDto.Title;
         user.Location = inDto.Location;
         user.Notes = inDto.Comment;
 
-        if (inDto.Sex.HasValue)
-        {
-            user.Sex = inDto.Sex.Value == SexEnum.Male;
-        }
+        // if (inDto.Sex.HasValue)
+        // {
+        //     user.Sex = inDto.Sex.Value == SexEnum.Male;
+        // }
 
         user.Spam = inDto.Spam;
-        user.BirthDate = inDto.Birthday != null ? tenantUtil.DateTimeFromUtc(inDto.Birthday) : null;
-        user.WorkFromDate = inDto.Worksfrom != null ? tenantUtil.DateTimeFromUtc(inDto.Worksfrom) : DateTime.UtcNow.Date;
+        // user.BirthDate = inDto.Birthday != null ? tenantUtil.DateTimeFromUtc(inDto.Birthday) : null;
+        // user.WorkFromDate = inDto.Worksfrom != null ? tenantUtil.DateTimeFromUtc(inDto.Worksfrom) : DateTime.UtcNow.Date;
 
         await UpdateContactsAsync(inDto.Contacts, user);
 
@@ -317,18 +316,18 @@ public class UserController(
         user.CultureName = inDto.CultureName;
         user.FirstName = inDto.FirstName;
         user.LastName = inDto.LastName;
-        user.Title = inDto.Title;
+        //user.Title = inDto.Title;
         user.Location = inDto.Location;
         user.Notes = inDto.Comment;
 
-        if (inDto.Sex.HasValue)
-        {
-            user.Sex = inDto.Sex.Value == SexEnum.Male;
-        }
+        // if (inDto.Sex.HasValue)
+        // {
+        //     user.Sex = inDto.Sex.Value == SexEnum.Male;
+        // }
 
         user.Spam = inDto.Spam;
-        user.BirthDate = inDto.Birthday != null && inDto.Birthday != DateTime.MinValue ? tenantUtil.DateTimeFromUtc(inDto.Birthday) : null;
-        user.WorkFromDate = inDto.Worksfrom != null && inDto.Worksfrom != DateTime.MinValue ? tenantUtil.DateTimeFromUtc(inDto.Worksfrom) : DateTime.UtcNow.Date;
+        //user.BirthDate = inDto.Birthday != null && inDto.Birthday != DateTime.MinValue ? tenantUtil.DateTimeFromUtc(inDto.Birthday) : null;
+        //user.WorkFromDate = inDto.Worksfrom != null && inDto.Worksfrom != DateTime.MinValue ? tenantUtil.DateTimeFromUtc(inDto.Worksfrom) : DateTime.UtcNow.Date;
         user.Status = EmployeeStatus.Active;
 
         await UpdateContactsAsync(inDto.Contacts, user, false);
@@ -798,18 +797,22 @@ public class UserController(
         }
 
         var relations = await _userManager.GetUserRelationsAsync(currentUser.Id);
+        var users = await inDto.UserIds.ToAsyncEnumerable().Select(async (Guid x, CancellationToken _) => await _userManager.GetUsersAsync(x)).ToListAsync();
 
-        foreach (var userId in inDto.UserIds)
+
+        foreach (var user in users)
         {
-            var user = await _userManager.GetUsersAsync(userId);
             if (user.Equals(Constants.LostUser) ||
                 user.Status == EmployeeStatus.Terminated ||
                 !await _userManager.IsGuestAsync(user) ||
                 !relations.ContainsKey(user.Id))
             {
-                continue;
+                throw new SecurityException(Resource.ErrorAccessDenied);
             }
+        }
 
+        foreach (var user in users)
+        {
             var t1 = _userManager.DeleteUserRelationAsync(currentUser.Id, user.Id);
             var t2 = fileSecurity.RemoveSecuritiesAsync(user.Id, currentUser.Id, SubjectType.User);
 
@@ -1870,7 +1873,7 @@ public class UserController(
         var tenant = tenantManager.GetCurrentTenant();
         var self = securityContext.CurrentAccount.ID.Equals(user.Id);
         var currentUserIsOwner = securityContext.CurrentAccount.ID.IsOwner(tenant);
-        var currentUserIsDocSpaceAdmin = await _userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID);
+        //var currentUserIsDocSpaceAdmin = await _userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID);
         var userIsOwner = user.IsOwner(tenant);
         var userType = await _userManager.GetUserTypeAsync(user.Id);
 
@@ -1904,38 +1907,38 @@ public class UserController(
                 user.LastName = lastName;
                 user.Location = inDto.UpdateMember.Location ?? user.Location;
 
-                if (currentUserIsDocSpaceAdmin)
-                {
-                    user.Title = inDto.UpdateMember.Title ?? user.Title;
-                    user.WorkFromDate = inDto.UpdateMember.Worksfrom != null
-                        ? tenantUtil.DateTimeFromUtc(inDto.UpdateMember.Worksfrom)
-                        : user.WorkFromDate;
-                }
+                // if (currentUserIsDocSpaceAdmin)
+                // {
+                //     user.Title = inDto.UpdateMember.Title ?? user.Title;
+                //     user.WorkFromDate = inDto.UpdateMember.Worksfrom != null
+                //         ? tenantUtil.DateTimeFromUtc(inDto.UpdateMember.Worksfrom)
+                //         : user.WorkFromDate;
+                // }
             }
 
             user.Notes = inDto.UpdateMember.Comment ?? user.Notes;
 
-            user.Sex = inDto.UpdateMember.Sex switch
-            {
-                SexEnum.Male => true,
-                SexEnum.Female => false,
-                _ => user.Sex
-            };
+            // user.Sex = inDto.UpdateMember.Sex switch
+            // {
+            //     SexEnum.Male => true,
+            //     SexEnum.Female => false,
+            //     _ => user.Sex
+            // };
 
             user.Spam = inDto.UpdateMember.Spam;
 
-            user.BirthDate = inDto.UpdateMember.Birthday != null ? tenantUtil.DateTimeFromUtc(inDto.UpdateMember.Birthday) : user.BirthDate;
+            //user.BirthDate = inDto.UpdateMember.Birthday != null ? tenantUtil.DateTimeFromUtc(inDto.UpdateMember.Birthday) : user.BirthDate;
 
-            var resetDate = new DateTime(1900, 01, 01);
-            if (user.BirthDate == resetDate)
-            {
-                user.BirthDate = null;
-            }
-
-            if (user.WorkFromDate == resetDate)
-            {
-                user.WorkFromDate = null;
-            }
+            //var resetDate = new DateTime(1900, 01, 01);
+            // if (user.BirthDate == resetDate)
+            // {
+            //     user.BirthDate = null;
+            // }
+            //
+            // if (user.WorkFromDate == resetDate)
+            // {
+            //     user.WorkFromDate = null;
+            // }
 
             await UpdateContactsAsync(inDto.UpdateMember.Contacts, user);
             await UpdateDepartmentsAsync(inDto.UpdateMember.Department, user);
@@ -2224,9 +2227,15 @@ public class UserController(
     [Tags("People / User type")]
     [SwaggerResponse(200, "Update type progress", typeof(TaskProgressResponseDto))]
     [SwaggerResponse(400, "Can not update user type")]
+    [SwaggerResponse(403, "Access denied")]
     [HttpPost("type")]
     public async Task<TaskProgressResponseDto> StartUserTypeUpdate(StartUpdateUserTypeDto inDto)
     {
+        if (inDto.Type is not (EmployeeType.Guest or EmployeeType.User))
+        {
+            throw new ArgumentException($"Can not update to {inDto.Type}");
+        }
+
         await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(inDto.Type), Constants.Action_AddRemoveUser);
 
         if (inDto.Type is EmployeeType.Guest)
@@ -2254,11 +2263,6 @@ public class UserController(
             || user.Id == currentUser.Id)
         {
             throw new ArgumentException($"Can not update type");
-        }
-
-        if (inDto.Type is EmployeeType.RoomAdmin or EmployeeType.DocSpaceAdmin)
-        {
-            throw new ArgumentException($"Can not update to {inDto.Type}");
         }
 
         if (!currentUser.IsOwner(tenant) && userType is EmployeeType.DocSpaceAdmin)

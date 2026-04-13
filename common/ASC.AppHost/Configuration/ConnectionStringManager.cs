@@ -24,6 +24,11 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Logging;
+
+using StackExchange.Redis;
+
 #pragma warning disable ASPIREINTERACTION001
 
 namespace ASC.AppHost.Configuration;
@@ -39,7 +44,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
     private IResourceBuilder<MySqlDatabaseResource>? MySqlDatabaseResource { get; set; }
     private IResourceBuilder<RabbitMQServerResource>? RabbitMqResource { get; set; }
     private IResourceBuilder<RedisResource>? RedisResource { get; set; }
-    private IResourceBuilder<ExecutableResource>? MigrateResource { get; set; }
+    private IResourceBuilder<ProjectResource>? MigrateResource { get; set; }
     private IResourceBuilder<ContainerResource>? EditorResource { get; set; }
     private IResourceBuilder<MailPitContainerResource>? MailResource { get; set; }
     private IResourceBuilder<ContainerResource>? OpensearchResource { get; set; }
@@ -50,10 +55,14 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
     private Dictionary<string, string>? _parameters;
 
 
-    public ConnectionStringManager AddMySql(bool withDbGate = false)
+    public ConnectionStringManager AddMySql(bool withDbGate = false, bool withDataVolume = true)
     {
-        var mysqlResourceBuilder = builder.AddMySql("mysql")
-            .WithDataVolume("docspace-mysql-data");
+        var mysqlResourceBuilder = builder.AddMySql("mysql");
+
+        if (withDataVolume)
+        {
+            mysqlResourceBuilder = mysqlResourceBuilder.WithDataVolume("docspace-mysql-data");
+        }
 
         if (withDbGate)
         {
@@ -71,24 +80,15 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             }
         });
 
-        var executableName = OperatingSystem.IsWindows() ? "ASC.Migration.Runner.exe" : "ASC.Migration.Runner";
-        var path = Path.GetFullPath(Path.Combine("..", "Tools", "ASC.Migration.Runner", "bin", "Debug", executableName));
-
         MigrateResource = builder
-            .AddExecutable("migrate", path, Path.GetDirectoryName(path) ?? "")
+            .AddProject<ASC_Migration_Runner>("migrate")
             .WithReference(MySqlDatabaseResource)
             .WaitFor(MySqlDatabaseResource);
 
         var isStandalone = string.Compare(builder.Configuration["APP_HOSTING_STANDALONE"], "true", StringComparison.OrdinalIgnoreCase) == 0;
 
-        if (isStandalone)
-        {
-            MigrateResource.WithEnvironment("standalone", "true");
-        }
-        else
-        {
-            MigrateResource.WithEnvironment("standalone", "");
-        }
+        MigrateResource.WithEnvironment("standalone", isStandalone ? "true" : "");
+
 
         return this;
     }
@@ -116,6 +116,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
 #pragma warning disable ASPIRECERTIFICATES001
         RedisResource = builder
             .AddRedis("cache")
+            .WithClearCommand()
             .WithPassword(null)
             .WithoutHttpsCertificate();
 #pragma warning restore ASPIRECERTIFICATES001
@@ -203,21 +204,34 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         return this;
     }
 
-    public ConnectionStringManager AddOpensearch()
+    public ConnectionStringManager AddOpensearch(bool withDashboard = true, bool fixedPort = true)
     {
         OpensearchResource = builder
             .AddContainer(Constants.OpensearchContainer, "opensearchproject/opensearch", "2")
-            .WithHttpEndpoint(port: Constants.OpensearchPort, targetPort: Constants.OpensearchPort)
             .WithEnvironment("DISABLE_INSTALL_DEMO_CONFIG", "true")
             .WithEnvironment("plugins.security.disabled", "true")
             .WithEnvironment("discovery.type", "single-node")
             .WithEntrypoint("/bin/bash")
             .WithArgs("-c", "opensearch-plugin install ingest-attachment --batch && /usr/share/opensearch/opensearch-docker-entrypoint.sh");
 
-        builder.AddContainer("opensearch-dashboard", "opensearchproject/opensearch-dashboards", "2")
-            .WithHttpEndpoint(targetPort: 5601)
-            .WithEnvironment("OPENSEARCH_HOSTS", $"http://{Constants.OpensearchContainer}:{Constants.OpensearchPort.ToString()}")
-            .WithEnvironment("DISABLE_SECURITY_DASHBOARDS_PLUGIN", "true");
+        if (fixedPort)
+        {
+            OpensearchResource = OpensearchResource
+                .WithHttpEndpoint(port: Constants.OpensearchPort, targetPort: Constants.OpensearchPort, name: "http");
+        }
+        else
+        {
+            OpensearchResource = OpensearchResource
+                .WithHttpEndpoint(targetPort: Constants.OpensearchPort, name: "http");
+        }
+
+        if (withDashboard)
+        {
+            builder.AddContainer("opensearch-dashboard", "opensearchproject/opensearch-dashboards", "2")
+                .WithHttpEndpoint(targetPort: 5601)
+                .WithEnvironment("OPENSEARCH_HOSTS", $"http://{Constants.OpensearchContainer}:{Constants.OpensearchPort.ToString()}")
+                .WithEnvironment("DISABLE_SECURITY_DASHBOARDS_PLUGIN", "true");
+        }
 
         return this;
     }
@@ -523,4 +537,57 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
     }
 
     public static string? SubstituteLocalhost(string? host) => host?.Replace(KnownHostNames.Localhost, KnownHostNames.DockerDesktopHostBridge);
+}
+
+internal static class RedisResourceBuilderExtensions
+{
+    public static IResourceBuilder<RedisResource> WithClearCommand(
+        this IResourceBuilder<RedisResource> builder)
+    {
+        var commandOptions = new CommandOptions
+        {
+            UpdateState = OnUpdateResourceState,
+            IconName = "AnimalRabbitOff",
+            IconVariant = IconVariant.Filled
+        };
+
+        builder.WithCommand(
+            name: "clear-cache",
+            displayName: "Clear Cache",
+            executeCommand: context => OnRunClearCacheCommandAsync(builder, context),
+            commandOptions: commandOptions);
+
+        return builder;
+    }
+
+    private static async Task<ExecuteCommandResult> OnRunClearCacheCommandAsync(
+        IResourceBuilder<RedisResource> builder,
+        ExecuteCommandContext context)
+    {
+        var connectionString = await builder.Resource.GetConnectionStringAsync() ??
+                               throw new InvalidOperationException(
+                                   $"Unable to get the '{context.ResourceName}' connection string.");
+
+        await using var connection = await ConnectionMultiplexer.ConnectAsync(connectionString);
+        var database = connection.GetDatabase();
+        await database.ExecuteAsync("FLUSHALL");
+
+        return CommandResults.Success();
+    }
+
+    private static ResourceCommandState OnUpdateResourceState(
+        UpdateCommandStateContext context)
+    {
+        var logger = context.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Updating resource state: {ResourceSnapshot}",
+                context.ResourceSnapshot);
+        }
+
+        return context.ResourceSnapshot.HealthStatus is HealthStatus.Healthy
+            ? ResourceCommandState.Enabled
+            : ResourceCommandState.Disabled;
+    }
 }

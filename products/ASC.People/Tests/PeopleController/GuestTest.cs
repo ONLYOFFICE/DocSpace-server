@@ -27,7 +27,7 @@
 namespace ASC.People.Tests.PeopleController;
 
 [Collection("Test Collection")]
-public class GuestTest(PeopleFactory peopleFactory, WepApiFactory apiFactory) : BaseTest(peopleFactory, apiFactory)
+public class GuestTest(AspireAppFixture fixture) : BaseTest(fixture)
 {
     [Fact]
     public async Task CreateGuest_ShouldCreateGuestSuccessfully()

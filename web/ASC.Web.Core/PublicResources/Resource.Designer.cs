@@ -60,6 +60,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Agent.
+        /// </summary>
+        public static string AccountingCustomerOperationAgent {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationAgent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Contact.
         /// </summary>
         public static string AccountingCustomerOperationContact {
@@ -627,6 +636,69 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Database type.
+        /// </summary>
+        public static string ConsumersdatabaseType {
+            get {
+                return ResourceManager.GetString("ConsumersdatabaseType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Host.
+        /// </summary>
+        public static string ConsumersdbHost {
+            get {
+                return ResourceManager.GetString("ConsumersdbHost", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Database name.
+        /// </summary>
+        public static string ConsumersdbName {
+            get {
+                return ResourceManager.GetString("ConsumersdbName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Password.
+        /// </summary>
+        public static string ConsumersdbPassword {
+            get {
+                return ResourceManager.GetString("ConsumersdbPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Port.
+        /// </summary>
+        public static string ConsumersdbPort {
+            get {
+                return ResourceManager.GetString("ConsumersdbPort", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Use SSL.
+        /// </summary>
+        public static string ConsumersdbSsl {
+            get {
+                return ResourceManager.GetString("ConsumersdbSsl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User.
+        /// </summary>
+        public static string ConsumersdbUser {
+            get {
+                return ResourceManager.GetString("ConsumersdbUser", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to DocuSign.
         /// </summary>
         public static string ConsumersDocuSign {
@@ -787,15 +859,7 @@ namespace ASC.Web.Core.PublicResources {
                 return ResourceManager.GetString("ConsumersExternalDbInstruction", resourceCulture);
             }
         }
-        /// <summary>
-        ///   Looks up a localized string similar to Database type.
-        /// </summary>
-        public static string ConsumersdatabaseType {
-            get {
-                return ResourceManager.GetString("ConsumersdatabaseType", resourceCulture);
-            }
-        }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to SQLite is only available in Standalone installations..
         /// </summary>
@@ -804,60 +868,7 @@ namespace ASC.Web.Core.PublicResources {
                 return ResourceManager.GetString("ConsumersExternalDbSqliteStandaloneOnly", resourceCulture);
             }
         }
-        /// <summary>
-        ///   Looks up a localized string similar to Host.
-        /// </summary>
-        public static string ConsumersdbHost {
-            get {
-                return ResourceManager.GetString("ConsumersdbHost", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Port.
-        /// </summary>
-        public static string ConsumersdbPort {
-            get {
-                return ResourceManager.GetString("ConsumersdbPort", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Database name.
-        /// </summary>
-        public static string ConsumersdbName {
-            get {
-                return ResourceManager.GetString("ConsumersdbName", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to User.
-        /// </summary>
-        public static string ConsumersdbUser {
-            get {
-                return ResourceManager.GetString("ConsumersdbUser", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Password.
-        /// </summary>
-        public static string ConsumersdbPassword {
-            get {
-                return ResourceManager.GetString("ConsumersdbPassword", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Use SSL.
-        /// </summary>
-        public static string ConsumersdbSsl {
-            get {
-                return ResourceManager.GetString("ConsumersdbSsl", resourceCulture);
-            }
-        }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Test connection.
         /// </summary>
@@ -866,15 +877,10 @@ namespace ASC.Web.Core.PublicResources {
                 return ResourceManager.GetString("ConsumersExternalDbTestConnection", resourceCulture);
             }
         }
-
+        
         /// <summary>
-        ///   Looks up a localized string similar to SQLite file path.
+        ///   Looks up a localized string similar to Facebook.
         /// </summary>
-        public static string ConsumerssqliteFilePath {
-            get {
-                return ResourceManager.GetString("ConsumerssqliteFilePath", resourceCulture);
-            }
-        }
         public static string ConsumersFacebook {
             get {
                 return ResourceManager.GetString("ConsumersFacebook", resourceCulture);
@@ -1598,6 +1604,15 @@ namespace ASC.Web.Core.PublicResources {
         public static string Consumerssmscpsw {
             get {
                 return ResourceManager.GetString("Consumerssmscpsw", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to SQLite file path.
+        /// </summary>
+        public static string ConsumerssqliteFilePath {
+            get {
+                return ResourceManager.GetString("ConsumerssqliteFilePath", resourceCulture);
             }
         }
         
@@ -3785,6 +3800,15 @@ namespace ASC.Web.Core.PublicResources {
         public static string TfaTooMuchError {
             get {
                 return ResourceManager.GetString("TfaTooMuchError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User authentication failed.
+        /// </summary>
+        public static string UserAuthenticationFailed {
+            get {
+                return ResourceManager.GetString("UserAuthenticationFailed", resourceCulture);
             }
         }
         

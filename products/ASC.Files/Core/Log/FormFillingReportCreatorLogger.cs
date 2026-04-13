@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2026
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,40 +24,15 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-extern alias ASCPeople;
-using DocSpace.API.SDK.Api.Group;
-using DocSpace.API.SDK.Api.People;
+namespace ASC.Files.Core.Log;
 
-namespace ASC.Files.Tests.ApiFactories;
-
-public class PeopleFactory : WebApplicationFactory<PeopleProgram>, IAsyncLifetime
+internal static partial class FormFillingReportCreatorLogger
 {
-    public HttpClient HttpClient { get; private set; } = null!;
-    public ProfilesApi  ProfilesApi { get; private set; } = null!;
-    public UserStatusApi  UserStatusApi { get; private set; } = null!;
-    public GroupApi  GroupApi { get; private set; } = null!;
-    public PhotosApi  PhotosApi { get; private set; } = null!;
-    
-    protected override IHost CreateHost(IHostBuilder builder)
-    {
-        builder.ConfigureHostConfiguration(configBuilder =>
-        {
-            configBuilder.AddInMemoryCollection(Initializer.GlobalSettings);
-        });
+    [LoggerMessage(LogLevel.Warning, "Gap sync: skipped form_id={FormId} for table {TableName} — no FormsData in OpenSearch")]
+    public static partial void WarnGapSyncSkippedNoData(
+        this ILogger<FormFillingReportCreator> logger, int formId, string tableName);
 
-        return base.CreateHost(builder);
-    }
-
-    public ValueTask InitializeAsync()
-    {
-        HttpClient = CreateClient();
-
-        var configuration = new Configuration { BasePath = HttpClient.BaseAddress!.ToString().TrimEnd('/') };
-        ProfilesApi = new ProfilesApi(HttpClient, configuration);
-        GroupApi = new GroupApi(HttpClient, configuration);
-        UserStatusApi = new UserStatusApi(HttpClient, configuration);
-        PhotosApi = new PhotosApi(HttpClient, configuration);
-        
-        return ValueTask.CompletedTask;
-    }
+    [LoggerMessage(LogLevel.Error, "Gap sync: failed to upsert form_id={FormId} into table {TableName}")]
+    public static partial void ErrorGapSyncUpsertFailed(
+        this ILogger<FormFillingReportCreator> logger, Exception exception, int formId, string tableName);
 }

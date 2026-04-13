@@ -97,7 +97,7 @@ internal sealed class FlexibleStringArrayJsonConverter : JsonConverter<IEnumerab
 internal static class FormDataToolHelpers
 {
     internal static readonly HashSet<string> ValidDateParts =
-        new(["YEAR", "MONTH", "WEEK", "DAYOFYEAR", "QUARTER"], StringComparer.OrdinalIgnoreCase);
+        new(["YEAR", "MONTH", "WEEK", "DAYOFYEAR", "QUARTER", "DAYOFWEEK"], StringComparer.OrdinalIgnoreCase);
 
     internal static readonly JsonSerializerOptions FlexibleJsonOptions = new(JsonSerializerDefaults.Web)
     {
