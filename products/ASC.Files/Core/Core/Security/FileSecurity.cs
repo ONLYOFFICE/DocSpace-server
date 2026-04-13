@@ -1697,7 +1697,7 @@ public class FileSecurity(
                     }
                 }
 
-                if (file != null && room is {SettingsPrivate: true} &&
+                if ((file != null && room is {SettingsPrivate: true} || folder is {SettingsPrivate: true}) &&
                     action is
                         FilesSecurityActions.Convert or
                         FilesSecurityActions.AskAi or
