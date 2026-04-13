@@ -2124,6 +2124,9 @@ public class UserController(
 
                     await cookiesManager.ResetUserCookieAsync(user.Id);
                     messageService.Send(MessageAction.CookieSettingsUpdated);
+
+                    await quotaSocketManager.LogoutSession(user.Id);
+
                     if (await _userManager.IsGuestAsync(user))
                     {
                         await socketManager.UpdateGuestAsync(user);
