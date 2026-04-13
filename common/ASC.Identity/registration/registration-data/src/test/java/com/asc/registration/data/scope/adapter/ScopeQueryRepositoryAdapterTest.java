@@ -38,7 +38,8 @@ import com.asc.registration.data.scope.repository.JpaScopeRepository;
 import java.util.Collections;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -65,8 +66,18 @@ class ScopeQueryRepositoryAdapterTest {
     when(scopeDataAccessMapper.toDomain(any(ScopeEntity.class))).thenReturn(scope);
   }
 
-  @Test
-  void whenScopeIsFoundByName_thenReturnScope() {
+  private static void assertScopeFieldEquals(String field, Scope actual) {
+    switch (field) {
+      case "name" -> assertEquals("testScope", actual.getName());
+      case "group" -> assertEquals("testGroup", actual.getGroup());
+      case "type" -> assertEquals("testType", actual.getType());
+      default -> throw new IllegalArgumentException("Unknown field: " + field);
+    }
+  }
+
+  @ParameterizedTest
+  @CsvSource({"name", "group", "type"})
+  void whenScopeIsFoundByName_thenScopeFieldMatches(String field) {
     when(jpaScopeRepository.findById("testScope")).thenReturn(Optional.of(scopeEntity));
 
     var result = scopeQueryRepositoryAdapter.findByName("testScope");
@@ -75,11 +86,12 @@ class ScopeQueryRepositoryAdapterTest {
     verify(scopeDataAccessMapper, times(1)).toDomain(any(ScopeEntity.class));
 
     assertTrue(result.isPresent());
-    assertEquals("testScope", result.get().getName());
+    assertScopeFieldEquals(field, result.get());
   }
 
-  @Test
-  void whenAllScopesAreQueried_thenReturnAllScopes() {
+  @ParameterizedTest
+  @CsvSource({"name", "group", "type"})
+  void whenAllScopesAreQueried_thenFirstScopeFieldMatches(String field) {
     when(jpaScopeRepository.findAll()).thenReturn(Collections.singletonList(scopeEntity));
 
     var result = scopeQueryRepositoryAdapter.findAll();
@@ -88,6 +100,6 @@ class ScopeQueryRepositoryAdapterTest {
     verify(scopeDataAccessMapper, times(1)).toDomain(any(ScopeEntity.class));
 
     assertEquals(1, result.size());
-    assertEquals("testScope", result.iterator().next().getName());
+    assertScopeFieldEquals(field, result.iterator().next());
   }
 }

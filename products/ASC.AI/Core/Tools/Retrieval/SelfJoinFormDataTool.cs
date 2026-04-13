@@ -79,13 +79,21 @@ public class SelfJoinFormDataTool(
                 "All column names must be from the schema."
             )] IEnumerable<string> joinConditions,
             [Description(
-                "Columns to include from both records in the result. Use PLAIN column names — do NOT add 'a_'/'b_' prefixes. " +
-                "Each column appears twice: prefixed with 'a_' for record A and 'b_' for record B. " +
-                "Example: [\"col_employee\", \"col_start_date\"] produces a_col_employee, a_col_start_date, b_col_employee, b_col_start_date."
+                "Columns to include from both records in the result. Must be a JSON array of plain column name strings — one name per element. " +
+                "Do NOT add 'a_'/'b_' prefixes. Do NOT pass comma-separated names as one string. " +
+                "Wrong: [\"col_employee, col_start_date\"]. Correct: [\"col_employee\", \"col_start_date\"]. " +
+                "Each column appears twice in output: prefixed with 'a_' for record A and 'b_' for record B."
             )] IEnumerable<string>? displayColumns = null,
             [Description("Maximum number of matching pairs to return (1–500). Default: 100.")] int limit = 100,
-            [Description("Row-level filter conditions applied to both records with AND. Same format as query_form_data filters: \"column_name OPERATOR value\". Example: \"col_year = 2025\". Column-to-column comparison is also supported: \"col_start < col_end\".")] IEnumerable<string>? filters = null,
-            [Description("Date-part filter conditions applied to both records. Format: \"column_name DATE_PART OPERATOR value[,v2,...]\". DATE_PART: YEAR, MONTH, WEEK, QUARTER, DAYOFYEAR. Example: \"col_start_date YEAR = 2025\" to limit to records in 2025.")] IEnumerable<string>? datePartFilters = null)
+            [Description("Row-level filter conditions applied to both records with AND. Format: \"column_name OPERATOR value\". Operators: =, !=, <, >, <=, >=, LIKE, NOT LIKE, IS NULL, IS NOT NULL, IN, NOT IN. Examples: \"col_year = 2025\", \"col_status IN approved,pending\". Column-to-column comparison: \"col_start < col_end\". IMPORTANT: use only PLAIN column names from the schema — never use output-prefixed names like 'a_pk', 'b_pk', 'a_col_employee', 'b_col_employee'. Those prefixes exist only in the result, not as filter columns.")] IEnumerable<string>? filters = null,
+            [Description("Date-part filter conditions applied to both records. Format: \"column_name DATE_PART OPERATOR value[,v2,...]\". DATE_PART: YEAR, MONTH, WEEK, QUARTER, DAYOFYEAR, DAYOFWEEK. DAYOFWEEK: 1=Sunday, 2=Monday, …, 7=Saturday. Example: \"col_start_date YEAR = 2025\" to limit to records in 2025.")] IEnumerable<string>? datePartFilters = null,
+            [Description(
+                "When set, returns a single count of distinct values of this column from the matching side (record A) " +
+                "instead of returning individual pairs. Use when the question asks 'how many distinct employees/items have " +
+                "overlapping or conflicting records?' — e.g. countDistinctColumn='col_employee'. " +
+                "Returns [{\"count\": N}]. Specify a plain column name from the schema. " +
+                "Do NOT use this when you need to inspect the individual pairs."
+            )] string? countDistinctColumn = null)
         {
             try
             {
@@ -114,7 +122,7 @@ public class SelfJoinFormDataTool(
                 var parsedDatePartFilters = cleanDatePartFilters.Select(DatePartFilter.Parse);
                 var result = await externalDatabaseClient.SelfJoinAsync(
                     tableName, allowedColumns, pkName, parsedJoinList, displayColumns, limit,
-                    parsedFilters, parsedDatePartFilters);
+                    parsedFilters, parsedDatePartFilters, countDistinctColumn);
                 return new ToolResponse<string> { Data = result };
             }
             catch (Exception e)
@@ -138,8 +146,9 @@ public class SelfJoinFormDataTool(
         var parsed = new List<SelfJoinCondition>();
         var datePart = new List<string>();
 
-        foreach (var cond in joinConditions)
+        foreach (var rawCond in joinConditions)
         {
+            var cond = rawCond.Trim();
             var parts = cond.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
             if (parts.Length >= 3 && FormDataToolHelpers.ValidDateParts.Contains(parts[1]))
@@ -205,18 +214,33 @@ public class SelfJoinFormDataTool(
         sb.Append("(3) same value across multiple records — \"submitted on the same date\", \"same employee appears twice\"; ");
         sb.Append("(4) any comparison between two different rows of the form \"find pairs where...\". ");
         sb.Append("DO NOT use query_form_data to fetch all rows for manual comparison — always use this tool instead. ");
-        sb.Append("joinConditions format: \"left_col OPERATOR right_col\" — plain column names only, NO 'a_'/'b_' prefixes. ");
+        sb.Append("RECORD A vs RECORD B: each joinCondition compares a column from record A (left side) against a column from record B (right side). ");
+        sb.Append("Use plain column names — do NOT add 'a_'/'b_' prefixes in joinConditions (those prefixes appear ONLY in output columns). ");
         sb.Append("Operators: =, !=, <, >, <=, >=. ");
-        sb.Append("Overlap example: joinConditions=[\"col_start_date <= col_end_date\", \"col_end_date >= col_start_date\"]. ");
-        sb.Append("To filter results by year/month add datePartFilters: e.g. datePartFilters=[\"col_start_date YEAR = 2025\"]. ");
-        sb.Append("Same-date example: joinConditions=[\"col_submission_date = col_submission_date\"]. ");
+        sb.Append("Overlap operators — CHOOSE based on column type: ");
+        sb.Append("(1) Date-only columns or 'same day' questions → use <= and >= (touching endpoints share a calendar day): joinConditions=[\"col_start <= col_end\", \"col_end >= col_start\"]. ");
+        sb.Append("(2) DateTime/time columns or 'strict overlap / no touching' questions → use < and > (touching at an instant does not count): joinConditions=[\"col_start < col_end\", \"col_end > col_start\"]. ");
+        sb.Append("Do NOT blindly copy the operator from examples — pick <= vs < based on semantics. ");
+        sb.Append("CRITICAL — same-entity overlaps: to find overlaps for the SAME employee/entity, you MUST include an equality condition on the entity column. ");
+        sb.Append("Wrong (finds overlaps across ALL records regardless of employee): joinConditions=[\"col_start <= col_end\", \"col_end >= col_start\"]. ");
+        sb.Append("Correct (same entity overlapping): joinConditions=[\"col_entity = col_entity\", \"col_start <= col_end\", \"col_end >= col_start\"]. ");
+        sb.Append("SAME CALENDAR DAY constraint ('on the same day'): when both records must fall on the same calendar day, add YEAR and DAYOFYEAR cross-row conditions: ");
+        sb.Append("joinConditions=[\"col_entity = col_entity\", \"col_start YEAR = col_start YEAR\", \"col_start DAYOFYEAR = col_start DAYOFYEAR\", \"col_start < col_end\", \"col_end > col_start\"]. ");
+        sb.Append("Without YEAR+DAYOFYEAR conditions the tool finds overlaps spanning DIFFERENT days (e.g. Mar28–Apr1 overlaps Mar31–Apr3) which overcounts the result. ");
+        sb.Append("WARNING: when 'col_date YEAR = col_date YEAR' is already in joinConditions (cross-row), do NOT also add datePartFilters=[\"col_date YEAR = YYYY\"] — that restricts to one year only and gives wrong counts when the question covers all time. ");
+        sb.Append("Same-date across all: joinConditions=[\"col_submission_date = col_submission_date\"]. ");
         sb.Append("Different employees same start: joinConditions=[\"col_start_date = col_start_date\", \"col_employee != col_employee\"]. ");
+        sb.Append("To filter by year/month add datePartFilters: e.g. datePartFilters=[\"col_start_date YEAR = 2025\"]. ");
+        sb.Append("NULL awareness: NULL values in join columns will not match any row including other NULLs — pre-filter with IS NOT NULL if needed. ");
+        sb.Append("Scale note: returns at most 500 pairs. On large tables apply filters or datePartFilters first to restrict the pair space. ");
+        sb.Append("Error recovery: if joinConditions is empty after parsing, check that each entry uses format 'plain_col OPERATOR plain_col'. Date-part cross-row: 'col_date YEAR = col_date YEAR' (not 'col_date_YEAR = col_date_YEAR'). ");
         sb.Append("Each result row contains a_pk and b_pk (the pair) plus displayColumns prefixed with a_ and b_. ");
         sb.Append($"Table: '{tableName}'. ");
         sb.Append("Available columns: ");
         sb.Append(string.Join(", ", columns.Select(c =>
         {
-            var desc = $"{c.Name} ({c.Type})";
+            var label = c.Label is not null && c.Label != c.Name ? $" \"{c.Label}\"" : string.Empty;
+            var desc = $"{c.Name}{label} ({c.Type})";
             return c.EnumValues?.Count > 0 ? desc + $" [{string.Join("/", c.EnumValues)}]" : desc;
         })));
         sb.Append('.');

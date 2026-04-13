@@ -7,7 +7,7 @@
       "url": "https://helpdesk.onlyoffice.com/hc/en-us",
       "email": "support@onlyoffice.com"
     },
-    "version": "3.6.0",
+    "version": "3.7.0",
     "x-scalar-sdk-installation": [
       {
         "lang": "Node",
@@ -5061,13 +5061,20 @@
         ],
         "responses": {
           "200": {
-            "description": "XLSX report generation has been queued"
+            "description": "Original form file information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileIntegerWrapper"
+                }
+              }
+            }
           },
           "403": {
             "description": "You do not have enough permissions to perform this action"
           },
           "404": {
-            "description": "Form file not found"
+            "description": "File not found"
           },
           "401": {
             "description": "Unauthorized"
@@ -8319,6 +8326,79 @@
             }
           }
         }
+      }
+    },
+    "/api/2.0/files/folder/{folderId}/xlsx": {
+      "post": {
+        "tags": [
+          "Files / Folders"
+        ],
+        "summary": "Generate XLSX report by folder",
+        "description": "Triggers asynchronous XLSX report generation for the specified form results folder.",
+        "operationId": "generateXlsxByFolder",
+        "parameters": [
+          {
+            "name": "folderId",
+            "in": "path",
+            "description": "The folder unique identifier.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Original form file information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileIntegerWrapper"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "You do not have enough permissions to perform this action"
+          },
+          "404": {
+            "description": "Form results folder not found"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": []
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": []
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": []
+          }
+        ]
       }
     },
     "/api/2.0/files/folder/{folderId}": {
@@ -19585,7 +19665,7 @@
         "tags": [
           "OAuth 2.0 / Authorization"
         ],
-        "summary": "OAuth2 authorization endpoint",
+        "summary": "OAuth2 Authorization Endpoint",
         "description": "Initiates the OAuth2 authorization flow.",
         "operationId": "authorizeOAuth",
         "parameters": [
@@ -19640,10 +19720,7 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "x-signature": []
           }
         ]
       },
@@ -19652,7 +19729,7 @@
           "OAuth 2.0 / Authorization"
         ],
         "summary": "OAuth2 consent endpoint",
-        "description": "Sends a consent request with the specified parameters.",
+        "description": "Sends consent approval",
         "operationId": "submitConsent",
         "requestBody": {
           "content": {
@@ -19690,10 +19767,7 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "x-signature": []
           }
         ]
       }
@@ -19703,8 +19777,8 @@
         "tags": [
           "OAuth 2.0 / Authorization"
         ],
-        "summary": "OAuth2 token endpoint",
-        "description": "Exchanges an authorization code specified in the request for the access token.",
+        "summary": "OAuth2 Token Endpoint",
+        "description": "Exchange authorization code for access token",
         "operationId": "exchangeToken",
         "requestBody": {
           "content": {
@@ -19744,7 +19818,7 @@
         },
         "responses": {
           "200": {
-            "description": "The authorization code was successfully exchanged for the access token",
+            "description": "Successfully exchanged authorization code for access token",
             "content": {
               "application/json": {
                 "schema": {
@@ -19781,6 +19855,26 @@
         }
       }
     },
+    "/.well-known/oauth-authorization-server": {
+      "options": {
+        "tags": [
+          "OAuth 2.0 / Discovery"
+        ],
+        "operationId": "handleOptions",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/2.0/clients/{clientId}": {
       "get": {
         "tags": [
@@ -19793,7 +19887,7 @@
           {
             "name": "clientId",
             "in": "path",
-            "description": "The client identifier.",
+            "description": "ID of the client to retrieve",
             "required": true,
             "schema": {
               "minLength": 1,
@@ -19851,7 +19945,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19861,7 +19955,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19871,7 +19965,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19881,7 +19975,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19891,7 +19985,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19899,10 +19993,7 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "x-signature": []
           }
         ]
       },
@@ -19911,13 +20002,13 @@
           "OAuth 2.0 / Client Management"
         ],
         "summary": "Update an existing OAuth2 client",
-        "description": "Updates the configuration of an existing OAuth2 client, allowing modifications to the client name, description, redirect URIs, and other settings. The client ID cannot be modified.",
+        "description": "Updates the configuration of an existing OAuth2 client. Allows modification of client name, description, redirect URIs, and other settings. The client ID cannot be modified.",
         "operationId": "updateClient",
         "parameters": [
           {
             "name": "clientId",
             "in": "path",
-            "description": "The client identifier.",
+            "description": "ID of the client to update",
             "required": true,
             "schema": {
               "minLength": 1,
@@ -19952,7 +20043,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19962,7 +20053,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19972,7 +20063,17 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported media type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19982,7 +20083,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19992,7 +20093,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -20000,10 +20101,7 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "x-signature": []
           }
         ]
       },
@@ -20012,13 +20110,13 @@
           "OAuth 2.0 / Client Management"
         ],
         "summary": "Delete an OAuth2 client",
-        "description": "Permanently deletes an OAuth2 client and all associated data. All access and refresh tokens issued to this client will be invalidated. This operation cannot be undone.",
+        "description": "Permanently deletes an OAuth2 client and all associated data. This will invalidate all access tokens and refresh tokens issued to this client. This operation cannot be undone.",
         "operationId": "deleteClient",
         "parameters": [
           {
             "name": "clientId",
             "in": "path",
-            "description": "The client identifier.",
+            "description": "ID of the client to delete",
             "required": true,
             "schema": {
               "minLength": 1,
@@ -20043,7 +20141,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -20053,7 +20151,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -20063,7 +20161,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -20073,7 +20171,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -20083,7 +20181,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -20091,10 +20189,7 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "x-signature": []
           }
         ]
       }
@@ -20104,27 +20199,28 @@
         "tags": [
           "OAuth 2.0 / Client Querying"
         ],
-        "summary": "Get clients",
-        "description": "Retrieves a paginated list of OAuth2 clients. The results can be paginated using the 'limit' parameter and the last seen client ID or creation date.",
+        "summary": "List clients",
+        "description": "Retrieves a paginated list of OAuth2 clients. The results can be paginated using the limit parameter and last seen client ID/creation date.",
         "operationId": "getClients",
         "parameters": [
           {
             "name": "limit",
             "in": "query",
-            "description": "The maximum number of results returned per page.",
+            "description": "Pagination limit",
             "required": true,
             "schema": {
               "maximum": 50,
               "minimum": 1,
               "type": "integer",
-              "format": "int32"
+              "format": "int32",
+              "default": 30
             },
             "example": 1
           },
           {
             "name": "last_client_id",
             "in": "query",
-            "description": "The ID of the last retrieved client.",
+            "description": "ID of the last retrieved client",
             "required": false,
             "schema": {
               "type": "string"
@@ -20134,7 +20230,7 @@
           {
             "name": "last_created_on",
             "in": "query",
-            "description": "The creation date of the last retrieved client.",
+            "description": "Date of the last retrieved client",
             "required": false,
             "schema": {
               "type": "string",
@@ -20199,17 +20295,17 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
           },
           "403": {
-            "description": "Insufficient permissions to create a client list",
+            "description": "Insufficient permissions to list clients",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -20219,7 +20315,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -20229,7 +20325,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -20237,10 +20333,7 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "x-signature": []
           }
         ]
       },
@@ -20310,17 +20403,27 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
           },
           "403": {
-            "description": "Insufficient permissions to create a client",
+            "description": "Insufficient permissions to create client",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported media type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -20330,7 +20433,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -20340,7 +20443,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -20348,10 +20451,62 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
+            "x-signature": []
+          }
             ]
+      },
+      "delete": {
+        "tags": [
+          "OAuth 2.0 / Client Management"
+        ],
+        "summary": "Delete all user OAuth2 clients",
+        "description": "Permanently deletes user OAuth2 clients and all associated data. This will invalidate all access tokens and refresh tokens issued to this client. This operation cannot be undone.",
+        "operationId": "deleteUserClients",
+        "responses": {
+          "200": {
+            "description": "Client successfully deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+          }
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient permissions to delete user clients",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests - rate limit exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error occurred",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "x-signature": []
           }
         ]
       }
@@ -20361,14 +20516,14 @@
         "tags": [
           "OAuth 2.0 / Client Management"
         ],
-        "summary": "Regenerate the client secret",
+        "summary": "Regenerate client secret",
         "description": "Generates a new client secret for the specified OAuth2 client. The old secret will be immediately invalidated. This operation should be used with caution as it requires updating the secret in all client applications.",
         "operationId": "regenerateSecret",
         "parameters": [
           {
             "name": "clientId",
             "in": "path",
-            "description": "The client identifier.",
+            "description": "ID of the client to regenerate secret for",
             "required": true,
             "schema": {
               "minLength": 1,
@@ -20396,7 +20551,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -20406,7 +20561,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -20416,7 +20571,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -20426,7 +20581,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -20436,7 +20591,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -20444,10 +20599,7 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "x-signature": []
           }
         ]
       }
@@ -20457,14 +20609,14 @@
         "tags": [
           "OAuth 2.0 / Client Management"
         ],
-        "summary": "Change the client activation status",
+        "summary": "Change client activation status",
         "description": "Activates or deactivates an OAuth2 client. When deactivated, the client cannot request new access tokens, but existing tokens will remain valid until they expire.",
         "operationId": "changeActivation",
         "parameters": [
           {
             "name": "clientId",
             "in": "path",
-            "description": "The client identifier.",
+            "description": "ID of the client to change activation for",
             "required": true,
             "schema": {
               "minLength": 1,
@@ -20499,7 +20651,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -20509,7 +20661,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -20519,7 +20671,17 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported media type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -20529,7 +20691,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -20539,7 +20701,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -20547,10 +20709,7 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "x-signature": []
           }
         ]
       }
@@ -20560,7 +20719,7 @@
         "tags": [
           "OAuth 2.0 / Scope Management"
         ],
-        "summary": "Get available OAuth2 scopes",
+        "summary": "List available OAuth2 scopes",
         "description": "Retrieves a list of all available OAuth2 scopes for the specified tenant. The scopes define the permissions that can be requested by OAuth2 clients. The list is ordered alphabetically, with the 'openid' scope always appearing first.",
         "operationId": "getScopes",
         "responses": {
@@ -20586,17 +20745,17 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
           },
           "403": {
-            "description": "Insufficient permissions to get a list of scopes",
+            "description": "Insufficient permissions to list scopes",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -20606,7 +20765,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -20616,7 +20775,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -20624,10 +20783,7 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "x-signature": []
           }
         ]
       }
@@ -20637,14 +20793,13 @@
         "tags": [
           "OAuth 2.0 / Client Querying"
         ],
-        "summary": "Get public client information",
-        "description": "Returns the public information for a client with the ID secified din the request.",
+        "summary": "Handles the GET request for public client information",
         "operationId": "getPublicClientInfo",
         "parameters": [
           {
             "name": "clientId",
             "in": "path",
-            "description": "The client identifier.",
+            "description": "ID of the client to retrieve",
             "required": true,
             "schema": {
               "minLength": 1,
@@ -20693,7 +20848,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -20709,14 +20864,14 @@
         "tags": [
           "OAuth 2.0 / Client Querying"
         ],
+        "summary": "Retrieves detailed information for a specific client",
         "operationId": "getClientInfo",
-        "summary": "Get detailed client information",
         "description": "Retrieves the detailed information for a client with the ID specified in the request.",
         "parameters": [
           {
             "name": "clientId",
             "in": "path",
-            "description": "The client identifier.",
+            "description": "ID of the client to retrieve",
             "required": true,
             "schema": {
               "minLength": 1,
@@ -20765,7 +20920,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -20776,10 +20931,7 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "x-signature": []
           }
         ]
       }
@@ -20789,14 +20941,14 @@
         "tags": [
           "OAuth 2.0 / Client Querying"
         ],
-        "summary": "Get detailed information of clients",
+        "summary": "Retrieves a pageable list of client information",
         "description": "Retrieves a paginated list of information for all clients.",
         "operationId": "getClientsInfo",
         "parameters": [
           {
             "name": "limit",
             "in": "query",
-            "description": "The maximum number of results returned per page.",
+            "description": "Pagination limit",
             "required": true,
             "schema": {
               "maximum": 50,
@@ -20809,7 +20961,7 @@
           {
             "name": "last_client_id",
             "in": "query",
-            "description": "The identifier of the last retrieved client.",
+            "description": "ID of the last retrieved client",
             "required": false,
             "schema": {
               "type": "string"
@@ -20819,7 +20971,7 @@
           {
             "name": "last_created_on",
             "in": "query",
-            "description": "The creation date of the last retrieved client.",
+            "description": "Date of the last retrieved client",
             "required": false,
             "schema": {
               "type": "string",
@@ -20847,7 +20999,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -20858,10 +21010,7 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "x-signature": []
           }
         ]
       }
@@ -20871,14 +21020,14 @@
         "tags": [
           "OAuth 2.0 / Client Querying"
         ],
-        "summary": "Get user consents",
+        "summary": "Retrieves a pageable list of consents",
         "description": "Retrieves a paginated list of user consents.",
         "operationId": "getConsents",
         "parameters": [
           {
             "name": "limit",
             "in": "query",
-            "description": "The maximum number of results returned per page.",
+            "description": "Pagination limit",
             "required": true,
             "schema": {
               "maximum": 50,
@@ -20891,7 +21040,7 @@
           {
             "name": "last_modified_on",
             "in": "query",
-            "description": "The date when the user consent was last modified.",
+            "description": "Date of the last retrieved consent",
             "required": false,
             "schema": {
               "type": "string",
@@ -20949,10 +21098,7 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "x-signature": []
           }
         ]
       }
@@ -20969,7 +21115,7 @@
           {
             "name": "clientId",
             "in": "path",
-            "description": "The client identifier.",
+            "description": "ID of the client to revoke consent for",
             "required": true,
             "schema": {
               "minLength": 1,
@@ -20994,7 +21140,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -21004,7 +21150,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -21014,7 +21160,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -21024,7 +21170,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -21034,7 +21180,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -21044,7 +21190,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -21052,10 +21198,64 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
+            "x-signature": []
+          }
             ]
+          }
+    },
+    "/api/2.0/clients/tenant": {
+      "delete": {
+        "tags": [
+          "OAuth 2.0 / Client Management"
+        ],
+        "summary": "Delete all tenant OAuth2 clients",
+        "description": "Permanently deletes tenant OAuth2 clients and all associated data. This will invalidate all access tokens and refresh tokens issued to this client. This operation cannot be undone.",
+        "operationId": "deleteTenantClients",
+        "responses": {
+          "200": {
+            "description": "Client successfully deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient permissions to delete tenant clients",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests - rate limit exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error occurred",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "x-signature": []
           }
         ]
       }
@@ -42999,6 +43199,9 @@
                   },
                   "UseChat": {
                     "type": "boolean"
+                  },
+                  "UpdateXlsx": {
+                    "type": "boolean"
                   }
                 },
                 "additionalProperties": false,
@@ -50434,6 +50637,9 @@
                   },
                   "UseChat": {
                     "type": "boolean"
+                  },
+                  "UpdateXlsx": {
+                    "type": "boolean"
                   }
                 },
                 "additionalProperties": false,
@@ -57193,64 +57399,88 @@
         "additionalProperties": false,
         "description": "The document watermark parameters."
       },
-      "ErrorResponse": {
+      "ProblemDetail": {
         "type": "object",
         "properties": {
-          "reason": {
-            "description": "The human-readable error explanation.",
+          "type": {
+            "type": "string",
+            "format": "uri"
+          },
+          "title": {
             "type": "string"
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "instance": {
+            "type": "string",
+            "format": "uri"
+          },
+          "properties": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
           }
+          }
+        }
         },
-        "description": "The error response containing the human-readable error explanation."
-      },
       "UpdateClientRequest": {
         "type": "object",
         "properties": {
           "name": {
             "minLength": 1,
             "type": "string",
-            "description": "The client name.",
+            "description": "The name of the client",
             "example": "Updated Client"
           },
           "description": {
             "maxLength": 255,
             "minLength": 0,
             "type": "string",
-            "description": "The client description",
+            "description": "The description of the client",
             "example": "Updated description of the client"
           },
           "logo": {
             "minLength": 1,
             "pattern": "^data:image\\/(?:png|jpeg|jpg|svg\\+xml);base64,.*.{1,}",
             "type": "string",
-            "description": "The client logo in base64 format.",
+            "description": "The logo of the client in base64 format",
             "example": "data:image/png;base64,..."
+          },
+          "public": {
+            "type": "boolean"
           },
           "allow_pkce": {
             "type": "boolean",
-            "description": "Indicates whether PKCE is allowed for the client.",
+            "description": "Indicates whether PKCE is allowed for the client",
             "example": true
           },
           "is_public": {
             "type": "boolean",
-            "description": "Indicates whether the client is accessible by third-party tenants.",
+            "description": "Indicates whether client is accessible by third-party tenants",
             "example": false
           },
           "allowed_origins": {
+            "maxItems": 12,
+            "minItems": 1,
             "uniqueItems": true,
             "type": "array",
-            "description": "The allowed origins for the client.",
+            "description": "The allowed origins for the client",
             "example": [
               "http://allowed.origin"
             ],
             "items": {
               "type": "string",
-              "description": "The allowed origins for the client.",
+              "description": "The allowed origins for the client",
               "example": "[\"http://allowed.origin\"]"
             }
           }
         },
-        "description": "The request for updating client details."
+        "description": "Client update request containing modified client details"
       },
       "ClientResponse": {
         "type": "object",
@@ -57378,97 +57608,104 @@
             "maxLength": 255,
             "minLength": 0,
             "type": "string",
-            "description": "The client description.",
+            "description": "The description of the client",
             "example": "Description of the client"
           },
           "logo": {
             "minLength": 1,
             "pattern": "^data:image\\/(?:png|jpeg|jpg|svg\\+xml);base64,.*.{1,}",
             "type": "string",
-            "description": "The client logo in base64 format.",
+            "description": "The logo of the client in base64 format",
             "example": "data:image/png;base64,..."
           },
           "scopes": {
             "minItems": 1,
             "uniqueItems": true,
             "type": "array",
-            "description": "The client scopes.",
+            "description": "The scopes for the client",
             "example": [
               "read",
               "write"
             ],
             "items": {
               "type": "string",
-              "description": "The client scopes.",
+              "description": "The scopes for the client",
               "example": "[\"read\",\"write\"]"
             }
           },
+          "public": {
+            "type": "boolean"
+          },
           "allow_pkce": {
             "type": "boolean",
-            "description": "Indicates whether PKCE is allowed for the client.",
+            "description": "Indicates whether PKCE is allowed for the client",
             "example": true
           },
           "is_public": {
             "type": "boolean",
-            "description": "Indicates whether the client is accessible by third-party tenants.",
+            "description": "Indicates if the client is public",
             "example": false
           },
           "website_url": {
             "minLength": 1,
-            "pattern": "^(https?://)?(([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}|localhost|[a-zA-Z0-9-]+)(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$",
+            "pattern": "^(https?://)?([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$",
             "type": "string",
-            "description": "The URL to the client's website.",
+            "description": "The website URL of the client",
             "example": "http://example.com"
           },
           "terms_url": {
             "minLength": 1,
-            "pattern": "^(https?://)?(([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}|localhost|[a-zA-Z0-9-]+)(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$",
+            "pattern": "^(https?://)?([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$",
             "type": "string",
-            "description": "The URL to the client's terms of service.",
+            "description": "The terms URL of the client",
             "example": "http://example.com/terms"
           },
           "policy_url": {
             "minLength": 1,
-            "pattern": "^(https?://)?(([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}|localhost|[a-zA-Z0-9-]+)(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$",
+            "pattern": "^(https?://)?([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$",
             "type": "string",
-            "description": "The URL to the client's privacy policy.",
+            "description": "The policy URL of the client",
             "example": "http://example.com/policy"
           },
           "redirect_uris": {
+            "maxItems": 12,
+            "minItems": 1,
             "uniqueItems": true,
             "type": "array",
-            "description": "The list of allowed redirect URIs.",
+            "description": "The redirect URIs for the client",
             "example": [
               "http://example.com/redirect"
             ],
             "items": {
               "type": "string",
-              "description": "The list of allowed redirect URIs.",
+              "description": "The redirect URIs for the client",
               "example": "[\"http://example.com/redirect\"]"
             }
           },
           "allowed_origins": {
+            "maxItems": 12,
+            "minItems": 1,
             "uniqueItems": true,
             "type": "array",
-            "description": "The list of allowed CORS origins.",
+            "description": "The allowed origins for the client",
             "example": [
               "http://example.com"
             ],
             "items": {
               "type": "string",
-              "description": "The list of allowed CORS origins.",
+              "description": "The allowed origins for the client",
               "example": "[\"http://example.com\"]"
             }
           },
           "logout_redirect_uri": {
             "minLength": 1,
-            "pattern": "^(https?://)?(([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}|localhost|[a-zA-Z0-9-]+)(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$",
+            "pattern": "^(https?://)?([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$",
             "type": "string",
-            "description": "The list of allowed logout redirect URIs.",
+            "description": "The logout redirect URI for the client",
             "example": "http://example.com/logout"
           }
         },
-        "description": "The request parameters for creating a client."
+        "description": "Client creation request containing client details"
       },
       "ClientSecretResponse": {
         "type": "object",
@@ -57488,11 +57725,11 @@
         "properties": {
           "status": {
             "type": "boolean",
-            "description": "The client activation status.",
+            "description": "The activation status of the client",
             "example": true
           }
         },
-        "description": "The request parameters for changing the client activation status."
+        "description": "Client activation change request"
       },
       "ScopeResponse": {
         "type": "object",
@@ -57555,6 +57792,9 @@
             "items": {
               "type": "string"
             }
+          },
+          "public": {
+            "type": "boolean"
           },
           "client_id": {
             "type": "string",
@@ -70081,8 +70321,12 @@
       "x-displayName": "Authorization"
     },
     {
+      "name": "OAuth 2.0 / Discovery",
+      "x-displayName": "Discovery"
+    },
+    {
       "name": "OAuth 2.0 / Client Management",
-      "description": "APIs for managing OAuth2 clients, including creation, updates, deletion, and activation.",
+      "description": "APIs for managing OAuth2 clients including creation, updates, deletion and activation",
       "x-displayName": "Client Management"
     },
     {
@@ -70415,6 +70659,7 @@
         "OAuth 2.0 / Authorization",
         "OAuth 2.0 / Client Management",
         "OAuth 2.0 / Client Querying",
+        "OAuth 2.0 / Discovery",
         "OAuth 2.0 / Scope Management"
       ]
     },

@@ -38,11 +38,13 @@ public class FilesControllerInternal(
     FileShareDtoHelper fileShareDtoHelper,
     HistoryApiHelper historyApiHelper,
     IFusionCache hybridCache,
+    EditHistoryMapper editHistoryMapper,
     IDaoFactory daoFactory, 
     FileSecurity fileSecurity, 
     EncryptionKeyPairDtoHelper encryptionKeyPairDtoHelper,
     AuthContext authContext)
-    : FilesController<int>(filesControllerHelper,
+    : FilesController<int>(
+        filesControllerHelper,
         fileStorageService,
         fileOperationsManager,
         fileOperationDtoHelper,
@@ -51,6 +53,7 @@ public class FilesControllerInternal(
         apiContext,
         fileShareDtoHelper,
         hybridCache,
+        editHistoryMapper,
         daoFactory,
         fileSecurity,
         encryptionKeyPairDtoHelper,
@@ -85,6 +88,7 @@ public class FilesControllerThirdparty(
     ApiContext apiContext,
     FileShareDtoHelper fileShareDtoHelper,
     IFusionCache hybridCache,
+    EditHistoryMapper editHistoryMapper,
     IDaoFactory daoFactory, 
     FileSecurity fileSecurity, 
     EncryptionKeyPairDtoHelper encryptionKeyPairDtoHelper,
@@ -98,6 +102,7 @@ public class FilesControllerThirdparty(
         apiContext,
         fileShareDtoHelper,
         hybridCache,
+        editHistoryMapper,
         daoFactory,
         fileSecurity,
         encryptionKeyPairDtoHelper,
@@ -113,6 +118,7 @@ public abstract class FilesController<T>(
     ApiContext apiContext,
     FileShareDtoHelper fileShareDtoHelper,
     IFusionCache hybridCache,
+    EditHistoryMapper editHistoryMapper,
     IDaoFactory daoFactory, 
     FileSecurity fileSecurity, 
     EncryptionKeyPairDtoHelper encryptionKeyPairDtoHelper,
@@ -311,7 +317,7 @@ public abstract class FilesController<T>(
     [HttpGet("file/{fileId}/edit/history")]
     public IAsyncEnumerable<EditHistoryDto> GetEditHistory(FileIdRequestDto<T> inDto)
     {
-        return filesControllerHelper.GetEditHistoryAsync(inDto.FileId);
+        return fileStorageService.GetEditHistoryAsync(inDto.FileId).Select(editHistoryMapper.MapToDto);
     }
 
     /// <remarks>
@@ -389,7 +395,7 @@ public abstract class FilesController<T>(
     [HttpPost("file/{fileId}/restoreversion")]
     public IAsyncEnumerable<EditHistoryDto> RestoreFileVersion(RestoreVersionRequestDto<T> inDto)
     {
-        return filesControllerHelper.RestoreVersionAsync(inDto.FileId, inDto.Version, inDto.Url);
+        return fileStorageService.RestoreVersionAsync(inDto.FileId, inDto.Version, inDto.Url).Select(editHistoryMapper.MapToDto);
     }
 
     /// <remarks>

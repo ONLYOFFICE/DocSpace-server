@@ -7,7 +7,7 @@
       "url": "https://helpdesk.onlyoffice.com/hc/en-us",
       "email": "support@onlyoffice.com"
     },
-    "version": "3.6.0",
+    "version": "3.7.0",
     "x-scalar-sdk-installation": [
       {
         "lang": "Node",
@@ -648,13 +648,20 @@
         ],
         "responses": {
           "200": {
-            "description": "XLSX report generation has been queued"
+            "description": "Original form file information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileIntegerWrapper"
+                }
+              }
+            }
           },
           "403": {
             "description": "You do not have enough permissions to perform this action"
           },
           "404": {
-            "description": "Form file not found"
+            "description": "File not found"
           },
           "401": {
             "description": "Unauthorized"
@@ -3902,6 +3909,79 @@
             }
           }
         }
+      }
+    },
+    "/api/2.0/files/folder/{folderId}/xlsx": {
+      "post": {
+        "tags": [
+          "Files / Folders"
+        ],
+        "summary": "Generate XLSX report by folder",
+        "description": "Triggers asynchronous XLSX report generation for the specified form results folder.",
+        "operationId": "generateXlsxByFolder",
+        "parameters": [
+          {
+            "name": "folderId",
+            "in": "path",
+            "description": "The folder unique identifier.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Original form file information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileIntegerWrapper"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "You do not have enough permissions to perform this action"
+          },
+          "404": {
+            "description": "Form results folder not found"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
       }
     },
     "/api/2.0/files/folder/{folderId}": {
@@ -20063,6 +20143,9 @@
                   },
                   "UseChat": {
                     "type": "boolean"
+                  },
+                  "UpdateXlsx": {
+                    "type": "boolean"
                   }
                 },
                 "additionalProperties": false,
@@ -20356,6 +20439,9 @@
                     "type": "boolean"
                   },
                   "UseChat": {
+                    "type": "boolean"
+                  },
+                  "UpdateXlsx": {
                     "type": "boolean"
                   }
                 },

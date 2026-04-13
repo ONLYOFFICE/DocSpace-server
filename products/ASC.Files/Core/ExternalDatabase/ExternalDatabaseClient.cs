@@ -29,7 +29,7 @@ namespace ASC.Files.Core.ExternalDatabase;
 
 public enum DbColumnType { Text, Integer, Boolean, Date, DateTime, Enum }
 
-public record DbColumnDefinition(string Name, DbColumnType Type, IReadOnlyList<string>? EnumValues = null, bool IsPrimaryKey = false);
+public record DbColumnDefinition(string Name, DbColumnType Type, IReadOnlyList<string>? EnumValues = null, bool IsPrimaryKey = false, string? Label = null);
 
 /// <summary>Column filter for structured queries against an external database table.</summary>
 /// <param name="Column">Name of the column to filter on.</param>
@@ -89,7 +89,7 @@ public record QueryFilter(string Column, string Operator, string? Value = null)
 
 /// <summary>Filter that applies a date-part function to a date/datetime column.</summary>
 /// <param name="Column">The date/datetime column name.</param>
-/// <param name="DatePart">YEAR, MONTH, WEEK, DAYOFYEAR, or QUARTER.</param>
+/// <param name="DatePart">YEAR, MONTH, WEEK, DAYOFYEAR, QUARTER, or DAYOFWEEK.</param>
 /// <param name="Operator">Comparison operator: =, !=, &lt;, &gt;, &lt;=, &gt;=, IN.</param>
 /// <param name="Values">One or more integer values. For IN, multiple values are allowed.</param>
 public record DatePartFilter(string Column, string DatePart, string Operator, IReadOnlyList<int> Values)
@@ -116,7 +116,7 @@ public record DatePartFilter(string Column, string DatePart, string Operator, IR
         }
         catch (FormatException)
         {
-            string[] dateParts = ["YEAR", "MONTH", "WEEK", "DAYOFYEAR", "QUARTER"];
+            string[] dateParts = ["YEAR", "MONTH", "WEEK", "DAYOFYEAR", "QUARTER", "DAYOFWEEK"];
             var hint = dateParts.Any(k => string.Equals(rawValues.Trim(), k, StringComparison.OrdinalIgnoreCase))
                 ? $"'{rawValues}' is a date-part keyword, not a value. Write the integer: \"col_start_date YEAR = 2025\"."
                 : $"value must be an integer (got: '{rawValues}'). Example: \"col_start_date YEAR = 2025\" or \"col_start_date MONTH IN 6,7,8\".";
@@ -127,41 +127,82 @@ public record DatePartFilter(string Column, string DatePart, string Operator, IR
     }
 }
 
-/// <summary>Filter that computes the difference in days between two date columns.</summary>
-/// <param name="StartColumn">The earlier date column (minuend in DATEDIFF).</param>
-/// <param name="EndColumn">The later date column (subtrahend in DATEDIFF).</param>
+/// <summary>Filter that computes the difference between two date/datetime columns.</summary>
+/// <param name="StartColumn">The earlier date column.</param>
+/// <param name="EndColumn">The later date column.</param>
 /// <param name="Operator">Comparison operator: =, !=, &lt;, &gt;, &lt;=, &gt;=.</param>
-/// <param name="Days">Integer number of days to compare against.</param>
-public record DateDiffFilter(string StartColumn, string EndColumn, string Operator, int Days)
+/// <param name="Value">Numeric value to compare against.</param>
+/// <param name="Unit">Time unit for the difference: DAYS (default), HOURS, or MINUTES.</param>
+public record DateDiffFilter(string StartColumn, string EndColumn, string Operator, int Value, string Unit = "DAYS")
 {
     /// <summary>
-    /// Parses a filter string of the form <c>start_col end_col OPERATOR days</c>.
-    /// Example: "col_start_date col_submission_date &lt; 7".
+    /// Parses a filter string of the form <c>start_col end_col OPERATOR value [UNIT]</c>.
+    /// Examples: "col_start_date col_submission_date &lt; 7", "col_start col_end &lt; 48 HOURS".
     /// </summary>
     public static DateDiffFilter Parse(string filter)
     {
         var parts = filter.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
-        // Handle "col_a DATEDIFF col_b OP days" — model included the "DATEDIFF" keyword
-        if (parts.Length == 5 && parts[1].Equals("DATEDIFF", StringComparison.OrdinalIgnoreCase))
+        // Handle "col_a DATEDIFF col_b OP value [UNIT]" — model included the "DATEDIFF" keyword
+        if (parts.Length is 5 or 6 && parts[1].Equals("DATEDIFF", StringComparison.OrdinalIgnoreCase))
         {
-            if (!int.TryParse(parts[4], out var days5))
+            if (!int.TryParse(parts[4], out var val5))
             {
-                throw new ArgumentException($"Invalid DateDiffFilter: days value must be an integer (got: '{parts[4]}'). Example: \"col_start col_end < 7\".");
+                throw new ArgumentException($"Invalid DateDiffFilter: value must be an integer (got: '{parts[4]}'). Example: \"col_start col_end < 48 HOURS\".");
             }
-            return new DateDiffFilter(parts[0], parts[2], parts[3].ToUpperInvariant(), days5);
+            var unit5 = parts.Length == 6 ? parts[5].ToUpperInvariant() : "DAYS";
+            DateDiffUnits.Validate(unit5);
+            return new DateDiffFilter(parts[0], parts[2], parts[3].ToUpperInvariant(), val5, unit5);
         }
 
-        if (parts.Length != 4)
+        if (parts.Length is < 4 or > 5)
         {
-            throw new ArgumentException($"Invalid DateDiffFilter expression (expected 'start_col end_col OPERATOR days'): '{filter}'");
+            throw new ArgumentException($"Invalid DateDiffFilter expression (expected 'start_col end_col OPERATOR value [UNIT]'): '{filter}'");
         }
 
-        if (!int.TryParse(parts[3], out var days))
+        if (!int.TryParse(parts[3], out var value))
         {
-            throw new ArgumentException($"Invalid DateDiffFilter: days value must be an integer (got: '{parts[3]}'). Example: \"col_start col_end < 7\".");
+            throw new ArgumentException($"Invalid DateDiffFilter: value must be an integer (got: '{parts[3]}'). Example: \"col_start col_end < 48 HOURS\".");
         }
-        return new DateDiffFilter(parts[0], parts[1], parts[2].ToUpperInvariant(), days);
+        var unit = parts.Length == 5 ? parts[4].ToUpperInvariant() : "DAYS";
+        DateDiffUnits.Validate(unit);
+        return new DateDiffFilter(parts[0], parts[1], parts[2].ToUpperInvariant(), value, unit);
+    }
+}
+
+/// <summary>Specifies two date/datetime columns whose difference is used as the aggregate value expression.</summary>
+/// <param name="StartColumn">The earlier date column.</param>
+/// <param name="EndColumn">The later date column.</param>
+/// <param name="Unit">Time unit: DAYS (default), HOURS, or MINUTES.</param>
+public record DateDiffAggregate(string StartColumn, string EndColumn, string Unit = "DAYS")
+{
+    /// <summary>
+    /// Parses a string of the form <c>start_col end_col [UNIT]</c>.
+    /// Examples: "col_created col_submitted HOURS", "col_start col_end".
+    /// </summary>
+    public static DateDiffAggregate Parse(string expr)
+    {
+        var parts = expr.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length is < 2 or > 3)
+        {
+            throw new ArgumentException($"Invalid DateDiffAggregate expression (expected 'start_col end_col [UNIT]'): '{expr}'");
+        }
+        var unit = parts.Length == 3 ? parts[2].ToUpperInvariant() : "DAYS";
+        DateDiffUnits.Validate(unit);
+        return new DateDiffAggregate(parts[0], parts[1], unit);
+    }
+}
+
+file static class DateDiffUnits
+{
+    private static readonly HashSet<string> _allowed = new(StringComparer.OrdinalIgnoreCase) { "DAYS", "HOURS", "MINUTES" };
+
+    public static void Validate(string unit)
+    {
+        if (!_allowed.Contains(unit))
+        {
+            throw new ArgumentException($"Invalid date-diff unit '{unit}'. Allowed: DAYS, HOURS, MINUTES.");
+        }
     }
 }
 
@@ -318,7 +359,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
 
     private static readonly HashSet<string> _allowedOperators = new(StringComparer.OrdinalIgnoreCase)
     {
-        "=", "!=", "<>", "<", ">", "<=", ">=", "LIKE", "NOT LIKE", "IS NULL", "IS NOT NULL"
+        "=", "!=", "<>", "<", ">", "<=", ">=", "LIKE", "NOT LIKE", "IS NULL", "IS NOT NULL", "IN", "NOT IN"
     };
 
     private static readonly HashSet<string> _nullaryOperators = new(StringComparer.OrdinalIgnoreCase)
@@ -333,7 +374,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
 
     private static readonly HashSet<string> _allowedDateParts = new(StringComparer.OrdinalIgnoreCase)
     {
-        "YEAR", "MONTH", "WEEK", "DAYOFYEAR", "QUARTER"
+        "YEAR", "MONTH", "WEEK", "DAYOFYEAR", "QUARTER", "DAYOFWEEK"
     };
 
     private static readonly HashSet<string> _datePartFilterOperators = new(StringComparer.OrdinalIgnoreCase)
@@ -361,6 +402,16 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         if (col.Length >= 2 && ((col[0] == '"' && col[^1] == '"') || (col[0] == '\'' && col[^1] == '\'')))
         {
             col = col[1..^1].Trim();
+        }
+
+        // Strip JSON-array brackets that models sometimes add: ["col_name"] → col_name, ["col_name" → col_name
+        if (col.StartsWith("[\"", StringComparison.Ordinal))
+        {
+            col = col[2..].TrimEnd('"', ']').Trim();
+        }
+        else if (col.StartsWith('[') || col.EndsWith(']'))
+        {
+            col = col.Trim('[', ']').Trim();
         }
 
         // Strip SQL aliases: "col_employee as a_employee" → "col_employee"
@@ -399,6 +450,63 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         return col;
     }
 
+    private static void BuildFilterClauses(
+        IReadOnlyList<QueryFilter> filters,
+        IReadOnlyCollection<string> allowedColumns,
+        char q,
+        ref int paramIndex,
+        Dictionary<string, object?> parameters,
+        List<string> whereParts)
+    {
+        foreach (var f in filters)
+        {
+            var colQuoted = $"{q}{f.Column}{q}";
+            var op = f.Operator.ToUpperInvariant();
+            if (_nullaryOperators.Contains(op))
+            {
+                whereParts.Add($"{colQuoted} {op}");
+            }
+            else if (op is "IN" or "NOT IN")
+            {
+                var values = (f.Value ?? "").Split(',');
+                var inParamNames = new List<string>(values.Length);
+                foreach (var v in values)
+                {
+                    var pn = $"@p{paramIndex++}";
+                    parameters[pn] = v.Trim();
+                    inParamNames.Add(pn);
+                }
+
+                whereParts.Add($"{colQuoted} {op} ({string.Join(", ", inParamNames)})");
+            }
+            else if (f.Value != null && allowedColumns.Contains(f.Value, StringComparer.OrdinalIgnoreCase))
+            {
+                whereParts.Add($"{colQuoted} {op} {q}{f.Value}{q}");
+            }
+            else
+            {
+                var pn = $"@p{paramIndex++}";
+                whereParts.Add($"{colQuoted} {op} {pn}");
+                parameters[pn] = f.Value;
+            }
+        }
+    }
+
+    private static void AppendDatePartClauses(
+        IReadOnlyList<DatePartFilter> datePartFilters,
+        ExternalDatabaseType dbType,
+        char q,
+        List<string> whereParts)
+    {
+        foreach (var dpf in datePartFilters)
+        {
+            var dpExpr = BuildDatePartExpr(dpf.Column, dpf.DatePart, dbType, q);
+            whereParts.Add(dpf.Operator == "IN"
+                ? $"{dpExpr} IN ({string.Join(", ", dpf.Values)})"
+                : $"{dpExpr} {dpf.Operator} {dpf.Values[0]}");
+        }
+    }
+
     private static string BuildDatePartExpr(string column, string datePart, ExternalDatabaseType dbType, char q)
     {
         if (dbType == ExternalDatabaseType.MySql)
@@ -413,15 +521,42 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
             "WEEK"      => $"CAST(strftime('%W', {q}{column}{q}) AS INTEGER)",
             "DAYOFYEAR" => $"CAST(strftime('%j', {q}{column}{q}) AS INTEGER)",
             "QUARTER"   => $"((CAST(strftime('%m', {q}{column}{q}) AS INTEGER) - 1) / 3 + 1)",
+            "DAYOFWEEK" => $"(CAST(strftime('%w', {q}{column}{q}) AS INTEGER) + 1)",
             _           => throw new ArgumentException($"Unsupported date part for SQLite: {datePart}")
         };
     }
 
-    private static string BuildDateDiffExpr(string startCol, string endCol, ExternalDatabaseType dbType, char q)
+    private static string BuildDateDiffExpr(string startCol, string endCol, ExternalDatabaseType dbType, char q, string unit = "DAYS")
     {
-        return dbType == ExternalDatabaseType.MySql
-            ? $"ABS(DATEDIFF({q}{startCol}{q}, {q}{endCol}{q}))"
-            : $"ABS(CAST(julianday({q}{startCol}{q}) - julianday({q}{endCol}{q}) AS INTEGER))";
+        if (dbType == ExternalDatabaseType.MySql)
+        {
+            return unit switch
+            {
+                "HOURS"   => $"ABS(TIMESTAMPDIFF(HOUR, {q}{startCol}{q}, {q}{endCol}{q}))",
+                "MINUTES" => $"ABS(TIMESTAMPDIFF(MINUTE, {q}{startCol}{q}, {q}{endCol}{q}))",
+                _         => $"ABS(DATEDIFF({q}{startCol}{q}, {q}{endCol}{q}))"
+            };
+        }
+
+        return unit switch
+        {
+            "HOURS"   => $"ABS(CAST((julianday({q}{endCol}{q}) - julianday({q}{startCol}{q})) * 24 AS INTEGER))",
+            "MINUTES" => $"ABS(CAST((julianday({q}{endCol}{q}) - julianday({q}{startCol}{q})) * 1440 AS INTEGER))",
+            _         => $"ABS(CAST(julianday({q}{endCol}{q}) - julianday({q}{startCol}{q}) AS INTEGER))"
+        };
+    }
+
+    private static void ValidateGroupBy(string? column, string? datePart, string label, IReadOnlyCollection<string> allowedColumns)
+    {
+        if (column != null && !allowedColumns.Contains(column, StringComparer.OrdinalIgnoreCase))
+        {
+            throw new UnauthorizedAccessException($"Unknown column in {label}: '{column}'. Available: {string.Join(", ", allowedColumns)}");
+        }
+
+        if (datePart != null && !_allowedDateParts.Contains(datePart))
+        {
+            throw new UnauthorizedAccessException($"Date part not allowed for {label}: {datePart}");
+        }
     }
 
     private static void ValidateFilters(IReadOnlyList<QueryFilter> filters, IReadOnlyCollection<string> allowedColumns)
@@ -444,6 +579,12 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
             if (!_allowedOperators.Contains(f.Operator))
             {
                 throw new UnauthorizedAccessException($"Operator not allowed: {f.Operator}");
+            }
+
+            var upperOp = f.Operator.ToUpperInvariant();
+            if ((upperOp is "IN" or "NOT IN") && string.IsNullOrWhiteSpace(f.Value))
+            {
+                throw new ArgumentException($"Operator {f.Operator} requires a comma-separated value list. Example: \"col_status IN approved,pending\".");
             }
 
             if (f.Value != null && !_nullaryOperators.Contains(f.Operator.ToUpperInvariant()))
@@ -554,19 +695,31 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         string? secondGroupByColumn = null,
         string? secondGroupByDatePart = null,
         IEnumerable<DatePartFilter>? datePartFilters = null,
-        DateDiffFilter? dateDiffFilter = null)
+        DateDiffFilter? dateDiffFilter = null,
+        DateDiffAggregate? dateDiffAggregate = null,
+        string? havingFilter = null,
+        string? thirdGroupByColumn = null,
+        string? thirdGroupByDatePart = null,
+        IEnumerable<QueryFilter>? excludeFilters = null,
+        IEnumerable<DatePartFilter>? excludeDatePartFilters = null)
     {
         ValidateTableName(tableName);
 
-        var upperFn = aggregateFunction.ToUpperInvariant();
-        if (!_allowedAggregateFunctions.Contains(upperFn))
+        // Normalize: split by comma, strip quotes/spaces from each token, take the first recognized function.
+        // This tolerates model outputs like "'COUNT', 'SUM'" or "',COUNT'" that contain extra punctuation.
+        var upperFn = aggregateFunction
+            .Split(',')
+            .Select(t => t.Trim().Trim('\'', '"').ToUpperInvariant())
+            .FirstOrDefault(t => _allowedAggregateFunctions.Contains(t));
+
+        if (upperFn is null)
         {
-            throw new UnauthorizedAccessException($"Aggregate function not allowed: {aggregateFunction}");
+            throw new ArgumentException($"Aggregate function not allowed: '{aggregateFunction}'. Pass exactly one keyword: COUNT, COUNT_DISTINCT, SUM, AVG, MIN, or MAX.");
         }
 
-        if (upperFn is "COUNT_DISTINCT" or "SUM" or "AVG" or "MIN" or "MAX" && valueColumn is null)
+        if (upperFn is "COUNT_DISTINCT" or "SUM" or "AVG" or "MIN" or "MAX" && valueColumn is null && dateDiffAggregate is null)
         {
-            throw new ArgumentException($"{aggregateFunction} requires valueColumn. To count all rows per group use COUNT (without valueColumn).");
+            throw new ArgumentException($"{aggregateFunction} requires either valueColumn or dateDiffValueExpr. To count all rows per group use COUNT (without valueColumn).");
         }
 
         if (valueColumn != null && !allowedColumns.Contains(valueColumn, StringComparer.OrdinalIgnoreCase))
@@ -574,25 +727,21 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
             throw new UnauthorizedAccessException($"Unknown column '{valueColumn}'. Available: {string.Join(", ", allowedColumns)}");
         }
 
-        if (groupByColumn != null && !allowedColumns.Contains(groupByColumn, StringComparer.OrdinalIgnoreCase))
+        if (dateDiffAggregate != null)
         {
-            throw new UnauthorizedAccessException($"Unknown column in GROUP BY: '{groupByColumn}'. Available: {string.Join(", ", allowedColumns)}");
+            if (!allowedColumns.Contains(dateDiffAggregate.StartColumn, StringComparer.OrdinalIgnoreCase))
+            {
+                throw new UnauthorizedAccessException($"Unknown column in dateDiffValueExpr: '{dateDiffAggregate.StartColumn}'. Available: {string.Join(", ", allowedColumns)}");
+            }
+            if (!allowedColumns.Contains(dateDiffAggregate.EndColumn, StringComparer.OrdinalIgnoreCase))
+            {
+                throw new UnauthorizedAccessException($"Unknown column in dateDiffValueExpr: '{dateDiffAggregate.EndColumn}'. Available: {string.Join(", ", allowedColumns)}");
+            }
         }
 
-        if (groupByDatePart != null && !_allowedDateParts.Contains(groupByDatePart))
-        {
-            throw new UnauthorizedAccessException($"Date part not allowed: {groupByDatePart}");
-        }
-
-        if (secondGroupByColumn != null && !allowedColumns.Contains(secondGroupByColumn, StringComparer.OrdinalIgnoreCase))
-        {
-            throw new UnauthorizedAccessException($"Unknown column in second GROUP BY: '{secondGroupByColumn}'. Available: {string.Join(", ", allowedColumns)}");
-        }
-
-        if (secondGroupByDatePart != null && !_allowedDateParts.Contains(secondGroupByDatePart))
-        {
-            throw new UnauthorizedAccessException($"Date part not allowed for second GROUP BY: {secondGroupByDatePart}");
-        }
+        ValidateGroupBy(groupByColumn, groupByDatePart, "GROUP BY", allowedColumns);
+        ValidateGroupBy(secondGroupByColumn, secondGroupByDatePart, "second GROUP BY", allowedColumns);
+        ValidateGroupBy(thirdGroupByColumn, thirdGroupByDatePart, "third GROUP BY", allowedColumns);
 
         var datePartFilterList = MergeDatePartFilters(datePartFilters?.ToList() ?? []);
         ValidateDatePartFilters(datePartFilterList, allowedColumns);
@@ -605,46 +754,53 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         var filterList = filters?.ToList() ?? [];
         ValidateFilters(filterList, allowedColumns);
 
+        var excludeFilterList = excludeFilters?.ToList() ?? [];
+        ValidateFilters(excludeFilterList, allowedColumns);
+
+        var excludeDatePartFilterList = MergeDatePartFilters(excludeDatePartFilters?.ToList() ?? []);
+        ValidateDatePartFilters(excludeDatePartFilterList, allowedColumns);
+
         var provider = Provider;
         var dbType = provider.DatabaseTypeEnum;
         var q = dbType == ExternalDatabaseType.MySql ? '`' : '"';
 
+        string? innerExpr = dateDiffAggregate != null
+            ? BuildDateDiffExpr(dateDiffAggregate.StartColumn, dateDiffAggregate.EndColumn, dbType, q, dateDiffAggregate.Unit)
+            : valueColumn != null ? $"{q}{valueColumn}{q}" : null;
+
         var aggExpr = upperFn switch
         {
-            "COUNT" when valueColumn is null => "COUNT(*)",
-            "COUNT" => $"COUNT({q}{valueColumn}{q})",
-            "COUNT_DISTINCT" => $"COUNT(DISTINCT {q}{valueColumn}{q})",
-            _ => $"{upperFn}({q}{valueColumn}{q})"
+            "COUNT" when innerExpr is null => "COUNT(*)",
+            "COUNT" => $"COUNT({innerExpr})",
+            "COUNT_DISTINCT" => $"COUNT(DISTINCT {innerExpr})",
+            _ => $"{upperFn}({innerExpr})"
         };
 
         var selectParts = new List<string>();
         var groupByParts = new List<string>();
 
-        if (groupByColumn != null)
-        {
-            var gbExpr = groupByDatePart != null
-                ? BuildDatePartExpr(groupByColumn, groupByDatePart, dbType, q)
-                : $"{q}{groupByColumn}{q}";
-            var gbAlias = groupByDatePart != null
-                ? $"{q}{groupByColumn}_{groupByDatePart.ToLowerInvariant()}{q}"
-                : $"{q}{groupByColumn}{q}";
-            selectParts.Add($"{gbExpr} AS {gbAlias}");
-            groupByParts.Add(gbExpr);
-        }
-
-        if (secondGroupByColumn != null)
-        {
-            var sgbExpr = secondGroupByDatePart != null
-                ? BuildDatePartExpr(secondGroupByColumn, secondGroupByDatePart, dbType, q)
-                : $"{q}{secondGroupByColumn}{q}";
-            var sgbAlias = secondGroupByDatePart != null
-                ? $"{q}{secondGroupByColumn}_{secondGroupByDatePart.ToLowerInvariant()}{q}"
-                : $"{q}{secondGroupByColumn}{q}";
-            selectParts.Add($"{sgbExpr} AS {sgbAlias}");
-            groupByParts.Add(sgbExpr);
-        }
+        AddGroupByParts(groupByColumn, groupByDatePart);
+        AddGroupByParts(secondGroupByColumn, secondGroupByDatePart);
+        AddGroupByParts(thirdGroupByColumn, thirdGroupByDatePart);
 
         selectParts.Add($"{aggExpr} AS result");
+
+        void AddGroupByParts(string? column, string? datePart)
+        {
+            if (column is null)
+            {
+                return;
+            }
+
+            var expr = datePart != null
+                ? BuildDatePartExpr(column, datePart, dbType, q)
+                : $"{q}{column}{q}";
+            var alias = datePart != null
+                ? $"{q}{column}_{datePart.ToLowerInvariant()}{q}"
+                : $"{q}{column}{q}";
+            selectParts.Add($"{expr} AS {alias}");
+            groupByParts.Add(expr);
+        }
 
         var sql = new StringBuilder($"SELECT {string.Join(", ", selectParts)} FROM {q}{tableName}{q}");
 
@@ -652,39 +808,22 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         var parameters = new Dictionary<string, object?>();
         var paramIndex = 0;
 
-        foreach (var f in filterList)
-        {
-            var colQuoted = $"{q}{f.Column}{q}";
-            var op = f.Operator.ToUpperInvariant();
-            if (_nullaryOperators.Contains(op))
-            {
-                whereParts.Add($"{colQuoted} {op}");
-            }
-            else if (f.Value != null && allowedColumns.Contains(f.Value, StringComparer.OrdinalIgnoreCase))
-            {
-                // column-to-column comparison — inline both sides, no parameters
-                whereParts.Add($"{colQuoted} {op} {q}{f.Value}{q}");
-            }
-            else
-            {
-                var paramName = $"@w{paramIndex++}";
-                whereParts.Add($"{colQuoted} {op} {paramName}");
-                parameters[paramName] = f.Value;
-            }
-        }
-
-        foreach (var dpf in datePartFilterList)
-        {
-            var dpExpr = BuildDatePartExpr(dpf.Column, dpf.DatePart, dbType, q);
-            whereParts.Add(dpf.Operator == "IN"
-                ? $"{dpExpr} IN ({string.Join(", ", dpf.Values)})"
-                : $"{dpExpr} {dpf.Operator} {dpf.Values[0]}");
-        }
+        BuildFilterClauses(filterList, allowedColumns, q, ref paramIndex, parameters, whereParts);
+        AppendDatePartClauses(datePartFilterList, dbType, q, whereParts);
 
         if (dateDiffFilter != null)
         {
-            var ddExpr = BuildDateDiffExpr(dateDiffFilter.StartColumn, dateDiffFilter.EndColumn, dbType, q);
-            whereParts.Add($"{ddExpr} {dateDiffFilter.Operator} {dateDiffFilter.Days}");
+            var ddExpr = BuildDateDiffExpr(dateDiffFilter.StartColumn, dateDiffFilter.EndColumn, dbType, q, dateDiffFilter.Unit);
+            whereParts.Add($"{ddExpr} {dateDiffFilter.Operator} {dateDiffFilter.Value}");
+        }
+
+        if (groupByColumn != null && (excludeFilterList.Count > 0 || excludeDatePartFilterList.Count > 0))
+        {
+            var subWhereParts = new List<string>();
+            BuildFilterClauses(excludeFilterList, allowedColumns, q, ref paramIndex, parameters, subWhereParts);
+            AppendDatePartClauses(excludeDatePartFilterList, dbType, q, subWhereParts);
+            var subWhere = subWhereParts.Count > 0 ? $" WHERE {string.Join(" AND ", subWhereParts)}" : string.Empty;
+            whereParts.Add($"{q}{groupByColumn}{q} NOT IN (SELECT DISTINCT {q}{groupByColumn}{q} FROM {q}{tableName}{q}{subWhere})");
         }
 
         if (whereParts.Count > 0)
@@ -694,7 +833,24 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
 
         if (groupByParts.Count > 0)
         {
-            sql.Append($" GROUP BY {string.Join(", ", groupByParts)} ORDER BY result DESC LIMIT 1000");
+            sql.Append($" GROUP BY {string.Join(", ", groupByParts)}");
+
+            if (!string.IsNullOrWhiteSpace(havingFilter))
+            {
+                var havingParts = havingFilter.Trim().Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
+                if (havingParts.Length != 2 ||
+                    !_datePartFilterOperators.Contains(havingParts[0]) ||
+                    !double.TryParse(havingParts[1], System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out _))
+                {
+                    throw new ArgumentException(
+                        $"Invalid having filter '{havingFilter}'. Expected format: 'OPERATOR value' (e.g. '> 5'). " +
+                        $"Operators: =, !=, <, >, <=, >=.");
+                }
+
+                sql.Append($" HAVING {aggExpr} {havingParts[0]} {havingParts[1]}");
+            }
+
+            sql.Append(" ORDER BY result DESC LIMIT 1000");
         }
         // No GROUP BY → aggregate returns exactly one row; LIMIT is intentionally omitted.
 
@@ -704,7 +860,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
 
         await using var cmd = connection.CreateCommand();
         cmd.CommandText = sql.ToString();
-        cmd.CommandTimeout = 30;
+        cmd.CommandTimeout = 60;
 
         foreach (var (name, value) in parameters)
         {
@@ -755,7 +911,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
             var invalid = selectList.Except(allowedColumns, StringComparer.OrdinalIgnoreCase).ToList();
             if (invalid.Count > 0)
             {
-                throw new UnauthorizedAccessException($"Unknown columns: {string.Join(", ", invalid)}");
+                throw new UnauthorizedAccessException($"Unknown columns: {string.Join(", ", invalid)}. Available: {string.Join(", ", allowedColumns)}");
             }
         }
 
@@ -788,39 +944,13 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         var parameters = new Dictionary<string, object?>();
         var paramIndex = 0;
 
-        foreach (var f in filterList)
-        {
-            var colQuoted = $"{q}{f.Column}{q}";
-            var op = f.Operator.ToUpperInvariant();
-            if (_nullaryOperators.Contains(op))
-            {
-                whereParts.Add($"{colQuoted} {op}");
-            }
-            else if (f.Value != null && allowedColumns.Contains(f.Value, StringComparer.OrdinalIgnoreCase))
-            {
-                // column-to-column comparison — inline both sides, no parameters
-                whereParts.Add($"{colQuoted} {op} {q}{f.Value}{q}");
-            }
-            else
-            {
-                var paramName = $"@w{paramIndex++}";
-                whereParts.Add($"{colQuoted} {op} {paramName}");
-                parameters[paramName] = f.Value;
-            }
-        }
-
-        foreach (var dpf in datePartFilterList)
-        {
-            var dpExpr = BuildDatePartExpr(dpf.Column, dpf.DatePart, dbType, q);
-            whereParts.Add(dpf.Operator == "IN"
-                ? $"{dpExpr} IN ({string.Join(", ", dpf.Values)})"
-                : $"{dpExpr} {dpf.Operator} {dpf.Values[0]}");
-        }
+        BuildFilterClauses(filterList, allowedColumns, q, ref paramIndex, parameters, whereParts);
+        AppendDatePartClauses(datePartFilterList, dbType, q, whereParts);
 
         if (dateDiffFilter != null)
         {
-            var ddExpr = BuildDateDiffExpr(dateDiffFilter.StartColumn, dateDiffFilter.EndColumn, dbType, q);
-            whereParts.Add($"{ddExpr} {dateDiffFilter.Operator} {dateDiffFilter.Days}");
+            var ddExpr = BuildDateDiffExpr(dateDiffFilter.StartColumn, dateDiffFilter.EndColumn, dbType, q, dateDiffFilter.Unit);
+            whereParts.Add($"{ddExpr} {dateDiffFilter.Operator} {dateDiffFilter.Value}");
         }
 
         var sql = new StringBuilder($"SELECT {selectPart} FROM {q}{tableName}{q}");
@@ -889,7 +1019,8 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         IEnumerable<string>? displayColumns = null,
         int limit = 100,
         IEnumerable<QueryFilter>? filters = null,
-        IEnumerable<DatePartFilter>? datePartFilters = null)
+        IEnumerable<DatePartFilter>? datePartFilters = null,
+        string? countDistinctColumn = null)
     {
         ValidateTableName(tableName);
 
@@ -941,6 +1072,17 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
             }
         }
 
+        if (countDistinctColumn != null)
+        {
+            var normalized = NormalizeColumnRef(countDistinctColumn, allowedColumns);
+            if (!allowedColumns.Contains(normalized, StringComparer.OrdinalIgnoreCase))
+            {
+                throw new ArgumentException($"Unknown countDistinctColumn: '{countDistinctColumn}'. Available: {string.Join(", ", allowedColumns)}");
+            }
+
+            countDistinctColumn = normalized;
+        }
+
         var filterList = filters?.ToList() ?? [];
         ValidateFilters(filterList, allowedColumns);
 
@@ -952,10 +1094,18 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         var dbType = provider.DatabaseTypeEnum;
         var q = dbType == ExternalDatabaseType.MySql ? '`' : '"';
 
-        var selectParts = new List<string> { $"a.{q}{pkColumn}{q} AS {q}a_pk{q}" };
-        selectParts.AddRange(displayList.Select(col => $"a.{q}{col}{q} AS {q}a_{col}{q}"));
-        selectParts.Add($"b.{q}{pkColumn}{q} AS {q}b_pk{q}");
-        selectParts.AddRange(displayList.Select(col => $"b.{q}{col}{q} AS {q}b_{col}{q}"));
+        List<string> selectParts;
+        if (countDistinctColumn != null)
+        {
+            selectParts = [$"COUNT(DISTINCT a.{q}{countDistinctColumn}{q}) AS {q}count{q}"];
+        }
+        else
+        {
+            selectParts = [$"a.{q}{pkColumn}{q} AS {q}a_pk{q}"];
+            selectParts.AddRange(displayList.Select(col => $"a.{q}{col}{q} AS {q}a_{col}{q}"));
+            selectParts.Add($"b.{q}{pkColumn}{q} AS {q}b_pk{q}");
+            selectParts.AddRange(displayList.Select(col => $"b.{q}{col}{q} AS {q}b_{col}{q}"));
+        }
 
         // Join conditions use a./b. prefixes; date-part conditions wrap both sides in the date function
         var whereParts = conditionList.Select(c =>
@@ -983,6 +1133,18 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
             {
                 whereParts.Add($"{aCol} {op}");
                 whereParts.Add($"{bCol} {op}");
+            }
+            else if (op is "IN" or "NOT IN")
+            {
+                var inParamNames = (f.Value ?? "").Split(',').Select((v, i) =>
+                {
+                    var pn = $"@w{paramIndex++}";
+                    parameters[pn] = v.Trim();
+                    return pn;
+                }).ToList();
+                var inList = string.Join(", ", inParamNames);
+                whereParts.Add($"{aCol} {op} ({inList})");
+                whereParts.Add($"{bCol} {op} ({inList})");
             }
             else if (f.Value != null && allowedColumns.Contains(f.Value, StringComparer.OrdinalIgnoreCase))
             {
@@ -1016,12 +1178,18 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
             }
         }
 
-        var sql =
-            $"SELECT {string.Join(", ", selectParts)} " +
-            $"FROM {q}{tableName}{q} a " +
-            $"JOIN {q}{tableName}{q} b ON a.{q}{pkColumn}{q} < b.{q}{pkColumn}{q} " +
-            $"WHERE {string.Join(" AND ", whereParts)} " +
-            $"LIMIT {pageSize}";
+        var sql = countDistinctColumn != null
+            ? $"SELECT COUNT(DISTINCT a.{q}{countDistinctColumn}{q}) AS {q}count{q} " +
+              $"FROM {q}{tableName}{q} a " +
+              $"WHERE EXISTS (" +
+              $"SELECT 1 FROM {q}{tableName}{q} b " +
+              $"WHERE a.{q}{pkColumn}{q} != b.{q}{pkColumn}{q} " +
+              $"AND {string.Join(" AND ", whereParts)})"
+            : $"SELECT {string.Join(", ", selectParts)} " +
+              $"FROM {q}{tableName}{q} a " +
+              $"JOIN {q}{tableName}{q} b ON a.{q}{pkColumn}{q} < b.{q}{pkColumn}{q} " +
+              $"WHERE {string.Join(" AND ", whereParts)} " +
+              $"LIMIT {pageSize}";
 
         await using var connection = await provider.CreateConnectionAsync(dbType);
         await connection.OpenAsync();
@@ -1029,7 +1197,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
 
         await using var cmd = connection.CreateCommand();
         cmd.CommandText = sql;
-        cmd.CommandTimeout = 30;
+        cmd.CommandTimeout = 120;
 
         foreach (var (name, value) in parameters)
         {
@@ -1123,6 +1291,41 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
                 await tx.DisposeAsync();
             }
         }
+    }
+
+    public async Task<long> GetTableCountAsync(string tableName) =>
+        await TableExistsAsync(tableName) ? await CountAsync(tableName) : 0;
+
+    public async Task<IReadOnlySet<int>> GetExistingFormIdsAsync(string tableName)
+    {
+        if (!await TableExistsAsync(tableName))
+        {
+            return new HashSet<int>();
+        }
+
+        ValidateTableName(tableName);
+        var provider = Provider;
+        var dbType = provider.DatabaseTypeEnum;
+        var q = dbType == ExternalDatabaseType.MySql ? '`' : '"';
+
+        await using var connection = await provider.CreateConnectionAsync(dbType);
+        await connection.OpenAsync();
+        await SetupSqliteAsync(connection, dbType);
+
+        await using var cmd = connection.CreateCommand();
+        cmd.CommandText = $"SELECT {q}form_id{q} FROM {q}{tableName}{q};";
+
+        await using var reader = await cmd.ExecuteReaderAsync();
+        var ids = new HashSet<int>();
+        while (await reader.ReadAsync())
+        {
+            if (!reader.IsDBNull(0))
+            {
+                ids.Add(reader.GetInt32(0));
+            }
+        }
+
+        return ids;
     }
 
     private async Task ExecuteInsertAsync(string tableName, Dictionary<string, object> data, string? keyColumn)

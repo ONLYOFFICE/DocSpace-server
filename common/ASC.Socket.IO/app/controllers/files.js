@@ -106,6 +106,11 @@ module.exports = (files) => {
     files.changeWebPlugin(req.body);
     res.end();
   });
+
+  router.post("/top-up-wallet", (req, res) => {
+    files.topUpWallet(req.body);
+    res.end();
+  });
   
   router.post("/update-history", (req, res) => {
     files.updateHistory(req.body);
@@ -240,6 +245,11 @@ module.exports = (files) => {
   router.post("/quota_exceeded", (req, res) => {
      files.quotaExceeded(req.body);
      res.end();
+  });
+
+  router.post("/change-ai-config", (req, res) => {
+    files.changeAiConfig(req.body);
+    res.end();
   });
 
   router.post("/external-db-settings", (req, res) => {

@@ -138,7 +138,7 @@ public class AiProviderDao(
             yield break;
         }
 
-        var dbContext = await dbContextFactory.CreateDbContextAsync();
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         await foreach (var provider in dbContext.GetProvidersAsync(tenantId, offset, limit))
         {
             var (success, decryptedKey) = await TryDecryptKeyAsync(provider.Key);

@@ -28,8 +28,10 @@
 package com.asc.registration.messaging.listener;
 
 import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import com.asc.common.core.domain.entity.Audit;
 import com.asc.common.messaging.mapper.RabbitAuditDataMapper;
@@ -37,11 +39,15 @@ import com.asc.common.service.AuditCreateCommandHandler;
 import com.asc.common.service.transfer.message.AuditMessage;
 import com.rabbitmq.client.Channel;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -59,15 +65,25 @@ public class AuditMessageListenerTest {
 
   @BeforeEach
   void setUp() {
-    when(message.getPayload()).thenReturn(auditMessage);
-    when(auditDataMapper.toAudit(auditMessage)).thenReturn(audit);
+    lenient().when(message.getPayload()).thenReturn(auditMessage);
+    lenient().when(auditDataMapper.toAudit(auditMessage)).thenReturn(audit);
   }
 
-  @Test
-  void whenMessagesAreReceived_thenAuditsAreCreated() {
-    List<Message<AuditMessage>> messages = Stream.of(message).collect(Collectors.toList());
+  @ParameterizedTest
+  @ValueSource(ints = {0, 1, 2, 3, 5})
+  void whenMessagesAreReceived_thenAuditsAreCreated(int messageCount) {
+    List<Message<AuditMessage>> messages =
+        IntStream.range(0, messageCount).mapToObj(i -> message).collect(Collectors.toList());
+
     listener.receiveMessage(messages, channel);
 
-    verify(auditCreateCommandHandler).createAudits(anySet());
+    if (messageCount == 0) {
+      verify(auditCreateCommandHandler, never()).createAudits(anySet());
+      return;
+    }
+
+    var captor = ArgumentCaptor.forClass(Set.class);
+    verify(auditCreateCommandHandler, times(1)).createAudits(captor.capture());
+    Assertions.assertEquals(1, captor.getValue().size());
   }
 }

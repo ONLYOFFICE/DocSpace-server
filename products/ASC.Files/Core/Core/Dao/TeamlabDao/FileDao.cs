@@ -775,7 +775,7 @@ internal class FileDao(
             return 0;
         }
 
-        var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var q = await GetFilesQueryWithFilters(parentId, null, filterType, subjectGroup, subjectId, searchText, searchInContent, withSubfolders, excludeSubject, roomId, extension, filesDbContext, formsItemDto);
         if (additionalFilterOption != AdditionalFilterOption.All)
@@ -802,7 +802,7 @@ internal class FileDao(
 
     public async Task<int> GetSharedFilesCountAsync(int parentId)
     {
-        var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var q = GetSharedFilesQuery(parentId, filesDbContext);
 
@@ -811,7 +811,7 @@ internal class FileDao(
 
     public async IAsyncEnumerable<File<int>> GetSharedFilesAsync(int parentId, int offset = 0, int count = -1)
     {
-        var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var q = GetSharedFilesQuery(parentId, filesDbContext);
 
@@ -1079,6 +1079,11 @@ internal class FileDao(
         var tenantId = _tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         return await filesDbContext.DbFilesAnyAsync(tenantId, title, category, folderId);
+    }
+
+    public async Task<string> GetAvailableTitleAsync(string requestTitle, int parentFolderId)
+    {
+        return await global.GetAvailableTitleAsync(requestTitle, parentFolderId, IsExistAsync, FileEntryType.File);
     }
 
     public async Task<TTo> MoveFileAsync<TTo>(int fileId, TTo toFolderId, bool deleteLinks = false)
@@ -1394,7 +1399,7 @@ internal class FileDao(
         copy.FileStatus = file.FileStatus & ~flagsToRemove;
         copy.EditingBy = file.EditingBy;
         copy.ParentId = toFolderId;
-        copy.Title = await global.GetAvailableTitleAsync(file.Title, toFolderId, IsExistAsync, FileEntryType.File);
+        copy.Title = await GetAvailableTitleAsync(file.Title, toFolderId);
         copy.ConvertedType = file.ConvertedType;
         copy.Comment = FilesCommonResource.CommentCopy;
         copy.Encrypted = file.Encrypted;

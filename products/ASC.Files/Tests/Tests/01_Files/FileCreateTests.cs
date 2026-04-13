@@ -24,9 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-extern alias ASCWebApi;
-extern alias ASCPeople;
-using ASC.Files.Tests.ApiFactories;
 
 namespace ASC.Files.Tests.Tests._01_Files;
 
@@ -34,11 +31,8 @@ namespace ASC.Files.Tests.Tests._01_Files;
 [Trait("Category", "CRUD")]
 [Trait("Feature", "Files")]
 public class FileCreateTests(
-    FilesApiFactory filesFactory, 
-    WepApiFactory apiFactory, 
-    PeopleFactory peopleFactory,
-    FilesServiceFactory filesServiceProgram) 
-    : BaseTest(filesFactory, apiFactory, peopleFactory, filesServiceProgram)
+    AspireAppFixture fixture)
+    : BaseTest(fixture)
 {
 
     public static TheoryData<string> Data =>

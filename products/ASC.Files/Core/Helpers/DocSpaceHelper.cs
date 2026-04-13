@@ -49,6 +49,11 @@ public static class DocSpaceHelper
         {
             return folderType == FolderType.AiRoom;
         }
+
+        public bool IsPublicSystemFolder()
+        {
+            return folderType == FolderType.AiAgents;
+        }
     }
 
     public static HashSet<FolderType> FormsFillingSystemFolders => [

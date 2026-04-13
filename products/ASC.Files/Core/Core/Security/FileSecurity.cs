@@ -1523,7 +1523,7 @@ public class FileSecurity(
 
                     switch (action)
                     {
-                        case FilesSecurityActions.Read or FilesSecurityActions.Copy:
+                        case FilesSecurityActions.Read:
                         case FilesSecurityActions.CopySharedLink when e.Shared:
                             return true;
                     }
@@ -1630,6 +1630,11 @@ public class FileSecurity(
                         if (action == FilesSecurityActions.StartFilling)
                         {
                             return hasFullAccessToForm;
+                        }
+
+                        if (action == FilesSecurityActions.FillForms)
+                        {
+                            return hasFullAccessToForm || shareRecord is { Share: FileShare.FillForms or FileShare.Editing };
                         }
 
                     }
@@ -2398,6 +2403,7 @@ public class FileSecurity(
             {
                 { RootFolderType: FolderType.USER } when entry.CreateBy != userId => true,
                 { RootFolderType: FolderType.VirtualRooms } when !isDocSpaceAdmin => true,
+                Folder<T> { FolderType: FolderType.FillingFormsRoom } when isDocSpaceAdmin => true,
                 _ => false
             };
 
@@ -3668,6 +3674,9 @@ public class FileSecurity(
         AskAi,
 
         [Description("Use chat")]
-        UseChat
+        UseChat,
+
+        [Description("Update xlsx")]
+        UpdateXlsx
     }
 }

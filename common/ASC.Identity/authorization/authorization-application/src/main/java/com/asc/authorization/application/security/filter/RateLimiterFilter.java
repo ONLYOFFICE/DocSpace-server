@@ -44,6 +44,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -59,6 +60,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @Slf4j
 @RequiredArgsConstructor
 @Component("authorizationRateLimiterFilter")
+@ConditionalOnProperty(prefix = "bucket4j", name = "enabled", havingValue = "true")
 public class RateLimiterFilter extends OncePerRequestFilter {
   private static final String SIGNATURE_COOKIE = "x-signature";
 

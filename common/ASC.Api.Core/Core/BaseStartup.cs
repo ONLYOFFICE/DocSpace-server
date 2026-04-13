@@ -1,25 +1,25 @@
 ﻿// (c) Copyright Ascensio System SIA 2009-2026
-// 
+//
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
+//
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
+//
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-// 
+//
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -28,12 +28,13 @@ using System.Diagnostics;
 
 using ASC.Api.Core.Cors;
 using ASC.Api.Core.Cors.Enums;
-using ASC.Api.Core.Cors.Middlewares;
 using ASC.MessagingSystem;
 
 using Asp.Versioning;
 
 using Flurl.Util;
+
+using Microsoft.AspNetCore.Cors.Infrastructure;
 
 using IPNetwork = System.Net.IPNetwork;
 
@@ -78,15 +79,17 @@ public abstract class BaseStartup
         services.AddMemoryCache();
 
         services.AddHttpClient();
-        services.AddHttpClient("customHttpClient", _ => { }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
-        services.AddHttpClient("defaultHttpClientSslIgnore", _ => { })
-                .ConfigurePrimaryHttpMessageHandler(_ =>
-                {
-                    return new HttpClientHandler
-                    {
-                        ServerCertificateCustomValidationCallback = (_, _, _, _) => true
-                    };
-                });
+        services.AddHttpClient("customHttpClient", _ => { })
+            .ConfigurePrimaryHttpMessageHandler(_ => new HttpClientHandler
+            {
+                AllowAutoRedirect = false
+            });
+        services.AddHttpClient("customHttpClientSslIgnore", _ => { })
+            .ConfigurePrimaryHttpMessageHandler(_ => new HttpClientHandler
+            {
+                AllowAutoRedirect = false,
+                ServerCertificateCustomValidationCallback = (_, _, _, _) => true
+            });
 
 
         services.AddExceptionHandler<CustomExceptionHandler>();
@@ -107,7 +110,7 @@ public abstract class BaseStartup
             options.SubstituteApiVersionInUrl = true;
             options.DefaultApiVersion = new ApiVersion(2, 0);
         });
-        
+
         services.Configure<ForwardedHeadersOptions>(options =>
         {
             options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
@@ -317,7 +320,8 @@ public abstract class BaseStartup
 
                     httpContext.Request.Body.Position = 0;
 
-                    var json = new StreamReader(httpContext.Request.Body).ReadToEndAsync().Result?.Trim();
+                    using var bodyReader = new StreamReader(httpContext.Request.Body, leaveOpen: true);
+                    var json = bodyReader.ReadToEndAsync().Result?.Trim();
 
                     try
                     {
@@ -402,7 +406,7 @@ public abstract class BaseStartup
 
         if (!string.IsNullOrEmpty(_corsOrigin))
         {
-            services.AddDynamicCors<DynamicCorsPolicyResolver>(options =>
+            services.AddCors(options =>
             {
                 options.AddPolicy(name: CorsPoliciesEnums.DynamicCorsPolicyName,
                                   policy =>
@@ -427,6 +431,8 @@ public abstract class BaseStartup
                                             .AllowAnyMethod();
                                   });
             });
+
+            services.AddTransient<ICorsPolicyProvider, DynamicCorsPolicyProvider>();
         }
 
 
@@ -460,7 +466,7 @@ public abstract class BaseStartup
         if (OpenApiEnabled)
         {
             mvcBuilder.AddApiExplorer();
-            
+
             services.AddOpenApi(_configuration);
         }
         if (OpenTelemetryEnabled)
@@ -527,17 +533,15 @@ public abstract class BaseStartup
         services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Reader);
         services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Writer);
         services.AddHostedService<SocketService>();
+        services.AddSocketHttpClient(_configuration);
 
         services.RegisterQueue<ResizeWorkerItem>(2);
 
-        if (!builder.Environment.IsDevelopment())
-        {
-            services
-                .AddStartupTask<WarmupServicesStartupTask>()
-                .AddStartupTask<WarmupProtobufStartupTask>()
-                .AddStartupTask<WarmupBaseDbContextStartupTask>()
-                .TryAddSingleton(services);
-        }
+        services
+            .AddStartupTask<WarmupServicesStartupTask>()
+            .AddStartupTask<WarmupProtobufStartupTask>()
+            .AddStartupTask<WarmupBaseDbContextStartupTask>()
+            .TryAddSingleton(services);
 
         services.AddTransient<DistributedTaskProgress>();
     }
@@ -573,7 +577,7 @@ public abstract class BaseStartup
 
         if (!string.IsNullOrEmpty(_corsOrigin))
         {
-            app.UseDynamicCorsMiddleware(CorsPoliciesEnums.DynamicCorsPolicyName);
+            app.UseCors(CorsPoliciesEnums.DynamicCorsPolicyName);
         }
 
         app.UseAuthentication();

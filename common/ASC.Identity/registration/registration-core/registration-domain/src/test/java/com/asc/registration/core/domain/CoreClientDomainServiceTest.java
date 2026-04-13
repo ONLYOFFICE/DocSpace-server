@@ -36,12 +36,18 @@ import com.asc.common.core.domain.value.UserId;
 import com.asc.common.core.domain.value.enums.AuthenticationMethod;
 import com.asc.common.core.domain.value.enums.ClientVisibility;
 import com.asc.registration.core.domain.entity.Client;
+import com.asc.registration.core.domain.event.ClientEvent;
 import com.asc.registration.core.domain.value.ClientInfo;
 import com.asc.registration.core.domain.value.ClientRedirectInfo;
 import com.asc.registration.core.domain.value.ClientWebsiteInfo;
 import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 
 class CoreClientDomainServiceTest {
@@ -59,6 +65,138 @@ class CoreClientDomainServiceTest {
     when(audit.getUserId()).thenReturn(USER_ID);
   }
 
+  @FunctionalInterface
+  interface ClientCommand {
+    ClientEvent execute(CoreClientDomainService service, Audit audit, Client client);
+  }
+
+  static Stream<Arguments> clientCommandCases() {
+    var clientInfo = new ClientInfo("Updated Client", "Updated Description", "Updated Logo URL");
+    var clientInfo2 =
+        new ClientInfo("Updated Client 2", "Updated Description 2", "Updated Logo URL 2");
+    var clientWebsiteInfo =
+        ClientWebsiteInfo.Builder.builder()
+            .websiteUrl("http://updated.website")
+            .termsUrl("http://updated.terms")
+            .policyUrl("http://updated.policy")
+            .build();
+    var clientRedirectInfo =
+        new ClientRedirectInfo(
+            Set.of("http://updated.redirect"),
+            Set.of("http://updated.origin"),
+            Set.of("http://updated.logout"));
+    var method = AuthenticationMethod.DEFAULT_AUTHENTICATION;
+    var pkceMethod = AuthenticationMethod.PKCE_AUTHENTICATION;
+    var addedScope = "newScope";
+    var removedScope = "existingScope";
+    var addedScope2 = "adminScope";
+    var removedScope2 = "revokedScope";
+
+    return Stream.of(
+        Arguments.of(
+            (ClientCommand) CoreClientDomainService::enableClient,
+            (BiConsumer<Client, ArgumentCaptor<UserId>>)
+                (client, captor) -> verify(client).enable(captor.capture())),
+        Arguments.of(
+            (ClientCommand) CoreClientDomainService::disableClient,
+            (BiConsumer<Client, ArgumentCaptor<UserId>>)
+                (client, captor) -> verify(client).disable(captor.capture())),
+        Arguments.of(
+            (ClientCommand) CoreClientDomainService::deleteClient,
+            (BiConsumer<Client, ArgumentCaptor<UserId>>)
+                (client, captor) -> verify(client).disable(captor.capture())),
+        Arguments.of(
+            (ClientCommand) CoreClientDomainService::regenerateClientSecret,
+            (BiConsumer<Client, ArgumentCaptor<UserId>>)
+                (client, captor) -> verify(client).regenerateSecret(captor.capture())),
+        Arguments.of(
+            (ClientCommand)
+                (service, audit, client) -> service.updateClientInfo(audit, client, clientInfo),
+            (BiConsumer<Client, ArgumentCaptor<UserId>>)
+                (client, captor) ->
+                    verify(client).updateClientInfo(eq(clientInfo), captor.capture())),
+        Arguments.of(
+            (ClientCommand)
+                (service, audit, client) -> service.updateClientInfo(audit, client, clientInfo2),
+            (BiConsumer<Client, ArgumentCaptor<UserId>>)
+                (client, captor) ->
+                    verify(client).updateClientInfo(eq(clientInfo2), captor.capture())),
+        Arguments.of(
+            (ClientCommand)
+                (service, audit, client) ->
+                    service.updateClientWebsiteInfo(audit, client, clientWebsiteInfo),
+            (BiConsumer<Client, ArgumentCaptor<UserId>>)
+                (client, captor) ->
+                    verify(client)
+                        .updateClientWebsiteInfo(eq(clientWebsiteInfo), captor.capture())),
+        Arguments.of(
+            (ClientCommand)
+                (service, audit, client) ->
+                    service.updateClientRedirectInfo(audit, client, clientRedirectInfo),
+            (BiConsumer<Client, ArgumentCaptor<UserId>>)
+                (client, captor) ->
+                    verify(client)
+                        .updateClientRedirectInfo(eq(clientRedirectInfo), captor.capture())),
+        Arguments.of(
+            (ClientCommand)
+                (service, audit, client) -> service.addAuthenticationMethod(audit, client, method),
+            (BiConsumer<Client, ArgumentCaptor<UserId>>)
+                (client, captor) ->
+                    verify(client).addAuthenticationMethod(eq(method), captor.capture())),
+        Arguments.of(
+            (ClientCommand)
+                (service, audit, client) ->
+                    service.addAuthenticationMethod(audit, client, pkceMethod),
+            (BiConsumer<Client, ArgumentCaptor<UserId>>)
+                (client, captor) ->
+                    verify(client).addAuthenticationMethod(eq(pkceMethod), captor.capture())),
+        Arguments.of(
+            (ClientCommand)
+                (service, audit, client) ->
+                    service.removeAuthenticationMethod(audit, client, method),
+            (BiConsumer<Client, ArgumentCaptor<UserId>>)
+                (client, captor) ->
+                    verify(client).removeAuthenticationMethod(eq(method), captor.capture())),
+        Arguments.of(
+            (ClientCommand)
+                (service, audit, client) ->
+                    service.removeAuthenticationMethod(audit, client, pkceMethod),
+            (BiConsumer<Client, ArgumentCaptor<UserId>>)
+                (client, captor) ->
+                    verify(client).removeAuthenticationMethod(eq(pkceMethod), captor.capture())),
+        Arguments.of(
+            (ClientCommand) (service, audit, client) -> service.addScope(audit, client, addedScope),
+            (BiConsumer<Client, ArgumentCaptor<UserId>>)
+                (client, captor) -> verify(client).addScope(eq(addedScope), captor.capture())),
+        Arguments.of(
+            (ClientCommand)
+                (service, audit, client) -> service.addScope(audit, client, addedScope2),
+            (BiConsumer<Client, ArgumentCaptor<UserId>>)
+                (client, captor) -> verify(client).addScope(eq(addedScope2), captor.capture())),
+        Arguments.of(
+            (ClientCommand)
+                (service, audit, client) -> service.removeScope(audit, client, removedScope),
+            (BiConsumer<Client, ArgumentCaptor<UserId>>)
+                (client, captor) -> verify(client).removeScope(eq(removedScope), captor.capture())),
+        Arguments.of(
+            (ClientCommand)
+                (service, audit, client) -> service.removeScope(audit, client, removedScope2),
+            (BiConsumer<Client, ArgumentCaptor<UserId>>)
+                (client, captor) ->
+                    verify(client).removeScope(eq(removedScope2), captor.capture())),
+        Arguments.of(
+            (ClientCommand) CoreClientDomainService::makeClientPublic,
+            (BiConsumer<Client, ArgumentCaptor<UserId>>)
+                (client, captor) ->
+                    verify(client).changeVisibility(eq(ClientVisibility.PUBLIC), captor.capture())),
+        Arguments.of(
+            (ClientCommand) CoreClientDomainService::makeClientPrivate,
+            (BiConsumer<Client, ArgumentCaptor<UserId>>)
+                (client, captor) ->
+                    verify(client)
+                        .changeVisibility(eq(ClientVisibility.PRIVATE), captor.capture())));
+  }
+
   @Test
   void whenClientIsCreated_thenEventIsGenerated() {
     var captor = ArgumentCaptor.forClass(UserId.class);
@@ -73,196 +211,13 @@ class CoreClientDomainServiceTest {
     assertNotNull(event.getEventAt());
   }
 
-  @Test
-  void whenClientIsEnabled_thenEventIsGenerated() {
+  @ParameterizedTest
+  @MethodSource("clientCommandCases")
+  void whenClientCommandIsExecuted_thenEventIsGenerated(
+      ClientCommand command, BiConsumer<Client, ArgumentCaptor<UserId>> verifier) {
     var captor = ArgumentCaptor.forClass(UserId.class);
-    var event = service.enableClient(audit, client);
-
-    verify(client).enable(captor.capture());
-
-    assertEquals(USER_ID, captor.getValue().getValue());
-    assertNotNull(event);
-    assertEquals(client, event.getClient());
-    assertEquals(audit, event.getAudit());
-    assertNotNull(event.getEventAt());
-  }
-
-  @Test
-  void whenClientIsDisabled_thenEventIsGenerated() {
-    var captor = ArgumentCaptor.forClass(UserId.class);
-    var event = service.disableClient(audit, client);
-
-    verify(client).disable(captor.capture());
-
-    assertEquals(USER_ID, captor.getValue().getValue());
-    assertNotNull(event);
-    assertEquals(client, event.getClient());
-    assertEquals(audit, event.getAudit());
-    assertNotNull(event.getEventAt());
-  }
-
-  @Test
-  void whenClientIsDeleted_thenEventIsGenerated() {
-    var captor = ArgumentCaptor.forClass(UserId.class);
-    var event = service.deleteClient(audit, client);
-
-    verify(client).disable(captor.capture());
-
-    assertEquals(USER_ID, captor.getValue().getValue());
-    assertNotNull(event);
-    assertEquals(client, event.getClient());
-    assertEquals(audit, event.getAudit());
-    assertNotNull(event.getEventAt());
-  }
-
-  @Test
-  void whenClientSecretIsRegenerated_thenEventIsGenerated() {
-    var captor = ArgumentCaptor.forClass(UserId.class);
-    var event = service.regenerateClientSecret(audit, client);
-
-    verify(client).regenerateSecret(captor.capture());
-
-    assertEquals(USER_ID, captor.getValue().getValue());
-    assertNotNull(event);
-    assertEquals(client, event.getClient());
-    assertEquals(audit, event.getAudit());
-    assertNotNull(event.getEventAt());
-  }
-
-  @Test
-  void whenClientInfoIsUpdated_thenEventIsGenerated() {
-    var captor = ArgumentCaptor.forClass(UserId.class);
-    var clientInfo = new ClientInfo("Updated Client", "Updated Description", "Updated Logo URL");
-    var event = service.updateClientInfo(audit, client, clientInfo);
-
-    verify(client).updateClientInfo(eq(clientInfo), captor.capture());
-
-    assertEquals(USER_ID, captor.getValue().getValue());
-    assertNotNull(event);
-    assertEquals(client, event.getClient());
-    assertEquals(audit, event.getAudit());
-    assertNotNull(event.getEventAt());
-  }
-
-  @Test
-  void whenClientWebsiteInfoIsUpdated_thenEventIsGenerated() {
-    var captor = ArgumentCaptor.forClass(UserId.class);
-    var clientWebsiteInfo =
-        ClientWebsiteInfo.Builder.builder()
-            .websiteUrl("http://updated.website")
-            .termsUrl("http://updated.terms")
-            .policyUrl("http://updated.policy")
-            .build();
-    var event = service.updateClientWebsiteInfo(audit, client, clientWebsiteInfo);
-
-    verify(client).updateClientWebsiteInfo(eq(clientWebsiteInfo), captor.capture());
-
-    assertEquals(USER_ID, captor.getValue().getValue());
-    assertNotNull(event);
-    assertEquals(client, event.getClient());
-    assertEquals(audit, event.getAudit());
-    assertNotNull(event.getEventAt());
-  }
-
-  @Test
-  void whenClientRedirectInfoIsUpdated_thenEventIsGenerated() {
-    var captor = ArgumentCaptor.forClass(UserId.class);
-    var clientRedirectInfo =
-        new ClientRedirectInfo(
-            Set.of("http://updated.redirect"),
-            Set.of("http://updated.origin"),
-            Set.of("http://updated.logout"));
-    var event = service.updateClientRedirectInfo(audit, client, clientRedirectInfo);
-
-    verify(client).updateClientRedirectInfo(eq(clientRedirectInfo), captor.capture());
-
-    assertEquals(USER_ID, captor.getValue().getValue());
-    assertNotNull(event);
-    assertEquals(client, event.getClient());
-    assertEquals(audit, event.getAudit());
-    assertNotNull(event.getEventAt());
-  }
-
-  @Test
-  void whenAuthenticationMethodIsAdded_thenEventIsGenerated() {
-    var captor = ArgumentCaptor.forClass(UserId.class);
-    var method = AuthenticationMethod.DEFAULT_AUTHENTICATION;
-    var event = service.addAuthenticationMethod(audit, client, method);
-
-    verify(client).addAuthenticationMethod(eq(method), captor.capture());
-
-    assertEquals(USER_ID, captor.getValue().getValue());
-    assertNotNull(event);
-    assertEquals(client, event.getClient());
-    assertEquals(audit, event.getAudit());
-    assertNotNull(event.getEventAt());
-  }
-
-  @Test
-  void whenAuthenticationMethodIsRemoved_thenEventIsGenerated() {
-    var captor = ArgumentCaptor.forClass(UserId.class);
-    var method = AuthenticationMethod.DEFAULT_AUTHENTICATION;
-    var event = service.removeAuthenticationMethod(audit, client, method);
-
-    verify(client).removeAuthenticationMethod(eq(method), captor.capture());
-
-    assertEquals(USER_ID, captor.getValue().getValue());
-    assertNotNull(event);
-    assertEquals(client, event.getClient());
-    assertEquals(audit, event.getAudit());
-    assertNotNull(event.getEventAt());
-  }
-
-  @Test
-  void whenScopeIsAdded_thenEventIsGenerated() {
-    var captor = ArgumentCaptor.forClass(UserId.class);
-    var scope = "newScope";
-    var event = service.addScope(audit, client, scope);
-
-    verify(client).addScope(eq(scope), captor.capture());
-
-    assertEquals(USER_ID, captor.getValue().getValue());
-    assertNotNull(event);
-    assertEquals(client, event.getClient());
-    assertEquals(audit, event.getAudit());
-    assertNotNull(event.getEventAt());
-  }
-
-  @Test
-  void whenScopeIsRemoved_thenEventIsGenerated() {
-    var captor = ArgumentCaptor.forClass(UserId.class);
-    var scope = "existingScope";
-    var event = service.removeScope(audit, client, scope);
-
-    verify(client).removeScope(eq(scope), captor.capture());
-
-    assertEquals(USER_ID, captor.getValue().getValue());
-    assertNotNull(event);
-    assertEquals(client, event.getClient());
-    assertEquals(audit, event.getAudit());
-    assertNotNull(event.getEventAt());
-  }
-
-  @Test
-  void whenClientIsMadePublic_thenEventIsGenerated() {
-    var captor = ArgumentCaptor.forClass(UserId.class);
-    var event = service.makeClientPublic(audit, client);
-
-    verify(client).changeVisibility(eq(ClientVisibility.PUBLIC), captor.capture());
-
-    assertEquals(USER_ID, captor.getValue().getValue());
-    assertNotNull(event);
-    assertEquals(client, event.getClient());
-    assertEquals(audit, event.getAudit());
-    assertNotNull(event.getEventAt());
-  }
-
-  @Test
-  void whenClientIsMadePrivate_thenEventIsGenerated() {
-    var captor = ArgumentCaptor.forClass(UserId.class);
-    var event = service.makeClientPrivate(audit, client);
-
-    verify(client).changeVisibility(eq(ClientVisibility.PRIVATE), captor.capture());
+    var event = command.execute(service, audit, client);
+    verifier.accept(client, captor);
 
     assertEquals(USER_ID, captor.getValue().getValue());
     assertNotNull(event);

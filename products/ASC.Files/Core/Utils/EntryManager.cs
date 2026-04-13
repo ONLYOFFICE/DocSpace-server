@@ -1619,7 +1619,7 @@ public class EntryManager(IDaoFactory daoFactory,
         {
             if (!finalize)
             {
-                throw new Exception(FilesCommonResource.ErrorMessage_FileUpdateToVersion);
+                throw new ArgumentException(FilesCommonResource.ErrorMessage_FileUpdateToVersion);
             }
         }
 

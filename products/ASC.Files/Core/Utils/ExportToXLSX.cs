@@ -39,7 +39,7 @@ public class ExportToXLSX(
     AuthContext authContext)
 {
 
-    public async Task UpdateXlsxReport(int roomId, int originalFormId, int originalFormVersion)
+    public async Task<FormFillingReportTask> UpdateXlsxReport(int roomId, int originalFormId, int originalFormVersion)
     {
         try
         {
@@ -50,8 +50,9 @@ public class ExportToXLSX(
             var baseUri = commonLinkUtility.ServerRootPath;
 
             var statusTask = serviceProvider.GetService<FormFillingReportTask>();
-            statusTask.Init(baseUri, tenantId, userId, null);
-            _ = await documentBuilderTaskManager.StartTask(statusTask, false);
+            var taskId = DocumentBuilderTaskManager.GetTaskId(tenantId, userId, originalFormId);
+            statusTask.Init(baseUri, tenantId, userId, null, taskId);
+            var taskProgress = await documentBuilderTaskManager.StartTask(statusTask, false);
 
             var headers = MessageSettings.GetHttpHeaders(httpContextAccessor?.HttpContext?.Request);
             var evt = new FormFillingReportIntegrationEvent(userId, tenantId, roomId, originalFormId, originalFormVersion, baseUri, headers: headers != null
@@ -59,11 +60,21 @@ public class ExportToXLSX(
                 : []);
 
             await eventBus.PublishAsync(evt);
+
+            return taskProgress;
         }
         catch (Exception ex)
         {
             logger.ErrorWhileGeneratingXlsx(ex);
             throw;
         }
+    }
+
+    public async Task<FormFillingReportTask> GetXlsxTaskAsync(int formId)
+    {
+        var tenantId = tenantManager.GetCurrentTenantId();
+        var userId = authContext.CurrentAccount.ID;
+
+        return await documentBuilderTaskManager.GetTask(tenantId, userId, formId);
     }
 }

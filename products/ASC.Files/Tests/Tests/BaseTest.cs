@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2026
+// (c) Copyright Ascensio System SIA 2009-2026
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,45 +24,40 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Files.Tests.ApiFactories;
-
 using DocSpace.API.SDK.Api.Group;
-using DocSpace.API.SDK.Api.People;
-using DocSpace.API.SDK.Api.Privacyroom;
-using DocSpace.API.SDK.Api.Settings;
 
 using QuotaApi = DocSpace.API.SDK.Api.Files.QuotaApi;
 using RoomsApi = DocSpace.API.SDK.Api.Rooms.RoomsApi;
+using SettingsApi = DocSpace.API.SDK.Api.Files.SettingsApi;
 
 namespace ASC.Files.Tests.Tests;
 
 [Collection("Test Collection")]
 public class BaseTest(
-    FilesApiFactory filesFactory,
-    WepApiFactory apiFactory,
-    PeopleFactory peopleFactory,
-    FilesServiceFactory filesServiceProgram
+    AspireAppFixture fixture
     ) : IAsyncLifetime
 {
-    protected readonly HttpClient _filesClient = filesFactory.HttpClient;
-    protected readonly HttpClient _peopleClient = peopleFactory.HttpClient;
-    protected readonly FoldersApi _foldersApi = filesFactory.FoldersApi;
-    protected readonly FilesApi _filesApi = filesFactory.FilesApi;
-    protected readonly OperationsApi _filesOperationsApi = filesFactory.OperationsApi;
-    protected readonly RoomsApi _roomsApi = filesFactory.RoomsApi;
-    protected readonly SettingsApi _filesSettingsApi = filesFactory.SettingsApi;
-    protected readonly QuotaApi _quotaApi = filesFactory.QuotaApi;
-    protected readonly SharingApi _sharingApi = filesFactory.SharingApi;
+    protected readonly HttpClient _filesClient = fixture.FilesHttpClient;
+    protected readonly HttpClient _peopleClient = fixture.PeopleHttpClient;
+    protected readonly FoldersApi _foldersApi = fixture.FoldersApi;
+    protected readonly FilesApi _filesApi = fixture.FilesApi;
+    protected readonly OperationsApi _filesOperationsApi = fixture.OperationsApi;
+    protected readonly RoomsApi _roomsApi = fixture.RoomsApi;
+    protected readonly SettingsApi _filesSettingsApi = fixture.SettingsApi;
+    protected readonly QuotaApi _quotaApi = fixture.QuotaApi;
+    protected readonly SharingApi _sharingApi = fixture.SharingApi;
     protected readonly PrivacyroomApi _privacyroomApi = filesFactory.PrivacyroomApi;
     
-    protected readonly GroupApi _groupApi = peopleFactory.GroupApi;
-    protected readonly UserStatusApi _userStatusApi = peopleFactory.UserStatusApi;
-    protected readonly PhotosApi _photosApi = peopleFactory.PhotosApi;
+    protected readonly GroupApi _groupApi = fixture.GroupApi;
+    protected readonly UserStatusApi _userStatusApi = fixture.UserStatusApi;
+    protected readonly PhotosApi _photosApi = fixture.PhotosApi;
 
-    protected readonly CommonSettingsApi _commonSettingsApi = apiFactory.CommonSettingsApi;
-    protected readonly DocSpace.API.SDK.Api.Settings.QuotaApi _settingsQuotaApi = apiFactory.SettingsQuotaApi;
+    protected readonly CommonSettingsApi _commonSettingsApi = fixture.CommonSettingsApi;
+    protected readonly DocSpace.API.SDK.Api.Settings.QuotaApi _settingsQuotaApi = fixture.WebApiSettingsQuotaApi;
+    protected readonly HttpClient _webApiClient = fixture.WebApiHttpClient;
+    protected readonly AuthenticationApi _authenticationApi = fixture.AuthenticationApi;
 
-    private readonly Func<Task> _resetDatabase = filesFactory.ResetDatabaseAsync;
+    private readonly Func<Task> _resetDatabase = fixture.ResetDatabaseAsync;
 
     //   FileShare.None
     public static TheoryData<FileShare> ValidFileShare =>
@@ -92,7 +87,7 @@ public class BaseTest(
 
     public async ValueTask InitializeAsync()
     {
-        await Initializer.InitializeAsync(filesFactory, apiFactory, peopleFactory, filesServiceProgram);
+        await Initializer.InitializeAsync(fixture);
     }
 
     public async ValueTask DisposeAsync()
