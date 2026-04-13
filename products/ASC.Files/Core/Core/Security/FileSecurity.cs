@@ -1692,6 +1692,16 @@ public class FileSecurity(
                     }
                 }
 
+                if (file != null && room is {SettingsPrivate: true} &&
+                    action is
+                        FilesSecurityActions.Convert or
+                        FilesSecurityActions.AskAi or
+                        FilesSecurityActions.Embed
+                    )
+                {
+                    return false;
+                }
+
                 if (await HasFullAccessAsync(e, userId, isGuest, isRoom, isUser))
                 {
                     return true;
