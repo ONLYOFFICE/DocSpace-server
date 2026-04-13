@@ -1146,9 +1146,18 @@ public class FileSecurity(
                 return false;
             }
 
-            if (file.FilterType == FilterType.ImagesOnly && file.ContentLength > aiConfiguration.MaxImageSize)
+            if (file.FilterType == FilterType.ImagesOnly)
             {
-                return false;
+                if (file.ContentLength > aiConfiguration.MaxImageSize)
+                {
+                    return false;
+                }
+
+                var extension = FileUtility.GetFileExtension(file.Title);
+                if (!AiConfiguration.SupportedImageFormats.Contains(extension))
+                {
+                    return false;
+                }
             }
 
             if (file.FilterType != FilterType.ImagesOnly)
