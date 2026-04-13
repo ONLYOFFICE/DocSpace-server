@@ -6,17 +6,16 @@
   },
   "generatorName": "my-go",
   "inputSpec": "./json/api-docs.json",
-  "outputDir": "ClientNet",
+  "outputDir": "go-sdk",
   "additionalProperties": {
-    "packageName": "DocSpace.API.SDK",
+    "packageName": "docspace_api_sdk",
     "packageVersion": "3.7.0",
     "licenseName": "Apache-2.0",
-    "repositoryUrl": "https://github.com/ONLYOFFICE/docspace-api-sdk-csharp",
-    "library": "httpclient",
-    "targetFramework": "net10.0",
-    "useOneOfDiscriminatorLookup": false,
+    "repositoryUrl": "https://github.com/ONLYOFFICE/docspace-api-sdk-go",
+    "gitHost": "github.com",
+    "gitUserId": "ONLYOFFICE",
+    "gitRepoId": "docspace-api-sdk-go",
     "excludeTests": true,
-    "zeroBasedEnums": true,
-    "packageTitle": "DocSpace.API.SDK"
+    "enumClassPrefix": true
   }
 }

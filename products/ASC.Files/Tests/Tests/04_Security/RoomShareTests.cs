@@ -24,7 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Files.Tests.ApiFactories;
 
 namespace ASC.Files.Tests.Tests._04_Security;
 
@@ -32,11 +31,8 @@ namespace ASC.Files.Tests.Tests._04_Security;
 [Trait("Category", "Security")]
 [Trait("Feature", "Rooms")]
 public class RoomShareTests(
-    FilesApiFactory filesFactory,
-    WepApiFactory apiFactory,
-    PeopleFactory peopleFactory,
-    FilesServiceFactory filesServiceProgram)
-    : BaseTest(filesFactory, apiFactory, peopleFactory, filesServiceProgram)
+    AspireAppFixture fixture)
+    : BaseTest(fixture)
 {
     public static TheoryData<RoomType, FileShare> DataWithFileShare => new MatrixTheoryData<RoomType, FileShare>(
         [RoomType.EditingRoom, RoomType.VirtualDataRoom],
@@ -643,7 +639,7 @@ public class RoomShareTests(
             roomsList.Should().NotBeNull();
             roomsList.Folders.Should().Contain(f => f.Title == customRoom.Title);
 
-            // Now check file access for user2 (without token) � rights should be persisted according to the last link
+            // Now check file access for user2 (without token) rights should be persisted according to the last link
             var fileInfoAsUser2 = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
             fileInfoAsUser2.Should().NotBeNull();
             fileInfoAsUser2.Access.Should().Be(access);
@@ -961,10 +957,10 @@ public class RoomShareTests(
         var response = (await _roomsApi.SetRoomLinkAsync(customRoom.Id, additionalLink1, TestContext.Current.CancellationToken)).Response;
         var shortLink = response.SharedLink.ShareLink;
 
-        await apiFactory.HttpClient.Authenticate(Initializer.Owner);
-        var fullLink = await apiFactory.HttpClient.GetAsync(shortLink, TestContext.Current.CancellationToken);
+        await _webApiClient.Authenticate(Initializer.Owner);
+        var fullLink = await _webApiClient.GetAsync(new Uri(shortLink).PathAndQuery, TestContext.Current.CancellationToken);
         var key = HttpUtility.ParseQueryString(fullLink.RequestMessage?.RequestUri?.Query!)["key"];
-        await apiFactory.AuthenticationApi.CheckConfirmAsync(new EmailValidationKeyModel(key!, uiD: Initializer.Owner.Id, type: ConfirmType.LinkInvite), TestContext.Current.CancellationToken);
+        await _authenticationApi.CheckConfirmAsync(new EmailValidationKeyModel(key!, uiD: Initializer.Owner.Id, type: ConfirmType.LinkInvite), TestContext.Current.CancellationToken);
 
         var info = (await _roomsApi.GetRoomSecurityInfoAsync(customRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
@@ -997,10 +993,10 @@ public class RoomShareTests(
         var shortInvitationLink = invitationReadLinkResponse.SharedLink.ShareLink;
 
         // User visits the Read link
-        await apiFactory.HttpClient.Authenticate(user);
-        var fullInvitationLink = await apiFactory.HttpClient.GetAsync(shortInvitationLink, TestContext.Current.CancellationToken);
+        await _webApiClient.Authenticate(user);
+        var fullInvitationLink = await _webApiClient.GetAsync(new Uri(shortInvitationLink).PathAndQuery, TestContext.Current.CancellationToken);
         var fullInvitationLinkKey = HttpUtility.ParseQueryString(fullInvitationLink.RequestMessage?.RequestUri?.Query!)["key"];
-        await apiFactory.AuthenticationApi.CheckConfirmAsync(new EmailValidationKeyModel(fullInvitationLinkKey!, uiD: owner.Id, type: ConfirmType.LinkInvite), TestContext.Current.CancellationToken);
+        await _authenticationApi.CheckConfirmAsync(new EmailValidationKeyModel(fullInvitationLinkKey!, uiD: owner.Id, type: ConfirmType.LinkInvite), TestContext.Current.CancellationToken);
 
         var info = (await _roomsApi.GetRoomSecurityInfoAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
@@ -1022,10 +1018,10 @@ public class RoomShareTests(
         var shortUpdatedInvitationLink = updatedLinkResponse.SharedLink.ShareLink;
 
         // User visits the updated link again, but personal rights must remain Read (because the user already exists in the room)
-        await apiFactory.HttpClient.Authenticate(user);
-        var fullUpdatedInvitationLink = await apiFactory.HttpClient.GetAsync(shortUpdatedInvitationLink, TestContext.Current.CancellationToken);
+        await _webApiClient.Authenticate(user);
+        var fullUpdatedInvitationLink = await _webApiClient.GetAsync(new Uri(shortUpdatedInvitationLink).PathAndQuery, TestContext.Current.CancellationToken);
         var fullUpdatedInvitationLinkKey = HttpUtility.ParseQueryString(fullUpdatedInvitationLink.RequestMessage?.RequestUri?.Query!)["key"];
-        await apiFactory.AuthenticationApi.CheckConfirmAsync(new EmailValidationKeyModel(fullUpdatedInvitationLinkKey!, uiD: owner.Id, type: ConfirmType.LinkInvite), TestContext.Current.CancellationToken);
+        await _authenticationApi.CheckConfirmAsync(new EmailValidationKeyModel(fullUpdatedInvitationLinkKey!, uiD: owner.Id, type: ConfirmType.LinkInvite), TestContext.Current.CancellationToken);
 
         var updatedInfo = (await _roomsApi.GetRoomSecurityInfoAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
 

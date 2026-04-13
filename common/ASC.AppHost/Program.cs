@@ -32,15 +32,26 @@ var basePath = Path.GetFullPath(Path.Combine("..", "..", ".."));
 var isDocker = string.Compare(builder.Configuration["Docker"], "true", StringComparison.OrdinalIgnoreCase) == 0;
 var skipClient = string.Compare(builder.Configuration["SKIP_CLIENT"], "true", StringComparison.OrdinalIgnoreCase) == 0;
 
-var connectionManager = new ConnectionStringManager(builder, basePath)
-
-    .AddEditors();
+var launchProfile = builder.Configuration["DOTNET_LAUNCH_PROFILE"];
+var connectionManager = new ConnectionStringManager(builder, basePath).AddEditors();
 
 var configurator = new ProjectConfigurator(builder, connectionManager, basePath, isDocker);
-
-var launchProfile = builder.Configuration["DOTNET_LAUNCH_PROFILE"];
 switch (launchProfile)
 {
+    case "integration-test":
+        connectionManager
+            .AddMySql(withDataVolume: false)
+            .AddRabbitMq()
+            .AddRedis()
+            .AddOpensearch(withDashboard: false, fixedPort: false);
+
+        configurator
+            .AddProject<ASC_Files>(Constants.FilesPort)
+            .AddProject<ASC_Files_Worker>(Constants.FilesWorkerPort)
+            .AddProject<ASC_People>(Constants.PeoplePort)
+            .AddProject<ASC_Web_Api>(Constants.WebApiPort);
+
+        break;
     case "preview":
         connectionManager
             .AddMySql();
