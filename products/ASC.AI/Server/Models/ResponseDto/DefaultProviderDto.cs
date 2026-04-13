@@ -50,8 +50,9 @@ public class DefaultProviderDto
     public string? ProviderTitle { get; init; }
 
     /// <summary>
-    /// AI provider type.
+    /// AI provider type (e.g., OpenAi, Anthropic, GoogleAi).
     /// </summary>
+    /// <example>0</example>
     public ProviderType ProviderType { get; init; }
 
     /// <summary>
