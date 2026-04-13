@@ -715,6 +715,11 @@ public abstract class VirtualRoomsController<T>(
     [HttpGet("covers")]
     public async IAsyncEnumerable<CoversResultDto> GetRoomCovers()
     {
+        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+
         foreach (var c in await RoomLogoManager.GetCoversAsync())
         {
             yield return new CoversResultDto { Id = c.Key, Data = c.Value };
