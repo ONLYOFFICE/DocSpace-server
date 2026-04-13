@@ -623,7 +623,11 @@ public class PaymentController(
         var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
         if (customerInfo != null)
         {
-            await DemandPayerAsync(customerInfo);
+            var currentQuota = await tariffHelper.GetCurrentQuotaAsync(false, false);
+            if (!currentQuota.NonProfit || !string.IsNullOrEmpty(customerInfo.Email))
+            {
+                await DemandPayerAsync(customerInfo);
+            }
 
             if (customerInfo.PaymentMethodStatus == PaymentMethodStatus.Set)
             {
