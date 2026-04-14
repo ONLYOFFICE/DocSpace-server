@@ -61,6 +61,7 @@ public class PaymentController(
     ApiDateTimeHelper apiDateTimeHelper,
     EmployeeDtoHelper employeeWrapperHelper,
     DisplayUserSettingsHelper displayUserSettingsHelper,
+    TenantLogoManager tenantLogoManager,
     IEventBus eventBus,
     CommonLinkUtility commonLinkUtility,
     DocumentBuilderTaskManager<CustomerOperationsReportTask, int, CustomerOperationsReportTaskData> documentBuilderTaskManager,
@@ -622,7 +623,11 @@ public class PaymentController(
         var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
         if (customerInfo != null)
         {
-            await DemandPayerAsync(customerInfo);
+            var currentQuota = await tariffHelper.GetCurrentQuotaAsync(false, false);
+            if (!currentQuota.NonProfit || !string.IsNullOrEmpty(customerInfo.Email))
+            {
+                await DemandPayerAsync(customerInfo);
+            }
 
             if (customerInfo.PaymentMethodStatus == PaymentMethodStatus.Set)
             {
@@ -863,8 +868,9 @@ public class PaymentController(
         }
 
         var participantDisplayNames = await report.GetParticipantDisplayNamesAsync(displayUserSettingsHelper);
+        var logoText = await tenantLogoManager.GetLogoTextAsync();
 
-        return new ReportDto(report, apiDateTimeHelper, participantDisplayNames, filter.ServiceName);
+        return new ReportDto(report, apiDateTimeHelper, participantDisplayNames, filter.ServiceName, logoText);
     }
 
     /// <remarks>

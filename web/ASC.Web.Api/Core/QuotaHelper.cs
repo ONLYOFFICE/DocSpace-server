@@ -1,25 +1,25 @@
 ﻿// (c) Copyright Ascensio System SIA 2009-2026
-// 
+//
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
+//
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
+//
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-// 
+//
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -31,6 +31,7 @@ namespace ASC.Web.Api.Core;
 [Scope]
 public class QuotaHelper(
     TenantManager tenantManager,
+    TenantLogoManager tenantLogoManager,
     IServiceProvider serviceProvider,
     CoreBaseSettings coreBaseSettings,
     SettingsManager settingsManager,
@@ -42,10 +43,11 @@ public class QuotaHelper(
         var quotaList = await tenantManager.GetTenantQuotasAsync(all, wallet);
         var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
         var enabledWalletServices = coreBaseSettings.Standalone ? null : (await settingsManager.LoadAsync<TenantWalletServiceSettings>()).EnabledServices;
+        var logoText = await tenantLogoManager.GetLogoTextAsync();
 
         foreach (var quota in quotaList)
         {
-            yield return await ToQuotaDto(quota, userType, false, enabledWalletServices);
+            yield return await ToQuotaDto(quota, userType, false, enabledWalletServices, logoText);
         }
     }
 
@@ -54,16 +56,18 @@ public class QuotaHelper(
         var quota = await tenantManager.GetCurrentTenantQuotaAsync(refresh);
         var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
         var enabledWalletServices = coreBaseSettings.Standalone ? null : (await settingsManager.LoadAsync<TenantWalletServiceSettings>()).EnabledServices;
+        var logoText = await tenantLogoManager.GetLogoTextAsync();
 
-        return await ToQuotaDto(quota, userType, getUsed, enabledWalletServices);
+        return await ToQuotaDto(quota, userType, getUsed, enabledWalletServices, logoText);
     }
 
     public async Task<QuotaDto> ToQuotaDtoAsync(TenantQuota quota, bool getUsed = true)
     {
         var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
         var enabledWalletServices = coreBaseSettings.Standalone ? null : (await settingsManager.LoadAsync<TenantWalletServiceSettings>()).EnabledServices;
+        var logoText = await tenantLogoManager.GetLogoTextAsync();
 
-        return await ToQuotaDto(quota, userType, getUsed, enabledWalletServices);
+        return await ToQuotaDto(quota, userType, getUsed, enabledWalletServices, logoText);
     }
 
     public async Task<IEnumerable<WalletServiceDto>> GetWalletServicesAsync()
@@ -73,6 +77,7 @@ public class QuotaHelper(
         var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
         var enabledWalletServices = coreBaseSettings.Standalone ? null : (await settingsManager.LoadAsync<TenantWalletServiceSettings>()).EnabledServices;
         var aiEnabled = !coreBaseSettings.Standalone && (await settingsManager.LoadAsync<TenantAiAccessSettings>()).Enabled;
+        var logoText = await tenantLogoManager.GetLogoTextAsync();
 
         var dict = new Dictionary<string, WalletServiceDto>();
 
@@ -82,8 +87,8 @@ public class QuotaHelper(
             {
                 continue;
             }
-            
-            var quotaDto = await ToQuotaDto(quota, userType, false, enabledWalletServices);
+
+            var quotaDto = await ToQuotaDto(quota, userType, false, enabledWalletServices, logoText);
             var walletServiceDto = quotaDto.MapToWalletServiceDto();
             walletServiceDto.ServiceName = quota.ServiceName;
 
@@ -109,9 +114,9 @@ public class QuotaHelper(
         return dict.Values;
     }
 
-    private async Task<QuotaDto> ToQuotaDto(TenantQuota quota, EmployeeType employeeType, bool getUsed = false, List<TenantWalletService> enabledWalletServices = null)
+    private async Task<QuotaDto> ToQuotaDto(TenantQuota quota, EmployeeType employeeType, bool getUsed = false, List<TenantWalletService> enabledWalletServices = null, string logoText = null)
     {
-        var features = await GetFeatures(quota, employeeType, getUsed, enabledWalletServices).ToListAsync();
+        var features = await GetFeatures(quota, employeeType, getUsed, enabledWalletServices, logoText).ToListAsync();
 
         var result = new QuotaDto
         {
@@ -151,7 +156,7 @@ public class QuotaHelper(
         return result;
     }
 
-    private async IAsyncEnumerable<TenantQuotaFeatureDto> GetFeatures(TenantQuota quota, EmployeeType employeeType, bool getUsed, List<TenantWalletService> enabledWalletServices)
+    private async IAsyncEnumerable<TenantQuotaFeatureDto> GetFeatures(TenantQuota quota, EmployeeType employeeType, bool getUsed, List<TenantWalletService> enabledWalletServices, string logoText)
     {
         var assembly = GetType().Assembly;
 
@@ -181,7 +186,7 @@ public class QuotaHelper(
 
             var result = new TenantQuotaFeatureDto
             {
-                Title = Resource.ResourceManager.GetString($"TariffsFeature_{featureName}")
+                Title = (Resource.ResourceManager.GetString($"TariffsFeature_{featureName}") ?? "").Replace("{LogoText}", logoText)
             };
 
             if (feature.Paid)

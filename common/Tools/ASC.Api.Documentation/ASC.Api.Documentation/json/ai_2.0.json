@@ -1242,7 +1242,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ExportChatRequestBodyInteger"
+                "$ref": "#/components/schemas/ExportChatRequestBody"
               }
             }
           },
@@ -2726,7 +2726,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ExportMessageRequestBodyInteger"
+                "$ref": "#/components/schemas/ExportMessageRequestBody"
               }
             }
           },
@@ -4693,12 +4693,6 @@
             "nullable": true,
             "example": "Mike Zanyatski"
           },
-          "title": {
-            "type": "string",
-            "description": "The user title.",
-            "nullable": true,
-            "example": "Manager"
-          },
           "avatar": {
             "type": "string",
             "description": "The user avatar.",
@@ -4779,7 +4773,7 @@
         ],
         "x-enum-type": "integer"
       },
-      "ExportChatRequestBodyInteger": {
+      "ExportChatRequestBody": {
         "required": [
           "folderId",
           "title"
@@ -4787,9 +4781,17 @@
         "type": "object",
         "properties": {
           "folderId": {
-            "type": "integer",
-            "description": "The identifier of the destination folder where the exported document will be saved.",
-            "format": "int32",
+            "oneOf": [
+              {
+                "type": "integer",
+                "example": 1234
+              },
+              {
+                "type": "string",
+                "example": "some text"
+              }
+            ],
+            "description": "The identifier of the destination folder where the exported document will be saved.\r\nCan be an integer for internal folders or a string for third-party storage folders.",
             "example": 123
           },
           "title": {
@@ -4802,7 +4804,7 @@
         "additionalProperties": false,
         "description": "Parameters for exporting an AI chat session to a document."
       },
-      "ExportMessageRequestBodyInteger": {
+      "ExportMessageRequestBody": {
         "required": [
           "folderId",
           "title"
@@ -4810,9 +4812,17 @@
         "type": "object",
         "properties": {
           "folderId": {
-            "type": "integer",
-            "description": "The identifier of the destination folder where the exported document will be saved.",
-            "format": "int32",
+            "oneOf": [
+              {
+                "type": "integer",
+                "example": 1234
+              },
+              {
+                "type": "string",
+                "example": "some text"
+              }
+            ],
+            "description": "The identifier of the destination folder where the exported document will be saved.\r\nCan be an integer for internal folders or a string for third-party storage folders.",
             "example": 123
           },
           "title": {
