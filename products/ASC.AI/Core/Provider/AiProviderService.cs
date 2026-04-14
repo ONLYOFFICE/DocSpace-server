@@ -250,7 +250,13 @@ public class AiProviderService(
         foreach (var m in models)
         {
             dbSettings.TryGetValue(m.Id, out var dbSetting);
-            var resolved = modelSettingsResolver.Resolve(provider.Type, m.Id, dbSetting, provider.HasModelSettings);
+            var resolved = modelSettingsResolver.Resolve(
+                provider.Type,
+                m.Id,
+                dbSetting,
+                provider.HasModelSettings,
+                m.Alias,
+                m.Capabilities);
 
             if (resolved is not { IsEnabled: true })
             {
@@ -485,7 +491,14 @@ public class AiProviderService(
         foreach (var m in models)
         {
             currentSettings.TryGetValue(m.Id, out var setting);
-            var resolved = modelSettingsResolver.Resolve(type, m.Id, setting, hasModelSettings);
+            var resolved = modelSettingsResolver.Resolve(
+                type,
+                m.Id,
+                setting,
+                hasModelSettings,
+                m.Alias,
+                m.Capabilities);
+
             if (resolved is { IsEnabled: true })
             {
                 yield return m;
@@ -524,7 +537,13 @@ public class AiProviderService(
             .Select(model =>
             {
                 dbSettings.TryGetValue(model.Id, out var dbSetting);
-                return modelSettingsResolver.Resolve(type, model.Id, dbSetting, hasModelSettings);
+                return modelSettingsResolver.Resolve(
+                    type,
+                    model.Id,
+                    dbSetting,
+                    hasModelSettings,
+                    model.Alias,
+                    model.Capabilities);
             })
             .OrderByDescending(x => x.IsRecommended)
             .ThenByDescending(x => x.IsEnabled);

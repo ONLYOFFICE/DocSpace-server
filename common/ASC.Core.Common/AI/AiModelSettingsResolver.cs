@@ -42,7 +42,13 @@ public record ModelSettings
 [Singleton]
 public class AiModelSettingsResolver(AiConfiguration aiConfig)
 {
-    public ModelSettings Resolve(ProviderType type, string modelId, AiModelSettings? dbSettings, bool hasModelSettings)
+    public ModelSettings Resolve(
+        ProviderType type,
+        string modelId,
+        AiModelSettings? dbSettings,
+        bool hasModelSettings,
+        string? providerAlias = null,
+        AiModelCapabilities? providerCapabilities = null)
     {
         var configModel = aiConfig.GetModel(type, modelId);
         if (configModel != null)
@@ -62,8 +68,8 @@ public class AiModelSettingsResolver(AiConfiguration aiConfig)
             return new ModelSettings
             {
                 Id = dbSettings.ModelId,
-                Alias = dbSettings.Alias,
-                Capabilities = dbSettings.Capabilities ?? AiModelCapabilities.Default,
+                Alias = dbSettings.Alias ?? providerAlias,
+                Capabilities = dbSettings.Capabilities ?? providerCapabilities ?? AiModelCapabilities.Default,
                 IsEnabled = dbSettings.IsEnabled
             };
         }
@@ -74,7 +80,8 @@ public class AiModelSettingsResolver(AiConfiguration aiConfig)
         return new ModelSettings
         {
             Id = modelId,
-            Capabilities = AiModelCapabilities.Default,
+            Alias = providerAlias,
+            Capabilities = providerCapabilities ?? AiModelCapabilities.Default,
             IsEnabled = enabled
         };
     }
