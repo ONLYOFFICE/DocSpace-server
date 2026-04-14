@@ -943,10 +943,11 @@ public class FileSecurity(
 
             var security = new Dictionary<FilesSecurityActions, bool>();
             var parentFolders = await GetFileParentFolders(entry.ParentId);
+            var shares = await PreloadEntrySharesAsync(entry, userId, isDocSpaceAdmin);
 
             foreach (var action in Enum.GetValues<FilesSecurityActions>().Where(r => _securityEntries[entry.FileEntryType].Contains(r)))
             {
-                security[action] = await FilterEntryAsync(entry, action, userId, null, isOutsider, isGuest, isAuthenticated, isDocSpaceAdmin, isUser, parentFolders, cachedFileDao);
+                security[action] = await FilterEntryAsync(entry, action, userId, shares, isOutsider, isGuest, isAuthenticated, isDocSpaceAdmin, isUser, parentFolders, cachedFileDao);
             }
 
             entry.Security = security;
@@ -2386,20 +2387,8 @@ public class FileSecurity(
         }
 
         FileShareRecord<T> ace;
-        var orderedSubjects = new List<OrderedSubject>();
-        if (shares == null)
-        {
-            var includeAvailableLinks = entry switch
-            {
-                { RootFolderType: FolderType.USER } when entry.CreateBy != userId => true,
-                { RootFolderType: FolderType.VirtualRooms } when !isDocSpaceAdmin => true,
-                Folder<T> { FolderType: FolderType.FillingFormsRoom } when isDocSpaceAdmin => true,
-                _ => false
-            };
-
-            orderedSubjects = await GetUserOrderedSubjectsAsync(userId, includeAvailableLinks);
-            shares = await GetSharesAsync(entry, orderedSubjects.Select(s => s.Subject).ToHashSet());
-        }
+        var orderedSubjects = await GetOrderedSubjectsForEntryAsync(entry, userId, isDocSpaceAdmin);
+        shares ??= await GetSharesAsync(entry, orderedSubjects.Select(s => s.Subject).ToHashSet());
 
         if (entry.FileEntryType == FileEntryType.File)
         {
@@ -3143,6 +3132,30 @@ public class FileSecurity(
         }
 
         return await GetUserOrderedSubjectsAsync<int>(userId, includeAvailableLinks);
+    }
+
+    private Task<List<OrderedSubject>> GetOrderedSubjectsForEntryAsync<T>(FileEntry<T> entry, Guid userId, bool isDocSpaceAdmin)
+    {
+        var includeAvailableLinks = entry switch
+        {
+            { RootFolderType: FolderType.USER } when entry.CreateBy != userId => true,
+            { RootFolderType: FolderType.VirtualRooms } when !isDocSpaceAdmin => true,
+            Folder<T> { FolderType: FolderType.FillingFormsRoom } when isDocSpaceAdmin => true,
+            _ => false
+        };
+
+        return GetUserOrderedSubjectsAsync(userId, includeAvailableLinks);
+    }
+
+    private async Task<IEnumerable<FileShareRecord<T>>> PreloadEntrySharesAsync<T>(FileEntry<T> entry, Guid userId, bool isDocSpaceAdmin)
+    {
+        if (entry is Folder<T> { FolderType: FolderType.VirtualRooms or FolderType.Archive })
+        {
+            return null;
+        }
+
+        var orderedSubjects = await GetOrderedSubjectsForEntryAsync(entry, userId, isDocSpaceAdmin);
+        return await GetSharesAsync(entry, orderedSubjects.Select(s => s.Subject).ToHashSet());
     }
 
     public async IAsyncEnumerable<FileShareRecord<string>> GetUserRecordsAsync()
