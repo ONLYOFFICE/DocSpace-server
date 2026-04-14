@@ -229,7 +229,7 @@ public class AiProviderDao(
         await strategy.ExecuteAsync(async () =>
         {
             await using var context = await dbContextFactory.CreateDbContextAsync();
-            var transaction = await context.Database.BeginTransactionAsync();
+            await using var transaction = await context.Database.BeginTransactionAsync();
 
             await context.DeleteDefaultProvidersByProviderIdsAsync(tenantId, ids);
             await context.DeleteProvidersAsync(tenantId, ids);
@@ -364,7 +364,7 @@ public class AiProviderDao(
             }
             else
             {
-                await context.ModelSettings.AddAsync(new DbAiModelSettings
+                context.ModelSettings.Add(new DbAiModelSettings
                 {
                     TenantId = tenantId,
                     ProviderId = providerId,

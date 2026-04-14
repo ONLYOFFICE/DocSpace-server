@@ -482,6 +482,8 @@ public class AiProviderService(
     {
         if (newSettings is { Count: > 0 })
         {
+            currentSettings = new Dictionary<string, AiModelSettings>(currentSettings);
+
             foreach (var s in newSettings)
             {
                 currentSettings[s.ModelId] = s;

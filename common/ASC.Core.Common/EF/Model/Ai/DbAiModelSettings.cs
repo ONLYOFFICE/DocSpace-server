@@ -58,9 +58,9 @@ public class AiModelCapabilities
     [JsonIgnore]
     public static readonly AiModelCapabilities Default = new()
     {
-        Vision = true,
-        ToolCalling = true,
-        Thinking = true
+        Vision = false,
+        ToolCalling = false,
+        Thinking = false
     };
 
     /// <summary>
