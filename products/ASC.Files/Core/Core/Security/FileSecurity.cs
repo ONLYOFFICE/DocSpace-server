@@ -2381,13 +2381,12 @@ public class FileSecurity(
 
     public async Task<FileShareRecord<T>> GetCurrentShareAsync<T>(FileEntry<T> entry, Guid userId, bool isDocSpaceAdmin, IEnumerable<FileShareRecord<T>> shares = null)
     {
-        if (entry is Folder<T> { FolderType: FolderType.VirtualRooms or FolderType.Archive })
+        FileShareRecord<T> ace;
+        var orderedSubjects = await GetOrderedSubjectsForEntryAsync(entry, userId, isDocSpaceAdmin);
+        if (orderedSubjects == null)
         {
             return null;
         }
-
-        FileShareRecord<T> ace;
-        var orderedSubjects = await GetOrderedSubjectsForEntryAsync(entry, userId, isDocSpaceAdmin);
         shares ??= await GetSharesAsync(entry, orderedSubjects.Select(s => s.Subject).ToHashSet());
 
         if (entry.FileEntryType == FileEntryType.File)
@@ -3136,6 +3135,11 @@ public class FileSecurity(
 
     private Task<List<OrderedSubject>> GetOrderedSubjectsForEntryAsync<T>(FileEntry<T> entry, Guid userId, bool isDocSpaceAdmin)
     {
+        if (entry is Folder<T> { FolderType: FolderType.VirtualRooms or FolderType.Archive })
+        {
+            return null;
+        }
+
         var includeAvailableLinks = entry switch
         {
             { RootFolderType: FolderType.USER } when entry.CreateBy != userId => true,
@@ -3149,12 +3153,11 @@ public class FileSecurity(
 
     private async Task<IEnumerable<FileShareRecord<T>>> PreloadEntrySharesAsync<T>(FileEntry<T> entry, Guid userId, bool isDocSpaceAdmin)
     {
-        if (entry is Folder<T> { FolderType: FolderType.VirtualRooms or FolderType.Archive })
+        var orderedSubjects = await GetOrderedSubjectsForEntryAsync(entry, userId, isDocSpaceAdmin);
+        if (orderedSubjects == null)
         {
             return null;
         }
-
-        var orderedSubjects = await GetOrderedSubjectsForEntryAsync(entry, userId, isDocSpaceAdmin);
         return await GetSharesAsync(entry, orderedSubjects.Select(s => s.Subject).ToHashSet());
     }
 
