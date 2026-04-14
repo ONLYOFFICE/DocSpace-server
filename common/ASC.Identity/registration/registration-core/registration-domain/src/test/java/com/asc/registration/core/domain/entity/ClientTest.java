@@ -42,8 +42,14 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
 
 class ClientTest {
   private final UserId CREATOR_ID = new UserId("creator");
@@ -72,6 +78,57 @@ class ClientTest {
                     .build())
             .clientVisibility(ClientVisibility.PRIVATE)
             .build();
+  }
+
+  static Stream<Arguments> scopeMutationCases() {
+    return Stream.of(
+        Arguments.of(
+            (Consumer<Client>) client -> client.addScope("delete", new UserId("modifier")),
+            "delete",
+            "missing-scope"),
+        Arguments.of(
+            (Consumer<Client>) client -> client.addScope("admin", new UserId("modifier")),
+            "admin",
+            "missing-scope"),
+        Arguments.of(
+            (Consumer<Client>) client -> client.removeScope("read", new UserId("modifier")),
+            "write",
+            "read"),
+        Arguments.of(
+            (Consumer<Client>) client -> client.removeScope("write", new UserId("modifier")),
+            "read",
+            "write"));
+  }
+
+  static Stream<Arguments> authenticationMutationCases() {
+    return Stream.of(
+        Arguments.of(
+            (Consumer<Client>)
+                client ->
+                    client.addAuthenticationMethod(
+                        AuthenticationMethod.PKCE_AUTHENTICATION, new UserId("modifier")),
+            AuthenticationMethod.PKCE_AUTHENTICATION,
+            2),
+        Arguments.of(
+            (Consumer<Client>)
+                client -> {
+                  client.addAuthenticationMethod(
+                      AuthenticationMethod.PKCE_AUTHENTICATION, new UserId("modifier"));
+                  client.removeAuthenticationMethod(
+                      AuthenticationMethod.DEFAULT_AUTHENTICATION, new UserId("modifier"));
+                },
+            AuthenticationMethod.PKCE_AUTHENTICATION,
+            1),
+        Arguments.of(
+            (Consumer<Client>)
+                client -> {
+                  client.addAuthenticationMethod(
+                      AuthenticationMethod.PKCE_AUTHENTICATION, new UserId("modifier"));
+                  client.removeAuthenticationMethod(
+                      AuthenticationMethod.PKCE_AUTHENTICATION, new UserId("modifier"));
+                },
+            AuthenticationMethod.DEFAULT_AUTHENTICATION,
+            1));
   }
 
   @Test
@@ -113,23 +170,15 @@ class ClientTest {
     assertNotEquals(oldSecret, client.getSecret().value());
   }
 
-  @Test
-  void whenScopeIsAdded_thenScopeIsIncluded() {
+  @ParameterizedTest
+  @MethodSource("scopeMutationCases")
+  void whenScopeIsMutated_thenExpectedScopesArePresent(
+      Consumer<Client> mutation, String presentScope, String absentScope) {
     client.initialize(CREATOR_ID);
-    String newScope = "delete";
-    client.addScope(newScope, MODIFIER_ID);
+    mutation.accept(client);
 
-    assertTrue(client.getScopes().contains(newScope));
-  }
-
-  @Test
-  void whenScopeIsRemoved_thenScopeIsExcluded() {
-    client.initialize(CREATOR_ID);
-    String scopeToRemove = "read";
-    client.removeScope(scopeToRemove, MODIFIER_ID);
-
-    assertFalse(client.getScopes().contains(scopeToRemove));
-    assertTrue(client.getScopes().contains("write"));
+    assertTrue(client.getScopes().contains(presentScope));
+    assertFalse(client.getScopes().contains(absentScope));
   }
 
   @Test
@@ -147,12 +196,15 @@ class ClientTest {
     assertEquals("Client must have at least one scope", exception.getMessage());
   }
 
-  @Test
-  void whenVisibilityIsChanged_thenVisibilityIsUpdated() {
+  @ParameterizedTest
+  @EnumSource(
+      value = ClientVisibility.class,
+      names = {"PUBLIC", "PRIVATE"})
+  void whenVisibilityIsChanged_thenVisibilityIsUpdated(ClientVisibility visibility) {
     client.initialize(CREATOR_ID);
-    client.changeVisibility(ClientVisibility.PUBLIC, MODIFIER_ID);
+    client.changeVisibility(visibility, MODIFIER_ID);
 
-    assertEquals(ClientVisibility.PUBLIC, client.getVisibility());
+    assertEquals(visibility, client.getVisibility());
   }
 
   @Test
@@ -191,25 +243,15 @@ class ClientTest {
     assertEquals(newClientRedirectInfo, client.getClientRedirectInfo());
   }
 
-  @Test
-  void whenAuthenticationMethodIsAdded_thenMethodIsIncluded() {
+  @ParameterizedTest
+  @MethodSource("authenticationMutationCases")
+  void whenAuthenticationMethodIsMutated_thenExpectedMethodsArePresent(
+      Consumer<Client> mutation, AuthenticationMethod presentMethod, int expectedMethodsCount) {
     client.initialize(CREATOR_ID);
-    var newMethod = AuthenticationMethod.PKCE_AUTHENTICATION;
-    client.addAuthenticationMethod(newMethod, MODIFIER_ID);
+    mutation.accept(client);
 
-    assertTrue(client.getAuthenticationMethods().contains(newMethod));
-  }
-
-  @Test
-  void whenAuthenticationMethodIsRemoved_thenMethodIsExcluded() {
-    client.initialize(CREATOR_ID);
-    var methodToRemove = AuthenticationMethod.DEFAULT_AUTHENTICATION;
-    var newMethod = AuthenticationMethod.PKCE_AUTHENTICATION;
-    client.addAuthenticationMethod(newMethod, MODIFIER_ID);
-    client.removeAuthenticationMethod(methodToRemove, MODIFIER_ID);
-
-    assertFalse(client.getAuthenticationMethods().contains(methodToRemove));
-    assertTrue(client.getAuthenticationMethods().contains(newMethod));
+    assertTrue(client.getAuthenticationMethods().contains(presentMethod));
+    assertEquals(expectedMethodsCount, client.getAuthenticationMethods().size());
   }
 
   @Test

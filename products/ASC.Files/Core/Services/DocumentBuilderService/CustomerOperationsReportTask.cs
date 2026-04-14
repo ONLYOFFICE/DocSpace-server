@@ -1,25 +1,25 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2026
-// 
+// (c) Copyright Ascensio System SIA 2009-2026
+//
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
+//
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
+//
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-// 
+//
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -61,11 +61,11 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
 
         using var request = new HttpRequestMessage();
         request.RequestUri = fileUri;
-        
+
 #pragma warning disable CA2000
         var httpClient = clientFactory.CreateClient();
 #pragma warning restore CA2000
-        
+
         using var response = await httpClient.SendAsync(request);
         await using var stream = await response.Content.ReadAsStreamAsync();
 
@@ -92,6 +92,26 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
         return file;
     }
 
+    private static async Task<TenantWalletService?> GetTenantWalletService(TenantManager tenantManager, string serviceName)
+    {
+        if (string.IsNullOrEmpty(serviceName))
+        {
+            return null;
+        }
+
+        var quotaList = await tenantManager.GetTenantQuotasAsync(true, true);
+
+        var selectedQuota = quotaList.FirstOrDefault(x =>
+            x.ServiceName.Equals(serviceName, StringComparison.InvariantCultureIgnoreCase));
+
+        if (selectedQuota != null && Enum.IsDefined(typeof(TenantWalletService), selectedQuota.TenantId))
+        {
+            return (TenantWalletService)selectedQuota.TenantId;
+        }
+
+        return null;
+    }
+
     private static async Task<(string scriptFilePath, string tempFileName, string outputFileName)> GetCustomerOperationsReportData(IServiceProvider serviceProvider, Guid userId, CustomerOperationsReportTaskData taskData)
     {
         var tenantManager = serviceProvider.GetService<TenantManager>();
@@ -99,6 +119,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
         var userManager = serviceProvider.GetService<UserManager>();
         var tenantUtil = serviceProvider.GetService<TenantUtil>();
         var displayUserSettingsHelper = serviceProvider.GetService<DisplayUserSettingsHelper>();
+        var tenantLogoManager = serviceProvider.GetService<TenantLogoManager>();
         var tempPath = serviceProvider.GetService<TempPath>();
 
         var tenant = tenantManager.GetCurrentTenant();
@@ -118,7 +139,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
         var tempFileName = DocumentBuilderScriptHelper.GetTempFileName(".xlsx");
         var outputFileName = string.Format(Resource.AccountingCustomerOperationsReportName + ".xlsx", utcStartDate.ToShortDateString(), utcEndDate.ToShortDateString());
 
-        var keys = new[] {
+        var keys = new List<string> {
             Resource.AccountingCustomerOperationDate,
             Resource.AccountingCustomerOperationType,
             Resource.AccountingCustomerOperationDetails,
@@ -129,6 +150,13 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
             Resource.AccountingCustomerOperationDebit,
             Resource.AccountingCustomerOperationCurrency
         };
+
+        var tenantWalletService = await GetTenantWalletService(tenantManager, taskData.ServiceName);
+        var addAgentColumn = tenantWalletService is TenantWalletService.AITools;
+        if (addAgentColumn)
+        {
+            keys.Add(Resource.AccountingCustomerOperationAgent);
+        }
 
         var options = new JsonSerializerOptions
         {
@@ -168,6 +196,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
                 tariffService,
                 tenantUtil,
                 displayUserSettingsHelper,
+                tenantLogoManager,
                 tenant.Id,
                 filter);
 
@@ -175,7 +204,12 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
             {
                 await foreach (var records in partialRecords)
                 {
-                    var text = Serialize(records, dateFormat, options);
+                    if (records is not { Count: > 0 })
+                    {
+                        continue;
+                    }
+
+                    var text = Serialize(records, dateFormat, options, addAgentColumn);
                     await writer.WriteAsync(text);
                 }
             }
@@ -190,6 +224,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
         TariffService tariffService,
         TenantUtil tenantUtil,
         DisplayUserSettingsHelper displayUserSettingsHelper,
+        TenantLogoManager tenantLogoManager,
         int tenantId,
         OperationFilter filter)
     {
@@ -210,10 +245,12 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
             }
 
             var participantDisplayNames = await report.GetParticipantDisplayNamesAsync(displayUserSettingsHelper);
+            var logoText = await tenantLogoManager.GetLogoTextAsync();
 
             foreach (var operation in report.Collection)
             {
-                var (description, unitOfMeasurement, quantity) = WalletServiceDescriptionManager.GetServiceDescriptionAndUom(operation, filter.ServiceName, operation.Metadata);
+                var (description, unitOfMeasurement, quantity) = WalletServiceDescriptionManager.GetServiceDescriptionAndUom(operation, filter.ServiceName, operation.Metadata, logoText);
+                var (agentId, agentTitle) = WalletServiceDescriptionManager.GetAgentInfo(operation.Metadata);
 
                 operation.Description = description;
                 operation.Details = WalletServiceDescriptionManager.GetServiceDetails(operation.Metadata);
@@ -223,6 +260,8 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
                 operation.ParticipantDisplayName = operation.ParticipantName != null && participantDisplayNames.TryGetValue(operation.ParticipantName, out var value)
                     ? value
                     : operation.ParticipantName;
+                operation.AgentId = agentId;
+                operation.AgentTitle = agentTitle;
             }
 
             yield return report.Collection;
@@ -236,7 +275,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
         }
     }
 
-    private static string Serialize(List<Operation> records, string dateFormat, JsonSerializerOptions jsonSerializerOptions)
+    private static string Serialize(List<Operation> records, string dateFormat, JsonSerializerOptions jsonSerializerOptions, bool addAgentColumn)
     {
         var sb = new StringBuilder();
 
@@ -254,6 +293,11 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
                 new(record.Debit.ToString(), "0.0000000000", "right"),
                 new(record.Currency, "@")
             };
+
+            if (addAgentColumn)
+            {
+                properties.Add(new PropertyValue(record.AgentTitle, "@"));
+            }
 
             _ = sb.AppendLine(JsonSerializer.Serialize(properties, jsonSerializerOptions) + ",");
         }

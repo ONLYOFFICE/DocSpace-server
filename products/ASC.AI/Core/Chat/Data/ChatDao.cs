@@ -306,12 +306,12 @@ public class ChatDao(IDbContextFactory<AiDbContext> dbContextFactory)
         return await dbContext.GetMessagesTotalCountAsync(chatId);
     }
 
-    public async Task<Guid?> GetChatIdByMessageAsync(int messageId, Guid userId)
+    public async Task<ChatSession?> GetChatByMessageIdAsync(int messageId)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-        var message = await dbContext.GetMessageAsync(messageId, userId);
+        var chat = await dbContext.GetChatByMessageIdAsync(messageId);
 
-        return message?.ChatId;
+        return chat?.Map();
     }
 
     public async Task<UserChatSettings> SetUserChatSettingsAsync(
@@ -331,7 +331,10 @@ public class ChatDao(IDbContextFactory<AiDbContext> dbContextFactory)
                 TenantId = tenantId,
                 RoomId = roomId,
                 UserId = userId,
-                WebSearchEnabled = settings.WebSearchEnabled
+                WebSearchEnabled = settings.WebSearchEnabled,
+                ReasoningEffort = settings.ReasoningEffort is ChatReasoningEffort.None
+                    ? null
+                    : (int)settings.ReasoningEffort
             };
 
             await context.UserChatSettings.AddOrUpdateAsync(dbSettings);

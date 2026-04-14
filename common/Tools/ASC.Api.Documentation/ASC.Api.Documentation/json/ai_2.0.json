@@ -7,7 +7,7 @@
       "url": "https://helpdesk.onlyoffice.com/hc/en-us",
       "email": "support@onlyoffice.com"
     },
-    "version": "3.6.0",
+    "version": "3.7.0",
     "x-scalar-sdk-installation": [
       {
         "lang": "Node",
@@ -52,6 +52,15 @@
             "name": "subjectId",
             "in": "query",
             "description": "The filter by user ID.",
+            "schema": {
+              "type": "string",
+              "example": "00000000-0000-0000-0000-000000000000"
+            }
+          },
+          {
+            "name": "subjectOwnerId",
+            "in": "query",
+            "description": "The filter by room owner ID.",
             "schema": {
               "type": "string",
               "example": "00000000-0000-0000-0000-000000000000"
@@ -1233,7 +1242,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ExportChatRequestBodyInteger"
+                "$ref": "#/components/schemas/ExportChatRequestBody"
               }
             }
           },
@@ -2704,6 +2713,8 @@
             "description": "The unique identifier of the AI chat message to export.",
             "required": true,
             "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
               "type": "integer",
               "format": "int32",
               "example": 1
@@ -2715,7 +2726,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ExportMessageRequestBodyInteger"
+                "$ref": "#/components/schemas/ExportMessageRequestBody"
               }
             }
           },
@@ -3672,6 +3683,20 @@
         "additionalProperties": false,
         "description": "The agent new item's information."
       },
+      "AiChatPrice": {
+        "type": "object",
+        "properties": {
+          "prompt": {
+            "type": "number",
+            "format": "double"
+          },
+          "completion": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
       "AiProviderArrayWrapper": {
         "type": "object",
         "properties": {
@@ -3907,6 +3932,11 @@
             "description": "The tool name used by the AI assistant to launch presentation creation in the editor.",
             "nullable": true,
             "example": "generate_presentation"
+          },
+          "systemAiEnabled": {
+            "type": "boolean",
+            "description": "Indicates whether the system-level AI provider is enabled.",
+            "example": true
           }
         },
         "additionalProperties": false,
@@ -4073,6 +4103,42 @@
         "additionalProperties": false,
         "description": "The multimodal settings for the chat model."
       },
+      "ChatReasoningEffort": {
+        "oneOf": [
+          {
+            "enum": [
+              "None",
+              "Low",
+              "Medium",
+              "High",
+              "XHigh"
+            ],
+            "type": "string",
+            "description": "[]",
+            "example": "None"
+          },
+          {
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "type": "integer",
+            "description": "[]",
+            "example": 0,
+            "x-enum-varnames": [
+              "None",
+              "Low",
+              "Medium",
+              "High",
+              "XHigh"
+            ]
+          }
+        ],
+        "x-enum-type": "integer"
+      },
       "ChatSettings": {
         "type": "object",
         "properties": {
@@ -4133,6 +4199,11 @@
           },
           "multimodal": {
             "$ref": "#/components/schemas/ChatMultimodalSettingsDto"
+          },
+          "thinking": {
+            "type": "boolean",
+            "description": "Indicates whether the model supports extended thinking mode.",
+            "example": false
           },
           "internal": {
             "type": "boolean",
@@ -4379,6 +4450,24 @@
         "additionalProperties": false,
         "description": "Request parameters for creating a new AI provider."
       },
+      "CurrencyInfo": {
+        "required": [
+          "code",
+          "symbol"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "nullable": true
+          },
+          "symbol": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "DefaultProviderDto": {
         "required": [
           "defaultModel"
@@ -4562,25 +4651,28 @@
             "enum": [
               "None",
               "OpenAi",
-              "OpenRouter"
+              "OpenRouter",
+              "PortalAi"
             ],
             "type": "string",
-            "description": "[None - None, OpenAi - OpenAi, OpenRouter - OpenRouter]",
+            "description": "[None - None, OpenAi - OpenAi, OpenRouter - OpenRouter, PortalAi - PortalAi]",
             "example": "None"
           },
           {
             "enum": [
               0,
               1,
-              2
+              2,
+              3
             ],
             "type": "integer",
-            "description": "[0 - None, 1 - OpenAi, 2 - OpenRouter]",
+            "description": "[0 - None, 1 - OpenAi, 2 - OpenRouter, 3 - PortalAi]",
             "example": 0,
             "x-enum-varnames": [
               "None",
               "OpenAi",
-              "OpenRouter"
+              "OpenRouter",
+              "PortalAi"
             ]
           }
         ],
@@ -4600,12 +4692,6 @@
             "description": "The HTML-encoded user's display name formatted according to the default format for the current culture.",
             "nullable": true,
             "example": "Mike Zanyatski"
-          },
-          "title": {
-            "type": "string",
-            "description": "The user title.",
-            "nullable": true,
-            "example": "Manager"
           },
           "avatar": {
             "type": "string",
@@ -4662,29 +4748,32 @@
           {
             "enum": [
               "None",
-              "Exa"
+              "Exa",
+              "PortalAi"
             ],
             "type": "string",
-            "description": "[None - None, Exa - Exa]",
+            "description": "[None - None, Exa - Exa, PortalAi - PortalAi]",
             "example": "None"
           },
           {
             "enum": [
               0,
-              1
+              1,
+              2
             ],
             "type": "integer",
-            "description": "[0 - None, 1 - Exa]",
+            "description": "[0 - None, 1 - Exa, 2 - PortalAi]",
             "example": 0,
             "x-enum-varnames": [
               "None",
-              "Exa"
+              "Exa",
+              "PortalAi"
             ]
           }
         ],
         "x-enum-type": "integer"
       },
-      "ExportChatRequestBodyInteger": {
+      "ExportChatRequestBody": {
         "required": [
           "folderId",
           "title"
@@ -4692,9 +4781,17 @@
         "type": "object",
         "properties": {
           "folderId": {
-            "type": "integer",
-            "description": "The identifier of the destination folder where the exported document will be saved.",
-            "format": "int32",
+            "oneOf": [
+              {
+                "type": "integer",
+                "example": 1234
+              },
+              {
+                "type": "string",
+                "example": "some text"
+              }
+            ],
+            "description": "The identifier of the destination folder where the exported document will be saved.\r\nCan be an integer for internal folders or a string for third-party storage folders.",
             "example": 123
           },
           "title": {
@@ -4707,7 +4804,7 @@
         "additionalProperties": false,
         "description": "Parameters for exporting an AI chat session to a document."
       },
-      "ExportMessageRequestBodyInteger": {
+      "ExportMessageRequestBody": {
         "required": [
           "folderId",
           "title"
@@ -4715,9 +4812,17 @@
         "type": "object",
         "properties": {
           "folderId": {
-            "type": "integer",
-            "description": "The identifier of the destination folder where the exported document will be saved.",
-            "format": "int32",
+            "oneOf": [
+              {
+                "type": "integer",
+                "example": 1234
+              },
+              {
+                "type": "string",
+                "example": "some text"
+              }
+            ],
+            "description": "The identifier of the destination folder where the exported document will be saved.\r\nCan be an integer for internal folders or a string for third-party storage folders.",
             "example": 123
           },
           "title": {
@@ -5047,6 +5152,9 @@
                     "type": "boolean"
                   },
                   "UseChat": {
+                    "type": "boolean"
+                  },
+                  "UpdateXlsx": {
                     "type": "boolean"
                   }
                 },
@@ -6630,6 +6738,12 @@
             "description": "The model identifier as recognized by the AI provider (e.g., \"gpt-4o\", \"claude-sonnet-4-20250514\").",
             "nullable": true,
             "example": "gpt-4o"
+          },
+          "price": {
+            "$ref": "#/components/schemas/AiChatPrice"
+          },
+          "currency": {
+            "$ref": "#/components/schemas/CurrencyInfo"
           }
         },
         "additionalProperties": false,
@@ -7122,6 +7236,9 @@
             "description": "Indicates whether the AI assistant is allowed to perform web searches when generating responses.",
             "nullable": true,
             "example": true
+          },
+          "reasoningEffort": {
+            "$ref": "#/components/schemas/ChatReasoningEffort"
           }
         },
         "additionalProperties": false,
@@ -7519,6 +7636,9 @@
             "type": "boolean",
             "description": "Indicates whether the AI assistant is allowed to perform web searches when generating responses in this room.",
             "example": true
+          },
+          "reasoningEffort": {
+            "$ref": "#/components/schemas/ChatReasoningEffort"
           }
         },
         "additionalProperties": false,

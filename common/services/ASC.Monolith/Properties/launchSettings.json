@@ -10,7 +10,8 @@
         "$STORAGE_ROOT": "../../../../Data",
         "log__name": "monolith",
         "log__dir": "../../../../Logs",
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "core__eventBus__subscriptionClientName": "asc_event_bus_monolith_queue"
       }
     }
   }

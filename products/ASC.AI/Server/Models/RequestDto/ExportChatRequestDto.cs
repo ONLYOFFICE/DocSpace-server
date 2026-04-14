@@ -29,7 +29,7 @@ namespace ASC.AI.Models.RequestDto;
 /// <summary>
 /// Request to export an AI chat session to a document.
 /// </summary>
-public class ExportChatRequestDto<T>
+public class ExportChatRequestDto
 {
     /// <summary>
     /// The unique identifier of the AI chat session to export.
@@ -43,19 +43,20 @@ public class ExportChatRequestDto<T>
     /// </summary>
     /// <example>{"folderId": 123, "title": "Chat Export"}</example>
     [FromBody]
-    public required ExportChatRequestBody<T> Body { get; init; }
+    public required ExportChatRequestBody Body { get; init; }
 }
 
 /// <summary>
 /// Parameters for exporting an AI chat session to a document.
 /// </summary>
-public class ExportChatRequestBody<T>
+public class ExportChatRequestBody
 {
     /// <summary>
     /// The identifier of the destination folder where the exported document will be saved.
+    /// Can be an integer for internal folders or a string for third-party storage folders.
     /// </summary>
     /// <example>123</example>
-    public required T FolderId { get; init; }
+    public required JsonElement FolderId { get; init; }
 
     /// <summary>
     /// The file name (without extension) to use for the exported document.

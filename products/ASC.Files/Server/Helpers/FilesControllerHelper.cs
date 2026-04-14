@@ -34,9 +34,6 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         FileDtoHelper fileDtoHelper,
         FileStorageService fileStorageService,
         ILogger<FilesControllerHelper> logger,
-        ApiDateTimeHelper apiDateTimeHelper,
-        UserManager userManager,
-        DisplayUserSettingsHelper displayUserSettingsHelper,
         FileConverter fileConverter,
         PathProvider pathProvider,
         FileChecker fileChecker,
@@ -182,11 +179,6 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         return null;
     }
 
-    public IAsyncEnumerable<EditHistoryDto> GetEditHistoryAsync<T>(T fileId)
-    {
-        return _fileStorageService.GetEditHistoryAsync(fileId).Select(f => new EditHistoryDto(f, apiDateTimeHelper, userManager, displayUserSettingsHelper));
-    }
-
     public IAsyncEnumerable<FileDto<T>> GetFileVersionInfoAsync<T>(T fileId)
     {
         return _fileStorageService.GetFileHistoryAsync(fileId).Select(async (File<T> e, CancellationToken _) => await _fileDtoHelper.GetAsync(e));
@@ -199,12 +191,6 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         return await _fileDtoHelper.GetAsync(result);
     }
 
-
-    public IAsyncEnumerable<EditHistoryDto> RestoreVersionAsync<T>(T fileId, int version = 0, string url = null)
-    {
-        return _fileStorageService.RestoreVersionAsync(fileId, version, url)
-            .Select(e => new EditHistoryDto(e, apiDateTimeHelper, userManager, displayUserSettingsHelper));
-    }
 
     public IAsyncEnumerable<ConversationResultDto> StartConversionAsync<T>(CheckConversionRequestDto<T> cheqConversionRequestDto)
     {
@@ -221,19 +207,20 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
     public async Task<FileDto<T>> UpdateFileAsync<T>(T fileId, string title, int lastVersion)
     {
         title = title?.Trim();
+        File<T> file = null;
 
         if (!string.IsNullOrEmpty(title))
         {
-            await _fileStorageService.FileRenameAsync(fileId, title);
+            file = await _fileStorageService.FileRenameAsync(fileId, title);
         }
 
         if (lastVersion <= 0)
         {
-            return await GetFileInfoAsync(fileId);
+            return await GetFileInfoAsync(file != null ? file.Id : fileId);
         }
 
         var result = await _fileStorageService.UpdateToVersionAsync(fileId, lastVersion);
-        var file = result.Key;
+        file = result.Key;
 
         return await GetFileInfoAsync(file.Id);
     }

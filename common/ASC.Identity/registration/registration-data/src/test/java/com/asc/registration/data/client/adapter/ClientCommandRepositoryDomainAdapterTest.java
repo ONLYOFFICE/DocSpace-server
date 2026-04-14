@@ -29,6 +29,7 @@ package com.asc.registration.data.client.adapter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 import com.asc.common.core.domain.event.DomainEventPublisher;
@@ -43,6 +44,9 @@ import java.time.ZonedDateTime;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -70,8 +74,44 @@ class ClientCommandRepositoryDomainAdapterTest {
     when(clientDataAccessMapper.toEntity(any(Client.class))).thenReturn(mock(ClientEntity.class));
     when(clientDataAccessMapper.toDomain(any(ClientEntity.class))).thenReturn(client);
 
-    // Stub publish methods
     doNothing().when(messagePublisher).publish(any(ClientEvent.class));
+  }
+
+  enum TenantClientMutationKind {
+    VISIBILITY,
+    ACTIVATION
+  }
+
+  @ParameterizedTest
+  @EnumSource(TenantClientMutationKind.class)
+  void whenTenantClientMutationIsApplied_thenRepositoryAndPublisherAreInvoked(
+      TenantClientMutationKind kind) {
+    var event = mock(ClientEvent.class);
+
+    switch (kind) {
+      case VISIBILITY -> {
+        clientCommandRepositoryDomainAdapter.changeVisibilityByTenantIdAndClientId(
+            event, tenantId, clientId, true);
+        verify(jpaClientRepository)
+            .changeVisibility(
+                eq(tenantId.getValue()),
+                eq(clientId.getValue().toString()),
+                eq(true),
+                any(ZonedDateTime.class));
+      }
+      case ACTIVATION -> {
+        clientCommandRepositoryDomainAdapter.changeActivationByTenantIdAndClientId(
+            event, tenantId, clientId, true);
+        verify(jpaClientRepository)
+            .changeActivation(
+                eq(tenantId.getValue()),
+                eq(clientId.getValue().toString()),
+                eq(true),
+                any(ZonedDateTime.class));
+      }
+    }
+
+    verify(messagePublisher).publish(any(ClientEvent.class));
   }
 
   @Test
@@ -109,37 +149,11 @@ class ClientCommandRepositoryDomainAdapterTest {
     assertEquals(newSecret, secretCaptor.getValue());
   }
 
-  @Test
-  void whenVisibilityIsChanged_thenRepositoryIsUpdated() {
-    clientCommandRepositoryDomainAdapter.changeVisibilityByTenantIdAndClientId(
-        mock(ClientEvent.class), tenantId, clientId, true);
-
-    verify(jpaClientRepository)
-        .changeVisibility(
-            eq(tenantId.getValue()),
-            eq(clientId.getValue().toString()),
-            eq(true),
-            any(ZonedDateTime.class));
-    verify(messagePublisher).publish(any(ClientEvent.class));
-  }
-
-  @Test
-  void whenActivationIsChanged_thenRepositoryIsUpdated() {
-    clientCommandRepositoryDomainAdapter.changeActivationByTenantIdAndClientId(
-        mock(ClientEvent.class), tenantId, clientId, true);
-
-    verify(jpaClientRepository)
-        .changeActivation(
-            eq(tenantId.getValue()),
-            eq(clientId.getValue().toString()),
-            eq(true),
-            any(ZonedDateTime.class));
-    verify(messagePublisher).publish(any(ClientEvent.class));
-  }
-
-  @Test
-  void whenClientIsDeleted_thenRepositoryAndPublishersAreCalled() {
-    when(jpaClientRepository.deleteByClientIdAndTenantId(anyString(), anyInt())).thenReturn(0);
+  @ParameterizedTest
+  @ValueSource(ints = {0, 5})
+  void whenClientIsDeleted_thenRepositoryAndPublishersAreCalled(int deletedCount) {
+    when(jpaClientRepository.deleteByClientIdAndTenantId(anyString(), anyLong()))
+        .thenReturn(deletedCount);
 
     var result =
         clientCommandRepositoryDomainAdapter.deleteByTenantIdAndClientId(
@@ -149,6 +163,6 @@ class ClientCommandRepositoryDomainAdapterTest {
         .deleteByClientIdAndTenantId(eq(clientId.getValue().toString()), eq(tenantId.getValue()));
     verify(messagePublisher).publish(any(ClientEvent.class));
 
-    assertEquals(0, result);
+    assertEquals(deletedCount, result);
   }
 }

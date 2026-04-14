@@ -32,6 +32,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.asc.registration.core.domain.exception.ScopeDomainException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 class ScopeTest {
   private Scope scope;
@@ -49,45 +51,32 @@ class ScopeTest {
     assertEquals("permission", scope.getType());
   }
 
-  @Test
-  void whenGroupIsUpdated_thenGroupIsUpdatedCorrectly() {
-    scope.updateGroup("admin");
-    assertEquals("admin", scope.getGroup());
+  @ParameterizedTest
+  @CsvSource({"admin,group", "guest,group", "role,type", "revoked,type"})
+  void whenScopePropertyIsUpdated_thenValueIsUpdatedCorrectly(String value, String property) {
+    if ("group".equals(property)) {
+      scope.updateGroup(value);
+      assertEquals(value, scope.getGroup());
+      return;
+    }
+
+    scope.updateType(value);
+    assertEquals(value, scope.getType());
   }
 
-  @Test
-  void whenTypeIsUpdated_thenTypeIsUpdatedCorrectly() {
-    scope.updateType("role");
-    assertEquals("role", scope.getType());
-  }
-
-  @Test
-  void whenScopeIsInvalid_thenValidationThrowsException() {
+  @ParameterizedTest
+  @CsvSource({
+    "'',user,permission,Scope name must not be null or empty",
+    "read,'',permission,Scope group must not be null or empty",
+    "read,user,'',Scope type must not be null or empty"
+  })
+  void whenScopeIsInvalid_thenValidationThrowsException(
+      String name, String group, String type, String expectedMessage) {
     var exception =
         assertThrows(
             ScopeDomainException.class,
-            () -> {
-              Scope invalidScope =
-                  Scope.Builder.builder().name("").group("user").type("permission").build();
-            });
-    assertEquals("Scope name must not be null or empty", exception.getMessage());
+            () -> Scope.Builder.builder().name(name).group(group).type(type).build());
 
-    exception =
-        assertThrows(
-            ScopeDomainException.class,
-            () -> {
-              Scope invalidScope =
-                  Scope.Builder.builder().name("read").group("").type("permission").build();
-            });
-    assertEquals("Scope group must not be null or empty", exception.getMessage());
-
-    exception =
-        assertThrows(
-            ScopeDomainException.class,
-            () -> {
-              Scope invalidScope =
-                  Scope.Builder.builder().name("read").group("user").type("").build();
-            });
-    assertEquals("Scope type must not be null or empty", exception.getMessage());
+    assertEquals(expectedMessage, exception.getMessage());
   }
 }

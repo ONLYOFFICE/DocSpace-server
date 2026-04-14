@@ -169,6 +169,15 @@ namespace ASC.AI.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Message not found.
+        /// </summary>
+        internal static string MessageNotFound {
+            get {
+                return ResourceManager.GetString("MessageNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No models available for this provider.
         /// </summary>
         internal static string NoModelsAvailable {

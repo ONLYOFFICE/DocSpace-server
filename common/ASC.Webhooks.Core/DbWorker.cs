@@ -120,7 +120,7 @@ public class DbWorker(
     {
         var tenantId = tenantManager.GetCurrentTenantId();
 
-        var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
+        await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
 
         var q = webhooksDbContext.WebhooksConfigsAsync(tenantId, enabled);
 
@@ -195,7 +195,7 @@ public class DbWorker(
         WebhookTrigger? trigger)
     {
         await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
-        var q = await GetQueryForJournal(deliveryFrom, deliveryTo, hookUri, configId, eventId, webhookGroupStatus, userId, trigger);
+        var q = await GetQueryForJournal(webhooksDbContext, deliveryFrom, deliveryTo, hookUri, configId, eventId, webhookGroupStatus, userId, trigger);
 
         if (startIndex != 0)
         {
@@ -222,7 +222,8 @@ public class DbWorker(
         Guid? userId,
         WebhookTrigger? trigger)
     {
-        return await (await GetQueryForJournal(deliveryFrom, deliveryTo, hookUri, configId, eventId, webhookGroupStatus, userId, trigger)).CountAsync();
+        await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
+        return await (await GetQueryForJournal(webhooksDbContext, deliveryFrom, deliveryTo, hookUri, configId, eventId, webhookGroupStatus, userId, trigger)).CountAsync();
     }
 
     public async Task<DbWebhooksLog> ReadJournal(int tenantId, int id)
@@ -277,6 +278,7 @@ public class DbWorker(
     }
 
     private async Task<IQueryable<DbWebhooks>> GetQueryForJournal(
+        WebhooksDbContext webhooksDbContext,
         DateTime? deliveryFrom,
         DateTime? deliveryTo,
         string hookUri,
@@ -287,8 +289,6 @@ public class DbWorker(
         WebhookTrigger? trigger)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
-
-        var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
 
         var q = webhooksDbContext.WebhooksLogs
             .OrderByDescending(t => t.Id)

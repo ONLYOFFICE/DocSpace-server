@@ -61,7 +61,8 @@ public class FormFillingReportIntegrationEventHandler(
 
                 var task = serviceProvider.GetService<FormFillingReportTask>();
 
-                task.Init(@event.BaseUri, @event.TenantId, @event.CreateBy, new FormFillingReportTaskData(@event.RoomId, @event.OriginalFormId, @event.OriginalFormVersion, @event.Headers));
+                var taskId = DocumentBuilderTaskManager.GetTaskId(@event.TenantId, @event.CreateBy, @event.OriginalFormId);
+                task.Init(@event.BaseUri, @event.TenantId, @event.CreateBy, new FormFillingReportTaskData(@event.RoomId, @event.OriginalFormId, @event.OriginalFormVersion, @event.Headers), taskId);
 
                 await documentBuilderTaskManager.StartTask(task);
             }

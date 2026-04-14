@@ -4659,6 +4659,10 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
+                    b.Property<sbyte?>("ReasoningEffort")
+                        .HasColumnType("tinyint")
+                        .HasColumnName("reasoning_effort");
+
                     b.Property<bool>("WebSearchEnabled")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("tinyint(1)")
@@ -5481,8 +5485,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("int")
                         .HasColumnName("tenant_id");
 
-                    b.Property<int>("Triggers")
-                        .HasColumnType("int")
+                    b.Property<long>("Triggers")
+                        .HasColumnType("bigint")
                         .HasColumnName("triggers");
 
                     b.Property<string>("Uri")
@@ -5553,8 +5557,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("int")
                         .HasColumnName("tenant_id");
 
-                    b.Property<int>("Trigger")
-                        .HasColumnType("int")
+                    b.Property<long>("Trigger")
+                        .HasColumnType("bigint")
                         .HasColumnName("trigger");
 
                     b.Property<string>("Uid")

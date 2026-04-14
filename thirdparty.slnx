@@ -1,0 +1,10 @@
+<Solution>
+  <Project Path="thirdparty/AppLimit.CloudComputing.SharpBox/AppLimit.CloudComputing.SharpBox.csproj" />
+  <Project Path="thirdparty/Microsoft.Graph.Core/Microsoft.Graph.Core.csproj" />
+  <Project Path="thirdparty/onedrive-sdk-csharp-master/src/OneDriveSdk/Microsoft.OneDrive.Sdk.csproj" />
+  <Project Path="thirdparty/openstack.net/src/corelib/OpenStack.csproj" />
+  <Project Path="thirdparty/rackspace-net-sdk/src/Rackspace/Rackspace.csproj" />
+  <Project Path="thirdparty/SharpZipLib/src/ICSharpCode.SharpZipLib/ICSharpCode.SharpZipLib.csproj" />
+  <Project Path="thirdparty/SimpleRestServices/src/SimpleRestServices/SimpleRestServices.v4.0.csproj" />
+  <Project Path="thirdparty/websocket-sharp-master/websocket-sharp/websocket-sharp.csproj" />
+</Solution>

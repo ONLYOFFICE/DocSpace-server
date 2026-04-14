@@ -1188,4 +1188,10 @@
   <data name="DocumentsDefaultTemplatesSettingsUpdated" xml:space="preserve">
     <value>Default template settings updated: {0}</value>
   </data>
+  <data name="AIAccessEnabled" xml:space="preserve">
+    <value>AI services have been enabled</value>
+  </data>
+  <data name="AIAccessDisabled" xml:space="preserve">
+    <value>AI services have been disabled</value>
+  </data>
 </root>

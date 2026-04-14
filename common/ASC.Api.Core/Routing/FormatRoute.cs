@@ -31,3 +31,6 @@ public class AllowNotPaymentAttribute : Attribute;
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
 public class AllowSuspendedAttribute : Attribute;
+
+[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
+public class AiFeatureAttribute : Attribute;

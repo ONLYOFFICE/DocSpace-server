@@ -125,7 +125,9 @@ public class CustomTagsService(
     {
         var folder = await daoFactory.GetFolderDao<T>().GetFolderAsync(folderId);
 
-        if (folder.RootFolderType == FolderType.Archive || !await fileSecurity.CanEditRoomAsync(folder))
+        var isDocSpaceAdmin = await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID);
+
+        if (folder.RootFolderType == FolderType.Archive || (!isDocSpaceAdmin && !await fileSecurity.CanEditRoomAsync(folder)))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);
         }
@@ -164,7 +166,9 @@ public class CustomTagsService(
     {
         var folder = await daoFactory.GetFolderDao<T>().GetFolderAsync(folderId);
 
-        if (folder.RootFolderType == FolderType.Archive || !await fileSecurity.CanEditRoomAsync(folder))
+        var isDocSpaceAdmin = await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID);
+
+        if (folder.RootFolderType == FolderType.Archive || (!isDocSpaceAdmin && !await fileSecurity.CanEditRoomAsync(folder)))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);
         }
@@ -190,7 +194,7 @@ public class CustomTagsService(
     {
         if (!await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID))
         {
-            var rooms = await fileSecurity.GetVirtualRoomsAsync(null, Guid.Empty, string.Empty, false, false, SearchArea.Active, false, [], false, ProviderFilter.None, SubjectFilter.Member, QuotaFilter.All, StorageFilter.None);
+            var rooms = await fileSecurity.GetVirtualRoomsAsync(null, Guid.Empty, string.Empty, false, false, SearchArea.Active, false, [], false, ProviderFilter.None, null, Guid.Empty, QuotaFilter.All, StorageFilter.None);
             var tags = rooms.SelectMany(r => r.Tags)
                 .Where(r => r.Type == tagType).Select(r => r.Name).Distinct();
 

@@ -1,25 +1,25 @@
 ﻿// (c) Copyright Ascensio System SIA 2009-2026
-// 
+//
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
+//
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
+//
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-// 
+//
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -34,31 +34,32 @@ public class ChatService(
     FileSecurity fileSecurity,
     TenantManager tenantManager,
     AiProviderService aiProviderService,
-    IEventBus eventBus)
+    IEventBus eventBus,
+    UserManager userManager)
 {
     public async Task<ChatSession> RenameChatAsync(Guid chatId, string title)
     {
         var chat = await GetChatAsync(chatId);
-        
+
         chat.Title = title;
         chat.ModifiedOn = DateTime.UtcNow;
-        
+
         await chatDao.UpdateChatAsync(chat);
-        
-        return chat; 
+
+        return chat;
     }
-    
+
     public async IAsyncEnumerable<ChatSession> GetChatsAsync(int roomId, int offset, int limit)
     {
         await ThrowIfNotAccessAsync(roomId);
 
-        await foreach (var chat in chatDao.GetChatsAsync(tenantManager.GetCurrentTenantId(), roomId, 
+        await foreach (var chat in chatDao.GetChatsAsync(tenantManager.GetCurrentTenantId(), roomId,
                            authContext.CurrentAccount.ID, offset, limit))
         {
             yield return chat;
         }
     }
-    
+
     public Task<int> GetChatsTotalCountAsync(int roomId)
     {
         return chatDao.GetChatsTotalCountAsync(tenantManager.GetCurrentTenantId(), roomId, authContext.CurrentAccount.ID);
@@ -94,49 +95,68 @@ public class ChatService(
         });
     }
 
-    public Task<IEnumerable<ModelData>> GetModelsAsync(int providerId)
+    public async Task<IEnumerable<ModelData>> GetModelsAsync(int providerId)
     {
-        return aiProviderService.GetModelsAsync(providerId, Scope.Chat);
+        var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
+        if (userType is EmployeeType.User or EmployeeType.Guest)
+        {
+            throw new SecurityException();
+        }
+
+        return await aiProviderService.GetModelsAsync(providerId, Scope.Chat);
     }
 
     public async Task<ChatSession> GetChatAsync(Guid chatId)
     {
         var chat = await chatDao.GetChatAsync(tenantManager.GetCurrentTenantId(), chatId);
-        if (chat == null || chat.UserId != authContext.CurrentAccount.ID)
+        if (chat == null)
         {
             throw new ItemNotFoundException(ErrorMessages.ChatNotFound);
         }
-        
+
+        if (chat.UserId != authContext.CurrentAccount.ID)
+        {
+            throw new SecurityException(ErrorMessages.ChatAccessDenied);
+        }
+
         return chat;
     }
 
-    public async Task<UserChatSettings> SetUserChatsSettingsAsync(int roomId, bool? webSearchEnabled = false)
+    public async Task<UserChatSettings> SetUserChatsSettingsAsync(
+        int roomId,
+        bool? webSearchEnabled = null,
+        ChatReasoningEffort? reasoningEffort = null)
     {
         await ThrowIfNotAccessAsync(roomId);
 
         var tenantId = tenantManager.GetCurrentTenantId();
         var userId = authContext.CurrentAccount.ID;
-        
+
         var settings = await chatDao.GetUserChatSettingsAsync(tenantId, roomId, userId);
 
         if (webSearchEnabled.HasValue)
         {
             settings.WebSearchEnabled = webSearchEnabled.Value;
         }
-        
+
+        if (reasoningEffort.HasValue)
+        {
+            settings.ReasoningEffort = reasoningEffort.Value;
+        }
+
         return await chatDao.SetUserChatSettingsAsync(tenantId, roomId, userId, settings);
     }
 
     public async Task<UserChatSettings> GetUserChatsSettingsAsync(int roomId)
     {
         await ThrowIfNotAccessAsync(roomId);
-        
+
         var tenantId = tenantManager.GetCurrentTenantId();
         var userId = authContext.CurrentAccount.ID;
-        
+
         return await chatDao.GetUserChatSettingsAsync(tenantId, roomId, userId);
     }
-    
+
     private async Task ThrowIfNotAccessAsync(int roomId)
     {
         var folderDao = daoFactory.GetFolderDao<int>();

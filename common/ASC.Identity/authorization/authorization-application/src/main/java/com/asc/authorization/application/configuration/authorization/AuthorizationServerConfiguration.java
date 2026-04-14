@@ -40,6 +40,7 @@ import com.asc.authorization.application.security.service.SignatureService;
 import jakarta.servlet.RequestDispatcher;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,7 +96,7 @@ public class AuthorizationServerConfiguration {
 
   private final AuthorizationFormConfiguration formConfiguration;
 
-  private final RateLimiterFilter rateLimiterFilter;
+  private final Optional<RateLimiterFilter> rateLimiterFilter;
   private final BasicSignatureAuthenticationFilter authenticationFilter;
 
   private final PersonalAccessTokenAuthenticationProvider personalAccessTokenAuthenticationProvider;
@@ -254,7 +255,7 @@ public class AuthorizationServerConfiguration {
                   dispatcher.forward(request, response);
                 },
                 PathPatternRequestMatcher.withDefaults().matcher(formConfiguration.getLogin())));
-    http.addFilterBefore(rateLimiterFilter, CsrfFilter.class);
+    rateLimiterFilter.ifPresent(filter -> http.addFilterBefore(filter, CsrfFilter.class));
     http.addFilterBefore(authenticationFilter, LogoutFilter.class);
 
     http.cors(c -> c.configurationSource(corsConfigurationSource()));

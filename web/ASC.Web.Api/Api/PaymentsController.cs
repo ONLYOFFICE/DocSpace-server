@@ -61,11 +61,13 @@ public class PaymentController(
     ApiDateTimeHelper apiDateTimeHelper,
     EmployeeDtoHelper employeeWrapperHelper,
     DisplayUserSettingsHelper displayUserSettingsHelper,
+    TenantLogoManager tenantLogoManager,
     IEventBus eventBus,
     CommonLinkUtility commonLinkUtility,
     DocumentBuilderTaskManager<CustomerOperationsReportTask, int, CustomerOperationsReportTaskData> documentBuilderTaskManager,
     IServiceProvider serviceProvider,
-    WalletStaticProvider walletStaticProvider)
+    WalletStaticProvider walletStaticProvider,
+    QuotaSocketManager quotaSocketManager)
     : ControllerBase
 {
     private readonly int _maxCount = 10;
@@ -621,7 +623,11 @@ public class PaymentController(
         var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
         if (customerInfo != null)
         {
-            await DemandPayerAsync(customerInfo);
+            var currentQuota = await tariffHelper.GetCurrentQuotaAsync(false, false);
+            if (!currentQuota.NonProfit || !string.IsNullOrEmpty(customerInfo.Email))
+            {
+                await DemandPayerAsync(customerInfo);
+            }
 
             if (customerInfo.PaymentMethodStatus == PaymentMethodStatus.Set)
             {
@@ -727,6 +733,8 @@ public class PaymentController(
         {
             var description = $"{inDto.Amount} {inDto.Currency}";
             messageService.Send(MessageAction.CustomerWalletToppedUp, description);
+
+            await quotaSocketManager.TopUpWallet(false);
         }
 
         return result;
@@ -860,8 +868,9 @@ public class PaymentController(
         }
 
         var participantDisplayNames = await report.GetParticipantDisplayNamesAsync(displayUserSettingsHelper);
+        var logoText = await tenantLogoManager.GetLogoTextAsync();
 
-        return new ReportDto(report, apiDateTimeHelper, participantDisplayNames, filter.ServiceName);
+        return new ReportDto(report, apiDateTimeHelper, participantDisplayNames, filter.ServiceName, logoText);
     }
 
     /// <remarks>
@@ -1167,6 +1176,11 @@ public class PaymentController(
         var result = await settingsManager.SaveAsync(settings);
 
         messageService.Send(MessageAction.CustomerWalletServicesSettingsUpdated);
+
+        if (inDto.Service == TenantWalletService.AITools)
+        {
+            await quotaSocketManager.ChangeAiConfigAsync();
+        }
 
         return settings;
     }

@@ -178,6 +178,24 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to AI services have been disabled.
+        /// </summary>
+        public static string AIAccessDisabled {
+            get {
+                return ResourceManager.GetString("AIAccessDisabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to AI services have been enabled.
+        /// </summary>
+        public static string AIAccessEnabled {
+            get {
+                return ResourceManager.GetString("AIAccessEnabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Default provider deleted.
         /// </summary>
         public static string AIDefaultProviderDeleted {

@@ -61,6 +61,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Agent.
+        /// </summary>
+        public static string AccountingCustomerOperationAgent {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationAgent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Contact.
         /// </summary>
         public static string AccountingCustomerOperationContact {
@@ -124,7 +133,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to AI tools.
+        ///   Looks up a localized string similar to {LogoText} AI.
         /// </summary>
         public static string AccountingCustomerOperationServiceDesc_ai_tools {
             get {
@@ -853,6 +862,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to SQLite is only available in Standalone installations..
+        /// </summary>
+        public static string ConsumersExternalDbSqliteStandaloneOnly {
+            get {
+                return ResourceManager.GetString("ConsumersExternalDbSqliteStandaloneOnly", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Test connection.
         /// </summary>
         public static string ConsumersExternalDbTestConnection {
@@ -1209,6 +1227,60 @@ namespace ASC.Web.Core.PublicResources {
         public static string ConsumersMicrosoftInstruction {
             get {
                 return ResourceManager.GetString("ConsumersMicrosoftInstruction", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Nextcloud.
+        /// </summary>
+        public static string ConsumersNextcloud {
+            get {
+                return ResourceManager.GetString("ConsumersNextcloud", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enter the URL address of the Nextcloud instance..
+        /// </summary>
+        public static string ConsumersNextcloudBaseUrl {
+            get {
+                return ResourceManager.GetString("ConsumersNextcloudBaseUrl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Client ID.
+        /// </summary>
+        public static string ConsumersNextcloudClientId {
+            get {
+                return ResourceManager.GetString("ConsumersNextcloudClientId", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Client Secret.
+        /// </summary>
+        public static string ConsumersNextcloudClientSecret {
+            get {
+                return ResourceManager.GetString("ConsumersNextcloudClientSecret", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enable the application to sign in to the portal using a Nextcloud account..
+        /// </summary>
+        public static string ConsumersNextcloudDescription {
+            get {
+                return ResourceManager.GetString("ConsumersNextcloudDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enable the application to sign in to the portal using a Nextcloud account..
+        /// </summary>
+        public static string ConsumersNextcloudInstruction {
+            get {
+                return ResourceManager.GetString("ConsumersNextcloudInstruction", resourceCulture);
             }
         }
         
@@ -3373,7 +3445,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to AI tools.
+        ///   Looks up a localized string similar to {LogoText} AI.
         /// </summary>
         public static string TariffsFeature_aitools_wallet {
             get {
@@ -3729,6 +3801,15 @@ namespace ASC.Web.Core.PublicResources {
         public static string TfaTooMuchError {
             get {
                 return ResourceManager.GetString("TfaTooMuchError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User authentication failed.
+        /// </summary>
+        public static string UserAuthenticationFailed {
+            get {
+                return ResourceManager.GetString("UserAuthenticationFailed", resourceCulture);
             }
         }
         

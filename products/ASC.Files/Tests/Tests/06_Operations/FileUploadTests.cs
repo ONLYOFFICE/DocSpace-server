@@ -27,20 +27,14 @@
 using System.Reflection;
 using System.Security.Cryptography;
 
-using ASC.Files.Tests.ApiFactories;
-using ASC.Web.Studio.Core;
-
 namespace ASC.Files.Tests.Tests._06_Operations;
 
 [Collection("Test Collection")]
 [Trait("Category", "Operations")]
 [Trait("Feature", "Files")]
 public class FileUploadTests(
-    FilesApiFactory filesFactory, 
-    WepApiFactory apiFactory, 
-    PeopleFactory peopleFactory,
-    FilesServiceFactory filesServiceProgram) 
-    : BaseTest(filesFactory, apiFactory, peopleFactory, filesServiceProgram)
+    AspireAppFixture fixture)
+    : BaseTest(fixture)
 {
     [Fact]
     public async Task UploadFile_ReturnsValidFile()
@@ -80,7 +74,7 @@ public class FileUploadTests(
         resultFile.Title.Should().Be(fileName);
         resultFile.File.Should().NotBeNull();
         resultFile.File.FolderId.Should().Be(myFolder);
-        resultFile.File.ContentLength.Should().Be(FileSizeComment.FilesSizeToString(contentLength));
+        resultFile.File.PureContentLength.Should().Be(contentLength);
         
         var configuration = (await _filesApi.GetFileInfoAsync(resultFile.File.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         var fileStream = await _filesClient.GetStreamAsync(configuration.ViewUrl, TestContext.Current.CancellationToken);

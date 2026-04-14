@@ -86,13 +86,13 @@ class AuditCommandRepositoryDomainAdapterTest {
   }
 
   @Test
-  void whenSavingAudit_thenRepositorySavesAuditEntityCorrectly() {
+  void givenAudit_whenSaving_thenRepositorySavesAuditEntityCorrectly() {
     when(auditDataAccessMapper.toEntity(audit)).thenReturn(auditEntity);
 
     auditCommandRepositoryDomainAdapter.saveAudit(audit);
 
-    ArgumentCaptor<AuditEntity> auditEntityArgumentCaptor =
-        ArgumentCaptor.forClass(AuditEntity.class);
+    var auditEntityArgumentCaptor = ArgumentCaptor.forClass(AuditEntity.class);
+
     verify(jpaAuditRepository).save(auditEntityArgumentCaptor.capture());
     assertEquals(auditEntity, auditEntityArgumentCaptor.getValue());
   }

@@ -1,30 +1,29 @@
 // (c) Copyright Ascensio System SIA 2009-2026
-// 
+//
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
+//
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
+//
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-// 
+//
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Files.Tests.ApiFactories;
 
 namespace ASC.Files.Tests.Tests._04_Security;
 
@@ -32,17 +31,14 @@ namespace ASC.Files.Tests.Tests._04_Security;
 [Trait("Category", "Security")]
 [Trait("Feature", "Rooms")]
 public class RoomShareTests(
-    FilesApiFactory filesFactory, 
-    WepApiFactory apiFactory, 
-    PeopleFactory peopleFactory,
-    FilesServiceFactory filesServiceProgram) 
-    : BaseTest(filesFactory, apiFactory, peopleFactory, filesServiceProgram)
+    AspireAppFixture fixture)
+    : BaseTest(fixture)
 {
     public static TheoryData<RoomType, FileShare> DataWithFileShare => new MatrixTheoryData<RoomType, FileShare>(
         [RoomType.EditingRoom, RoomType.VirtualDataRoom],
         [FileShare.Read, FileShare.Editing, FileShare.Comment, FileShare.Review]
     );
-    
+
     [Theory]
     [MemberData(nameof(ValidRoomTypesForShare))]
     public async Task CreatePrimaryExternalLink_ValidRoomType_ReturnsLinkData(RoomType roomType)
@@ -50,52 +46,52 @@ public class RoomShareTests(
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
         var customRoom = (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("room title", roomType: roomType), TestContext.Current.CancellationToken)).Response;
-        
+
         // Act
         var result = (await _roomsApi.GetRoomsPrimaryExternalLinkAsync(customRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         var sharedTo = result.SharedLink;
-        
+
         await _filesClient.Authenticate(null);
         _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, sharedTo.RequestToken);
         var roomInfo = (await _foldersApi.GetFolderByFolderIdAsync(customRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
-        
+
         // Assert
         result.Should().NotBeNull();
         result.Access.Should().Be(FileShare.Read);
         result.CanEditAccess.Should().BeFalse();
         result.IsOwner.Should().BeFalse();
-        
+
         roomInfo.Should().NotBeNull();
         roomInfo.Current.Should().NotBeNull();
     }
-    
+
     [Fact]
     public async Task CreatePrimaryExternalLink_FillingForm_ReturnsLinkData()
     {
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
         var customRoom = (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("filling form room title", roomType: RoomType.FillingFormsRoom), TestContext.Current.CancellationToken)).Response;
-        
+
         // Act
         var result = (await _roomsApi.GetRoomsPrimaryExternalLinkAsync(customRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         var sharedTo = result.SharedLink;
-        
+
         await _filesClient.Authenticate(null);
         _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, sharedTo.RequestToken);
         var roomInfo = (await _foldersApi.GetFolderByFolderIdAsync(customRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
-        
+
         // Assert
         result.Should().NotBeNull();
         result.Access.Should().Be(FileShare.FillForms);
         result.CanEditAccess.Should().BeFalse();
         result.IsOwner.Should().BeFalse();
-        
+
         roomInfo.Should().NotBeNull();
         roomInfo.Current.Should().NotBeNull();
     }
-    
+
     [Theory]
     [MemberData(nameof(InValidRoomTypesForShare))]
     public async Task CreatePrimaryExternalLink_RestrictedRoomType_ReturnsError(RoomType roomType)
@@ -103,14 +99,14 @@ public class RoomShareTests(
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
         var customRoom = (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("room", roomType: roomType), TestContext.Current.CancellationToken)).Response;
-        
+
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(async () => await _roomsApi.GetRoomsPrimaryExternalLinkAsync(customRoom.Id, cancellationToken: TestContext.Current.CancellationToken));
-        
+
         // Verify error
         exception.ErrorCode.Should().Be(403);
     }
-    
+
     [Theory]
     [MemberData(nameof(DataWithFileShare))]
     public async Task CreateExternalLink_RestrictedRoomType_ReturnsError(RoomType roomType, FileShare fileShare)
@@ -118,19 +114,19 @@ public class RoomShareTests(
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
         var customRoom = (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("room", roomType: roomType), TestContext.Current.CancellationToken)).Response;
-        
+
         var additionalLink = new RoomLinkRequest(
             access: fileShare,
             title: "Additional Link 1",
             linkType: LinkType.External);
-        
+
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(async () => await _roomsApi.SetRoomLinkAsync(customRoom.Id, additionalLink, TestContext.Current.CancellationToken));
-        
+
         // Verify error
         exception.ErrorCode.Should().Be(403);
     }
-    
+
     [Theory]
     [MemberData(nameof(ValidRoomTypesForShare))]
     public async Task CreateMultipleLinks_InRoom_ReturnsAllLinks(RoomType roomType)
@@ -164,15 +160,15 @@ public class RoomShareTests(
         allLinks.Should().HaveCountGreaterThanOrEqualTo(3); // Primary + 2 additional links
 
         // Verify links by title and access level
-        allLinks.Should().Contain(link => 
-            link.SharedLink.Title == "Additional Link 1" && 
+        allLinks.Should().Contain(link =>
+            link.SharedLink.Title == "Additional Link 1" &&
             link.Access == FileShare.Read);
 
-        allLinks.Should().Contain(link => 
-            link.SharedLink.Title == "Additional Link 2" && 
+        allLinks.Should().Contain(link =>
+            link.SharedLink.Title == "Additional Link 2" &&
             link.Access == FileShare.Editing);
     }
-    
+
     [Fact]
     public async Task CreateMaximumFiveLinks_InRoom_ReturnsError()
     {
@@ -188,17 +184,17 @@ public class RoomShareTests(
             access: FileShare.Read,
             title: "Additional Link 1",
             linkType: LinkType.External);
-        
+
        for (var i = 0; i < 5; i++)
        {
            await _roomsApi.SetRoomLinkAsync(customRoom.Id, additionalLink1, TestContext.Current.CancellationToken);
        }
-       
+
        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _roomsApi.SetRoomLinkAsync(customRoom.Id, additionalLink1, TestContext.Current.CancellationToken));
-       
+
        exception.ErrorCode.Should().Be(403);
     }
-    
+
 
     [Theory]
     [MemberData(nameof(InvalidFileShareFillingForms))]
@@ -216,9 +212,9 @@ public class RoomShareTests(
             access: fileShare,
             title: "Additional Link 1",
             linkType: LinkType.External);
-        
+
        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _roomsApi.SetRoomLinkAsync(customRoom.Id, additionalLink1, TestContext.Current.CancellationToken));
-       
+
        exception.ErrorCode.Should().Be(403);
     }
 
@@ -284,15 +280,15 @@ public class RoomShareTests(
         updatedLink2SharedTo.Password.Should().Be("testpassword");
 
         // Verify links in the complete list
-        allLinks.Should().Contain(link => 
-                link.SharedLink.Title == "Updated Link 1" && 
+        allLinks.Should().Contain(link =>
+                link.SharedLink.Title == "Updated Link 1" &&
                 link.Access == FileShare.Editing);
 
-        allLinks.Should().Contain(link => 
-            link.SharedLink.Title == "Updated Link 2" && 
+        allLinks.Should().Contain(link =>
+            link.SharedLink.Title == "Updated Link 2" &&
             link.Access == FileShare.Comment);
     }
-    
+
     [Theory]
     [MemberData(nameof(ValidFileShare))]
     public async Task UpdatePrimaryExternalLink_ValidFileShare_ReturnsLinkData(FileShare fileShare)
@@ -300,7 +296,7 @@ public class RoomShareTests(
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
         var customRoom = await CreateCustomRoom("custom room");
-        
+
         // Act
         var externalLink = (await _roomsApi.GetRoomsPrimaryExternalLinkAsync(customRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         var sharedTo = externalLink.SharedLink;
@@ -308,7 +304,7 @@ public class RoomShareTests(
         var data = new RoomLinkRequest(sharedTo.Id, fileShare, new ApiDateTime { UtcTime = DateTime.UtcNow.AddDays(1) }, false, customRoom.Title + " updated", LinkType.External, "11111111", true);
         var updatedExternalLink = (await _roomsApi.SetRoomLinkAsync(customRoom.Id, data, TestContext.Current.CancellationToken)).Response;
         var updatedSharedTo = updatedExternalLink.SharedLink;
-        
+
         // Assert
         updatedExternalLink.Should().NotBeNull();
         updatedExternalLink.Access.Should().Be(data.Access);
@@ -319,7 +315,7 @@ public class RoomShareTests(
         updatedSharedTo.Password.Should().Be(data.Password);
         updatedSharedTo.DenyDownload.Should().Be(data.DenyDownload);
     }
-    
+
     [Fact]
     public async Task ExternalLinkDenyDownload_InternalUser_ReturnsOk()
     {
@@ -327,19 +323,19 @@ public class RoomShareTests(
         await _filesClient.Authenticate(Initializer.Owner);
         var customRoom = await CreateCustomRoom("custom room");
         var file = await CreateFile("file_to_share.docx", customRoom.Id);
-        
+
         // Act
         var externalLink = (await _roomsApi.GetRoomsPrimaryExternalLinkAsync(customRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         var sharedTo = externalLink.SharedLink;
-        
+
         var data = new RoomLinkRequest(sharedTo.Id, FileShare.Editing, linkType: LinkType.External, denyDownload: true);
         await _roomsApi.SetRoomLinkAsync(customRoom.Id, data, TestContext.Current.CancellationToken);
-        
+
         file = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         file.Should().NotBeNull();
         file.Security.Download.Should().BeTrue();
     }
-    
+
     [Fact]
     public async Task ExternalLinkDenyDownload_ExternalUser_ReturnsError()
     {
@@ -347,7 +343,7 @@ public class RoomShareTests(
         await _filesClient.Authenticate(Initializer.Owner);
         var customRoom = await CreateCustomRoom("custom room");
         var file = await CreateFile("file_to_share.docx", customRoom.Id);
-        
+
         // Act
         var externalLink = (await _roomsApi.GetRoomsPrimaryExternalLinkAsync(customRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         var sharedTo = externalLink.SharedLink;
@@ -355,16 +351,16 @@ public class RoomShareTests(
         var data = new RoomLinkRequest(sharedTo.Id, FileShare.Editing, linkType: LinkType.External, denyDownload: true);
         var updatedExternalLink = (await _roomsApi.SetRoomLinkAsync(customRoom.Id, data, TestContext.Current.CancellationToken)).Response;
         var updatedSharedTo = updatedExternalLink.SharedLink;
-        
+
         await _filesClient.Authenticate(null);
         _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, updatedSharedTo.RequestToken);
         file = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
-        
+
         file.Should().NotBeNull();
         file.Security.Download.Should().BeFalse();
     }
-    
+
     [Fact]
     public async Task ExternalLinkWithPassword_ExternalUser_ReturnsError()
     {
@@ -372,7 +368,7 @@ public class RoomShareTests(
         await _filesClient.Authenticate(Initializer.Owner);
         var customRoom = await CreateCustomRoom("custom room");
         var file = await CreateFile("file_to_share.docx", customRoom.Id);
-        
+
         // Act
         var externalLink = (await _roomsApi.GetRoomsPrimaryExternalLinkAsync(customRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         var sharedTo = externalLink.SharedLink;
@@ -380,22 +376,22 @@ public class RoomShareTests(
         var data = new RoomLinkRequest(sharedTo.Id, FileShare.Editing, linkType: LinkType.External, password: "11111111");
         var updatedExternalLink = (await _roomsApi.SetRoomLinkAsync(customRoom.Id, data, TestContext.Current.CancellationToken)).Response;
         var updatedSharedTo = updatedExternalLink.SharedLink;
-        
+
         await _filesClient.Authenticate(null);
         _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, updatedSharedTo.RequestToken);
         var exception = await Assert.ThrowsAsync<ApiException>(async () => await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken));
         _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
-        
+
         exception.ErrorCode.Should().Be(403);
     }
-    
+
     [Fact]
     public async Task ExternalLinkWithPassword_ExternalUserRequirePassword_ReturnsError()
     {
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
         var customRoom = await CreateCustomRoom("custom room");
-        
+
         // Act
         var externalLink = (await _roomsApi.GetRoomsPrimaryExternalLinkAsync(customRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         var sharedTo = externalLink.SharedLink;
@@ -403,7 +399,7 @@ public class RoomShareTests(
         var data = new RoomLinkRequest(sharedTo.Id, FileShare.Editing, linkType: LinkType.External, password: "11111111");
         var updatedExternalLink = (await _roomsApi.SetRoomLinkAsync(customRoom.Id, data, TestContext.Current.CancellationToken)).Response;
         var updatedSharedTo = updatedExternalLink.SharedLink;
-        
+
         await _filesClient.Authenticate(null);
         _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, updatedSharedTo.RequestToken);
         var externalShareData = (await _sharingApi.GetExternalShareDataAsync(updatedSharedTo.RequestToken, cancellationToken: TestContext.Current.CancellationToken)).Response;
@@ -411,14 +407,14 @@ public class RoomShareTests(
 
         externalShareData.Status.Should().Be(Status.RequiredPassword);
     }
-    
+
     [Fact]
     public async Task ExternalLinkWithPassword_CheckInvalidPassword_ReturnsOk()
     {
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
         var customRoom = await CreateCustomRoom("custom room");
-        
+
         // Act
         var externalLink = (await _roomsApi.GetRoomsPrimaryExternalLinkAsync(customRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         var sharedTo = externalLink.SharedLink;
@@ -427,7 +423,7 @@ public class RoomShareTests(
         var data = new RoomLinkRequest(sharedTo.Id, FileShare.Editing, linkType: LinkType.External, password: password);
         var updatedExternalLink = (await _roomsApi.SetRoomLinkAsync(customRoom.Id, data, TestContext.Current.CancellationToken)).Response;
         var updatedSharedTo = updatedExternalLink.SharedLink;
-        
+
         await _filesClient.Authenticate(null);
         _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, updatedSharedTo.RequestToken);
         var externalShareDataWrongPassword = (await _sharingApi.ApplyExternalSharePasswordAsync(updatedSharedTo.RequestToken, new ExternalShareRequestParam { Password = password + "1" }, cancellationToken: TestContext.Current.CancellationToken)).Response;
@@ -437,7 +433,7 @@ public class RoomShareTests(
         externalShareDataWrongPassword.Status.Should().Be(Status.InvalidPassword);
         externalShareData.Status.Should().Be(Status.Ok);
     }
-    
+
     [Fact]
     public async Task ExternalLinkWithPassword_ExternalUserWithPassword_ReturnsFileData()
     {
@@ -445,7 +441,7 @@ public class RoomShareTests(
         await _filesClient.Authenticate(Initializer.Owner);
         var customRoom = await CreateCustomRoom("custom room");
         var file = await CreateFile("file_to_share.docx", customRoom.Id);
-        
+
         // Act
         var externalLink = (await _roomsApi.GetRoomsPrimaryExternalLinkAsync(customRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         var sharedTo = externalLink.SharedLink;
@@ -454,18 +450,18 @@ public class RoomShareTests(
         var data = new RoomLinkRequest(sharedTo.Id, FileShare.Editing, linkType: LinkType.External, password: password);
         var updatedExternalLink = (await _roomsApi.SetRoomLinkAsync(customRoom.Id, data, TestContext.Current.CancellationToken)).Response;
         var updatedSharedTo = updatedExternalLink.SharedLink;
-        
+
         await _filesClient.Authenticate(null);
         _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, updatedSharedTo.RequestToken);
         var externalShareDataWithHttpInfo = await _sharingApi.ApplyExternalSharePasswordWithHttpInfoAsync(updatedSharedTo.RequestToken, new ExternalShareRequestParam { Password = password }, cancellationToken: TestContext.Current.CancellationToken);
         var setCookie = externalShareDataWithHttpInfo.Headers.ToDictionary()["Set-Cookie"];
         var anonymousSessionKey = setCookie.First();
-       
+
         _filesClient.DefaultRequestHeaders.Add("Cookie", anonymousSessionKey);
         var createdFile = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         _filesClient.DefaultRequestHeaders.Remove("Cookie");
         _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
-        
+
         file.Should().NotBeNull();
         createdFile.Title.Should().Be(file.Title);
     }
@@ -483,8 +479,8 @@ public class RoomShareTests(
 
         // Act - Set the link with FileShare.None
         var updateRequest = new RoomLinkRequest(
-            linkId: originalSharedTo.Id, 
-            access: FileShare.None, 
+            linkId: originalSharedTo.Id,
+            access: FileShare.None,
             linkType: LinkType.External);
 
         var updatedLink = (await _roomsApi.SetRoomLinkAsync(publicRoom.Id, updateRequest, TestContext.Current.CancellationToken)).Response;
@@ -516,8 +512,8 @@ public class RoomShareTests(
 
         // Act - Set the link with FileShare.None
         var updateRequest = new RoomLinkRequest(
-            linkId: originalSharedTo.Id, 
-            expirationDate: new ApiDateTime { UtcTime = DateTime.UtcNow.AddDays(1)}, 
+            linkId: originalSharedTo.Id,
+            expirationDate: new ApiDateTime { UtcTime = DateTime.UtcNow.AddDays(1)},
             linkType: LinkType.External);
 
         var updatedLink = (await _roomsApi.SetRoomLinkAsync(publicRoom.Id, updateRequest, TestContext.Current.CancellationToken)).Response;
@@ -528,7 +524,7 @@ public class RoomShareTests(
         updatedSharedTo.Should().NotBeNull();
         updatedSharedTo.ExpirationDate.Should().BeNull();
     }
-    
+
     [Fact]
     public async Task SetRoomLinkAsync_CustomRoomWithNoneAccess_ReturnsNull()
     {
@@ -542,17 +538,17 @@ public class RoomShareTests(
 
         // Act - Set the link with FileShare.None
         var updateRequest = new RoomLinkRequest(
-            linkId: originalSharedTo.Id, 
-            access: FileShare.None, 
+            linkId: originalSharedTo.Id,
+            access: FileShare.None,
             linkType: LinkType.External);
 
         var updatedLink = (await _roomsApi.SetRoomLinkAsync(customRoom.Id, updateRequest, TestContext.Current.CancellationToken)).Response;
-        
+
         // Assert
         updatedLink.Should().BeNull();
-        
+
         var allLinks = (await _roomsApi.GetRoomLinksAsync(customRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        allLinks.Should().BeEmpty(); 
+        allLinks.Should().BeEmpty();
     }
 
     [Fact]
@@ -643,7 +639,7 @@ public class RoomShareTests(
             roomsList.Should().NotBeNull();
             roomsList.Folders.Should().Contain(f => f.Title == customRoom.Title);
 
-            // Now check file access for user2 (without token) � rights should be persisted according to the last link
+            // Now check file access for user2 (without token) rights should be persisted according to the last link
             var fileInfoAsUser2 = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
             fileInfoAsUser2.Should().NotBeNull();
             fileInfoAsUser2.Access.Should().Be(access);
@@ -791,13 +787,13 @@ public class RoomShareTests(
 
         var editLinkResponse = (await _filesApi.SetFileExternalLinkAsync(file.Id, new FileLinkRequest(access: FileShare.Editing, title: "EditLink"), TestContext.Current.CancellationToken)).Response;
         var editToken = editLinkResponse.SharedLink.RequestToken;
-        
+
 
         // Authenticate user2 and open room
         await _filesClient.Authenticate(user2);
 
         await _filesApi.AddFileToRecentAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken);
-        
+
         // Check personal Read rights
         var openedFile = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         openedFile.Should().NotBeNull();
@@ -805,7 +801,7 @@ public class RoomShareTests(
 
         // User2 visits Comment link -> should still have personal Read rights on the file
         _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, commentToken);
-        
+
         await _filesApi.AddFileToRecentAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken);
 
         var openedFileViaCommentLink = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
@@ -816,12 +812,12 @@ public class RoomShareTests(
         openedFileViaCommentLink.Security.Edit.Should().BeFalse();
 
         _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
-        
+
         // User2 visits Edit link -> personal Read rights must still be preserved
         _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, editToken);
-        
+
         await _filesApi.AddFileToRecentAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken);
-        
+
         var openedFileViaEditLink = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         openedFileViaEditLink.Should().NotBeNull();
         openedFileViaEditLink.Access.Should().Be(FileShare.Read);
@@ -839,13 +835,13 @@ public class RoomShareTests(
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
         var room = (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("room title", roomType: roomType), TestContext.Current.CancellationToken)).Response;
-        
+
         // Get the primary external link
         var primaryLink = (await _roomsApi.GetRoomsPrimaryExternalLinkAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         primaryLink.CanEditAccess.Should().BeFalse();
     }
-    
+
     [Theory]
     [InlineData(RoomType.CustomRoom)]
     public async Task CheckEditAccess_ValidRoomType_ReturnsTrue(RoomType roomType)
@@ -853,16 +849,16 @@ public class RoomShareTests(
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
         var room = (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("room title", roomType: roomType), TestContext.Current.CancellationToken)).Response;
-        
+
         // Get the primary external link
         var primaryLink = (await _roomsApi.GetRoomsPrimaryExternalLinkAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         primaryLink.CanEditInternal.Should().BeTrue();
     }
-    
+
    public static TheoryData<RoomType> Bug77820Data => [RoomType.CustomRoom, RoomType.PublicRoom];
 
-   
+
     [Theory]
     [MemberData(nameof(Bug77820Data))]
     [Trait("Category", "Bug")]
@@ -871,9 +867,9 @@ public class RoomShareTests(
     {
         await _filesClient.Authenticate(Initializer.Owner);
         var room = (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("room title", roomType: roomType), TestContext.Current.CancellationToken)).Response;
-        
+
         var primaryLink = (await _roomsApi.GetRoomsPrimaryExternalLinkAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        
+
         var user = await Initializer.InviteContact(EmployeeType.User);
         await _filesClient.Authenticate(user);
         await _sharingApi.GetExternalShareDataAsync(primaryLink.SharedLink.RequestToken, cancellationToken: TestContext.Current.CancellationToken);
@@ -883,7 +879,7 @@ public class RoomShareTests(
         response.Should().NotBeNull();
         response.Folders.Should().BeEmpty();
     }
-    
+
     [Fact]
     [Trait("Category", "Bug")]
     [Trait("Bug", "79361")]
@@ -892,54 +888,56 @@ public class RoomShareTests(
         await _filesClient.Authenticate(Initializer.Owner);
         var roomAdmin = await Initializer.InviteContact(EmployeeType.RoomAdmin);
         var guest = await Initializer.InviteContact(EmployeeType.Guest);
-        
+
         await _filesClient.Authenticate(roomAdmin);
         var room = await CreateCustomRoom("room_guest_does_not_belong_to_me");
         var securityRequest = new RoomInvitationRequest
         {
             Invitations = [new() { Id = guest.Id, Access = FileShare.Read }]
         };
-        
+
         await _roomsApi.SetRoomSecurityAsync(room.Id, securityRequest, TestContext.Current.CancellationToken);
 
         var response = await _roomsApi.GetRoomSecurityInfoAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken);
         response.Response.Should().NotContain(r=> r.SharedToUser.Id == guest.Id);
-        
+
         var myguest = await Initializer.InviteContact(EmployeeType.Guest, roomAdmin);
-        
+
         await _filesClient.Authenticate(roomAdmin);
         securityRequest = new RoomInvitationRequest
         {
             Invitations = [new() { Id = myguest.Id, Access = FileShare.Read }]
         };
-        
+
         await _roomsApi.SetRoomSecurityAsync(room.Id, securityRequest, TestContext.Current.CancellationToken);
 
         response = await _roomsApi.GetRoomSecurityInfoAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken);
         response.Response.Should().Contain(r=> r.SharedToUser.Id == myguest.Id && r.Access == FileShare.Read);
     }
-    
+
     [Fact]
     [Trait("Category", "Bug")]
     [Trait("Bug", "79366")]
     public async Task GuestWhoDoesNotBelongToMe_GetPhoto_ReturnEmpty()
     {
         await _filesClient.Authenticate(Initializer.Owner);
-        
+
         var guest = await Initializer.InviteContact(EmployeeType.Guest);
         var roomAdmin = await Initializer.InviteContact(EmployeeType.RoomAdmin);
-        
+
         await _peopleClient.Authenticate(roomAdmin);
-        
+
         var exception = await Assert.ThrowsAsync<ApiException>(async () =>  await _photosApi.GetMemberPhotoAsync(guest.Id.ToString(), cancellationToken: TestContext.Current.CancellationToken));
         exception.ErrorCode.Should().Be(403);
-        
+
         var roomAdminGuest = await Initializer.InviteContact(EmployeeType.Guest, roomAdmin);
         var photo = (await _photosApi.GetMemberPhotoAsync(roomAdminGuest.Id.ToString(), cancellationToken: TestContext.Current.CancellationToken)).Response;
-        
+
         photo.Should().NotBeNull();
     }
-    
+
+
+
     [Theory]
     [MemberData(nameof(ValidRoomTypesForShare))]
     public async Task CreateInviteLinkInRoom_UseLinkByOwner_ReturnsOnlyOwner(RoomType roomType)
@@ -955,17 +953,17 @@ public class RoomShareTests(
         var additionalLink1 = new RoomLinkRequest(
             access: FileShare.Read,
             title: "Additional Link 1");
-        
+
         var response = (await _roomsApi.SetRoomLinkAsync(customRoom.Id, additionalLink1, TestContext.Current.CancellationToken)).Response;
         var shortLink = response.SharedLink.ShareLink;
-        
-        await apiFactory.HttpClient.Authenticate(Initializer.Owner);
-        var fullLink = await apiFactory.HttpClient.GetAsync(shortLink, TestContext.Current.CancellationToken);
+
+        await _webApiClient.Authenticate(Initializer.Owner);
+        var fullLink = await _webApiClient.GetAsync(new Uri(shortLink).PathAndQuery, TestContext.Current.CancellationToken);
         var key = HttpUtility.ParseQueryString(fullLink.RequestMessage?.RequestUri?.Query!)["key"];
-        await apiFactory.AuthenticationApi.CheckConfirmAsync(new EmailValidationKeyModel(key!, uiD: Initializer.Owner.Id, type: ConfirmType.LinkInvite), TestContext.Current.CancellationToken);
-        
+        await _authenticationApi.CheckConfirmAsync(new EmailValidationKeyModel(key!, uiD: Initializer.Owner.Id, type: ConfirmType.LinkInvite), TestContext.Current.CancellationToken);
+
         var info = (await _roomsApi.GetRoomSecurityInfoAsync(customRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        
+
         // Assert
         info.Should().NotBeNull();
         info.Should().HaveCount(1);
@@ -995,10 +993,10 @@ public class RoomShareTests(
         var shortInvitationLink = invitationReadLinkResponse.SharedLink.ShareLink;
 
         // User visits the Read link
-        await apiFactory.HttpClient.Authenticate(user);
-        var fullInvitationLink = await apiFactory.HttpClient.GetAsync(shortInvitationLink, TestContext.Current.CancellationToken);
+        await _webApiClient.Authenticate(user);
+        var fullInvitationLink = await _webApiClient.GetAsync(new Uri(shortInvitationLink).PathAndQuery, TestContext.Current.CancellationToken);
         var fullInvitationLinkKey = HttpUtility.ParseQueryString(fullInvitationLink.RequestMessage?.RequestUri?.Query!)["key"];
-        await apiFactory.AuthenticationApi.CheckConfirmAsync(new EmailValidationKeyModel(fullInvitationLinkKey!, uiD: owner.Id, type: ConfirmType.LinkInvite), TestContext.Current.CancellationToken);
+        await _authenticationApi.CheckConfirmAsync(new EmailValidationKeyModel(fullInvitationLinkKey!, uiD: owner.Id, type: ConfirmType.LinkInvite), TestContext.Current.CancellationToken);
 
         var info = (await _roomsApi.GetRoomSecurityInfoAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
@@ -1020,10 +1018,10 @@ public class RoomShareTests(
         var shortUpdatedInvitationLink = updatedLinkResponse.SharedLink.ShareLink;
 
         // User visits the updated link again, but personal rights must remain Read (because the user already exists in the room)
-        await apiFactory.HttpClient.Authenticate(user);
-        var fullUpdatedInvitationLink = await apiFactory.HttpClient.GetAsync(shortUpdatedInvitationLink, TestContext.Current.CancellationToken);
+        await _webApiClient.Authenticate(user);
+        var fullUpdatedInvitationLink = await _webApiClient.GetAsync(new Uri(shortUpdatedInvitationLink).PathAndQuery, TestContext.Current.CancellationToken);
         var fullUpdatedInvitationLinkKey = HttpUtility.ParseQueryString(fullUpdatedInvitationLink.RequestMessage?.RequestUri?.Query!)["key"];
-        await apiFactory.AuthenticationApi.CheckConfirmAsync(new EmailValidationKeyModel(fullUpdatedInvitationLinkKey!, uiD: owner.Id, type: ConfirmType.LinkInvite), TestContext.Current.CancellationToken);
+        await _authenticationApi.CheckConfirmAsync(new EmailValidationKeyModel(fullUpdatedInvitationLinkKey!, uiD: owner.Id, type: ConfirmType.LinkInvite), TestContext.Current.CancellationToken);
 
         var updatedInfo = (await _roomsApi.GetRoomSecurityInfoAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
@@ -1066,9 +1064,9 @@ public class RoomShareTests(
         await _filesClient.Authenticate(Initializer.Owner);
         var roles = new List<FormRole>
         {
-            new() 
-            { 
-                UserId = user.Id, 
+            new()
+            {
+                UserId = user.Id,
                 RoleName = "Anyone",
                 RoomId = room.Id,
                 RoleColor = "ffefbf"
@@ -1091,5 +1089,48 @@ public class RoomShareTests(
         roomContentAfterRole.Folders.Should().HaveCount(1);
         roomContentAfterRole.Files.Should().HaveCount(1);
         roomContentAfterRole.Total.Should().Be(2);
+    }
+
+    [Fact]
+    [Trait("Category", "Bug")]
+    [Trait("Bug", "80124")]
+    public async Task RoomManager_InvitesGuest_OwnerRemovesGuest_GuestStaysRemoved()
+    {
+        // Arrange: Room admin creates a custom room
+        await _filesClient.Authenticate(Initializer.Owner);
+        var roomAdmin = await Initializer.InviteContact(EmployeeType.RoomAdmin);
+
+        await _filesClient.Authenticate(roomAdmin);
+        var room = await CreateCustomRoom("room_manager_guest_removal");
+
+        // Room admin invites second user as Room manager
+        var roomManager = await Initializer.InviteContact(EmployeeType.RoomAdmin);
+        await _roomsApi.SetRoomSecurityAsync(room.Id, new RoomInvitationRequest
+        {
+            Invitations = [new RoomInvitation { Id = roomManager.Id, Access = FileShare.RoomManager }]
+        }, TestContext.Current.CancellationToken);
+
+        // Room manager invites a guest
+        await _filesClient.Authenticate(roomManager);
+        var guest = await Initializer.InviteContact(EmployeeType.Guest, roomManager);
+        await _roomsApi.SetRoomSecurityAsync(room.Id, new RoomInvitationRequest
+        {
+            Invitations = [new RoomInvitation { Id = guest.Id, Access = FileShare.Read }]
+        }, TestContext.Current.CancellationToken);
+
+        // Verify guest is in the room
+        var securityInfoBeforeRemoval = (await _roomsApi.GetRoomSecurityInfoAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        securityInfoBeforeRemoval.Should().Contain(r => r.SharedToUser.Id == guest.Id && r.Access == FileShare.Read);
+
+        // Act: Room owner (room admin) removes the guest
+        await _filesClient.Authenticate(roomAdmin);
+        await _roomsApi.SetRoomSecurityAsync(room.Id, new RoomInvitationRequest
+        {
+            Invitations = [new RoomInvitation { Id = guest.Id, Access = FileShare.None }]
+        }, TestContext.Current.CancellationToken);
+
+        // Assert: Guest should be removed and stay removed
+        var securityInfoAfterRemoval = (await _roomsApi.GetRoomSecurityInfoAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        securityInfoAfterRemoval.Should().NotContain(r => r.SharedToUser.Id == guest.Id);
     }
 }

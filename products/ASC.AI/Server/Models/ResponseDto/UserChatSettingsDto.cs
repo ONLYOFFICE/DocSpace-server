@@ -36,6 +36,13 @@ public class UserChatSettingsDto
     /// </summary>
     /// <example>true</example>
     public bool WebSearchEnabled { get; init; }
+
+    /// <summary>
+    /// The reasoning effort level for the AI model.
+    /// Controls how much reasoning the model applies when generating responses in this room.
+    /// </summary>
+    /// <example>None</example>
+    public ChatReasoningEffort ReasoningEffort { get; init; }
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]

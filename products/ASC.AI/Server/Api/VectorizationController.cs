@@ -29,6 +29,7 @@ namespace ASC.AI.Api;
 [Scope]
 [DefaultRoute]
 [ApiController]
+[AiFeature]
 [ControllerName("ai")]
 public class VectorizationController(
     VectorizationTaskPublisher vectorizationTaskPublisher) : ControllerBase

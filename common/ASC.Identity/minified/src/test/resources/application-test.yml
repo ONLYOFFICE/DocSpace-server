@@ -1,0 +1,104 @@
+server:
+  port: 0
+  servlet:
+    session:
+      tracking-modes: cookie
+spring:
+  main:
+    banner-mode: off
+    allow-bean-definition-overriding: true
+  application:
+    name: ASC.Identity.Minified.Test
+    region: local
+    encryption:
+      type: aes
+      secret: test-encryption-secret-key
+    signature:
+      jwks: ec
+      secret: 1123askdasjklasbnd
+    web:
+      api: /api/2.0
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
+      - org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+  cache:
+    type: caffeine
+  cloud:
+    aws:
+      region:
+        auto: false
+        static: us-east-1
+      dynamodb:
+        enabled: false
+  security:
+    oauth2:
+      registered-client:
+        accessTokenMinutesTTL: 60
+        refreshTokenDaysTTL: 30
+        authorizationCodeMinutesTTL: 1
+  threads:
+    virtual:
+      enabled: true
+client:
+  cache:
+    redis:
+      enabled: false
+bucket4j:
+  enabled: false
+resilience4j:
+  ratelimiter:
+    instances:
+      globalRateLimiter:
+        limitForPeriod: 1000
+        limitRefreshPeriod: 1s
+        timeoutDuration: 0
+        registerHealthIndicator: false
+      publicRateLimiter:
+        limitForPeriod: 1000
+        limitRefreshPeriod: 1s
+        timeoutDuration: 0
+        registerHealthIndicator: false
+grpc:
+  server:
+    in-process-name: identity-minified-test
+    port: -1
+  client:
+    registrationService:
+      address: in-process:identity-minified-test
+      negotiation-type: plaintext
+    authorizationService:
+      address: in-process:identity-minified-test
+      negotiation-type: plaintext
+management:
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: always
+  endpoints:
+    web:
+      base-path:
+      exposure:
+        include: health
+      path-mapping:
+        health: /health
+  health:
+    diskspace:
+      enabled: false
+    livenessState:
+      enabled: true
+    readinessState:
+      enabled: true
+logging:
+  level:
+    root: WARN
+    com.asc: DEBUG
+  cloudwatch:
+    enabled: false

@@ -28,11 +28,8 @@ using ASC.Api.Core.Cors;
 
 namespace ASC.Api.Core.Log;
 
-internal static partial class DynamicCorsPolicyResolverLogger
+internal static partial class DynamicCorsPolicyProviderLogger
 {
-    [LoggerMessage(LogLevel.Debug, "Check cors for origin: {origin}")]
-    public static partial void DebugCheckOrigin(this ILogger<DynamicCorsPolicyResolver> logger, string origin);
-
-    [LoggerMessage(LogLevel.Debug, "Get origins from OAuth 2.0 app with client id: {clienId}, origins: {origins}")]
-    public static partial void DebugGetOriginsFromOAuth2App(this ILogger<DynamicCorsPolicyResolver> logger, Guid clienId, IEnumerable<string> origins);
+    [LoggerMessage(LogLevel.Debug, "Get origins from OAuth 2.0 app with client id: {clientId}, origins: {origins}")]
+    public static partial void DebugGetOriginsFromOAuth2App(this ILogger<DynamicCorsPolicyProvider> logger, Guid clientId, IEnumerable<string> origins);
 }

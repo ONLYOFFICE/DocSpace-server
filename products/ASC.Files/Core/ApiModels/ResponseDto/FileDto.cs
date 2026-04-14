@@ -578,6 +578,13 @@ public class FileDtoHelper(
                 }
             }
 
+            var isOriginalForm = currentRoom is { FolderType: FolderType.FillingFormsRoom }
+                && formFilling is { StartFilling: true }
+                && Equals(file.Id, formFilling.OriginalFormId);
+
+            result.Security[FileSecurity.FilesSecurityActions.UpdateXlsx] = isOriginalForm
+                && result.Security[FileSecurity.FilesSecurityActions.Edit];
+
             if (currentRoom is { FolderType: FolderType.VirtualDataRoom })
             {
                 var (currentStep, roleList) = await fileDao.GetUserFormRoles(file.Id, authContext.CurrentAccount.ID);
@@ -623,6 +630,24 @@ public class FileDtoHelper(
                     }
                 }
             }
+        }
+        else if (extension is ".xlsx" or ".csv" && file.RootFolderType == FolderType.VirtualRooms)
+        {
+            var xlsxProperties = await fileDao.GetProperties(file.Id);
+            var xlsxFormFilling = xlsxProperties?.FormFilling;
+
+            var canUpdateXlsx = false;
+            if (xlsxFormFilling != null && !Equals(xlsxFormFilling.OriginalFormId, default(T)))
+            {
+                var xlsxFolder = await folderDao.GetFolderAsync(file.ParentId);
+                if (xlsxFolder.FolderType == FolderType.FormFillingFolderDone)
+                {
+                    var originalForm = await fileDao.GetFileAsync(xlsxFormFilling.OriginalFormId);
+                    canUpdateXlsx = originalForm != null && await _fileSecurity.CanEditAsync(originalForm);
+                }
+            }
+
+            result.Security[FileSecurity.FilesSecurityActions.UpdateXlsx] = canUpdateXlsx;
         }
 
         if (!file.ProviderEntry && file.RootFolderType == FolderType.VirtualRooms && !expiration.HasValue)
@@ -674,7 +699,7 @@ public class FileDtoHelper(
                 }
 
                 var parents = await folderDao.GetParentFoldersAsync(result.FolderId).ToListAsync();
-                var parent = parents.Count >= 2 ? parents[^2] : null;
+                var parent = parents.LastOrDefault();
                 if (!await _fileSecurity.CanReadAsync(parent))
                 {
                     result.FolderId = await _globalFolderHelper.GetFolderShareAsync<T>();
@@ -684,7 +709,7 @@ public class FileDtoHelper(
                 var room = parents.FirstOrDefault(f => f.IsRoom);
                 if (room != null)
                 {
-                    result.OwnedBy = await _employeeWrapperHelper.GetAsync(room.CreateBy);
+                    result.OwnedBy = authContext.IsAuthenticated ? await _employeeWrapperHelper.GetAsync(room.CreateBy) : null;
                 }
             }
 

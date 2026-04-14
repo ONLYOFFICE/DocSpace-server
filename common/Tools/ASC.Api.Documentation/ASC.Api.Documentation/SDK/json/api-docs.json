@@ -7,7 +7,7 @@
       "url": "https://helpdesk.onlyoffice.com/hc/en-us",
       "email": "support@onlyoffice.com"
     },
-    "version": "3.6.0",
+    "version": "3.7.0",
     "x-scalar-sdk-installation": [
       {
         "lang": "Node",
@@ -52,6 +52,15 @@
             "name": "subjectId",
             "in": "query",
             "description": "The filter by user ID.",
+            "schema": {
+              "type": "string",
+              "example": "00000000-0000-0000-0000-000000000000"
+            }
+          },
+          {
+            "name": "subjectOwnerId",
+            "in": "query",
+            "description": "The filter by room owner ID.",
             "schema": {
               "type": "string",
               "example": "00000000-0000-0000-0000-000000000000"
@@ -1233,7 +1242,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ExportChatRequestBodyInteger"
+                "$ref": "#/components/schemas/ExportChatRequestBody"
               }
             }
           },
@@ -2704,6 +2713,8 @@
             "description": "The unique identifier of the AI chat message to export.",
             "required": true,
             "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
               "type": "integer",
               "format": "int32",
               "example": 1
@@ -2715,7 +2726,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ExportMessageRequestBodyInteger"
+                "$ref": "#/components/schemas/ExportMessageRequestBody"
               }
             }
           },
@@ -4302,7 +4313,7 @@
           "Backup"
         ],
         "summary": "Get the number of backups",
-        "description": "Returns the number of backups for a period of time. The default is one month.",
+        "description": "Returns the number of backups for a period of time. The default is the current calendar month.",
         "operationId": "getBackupsCount",
         "parameters": [
           {
@@ -4405,6 +4416,9 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "Access denied"
           },
           "401": {
             "description": "Unauthorized"
@@ -5050,13 +5064,85 @@
         ],
         "responses": {
           "200": {
-            "description": "XLSX report generation has been queued"
+            "description": "Ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/XlsxReportResponseWrapper"
+                }
+              }
+            }
           },
           "403": {
             "description": "You do not have enough permissions to perform this action"
           },
           "404": {
-            "description": "Form file not found"
+            "description": "The required file was not found"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": []
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": []
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": []
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "Files / Files"
+        ],
+        "summary": "Get XLSX report generation status",
+        "description": "Returns the status of the XLSX report generation task for the specified form.",
+        "operationId": "getXlsx",
+        "parameters": [
+          {
+            "name": "fileId",
+            "in": "path",
+            "description": "The file unique identifier.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentBuilderTaskWrapper"
+                }
+              }
+            }
           },
           "401": {
             "description": "Unauthorized"
@@ -7399,6 +7485,12 @@
               }
             }
           },
+          "403": {
+            "description": "You don't have enough permission to perform the operation"
+          },
+          "404": {
+            "description": "File not found"
+          },
           "401": {
             "description": "Unauthorized"
           }
@@ -8179,6 +8271,79 @@
             }
           }
         }
+      }
+    },
+    "/api/2.0/files/folder/{folderId}/xlsx": {
+      "post": {
+        "tags": [
+          "Files / Folders"
+        ],
+        "summary": "Generate XLSX report by folder",
+        "description": "Triggers asynchronous XLSX report generation for the specified form results folder.",
+        "operationId": "generateXlsxByFolder",
+        "parameters": [
+          {
+            "name": "folderId",
+            "in": "path",
+            "description": "The folder unique identifier.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/XlsxReportResponseWrapper"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "You do not have enough permissions to perform this action"
+          },
+          "404": {
+            "description": "The required folder was not found"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": []
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": []
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": []
+          }
+        ]
       }
     },
     "/api/2.0/files/folder/{folderId}": {
@@ -15863,6 +16028,15 @@
             }
           },
           {
+            "name": "subjectOwnerId",
+            "in": "query",
+            "description": "The filter by room owner ID.",
+            "schema": {
+              "type": "string",
+              "example": "00000000-0000-0000-0000-000000000000"
+            }
+          },
+          {
             "name": "searchArea",
             "in": "query",
             "description": "The room search area (Active, Archive, Any, Recent by links).",
@@ -18126,18 +18300,15 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "FormCollection": {
-                    "type": "array",
-                    "items": {
-                      "$ref": "#/components/schemas/KeyValuePairStringStringValues"
-                    },
-                    "description": "The image data.",
-                    "example": "multipart/form-data"
+                  "File": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "The image data."
                   }
                 }
               },
               "encoding": {
-                "FormCollection": {
+                "File": {
                   "style": "form"
                 }
               }
@@ -18854,7 +19025,7 @@
         "tags": [
           "OAuth 2.0 / Authorization"
         ],
-        "summary": "OAuth2 authorization endpoint",
+        "summary": "OAuth2 Authorization Endpoint",
         "description": "Initiates the OAuth2 authorization flow.",
         "operationId": "authorizeOAuth",
         "parameters": [
@@ -18909,10 +19080,7 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "x-signature": []
           }
         ]
       },
@@ -18921,7 +19089,7 @@
           "OAuth 2.0 / Authorization"
         ],
         "summary": "OAuth2 consent endpoint",
-        "description": "Sends a consent request with the specified parameters.",
+        "description": "Sends consent approval",
         "operationId": "submitConsent",
         "requestBody": {
           "content": {
@@ -18959,10 +19127,7 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "x-signature": []
           }
         ]
       }
@@ -18972,8 +19137,8 @@
         "tags": [
           "OAuth 2.0 / Authorization"
         ],
-        "summary": "OAuth2 token endpoint",
-        "description": "Exchanges an authorization code specified in the request for the access token.",
+        "summary": "OAuth2 Token Endpoint",
+        "description": "Exchange authorization code for access token",
         "operationId": "exchangeToken",
         "requestBody": {
           "content": {
@@ -19013,7 +19178,7 @@
         },
         "responses": {
           "200": {
-            "description": "The authorization code was successfully exchanged for the access token",
+            "description": "Successfully exchanged authorization code for access token",
             "content": {
               "application/json": {
                 "schema": {
@@ -19050,6 +19215,26 @@
         }
       }
     },
+    "/.well-known/oauth-authorization-server": {
+      "options": {
+        "tags": [
+          "OAuth 2.0 / Discovery"
+        ],
+        "operationId": "handleOptions",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/2.0/clients/{clientId}": {
       "get": {
         "tags": [
@@ -19062,7 +19247,7 @@
           {
             "name": "clientId",
             "in": "path",
-            "description": "The client identifier.",
+            "description": "ID of the client to retrieve",
             "required": true,
             "schema": {
               "minLength": 1,
@@ -19120,7 +19305,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19130,7 +19315,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19140,7 +19325,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19150,7 +19335,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19160,7 +19345,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19168,10 +19353,7 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "x-signature": []
           }
         ]
       },
@@ -19180,13 +19362,13 @@
           "OAuth 2.0 / Client Management"
         ],
         "summary": "Update an existing OAuth2 client",
-        "description": "Updates the configuration of an existing OAuth2 client, allowing modifications to the client name, description, redirect URIs, and other settings. The client ID cannot be modified.",
+        "description": "Updates the configuration of an existing OAuth2 client. Allows modification of client name, description, redirect URIs, and other settings. The client ID cannot be modified.",
         "operationId": "updateClient",
         "parameters": [
           {
             "name": "clientId",
             "in": "path",
-            "description": "The client identifier.",
+            "description": "ID of the client to update",
             "required": true,
             "schema": {
               "minLength": 1,
@@ -19221,7 +19403,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19231,7 +19413,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19241,7 +19423,17 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported media type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19251,7 +19443,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19261,7 +19453,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19269,10 +19461,7 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "x-signature": []
           }
         ]
       },
@@ -19281,13 +19470,13 @@
           "OAuth 2.0 / Client Management"
         ],
         "summary": "Delete an OAuth2 client",
-        "description": "Permanently deletes an OAuth2 client and all associated data. All access and refresh tokens issued to this client will be invalidated. This operation cannot be undone.",
+        "description": "Permanently deletes an OAuth2 client and all associated data. This will invalidate all access tokens and refresh tokens issued to this client. This operation cannot be undone.",
         "operationId": "deleteClient",
         "parameters": [
           {
             "name": "clientId",
             "in": "path",
-            "description": "The client identifier.",
+            "description": "ID of the client to delete",
             "required": true,
             "schema": {
               "minLength": 1,
@@ -19312,7 +19501,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19322,7 +19511,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19332,7 +19521,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19342,7 +19531,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19352,7 +19541,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19360,10 +19549,7 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "x-signature": []
           }
         ]
       }
@@ -19373,27 +19559,28 @@
         "tags": [
           "OAuth 2.0 / Client Querying"
         ],
-        "summary": "Get clients",
-        "description": "Retrieves a paginated list of OAuth2 clients. The results can be paginated using the 'limit' parameter and the last seen client ID or creation date.",
+        "summary": "List clients",
+        "description": "Retrieves a paginated list of OAuth2 clients. The results can be paginated using the limit parameter and last seen client ID/creation date.",
         "operationId": "getClients",
         "parameters": [
           {
             "name": "limit",
             "in": "query",
-            "description": "The maximum number of results returned per page.",
+            "description": "Pagination limit",
             "required": true,
             "schema": {
               "maximum": 50,
               "minimum": 1,
               "type": "integer",
-              "format": "int32"
+              "format": "int32",
+              "default": 30
             },
             "example": 1
           },
           {
             "name": "last_client_id",
             "in": "query",
-            "description": "The ID of the last retrieved client.",
+            "description": "ID of the last retrieved client",
             "required": false,
             "schema": {
               "type": "string"
@@ -19403,7 +19590,7 @@
           {
             "name": "last_created_on",
             "in": "query",
-            "description": "The creation date of the last retrieved client.",
+            "description": "Date of the last retrieved client",
             "required": false,
             "schema": {
               "type": "string",
@@ -19468,17 +19655,17 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
           },
           "403": {
-            "description": "Insufficient permissions to create a client list",
+            "description": "Insufficient permissions to list clients",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19488,7 +19675,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19498,7 +19685,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19506,10 +19693,7 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "x-signature": []
           }
         ]
       },
@@ -19579,17 +19763,27 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
           },
           "403": {
-            "description": "Insufficient permissions to create a client",
+            "description": "Insufficient permissions to create client",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported media type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19599,7 +19793,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19609,7 +19803,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19617,10 +19811,62 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "x-signature": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "OAuth 2.0 / Client Management"
+        ],
+        "summary": "Delete all user OAuth2 clients",
+        "description": "Permanently deletes user OAuth2 clients and all associated data. This will invalidate all access tokens and refresh tokens issued to this client. This operation cannot be undone.",
+        "operationId": "deleteUserClients",
+        "responses": {
+          "200": {
+            "description": "Client successfully deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient permissions to delete user clients",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests - rate limit exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error occurred",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "x-signature": []
           }
         ]
       }
@@ -19630,14 +19876,14 @@
         "tags": [
           "OAuth 2.0 / Client Management"
         ],
-        "summary": "Regenerate the client secret",
+        "summary": "Regenerate client secret",
         "description": "Generates a new client secret for the specified OAuth2 client. The old secret will be immediately invalidated. This operation should be used with caution as it requires updating the secret in all client applications.",
         "operationId": "regenerateSecret",
         "parameters": [
           {
             "name": "clientId",
             "in": "path",
-            "description": "The client identifier.",
+            "description": "ID of the client to regenerate secret for",
             "required": true,
             "schema": {
               "minLength": 1,
@@ -19665,7 +19911,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19675,7 +19921,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19685,7 +19931,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19695,7 +19941,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19705,7 +19951,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19713,10 +19959,7 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "x-signature": []
           }
         ]
       }
@@ -19726,14 +19969,14 @@
         "tags": [
           "OAuth 2.0 / Client Management"
         ],
-        "summary": "Change the client activation status",
+        "summary": "Change client activation status",
         "description": "Activates or deactivates an OAuth2 client. When deactivated, the client cannot request new access tokens, but existing tokens will remain valid until they expire.",
         "operationId": "changeActivation",
         "parameters": [
           {
             "name": "clientId",
             "in": "path",
-            "description": "The client identifier.",
+            "description": "ID of the client to change activation for",
             "required": true,
             "schema": {
               "minLength": 1,
@@ -19768,7 +20011,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19778,7 +20021,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19788,7 +20031,17 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported media type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19798,7 +20051,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19808,7 +20061,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19816,10 +20069,7 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "x-signature": []
           }
         ]
       }
@@ -19829,7 +20079,7 @@
         "tags": [
           "OAuth 2.0 / Scope Management"
         ],
-        "summary": "Get available OAuth2 scopes",
+        "summary": "List available OAuth2 scopes",
         "description": "Retrieves a list of all available OAuth2 scopes for the specified tenant. The scopes define the permissions that can be requested by OAuth2 clients. The list is ordered alphabetically, with the 'openid' scope always appearing first.",
         "operationId": "getScopes",
         "responses": {
@@ -19855,17 +20105,17 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
           },
           "403": {
-            "description": "Insufficient permissions to get a list of scopes",
+            "description": "Insufficient permissions to list scopes",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19875,7 +20125,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19885,7 +20135,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19893,10 +20143,7 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "x-signature": []
           }
         ]
       }
@@ -19906,14 +20153,13 @@
         "tags": [
           "OAuth 2.0 / Client Querying"
         ],
-        "summary": "Get public client information",
-        "description": "Returns the public information for a client with the ID secified din the request.",
+        "summary": "Handles the GET request for public client information",
         "operationId": "getPublicClientInfo",
         "parameters": [
           {
             "name": "clientId",
             "in": "path",
-            "description": "The client identifier.",
+            "description": "ID of the client to retrieve",
             "required": true,
             "schema": {
               "minLength": 1,
@@ -19962,7 +20208,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19978,14 +20224,14 @@
         "tags": [
           "OAuth 2.0 / Client Querying"
         ],
+        "summary": "Retrieves detailed information for a specific client",
         "operationId": "getClientInfo",
-        "summary": "Get detailed client information",
         "description": "Retrieves the detailed information for a client with the ID specified in the request.",
         "parameters": [
           {
             "name": "clientId",
             "in": "path",
-            "description": "The client identifier.",
+            "description": "ID of the client to retrieve",
             "required": true,
             "schema": {
               "minLength": 1,
@@ -20034,7 +20280,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -20045,10 +20291,7 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "x-signature": []
           }
         ]
       }
@@ -20058,14 +20301,14 @@
         "tags": [
           "OAuth 2.0 / Client Querying"
         ],
-        "summary": "Get detailed information of clients",
+        "summary": "Retrieves a pageable list of client information",
         "description": "Retrieves a paginated list of information for all clients.",
         "operationId": "getClientsInfo",
         "parameters": [
           {
             "name": "limit",
             "in": "query",
-            "description": "The maximum number of results returned per page.",
+            "description": "Pagination limit",
             "required": true,
             "schema": {
               "maximum": 50,
@@ -20078,7 +20321,7 @@
           {
             "name": "last_client_id",
             "in": "query",
-            "description": "The identifier of the last retrieved client.",
+            "description": "ID of the last retrieved client",
             "required": false,
             "schema": {
               "type": "string"
@@ -20088,7 +20331,7 @@
           {
             "name": "last_created_on",
             "in": "query",
-            "description": "The creation date of the last retrieved client.",
+            "description": "Date of the last retrieved client",
             "required": false,
             "schema": {
               "type": "string",
@@ -20116,7 +20359,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -20127,10 +20370,7 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "x-signature": []
           }
         ]
       }
@@ -20140,14 +20380,14 @@
         "tags": [
           "OAuth 2.0 / Client Querying"
         ],
-        "summary": "Get user consents",
+        "summary": "Retrieves a pageable list of consents",
         "description": "Retrieves a paginated list of user consents.",
         "operationId": "getConsents",
         "parameters": [
           {
             "name": "limit",
             "in": "query",
-            "description": "The maximum number of results returned per page.",
+            "description": "Pagination limit",
             "required": true,
             "schema": {
               "maximum": 50,
@@ -20160,7 +20400,7 @@
           {
             "name": "last_modified_on",
             "in": "query",
-            "description": "The date when the user consent was last modified.",
+            "description": "Date of the last retrieved consent",
             "required": false,
             "schema": {
               "type": "string",
@@ -20218,10 +20458,7 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "x-signature": []
           }
         ]
       }
@@ -20238,7 +20475,7 @@
           {
             "name": "clientId",
             "in": "path",
-            "description": "The client identifier.",
+            "description": "ID of the client to revoke consent for",
             "required": true,
             "schema": {
               "minLength": 1,
@@ -20263,7 +20500,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -20273,7 +20510,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -20283,7 +20520,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -20293,7 +20530,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -20303,7 +20540,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -20313,7 +20550,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -20321,10 +20558,64 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "x-signature": []
+          }
+        ]
+      }
+    },
+    "/api/2.0/clients/tenant": {
+      "delete": {
+        "tags": [
+          "OAuth 2.0 / Client Management"
+        ],
+        "summary": "Delete all tenant OAuth2 clients",
+        "description": "Permanently deletes tenant OAuth2 clients and all associated data. This will invalidate all access tokens and refresh tokens issued to this client. This operation cannot be undone.",
+        "operationId": "deleteTenantClients",
+        "responses": {
+          "200": {
+            "description": "Client successfully deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient permissions to delete tenant clients",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests - rate limit exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error occurred",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "x-signature": []
           }
         ]
       }
@@ -22731,24 +23022,28 @@
             "multipart/form-data": {
               "schema": {
                 "required": [
-                  "formCollection"
+                  "File"
                 ],
                 "type": "object",
                 "properties": {
-                  "formCollection": {
-                    "type": "array",
-                    "items": {
-                      "$ref": "#/components/schemas/KeyValuePairStringStringValues"
-                    },
+                  "File": {
+                    "type": "string",
                     "description": "The image data.",
-                    "example": {
-                      "file": "photo.jpg"
-                    }
+                    "format": "binary",
+                    "example": "{\"file\": \"photo.jpg\"}"
+                  },
+                  "Autosave": {
+                    "type": "boolean",
+                    "description": "Specifies whether to autosave a photo or not.",
+                    "example": true
                   }
                 }
               },
               "encoding": {
-                "formCollection": {
+                "File": {
+                  "style": "form"
+                },
+                "Autosave": {
                   "style": "form"
                 }
               }
@@ -27188,7 +27483,7 @@
         ],
         "summary": "Start updating user type",
         "description": "Starts updating the type of the user or guest when reassigning rooms and shared files.",
-        "operationId": "starUserTypetUpdate",
+        "operationId": "startUserTypeUpdate",
         "requestBody": {
           "content": {
             "application/json": {
@@ -27211,6 +27506,9 @@
           },
           "400": {
             "description": "Can not update user type"
+          },
+          "403": {
+            "description": "Access denied"
           },
           "401": {
             "description": "Unauthorized"
@@ -28811,7 +29109,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/QuotaWrapper"
+                  "$ref": "#/components/schemas/WalletServiceWrapper"
                 }
               }
             }
@@ -29266,7 +29564,7 @@
             "description": "The service name.",
             "schema": {
               "type": "string",
-              "example": "aitools"
+              "example": "backup"
             }
           },
           {
@@ -29366,7 +29664,16 @@
             "description": "The service name.",
             "schema": {
               "type": "string",
-              "example": "aitools"
+              "example": "backup"
+            }
+          },
+          {
+            "name": "WriteOffServiceQuota",
+            "in": "query",
+            "description": "Write-off of the quota for the service",
+            "schema": {
+              "type": "boolean",
+              "example": false
             }
           },
           {
@@ -34140,6 +34447,124 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": []
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": []
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": []
+          }
+        ]
+      }
+    },
+    "/api/2.0/settings/ai-access": {
+      "get": {
+        "tags": [
+          "Settings / Common settings"
+        ],
+        "summary": "Get the AI access settings for the portal",
+        "description": "Returns the current portal-level AI access settings that control whether all AI functionality\r\n(chat, agents, vectorization) is available for the portal. AI is enabled by default.",
+        "operationId": "getTenantAiAccessSettings",
+        "responses": {
+          "200": {
+            "description": "AI access settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TenantAiAccessSettingsWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": []
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": []
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Settings / Common settings"
+        ],
+        "summary": "Set the AI access for the portal",
+        "description": "Updates the portal-level AI access settings. When AI is disabled, all AI features are turned off:\r\nthe AI Agents folder is hidden from root folder listings, AI status checks immediately return disabled,\r\nand AI chat endpoints become inaccessible. Only users with the DocSpaceAdmin role\r\n(EditPortalSettings permission) can change this setting.",
+        "operationId": "setTenantAiAccessSettings",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TenantAiAccessSettingsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated AI access settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TenantAiAccessSettingsWrapper"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "You don't have enough permission to change the AI access settings"
           },
           "401": {
             "description": "Unauthorized"
@@ -39569,6 +39994,9 @@
               }
             }
           },
+          "403": {
+            "description": "Access denied"
+          },
           "401": {
             "description": "Unauthorized"
           }
@@ -39630,6 +40058,12 @@
               }
             }
           },
+          "400": {
+            "description": "Invalid or empty parameters"
+          },
+          "403": {
+            "description": "Access denied"
+          },
           "401": {
             "description": "Unauthorized"
           }
@@ -39690,6 +40124,15 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Invalid or empty parameters"
+          },
+          "403": {
+            "description": "Access denied"
+          },
+          "404": {
+            "description": "Item not found"
           },
           "401": {
             "description": "Unauthorized"
@@ -39753,6 +40196,15 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Invalid or empty parameters"
+          },
+          "403": {
+            "description": "Access denied"
+          },
+          "404": {
+            "description": "Item not found"
           },
           "401": {
             "description": "Unauthorized"
@@ -39820,6 +40272,12 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "Access denied"
+          },
+          "404": {
+            "description": "Item not found"
           },
           "401": {
             "description": "Unauthorized"
@@ -39976,6 +40434,9 @@
               }
             }
           },
+          "403": {
+            "description": "Access denied"
+          },
           "401": {
             "description": "Unauthorized"
           }
@@ -40046,6 +40507,9 @@
           "400": {
             "description": "Id incorrect"
           },
+          "403": {
+            "description": "Access denied"
+          },
           "404": {
             "description": "Item not found"
           },
@@ -40111,6 +40575,9 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "Access denied"
           },
           "401": {
             "description": "Unauthorized"
@@ -40742,6 +41209,20 @@
         "additionalProperties": false,
         "description": "The agent new item's information."
       },
+      "AiChatPrice": {
+        "type": "object",
+        "properties": {
+          "prompt": {
+            "type": "number",
+            "format": "double"
+          },
+          "completion": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
       "AiProviderArrayWrapper": {
         "type": "object",
         "properties": {
@@ -40977,6 +41458,11 @@
             "description": "The tool name used by the AI assistant to launch presentation creation in the editor.",
             "nullable": true,
             "example": "generate_presentation"
+          },
+          "systemAiEnabled": {
+            "type": "boolean",
+            "description": "Indicates whether the system-level AI provider is enabled.",
+            "example": true
           }
         },
         "additionalProperties": false,
@@ -41143,6 +41629,25 @@
         "additionalProperties": false,
         "description": "The multimodal settings for the chat model."
       },
+      "ChatReasoningEffort": {
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "type": "integer",
+        "example": 0,
+        "x-enum-varnames": [
+          "None",
+          "Low",
+          "Medium",
+          "High",
+          "XHigh"
+        ],
+        "description": "[]"
+      },
       "ChatSettings": {
         "type": "object",
         "properties": {
@@ -41203,6 +41708,11 @@
           },
           "multimodal": {
             "$ref": "#/components/schemas/ChatMultimodalSettingsDto"
+          },
+          "thinking": {
+            "type": "boolean",
+            "description": "Indicates whether the model supports extended thinking mode.",
+            "example": false
           },
           "internal": {
             "type": "boolean",
@@ -41449,6 +41959,24 @@
         "additionalProperties": false,
         "description": "Request parameters for creating a new AI provider."
       },
+      "CurrencyInfo": {
+        "required": [
+          "code",
+          "symbol"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "nullable": true
+          },
+          "symbol": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "DefaultProviderDto": {
         "required": [
           "defaultModel"
@@ -41613,16 +42141,18 @@
         "enum": [
           0,
           1,
-          2
+          2,
+          3
         ],
         "type": "integer",
         "example": 0,
         "x-enum-varnames": [
           "None",
           "OpenAi",
-          "OpenRouter"
+          "OpenRouter",
+          "PortalAi"
         ],
-        "description": "[0 - None, 1 - OpenAi, 2 - OpenRouter]"
+        "description": "[0 - None, 1 - OpenAi, 2 - OpenRouter, 3 - PortalAi]"
       },
       "EmployeeDto": {
         "type": "object",
@@ -41638,12 +42168,6 @@
             "description": "The HTML-encoded user's display name formatted according to the default format for the current culture.",
             "nullable": true,
             "example": "Mike Zanyatski"
-          },
-          "title": {
-            "type": "string",
-            "description": "The user title.",
-            "nullable": true,
-            "example": "Manager"
           },
           "avatar": {
             "type": "string",
@@ -41698,17 +42222,19 @@
       "EngineType": {
         "enum": [
           0,
-          1
+          1,
+          2
         ],
         "type": "integer",
         "example": 0,
         "x-enum-varnames": [
           "None",
-          "Exa"
+          "Exa",
+          "PortalAi"
         ],
-        "description": "[0 - None, 1 - Exa]"
+        "description": "[0 - None, 1 - Exa, 2 - PortalAi]"
       },
-      "ExportChatRequestBodyInteger": {
+      "ExportChatRequestBody": {
         "required": [
           "folderId",
           "title"
@@ -41716,9 +42242,17 @@
         "type": "object",
         "properties": {
           "folderId": {
-            "type": "integer",
-            "description": "The identifier of the destination folder where the exported document will be saved.",
-            "format": "int32",
+            "oneOf": [
+              {
+                "type": "integer",
+                "example": 1234
+              },
+              {
+                "type": "string",
+                "example": "some text"
+              }
+            ],
+            "description": "The identifier of the destination folder where the exported document will be saved.\r\nCan be an integer for internal folders or a string for third-party storage folders.",
             "example": 123
           },
           "title": {
@@ -41731,7 +42265,7 @@
         "additionalProperties": false,
         "description": "Parameters for exporting an AI chat session to a document."
       },
-      "ExportMessageRequestBodyInteger": {
+      "ExportMessageRequestBody": {
         "required": [
           "folderId",
           "title"
@@ -41739,9 +42273,17 @@
         "type": "object",
         "properties": {
           "folderId": {
-            "type": "integer",
-            "description": "The identifier of the destination folder where the exported document will be saved.",
-            "format": "int32",
+            "oneOf": [
+              {
+                "type": "integer",
+                "example": 1234
+              },
+              {
+                "type": "string",
+                "example": "some text"
+              }
+            ],
+            "description": "The identifier of the destination folder where the exported document will be saved.\r\nCan be an integer for internal folders or a string for third-party storage folders.",
             "example": 123
           },
           "title": {
@@ -42071,6 +42613,9 @@
                     "type": "boolean"
                   },
                   "UseChat": {
+                    "type": "boolean"
+                  },
+                  "UpdateXlsx": {
                     "type": "boolean"
                   }
                 },
@@ -43534,6 +44079,12 @@
             "description": "The model identifier as recognized by the AI provider (e.g., gpt-4o, claude-sonnet-4-20250514).",
             "nullable": true,
             "example": "gpt-4o"
+          },
+          "price": {
+            "$ref": "#/components/schemas/AiChatPrice"
+          },
+          "currency": {
+            "$ref": "#/components/schemas/CurrencyInfo"
           }
         },
         "additionalProperties": false,
@@ -43924,6 +44475,9 @@
             "description": "Indicates whether the AI assistant is allowed to perform web searches when generating responses.",
             "nullable": true,
             "example": true
+          },
+          "reasoningEffort": {
+            "$ref": "#/components/schemas/ChatReasoningEffort"
           }
         },
         "additionalProperties": false,
@@ -44277,6 +44831,9 @@
             "type": "boolean",
             "description": "Indicates whether the AI assistant is allowed to perform web searches when generating responses in this room.",
             "example": true
+          },
+          "reasoningEffort": {
+            "$ref": "#/components/schemas/ChatReasoningEffort"
           }
         },
         "additionalProperties": false,
@@ -46517,10 +47074,11 @@
         "type": "object",
         "properties": {
           "color": {
+            "pattern": "^([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$",
             "type": "string",
             "description": "The cover color.",
             "nullable": true,
-            "example": "#FF0000"
+            "example": "FF0000"
           },
           "cover": {
             "type": "string",
@@ -48385,15 +48943,6 @@
                   }
                 ]
               },
-              "birthday": {
-                "$ref": "#/components/schemas/ApiDateTime"
-              },
-              "sex": {
-                "type": "string",
-                "description": "The user sex.",
-                "nullable": true,
-                "example": "male"
-              },
               "status": {
                 "$ref": "#/components/schemas/EmployeeStatus"
               },
@@ -48408,9 +48957,6 @@
                 "description": "The user department.",
                 "nullable": true,
                 "example": "Marketing"
-              },
-              "workFrom": {
-                "$ref": "#/components/schemas/ApiDateTime"
               },
               "groups": {
                 "type": "array",
@@ -48923,6 +49469,12 @@
                 "nullable": true,
                 "example": false
               },
+              "isFillingPreparing": {
+                "type": "boolean",
+                "description": "Specifies if the form filling has started but the file is still being saved by the document editor. Filling and editing are not allowed.",
+                "nullable": true,
+                "example": false
+              },
               "inProcessFolderId": {
                 "type": "integer",
                 "description": "The InProcess folder ID of the file.",
@@ -49294,6 +49846,9 @@
                     "type": "boolean"
                   },
                   "UseChat": {
+                    "type": "boolean"
+                  },
+                  "UpdateXlsx": {
                     "type": "boolean"
                   }
                 },
@@ -51293,17 +51848,20 @@
           "key": {
             "type": "string",
             "description": "The form field key.",
-            "nullable": true
+            "nullable": true,
+            "example": "name"
           },
           "type": {
             "type": "string",
             "description": "The form field type.",
-            "nullable": true
+            "nullable": true,
+            "example": "text"
           },
           "format": {
             "type": "string",
             "description": "The form field format.",
-            "nullable": true
+            "nullable": true,
+            "example": "date"
           },
           "possibleValues": {
             "type": "array",
@@ -52120,22 +52678,6 @@
           }
         }
       },
-      "KeyValuePairStringStringValues": {
-        "type": "object",
-        "properties": {
-          "key": {
-            "type": "string",
-            "nullable": true
-          },
-          "value": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "additionalProperties": false
-      },
       "LinkType": {
         "description": "[0 - Invitation, 1 - External]",
         "enum": [
@@ -52356,7 +52898,7 @@
         }
       },
       "MessageAction": {
-        "description": "[1000 - Login success, 1001 - Login success via social account, 1002 - Login fail invalid combination, 1003 - Login fail social account not found, 1004 - Login fail disabled profile, 1005 - Login fail, 1006 - Logout, 1007 - Login success via sms, 1008 - Login fail via sms, 1009 - Login fail ip security, 1010 - Login success via api, 1011 - Login success via social app, 1012 - Login success via api sms, 1013 - Login fail via api, 1014 - Login fail via api sms, 1015 - Login success via SSO, 1016 - Session started, 1017 - Session completed, 1018 - Login fail via SSO, 1019 - Login success via api social account, 1020 - Login fail via api social account, 1021 - Login succes via tfa app, 1022 - Login fail via Tfa app, 1023 - Login fail brute force, 1024 - Login success via api tfa, 1025 - Login fail via api tfa, 1026 - Login fail recaptcha, 1027 - Authorization link activated, 1028 - Login success via OAuth 2.0, 1029 - Login success via login and password, 4000 - User created, 4001 - Guest created, 4002 - User created via invite, 4003 - Guest created via invite, 4004 - User activated, 4005 - Guest activated, 4006 - User updated, 4007 - User updated language, 4008 - User added avatar, 4009 - User deleted avatar, 4010 - User updated avatar thumbnails, 4011 - User linked social account, 4012 - User unlinked social account, 4013 - User sent activation instructions, 4014 - User sent email change instructions, 4015 - User sent password change instructions, 4016 - User sent delete instructions, 4017 - User updated password, 4018 - User deleted, 4019 - Users updated type, 4020 - Users updated status, 4021 - Users sent activation instructions, 4022 - Users deleted, 4023 - Sent invite instructions, 4024 - User imported, 4025 - Guest imported, 4026 - Group created, 4027 - Group updated, 4028 - Group deleted, 4029 - User updated mobile number, 4030 - User data reassigns, 4031 - User data removing, 4032 - User connected tfa app, 4033 - User disconnected tfa app, 4034 - User logout active connections, 4035 - User logout active connection, 4036 - User logout active connections for user, 4037 - Send join invite, 5000 - File created, 5001 - File renamed, 5002 - File updated, 5003 - File created version, 5004 - File deleted version, 5005 - File updated revision comment, 5006 - File locked, 5007 - File unlocked, 5008 - File updated access, 5009 - File downloaded, 5010 - File downloaded as, 5011 - File uploaded, 5012 - File imported, 5013 - File copied, 5014 - File copied with overwriting, 5015 - File moved, 5016 - File moved with overwriting, 5017 - File moved to trash, 5018 - File deleted, 5019 - Folder created, 5020 - Folder renamed, 5021 - Folder updated access, 5022 - Folder copied, 5023 - Folder copied with overwriting, 5024 - Folder moved, 5025 - Folder moved with overwriting, 5026 - Folder moved to trash, 5027 - Folder deleted, 5028 - ThirdParty created, 5029 - ThirdParty updated, 5030 - ThirdParty deleted, 5031 - Documents ThirdParty settings updated, 5032 - Documents overwriting settings updated, 5033 - Documents uploading formats settings updated, 5034 - User file updated, 5035 - File converted, 5036 - File send access link, 5037 - Document service location setting, 5038 - Authorization keys setting, 5039 - Full text search setting, 5040 - Start transfer setting, 5041 - Backup started, 5042 - License key uploaded, 5043 - File change owner, 5044 - File restore version, 5045 - Document send to sign, 5046 - Document sign complete, 5047 - User updated email, 5048 - Documents store forcesave, 5049 - Documents forcesave, 5050 - Start storage encryption, 5051 - Privacy room enable, 5052 - Privacy room disable, 5053 - Start storage decryption, 5054 - File opened for change, 5055 - File marked as favorite, 5056 - File removed from favorite, 5057 - Folder downloaded, 5058 - File removed from list, 5059 - Folder removed from list, 5060 - File external link access updated, 5061 - Trash emptied, 5062 - File revision downloaded, 5063 - File marked as read, 5064 - File readed, 5065 - Folder marked as read, 5066 - Folder updated access for, 5068 - File updated access for, 5069 - Documents external share settings updated, 5070 - Room created, 5071 - Room renamed, 5072 - Room archived, 5073 - Room unarchived, 5074 - Room deleted, 5075 - Room update access for user, 5076 - Tag created, 5077 - Tags deleted, 5078 - Added room tags, 5079 - Deleted room tags, 5080 - Room logo created, 5081 - Room logo deleted, 5082 - Room invitation link updated, 5083 - Documents keep new file name settings updated, 5084 - Room remove user, 5085 - Room create user, 5086 - Room invitation link created, 5087 - Room invitation link deleted, 5088 - Room external link created, 5089 - Room external link updated, 5090 - Room external link deleted, 5091 - File external link created, 5092 - File external link updated, 5093 - File external link deleted, 5094 - Room group added, 5095 - Room update access for group, 5096 - Room group remove, 5097 - Room external link revoked, 5098 - Room external link renamed, 5099 - File uploaded with overwriting, 5100 - Room copied, 5101 - Documents display file extension updated, 5102 - Room color changed, 5103 - Room cover changed, 5104 - Room indexing changed, 5105 - Room deny download changed, 5106 - Room index export saved, 5107 - Folder index changed, 5108 - Folder index reordered, 5109 - Room deny download enabled, 5110 - Room deny download disabled, 5111 - File index changed, 5112 - Room watermark set, 5113 - Room watermark disabled, 5114 - Room index export saved, 5115 - Room indexing disabled, 5116 - Room life time set, 5117 - Room life time disabled, 5118 - Room invite resend, 5119 - File version deleted, 5120 - File custom filter enabled, 5121 - File custom filter disabled, 5122 - Folder external link created, 5123 - Folder external link updated, 5124 - Folder external link deleted, 5125 - Backup completed, 5126 - Backup failed, 5127 - Scheduled backup started, 5128 - Scheduled backup completed, 5129 - Scheduled backup failed, 5130 - Scheduled backup deleted, 5131 - Backup cancelled, 5132 - Restore started, 5133 - Restore cancelled, 5150 - Form started to fill, 5151 - Form partially filled, 5152 - Form completely filled, 5153 - Form stopped, 5154 - AI agent created, 5155 - AI agent renamed, 5156 - AI agent deleted, 5157 - MCP server added to AI agent, 5158 - MCP server deleted from AI agent, 5159 - Room change owner, 5160 - Documents default templates settings updated, 5201 - File saved, user quota exceeded, 5202 - File not saved due to user quota exceeded, 5203 - File saved, room quota exceeded, 5204 - File not saved due to room quota exceeded, 5501 - Ldap enabled, 5502 - Ldap disabled, 5503 - LDAP synchronization completed, 6000 - Language settings updated, 6001 - Time zone settings updated, 6002 - Dns settings updated, 6003 - Trusted mail domain settings updated, 6004 - Password strength settings updated, 6005 - Two factor authentication settings updated, 6006 - Administrator message settings updated, 6007 - Default start page settings updated, 6008 - Products list updated, 6009 - Administrator added, 6010 - Administrator opened full access, 6011 - Administrator deleted, 6012 - Users opened product access, 6013 - Groups opened product access, 6014 - Product access opened, 6015 - Product access restricted, 6016 - Product added administrator, 6017 - Product deleted administrator, 6018 - Greeting settings updated, 6019 - Team template changed, 6020 - Color theme changed, 6021 - Owner sent change owner instructions, 6022 - Owner updated, 6023 - Owner sent portal deactivation instructions, 6024 - Owner sent portal delete instructions, 6025 - Portal deactivated, 6026 - Portal deleted, 6027 - Login history report downloaded, 6028 - Audit trail report downloaded, 6029 - SSO enabled, 6030 - SSO disabled, 6031 - Portal access settings updated, 6032 - Cookie settings updated, 6033 - Mail service settings updated, 6034 - Custom navigation settings updated, 6035 - Audit settings updated, 6036 - Two factor authentication disabled, 6037 - Two factor authentication enabled by sms, 6038 - Two factor authentication enabled by tfa app, 6039 - Portal renamed, 6040 - Quota per room changed, 6041 - Quota per room disabled, 6042 - Quota per user changed, 6043 - Quota per user disabled, 6044 - Quota per portal changed, 6045 - Quota per portal disabled, 6046 - Form submit, 6047 - Form opened for filling, 6048 - Custom quota per room default, 6049 - Custom quota per room changed, 6050 - Custom quota per room disabled, 6051 - Custom quota per user default, 6052 - Custom quota per user changed, 6053 - Custom quota per user disabled, 6054 - DevTools access settings changed, 6055 - Webhook created, 6056 - Webhook updated, 6057 - Webhook deleted, 6058 - Created api key, 6059 - Update api key, 6060 - Deleted User api key, 6061 - Customer wallet topped up, 6062 - Customer operation performed, 6063 - Customer operations report downloaded, 6064 - Customer wallet top up settings updated, 6065 - Customer subscription updated, 6066 - Promotional banners visibility settings changed, 6067 - Customer wallet services settings updated, 6068 - Quota per AI agent changed, 6069 - Quota per AI agent disabled, 6070 - Custom quota per AI agent default, 6071 - Custom quota per AI agent changed, 6072 - Custom quota per AI agent disabled, 6073 - AI provider created, 6074 - AI provider updated, 6075 - AI provider deleted, 6076 - MCP server created, 6077 - MCP server updated, 6078 - MCP server enabled, 6079 - MCP server disabled, 6080 - MCP server deleted, 6081 - WebSearch settings configured, 6082 - WebSearch settings reset, 6083 - Vectorization settings configured, 6084 - Vectorization settings reset, 6085 - Webplugin uploaded, 6086 - Webplugin updated, 6087 - Webplugin deleted, 6088 - Whitelabel settings logo text updated, 6089 - Whitelabel settings logos updated, 6090 - Whitelabel company settings updated, 6091 - Whitelabel additional settings updated, 6092 - Whitelabel mail settings updated, 6093 - Invitation settings updated, 6094 - IP restrictions settings updated, 6095 - Login settings updated, 6096 - AI default provider set, 7000 - Contact admin mail sent, 7001 - Room invite link used, 7002 - User created and added to room, 7003 - Guest created and added to room, 7004 - Contact sales mail sent, 9901 - Create client, 9902 - Update client, 9903 - Regenerate secret, 9904 - Delete client, 9905 - Change client activation, 9906 - Change client visibility, 9907 - Revoke user client, 9908 - Generate authorization code token, 9909 - Generate personal access token, -1 - None]",
+        "description": "[1000 - Login success, 1001 - Login success via social account, 1002 - Login fail invalid combination, 1003 - Login fail social account not found, 1004 - Login fail disabled profile, 1005 - Login fail, 1006 - Logout, 1007 - Login success via sms, 1008 - Login fail via sms, 1009 - Login fail ip security, 1010 - Login success via api, 1011 - Login success via social app, 1012 - Login success via api sms, 1013 - Login fail via api, 1014 - Login fail via api sms, 1015 - Login success via SSO, 1016 - Session started, 1017 - Session completed, 1018 - Login fail via SSO, 1019 - Login success via api social account, 1020 - Login fail via api social account, 1021 - Login succes via tfa app, 1022 - Login fail via Tfa app, 1023 - Login fail brute force, 1024 - Login success via api tfa, 1025 - Login fail via api tfa, 1026 - Login fail recaptcha, 1027 - Authorization link activated, 1028 - Login success via OAuth 2.0, 1029 - Login success via login and password, 4000 - User created, 4001 - Guest created, 4002 - User created via invite, 4003 - Guest created via invite, 4004 - User activated, 4005 - Guest activated, 4006 - User updated, 4007 - User updated language, 4008 - User added avatar, 4009 - User deleted avatar, 4010 - User updated avatar thumbnails, 4011 - User linked social account, 4012 - User unlinked social account, 4013 - User sent activation instructions, 4014 - User sent email change instructions, 4015 - User sent password change instructions, 4016 - User sent delete instructions, 4017 - User updated password, 4018 - User deleted, 4019 - Users updated type, 4020 - Users updated status, 4021 - Users sent activation instructions, 4022 - Users deleted, 4023 - Sent invite instructions, 4024 - User imported, 4025 - Guest imported, 4026 - Group created, 4027 - Group updated, 4028 - Group deleted, 4029 - User updated mobile number, 4030 - User data reassigns, 4031 - User data removing, 4032 - User connected tfa app, 4033 - User disconnected tfa app, 4034 - User logout active connections, 4035 - User logout active connection, 4036 - User logout active connections for user, 4037 - Send join invite, 5000 - File created, 5001 - File renamed, 5002 - File updated, 5003 - File created version, 5004 - File deleted version, 5005 - File updated revision comment, 5006 - File locked, 5007 - File unlocked, 5008 - File updated access, 5009 - File downloaded, 5010 - File downloaded as, 5011 - File uploaded, 5012 - File imported, 5013 - File copied, 5014 - File copied with overwriting, 5015 - File moved, 5016 - File moved with overwriting, 5017 - File moved to trash, 5018 - File deleted, 5019 - Folder created, 5020 - Folder renamed, 5021 - Folder updated access, 5022 - Folder copied, 5023 - Folder copied with overwriting, 5024 - Folder moved, 5025 - Folder moved with overwriting, 5026 - Folder moved to trash, 5027 - Folder deleted, 5028 - ThirdParty created, 5029 - ThirdParty updated, 5030 - ThirdParty deleted, 5031 - Documents ThirdParty settings updated, 5032 - Documents overwriting settings updated, 5033 - Documents uploading formats settings updated, 5034 - User file updated, 5035 - File converted, 5036 - File send access link, 5037 - Document service location setting, 5038 - Authorization keys setting, 5039 - Full text search setting, 5040 - Start transfer setting, 5041 - Backup started, 5042 - License key uploaded, 5043 - File change owner, 5044 - File restore version, 5045 - Document send to sign, 5046 - Document sign complete, 5047 - User updated email, 5048 - Documents store forcesave, 5049 - Documents forcesave, 5050 - Start storage encryption, 5051 - Privacy room enable, 5052 - Privacy room disable, 5053 - Start storage decryption, 5054 - File opened for change, 5055 - File marked as favorite, 5056 - File removed from favorite, 5057 - Folder downloaded, 5058 - File removed from list, 5059 - Folder removed from list, 5060 - File external link access updated, 5061 - Trash emptied, 5062 - File revision downloaded, 5063 - File marked as read, 5064 - File readed, 5065 - Folder marked as read, 5066 - Folder updated access for, 5068 - File updated access for, 5069 - Documents external share settings updated, 5070 - Room created, 5071 - Room renamed, 5072 - Room archived, 5073 - Room unarchived, 5074 - Room deleted, 5075 - Room update access for user, 5076 - Tag created, 5077 - Tags deleted, 5078 - Added room tags, 5079 - Deleted room tags, 5080 - Room logo created, 5081 - Room logo deleted, 5082 - Room invitation link updated, 5083 - Documents keep new file name settings updated, 5084 - Room remove user, 5085 - Room create user, 5086 - Room invitation link created, 5087 - Room invitation link deleted, 5088 - Room external link created, 5089 - Room external link updated, 5090 - Room external link deleted, 5091 - File external link created, 5092 - File external link updated, 5093 - File external link deleted, 5094 - Room group added, 5095 - Room update access for group, 5096 - Room group remove, 5097 - Room external link revoked, 5098 - Room external link renamed, 5099 - File uploaded with overwriting, 5100 - Room copied, 5101 - Documents display file extension updated, 5102 - Room color changed, 5103 - Room cover changed, 5104 - Room indexing changed, 5105 - Room deny download changed, 5106 - Room index export saved, 5107 - Folder index changed, 5108 - Folder index reordered, 5109 - Room deny download enabled, 5110 - Room deny download disabled, 5111 - File index changed, 5112 - Room watermark set, 5113 - Room watermark disabled, 5114 - Room index export saved, 5115 - Room indexing disabled, 5116 - Room life time set, 5117 - Room life time disabled, 5118 - Room invite resend, 5119 - File version deleted, 5120 - File custom filter enabled, 5121 - File custom filter disabled, 5122 - Folder external link created, 5123 - Folder external link updated, 5124 - Folder external link deleted, 5125 - Backup completed, 5126 - Backup failed, 5127 - Scheduled backup started, 5128 - Scheduled backup completed, 5129 - Scheduled backup failed, 5130 - Scheduled backup deleted, 5131 - Backup cancelled, 5132 - Restore started, 5133 - Restore cancelled, 5150 - Form started to fill, 5151 - Form partially filled, 5152 - Form completely filled, 5153 - Form stopped, 5154 - AI agent created, 5155 - AI agent renamed, 5156 - AI agent deleted, 5157 - MCP server added to AI agent, 5158 - MCP server deleted from AI agent, 5159 - Room change owner, 5160 - Documents default templates settings updated, 5201 - File saved, user quota exceeded, 5202 - File not saved due to user quota exceeded, 5203 - File saved, room quota exceeded, 5204 - File not saved due to room quota exceeded, 5501 - Ldap enabled, 5502 - Ldap disabled, 5503 - LDAP synchronization completed, 6000 - Language settings updated, 6001 - Time zone settings updated, 6002 - Dns settings updated, 6003 - Trusted mail domain settings updated, 6004 - Password strength settings updated, 6005 - Two factor authentication settings updated, 6006 - Administrator message settings updated, 6007 - Default start page settings updated, 6008 - Products list updated, 6009 - Administrator added, 6010 - Administrator opened full access, 6011 - Administrator deleted, 6012 - Users opened product access, 6013 - Groups opened product access, 6014 - Product access opened, 6015 - Product access restricted, 6016 - Product added administrator, 6017 - Product deleted administrator, 6018 - Greeting settings updated, 6019 - Team template changed, 6020 - Color theme changed, 6021 - Owner sent change owner instructions, 6022 - Owner updated, 6023 - Owner sent portal deactivation instructions, 6024 - Owner sent portal delete instructions, 6025 - Portal deactivated, 6026 - Portal deleted, 6027 - Login history report downloaded, 6028 - Audit trail report downloaded, 6029 - SSO enabled, 6030 - SSO disabled, 6031 - Portal access settings updated, 6032 - Cookie settings updated, 6033 - Mail service settings updated, 6034 - Custom navigation settings updated, 6035 - Audit settings updated, 6036 - Two factor authentication disabled, 6037 - Two factor authentication enabled by sms, 6038 - Two factor authentication enabled by tfa app, 6039 - Portal renamed, 6040 - Quota per room changed, 6041 - Quota per room disabled, 6042 - Quota per user changed, 6043 - Quota per user disabled, 6044 - Quota per portal changed, 6045 - Quota per portal disabled, 6046 - Form submit, 6047 - Form opened for filling, 6048 - Custom quota per room default, 6049 - Custom quota per room changed, 6050 - Custom quota per room disabled, 6051 - Custom quota per user default, 6052 - Custom quota per user changed, 6053 - Custom quota per user disabled, 6054 - DevTools access settings changed, 6055 - Webhook created, 6056 - Webhook updated, 6057 - Webhook deleted, 6058 - Created api key, 6059 - Update api key, 6060 - Deleted User api key, 6061 - Customer wallet topped up, 6062 - Customer operation performed, 6063 - Customer operations report downloaded, 6064 - Customer wallet top up settings updated, 6065 - Customer subscription updated, 6066 - Promotional banners visibility settings changed, 6067 - Customer wallet services settings updated, 6068 - Quota per AI agent changed, 6069 - Quota per AI agent disabled, 6070 - Custom quota per AI agent default, 6071 - Custom quota per AI agent changed, 6072 - Custom quota per AI agent disabled, 6073 - AI provider created, 6074 - AI provider updated, 6075 - AI provider deleted, 6076 - MCP server created, 6077 - MCP server updated, 6078 - MCP server enabled, 6079 - MCP server disabled, 6080 - MCP server deleted, 6081 - WebSearch settings configured, 6082 - WebSearch settings reset, 6083 - Vectorization settings configured, 6084 - Vectorization settings reset, 6085 - Webplugin uploaded, 6086 - Webplugin updated, 6087 - Webplugin deleted, 6088 - Whitelabel settings logo text updated, 6089 - Whitelabel settings logos updated, 6090 - Whitelabel company settings updated, 6091 - Whitelabel additional settings updated, 6092 - Whitelabel mail settings updated, 6093 - Invitation settings updated, 6094 - IP restrictions settings updated, 6095 - Login settings updated, 6096 - AI default provider set, 6097 - AI access enabled, 6098 - AI access disabled, 7000 - Contact admin mail sent, 7001 - Room invite link used, 7002 - User created and added to room, 7003 - Guest created and added to room, 7004 - Contact sales mail sent, 9901 - Create client, 9902 - Update client, 9903 - Regenerate secret, 9904 - Delete client, 9905 - Change client activation, 9906 - Change client visibility, 9907 - Revoke user client, 9908 - Generate authorization code token, 9909 - Generate personal access token, -1 - None]",
         "enum": [
           1000,
           1001,
@@ -52674,6 +53216,8 @@
           6094,
           6095,
           6096,
+          6097,
+          6098,
           7000,
           7001,
           7002,
@@ -53009,6 +53553,8 @@
           "IPRestrictionsSettingsUpdated",
           "LoginSettingsUpdated",
           "AIDefaultProviderSet",
+          "AIAccessEnabled",
+          "AIAccessDisabled",
           "ContactAdminMailSent",
           "RoomInviteLinkUsed",
           "UserCreatedAndAddedToRoom",
@@ -56021,15 +56567,87 @@
         "additionalProperties": false,
         "description": "The document watermark parameters."
       },
-      "ErrorResponse": {
+      "XlsxReportResponseDto": {
         "type": "object",
         "properties": {
-          "reason": {
-            "description": "The human-readable error explanation.",
-            "type": "string"
+          "form": {
+            "$ref": "#/components/schemas/FileDtoInteger"
+          },
+          "task": {
+            "$ref": "#/components/schemas/DocumentBuilderTaskDto"
           }
         },
-        "description": "The error response containing the human-readable error explanation."
+        "additionalProperties": false,
+        "description": "The XLSX report task response parameters."
+      },
+      "XlsxReportResponseWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/XlsxReportResponseDto"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
+      "ProblemDetail": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "instance": {
+            "type": "string",
+            "format": "uri"
+          },
+          "properties": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            }
+          }
+        }
       },
       "UpdateClientRequest": {
         "type": "object",
@@ -56037,48 +56655,53 @@
           "name": {
             "minLength": 1,
             "type": "string",
-            "description": "The client name.",
+            "description": "The name of the client",
             "example": "Updated Client"
           },
           "description": {
             "maxLength": 255,
             "minLength": 0,
             "type": "string",
-            "description": "The client description",
+            "description": "The description of the client",
             "example": "Updated description of the client"
           },
           "logo": {
             "minLength": 1,
             "pattern": "^data:image\\/(?:png|jpeg|jpg|svg\\+xml);base64,.*.{1,}",
             "type": "string",
-            "description": "The client logo in base64 format.",
+            "description": "The logo of the client in base64 format",
             "example": "data:image/png;base64,..."
+          },
+          "public": {
+            "type": "boolean"
           },
           "allow_pkce": {
             "type": "boolean",
-            "description": "Indicates whether PKCE is allowed for the client.",
+            "description": "Indicates whether PKCE is allowed for the client",
             "example": true
           },
           "is_public": {
             "type": "boolean",
-            "description": "Indicates whether the client is accessible by third-party tenants.",
+            "description": "Indicates whether client is accessible by third-party tenants",
             "example": false
           },
           "allowed_origins": {
+            "maxItems": 12,
+            "minItems": 1,
             "uniqueItems": true,
             "type": "array",
-            "description": "The allowed origins for the client.",
+            "description": "The allowed origins for the client",
             "example": [
               "http://allowed.origin"
             ],
             "items": {
               "type": "string",
-              "description": "The allowed origins for the client.",
+              "description": "The allowed origins for the client",
               "example": "[\"http://allowed.origin\"]"
             }
           }
         },
-        "description": "The request for updating client details."
+        "description": "Client update request containing modified client details"
       },
       "ClientResponse": {
         "type": "object",
@@ -56206,97 +56829,104 @@
             "maxLength": 255,
             "minLength": 0,
             "type": "string",
-            "description": "The client description.",
+            "description": "The description of the client",
             "example": "Description of the client"
           },
           "logo": {
             "minLength": 1,
             "pattern": "^data:image\\/(?:png|jpeg|jpg|svg\\+xml);base64,.*.{1,}",
             "type": "string",
-            "description": "The client logo in base64 format.",
+            "description": "The logo of the client in base64 format",
             "example": "data:image/png;base64,..."
           },
           "scopes": {
             "minItems": 1,
             "uniqueItems": true,
             "type": "array",
-            "description": "The client scopes.",
+            "description": "The scopes for the client",
             "example": [
               "read",
               "write"
             ],
             "items": {
               "type": "string",
-              "description": "The client scopes.",
+              "description": "The scopes for the client",
               "example": "[\"read\",\"write\"]"
             }
           },
+          "public": {
+            "type": "boolean"
+          },
           "allow_pkce": {
             "type": "boolean",
-            "description": "Indicates whether PKCE is allowed for the client.",
+            "description": "Indicates whether PKCE is allowed for the client",
             "example": true
           },
           "is_public": {
             "type": "boolean",
-            "description": "Indicates whether the client is accessible by third-party tenants.",
+            "description": "Indicates if the client is public",
             "example": false
           },
           "website_url": {
             "minLength": 1,
-            "pattern": "^(https?://)?(([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}|localhost|[a-zA-Z0-9-]+)(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$",
+            "pattern": "^(https?://)?([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$",
             "type": "string",
-            "description": "The URL to the client's website.",
+            "description": "The website URL of the client",
             "example": "http://example.com"
           },
           "terms_url": {
             "minLength": 1,
-            "pattern": "^(https?://)?(([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}|localhost|[a-zA-Z0-9-]+)(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$",
+            "pattern": "^(https?://)?([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$",
             "type": "string",
-            "description": "The URL to the client's terms of service.",
+            "description": "The terms URL of the client",
             "example": "http://example.com/terms"
           },
           "policy_url": {
             "minLength": 1,
-            "pattern": "^(https?://)?(([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}|localhost|[a-zA-Z0-9-]+)(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$",
+            "pattern": "^(https?://)?([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$",
             "type": "string",
-            "description": "The URL to the client's privacy policy.",
+            "description": "The policy URL of the client",
             "example": "http://example.com/policy"
           },
           "redirect_uris": {
+            "maxItems": 12,
+            "minItems": 1,
             "uniqueItems": true,
             "type": "array",
-            "description": "The list of allowed redirect URIs.",
+            "description": "The redirect URIs for the client",
             "example": [
               "http://example.com/redirect"
             ],
             "items": {
               "type": "string",
-              "description": "The list of allowed redirect URIs.",
+              "description": "The redirect URIs for the client",
               "example": "[\"http://example.com/redirect\"]"
             }
           },
           "allowed_origins": {
+            "maxItems": 12,
+            "minItems": 1,
             "uniqueItems": true,
             "type": "array",
-            "description": "The list of allowed CORS origins.",
+            "description": "The allowed origins for the client",
             "example": [
               "http://example.com"
             ],
             "items": {
               "type": "string",
-              "description": "The list of allowed CORS origins.",
+              "description": "The allowed origins for the client",
               "example": "[\"http://example.com\"]"
             }
           },
           "logout_redirect_uri": {
             "minLength": 1,
-            "pattern": "^(https?://)?(([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}|localhost|[a-zA-Z0-9-]+)(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$",
+            "pattern": "^(https?://)?([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$",
             "type": "string",
-            "description": "The list of allowed logout redirect URIs.",
+            "description": "The logout redirect URI for the client",
             "example": "http://example.com/logout"
           }
         },
-        "description": "The request parameters for creating a client."
+        "description": "Client creation request containing client details"
       },
       "ClientSecretResponse": {
         "type": "object",
@@ -56316,11 +56946,11 @@
         "properties": {
           "status": {
             "type": "boolean",
-            "description": "The client activation status.",
+            "description": "The activation status of the client",
             "example": true
           }
         },
-        "description": "The request parameters for changing the client activation status."
+        "description": "Client activation change request"
       },
       "ScopeResponse": {
         "type": "object",
@@ -56383,6 +57013,9 @@
             "items": {
               "type": "string"
             }
+          },
+          "public": {
+            "type": "boolean"
           },
           "client_id": {
             "type": "string",
@@ -57516,28 +58149,11 @@
               "00000000-0000-0000-0000-000000000000"
             ]
           },
-          "title": {
-            "maxLength": 255,
-            "minLength": 0,
-            "type": "string",
-            "description": "The user title.",
-            "nullable": true,
-            "example": "Manager"
-          },
           "location": {
             "type": "string",
             "description": "The user location.",
             "nullable": true,
             "example": "New York"
-          },
-          "sex": {
-            "$ref": "#/components/schemas/SexEnum"
-          },
-          "birthday": {
-            "$ref": "#/components/schemas/ApiDateTime"
-          },
-          "worksfrom": {
-            "$ref": "#/components/schemas/ApiDateTime"
           },
           "comment": {
             "type": "string",
@@ -57663,19 +58279,6 @@
         },
         "additionalProperties": false,
         "description": "The request for setting a group manager."
-      },
-      "SexEnum": {
-        "description": "[0 - Female, 1 - Male]",
-        "enum": [
-          0,
-          1
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
-          "Female",
-          "Male"
-        ]
       },
       "SignupAccountRequestDto": {
         "required": [
@@ -58115,28 +58718,11 @@
               "00000000-0000-0000-0000-000000000000"
             ]
           },
-          "title": {
-            "maxLength": 255,
-            "minLength": 0,
-            "type": "string",
-            "description": "The user title.",
-            "nullable": true,
-            "example": "Manager"
-          },
           "location": {
             "type": "string",
             "description": "The user location.",
             "nullable": true,
             "example": "New York"
-          },
-          "sex": {
-            "$ref": "#/components/schemas/SexEnum"
-          },
-          "birthday": {
-            "$ref": "#/components/schemas/ApiDateTime"
-          },
-          "worksfrom": {
-            "$ref": "#/components/schemas/ApiDateTime"
           },
           "comment": {
             "type": "string",
@@ -58655,20 +59241,6 @@
           },
           "price": {
             "$ref": "#/components/schemas/AiChatPrice"
-          }
-        },
-        "additionalProperties": false
-      },
-      "AiChatPrice": {
-        "type": "object",
-        "properties": {
-          "prompt": {
-            "type": "number",
-            "format": "double"
-          },
-          "completion": {
-            "type": "number",
-            "format": "double"
           }
         },
         "additionalProperties": false
@@ -59311,7 +59883,7 @@
             "type": "string",
             "description": "The account name.",
             "nullable": true,
-            "example": "aitools"
+            "example": "account name"
           },
           "accountCurrency": {
             "type": "string",
@@ -59439,7 +60011,7 @@
             "type": "string",
             "description": "The service name.",
             "nullable": true,
-            "example": "aitools"
+            "example": "backup"
           }
         },
         "additionalProperties": false,
@@ -60325,24 +60897,6 @@
         "additionalProperties": false,
         "description": "The currencies parameters."
       },
-      "CurrencyInfo": {
-        "required": [
-          "code",
-          "symbol"
-        ],
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "string",
-            "nullable": true
-          },
-          "symbol": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
       "CurrentLicenseInfo": {
         "required": [
           "dueDate",
@@ -60573,7 +61127,12 @@
             "type": "string",
             "description": "The service name.",
             "nullable": true,
-            "example": "aitools"
+            "example": "backup"
+          },
+          "writeOffServiceQuota": {
+            "type": "boolean",
+            "description": "Write-off of the quota for the service",
+            "example": false
           },
           "startDate": {
             "type": "string",
@@ -61176,6 +61735,9 @@
             "type": "string",
             "nullable": true
           },
+          "databaseTypeEnum": {
+            "$ref": "#/components/schemas/ExternalDatabaseType"
+          },
           "dbHost": {
             "type": "string",
             "nullable": true
@@ -61205,6 +61767,19 @@
           }
         },
         "additionalProperties": false
+      },
+      "ExternalDatabaseType": {
+        "enum": [
+          0,
+          1
+        ],
+        "type": "integer",
+        "example": 0,
+        "x-enum-varnames": [
+          "MySql",
+          "Sqlite"
+        ],
+        "description": "[]"
       },
       "FeatureUsedDto": {
         "required": [
@@ -62254,7 +62829,8 @@
           10,
           11,
           12,
-          13
+          13,
+          14
         ],
         "type": "integer",
         "example": 0,
@@ -62272,9 +62848,10 @@
           "Wordpress",
           "Yahoo",
           "Yandex",
-          "Github"
+          "Github",
+          "Nextcloud"
         ],
-        "description": "[0 - Facebook, 1 - Google, 2 - Dropbox, 3 - Docusign, 4 - Box, 5 - OneDrive, 6 - GosUslugi, 7 - LinkedIn, 8 - MailRu, 9 - VK, 10 - Wordpress, 11 - Yahoo, 12 - Yandex, 13 - Github]"
+        "description": "[0 - Facebook, 1 - Google, 2 - Dropbox, 3 - Docusign, 4 - Box, 5 - OneDrive, 6 - GosUslugi, 7 - LinkedIn, 8 - MailRu, 9 - VK, 10 - Wordpress, 11 - Yahoo, 12 - Yandex, 13 - Github, 14 - Nextcloud]"
       },
       "LoginSettingsDto": {
         "required": [
@@ -62927,6 +63504,18 @@
             "description": "The participant display name.",
             "nullable": true,
             "example": "Example Name"
+          },
+          "agentId": {
+            "type": "string",
+            "description": "AI Agent id.",
+            "nullable": true,
+            "example": 123
+          },
+          "agentTitle": {
+            "type": "string",
+            "description": "AI Agent name.",
+            "nullable": true,
+            "example": "My AI Agent"
           }
         },
         "additionalProperties": false,
@@ -64543,6 +65132,11 @@
             "description": "Specifies whether to display the promotional banners.",
             "example": true
           },
+          "aiEnabled": {
+            "type": "boolean",
+            "description": "Specifies whether AI functionality (chat, agents, vectorization) is enabled for the current tenant.\r\nWhen `false`, all AI features are disabled and the AI Agents folder is hidden.",
+            "example": true
+          },
           "userNameRegex": {
             "type": "string",
             "description": "The user name validation regex.",
@@ -64585,7 +65179,8 @@
           },
           "externalDbEnabled": {
             "type": "boolean",
-            "description": "Specifies if an external database is connected for storing form results."
+            "description": "Specifies if an external database is connected for storing form results.",
+            "example": true
           }
         },
         "additionalProperties": false,
@@ -65686,6 +66281,76 @@
           }
         }
       },
+      "TenantAiAccessSettings": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "Specifies whether AI functionality is enabled for the tenant.\r\nWhen set to `false`, all AI features (chat, agents, vectorization) are disabled tenant-wide.",
+            "example": true
+          },
+          "lastModified": {
+            "type": "string",
+            "description": "The timestamp indicating when the settings were last modified.",
+            "format": "date-time",
+            "example": "1990-01-01T00:00:00Z"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The tenant-level settings for enabling or disabling all AI functionality in DocSpace."
+      },
+      "TenantAiAccessSettingsDto": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "Specifies whether AI functionality is enabled for the tenant.\r\nSet to `true` to enable all AI features or `false` to disable them tenant-wide.",
+            "example": false
+          }
+        },
+        "additionalProperties": false,
+        "description": "The request parameters for managing the tenant-level AI access settings."
+      },
+      "TenantAiAccessSettingsWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/TenantAiAccessSettings"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
       "TenantAiAgentQuotaSettings": {
         "allOf": [
           {
@@ -66265,13 +66930,13 @@
             "type": "string",
             "description": "The service name.",
             "nullable": true,
-            "example": "space"
+            "example": "backup"
           },
           "serviceGroup": {
             "type": "string",
             "description": "The service group.",
             "nullable": true,
-            "example": "ai"
+            "example": "services"
           },
           "visible": {
             "type": "boolean",
@@ -66867,17 +67532,15 @@
         }
       },
       "TenantWalletService": {
-        "description": "[-14 - WebSearch, -13 - AITools, -12 - Backup, -11 - Storage]",
+        "description": "[-13 - AITools, -12 - Backup, -11 - Storage]",
         "enum": [
-          -14,
           -13,
           -12,
           -11
         ],
         "type": "integer",
-        "example": -14,
+        "example": -13,
         "x-enum-varnames": [
-          "WebSearch",
           "AITools",
           "Backup",
           "Storage"
@@ -66890,15 +67553,13 @@
             "type": "array",
             "items": {
               "enum": [
-                -14,
                 -13,
                 -12,
                 -11
               ],
               "type": "integer",
-              "example": -14,
+              "example": -13,
               "x-enum-varnames": [
-                "WebSearch",
                 "AITools",
                 "Backup",
                 "Storage"
@@ -67617,7 +68278,7 @@
               "innerServices": {
                 "type": "array",
                 "items": {
-                  "$ref": "#/components/schemas/QuotaDto"
+                  "$ref": "#/components/schemas/WalletServiceDto"
                 },
                 "description": "The list of inner services.",
                 "nullable": true,
@@ -67627,12 +68288,58 @@
                     "size": 1073741824
                   }
                 ]
+              },
+              "serviceName": {
+                "type": "string",
+                "description": "The service name.",
+                "nullable": true,
+                "example": "backup"
               }
             }
           }
         ],
         "additionalProperties": false,
         "description": "The wallet service information."
+      },
+      "WalletServiceWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/WalletServiceDto"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
       },
       "WebItemSecurityRequestsDto": {
         "required": [
@@ -68046,7 +68753,10 @@
           "RoomCopied",
           "FormSubmit",
           "FormFilledOut",
-          "FormStopped"
+          "FormStopped",
+          "AgentCreated",
+          "AgentUpdated",
+          "AgentDeleted"
         ]
       },
       "WebhooksConfigDto": {
@@ -68799,8 +69509,12 @@
       "x-displayName": "Authorization"
     },
     {
+      "name": "OAuth 2.0 / Discovery",
+      "x-displayName": "Discovery"
+    },
+    {
       "name": "OAuth 2.0 / Client Management",
-      "description": "APIs for managing OAuth2 clients, including creation, updates, deletion, and activation.",
+      "description": "APIs for managing OAuth2 clients including creation, updates, deletion and activation",
       "x-displayName": "Client Management"
     },
     {
@@ -69133,6 +69847,7 @@
         "OAuth 2.0 / Authorization",
         "OAuth 2.0 / Client Management",
         "OAuth 2.0 / Client Querying",
+        "OAuth 2.0 / Discovery",
         "OAuth 2.0 / Scope Management"
       ]
     },

@@ -56,4 +56,10 @@ public class SetUserChatSettingsRequestBody
     /// </summary>
     /// <example>true</example>
     public bool? WebSearchEnabled { get; init; }
+
+    /// <summary>
+    /// The reasoning effort level for the AI model.
+    /// Controls how much reasoning the model applies when generating responses.
+    /// </summary>
+    public ChatReasoningEffort? ReasoningEffort { get; init; }
 }

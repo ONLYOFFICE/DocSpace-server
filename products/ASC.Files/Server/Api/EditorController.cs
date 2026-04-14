@@ -182,7 +182,17 @@ public abstract class EditorController<T>(
                 FolderType.FormFillingFolderInProgress => documentServiceHelper.GetFormOpenSetupForFolderInProgress(file, inDto.EditorType),
                 FolderType.FormFillingFolderDone => documentServiceHelper.GetFormOpenSetupForFolderDone<T>(inDto.EditorType),
                 FolderType.VirtualDataRoom => await documentServiceHelper.GetFormOpenSetupForVirtualDataRoomAsync(file, rootFolder, inDto.EditorType),
+                FolderType.PublicRoom => await documentServiceHelper.GetFormOpenSetupForPublicRoomAsync(file, inDto.EditorType),
                 FolderType.USER => await documentServiceHelper.GetFormOpenSetupForUserFolderAsync(file, inDto.EditorType, inDto.Edit, inDto.Fill),
+                FolderType.DefaultTemplates => new FormOpenSetup<T>
+                {
+                    CanEdit = false,
+                    CanFill = false,
+                    CanStartFilling = false,
+                    EditorType = inDto.EditorType != EditorType.Mobile
+                        ? EditorType.Embedded
+                        : inDto.EditorType
+                },
                 _ => new FormOpenSetup<T>
                 {
                     CanEdit = !inDto.Fill,
@@ -378,13 +388,34 @@ public abstract class EditorController<T>(
     /// <summary>Generate XLSX report</summary>
     /// <path>api/2.0/files/file/{fileId}/xlsx</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "XLSX report generation has been queued")]
+    [SwaggerResponse(200, "Ok", typeof(XlsxReportResponseDto))]
     [SwaggerResponse(403, "You do not have enough permissions to perform this action")]
-    [SwaggerResponse(404, "Form file not found")]
+    [SwaggerResponse(404, "The required file was not found")]
     [HttpPost("{fileId}/xlsx")]
-    public async Task GenerateXlsx(FileIdRequestDto<int> inDto)
+    public async Task<XlsxReportResponseDto> GenerateXlsx(FileIdRequestDto<int> inDto)
     {
-        await fileStorageService.GenerateXlsxAsync(inDto.FileId);
+        var (task, form) = await fileStorageService.GenerateXlsxAsync(inDto.FileId);
+
+        return new XlsxReportResponseDto
+        {
+            Form = await _fileDtoHelper.GetAsync(form),
+            Task = DocumentBuilderTaskDto.Get(task)
+        };
+    }
+
+    /// <remarks>
+    /// Returns the status of the XLSX report generation task for the specified form.
+    /// </remarks>
+    /// <summary>Get XLSX report generation status</summary>
+    /// <path>api/2.0/files/file/{fileId}/xlsx</path>
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "Ok", typeof(DocumentBuilderTaskDto))]
+    [HttpGet("{fileId}/xlsx")]
+    public async Task<DocumentBuilderTaskDto> GetXlsx(FileIdRequestDto<int> inDto)
+    {
+        var task = await fileStorageService.GetXlsxTaskAsync(inDto.FileId);
+
+        return DocumentBuilderTaskDto.Get(task);
     }
 }
 

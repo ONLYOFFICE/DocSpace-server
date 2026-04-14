@@ -284,19 +284,17 @@ public class ProjectConfigurator(
 
     public ProjectConfigurator AddIdentity()
     {
-        var ascIdentityRegistration = "onlyoffice-identity-registration";
-        var ascIdentityAuthorization = "onlyoffice-identity-authorization";
         var path = Path.Combine("..", "ASC.Identity");
 
         var registrationBuilder = builder
-            .AddDockerfile(ascIdentityRegistration, path)
+            .AddDockerfile(Constants.IdentityRegistrationContainer, path)
             .WithImageTag("dev")
             .WithEnvironment("log:dir", "/logs")
             .WithEnvironment("log:name", "identity.registration")
             .WithEnvironment("SERVER_PORT", Constants.IdentityRegistrationPort.ToString())
             .WithEnvironment("SPRING_PROFILES_ACTIVE", "dev,server")
             .WithEnvironment("SPRING_APPLICATION_NAME", "ASC.Identity.Registration")
-            .WithEnvironment("GRPC_CLIENT_AUTHORIZATION_ADDRESS", new UriBuilder("static", ascIdentityAuthorization, 9999).ToString())
+            .WithEnvironment("GRPC_CLIENT_AUTHORIZATION_ADDRESS", new UriBuilder("static", Constants.IdentityAuthorizationContainer, 9999).ToString())
             .WithHttpEndpoint(Constants.IdentityRegistrationPort, Constants.IdentityRegistrationPort, isProxied: false)
             .WithBuildArg("MODULE", "registration/registration-container")
             .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
@@ -304,14 +302,14 @@ public class ProjectConfigurator(
         connectionManager.AddIdentityEnv(registrationBuilder);
 
         var authorizationBuilder = builder
-            .AddDockerfile(ascIdentityAuthorization, path)
+            .AddDockerfile(Constants.IdentityAuthorizationContainer, path)
             .WithImageTag("dev")
             .WithEnvironment("log:dir", "/logs")
             .WithEnvironment("log:name", "identity.authorization")
             .WithEnvironment("SERVER_PORT", Constants.IdentityAuthorizationPort.ToString())
             .WithEnvironment("SPRING_PROFILES_ACTIVE", "dev,server")
             .WithEnvironment("SPRING_APPLICATION_NAME", "ASC.Identity.Authorization")
-            .WithEnvironment("GRPC_CLIENT_AUTHORIZATION_ADDRESS", new UriBuilder("static", ascIdentityRegistration, 8888).ToString())
+            .WithEnvironment("GRPC_CLIENT_AUTHORIZATION_ADDRESS", new UriBuilder("static", Constants.IdentityRegistrationContainer, 8888).ToString())
             .WithHttpEndpoint(Constants.IdentityAuthorizationPort, Constants.IdentityAuthorizationPort, isProxied: false)
             .WithBuildArg("MODULE", "authorization/authorization-container")
             .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
