@@ -132,7 +132,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} AI.
+        ///   Looks up a localized string similar to {LogoText} AI.
         /// </summary>
         public static string AccountingCustomerOperationServiceDesc_ai_tools {
             get {
@@ -3444,7 +3444,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} AI.
+        ///   Looks up a localized string similar to {LogoText} AI.
         /// </summary>
         public static string TariffsFeature_aitools_wallet {
             get {

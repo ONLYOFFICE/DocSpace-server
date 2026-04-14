@@ -77,7 +77,7 @@ public class WalletServiceDescriptionManager()
             quantity = 0;
         }
 
-        var description = string.Format(Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceDesc_{serviceName}") ?? "", logoText);
+        var description = (Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceDesc_{serviceName}") ?? "").Replace("{LogoText}", logoText);
         var uom = Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceUOM_{serviceName}");
 
         return (description, uom, quantity);

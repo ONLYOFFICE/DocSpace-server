@@ -186,7 +186,7 @@ public class QuotaHelper(
 
             var result = new TenantQuotaFeatureDto
             {
-                Title = string.Format(Resource.ResourceManager.GetString($"TariffsFeature_{featureName}") ?? "", logoText)
+                Title = (Resource.ResourceManager.GetString($"TariffsFeature_{featureName}") ?? "").Replace("{LogoText}", logoText)
             };
 
             if (feature.Paid)
