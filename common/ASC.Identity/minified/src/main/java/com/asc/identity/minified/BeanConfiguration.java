@@ -175,6 +175,7 @@ public class BeanConfiguration {
    *
    * @param validator bean validation entry point
    * @param clientCacheService cache abstraction for clients
+   * @param scopeApplicationService scopes service
    * @param tenantClientsRemovedEventAuthorizationMessagePublisher publisher for tenant-level
    *     cleanup events
    * @param userClientsRemovedEventAuthorizationMessagePublisher publisher for user-level cleanup
@@ -190,6 +191,7 @@ public class BeanConfiguration {
   public ClientApplicationService clientApplicationService(
       Validator validator,
       ClientCacheService clientCacheService,
+      ScopeApplicationService scopeApplicationService,
       AuthorizationMessagePublisher<TenantClientsRemovedEvent>
           tenantClientsRemovedEventAuthorizationMessagePublisher,
       AuthorizationMessagePublisher<UserClientsRemovedEvent>
@@ -202,6 +204,7 @@ public class BeanConfiguration {
     return new CoreClientApplicationService(
         validator,
         clientCacheService,
+        scopeApplicationService,
         tenantClientsRemovedEventAuthorizationMessagePublisher,
         userClientsRemovedEventAuthorizationMessagePublisher,
         clientCacheTenantRemoveEventAuthorizationMessagePublisher,

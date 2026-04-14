@@ -32,12 +32,14 @@ import com.asc.registration.application.transfer.ValidationErrorCodeResponse;
 import com.asc.registration.application.transfer.ValidationErrorResponse;
 import com.asc.registration.core.domain.exception.ClientDomainException;
 import com.asc.registration.service.exception.ExceededClientsPerResourceException;
+import com.asc.registration.service.exception.InvalidScopeException;
 import io.github.resilience4j.ratelimiter.RequestNotPermitted;
 import io.grpc.StatusRuntimeException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ValidationException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
@@ -236,6 +238,27 @@ public class RegistrationGlobalExceptionHandler {
   public ProblemDetail handleAccessDeniedException(
       AuthorizationDeniedException e, HttpServletRequest request) {
     return createProblemDetail(HttpStatus.FORBIDDEN, "Access denied", request.getRequestURI());
+  }
+
+  /**
+   * Handles {@link InvalidScopeException} exceptions thrown when a request contains scope names
+   * that do not exist in the application registry.
+   *
+   * @param e the {@link InvalidScopeException} that was raised.
+   * @param request the {@link HttpServletRequest} associated with the current request.
+   * @return a {@link ProblemDetail} with field-specific scope errors in the "errors" property.
+   */
+  @ExceptionHandler(value = InvalidScopeException.class)
+  public ProblemDetail handleInvalidScopeException(
+      InvalidScopeException e, HttpServletRequest request) {
+    var problemDetail =
+        createProblemDetail(HttpStatus.BAD_REQUEST, "Validation failed", request.getRequestURI());
+    problemDetail.setProperty(
+        "errors",
+        List.of(
+            new ValidationErrorResponse.FieldError(
+                "scopes", ValidationErrorCodeResponse.ERROR_INVALID_SCOPE, e.getMessage())));
+    return problemDetail;
   }
 
   /**

@@ -31,6 +31,7 @@ import com.asc.common.utilities.validation.URLCollection;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.io.Serializable;
@@ -90,4 +91,17 @@ public class UpdateTenantClientCommand implements Serializable {
       max = 12,
       message = "allowed origins must contain at least 1 and at most 12 addresses")
   private Set<String> allowedOrigins;
+
+  /** The redirect URIs for the client. Each must be a valid URL. */
+  @URLCollection
+  @JsonProperty("redirect_uris")
+  @Size(
+      min = 1,
+      max = 12,
+      message = "redirect uris must contain at least 1 and at most 12 addresses")
+  private Set<String> redirectUris;
+
+  /** The scopes for the client. This field cannot be empty. */
+  @NotEmpty(message = "scopes field can not be empty")
+  private Set<String> scopes;
 }

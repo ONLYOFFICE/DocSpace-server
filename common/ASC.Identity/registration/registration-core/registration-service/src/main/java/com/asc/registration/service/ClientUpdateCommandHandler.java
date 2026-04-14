@@ -50,6 +50,7 @@ import com.asc.registration.service.ports.output.repository.ClientQueryRepositor
 import com.asc.registration.service.ports.output.resilience.RetryExecutor;
 import com.asc.registration.service.transfer.request.update.*;
 import com.asc.registration.service.transfer.response.ClientSecretResponse;
+import java.util.HashSet;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -213,9 +214,18 @@ public class ClientUpdateCommandHandler {
                   audit,
                   client,
                   new ClientRedirectInfo(
-                      client.getClientRedirectInfo().redirectUris(),
+                      command.getRedirectUris(),
                       command.getAllowedOrigins(),
                       client.getClientRedirectInfo().logoutRedirectUris()));
+
+          var cScopes = new HashSet<>(client.getScopes());
+          var nScopes = command.getScopes();
+          nScopes.stream()
+              .filter(scope -> !cScopes.contains(scope))
+              .forEach(scope -> clientDomainService.addScope(audit, client, scope));
+          cScopes.stream()
+              .filter(scope -> !nScopes.contains(scope))
+              .forEach(scope -> clientDomainService.removeScope(audit, client, scope));
 
           if (command.isAllowPkce()) {
             clientDomainService.addAuthenticationMethod(

@@ -39,14 +39,10 @@ import com.asc.registration.application.security.authentication.BasicSignatureTo
 import com.asc.registration.application.transfer.ChangeClientActivationRequest;
 import com.asc.registration.application.transfer.CreateClientRequest;
 import com.asc.registration.application.transfer.UpdateClientRequest;
-import com.asc.registration.application.transfer.ValidationErrorCodeResponse;
-import com.asc.registration.application.transfer.ValidationErrorResponse;
 import com.asc.registration.service.ports.input.service.ClientApplicationService;
-import com.asc.registration.service.ports.input.service.ScopeApplicationService;
 import com.asc.registration.service.transfer.request.create.CreateTenantClientCommand;
 import com.asc.registration.service.transfer.request.update.*;
 import com.asc.registration.service.transfer.response.ClientSecretResponse;
-import com.asc.registration.service.transfer.response.ScopeResponse;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.grpc.StatusRuntimeException;
 import io.swagger.v3.oas.annotations.Operation;
@@ -60,9 +56,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import java.net.URI;
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
@@ -103,9 +96,6 @@ public class ClientCommandController {
 
   /** The service for managing client applications. */
   private final ClientApplicationService clientApplicationService;
-
-  /** The service for managing scopes. */
-  private final ScopeApplicationService scopeApplicationService;
 
   private final HttpUtils httpUtils;
   private final AuditMessagePublisher messagePublisher;
@@ -235,32 +225,6 @@ public class ClientCommandController {
           CreateClientRequest command) {
     try {
       setLoggingParameters(principal);
-      var validScopes =
-          scopeApplicationService.getScopes().stream()
-              .map(ScopeResponse::getName)
-              .collect(Collectors.toSet());
-
-      var invalidScopes =
-          command.getScopes().stream()
-              .filter(scope -> !validScopes.contains(scope))
-              .collect(Collectors.toSet());
-      if (!invalidScopes.isEmpty()) {
-        var problemDetail =
-            ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Validation failed");
-        problemDetail.setType(
-            URI.create(
-                "https://api.onlyoffice.com/docspace/api-backend/get-started/basic-concepts"));
-        problemDetail.setInstance(URI.create(request.getRequestURI()));
-        problemDetail.setProperty(
-            "errors",
-            List.of(
-                new ValidationErrorResponse.FieldError(
-                    "scopes",
-                    ValidationErrorCodeResponse.ERROR_INVALID_SCOPE,
-                    String.format("Invalid scopes: %s", String.join(", ", invalidScopes)))));
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problemDetail);
-      }
-
       return ResponseEntity.status(HttpStatus.CREATED)
           .body(
               clientApplicationService.createClient(
@@ -362,7 +326,9 @@ public class ClientCommandController {
                     "logo": "data:image/png;base64,iVBOR",
                     "allow_pkce": false,
                     "is_public": true,
-                    "allowed_origins": ["https://example.com"]
+                    "allowed_origins": ["https://example.com"],
+                    "redirect_uris": ["https://example.com/callback"],
+                    "scopes": ["files:read", "files:write"]
                   }
                   """)))
           UpdateClientRequest command) {
@@ -378,6 +344,8 @@ public class ClientCommandController {
               .allowPkce(command.isAllowPkce())
               .isPublic(true)
               .allowedOrigins(command.getAllowedOrigins())
+              .redirectUris(command.getRedirectUris())
+              .scopes(command.getScopes())
               .clientId(clientId)
               .tenantId(principal.getTenantId())
               .build());
