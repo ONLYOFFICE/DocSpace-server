@@ -3137,7 +3137,7 @@ public class FileSecurity(
     {
         if (entry is Folder<T> { FolderType: FolderType.VirtualRooms or FolderType.Archive })
         {
-            return null;
+            return Task.FromResult<List<OrderedSubject>>(null);
         }
 
         var includeAvailableLinks = entry switch
