@@ -30,12 +30,30 @@ public class TogetherAiModelClient(HttpClient client, string url, string apiKey)
 {
     protected override async Task<IEnumerable<ModelInfo>> GetModelsDataAsync(HttpResponseMessage response)
     {
-        var content = await response.Content.ReadFromJsonAsync<IEnumerable<ModelInfo>>();
-        if (content == null)
+        var content = await response.Content.ReadFromJsonAsync<List<TogetherAiModel>>();
+        if (content is null)
         {
             return [];
         }
 
-        return content.OrderByDescending(x => x.Created);
+        return content
+            .Where(m => m.Type is null or "chat")
+            .Select(m => new ModelInfo
+            {
+                Id = m.Id,
+                Created = m.Created,
+                Alias = m.DisplayName
+            })
+            .OrderByDescending(x => x.Created);
+    }
+
+    private class TogetherAiModel
+    {
+        public required string Id { get; init; }
+        public int Created { get; init; }
+        public string? Type { get; init; }
+
+        [JsonPropertyName("display_name")]
+        public string? DisplayName { get; init; }
     }
 }
