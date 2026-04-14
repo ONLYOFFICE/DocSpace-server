@@ -1,17 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
-  <!-- 
-    Microsoft ResX Schema 
-    
+  <!--
+    Microsoft ResX Schema
+
     Version 2.0
-    
-    The primary goals of this format is to allow a simple XML format 
-    that is mostly human readable. The generation and parsing of the 
-    various data types are done through the TypeConverter classes 
+
+    The primary goals of this format is to allow a simple XML format
+    that is mostly human readable. The generation and parsing of the
+    various data types are done through the TypeConverter classes
     associated with the data types.
-    
+
     Example:
-    
+
     ... ado.net/XML headers & schema ...
     <resheader name="resmimetype">text/microsoft-resx</resheader>
     <resheader name="version">2.0</resheader>
@@ -26,36 +26,36 @@
         <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
         <comment>This is a comment</comment>
     </data>
-                
-    There are any number of "resheader" rows that contain simple 
+
+    There are any number of "resheader" rows that contain simple
     name/value pairs.
-    
-    Each data row contains a name, and value. The row also contains a 
-    type or mimetype. Type corresponds to a .NET class that support 
-    text/value conversion through the TypeConverter architecture. 
-    Classes that don't support this are serialized and stored with the 
+
+    Each data row contains a name, and value. The row also contains a
+    type or mimetype. Type corresponds to a .NET class that support
+    text/value conversion through the TypeConverter architecture.
+    Classes that don't support this are serialized and stored with the
     mimetype set.
-    
-    The mimetype is used for serialized objects, and tells the 
-    ResXResourceReader how to depersist the object. This is currently not 
+
+    The mimetype is used for serialized objects, and tells the
+    ResXResourceReader how to depersist the object. This is currently not
     extensible. For a given mimetype the value must be set accordingly:
-    
-    Note - application/x-microsoft.net.object.binary.base64 is the format 
-    that the ResXResourceWriter will generate, however the reader can 
+
+    Note - application/x-microsoft.net.object.binary.base64 is the format
+    that the ResXResourceWriter will generate, however the reader can
     read any of the formats listed below.
-    
+
     mimetype: application/x-microsoft.net.object.binary.base64
-    value   : The object must be serialized with 
+    value   : The object must be serialized with
             : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
             : and then encoded with base64 encoding.
-    
+
     mimetype: application/x-microsoft.net.object.soap.base64
-    value   : The object must be serialized with 
+    value   : The object must be serialized with
             : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
             : and then encoded with base64 encoding.
 
     mimetype: application/x-microsoft.net.object.bytearray.base64
-    value   : The object must be serialized into a byte array 
+    value   : The object must be serialized into a byte array
             : using a System.ComponentModel.TypeConverter
             : and then encoded with base64 encoding.
     -->
@@ -265,13 +265,13 @@
     <value>Обновлены настройки пользовательской навигации</value>
   </data>
   <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
-    <value>ИИ-агенты [{0}]. Установить пользовательскую квоту хранения для ИИ-агентов: {1}</value>
+    <value>ИИ-агенты [{0}]. Установлена пользовательская квота хранилища для ИИ-агентов: {1}</value>
   </data>
   <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
-    <value>ИИ-агенты [{0}]. Установить квоту хранения по умолчанию для ИИ-агентов: {1}</value>
+    <value>ИИ-агенты [{0}]. Установлена квота хранилища по умолчанию для ИИ-агентов: {1}</value>
   </data>
   <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
-    <value>ИИ-агенты [{0}]. Отключена квота хранения для агентов ИИ</value>
+    <value>ИИ-агенты [{0}]. Отключена квота хранилища для ИИ-агентов</value>
   </data>
   <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
     <value>Комнаты [{0}]. Установлена пользовательская квота хранилища для комнат: {1}</value>
@@ -775,10 +775,10 @@
     <value>Обновлен список продуктов</value>
   </data>
   <data name="QuotaPerAiAgentChanged" xml:space="preserve">
-    <value>Установить квоту хранилища по умолчанию для ИИ-агентов: {0}</value>
+    <value>Установлена квота хранилища по умолчанию для ИИ-агентов: {0}</value>
   </data>
   <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
-    <value>Отключить квоту хранилища по умолчанию для ИИ-агентов</value>
+    <value>Отключена квота хранилища по умолчанию для ИИ-агентов</value>
   </data>
   <data name="QuotaPerPortalChanged" xml:space="preserve">
     <value>Установлена квота хранилища по умолчанию: {0}</value>
@@ -1160,5 +1160,32 @@
   </data>
   <data name="WhiteLabelSettingsLogoTextUpdated" xml:space="preserve">
     <value>Обновлено название бренда</value>
+  </data>
+  <data name="BackupCancelled" xml:space="preserve">
+    <value>Резервное копирование отменено</value>
+  </data>
+  <data name="DocumentsDefaultTemplatesSettingsUpdated" xml:space="preserve">
+    <value>Обновлены настройки шаблона по умолчанию: {0}</value>
+  </data>
+  <data name="FileNotSavedDueToRoomQuota" xml:space="preserve">
+    <value>Комнаты [{0}]. Файл не сохранен: {1} — превышена квота хранилища для комнаты.</value>
+  </data>
+  <data name="FileNotSavedDueToUserQuota" xml:space="preserve">
+    <value>Пользователи [{0}]. Файл не сохранен: {1} — превышена квота хранилища для пользователя.</value>
+  </data>
+  <data name="FileSavedButRoomQuotaExceeded" xml:space="preserve">
+    <value>Комнаты [{0}]. Обновлен файл: {1}, превышающий квоту хранилища для комнаты.</value>
+  </data>
+  <data name="FileSavedButUserQuotaExceeded" xml:space="preserve">
+    <value>Пользователи [{0}]. Обновлен файл: {1}, превышающий квоту хранилища для пользователя.</value>
+  </data>
+  <data name="RestoreCancelled" xml:space="preserve">
+    <value>Восстановление отменено</value>
+  </data>
+  <data name="RestoreStarted" xml:space="preserve">
+    <value>Восстановление началось</value>
+  </data>
+  <data name="ScheduledBackupDeleted" xml:space="preserve">
+    <value>Запланированное резервное копирование отменено</value>
   </data>
 </root>
