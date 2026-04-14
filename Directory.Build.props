@@ -1,0 +1,5 @@
+<Project>
+  <PropertyGroup Condition="'$(SolutionName)' == 'ASC.Api.Documentation'">
+    <OpenApiGenerateDocuments>true</OpenApiGenerateDocuments>
+  </PropertyGroup>
+</Project>
