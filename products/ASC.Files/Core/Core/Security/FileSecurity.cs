@@ -2398,7 +2398,7 @@ public class FileSecurity(
             };
 
             orderedSubjects = await GetUserOrderedSubjectsAsync(userId, includeAvailableLinks);
-            shares = await GetSharesAsync(entry, orderedSubjects.Select(s => s.Subject));
+            shares = await GetSharesAsync(entry, orderedSubjects.Select(s => s.Subject).ToHashSet());
         }
 
         if (entry.FileEntryType == FileEntryType.File)
@@ -2454,7 +2454,7 @@ public class FileSecurity(
         await securityDao.SetShareAsync(r);
     }
 
-    public async Task<IEnumerable<FileShareRecord<T>>> GetSharesAsync<T>(FileEntry<T> entry, IEnumerable<Guid> subjects = null)
+    public async Task<IEnumerable<FileShareRecord<T>>> GetSharesAsync<T>(FileEntry<T> entry, HashSet<Guid> subjects = null)
     {
         return await daoFactory.GetSecurityDao<T>().GetSharesAsync(entry, subjects);
     }
