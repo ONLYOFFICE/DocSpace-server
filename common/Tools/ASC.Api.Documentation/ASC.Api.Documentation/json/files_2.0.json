@@ -648,11 +648,11 @@
         ],
         "responses": {
           "200": {
-            "description": "Original form file information",
+            "description": "Ok",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FileIntegerWrapper"
+                  "$ref": "#/components/schemas/XlsxReportResponseWrapper"
                 }
               }
             }
@@ -661,7 +661,72 @@
             "description": "You do not have enough permissions to perform this action"
           },
           "404": {
-            "description": "File not found"
+            "description": "The required file was not found"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "Files / Files"
+        ],
+        "summary": "Get XLSX report generation status",
+        "description": "Returns the status of the XLSX report generation task for the specified form.",
+        "operationId": "getXlsx",
+        "parameters": [
+          {
+            "name": "fileId",
+            "in": "path",
+            "description": "The file unique identifier.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentBuilderTaskWrapper"
+                }
+              }
+            }
           },
           "401": {
             "description": "Unauthorized"
@@ -3002,6 +3067,12 @@
               }
             }
           },
+          "403": {
+            "description": "You don't have enough permission to perform the operation"
+          },
+          "404": {
+            "description": "File not found"
+          },
           "401": {
             "description": "Unauthorized"
           }
@@ -3805,11 +3876,11 @@
         ],
         "responses": {
           "200": {
-            "description": "Original form file information",
+            "description": "Ok",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FileIntegerWrapper"
+                  "$ref": "#/components/schemas/XlsxReportResponseWrapper"
                 }
               }
             }
@@ -3818,7 +3889,7 @@
             "description": "You do not have enough permissions to perform this action"
           },
           "404": {
-            "description": "Form results folder not found"
+            "description": "The required folder was not found"
           },
           "401": {
             "description": "Unauthorized"
@@ -18058,12 +18129,6 @@
             "nullable": true,
             "example": "Mike Zanyatski"
           },
-          "title": {
-            "type": "string",
-            "description": "The user title.",
-            "nullable": true,
-            "example": "Manager"
-          },
           "avatar": {
             "type": "string",
             "description": "The user avatar.",
@@ -18161,15 +18226,6 @@
                   }
                 ]
               },
-              "birthday": {
-                "$ref": "#/components/schemas/ApiDateTime"
-              },
-              "sex": {
-                "type": "string",
-                "description": "The user sex.",
-                "nullable": true,
-                "example": "male"
-              },
               "status": {
                 "$ref": "#/components/schemas/EmployeeStatus"
               },
@@ -18184,9 +18240,6 @@
                 "description": "The user department.",
                 "nullable": true,
                 "example": "Marketing"
-              },
-              "workFrom": {
-                "$ref": "#/components/schemas/ApiDateTime"
               },
               "groups": {
                 "type": "array",
@@ -28327,6 +28380,59 @@
         },
         "additionalProperties": false,
         "description": "The request parameters for adding watermarks."
+      },
+      "XlsxReportResponseDto": {
+        "type": "object",
+        "properties": {
+          "form": {
+            "$ref": "#/components/schemas/FileDtoInteger"
+          },
+          "task": {
+            "$ref": "#/components/schemas/DocumentBuilderTaskDto"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The XLSX report task response parameters."
+      },
+      "XlsxReportResponseWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/XlsxReportResponseDto"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
       }
     },
     "securitySchemes": {

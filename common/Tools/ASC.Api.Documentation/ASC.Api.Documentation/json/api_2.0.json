@@ -12281,6 +12281,9 @@
               }
             }
           },
+          "403": {
+            "description": "Access denied"
+          },
           "401": {
             "description": "Unauthorized"
           }
@@ -12342,6 +12345,12 @@
               }
             }
           },
+          "400": {
+            "description": "Invalid or empty parameters"
+          },
+          "403": {
+            "description": "Access denied"
+          },
           "401": {
             "description": "Unauthorized"
           }
@@ -12402,6 +12411,15 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Invalid or empty parameters"
+          },
+          "403": {
+            "description": "Access denied"
+          },
+          "404": {
+            "description": "Item not found"
           },
           "401": {
             "description": "Unauthorized"
@@ -12465,6 +12483,15 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Invalid or empty parameters"
+          },
+          "403": {
+            "description": "Access denied"
+          },
+          "404": {
+            "description": "Item not found"
           },
           "401": {
             "description": "Unauthorized"
@@ -12532,6 +12559,12 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "Access denied"
+          },
+          "404": {
+            "description": "Item not found"
           },
           "401": {
             "description": "Unauthorized"
@@ -12688,6 +12721,9 @@
               }
             }
           },
+          "403": {
+            "description": "Access denied"
+          },
           "401": {
             "description": "Unauthorized"
           }
@@ -12758,6 +12794,9 @@
           "400": {
             "description": "Id incorrect"
           },
+          "403": {
+            "description": "Access denied"
+          },
           "404": {
             "description": "Item not found"
           },
@@ -12823,6 +12862,9 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "Access denied"
           },
           "401": {
             "description": "Unauthorized"
@@ -16555,12 +16597,6 @@
             "nullable": true,
             "example": "Mike Zanyatski"
           },
-          "title": {
-            "type": "string",
-            "description": "The user title.",
-            "nullable": true,
-            "example": "Manager"
-          },
           "avatar": {
             "type": "string",
             "description": "The user avatar.",
@@ -18105,10 +18141,11 @@
               "Wordpress",
               "Yahoo",
               "Yandex",
-              "Github"
+              "Github",
+              "Nextcloud"
             ],
             "type": "string",
-            "description": "[Facebook - Facebook, Google - Google, Dropbox - Dropbox, Docusign - Docusign, Box - Box, OneDrive - OneDrive, GosUslugi - GosUslugi, LinkedIn - LinkedIn, MailRu - MailRu, VK - VK, Wordpress - Wordpress, Yahoo - Yahoo, Yandex - Yandex, Github - Github]",
+            "description": "[Facebook - Facebook, Google - Google, Dropbox - Dropbox, Docusign - Docusign, Box - Box, OneDrive - OneDrive, GosUslugi - GosUslugi, LinkedIn - LinkedIn, MailRu - MailRu, VK - VK, Wordpress - Wordpress, Yahoo - Yahoo, Yandex - Yandex, Github - Github, Nextcloud - Nextcloud]",
             "example": "Facebook"
           },
           {
@@ -18126,10 +18163,11 @@
               10,
               11,
               12,
-              13
+              13,
+              14
             ],
             "type": "integer",
-            "description": "[0 - Facebook, 1 - Google, 2 - Dropbox, 3 - Docusign, 4 - Box, 5 - OneDrive, 6 - GosUslugi, 7 - LinkedIn, 8 - MailRu, 9 - VK, 10 - Wordpress, 11 - Yahoo, 12 - Yandex, 13 - Github]",
+            "description": "[0 - Facebook, 1 - Google, 2 - Dropbox, 3 - Docusign, 4 - Box, 5 - OneDrive, 6 - GosUslugi, 7 - LinkedIn, 8 - MailRu, 9 - VK, 10 - Wordpress, 11 - Yahoo, 12 - Yandex, 13 - Github, 14 - Nextcloud]",
             "example": 0,
             "x-enum-varnames": [
               "Facebook",
@@ -18145,7 +18183,8 @@
               "Wordpress",
               "Yahoo",
               "Yandex",
-              "Github"
+              "Github",
+              "Nextcloud"
             ]
           }
         ],
@@ -19951,6 +19990,18 @@
             "description": "The participant display name.",
             "nullable": true,
             "example": "Example Name"
+          },
+          "agentId": {
+            "type": "string",
+            "description": "AI Agent id.",
+            "nullable": true,
+            "example": 123
+          },
+          "agentTitle": {
+            "type": "string",
+            "description": "AI Agent name.",
+            "nullable": true,
+            "example": "My AI Agent"
           }
         },
         "additionalProperties": false,
