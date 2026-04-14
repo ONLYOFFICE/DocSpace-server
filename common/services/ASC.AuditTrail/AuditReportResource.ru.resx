@@ -775,10 +775,10 @@
     <value>Обновлен список продуктов</value>
   </data>
   <data name="QuotaPerAiAgentChanged" xml:space="preserve">
-    <value>Установить квоту хранилища по умолчанию для ИИ-агентов: {0}</value>
+    <value>Установлена квота хранилища по умолчанию для ИИ-агентов: {0}</value>
   </data>
   <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
-    <value>Отключить квоту хранилища по умолчанию для ИИ-агентов</value>
+    <value>Отключена квота хранилища по умолчанию для ИИ-агентов</value>
   </data>
   <data name="QuotaPerPortalChanged" xml:space="preserve">
     <value>Установлена квота хранилища по умолчанию: {0}</value>
