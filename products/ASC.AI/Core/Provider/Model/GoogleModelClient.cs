@@ -34,6 +34,8 @@ public class GoogleModelClient(IHttpClientFactory httpClientFactory, string apiK
     private readonly GenerativeModel _generativeModel =
         new GoogleAI(apiKey: apiKey, httpClientFactory: httpClientFactory).GenerativeModel();
 
+    private static readonly HashSet<string> _restrictedKeywords = ["robotics", "image", "computer", "lyria"];
+
     public Task PingAsync()
     {
         return _generativeModel.ListModels(pageSize: 1);
@@ -47,11 +49,29 @@ public class GoogleModelClient(IHttpClientFactory httpClientFactory, string apiK
             .Where(x => !string.IsNullOrEmpty(x.Name))
             .Where(x =>
                 x.SupportedGenerationMethods != null && x.SupportedGenerationMethods.Contains(Method.GenerateContent))
-            .OrderByDescending(x => x.UpdateTime)
+            .Where(x => IsChatModel(x.Name))
+            .Reverse()
             .Select(x => new ModelInfo
             {
                 Id = x.Name!,
-                Created = 0
+                Created = 0,
+                Alias = x.DisplayName,
+                Capabilities = new AiModelCapabilities
+                {
+                    ToolCalling = true,
+                    Vision = true,
+                    Thinking = x.Thinking ?? false
+                }
             });
+    }
+
+    private static bool IsChatModel(string? modelId)
+    {
+        if (modelId == null)
+        {
+            return true;
+        }
+
+        return !_restrictedKeywords.Any(modelId.Contains);
     }
 }
