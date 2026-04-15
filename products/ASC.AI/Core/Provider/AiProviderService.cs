@@ -69,6 +69,13 @@ public class AiProviderService(
 
         var client = modelClientFactory.Create(type, url, key);
 
+        // The request for a list of models from OpenRouter is public and does not require a key,
+        // so we'll use a different one to test it
+        if (type is ProviderType.OpenRouter)
+        {
+            await client.PingAsync();
+        }
+
         var models = await ExecuteProviderRequestAsync(type,
             async() => (await client.ListModelsAsync()).ToList());
         if (models.Count == 0)
