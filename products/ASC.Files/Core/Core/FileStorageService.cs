@@ -5416,7 +5416,7 @@ public class FileStorageService //: IFileStorageService
         return group;
     }
 
-    public async Task<(FormFillingReportTask Task, File<int> Form)> GenerateXlsxAsync(int fileId)
+    public async Task<(FormFillingReportTask Task, File<int> Form, bool IsNewFile)> GenerateXlsxAsync(int fileId)
     {
         var fileDao = daoFactory.GetFileDao<int>();
         var folderDao = daoFactory.GetFolderDao<int>();
@@ -5500,14 +5500,14 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
         }
 
-        await entryManager.EnsureFormFillingOutputAsync(form, room, resultsFile, resultFolder, properties, folderDao, fileDao);
+        var isNewFile = await entryManager.EnsureFormFillingOutputAsync(form, room, resultsFile, resultFolder, properties, folderDao, fileDao);
 
         var task = await exportToXLSX.UpdateXlsxReport(room.Id, form.Id, form.Version);
 
-        return (task, form);
+        return (task, form, isNewFile);
     }
 
-    public async Task<(FormFillingReportTask Task, File<int> Form)> GenerateXlsxByFolderAsync(int folderId)
+    public async Task<(FormFillingReportTask Task, File<int> Form, bool IsNewFile)> GenerateXlsxByFolderAsync(int folderId)
     {
         var fileDao = daoFactory.GetFileDao<int>();
         var folderDao = daoFactory.GetFolderDao<int>();
@@ -5575,11 +5575,11 @@ public class FileStorageService //: IFileStorageService
 
         var resultsFile = await fileDao.GetFileAsync(formFilling.ResultsFileID);
 
-        await entryManager.EnsureFormFillingOutputAsync(form, room, resultsFile, resultFolder, properties, folderDao, fileDao);
+        var isNewFile = await entryManager.EnsureFormFillingOutputAsync(form, room, resultsFile, resultFolder, properties, folderDao, fileDao);
 
         var task = await exportToXLSX.UpdateXlsxReport(room.Id, form.Id, form.Version);
 
-        return (task, form);
+        return (task, form, isNewFile);
     }
 
     public Task<FormFillingReportTask> GetXlsxTaskAsync(int formId)

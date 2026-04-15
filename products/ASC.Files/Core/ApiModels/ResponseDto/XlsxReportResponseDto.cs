@@ -40,4 +40,10 @@ public class XlsxReportResponseDto
     /// The Document Builder task information.
     /// </summary>
     public DocumentBuilderTaskDto Task { get; set; }
+
+    /// <summary>
+    /// Specifies whether the XLSX report file is newly created or an existing file will be updated.
+    /// </summary>
+    /// <example>true</example>
+    public bool IsNewFile { get; set; }
 }
