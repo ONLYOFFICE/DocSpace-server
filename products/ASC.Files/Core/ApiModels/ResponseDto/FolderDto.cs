@@ -251,7 +251,8 @@ public class FolderDtoHelper(
     EntryStatusManager entryStatusManager,
     AiAccessibility accessibility,
     AiModelSettingsResolver modelSettingsResolver,
-    AiConfiguration aiConfiguration)
+    AiConfiguration aiConfiguration,
+    AiModelSettingsLoader modelSettingsLoader)
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, fileSharing, urlShortener)
 {
     private readonly EmployeeDtoHelper _employeeWrapperHelper = employeeWrapperHelper;
@@ -409,10 +410,14 @@ public class FolderDtoHelper(
                     folder.SettingsChatProviderId = 0;
                 }
             }
-            else if (modelSettingsResult?.Providers?.TryGetValue(folder.SettingsChatProviderId, out var meta) == true)
+            else
             {
-                providerType = meta.Type;
-                hasModelSettings = meta.HasModelSettings;
+                modelSettingsResult ??= await modelSettingsLoader.LoadForEntriesAsync([], folder);
+                if (modelSettingsResult?.Providers?.TryGetValue(folder.SettingsChatProviderId, out var meta) == true)
+                {
+                    providerType = meta.Type;
+                    hasModelSettings = meta.HasModelSettings;
+                }
             }
 
             var modelId = folder.SettingsChatProviderId == 0 ? null : folder.SettingsChatParameters.ModelId;
