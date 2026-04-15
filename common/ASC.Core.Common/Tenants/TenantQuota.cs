@@ -729,24 +729,24 @@ public partial class TenantQuotaMapper(IServiceProvider provider)
     public partial DbQuota Map(TenantQuota source);
 
     [UserMapping(Default = true)]
-    public TenantQuota MapDbQuotaToTenantQuota(DbQuota quota)
+    public async Task<TenantQuota> MapDbQuotaToTenantQuota(DbQuota quota)
     {
         var dto = Map(quota);
-        (dto.Price, dto.PriceCurrencySymbol, dto.PriceISOCurrencySymbol) = Resolve(quota);
+        (dto.Price, dto.PriceCurrencySymbol, dto.PriceISOCurrencySymbol) = await Resolve(quota);
         return dto;
     }
 
-    private (decimal, string, string) Resolve(DbQuota source)
+    private async Task<(decimal, string, string)> Resolve(DbQuota source)
     {
         var tenantManager = provider.GetService<TenantManager>();
         var regionHelper = provider.GetService<RegionHelper>();
 
         var productPaymentId = source.GetPaymentId();
-        var priceInfo = tenantManager.GetProductPriceInfo(productPaymentId, source.Wallet);
+        var priceInfo = await tenantManager.GetProductPriceInfoAsync(productPaymentId, source.Wallet);
 
         if (priceInfo != null)
         {
-            var currentRegion = regionHelper.GetCurrentRegionInfoAsync(new Dictionary<string, Dictionary<string, decimal>> { { productPaymentId, priceInfo } }).Result;
+            var currentRegion = await regionHelper.GetCurrentRegionInfoAsync(new Dictionary<string, Dictionary<string, decimal>> { { productPaymentId, priceInfo } });
 
             if (priceInfo.TryGetValue(currentRegion.ISOCurrencySymbol, out var resolve))
             {
