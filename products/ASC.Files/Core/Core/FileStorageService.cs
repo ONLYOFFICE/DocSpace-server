@@ -5344,8 +5344,8 @@ public class FileStorageService //: IFileStorageService
 
         await Task.WhenAll(resultsFileTask, roomTask);
 
-        var resultsFile = resultsFileTask.Result;
-        var room = roomTask.Result;
+        var resultsFile = await resultsFileTask;
+        var room = await roomTask;
 
         if (room == null ||
             formFilling.RoomId != room.Id)
@@ -5484,9 +5484,9 @@ public class FileStorageService //: IFileStorageService
 
         await Task.WhenAll(resultsFileTask, roomTask, resultFolderTask);
 
-        var resultsFile = resultsFileTask.Result;
-        var room = roomTask.Result;
-        var resultFolder = resultFolderTask.Result;
+        var resultsFile = await resultsFileTask;
+        var room = await roomTask;
+        var resultFolder = await resultFolderTask;
 
         if (room == null ||
             formFilling.RoomId != room.Id ||
@@ -5547,8 +5547,8 @@ public class FileStorageService //: IFileStorageService
 
         await Task.WhenAll(formTask, roomTask);
 
-        var form = formTask.Result;
-        var room = roomTask.Result;
+        var form = await formTask;
+        var room = await roomTask;
 
         if (form == null)
         {
