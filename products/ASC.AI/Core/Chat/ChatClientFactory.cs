@@ -50,6 +50,7 @@ public class ChatClientFactory(
 
         switch (options.Provider)
         {
+            case ProviderType.XAi:
             case ProviderType.OpenAi:
                 {
                     var openAiClient = CreateOpenAiClient(options);
