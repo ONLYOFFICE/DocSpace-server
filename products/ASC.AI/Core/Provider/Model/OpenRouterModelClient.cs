@@ -29,7 +29,7 @@ namespace ASC.AI.Core.Provider.Model;
 public class OpenRouterModelClient(
     HttpClient httpClient,
     string url,
-    string apiKey) : OpenAiModelClient(httpClient, url, apiKey)
+    string apiKey) : OpenAiModelClientBase(httpClient, url, apiKey)
 {
     protected override string ModelsEndpoint => "models";
     protected override string PingEndpoint => "models/user";

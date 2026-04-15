@@ -26,7 +26,7 @@
 
 namespace ASC.AI.Core.Provider.Model;
 
-public class XAiModelClient(HttpClient httpClient, string url, string apiKey) : OpenAiModelClient(httpClient, url, apiKey)
+public class XAiModelClient(HttpClient httpClient, string url, string apiKey) : OpenAiModelClientBase(httpClient, url, apiKey)
 {
     protected override async Task<IEnumerable<ModelInfo>> GetModelsDataAsync(HttpResponseMessage response)
     {

@@ -26,34 +26,39 @@
 
 namespace ASC.AI.Core.Provider.Model;
 
-public class TogetherAiModelClient(HttpClient client, string url, string apiKey) : OpenAiModelClientBase(client, url, apiKey)
+public abstract class OpenAiModelClientBase(HttpClient httpClient, string url, string apiKey) : IModelClient
 {
-    protected override async Task<IEnumerable<ModelInfo>> GetModelsDataAsync(HttpResponseMessage response)
-    {
-        var content = await response.Content.ReadFromJsonAsync<List<TogetherAiModel>>();
-        if (content is null)
-        {
-            return [];
-        }
+    protected virtual string ModelsEndpoint => "models";
+    protected virtual string PingEndpoint => "models";
 
-        return content
-            .Where(m => m.Type is null or "chat")
-            .Select(m => new ModelInfo
-            {
-                Id = m.Id,
-                Created = m.Created,
-                Alias = m.DisplayName
-            })
-            .OrderByDescending(x => x.Created);
+    public async Task PingAsync()
+    {
+        using var response = await SendRequestAsync(
+            $"{url.TrimEnd('/')}/{PingEndpoint}",
+            HttpCompletionOption.ResponseHeadersRead);
     }
 
-    private class TogetherAiModel
+    public async Task<IEnumerable<ModelInfo>> ListModelsAsync()
     {
-        public required string Id { get; init; }
-        public int Created { get; init; }
-        public string? Type { get; init; }
+        var response = await SendRequestAsync(
+            $"{url.TrimEnd('/')}/{ModelsEndpoint}",
+            HttpCompletionOption.ResponseContentRead);
 
-        [JsonPropertyName("display_name")]
-        public string? DisplayName { get; init; }
+        return await GetModelsDataAsync(response);
+    }
+
+    protected abstract Task<IEnumerable<ModelInfo>> GetModelsDataAsync(HttpResponseMessage response);
+
+    private async Task<HttpResponseMessage> SendRequestAsync(string endpoint, HttpCompletionOption completionOption)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Get, endpoint);
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
+
+        return (await httpClient.SendAsync(request, completionOption)).EnsureSuccessStatusCode();
+    }
+
+    private class Response
+    {
+        public required List<ModelInfo> Data { get; init; }
     }
 }

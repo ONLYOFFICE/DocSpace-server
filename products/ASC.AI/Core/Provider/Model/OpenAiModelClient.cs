@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2026
+// (c) Copyright Ascensio System SIA 2009-2026
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,41 +26,31 @@
 
 namespace ASC.AI.Core.Provider.Model;
 
-public class OpenAiModelClient(HttpClient httpClient, string url, string apiKey) : IModelClient
+public class OpenAiModelClient(HttpClient httpClient, string url, string apiKey) : OpenAiModelClientBase(httpClient, url, apiKey)
 {
-    protected virtual string ModelsEndpoint => "models";
-    protected virtual string PingEndpoint => "models";
+    private readonly HashSet<string> _restrictedKeywords = ["audio", "realtime", "tts", "transcribe", "chat", "image",
+        "sora", "dall-e", "embedding", "whisper", "babbage"];
 
-    public async Task PingAsync()
-    {
-        using var response = await SendRequestAsync(
-            $"{url.TrimEnd('/')}/{PingEndpoint}",
-            HttpCompletionOption.ResponseHeadersRead);
-    }
-
-    public async Task<IEnumerable<ModelInfo>> ListModelsAsync()
-    {
-        var response = await SendRequestAsync(
-            $"{url.TrimEnd('/')}/{ModelsEndpoint}",
-            HttpCompletionOption.ResponseContentRead);
-
-        return await GetModelsDataAsync(response);
-    }
-
-    protected virtual async Task<IEnumerable<ModelInfo>> GetModelsDataAsync(HttpResponseMessage response)
+    protected override async Task<IEnumerable<ModelInfo>> GetModelsDataAsync(HttpResponseMessage response)
     {
         var content = await response.Content.ReadFromJsonAsync<Response>();
         return content?.Data == null
             ? []
-            : content.Data.OrderByDescending(x => x.Created);
-    }
-
-    private async Task<HttpResponseMessage> SendRequestAsync(string endpoint, HttpCompletionOption completionOption)
-    {
-        using var request = new HttpRequestMessage(HttpMethod.Get, endpoint);
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
-
-        return (await httpClient.SendAsync(request, completionOption)).EnsureSuccessStatusCode();
+            : content.Data
+                .Where(x => x.Created > 1771905621)
+                .Where(x => !_restrictedKeywords.Any(y => x.Id.Contains(y)))
+                .OrderByDescending(x => x.Created)
+                .Select(x => new ModelInfo
+                {
+                    Id = x.Id,
+                    Created = x.Created,
+                    Capabilities = new AiModelCapabilities
+                    {
+                        ToolCalling = true,
+                        Thinking = true,
+                        Vision = true
+                    }
+                });
     }
 
     private class Response
