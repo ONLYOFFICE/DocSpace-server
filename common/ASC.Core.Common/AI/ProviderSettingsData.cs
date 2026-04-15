@@ -34,28 +34,16 @@ public class ProviderSettingsData
     public string? Name { get; init; }
     public ProviderType Type { get; init; }
     public string? Url { get; init; }
-    public List<ModelSettings>? Models { get; init; }
+    public List<ModelSettingsData>? Models { get; init; }
     public bool Enabled { get; init; }
 }
 
-public class ModelSettings
+public record ModelSettingsData
 {
     public required string Id { get; init; }
     public required string Alias { get; init; }
-    public MultimodalSettings? Multimodal { get; init; }
-    public bool Thinking { get; init; }
+    public required AiModelCapabilities Capabilities { get; init; }
     public HashSet<string>? Replaces { get; init; }
-}
-
-public class MultimodalSettings
-{
-    public bool UrlSupported { get; init; }
-    public ImageMultimodalSettings? Image { get; init; }
-}
-
-public class ImageMultimodalSettings
-{
-    public required HashSet<string> Formats { get; init; }
 }
 
 public class EffortSettingsData

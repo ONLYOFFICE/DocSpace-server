@@ -1,49 +1,81 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2026
-// 
+// (c) Copyright Ascensio System SIA 2009-2026
+//
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
+//
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
+//
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-// 
+//
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Provider.Data;
+namespace ASC.AI.Models.RequestDto;
 
-public class AiProvider
+/// <summary>
+/// A single model settings entry within a provider create or update request.
+/// </summary>
+public class ModelSettingsItemDto : IEquatable<ModelSettingsItemDto>
 {
-    public int Id { get; set; }
-    public required string Title { get; set; }
-    public required string Key { get; set; }
-    public required string Url { get; set; }
-    public ProviderType Type { get; init; }
-    public DateTime CreatedOn { get; set; }
-    public DateTime ModifiedOn { get; set; }
+    /// <summary>
+    /// The model identifier.
+    /// </summary>
+    /// <example>claude-opus-4-1-20250805</example>
+    [Required]
+    [MaxLength(255)]
+    public required string ModelId { get; init; }
 
-    public bool HasModelSettings { get; set; }
-    public bool NeedReset { get; set; }
-    public bool IsDefault { get; set; }
+    /// <summary>
+    /// Whether the model is enabled for use in chat.
+    /// </summary>
+    /// <example>true</example>
+    public bool IsEnabled { get; init; }
+
+    /// <summary>
+    /// The display name for the model. Only applies to non-recommended models.
+    /// </summary>
+    /// <example>Claude Opus 4.1</example>
+    [MaxLength(255)]
+    public string? Alias { get; init; }
+
+    /// <summary>
+    /// The model capabilities. Only applies to non-recommended models.
+    /// </summary>
+    public AiModelCapabilities? Capabilities { get; init; }
+
+    public bool Equals(ModelSettingsItemDto? other)
+    {
+        return other is not null && string.Equals(ModelId, other.ModelId, StringComparison.Ordinal);
+    }
+
+    public override bool Equals(object? obj)
+    {
+        return Equals(obj as ModelSettingsItemDto);
+    }
+
+    public override int GetHashCode()
+    {
+        return StringComparer.Ordinal.GetHashCode(ModelId);
+    }
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
     PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
-public static partial class AiProviderMapper
+public static partial class ModelSettingsItemDtoMapper
 {
-    public static partial AiProvider Map(this DbAiProvider source);
+    public static partial AiModelSettings Map(this ModelSettingsItemDto source);
 }

@@ -103,7 +103,7 @@ public class ChatService(
             throw new SecurityException();
         }
 
-        return await aiProviderService.GetModelsAsync(providerId, Scope.Chat);
+        return await aiProviderService.GetActiveModelsAsync(providerId);
     }
 
     public async Task<ChatSession> GetChatAsync(Guid chatId)

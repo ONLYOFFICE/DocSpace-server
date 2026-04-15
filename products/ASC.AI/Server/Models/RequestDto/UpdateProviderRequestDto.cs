@@ -68,4 +68,9 @@ public class UpdateProviderBody
     /// </summary>
     /// <example>sk-example-key-123</example>
     public string? Key { get; set; }
+
+    /// <summary>
+    /// Optional list of model settings changes to apply atomically with the provider update.
+    /// </summary>
+    public HashSet<ModelSettingsItemDto>? ModelSettings { get; set; }
 }
