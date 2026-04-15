@@ -895,7 +895,7 @@
     <value>File size exceeds limit</value>
   </data>
   <data name="ErrorWebPluginForbiddenSystem" xml:space="preserve">
-    <value>Сhanges to system plugins are prohibited</value>
+    <value>Changes to system plugins are prohibited</value>
   </data>
   <data name="ErrorWebPluginMaxCount" xml:space="preserve">
     <value>The number of plugins exceeds the limit</value>

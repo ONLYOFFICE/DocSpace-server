@@ -28,7 +28,7 @@ namespace ASC.People.Log;
 
 internal static partial class UserControllerLogger
 {
-    [LoggerMessage(LogLevel.Error, "Account {userId} сould not get user by name {userName}")]
+    [LoggerMessage(LogLevel.Error, "Account {userId} could not get user by name {userName}")]
     public static partial void ErrorCouldNotGetUserByName(this ILogger<UserController> logger, Guid userId, string userName);
 
     [LoggerMessage(LogLevel.Error, "Password recovery ({email}): {error}")]
