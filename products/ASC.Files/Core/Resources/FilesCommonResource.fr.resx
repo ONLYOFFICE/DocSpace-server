@@ -586,4 +586,7 @@ Compatibilité maximale avec docx, xlsx, pptx.</value>
   <data name="User" xml:space="preserve">
     <value>Utilisateur</value>
   </data>
+  <data name="ErrorMessage_AiServicesDisabled" xml:space="preserve">
+    <value>Les services IA sont désactivés pour le portail actuel</value>
+  </data>
 </root>

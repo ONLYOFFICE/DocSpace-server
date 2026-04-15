@@ -586,4 +586,7 @@ Compatibilitate garantată 100% cu formatele MS Office.</value>
   <data name="User" xml:space="preserve">
     <value>Utilizator</value>
   </data>
+  <data name="ErrorMessage_AiServicesDisabled" xml:space="preserve">
+    <value>Serviciile IA sunt dezactivate pentru portalul curent</value>
+  </data>
 </root>

@@ -1131,4 +1131,67 @@
   <data name="WebpluginUploaded" xml:space="preserve">
     <value>Plugin carregado: {0}</value>
   </data>
+  <data name="AIAccessDisabled" xml:space="preserve">
+    <value>Os serviços de IA foram desativados</value>
+  </data>
+  <data name="AIAccessEnabled" xml:space="preserve">
+    <value>Os serviços de IA foram ativados</value>
+  </data>
+  <data name="AIDefaultProviderDeleted" xml:space="preserve">
+    <value>Provedor padrão excluído</value>
+  </data>
+  <data name="AIDefaultProviderSet" xml:space="preserve">
+    <value>Provedor de IA padrão definido: Nome: {0}, Modelo padrão: {1}</value>
+  </data>
+  <data name="BackupCancelled" xml:space="preserve">
+    <value>Backup cancelado</value>
+  </data>
+  <data name="DocumentsDefaultTemplatesSettingsUpdated" xml:space="preserve">
+    <value>Configurações do modelo padrão atualizadas: {0}</value>
+  </data>
+  <data name="FileNotSavedDueToRoomQuota" xml:space="preserve">
+    <value>Salas [{0}]. Arquivo não salvo: {1} – cota de armazenamento da sala excedida.</value>
+  </data>
+  <data name="FileNotSavedDueToUserQuota" xml:space="preserve">
+    <value>Usuários [{0}]. Arquivo não salvo: {1} – cota de armazenamento do usuário excedida.</value>
+  </data>
+  <data name="FileSavedButRoomQuotaExceeded" xml:space="preserve">
+    <value>Salas [{0}]. Arquivo atualizado: {1}, excedendo a cota de armazenamento da sala.</value>
+  </data>
+  <data name="FileSavedButUserQuotaExceeded" xml:space="preserve">
+    <value>Usuários [{0}]. Arquivo atualizado: {1}, excedendo a cota de armazenamento do usuário.</value>
+  </data>
+  <data name="InvitationSettingsUpdated" xml:space="preserve">
+    <value>Configurações de convite atualizadas</value>
+  </data>
+  <data name="IPRestrictionsSettingsUpdated" xml:space="preserve">
+    <value>Configurações de segurança IP atualizadas</value>
+  </data>
+  <data name="LoginSettingsUpdated" xml:space="preserve">
+    <value>Configurações de proteção contra força bruta atualizadas</value>
+  </data>
+  <data name="RestoreCancelled" xml:space="preserve">
+    <value>Restauração cancelada</value>
+  </data>
+  <data name="RestoreStarted" xml:space="preserve">
+    <value>Restauração iniciada</value>
+  </data>
+  <data name="ScheduledBackupDeleted" xml:space="preserve">
+    <value>Backup agendado excluído</value>
+  </data>
+  <data name="WhiteLabelAdditionalSettingsUpdated" xml:space="preserve">
+    <value>Configurações adicionais de identidade visual atualizadas</value>
+  </data>
+  <data name="WhiteLabelCompanySettingsUpdated" xml:space="preserve">
+    <value>Configurações de informações da empresa atualizadas</value>
+  </data>
+  <data name="WhiteLabelMailSettingsUpdated" xml:space="preserve">
+    <value>Configurações de e-mail atualizadas</value>
+  </data>
+  <data name="WhiteLabelSettingsLogosUpdated" xml:space="preserve">
+    <value>Configurações do logotipo atualizadas</value>
+  </data>
+  <data name="WhiteLabelSettingsLogoTextUpdated" xml:space="preserve">
+    <value>Nome da marca atualizado</value>
+  </data>
 </root>

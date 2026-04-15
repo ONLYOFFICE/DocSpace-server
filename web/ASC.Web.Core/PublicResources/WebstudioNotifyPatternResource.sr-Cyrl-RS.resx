@@ -2164,4 +2164,31 @@ $TrulyYours</value>
   <data name="TrulyYoursText" xml:space="preserve">
     <value>Заиста Ваш, ${LetterLogoText} Тим</value>
   </data>
+  <data name="ActionFileUploadedToAgentKnowledge" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; је отпремио нови документ: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; у базу знања ВИ агента: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
+  </data>
+  <data name="subject_api_key_expired" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace: Ваш API кључ је истекао</value>
+  </data>
+  <data name="subject_user_agent_role_changed" xml:space="preserve">
+    <value>Ваша улога у DocSpace AI агенту је промењена</value>
+  </data>
+  <data name="pattern_api_key_expired" xml:space="preserve">
+    <value>Здраво, $UserName!
+
+Овај е-мејл је да вас обавести да је ваш API кључ "*$Message*" истекао и деактивиран.
+
+Можете генерисати нови API кључ у "Алатима за програмере":"${__VirtualRootPath}/developer-tools/api-keys".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_user_agent_role_changed" xml:space="preserve">
+    <value>Здраво!
+
+Додељена вам је нова улога у DocSpace ВИ агенту "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+
+Сазнајте више о улогама и дозволама собе у "Центру за помоћ":"${HelpCenterUrl}".
+
+$TrulyYours</value>
+  </data>
 </root>
