@@ -180,6 +180,7 @@ public class UserController(
         // }
 
         user.Spam = inDto.Spam;
+        user.CreatedBy = securityContext.CurrentAccount.ID;
         // user.BirthDate = inDto.Birthday != null ? tenantUtil.DateTimeFromUtc(inDto.Birthday) : null;
         // user.WorkFromDate = inDto.Worksfrom != null ? tenantUtil.DateTimeFromUtc(inDto.Worksfrom) : DateTime.UtcNow.Date;
 
