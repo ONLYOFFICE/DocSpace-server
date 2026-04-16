@@ -40,7 +40,17 @@ public class AnthropicModelClient(HttpClient httpClient, string url, string apiK
         try
         {
             var response = await _innerClient.Models.ListModelsAsync(beforeId: "claude-opus-4-20250514", limit: 100);
-            return response.Models.Select(x => new ModelInfo { Id = x.Id });
+            return response.Models.Select(x => new ModelInfo
+            {
+                Id = x.Id,
+                Alias = x.DisplayName,
+                Capabilities = new AiModelCapabilities
+                {
+                    Vision = true,
+                    ToolCalling = true,
+                    Thinking = true
+                }
+            });
         }
         catch (AuthenticationException e)
         {
