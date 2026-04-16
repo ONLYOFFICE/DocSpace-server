@@ -2095,7 +2095,7 @@ public class EntryManager(IDaoFactory daoFactory,
         {
             var origProperties = await daoFactory.GetFileDao<T>().GetProperties(originalFormId) ?? properties;
             if (userId.Equals(ASC.Core.Configuration.Constants.Guest.ID) &&
-                (origProperties.FormFilling.ResultsFileID == null || Equals(origProperties.FormFilling.ResultsFileID, default(T))))
+                (origProperties.FormFilling.ResultsFolderId == null || Equals(origProperties.FormFilling.ResultsFolderId, default(T))))
             {
                 await InitFormFillingFolders(file, room, origProperties, folderDao, fileDao, originalForm.CreateBy);
                 origProperties = await daoFactory.GetFileDao<T>().GetProperties(originalFormId);
