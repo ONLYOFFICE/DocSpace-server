@@ -86,6 +86,37 @@ public class TfaSettingsDto
 }
 
 /// <summary>
+/// The TFA confirmation data.
+/// </summary>
+/// <example>
+/// {
+/// "url": "https://example.com/confirm?type=TfaAuth&amp;key=abc123",
+/// "cookieName": "asc_confirm_key_TfaAuth"
+/// "cookieValue": "1234567890.abcdef"
+/// }
+/// </example>
+public class TfaConfirmDataDto
+{
+    /// <summary>
+    /// The confirmation URL.
+    /// </summary>
+    /// <example>https://example.com/confirm?type=TfaAuth&amp;key=abc123</example>
+    public string Url { get; set; }
+
+    /// <summary>
+    /// The confirmation cookie name.
+    /// </summary>
+    /// <example>asc_confirm_key_TfaAuth</example>
+    public string CookieName { get; set; }
+
+    /// <summary>
+    /// The confirmation cookie value.
+    /// </summary>
+    /// <example>1234567890.abcdef</example>
+    public string CookieValue { get; set; }
+}
+
+/// <summary>
 /// The TFA app code.
 /// </summary>
 /// <example>

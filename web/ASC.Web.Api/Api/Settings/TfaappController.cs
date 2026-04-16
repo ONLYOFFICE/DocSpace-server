@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2026
+// (c) Copyright Ascensio System SIA 2009-2026
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -130,25 +130,25 @@ public class TfaappController(
     }
 
     /// <remarks>
-    /// Returns the confirmation URL for authorization via SMS or TFA application.
+    /// Returns the confirmation data for authorization via SMS or TFA application.
     /// </remarks>
-    /// <summary>Get TFA confirmation URL</summary>
+    /// <summary>Get TFA confirmation data</summary>
     ///<path>api/2.0/settings/tfaapp/confirm</path>
     [Tags("Settings / TFA settings")]
-    [SwaggerResponse(200, "TFA confirmation URL", typeof(string))]
+    [SwaggerResponse(200, "TFA confirmation data", typeof(TfaConfirmDataDto))]
     [HttpGet("tfaapp/confirm")]
-    public async Task<string> GetTfaConfirmUrl()
+    public async Task<TfaConfirmDataDto> GetTfaConfirmData()
     {
         var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
 
-        if (studioSmsNotificationSettingsHelper.IsVisibleSettings && await studioSmsNotificationSettingsHelper.TfaEnabledForUserAsync(user.Id))// && smsConfirm.ToLower() != "true")
+        if (studioSmsNotificationSettingsHelper.IsVisibleSettings && await studioSmsNotificationSettingsHelper.TfaEnabledForUserAsync(user.Id))
         {
             var confirmType = string.IsNullOrEmpty(user.MobilePhone) ||
                             user.MobilePhoneActivationStatus == MobilePhoneActivationStatus.NotActivated
                                 ? ConfirmType.PhoneActivation
                                 : ConfirmType.PhoneAuth;
 
-            return commonLinkUtility.GetConfirmationEmailUrl(user.Email, confirmType);
+            return new TfaConfirmDataDto { Url = commonLinkUtility.GetConfirmationEmailUrl(user.Email, confirmType) };
         }
 
         if (tfaAppAuthSettingsHelper.IsVisibleSettings && await tfaAppAuthSettingsHelper.TfaEnabledForUserAsync(user.Id))
@@ -158,12 +158,19 @@ public class TfaappController(
                 ? ConfirmType.TfaActivation
                 : ConfirmType.TfaAuth;
 
+            var itemId = $"_{confirmType}";
             var (url, key) = commonLinkUtility.GetConfirmationUrlAndKey(user.Id, confirmType);
-            await cookiesManager.SetCookiesAsync(CookiesType.ConfirmKey, key, true, $"_{confirmType}");
-            return url;
+            await cookiesManager.SetCookiesAsync(CookiesType.ConfirmKey, key, true, itemId);
+
+            return new TfaConfirmDataDto
+            {
+                Url = url,
+                CookieName = cookiesManager.GetConfirmCookiesName(itemId),
+                CookieValue = key
+            };
         }
 
-        return string.Empty;
+        return null;
     }
 
     /// <remarks>
@@ -287,7 +294,8 @@ public class TfaappController(
     {
         if (await UpdateTfaSettings(inDto))
         {
-            return await GetTfaConfirmUrl();
+            var data = await GetTfaConfirmData();
+            return data.Url;
         }
 
         return string.Empty;
