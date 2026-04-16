@@ -34,6 +34,9 @@ public class OpenRouterModelClient(
     protected override string ModelsEndpoint => "models";
     protected override string PingEndpoint => "models/user";
 
+    private static readonly HashSet<string> _restrictedKeywords = ["robotics", "image", "computer", "lyria", "audio",
+        "realtime", "tts", "transcribe", "whisper", "babbage"];
+
     protected override async Task<IEnumerable<ModelInfo>> GetModelsDataAsync(HttpResponseMessage response)
     {
         var content = await response.Content.ReadFromJsonAsync<OpenRouterResponse>();
@@ -43,6 +46,9 @@ public class OpenRouterModelClient(
         }
 
         return content.Data
+            .Where(m => !_restrictedKeywords.Any(y => m.Id.Contains(y)))
+            .OrderBy(x => x.Id.Split('/').FirstOrDefault() ?? x.Id)
+            .ThenByDescending(x => x.Created)
             .Select(m => new ModelInfo
             {
                 Id = m.Id,
@@ -54,8 +60,7 @@ public class OpenRouterModelClient(
                     ToolCalling = m.SupportedParameters?.Contains("tools") is true,
                     Thinking = m.SupportedParameters?.Contains("reasoning") is true
                 }
-            })
-            .OrderByDescending(x => x.Created);
+            });
     }
 
     private class OpenRouterResponse
