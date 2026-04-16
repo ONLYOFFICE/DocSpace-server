@@ -37,4 +37,5 @@ public interface IFileSecurity
     Task<bool> CanEditAsync<T>(FileEntry<T> entry, Guid userId);
     Task<bool> CanDeleteAsync<T>(FileEntry<T> entry, Guid userId);
     Task<IEnumerable<Guid>> WhoCanReadAsync<T>(FileEntry<T> entry, bool includeLinks = false);
+    Task<int> UpdateShareByFolderTypesAsync(Guid subject, IEnumerable<FolderType> folderTypes, FileShare share);
 }

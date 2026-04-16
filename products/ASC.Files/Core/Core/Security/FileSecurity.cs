@@ -602,6 +602,13 @@ public class FileSecurity(
         return await CanAsync(entry, authContext.CurrentAccount.ID, FilesSecurityActions.UseChat);
     }
 
+    public async Task<int> UpdateShareByFolderTypesAsync(Guid subject, IEnumerable<FolderType> folderTypes, FileShare share)
+    {
+        var securityDao = daoFactory.GetSecurityDao<int>();
+
+        return await securityDao.UpdateShareByFolderTypesAsync(subject, folderTypes, share);
+    }
+
     public async Task<IEnumerable<Guid>> WhoCanReadAsync<T>(FileEntry<T> entry, bool includeLinks = false)
     {
         var (directAccess, sharedAccess) = await WhoCanAsync(entry, FilesSecurityActions.Read, includeLinks);
