@@ -62,3 +62,4 @@ products/ASC.AI/Server/DocStore/
 products/ASC.Files/Server/DocStore/
 common/services/ASC.Monolith/DocStore/
 /.claude/settings.local.json
+/.claude/worktrees

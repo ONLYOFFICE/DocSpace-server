@@ -33,7 +33,13 @@ var isDocker = string.Compare(builder.Configuration["Docker"], "true", StringCom
 var skipClient = string.Compare(builder.Configuration["SKIP_CLIENT"], "true", StringComparison.OrdinalIgnoreCase) == 0;
 
 var launchProfile = builder.Configuration["DOTNET_LAUNCH_PROFILE"];
+var otelFileLogging = string.Compare(builder.Configuration["OTEL_FILE_LOGGING"], "true", StringComparison.OrdinalIgnoreCase) == 0;
 var connectionManager = new ConnectionStringManager(builder, basePath).AddEditors();
+
+if (otelFileLogging)
+{
+    connectionManager.AddOpenTelemetryCollector();
+}
 
 var configurator = new ProjectConfigurator(builder, connectionManager, basePath, isDocker);
 switch (launchProfile)
