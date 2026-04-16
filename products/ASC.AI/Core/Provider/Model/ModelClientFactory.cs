@@ -35,7 +35,7 @@ public class ModelClientFactory(IHttpClientFactory httpClientFactory)
 #pragma warning disable CA2000
         return type switch
         {
-            ProviderType.OpenAi or ProviderType.OpenAiCompatible or ProviderType.DeepSeek =>
+            ProviderType.OpenAi =>
                 new OpenAiModelClient(httpClientFactory.CreateClient(), url, apiKey),
             ProviderType.TogetherAi =>
                 new TogetherAiModelClient(httpClientFactory.CreateClient(), url, apiKey),
@@ -49,6 +49,8 @@ public class ModelClientFactory(IHttpClientFactory httpClientFactory)
                 new GoogleModelClient(httpClientFactory, apiKey),
             ProviderType.XAi =>
                 new XAiModelClient(httpClientFactory.CreateClient(), url, apiKey),
+            ProviderType.OpenAiCompatible or ProviderType.DeepSeek =>
+                new OpenAiCompatibleModelClient(httpClientFactory.CreateClient(), url, apiKey),
             _ => throw new ArgumentOutOfRangeException(nameof(type))
         };
 #pragma warning restore CA2000
