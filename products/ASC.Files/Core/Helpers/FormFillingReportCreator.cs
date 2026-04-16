@@ -57,7 +57,7 @@ public class FormFillingReportCreator(
 
         if (settingsSaveFormAsXLSX)
         {
-            await exportToXLSX.UpdateXlsxReport(roomId, originalFormId, originalFormVersion);
+            await exportToXLSX.UpdateXlsxReport(roomId, originalFormId, originalFormVersion, isNewFile: false);
         }
     }
 
