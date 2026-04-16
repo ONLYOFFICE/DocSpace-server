@@ -2185,4 +2185,10 @@ $TrulyYours</value>
   <data name="TrulyYoursText" xml:space="preserve">
     <value>감사드립니다, ${LetterLogoText} 팀</value>
   </data>
+  <data name="subject_api_key_expired" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace: API 키가 만료되었습니다</value>
+  </data>
+  <data name="subject_user_agent_role_changed" xml:space="preserve">
+    <value>DocSpace AI 에이전트에서 귀하의 역할이 변경되었습니다</value>
+  </data>
 </root>

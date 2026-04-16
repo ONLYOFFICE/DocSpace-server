@@ -1131,4 +1131,67 @@
   <data name="WebpluginUploaded" xml:space="preserve">
     <value>Plug-in geüpload: {0}</value>
   </data>
+  <data name="AIAccessDisabled" xml:space="preserve">
+    <value>AI-services zijn uitgeschakeld</value>
+  </data>
+  <data name="AIAccessEnabled" xml:space="preserve">
+    <value>AI-services zijn ingeschakeld</value>
+  </data>
+  <data name="AIDefaultProviderDeleted" xml:space="preserve">
+    <value>Standaardprovider verwijderd</value>
+  </data>
+  <data name="AIDefaultProviderSet" xml:space="preserve">
+    <value>Standaard AI-provider ingesteld: Naam: {0}, Standaardmodel: {1}</value>
+  </data>
+  <data name="BackupCancelled" xml:space="preserve">
+    <value>Back-up geannuleerd</value>
+  </data>
+  <data name="DocumentsDefaultTemplatesSettingsUpdated" xml:space="preserve">
+    <value>Standaard sjablooninstellingen bijgewerkt: {0}</value>
+  </data>
+  <data name="FileNotSavedDueToRoomQuota" xml:space="preserve">
+    <value>Kamers [{0}]. Bestand niet opgeslagen: {1} – opslagquotum voor kamer overschreden.</value>
+  </data>
+  <data name="FileNotSavedDueToUserQuota" xml:space="preserve">
+    <value>Gebruikers [{0}]. Bestand niet opgeslagen: {1} – opslagquotum voor gebruiker overschreden.</value>
+  </data>
+  <data name="FileSavedButRoomQuotaExceeded" xml:space="preserve">
+    <value>Kamers [{0}]. Bestand bijgewerkt: {1}, opslagquotum van kamer overschreden.</value>
+  </data>
+  <data name="FileSavedButUserQuotaExceeded" xml:space="preserve">
+    <value>Gebruikers [{0}]. Bestand bijgewerkt: {1}, opslagquotum van gebruiker overschreden.</value>
+  </data>
+  <data name="InvitationSettingsUpdated" xml:space="preserve">
+    <value>Uitnodigingsinstellingen bijgewerkt</value>
+  </data>
+  <data name="IPRestrictionsSettingsUpdated" xml:space="preserve">
+    <value>IP-beveiligingsinstellingen bijgewerkt</value>
+  </data>
+  <data name="LoginSettingsUpdated" xml:space="preserve">
+    <value>Instellingen voor bescherming tegen brute-force-aanvallen bijgewerkt</value>
+  </data>
+  <data name="RestoreCancelled" xml:space="preserve">
+    <value>Herstel geannuleerd</value>
+  </data>
+  <data name="RestoreStarted" xml:space="preserve">
+    <value>Herstel gestart</value>
+  </data>
+  <data name="ScheduledBackupDeleted" xml:space="preserve">
+    <value>Geplande back-up verwijderd</value>
+  </data>
+  <data name="WhiteLabelAdditionalSettingsUpdated" xml:space="preserve">
+    <value>Aanvullende brandinginstellingen bijgewerkt</value>
+  </data>
+  <data name="WhiteLabelCompanySettingsUpdated" xml:space="preserve">
+    <value>Bedrijfsinformatie-instellingen bijgewerkt</value>
+  </data>
+  <data name="WhiteLabelMailSettingsUpdated" xml:space="preserve">
+    <value>E-mailinstellingen bijgewerkt</value>
+  </data>
+  <data name="WhiteLabelSettingsLogosUpdated" xml:space="preserve">
+    <value>Logo-instellingen bijgewerkt</value>
+  </data>
+  <data name="WhiteLabelSettingsLogoTextUpdated" xml:space="preserve">
+    <value>Merknaam bijgewerkt</value>
+  </data>
 </root>

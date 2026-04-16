@@ -586,4 +586,7 @@ Visaugstākā saderība ar docx, xlsx, pptx.</value>
   <data name="User" xml:space="preserve">
     <value>Lietotājs</value>
   </data>
+  <data name="ErrorMessage_AiServicesDisabled" xml:space="preserve">
+    <value>MI pakalpojumi ir atspējoti pašreizējam portālam</value>
+  </data>
 </root>

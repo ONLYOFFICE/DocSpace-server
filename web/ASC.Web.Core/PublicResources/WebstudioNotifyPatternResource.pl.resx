@@ -2156,4 +2156,40 @@ $TrulyYours</value>
   <data name="TrulyYoursText" xml:space="preserve">
     <value>Z poważaniem, Zespół ${LetterLogoText}</value>
   </data>
+  <data name="ActionFileUploadedToAgentKnowledge" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; przesłał nowy dokument: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; do bazy wiedzy agenta AI: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
+  </data>
+  <data name="subject_api_key_expired" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace: Twój klucz API wygasł</value>
+  </data>
+  <data name="subject_user_agent_role_changed" xml:space="preserve">
+    <value>Twoja rola w agencie AI DocSpace uległa zmianie</value>
+  </data>
+  <data name="pattern_api_key_expired" xml:space="preserve">
+    <value>Witaj, $UserName!
+
+Ten e-mail informuje Cię, że Twój klucz API "*$Message*" wygasł i został dezaktywowany.
+
+Możesz wygenerować nowy klucz API w "Narzędziach deweloperskich":"${__VirtualRootPath}/developer-tools/api-keys".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace został usunięty.
+
+*Portal:* ${PortalUrl}
+*Właściciel:* ${UserName} ${UserEmail}
+*Klient:* ${OwnerName}
+
+Upewnij się, że automatyczne rozliczenia są wyłączone. Sprawdź status automatycznych rozliczeń na koncie klienta w Stripe.</value>
+  </data>
+  <data name="pattern_user_agent_role_changed" xml:space="preserve">
+    <value>Witaj!
+
+Przypisano Ci nową rolę w agencie AI DocSpace "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+
+Dowiedz się więcej o rolach i uprawnieniach pokoi w "Centrum pomocy":"${HelpCenterUrl}".
+
+$TrulyYours</value>
+  </data>
 </root>
