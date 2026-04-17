@@ -42,14 +42,6 @@ If you want to use an HttpClient but do not have access to its handler (for exam
 HttpClient yourHttpClient = new HttpClient();
 var api = new RoomsApi(yourHttpClient);
 ```
-If you want to use an HttpClient but do not have access to its handler (for example, when using IHttpClientFactory in the ASP.NET Core DI context), you can create and configure your HttpClient instance separately and then pass it to the API class constructor:
-
-Here is an example of DI setup in a sample web project:
-
-```csharp
-services.AddHttpClient<RoomsApi>(httpClient =>
-   new RoomsApi(httpClient));
-```
 
 {{/useHttpClient}}
 

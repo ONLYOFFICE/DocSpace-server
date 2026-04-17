@@ -259,10 +259,6 @@ public class MyJavaClientCodegen extends JavaClientCodegen {
 
         String baseFileName = toApiFilename(tagParts.classPart) + suffix;
         String fileName = baseFileName;
-        // if (usedApiClassNames.contains(fileName)) {
-        //     fileName = tagParts.folderPart + toApiFilename(tagParts.classPart) + suffix;
-        // }
-        // usedApiClassNames.add(fileName);
 
         return folderPath + File.separator + fileName;
     }
