@@ -2741,7 +2741,7 @@ public class FileSecurity(
 
         var rooms = storageFilter == StorageFilter.ThirdParty
             ? []
-            : await folderDao.GetRoomsAsync(internalRecords.Keys, filterTypes, tagNames, subjectId, search, withSubfolders, withoutTags, excludeSubject, provider, subjectFilter, subjectOwnerId, subjectEntries, rootFoldersIds)
+            : await folderDao.GetRoomsAsync(internalRecords.Keys, filterTypes, tagNames, subjectId, search, withSubfolders, withoutTags, excludeSubject, provider, subjectFilter, subjectOwnerId, subjectEntries, rootFoldersIds, groupId)
                 .Where(r => withSubfolders || r.IsRoom)
                 .Where(r => Filter(r, internalRecords))
                 .ToListAsync();

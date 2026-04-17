@@ -209,7 +209,8 @@ internal class FolderDao(
         SubjectFilter? subjectFilter,
         Guid subjectOwnerId,
         IEnumerable<string> subjectEntriesIds,
-        IEnumerable<int> parentsIds)
+        IEnumerable<int> parentsIds = null,
+        int? groupId = null)
     {
         if (CheckInvalidFilters(filterTypes) || provider != ProviderFilter.None)
         {
@@ -225,7 +226,7 @@ internal class FolderDao(
         var q = GetFolderQuery(filesDbContext, f => roomsIds.Contains(f.Id) || (f.CreateBy == _authContext.CurrentAccount.ID && parentsIds != null && parentsIds.Contains(f.ParentId)));
 
         q = !withSubfolders ?
-            BuildRoomsQuery(filesDbContext, q, filter, tags, subjectId, searchByTags, withoutTags, searchByTypes, false, excludeSubject, subjectFilter, subjectOwnerId, subjectEntriesIds) :
+            BuildRoomsQuery(filesDbContext, q, filter, tags, subjectId, searchByTags, withoutTags, searchByTypes, false, excludeSubject, subjectFilter, subjectOwnerId, subjectEntriesIds, groupId: groupId) :
             BuildRoomsWithSubfoldersQuery(filesDbContext, roomsIds, filter, tags, searchByTags, searchByTypes, withoutTags, excludeSubject, subjectId, subjectFilter, subjectOwnerId, subjectEntriesIds);
 
         if (!string.IsNullOrEmpty(searchText))
