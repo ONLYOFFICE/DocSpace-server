@@ -342,7 +342,7 @@ public class WebhooksController(
     /// <path>api/2.0/settings/webhook/triggers</path>
     /// <collection>list</collection>
     [Tags("Settings / Webhooks")]
-    [SwaggerResponse(200, "List of triggers for a webhook", typeof(Dictionary<string, int>))]
+    [SwaggerResponse(200, "List of triggers for a webhook", typeof(Dictionary<string, long>))]
     [HttpGet("webhook/triggers")]
     public Dictionary<string, long> GetWebhookTriggers()
     {
