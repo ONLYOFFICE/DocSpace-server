@@ -265,6 +265,13 @@ public class Selector<T>(IServiceProvider serviceProvider)
         };
     }
 
+    internal Func<CountDescriptor<T>, ICountRequest> GetCountDescriptor(BaseIndexer<T> indexer)
+    {
+        return s => s
+            .Query(_ => _queryContainer)
+            .Index(indexer.IndexName);
+    }
+
     internal Func<DeleteByQueryDescriptor<T>, IDeleteByQueryRequest> GetDescriptorForDelete(BaseIndexer<T> indexer, bool immediately = true)
     {
         return s =>

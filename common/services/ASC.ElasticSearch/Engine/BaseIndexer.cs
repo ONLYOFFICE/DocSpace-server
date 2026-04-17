@@ -399,6 +399,24 @@ public abstract class BaseIndexer<T>(Client client,
         return (await client.Instance.SearchAsync(descriptor.GetDescriptor(this, onlyId))).Documents;
     }
 
+    internal async Task<long> CountAsync(Expression<Func<Selector<T>, Selector<T>>> expression)
+    {
+        var func = expression.Compile();
+        var selector = new Selector<T>(serviceProvider);
+        var tenant = _tenantManager.GetCurrentTenant();
+        var descriptor = func(selector).Where(r => r.TenantId, tenant.Id);
+
+        var response = await client.Instance.CountAsync(descriptor.GetCountDescriptor(this));
+
+        if (!response.IsValid)
+        {
+            throw response.OriginalException
+                ?? new InvalidOperationException(response.DebugInformation ?? "Count request returned invalid response");
+        }
+
+        return response.Count;
+    }
+
     internal (IReadOnlyCollection<T>, long) SelectWithTotal(Expression<Func<Selector<T>, Selector<T>>> expression, bool onlyId)
     {
         var func = expression.Compile();

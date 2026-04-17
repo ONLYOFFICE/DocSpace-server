@@ -395,38 +395,41 @@ public class FolderDtoHelper(
 
         if (folder.SettingsChatParameters != null)
         {
-            if (folder.SettingsChatProviderId == AiGateway.ProviderId && !aiStatus.GatewayEnabled)
+            if (folder.SettingsChatProviderId == AiGateway.ProviderId)
             {
-                folder.SettingsChatProviderId = 0;
+                folder.ChatProviderType = ProviderType.PortalAi;
+
+                if (!aiStatus.GatewayEnabled)
+                {
+                    folder.SettingsChatProviderId = 0;
+                }
             }
 
             var modelId = folder.SettingsChatProviderId == 0 ? null : folder.SettingsChatParameters.ModelId;
-            ChatMultimodalSettingsDto multimodal = null;
-            string modelAlias = null;
+            var model = modelId != null && folder.ChatProviderType.HasValue
+                ? aiConfiguration.GetModel(folder.ChatProviderType.Value, modelId)
+                : null;
 
-            if (modelId != null)
+            ChatMultimodalSettingsDto multimodal = null;
+            if (model?.Multimodal?.Image != null)
             {
-                modelAlias = aiConfiguration.GetModelAlias(modelId);
-                var multimodalSettings = aiConfiguration.GetMultimodalSettings(modelId);
-                if (multimodalSettings?.Image != null)
+                multimodal = new ChatMultimodalSettingsDto
                 {
-                    multimodal = new ChatMultimodalSettingsDto
+                    Image = new ChatImageMultimodalSettingsDto
                     {
-                        Image = new ChatImageMultimodalSettingsDto
-                        {
-                            Formats = multimodalSettings.Image.Formats
-                        }
-                    };
-                }
+                        Formats = model.Multimodal.Image.Formats
+                    }
+                };
             }
 
             result.ChatSettings = new ChatSettingsDto
             {
                 ProviderId = folder.SettingsChatProviderId,
                 ModelId = modelId,
-                ModelAlias = modelAlias,
+                ModelAlias = model?.Alias,
                 Prompt = folder.SettingsChatParameters.Prompt,
-                Multimodal = multimodal
+                Multimodal = multimodal,
+                Thinking = model?.Thinking ?? false
             };
         }
 
@@ -515,6 +518,38 @@ public class FolderDtoHelper(
                     result.Security[FileSecurity.FilesSecurityActions.EditAccess] = false;
                     break;
             }
+        }
+
+        if (folder.FolderType == FolderType.FormFillingFolderDone && folder.Id is int doneFolderId)
+        {
+            var fileDao = _daoFactory.GetFileDao<int>();
+            var completedForm = await fileDao
+                .GetFilesAsync(doneFolderId, new OrderBy(SortedByType.DateAndTime, false), FilterType.PdfForm, false, Guid.Empty, null, null, false, count: 1)
+                .FirstOrDefaultAsync();
+
+            var canUpdateXlsx = false;
+            if (completedForm != null)
+            {
+                var completedFormProperties = await fileDao.GetProperties(completedForm.Id);
+                var originalFormId = completedFormProperties?.FormFilling?.OriginalFormId ?? 0;
+                if (originalFormId != 0)
+                {
+                    var originalForm = await fileDao.GetFileAsync(originalFormId);
+                    canUpdateXlsx = originalForm != null && await _fileSecurity.CanEditAsync(originalForm);
+                }
+            }
+
+            result.Security[FileSecurity.FilesSecurityActions.UpdateXlsx] = canUpdateXlsx;
+        }
+        else
+        {
+            result.Security[FileSecurity.FilesSecurityActions.UpdateXlsx] = false;
+        }
+
+        if (folder.FolderType.IsPublicSystemFolder())
+        {
+            result.CreatedBy = EmployeeDto.Default;
+            result.UpdatedBy = EmployeeDto.Default;
         }
 
         return result;

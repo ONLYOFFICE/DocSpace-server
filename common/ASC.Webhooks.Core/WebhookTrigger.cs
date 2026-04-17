@@ -29,7 +29,7 @@ namespace ASC.Webhooks.Core;
 /// <summary>
 /// The webhook trigger type.
 /// </summary>
-public enum WebhookTrigger
+public enum WebhookTrigger : long
 {
     [Description("*")]
     All = 0,
@@ -153,11 +153,23 @@ public enum WebhookTrigger
     FormFilledOut = 536870912,
 
     [Description("form.stopped")]
-    FormStopped = 1073741824
+    FormStopped = 1073741824,
 
     #endregion
 
-    //remaining possible values: 2147483648, 4294967296, 8589934592
+
+    #region Agent
+
+    [Description("agent.created")]
+    AgentCreated = 2147483648,
+
+    [Description("agent.updated")]
+    AgentUpdated = 4294967296,
+
+    [Description("agent.deleted")]
+    AgentDeleted = 8589934592,
+
+    #endregion
 }
 
 

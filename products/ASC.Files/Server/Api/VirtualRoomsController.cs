@@ -1,25 +1,25 @@
 ﻿// (c) Copyright Ascensio System SIA 2009-2026
-// 
+//
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
+//
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
+//
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-// 
+//
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -83,8 +83,8 @@ public class VirtualRoomsInternalController(
         var lifetime = inDto.Lifetime.Map();
         lifetime?.StartDate = DateTime.UtcNow;
 
-        var room = await _fileStorageService.CreateRoomAsync(inDto.Title, inDto.RoomType, inDto.Private, 
-            inDto.Indexing, inDto.Share, inDto.Quota, lifetime, inDto.DenyDownload, inDto.Watermark, inDto.Color, inDto.Cover, 
+        var room = await _fileStorageService.CreateRoomAsync(inDto.Title, inDto.RoomType, inDto.Private,
+            inDto.Indexing, inDto.Share, inDto.Quota, lifetime, inDto.DenyDownload, inDto.Watermark, inDto.Color, inDto.Cover,
             inDto.Tags, inDto.Logo, inDto.ChatSettings);
 
         return await _folderDtoHelper.GetAsync(room);
@@ -458,7 +458,7 @@ public abstract class VirtualRoomsController<T>(
 
         var newGuestsInvited =
             inDto.RoomInvitation.Invitations.Any(i => !string.IsNullOrEmpty(i.Email) && i.Access != FileShare.None);
-        
+
         var guestsInvited =
             await inDto.RoomInvitation.Invitations
                 .Where(r => r.Id != Guid.Empty && r.Access != FileShare.None)
@@ -495,26 +495,29 @@ public abstract class VirtualRoomsController<T>(
 
         foreach (var invitation in inDto.RoomInvitation.Invitations)
         {
-            if (invitation.Access == FileShare.None && !inDto.RoomInvitation.Force)
+            if (invitation.Access == FileShare.None && !inDto.RoomInvitation.Force &&
+                await _fileStorageService.ShouldPreventUserDeletion(room, invitation.Id))
             {
-                if (await _fileStorageService.ShouldPreventUserDeletion(room, invitation.Id))
-                {
-                    result.Error = RoomSecurityError.FormRoleBlockingDeletion;
-                    return result;
-                }
+                result.Error = RoomSecurityError.FormRoleBlockingDeletion;
+                return result;
             }
         }
 
+        var invitationIds = inDto.RoomInvitation.Invitations.Select(s => s.Id).ToList();
+        var currentUsers = await _fileStorageService.GetRoomSharedInfoAsync(inDto.Id, invitationIds).ToListAsync();
+        var currentUserId = authContext.CurrentAccount.ID;
         var wrappers = (await inDto.RoomInvitation.Invitations
             .ToAsyncEnumerable()
-            .Where(async (s, _) => await userManager.CanUserViewAnotherUserAsync(authContext.CurrentAccount.ID, s.Id))
+            .Where(async (s, _) =>
+             (room.CreateBy == currentUserId && (s.Access == FileShare.None || currentUsers.Any(c => c.Id == s.Id))) ||
+                await userManager.CanUserViewAnotherUserAsync(currentUserId, s.Id))
             .ToListAsync())
             .Map();
 
         var aceCollection = new AceCollection<T> { Files = [], Folders = [inDto.Id], Aces = wrappers, Message = inDto.RoomInvitation.Message };
 
         result.Warning = (await _fileStorageService.SetAceObjectAsync(aceCollection, inDto.RoomInvitation.Notify, inDto.RoomInvitation.Culture)).Select(r => r.Warning).FirstOrDefault();
-        result.Members = await _fileStorageService.GetRoomSharedInfoAsync(inDto.Id, inDto.RoomInvitation.Invitations.Select(s => s.Id))
+        result.Members = await _fileStorageService.GetRoomSharedInfoAsync(inDto.Id, invitationIds)
             .Select(async (AceWrapper a, CancellationToken _) => await fileShareDtoHelper.Get(a))
             .ToListAsync();
 
@@ -900,7 +903,8 @@ public class VirtualRoomsCommonController(
             tagNames,
             inDto.ExcludeSubject ?? false,
             inDto.Provider ?? ProviderFilter.None,
-            inDto.SubjectFilter ?? SubjectFilter.Owner,
+            inDto.SubjectFilter,
+            inDto.SubjectOwnerId,
             quotaFilter: inDto.QuotaFilter ?? QuotaFilter.All,
             storageFilter: inDto.StorageFilter ?? StorageFilter.None,
             groupId: inDto.GroupId ?? null);
@@ -1138,11 +1142,11 @@ public class VirtualRoomsCommonController(
 
             foreach (var (k, v) in value)
             {
-                var item = await rootNewItemsDtoHelper.GetAsync(k, v, (room, roomItems) => 
-                    new RoomNewItemsDto 
-                    { 
-                        Room = room, 
-                        Items = roomItems 
+                var item = await rootNewItemsDtoHelper.GetAsync(k, v, (room, roomItems) =>
+                    new RoomNewItemsDto
+                    {
+                        Room = room,
+                        Items = roomItems
                     });
                 items.Add(item);
             }

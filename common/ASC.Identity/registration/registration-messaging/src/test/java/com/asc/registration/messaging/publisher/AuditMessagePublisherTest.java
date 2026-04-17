@@ -27,12 +27,14 @@
 
 package com.asc.registration.messaging.publisher;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.*;
 
 import com.asc.common.messaging.publisher.RabbitAuthorizationAuditMessagePublisher;
 import com.asc.common.service.transfer.message.AuditMessage;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -44,12 +46,17 @@ public class AuditMessagePublisherTest {
   @Mock private AmqpTemplate amqpClient;
   @Mock private AuditMessage auditMessage;
 
-  @Test
-  void whenPublishFails_thenExceptionIsThrown() {
-    doThrow(new RuntimeException())
-        .when(amqpClient)
-        .convertAndSend(anyString(), anyString(), (Object) any());
+  @ParameterizedTest
+  @CsvSource({"false,none", "true,publish failed", "true,timeout", "true,broker down"})
+  void whenPublishFailsOrSucceeds_thenExceptionIsNotPropagated(
+      boolean shouldThrow, String exceptionMessage) {
+    if (shouldThrow) {
+      doThrow(new RuntimeException(exceptionMessage))
+          .when(amqpClient)
+          .convertAndSend(anyString(), anyString(), (Object) any());
+    }
 
-    publisher.publish(auditMessage);
+    assertDoesNotThrow(() -> publisher.publish(auditMessage));
+    verify(amqpClient).convertAndSend(anyString(), anyString(), (Object) any());
   }
 }

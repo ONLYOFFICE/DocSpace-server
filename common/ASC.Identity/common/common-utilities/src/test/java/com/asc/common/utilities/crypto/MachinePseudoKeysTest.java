@@ -36,25 +36,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 public class MachinePseudoKeysTest {
-
-  @ParameterizedTest(name = "Machine Pseudo Keys with Secret: {0}")
-  @MethodSource("machineKeyProvider")
-  public void whenSecretProvided_thenGetMachineConstant256MatchesExpectedIntArray(
-      String secret, int[] expectedInts) {
-    var machinePseudoKeys = new MachinePseudoKeys(secret);
-    var actualBytes = machinePseudoKeys.getMachineConstant(256);
-
-    assertEquals(
-        256, actualBytes.length, "Generated machine constant should be 256 bytes in length");
-
-    var actualInts = toIntArray(actualBytes);
-
-    assertArrayEquals(
-        expectedInts,
-        actualInts,
-        "The generated machine constant does not match the expected value");
-  }
-
   private static Stream<Arguments> machineKeyProvider() {
     return Stream.of(
         Arguments.of(
@@ -189,5 +170,23 @@ public class MachinePseudoKeysTest {
     var ints = new int[bytes.length];
     for (int i = 0; i < bytes.length; i++) ints[i] = bytes[i] & 0xFF;
     return ints;
+  }
+
+  @ParameterizedTest
+  @MethodSource("machineKeyProvider")
+  public void givenSecretProvided_whenGettingMachineConstant256_thenMatchesExpectedIntArray(
+      String secret, int[] expectedInts) {
+    var machinePseudoKeys = new MachinePseudoKeys(secret);
+    var actualBytes = machinePseudoKeys.getMachineConstant(256);
+
+    assertEquals(
+        256, actualBytes.length, "Generated machine constant should be 256 bytes in length");
+
+    var actualInts = toIntArray(actualBytes);
+
+    assertArrayEquals(
+        expectedInts,
+        actualInts,
+        "The generated machine constant does not match the expected value");
   }
 }

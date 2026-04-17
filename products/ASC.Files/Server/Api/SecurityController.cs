@@ -1,25 +1,25 @@
 ﻿// (c) Copyright Ascensio System SIA 2009-2026
-// 
+//
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
+//
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
+//
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-// 
+//
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -29,29 +29,37 @@ using HtmlAgilityPack;
 namespace ASC.Files.Api;
 
 [ConstraintRoute("int")]
-public class SecurityControllerInternal(FileStorageService fileStorageService,
-        SecurityControllerHelper securityControllerHelper,
-        FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper,
-        ApiContext apiContext,
-        IDaoFactory daoFactory,
-        FileSharing fileSharing,
-        EmployeeFullDtoHelper employeeFullDtoHelper,
-        FileShareDtoHelper fileShareDtoHelper)
-    : SecurityController<int>(fileStorageService, securityControllerHelper, folderDtoHelper, fileDtoHelper, apiContext, daoFactory, fileSharing, employeeFullDtoHelper, fileShareDtoHelper);
+public class SecurityControllerInternal(
+    UserManager userManager,
+    AuthContext authContext,
+    FileStorageService fileStorageService,
+    SecurityControllerHelper securityControllerHelper,
+    FolderDtoHelper folderDtoHelper,
+    FileDtoHelper fileDtoHelper,
+    ApiContext apiContext,
+    IDaoFactory daoFactory,
+    FileSharing fileSharing,
+    EmployeeFullDtoHelper employeeFullDtoHelper,
+    FileShareDtoHelper fileShareDtoHelper)
+    : SecurityController<int>(userManager, authContext, fileStorageService, securityControllerHelper, folderDtoHelper, fileDtoHelper, apiContext, daoFactory, fileSharing, employeeFullDtoHelper, fileShareDtoHelper);
 
-public class SecurityControllerThirdparty(FileStorageService fileStorageService,
-        SecurityControllerHelper securityControllerHelper,
-        FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper,
-        ApiContext apiContext,
-        IDaoFactory daoFactory,
-        FileSharing fileSharing,
-        EmployeeFullDtoHelper employeeFullDtoHelper,
-        FileShareDtoHelper fileShareDtoHelper)
-    : SecurityController<string>(fileStorageService, securityControllerHelper, folderDtoHelper, fileDtoHelper, apiContext, daoFactory, fileSharing, employeeFullDtoHelper, fileShareDtoHelper);
+public class SecurityControllerThirdparty(
+    UserManager userManager,
+    AuthContext authContext,
+    FileStorageService fileStorageService,
+    SecurityControllerHelper securityControllerHelper,
+    FolderDtoHelper folderDtoHelper,
+    FileDtoHelper fileDtoHelper,
+    ApiContext apiContext,
+    IDaoFactory daoFactory,
+    FileSharing fileSharing,
+    EmployeeFullDtoHelper employeeFullDtoHelper,
+    FileShareDtoHelper fileShareDtoHelper)
+    : SecurityController<string>(userManager, authContext, fileStorageService, securityControllerHelper, folderDtoHelper, fileDtoHelper, apiContext, daoFactory, fileSharing, employeeFullDtoHelper, fileShareDtoHelper);
 
 public abstract class SecurityController<T>(
+    UserManager userManager,
+    AuthContext authContext,
     FileStorageService fileStorageService,
     SecurityControllerHelper securityControllerHelper,
     FolderDtoHelper folderDtoHelper,
@@ -74,6 +82,11 @@ public abstract class SecurityController<T>(
     [HttpGet("file/{id}/share")]
     public async IAsyncEnumerable<FileShareDto> GetFileSecurityInfo(FilePrimaryIdRequestDto<T> inDto)
     {
+        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
         var counter = 0;
 
         await foreach (var ace in fileStorageService.GetPureSharesAsync(inDto.Id, FileEntryType.File, ShareFilterType.UserOrGroup, null, inDto.StartIndex, inDto.Count))
@@ -98,6 +111,11 @@ public abstract class SecurityController<T>(
     [HttpGet("folder/{id}/share")]
     public async IAsyncEnumerable<FileShareDto> GetFolderSecurityInfo(FolderPrimaryIdRequestDto<T> inDto)
     {
+        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
         var counter = 0;
 
         await foreach (var ace in fileStorageService.GetPureSharesAsync(inDto.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, null, inDto.StartIndex, inDto.Count))
@@ -121,7 +139,7 @@ public abstract class SecurityController<T>(
     [SwaggerResponse(200, "List of shared file information: sharing rights, a user who has the access to the specified file, the file is locked by this user or not, this user is an owner of the specified file or not, this user can edit the access to the specified file or not", typeof(IAsyncEnumerable<FileShareDto>))]
     [HttpPut("file/{fileId}/share")]
     public IAsyncEnumerable<FileShareDto> SetFileSecurityInfo(FileSecurityInfoSimpleRequestDto<T> inDto)
-    {                
+    {
         string text = null;
 
         if (inDto.SecurityInfoSimple.SharingMessage != null)
@@ -144,7 +162,7 @@ public abstract class SecurityController<T>(
     [SwaggerResponse(200, "List of shared folder information: sharing rights, a user who has the access to the specified folder, the folder is locked by this user or not, this user is an owner of the specified folder or not, this user can edit the access to the specified folder or not", typeof(IAsyncEnumerable<FileShareDto>))]
     [HttpPut("folder/{folderId}/share")]
     public IAsyncEnumerable<FileShareDto> SetFolderSecurityInfo(FolderSecurityInfoSimpleRequestDto<T> inDto)
-    {        
+    {
         string text = null;
 
         if (inDto.SecurityInfoSimple.SharingMessage != null)
@@ -153,7 +171,7 @@ public abstract class SecurityController<T>(
             htmlDoc.LoadHtml(inDto.SecurityInfoSimple.SharingMessage);
             text = htmlDoc.DocumentNode.InnerText;
         }
-        
+
         return securityControllerHelper.SetSecurityInfoAsync([], [inDto.FolderId], inDto.SecurityInfoSimple.Share, inDto.SecurityInfoSimple.Notify, text);
     }
 
@@ -355,7 +373,7 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
             htmlDoc.LoadHtml(inDto.SharingMessage);
             text = htmlDoc.DocumentNode.InnerText;
         }
-        
+
         var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(inDto.FolderIds);
         var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(inDto.FileIds);
 

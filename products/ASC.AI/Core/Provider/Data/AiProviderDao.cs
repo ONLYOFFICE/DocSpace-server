@@ -30,7 +30,8 @@ namespace ASC.AI.Core.Provider.Data;
 public class AiProviderDao(
     IDbContextFactory<AiDbContext> dbContextFactory,
     InstanceCrypto crypto,
-    AiGateway gateway) : IAiProviderDao
+    AiGateway gateway,
+    AiConfiguration aiConfiguration) : IAiProviderDao
 {
     public async Task<AiProvider> AddProviderAsync(
         int tenantId,
@@ -137,7 +138,7 @@ public class AiProviderDao(
             yield break;
         }
 
-        var dbContext = await dbContextFactory.CreateDbContextAsync();
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         await foreach (var provider in dbContext.GetProvidersAsync(tenantId, offset, limit))
         {
             var (success, decryptedKey) = await TryDecryptKeyAsync(provider.Key);
@@ -269,12 +270,16 @@ public class AiProviderDao(
             return null;
         }
 
-        if (result.ProviderId != AiGateway.ProviderId)
+        if (result.ProviderId == AiGateway.ProviderId)
         {
-            return result;
+            result.ProviderTitle = AiGateway.ProviderTitle;
+            result.ProviderType = ProviderType.PortalAi;
         }
-
-        result.ProviderTitle = AiGateway.ProviderTitle;
+        
+        if (result.ProviderType.HasValue)
+        {
+            result.DefaultModel = aiConfiguration.ResolveModelId(result.ProviderType.Value, result.DefaultModel);
+        }
 
         return result;
     }

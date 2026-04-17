@@ -19,7 +19,7 @@
     "library": "apache-httpclient",
     "excludeTests": true,
     "outputFolder": "generated-sdk/billing-api-sdk-java",
-    "packageDescription": "A simple PHP SDK for integrating with the ONLYOFFICE DocSpace API",
+    "packageDescription": "A simple Java SDK for integrating with the ONLYOFFICE Billing API",
     "seealsoBaseUrl": "https://api.onlyoffice.com/billing",
     "example": false,
     "readMe": "README_Billing.mustache"

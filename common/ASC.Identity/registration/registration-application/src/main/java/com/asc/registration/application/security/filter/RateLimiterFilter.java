@@ -42,6 +42,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -58,6 +59,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @Slf4j
 @RequiredArgsConstructor
 @Component("registrationRateLimiterFilter")
+@ConditionalOnProperty(prefix = "bucket4j", name = "enabled", havingValue = "true")
 public class RateLimiterFilter extends OncePerRequestFilter {
   /** HTTP response header for remaining rate limit tokens. */
   private static final String X_RATE_REMAINING = "X-Ratelimit-Remaining";

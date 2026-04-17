@@ -6,7 +6,7 @@
   },
   "generatorName": "my-csharp",
   "inputSpec": "./json/billing-api.json",
-  "outputDir": "ClientNet",
+  "outputDir": "go-sdk",
   "additionalProperties": {
     "packageName": "BillingApiSDK",
     "packageVersion": "3.6.0",

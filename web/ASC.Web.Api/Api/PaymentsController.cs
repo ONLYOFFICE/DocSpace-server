@@ -65,7 +65,8 @@ public class PaymentController(
     CommonLinkUtility commonLinkUtility,
     DocumentBuilderTaskManager<CustomerOperationsReportTask, int, CustomerOperationsReportTaskData> documentBuilderTaskManager,
     IServiceProvider serviceProvider,
-    WalletStaticProvider walletStaticProvider)
+    WalletStaticProvider walletStaticProvider,
+    QuotaSocketManager quotaSocketManager)
     : ControllerBase
 {
     private readonly int _maxCount = 10;
@@ -727,6 +728,8 @@ public class PaymentController(
         {
             var description = $"{inDto.Amount} {inDto.Currency}";
             messageService.Send(MessageAction.CustomerWalletToppedUp, description);
+
+            await quotaSocketManager.TopUpWallet(false);
         }
 
         return result;
@@ -1167,6 +1170,11 @@ public class PaymentController(
         var result = await settingsManager.SaveAsync(settings);
 
         messageService.Send(MessageAction.CustomerWalletServicesSettingsUpdated);
+
+        if (inDto.Service == TenantWalletService.AITools)
+        {
+            await quotaSocketManager.ChangeAiConfigAsync();
+        }
 
         return settings;
     }

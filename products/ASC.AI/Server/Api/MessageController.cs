@@ -29,6 +29,7 @@ namespace ASC.AI.Api;
 [Scope]
 [DefaultRoute]
 [ApiController]
+[AiFeature]
 [ControllerName("ai")]
 public class MessageController(MessageExporter exporter) : ControllerBase
 {
@@ -46,8 +47,15 @@ public class MessageController(MessageExporter exporter) : ControllerBase
     [SwaggerResponse(400, "The message identifier is invalid (must be greater than 0)")]
     [SwaggerResponse(404, "The specified message was not found or the current user does not have access to it")]
     [HttpPost("messages/{messageId}/export")]
-    public async Task ExportMessageAsync(ExportMessageRequestDto<int> inDto)
+    public async Task ExportMessageAsync(ExportMessageRequestDto inDto)
     {
-        await exporter.ExportMessageAsync(inDto.Body.FolderId, inDto.Body.Title, inDto.MessageId);
+        if (inDto.Body.FolderId.ValueKind == JsonValueKind.Number)
+        {
+            await exporter.ExportMessageAsync(inDto.Body.FolderId.GetInt32(), inDto.Body.Title, inDto.MessageId);
+        }
+        else
+        {
+            await exporter.ExportMessageAsync(inDto.Body.FolderId.GetString(), inDto.Body.Title, inDto.MessageId);
+        }
     }
 }

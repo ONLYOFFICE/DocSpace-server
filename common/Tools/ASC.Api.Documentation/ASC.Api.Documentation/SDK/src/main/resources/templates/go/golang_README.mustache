@@ -1,0 +1,226 @@
+# {{packageName}}
+
+The ONLYOFFICE DocSpace SDK for Golang is a library that provides tools for integrating and managing DocSpace features within your applications. It simplifies interaction with the DocSpace API by offering ready-to-use methods and models.
+
+{{#infoUrl}}
+For more information, please visit [{{{infoUrl}}}]({{{infoUrl}}})
+{{/infoUrl}}
+
+## Installation
+
+Import the package in a Go file in your project and run `go mod tidy`:
+
+```go
+import (
+    "context"
+    "fmt"
+
+    {{packageName}} "{{goModulePath}}{{^goModulePath}}{{packageImportPath}}{{/goModulePath}}{{#isGoSubmodule}}/{{packageName}}{{/isGoSubmodule}}"
+)
+```
+
+## Getting Started
+
+Please follow the [installation](#installation) instruction and execute the following Go code:
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+
+    {{packageName}} "{{goModulePath}}{{^goModulePath}}{{packageImportPath}}{{/goModulePath}}{{#isGoSubmodule}}/{{packageName}}{{/isGoSubmodule}}"
+)
+
+func main() {
+    cfg := {{packageName}}.NewConfiguration()
+    cfg.Servers = {{packageName}}.ServerConfigurations{
+        {
+            URL: "https://your-docspace.onlyoffice.com",
+            Description: "Default server",
+        },
+    }
+
+    client := {{packageName}}.NewAPIClient(cfg)
+    ctx := context.Background()
+
+    {{#authMethods}}
+    {{#isBasic}}
+    {{#isBasicBearer}}
+    ctx = context.WithValue(ctx, {{packageName}}.ContextAccessToken, "YOUR_ACCESS_TOKEN")
+    {{/isBasicBearer}}
+    {{/isBasic}}
+    {{/authMethods}}
+
+    {{#apiInfo}}{{#apis}}{{#-first}}{{#operations}}{{#operation}}{{#-first}}
+    {{#requiredParams}}{{{paramName}}} := {{{example}}} // {{{description}}}
+    {{/requiredParams}}
+
+    request := client.{{{classname}}}.{{{operationId}}}(ctx{{#requiredParams}}, {{{paramName}}}{{/requiredParams}})
+    {{#optionalParams}}
+    // Optional parameter available: {{paramName}} ({{{dataType}}}){{#example}}, example: {{{example}}}{{/example}} // {{{description}}}
+    {{/optionalParams}}
+
+    response, httpResponse, err := request.Execute()
+    if err != nil {
+        fmt.Printf("Error when calling {{{classname}}}.{{{operationId}}}: %v\n", err)
+        if httpResponse != nil {
+            fmt.Printf("HTTP response: %s\n", httpResponse.Status)
+        }
+        return
+    }
+
+    fmt.Printf("Response from `{{{operationId}}}`: %v\n", response)
+    {{/-first}}{{/operation}}{{/operations}}{{/-first}}{{/apis}}{{/apiInfo}}
+}
+```
+
+## Documentation For Authorization
+
+{{^authMethods}}Endpoints do not require authorization.{{/authMethods}}
+{{#hasAuthMethods}}Authentication schemes defined for the API:{{/hasAuthMethods}}
+{{#authMethods}}
+<a id="{{name}}"></a>
+### {{{name}}}
+
+{{#isApiKey}}
+- **Type**: API key
+- **API key parameter name**: {{{keyParamName}}}
+- **Location**: {{#isKeyInQuery}}URL query string{{/isKeyInQuery}}{{#isKeyInHeader}}HTTP header{{/isKeyInHeader}}{{#isKeyInCookie}}Cookie{{/isKeyInCookie}}
+
+Note, each API key must be added to a map of `map[string]APIKey` where the key is: {{{name}}} and passed in as the auth context for each request.
+
+Example
+
+```go
+auth := context.WithValue(
+    context.Background(),
+    {{packageName}}.ContextAPIKeys,
+    map[string]{{packageName}}.APIKey{
+        "{{{name}}}": {Key: "API_KEY_STRING"},
+    },
+)
+request := client.{{#apiInfo}}{{#apis}}{{#-first}}{{classname}}{{/-first}}{{/apis}}{{/apiInfo}}.{{#apiInfo}}{{#apis}}{{#-first}}{{#operations}}{{#operation}}{{#-first}}{{operationId}}{{/-first}}{{/operation}}{{/operations}}{{/-first}}{{/apis}}{{/apiInfo}}(auth{{#apiInfo}}{{#apis}}{{#-first}}{{#operations}}{{#operation}}{{#-first}}{{#requiredParams}}, /* {{{paramName}}} */{{/requiredParams}}{{/-first}}{{/operation}}{{/operations}}{{/-first}}{{/apis}}{{/apiInfo}})
+_, _, err := request.Execute()
+```
+{{/isApiKey}}
+{{#isBasic}}
+{{#isBasicBasic}}
+- **Type**: HTTP basic authentication
+
+Example
+
+```go
+auth := context.WithValue(context.Background(), {{packageName}}.ContextBasicAuth, {{packageName}}.BasicAuth{
+    UserName: "username",
+    Password: "password",
+})
+request := client.{{#apiInfo}}{{#apis}}{{#-first}}{{classname}}{{/-first}}{{/apis}}{{/apiInfo}}.{{#apiInfo}}{{#apis}}{{#-first}}{{#operations}}{{#operation}}{{#-first}}{{operationId}}{{/-first}}{{/operation}}{{/operations}}{{/-first}}{{/apis}}{{/apiInfo}}(auth{{#apiInfo}}{{#apis}}{{#-first}}{{#operations}}{{#operation}}{{#-first}}{{#requiredParams}}, /* {{{paramName}}} */{{/requiredParams}}{{/-first}}{{/operation}}{{/operations}}{{/-first}}{{/apis}}{{/apiInfo}})
+_, _, err := request.Execute()
+```
+{{/isBasicBasic}}
+{{#isBasicBearer}}
+- **Type**: Bearer authentication{{#bearerFormat}} ({{{.}}}){{/bearerFormat}}
+
+Example
+
+```go
+auth := context.WithValue(context.Background(), {{packageName}}.ContextAccessToken, "BEARER_TOKEN_STRING")
+request := client.{{#apiInfo}}{{#apis}}{{#-first}}{{classname}}{{/-first}}{{/apis}}{{/apiInfo}}.{{#apiInfo}}{{#apis}}{{#-first}}{{#operations}}{{#operation}}{{#-first}}{{operationId}}{{/-first}}{{/operation}}{{/operations}}{{/-first}}{{/apis}}{{/apiInfo}}(auth{{#apiInfo}}{{#apis}}{{#-first}}{{#operations}}{{#operation}}{{#-first}}{{#requiredParams}}, /* {{{paramName}}} */{{/requiredParams}}{{/-first}}{{/operation}}{{/operations}}{{/-first}}{{/apis}}{{/apiInfo}})
+_, _, err := request.Execute()
+```
+{{/isBasicBearer}}
+{{#isHttpSignature}}
+- **Type**: HTTP signature authentication
+{{/isHttpSignature}}
+{{/isBasic}}
+{{#isOAuth}}
+- **Type**: OAuth
+- **Flow**: {{{flow}}}
+- **Authorization URL**: {{{x-authorizationUrl}}}
+- **Token URL**: {{{x-tokenUrl}}}
+- **Scopes**: {{^scopes}}N/A{{/scopes}}
+{{#scopes}} - **{{{scope}}}**: {{{description}}}
+{{/scopes}}
+
+Example
+
+```go
+auth := context.WithValue(context.Background(), {{packageName}}.ContextAccessToken, "ACCESSTOKENSTRING")
+request := client.{{#apiInfo}}{{#apis}}{{#-first}}{{classname}}{{/-first}}{{/apis}}{{/apiInfo}}.{{#apiInfo}}{{#apis}}{{#-first}}{{#operations}}{{#operation}}{{#-first}}{{operationId}}{{/-first}}{{/operation}}{{/operations}}{{/-first}}{{/apis}}{{/apiInfo}}(auth{{#apiInfo}}{{#apis}}{{#-first}}{{#operations}}{{#operation}}{{#-first}}{{#requiredParams}}, /* {{{paramName}}} */{{/requiredParams}}{{/-first}}{{/operation}}{{/operations}}{{/-first}}{{/apis}}{{/apiInfo}})
+_, _, err := request.Execute()
+```
+{{/isOAuth}}
+{{#isOpenId}}
+- **Type**: OpenId Connect
+- **OpenId Connect URL**: {{{x-openIdConnectUrl}}}
+{{#scopes}} - **{{{scope}}}**: {{{description}}}
+{{/scopes}}
+{{/isOpenId}}
+
+{{/authMethods}}
+
+### Documentation for API Endpoints
+
+All URIs are relative to *https://your-docspace.onlyoffice.com*
+
+### API endpoints tables
+
+{{#customApis}}
+<details>
+  <summary>{{{folder}}}</summary>
+
+  <table>
+    <tbody>
+      <tr>
+        <th>Method</th>
+        <th>HTTP request</th>
+        <th>Description</th>
+      </tr>
+      {{#apis}}
+      <tr>
+        <td colspan="3" style="text-align: center;"><strong>{{x-classname}}</strong></td>
+      </tr>
+      {{#operations.operation}}
+      <tr>
+        <td><a href="{{apiDocPath}}{{classname}}.md#{{operationIdLowerCase}}"><strong>{{operationId}}</strong></a></td>
+        <td><strong>{{httpMethod}}</strong> {{path}}</td>
+        <td>{{{summary}}}</td>
+      </tr>
+      {{/operations.operation}}
+      {{/apis}}
+    </tbody>
+  </table>
+
+</details>
+{{/customApis}}
+
+### Documentation For Models
+
+<details><summary>Models list</summary>
+
+{{#models}}{{#model}} - [{{{classname}}}]({{modelDocPath}}{{{classname}}}.md)
+{{/model}}{{/models}}
+</details>
+
+## Documentation for Utility Methods
+
+Due to the fact that model structure members are all pointers, this package contains
+a number of utility functions to easily obtain pointers to values of basic types.
+Each of these functions takes a value of the given basic type and returns a pointer to it:
+
+* `PtrBool`
+* `PtrInt`
+* `PtrInt32`
+* `PtrInt64`
+* `PtrFloat`
+* `PtrFloat32`
+* `PtrFloat64`
+* `PtrString`
+* `PtrTime`
+
+## Author
+
+{{#apiInfo}}{{#apis}}{{#-last}}{{{infoEmail}}}
+{{/-last}}{{/apis}}{{/apiInfo}}

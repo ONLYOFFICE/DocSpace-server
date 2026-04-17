@@ -414,6 +414,16 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:change-invitation-limit-value", value);
   }
 
+  function changeWebPlugin({ room, webPluginName, enabled } = {}) {
+    logger.info(`changed web plugin in room ${room}, webPluginName ${webPluginName}, enabled ${enabled}`);
+    filesIO.to(room).emit("s:change-web-plugin", { webPluginName, enabled });
+  }
+
+  function topUpWallet({ room, auto } = {}) {
+    logger.info(`wallet topped up ${room}, auto ${auto}`);
+    filesIO.to(room).emit("s:top-up-wallet", { auto });
+  }
+
   function updateHistory({ room, id, type } = {}) {
     logger.info(`update ${type} history ${id} in room ${room}`);
     filesIO.to(room).emit("s:update-history", { id, type });
@@ -585,6 +595,11 @@ module.exports = (io) => {
     filesIO.to(data.room).emit(`s:quota_exceeded`, { data });
   }
 
+  function changeAiConfig({ room } = {}) {
+    logger.info(`change ai config in room ${room}`);
+    filesIO.to(room).emit("s:change-ai-config");
+  }
+
   function externalDbSettings({ tenantId, externalDbEnabled } = {}) {
     var room = `${tenantId}-external-db-settings`;
     logger.info(`external db settings changed in room ${room}, enabled: ${externalDbEnabled}`);
@@ -607,6 +622,8 @@ module.exports = (io) => {
     markAsNewFiles,
     markAsNewFolders,
     changeInvitationLimitValue,
+    changeWebPlugin,
+    topUpWallet,
     updateHistory,
     logoutSession,
     changeMyType,
@@ -634,6 +651,7 @@ module.exports = (io) => {
     changeAccessRightsForFile,
     changeAccessRightsForFolder,
     quotaExceeded,
+    changeAiConfig,
     externalDbSettings
   };
 };

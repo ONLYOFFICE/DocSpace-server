@@ -24,7 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Files.Tests.ApiFactories;
 
 namespace ASC.Files.Tests.Tests._01_Files;
 
@@ -32,11 +31,8 @@ namespace ASC.Files.Tests.Tests._01_Files;
 [Trait("Category", "CRUD")]
 [Trait("Feature", "Files")]
 public class FileDeleteTests(
-    FilesApiFactory filesFactory, 
-    WepApiFactory apiFactory, 
-    PeopleFactory peopleFactory,
-    FilesServiceFactory filesServiceProgram) 
-    : BaseTest(filesFactory, apiFactory, peopleFactory, filesServiceProgram)
+    AspireAppFixture fixture)
+    : BaseTest(fixture)
 {
     [Fact]
     public async Task DeleteFile_FolderMy_Owner_ReturnsOk()
@@ -58,44 +54,140 @@ public class FileDeleteTests(
         await Assert.ThrowsAsync<ApiException>(async () => 
             await _filesApi.GetFileInfoAsync(createdFile.Id, cancellationToken: TestContext.Current.CancellationToken));
     }
-    
-    // [Fact]
-    // public async Task DeleteFile_NonExistingFile_ReturnsError()
-    // {
-    //     // Arrange
-    //     await _filesClient.Authenticate(Initializer.Owner);
-    //     var nonExistingFileId = 99999; // Non-existing file ID
-    //     
-    //     // Act & Assert
-    //     var exception = await Assert.ThrowsAsync<Docspace.Client.ApiException>(
-    //         async () => await _filesFilesApi.DeleteFileAsync(
-    //             nonExistingFileId, 
-    //             new Delete(false, true),
-    //             TestContext.Current.CancellationToken));
-    //     
-    //     exception.ErrorCode.Should().Be(404);
-    // }
-    //
-    // [Fact]
-    // public async Task DeleteFile_WithoutPermission_ReturnsAccessDenied()
-    // {
-    //     // Arrange
-    //     await _filesClient.Authenticate(Initializer.Owner);
-    //     
-    //     // Create a file by owner
-    //     var file = await CreateFile("file_no_permissions.docx", FolderType.USER, Initializer.Owner);
-    //     
-    //     // Switch to another user who doesn't have permission
-    //     var user = await Initializer.InviteContact(EmployeeType.User);
-    //     await _filesClient.Authenticate(user);
-    //     
-    //     // Act & Assert
-    //     var exception = await Assert.ThrowsAsync<Docspace.Client.ApiException>(
-    //         async () => await _filesFilesApi.DeleteFileAsync(
-    //             file.Id, 
-    //             new Delete(false, true), 
-    //             TestContext.Current.CancellationToken));
-    //     
-    //     exception.ErrorCode.Should().Be(403);
-    // }
+
+    [Fact]
+    public async Task DeleteFile_NonExistingFile_ReturnsError()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var nonExistingFileId = 99999; // Non-existing file ID
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _filesApi.DeleteFileAsync(
+                nonExistingFileId,
+                new Delete(false, true),
+                false,
+                TestContext.Current.CancellationToken));
+
+        exception.ErrorCode.Should().Be(404);
+    }
+
+    [Fact]
+    public async Task DeleteFile_NoPermissions_ReturnsError()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        
+        var file = await CreateFile("file_no_permissions.docx", FolderType.USER, Initializer.Owner);
+        
+        var user = await Initializer.InviteContact(EmployeeType.User);
+        await _filesClient.Authenticate(user);
+        
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _filesApi.DeleteFileAsync(
+                file.Id, 
+                new Delete(false, true), 
+                false,
+                TestContext.Current.CancellationToken));
+        
+        exception.ErrorCode.Should().Be(403);
+    }
+
+    [Fact]
+    public async Task DeleteFile_FileLockedInRoom_ReturnsError()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var createdRoom = await CreateVirtualRoom("room_to_lock");
+        var sourceFile = await CreateFile("file_to_lock.docx", createdRoom.Id);
+        var lockedFile = (await _filesApi.LockFileAsync(sourceFile.Id, new LockFileParameters(true), TestContext.Current.CancellationToken)).Response;
+
+        var user = await Initializer.InviteContact(EmployeeType.User);
+        await _filesClient.Authenticate(user);
+        var targetFolderId = await GetUserFolderIdAsync(user);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _filesApi.DeleteFileAsync(
+                lockedFile.Id, 
+                new Delete(false, true), 
+                false,
+                TestContext.Current.CancellationToken));
+        
+        exception.ErrorCode.Should().Be(403);
+    }
+
+    [Fact]
+    public async Task DeleteFile_FileLocked_ReturnsError()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+
+        var file = await CreateFile("locked_file.docx", FolderType.USER, Initializer.Owner);
+        await _filesApi.LockFileAsync(file.Id, new LockFileParameters(true), TestContext.Current.CancellationToken);
+
+        var user = await Initializer.InviteContact(EmployeeType.User);
+        await _filesClient.Authenticate(user);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _filesApi.DeleteFileAsync(
+                file.Id,
+                new Delete(false, true),
+                false,
+                TestContext.Current.CancellationToken));
+
+        exception.ErrorCode.Should().Be(403);
+    }
+
+    [Fact]
+    public async Task DeleteFile_SharedFileLocked_ReturnsError()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+
+        var file = await CreateFileInMy("file_security_info.docx", Initializer.Owner);
+        var user1 = await Initializer.InviteContact(EmployeeType.User);
+
+        var shareInfo = new List<FileShareParams>
+        {
+            new() { ShareTo = user1.Id, Access = FileShare.ReadWrite },
+        };
+
+        await _filesApi.LockFileAsync(file.Id, new LockFileParameters(true), TestContext.Current.CancellationToken);
+
+        await _filesClient.Authenticate(user1);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _filesApi.DeleteFileAsync(
+                file.Id,
+                new Delete(false, true),
+                false,
+                TestContext.Current.CancellationToken));
+
+        exception.ErrorCode.Should().Be(403);
+    }
+
+    [Fact]
+    public async Task DeleteFile_EditingFile_ReturnsError()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+
+        var file = await CreateFile("editing_file.docx", FolderType.USER, Initializer.Owner);
+        await _filesApi.StartEditFileAsync(file.Id, new StartEdit(true), TestContext.Current.CancellationToken);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _filesApi.DeleteFileAsync(
+                file.Id,
+                new Delete(false, true),
+                false,
+                TestContext.Current.CancellationToken));
+
+        exception.ErrorCode.Should().Be(403);
+    }
 }

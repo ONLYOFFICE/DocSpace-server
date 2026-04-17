@@ -55,14 +55,14 @@ public class {{x-classname}} extends BaseApi {
 
   {{#operation}}
   /**
-   * {{summary}}
-   * {{notes}}
+   * {{{summary}}}
+   * {{{notes}}}
    *
    * REST API Reference for {{{operationId}}} Operation
    * @see {{vendorExtensions.x-seealsoUrl}}
    *
    {{#allParams}}
-   * @param {{paramName}} {{description}}{{#required}} (required){{/required}}{{^required}} (optional{{^isContainer}}{{#defaultValue}}, default to {{.}}{{/defaultValue}}{{/isContainer}}){{/required}}
+   * @param {{paramName}} {{{description}}}{{#required}} (required){{/required}}{{^required}} (optional{{^isContainer}}{{#defaultValue}}, default to {{.}}{{/defaultValue}}{{/isContainer}}){{/required}}
    {{/allParams}}
    {{#returnType}}
    * @return {{returnType}}
@@ -72,8 +72,8 @@ public class {{x-classname}} extends BaseApi {
    * @deprecated
    {{/isDeprecated}}
    {{#externalDocs}}
-   * {{description}}
-   * @see <a href="{{url}}">{{summary}} Documentation</a>
+   * {{{description}}}
+   * @see <a href="{{url}}">{{{summary}}} Documentation</a>
    {{/externalDocs}}
    */
   {{#isDeprecated}}
@@ -85,14 +85,14 @@ public class {{x-classname}} extends BaseApi {
 
 
   /**
-   * {{summary}}
-   * {{notes}}
+   * {{{summary}}}
+   * {{{notes}}}
    *
    * REST API Reference for {{{operationId}}} Operation
    * @see {{vendorExtensions.x-seealsoUrl}}
    *
    {{#allParams}}
-   * @param {{paramName}} {{description}}{{#required}} (required){{/required}}{{^required}} (optional{{^isContainer}}{{#defaultValue}}, default to {{.}}{{/defaultValue}}{{/isContainer}}){{/required}}
+   * @param {{paramName}} {{{description}}}{{#required}} (required){{/required}}{{^required}} (optional{{^isContainer}}{{#defaultValue}}, default to {{.}}{{/defaultValue}}{{/isContainer}}){{/required}}
    {{/allParams}}
    * @param additionalHeaders additionalHeaders for this call
    {{#returnType}}
@@ -103,8 +103,8 @@ public class {{x-classname}} extends BaseApi {
    * @deprecated
    {{/isDeprecated}}
    {{#externalDocs}}
-   * {{description}}
-   * @see <a href="{{url}}">{{summary}} Documentation</a>
+   * {{{description}}}
+   * @see <a href="{{url}}">{{{summary}}} Documentation</a>
    {{/externalDocs}}
    */
   {{#isDeprecated}}

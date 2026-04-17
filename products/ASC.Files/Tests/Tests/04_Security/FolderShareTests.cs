@@ -24,7 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Files.Tests.ApiFactories;
 
 namespace ASC.Files.Tests.Tests._04_Security;
 
@@ -32,11 +31,8 @@ namespace ASC.Files.Tests.Tests._04_Security;
 [Trait("Category", "Security")]
 [Trait("Feature", "Sharing")]
 public class FolderShareTests(
-    FilesApiFactory filesFactory,
-    WepApiFactory apiFactory,
-    PeopleFactory peopleFactory,
-    FilesServiceFactory filesServiceProgram)
-    : BaseTest(filesFactory, apiFactory, peopleFactory, filesServiceProgram)
+    AspireAppFixture fixture)
+    : BaseTest(fixture)
 {
     [Theory]
     [MemberData(nameof(ValidFileShare))]

@@ -29,6 +29,7 @@ namespace ASC.AI.Api;
 [Scope]
 [DefaultRoute]
 [ApiController]
+[AiFeature]
 [ControllerName("ai")]
 public class ChatController(
     ChatCompletionRunner chatCompletionRunner, 
@@ -63,7 +64,9 @@ public class ChatController(
     public async Task<IActionResult> StartNewChatAsync(StartNewChatRequestDto inDto)
     {
         var generator = await chatCompletionRunner.StartNewChatAsync(
-            inDto.RoomId, inDto.Body.Message, inDto.Body.Files);
+            inDto.RoomId,
+            inDto.Body.Message,
+            inDto.Body.Files);
 
         var source = generator.GenerateCompletionAsync(Request.HttpContext.RequestAborted);
 
@@ -91,7 +94,9 @@ public class ChatController(
     public async Task<IActionResult> ContinueChatAsync(ContinueChatRequestDto inDto)
     {
         var generator = await chatCompletionRunner.StartChatAsync(
-            inDto.ChatId, inDto.Body.Message, inDto.Body.Files);
+            inDto.ChatId,
+            inDto.Body.Message,
+            inDto.Body.Files);
 
         var source = generator.GenerateCompletionAsync(Request.HttpContext.RequestAborted);
 
@@ -220,9 +225,16 @@ public class ChatController(
     [SwaggerResponse(200, "The chat messages were successfully exported to the specified folder")]
     [SwaggerResponse(404, "The chat with the specified ID was not found or does not belong to the current user")]
     [HttpPost("chats/{chatId}/messages/export")]
-    public async Task ExportChatAsync(ExportChatRequestDto<int> inDto)
+    public async Task ExportChatAsync(ExportChatRequestDto inDto)
     {
-        await exporter.ExportMessagesAsync(inDto.Body.FolderId, inDto.Body.Title, inDto.ChatId);
+        if (inDto.Body.FolderId.ValueKind == JsonValueKind.Number)
+        {
+            await exporter.ExportMessagesAsync(inDto.Body.FolderId.GetInt32(), inDto.Body.Title, inDto.ChatId);
+        }
+        else
+        {
+            await exporter.ExportMessagesAsync(inDto.Body.FolderId.GetString(), inDto.Body.Title, inDto.ChatId);
+        }
     }
 
     /// <summary>
@@ -277,7 +289,7 @@ public class ChatController(
     [HttpPut("rooms/{roomId}/chats/config")]
     public async Task<UserChatSettingsDto> SetUserChatsSettingsAsync(SetUserChatsSettingsRequestDto inDto)
     {
-        var settings = await chatService.SetUserChatsSettingsAsync(inDto.RoomId, inDto.Body.WebSearchEnabled);
+        var settings = await chatService.SetUserChatsSettingsAsync(inDto.RoomId, inDto.Body.WebSearchEnabled, inDto.Body.ReasoningEffort);
         return settings.MapToDto();
     }
     

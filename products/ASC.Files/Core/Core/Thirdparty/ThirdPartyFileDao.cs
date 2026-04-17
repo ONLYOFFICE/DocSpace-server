@@ -1,25 +1,25 @@
 ﻿// (c) Copyright Ascensio System SIA 2009-2026
-// 
+//
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
+//
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
+//
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-// 
+//
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -41,7 +41,6 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
     where TFolder : class, TItem
     where TItem : class
 {
-    protected readonly Global _global = global;
     internal IDaoBase<TFile, TFolder, TItem> Dao { get; } = dao;
     internal IProviderInfo<TFile, TFolder, TItem> ProviderInfo { get; private set; }
 
@@ -370,14 +369,14 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
             if (!Dao.GetName(newFile).Equals(file.Title))
             {
                 var folderId = Dao.GetParentFolderId(await Dao.GetFileAsync(fileId));
-                file.Title = await _global.GetAvailableTitleAsync(file.Title, folderId, IsExistAsync, FileEntryType.File);
+                file.Title = await GetAvailableTitleAsync(file.Title, folderId);
                 newFile = await storage.RenameFileAsync(fileId, file.Title);
             }
         }
         else if (file.ParentId != null)
         {
             var folderId = Dao.MakeThirdId(file.ParentId);
-            file.Title = await _global.GetAvailableTitleAsync(file.Title, folderId, IsExistAsync, FileEntryType.File);
+            file.Title = await GetAvailableTitleAsync(file.Title, folderId);
             newFile = await storage.CreateFileAsync(fileStream, file.Title, folderId);
         }
 
@@ -401,6 +400,11 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
     public async Task<bool> IsExistAsync(string title, int category, string folderId)
     {
         return await IsExistAsync(title, folderId);
+    }
+
+    public async Task<string> GetAvailableTitleAsync(string requestTitle, string parentFolderId)
+    {
+        return await global.GetAvailableTitleAsync(requestTitle, parentFolderId, IsExistAsync, FileEntryType.File);
     }
 
     public Task<File<string>> ReplaceFileVersionAsync(File<string> file, Stream fileStream)
@@ -497,7 +501,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
             throw new Exception(errorFolder.Error);
         }
 
-        var newTitle = await _global.GetAvailableTitleAsync(Dao.GetName(file), Dao.GetId(toFolder), IsExistAsync, FileEntryType.File);
+        var newTitle = await GetAvailableTitleAsync(Dao.GetName(file), Dao.GetId(toFolder));
         var storage = await ProviderInfo.StorageAsync;
         var movedFile = await storage.MoveFileAsync(Dao.GetId(file), newTitle, Dao.GetId(toFolder));
 
@@ -544,7 +548,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
             throw new Exception(errorFolder.Error);
         }
 
-        var newTitle = await _global.GetAvailableTitleAsync(Dao.GetName(file), Dao.GetId(toFolder), IsExistAsync, FileEntryType.File);
+        var newTitle = await GetAvailableTitleAsync(Dao.GetName(file), Dao.GetId(toFolder));
         var storage = await ProviderInfo.StorageAsync;
         var newFile = await storage.CopyFileAsync(Dao.GetId(file), newTitle, Dao.GetId(toFolder));
 
@@ -565,12 +569,12 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
     public async Task<string> FileRenameAsync(File<string> file, string newTitle)
     {
         var thirdFile = await Dao.GetFileAsync(file.Id);
-        newTitle = await _global.GetAvailableTitleAsync(newTitle, Dao.GetParentFolderId(thirdFile), IsExistAsync, FileEntryType.File);
+        newTitle = await GetAvailableTitleAsync(newTitle, Dao.GetParentFolderId(thirdFile));
 
         var storage = await ProviderInfo.StorageAsync;
         var renamedThirdFile = await storage.RenameFileAsync(Dao.GetId(thirdFile), newTitle);
 
-        await ProviderInfo.CacheResetAsync(Dao.GetId(thirdFile));
+        await ProviderInfo.CacheResetAsync(Dao.GetId(thirdFile), true);
         var parentId = Dao.GetParentFolderId(thirdFile);
         if (parentId != null)
         {
@@ -852,7 +856,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
     {
         return Task.FromResult(0);
     }
-    
+
     public Task SetVectorizationStatusAsync(string fileId, VectorizationStatus status, Func<Task> action = null)
     {
         return Task.CompletedTask;

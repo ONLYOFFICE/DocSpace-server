@@ -8,10 +8,10 @@
   "inputSpec": "./json/billing-api.json",
   "outputDir": "postman-collection-sdk",
   "additionalProperties": {
-    "packageName": "DocSpace API",
+    "packageName": "Billing API",
     "packageVersion": "3.6.0",
     "outputFolder": "generated-sdk/billing-api-postman-collections",
-    "packageDescription": "A simple Postman Collection for integrating with the ONLYOFFICE DocSpace API",
+    "packageDescription": "A simple Postman Collection for integrating with the ONLYOFFICE Billing API",
     "postmanId": "5d8c9db9-3822-4cc8-864b-75521aa761c2",
     "postmanSchema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   }

@@ -17,10 +17,10 @@
     "apiPackage": "api", 
     "axiosVersion": "1.13.5",
     "outputFolder": "generated-sdk/billing-api-sdk-typescript",
-    "packageDescription": "A simple TypeScript SDK for integrating with the ONLYOFFICE DocSpace API",
+    "packageDescription": "A simple TypeScript SDK for integrating with the ONLYOFFICE Billing API",
     "packageKeywords": [
       "onlyoffice",
-      "docspace",
+      "billing",
       "sdk"
     ],
     "homepage": "https://www.onlyoffice.com",

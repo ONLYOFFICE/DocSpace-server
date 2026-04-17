@@ -9,7 +9,7 @@
   "outputDir": "ClientNet",
   "additionalProperties": {
     "packageName": "DocSpace.API.SDK",
-    "packageVersion": "3.6.0",
+    "packageVersion": "3.7.0",
     "licenseName": "Apache-2.0",
     "repositoryUrl": "https://github.com/ONLYOFFICE/docspace-api-sdk-csharp",
     "library": "httpclient",
@@ -19,7 +19,7 @@
     "zeroBasedEnums": true,
     "packageTitle": "DocSpace.API.SDK",
     "outputFolder": "../../../../../sdk/docspace-api-sdk-csharp",
-    "packageDescription": "A simple PHP SDK for integrating with the ONLYOFFICE DocSpace API",
+    "packageDescription": "A simple CSharp SDK for integrating with the ONLYOFFICE DocSpace API",
     "seealsoBaseUrl": "https://api.onlyoffice.com/docspace/api-backend/usage-api",
     "example": true,
     "readMe": "README.mustache"

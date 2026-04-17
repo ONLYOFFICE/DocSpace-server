@@ -173,6 +173,8 @@ public class BackupController(
     [HttpPost("startbackup")]
     public async Task<BackupProgress> StartBackup(BackupDto inDto, [FromServices] TenantQuotaController quotaController)
     {
+        await backupService.DemandPermissionsBackupAsync();
+
         if (inDto.Dump)
         {
             await tenantExtra.DemandAccessSpacePermissionAsync();
@@ -542,10 +544,13 @@ public class BackupController(
     /// <path>api/2.0/backup/getservicestate</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "Backup service state", typeof(BackupServiceStateDto))]
+    [SwaggerResponse(403, "Access denied")]
     [AllowNotPayment]
     [HttpGet("getservicestate")]
     public async Task<BackupServiceStateDto> GetBackupsServiceStateAsync()
     {
+        await backupService.DemandPermissionsBackupAsync();
+
         var tenantId = tenantManager.GetCurrentTenantId();
 
         var backupServiceEnabled = await backupService.IsBackupServiceEnabledAsync(tenantId);

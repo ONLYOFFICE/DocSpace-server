@@ -15,10 +15,10 @@
     "library": "guzzle",
     "excludeTests": true,
     "outputFolder": "generated-sdk/billing-api-sdk-php",
-    "packageDescription": "A simple PHP SDK for integrating with the ONLYOFFICE DocSpace API",
+    "packageDescription": "A simple PHP SDK for integrating with the ONLYOFFICE Billing API",
     "packageKeywords": [
       "onlyoffice",
-      "docspace",
+      "billing",
       "sdk"
     ],
     "homepage": "https://www.onlyoffice.com",

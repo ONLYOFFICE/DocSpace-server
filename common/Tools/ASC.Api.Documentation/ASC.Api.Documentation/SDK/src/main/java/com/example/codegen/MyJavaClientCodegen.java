@@ -108,12 +108,6 @@ public class MyJavaClientCodegen extends JavaClientCodegen {
             String baseClassName = tagParts.classPart + apiNameSuffix;
             String finalClassName = baseClassName;
 
-            // if (usedClassNames.contains(finalClassName)) {
-            //     finalClassName = camelize(tagParts.folderPart) + baseClassName;
-            // }
-
-            // usedClassNames.add(finalClassName);
-
             operationMap.put("x-folder", tagParts.folderPart);
             operationMap.put("x-classname", finalClassName);
             boolean shouldSupportFields = false;

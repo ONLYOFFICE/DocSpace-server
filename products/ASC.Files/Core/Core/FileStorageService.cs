@@ -234,7 +234,8 @@ public class FileStorageService //: IFileStorageService
         IEnumerable<string> tagNames = null,
         bool excludeSubject = false,
         ProviderFilter provider = ProviderFilter.None,
-        SubjectFilter subjectFilter = SubjectFilter.Owner,
+        SubjectFilter? subjectFilter = null,
+        string subjectOwnerId = null,
         ApplyFilterOption applyFilterOption = ApplyFilterOption.All,
         QuotaFilter quotaFilter = QuotaFilter.All,
         StorageFilter storageFilter = StorageFilter.None,
@@ -243,6 +244,11 @@ public class FileStorageService //: IFileStorageService
         int? groupId = null)
     {
         var subjectId = string.IsNullOrEmpty(subject) ? Guid.Empty : new Guid(subject);
+        var subjectOwnerIdGuid = string.IsNullOrEmpty(subjectOwnerId) ? Guid.Empty : new Guid(subjectOwnerId);
+        if (subjectFilter != null)
+        {
+            subjectOwnerIdGuid = Guid.Empty;
+        }
 
         var folderDao = daoFactory.GetCacheFolderDao<T>();
 
@@ -378,6 +384,7 @@ public class FileStorageService //: IFileStorageService
                 excludeSubject,
                 provider,
                 subjectFilter,
+                subjectOwnerIdGuid,
                 applyFilterOption,
                 quotaFilter,
                 storageFilter,
@@ -793,7 +800,11 @@ public class FileStorageService //: IFileStorageService
             folder,
             folder.Title);
 
-        await webhookManager.PublishAsync(WebhookTrigger.RoomCreated, folder);
+        await webhookManager.PublishAsync(
+            folder.IsAgent
+                ? WebhookTrigger.AgentCreated
+                : WebhookTrigger.RoomCreated,
+            folder);
 
         if (folder.ParentId is int parent && parent == await globalFolderHelper.FolderRoomTemplatesAsync)
         {
@@ -1075,7 +1086,7 @@ public class FileStorageService //: IFileStorageService
 
         if (!canEdit)
         {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_RenameFolder);
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
         if (folder.RootFolderType == FolderType.TRASH)
@@ -1099,7 +1110,7 @@ public class FileStorageService //: IFileStorageService
 
         await socketManager.UpdateFolderAsync(folder);
 
-        await webhookManager.PublishAsync(isRoom ? WebhookTrigger.RoomUpdated : WebhookTrigger.FolderUpdated, folder);
+        await webhookManager.PublishAsync(isRoom ? folder.IsAgent ? WebhookTrigger.AgentUpdated : WebhookTrigger.RoomUpdated : WebhookTrigger.FolderUpdated, folder);
 
         return folder;
     }
@@ -1370,7 +1381,12 @@ public class FileStorageService //: IFileStorageService
 
         await socketManager.UpdateFolderAsync(folder);
 
-        await webhookManager.PublishAsync(isRoom ? WebhookTrigger.RoomUpdated : WebhookTrigger.FolderUpdated, folder);
+        await webhookManager.PublishAsync(isRoom
+            ? folder.IsAgent
+                ? WebhookTrigger.AgentUpdated
+                : WebhookTrigger.RoomUpdated
+            : WebhookTrigger.FolderUpdated,
+            folder);
 
         return folder;
     }
@@ -1440,7 +1456,11 @@ public class FileStorageService //: IFileStorageService
                     renamedFolder,
                     renamedFolder.Title);
 
-                await webhookManager.PublishAsync(WebhookTrigger.RoomUpdated, renamedFolder);
+                await webhookManager.PublishAsync(
+                    renamedFolder.IsAgent
+                        ? WebhookTrigger.AgentUpdated
+                        : WebhookTrigger.RoomUpdated,
+                    renamedFolder);
             }
             else
             {
@@ -1493,7 +1513,7 @@ public class FileStorageService //: IFileStorageService
             : await fileDao.GetFileAsync(fileId);
         if (file == null)
         {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
         if (!await fileSecurity.CanReadAsync(file))
@@ -1655,22 +1675,22 @@ public class FileStorageService //: IFileStorageService
 
                 if (!string.IsNullOrWhiteSpace(docTemplate?.ThumbnailPath))
                 {
-                foreach (var size in thumbnailSettings.Sizes)
-                {
+                    foreach (var size in thumbnailSettings.Sizes)
+                    {
                         var pathThumb = $"{docTemplate.ThumbnailPath}{fileExt.Trim('.')}.{size.Width}x{size.Height}.{global.ThumbnailExtension}";
 
-                    if (!await storeTemplate.IsFileAsync("", pathThumb))
-                    {
-                        break;
-                    }
+                        if (!await storeTemplate.IsFileAsync("", pathThumb))
+                        {
+                            break;
+                        }
 
-                    await using (var streamThumb = await storeTemplate.GetReadStreamAsync("", pathThumb, 0))
-                    {
-                        await (await globalStore.GetStoreAsync()).SaveAsync(fileDao.GetUniqThumbnailPath(file, size.Width, size.Height), streamThumb);
-                    }
+                        await using (var streamThumb = await storeTemplate.GetReadStreamAsync("", pathThumb, 0))
+                        {
+                            await (await globalStore.GetStoreAsync()).SaveAsync(fileDao.GetUniqThumbnailPath(file, size.Width, size.Height), streamThumb);
+                        }
 
-                    counter++;
-                }
+                        counter++;
+                    }
                 }
 
                 if (thumbnailSettings.Sizes.Count() == counter)
@@ -1793,7 +1813,7 @@ public class FileStorageService //: IFileStorageService
 
         if (room is { FolderType: FolderType.PublicRoom })
         {
-            await SetExternalLinkAsync(file, Guid.NewGuid(), FileShare.Read, title ?? FilesCommonResource.DefaultExternalLinkTitle, primary: true);
+            await SetExternalLinkAsync(file, Guid.NewGuid(), file.IsForm ? FileShare.FillForms : FileShare.Read, title ?? FilesCommonResource.DefaultExternalLinkTitle, primary: true);
         }
 
         return file;
@@ -1973,6 +1993,12 @@ public class FileStorageService //: IFileStorageService
         try
         {
             var file = await daoFactory.GetFileDao<T>().GetFileAsync(fileId);
+
+            if (file == null)
+            {
+                throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+            }
+
             FileOptions<T> result = null;
 
             var oldTitle = file.Title;
@@ -2140,7 +2166,7 @@ public class FileStorageService //: IFileStorageService
 
         if (file == null)
         {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
         if (!await fileSecurity.CanLockAsync(file))
@@ -2289,7 +2315,7 @@ public class FileStorageService //: IFileStorageService
 
         if (file == null)
         {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
         if (!await fileSecurity.CanReadHistoryAsync(file))
@@ -2597,7 +2623,7 @@ public class FileStorageService //: IFileStorageService
 
     private async Task<(MemoryStream, MemoryStream)> GetCloneMemoryStreams(Stream stream)
     {
-        var memoryStream = new MemoryStream();
+        await using var memoryStream = new MemoryStream();
         await stream.CopyToAsync(memoryStream);
 
         return (await tempStream.CloneMemoryStream(memoryStream, 300), await tempStream.CloneMemoryStream(memoryStream));
@@ -3296,7 +3322,7 @@ public class FileStorageService //: IFileStorageService
         return any;
     }
 
-    public async Task ReassignRoomsAsync(Guid user, Guid? reassign)
+    public async Task ChangeRoomsOwnerAsync(Guid user, Guid? reassign)
     {
         var entries = await GetEntriesAsync(await globalFolderHelper.GetFolderVirtualRooms());
         entries.AddRange(await GetEntriesAsync(await globalFolderHelper.GetFolderAiAgentsAsync()));
@@ -3612,6 +3638,21 @@ public class FileStorageService //: IFileStorageService
             _logger.InformationReassignProvider(commonProviderInfo.ProviderId, userFromId, userToId);
             await providerDao.UpdateProviderInfoAsync(commonProviderInfo.ProviderId, null, null, FolderType.DEFAULT, userToId);
         }
+    }
+
+    public async Task ReassignRoomsAsync(Guid userFromId, Guid userToId, bool checkPermission = false)
+    {
+        if (checkPermission)
+        {
+            await DemandPermissionToDeletePersonalDataAsync(userFromId);
+        }
+
+        if (daoFactory.GetFolderDao<int>() is not FolderDao folderDao)
+        {
+            return;
+        }
+
+        await folderDao.ReassignRoomsAsync(userFromId, userToId);
     }
 
     public async Task ReassignRoomsFoldersAsync(Guid userFromId, bool checkPermission = false)
@@ -4514,7 +4555,8 @@ public class FileStorageService //: IFileStorageService
         }
         else
         {
-            await tagDao.RemoveTagsAsync(tag);
+            var tags = await tagDao.GetTagsAsync(authContext.CurrentAccount.ID, [TagType.Pin], [room]).ToListAsync();
+            await tagDao.RemoveTagsAsync(room, tags.Select(r=> r.Id));
         }
 
         room.Pinned = pin;
@@ -5032,6 +5074,11 @@ public class FileStorageService //: IFileStorageService
             return null;
         }
 
+        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
         var fileDao = daoFactory.GetFileDao<T>();
         var file = await fileDao.GetFileAsync(fileId);
 
@@ -5331,6 +5378,10 @@ public class FileStorageService //: IFileStorageService
     public async Task<RoomGroup> GetGroupInfoAsync(int roomGroupId)
     {
         var group = await daoFactory.GetRoomGroupDao<int>().GetGroupInfoAsync(roomGroupId);
+        if (group == null)
+        {
+            throw new ItemNotFoundException(Resource.ErrorGroupNotFound);
+        }
         return group;
     }
 
@@ -5353,14 +5404,11 @@ public class FileStorageService //: IFileStorageService
 
     public async Task<RoomGroup> ChangeGroupIconAsync(int groupId, string icon)
     {
-        var group = await daoFactory.GetRoomGroupDao<int>().GetGroupInfoAsync(groupId);
+        var group = await GetGroupInfoAsync(groupId);
+
         if (icon != null)
         {
-            var covers = await RoomLogoManager.GetCoversAsync();
-            if (icon != "" && !covers.ContainsKey(icon))
-            {
-                throw new ArgumentException(null, nameof(icon));
-            }
+            await RoomLogoManager.ValidateRoomCover(icon);
 
             group.Icon = icon == "" ? null : icon;
             return await SaveRoomGroupAsync(group);
@@ -5368,20 +5416,54 @@ public class FileStorageService //: IFileStorageService
         return group;
     }
 
-    public async Task GenerateXlsxAsync(int formId)
+    public async Task<(FormFillingReportTask Task, File<int> Form)> GenerateXlsxAsync(int fileId)
     {
         var fileDao = daoFactory.GetFileDao<int>();
         var folderDao = daoFactory.GetFolderDao<int>();
 
-        var form = await fileDao.GetFileAsync(formId);
-        if (form == null)
+        var file = await fileDao.GetFileAsync(fileId);
+        if (file == null)
         {
             throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
-        if (!await DocSpaceHelper.IsFormOrCompletedForm(form, daoFactory))
+        var fileProperties = await fileDao.GetProperties(file.Id);
+
+        File<int> form;
+        EntryProperties<int> properties;
+
+        var extension = FileUtility.GetFileExtension(file.Title);
+        if (extension is ".xlsx" or ".csv")
         {
-            throw new InvalidOperationException();
+            var parentFolder = await folderDao.GetFolderAsync(file.ParentId);
+            if (parentFolder?.FolderType != FolderType.FormFillingFolderDone)
+            {
+                throw new InvalidOperationException();
+            }
+
+            var originalFormId = fileProperties?.FormFilling?.OriginalFormId ?? 0;
+            if (originalFormId == 0)
+            {
+                throw new InvalidOperationException();
+            }
+
+            form = await fileDao.GetFileAsync(originalFormId);
+            if (form == null)
+            {
+                throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+            }
+
+            properties = await fileDao.GetProperties(form.Id);
+        }
+        else
+        {
+            if (!await DocSpaceHelper.IsFormOrCompletedForm(file, daoFactory))
+            {
+                throw new InvalidOperationException();
+            }
+
+            form = file;
+            properties = fileProperties;
         }
 
         if (!await fileSecurity.CanEditAsync(form))
@@ -5389,7 +5471,6 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
         }
 
-        var properties = await fileDao.GetProperties(form.Id);
         var formFilling = properties?.FormFilling;
 
         if (formFilling?.StartFilling != true || formFilling.OriginalFormId != form.Id)
@@ -5421,8 +5502,89 @@ public class FileStorageService //: IFileStorageService
 
         await entryManager.EnsureFormFillingOutputAsync(form, room, resultsFile, resultFolder, properties, folderDao, fileDao);
 
-        await exportToXLSX.UpdateXlsxReport(room.Id, form.Id, form.Version);
+        var task = await exportToXLSX.UpdateXlsxReport(room.Id, form.Id, form.Version);
 
+        return (task, form);
+    }
+
+    public async Task<(FormFillingReportTask Task, File<int> Form)> GenerateXlsxByFolderAsync(int folderId)
+    {
+        var fileDao = daoFactory.GetFileDao<int>();
+        var folderDao = daoFactory.GetFolderDao<int>();
+
+        var resultFolder = await folderDao.GetFolderAsync(folderId);
+
+        if (resultFolder == null)
+        {
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
+
+        if (resultFolder.FolderType != FolderType.FormFillingFolderDone)
+        {
+            throw new InvalidOperationException();
+        }
+
+        var completedForm = await fileDao.GetFilesAsync(folderId, new OrderBy(SortedByType.DateAndTime, false), FilterType.PdfForm, false, Guid.Empty, null, null, false, count: 1)
+            .FirstOrDefaultAsync();
+
+        if (completedForm == null)
+        {
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+
+        var completedFormProperties = await fileDao.GetProperties(completedForm.Id);
+        var originalFormId = completedFormProperties?.FormFilling?.OriginalFormId ?? 0;
+
+        if (originalFormId == 0)
+        {
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+
+        var roomId = completedFormProperties.FormFilling.RoomId;
+
+        var formTask = fileDao.GetFileAsync(originalFormId);
+        var roomTask = folderDao.GetFolderAsync(roomId);
+
+        await Task.WhenAll(formTask, roomTask);
+
+        var form = formTask.Result;
+        var room = roomTask.Result;
+
+        if (form == null)
+        {
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+
+        if (room == null || room.FolderType != FolderType.FillingFormsRoom)
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (!await fileSecurity.CanEditAsync(form))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
+        }
+
+        var properties = await fileDao.GetProperties(form.Id);
+        var formFilling = properties?.FormFilling;
+
+        if (formFilling?.StartFilling != true || formFilling.OriginalFormId != form.Id)
+        {
+            throw new InvalidOperationException();
+        }
+
+        var resultsFile = await fileDao.GetFileAsync(formFilling.ResultsFileID);
+
+        await entryManager.EnsureFormFillingOutputAsync(form, room, resultsFile, resultFolder, properties, folderDao, fileDao);
+
+        var task = await exportToXLSX.UpdateXlsxReport(room.Id, form.Id, form.Version);
+
+        return (task, form);
+    }
+
+    public Task<FormFillingReportTask> GetXlsxTaskAsync(int formId)
+    {
+        return exportToXLSX.GetXlsxTaskAsync(formId);
     }
 
     private async Task CheckRoomAvailability<T>(T roomId)

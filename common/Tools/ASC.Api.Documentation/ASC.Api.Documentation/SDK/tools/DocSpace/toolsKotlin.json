@@ -9,13 +9,14 @@
   "outputDir": "Kotlin",
   "additionalProperties": {
     "packageName": "onlyoffice.docspace.api.sdk",
-    "packageVersion": "3.6.0",
+    "packageVersion": "3.7.0",
     "artifactId": "onlyoffice.docspace.api.sdk",
     "licenseName": "Apache-2.0",
     "repositoryUrl": "https://github.com/ONLYOFFICE/docspace-api-sdk-kotlin",
     "library": "jvm-retrofit2",
     "dateLibrary": "java8",
     "excludeTests": true,
+    "useCoroutines": true
     "outputFolder": "../../../../../sdk/docspace-api-sdk-kotlin",
     "seealsoBaseUrl": "https://api.onlyoffice.com/docspace/api-backend/usage-api"
   }

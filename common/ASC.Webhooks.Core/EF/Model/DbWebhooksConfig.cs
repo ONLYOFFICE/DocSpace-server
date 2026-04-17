@@ -117,6 +117,7 @@ public static class WebhooksConfigExtension
 
                 entity.Property(e => e.Triggers)
                     .HasColumnName("triggers")
+                    .HasColumnType("bigint")
                     .IsRequired();
 
                 entity.Property(e => e.TargetId)
@@ -217,6 +218,7 @@ public static class WebhooksConfigExtension
 
                 entity.Property(e => e.Triggers)
                     .HasColumnName("triggers")
+                    .HasColumnType("bigint")
                     .IsRequired();
 
                 entity.Property(e => e.TargetId)

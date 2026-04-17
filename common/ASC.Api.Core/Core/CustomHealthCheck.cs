@@ -37,10 +37,13 @@ public static class CustomHealthCheck
 
     public static IServiceCollection AddCustomHealthCheck(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddSingleton<WarmupState>();
+
         var hcBuilder = services.AddHealthChecks();
 
         hcBuilder.AddCheck("self", () => Running ? HealthCheckResult.Healthy()
                                     : HealthCheckResult.Unhealthy())
+                 .AddCheck<WarmupHealthCheck>("warmup", tags: ["warmup", "services"])
                  .AddDatabase(configuration)
                  .AddDistibutedCache(configuration);
         //.AddMessageQueue(configuration);

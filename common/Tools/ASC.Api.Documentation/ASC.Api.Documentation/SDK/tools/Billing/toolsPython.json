@@ -14,7 +14,7 @@
     "repositoryUrl": "https://github.com/ONLYOFFICE/billing-api-sdk-python",
     "excludeTests": true,
     "outputFolder": "generated-sdk/billing-api-sdk-python",
-    "packageDescription": "A simple PHP SDK for integrating with the ONLYOFFICE DocSpace API",
+    "packageDescription": "A simple Python SDK for integrating with the ONLYOFFICE Billing API",
     "example": false,
     "readMe": "README_Billing.mustache"
   },
