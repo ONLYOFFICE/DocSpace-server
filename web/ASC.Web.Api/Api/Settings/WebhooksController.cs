@@ -344,9 +344,9 @@ public class WebhooksController(
     [Tags("Settings / Webhooks")]
     [SwaggerResponse(200, "List of triggers for a webhook", typeof(Dictionary<string, int>))]
     [HttpGet("webhook/triggers")]
-    public Dictionary<string, int> GetWebhookTriggers()
+    public Dictionary<string, long> GetWebhookTriggers()
     {
-        return Enum.GetValues<WebhookTrigger>().ToDictionary(item => item.ToCustomString(), item => (int)item);
+        return Enum.GetValues<WebhookTrigger>().ToDictionary(item => item.ToCustomString(), item => (long)item);
     }
 
     private async Task<bool> CheckAdminPermissionsAsync()
