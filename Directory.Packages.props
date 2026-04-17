@@ -182,7 +182,6 @@
     <PackageVersion Include="Swashbuckle.AspNetCore.Annotations" Version="10.1.4" />
     <PackageVersion Include="Swashbuckle.AspNetCore.SwaggerGen" Version="10.1.4" />
     <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="8.15.0" />
-    <PackageVersion Include="System.ServiceModel.Primitives" Version="10.0.652802" />
     <PackageVersion Include="Aspire.Hosting.PostgreSQL" Version="13.2.0" />
     <PackageVersion Include="Aspire.Hosting.Testing" Version="13.2.0" />
     <PackageVersion Include="Telegram.Bot" Version="22.7.6" />
