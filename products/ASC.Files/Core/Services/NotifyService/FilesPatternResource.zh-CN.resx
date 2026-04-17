@@ -165,8 +165,7 @@ $OrangeButton
   </data>
   <data name="pattern_FormStartedFilling" xml:space="preserve">
     <value>
-      活动通知。"$FromUserName":"$FromUserLink" 已启动表单填写进程："$DocumentTitle":"$DocumentURL"，位于房间："$RoomTitle":"$RoomURL" — $__DateTime。
-</value>
+      活动通知。"$FromUserName":"$FromUserLink" 已启动表单填写进程："$DocumentTitle":"$DocumentURL"，位于房间："$RoomTitle":"$RoomURL" — $__DateTime。</value>
   </data>
   <data name="pattern_FormSubmitted" xml:space="preserve">
     <value>h1. 您已填写表单 $Message
@@ -297,5 +296,19 @@ $Message</value>
   </data>
   <data name="subject_YourTurnFormFilling" xml:space="preserve">
     <value>协作空间通知。</value>
+  </data>
+  <data name="pattern_AgentRemoved" xml:space="preserve">
+    <value>h1. $__AuthorName 删除了一个 AI 代理
+
+$__AuthorName 删除了 AI 代理：$RoomTitle</value>
+  </data>
+  <data name="pattern_AgentUpdateAccessForUser_push" xml:space="preserve">
+    <value>您在 AI 代理"$RoomTitle"中的角色已更改为"$RoomRole"</value>
+  </data>
+  <data name="pattern_InvitedToAgent_push" xml:space="preserve">
+    <value>您已被邀请加入 AI 代理"$RoomTitle"</value>
+  </data>
+  <data name="subject_AgentRemoved" xml:space="preserve">
+    <value>DocSpace 通知。AI 代理已删除</value>
   </data>
 </root>

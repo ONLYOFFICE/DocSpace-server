@@ -298,4 +298,18 @@ $Message</value>
   <data name="subject_YourTurnFormFilling" xml:space="preserve">
     <value>DocSpaceの通知。</value>
   </data>
+  <data name="pattern_AgentRemoved" xml:space="preserve">
+    <value>h1. $__AuthorNameがAIエージェントを削除しました
+
+$__AuthorNameがAIエージェントを削除しました： RoomTitle</value>
+  </data>
+  <data name="pattern_AgentUpdateAccessForUser_push" xml:space="preserve">
+    <value>AIエージェント"$RoomTitle"におけるあなたの役割が"$RoomRole"に変更されました</value>
+  </data>
+  <data name="pattern_InvitedToAgent_push" xml:space="preserve">
+    <value>AIエージェント "$RoomTitle" に招待されました</value>
+  </data>
+  <data name="subject_AgentRemoved" xml:space="preserve">
+    <value>DocSpace通知。AIエージェントが削除されました</value>
+  </data>
 </root>

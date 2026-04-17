@@ -174,4 +174,13 @@
   <data name="UnavailableServers" xml:space="preserve">
     <value>MCP sunucuları kullanılamıyor: {0}. Bağlantı ayarlarını kontrol edin</value>
   </data>
+  <data name="MessageNotFound" xml:space="preserve">
+    <value>Mesaj bulunamadı</value>
+  </data>
+  <data name="NoModelsAvailable" xml:space="preserve">
+    <value>Bu sağlayıcı için kullanılabilir model yok</value>
+  </data>
+  <data name="ProviderNameExists" xml:space="preserve">
+    <value>Sağlayıcı adı zaten mevcut</value>
+  </data>
 </root>

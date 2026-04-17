@@ -171,4 +171,16 @@
   <data name="UnavailableServers" xml:space="preserve">
     <value>MCPサーバーが利用できません: {0}。接続設定を確認してください</value>
   </data>
+  <data name="MessageNotFound" xml:space="preserve">
+    <value>メッセージが見つかりません</value>
+  </data>
+  <data name="NoModelsAvailable" xml:space="preserve">
+    <value>このプロバイダーに利用可能なモデルがありません</value>
+  </data>
+  <data name="ProviderNameExists" xml:space="preserve">
+    <value>プロバイダー名はすでに存在します</value>
+  </data>
+  <data name="AttachmentProcessFailed" xml:space="preserve">
+    <value>ファイルを処理できません：{0}。ファイルが破損しているか、暗号化されている可能性があります</value>
+  </data>
 </root>

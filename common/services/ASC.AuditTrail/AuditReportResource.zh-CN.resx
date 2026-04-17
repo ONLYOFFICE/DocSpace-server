@@ -1131,4 +1131,16 @@
   <data name="WebpluginUploaded" xml:space="preserve">
     <value>插件已上传：{0}</value>
   </data>
+  <data name="AIAccessDisabled" xml:space="preserve">
+    <value>AI 服务已被禁用</value>
+  </data>
+  <data name="AIAccessEnabled" xml:space="preserve">
+    <value>AI 服务已启用</value>
+  </data>
+  <data name="AIDefaultProviderDeleted" xml:space="preserve">
+    <value>默认提供商已删除</value>
+  </data>
+  <data name="AIDefaultProviderSet" xml:space="preserve">
+    <value>已设置默认 AI 提供商：名称：{0}，默认模型：{1}</value>
+  </data>
 </root>

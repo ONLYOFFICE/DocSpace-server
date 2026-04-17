@@ -171,4 +171,16 @@
   <data name="UnavailableServers" xml:space="preserve">
     <value>MCP serverləri mövcud deyil: {0}. Əlaqə parametrlərini yoxlayın</value>
   </data>
+  <data name="AttachmentProcessFailed" xml:space="preserve">
+    <value>{0} faylları emal etmək mümkün deyil. Fayllar zədələnmiş və ya şifrələnmiş ola bilər</value>
+  </data>
+  <data name="MessageNotFound" xml:space="preserve">
+    <value>Mesaj tapılmadı</value>
+  </data>
+  <data name="NoModelsAvailable" xml:space="preserve">
+    <value>Bu provayder üçün mövcud model yoxdur</value>
+  </data>
+  <data name="ProviderNameExists" xml:space="preserve">
+    <value>Provayder adı artıq mövcuddur</value>
+  </data>
 </root>

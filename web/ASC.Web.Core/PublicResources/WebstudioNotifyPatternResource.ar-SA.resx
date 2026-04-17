@@ -2252,4 +2252,31 @@ $TrulyYours</value>
   <data name="TrulyYoursText" xml:space="preserve">
     <value>شكرًا لك، فريق ${LetterLogoText}</value>
   </data>
+  <data name="ActionFileUploadedToAgentKnowledge" xml:space="preserve">
+    <value>قام &lt;b&gt;{0}&lt;/b&gt; بتحميل مستند جديد: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; إلى قاعدة معرفة وكيل الذكاء الاصطناعي: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
+  </data>
+  <data name="subject_api_key_expired" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace: انتهت صلاحية مفتاح API الخاص بك</value>
+  </data>
+  <data name="subject_user_agent_role_changed" xml:space="preserve">
+    <value>تم تغيير دورك في وكيل ذكاء اصطناعي في DocSpace</value>
+  </data>
+  <data name="pattern_api_key_expired" xml:space="preserve">
+    <value>مرحبًا، $UserName!
+
+يهدف هذا البريد الإلكتروني إلى إعلامك بأن مفتاح API الخاص بك "*$Message*" قد انتهت صلاحيته وتم إلغاء تفعيله.
+
+يمكنك إنشاء مفتاح API جديد في "أدوات المطور":"${__VirtualRootPath}/developer-tools/api-keys".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_user_agent_role_changed" xml:space="preserve">
+    <value>مرحبًا!
+
+لقد تم تعيينك في دور جديد في وكيل الذكاء الاصطناعي في DocSpace "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+
+تعرف على المزيد حول أدوار الغرف وأذوناتها في "مركز المساعدة": "${HelpCenterUrl}".
+
+$TrulyYours</value>
+  </data>
 </root>

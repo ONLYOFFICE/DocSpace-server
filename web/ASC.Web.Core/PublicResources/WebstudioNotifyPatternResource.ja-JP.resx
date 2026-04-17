@@ -2141,4 +2141,70 @@ $TrulyYours</value>
   <data name="TrulyYoursText" xml:space="preserve">
     <value>${LetterLogoText} チーム</value>
   </data>
+  <data name="ActionFileUploadedToAgentKnowledge" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt;が新しいドキュメントをアップロードしました：&lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; AIエージェントのナレッジベースに：&lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
+  </data>
+  <data name="subject_api_key_expired" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace：APIキーの有効期限が切れました</value>
+  </data>
+  <data name="subject_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpaceが削除されました</value>
+  </data>
+  <data name="subject_user_agent_role_changed" xml:space="preserve">
+    <value>DocSpace AIエージェントにおけるあなたの役割が変更されました</value>
+  </data>
+  <data name="pattern_api_key_expired" xml:space="preserve">
+    <value>こんにちは、$UserName！
+
+このメールは、APIキー"*$Message*"の有効期限が切れ、無効化されたことをお知らせするものです。
+
+新しいAPIキーは"開発者ツール":"${__VirtualRootPath}/developer-tools/api-keys"で生成できます。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_user_agent_role_changed" xml:space="preserve">
+    <value>こんにちは！
+
+DocSpace AIエージェント"${RoomTitle}":"${RoomUrl}"に新しい役割が割り当てられました：${UserRole}。
+
+ルームの役割と権限の詳細については、"ヘルプセンター":"${HelpCenterUrl}"をご覧ください。
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_scheduled_backup_failed" xml:space="preserve">
+    <value>DocSpaceの自動バックアップに失敗しました</value>
+  </data>
+  <data name="pattern_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpaceが削除されました。
+
+*ポータル：* ${PortalUrl}
+*オーナー：* ${UserName} ${UserEmail}
+*お客様：* ${OwnerName}
+
+自動請求がオフになっていることをご確認ください。お客様のStripeアカウントで自動請求のステータスをご確認ください。</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed" xml:space="preserve">
+    <value>こんにちは、$UserName、
+
+DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" のスケジュールされたバックアッププロセスに失敗しました。
+
+"バックアップ":"${__VirtualRootPath}/portal-settings/backup/data-backup" および "サービス":"{__VirtualRootPath}/portal-settings/services" の設定を確認することをお勧めします。
+
+ご質問やサポートが必要な場合は、"${__SupportLink}":"${__SupportLink}" よりお気軽にお問い合わせください。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
+    <value>こんにちは、$UserName、
+
+DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) のスケジュールされたバックアッププロセスに失敗しました。
+
+[バックアップ](${__VirtualRootPath}/portal-settings/backup/data-backup) および [サービス](${__VirtualRootPath}/portal-settings/services) の設定を確認することをお勧めします。
+
+ご質問やサポートが必要な場合は、[${__SupportLink}](${__SupportLink}) よりお気軽にお問い合わせください。
+
+敬具、
+${LetterLogoText} サポートチーム
+[${__SiteLink}](${__SiteLink})</value>
+  </data>
 </root>

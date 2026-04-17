@@ -2153,4 +2153,43 @@ $TrulyYours</value>
   <data name="TrulyYoursText" xml:space="preserve">
     <value>Hörmətlə, ${LetterLogoText} Komandası</value>
   </data>
+  <data name="ActionFileUploadedToAgentKnowledge" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; yeni sənəd yüklədi: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; AI agentinin bilik bazasına: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
+  </data>
+  <data name="subject_api_key_expired" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace: API açarınızın müddəti bitib</value>
+  </data>
+  <data name="subject_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace silindi</value>
+  </data>
+  <data name="subject_user_agent_role_changed" xml:space="preserve">
+    <value>DocSpace AI agentindəki rolunuz dəyişdi</value>
+  </data>
+  <data name="pattern_api_key_expired" xml:space="preserve">
+    <value>Salam, $UserName!
+
+Bu e-poçt sizi "$Message*" API açarınızın müddətinin bitdiyini və deaktiv edildiyini xəbərdar etmək üçündür.
+
+"Tərtibatçı Alətləri":"${__VirtualRootPath}/developer-tools/api-keys" ndə yeni API açarı yarada bilərsiniz.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace silindi.
+
+*Portal:* ${PortalUrl}
+*Sahib:* ${UserName} ${UserEmail}
+*Müştəri:* ${OwnerName}
+
+Zəhmət olmasa, avtomatik ödənişin söndürüldüyünə əmin olun. Müştərinin Stripe hesabında avtomatik ödənişin statusunu yoxlayın.</value>
+  </data>
+  <data name="pattern_user_agent_role_changed" xml:space="preserve">
+    <value>Salam!
+
+DocSpace AI agentində "${RoomTitle}":"${RoomUrl}" sizə yeni rol təyin edildi: ${UserRole}.
+
+Otaq rolları və icazələri haqqında daha çox məlumat üçün "Yardım Mərkəzi":"${HelpCenterUrl}" nə baxın.
+
+$TrulyYours</value>
+  </data>
 </root>
