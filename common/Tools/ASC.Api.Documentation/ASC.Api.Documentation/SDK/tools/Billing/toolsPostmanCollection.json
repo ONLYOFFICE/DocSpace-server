@@ -12,7 +12,7 @@
     "packageVersion": "3.6.0",
     "outputFolder": "generated-sdk/billing-api-postman-collections",
     "packageDescription": "A simple Postman Collection for integrating with the ONLYOFFICE Billing API",
-    "postmanId": "<new-unique-uuid>",
+    "postmanId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
     "postmanSchema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   }
 }
