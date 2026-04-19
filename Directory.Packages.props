@@ -9,8 +9,8 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Company>Ascensio System SIA</Company>
-    <AssemblyVersion>3.6.0</AssemblyVersion>
-    <ProductVersion>3.6.0</ProductVersion>
+    <AssemblyVersion>3.7.0</AssemblyVersion>
+    <ProductVersion>3.7.0</ProductVersion>
     <Copyright>(c) Ascensio System SIA. All rights reserved</Copyright>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <AnalysisLevel>latest</AnalysisLevel>
