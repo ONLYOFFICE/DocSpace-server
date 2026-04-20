@@ -3118,6 +3118,148 @@
         ]
       }
     },
+    "/api/2.0/ai/providers/models/preview": {
+      "post": {
+        "tags": [
+          "AI / Providers"
+        ],
+        "summary": "Preview models for a new AI provider",
+        "description": "Connects to the specified AI provider using the provided credentials and returns the available models\r\nwith their default settings. This is used to preview models before saving the provider.\r\nRecommended models are enabled by default with configuration-defined settings.\r\nAdditional models are disabled by default with empty capabilities.",
+        "operationId": "previewProviderModels",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PreviewProviderModelsRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "List of models with default settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModelSettingsArrayWrapper"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid connection data or unsupported provider type"
+          },
+          "403": {
+            "description": "You don't have enough permission to manage providers"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": []
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": []
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": []
+          }
+        ]
+      }
+    },
+    "/api/2.0/ai/providers/{providerId}/models": {
+      "get": {
+        "tags": [
+          "AI / Providers"
+        ],
+        "summary": "Get all models for a provider with their settings",
+        "description": "Returns the full list of AI models available from a provider, including both recommended and additional models.\r\nEach model includes its current settings: enabled state, display alias, and capabilities (vision, tool calling, thinking).\r\nRecommended models are enabled by default and their alias and capabilities come from configuration.\r\nAdditional models are disabled by default and can be configured by the admin.",
+        "operationId": "getProviderModels",
+        "parameters": [
+          {
+            "name": "providerId",
+            "in": "path",
+            "description": "The identifier of the AI provider.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of models with settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModelSettingsArrayWrapper"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "You don't have enough permission to manage providers"
+          },
+          "404": {
+            "description": "Provider not found"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": []
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": []
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": []
+          }
+        ]
+      }
+    },
     "/api/2.0/ai/providers/default": {
       "put": {
         "tags": [
@@ -39617,16 +39759,16 @@
         "tags": [
           "Settings / TFA settings"
         ],
-        "summary": "Get confirmation email",
-        "description": "Returns the confirmation email URL for authorization via SMS or TFA application.",
-        "operationId": "getTfaConfirmUrl",
+        "summary": "Get TFA confirmation data",
+        "description": "Returns the confirmation data for authorization via SMS or TFA application.",
+        "operationId": "getTfaConfirmData",
         "responses": {
           "200": {
-            "description": "Confirmation email URL",
+            "description": "TFA confirmation data",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/StringWrapper"
+                  "$ref": "#/components/schemas/TfaConfirmDataWrapper"
                 }
               }
             }
@@ -39671,8 +39813,8 @@
         "tags": [
           "Settings / TFA settings"
         ],
-        "summary": "Get a confirmation email for updating TFA settings",
-        "description": "Returns the confirmation email URL for updating TFA settings.",
+        "summary": "Updates TFA settings",
+        "description": "Updates TFA settings and returns the confirmation URL for authorization via SMS or TFA application.",
         "operationId": "updateTfaSettingsLink",
         "requestBody": {
           "content": {
@@ -39685,7 +39827,7 @@
         },
         "responses": {
           "200": {
-            "description": "Confirmation email URL",
+            "description": "TFA confirmation URL",
             "content": {
               "application/json": {
                 "schema": {
@@ -39806,7 +39948,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ObjectArrayWrapper"
+                  "$ref": "#/components/schemas/TfaAppCodeArrayWrapper"
                 }
               }
             }
@@ -39863,7 +40005,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ObjectArrayWrapper"
+                  "$ref": "#/components/schemas/TfaAppCodeArrayWrapper"
                 }
               }
             }
@@ -40634,7 +40776,7 @@
                       "type": "object",
                       "additionalProperties": {
                         "type": "integer",
-                        "format": "int32"
+                        "format": "int64"
                       }
                     },
                     "count": {
@@ -41223,6 +41365,28 @@
         },
         "additionalProperties": false
       },
+      "AiModelCapabilities": {
+        "type": "object",
+        "properties": {
+          "vision": {
+            "type": "boolean",
+            "description": "Indicates whether the model supports image and vision input.",
+            "example": true
+          },
+          "toolCalling": {
+            "type": "boolean",
+            "description": "Indicates whether the model supports tool (function) calling.",
+            "example": true
+          },
+          "thinking": {
+            "type": "boolean",
+            "description": "Indicates whether the model supports extended thinking and reasoning.",
+            "example": false
+          }
+        },
+        "additionalProperties": false,
+        "description": "The AI model capabilities."
+      },
       "AiProviderArrayWrapper": {
         "type": "object",
         "properties": {
@@ -41712,7 +41876,11 @@
           "thinking": {
             "type": "boolean",
             "description": "Indicates whether the model supports extended thinking mode.",
-            "example": false
+            "example": false,
+            "deprecated": true
+          },
+          "capabilities": {
+            "$ref": "#/components/schemas/AiModelCapabilities"
           },
           "internal": {
             "type": "boolean",
@@ -41954,6 +42122,27 @@
             "description": "The authentication API key for the AI provider.",
             "nullable": true,
             "example": "sk-example-key-123"
+          },
+          "modelSettings": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ModelSettingsItemDto"
+            },
+            "description": "Optional list of model settings to configure atomically with the provider creation.",
+            "nullable": true,
+            "example": [
+              {
+                "modelId": "claude-opus-4-1-20250805",
+                "isEnabled": true,
+                "alias": "Claude Opus 4.1",
+                "capabilities": {
+                  "vision": true,
+                  "toolCalling": true,
+                  "thinking": false
+                }
+              }
+            ]
           }
         },
         "additionalProperties": false,
@@ -42000,6 +42189,15 @@
             "description": "AI provider title.",
             "nullable": true,
             "example": "OpenAI"
+          },
+          "providerType": {
+            "$ref": "#/components/schemas/ProviderType"
+          },
+          "defaultModelAlias": {
+            "type": "string",
+            "description": "Display alias of the default model.",
+            "nullable": true,
+            "example": "GPT-4o"
           }
         },
         "additionalProperties": false,
@@ -44080,6 +44278,15 @@
             "nullable": true,
             "example": "gpt-4o"
           },
+          "alias": {
+            "type": "string",
+            "description": "The display name for the model.",
+            "nullable": true,
+            "example": "GPT-4o"
+          },
+          "capabilities": {
+            "$ref": "#/components/schemas/AiModelCapabilities"
+          },
           "price": {
             "$ref": "#/components/schemas/AiChatPrice"
           },
@@ -44089,6 +44296,117 @@
         },
         "additionalProperties": false,
         "description": "The AI model information."
+      },
+      "ModelSettingsArrayWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ModelSettingsDto"
+            }
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
+      "ModelSettingsDto": {
+        "required": [
+          "capabilities",
+          "id"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The model identifier.",
+            "nullable": true,
+            "example": "claude-sonnet-4-20250514"
+          },
+          "alias": {
+            "type": "string",
+            "description": "The display name for the model.",
+            "nullable": true,
+            "example": "Claude Sonnet 4"
+          },
+          "isEnabled": {
+            "type": "boolean",
+            "description": "Whether the model is enabled for use in chat.",
+            "example": true
+          },
+          "isRecommended": {
+            "type": "boolean",
+            "description": "Whether the model is recommended (defined in configuration).",
+            "example": true
+          },
+          "capabilities": {
+            "$ref": "#/components/schemas/AiModelCapabilities"
+          }
+        },
+        "additionalProperties": false,
+        "description": "AI model settings information."
+      },
+      "ModelSettingsItemDto": {
+        "required": [
+          "modelId"
+        ],
+        "type": "object",
+        "properties": {
+          "modelId": {
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string",
+            "description": "The model identifier.",
+            "example": "claude-opus-4-1-20250805"
+          },
+          "isEnabled": {
+            "type": "boolean",
+            "description": "Whether the model is enabled for use in chat.",
+            "example": true
+          },
+          "alias": {
+            "maxLength": 255,
+            "type": "string",
+            "description": "The display name for the model. Only applies to non-recommended models.",
+            "nullable": true,
+            "example": "Claude Opus 4.1"
+          },
+          "capabilities": {
+            "$ref": "#/components/schemas/AiModelCapabilities"
+          }
+        },
+        "additionalProperties": false,
+        "description": "A single model settings entry within a provider create or update request."
       },
       "NewItemsAgentNewItemsArrayWrapper": {
         "type": "object",
@@ -44154,6 +44472,31 @@
         },
         "additionalProperties": false,
         "description": "The new item parameters."
+      },
+      "PreviewProviderModelsRequestDto": {
+        "required": [
+          "key"
+        ],
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/ProviderType"
+          },
+          "url": {
+            "type": "string",
+            "description": "The API endpoint URL. Required for OpenAiCompatible type; optional for other types that have default URLs.",
+            "nullable": true,
+            "example": "https://api.openai.com/v1"
+          },
+          "key": {
+            "type": "string",
+            "description": "The authentication API key for the AI provider.",
+            "nullable": true,
+            "example": "sk-example-key-123"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Request parameters for previewing models available from a provider before saving it."
       },
       "ProviderSettingsArrayWrapper": {
         "type": "object",
@@ -44621,6 +44964,15 @@
             "description": "The new authentication API key for the AI provider. If null, the key is not changed.",
             "nullable": true,
             "example": "sk-example-key-123"
+          },
+          "modelSettings": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ModelSettingsItemDto"
+            },
+            "description": "Optional list of model settings changes to apply atomically with the provider update.",
+            "nullable": true
           }
         },
         "additionalProperties": false,
@@ -56575,6 +56927,11 @@
           },
           "task": {
             "$ref": "#/components/schemas/DocumentBuilderTaskDto"
+          },
+          "isNewFile": {
+            "type": "boolean",
+            "description": "Specifies whether the XLSX report file is newly created or an existing file will be updated.",
+            "example": true
           }
         },
         "additionalProperties": false,
@@ -67713,6 +68070,132 @@
           }
         }
       },
+      "TfaAppCodeArrayWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TfaAppCodeDto"
+            }
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
+      "TfaAppCodeDto": {
+        "type": "object",
+        "properties": {
+          "isUsed": {
+            "type": "boolean",
+            "description": "The TFA app code usage status.",
+            "example": true
+          },
+          "code": {
+            "type": "string",
+            "description": "The TFA app code.",
+            "nullable": true,
+            "example": 123456
+          }
+        },
+        "additionalProperties": false,
+        "description": "The TFA app code."
+      },
+      "TfaConfirmDataDto": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "The confirmation URL.",
+            "nullable": true,
+            "example": "https://example.com/confirm?type=TfaAuth&key=abc123"
+          },
+          "cookieName": {
+            "type": "string",
+            "description": "The confirmation cookie name.",
+            "nullable": true,
+            "example": "asc_confirm_key_TfaAuth"
+          },
+          "cookieValue": {
+            "type": "string",
+            "description": "The confirmation cookie value.",
+            "nullable": true,
+            "example": "1234567890.abcdef"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The TFA confirmation data."
+      },
+      "TfaConfirmDataWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/TfaConfirmDataDto"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
       "TfaRequestsDto": {
         "type": "object",
         "properties": {
@@ -67825,7 +68308,7 @@
       },
       "TfaSettingsDto": {
         "required": [
-          "avaliable",
+          "available",
           "enabled",
           "id",
           "title"
@@ -67849,7 +68332,7 @@
             "description": "Indicates whether the TFA configuration is currently active.",
             "example": true
           },
-          "avaliable": {
+          "available": {
             "type": "boolean",
             "description": "Indicates whether the TFA configuration can be used.",
             "example": true
