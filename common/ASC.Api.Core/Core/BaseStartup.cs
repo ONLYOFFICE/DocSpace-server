@@ -90,6 +90,11 @@ public abstract class BaseStartup
                 AllowAutoRedirect = false,
                 ServerCertificateCustomValidationCallback = (_, _, _, _) => true
             });
+        services.AddHttpClient("customHttpClientNoCookie", _ => { })
+            .ConfigurePrimaryHttpMessageHandler(_ => new HttpClientHandler
+            {
+                UseCookies = false,
+            });
 
 
         services.AddExceptionHandler<CustomExceptionHandler>();

@@ -144,12 +144,13 @@ public class FoldersControllerInternal(
     [HttpPost("folder/{folderId:int}/xlsx")]
     public async Task<XlsxReportResponseDto> GenerateXlsxByFolder(FolderIdRequestDto<int> inDto)
     {
-        var (task, form) = await _fileStorageServiceInternal.GenerateXlsxByFolderAsync(inDto.FolderId);
+        var (task, form, isNewFile) = await _fileStorageServiceInternal.GenerateXlsxByFolderAsync(inDto.FolderId);
 
         return new XlsxReportResponseDto
         {
             Form = await _fileDtoHelper.GetAsync(form),
-            Task = DocumentBuilderTaskDto.Get(task)
+            Task = DocumentBuilderTaskDto.Get(task),
+            IsNewFile = isNewFile
         };
     }
 }

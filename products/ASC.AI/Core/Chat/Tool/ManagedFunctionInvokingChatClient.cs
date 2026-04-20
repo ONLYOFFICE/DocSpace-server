@@ -148,6 +148,11 @@ public class ManagedFunctionInvokingChatClient(
                 functionResult = ToFunctionTextResult(message);
             }
 
+            if (functionResult is TextContent text)
+            {
+                functionResult = new { Content = new List<AIContent> { text } };
+            }
+
             return new FunctionResultContent(result.CallContent.CallId, functionResult) { Exception = result.Exception };
         }
     }

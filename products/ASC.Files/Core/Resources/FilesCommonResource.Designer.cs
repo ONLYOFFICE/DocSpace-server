@@ -1196,7 +1196,7 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Сommenter.
+        ///   Looks up a localized string similar to Commenter.
         /// </summary>
         public static string RoleEnum_Comment {
             get {

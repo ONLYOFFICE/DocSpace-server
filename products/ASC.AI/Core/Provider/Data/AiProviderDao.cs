@@ -39,7 +39,8 @@ public class AiProviderDao(
         string url,
         string key,
         ProviderType type,
-        string defaultModel)
+        string defaultModel,
+        List<AiModelSettings>? modelSettings = null)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var strategy = dbContext.Database.CreateExecutionStrategy();
@@ -63,7 +64,8 @@ public class AiProviderDao(
                 Key = await crypto.EncryptAsync(key),
                 Title = title,
                 CreatedOn = now,
-                ModifiedOn = now
+                ModifiedOn = now,
+                HasModelSettings = true
             };
 
             await context.Providers.AddAsync(dbProvider);
@@ -80,6 +82,8 @@ public class AiProviderDao(
                 await context.DefaultProviders.AddAsync(defaultProviderEntity);
                 await context.SaveChangesAsync();
             }
+
+            await SaveModelSettingsInternalAsync(context, tenantId, dbProvider.Id, modelSettings);
 
             await transaction.CommitAsync();
         });
@@ -191,7 +195,7 @@ public class AiProviderDao(
         return await dbContext.IsProviderNameExistsAsync(tenantId, title, excludedProviderId);
     }
 
-    public async Task<AiProvider> UpdateProviderAsync(int tenantId, AiProvider provider)
+    public async Task<AiProvider> UpdateProviderAsync(int tenantId, AiProvider provider, List<AiModelSettings>? modelSettings = null)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var strategy = dbContext.Database.CreateExecutionStrategy();
@@ -202,10 +206,14 @@ public class AiProviderDao(
         await strategy.ExecuteAsync(async () =>
         {
             await using var context = await dbContextFactory.CreateDbContextAsync();
+            await using var transaction = await context.Database.BeginTransactionAsync();
 
             await context.UpdateProviderAsync(tenantId, provider.Id, provider.Title, provider.Url, key, now);
-
             await context.SaveChangesAsync();
+
+            await SaveModelSettingsInternalAsync(context, tenantId, provider.Id, modelSettings);
+
+            await transaction.CommitAsync();
         });
 
         provider.ModifiedOn = now;
@@ -221,7 +229,7 @@ public class AiProviderDao(
         await strategy.ExecuteAsync(async () =>
         {
             await using var context = await dbContextFactory.CreateDbContextAsync();
-            var transaction = await context.Database.BeginTransactionAsync();
+            await using var transaction = await context.Database.BeginTransactionAsync();
 
             await context.DeleteDefaultProvidersByProviderIdsAsync(tenantId, ids);
             await context.DeleteProvidersAsync(tenantId, ids);
@@ -232,7 +240,7 @@ public class AiProviderDao(
         });
     }
 
-    public async Task<DefaultAiProvider> SetDefaultProviderAsync(int tenantId, AiProvider provider, string defaultModel)
+    public async Task<DefaultAiProviderSettings> SetDefaultProviderAsync(int tenantId, AiProvider provider, string defaultModel)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var strategy = dbContext.Database.CreateExecutionStrategy();
@@ -252,33 +260,44 @@ public class AiProviderDao(
             await context.SaveChangesAsync();
         });
 
-        return new DefaultAiProvider
+        return new DefaultAiProviderSettings
         {
             ProviderId = provider.Id,
             ProviderTitle = provider.Title,
-            DefaultModel = defaultModel
+            ProviderType = provider.Type,
+            DefaultModel = defaultModel,
+            HasModelSettings = provider.HasModelSettings
         };
     }
 
-    public async Task<DefaultAiProvider?> GetDefaultProviderAsync(int tenantId)
+    public async Task<DefaultAiProviderSettings?> GetDefaultProviderAsync(int tenantId)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
 
-        var result = await dbContext.GetDefaultProviderAsync(tenantId);
-        if (result == null)
+        var queryResult = await dbContext.GetDefaultProviderAsync(tenantId);
+        if (queryResult == null)
         {
             return null;
         }
 
-        if (result.ProviderId == AiGateway.ProviderId)
+        var providerType = queryResult.ProviderId == AiGateway.ProviderId
+            ? ProviderType.PortalAi
+            : queryResult.ProviderType ?? default;
+
+        var result = new DefaultAiProviderSettings
         {
-            result.ProviderTitle = AiGateway.ProviderTitle;
-            result.ProviderType = ProviderType.PortalAi;
-        }
-        
-        if (result.ProviderType.HasValue)
+            ProviderId = queryResult.ProviderId,
+            DefaultModel = aiConfiguration.ResolveModelId(providerType, queryResult.DefaultModel),
+            ProviderTitle = queryResult.ProviderId == AiGateway.ProviderId
+                ? AiGateway.ProviderTitle
+                : queryResult.ProviderTitle,
+            ProviderType = providerType,
+            HasModelSettings = queryResult.HasModelSettings
+        };
+
+        if (queryResult.DbModelSettings != null)
         {
-            result.DefaultModel = aiConfiguration.ResolveModelId(result.ProviderType.Value, result.DefaultModel);
+            result.DbModelSettings = queryResult.DbModelSettings.Map();
         }
 
         return result;
@@ -295,6 +314,69 @@ public class AiProviderDao(
 
         return await dbContext.GetFirstProviderIdAsync(tenantId)
             ?? (gateway.Configured ? AiGateway.ProviderId : null);
+    }
+
+    public async Task<Dictionary<string, AiModelSettings>> GetModelSettingsAsync(int tenantId, int providerId, ProviderType type)
+    {
+        if (type == ProviderType.PortalAi)
+        {
+            return [];
+        }
+
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+
+        return await dbContext.GetModelSettingsAsync(tenantId, providerId)
+            .ToDictionaryAsync(x => x.ModelId, x => x.Map());
+    }
+
+    public async Task<AiModelSettings?> GetModelSettingAsync(int tenantId, int providerId, string modelId)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+
+        var entity = await dbContext.GetModelSettingAsync(tenantId, providerId, modelId);
+
+        return entity?.Map();
+    }
+
+    private static async Task SaveModelSettingsInternalAsync(
+        AiDbContext context,
+        int tenantId,
+        int providerId,
+        List<AiModelSettings>? modelSettings)
+    {
+        if (modelSettings is not { Count: > 0 })
+        {
+            return;
+        }
+
+        var modelIds = modelSettings.Select(s => s.ModelId).ToList();
+
+        var existing = await context.GetModelSettingsByIdsAsync(tenantId, providerId, modelIds)
+            .ToDictionaryAsync(x => x.ModelId);
+
+        foreach (var s in modelSettings)
+        {
+            if (existing.TryGetValue(s.ModelId, out var entity))
+            {
+                entity.Alias = s.Alias;
+                entity.IsEnabled = s.IsEnabled;
+                entity.Capabilities = s.Capabilities;
+            }
+            else
+            {
+                context.ModelSettings.Add(new DbAiModelSettings
+                {
+                    TenantId = tenantId,
+                    ProviderId = providerId,
+                    ModelId = s.ModelId,
+                    Alias = s.Alias,
+                    IsEnabled = s.IsEnabled,
+                    Capabilities = s.Capabilities
+                });
+            }
+        }
+
+        await context.SaveChangesAsync();
     }
 
     private async Task<AiProvider> CreateGatewayProviderAsync(bool includeCredentials = false, bool force = false)

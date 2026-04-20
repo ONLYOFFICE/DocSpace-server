@@ -79,7 +79,7 @@ public partial class McpService(
         };
 
 #pragma warning disable CA2000
-        var httpClient = httpClientFactory.CreateClient();
+        var httpClient = httpClientFactory.CreateClient(McpContentTypeHandler.HttpClientName);
 #pragma warning restore CA2000
 
         await using var transport = new HttpClientTransport(options, httpClient);
@@ -163,7 +163,7 @@ public partial class McpService(
         };
 
 #pragma warning disable CA2000
-        var httpClient = httpClientFactory.CreateClient();
+        var httpClient = httpClientFactory.CreateClient(McpContentTypeHandler.HttpClientName);
 #pragma warning restore CA2000
 
         await using var transport = new HttpClientTransport(options, httpClient);
@@ -226,6 +226,12 @@ public partial class McpService(
 
     public async Task<(List<McpServer> servers, int totalCount)> GetActiveServersAsync(int offset, int count)
     {
+        var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
+        if (userType is EmployeeType.Guest)
+        {
+            throw new SecurityException();
+        }
+
         var tenantId = tenantManager.GetCurrentTenantId();
         return await mcpDao.GetActiveServersAsync(tenantId, offset, count);
     }

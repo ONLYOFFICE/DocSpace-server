@@ -2025,7 +2025,7 @@ public class EntryManager(IDaoFactory daoFactory,
         return file.Id;
     }
 
-    public async Task EnsureFormFillingOutputAsync(
+    public async Task<bool> EnsureFormFillingOutputAsync(
         File<int> form,
         Folder<int> room,
         File<int> resultsFile,
@@ -2047,12 +2047,19 @@ public class EntryManager(IDaoFactory daoFactory,
             formFilling.ResultsFileID = await CreateFillResultsFile(resultsFolderId, form.CreateBy, title, fileDao);
             formFilling.ResultsFolderId = resultsFolderId;
             await fileDao.SaveProperties(form.Id, properties);
+
+            return true;
         }
-        else if (resultsFile == null || !resultsFile.ParentId.Equals(resultFolder.Id))
+
+        if (resultsFile == null || !resultsFile.ParentId.Equals(resultFolder.Id))
         {
             formFilling.ResultsFileID = await CreateFillResultsFile(resultFolder.Id, form.CreateBy, title, fileDao);
             await fileDao.SaveProperties(form.Id, properties);
+
+            return true;
         }
+
+        return false;
     }
 
     private async Task<EntryProperties<T>> InitFormFillingProperties<T>(T roomId, string sourceTitle, T sourceFileId, int sourceFileVersion, T inProcessFormFolderId, T readyFormFolderId, Guid createBy, EntryProperties<T> properties, IFileDao<T> fileDao, IFolderDao<T> folderDao)
@@ -2088,7 +2095,7 @@ public class EntryManager(IDaoFactory daoFactory,
         {
             var origProperties = await daoFactory.GetFileDao<T>().GetProperties(originalFormId) ?? properties;
             if (userId.Equals(ASC.Core.Configuration.Constants.Guest.ID) &&
-                (origProperties.FormFilling.ResultsFileID == null || Equals(origProperties.FormFilling.ResultsFileID, default(T))))
+                (origProperties.FormFilling.ResultsFolderId == null || Equals(origProperties.FormFilling.ResultsFolderId, default(T))))
             {
                 await InitFormFillingFolders(file, room, origProperties, folderDao, fileDao, originalForm.CreateBy);
                 origProperties = await daoFactory.GetFileDao<T>().GetProperties(originalFormId);

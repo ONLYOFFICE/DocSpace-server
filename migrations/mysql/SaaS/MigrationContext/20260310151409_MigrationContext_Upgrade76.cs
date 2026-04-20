@@ -15,7 +15,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 table: "files_room_settings",
                 type: "tinyint(1)",
                 nullable: false,
-                defaultValueSql: "0");
+                defaultValueSql: "1");
 
             migrationBuilder.AddColumn<bool>(
                 name: "send_form_to_external_db",

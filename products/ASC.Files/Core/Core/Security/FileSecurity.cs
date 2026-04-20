@@ -602,6 +602,13 @@ public class FileSecurity(
         return await CanAsync(entry, authContext.CurrentAccount.ID, FilesSecurityActions.UseChat);
     }
 
+    public async Task<int> UpdateShareByFolderTypesAsync(Guid subject, IEnumerable<FolderType> folderTypes, FileShare share)
+    {
+        var securityDao = daoFactory.GetSecurityDao<int>();
+
+        return await securityDao.UpdateShareByFolderTypesAsync(subject, folderTypes, share);
+    }
+
     public async Task<IEnumerable<Guid>> WhoCanReadAsync<T>(FileEntry<T> entry, bool includeLinks = false)
     {
         var (directAccess, sharedAccess) = await WhoCanAsync(entry, FilesSecurityActions.Read, includeLinks);
@@ -1147,9 +1154,18 @@ public class FileSecurity(
                 return false;
             }
 
-            if (file.FilterType == FilterType.ImagesOnly && file.ContentLength > aiConfiguration.MaxImageSize)
+            if (file.FilterType == FilterType.ImagesOnly)
             {
-                return false;
+                if (file.ContentLength > aiConfiguration.MaxImageSize)
+                {
+                    return false;
+                }
+
+                var extension = FileUtility.GetFileExtension(file.Title);
+                if (!AiConfiguration.SupportedImageFormats.Contains(extension))
+                {
+                    return false;
+                }
             }
 
             if (file.FilterType != FilterType.ImagesOnly)
@@ -2725,7 +2741,7 @@ public class FileSecurity(
 
         var rooms = storageFilter == StorageFilter.ThirdParty
             ? []
-            : await folderDao.GetRoomsAsync(internalRecords.Keys, filterTypes, tagNames, subjectId, search, withSubfolders, withoutTags, excludeSubject, provider, subjectFilter, subjectOwnerId, subjectEntries, rootFoldersIds)
+            : await folderDao.GetRoomsAsync(internalRecords.Keys, filterTypes, tagNames, subjectId, search, withSubfolders, withoutTags, excludeSubject, provider, subjectFilter, subjectOwnerId, subjectEntries, rootFoldersIds, groupId)
                 .Where(r => withSubfolders || r.IsRoom)
                 .Where(r => Filter(r, internalRecords))
                 .ToListAsync();
