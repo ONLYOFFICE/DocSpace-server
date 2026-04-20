@@ -226,6 +226,12 @@ public partial class McpService(
 
     public async Task<(List<McpServer> servers, int totalCount)> GetActiveServersAsync(int offset, int count)
     {
+        var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
+        if (userType is EmployeeType.Guest)
+        {
+            throw new SecurityException();
+        }
+
         var tenantId = tenantManager.GetCurrentTenantId();
         return await mcpDao.GetActiveServersAsync(tenantId, offset, count);
     }
