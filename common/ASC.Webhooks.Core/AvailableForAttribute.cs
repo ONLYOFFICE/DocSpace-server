@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2026
+// (c) Copyright Ascensio System SIA 2009-2026
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,21 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-global using System.ComponentModel;
-global using System.ComponentModel.DataAnnotations;
+namespace ASC.Webhooks.Core;
 
-global using ASC.Common;
-global using ASC.Common.Caching;
-global using ASC.Core;
-global using ASC.Core.Common.EF;
-global using ASC.Core.Common.EF.Model;
-global using ASC.Core.Users;
-global using ASC.EventBus.Abstractions;
-global using ASC.EventBus.Events;
-global using ASC.Webhooks.Core.EF.Context;
-global using ASC.Webhooks.Core.EF.Model;
-global using ASC.Webhooks.Core.IntegrationEvents.Events;
-
-global using Microsoft.EntityFrameworkCore;
-
-global using ProtoBuf;
+[AttributeUsage(AttributeTargets.Field)]
+public sealed class AvailableForAttribute(params EmployeeType[] roles) : Attribute
+{
+    public EmployeeType[] Roles { get; } = roles;
+}

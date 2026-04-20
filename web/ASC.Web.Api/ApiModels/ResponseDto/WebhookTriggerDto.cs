@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2026
+// (c) Copyright Ascensio System SIA 2009-2026
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,21 +24,35 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-global using System.ComponentModel;
-global using System.ComponentModel.DataAnnotations;
+namespace ASC.Web.Api.ApiModels.ResponseDto;
 
-global using ASC.Common;
-global using ASC.Common.Caching;
-global using ASC.Core;
-global using ASC.Core.Common.EF;
-global using ASC.Core.Common.EF.Model;
-global using ASC.Core.Users;
-global using ASC.EventBus.Abstractions;
-global using ASC.EventBus.Events;
-global using ASC.Webhooks.Core.EF.Context;
-global using ASC.Webhooks.Core.EF.Model;
-global using ASC.Webhooks.Core.IntegrationEvents.Events;
+/// <summary>
+/// The webhook trigger with its availability for the current user.
+/// </summary>
+/// <example>
+/// {
+/// name: "file.created",
+/// id: 128,
+/// available: true
+/// }
+/// </example>
+public class WebhookTriggerDto
+{
+    /// <summary>
+    /// The trigger name.
+    /// </summary>
+    /// <example>file.created</example>
+    public string Name { get; set; }
 
-global using Microsoft.EntityFrameworkCore;
+    /// <summary>
+    /// The trigger bit value.
+    /// </summary>
+    /// <example>128</example>
+    public long Id { get; set; }
 
-global using ProtoBuf;
+    /// <summary>
+    /// Specifies whether this trigger is available for the current user's role.
+    /// </summary>
+    /// <example>true</example>
+    public bool Available { get; set; }
+}

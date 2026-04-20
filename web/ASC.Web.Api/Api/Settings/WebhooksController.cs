@@ -334,7 +334,7 @@ public class WebhooksController(
     }
 
     /// <remarks>
-    /// Returns a list of triggers for a webhook.
+    /// Returns a list of triggers for a webhook with their availability for the current user.
     /// </remarks>
     /// <summary>
     /// Get webhook triggers
@@ -342,11 +342,18 @@ public class WebhooksController(
     /// <path>api/2.0/settings/webhook/triggers</path>
     /// <collection>list</collection>
     [Tags("Settings / Webhooks")]
-    [SwaggerResponse(200, "List of triggers for a webhook", typeof(Dictionary<string, long>))]
+    [SwaggerResponse(200, "List of triggers with availability for the current user", typeof(IEnumerable<WebhookTriggerDto>))]
     [HttpGet("webhook/triggers")]
-    public Dictionary<string, long> GetWebhookTriggers()
+    public async Task<IEnumerable<WebhookTriggerDto>> GetWebhookTriggers()
     {
-        return Enum.GetValues<WebhookTrigger>().ToDictionary(item => item.ToCustomString(), item => (long)item);
+        var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
+
+        return Enum.GetValues<WebhookTrigger>().Select(t => new WebhookTriggerDto
+        {
+            Name = t.ToCustomString(),
+            Id = (long)t,
+            Available = t.IsAvailableFor(userType)
+        });
     }
 
     private async Task<bool> CheckAdminPermissionsAsync()
