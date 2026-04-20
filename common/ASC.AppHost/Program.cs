@@ -51,7 +51,15 @@ switch (launchProfile)
             .AddRedis()
             .AddOpensearch(withDashboard: false, fixedPort: false);
 
+        var ollamaModel = builder.Configuration["OLLAMA_MODEL"];
+        if (!string.IsNullOrEmpty(ollamaModel))
+        {
+            connectionManager.AddOllama(ollamaModel);
+        }
+
         configurator
+            .AddProject<ASC_AI>(Constants.AiPort)
+            .AddProject<ASC_AI_Worker>(Constants.AiWorkerPort)
             .AddProject<ASC_Files>(Constants.FilesPort)
             .AddProject<ASC_Files_Worker>(Constants.FilesWorkerPort)
             .AddProject<ASC_People>(Constants.PeoplePort)

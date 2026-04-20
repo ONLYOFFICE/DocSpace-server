@@ -24,7 +24,11 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Collections;
+
 using Aspire.Hosting.ApplicationModel;
+
+using DocSpace.API.SDK.Api.AI;
 
 using Microsoft.Extensions.DependencyInjection;
 
@@ -42,6 +46,11 @@ public class AspireAppFixture : IAsyncLifetime
     private Provider _provider;
     private readonly List<string> _tablesToBackup = ["files_folder", "files_folder_tree", "core_user", "core_usersecurity", "files_bunch_objects"];
     private readonly List<string> _tablesToIgnore = ["core_acl", "core_settings", "core_subscription", "core_subscriptionmethod", "core_usergroup", "login_events", "tenants_tenants", "tenants_quota", "webstudio_settings"];
+
+    //AI service
+    public HttpClient AIHttpClient { get; private set; } = null!;
+    public ProvidersApi ProvidersApi { get; private set; } = null!;
+    public AgentsApi AgentsApi { get; private set; } = null!;
 
     // Files service
     public HttpClient FilesHttpClient { get; private set; } = null!;
@@ -68,6 +77,9 @@ public class AspireAppFixture : IAsyncLifetime
     public CommonSettingsApi CommonSettingsApi { get; private set; } = null!;
     public UsersApi PortalUsersApi { get; private set; } = null!;
 
+
+    public HttpClient? OllamaHttpClient { get; private set; }
+
     public async ValueTask InitializeAsync()
     {
         var config = new ConfigurationBuilder()
@@ -79,8 +91,21 @@ public class AspireAppFixture : IAsyncLifetime
         _provider = config.GetValue<Provider>("dbProviderType");
 
         // Start Aspire AppHost with integration-test profile
-        var appHost = await DistributedApplicationTestingBuilder.CreateAsync<Projects.ASC_AppHost>(
-            ["DOTNET_LAUNCH_PROFILE=integration-test", "SKIP_CLIENT=true"]);
+        var args = new List<string>
+        {
+            "DOTNET_LAUNCH_PROFILE=integration-test",
+            "SKIP_CLIENT=true"
+        };
+
+        var withOllama = false;
+        var model = config.GetValue<string>("OLLAMA_MODEL");
+        if (!string.IsNullOrEmpty(model))
+        {
+            args.Add($"OLLAMA_MODEL={model}");
+            withOllama = true;
+        }
+
+        var appHost = await DistributedApplicationTestingBuilder.CreateAsync<Projects.ASC_AppHost>(args.ToArray());
 
         appHost.Configuration["DOTNET_DASHBOARD_OTLP_ENDPOINT_URL"] = "";
         appHost.Configuration["ASPIRE_DASHBOARD_OTLP_ENDPOINT_URL"] = "";
@@ -90,15 +115,18 @@ public class AspireAppFixture : IAsyncLifetime
 
         // Wait for services to be healthy
         var resourceNotifications = _app.ResourceNotifications;
+        const string onlyofficeAI = "onlyoffice-ai";
         const string onlyofficeFiles = "onlyoffice-files";
         const string onlyofficePeople = "onlyoffice-people";
         const string onlyofficeWebApi = "onlyoffice-web-api";
+        const string ollama = "ollama";
 
+        var waitForAI = resourceNotifications.WaitForResourceHealthyAsync(onlyofficeAI);
         var waitForFiles = resourceNotifications.WaitForResourceHealthyAsync(onlyofficeFiles);
         var waitForPeople = resourceNotifications.WaitForResourceHealthyAsync(onlyofficePeople);
         var waitForApi = resourceNotifications.WaitForResourceHealthyAsync(onlyofficeWebApi);
 
-        await Task.WhenAll(waitForFiles, waitForPeople, waitForApi);
+        await Task.WhenAll(waitForAI, waitForFiles, waitForPeople, waitForApi);
 
         // Get connection strings from Aspire resources
         var dbConnectionString = await _app.GetConnectionStringAsync("docspace");
@@ -110,9 +138,20 @@ public class AspireAppFixture : IAsyncLifetime
         await _dbconnection.OpenAsync();
 
         // Create HTTP clients with cookies disabled to avoid stale auth cookies
+        AIHttpClient = CreateHttpClientNoCookies(onlyofficeAI);
         FilesHttpClient = CreateHttpClientNoCookies(onlyofficeFiles);
         PeopleHttpClient = CreateHttpClientNoCookies(onlyofficePeople);
         WebApiHttpClient = CreateHttpClientNoCookies(onlyofficeWebApi);
+
+        if (withOllama)
+        {
+            OllamaHttpClient = CreateHttpClientNoCookies(ollama, "/v1/");
+        }
+
+        // Initialize AI API clients
+        var aiConfig = new Configuration { BasePath = AIHttpClient.BaseAddress!.ToString().TrimEnd('/') };
+        ProvidersApi = new ProvidersApi(AIHttpClient, aiConfig);
+        AgentsApi = new AgentsApi(AIHttpClient, aiConfig);
 
         // Initialize Files API clients
         var filesConfig = new Configuration { BasePath = FilesHttpClient.BaseAddress!.ToString().TrimEnd('/') };
@@ -200,13 +239,19 @@ public class AspireAppFixture : IAsyncLifetime
         await commandService.ExecuteCommandAsync("cache", "clear-cache", CancellationToken.None);
     }
 
-    private HttpClient CreateHttpClientNoCookies(string resourceName)
+    private HttpClient CreateHttpClientNoCookies(string resourceName, string? path = null)
     {
         Uri? baseAddress;
         using (var baseClient = _app.CreateHttpClient(resourceName))
         {
             baseAddress = baseClient.BaseAddress;
         }
+
+        if (path != null && baseAddress != null)
+        {
+            baseAddress = new Uri(baseAddress, path);
+        }
+
         var handler = new HttpClientHandler { UseCookies = false };
         return new HttpClient(handler) { BaseAddress = baseAddress };
     }

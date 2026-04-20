@@ -53,6 +53,9 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
     private IResourceBuilder<ContainerResource>? OtelCollectorResource { get; set; }
     private IResourceBuilder<JavaScriptAppResource>? ApiTestResource { get; set; }
     private IResourceBuilder<JavaScriptAppResource>? E2ETestResource { get; set; }
+
+    private IResourceBuilder<OllamaResource>? OllamaResource { get; set; }
+
     private Dictionary<string, string>? _parameters;
 
     public bool HasOtelCollector => OtelCollectorResource != null;
@@ -111,6 +114,31 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             }
         });
 
+        return this;
+    }
+
+    public ConnectionStringManager AddOllama(string model, bool withGPUSupport = true, bool withOpenWebUI = true)
+    {
+        OllamaResource = builder.AddOllama("ollama")
+            .WithDataVolume();
+
+        if (withGPUSupport)
+        {
+            OllamaResource.WithGPUSupport();
+        }
+
+        if (withOpenWebUI)
+        {
+            OllamaResource.WithOpenWebUI();
+        }
+
+        OllamaResource.AddModel(model);
+
+        builder.Eventing.Subscribe(OllamaResource.Resource, async (ConnectionStringAvailableEvent _, CancellationToken ct) =>
+        {
+            var a = await OllamaResource.Resource.ConnectionStringExpression.GetValueAsync(ct).ConfigureAwait(false);
+
+        });
         return this;
     }
 
@@ -463,6 +491,11 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         if (OtelCollectorResource != null)
         {
             resourceBuilder.WaitFor(OtelCollectorResource);
+        }
+
+        if (OllamaResource != null)
+        {
+            resourceBuilder.WaitFor(OllamaResource);
         }
 
         ApiTestResource?.WaitFor((IResourceBuilder<IResource>)resourceBuilder);

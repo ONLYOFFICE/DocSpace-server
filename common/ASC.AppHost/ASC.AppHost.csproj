@@ -16,6 +16,7 @@
         <PackageReference Include="CommunityToolkit.Aspire.Hosting.MailPit" />
         <PackageReference Include="CommunityToolkit.Aspire.Hosting.McpInspector" />
         <PackageReference Include="CommunityToolkit.Aspire.Hosting.MySql.Extensions" />
+        <PackageReference Include="CommunityToolkit.Aspire.Hosting.Ollama" />
     </ItemGroup>
 
     <ItemGroup>

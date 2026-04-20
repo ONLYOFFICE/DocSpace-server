@@ -24,6 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using DocSpace.API.SDK.Api.AI;
 using DocSpace.API.SDK.Api.Group;
 
 using QuotaApi = DocSpace.API.SDK.Api.Files.QuotaApi;
@@ -37,8 +38,12 @@ public class BaseTest(
     AspireAppFixture fixture
     ) : IAsyncLifetime
 {
+    protected readonly HttpClient _aiHttpClient = fixture.AIHttpClient;
     protected readonly HttpClient _filesClient = fixture.FilesHttpClient;
     protected readonly HttpClient _peopleClient = fixture.PeopleHttpClient;
+    protected readonly HttpClient? _ollamaHttpClient = fixture.OllamaHttpClient;
+    protected readonly HttpClient _webApiClient = fixture.WebApiHttpClient;
+
     protected readonly FoldersApi _foldersApi = fixture.FoldersApi;
     protected readonly FilesApi _filesApi = fixture.FilesApi;
     protected readonly OperationsApi _filesOperationsApi = fixture.OperationsApi;
@@ -46,6 +51,8 @@ public class BaseTest(
     protected readonly SettingsApi _filesSettingsApi = fixture.SettingsApi;
     protected readonly QuotaApi _quotaApi = fixture.QuotaApi;
     protected readonly SharingApi _sharingApi = fixture.SharingApi;
+    protected readonly ProvidersApi _providersApi = fixture.ProvidersApi;
+    protected readonly AgentsApi _agentsApi = fixture.AgentsApi;
 
     protected readonly GroupApi _groupApi = fixture.GroupApi;
     protected readonly UserStatusApi _userStatusApi = fixture.UserStatusApi;
@@ -53,7 +60,6 @@ public class BaseTest(
 
     protected readonly CommonSettingsApi _commonSettingsApi = fixture.CommonSettingsApi;
     protected readonly DocSpace.API.SDK.Api.Settings.QuotaApi _settingsQuotaApi = fixture.WebApiSettingsQuotaApi;
-    protected readonly HttpClient _webApiClient = fixture.WebApiHttpClient;
     protected readonly AuthenticationApi _authenticationApi = fixture.AuthenticationApi;
 
     private readonly Func<Task> _resetDatabase = fixture.ResetDatabaseAsync;

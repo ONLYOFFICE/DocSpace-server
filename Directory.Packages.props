@@ -60,6 +60,7 @@
     <PackageVersion Include="CommunityToolkit.Aspire.Hosting.MailPit" Version="13.1.1" />
     <PackageVersion Include="CommunityToolkit.Aspire.Hosting.McpInspector" Version="13.1.1" />
     <PackageVersion Include="CommunityToolkit.Aspire.Hosting.MySql.Extensions" Version="13.1.1" />
+    <PackageVersion Include="CommunityToolkit.Aspire.Hosting.Ollama" Version="13.1.1" />
     <PackageVersion Include="Confluent.Kafka" Version="2.13.0" />
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />
     <PackageVersion Include="CsvHelper" Version="33.1.0" />
