@@ -154,11 +154,11 @@ $Message</value>
   </data>
   <data name="pattern_FormReceived" xml:space="preserve">
     <value>h1. 「$Message」フォームが記入されました
- 
+
 新しいフォーム "$DocumentTitle":"$DocumentURL" がルーム "$RoomTitle":"$RoomURL" で記入されました。
- 
+
 フォーム記入者： "$FromUserName":"$FromUserLink"
- 
+
 $OrangeButton
 
 &amp;nbsp;</value>
@@ -170,11 +170,11 @@ $OrangeButton
   </data>
   <data name="pattern_FormSubmitted" xml:space="preserve">
     <value>h1. 「$Message」フォームが記入されました
- 
+
 あなたは"$RoomTitle":"$RoomURL"ルームで"$DocumentTitle":"$DocumentURL"フォームを記入しました。
- 
+
 マネージャー："$ToUserName":"$ToUserLink"
- 
+
 $OrangeButton
 
 &amp;nbsp;</value>
@@ -211,14 +211,14 @@ $__AuthorName さんが次のルームを削除しました：$RoomTitle</value>
   <data name="pattern_ShareDocument" xml:space="preserve">
     <value>h1. 文書に付与されたアクセス: "$DocumentTitle":"$DocumentURL"
 
-$__DateTime $__AuthorName granted you the access to the "$DocumentTitle":"$DocumentURL" document with the following access rights: "$AccessRights". 
+$__DateTime $__AuthorName granted you the access to the "$DocumentTitle":"$DocumentURL" document with the following access rights: "$AccessRights".
 
 $Message</value>
   </data>
   <data name="pattern_ShareFolder" xml:space="preserve">
     <value>h1. フォルダに付与されたアクセス: "$DocumentTitle":"$DocumentURL"
 
-$__DateTime $__AuthorName granted you the access to the "$DocumentTitle":"$DocumentURL" folder with the following access rights: "$AccessRights". 
+$__DateTime $__AuthorName granted you the access to the "$DocumentTitle":"$DocumentURL" folder with the following access rights: "$AccessRights".
 
 $Message</value>
   </data>
@@ -299,12 +299,12 @@ $Message</value>
     <value>DocSpaceの通知。</value>
   </data>
   <data name="pattern_AgentRemoved" xml:space="preserve">
-    <value>h1. $__AuthorNameがAIエージェントを削除しました
+    <value>h1. $__AuthorName がAIエージェントを削除しました
 
-$__AuthorNameがAIエージェントを削除しました： RoomTitle</value>
+$__AuthorName がAIエージェントを削除しました： RoomTitle</value>
   </data>
   <data name="pattern_AgentUpdateAccessForUser_push" xml:space="preserve">
-    <value>AIエージェント"$RoomTitle"におけるあなたの役割が"$RoomRole"に変更されました</value>
+    <value>AIエージェント "$RoomTitle" におけるあなたの役割が "$RoomRole" に変更されました</value>
   </data>
   <data name="pattern_InvitedToAgent_push" xml:space="preserve">
     <value>AIエージェント "$RoomTitle" に招待されました</value>

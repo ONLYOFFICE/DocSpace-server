@@ -303,10 +303,10 @@ $Message</value>
 $__AuthorName 删除了 AI 代理：$RoomTitle</value>
   </data>
   <data name="pattern_AgentUpdateAccessForUser_push" xml:space="preserve">
-    <value>您在 AI 代理"$RoomTitle"中的角色已更改为"$RoomRole"</value>
+    <value>您在 AI 代理 "$RoomTitle" 中的角色已更改为 "$RoomRole"</value>
   </data>
   <data name="pattern_InvitedToAgent_push" xml:space="preserve">
-    <value>您已被邀请加入 AI 代理"$RoomTitle"</value>
+    <value>您已被邀请加入 AI 代理 "$RoomTitle"</value>
   </data>
   <data name="subject_AgentRemoved" xml:space="preserve">
     <value>DocSpace 通知。AI 代理已删除</value>

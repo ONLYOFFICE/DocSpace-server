@@ -574,7 +574,7 @@
     <value>IP</value>
   </data>
   <data name="IPRestrictionsSettingsUpdated" xml:space="preserve">
-    <value>P 보안 설정이 업데이트되었습니다</value>
+    <value>IP 보안 설정이 업데이트되었습니다</value>
   </data>
   <data name="LanguageSettingsUpdated" xml:space="preserve">
     <value>언어 설정이 업데이트되었습니다</value>

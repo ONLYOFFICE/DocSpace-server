@@ -174,7 +174,7 @@ $OrangeButton
 Попунили сте формулар "$DocumentTitle":"$DocumentURL" у просторији "$RoomTitle":"$RoomURL"
 
 Менаџер: "$ToUserName":"$ToUserLink"
- 
+
 $OrangeButton
 
 &amp;nbsp;</value>
@@ -211,7 +211,7 @@ $__AuthorName је избрисао собу: $RoomTitle</value>
   <data name="pattern_ShareDocument" xml:space="preserve">
     <value>h1. Приступ дозвољен документу:"$DocumentTitle":"$DocumentURL"
 
-$__DateTime $__AuthorName вам је дозволио приступ "$DocumentTitle":"$DocumentURL" документу са следећим правима приступа: "$AccessRights". 
+$__DateTime $__AuthorName вам је дозволио приступ "$DocumentTitle":"$DocumentURL" документу са следећим правима приступа: "$AccessRights".
 
 $Message</value>
   </data>
@@ -307,7 +307,7 @@ $__AuthorName је обрисао ВИ агента: $RoomTitle</value>
     <value>Ваша улога у AI агенту "$RoomTitle" је промењена у "$RoomRole"</value>
   </data>
   <data name="pattern_InvitedToAgent_push" xml:space="preserve">
-    <value>Позвани сте у ВИ агента „$RoomTitle"</value>
+    <value>Позвани сте у ВИ агента "$RoomTitle"</value>
   </data>
   <data name="subject_AgentRemoved" xml:space="preserve">
     <value>DocSpace обавештење. ВИ агент обрисан</value>
