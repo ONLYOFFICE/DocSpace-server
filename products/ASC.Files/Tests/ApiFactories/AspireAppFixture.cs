@@ -51,6 +51,7 @@ public class AspireAppFixture : IAsyncLifetime
     public HttpClient AIHttpClient { get; private set; } = null!;
     public ProvidersApi ProvidersApi { get; private set; } = null!;
     public AgentsApi AgentsApi { get; private set; } = null!;
+    public string? OllamaModel { get; set; }
 
     // Files service
     public HttpClient FilesHttpClient { get; private set; } = null!;
@@ -97,12 +98,10 @@ public class AspireAppFixture : IAsyncLifetime
             "SKIP_CLIENT=true"
         };
 
-        var withOllama = false;
-        var model = config.GetValue<string>("OLLAMA_MODEL");
-        if (!string.IsNullOrEmpty(model))
+        OllamaModel = config.GetValue<string>("OLLAMA_MODEL");
+        if (!string.IsNullOrEmpty(OllamaModel))
         {
-            args.Add($"OLLAMA_MODEL={model}");
-            withOllama = true;
+            args.Add($"OLLAMA_MODEL={OllamaModel}");
         }
 
         var appHost = await DistributedApplicationTestingBuilder.CreateAsync<Projects.ASC_AppHost>(args.ToArray());
@@ -143,7 +142,7 @@ public class AspireAppFixture : IAsyncLifetime
         PeopleHttpClient = CreateHttpClientNoCookies(onlyofficePeople);
         WebApiHttpClient = CreateHttpClientNoCookies(onlyofficeWebApi);
 
-        if (withOllama)
+        if (!string.IsNullOrEmpty(OllamaModel))
         {
             OllamaHttpClient = CreateHttpClientNoCookies(ollama, "/v1/");
         }

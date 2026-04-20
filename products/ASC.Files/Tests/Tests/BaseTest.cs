@@ -44,6 +44,10 @@ public class BaseTest(
     protected readonly HttpClient? _ollamaHttpClient = fixture.OllamaHttpClient;
     protected readonly HttpClient _webApiClient = fixture.WebApiHttpClient;
 
+    protected readonly ProvidersApi _providersApi = fixture.ProvidersApi;
+    protected readonly AgentsApi _agentsApi = fixture.AgentsApi;
+    protected readonly string? _ollamaModel = fixture.OllamaModel;
+
     protected readonly FoldersApi _foldersApi = fixture.FoldersApi;
     protected readonly FilesApi _filesApi = fixture.FilesApi;
     protected readonly OperationsApi _filesOperationsApi = fixture.OperationsApi;
@@ -51,8 +55,6 @@ public class BaseTest(
     protected readonly SettingsApi _filesSettingsApi = fixture.SettingsApi;
     protected readonly QuotaApi _quotaApi = fixture.QuotaApi;
     protected readonly SharingApi _sharingApi = fixture.SharingApi;
-    protected readonly ProvidersApi _providersApi = fixture.ProvidersApi;
-    protected readonly AgentsApi _agentsApi = fixture.AgentsApi;
 
     protected readonly GroupApi _groupApi = fixture.GroupApi;
     protected readonly UserStatusApi _userStatusApi = fixture.UserStatusApi;

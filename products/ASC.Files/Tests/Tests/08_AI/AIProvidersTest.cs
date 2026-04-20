@@ -28,21 +28,24 @@ namespace ASC.Files.Tests.Tests._08_AI;
 
 [Collection("Test Collection")]
 [Trait("Feature", "AI")]
-public class AIProvidersTest(
-    AspireAppFixture fixture)
-    : BaseTest(fixture)
+public class AIProvidersTest(AspireAppFixture fixture) : BaseTest(fixture)
 {
     [Fact]
     public async Task CreateProvider_ReturnsOk()
     {
-        if (_ollamaHttpClient?.BaseAddress == null)
+        if (_ollamaHttpClient?.BaseAddress == null || string.IsNullOrEmpty(_ollamaModel))
         {
             Assert.Skip("Ollama is not running.");
         }
 
         await _aiHttpClient.Authenticate(Initializer.Owner);
 
-        var createProviderRequestDto = new CreateProviderRequestDto(ProviderType.OpenAiCompatible, "ollama", _ollamaHttpClient.BaseAddress.AbsoluteUri, "random");
+        var createProviderRequestDto = new CreateProviderRequestDto(
+            ProviderType.OpenAiCompatible,
+            "ollama",
+            _ollamaHttpClient.BaseAddress.AbsoluteUri,
+            "random",
+            [new ModelSettingsItemDto(_ollamaModel, true)]);
         var result = await _providersApi.AddProviderAsync(createProviderRequestDto, TestContext.Current.CancellationToken);
 
         result.Response.Should().NotBeNull();
@@ -52,16 +55,22 @@ public class AIProvidersTest(
     [Fact]
     public async Task CreateAgent_ReturnsOk()
     {
-        if (_ollamaHttpClient?.BaseAddress == null)
+        if (_ollamaHttpClient?.BaseAddress == null || string.IsNullOrEmpty(_ollamaModel))
         {
             Assert.Skip("Ollama is not running.");
         }
 
         await _aiHttpClient.Authenticate(Initializer.Owner);
 
-        var createProviderRequestDto = new CreateProviderRequestDto(ProviderType.OpenAiCompatible, "ollama", _ollamaHttpClient.BaseAddress.AbsoluteUri, "random");
+        var createProviderRequestDto = new CreateProviderRequestDto(
+            ProviderType.OpenAiCompatible,
+            "ollama",
+            _ollamaHttpClient.BaseAddress.AbsoluteUri,
+            "random",
+            [new ModelSettingsItemDto(_ollamaModel, true)]);
+
         var provider = (await _providersApi.AddProviderAsync(createProviderRequestDto, TestContext.Current.CancellationToken)).Response;
-        var agent = await _agentsApi.CreateAgentAsync(new CreateAgentRequestDto("agent", chatSettings: new ChatSettings(provider.Id)), TestContext.Current.CancellationToken);
+        var agent = await _agentsApi.CreateAgentAsync(new CreateAgentRequestDto("agent", chatSettings: new ChatSettings(provider.Id, _ollamaModel)), TestContext.Current.CancellationToken);
 
         agent.Response.Should().NotBeNull();
         agent.Response.Id.Should().BeGreaterThan(0);
