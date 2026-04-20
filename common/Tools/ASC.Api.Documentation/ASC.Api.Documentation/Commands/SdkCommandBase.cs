@@ -24,19 +24,21 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Api.Documentation.Commands;
+namespace ASC.Api.Documentation.Commands;
 
-namespace ASC.Api.Documentation.SDKs;
-
-public abstract class SdkCommandBase : AsyncCommand<NoArgumentsCommandSettings>
+public abstract class SdkCommandBase<TSettings> : AsyncCommand<TSettings>
+    where TSettings : CommandSettings
 {
     public abstract string Name { get; }
 
-    protected abstract string WorkingDirectory { get; }
+    protected virtual string WorkingDirectory => SdkPaths.WorkingDirectory;
+
+    public override ValidationResult Validate(CommandContext context, TSettings settings) =>
+        ToolRunner.ValidateAvailable("openapi-generator-cli", "version");
 
     public override async Task<int> ExecuteAsync(
         CommandContext context,
-        NoArgumentsCommandSettings settings,
+        TSettings settings,
         CancellationToken cancellationToken)
     {
         return await ToolRunner.RunAndWriteAsync(
@@ -52,4 +54,8 @@ public abstract class SdkCommandBase : AsyncCommand<NoArgumentsCommandSettings>
              cancellationToken,
              $"Failed to start openapi-generator-cli for {Name}.");
     }
+}
+
+public abstract class SdkCommandBase : SdkCommandBase<NoArgumentsCommandSettings>
+{
 }

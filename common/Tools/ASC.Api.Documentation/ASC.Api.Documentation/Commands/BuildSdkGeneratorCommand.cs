@@ -28,9 +28,6 @@ namespace ASC.Api.Documentation.Commands;
 
 public class BuildSdkGeneratorCommand : AsyncCommand<NoArgumentsCommandSettings>
 {
-    private static string WorkingDirectory =>
-        Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "SDK"));
-
     public override ValidationResult Validate(CommandContext context, NoArgumentsCommandSettings settings) =>
         ToolRunner.ValidateAvailable("mvn", "--version");
 
@@ -42,7 +39,7 @@ public class BuildSdkGeneratorCommand : AsyncCommand<NoArgumentsCommandSettings>
         return await ToolRunner.RunAndWriteAsync(
             "mvn",
             ["clean", "package"],
-            WorkingDirectory,
+            SdkPaths.WorkingDirectory,
             cancellationToken,
             "Failed to start Maven build.");
     }

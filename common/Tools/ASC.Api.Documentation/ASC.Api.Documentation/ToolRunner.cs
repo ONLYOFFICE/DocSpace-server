@@ -24,10 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.ComponentModel;
-using System.Diagnostics;
-
-namespace ASC.Api.Documentation.Commands;
+namespace ASC.Api.Documentation;
 
 internal static class ToolRunner
 {
@@ -35,9 +32,7 @@ internal static class ToolRunner
     {
         try
         {
-            var result = RunAndCaptureAsync(toolName, arguments, cancellationToken: CancellationToken.None)
-                .GetAwaiter()
-                .GetResult();
+            var result = RunAndCapture(toolName, arguments);
 
             if (result.ExitCode == 0)
             {
@@ -49,6 +44,76 @@ internal static class ToolRunner
         catch (ToolExecutionException ex)
         {
             return ValidationResult.Error(ex.Message);
+        }
+    }
+
+    private static ToolRunResult RunAndCapture(
+        string toolName,
+        IReadOnlyList<string> arguments,
+        string? workingDirectory = null)
+    {
+        var resolvedTool = ResolveTool(toolName);
+        var startInfo = CreateStartInfo(resolvedTool, arguments, workingDirectory);
+
+        try
+        {
+            using var process = new Process
+            {
+                StartInfo = startInfo,
+            };
+
+            var standardOutput = new StringBuilder();
+            var standardError = new StringBuilder();
+
+            using var outputCompleted = new ManualResetEventSlim(false);
+            using var errorCompleted = new ManualResetEventSlim(false);
+
+            process.OutputDataReceived += (_, eventArgs) =>
+            {
+                if (eventArgs.Data is null)
+                {
+                    outputCompleted.Set();
+                    return;
+                }
+
+                standardOutput.AppendLine(eventArgs.Data);
+            };
+
+            process.ErrorDataReceived += (_, eventArgs) =>
+            {
+                if (eventArgs.Data is null)
+                {
+                    errorCompleted.Set();
+                    return;
+                }
+
+                standardError.AppendLine(eventArgs.Data);
+            };
+
+            if (!process.Start())
+            {
+                throw new ToolExecutionException(
+                    $"Resolved '{toolName}' to '{resolvedTool.Path}', but the process was not created.");
+            }
+
+            process.BeginOutputReadLine();
+            process.BeginErrorReadLine();
+
+            process.WaitForExit();
+            outputCompleted.Wait();
+            errorCompleted.Wait();
+
+            return new ToolRunResult(
+                process.ExitCode,
+                standardOutput.ToString(),
+                standardError.ToString(),
+                resolvedTool.Path);
+        }
+        catch (Exception ex) when (ex is Win32Exception or FileNotFoundException or InvalidOperationException)
+        {
+            throw new ToolExecutionException(
+                $"Resolved '{toolName}' to '{resolvedTool.Path}', but it could not be started: {ex.Message}",
+                ex);
         }
     }
 

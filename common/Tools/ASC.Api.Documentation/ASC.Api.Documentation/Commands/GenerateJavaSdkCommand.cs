@@ -24,14 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Api.Documentation.SDKs;
+namespace ASC.Api.Documentation.Commands;
 
 public class GenerateJavaSdkCommand : SdkCommandBase
 {
     public override string Name => "Java";
-
-    protected override string WorkingDirectory =>
-        Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "SDK"));
 }
-
-

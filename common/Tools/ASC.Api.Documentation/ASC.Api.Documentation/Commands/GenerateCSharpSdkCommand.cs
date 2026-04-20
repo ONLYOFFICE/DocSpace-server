@@ -24,20 +24,26 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Api.Documentation.Commands;
+namespace ASC.Api.Documentation.Commands;
 
-namespace ASC.Api.Documentation.SDKs;
-
-public class GenerateCSharpSdkCommand : SdkCommandBase
+public class GenerateCSharpSdkCommand : SdkCommandBase<CSharpSdkCommandSettings>
 {
     public override string Name => "CSharp";
 
-    protected override string WorkingDirectory =>
-        Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "SDK"));
+    public override ValidationResult Validate(CommandContext context, CSharpSdkCommandSettings settings)
+    {
+        var baseValidation = base.Validate(context, settings);
+        if (!baseValidation.Successful)
+        {
+            return baseValidation;
+        }
+
+        return ToolRunner.ValidateAvailable("dotnet", "--version");
+    }
 
     public override async Task<int> ExecuteAsync(
         CommandContext context,
-        NoArgumentsCommandSettings settings,
+        CSharpSdkCommandSettings settings,
         CancellationToken cancellationToken)
     {
         var generateExitCode = await base.ExecuteAsync(context, settings, cancellationToken);
@@ -57,38 +63,58 @@ public class GenerateCSharpSdkCommand : SdkCommandBase
                 "sdk",
                 "docspace-api-sdk-csharp"));
 
-        var buildExitCode = await BuildAsync(csharpSdkDirectory, cancellationToken);
+        var buildExitCode = await BuildAsync(csharpSdkDirectory, settings.Configuration, cancellationToken);
         if (buildExitCode != 0)
         {
             return buildExitCode;
         }
 
-        CopyPackages(csharpSdkDirectory);
-        return 0;
+        return CopyPackages(csharpSdkDirectory, settings.Configuration);
     }
 
-    private static async Task<int> BuildAsync(string workingDirectory, CancellationToken cancellationToken)
+    private static async Task<int> BuildAsync(
+        string workingDirectory,
+        string configuration,
+        CancellationToken cancellationToken)
     {
         return await ToolRunner.RunAndWriteAsync(
             "dotnet",
-            ["build"],
+            ["build", "-c", configuration],
             workingDirectory,
             cancellationToken,
             "Failed to start dotnet build.");
     }
 
-    private static void CopyPackages(string csharpSdkDirectory)
+    private static int CopyPackages(string csharpSdkDirectory, string configuration)
     {
-        var packageSourceDirectory = Path.Combine(csharpSdkDirectory, "src", "DocSpace.API.SDK", "bin", "Debug");
+        var packageSourceDirectory = Path.Combine(csharpSdkDirectory, "src", "DocSpace.API.SDK", "bin", configuration);
         var packageTargetDirectory = Path.GetFullPath(
             Path.Combine(csharpSdkDirectory, "..", "..", ".nuget", "packages"));
 
+        if (!Directory.Exists(packageSourceDirectory))
+        {
+            AnsiConsole.MarkupLine(
+                $"[red]{Markup.Escape($"Package source directory '{packageSourceDirectory}' was not found after building configuration '{configuration}'.")}[/]");
+            return 1;
+        }
+
         Directory.CreateDirectory(packageTargetDirectory);
 
+        var copiedPackages = 0;
         foreach (var packagePath in Directory.EnumerateFiles(packageSourceDirectory, "*.nupkg"))
         {
             var destinationPath = Path.Combine(packageTargetDirectory, Path.GetFileName(packagePath));
             File.Copy(packagePath, destinationPath, overwrite: true);
+            copiedPackages++;
         }
+
+        if (copiedPackages == 0)
+        {
+            AnsiConsole.MarkupLine(
+                $"[red]{Markup.Escape($"No .nupkg files were found in '{packageSourceDirectory}' after building configuration '{configuration}'.")}[/]");
+            return 1;
+        }
+
+        return 0;
     }
 }

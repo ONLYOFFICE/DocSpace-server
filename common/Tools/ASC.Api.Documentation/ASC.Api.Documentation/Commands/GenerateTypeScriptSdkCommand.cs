@@ -24,19 +24,22 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Api.Documentation.Commands;
-
-namespace ASC.Api.Documentation.SDKs;
+namespace ASC.Api.Documentation.Commands;
 
 public class GenerateTypeScriptSdkCommand : SdkCommandBase
 {
     public override string Name => "TypeScript";
 
-    protected override string WorkingDirectory =>
-        Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "SDK"));
+    public override ValidationResult Validate(CommandContext context, NoArgumentsCommandSettings settings)
+    {
+        var baseValidation = base.Validate(context, settings);
+        if (!baseValidation.Successful)
+        {
+            return baseValidation;
+        }
 
-    public override ValidationResult Validate(CommandContext context, NoArgumentsCommandSettings settings) =>
-        ToolRunner.ValidateAvailable("npm", "--version");
+        return ToolRunner.ValidateAvailable("npm", "--version");
+    }
 
     public override async Task<int> ExecuteAsync(
         CommandContext context,
@@ -72,8 +75,7 @@ public class GenerateTypeScriptSdkCommand : SdkCommandBase
             return packExitCode;
         }
 
-        CopyPackages(typeScriptSdkDirectory);
-        return 0;
+        return CopyPackages(typeScriptSdkDirectory);
     }
 
     private static async Task<int> RunNpmAsync(string command, string workingDirectory, CancellationToken cancellationToken)
@@ -86,17 +88,35 @@ public class GenerateTypeScriptSdkCommand : SdkCommandBase
             $"Failed to start npm {command}.");
     }
 
-    private static void CopyPackages(string typeScriptSdkDirectory)
+    private static int CopyPackages(string typeScriptSdkDirectory)
     {
         var packageTargetDirectory = Path.GetFullPath(
             Path.Combine(typeScriptSdkDirectory, "..", "..", "..", "client", "libs", "ui-kit"));
 
+        if (!Directory.Exists(typeScriptSdkDirectory))
+        {
+            AnsiConsole.MarkupLine(
+                $"[red]{Markup.Escape($"Package source directory '{typeScriptSdkDirectory}' was not found after running npm pack.")}[/]");
+            return 1;
+        }
+
         Directory.CreateDirectory(packageTargetDirectory);
 
+        var copiedPackages = 0;
         foreach (var packagePath in Directory.EnumerateFiles(typeScriptSdkDirectory, "onlyoffice-docspace-api-sdk-*.tgz"))
         {
             var destinationPath = Path.Combine(packageTargetDirectory, Path.GetFileName(packagePath));
             File.Copy(packagePath, destinationPath, overwrite: true);
+            copiedPackages++;
         }
+
+        if (copiedPackages == 0)
+        {
+            AnsiConsole.MarkupLine(
+                $"[red]{Markup.Escape($"No .tgz files matching 'onlyoffice-docspace-api-sdk-*.tgz' were found in '{typeScriptSdkDirectory}' after running npm pack.")}[/]");
+            return 1;
+        }
+
+        return 0;
     }
 }
