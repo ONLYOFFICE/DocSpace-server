@@ -383,16 +383,36 @@ public abstract class FactoryIndexer<T>(ILoggerProvider options,
         }
     }
 
-    public Task IndexAsync(T data, bool immediately = true)
+    public Task IndexAsync(T data, bool immediately = true, bool waitForCompletion = false)
     {
         var t = serviceProvider.GetService<T>();
 
-        if (Support(t))
+        if (!Support(t))
         {
-            return QueueAsync(() => _indexer.IndexAsync(data, immediately));
+            return Task.CompletedTask;
         }
 
-        return Task.CompletedTask;
+        if (waitForCompletion)
+        {
+            return Task.Factory.StartNew(
+                async () =>
+                {
+                    try
+                    {
+                        await _indexer.IndexAsync(data, immediately);
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.ErrorIndex(e);
+                    }
+                },
+                CancellationToken.None,
+                TaskCreationOptions.LongRunning,
+                _scheduler
+            ).Unwrap();
+        }
+
+        return QueueAsync(() => _indexer.IndexAsync(data, immediately));
     }
 
     public Task<bool> UpdateAsync(T data, bool immediately = true, params Expression<Func<T, object>>[] fields)
