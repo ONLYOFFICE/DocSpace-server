@@ -75,4 +75,66 @@ public class AIProvidersTest(AspireAppFixture fixture) : BaseTest(fixture)
         agent.Response.Should().NotBeNull();
         agent.Response.Id.Should().BeGreaterThan(0);
     }
+
+    [Fact]
+    public async Task CreateAgent_AskAIAboutForm_ReturnsOk()
+    {
+        if (_ollamaHttpClient?.BaseAddress == null || string.IsNullOrEmpty(_ollamaModel))
+        {
+            Assert.Skip("Ollama is not running.");
+        }
+
+        await _aiHttpClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Initializer.Owner);
+        await _webApiClient.Authenticate(Initializer.Owner);
+
+        var createProviderRequestDto = new CreateProviderRequestDto(
+            ProviderType.OpenAiCompatible,
+            "ollama",
+            _ollamaHttpClient.BaseAddress.AbsoluteUri,
+            "random",
+            [new ModelSettingsItemDto(_ollamaModel, true)]);
+
+        var provider = (await _providersApi.AddProviderAsync(createProviderRequestDto, TestContext.Current.CancellationToken)).Response;
+        var agent = await _agentsApi.CreateAgentAsync(new CreateAgentRequestDto("agent", chatSettings: new ChatSettings(provider.Id, _ollamaModel)), TestContext.Current.CancellationToken);
+
+        const string testFormDb = "test-form";
+
+        var csb = new MySqlConnectionStringBuilder(_dbConnectionString);
+
+        var serverCsb = new MySqlConnectionStringBuilder
+        {
+            Server = csb.Server,
+            Port = csb.Port,
+            UserID = csb.UserID,
+            Password = csb.Password
+        };
+
+        await using (var serverConnection = new MySqlConnection(serverCsb.ConnectionString))
+        {
+            await serverConnection.OpenAsync(TestContext.Current.CancellationToken);
+            await using var cmd = serverConnection.CreateCommand();
+            cmd.CommandText = $"CREATE DATABASE IF NOT EXISTS `{testFormDb}`;";
+            await cmd.ExecuteNonQueryAsync(TestContext.Current.CancellationToken);
+        }
+
+        await _authorizationApi.SaveAuthKeysAsync(new AuthServiceRequestsDto("externaldb", props:
+        [
+            new AuthKey("databaseType", "mysql"),
+            new AuthKey("dbHost", csb.Server),
+            new AuthKey("dbPort", csb.Port.ToString()),
+            new AuthKey("dbName", testFormDb),
+            new AuthKey("dbUser", csb.UserID),
+            new AuthKey("dbPassword", csb.Password),
+            new AuthKey("dbSsl", "false")
+        ]), TestContext.Current.CancellationToken);
+
+        var formRoom = (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("form room", roomType: RoomType.FillingFormsRoom), TestContext.Current.CancellationToken)).Response;
+        var updated = (await _roomsApi.UpdateRoomAsync(formRoom.Id, new UpdateRoomRequest(sendFormToExternalDB: true, saveFormAsXLSX: true), TestContext.Current.CancellationToken)).Response;
+
+        updated.Should().NotBeNull();
+        updated.Id.Should().BeGreaterThan(0);
+        updated.SendFormToExternalDB.Should().BeTrue();
+        updated.SaveFormAsXLSX.Should().BeTrue();
+    }
 }

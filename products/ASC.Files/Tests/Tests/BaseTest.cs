@@ -38,6 +38,8 @@ public class BaseTest(
     AspireAppFixture fixture
     ) : IAsyncLifetime
 {
+    protected readonly string? _dbConnectionString = fixture.DbConnectionString;
+
     protected readonly HttpClient _aiHttpClient = fixture.AIHttpClient;
     protected readonly HttpClient _filesClient = fixture.FilesHttpClient;
     protected readonly HttpClient _peopleClient = fixture.PeopleHttpClient;
@@ -63,6 +65,7 @@ public class BaseTest(
     protected readonly CommonSettingsApi _commonSettingsApi = fixture.CommonSettingsApi;
     protected readonly DocSpace.API.SDK.Api.Settings.QuotaApi _settingsQuotaApi = fixture.WebApiSettingsQuotaApi;
     protected readonly AuthenticationApi _authenticationApi = fixture.AuthenticationApi;
+    protected readonly AuthorizationApi _authorizationApi = fixture.AuthorizationApi;
 
     private readonly Func<Task> _resetDatabase = fixture.ResetDatabaseAsync;
 

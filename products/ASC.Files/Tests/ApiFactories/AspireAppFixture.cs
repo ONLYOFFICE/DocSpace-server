@@ -41,17 +41,18 @@ namespace ASC.Files.Tests.ApiFactories;
 public class AspireAppFixture : IAsyncLifetime
 {
     private DistributedApplication _app = null!;
-    private DbConnection _dbconnection = null!;
+    private DbConnection _dbConnection = null!;
     private Respawner _respawner = null!;
     private Provider _provider;
     private readonly List<string> _tablesToBackup = ["files_folder", "files_folder_tree", "core_user", "core_usersecurity", "files_bunch_objects"];
     private readonly List<string> _tablesToIgnore = ["core_acl", "core_settings", "core_subscription", "core_subscriptionmethod", "core_usergroup", "login_events", "tenants_tenants", "tenants_quota", "webstudio_settings"];
+    public string? DbConnectionString { get; private set; }
 
     //AI service
     public HttpClient AIHttpClient { get; private set; } = null!;
     public ProvidersApi ProvidersApi { get; private set; } = null!;
     public AgentsApi AgentsApi { get; private set; } = null!;
-    public string? OllamaModel { get; set; }
+    public string? OllamaModel { get; private set; }
 
     // Files service
     public HttpClient FilesHttpClient { get; private set; } = null!;
@@ -75,6 +76,7 @@ public class AspireAppFixture : IAsyncLifetime
     public HttpClient WebApiHttpClient { get; private set; } = null!;
     public DocSpace.API.SDK.Api.Settings.QuotaApi WebApiSettingsQuotaApi { get; private set; } = null!;
     public AuthenticationApi AuthenticationApi { get; private set; } = null!;
+    public AuthorizationApi AuthorizationApi { get; private set; } = null!;
     public CommonSettingsApi CommonSettingsApi { get; private set; } = null!;
     public UsersApi PortalUsersApi { get; private set; } = null!;
 
@@ -129,12 +131,13 @@ public class AspireAppFixture : IAsyncLifetime
 
         // Get connection strings from Aspire resources
         var dbConnectionString = await _app.GetConnectionStringAsync("docspace");
+        DbConnectionString = dbConnectionString;
 
         // Create DB connection for Respawn
-        _dbconnection = _provider == Provider.MySql
+        _dbConnection = _provider == Provider.MySql
             ? new MySqlConnection(dbConnectionString)
             : new NpgsqlConnection(dbConnectionString);
-        await _dbconnection.OpenAsync();
+        await _dbConnection.OpenAsync();
 
         // Create HTTP clients with cookies disabled to avoid stale auth cookies
         AIHttpClient = CreateHttpClientNoCookies(onlyofficeAI);
@@ -174,6 +177,7 @@ public class AspireAppFixture : IAsyncLifetime
         var webApiConfig = new Configuration { BasePath = WebApiHttpClient.BaseAddress!.ToString().TrimEnd('/') };
         WebApiSettingsQuotaApi = new DocSpace.API.SDK.Api.Settings.QuotaApi(WebApiHttpClient, webApiConfig);
         AuthenticationApi = new AuthenticationApi(WebApiHttpClient, webApiConfig);
+        AuthorizationApi = new AuthorizationApi(WebApiHttpClient, webApiConfig);
         CommonSettingsApi = new CommonSettingsApi(WebApiHttpClient, webApiConfig);
         PortalUsersApi = new UsersApi(WebApiHttpClient, webApiConfig);
 
@@ -181,7 +185,7 @@ public class AspireAppFixture : IAsyncLifetime
         var tablesToIgnore = _tablesToIgnore.Select(t => new Table(t)).ToList();
         tablesToIgnore.AddRange(_tablesToBackup.Select(r => new Table(MakeCopyTableName(r))));
 
-        _respawner = await Respawner.CreateAsync(_dbconnection, new RespawnerOptions
+        _respawner = await Respawner.CreateAsync(_dbConnection, new RespawnerOptions
         {
             DbAdapter = _provider == Provider.MySql ? DbAdapter.MySql : DbAdapter.Postgres,
             TablesToIgnore = tablesToIgnore.ToArray(),
@@ -190,7 +194,7 @@ public class AspireAppFixture : IAsyncLifetime
 
     internal async Task ResetDatabaseAsync()
     {
-        await _respawner.ResetAsync(_dbconnection);
+        await _respawner.ResetAsync(_dbConnection);
 
         var script = _provider switch
         {
@@ -227,7 +231,7 @@ public class AspireAppFixture : IAsyncLifetime
             backupScript.AppendFormat(scriptTemplate, table, MakeCopyTableName(table));
         }
 
-        await using var cmd = _dbconnection.CreateCommand();
+        await using var cmd = _dbConnection.CreateCommand();
         cmd.CommandText = backupScript.ToString();
         await cmd.ExecuteNonQueryAsync();
     }
@@ -263,7 +267,7 @@ public class AspireAppFixture : IAsyncLifetime
     public async ValueTask DisposeAsync()
     {
         await _app.StopAsync();
-        await _dbconnection.DisposeAsync();
+        await _dbConnection.DisposeAsync();
         await _app.DisposeAsync();
     }
 }
