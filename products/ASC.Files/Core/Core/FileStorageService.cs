@@ -1553,7 +1553,10 @@ public class FileStorageService //: IFileStorageService
         return file;
     }
 
-    public async ValueTask<File<T>> CreateNewFileAsync<T, TTemplate>(FileModel<T, TTemplate> fileWrapper, bool enableExternalExt = false)
+    public async ValueTask<File<T>> CreateNewFileAsync<T, TTemplate>(
+        FileModel<T, TTemplate> fileWrapper,
+        bool enableExternalExt = false,
+        bool ignoreTemplates = false)
     {
         ArgumentException.ThrowIfNullOrEmpty(fileWrapper.Title);
         ArgumentNullException.ThrowIfNull(fileWrapper.ParentId);
@@ -1636,7 +1639,7 @@ public class FileStorageService //: IFileStorageService
         {
             var culture = (await userManager.GetUsersAsync(authContext.CurrentAccount.ID)).GetCulture();
             var storeTemplate = await globalStore.GetStoreTemplateAsync();
-            var docTemplate = await globalStore.GetNewDocTemplate(serviceProvider, storeTemplate, fileExt, culture);
+            var docTemplate = await globalStore.GetNewDocTemplate(serviceProvider, storeTemplate, fileExt, culture, ignoreTemplates);
 
             try
             {
