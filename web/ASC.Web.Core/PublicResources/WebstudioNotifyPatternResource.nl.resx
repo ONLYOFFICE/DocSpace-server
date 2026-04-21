@@ -2157,4 +2157,40 @@ $TrulyYours</value>
   <data name="TrulyYoursText" xml:space="preserve">
     <value>Hoogachtend, ${LetterLogoText} Team</value>
   </data>
+  <data name="ActionFileUploadedToAgentKnowledge" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; heeft een nieuw document geüpload: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; naar de kennisbank van de AI-agent: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
+  </data>
+  <data name="subject_api_key_expired" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace: Uw API-sleutel is verlopen</value>
+  </data>
+  <data name="subject_user_agent_role_changed" xml:space="preserve">
+    <value>Uw rol in een DocSpace AI-agent is gewijzigd</value>
+  </data>
+  <data name="pattern_api_key_expired" xml:space="preserve">
+    <value>Hallo, $UserName!
+
+Deze e-mail is om u te informeren dat uw API-sleutel "*$Message*" is verlopen en gedeactiveerd.
+
+U kunt een nieuwe API-sleutel genereren in de "Ontwikkelaarstools":"${__VirtualRootPath}/developer-tools/api-keys".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace is verwijderd.
+
+*Portaal:* ${PortalUrl}
+*Eigenaar:* ${UserName} ${UserEmail}
+*Klant:* ${OwnerName}
+
+Zorg ervoor dat automatische facturering is uitgeschakeld. Controleer de status van automatische facturering in het Stripe-account van de klant.</value>
+  </data>
+  <data name="pattern_user_agent_role_changed" xml:space="preserve">
+    <value>Hallo!
+
+U heeft een nieuwe rol toegewezen gekregen in de DocSpace AI-agent "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+
+Lees meer over ruimterollen en -machtigingen in het "Helpcentrum":"${HelpCenterUrl}".
+
+$TrulyYours</value>
+  </data>
 </root>

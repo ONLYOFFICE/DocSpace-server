@@ -174,4 +174,13 @@
   <data name="UnavailableServers" xml:space="preserve">
     <value>Servery MCP sú nedostupné: {0}. Skontrolujte nastavenia pripojenia</value>
   </data>
+  <data name="MessageNotFound" xml:space="preserve">
+    <value>Správa sa nenašla</value>
+  </data>
+  <data name="NoModelsAvailable" xml:space="preserve">
+    <value>Pre tohto poskytovateľa nie sú k dispozícii žiadne modely</value>
+  </data>
+  <data name="ProviderNameExists" xml:space="preserve">
+    <value>Názov poskytovateľa už existuje</value>
+  </data>
 </root>

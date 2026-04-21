@@ -1131,4 +1131,67 @@
   <data name="WebpluginUploaded" xml:space="preserve">
     <value>Wgrana wtyczka: {0}</value>
   </data>
+  <data name="AIAccessDisabled" xml:space="preserve">
+    <value>Usługi AI zostały wyłączone</value>
+  </data>
+  <data name="AIAccessEnabled" xml:space="preserve">
+    <value>Usługi AI zostały włączone</value>
+  </data>
+  <data name="AIDefaultProviderDeleted" xml:space="preserve">
+    <value>Domyślny dostawca usunięty</value>
+  </data>
+  <data name="AIDefaultProviderSet" xml:space="preserve">
+    <value>Domyślny dostawca AI ustawiony: Nazwa: {0}, Domyślny model: {1}</value>
+  </data>
+  <data name="BackupCancelled" xml:space="preserve">
+    <value>Kopia zapasowa anulowana</value>
+  </data>
+  <data name="DocumentsDefaultTemplatesSettingsUpdated" xml:space="preserve">
+    <value>Domyślne ustawienia szablonu zaktualizowane: {0}</value>
+  </data>
+  <data name="FileNotSavedDueToRoomQuota" xml:space="preserve">
+    <value>Pokoje [{0}]. Plik nie został zapisany: {1} – przekroczony limit pamięci pokoju.</value>
+  </data>
+  <data name="FileNotSavedDueToUserQuota" xml:space="preserve">
+    <value>Użytkownicy [{0}]. Plik nie został zapisany: {1} – przekroczony limit pamięci użytkownika.</value>
+  </data>
+  <data name="FileSavedButRoomQuotaExceeded" xml:space="preserve">
+    <value>Pokoje [{0}]. Plik zaktualizowany: {1}, przekraczając limit pamięci pokoju.</value>
+  </data>
+  <data name="FileSavedButUserQuotaExceeded" xml:space="preserve">
+    <value>Użytkownicy [{0}]. Plik zaktualizowany: {1}, przekraczając limit pamięci użytkownika.</value>
+  </data>
+  <data name="InvitationSettingsUpdated" xml:space="preserve">
+    <value>Ustawienia zaproszeń zaktualizowane</value>
+  </data>
+  <data name="IPRestrictionsSettingsUpdated" xml:space="preserve">
+    <value>Ustawienia zabezpieczeń IP zaktualizowane</value>
+  </data>
+  <data name="LoginSettingsUpdated" xml:space="preserve">
+    <value>Ustawienia ochrony przed atakami siłowymi zaktualizowane</value>
+  </data>
+  <data name="RestoreCancelled" xml:space="preserve">
+    <value>Przywracanie anulowane</value>
+  </data>
+  <data name="RestoreStarted" xml:space="preserve">
+    <value>Przywracanie rozpoczęte</value>
+  </data>
+  <data name="ScheduledBackupDeleted" xml:space="preserve">
+    <value>Zaplanowana kopia zapasowa usunięta</value>
+  </data>
+  <data name="WhiteLabelAdditionalSettingsUpdated" xml:space="preserve">
+    <value>Dodatkowe ustawienia brandingu zaktualizowane</value>
+  </data>
+  <data name="WhiteLabelCompanySettingsUpdated" xml:space="preserve">
+    <value>Ustawienia informacji o firmie zaktualizowane</value>
+  </data>
+  <data name="WhiteLabelMailSettingsUpdated" xml:space="preserve">
+    <value>Ustawienia poczty zaktualizowane</value>
+  </data>
+  <data name="WhiteLabelSettingsLogosUpdated" xml:space="preserve">
+    <value>Ustawienia logo zaktualizowane</value>
+  </data>
+  <data name="WhiteLabelSettingsLogoTextUpdated" xml:space="preserve">
+    <value>Nazwa marki zaktualizowana</value>
+  </data>
 </root>

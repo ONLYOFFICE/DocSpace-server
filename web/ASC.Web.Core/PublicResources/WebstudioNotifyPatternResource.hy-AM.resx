@@ -2159,4 +2159,34 @@ $TrulyYours</value>
   <data name="TrulyYoursText" xml:space="preserve">
     <value>Սիրով Ձեր, ${LetterLogoText} թիմ</value>
   </data>
+  <data name="ActionFileUploadedToAgentKnowledge" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt;-ը վերբեռնել է նոր փաստաթուղթ. &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; AI գործակալի գիտելիքների բազա. &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
+  </data>
+  <data name="subject_api_key_expired" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace. Ձեր API բանալին սպառվել է</value>
+  </data>
+  <data name="subject_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace-ը ջնջված է</value>
+  </data>
+  <data name="subject_user_agent_role_changed" xml:space="preserve">
+    <value>Ձեր դերը DocSpace ԱԲ գործակալում փոխվել է</value>
+  </data>
+  <data name="pattern_api_key_expired" xml:space="preserve">
+    <value>Բարև, $UserName!
+
+Այս նամակը ուղարկվում է ձեզ տեղեկացնելու, որ ձեր API բանալին "*$Message*" սպառվել և անջատվել է:
+
+Կարող եք ստեղծել նոր API բանալի "Մշակողի գործիքներ":"${__VirtualRootPath}/developer-tools/api-keys" ում:
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_user_agent_role_changed" xml:space="preserve">
+    <value>Բարև!
+
+Ձեզ DocSpace ԱԲ գործակալում նոր դեր է նշանակվել՝ "${RoomTitle}":"${RoomUrl}": ${UserRole}:
+
+Իմացեք ավելին սենյակի դերերի և թույլտվությունների մասին "Օժանդակության կենտրոն":"${HelpCenterUrl}" ում.
+
+$TrulyYours</value>
+  </data>
 </root>

@@ -586,4 +586,7 @@ Je garantována 100% kompatibilita s MS Office formáty.</value>
   <data name="User" xml:space="preserve">
     <value>Uživatel</value>
   </data>
+  <data name="ErrorMessage_AiServicesDisabled" xml:space="preserve">
+    <value>Služby AI jsou pro aktuální portál deaktivovány</value>
+  </data>
 </root>

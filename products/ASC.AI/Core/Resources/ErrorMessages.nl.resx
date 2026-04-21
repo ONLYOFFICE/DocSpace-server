@@ -174,4 +174,13 @@
   <data name="UnavailableServers" xml:space="preserve">
     <value>MCP-servers zijn niet beschikbaar: {0}. Controleer de verbindingsinstellingen</value>
   </data>
+  <data name="MessageNotFound" xml:space="preserve">
+    <value>Bericht niet gevonden</value>
+  </data>
+  <data name="NoModelsAvailable" xml:space="preserve">
+    <value>Geen modellen beschikbaar voor deze provider</value>
+  </data>
+  <data name="ProviderNameExists" xml:space="preserve">
+    <value>Providernaam bestaat al</value>
+  </data>
 </root>

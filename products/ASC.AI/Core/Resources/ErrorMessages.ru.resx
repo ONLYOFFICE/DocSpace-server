@@ -180,4 +180,7 @@
   <data name="ProviderNameExists" xml:space="preserve">
     <value>Имя провайдера уже существует</value>
   </data>
+  <data name="MessageNotFound" xml:space="preserve">
+    <value>Сообщение не найдено</value>
+  </data>
 </root>

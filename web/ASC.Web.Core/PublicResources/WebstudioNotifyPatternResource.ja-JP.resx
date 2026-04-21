@@ -375,11 +375,11 @@ $OrangeButton
   </data>
   <data name="pattern_change_password_v115" xml:space="preserve">
     <value>${LetterLogoText}アカウントのパスワードを変更したいですか？下のボタンをクリックして確認してください。
- 
+
 $OrangeButton
- 
+
 リンクは7日間有効です。
- 
+
 パスワードを変更したくないですか？このメッセージは無視してください</value>
   </data>
   <data name="pattern_change_phone" xml:space="preserve">
@@ -499,7 +499,7 @@ $TrulyYours</value>
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 44px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 700; line-height: 19px; Margin: 0; padding: 0px 40px 24px; vertical-align: top; text-align: center;"&gt;ドキュメントコラボレーションの新時代をどうぞお楽しみください！&lt;/td&gt;&lt;/tr&gt; 
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 700; line-height: 19px; Margin: 0; padding: 0px 40px 24px; vertical-align: top; text-align: center;"&gt;ドキュメントコラボレーションの新時代をどうぞお楽しみください！&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
   </data>
@@ -650,7 +650,7 @@ $UserName 様
 $OrangeButton
 
 リンクの有効期間は7日です。
- 
+
 ウェブオフィスを使用するためのヒントをお送りします。プロファイルページでいつでも購読をキャンセルしたり、再度有効にすることができます。</value>
   </data>
   <data name="pattern_enterprise_guest_welcome_v1" xml:space="preserve">
@@ -717,7 +717,7 @@ $TrulyYours</value>
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 44px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 700; line-height: 19px; Margin: 0; padding: 0px 40px 24px; vertical-align: top; text-align: center;"&gt;ドキュメントコラボレーションの新時代をどうぞお楽しみください！&lt;/td&gt;&lt;/tr&gt; 
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 700; line-height: 19px; Margin: 0; padding: 0px 40px 24px; vertical-align: top; text-align: center;"&gt;ドキュメントコラボレーションの新時代をどうぞお楽しみください！&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
   </data>
@@ -854,12 +854,12 @@ $OrangeButton
       ログイン: &lt;b&gt;$Login&lt;/b&gt;
       パスワード: "&lt;b&gt;パスワードを設定する&lt;/b&gt;":"$MyStaffLink"
 
-      受信メール（IMAP）： 
+      受信メール（IMAP）：
       サーバー： &lt;b&gt;$Server&lt;/b&gt;
       ポート: &lt;b&gt;$ImapPort&lt;/b&gt;
       SSL/TLS: &lt;b&gt;$Encryption&lt;/b&gt;
 
-      送信メール (SMTP)： 
+      送信メール (SMTP)：
       サーバー： &lt;b&gt;$Server&lt;/b&gt;
       ポート ポート: &lt;b&gt;$SmtpPort&lt;/b&gt;
       SSL/TLS: &lt;b&gt;$Encryption&lt;/b&gt;
@@ -958,7 +958,7 @@ $OrangeButton
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 44px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 700; line-height: 19px; Margin: 0; padding: 0px 40px 24px; vertical-align: top; text-align: center;"&gt;ドキュメントコラボレーションの新時代をどうぞお楽しみください！&lt;/td&gt;&lt;/tr&gt; 
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 700; line-height: 19px; Margin: 0; padding: 0px 40px 24px; vertical-align: top; text-align: center;"&gt;ドキュメントコラボレーションの新時代をどうぞお楽しみください！&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
   </data>
@@ -1110,7 +1110,7 @@ ${LetterLogoText} サポートチーム
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}"スペースの削除
 
 $OwnerName 様
- 
+
 "${__VirtualRootPath}":"${__VirtualRootPath}" スペースの永久削除のリクエストがありました。
 
 *重要！スペースに保存されているすべてのデータ、および登録情報は失われ、回復することはできません。
@@ -1546,7 +1546,7 @@ $TrulyYours</value>
     <value>$UserName 様
 
 ${LetterLogoText} DocSpaceの$PaymentDelay日数の猶予期間が有効になっていることをご考慮ください。
- 
+
 猶予期間内にぜひBusinessサブスクリプションをお支払いください。そうすれば、${LetterLogoText} DocSpaceのすべての利点をさらに利用することができます。
 
 $OrangeButton
@@ -1568,7 +1568,7 @@ $TrulyYours</value>
     <value>$UserName 様
 
 ${LetterLogoText} DocSpaceの$PaymentDelay日数の猶予期間は終了していますので、ご考慮ください。
- 
+
 可能な限り早く、Businessサブスクリプションをご購入ください。そうすれば、${LetterLogoText} DocSpaceの特典はこれまで通りご利用いただけます。
 
 $OrangeButton
@@ -1579,7 +1579,7 @@ $TrulyYours</value>
     <value>$UserName 様
 
 ${LetterLogoText} DocSpaceの$PaymentDelay日数の猶予が明日までとなりますので、ご配慮願います。
- 
+
 本日中にぜひBusinessサブスクリプションをご購入ください。そうすれば、${LetterLogoText} DocSpaceのすべての利点をさらにご利用いただけます。
 
 $OrangeButton
@@ -1590,9 +1590,9 @@ $TrulyYours</value>
     <value>こんにちは！
 
 "${__VirtualRootPath}":"${__VirtualRootPath}" のDocSpaceルームに招待されています。リンクをクリックして招待を承諾してください：
- 
+
 $OrangeButton
- 
+
 招待リンクをクリックした後、アカウントに新しいパスワードを設定してください。
 
 $TrulyYours</value>
@@ -1693,10 +1693,10 @@ $TrulyYours</value>
   </data>
   <data name="pattern_send_whats_new" xml:space="preserve">
     <value>h1.$Date："${__VirtualRootPath}":"${__VirtualRootPath}" DocSpaceの新着情報です。
- 
+
 #foreach($activity in $Activities)
 $activity
- 
+
 #end</value>
   </data>
   <data name="pattern_set_password" xml:space="preserve">
@@ -1819,11 +1819,11 @@ ${LetterLogoText} DocSpaceをご利用いただきありがとうございます
 社内チーム、顧客、パートナーなどとのコラボレーションを促進するドキュメントハブである${LetterLogoText} DocSpaceでお客様のアカウントを作成いたしました。アカウントのアドレスは以下の通りです。"${__VirtualRootPath}":"${__VirtualRootPath}".
 
 現在のプランはSTARTUPです。このプランは完全無料で以下のものが含まれています：
- 
+
 &lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: auto; max-width: 342px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;100 管理者&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;100 ルームまで&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; vertical-align: top;"&gt;100 GB ディスク容量&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
 
 *ドキュメントコラボレーションの新時代をどうぞお楽しみください！*
- 
+
 $TrulyYours</value>
   </data>
   <data name="subject_activate_email" xml:space="preserve">
@@ -2140,5 +2140,71 @@ $TrulyYours</value>
   </data>
   <data name="TrulyYoursText" xml:space="preserve">
     <value>${LetterLogoText} チーム</value>
+  </data>
+  <data name="ActionFileUploadedToAgentKnowledge" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt;が新しいドキュメントをアップロードしました：&lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; AIエージェントのナレッジベースに：&lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
+  </data>
+  <data name="subject_api_key_expired" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace：APIキーの有効期限が切れました</value>
+  </data>
+  <data name="subject_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpaceが削除されました</value>
+  </data>
+  <data name="subject_user_agent_role_changed" xml:space="preserve">
+    <value>DocSpace AIエージェントにおけるあなたの役割が変更されました</value>
+  </data>
+  <data name="pattern_api_key_expired" xml:space="preserve">
+    <value>こんにちは、$UserName！
+
+このメールは、APIキー "*$Message*" の有効期限が切れ、無効化されたことをお知らせするものです。
+
+新しいAPIキーは "開発者ツール":"${__VirtualRootPath}/developer-tools/api-keys" で生成できます。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_user_agent_role_changed" xml:space="preserve">
+    <value>こんにちは！
+
+DocSpace AIエージェント "${RoomTitle}":"${RoomUrl}" に新しい役割が割り当てられました：${UserRole}。
+
+ルームの役割と権限の詳細については、 "ヘルプセンター":"${HelpCenterUrl}" をご覧ください。
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_scheduled_backup_failed" xml:space="preserve">
+    <value>DocSpaceの自動バックアップに失敗しました</value>
+  </data>
+  <data name="pattern_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpaceが削除されました。
+
+*ポータル：* ${PortalUrl}
+*オーナー：* ${UserName} ${UserEmail}
+*お客様：* ${OwnerName}
+
+自動請求がオフになっていることをご確認ください。お客様のStripeアカウントで自動請求のステータスをご確認ください。</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed" xml:space="preserve">
+    <value>こんにちは、$UserName、
+
+DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" のスケジュールされたバックアッププロセスに失敗しました。
+
+"バックアップ":"${__VirtualRootPath}/portal-settings/backup/data-backup" および "サービス":"{__VirtualRootPath}/portal-settings/services" の設定を確認することをお勧めします。
+
+ご質問やサポートが必要な場合は、"${__SupportLink}":"${__SupportLink}" よりお気軽にお問い合わせください。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
+    <value>こんにちは、$UserName、
+
+DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) のスケジュールされたバックアッププロセスに失敗しました。
+
+[バックアップ](${__VirtualRootPath}/portal-settings/backup/data-backup) および [サービス](${__VirtualRootPath}/portal-settings/services) の設定を確認することをお勧めします。
+
+ご質問やサポートが必要な場合は、[${__SupportLink}](${__SupportLink}) よりお気軽にお問い合わせください。
+
+敬具、
+${LetterLogoText} サポートチーム
+[${__SiteLink}](${__SiteLink})</value>
   </data>
 </root>

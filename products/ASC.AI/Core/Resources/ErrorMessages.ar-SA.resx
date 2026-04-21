@@ -174,4 +174,13 @@
   <data name="UnavailableServers" xml:space="preserve">
     <value>خوادم MCP غير متوفرة: {0}. التحقق من إعدادات الاتصال</value>
   </data>
+  <data name="MessageNotFound" xml:space="preserve">
+    <value>الرسالة غير موجودة</value>
+  </data>
+  <data name="NoModelsAvailable" xml:space="preserve">
+    <value>لا توجد نماذج متاحة لهذا المزود</value>
+  </data>
+  <data name="ProviderNameExists" xml:space="preserve">
+    <value>اسم المزود موجود بالفعل</value>
+  </data>
 </root>

@@ -1131,4 +1131,67 @@
   <data name="WebpluginUploaded" xml:space="preserve">
     <value>Plugin-ul a fost încărcat: {0}</value>
   </data>
+  <data name="AIAccessDisabled" xml:space="preserve">
+    <value>Serviciile IA au fost dezactivate</value>
+  </data>
+  <data name="AIAccessEnabled" xml:space="preserve">
+    <value>Serviciile IA au fost activate</value>
+  </data>
+  <data name="AIDefaultProviderDeleted" xml:space="preserve">
+    <value>Furnizorul implicit a fost șters</value>
+  </data>
+  <data name="AIDefaultProviderSet" xml:space="preserve">
+    <value>Furnizor IA implicit setat: Nume: {0}, Model implicit: {1}</value>
+  </data>
+  <data name="BackupCancelled" xml:space="preserve">
+    <value>Backup anulat</value>
+  </data>
+  <data name="DocumentsDefaultTemplatesSettingsUpdated" xml:space="preserve">
+    <value>Setările implicite ale șablonului au fost actualizate: {0}</value>
+  </data>
+  <data name="FileNotSavedDueToRoomQuota" xml:space="preserve">
+    <value>Săli [{0}]. Fișier nesalvat: {1} – cota de stocare a sălii depășită.</value>
+  </data>
+  <data name="FileNotSavedDueToUserQuota" xml:space="preserve">
+    <value>Utilizatori [{0}]. Fișier nesalvat: {1} – cota de stocare a utilizatorului depășită.</value>
+  </data>
+  <data name="FileSavedButRoomQuotaExceeded" xml:space="preserve">
+    <value>Săli [{0}]. Fișier actualizat: {1}, depășind cota de stocare a sălii.</value>
+  </data>
+  <data name="FileSavedButUserQuotaExceeded" xml:space="preserve">
+    <value>Utilizatori [{0}]. Fișier actualizat: {1}, depășind cota de stocare a utilizatorului.</value>
+  </data>
+  <data name="InvitationSettingsUpdated" xml:space="preserve">
+    <value>Setările de invitație au fost actualizate</value>
+  </data>
+  <data name="IPRestrictionsSettingsUpdated" xml:space="preserve">
+    <value>Setările de securitate IP au fost actualizate</value>
+  </data>
+  <data name="LoginSettingsUpdated" xml:space="preserve">
+    <value>Setările de protecție împotriva atacurilor brute force au fost actualizate</value>
+  </data>
+  <data name="RestoreCancelled" xml:space="preserve">
+    <value>Restaurare anulată</value>
+  </data>
+  <data name="RestoreStarted" xml:space="preserve">
+    <value>Restaurare pornită</value>
+  </data>
+  <data name="ScheduledBackupDeleted" xml:space="preserve">
+    <value>Backup programat șters</value>
+  </data>
+  <data name="WhiteLabelAdditionalSettingsUpdated" xml:space="preserve">
+    <value>Setările suplimentare de branding au fost actualizate</value>
+  </data>
+  <data name="WhiteLabelCompanySettingsUpdated" xml:space="preserve">
+    <value>Setările informațiilor companiei au fost actualizate</value>
+  </data>
+  <data name="WhiteLabelMailSettingsUpdated" xml:space="preserve">
+    <value>Setările de e-mail au fost actualizate</value>
+  </data>
+  <data name="WhiteLabelSettingsLogosUpdated" xml:space="preserve">
+    <value>Setările logo-ului au fost actualizate</value>
+  </data>
+  <data name="WhiteLabelSettingsLogoTextUpdated" xml:space="preserve">
+    <value>Numele mărcii a fost actualizat</value>
+  </data>
 </root>

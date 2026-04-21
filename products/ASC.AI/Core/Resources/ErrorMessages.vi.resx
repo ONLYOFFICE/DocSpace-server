@@ -174,4 +174,13 @@
   <data name="UnavailableServers" xml:space="preserve">
     <value>Máy chủ MCP hiện không khả dụng: {0}. Kiểm tra cài đặt kết nối</value>
   </data>
+  <data name="MessageNotFound" xml:space="preserve">
+    <value>Không tìm thấy tin nhắn</value>
+  </data>
+  <data name="NoModelsAvailable" xml:space="preserve">
+    <value>Không có mô hình nào cho nhà cung cấp này</value>
+  </data>
+  <data name="ProviderNameExists" xml:space="preserve">
+    <value>Tên nhà cung cấp đã tồn tại</value>
+  </data>
 </root>

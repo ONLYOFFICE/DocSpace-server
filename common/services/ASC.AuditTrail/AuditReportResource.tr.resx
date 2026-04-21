@@ -1155,4 +1155,43 @@
   <data name="WhiteLabelSettingsLogoTextUpdated" xml:space="preserve">
     <value>Marka adı güncellendi</value>
   </data>
+  <data name="AIAccessDisabled" xml:space="preserve">
+    <value>AI hizmetleri devre dışı bırakıldı</value>
+  </data>
+  <data name="AIAccessEnabled" xml:space="preserve">
+    <value>AI hizmetleri etkinleştirildi</value>
+  </data>
+  <data name="AIDefaultProviderDeleted" xml:space="preserve">
+    <value>Varsayılan sağlayıcı silindi</value>
+  </data>
+  <data name="AIDefaultProviderSet" xml:space="preserve">
+    <value>Varsayılan AI sağlayıcısı ayarlandı: Ad: {0}, Varsayılan Model: {1}</value>
+  </data>
+  <data name="BackupCancelled" xml:space="preserve">
+    <value>Yedekleme iptal edildi</value>
+  </data>
+  <data name="DocumentsDefaultTemplatesSettingsUpdated" xml:space="preserve">
+    <value>Varsayılan şablon ayarları güncellendi: {0}</value>
+  </data>
+  <data name="FileNotSavedDueToRoomQuota" xml:space="preserve">
+    <value>Odalar [{0}]. Dosya kaydedilmedi: {1} – oda depolama kotası aşıldı.</value>
+  </data>
+  <data name="FileNotSavedDueToUserQuota" xml:space="preserve">
+    <value>Kullanıcılar [{0}]. Dosya kaydedilmedi: {1} – kullanıcı depolama kotası aşıldı.</value>
+  </data>
+  <data name="FileSavedButRoomQuotaExceeded" xml:space="preserve">
+    <value>Odalar [{0}]. Dosya güncellendi: {1}, oda depolama kotası aşıldı.</value>
+  </data>
+  <data name="FileSavedButUserQuotaExceeded" xml:space="preserve">
+    <value>Kullanıcılar [{0}]. Dosya güncellendi: {1}, kullanıcı depolama kotası aşıldı.</value>
+  </data>
+  <data name="RestoreCancelled" xml:space="preserve">
+    <value>Geri yükleme iptal edildi</value>
+  </data>
+  <data name="RestoreStarted" xml:space="preserve">
+    <value>Geri yükleme başlatıldı</value>
+  </data>
+  <data name="ScheduledBackupDeleted" xml:space="preserve">
+    <value>Zamanlanmış yedekleme silindi</value>
+  </data>
 </root>
