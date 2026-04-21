@@ -29,6 +29,7 @@ using ASC.Webhooks.Core;
 
 using InternalWebhookTrigger = ASC.Webhooks.Core.WebhookTrigger;
 using InternalEmployeeType = ASC.Core.Users.EmployeeType;
+using WebhookTrigger = DocSpace.API.SDK.Model.WebhookTrigger;
 
 namespace ASC.People.Tests.PeopleController;
 
@@ -137,9 +138,25 @@ public class WebhookTest(AspireAppFixture fixture) : BaseTest(fixture)
         triggers.Should().NotBeNull();
         triggers.Response.Should().NotBeNull();
 
-        //var trigger = triggers.Response.FirstOrDefault(x => x.Id == InternalWebhookTrigger.UserCreated);
+        //var trigger = triggers.Response.FirstOrDefault(x => x.Id == WebhookTrigger.UserCreated);
         //trigger.Should().NotBeNull();
         //trigger.Available.Should().Be(false);
+
+        var createWebhooksConfigRequestsDto = new CreateWebhooksConfigRequestsDto(
+            "test",
+            "https://onlyoffice.com",
+            "test123!@#%ABC",
+            true,
+            true,
+            WebhookTrigger.UserCreated
+            );
+
+        var exception = await Assert.ThrowsAsync<ApiException>(async () =>
+            await _webhooksApi.CreateWebhookAsync(
+                createWebhooksConfigRequestsDto,
+                TestContext.Current.CancellationToken));
+
+        exception.ErrorCode.Should().Be(400);
     }
 
     [Fact]

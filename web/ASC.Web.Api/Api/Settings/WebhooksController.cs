@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2026
+// (c) Copyright Ascensio System SIA 2009-2026
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -86,7 +86,7 @@ public class WebhooksController(
     {
         _ = await CheckAdminPermissionsAsync();
 
-        await CheckWebhook(inDto.Name, inDto.Uri, inDto.SecretKey, inDto.SSL, true);
+        await CheckWebhook(inDto.Name, inDto.Uri, inDto.SecretKey, inDto.SSL, inDto.Triggers, true);
 
         var webhook = await dbWorker.AddWebhookConfig(inDto.Name, inDto.Uri, inDto.SecretKey, inDto.Enabled, inDto.SSL, inDto.Triggers, inDto.TargetId);
 
@@ -110,7 +110,7 @@ public class WebhooksController(
     [HttpPut("webhook")]
     public async Task<WebhooksConfigDto> UpdateWebhook(UpdateWebhooksConfigRequestsDto inDto)
     {
-        await CheckWebhook(inDto.Name, inDto.Uri, inDto.SecretKey, inDto.SSL, false);
+        await CheckWebhook(inDto.Name, inDto.Uri, inDto.SecretKey, inDto.SSL, inDto.Triggers, false);
 
         var existingWebhook = await dbWorker.GetWebhookConfig(tenantManager.GetCurrentTenantId(), inDto.Id);
 
@@ -178,7 +178,7 @@ public class WebhooksController(
 
         if (inDto.Enabled)
         {
-            await CheckWebhook(existingWebhook.Name, existingWebhook.Uri, existingWebhook.SecretKey, existingWebhook.SSL, false);
+            await CheckWebhook(existingWebhook.Name, existingWebhook.Uri, existingWebhook.SecretKey, existingWebhook.SSL, existingWebhook.Triggers, false);
         }
 
         existingWebhook.Enabled = inDto.Enabled;
@@ -380,10 +380,28 @@ public class WebhooksController(
         return false;
     }
 
-    private async Task CheckWebhook(string name, string uri, string secret, bool ssl, bool creation)
+    private async Task CheckWebhook(string name, string uri, string secret, bool ssl, WebhookTrigger triggers, bool creation)
     {
         ArgumentNullException.ThrowIfNull(name);
         ArgumentNullException.ThrowIfNull(uri);
+
+        if (triggers != WebhookTrigger.All)
+        {
+            var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
+
+            foreach (var trigger in Enum.GetValues<WebhookTrigger>())
+            {
+                if (trigger == WebhookTrigger.All)
+                {
+                    continue;
+                }
+
+                if (triggers.HasFlag(trigger) && !trigger.IsAvailableFor(userType))
+                {
+                    throw new ArgumentException("Trigger is not available");
+                }
+            }
+        }
 
         if (creation || !string.IsNullOrEmpty(secret))
         {
