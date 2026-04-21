@@ -60,7 +60,10 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
 
     public ConnectionStringManager AddMySql(bool withDbGate = false, bool withDataVolume = true)
     {
-        var mysqlResourceBuilder = builder.AddMySql("mysql");
+        var mysqlRootPassword = builder.AddParameter("mysql-root-password", "root", secret: true);
+
+        var mysqlResourceBuilder = builder.AddMySql("mysql", password: mysqlRootPassword)
+            .WithEndpoint("tcp", endpoint => endpoint.Port = 3306);
 
         if (withDataVolume)
         {
@@ -226,7 +229,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         return this;
     }
 
-    public ConnectionStringManager AddOpensearch(bool withDashboard = true, bool fixedPort = true)
+    public ConnectionStringManager AddOpensearch(bool withDashboard = true, bool fixedPort = true, bool withDataVolume = true)
     {
         OpensearchResource = builder
             .AddContainer(Constants.OpensearchContainer, "opensearchproject/opensearch", "2")
@@ -245,6 +248,12 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         {
             OpensearchResource = OpensearchResource
                 .WithHttpEndpoint(targetPort: Constants.OpensearchPort, name: "http");
+        }
+
+        if (withDataVolume)
+        {
+            OpensearchResource = OpensearchResource
+                .WithVolume("docspace-opensearch-data", "/usr/share/opensearch/data");
         }
 
         if (withDashboard)
