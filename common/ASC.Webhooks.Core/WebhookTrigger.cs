@@ -147,7 +147,7 @@ public enum WebhookTrigger : long
     #region Room
 
     [Description("room.created")]
-    [AvailableFor(EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User)]
+    [AvailableFor(EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin)]
     RoomCreated = 1L << 22,
 
     [Description("room.updated")]
@@ -167,7 +167,7 @@ public enum WebhookTrigger : long
     RoomRestored = 1L << 26,
 
     [Description("room.copied")]
-    [AvailableFor(EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User)]
+    [AvailableFor(EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin)]
     RoomCopied = 1L << 27,
 
     #endregion
@@ -193,7 +193,7 @@ public enum WebhookTrigger : long
     #region Agent
 
     [Description("agent.created")]
-    [AvailableFor(EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User)]
+    [AvailableFor(EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin)]
     AgentCreated = 1L << 31,
 
     [Description("agent.updated")]
