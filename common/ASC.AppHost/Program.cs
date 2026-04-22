@@ -137,7 +137,15 @@ var clientBasePath = Path.Combine(basePath, "client");
 
 if (!skipClient)
 {
-    startPackages = builder.AddJavaScriptApp("onlyoffice-client", clientBasePath, "start").WithPnpm();
+    var (certDir, crtFileName, _) = DevCertificateGenerator.EnsureCertificate(builder.AppHostDirectory);
+    var dnsPatchPath = Path.Combine(builder.AppHostDirectory, "scripts", "docspace-dns-patch.js").Replace('\\', '/');
+    var crtPath = Path.Combine(certDir, crtFileName);
+
+    startPackages = builder.AddJavaScriptApp("onlyoffice-client", clientBasePath, "start")
+        .WithPnpm()
+        .WithEnvironment("NODE_OPTIONS", $"--require={dnsPatchPath}")
+        .WithEnvironment("NODE_EXTRA_CA_CERTS", crtPath)
+        .WithEnvironment("API_HOST", $"http://localhost:{Constants.AppHostPort.ToString()}");
 }
 
 var isPreview = builder.Configuration["DOTNET_LAUNCH_PROFILE"] == "preview";

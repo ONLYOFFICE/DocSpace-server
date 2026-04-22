@@ -59,6 +59,18 @@ public class TenantManager(
         {
             // ignore
         }
+
+        // Additional host names that should resolve to the default local tenant.
+        // Consumed by dev setups that front the app with a friendly HTTPS host
+        // (e.g. Aspire AppHost publishes docspace.localhost on :443 → openresty → backend).
+        var extraAliases = Environment.GetEnvironmentVariable("CORE__LOCAL_ADDRESSES");
+        if (!string.IsNullOrWhiteSpace(extraAliases))
+        {
+            foreach (var alias in extraAliases.Split([',', ';', ' '], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            {
+                _thisCompAddresses.Add(alias.ToLowerInvariant());
+            }
+        }
     }
 
 

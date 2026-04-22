@@ -38,6 +38,9 @@ public static class NginxConfiguration
     {
         var isArm64 = System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture == System.Runtime.InteropServices.Architecture.Arm64;
 
+        var (certDir, _, _) = DevCertificateGenerator.EnsureCertificate(builder.AppHostDirectory);
+        var sslConfPath = Path.Combine(builder.AppHostDirectory, "nginx", "docspace-ssl.conf");
+
         var openResty = builder.AddContainer(Constants.OpenRestyContainer, "openresty/openresty", "1.27.1.2-10-alpine" + (isArm64 ? "-arm64" : ""))
             .WithBindMount(Path.Combine(basePath, "buildtools", "config", "nginx"), "/etc/nginx/conf.d/")
             .WithBindMount(Path.Combine(basePath, "buildtools", "config", "nginx", "includes"), "/etc/nginx/includes/")
@@ -46,7 +49,11 @@ public static class NginxConfiguration
             .WithBindMount(Path.Combine(clientBasePath, "packages", "client"), "/var/www/client")
             .WithBindMount(Path.Combine(clientBasePath, "packages", "login"), "/var/www/login")
             .WithBindMount(Path.Combine(clientBasePath, "packages", "management"), "/var/www/management")
-            .WithContainerRuntimeArgs("-p", $"0.0.0.0:{Constants.AppHostPort}:{Constants.RestyPort}");
+            .WithBindMount(certDir, "/etc/nginx/certs/", isReadOnly: true)
+            .WithBindMount(sslConfPath, "/etc/nginx/conf.d/docspace-ssl.conf", isReadOnly: true)
+            .WithContainerRuntimeArgs(
+                "-p", $"0.0.0.0:{Constants.AppHostPort}:{Constants.RestyPort}",
+                "-p", $"0.0.0.0:{Constants.AppHostHttpsPort}:{Constants.RestyHttpsPort}");
 
         if (startPackages != null)
         {

@@ -29,8 +29,11 @@ namespace ASC.AppHost.Configuration;
 public static class Constants
 {
     public const int AppHostPort = 8092;
+    public const int AppHostHttpsPort = 443;
+    public const string AppHostHttpsHost = "docspace.localhost";
 
     public const int RestyPort = 8092;
+    public const int RestyHttpsPort = 443;
     public const int SocketIoPort = 9899;
     public const int SsoAuthPort = 9834;
     public const int WebDavPort = 1900;
