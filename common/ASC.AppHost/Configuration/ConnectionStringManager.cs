@@ -63,7 +63,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         var mysqlRootPassword = builder.AddParameter("mysql-root-password", "root", secret: true);
 
         var mysqlResourceBuilder = builder.AddMySql("mysql", password: mysqlRootPassword)
-            .WithEndpoint("tcp", endpoint => endpoint.Port = 33060);
+            .WithEndpoint("tcp", endpoint => endpoint.Port = 33306);
 
         if (withDataVolume)
         {
