@@ -32,8 +32,8 @@ namespace ASC.AppHost.Configuration;
 
 public static class DevCertificateGenerator
 {
-    private const string Subject = "CN=docspace.localhost";
-    private static readonly string[] _dnsNames = ["docspace.localhost", "localhost"];
+    private const string Subject = "CN=localhost";
+    private static readonly string[] _dnsNames = ["localhost", "*.localhost"];
 
     public static (string CertDir, string CrtFileName, string KeyFileName) EnsureCertificate(string appHostDirectory)
     {
@@ -51,7 +51,9 @@ public static class DevCertificateGenerator
         if (File.Exists(crtPath) && File.Exists(keyPath))
         {
             var existing = X509CertificateLoader.LoadCertificateFromFile(crtPath);
-            if (existing.NotAfter > DateTime.UtcNow.AddDays(7) && IsTrusted(existing, trustMarkerPath))
+            if (existing.NotAfter > DateTime.UtcNow.AddDays(7)
+                && HasAllDnsNames(existing, _dnsNames)
+                && IsTrusted(existing, trustMarkerPath))
             {
                 return (certDir, crtFileName, keyFileName);
             }
@@ -84,6 +86,18 @@ public static class DevCertificateGenerator
         return (certDir, crtFileName, keyFileName);
     }
 
+    private static bool HasAllDnsNames(X509Certificate2 cert, IEnumerable<string> expected)
+    {
+        var sanExt = cert.Extensions["2.5.29.17"];
+        if (sanExt is null)
+        {
+            return false;
+        }
+
+        var decoded = new AsnEncodedData(sanExt.Oid, sanExt.RawData).Format(true);
+        return expected.All(name => decoded.Contains(name, StringComparison.OrdinalIgnoreCase));
+    }
+
     private static bool IsTrusted(X509Certificate2 cert, string trustMarkerPath)
     {
         if (OperatingSystem.IsWindows())
@@ -108,10 +122,13 @@ public static class DevCertificateGenerator
             using var store = new X509Store(StoreName.Root, StoreLocation.CurrentUser);
             store.Open(OpenFlags.ReadWrite);
 
-            var stale = store.Certificates.Find(X509FindType.FindBySubjectName, "docspace.localhost", false);
-            foreach (var old in stale)
+            foreach (var staleSubject in new[] { "docspace.localhost", "localhost" })
             {
-                store.Remove(old);
+                var stale = store.Certificates.Find(X509FindType.FindBySubjectName, staleSubject, false);
+                foreach (var old in stale)
+                {
+                    store.Remove(old);
+                }
             }
 
             store.Add(cert);
