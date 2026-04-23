@@ -1,25 +1,25 @@
 // (c) Copyright Ascensio System SIA 2009-2026
-// 
+//
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
+//
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
+//
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-// 
+//
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -159,13 +159,13 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
                 }
 
                 _log.Debug($"SendMsgWhatsNew userActivities count : {userActivities.Count}");//temp
-                
+
                 var roomsActivityNotifyAction = serviceProvider.GetService<RoomsActivityNotifyAction>();
                 roomsActivityNotifyAction.Init(scheduleDate, whatsNewType, userActivities);
-                
+
                 var sendWhatsNewNotifyAction = serviceProvider.GetService<SendWhatsNewNotifyAction>();
                 sendWhatsNewNotifyAction.Init(scheduleDate, whatsNewType, userActivities);
-                
+
                 INotifyAction action = whatsNewType == WhatsNewType.RoomsActivity ? roomsActivityNotifyAction : sendWhatsNewNotifyAction;
 
                 if (userActivities.Count != 0)
@@ -216,14 +216,19 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
 
         if (action == MessageAction.FileCreated)
         {
-            userActivityText = string.Format(WebstudioNotifyPatternResource.ActionFileCreated,
-                userName, fileUrl, fileTitle, roomsUrl, roomsTitle, date);
+            var pattern = activityInfo.IsSharedForMe
+                ? WebstudioNotifyPatternResource.ActionFileCreatedInSharedForMe
+                : WebstudioNotifyPatternResource.ActionFileCreated;
 
+            userActivityText = string.Format(pattern, userName, fileUrl, fileTitle, roomsUrl, roomsTitle, date);
         }
         else if (action == MessageAction.FileUpdatedRevisionComment)
         {
-            userActivityText = string.Format(WebstudioNotifyPatternResource.ActionNewComment,
-                userName, fileUrl, fileTitle, roomsUrl, roomsTitle, date);
+            var pattern = activityInfo.IsSharedForMe
+                ? WebstudioNotifyPatternResource.ActionNewCommentInSharedForMe
+                : WebstudioNotifyPatternResource.ActionNewComment;
+
+            userActivityText = string.Format(pattern, userName, fileUrl, fileTitle, roomsUrl, roomsTitle, date);
         }
         else if (action == MessageAction.RoomCreated)
         {
@@ -262,23 +267,28 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
         }
         else if (action == MessageAction.FileUploaded)
         {
-            var pattern = activityInfo.IsAgent && activityInfo.IsKnowledge
-                ? WebstudioNotifyPatternResource.ActionFileUploadedToAgentKnowledge
-                : WebstudioNotifyPatternResource.ActionFileUploaded;
+            var pattern = activityInfo.IsSharedForMe
+                ? WebstudioNotifyPatternResource.ActionFileUploadedInSharedForMe
+                : activityInfo.IsAgent && activityInfo.IsKnowledge
+                    ? WebstudioNotifyPatternResource.ActionFileUploadedToAgentKnowledge
+                    : WebstudioNotifyPatternResource.ActionFileUploaded;
 
             userActivityText = string.Format(pattern, userName, fileUrl, fileTitle, roomsUrl, roomsTitle, date);
         }
         else if (action == MessageAction.UserFileUpdated)
         {
-            userActivityText = string.Format(WebstudioNotifyPatternResource.ActionFileEdited,
-                userName, fileUrl, fileTitle, roomsUrl, roomsTitle);
+            var pattern = activityInfo.IsSharedForMe
+                ? WebstudioNotifyPatternResource.ActionFileEditedInSharedForMe
+                : WebstudioNotifyPatternResource.ActionFileEdited;
+
+            userActivityText = string.Format(pattern, userName, fileUrl, fileTitle, roomsUrl, roomsTitle);
         }
         else if (action == MessageAction.RoomCreateUser)
         {
-            var pattern = activityInfo.IsAgent 
-                ? WebstudioNotifyPatternResource.ActionUserAddedToAgent 
+            var pattern = activityInfo.IsAgent
+                ? WebstudioNotifyPatternResource.ActionUserAddedToAgent
                 : WebstudioNotifyPatternResource.ActionUserAddedToRoom;
-            
+
             userActivityText = string.Format(pattern, targetUserNames, roomsUrl, roomsTitle);
         }
         else if (action == MessageAction.RoomRemoveUser)
@@ -286,7 +296,7 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
             var pattern = activityInfo.IsAgent
                 ? WebstudioNotifyPatternResource.ActionUserRemovedFromAgent
                 : WebstudioNotifyPatternResource.ActionUserRemovedFromRoom;
-            
+
             userActivityText = string.Format(pattern, targetUserNames, roomsUrl, roomsTitle, date);
         }
         else if (action == MessageAction.RoomUpdateAccessForUser)
@@ -294,7 +304,7 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
             var pattern = activityInfo.IsAgent
                 ? WebstudioNotifyPatternResource.ActionAgentUpdateAccessForUser
                 : WebstudioNotifyPatternResource.ActionRoomUpdateAccessForUser;
-            
+
             userActivityText = string.Format(pattern, targetUserNames, userRole, roomsUrl, roomsTitle);
         }
         else if (action == MessageAction.RoomDeleted)
@@ -367,6 +377,7 @@ public class ActivityInfo
     public string UserRole { get; set; }
     public bool IsAgent { get; set; }
     public bool IsKnowledge { get; set; }
+    public bool IsSharedForMe { get; set; }
 }
 
 public enum WhatsNewType
