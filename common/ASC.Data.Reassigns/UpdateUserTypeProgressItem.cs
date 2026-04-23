@@ -76,7 +76,7 @@ public class UpdateUserTypeProgressItem : DistributedTaskProgress
     {
         await using var scope = _serviceScopeFactory.CreateAsyncScope();
         var scopeClass = scope.ServiceProvider.GetService<ChangeUserTypeProgressItemScope>();
-        var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, displayUserSettingsHelper, options, webItemSecurityCache, distributedLockProvider, socketManager, webhookManager, userFormatter, daoFactory, groupFullDtoHelper) = scopeClass;
+        var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, displayUserSettingsHelper, options, webItemSecurityCache, distributedLockProvider, socketManager, webhookManager, userFormatter, daoFactory, groupFullDtoHelper, fileSecurity) = scopeClass;
         var settingsManager = scope.ServiceProvider.GetService<SettingsManager>();
         var logger = options.CreateLogger("ASC.Web");
         await tenantManager.SetCurrentTenantAsync(_tenantId);
@@ -116,6 +116,10 @@ public class UpdateUserTypeProgressItem : DistributedTaskProgress
                 await securityContext.AuthenticateMeWithoutCookieAsync(ToUser);
                 await fileStorageService.UpdatePersonalFolderModified(User);
                 await securityContext.AuthenticateMeWithoutCookieAsync(_currentUserId);
+                await fileSecurity.UpdateShareByFolderTypesAsync(
+                    User,
+                    [FolderType.AiRoom],
+                    Files.Core.Security.FileShare.Read);
 
                 await SetPercentageAndCheckCancellationAsync(60, true);
             }
@@ -286,4 +290,5 @@ public record ChangeUserTypeProgressItemScope(
     UserWebhookManager WebhookManager,
     UserFormatter UserFormatter,
     IDaoFactory DaoFactory,
-    GroupFullDtoHelper GroupFullDtoHelper);
+    GroupFullDtoHelper GroupFullDtoHelper,
+    IFileSecurity FileSecurity);

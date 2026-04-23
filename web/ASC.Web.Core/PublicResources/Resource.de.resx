@@ -1,17 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
-  <!-- 
-    Microsoft ResX Schema 
-    
+  <!--
+    Microsoft ResX Schema
+
     Version 2.0
-    
-    The primary goals of this format is to allow a simple XML format 
-    that is mostly human readable. The generation and parsing of the 
-    various data types are done through the TypeConverter classes 
+
+    The primary goals of this format is to allow a simple XML format
+    that is mostly human readable. The generation and parsing of the
+    various data types are done through the TypeConverter classes
     associated with the data types.
-    
+
     Example:
-    
+
     ... ado.net/XML headers & schema ...
     <resheader name="resmimetype">text/microsoft-resx</resheader>
     <resheader name="version">2.0</resheader>
@@ -26,36 +26,36 @@
         <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
         <comment>This is a comment</comment>
     </data>
-                
-    There are any number of "resheader" rows that contain simple 
+
+    There are any number of "resheader" rows that contain simple
     name/value pairs.
-    
-    Each data row contains a name, and value. The row also contains a 
-    type or mimetype. Type corresponds to a .NET class that support 
-    text/value conversion through the TypeConverter architecture. 
-    Classes that don't support this are serialized and stored with the 
+
+    Each data row contains a name, and value. The row also contains a
+    type or mimetype. Type corresponds to a .NET class that support
+    text/value conversion through the TypeConverter architecture.
+    Classes that don't support this are serialized and stored with the
     mimetype set.
-    
-    The mimetype is used for serialized objects, and tells the 
-    ResXResourceReader how to depersist the object. This is currently not 
+
+    The mimetype is used for serialized objects, and tells the
+    ResXResourceReader how to depersist the object. This is currently not
     extensible. For a given mimetype the value must be set accordingly:
-    
-    Note - application/x-microsoft.net.object.binary.base64 is the format 
-    that the ResXResourceWriter will generate, however the reader can 
+
+    Note - application/x-microsoft.net.object.binary.base64 is the format
+    that the ResXResourceWriter will generate, however the reader can
     read any of the formats listed below.
-    
+
     mimetype: application/x-microsoft.net.object.binary.base64
-    value   : The object must be serialized with 
+    value   : The object must be serialized with
             : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
             : and then encoded with base64 encoding.
-    
+
     mimetype: application/x-microsoft.net.object.soap.base64
-    value   : The object must be serialized with 
+    value   : The object must be serialized with
             : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
             : and then encoded with base64 encoding.
 
     mimetype: application/x-microsoft.net.object.bytearray.base64
-    value   : The object must be serialized into a byte array 
+    value   : The object must be serialized into a byte array
             : using a System.ComponentModel.TypeConverter
             : and then encoded with base64 encoding.
     -->
@@ -139,7 +139,7 @@
     <value>Menge</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>KI-Tools</value>
+    <value>{LogoText} AI</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Backup</value>
@@ -595,7 +595,7 @@
     <value>X</value>
   </data>
   <data name="ConsumerstwitterAccessTokenSecret_Default" xml:space="preserve">
-    <value>Client Secret</value>
+    <value>Geheimer Clientschlüssel</value>
   </data>
   <data name="ConsumerstwitterAccessToken_Default" xml:space="preserve">
     <value>Client ID</value>
@@ -637,7 +637,7 @@
     <value>Client-ID</value>
   </data>
   <data name="ConsumersWeixinClientSecret" xml:space="preserve">
-    <value>Client-Geheimnis</value>
+    <value>Geheimer Clientschlüssel</value>
   </data>
   <data name="ConsumersWeixinDescription" xml:space="preserve">
     <value>Aktivieren Sie die Anwendung für die Anmeldung im Portal mit einem WeChat-Konto.</value>
@@ -697,7 +697,7 @@
     <value>Zoom Kundennummer</value>
   </data>
   <data name="ConsumersZoomClientSecret" xml:space="preserve">
-    <value>Zoom Client Geheimnis</value>
+    <value>Zoom Geheimer Clientschlüssel</value>
   </data>
   <data name="ConsumersZoomDescription" xml:space="preserve">
     <value>Aktivieren Sie die Anwendung, um sich mit einem Zoom-Konto am Portal anzumelden.</value>
@@ -1153,7 +1153,7 @@
     <value>Die Anzahl der KI-Agenten sollte {0} nicht überschreiten</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>KI-Tools</value>
+    <value>{LogoText} AI</value>
   </data>
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
     <value>Aktivieren Sie KI-Funktionen in Ihrem DocSpace, um die Produktivität zu steigern.</value>
@@ -1289,5 +1289,95 @@
   </data>
   <data name="WhatsNewSubscriptionName" xml:space="preserve">
     <value>Neues</value>
+  </data>
+  <data name="AccountingCustomerOperationAgent" xml:space="preserve">
+    <value>Agent</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_chat" xml:space="preserve">
+    <value>Chat</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_fetch" xml:space="preserve">
+    <value>Web-Crawling</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_search" xml:space="preserve">
+    <value>Websuche</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-tools" xml:space="preserve">
+    <value>KI-Credits</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_fetch" xml:space="preserve">
+    <value>Quellen</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_search" xml:space="preserve">
+    <value>Ergebnisse</value>
+  </data>
+  <data name="ConsumersdatabaseType" xml:space="preserve">
+    <value>Datenbanktyp</value>
+  </data>
+  <data name="ConsumersdbHost" xml:space="preserve">
+    <value>Host</value>
+  </data>
+  <data name="ConsumersdbName" xml:space="preserve">
+    <value>Datenbankname</value>
+  </data>
+  <data name="ConsumersdbPassword" xml:space="preserve">
+    <value>Passwort</value>
+  </data>
+  <data name="ConsumersdbPort" xml:space="preserve">
+    <value>Port</value>
+  </data>
+  <data name="ConsumersdbSsl" xml:space="preserve">
+    <value>SSL verwenden</value>
+  </data>
+  <data name="ConsumersdbUser" xml:space="preserve">
+    <value>Benutzer</value>
+  </data>
+  <data name="ConsumersExternalDb" xml:space="preserve">
+    <value>Datenbankverbindung</value>
+  </data>
+  <data name="ConsumersExternalDbDescription" xml:space="preserve">
+    <value>Formularergebnisse in einer externen Datenbank wie MySQL oder SQLite speichern.</value>
+  </data>
+  <data name="ConsumersExternalDbInstruction" xml:space="preserve">
+    <value>Verbinden Sie eine externe Datenbank, um Formularergebnisse zu speichern.</value>
+  </data>
+  <data name="ConsumersExternalDbSqliteStandaloneOnly" xml:space="preserve">
+    <value>SQLite ist nur in eigenständigen Installationen verfügbar.</value>
+  </data>
+  <data name="ConsumersExternalDbTestConnection" xml:space="preserve">
+    <value>Verbindung testen</value>
+  </data>
+  <data name="ConsumersNextcloud" xml:space="preserve">
+    <value>Nextcloud</value>
+  </data>
+  <data name="ConsumersNextcloudBaseUrl" xml:space="preserve">
+    <value>Geben Sie die URL-Adresse der Nextcloud-Instanz ein.</value>
+  </data>
+  <data name="ConsumersNextcloudClientId" xml:space="preserve">
+    <value>Client ID</value>
+  </data>
+  <data name="ConsumersNextcloudClientSecret" xml:space="preserve">
+    <value>Geheimer Clientschlüssel</value>
+  </data>
+  <data name="ConsumersNextcloudDescription" xml:space="preserve">
+    <value>Ermöglichen Sie der Anwendung, sich mit einem Nextcloud-Konto im Portal anzumelden.</value>
+  </data>
+  <data name="ConsumersNextcloudInstruction" xml:space="preserve">
+    <value>Ermöglichen Sie der Anwendung, sich mit einem Nextcloud-Konto im Portal anzumelden.</value>
+  </data>
+  <data name="ConsumerssqliteFilePath" xml:space="preserve">
+    <value>SQLite-Dateipfad</value>
+  </data>
+  <data name="CouldNotRecoverPasswordForAutoGeneratedEmail" xml:space="preserve">
+    <value>Kennwortwiederherstellung  ist für automatisch generierte E-Mail-Adressen nicht zulässig</value>
+  </data>
+  <data name="TariffsFeature_embedding_wallet" xml:space="preserve">
+    <value>KI-Einbettung</value>
+  </data>
+  <data name="TariffsFeature_embedding_wallet_price_count" xml:space="preserve">
+    <value>Eine Einheit zur Einbettungsmessung, die große Sprachmodelle (LLMs) verarbeiten können</value>
+  </data>
+  <data name="UserAuthenticationFailed" xml:space="preserve">
+    <value>Benutzerauthentifizierung fehlgeschlagen</value>
   </data>
 </root>

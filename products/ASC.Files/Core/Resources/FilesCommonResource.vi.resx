@@ -586,4 +586,7 @@ Khả năng tương thích cao nhất với docx, xlsx, pptx.</value>
   <data name="User" xml:space="preserve">
     <value>Người dùng</value>
   </data>
+  <data name="ErrorMessage_AiServicesDisabled" xml:space="preserve">
+    <value>Dịch vụ AI bị vô hiệu hóa cho cổng thông tin hiện tại</value>
+  </data>
 </root>

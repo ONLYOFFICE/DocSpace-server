@@ -576,7 +576,9 @@ public class FileStorageService //: IFileStorageService
         return folder;
     }
 
-    public async Task<Folder<int>> CreateRoomAsync(string title, RoomType roomType, bool privacy, bool? indexing, IEnumerable<FileShareParams> share, long? quota, RoomDataLifetime lifetime, bool? denyDownload, WatermarkRequestDto watermark, string color, string cover, IEnumerable<string> tags, LogoRequest logo, ChatSettings chatSettings = null)
+    public async Task<Folder<int>> CreateRoomAsync(string title, RoomType roomType, bool privacy, bool? indexing, IEnumerable<FileShareParams> share, long? quota, RoomDataLifetime lifetime, bool? denyDownload, WatermarkRequestDto watermark, string color, string cover, IEnumerable<string> tags, LogoRequest logo, ChatSettings chatSettings = null,
+        bool? sendFormToExternalDB = null,
+        bool? saveFormAsXLSX = null)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
         var parentId = await globalFolderHelper.GetFolderVirtualRooms();
@@ -586,12 +588,14 @@ public class FileStorageService //: IFileStorageService
             await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetRoomsCountCheckKey(tenantId)))
             {
                 await countRoomChecker.CheckAppend();
-                return await InternalCreateFolderAsync(parentId, title, DocSpaceHelper.MapToFolderType(roomType), privacy, indexing, quota, lifetime, denyDownload, watermark, color, cover, tags, logo, chatSettings);
+                return await InternalCreateFolderAsync(parentId, title, DocSpaceHelper.MapToFolderType(roomType), privacy, indexing, quota, lifetime, denyDownload, watermark, color, cover, tags, logo, chatSettings, sendFormToExternalDB, saveFormAsXLSX);
             }
         }, privacy, share);
     }
 
-    public async Task<Folder<int>> CreateAiAgentAsync(string title, bool privacy, bool? indexing, IEnumerable<FileShareParams> share, long? quota, RoomDataLifetime lifetime, bool? denyDownload, WatermarkRequestDto watermark, string color, string cover, IEnumerable<string> tags, LogoRequest logo, ChatSettings chatSettings)
+    public async Task<Folder<int>> CreateAiAgentAsync(string title, bool privacy, bool? indexing, IEnumerable<FileShareParams> share, long? quota, RoomDataLifetime lifetime, bool? denyDownload, WatermarkRequestDto watermark, string color, string cover, IEnumerable<string> tags, LogoRequest logo, ChatSettings chatSettings,
+        bool? sendFormToExternalDB = null,
+        bool? saveFormAsXLSX = null)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
         var parentId = await globalFolderHelper.GetFolderAiAgentsAsync();
@@ -601,7 +605,7 @@ public class FileStorageService //: IFileStorageService
             await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetAIAgentsCountCheckKey(tenantId)))
             {
                 await countAIAgentChecker.CheckAppend();
-                return await InternalCreateFolderAsync(parentId, title, FolderType.AiRoom, privacy, indexing, quota, lifetime, denyDownload, watermark, color, cover, tags, logo, chatSettings);
+                return await InternalCreateFolderAsync(parentId, title, FolderType.AiRoom, privacy, indexing, quota, lifetime, denyDownload, watermark, color, cover, tags, logo, chatSettings, sendFormToExternalDB, saveFormAsXLSX);
             }
         }, privacy, share);
     }
@@ -862,7 +866,23 @@ public class FileStorageService //: IFileStorageService
         return folder;
     }
 
-    private async Task<Folder<T>> InternalCreateFolderAsync<T>(T parentId, string title, FolderType folderType = FolderType.DEFAULT, bool privacy = false, bool? indexing = false, long? quota = TenantEntityQuotaSettings.DefaultQuotaValue, RoomDataLifetime lifetime = null, bool? denyDownload = false, WatermarkRequestDto watermark = null, string color = null, string cover = null, IEnumerable<string> names = null, LogoRequest logo = null, ChatSettings chatSettings = null)
+    private async Task<Folder<T>> InternalCreateFolderAsync<T>(
+        T parentId,
+        string title,
+        FolderType folderType = FolderType.DEFAULT,
+        bool privacy = false,
+        bool? indexing = false,
+        long? quota = TenantEntityQuotaSettings.DefaultQuotaValue,
+        RoomDataLifetime lifetime = null,
+        bool? denyDownload = false,
+        WatermarkRequestDto watermark = null,
+        string color = null,
+        string cover = null,
+        IEnumerable<string> names = null,
+        LogoRequest logo = null,
+        ChatSettings chatSettings = null,
+        bool? sendFormToExternalDB = null,
+        bool? saveFormAsXLSX = null)
     {
         title = title?.Trim();
 
@@ -941,6 +961,16 @@ public class FileStorageService //: IFileStorageService
             if (quota.HasValue)
             {
                 newFolder.SettingsQuota = quota.Value;
+            }
+
+            if (saveFormAsXLSX.HasValue)
+            {
+                newFolder.SettingsSaveFormAsXLSX = saveFormAsXLSX.Value;
+            }
+
+            if (sendFormToExternalDB.HasValue)
+            {
+                newFolder.SettingsSendFormToExternalDB = sendFormToExternalDB.Value;
             }
 
             if (chatSettings != null)
@@ -1553,7 +1583,10 @@ public class FileStorageService //: IFileStorageService
         return file;
     }
 
-    public async ValueTask<File<T>> CreateNewFileAsync<T, TTemplate>(FileModel<T, TTemplate> fileWrapper, bool enableExternalExt = false)
+    public async ValueTask<File<T>> CreateNewFileAsync<T, TTemplate>(
+        FileModel<T, TTemplate> fileWrapper,
+        bool enableExternalExt = false,
+        bool ignoreTemplates = false)
     {
         ArgumentException.ThrowIfNullOrEmpty(fileWrapper.Title);
         ArgumentNullException.ThrowIfNull(fileWrapper.ParentId);
@@ -1636,7 +1669,7 @@ public class FileStorageService //: IFileStorageService
         {
             var culture = (await userManager.GetUsersAsync(authContext.CurrentAccount.ID)).GetCulture();
             var storeTemplate = await globalStore.GetStoreTemplateAsync();
-            var docTemplate = await globalStore.GetNewDocTemplate(serviceProvider, storeTemplate, fileExt, culture);
+            var docTemplate = await globalStore.GetNewDocTemplate(serviceProvider, storeTemplate, fileExt, culture, ignoreTemplates);
 
             try
             {
@@ -5344,8 +5377,8 @@ public class FileStorageService //: IFileStorageService
 
         await Task.WhenAll(resultsFileTask, roomTask);
 
-        var resultsFile = resultsFileTask.Result;
-        var room = roomTask.Result;
+        var resultsFile = await resultsFileTask;
+        var room = await roomTask;
 
         if (room == null ||
             formFilling.RoomId != room.Id)
@@ -5416,7 +5449,7 @@ public class FileStorageService //: IFileStorageService
         return group;
     }
 
-    public async Task<(FormFillingReportTask Task, File<int> Form)> GenerateXlsxAsync(int fileId)
+    public async Task<(FormFillingReportTask Task, File<int> Form, bool IsNewFile)> GenerateXlsxAsync(int fileId)
     {
         var fileDao = daoFactory.GetFileDao<int>();
         var folderDao = daoFactory.GetFolderDao<int>();
@@ -5484,9 +5517,9 @@ public class FileStorageService //: IFileStorageService
 
         await Task.WhenAll(resultsFileTask, roomTask, resultFolderTask);
 
-        var resultsFile = resultsFileTask.Result;
-        var room = roomTask.Result;
-        var resultFolder = resultFolderTask.Result;
+        var resultsFile = await resultsFileTask;
+        var room = await roomTask;
+        var resultFolder = await resultFolderTask;
 
         if (room == null ||
             formFilling.RoomId != room.Id ||
@@ -5500,14 +5533,14 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
         }
 
-        await entryManager.EnsureFormFillingOutputAsync(form, room, resultsFile, resultFolder, properties, folderDao, fileDao);
+        var isNewFile = await entryManager.EnsureFormFillingOutputAsync(form, room, resultsFile, resultFolder, properties, folderDao, fileDao);
 
-        var task = await exportToXLSX.UpdateXlsxReport(room.Id, form.Id, form.Version);
+        var task = await exportToXLSX.UpdateXlsxReport(room.Id, form.Id, form.Version, isNewFile);
 
-        return (task, form);
+        return (task, form, isNewFile);
     }
 
-    public async Task<(FormFillingReportTask Task, File<int> Form)> GenerateXlsxByFolderAsync(int folderId)
+    public async Task<(FormFillingReportTask Task, File<int> Form, bool IsNewFile)> GenerateXlsxByFolderAsync(int folderId)
     {
         var fileDao = daoFactory.GetFileDao<int>();
         var folderDao = daoFactory.GetFolderDao<int>();
@@ -5547,8 +5580,8 @@ public class FileStorageService //: IFileStorageService
 
         await Task.WhenAll(formTask, roomTask);
 
-        var form = formTask.Result;
-        var room = roomTask.Result;
+        var form = await formTask;
+        var room = await roomTask;
 
         if (form == null)
         {
@@ -5575,11 +5608,11 @@ public class FileStorageService //: IFileStorageService
 
         var resultsFile = await fileDao.GetFileAsync(formFilling.ResultsFileID);
 
-        await entryManager.EnsureFormFillingOutputAsync(form, room, resultsFile, resultFolder, properties, folderDao, fileDao);
+        var isNewFile = await entryManager.EnsureFormFillingOutputAsync(form, room, resultsFile, resultFolder, properties, folderDao, fileDao);
 
-        var task = await exportToXLSX.UpdateXlsxReport(room.Id, form.Id, form.Version);
+        var task = await exportToXLSX.UpdateXlsxReport(room.Id, form.Id, form.Version, isNewFile);
 
-        return (task, form);
+        return (task, form, isNewFile);
     }
 
     public Task<FormFillingReportTask> GetXlsxTaskAsync(int formId)

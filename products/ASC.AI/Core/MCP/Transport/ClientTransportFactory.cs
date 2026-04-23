@@ -62,7 +62,7 @@ public class ClientTransportFactory(
 
         // CA2000: HttpClient owned by HttpClientTransport
 #pragma warning disable CA2000
-        return new HttpClientTransport(options, clientFactory.CreateClient());
+        return new HttpClientTransport(options, clientFactory.CreateClient(McpContentTypeHandler.HttpClientName));
 #pragma warning restore CA2000
     }
 }

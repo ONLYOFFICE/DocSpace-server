@@ -42,7 +42,7 @@ public class RequestHelper(IHttpClientFactory httpClientFactory)
             Method = new HttpMethod(method)
         };
 
-        using var httpClient = httpClientFactory.CreateClient();
+        using var httpClient = httpClientFactory.CreateClient("customHttpClientNoCookie");
         httpClient.Timeout = TimeSpan.FromMilliseconds(timeout);
 
         if (headers != null)

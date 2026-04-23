@@ -586,4 +586,7 @@ Përputhshmëria më e lartë me docx, xlsx, pptx.</value>
   <data name="User" xml:space="preserve">
     <value>Përdoruesi</value>
   </data>
+  <data name="ErrorMessage_AiServicesDisabled" xml:space="preserve">
+    <value>Shërbimet AI janë të çaktivizuara për portalin aktual</value>
+  </data>
 </root>

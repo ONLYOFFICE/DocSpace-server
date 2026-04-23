@@ -741,7 +741,7 @@ public class Report
     /// </summary>
     public int CurrentPage { get; set; }
 
-    public async Task<Dictionary<string, string>> GetParticipantDisplayNamesAsync(DisplayUserSettingsHelper displayUserSettingsHelper)
+    public async Task<Dictionary<string, string>> GetParticipantDisplayNamesAsync(DisplayUserSettingsHelper displayUserSettingsHelper, bool withHtmlEncode)
     {
         var participantDisplayNames = new Dictionary<string, string>();
 
@@ -754,7 +754,7 @@ public class Report
 
             if (Guid.TryParse(operation.ParticipantName, out var userId))
             {
-                var participantDisplayName = await displayUserSettingsHelper.GetFullUserNameAsync(userId, true, false);
+                var participantDisplayName = await displayUserSettingsHelper.GetFullUserNameAsync(userId, withHtmlEncode, false);
                 participantDisplayNames.Add(operation.ParticipantName, participantDisplayName);
             }
         }

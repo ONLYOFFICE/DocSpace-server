@@ -50,14 +50,20 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
     private IResourceBuilder<ContainerResource>? OpensearchResource { get; set; }
 
     private IResourceBuilder<ContainerResource>? McpResource { get; set; }
+    private IResourceBuilder<ContainerResource>? OtelCollectorResource { get; set; }
     private IResourceBuilder<JavaScriptAppResource>? ApiTestResource { get; set; }
     private IResourceBuilder<JavaScriptAppResource>? E2ETestResource { get; set; }
     private Dictionary<string, string>? _parameters;
 
+    public bool HasOtelCollector => OtelCollectorResource != null;
+
 
     public ConnectionStringManager AddMySql(bool withDbGate = false, bool withDataVolume = true)
     {
-        var mysqlResourceBuilder = builder.AddMySql("mysql");
+        var mysqlRootPassword = builder.AddParameter("mysql-root-password", "root", secret: true);
+
+        var mysqlResourceBuilder = builder.AddMySql("mysql", password: mysqlRootPassword)
+            .WithEndpoint("tcp", endpoint => endpoint.Port = 33306);
 
         if (withDataVolume)
         {
@@ -152,6 +158,25 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         return this;
     }
 
+    public ConnectionStringManager AddOpenTelemetryCollector()
+    {
+        var configPath = Path.Combine(basePath, "server", "common", "ASC.AppHost", "Configuration", "otel-collector-config.yaml");
+        var logsPath = Path.Combine(basePath, "Logs");
+
+        Directory.CreateDirectory(Path.Combine(logsPath, "otel"));
+
+        OtelCollectorResource = builder
+            .AddContainer(Constants.OtelCollectorContainer, "otel/opentelemetry-collector-contrib")
+            .WithImageTag("latest")
+            .WithBindMount(configPath, "/etc/otelcol-contrib/config.yaml")
+            .WithBindMount(logsPath, "/logs")
+            .WithArgs("--config=/etc/otelcol-contrib/config.yaml")
+            .WithHttpEndpoint(port: Constants.OtelCollectorGrpcPort, targetPort: Constants.OtelCollectorGrpcPort, name: "otlp-grpc", isProxied: false)
+            .WithHttpEndpoint(port: Constants.OtelCollectorHttpPort, targetPort: Constants.OtelCollectorHttpPort, name: "otlp-http", isProxied: false);
+
+        return this;
+    }
+
     public ConnectionStringManager AddMcpServer(bool withMcpInspector = false)
     {
         McpResource = builder
@@ -204,7 +229,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         return this;
     }
 
-    public ConnectionStringManager AddOpensearch(bool withDashboard = true, bool fixedPort = true)
+    public ConnectionStringManager AddOpensearch(bool withDashboard = true, bool fixedPort = true, bool withDataVolume = true)
     {
         OpensearchResource = builder
             .AddContainer(Constants.OpensearchContainer, "opensearchproject/opensearch", "2")
@@ -223,6 +248,12 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         {
             OpensearchResource = OpensearchResource
                 .WithHttpEndpoint(targetPort: Constants.OpensearchPort, name: "http");
+        }
+
+        if (withDataVolume)
+        {
+            OpensearchResource = OpensearchResource
+                .WithVolume("docspace-opensearch-data", "/usr/share/opensearch/data");
         }
 
         if (withDashboard)
@@ -394,6 +425,10 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         return this;
     }
 
+    public string GetOtelCollectorEndpoint(bool isDocker) => isDocker
+        ? $"http://{Constants.OtelCollectorContainer}:{Constants.OtelCollectorGrpcPort}"
+        : $"http://localhost:{Constants.OtelCollectorGrpcPort}";
+
     public void AddWaitFor<T>(
         IResourceBuilder<T> resourceBuilder,
         bool includeMigrate = true,
@@ -432,6 +467,11 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         if (includeMailPit && MailResource != null)
         {
             resourceBuilder.WaitFor(MailResource);
+        }
+
+        if (OtelCollectorResource != null)
+        {
+            resourceBuilder.WaitFor(OtelCollectorResource);
         }
 
         ApiTestResource?.WaitFor((IResourceBuilder<IResource>)resourceBuilder);

@@ -34,6 +34,7 @@ global using ASC.Core;
 global using ASC.Core.Users;
 global using ASC.Data.Reassigns.Log;
 global using ASC.Files.Core;
+global using ASC.Files.Core.Security;
 global using ASC.MessagingSystem.Core;
 global using ASC.MessagingSystem.EF.Model;
 global using ASC.Web.Core;

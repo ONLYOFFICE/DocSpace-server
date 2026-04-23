@@ -174,4 +174,13 @@
   <data name="UnavailableServers" xml:space="preserve">
     <value>MCP serveri nisu dostupni: {0}. Proverite podešavanja veze</value>
   </data>
+  <data name="MessageNotFound" xml:space="preserve">
+    <value>Poruka nije pronađena</value>
+  </data>
+  <data name="NoModelsAvailable" xml:space="preserve">
+    <value>Nema dostupnih modela za ovog provajdera</value>
+  </data>
+  <data name="ProviderNameExists" xml:space="preserve">
+    <value>Naziv provajdera već postoji</value>
+  </data>
 </root>

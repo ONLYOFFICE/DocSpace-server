@@ -174,4 +174,13 @@
   <data name="UnavailableServers" xml:space="preserve">
     <value>Strežniki MCP niso na voljo: {0}. Preverite nastavitve povezave</value>
   </data>
+  <data name="MessageNotFound" xml:space="preserve">
+    <value>Sporočilo ni bilo najdeno</value>
+  </data>
+  <data name="NoModelsAvailable" xml:space="preserve">
+    <value>Za tega ponudnika ni na voljo nobenih modelov</value>
+  </data>
+  <data name="ProviderNameExists" xml:space="preserve">
+    <value>Ime ponudnika že obstaja</value>
+  </data>
 </root>

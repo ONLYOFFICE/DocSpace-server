@@ -1,17 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
-  <!-- 
-    Microsoft ResX Schema 
-    
+  <!--
+    Microsoft ResX Schema
+
     Version 2.0
-    
-    The primary goals of this format is to allow a simple XML format 
-    that is mostly human readable. The generation and parsing of the 
-    various data types are done through the TypeConverter classes 
+
+    The primary goals of this format is to allow a simple XML format
+    that is mostly human readable. The generation and parsing of the
+    various data types are done through the TypeConverter classes
     associated with the data types.
-    
+
     Example:
-    
+
     ... ado.net/XML headers & schema ...
     <resheader name="resmimetype">text/microsoft-resx</resheader>
     <resheader name="version">2.0</resheader>
@@ -26,36 +26,36 @@
         <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
         <comment>This is a comment</comment>
     </data>
-                
-    There are any number of "resheader" rows that contain simple 
+
+    There are any number of "resheader" rows that contain simple
     name/value pairs.
-    
-    Each data row contains a name, and value. The row also contains a 
-    type or mimetype. Type corresponds to a .NET class that support 
-    text/value conversion through the TypeConverter architecture. 
-    Classes that don't support this are serialized and stored with the 
+
+    Each data row contains a name, and value. The row also contains a
+    type or mimetype. Type corresponds to a .NET class that support
+    text/value conversion through the TypeConverter architecture.
+    Classes that don't support this are serialized and stored with the
     mimetype set.
-    
-    The mimetype is used for serialized objects, and tells the 
-    ResXResourceReader how to depersist the object. This is currently not 
+
+    The mimetype is used for serialized objects, and tells the
+    ResXResourceReader how to depersist the object. This is currently not
     extensible. For a given mimetype the value must be set accordingly:
-    
-    Note - application/x-microsoft.net.object.binary.base64 is the format 
-    that the ResXResourceWriter will generate, however the reader can 
+
+    Note - application/x-microsoft.net.object.binary.base64 is the format
+    that the ResXResourceWriter will generate, however the reader can
     read any of the formats listed below.
-    
+
     mimetype: application/x-microsoft.net.object.binary.base64
-    value   : The object must be serialized with 
+    value   : The object must be serialized with
             : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
             : and then encoded with base64 encoding.
-    
+
     mimetype: application/x-microsoft.net.object.soap.base64
-    value   : The object must be serialized with 
+    value   : The object must be serialized with
             : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
             : and then encoded with base64 encoding.
 
     mimetype: application/x-microsoft.net.object.bytearray.base64
-    value   : The object must be serialized into a byte array 
+    value   : The object must be serialized into a byte array
             : using a System.ComponentModel.TypeConverter
             : and then encoded with base64 encoding.
     -->
@@ -139,7 +139,7 @@
     <value>Количество</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>AI инструменти</value>
+    <value>{LogoText} AI</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Резервно копие</value>
@@ -634,10 +634,10 @@
     <value>WeChat</value>
   </data>
   <data name="ConsumersWeixinClientId" xml:space="preserve">
-    <value>Клиентска идентификация</value>
+    <value>ID на клиента</value>
   </data>
   <data name="ConsumersWeixinClientSecret" xml:space="preserve">
-    <value>Клиентска Тайна</value>
+    <value>Клиентска тайна</value>
   </data>
   <data name="ConsumersWeixinDescription" xml:space="preserve">
     <value>Разрешете на приложението да влиза в портала, използвайки WeChat профил.</value>
@@ -667,7 +667,7 @@
     <value>ID на клиента</value>
   </data>
   <data name="ConsumersyahooClientSecret" xml:space="preserve">
-    <value>Тайна на клиента</value>
+    <value>Клиентска тайна</value>
   </data>
   <data name="ConsumersYahooDescription" xml:space="preserve">
     <value>Активирайте приложението за импортиране на контакти в Yahoo.</value>
@@ -1153,7 +1153,7 @@
     <value>Броят на AI агентите не трябва да надвишава {0}</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>AI инструменти</value>
+    <value>{LogoText} AI</value>
   </data>
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
     <value>Активирайте AI функциите във вашия DocSpace, за да повишите производителността.</value>
@@ -1289,5 +1289,95 @@
   </data>
   <data name="WhatsNewSubscriptionName" xml:space="preserve">
     <value>Какво ново</value>
+  </data>
+  <data name="AccountingCustomerOperationAgent" xml:space="preserve">
+    <value>Агент</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_chat" xml:space="preserve">
+    <value>Чат</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_fetch" xml:space="preserve">
+    <value>Обхождане на уеб</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_search" xml:space="preserve">
+    <value>Уеб търсене</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-tools" xml:space="preserve">
+    <value>AI кредити</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_fetch" xml:space="preserve">
+    <value>Източници</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_search" xml:space="preserve">
+    <value>Резултати</value>
+  </data>
+  <data name="ConsumersdatabaseType" xml:space="preserve">
+    <value>Тип база данни</value>
+  </data>
+  <data name="ConsumersdbHost" xml:space="preserve">
+    <value>Хост</value>
+  </data>
+  <data name="ConsumersdbName" xml:space="preserve">
+    <value>Име на базата данни</value>
+  </data>
+  <data name="ConsumersdbPassword" xml:space="preserve">
+    <value>Парола</value>
+  </data>
+  <data name="ConsumersdbPort" xml:space="preserve">
+    <value>Порт</value>
+  </data>
+  <data name="ConsumersdbSsl" xml:space="preserve">
+    <value>Използвай SSL</value>
+  </data>
+  <data name="ConsumersdbUser" xml:space="preserve">
+    <value>Потребител</value>
+  </data>
+  <data name="ConsumersExternalDb" xml:space="preserve">
+    <value>Връзка с базата данни</value>
+  </data>
+  <data name="ConsumersExternalDbDescription" xml:space="preserve">
+    <value>Съхранявайте резултатите от формуляра във външна база данни като MySQL или SQLite.</value>
+  </data>
+  <data name="ConsumersExternalDbInstruction" xml:space="preserve">
+    <value>Свържете външна база данни за съхранение на резултатите от формуляра.</value>
+  </data>
+  <data name="ConsumersExternalDbSqliteStandaloneOnly" xml:space="preserve">
+    <value>SQLite е наличен само при самостоятелни инсталации.</value>
+  </data>
+  <data name="ConsumersExternalDbTestConnection" xml:space="preserve">
+    <value>Тествай връзката</value>
+  </data>
+  <data name="ConsumersNextcloud" xml:space="preserve">
+    <value>Nextcloud</value>
+  </data>
+  <data name="ConsumersNextcloudBaseUrl" xml:space="preserve">
+    <value>Въведете URL адреса на инстанцията на Nextcloud.</value>
+  </data>
+  <data name="ConsumersNextcloudClientId" xml:space="preserve">
+    <value>ID на клиента</value>
+  </data>
+  <data name="ConsumersNextcloudClientSecret" xml:space="preserve">
+    <value>Клиентска тайна</value>
+  </data>
+  <data name="ConsumersNextcloudDescription" xml:space="preserve">
+    <value>Разрешете на приложението да влиза в портала с акаунт в Nextcloud.</value>
+  </data>
+  <data name="ConsumersNextcloudInstruction" xml:space="preserve">
+    <value>Разрешете на приложението да влиза в портала с акаунт в Nextcloud.</value>
+  </data>
+  <data name="ConsumerssqliteFilePath" xml:space="preserve">
+    <value>Път до SQLite файл</value>
+  </data>
+  <data name="CouldNotRecoverPasswordForAutoGeneratedEmail" xml:space="preserve">
+    <value>Операцията за възстановяване на парола е забранена за автоматично генерирани имейл адреси</value>
+  </data>
+  <data name="TariffsFeature_embedding_wallet" xml:space="preserve">
+    <value>AI вграждане</value>
+  </data>
+  <data name="TariffsFeature_embedding_wallet_price_count" xml:space="preserve">
+    <value>Единица за измерване на вграждане, която могат да обработват големи езикови модели (LLM)</value>
+  </data>
+  <data name="UserAuthenticationFailed" xml:space="preserve">
+    <value>Удостоверяването на потребителя е неуспешно</value>
   </data>
 </root>

@@ -1,25 +1,25 @@
 ﻿// (c) Copyright Ascensio System SIA 2009-2026
-// 
+//
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
+//
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
+//
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-// 
+//
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -61,12 +61,9 @@ public class AttachmentHandler(
         IEnumerable<int> filesIds,
         IEnumerable<string> thirdPartyFilesIds)
     {
-        var modelSettings = aiConfiguration.GetModel(context.ClientOptions.Provider, context.ClientOptions.ModelId);
-        ArgumentNullException.ThrowIfNull(modelSettings);
-
         var count = 0;
 
-        await foreach (var result in HandleAsync(modelSettings.Multimodal, filesIds, context.ChatId, context.Agent.Id))
+        await foreach (var result in HandleAsync(context.ModelSettings, filesIds, context.ChatId, context.Agent.Id))
         {
             if (count >= MaxAttachmentsCount)
             {
@@ -77,7 +74,7 @@ public class AttachmentHandler(
             yield return result;
         }
 
-        await foreach (var result in HandleAsync(modelSettings.Multimodal, thirdPartyFilesIds, context.ChatId, context.Agent.Id))
+        await foreach (var result in HandleAsync(context.ModelSettings, thirdPartyFilesIds, context.ChatId, context.Agent.Id))
         {
             if (count >= MaxAttachmentsCount)
             {
@@ -104,12 +101,13 @@ public class AttachmentHandler(
     }
 
     private async IAsyncEnumerable<AttachmentResult> HandleAsync<T>(
-        MultimodalSettings? multimodal,
+        ModelSettings modelSettings,
         IEnumerable<T> filesIds,
         Guid chatId,
         int agentId)
     {
         var fileDao = daoFactory.GetFileDao<T>();
+        var hasVision = modelSettings.Capabilities.Vision;
 
         var textFiles = new List<(File<T> File, string Extension)>();
         var mediaFiles = new List<(File<T> File, FileType FileType, string Extension)>();
@@ -126,12 +124,12 @@ public class AttachmentHandler(
 
             if (fileType == FileType.Image)
             {
-                if (multimodal?.Image == null)
+                if (!hasVision)
                 {
                     continue;
                 }
 
-                if (!multimodal.Image.Formats.Contains(extension))
+                if (!AiConfiguration.SupportedImageFormats.Contains(extension))
                 {
                     continue;
                 }
@@ -164,7 +162,7 @@ public class AttachmentHandler(
 
         foreach (var (file, extension) in textFiles)
         {
-            yield return await HandleTextAsync(fileDao, file, extension);
+            yield return await HandleTextAsync(modelSettings, fileDao, file, extension);
         }
     }
 
@@ -222,7 +220,11 @@ public class AttachmentHandler(
         }
     }
 
-    private async Task<AttachmentResult> HandleTextAsync<T>(IFileDao<T> fileDao, File<T> file, string extension)
+    private async Task<AttachmentResult> HandleTextAsync<T>(
+        ModelSettings modelSettings,
+        IFileDao<T> fileDao,
+        File<T> file,
+        string extension)
     {
         await using var stream = await fileDao.GetFileStreamAsync(file);
 
@@ -241,7 +243,7 @@ public class AttachmentHandler(
         }
 
         IReadOnlyList<ToolWrapper>? formTools = null;
-        if (file.IsForm)
+        if (file.IsForm && modelSettings.Capabilities.ToolCalling)
         {
             var (formData, tools) = await TryGetFormDataAsync(file);
             formTools = tools;

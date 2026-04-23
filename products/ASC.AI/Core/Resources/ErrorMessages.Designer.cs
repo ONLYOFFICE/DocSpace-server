@@ -177,6 +177,15 @@ namespace ASC.AI.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The model has been disabled by your provider&apos;s settings..
+        /// </summary>
+        internal static string ModelDisabled {
+            get {
+                return ResourceManager.GetString("ModelDisabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No models available for this provider.
         /// </summary>
         internal static string NoModelsAvailable {
@@ -209,6 +218,15 @@ namespace ASC.AI.Core.Resources {
         internal static string ReservedServerName {
             get {
                 return ResourceManager.GetString("ReservedServerName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The server has already been added to the agent.
+        /// </summary>
+        internal static string ServerAlreadyAdded {
+            get {
+                return ResourceManager.GetString("ServerAlreadyAdded", resourceCulture);
             }
         }
         

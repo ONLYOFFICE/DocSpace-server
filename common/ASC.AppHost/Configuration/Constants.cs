@@ -57,12 +57,16 @@ public static class Constants
     public const int TelegramPort = 5050;
     public const int MonolithPort = 5027;
 
+    public const int OtelCollectorGrpcPort = 4317;
+    public const int OtelCollectorHttpPort = 4318;
+
     public const string HostDockerInternal = "host.docker.internal";
     public const string OpenRestyContainer = "onlyoffice-openresty";
     public const string EditorsContainer = "onlyoffice-editors";
     public const string OpensearchContainer = "opensearch";
     public const string SocketIoContainer = "onlyoffice-socketIO";
     public const string DocSpaceMcpContainer = "onlyoffice-docspace-mcp";
+    public const string OtelCollectorContainer = "onlyoffice-otel-collector";
 
     public const string IdentityRegistrationContainer = "onlyoffice-identity-registration";
     public const string IdentityAuthorizationContainer = "onlyoffice-identity-authorization";

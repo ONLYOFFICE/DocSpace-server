@@ -28,8 +28,7 @@ namespace ASC.AI.Worker;
 
 public class Startup : BaseWorkerStartup
 {
-    public Startup(IConfiguration configuration, IHostEnvironment hostEnvironment)
-        : base(configuration, hostEnvironment)
+    public Startup(IConfiguration configuration) : base(configuration)
     {
         if (configuration.GetSection("RabbitMQ").GetChildren().Any() &&
             string.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))

@@ -2156,4 +2156,45 @@ $TrulyYours</value>
   <data name="TrulyYoursText" xml:space="preserve">
     <value>I juaji, ekipi i ${LetterLogoText}</value>
   </data>
+  <data name="ActionFileUploadedToAgentKnowledge" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; ngarkoi një dokument të ri: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; në bazën e njohurive të agjentit AI: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
+  </data>
+  <data name="subject_api_key_expired" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace: Çelësi juaj API ka skaduar</value>
+  </data>
+  <data name="subject_portal_deleted_to_support" xml:space="preserve">
+    <value>DocSpace ${LetterLogoText} është fshirë</value>
+  </data>
+  <data name="subject_user_agent_role_changed" xml:space="preserve">
+    <value>Roli juaj në një agjent AI të DocSpace ka ndryshuar</value>
+  </data>
+  <data name="pattern_api_key_expired" xml:space="preserve">
+    <value>Përshëndetje, $UserName!
+
+Ky email është për t'ju informuar se çelësi juaj API "*$Message*" ka skaduar dhe është çaktivizuar.
+
+Mund të gjeneroni një çelës të ri API në "Mjetet e zhvilluesit":"${__VirtualRootPath}/developer-tools/api-keys".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace është fshirë.
+
+*Portali:* ${PortalUrl}
+
+*Pronari:* ${UserName} ${UserEmail}
+
+*Klienti:* ${OwnerName}
+
+Ju lutemi sigurohuni që faturimi automatik është i çaktivizuar. Kontrolloni statusin e faturimit automatik në llogarinë Stripe të klientit.</value>
+  </data>
+  <data name="pattern_user_agent_role_changed" xml:space="preserve">
+    <value>Përshëndetje!
+
+Ju është caktuar një rol i ri në agjentin AI të DocSpace "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+
+Mësoni më shumë rreth roleve dhe lejeve të dhomës në "Qendrën e ndihmës":"${HelpCenterUrl}".
+
+$TrulyYours</value>
+  </data>
 </root>

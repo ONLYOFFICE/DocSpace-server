@@ -229,7 +229,7 @@ $Message</value>
   </data>
   <data name="pattern_YourTurnFormFilling" xml:space="preserve">
     <value>
-       Obaveštenje o aktivnosti. Na vama je red! Potrebno je popunjavanje obrasca: "$DocumentTitle":"$DocumentURL" u prostoriji: "$RoomTitle":"$RoomURL" — $__DateTime.
+      Obaveštenje o aktivnosti. Na vama je red! Potrebno je popunjavanje obrasca: "$DocumentTitle":"$DocumentURL" u prostoriji: "$RoomTitle":"$RoomURL" — $__DateTime.
     </value>
   </data>
   <data name="subject_DocuSignComplete" xml:space="preserve">
@@ -297,5 +297,19 @@ $Message</value>
   </data>
   <data name="subject_YourTurnFormFilling" xml:space="preserve">
     <value>Obaveštenje iz DocSpace-a.</value>
+  </data>
+  <data name="pattern_AgentRemoved" xml:space="preserve">
+    <value>h1. $__AuthorName je obrisao AI agenta
+
+$__AuthorName je obrisao AI agenta: $RoomTitle</value>
+  </data>
+  <data name="pattern_AgentUpdateAccessForUser_push" xml:space="preserve">
+    <value>Vaša uloga u AI agentu "$RoomTitle" je promenjena u "$RoomRole"</value>
+  </data>
+  <data name="pattern_InvitedToAgent_push" xml:space="preserve">
+    <value>Pozvani ste u AI agenta "$RoomTitle"</value>
+  </data>
+  <data name="subject_AgentRemoved" xml:space="preserve">
+    <value>DocSpace obaveštenje. AI agent obrisan</value>
   </data>
 </root>

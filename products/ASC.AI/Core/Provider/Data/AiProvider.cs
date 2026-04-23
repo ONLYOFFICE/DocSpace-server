@@ -36,6 +36,7 @@ public class AiProvider
     public DateTime CreatedOn { get; set; }
     public DateTime ModifiedOn { get; set; }
 
+    public bool HasModelSettings { get; set; }
     public bool NeedReset { get; set; }
     public bool IsDefault { get; set; }
 }

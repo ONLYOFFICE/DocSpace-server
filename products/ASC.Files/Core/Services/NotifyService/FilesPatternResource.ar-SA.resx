@@ -297,4 +297,18 @@ $Message</value>
   <data name="subject_YourTurnFormFilling" xml:space="preserve">
     <value>إشعار DocSpace.</value>
   </data>
+  <data name="pattern_AgentRemoved" xml:space="preserve">
+    <value>h1. قام $__AuthorName بحذف وكيل ذكاء اصطناعي
+
+قام $__AuthorName بحذف وكيل الذكاء الاصطناعي: $RoomTitle</value>
+  </data>
+  <data name="pattern_AgentUpdateAccessForUser_push" xml:space="preserve">
+    <value>تم تغيير دورك في وكيل الذكاء الاصطناعي "$RoomTitle" إلى "$RoomRole".</value>
+  </data>
+  <data name="pattern_InvitedToAgent_push" xml:space="preserve">
+    <value>لقد تمت دعوتك إلى وكيل الذكاء الاصطناعي "$RoomTitle"</value>
+  </data>
+  <data name="subject_AgentRemoved" xml:space="preserve">
+    <value>إشعار DocSpace. تم حذف وكيل الذكاء الاصطناعي</value>
+  </data>
 </root>

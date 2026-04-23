@@ -171,4 +171,16 @@
   <data name="UnavailableServers" xml:space="preserve">
     <value>Servery MCP nejsou k dispozici: {0}. Zkontrolujte nastavení připojení</value>
   </data>
+  <data name="AttachmentProcessFailed" xml:space="preserve">
+    <value>Nelze zpracovat soubory: {0}. Soubory mohou být poškozeny nebo zašifrovány</value>
+  </data>
+  <data name="MessageNotFound" xml:space="preserve">
+    <value>Zpráva nebyla nalezena</value>
+  </data>
+  <data name="NoModelsAvailable" xml:space="preserve">
+    <value>Pro tohoto poskytovatele nejsou k dispozici žádné modely</value>
+  </data>
+  <data name="ProviderNameExists" xml:space="preserve">
+    <value>Název poskytovatele již existuje</value>
+  </data>
 </root>

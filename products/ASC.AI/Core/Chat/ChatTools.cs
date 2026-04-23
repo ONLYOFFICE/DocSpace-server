@@ -40,8 +40,7 @@ public class ChatTools(
     AiAccessibility aiAccessibility,
     TenantManager tenantManager)
 {
-    public async Task<(ToolHolder, string? error)> GetAsync(
-        Folder<int> agent,
+    public async Task<(ToolHolder, string? error)> GetAsync(Folder<int> agent,
         UserChatSettings chatSettings,
         bool knowledgeHasFiles,
         int resultStorageId,

@@ -602,6 +602,13 @@ public class FileSecurity(
         return await CanAsync(entry, authContext.CurrentAccount.ID, FilesSecurityActions.UseChat);
     }
 
+    public async Task<int> UpdateShareByFolderTypesAsync(Guid subject, IEnumerable<FolderType> folderTypes, FileShare share)
+    {
+        var securityDao = daoFactory.GetSecurityDao<int>();
+
+        return await securityDao.UpdateShareByFolderTypesAsync(subject, folderTypes, share);
+    }
+
     public async Task<IEnumerable<Guid>> WhoCanReadAsync<T>(FileEntry<T> entry, bool includeLinks = false)
     {
         var (directAccess, sharedAccess) = await WhoCanAsync(entry, FilesSecurityActions.Read, includeLinks);
@@ -943,10 +950,11 @@ public class FileSecurity(
 
             var security = new Dictionary<FilesSecurityActions, bool>();
             var parentFolders = await GetFileParentFolders(entry.ParentId);
+            var shares = await PreloadEntrySharesAsync(entry, userId, isDocSpaceAdmin);
 
             foreach (var action in Enum.GetValues<FilesSecurityActions>().Where(r => _securityEntries[entry.FileEntryType].Contains(r)))
             {
-                security[action] = await FilterEntryAsync(entry, action, userId, null, isOutsider, isGuest, isAuthenticated, isDocSpaceAdmin, isUser, parentFolders, cachedFileDao);
+                security[action] = await FilterEntryAsync(entry, action, userId, shares, isOutsider, isGuest, isAuthenticated, isDocSpaceAdmin, isUser, parentFolders, cachedFileDao);
             }
 
             entry.Security = security;
@@ -1146,9 +1154,18 @@ public class FileSecurity(
                 return false;
             }
 
-            if (file.FilterType == FilterType.ImagesOnly && file.ContentLength > aiConfiguration.MaxImageSize)
+            if (file.FilterType == FilterType.ImagesOnly)
             {
-                return false;
+                if (file.ContentLength > aiConfiguration.MaxImageSize)
+                {
+                    return false;
+                }
+
+                var extension = FileUtility.GetFileExtension(file.Title);
+                if (!AiConfiguration.SupportedImageFormats.Contains(extension))
+                {
+                    return false;
+                }
             }
 
             if (file.FilterType != FilterType.ImagesOnly)
@@ -2380,26 +2397,13 @@ public class FileSecurity(
 
     public async Task<FileShareRecord<T>> GetCurrentShareAsync<T>(FileEntry<T> entry, Guid userId, bool isDocSpaceAdmin, IEnumerable<FileShareRecord<T>> shares = null)
     {
-        if (entry is Folder<T> { FolderType: FolderType.VirtualRooms or FolderType.Archive })
+        FileShareRecord<T> ace;
+        var orderedSubjects = await GetOrderedSubjectsForEntryAsync(entry, userId, isDocSpaceAdmin);
+        if (orderedSubjects == null)
         {
             return null;
         }
-
-        FileShareRecord<T> ace;
-        var orderedSubjects = new List<OrderedSubject>();
-        if (shares == null)
-        {
-            var includeAvailableLinks = entry switch
-            {
-                { RootFolderType: FolderType.USER } when entry.CreateBy != userId => true,
-                { RootFolderType: FolderType.VirtualRooms } when !isDocSpaceAdmin => true,
-                Folder<T> { FolderType: FolderType.FillingFormsRoom } when isDocSpaceAdmin => true,
-                _ => false
-            };
-
-            orderedSubjects = await GetUserOrderedSubjectsAsync(userId, includeAvailableLinks);
-            shares = await GetSharesAsync(entry, orderedSubjects.Select(s => s.Subject));
-        }
+        shares ??= await GetSharesAsync(entry, orderedSubjects.Select(s => s.Subject).ToHashSet());
 
         if (entry.FileEntryType == FileEntryType.File)
         {
@@ -2454,7 +2458,7 @@ public class FileSecurity(
         await securityDao.SetShareAsync(r);
     }
 
-    public async Task<IEnumerable<FileShareRecord<T>>> GetSharesAsync<T>(FileEntry<T> entry, IEnumerable<Guid> subjects = null)
+    public async Task<IEnumerable<FileShareRecord<T>>> GetSharesAsync<T>(FileEntry<T> entry, HashSet<Guid> subjects = null)
     {
         return await daoFactory.GetSecurityDao<T>().GetSharesAsync(entry, subjects);
     }
@@ -2737,7 +2741,7 @@ public class FileSecurity(
 
         var rooms = storageFilter == StorageFilter.ThirdParty
             ? []
-            : await folderDao.GetRoomsAsync(internalRecords.Keys, filterTypes, tagNames, subjectId, search, withSubfolders, withoutTags, excludeSubject, provider, subjectFilter, subjectOwnerId, subjectEntries, rootFoldersIds)
+            : await folderDao.GetRoomsAsync(internalRecords.Keys, filterTypes, tagNames, subjectId, search, withSubfolders, withoutTags, excludeSubject, provider, subjectFilter, subjectOwnerId, subjectEntries, rootFoldersIds, groupId)
                 .Where(r => withSubfolders || r.IsRoom)
                 .Where(r => Filter(r, internalRecords))
                 .ToListAsync();
@@ -3143,6 +3147,34 @@ public class FileSecurity(
         }
 
         return await GetUserOrderedSubjectsAsync<int>(userId, includeAvailableLinks);
+    }
+
+    private Task<List<OrderedSubject>> GetOrderedSubjectsForEntryAsync<T>(FileEntry<T> entry, Guid userId, bool isDocSpaceAdmin)
+    {
+        if (entry is Folder<T> { FolderType: FolderType.VirtualRooms or FolderType.Archive })
+        {
+            return Task.FromResult<List<OrderedSubject>>(null);
+        }
+
+        var includeAvailableLinks = entry switch
+        {
+            { RootFolderType: FolderType.USER } when entry.CreateBy != userId => true,
+            { RootFolderType: FolderType.VirtualRooms } when !isDocSpaceAdmin => true,
+            Folder<T> { FolderType: FolderType.FillingFormsRoom } when isDocSpaceAdmin => true,
+            _ => false
+        };
+
+        return GetUserOrderedSubjectsAsync(userId, includeAvailableLinks);
+    }
+
+    private async Task<IEnumerable<FileShareRecord<T>>> PreloadEntrySharesAsync<T>(FileEntry<T> entry, Guid userId, bool isDocSpaceAdmin)
+    {
+        var orderedSubjects = await GetOrderedSubjectsForEntryAsync(entry, userId, isDocSpaceAdmin);
+        if (orderedSubjects == null)
+        {
+            return null;
+        }
+        return await GetSharesAsync(entry, orderedSubjects.Select(s => s.Subject).ToHashSet());
     }
 
     public async IAsyncEnumerable<FileShareRecord<string>> GetUserRecordsAsync()

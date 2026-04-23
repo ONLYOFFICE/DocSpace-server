@@ -2152,4 +2152,40 @@ $TrulyYours</value>
   <data name="TrulyYoursText" xml:space="preserve">
     <value>Искрено Ваш, Екипът на ${LetterLogoText}</value>
   </data>
+  <data name="ActionFileUploadedToAgentKnowledge" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; качи нов документ: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; в базата знания на AI агента: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
+  </data>
+  <data name="pattern_api_key_expired" xml:space="preserve">
+    <value>Здравейте, $UserName!
+
+Този имейл е, за да ви информира, че вашият API ключ "*$Message*" е изтекъл и е деактивиран.
+
+Можете да генерирате нов API ключ в "Инструменти за разработчици":"${__VirtualRootPath}/developer-tools/api-keys".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace беше изтрит.
+
+*Портал:* ${PortalUrl}
+*Собственик:* ${UserName} ${UserEmail}
+*Клиент:* ${OwnerName}
+
+Моля, уверете се, че автоматичното таксуване е изключено. Проверете статуса на автоматичното таксуване в клиентския акаунт в Stripe.</value>
+  </data>
+  <data name="pattern_user_agent_role_changed" xml:space="preserve">
+    <value>Здравейте!
+
+Назначена ви е нова роля в AI агента на DocSpace "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+
+Научете повече за ролите и разрешенията на стаите в "Център за помощ":"${HelpCenterUrl}".
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_api_key_expired" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace: Вашият API ключ е изтекъл</value>
+  </data>
+  <data name="subject_user_agent_role_changed" xml:space="preserve">
+    <value>Вашата роля в AI агент на DocSpace е променена</value>
+  </data>
 </root>

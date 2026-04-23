@@ -174,4 +174,13 @@
   <data name="UnavailableServers" xml:space="preserve">
     <value>MCP-palvelimet eivät ole käytettävissä: {0}. Tarkista yhteysasetukset</value>
   </data>
+  <data name="MessageNotFound" xml:space="preserve">
+    <value>Viestiä ei löydy</value>
+  </data>
+  <data name="NoModelsAvailable" xml:space="preserve">
+    <value>Tälle palveluntarjoajalle ei ole saatavilla malleja</value>
+  </data>
+  <data name="ProviderNameExists" xml:space="preserve">
+    <value>Palveluntarjoajan nimi on jo olemassa</value>
+  </data>
 </root>

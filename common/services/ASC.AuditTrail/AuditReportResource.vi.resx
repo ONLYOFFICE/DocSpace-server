@@ -1155,4 +1155,43 @@
   <data name="WhiteLabelSettingsLogoTextUpdated" xml:space="preserve">
     <value>Đã cập nhật tên thương hiệu</value>
   </data>
+  <data name="AIAccessDisabled" xml:space="preserve">
+    <value>Dịch vụ AI đã bị vô hiệu hóa</value>
+  </data>
+  <data name="AIAccessEnabled" xml:space="preserve">
+    <value>Dịch vụ AI đã được kích hoạt</value>
+  </data>
+  <data name="AIDefaultProviderDeleted" xml:space="preserve">
+    <value>Nhà cung cấp mặc định đã bị xóa</value>
+  </data>
+  <data name="AIDefaultProviderSet" xml:space="preserve">
+    <value>Nhà cung cấp AI mặc định đã được đặt: Tên: {0}, Mô hình mặc định: {1}</value>
+  </data>
+  <data name="BackupCancelled" xml:space="preserve">
+    <value>Sao lưu đã bị hủy</value>
+  </data>
+  <data name="DocumentsDefaultTemplatesSettingsUpdated" xml:space="preserve">
+    <value>Cài đặt mẫu mặc định đã được cập nhật: {0}</value>
+  </data>
+  <data name="FileNotSavedDueToRoomQuota" xml:space="preserve">
+    <value>Phòng [{0}]. Tệp chưa được lưu: {1} – vượt quá hạn mức lưu trữ của phòng.</value>
+  </data>
+  <data name="FileNotSavedDueToUserQuota" xml:space="preserve">
+    <value>Người dùng [{0}]. Tệp chưa được lưu: {1} – vượt quá hạn mức lưu trữ của người dùng.</value>
+  </data>
+  <data name="FileSavedButRoomQuotaExceeded" xml:space="preserve">
+    <value>Phòng [{0}]. Tệp đã được cập nhật: {1}, vượt quá hạn mức lưu trữ của phòng.</value>
+  </data>
+  <data name="FileSavedButUserQuotaExceeded" xml:space="preserve">
+    <value>Người dùng [{0}]. Tệp đã được cập nhật: {1}, vượt quá hạn mức lưu trữ của người dùng.</value>
+  </data>
+  <data name="RestoreCancelled" xml:space="preserve">
+    <value>Khôi phục đã bị hủy</value>
+  </data>
+  <data name="RestoreStarted" xml:space="preserve">
+    <value>Khôi phục đã bắt đầu</value>
+  </data>
+  <data name="ScheduledBackupDeleted" xml:space="preserve">
+    <value>Sao lưu theo lịch đã bị xóa</value>
+  </data>
 </root>
