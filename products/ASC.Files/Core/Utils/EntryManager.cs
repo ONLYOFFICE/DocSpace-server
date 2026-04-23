@@ -2197,6 +2197,17 @@ public class EntryManager(IDaoFactory daoFactory,
 
                 if (origProperties.FormFilling.OriginalFormId is int origFormId && origProperties.FormFilling.RoomId is int rId)
                 {
+                    if (originalForm != null && origProperties.FormFilling.OriginalFormVersion != originalForm.Version)
+                    {
+                        origProperties.FormFilling.OriginalFormVersion = originalForm.Version;
+                        await fileDao.SaveProperties(originalFormId, origProperties);
+                    }
+
+                    if (originalForm != null)
+                    {
+                        await formFillingReportCreator.MigrateFormVersionAsync(rId, origFormId, origProperties.FormFilling.OriginalFormVersion);
+                    }
+
                     await formFillingReportCreator.UpdateFormFillingReport(
                        origFormId,
                        origProperties.FormFilling.OriginalFormVersion,

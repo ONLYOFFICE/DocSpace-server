@@ -171,4 +171,16 @@
   <data name="UnavailableServers" xml:space="preserve">
     <value>Serverat MCP nuk janë të disponueshëm: {0}. Kontrolloni cilësimet e lidhjes</value>
   </data>
+  <data name="AttachmentProcessFailed" xml:space="preserve">
+    <value>Nuk mund të përpunohen skedarët: {0}. Skedarët mund të jenë të dëmtuar ose të enkriptuar</value>
+  </data>
+  <data name="MessageNotFound" xml:space="preserve">
+    <value>Mesazhi nuk u gjet</value>
+  </data>
+  <data name="NoModelsAvailable" xml:space="preserve">
+    <value>Nuk ka modele të disponueshme për këtë ofrues</value>
+  </data>
+  <data name="ProviderNameExists" xml:space="preserve">
+    <value>Emri i ofruesit ekziston tashmë</value>
+  </data>
 </root>

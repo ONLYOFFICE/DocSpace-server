@@ -1155,4 +1155,43 @@
   <data name="WhiteLabelSettingsLogoTextUpdated" xml:space="preserve">
     <value>Zīmola nosaukums atjaunināts</value>
   </data>
+  <data name="AIAccessDisabled" xml:space="preserve">
+    <value>MI pakalpojumi ir atspējoti</value>
+  </data>
+  <data name="AIAccessEnabled" xml:space="preserve">
+    <value>MI pakalpojumi ir iespējoti</value>
+  </data>
+  <data name="AIDefaultProviderDeleted" xml:space="preserve">
+    <value>Noklusējuma pakalpojumu sniedzējs dzēsts</value>
+  </data>
+  <data name="AIDefaultProviderSet" xml:space="preserve">
+    <value>Noklusējuma MI pakalpojumu sniedzējs iestatīts: Nosaukums: {0}, Noklusējuma modelis: {1}</value>
+  </data>
+  <data name="BackupCancelled" xml:space="preserve">
+    <value>Dublēšana atcelta</value>
+  </data>
+  <data name="DocumentsDefaultTemplatesSettingsUpdated" xml:space="preserve">
+    <value>Noklusējuma veidnes iestatījumi atjaunināti: {0}</value>
+  </data>
+  <data name="FileNotSavedDueToRoomQuota" xml:space="preserve">
+    <value>Telpas [{0}]. Fails nav saglabāts: {1} – pārsniegta telpas krātuves kvota.</value>
+  </data>
+  <data name="FileNotSavedDueToUserQuota" xml:space="preserve">
+    <value>Lietotāji [{0}]. Fails nav saglabāts: {1} – pārsniegta lietotāja krātuves kvota.</value>
+  </data>
+  <data name="FileSavedButRoomQuotaExceeded" xml:space="preserve">
+    <value>Telpas [{0}]. Fails atjaunināts: {1}, pārsniedzot telpas krātuves kvotu.</value>
+  </data>
+  <data name="FileSavedButUserQuotaExceeded" xml:space="preserve">
+    <value>Lietotāji [{0}]. Fails atjaunināts: {1}, pārsniedzot lietotāja krātuves kvotu.</value>
+  </data>
+  <data name="RestoreCancelled" xml:space="preserve">
+    <value>Atjaunošana atcelta</value>
+  </data>
+  <data name="RestoreStarted" xml:space="preserve">
+    <value>Atjaunošana sākta</value>
+  </data>
+  <data name="ScheduledBackupDeleted" xml:space="preserve">
+    <value>Plānotā rezerves kopēšana dzēsta</value>
+  </data>
 </root>

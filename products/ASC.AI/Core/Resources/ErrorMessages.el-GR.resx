@@ -174,4 +174,13 @@
   <data name="UnavailableServers" xml:space="preserve">
     <value>Οι διακομιστές MCP δεν είναι διαθέσιμοι: {0}. Ελέγξτε τις ρυθμίσεις σύνδεσης</value>
   </data>
+  <data name="MessageNotFound" xml:space="preserve">
+    <value>Το μήνυμα δεν βρέθηκε</value>
+  </data>
+  <data name="NoModelsAvailable" xml:space="preserve">
+    <value>Δεν υπάρχουν διαθέσιμα μοντέλα για αυτόν τον πάροχο</value>
+  </data>
+  <data name="ProviderNameExists" xml:space="preserve">
+    <value>Το όνομα παρόχου υπάρχει ήδη</value>
+  </data>
 </root>

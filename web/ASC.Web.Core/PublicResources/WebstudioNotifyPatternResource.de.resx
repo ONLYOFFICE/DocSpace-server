@@ -2162,4 +2162,33 @@ $TrulyYours</value>
   <data name="TrulyYoursText" xml:space="preserve">
     <value>Mit freundlichen Grüßen ${LetterLogoText} Team</value>
   </data>
+  <data name="ActionFileUploadedToAgentKnowledge" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; hat ein neues Dokument hochgeladen: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; in die Wissensbasis des KI-Agenten: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
+  </data>
+  <data name="subject_api_key_expired" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace: Ihr API-Schlüssel ist abgelaufen</value>
+  </data>
+  <data name="subject_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace wurde gelöscht</value>
+  </data>
+  <data name="subject_user_agent_role_changed" xml:space="preserve">
+    <value>Ihre Rolle in einem DocSpace-KI-Agenten hat sich geändert</value>
+  </data>
+  <data name="pattern_api_key_expired" xml:space="preserve">
+    <value>Hallo, $UserName!
+Diese E-Mail informiert Sie darüber, dass Ihr API-Schlüssel "*$Message*" abgelaufen und deaktiviert wurde.
+
+Sie können einen neuen API-Schlüssel in den "Entwicklertools":"${__VirtualRootPath}/developer-tools/api-keys" generieren.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_user_agent_role_changed" xml:space="preserve">
+    <value>Hallo!
+
+Ihnen wurde eine neue Rolle im DocSpace-KI-Agenten "${RoomTitle}":"${RoomUrl}" zugewiesen: ${UserRole}.
+
+Erfahren Sie mehr über Raumrollen und -berechtigungen im "Hilfecenter":"${HelpCenterUrl}".
+
+$TrulyYours</value>
+  </data>
 </root>

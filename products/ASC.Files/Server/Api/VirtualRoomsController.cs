@@ -85,7 +85,7 @@ public class VirtualRoomsInternalController(
 
         var room = await _fileStorageService.CreateRoomAsync(inDto.Title, inDto.RoomType, inDto.Private,
             inDto.Indexing, inDto.Share, inDto.Quota, lifetime, inDto.DenyDownload, inDto.Watermark, inDto.Color, inDto.Cover,
-            inDto.Tags, inDto.Logo, inDto.ChatSettings);
+            inDto.Tags, inDto.Logo, inDto.ChatSettings, inDto.SendFormToExternalDB, inDto.SaveFormAsXLSX);
 
         return await _folderDtoHelper.GetAsync(room);
     }

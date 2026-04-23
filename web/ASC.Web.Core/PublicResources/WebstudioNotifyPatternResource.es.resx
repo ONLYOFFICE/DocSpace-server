@@ -2162,4 +2162,34 @@ $TrulyYours</value>
   <data name="TrulyYoursText" xml:space="preserve">
     <value>Atentamente, Equipo de ${LetterLogoText}</value>
   </data>
+  <data name="ActionFileUploadedToAgentKnowledge" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; cargó un nuevo documento: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; en la base de conocimientos del agente de IA: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
+  </data>
+  <data name="subject_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace se ha eliminado</value>
+  </data>
+  <data name="subject_api_key_expired" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace: Tu clave API ha expirado</value>
+  </data>
+  <data name="subject_user_agent_role_changed" xml:space="preserve">
+    <value>Tu rol en un agente de IA de DocSpace ha cambiado</value>
+  </data>
+  <data name="pattern_api_key_expired" xml:space="preserve">
+    <value>¡Hola, $UserName!
+
+Este correo es para informarte de que tu clave API "*$Message*" ha expirado y ha sido desactivada.
+
+Puedes generar una nueva clave API en las "Herramientas para desarrolladores":"${__VirtualRootPath}/developer-tools/api-keys".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_user_agent_role_changed" xml:space="preserve">
+    <value>¡Hola!
+
+Se te ha asignado un nuevo rol en el agente de IA de DocSpace "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+
+Obtén más información sobre los roles y permisos de la sala en el "Centro de ayuda":"${HelpCenterUrl}".
+
+$TrulyYours</value>
+  </data>
 </root>

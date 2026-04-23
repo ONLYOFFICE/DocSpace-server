@@ -49,7 +49,7 @@ switch (launchProfile)
             .AddMySql(withDataVolume: false)
             .AddRabbitMq()
             .AddRedis()
-            .AddOpensearch(withDashboard: false, fixedPort: false);
+            .AddOpensearch(withDashboard: false, fixedPort: false, withDataVolume: false);
 
         configurator
             .AddProject<ASC_Files>(Constants.FilesPort)

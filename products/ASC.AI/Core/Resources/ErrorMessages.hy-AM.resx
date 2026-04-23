@@ -121,7 +121,7 @@
     <value>Դուք չունեք ԱԲ կարգավորումները կառավարելու թույլտվություն</value>
   </data>
   <data name="AttachmentProcessFailed" xml:space="preserve">
-    <value>Հնարավոր չէ մշակել ֆայլերը՝ {0}: Ֆայլերը կարող են վնասված կամ կոդավորված լինել:</value>
+    <value>Հնարավոր չէ մշակել ֆայլերը՝ {0}: Ֆայլերը կարող են վնասված կամ կոդավորված լինել</value>
   </data>
   <data name="ChatAccessDenied" xml:space="preserve">
     <value>Դուք չունեք չատն օգտագործելու թույլտվություն</value>
@@ -173,5 +173,14 @@
   </data>
   <data name="UnavailableServers" xml:space="preserve">
     <value>MCP սերվերները հասանելի չեն՝ {0}: Ստուգեք կապի կարգավորումները</value>
+  </data>
+  <data name="MessageNotFound" xml:space="preserve">
+    <value>Հաղորդագրությունը չի գտնվել</value>
+  </data>
+  <data name="NoModelsAvailable" xml:space="preserve">
+    <value>Այս մատակարարի համար հասանելի մոդելներ չկան</value>
+  </data>
+  <data name="ProviderNameExists" xml:space="preserve">
+    <value>Մատակարարի անվանումն արդեն գոյություն ունի</value>
   </data>
 </root>

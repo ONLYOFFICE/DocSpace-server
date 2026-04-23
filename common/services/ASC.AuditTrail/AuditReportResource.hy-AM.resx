@@ -1131,4 +1131,67 @@
   <data name="WebpluginUploaded" xml:space="preserve">
     <value>Պլագինը բեռնվել է՝ {0}</value>
   </data>
+  <data name="AIAccessDisabled" xml:space="preserve">
+    <value>ԱԲ ծառայությունները անջատված են</value>
+  </data>
+  <data name="AIAccessEnabled" xml:space="preserve">
+    <value>ԱԲ ծառայությունները միացված են</value>
+  </data>
+  <data name="AIDefaultProviderDeleted" xml:space="preserve">
+    <value>Լռելյայն մատակարարը ջնջվել է</value>
+  </data>
+  <data name="AIDefaultProviderSet" xml:space="preserve">
+    <value>Լռելյայն ԱԲ մատակարարը սահմանված է. Անվանում: {0}, Լռելյայն մոդել: {1}</value>
+  </data>
+  <data name="BackupCancelled" xml:space="preserve">
+    <value>Կրկնօրինակումը չեղարկվել է</value>
+  </data>
+  <data name="DocumentsDefaultTemplatesSettingsUpdated" xml:space="preserve">
+    <value>Կաղապարի լռելյայն կարգավորումները թարմացվել են. {0}</value>
+  </data>
+  <data name="FileNotSavedDueToRoomQuota" xml:space="preserve">
+    <value>Սենյակներ [{0}]. Ֆայլը չի պահպանվել. {1} – սենյակի պահեստավորման քվոտան գերազանցվել է:</value>
+  </data>
+  <data name="FileNotSavedDueToUserQuota" xml:space="preserve">
+    <value>Օգտատերեր [{0}]. Ֆայլը չի պահպանվել. {1} – օգտատիրոջ պահեստավորման քվոտան գերազանցվել է:</value>
+  </data>
+  <data name="FileSavedButRoomQuotaExceeded" xml:space="preserve">
+    <value>Սենյակներ [{0}]. Ֆայլը թարմացվել է. {1}, գերազանցելով սենյակի պահեստավորման քվոտան:</value>
+  </data>
+  <data name="FileSavedButUserQuotaExceeded" xml:space="preserve">
+    <value>Օգտատերեր [{0}]. Ֆայլը թարմացվել է. {1}, գերազանցելով օգտատիրոջ պահեստավորման քվոտան:</value>
+  </data>
+  <data name="InvitationSettingsUpdated" xml:space="preserve">
+    <value>Հրավերի կարգավորումները թարմացվել են</value>
+  </data>
+  <data name="IPRestrictionsSettingsUpdated" xml:space="preserve">
+    <value>IP անվտանգության կարգավորումները թարմացվել են</value>
+  </data>
+  <data name="LoginSettingsUpdated" xml:space="preserve">
+    <value>Կոպիտ ուժի հարձակումներից պաշտպանության կարգավորումները թարմացվել են</value>
+  </data>
+  <data name="RestoreCancelled" xml:space="preserve">
+    <value>Վերականգնումը չեղարկվել է</value>
+  </data>
+  <data name="RestoreStarted" xml:space="preserve">
+    <value>Վերականգնումը սկսվել է</value>
+  </data>
+  <data name="ScheduledBackupDeleted" xml:space="preserve">
+    <value>Նախատեսված կրկնօրինակումը ջնջվել է</value>
+  </data>
+  <data name="WhiteLabelAdditionalSettingsUpdated" xml:space="preserve">
+    <value>Բրենդավորման լրացուցիչ կարգավորումները թարմացվել են</value>
+  </data>
+  <data name="WhiteLabelCompanySettingsUpdated" xml:space="preserve">
+    <value>Ընկերության տեղեկատվության կարգավորումները թարմացվել են</value>
+  </data>
+  <data name="WhiteLabelMailSettingsUpdated" xml:space="preserve">
+    <value>Փոստի կարգավորումները թարմացվել են</value>
+  </data>
+  <data name="WhiteLabelSettingsLogosUpdated" xml:space="preserve">
+    <value>Լոգոյի կարգավորումները թարմացվել են</value>
+  </data>
+  <data name="WhiteLabelSettingsLogoTextUpdated" xml:space="preserve">
+    <value>Բրենդի անվանումը թարմացվել է</value>
+  </data>
 </root>

@@ -174,4 +174,13 @@
   <data name="UnavailableServers" xml:space="preserve">
     <value>Servidores MCP indisponíveis: {0}. Verifique as definições de ligação</value>
   </data>
+  <data name="MessageNotFound" xml:space="preserve">
+    <value>Mensagem não encontrada</value>
+  </data>
+  <data name="NoModelsAvailable" xml:space="preserve">
+    <value>Não há modelos disponíveis para este fornecedor</value>
+  </data>
+  <data name="ProviderNameExists" xml:space="preserve">
+    <value>O nome do fornecedor já existe</value>
+  </data>
 </root>

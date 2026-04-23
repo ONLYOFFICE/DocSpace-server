@@ -298,4 +298,18 @@ $Message</value>
   <data name="subject_YourTurnFormFilling" xml:space="preserve">
     <value>DocSpace-Benachrichtigung.</value>
   </data>
+  <data name="pattern_AgentRemoved" xml:space="preserve">
+    <value>h1. $__AuthorName hat einen KI-Agenten gelöscht
+
+$__AuthorName hat den KI-Agenten gelöscht: $RoomTitle</value>
+  </data>
+  <data name="pattern_AgentUpdateAccessForUser_push" xml:space="preserve">
+    <value>Ihre Rolle im KI-Agenten "$RoomTitle" wurde in "$RoomRole" geändert</value>
+  </data>
+  <data name="pattern_InvitedToAgent_push" xml:space="preserve">
+    <value>Sie wurden zum KI-Agenten "$RoomTitle" eingeladen</value>
+  </data>
+  <data name="subject_AgentRemoved" xml:space="preserve">
+    <value>DocSpace-Benachrichtigung. KI-Agent gelöscht</value>
+  </data>
 </root>

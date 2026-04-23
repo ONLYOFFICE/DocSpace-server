@@ -1131,4 +1131,67 @@
   <data name="WebpluginUploaded" xml:space="preserve">
     <value>Το πρόσθετο μεταφορτώθηκε: {0}</value>
   </data>
+  <data name="AIAccessDisabled" xml:space="preserve">
+    <value>Οι υπηρεσίες AI έχουν απενεργοποιηθεί</value>
+  </data>
+  <data name="AIAccessEnabled" xml:space="preserve">
+    <value>Οι υπηρεσίες AI έχουν ενεργοποιηθεί</value>
+  </data>
+  <data name="AIDefaultProviderDeleted" xml:space="preserve">
+    <value>Ο προεπιλεγμένος πάροχος διαγράφηκε</value>
+  </data>
+  <data name="AIDefaultProviderSet" xml:space="preserve">
+    <value>Ορίστηκε προεπιλεγμένος πάροχος AI: Όνομα: {0}, Προεπιλεγμένο μοντέλο: {1}</value>
+  </data>
+  <data name="BackupCancelled" xml:space="preserve">
+    <value>Το αντίγραφο ασφαλείας ακυρώθηκε</value>
+  </data>
+  <data name="DocumentsDefaultTemplatesSettingsUpdated" xml:space="preserve">
+    <value>Οι προεπιλεγμένες ρυθμίσεις προτύπου ενημερώθηκαν: {0}</value>
+  </data>
+  <data name="FileNotSavedDueToRoomQuota" xml:space="preserve">
+    <value>Δωμάτια [{0}]. Το αρχείο δεν αποθηκεύτηκε: {1} – υπέρβαση ορίου αποθήκευσης δωματίου.</value>
+  </data>
+  <data name="FileNotSavedDueToUserQuota" xml:space="preserve">
+    <value>Χρήστες [{0}]. Το αρχείο δεν αποθηκεύτηκε: {1} – υπέρβαση ορίου αποθήκευσης χρήστη.</value>
+  </data>
+  <data name="FileSavedButRoomQuotaExceeded" xml:space="preserve">
+    <value>Δωμάτια [{0}]. Το αρχείο ενημερώθηκε: {1}, υπερβαίνοντας το όριο αποθήκευσης δωματίου.</value>
+  </data>
+  <data name="FileSavedButUserQuotaExceeded" xml:space="preserve">
+    <value>Χρήστες [{0}]. Το αρχείο ενημερώθηκε: {1}, υπερβαίνοντας το όριο αποθήκευσης χρήστη.</value>
+  </data>
+  <data name="InvitationSettingsUpdated" xml:space="preserve">
+    <value>Οι ρυθμίσεις πρόσκλησης ενημερώθηκαν</value>
+  </data>
+  <data name="IPRestrictionsSettingsUpdated" xml:space="preserve">
+    <value>Οι ρυθμίσεις ασφαλείας IP ενημερώθηκαν</value>
+  </data>
+  <data name="LoginSettingsUpdated" xml:space="preserve">
+    <value>Οι ρυθμίσεις προστασίας από επιθέσεις brute force ενημερώθηκαν</value>
+  </data>
+  <data name="RestoreCancelled" xml:space="preserve">
+    <value>Η επαναφορά ακυρώθηκε</value>
+  </data>
+  <data name="RestoreStarted" xml:space="preserve">
+    <value>Η επαναφορά ξεκίνησε</value>
+  </data>
+  <data name="ScheduledBackupDeleted" xml:space="preserve">
+    <value>Το προγραμματισμένο αντίγραφο ασφαλείας διαγράφηκε</value>
+  </data>
+  <data name="WhiteLabelAdditionalSettingsUpdated" xml:space="preserve">
+    <value>Οι πρόσθετες ρυθμίσεις επωνυμίας ενημερώθηκαν</value>
+  </data>
+  <data name="WhiteLabelCompanySettingsUpdated" xml:space="preserve">
+    <value>Οι ρυθμίσεις πληροφοριών εταιρείας ενημερώθηκαν</value>
+  </data>
+  <data name="WhiteLabelMailSettingsUpdated" xml:space="preserve">
+    <value>Οι ρυθμίσεις αλληλογραφίας ενημερώθηκαν</value>
+  </data>
+  <data name="WhiteLabelSettingsLogosUpdated" xml:space="preserve">
+    <value>Οι ρυθμίσεις λογότυπου ενημερώθηκαν</value>
+  </data>
+  <data name="WhiteLabelSettingsLogoTextUpdated" xml:space="preserve">
+    <value>Το όνομα επωνυμίας ενημερώθηκε</value>
+  </data>
 </root>

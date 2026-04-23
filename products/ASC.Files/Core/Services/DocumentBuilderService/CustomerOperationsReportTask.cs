@@ -244,7 +244,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
                 break;
             }
 
-            var participantDisplayNames = await report.GetParticipantDisplayNamesAsync(displayUserSettingsHelper);
+            var participantDisplayNames = await report.GetParticipantDisplayNamesAsync(displayUserSettingsHelper, false);
             var logoText = await tenantLogoManager.GetLogoTextAsync();
 
             foreach (var operation in report.Collection)
