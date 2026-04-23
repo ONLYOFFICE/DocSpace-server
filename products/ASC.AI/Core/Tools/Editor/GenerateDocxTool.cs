@@ -46,14 +46,14 @@ public class GenerateDocxTool(FileStorageService fileService, EditorToolCallStat
             [Description("Short description of the document to generate")] string description)
         {
             const string extension = ".docx";
-            
+
             try
             {
                 var file = await fileService.CreateNewFileAsync(new FileModel<int, int>
                 {
                     ParentId = resultStorageId,
                     Title = $"{fileName}{extension}"
-                });
+                }, ignoreTemplates: true);
 
                 await callStateStore.SetAsync(file.Id, new EditorToolCallState
                 {

@@ -174,4 +174,13 @@
   <data name="UnavailableServers" xml:space="preserve">
     <value>MCP сървърите не са налични: {0}. Проверете настройките за връзка</value>
   </data>
+  <data name="MessageNotFound" xml:space="preserve">
+    <value>Съобщението не е намерено</value>
+  </data>
+  <data name="NoModelsAvailable" xml:space="preserve">
+    <value>Няма налични модели за този доставчик</value>
+  </data>
+  <data name="ProviderNameExists" xml:space="preserve">
+    <value>Името на доставчика вече съществува</value>
+  </data>
 </root>

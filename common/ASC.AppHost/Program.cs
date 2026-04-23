@@ -49,7 +49,7 @@ switch (launchProfile)
             .AddMySql(withDataVolume: false)
             .AddRabbitMq()
             .AddRedis()
-            .AddOpensearch(withDashboard: false, fixedPort: false);
+            .AddOpensearch(withDashboard: false, fixedPort: false, withDataVolume: false);
 
         var ollamaModel = builder.Configuration["OLLAMA_MODEL"];
         if (!string.IsNullOrEmpty(ollamaModel))

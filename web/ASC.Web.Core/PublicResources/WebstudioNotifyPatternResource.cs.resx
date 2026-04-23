@@ -2153,4 +2153,43 @@ $TrulyYours</value>
   <data name="TrulyYoursText" xml:space="preserve">
     <value>S pozdravem, tým ${LetterLogoText}</value>
   </data>
+  <data name="ActionFileUploadedToAgentKnowledge" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; nahrál nový dokument: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; do znalostní báze agenta AI: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
+  </data>
+  <data name="subject_api_key_expired" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace: Platnost vašeho API klíče vypršela</value>
+  </data>
+  <data name="subject_portal_deleted_to_support" xml:space="preserve">
+    <value>Dokumentační prostor ${LetterLogoText} byl smazán</value>
+  </data>
+  <data name="subject_user_agent_role_changed" xml:space="preserve">
+    <value>Vaše role v agentovi AI DocSpace se změnila</value>
+  </data>
+  <data name="pattern_api_key_expired" xml:space="preserve">
+    <value>Dobrý den, $UserName!
+
+Tento e-mail vás informuje, že platnost vašeho API klíče "*$Message*" vypršela a byl deaktivován.
+
+Nový API klíč můžete vygenerovat v "Nástrojích pro vývojáře":"${__VirtualRootPath}/developer-tools/api-keys".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace byl smazán.
+
+*Portál:* ${PortalUrl}
+*Vlastník:* ${UserName} ${UserEmail}
+*Zákazník:* ${OwnerName}
+
+Ujistěte se prosím, že automatická fakturace je vypnuta. Zkontrolujte stav automatické fakturace v zákaznickém účtu Stripe.</value>
+  </data>
+  <data name="pattern_user_agent_role_changed" xml:space="preserve">
+    <value>Dobrý den!
+
+Byla vám přidělena nová role v agentovi AI DocSpace "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+
+Více informací o rolích a oprávněních místností najdete v "Centru nápovědy":"${HelpCenterUrl}".
+
+$TrulyYours</value>
+  </data>
 </root>

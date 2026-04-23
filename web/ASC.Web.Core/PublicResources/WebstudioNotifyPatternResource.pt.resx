@@ -2188,4 +2188,15 @@ $TrulyYours</value>
   <data name="TrulyYoursText" xml:space="preserve">
     <value>Atenciosamente, equipe ${LetterLogoText}</value>
   </data>
+  <data name="pattern_saas_agent_invite" xml:space="preserve">
+    <value>Olá!
+
+Foi convidado para se juntar a um agente de IA do DocSpace em "${__VirtualRootPath}":"${__VirtualRootPath}". Aceite o convite clicando na ligação:
+
+$OrangeButton
+
+Após clicar na ligação do convite, defina uma nova palavra-passe para a sua conta.
+
+$TrulyYours</value>
+  </data>
 </root>

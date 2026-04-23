@@ -1131,4 +1131,67 @@
   <data name="WebpluginUploaded" xml:space="preserve">
     <value>Plugin cargado: {0}</value>
   </data>
+  <data name="AIAccessDisabled" xml:space="preserve">
+    <value>Los servicios de IA han sido desactivados</value>
+  </data>
+  <data name="AIAccessEnabled" xml:space="preserve">
+    <value>Los servicios de IA han sido activados</value>
+  </data>
+  <data name="AIDefaultProviderSet" xml:space="preserve">
+    <value>Proveedor de IA predeterminado establecido: Nombre: {0}, Modelo predeterminado: {1}</value>
+  </data>
+  <data name="AIDefaultProviderDeleted" xml:space="preserve">
+    <value>Proveedor predeterminado eliminado</value>
+  </data>
+  <data name="BackupCancelled" xml:space="preserve">
+    <value>Copia de seguridad cancelada</value>
+  </data>
+  <data name="DocumentsDefaultTemplatesSettingsUpdated" xml:space="preserve">
+    <value>Configuración de plantilla predeterminada actualizada: {0}</value>
+  </data>
+  <data name="FileNotSavedDueToRoomQuota" xml:space="preserve">
+    <value>Salas [{0}]. Archivo no guardado: {1} – cuota de almacenamiento de la sala superada.</value>
+  </data>
+  <data name="FileNotSavedDueToUserQuota" xml:space="preserve">
+    <value>Usuarios [{0}]. Archivo no guardado: {1} – cuota de almacenamiento del usuario superada.</value>
+  </data>
+  <data name="FileSavedButRoomQuotaExceeded" xml:space="preserve">
+    <value>Salas [{0}]. Archivo actualizado: {1}, superando la cuota de almacenamiento de la sala.</value>
+  </data>
+  <data name="FileSavedButUserQuotaExceeded" xml:space="preserve">
+    <value>Usuarios [{0}]. Archivo actualizado: {1}, superando la cuota de almacenamiento del usuario.</value>
+  </data>
+  <data name="InvitationSettingsUpdated" xml:space="preserve">
+    <value>Configuración de invitaciones actualizada</value>
+  </data>
+  <data name="IPRestrictionsSettingsUpdated" xml:space="preserve">
+    <value>Configuración de seguridad IP actualizada</value>
+  </data>
+  <data name="LoginSettingsUpdated" xml:space="preserve">
+    <value>Configuración de protección contra fuerza bruta actualizada</value>
+  </data>
+  <data name="RestoreCancelled" xml:space="preserve">
+    <value>Restauración cancelada</value>
+  </data>
+  <data name="RestoreStarted" xml:space="preserve">
+    <value>Restauración iniciada</value>
+  </data>
+  <data name="ScheduledBackupDeleted" xml:space="preserve">
+    <value>Copia de seguridad programada eliminada</value>
+  </data>
+  <data name="WhiteLabelAdditionalSettingsUpdated" xml:space="preserve">
+    <value>Configuración adicional de marca actualizada</value>
+  </data>
+  <data name="WhiteLabelCompanySettingsUpdated" xml:space="preserve">
+    <value>Configuración de información de la empresa actualizada</value>
+  </data>
+  <data name="WhiteLabelMailSettingsUpdated" xml:space="preserve">
+    <value>Configuración de correo actualizada</value>
+  </data>
+  <data name="WhiteLabelSettingsLogosUpdated" xml:space="preserve">
+    <value>Configuración del logotipo actualizada</value>
+  </data>
+  <data name="WhiteLabelSettingsLogoTextUpdated" xml:space="preserve">
+    <value>Nombre de marca actualizado</value>
+  </data>
 </root>

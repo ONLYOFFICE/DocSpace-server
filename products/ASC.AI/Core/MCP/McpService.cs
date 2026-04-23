@@ -297,7 +297,15 @@ public partial class McpService(
                 throw new ArgumentOutOfRangeException(string.Format(ErrorMessages.ServersRoomLimit, MaxMcpServersByRoom));
             }
 
-            await mcpDao.AddServersConnectionsAsync(tenantId, room.Id, serversToAdd);
+            try
+            {
+                await mcpDao.AddServersConnectionsAsync(tenantId, room.Id, serversToAdd);
+            }
+            catch (ServerAlreadyAddedException)
+            {
+                throw new ArgumentException(ErrorMessages.ServerAlreadyAdded);
+            }
+
             notify = true;
         }
 

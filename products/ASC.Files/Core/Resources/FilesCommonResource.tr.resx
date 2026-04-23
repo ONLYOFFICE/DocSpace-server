@@ -586,4 +586,7 @@ docx, xlsx, pptx ile en yüksek uyumluluk.</value>
   <data name="User" xml:space="preserve">
     <value>Kullanıcı</value>
   </data>
+  <data name="ErrorMessage_AiServicesDisabled" xml:space="preserve">
+    <value>Mevcut portal için AI hizmetleri devre dışı</value>
+  </data>
 </root>

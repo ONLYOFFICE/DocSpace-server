@@ -172,6 +172,15 @@
     <value>Nombre maximum de serveurs par salle : {0}</value>
   </data>
   <data name="UnavailableServers" xml:space="preserve">
-    <value>Les serveurs MCP sont indisponibles : {0}. Veuillez vérifier les paramètres de connexion</value>
+    <value>Les serveurs MCP sont indisponibles: {0}. Veuillez vérifier les paramètres de connexion</value>
+  </data>
+  <data name="MessageNotFound" xml:space="preserve">
+    <value>Message introuvable</value>
+  </data>
+  <data name="NoModelsAvailable" xml:space="preserve">
+    <value>Aucun modèle disponible pour ce fournisseur</value>
+  </data>
+  <data name="ProviderNameExists" xml:space="preserve">
+    <value>Le nom du fournisseur existe déjà</value>
   </data>
 </root>

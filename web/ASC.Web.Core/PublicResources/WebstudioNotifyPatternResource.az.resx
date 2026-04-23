@@ -494,7 +494,7 @@ $TrulyYours</value>
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 44px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 700; line-height: 19px; Margin: 0; padding: 0px 40px 24px; vertical-align: top; text-align: center;"&gt;Sənəd əməkdaşlığının yeni üsulundan həzz alın!&lt;/td&gt;&lt;/tr&gt; 
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 700; line-height: 19px; Margin: 0; padding: 0px 40px 24px; vertical-align: top; text-align: center;"&gt;Sənəd əməkdaşlığının yeni üsulundan həzz alın!&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
   </data>
@@ -556,7 +556,7 @@ Satınalma zamanı mövcud olan bütün funksiyalardan *məhdud müddətə* isti
 
 $OrangeButton
 
-Həmçinin lisenziya yeniləmələri üçün birbaşa satış menecerinizlə əlaqə saxlaya bilərsiniz. 
+Həmçinin lisenziya yeniləmələri üçün birbaşa satış menecerinizlə əlaqə saxlaya bilərsiniz.
 
 Ödənişlə bağlı suallar üçün "${__SalesEmail}":"mailto:${__SalesEmail}" ünvanında bizimlə əlaqə saxlayın. Hər hansı texniki problemləri həll etmək üçün "${__SupportLink}":"${__SupportLink}" istifadə edin.
 
@@ -704,7 +704,7 @@ $TrulyYours</value>
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 44px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 700; line-height: 19px; Margin: 0; padding: 0px 40px 24px; vertical-align: top; text-align: center;"&gt;Sənəd əməkdaşlığının yeni üsulundan həzz alın!&lt;/td&gt;&lt;/tr&gt; 
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 700; line-height: 19px; Margin: 0; padding: 0px 40px 24px; vertical-align: top; text-align: center;"&gt;Sənəd əməkdaşlığının yeni üsulundan həzz alın!&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
   </data>
@@ -873,7 +873,7 @@ $OrangeButton
     <value>h1.Portalın başqa bölgəyə köçürülməsi zamanı xəta
 
 $RegionName bölgəsinə köçürülərkən xəta baş verdi. Zəhmət olmasa bir az sonra yenidən cəhd edin.
-Portalınız indi köhnə "$PortalUrl":"$PortalUrl" ünvanında mövcuddur: 
+Portalınız indi köhnə "$PortalUrl":"$PortalUrl" ünvanında mövcuddur:
 
 Hər hansı bir sualınız və ya köməyə ehtiyacınız olarsa,  ünvanında bizimlə əlaqə saxlamaqdan çəkinməyin "${__SalesEmail}":"mailto:${__SalesEmail}"
 
@@ -946,7 +946,7 @@ Bu e-məktubu səhvən almısınızsa, ona məhəl qoymayın və ya əlavə məl
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 44px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 700; line-height: 19px; Margin: 0; padding: 0px 40px 24px; vertical-align: top; text-align: center;"&gt;Sənəd əməkdaşlığının yeni üsulundan həzz alın!&lt;/td&gt;&lt;/tr&gt; 
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 700; line-height: 19px; Margin: 0; padding: 0px 40px 24px; vertical-align: top; text-align: center;"&gt;Sənəd əməkdaşlığının yeni üsulundan həzz alın!&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
   </data>
@@ -1095,7 +1095,7 @@ ${LetterLogoText} komandası
 [${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
-    <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" sahəsinin silinməsi: 
+    <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" sahəsinin silinməsi:
 
 Əziz $OwnerName,
 
@@ -2152,5 +2152,44 @@ $TrulyYours</value>
   </data>
   <data name="TrulyYoursText" xml:space="preserve">
     <value>Hörmətlə, ${LetterLogoText} Komandası</value>
+  </data>
+  <data name="ActionFileUploadedToAgentKnowledge" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; yeni sənəd yüklədi: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; AI agentinin bilik bazasına: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
+  </data>
+  <data name="subject_api_key_expired" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace: API açarınızın müddəti bitib</value>
+  </data>
+  <data name="subject_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace silindi</value>
+  </data>
+  <data name="subject_user_agent_role_changed" xml:space="preserve">
+    <value>DocSpace AI agentindəki rolunuz dəyişdi</value>
+  </data>
+  <data name="pattern_api_key_expired" xml:space="preserve">
+    <value>Salam, $UserName!
+
+Bu e-poçt sizi "*$Message*" API açarınızın müddətinin bitdiyini və deaktiv edildiyini xəbərdar etmək üçündür.
+
+"Tərtibatçı Alətləri":"${__VirtualRootPath}/developer-tools/api-keys" ndə yeni API açarı yarada bilərsiniz.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace silindi.
+
+*Portal:* ${PortalUrl}
+*Sahib:* ${UserName} ${UserEmail}
+*Müştəri:* ${OwnerName}
+
+Zəhmət olmasa, avtomatik ödənişin söndürüldüyünə əmin olun. Müştərinin Stripe hesabında avtomatik ödənişin statusunu yoxlayın.</value>
+  </data>
+  <data name="pattern_user_agent_role_changed" xml:space="preserve">
+    <value>Salam!
+
+DocSpace AI agentində "${RoomTitle}":"${RoomUrl}" sizə yeni rol təyin edildi: ${UserRole}.
+
+Otaq rolları və icazələri haqqında daha çox məlumat üçün "Yardım Mərkəzi":"${HelpCenterUrl}" nə baxın.
+
+$TrulyYours</value>
   </data>
 </root>

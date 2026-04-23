@@ -442,7 +442,7 @@
     <value>ID du client de l'application</value>
   </data>
   <data name="ConsumersmicrosoftClientSecret" xml:space="preserve">
-    <value>Clé secrète du client</value>
+    <value>Clé secrète client</value>
   </data>
   <data name="ConsumersMicrosoftDescription" xml:space="preserve">
     <value>Autoriser l’application de se connecter au portail avec un compte Microsoft.</value>
@@ -535,7 +535,7 @@
     <value>Identifiant de l'application</value>
   </data>
   <data name="Consumersskydriveappsecret" xml:space="preserve">
-    <value>Clé secrète du client</value>
+    <value>Clé secrète client</value>
   </data>
   <data name="ConsumersSkyDriveDescription" xml:space="preserve">
     <value>Connecter l'application pour gérer les fichiers et dossiers OneDrive.</value>
@@ -595,10 +595,10 @@
     <value>X</value>
   </data>
   <data name="ConsumerstwitterAccessTokenSecret_Default" xml:space="preserve">
-    <value>Client Secret</value>
+    <value>Clé secrète client</value>
   </data>
   <data name="ConsumerstwitterAccessToken_Default" xml:space="preserve">
-    <value>Client ID</value>
+    <value>ID client</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
     <value>Se connecter à l'application pour accéder au portail en utilisant le compte X.</value>
@@ -667,7 +667,7 @@
     <value>Identifiant du client</value>
   </data>
   <data name="ConsumersyahooClientSecret" xml:space="preserve">
-    <value>Clé secrète du client</value>
+    <value>Clé secrète client</value>
   </data>
   <data name="ConsumersYahooDescription" xml:space="preserve">
     <value>Activer l'importation de contacts Yahoo pour cette application.</value>
@@ -709,7 +709,7 @@
     <value>La fonction de récupération du mot de passe est interdite à l'utilisateur LDAP</value>
   </data>
   <data name="CouldNotRecoverPasswordForSsoUser" xml:space="preserve">
-    <value>L'opération de récupération de mot de passe est interdite pour un utilisateur SSO</value>
+    <value>La fonction de récupération de mot de passe est interdite pour un utilisateur SSO</value>
   </data>
   <data name="CustomNamingPeopleSchema" xml:space="preserve">
     <value>Personnel</value>
@@ -1289,5 +1289,95 @@
   </data>
   <data name="WhatsNewSubscriptionName" xml:space="preserve">
     <value>Quoi de neuf</value>
+  </data>
+  <data name="AccountingCustomerOperationAgent" xml:space="preserve">
+    <value>Agent</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_chat" xml:space="preserve">
+    <value>Chat</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_fetch" xml:space="preserve">
+    <value>Exploration Web</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_search" xml:space="preserve">
+    <value>Recherche Web</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-tools" xml:space="preserve">
+    <value>Crédits IA</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_fetch" xml:space="preserve">
+    <value>Sources</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_search" xml:space="preserve">
+    <value>Résultats</value>
+  </data>
+  <data name="ConsumersdatabaseType" xml:space="preserve">
+    <value>Type de base de données</value>
+  </data>
+  <data name="ConsumersdbHost" xml:space="preserve">
+    <value>Hôte</value>
+  </data>
+  <data name="ConsumersdbName" xml:space="preserve">
+    <value>Nom de la base de données</value>
+  </data>
+  <data name="ConsumersdbPassword" xml:space="preserve">
+    <value>Mot de passe</value>
+  </data>
+  <data name="ConsumersdbPort" xml:space="preserve">
+    <value>Port</value>
+  </data>
+  <data name="ConsumersdbSsl" xml:space="preserve">
+    <value>Utiliser SSL</value>
+  </data>
+  <data name="ConsumersdbUser" xml:space="preserve">
+    <value>Utilisateur</value>
+  </data>
+  <data name="ConsumersExternalDb" xml:space="preserve">
+    <value>Connexion à la base de données</value>
+  </data>
+  <data name="ConsumersExternalDbDescription" xml:space="preserve">
+    <value>Stocker les résultats du formulaire dans une base de données externe telle que MySQL ou SQLite.</value>
+  </data>
+  <data name="ConsumersExternalDbInstruction" xml:space="preserve">
+    <value>Connectez une base de données externe pour stocker les résultats du formulaire.</value>
+  </data>
+  <data name="ConsumersExternalDbSqliteStandaloneOnly" xml:space="preserve">
+    <value>SQLite est uniquement disponible dans les installations autonomes.</value>
+  </data>
+  <data name="ConsumersExternalDbTestConnection" xml:space="preserve">
+    <value>Tester la connexion</value>
+  </data>
+  <data name="ConsumersNextcloud" xml:space="preserve">
+    <value>Nextcloud</value>
+  </data>
+  <data name="ConsumersNextcloudBaseUrl" xml:space="preserve">
+    <value>Entrez l'adresse URL de l'instance Nextcloud.</value>
+  </data>
+  <data name="ConsumersNextcloudClientId" xml:space="preserve">
+    <value>ID client</value>
+  </data>
+  <data name="ConsumersNextcloudClientSecret" xml:space="preserve">
+    <value>Clé secrète client</value>
+  </data>
+  <data name="ConsumersNextcloudDescription" xml:space="preserve">
+    <value>Permettre à l'application de se connecter au portail à l'aide d'un compte Nextcloud.</value>
+  </data>
+  <data name="ConsumersNextcloudInstruction" xml:space="preserve">
+    <value>Permettre à l'application de se connecter au portail à l'aide d'un compte Nextcloud.</value>
+  </data>
+  <data name="CouldNotRecoverPasswordForAutoGeneratedEmail" xml:space="preserve">
+    <value>La fonction de récupération de mot de passe est interdite pour les adresses e-mail générées automatiquement</value>
+  </data>
+  <data name="ConsumerssqliteFilePath" xml:space="preserve">
+    <value>Chemin du fichier SQLite</value>
+  </data>
+  <data name="TariffsFeature_embedding_wallet" xml:space="preserve">
+    <value>Incorporation IA</value>
+  </data>
+  <data name="TariffsFeature_embedding_wallet_price_count" xml:space="preserve">
+    <value>Une unité de mesure d'incorporation que les grands modèles de langage (LLM) peuvent traiter</value>
+  </data>
+  <data name="UserAuthenticationFailed" xml:space="preserve">
+    <value>Échec de l'authentification de l'utilisateur</value>
   </data>
 </root>

@@ -222,6 +222,15 @@ namespace ASC.AI.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The server has already been added to the agent.
+        /// </summary>
+        internal static string ServerAlreadyAdded {
+            get {
+                return ResourceManager.GetString("ServerAlreadyAdded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Failed to connect to MCP server.
         /// </summary>
         internal static string ServerFailedConnect {

@@ -333,7 +333,7 @@ $TrulyYours</value>
 已创建包含来自 [${__VirtualRootPath}](${__VirtualRootPath}) 门户数据的备份文件。
 
 如需了解更多有关备份流程的信息，请参考我们的[数据备份](${URL1})用户指南。
- 
+
 如果您有任何问题或是需要协助，欢迎随时通过[${__SupportLink}](${__SupportLink}) 联系我们
 
 祝好，
@@ -399,7 +399,7 @@ $OrangeButton
 您在进入 ${LetterLogoText} 门户时所使用的的身份验证器应用配置已重置。
 
 请点击下方的按钮前往门户登录页面并配置身份验证器应用程序：
- 
+
 $OrangeButton
 
 &amp;nbsp;</value>
@@ -503,7 +503,7 @@ $TrulyYours</value>
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 44px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 700; line-height: 19px; Margin: 0; padding: 0px 40px 24px; vertical-align: top; text-align: center;"&gt;欢迎享受一种新的文档协作方式!&lt;/td&gt;&lt;/tr&gt; 
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 700; line-height: 19px; Margin: 0; padding: 0px 40px 24px; vertical-align: top; text-align: center;"&gt;欢迎享受一种新的文档协作方式!&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
   </data>
@@ -725,7 +725,7 @@ $TrulyYours</value>
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 44px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 700; line-height: 19px; Margin: 0; padding: 0px 40px 24px; vertical-align: top; text-align: center;"&gt;欢迎享受一种新的文档协作方式!&lt;/td&gt;&lt;/tr&gt; 
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 700; line-height: 19px; Margin: 0; padding: 0px 40px 24px; vertical-align: top; text-align: center;"&gt;欢迎享受一种新的文档协作方式!&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
   </data>
@@ -837,7 +837,7 @@ $Body</value>
 姓名：$UserName
 
 电子邮件地址：$UserEmail
- 
+
 $Body</value>
   </data>
   <data name="pattern_join" xml:space="preserve">
@@ -967,7 +967,7 @@ $OrangeButton
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 44px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 700; line-height: 19px; Margin: 0; padding: 0px 40px 24px; vertical-align: top; text-align: center;"&gt;欢迎享受一种新的文档协作方式!&lt;/td&gt;&lt;/tr&gt; 
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 700; line-height: 19px; Margin: 0; padding: 0px 40px 24px; vertical-align: top; text-align: center;"&gt;欢迎享受一种新的文档协作方式!&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
   </data>
@@ -2184,5 +2184,35 @@ $TrulyYours</value>
   </data>
   <data name="TrulyYoursText" xml:space="preserve">
     <value>${LetterLogoText} 团队</value>
+  </data>
+  <data name="ActionFileUploadedToAgentKnowledge" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; 上传了新文档：&lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; 到 AI 代理的知识库：&lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
+  </data>
+  <data name="subject_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} 协作空间已删除</value>
+  </data>
+  <data name="subject_api_key_expired" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace：您的 API 密钥已过期</value>
+  </data>
+  <data name="subject_user_agent_role_changed" xml:space="preserve">
+    <value>您在 DocSpace AI 代理中的角色已更改</value>
+  </data>
+  <data name="pattern_api_key_expired" xml:space="preserve">
+    <value>您好，$UserName！
+
+此邮件是为了通知您，您的 API 密钥 "*$Message*" 已过期并已停用。
+
+您可以在 "开发者工具":"${__VirtualRootPath}/developer-tools/api-keys" 中生成新的 API 密钥。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_user_agent_role_changed" xml:space="preserve">
+    <value>您好！
+
+您已在 DocSpace AI 代理 "${RoomTitle}":"${RoomUrl}" 中被分配了新角色：${UserRole}。
+
+在 "帮助中心":"${HelpCenterUrl}" 中了解更多关于房间角色和权限的信息。
+
+$TrulyYours</value>
   </data>
 </root>

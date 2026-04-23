@@ -586,4 +586,7 @@ Najvišja združljivost z docx, xlsx, pptx.</value>
   <data name="User" xml:space="preserve">
     <value>Uporabnik</value>
   </data>
+  <data name="ErrorMessage_AiServicesDisabled" xml:space="preserve">
+    <value>Storitve AI so onemogočene za trenutni portal</value>
+  </data>
 </root>

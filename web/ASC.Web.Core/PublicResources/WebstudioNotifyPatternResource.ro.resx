@@ -2163,4 +2163,34 @@ $TrulyYours</value>
   <data name="TrulyYoursText" xml:space="preserve">
     <value>Cu deosebită considerație, Echipă ${LetterLogoText}</value>
   </data>
+  <data name="ActionFileUploadedToAgentKnowledge" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; a încărcat un document nou: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; în baza de cunoștințe a agentului IA: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
+  </data>
+  <data name="subject_api_key_expired" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace: Cheia dvs. API a expirat</value>
+  </data>
+  <data name="subject_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace a fost șters</value>
+  </data>
+  <data name="subject_user_agent_role_changed" xml:space="preserve">
+    <value>Rolul tău într-un agent IA DocSpace s-a schimbat</value>
+  </data>
+  <data name="pattern_api_key_expired" xml:space="preserve">
+    <value>Bună ziua, $UserName!
+
+Acest e-mail este pentru a vă informa că cheia dvs. API "*$Message*" a expirat și a fost dezactivată.
+
+Puteți genera o nouă cheie API în "Instrumente pentru dezvoltatori":"${__VirtualRootPath}/developer-tools/api-keys".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_user_agent_role_changed" xml:space="preserve">
+    <value>Bună ziua!
+
+Vi s-a atribuit un nou rol în agentul IA DocSpace "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+
+Aflați mai multe despre rolurile și permisiunile camerelor în "Centrul de ajutor":"${HelpCenterUrl}".
+
+$TrulyYours</value>
+  </data>
 </root>
