@@ -2017,7 +2017,7 @@ public class FileStorageService //: IFileStorageService
         {
             await fileTracker.RemoveAsync(fileId);
 
-            throw GenerateException(e);
+            throw;
         }
     }
 

@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Security.Authentication;
+
 namespace ASC.Web.Files.Utils;
 
 [Scope]
@@ -1565,6 +1567,11 @@ public class EntryManager(IDaoFactory daoFactory,
 
         if (!await CanEditAsync(userId, file))
         {
+            if (!securityContext.CurrentAccount.IsAuthenticated)
+            {
+                throw new AuthenticationException();
+            }
+
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
         }
 
