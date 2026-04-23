@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2026
+// (c) Copyright Ascensio System SIA 2009-2026
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -984,16 +984,16 @@ public class UserController(
     /// Check if a user exists by email
     /// </summary>
     /// <remarks>
-    /// Returns a boolean indicating whether a user with the specified email exists on the portal.
+    /// Returns data indicating whether a user with the specified email exists on the portal.
     /// </remarks>
     /// <path>api/2.0/people/exists</path>
     [Tags("People / Profiles")]
-    [SwaggerResponse(200, "Boolean result", typeof(bool))]
+    [SwaggerResponse(200, "User existence result", typeof(UserExistsResponseDto))]
     [SwaggerResponse(400, "Incorrect email")]
     [AllowNotPayment]
     [HttpGet("exists")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "LinkInvite,GuestShareLink,Authenticated")]
-    public async Task<bool> CheckUserExistsByEmail(GetMemberByEmailRequestDto inDto)
+    public async Task<UserExistsResponseDto> CheckUserExistsByEmail(GetMemberByEmailRequestDto inDto)
     {
         var email = string.IsNullOrEmpty(inDto.Email) && !string.IsNullOrEmpty(inDto.EncEmail)
             ? emailValidationKeyModelHelper.DecryptEmail(inDto.EncEmail)
@@ -1002,8 +1002,13 @@ public class UserController(
         ArgumentException.ThrowIfNullOrWhiteSpace(email);
 
         var user = await _userManager.GetUserByEmailAsync(email.Trim());
+        var exists = user.Id != Constants.LostUser.Id;
 
-        return user.Id != Constants.LostUser.Id;
+        return new UserExistsResponseDto
+        {
+            Exist = exists,
+            Status = exists ? user.Status : null
+        };
     }
 
     /// <remarks>
