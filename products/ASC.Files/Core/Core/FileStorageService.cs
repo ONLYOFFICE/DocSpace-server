@@ -2362,69 +2362,6 @@ public class FileStorageService //: IFileStorageService
         }
     }
 
-    public async Task<EditHistoryDataDto> GetEditDiffUrlAsync<T>(T fileId, int version = 0)
-    {
-        var fileDao = daoFactory.GetFileDao<T>();
-
-        var file = version > 0
-            ? await fileDao.GetFileAsync(fileId, version)
-            : await fileDao.GetFileAsync(fileId);
-
-        if (file == null)
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
-        }
-
-        if (!await fileSecurity.CanReadHistoryAsync(file))
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
-        }
-
-        if (file.ProviderEntry)
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_BadRequest);
-        }
-
-        var result = new EditHistoryDataDto { FileType = file.ConvertedExtension.Trim('.'), Key = await documentServiceHelper.GetDocKeyAsync(file), Url = documentServiceConnector.ReplaceCommunityAddress(pathProvider.GetFileStreamUrl(file)), Version = version };
-
-        if (await fileDao.ContainChangesAsync(file.Id, file.Version))
-        {
-            string previousKey;
-            string sourceFileUrl;
-            string sourceExt;
-
-            var history = await fileDao.GetFileHistoryAsync(file.Id).ToListAsync();
-            var previousFileStable = history.OrderByDescending(r => r.Version).FirstOrDefault(r => r.Version < file.Version);
-            if (previousFileStable != null)
-            {
-                sourceFileUrl = pathProvider.GetFileStreamUrl(previousFileStable);
-                sourceExt = previousFileStable.ConvertedExtension;
-
-                previousKey = await documentServiceHelper.GetDocKeyAsync(previousFileStable);
-            }
-            else
-            {
-                var culture = (await userManager.GetUsersAsync(authContext.CurrentAccount.ID)).GetCulture();
-                var storeTemplate = await globalStore.GetStoreTemplateAsync();
-                var fileExt = FileUtility.GetFileExtension(file.Title);
-                var path = await globalStore.GetNewDocTemplatePath(storeTemplate, fileExt, culture);
-                var uri = await storeTemplate.GetUriAsync("", path);
-
-                sourceFileUrl = baseCommonLinkUtility.GetFullAbsolutePath(uri.ToString());
-                sourceExt = fileExt.Trim('.');
-
-                previousKey = DocumentServiceConnector.GenerateRevisionId(Guid.NewGuid().ToString());
-            }
-
-            result.Previous = new EditHistoryUrl { Key = previousKey, Url = documentServiceConnector.ReplaceCommunityAddress(sourceFileUrl), FileType = sourceExt.Trim('.') };
-
-            result.ChangesUrl = documentServiceConnector.ReplaceCommunityAddress(pathProvider.GetFileChangesUrl(file));
-        }
-
-        result.Token = documentServiceHelper.GetSignature(result);
-
-        return result;
-    }
 
     public async IAsyncEnumerable<EditHistory> RestoreVersionAsync<T>(T fileId, int version, string url = null)
     {
