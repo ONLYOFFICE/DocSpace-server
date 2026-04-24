@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Security.Authentication;
+
 namespace ASC.Web.Files.Services.WCFService;
 
 [Scope]
@@ -1856,7 +1858,7 @@ public class FileStorageService //: IFileStorageService
     {
         if (!authContext.IsAuthenticated && await externalShare.GetLinkIdAsync() == Guid.Empty)
         {
-            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+            throw new AuthenticationException();
         }
 
         var (file, _) = await documentServiceHelper.GetCurFileInfoAsync(fileId, -1);
