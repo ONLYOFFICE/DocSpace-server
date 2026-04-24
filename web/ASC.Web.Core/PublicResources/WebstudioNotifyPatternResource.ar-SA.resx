@@ -2278,4 +2278,16 @@ $TrulyYours</value>
 
 $TrulyYours</value>
   </data>
+  <data name="ActionFileCreatedInSharedForMe" xml:space="preserve">
+    <value>أنشأ &lt;b&gt;{0}&lt;/b&gt; مستندًا جديدًا: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; في: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionFileEditedInSharedForMe" xml:space="preserve">
+    <value>قام &lt;b&gt;{0}&lt;/b&gt; بتحرير المستند: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; في: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionFileUploadedInSharedForMe" xml:space="preserve">
+    <value>قام &lt;b&gt;{0}&lt;/b&gt; بتحميل مستند جديد: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; في: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionNewCommentInSharedForMe" xml:space="preserve">
+    <value>أضاف &lt;b&gt;{0}&lt;/b&gt; تعليقًا جديدًا على إصدار المستند: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; في: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+  </data>
 </root>
