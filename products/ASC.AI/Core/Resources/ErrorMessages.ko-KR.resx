@@ -183,4 +183,10 @@
   <data name="ProviderNameExists" xml:space="preserve">
     <value>공급자 이름이 이미 존재함</value>
   </data>
+  <data name="ModelDisabled" xml:space="preserve">
+    <value>모델이 공급자 설정에 의해 비활성화되었습니다.</value>
+  </data>
+  <data name="ServerAlreadyAdded" xml:space="preserve">
+    <value>서버가 이미 에이전트에 추가되었습니다</value>
+  </data>
 </root>

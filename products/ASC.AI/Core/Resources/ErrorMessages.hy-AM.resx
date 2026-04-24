@@ -183,4 +183,10 @@
   <data name="ProviderNameExists" xml:space="preserve">
     <value>Մատակարարի անվանումն արդեն գոյություն ունի</value>
   </data>
+  <data name="ModelDisabled" xml:space="preserve">
+    <value>Մոդելն անջատված է ձեր մատակարարի կարգավորումներով։</value>
+  </data>
+  <data name="ServerAlreadyAdded" xml:space="preserve">
+    <value>Սերվերն արդեն ավելացվել է գործակալին</value>
+  </data>
 </root>

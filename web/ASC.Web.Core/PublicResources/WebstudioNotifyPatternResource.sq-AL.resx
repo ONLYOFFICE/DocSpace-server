@@ -136,7 +136,7 @@
     <value>&lt;b&gt;{0}&lt;/b&gt; redaktuat dokumentin: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;  në dhomë: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="ActionFileUploaded" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; ngarkuar një dokument të ri: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; në dhomë: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; ngarkoi një dokument të ri: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; në dhomë: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="ActionNewComment" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; shtuar një koment të ri në versionin e dokumentit: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; në dhomë: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
@@ -2196,5 +2196,17 @@ Ju është caktuar një rol i ri në agjentin AI të DocSpace "${RoomTitle}":"${
 Mësoni më shumë rreth roleve dhe lejeve të dhomës në "Qendrën e ndihmës":"${HelpCenterUrl}".
 
 $TrulyYours</value>
+  </data>
+  <data name="ActionFileCreatedInSharedForMe" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; krijoi një dokument të ri: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; në: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionFileEditedInSharedForMe" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; redaktoi dokumentin: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; në: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionFileUploadedInSharedForMe" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; ngarkoi një dokument të ri: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; në: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionNewCommentInSharedForMe" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; shtoi një koment të ri në versionin e dokumentit: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; në: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
 </root>
