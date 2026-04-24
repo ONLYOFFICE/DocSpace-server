@@ -187,6 +187,6 @@
     <value>Máy chủ đã được thêm vào tác nhân</value>
   </data>
   <data name="ModelDisabled" xml:space="preserve">
-    <value>Model, sağlayıcınızın ayarları tarafından devre dışı bırakıldı.</value>
+    <value>Mô hình đã bị vô hiệu hóa bởi cài đặt của nhà cung cấp của bạn.</value>
   </data>
 </root>
