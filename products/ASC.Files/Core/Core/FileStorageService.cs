@@ -1854,36 +1854,29 @@ public class FileStorageService //: IFileStorageService
 
     public async Task<KeyValuePair<bool, string>> TrackEditFileAsync<T>(T fileId, Guid tabId, string docKeyForTrack, bool isFinish = false)
     {
-        try
+        if (!authContext.IsAuthenticated && await externalShare.GetLinkIdAsync() == Guid.Empty)
         {
-            if (!authContext.IsAuthenticated && await externalShare.GetLinkIdAsync() == Guid.Empty)
-            {
-                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
-            }
-
-            var (file, _) = await documentServiceHelper.GetCurFileInfoAsync(fileId, -1);
-
-            if (docKeyForTrack != await documentServiceHelper.GetDocKeyAsync(fileId, -1, DateTime.MinValue) && docKeyForTrack != await documentServiceHelper.GetDocKeyAsync(file.Id, file.Version, file.ProviderEntry ? file.ModifiedOn : file.CreateOn))
-            {
-                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
-            }
-
-            if (isFinish)
-            {
-                await fileTracker.RemoveAsync(fileId, tabId);
-                await socketManager.StopEditAsync(fileId);
-            }
-            else
-            {
-                await entryManager.TrackEditingAsync(fileId, tabId, authContext.CurrentAccount.ID, tenantManager.GetCurrentTenant());
-            }
-
-            return new KeyValuePair<bool, string>(true, string.Empty);
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
-        catch (Exception ex)
+
+        var (file, _) = await documentServiceHelper.GetCurFileInfoAsync(fileId, -1);
+
+        if (docKeyForTrack != await documentServiceHelper.GetDocKeyAsync(fileId, -1, DateTime.MinValue) && docKeyForTrack != await documentServiceHelper.GetDocKeyAsync(file.Id, file.Version, file.ProviderEntry ? file.ModifiedOn : file.CreateOn))
         {
-            return new KeyValuePair<bool, string>(false, ex.Message);
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
+
+        if (isFinish)
+        {
+            await fileTracker.RemoveAsync(fileId, tabId);
+            await socketManager.StopEditAsync(fileId);
+        }
+        else
+        {
+            await entryManager.TrackEditingAsync(fileId, tabId, authContext.CurrentAccount.ID, tenantManager.GetCurrentTenant());
+        }
+
+        return new KeyValuePair<bool, string>(true, string.Empty);
     }
 
     public async Task<File<T>> SaveEditingAsync<T>(T fileId, string fileExtension, string fileUri, Stream stream, bool forceSave = false)
