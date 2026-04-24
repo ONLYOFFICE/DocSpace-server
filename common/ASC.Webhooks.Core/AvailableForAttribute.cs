@@ -24,32 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using DocSpace.API.SDK.Api.Settings;
+namespace ASC.Webhooks.Core;
 
-namespace ASC.People.Tests.PeopleController;
-
-[Collection("Test Collection")]
-public class BaseTest(
-    AspireAppFixture fixture
-    ) : IAsyncLifetime
+[AttributeUsage(AttributeTargets.Field)]
+public sealed class AvailableForAttribute(params EmployeeType[] roles) : Attribute
 {
-    protected readonly HttpClient _peopleClient = fixture.PeopleHttpClient;
-    protected readonly HttpClient _apiClient = fixture.WebApiHttpClient;
-    protected readonly ProfilesApi _profilesApi = fixture.ProfilesApi;
-    protected readonly GroupApi _groupApi = fixture.GroupApi;
-    protected readonly UsersApi _portalUsersApi = fixture.PortalUsersApi;
-    protected readonly UserTypeApi _userTypeApi = fixture.UserTypeApi;
-    protected readonly CommonSettingsApi _commonSettingsApi = fixture.CommonSettingsApi;
-    protected readonly WebhooksApi _webhooksApi = fixture.WebhooksApi;
-    private readonly Func<Task> _resetDatabase = fixture.ResetDatabaseAsync;
-
-    public async ValueTask InitializeAsync()
-    {
-        await Initializer.InitializeAsync(fixture);
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        await _resetDatabase();
-    }
+    public EmployeeType[] Roles { get; } = roles;
 }

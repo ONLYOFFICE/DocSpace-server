@@ -287,6 +287,7 @@ public class ProductEntryPoint : Product
 
                 file.Value.RoomUri = sharedFolderUrl;
                 file.Value.RoomTitle = FilesUCResource.SharedForMe;
+                file.Value.IsSharedForMe = true;
                 result.Add(file.Value);
             }
         }
