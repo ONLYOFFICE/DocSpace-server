@@ -187,6 +187,11 @@ public class UserFormatter : IComparer<UserInfo>
 
     public bool IsValidUserName(string firstName, string lastName)
     {
-        return UserNameRegex.IsMatch(firstName + lastName);
+        if (!UserNameRegex.IsMatch(firstName))
+        {
+            return false;
+        }
+
+        return string.IsNullOrEmpty(lastName) || UserNameRegex.IsMatch(lastName);
     }
 }
