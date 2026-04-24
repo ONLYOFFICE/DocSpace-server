@@ -90,7 +90,7 @@ public class FormFillingReportCreator(
         await externalDatabaseClient.CreateTableAndUpsertAsync(tableName, columnDefinitions, rowData, keyColumn: "form_id");
     }
 
-    public async Task ExportMissingFromOpenSearchAsync(int originalFormId, int originalFormVersion, int roomId)
+    public async Task<bool> ExportMissingFromOpenSearchAsync(int originalFormId, int originalFormVersion, int roomId)
     {
         var tableName = GetTableName(originalFormId, originalFormVersion);
 
@@ -102,9 +102,14 @@ public class FormFillingReportCreator(
              .Where(s => s.OriginalFormId, originalFormId)
              .Where(s => s.OriginalFormVersion, originalFormVersion));
 
-        if (!osCountSuccess || osCount <= dbCount)
+        if (!osCountSuccess)
         {
-            return;
+            return false;
+        }
+
+        if (osCount <= dbCount)
+        {
+            return true;
         }
 
         var existingIds = await externalDatabaseClient.GetExistingFormIdsAsync(tableName);
@@ -115,9 +120,14 @@ public class FormFillingReportCreator(
              .Where(s => s.OriginalFormVersion, originalFormVersion)
              .Limit(0, BaseIndexer<DbFormsItemDataSearch>.QueryLimit));
 
-        if (!success || allSubmissions.Count == 0)
+        if (!success)
         {
-            return;
+            return false;
+        }
+
+        if (allSubmissions.Count == 0)
+        {
+            return true;
         }
 
         var missing = allSubmissions
@@ -126,7 +136,7 @@ public class FormFillingReportCreator(
 
         if (missing.Count == 0)
         {
-            return;
+            return true;
         }
 
         factoryIndexerFormMetadata.Refresh();
@@ -149,13 +159,14 @@ public class FormFillingReportCreator(
 
             if (normalizedMeta.Count == 0)
             {
-                return;
+                return false;
             }
         }
 
         var columnDefinitions = BuildColumnDefinitions(normalizedMeta).ToList();
 
         var culture = tenantManager.GetCurrentTenant().GetCulture();
+        var hadFailure = false;
 
         foreach (var item in missing)
         {
@@ -182,8 +193,11 @@ public class FormFillingReportCreator(
             catch (Exception ex)
             {
                 logger.ErrorGapSyncUpsertFailed(ex, item.Id, tableName);
+                hadFailure = true;
             }
         }
+
+        return !hadFailure;
     }
 
     public async Task<IEnumerable<FormsItemData>> GetFormsFields(int folderId)

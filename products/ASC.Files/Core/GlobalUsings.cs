@@ -134,6 +134,7 @@ global using ASC.Files.Core.Resources;
 global using ASC.Files.Core.RoomTemplates.Events;
 global using ASC.Files.Core.RoomTemplates.Operations;
 global using ASC.Files.Core.Security;
+global using ASC.Files.Core.Services.ExternalDbSync;
 global using ASC.Files.Core.Services.NotifyService;
 global using ASC.Files.Core.Services.OFormService;
 global using ASC.Files.Core.Services.WCFService.Wrappers;

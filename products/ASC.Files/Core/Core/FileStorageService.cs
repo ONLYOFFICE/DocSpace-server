@@ -102,7 +102,8 @@ public class FileStorageService //: IFileStorageService
     FileSharingHelper fileSharingHelper,
     AiGateway gateway,
     FormFillingReportCreator formFillingReportCreator,
-    ExportToXLSX exportToXLSX)
+    ExportToXLSX exportToXLSX,
+    ExternalDbSyncService externalDbSyncService)
 {
     private readonly ILogger _logger = optionMonitor.CreateLogger("ASC.Files");
 
@@ -1311,6 +1312,11 @@ public class FileStorageService //: IFileStorageService
                         await filesMessageService.SendAsync(MessageAction.RoomLifeTimeSet, folder, lifetime.Value.ToString(), lifetime.Period.ToStringFast(),
                             lifetime.DeletePermanently.ToString());
                     }
+                }
+
+                if (sendFormToExternalDBChanged && updateData.SendFormToExternalDB.Value && folder.Id is int intRoomId)
+                {
+                    await externalDbSyncService.StartSyncAsync(intRoomId);
                 }
             }
 
@@ -5618,6 +5624,38 @@ public class FileStorageService //: IFileStorageService
     public Task<FormFillingReportTask> GetXlsxTaskAsync(int formId)
     {
         return exportToXLSX.GetXlsxTaskAsync(formId);
+    }
+
+    public async Task<ExternalDbSyncTask> StartExternalDbSyncAsync(int roomId)
+    {
+        var folderDao = daoFactory.GetFolderDao<int>();
+        var room = await folderDao.GetFolderAsync(roomId).NotFoundIfNull();
+
+        if (room.FolderType != FolderType.FillingFormsRoom)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
+        if (!await fileSecurity.CanEditAsync(room))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
+        }
+
+        return await externalDbSyncService.StartSyncAsync(roomId)
+            ?? throw new InvalidOperationException(FilesCommonResource.ErrorMessage_BadRequest);
+    }
+
+    public async Task<ExternalDbSyncTask> GetExternalDbSyncTaskAsync(int roomId)
+    {
+        var folderDao = daoFactory.GetFolderDao<int>();
+        var room = await folderDao.GetFolderAsync(roomId).NotFoundIfNull();
+
+        if (!await fileSecurity.CanEditAsync(room))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
+        return await externalDbSyncService.GetTaskAsync(roomId);
     }
 
     private async Task CheckRoomAvailability<T>(T roomId)

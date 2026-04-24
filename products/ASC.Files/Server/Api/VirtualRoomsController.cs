@@ -196,6 +196,38 @@ public class VirtualRoomsInternalController(
 
         return null;
     }
+
+    /// <remarks>
+    /// Triggers external DB synchronization for all form templates in the specified filling forms room.
+    /// </remarks>
+    /// <summary>Start external DB sync</summary>
+    /// <path>api/2.0/files/rooms/{id}/external_db_sync</path>
+    [Tags("Rooms")]
+    [SwaggerResponse(200, "Synchronization task information", typeof(ExternalDbSyncTaskDto))]
+    [SwaggerResponse(400, "External DB is not configured")]
+    [SwaggerResponse(403, "You do not have enough permissions to perform this action")]
+    [SwaggerResponse(404, "Room not found")]
+    [HttpPost("{id}/external_db_sync")]
+    public async Task<ExternalDbSyncTaskDto> StartExternalDbSync(RoomIdRequestDto<int> inDto)
+    {
+        var task = await _fileStorageService.StartExternalDbSyncAsync(inDto.Id);
+        return ExternalDbSyncTaskDto.Get(task);
+    }
+
+    /// <remarks>
+    /// Returns the status of the external DB synchronization task for the specified filling forms room.
+    /// </remarks>
+    /// <summary>Get external DB sync status</summary>
+    /// <path>api/2.0/files/rooms/{id}/external_db_sync</path>
+    [Tags("Rooms")]
+    [SwaggerResponse(200, "Synchronization task information", typeof(ExternalDbSyncTaskDto))]
+    [SwaggerResponse(404, "Room not found")]
+    [HttpGet("{id}/external_db_sync")]
+    public async Task<ExternalDbSyncTaskDto> GetExternalDbSyncStatus(RoomIdRequestDto<int> inDto)
+    {
+        var task = await _fileStorageService.GetExternalDbSyncTaskAsync(inDto.Id);
+        return ExternalDbSyncTaskDto.Get(task);
+    }
 }
 
 public class VirtualRoomsThirdPartyController(

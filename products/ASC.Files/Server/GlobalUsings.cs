@@ -65,6 +65,7 @@ global using ASC.Files.Core.RoomTemplates;
 global using ASC.Files.Core.RoomTemplates.Events;
 global using ASC.Files.Core.Security;
 global using ASC.Files.Core.Services.DocumentBuilderService;
+global using ASC.Files.Core.Services.ExternalDbSync;
 global using ASC.Files.Core.VirtualRooms;
 global using ASC.Files.Extension;
 global using ASC.Files.Helpers;
