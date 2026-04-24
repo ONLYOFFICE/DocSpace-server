@@ -4943,7 +4943,7 @@ public class FileStorageService //: IFileStorageService
     {
         if (!authContext.IsAuthenticated && await externalShare.GetLinkIdAsync() == Guid.Empty)
         {
-            throw GenerateException(new SecurityException(FilesCommonResource.ErrorMessage_SecurityException));
+            throw new AuthenticationException();
         }
 
         try
