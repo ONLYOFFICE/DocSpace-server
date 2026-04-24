@@ -3796,6 +3796,11 @@ public class FileStorageService //: IFileStorageService
 
     public async Task DeleteTemplatesAsync<T>(IEnumerable<T> filesId)
     {
+        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
         var tagDao = daoFactory.GetTagDao<T>();
         var fileDao = daoFactory.GetFileDao<T>();
 
