@@ -2003,12 +2003,12 @@ public class FileStorageService //: IFileStorageService
 
             if (!await documentServiceTrackerHelper.StartTrackAsync(fileId.ToString(), key))
             {
-                throw new Exception(FilesCommonResource.ErrorMessage_StartEditing);
+                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_StartEditing);
             }
 
             return key;
         }
-        catch (Exception e)
+        catch (Exception)
         {
             await fileTracker.RemoveAsync(fileId);
 
