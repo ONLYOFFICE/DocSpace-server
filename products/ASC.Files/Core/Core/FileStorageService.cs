@@ -2003,12 +2003,12 @@ public class FileStorageService //: IFileStorageService
 
             if (!await documentServiceTrackerHelper.StartTrackAsync(fileId.ToString(), key))
             {
-                throw new Exception(FilesCommonResource.ErrorMessage_StartEditing);
+                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_StartEditing);
             }
 
             return key;
         }
-        catch (Exception e)
+        catch (Exception)
         {
             await fileTracker.RemoveAsync(fileId);
 
@@ -3796,6 +3796,11 @@ public class FileStorageService //: IFileStorageService
 
     public async Task DeleteTemplatesAsync<T>(IEnumerable<T> filesId)
     {
+        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
         var tagDao = daoFactory.GetTagDao<T>();
         var fileDao = daoFactory.GetFileDao<T>();
 
@@ -4938,7 +4943,7 @@ public class FileStorageService //: IFileStorageService
     {
         if (!authContext.IsAuthenticated && await externalShare.GetLinkIdAsync() == Guid.Empty)
         {
-            throw GenerateException(new SecurityException(FilesCommonResource.ErrorMessage_SecurityException));
+            throw new AuthenticationException();
         }
 
         try
