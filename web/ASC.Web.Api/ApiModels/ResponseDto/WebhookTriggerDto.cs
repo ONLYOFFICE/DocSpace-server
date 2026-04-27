@@ -24,32 +24,35 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using DocSpace.API.SDK.Api.Settings;
+namespace ASC.Web.Api.ApiModels.ResponseDto;
 
-namespace ASC.People.Tests.PeopleController;
-
-[Collection("Test Collection")]
-public class BaseTest(
-    AspireAppFixture fixture
-    ) : IAsyncLifetime
+/// <summary>
+/// The webhook trigger with its availability for the current user.
+/// </summary>
+/// <example>
+/// {
+/// name: "file.created",
+/// id: 128,
+/// available: true
+/// }
+/// </example>
+public class WebhookTriggerDto
 {
-    protected readonly HttpClient _peopleClient = fixture.PeopleHttpClient;
-    protected readonly HttpClient _apiClient = fixture.WebApiHttpClient;
-    protected readonly ProfilesApi _profilesApi = fixture.ProfilesApi;
-    protected readonly GroupApi _groupApi = fixture.GroupApi;
-    protected readonly UsersApi _portalUsersApi = fixture.PortalUsersApi;
-    protected readonly UserTypeApi _userTypeApi = fixture.UserTypeApi;
-    protected readonly CommonSettingsApi _commonSettingsApi = fixture.CommonSettingsApi;
-    protected readonly WebhooksApi _webhooksApi = fixture.WebhooksApi;
-    private readonly Func<Task> _resetDatabase = fixture.ResetDatabaseAsync;
+    /// <summary>
+    /// The trigger name.
+    /// </summary>
+    /// <example>file.created</example>
+    public string Name { get; set; }
 
-    public async ValueTask InitializeAsync()
-    {
-        await Initializer.InitializeAsync(fixture);
-    }
+    /// <summary>
+    /// The trigger bit value.
+    /// </summary>
+    /// <example>128</example>
+    public long Id { get; set; }
 
-    public async ValueTask DisposeAsync()
-    {
-        await _resetDatabase();
-    }
+    /// <summary>
+    /// Specifies whether this trigger is available for the current user's role.
+    /// </summary>
+    /// <example>true</example>
+    public bool Available { get; set; }
 }

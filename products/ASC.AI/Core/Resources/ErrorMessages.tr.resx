@@ -183,4 +183,10 @@
   <data name="ProviderNameExists" xml:space="preserve">
     <value>Sağlayıcı adı zaten mevcut</value>
   </data>
+  <data name="ServerAlreadyAdded" xml:space="preserve">
+    <value>Sunucu zaten ajana eklendi</value>
+  </data>
+  <data name="ModelDisabled" xml:space="preserve">
+    <value>Model, sağlayıcınızın ayarları tarafından devre dışı bırakıldı.</value>
+  </data>
 </root>

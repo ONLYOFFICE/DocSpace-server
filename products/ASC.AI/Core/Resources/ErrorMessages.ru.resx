@@ -183,4 +183,10 @@
   <data name="MessageNotFound" xml:space="preserve">
     <value>Сообщение не найдено</value>
   </data>
+  <data name="ModelDisabled" xml:space="preserve">
+    <value>Модель отключена настройками вашего провайдера.</value>
+  </data>
+  <data name="ServerAlreadyAdded" xml:space="preserve">
+    <value>Сервер уже добавлен в агент</value>
+  </data>
 </root>

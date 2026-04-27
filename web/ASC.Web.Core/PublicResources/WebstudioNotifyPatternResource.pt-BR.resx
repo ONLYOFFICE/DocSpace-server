@@ -2198,4 +2198,16 @@ Saiba mais sobre funções e permissões de sala na "Central de Ajuda":"${HelpCe
 
 $TrulyYours</value>
   </data>
+  <data name="ActionFileCreatedInSharedForMe" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; criou um novo documento: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; em: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionFileEditedInSharedForMe" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; editou o documento: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; em: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionFileUploadedInSharedForMe" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; carregou um novo documento: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; em: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionNewCommentInSharedForMe" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; adicionou um novo comentário à versão do documento: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; em: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+  </data>
 </root>

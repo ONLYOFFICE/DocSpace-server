@@ -51,6 +51,7 @@ public class AspireAppFixture : IAsyncLifetime
     public AuthenticationApi AuthenticationApi { get; private set; } = null!;
     public CommonSettingsApi CommonSettingsApi { get; private set; } = null!;
     public UsersApi PortalUsersApi { get; private set; } = null!;
+    public WebhooksApi WebhooksApi { get; private set; } = null!;
 
     public async ValueTask InitializeAsync()
     {
@@ -106,6 +107,7 @@ public class AspireAppFixture : IAsyncLifetime
         AuthenticationApi = new AuthenticationApi(WebApiHttpClient, webApiConfig);
         CommonSettingsApi = new CommonSettingsApi(WebApiHttpClient, webApiConfig);
         PortalUsersApi = new UsersApi(WebApiHttpClient, webApiConfig);
+        WebhooksApi = new WebhooksApi(PeopleHttpClient, webApiConfig);
 
         // Create Respawner
         var tablesToIgnore = _tablesToIgnore.Select(t => new Table(t)).ToList();

@@ -2189,4 +2189,16 @@ $TrulyYours</value>
 
 $TrulyYours</value>
   </data>
+  <data name="ActionFileCreatedInSharedForMe" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt;-ը ստեղծել է նոր փաստաթուղթ. &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; հետևյալ վայրում. &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionFileEditedInSharedForMe" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt;-ը խմբագրել է փաստաթուղթը. &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; հետևյալ վայրում. &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionFileUploadedInSharedForMe" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt;-ը վերբեռնել է նոր փաստաթուղթ. &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; հետևյալ վայրում. &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionNewCommentInSharedForMe" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt;-ը նոր մեկնաբանություն ավելացրեց փաստաթղթի տարբերակին. &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; հետևյալ վայրում. &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+  </data>
 </root>

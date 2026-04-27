@@ -183,4 +183,10 @@
   <data name="AttachmentProcessFailed" xml:space="preserve">
     <value>ファイルを処理できません：{0}。ファイルが破損しているか、暗号化されている可能性があります</value>
   </data>
+  <data name="ModelDisabled" xml:space="preserve">
+    <value>このモデルはプロバイダーの設定によって無効化されています。</value>
+  </data>
+  <data name="ServerAlreadyAdded" xml:space="preserve">
+    <value>サーバーはすでにエージェントに追加されています</value>
+  </data>
 </root>

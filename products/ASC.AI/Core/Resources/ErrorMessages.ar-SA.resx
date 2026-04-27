@@ -183,4 +183,10 @@
   <data name="ProviderNameExists" xml:space="preserve">
     <value>اسم المزود موجود بالفعل</value>
   </data>
+  <data name="ServerAlreadyAdded" xml:space="preserve">
+    <value>تمت إضافة الخادم بالفعل إلى الوكيل</value>
+  </data>
+  <data name="ModelDisabled" xml:space="preserve">
+    <value>تم تعطيل النموذج بواسطة إعدادات مزودك.</value>
+  </data>
 </root>

@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Security.Authentication;
+
 namespace ASC.Web.Files.Services.WCFService;
 
 [Scope]
@@ -1854,36 +1856,29 @@ public class FileStorageService //: IFileStorageService
 
     public async Task<KeyValuePair<bool, string>> TrackEditFileAsync<T>(T fileId, Guid tabId, string docKeyForTrack, bool isFinish = false)
     {
-        try
+        if (!authContext.IsAuthenticated && await externalShare.GetLinkIdAsync() == Guid.Empty)
         {
-            if (!authContext.IsAuthenticated && await externalShare.GetLinkIdAsync() == Guid.Empty)
-            {
-                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
-            }
-
-            var (file, _) = await documentServiceHelper.GetCurFileInfoAsync(fileId, -1);
-
-            if (docKeyForTrack != await documentServiceHelper.GetDocKeyAsync(fileId, -1, DateTime.MinValue) && docKeyForTrack != await documentServiceHelper.GetDocKeyAsync(file.Id, file.Version, file.ProviderEntry ? file.ModifiedOn : file.CreateOn))
-            {
-                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
-            }
-
-            if (isFinish)
-            {
-                await fileTracker.RemoveAsync(fileId, tabId);
-                await socketManager.StopEditAsync(fileId);
-            }
-            else
-            {
-                await entryManager.TrackEditingAsync(fileId, tabId, authContext.CurrentAccount.ID, tenantManager.GetCurrentTenant());
-            }
-
-            return new KeyValuePair<bool, string>(true, string.Empty);
+            throw new AuthenticationException();
         }
-        catch (Exception ex)
+
+        var (file, _) = await documentServiceHelper.GetCurFileInfoAsync(fileId, -1);
+
+        if (docKeyForTrack != await documentServiceHelper.GetDocKeyAsync(fileId, -1, DateTime.MinValue) && docKeyForTrack != await documentServiceHelper.GetDocKeyAsync(file.Id, file.Version, file.ProviderEntry ? file.ModifiedOn : file.CreateOn))
         {
-            return new KeyValuePair<bool, string>(false, ex.Message);
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
+
+        if (isFinish)
+        {
+            await fileTracker.RemoveAsync(fileId, tabId);
+            await socketManager.StopEditAsync(fileId);
+        }
+        else
+        {
+            await entryManager.TrackEditingAsync(fileId, tabId, authContext.CurrentAccount.ID, tenantManager.GetCurrentTenant());
+        }
+
+        return new KeyValuePair<bool, string>(true, string.Empty);
     }
 
     public async Task<File<T>> SaveEditingAsync<T>(T fileId, string fileExtension, string fileUri, Stream stream, bool forceSave = false)
@@ -2008,16 +2003,16 @@ public class FileStorageService //: IFileStorageService
 
             if (!await documentServiceTrackerHelper.StartTrackAsync(fileId.ToString(), key))
             {
-                throw new Exception(FilesCommonResource.ErrorMessage_StartEditing);
+                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_StartEditing);
             }
 
             return key;
         }
-        catch (Exception e)
+        catch (Exception)
         {
             await fileTracker.RemoveAsync(fileId);
 
-            throw GenerateException(e);
+            throw;
         }
     }
 
@@ -2367,69 +2362,6 @@ public class FileStorageService //: IFileStorageService
         }
     }
 
-    public async Task<EditHistoryDataDto> GetEditDiffUrlAsync<T>(T fileId, int version = 0)
-    {
-        var fileDao = daoFactory.GetFileDao<T>();
-
-        var file = version > 0
-            ? await fileDao.GetFileAsync(fileId, version)
-            : await fileDao.GetFileAsync(fileId);
-
-        if (file == null)
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
-        }
-
-        if (!await fileSecurity.CanReadHistoryAsync(file))
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
-        }
-
-        if (file.ProviderEntry)
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_BadRequest);
-        }
-
-        var result = new EditHistoryDataDto { FileType = file.ConvertedExtension.Trim('.'), Key = await documentServiceHelper.GetDocKeyAsync(file), Url = documentServiceConnector.ReplaceCommunityAddress(pathProvider.GetFileStreamUrl(file)), Version = version };
-
-        if (await fileDao.ContainChangesAsync(file.Id, file.Version))
-        {
-            string previousKey;
-            string sourceFileUrl;
-            string sourceExt;
-
-            var history = await fileDao.GetFileHistoryAsync(file.Id).ToListAsync();
-            var previousFileStable = history.OrderByDescending(r => r.Version).FirstOrDefault(r => r.Version < file.Version);
-            if (previousFileStable != null)
-            {
-                sourceFileUrl = pathProvider.GetFileStreamUrl(previousFileStable);
-                sourceExt = previousFileStable.ConvertedExtension;
-
-                previousKey = await documentServiceHelper.GetDocKeyAsync(previousFileStable);
-            }
-            else
-            {
-                var culture = (await userManager.GetUsersAsync(authContext.CurrentAccount.ID)).GetCulture();
-                var storeTemplate = await globalStore.GetStoreTemplateAsync();
-                var fileExt = FileUtility.GetFileExtension(file.Title);
-                var path = await globalStore.GetNewDocTemplatePath(storeTemplate, fileExt, culture);
-                var uri = await storeTemplate.GetUriAsync("", path);
-
-                sourceFileUrl = baseCommonLinkUtility.GetFullAbsolutePath(uri.ToString());
-                sourceExt = fileExt.Trim('.');
-
-                previousKey = DocumentServiceConnector.GenerateRevisionId(Guid.NewGuid().ToString());
-            }
-
-            result.Previous = new EditHistoryUrl { Key = previousKey, Url = documentServiceConnector.ReplaceCommunityAddress(sourceFileUrl), FileType = sourceExt.Trim('.') };
-
-            result.ChangesUrl = documentServiceConnector.ReplaceCommunityAddress(pathProvider.GetFileChangesUrl(file));
-        }
-
-        result.Token = documentServiceHelper.GetSignature(result);
-
-        return result;
-    }
 
     public async IAsyncEnumerable<EditHistory> RestoreVersionAsync<T>(T fileId, int version, string url = null)
     {
@@ -3864,6 +3796,11 @@ public class FileStorageService //: IFileStorageService
 
     public async Task DeleteTemplatesAsync<T>(IEnumerable<T> filesId)
     {
+        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
         var tagDao = daoFactory.GetTagDao<T>();
         var fileDao = daoFactory.GetFileDao<T>();
 
@@ -5006,7 +4943,7 @@ public class FileStorageService //: IFileStorageService
     {
         if (!authContext.IsAuthenticated && await externalShare.GetLinkIdAsync() == Guid.Empty)
         {
-            throw GenerateException(new SecurityException(FilesCommonResource.ErrorMessage_SecurityException));
+            throw new AuthenticationException();
         }
 
         try
