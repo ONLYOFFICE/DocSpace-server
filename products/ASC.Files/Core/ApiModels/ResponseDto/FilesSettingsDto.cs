@@ -385,7 +385,31 @@ public class FilesSettingsDto
     /// </summary>
     /// <example>true</example>
     public bool OrganizeRoomsGrouping { get; set; }
-    
+
+    /// <summary>
+    /// Specifies the default sharing link type: true = DocSpace users only (internal), false = Anyone with the link.
+    /// </summary>
+    /// <example>false</example>
+    public bool DefaultShareLinkInternal { get; set; }
+
+    /// <summary>
+    /// When external sharing is restricted, specifies whether the restriction applies to the My Documents section.
+    /// </summary>
+    /// <example>true</example>
+    public bool ExternalShareApplyToDocuments { get; set; }
+
+    /// <summary>
+    /// When external sharing is restricted, specifies whether the restriction applies to the Rooms section.
+    /// </summary>
+    /// <example>true</example>
+    public bool ExternalShareApplyToRooms { get; set; }
+
+    /// <summary>
+    /// When external sharing is restricted, specifies whether existing public links are blocked immediately.
+    /// </summary>
+    /// <example>true</example>
+    public bool BlockExistingLinksOnRestrict { get; set; }
+
     /// <summary>
     /// List of extensions available for vectorization
     /// </summary>
@@ -470,6 +494,10 @@ public class FilesSettingsDtoConverter(
             ChunkUploadSize = setupInfo.ChunkUploadSize,
             OpenEditorInSameTab = await filesSettingsHelper.GetOpenEditorInSameTabAsync(),
             OrganizeRoomsGrouping = await filesSettingsHelper.GetOrganizeRoomsGroupingAsync(),
+            DefaultShareLinkInternal = await filesSettingsHelper.GetDefaultShareLinkInternal(),
+            ExternalShareApplyToDocuments = await filesSettingsHelper.GetExternalShareApplyToDocuments(),
+            ExternalShareApplyToRooms = await filesSettingsHelper.GetExternalShareApplyToRooms(),
+            BlockExistingLinksOnRestrict = await filesSettingsHelper.GetBlockExistingLinksOnRestrict(),
             ExtsFilesVectorized = vectorizationGlobalSettings.SupportedFormats.ToList(),
             MaxVectorizationFileSize = vectorizationGlobalSettings.MaxContentLength
         };

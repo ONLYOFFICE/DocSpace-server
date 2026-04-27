@@ -586,6 +586,13 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
 
             var (linkRight, file) = await CheckLinkAsync(id, version, fileDao);
 
+            if (linkRight.Status == Status.ExternalAccessDenied)
+            {
+                context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+                await context.Response.WriteAsync(FilesCommonResource.ErrorMessage_SecurityException);
+                return;
+            }
+
             if (linkRight.Access == FileShare.Restrict && !securityContext.IsAuthenticated)
             {
                 var auth = context.Request.Query[FilesLinkUtility.AuthKey];
@@ -905,6 +912,13 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             }
 
             var (linkRight, file) = await CheckLinkAsync(id, version, fileDao);
+
+            if (linkRight.Status == Status.ExternalAccessDenied)
+            {
+                context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+                await context.Response.WriteAsync(FilesCommonResource.ErrorMessage_SecurityException);
+                return;
+            }
 
             if (linkRight.Access == FileShare.Restrict && !securityContext.IsAuthenticated)
             {

@@ -36,7 +36,8 @@ public class ExternalShare(
     BaseCommonLinkUtility commonLinkUtility,
     FilesLinkUtility filesLinkUtility,
     FileUtility fileUtility,
-    CoreSettings coreSettings)
+    CoreSettings coreSettings,
+    FilesSettingsHelper filesSettingsHelper)
 {
     private ExternalSessionSnapshot _snapshot;
     private string _dbKey;
@@ -103,6 +104,15 @@ public class ExternalShare(
         if (record.Options.Internal && !isAuthenticated)
         {
             return Status.ExternalAccessDenied;
+        }
+
+        if (!record.Options.Internal && !isAuthenticated && entry != null)
+        {
+            var settings = await filesSettingsHelper.GetExternalSharingSettingsAsync();
+            if (IsGlobalRestrictionApplies(entry, settings))
+            {
+                return Status.ExternalAccessDenied;
+            }
         }
 
         if (entry is { RootFolderType: FolderType.Archive or FolderType.TRASH })
@@ -333,6 +343,32 @@ public class ExternalShare(
     private async Task<string> GetDbKeyAsync()
     {
         return _dbKey ??= await coreSettings.GetDocDbKeyAsync();
+    }
+
+    public async Task<bool> IsGloballyRestrictedAsync(FileEntry entry)
+    {
+        var settings = await filesSettingsHelper.GetExternalSharingSettingsAsync();
+        return IsGlobalRestrictionApplies(entry, settings);
+    }
+
+    private static bool IsGlobalRestrictionApplies(FileEntry entry, FilesSettings settings)
+    {
+        if (!settings.DisableShareLinkSetting)
+        {
+            return false;
+        }
+
+        if (!settings.BlockExistingLinksOnRestrictSetting)
+        {
+            return false;
+        }
+
+        return entry.RootFolderType switch
+        {
+            FolderType.USER => settings.ExternalShareApplyToDocumentsSetting,
+            FolderType.VirtualRooms => settings.ExternalShareApplyToRoomsSetting,
+            _ => false
+        };
     }
 }
 

@@ -1,25 +1,25 @@
 // (c) Copyright Ascensio System SIA 2009-2026
-// 
+//
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
+//
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
+//
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-// 
+//
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -176,6 +176,30 @@ public class FilesSettings : ISettings<FilesSettings>
     [JsonPropertyName("OrganizeRoomsGrouping")]
     public bool OrganizeRoomsGrouping { get; set; }
 
+    /// <summary>
+    /// Specifies the default sharing link type: true = DocSpace users only (internal), false = Anyone with the link.
+    /// </summary>
+    [JsonPropertyName("DefaultShareLinkInternal")]
+    public bool DefaultShareLinkInternalSetting { get; set; }
+
+    /// <summary>
+    /// When external sharing is restricted, specifies whether to apply the restriction to My Documents section.
+    /// </summary>
+    [JsonPropertyName("ExternalShareApplyToDocuments")]
+    public bool ExternalShareApplyToDocumentsSetting { get; set; }
+
+    /// <summary>
+    /// When external sharing is restricted, specifies whether to apply the restriction to Rooms section.
+    /// </summary>
+    [JsonPropertyName("ExternalShareApplyToRooms")]
+    public bool ExternalShareApplyToRoomsSetting { get; set; }
+
+    /// <summary>
+    /// When external sharing is restricted, specifies whether to block existing public links immediately.
+    /// </summary>
+    [JsonPropertyName("BlockExistingLinksOnRestrict")]
+    public bool BlockExistingLinksOnRestrictSetting { get; set; }
+
     public FilesSettings GetDefault()
     {
         return new FilesSettings
@@ -198,7 +222,11 @@ public class FilesSettings : ISettings<FilesSettings>
             AutomaticallyCleanUpSetting = null,
             DefaultSharingAccessRightsSetting = null,
             OpenEditorInSameTab = false,
-            OrganizeRoomsGrouping = true
+            OrganizeRoomsGrouping = true,
+            DefaultShareLinkInternalSetting = false,
+            ExternalShareApplyToDocumentsSetting = true,
+            ExternalShareApplyToRoomsSetting = true,
+            BlockExistingLinksOnRestrictSetting = true
         };
     }
 
@@ -445,9 +473,67 @@ public class FilesSettingsHelper(
         setting.OrganizeRoomsGrouping = value;
         await SaveForCurrentUser(setting);
     }
+
     public async Task<bool> GetOrganizeRoomsGroupingAsync()
     {
         return (await LoadForCurrentUser()).OrganizeRoomsGrouping;
+    }
+
+    public async Task<FilesSettings> GetExternalSharingSettingsAsync()
+    {
+        return await settingsManager.LoadAsync<FilesSettings>();
+    }
+
+    public async Task<bool> GetDefaultShareLinkInternal()
+    {
+        return (await Load()).DefaultShareLinkInternalSetting;
+    }
+
+    public async Task<bool> GetExternalShareApplyToDocuments()
+    {
+        return (await Load()).ExternalShareApplyToDocumentsSetting;
+    }
+
+    public async Task<bool> GetExternalShareApplyToRooms()
+    {
+        return (await Load()).ExternalShareApplyToRoomsSetting;
+    }
+
+    public async Task<bool> GetBlockExistingLinksOnRestrict()
+    {
+        return (await Load()).BlockExistingLinksOnRestrictSetting;
+    }
+
+    public async Task<ExternalSharingSettingsDto> ChangeExternalSharingSettingsAsync(ExternalSharingSettingsRequestDto inDto)
+    {
+        if (!await global.IsDocSpaceAdministratorAsync)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
+        var settings = await settingsManager.LoadAsync<FilesSettings>();
+        settings.DisableShareLinkSetting = !inDto.ExternalShare;
+        settings.DefaultShareLinkInternalSetting = inDto.DefaultShareLinkInternal;
+        settings.ExternalShareApplyToDocumentsSetting = inDto.ExternalShareApplyToDocuments;
+        settings.ExternalShareApplyToRoomsSetting = inDto.ExternalShareApplyToRooms;
+        settings.BlockExistingLinksOnRestrictSetting = inDto.BlockExistingLinksOnRestrict;
+
+        if (settings.DisableShareLinkSetting)
+        {
+            settings.DisableShareSocialMediaSetting = true;
+        }
+
+        await settingsManager.SaveAsync(settings);
+        messageService.SendHeadersMessage(MessageAction.DocumentsExternalShareSettingsUpdated);
+
+        return new ExternalSharingSettingsDto
+        {
+            ExternalShare = inDto.ExternalShare,
+            DefaultShareLinkInternal = inDto.DefaultShareLinkInternal,
+            ExternalShareApplyToDocuments = inDto.ExternalShareApplyToDocuments,
+            ExternalShareApplyToRooms = inDto.ExternalShareApplyToRooms,
+            BlockExistingLinksOnRestrict = inDto.BlockExistingLinksOnRestrict
+        };
     }
 
     public bool GetForcesave() => true;
