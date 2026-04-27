@@ -124,10 +124,10 @@
     <value>&lt;b&gt;{0}&lt;/b&gt; smazal agenta: &lt;b&gt;{1}&lt;/b&gt;</value>
   </data>
   <data name="ActionAgentRenamed" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; přejmenoval agenta: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; přejmenoval/a agenta: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
   </data>
   <data name="ActionAgentUpdateAccessForUser" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; byla přiřazena role &lt;b&gt;{1}&lt;/b&gt; v agentovi: &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; byl/a přiřazena role &lt;b&gt;{1}&lt;/b&gt; v agentovi: &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
   </data>
   <data name="ActionFileCreated" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; vytvořil/a nový dokument: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; v místnosti: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
@@ -136,7 +136,7 @@
     <value>&lt;b&gt;{0}&lt;/b&gt; upravil/a dokument: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; v místnosti: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="ActionFileUploaded" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; nahrál nový dokument: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; v místnosti: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; nahrá/a nový dokument: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; v místnosti: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="ActionNewComment" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; přidal/a nový komentář k verzi dokumentu: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; v místnosti: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
@@ -154,10 +154,10 @@
     <value>&lt;b&gt;{0}&lt;/b&gt; přejmenoval/a místnost: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomUpdateAccessForUser" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; byla přidělena role &lt;b&gt;{1}&lt;/b&gt; v místnosti: &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; byl/a přidělena role &lt;b&gt;{1}&lt;/b&gt; v místnosti: &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserAddedToAgent" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; byl přidán do agenta: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; byl/a přidán do agenta: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserAddedToRoom" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; byl/a přidán do místnosti: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
@@ -166,7 +166,7 @@
     <value>Přidán nový uživatel DocSpace: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserRemovedFromAgent" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; byl odstraněn z agenta: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; byl/a odstraněn z agenta: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserRemovedFromRoom" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; byl/a odstraněn z místnosti: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
@@ -2154,7 +2154,7 @@ $TrulyYours</value>
     <value>S pozdravem, tým ${LetterLogoText}</value>
   </data>
   <data name="ActionFileUploadedToAgentKnowledge" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; nahrál nový dokument: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; do znalostní báze agenta AI: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; nahrál/a nový dokument: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; do znalostní báze agenta AI: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="subject_api_key_expired" xml:space="preserve">
     <value>${LetterLogoText} DocSpace: Platnost vašeho API klíče vypršela</value>
@@ -2191,5 +2191,17 @@ Byla vám přidělena nová role v agentovi AI DocSpace "${RoomTitle}":"${RoomUr
 Více informací o rolích a oprávněních místností najdete v "Centru nápovědy":"${HelpCenterUrl}".
 
 $TrulyYours</value>
+  </data>
+  <data name="ActionFileCreatedInSharedForMe" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; vytvořil/a nový dokument: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; v: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionFileEditedInSharedForMe" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; upravil/a dokument: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; v: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionFileUploadedInSharedForMe" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; nahrál/a nový dokument: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; v: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionNewCommentInSharedForMe" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; přidal/a nový komentář k verzi dokumentu: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; v: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
 </root>

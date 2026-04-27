@@ -2192,4 +2192,16 @@ Otaq rolları və icazələri haqqında daha çox məlumat üçün "Yardım Mər
 
 $TrulyYours</value>
   </data>
+  <data name="ActionFileCreatedInSharedForMe" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; yeni sənəd yaratdı: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; yerdə: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionNewCommentInSharedForMe" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; sənədin versiyasına yeni şərh əlavə etdi: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; yerdə: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionFileUploadedInSharedForMe" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; yeni sənəd yüklədi: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; yerdə: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionFileEditedInSharedForMe" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; sənədi redaktə etdi: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; yerdə: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
+  </data>
 </root>

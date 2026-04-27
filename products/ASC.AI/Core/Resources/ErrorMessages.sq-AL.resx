@@ -183,4 +183,10 @@
   <data name="ProviderNameExists" xml:space="preserve">
     <value>Emri i ofruesit ekziston tashmë</value>
   </data>
+  <data name="ModelDisabled" xml:space="preserve">
+    <value>Modeli është çaktivizuar nga cilësimet e ofruesit tuaj.</value>
+  </data>
+  <data name="ServerAlreadyAdded" xml:space="preserve">
+    <value>Serveri është shtuar tashmë te agjenti</value>
+  </data>
 </root>

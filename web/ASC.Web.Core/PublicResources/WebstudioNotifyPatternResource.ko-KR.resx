@@ -2191,4 +2191,16 @@ $TrulyYours</value>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
     <value>DocSpace AI 에이전트에서 귀하의 역할이 변경되었습니다</value>
   </data>
+  <data name="ActionFileCreatedInSharedForMe" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt;이(가) 새 문서를 만들었습니다: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; 위치: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionFileEditedInSharedForMe" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt;이(가) 문서를 편집했습니다: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; 위치: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionFileUploadedInSharedForMe" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt;이(가) 새 문서를 업로드했습니다: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; 위치: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionNewCommentInSharedForMe" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt;이(가) 문서 버전에 새 댓글을 추가했습니다: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; 위치: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+  </data>
 </root>
