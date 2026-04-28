@@ -24,7 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Collections;
+using System.Net.Sockets;
 
 using Aspire.Hosting.ApplicationModel;
 
@@ -83,6 +83,10 @@ public class AspireAppFixture : IAsyncLifetime
 
     public HttpClient? OllamaHttpClient { get; private set; }
 
+    // Editors / Document Builder (served by the documentserver container at /docbuilder)
+    public HttpClient EditorsHttpClient { get; private set; } = null!;
+    private const string EditorsJwtSecret = "secret";
+
     public async ValueTask InitializeAsync()
     {
         var config = new ConfigurationBuilder()
@@ -121,13 +125,15 @@ public class AspireAppFixture : IAsyncLifetime
         const string onlyofficePeople = "onlyoffice-people";
         const string onlyofficeWebApi = "onlyoffice-web-api";
         const string ollama = "ollama";
+        const string onlyofficeEditors = "onlyoffice-editors";
 
         var waitForAI = resourceNotifications.WaitForResourceHealthyAsync(onlyofficeAI);
         var waitForFiles = resourceNotifications.WaitForResourceHealthyAsync(onlyofficeFiles);
         var waitForPeople = resourceNotifications.WaitForResourceHealthyAsync(onlyofficePeople);
         var waitForApi = resourceNotifications.WaitForResourceHealthyAsync(onlyofficeWebApi);
+        var waitForEditors = resourceNotifications.WaitForResourceHealthyAsync(onlyofficeEditors);
 
-        await Task.WhenAll(waitForAI, waitForFiles, waitForPeople, waitForApi);
+        await Task.WhenAll(waitForAI, waitForFiles, waitForPeople, waitForApi, waitForEditors);
 
         // Get connection strings from Aspire resources
         var dbConnectionString = await _app.GetConnectionStringAsync("docspace");
@@ -149,6 +155,8 @@ public class AspireAppFixture : IAsyncLifetime
         {
             OllamaHttpClient = CreateHttpClientNoCookies(ollama, "/v1/");
         }
+
+        EditorsHttpClient = CreateHttpClientNoCookies(onlyofficeEditors);
 
         // Initialize AI API clients
         var aiConfig = new Configuration { BasePath = AIHttpClient.BaseAddress!.ToString().TrimEnd('/') };
@@ -240,6 +248,181 @@ public class AspireAppFixture : IAsyncLifetime
     {
         var commandService = _app.Services.GetRequiredService<ResourceCommandService>();
         await commandService.ExecuteCommandAsync("cache", "clear-cache", CancellationToken.None);
+    }
+
+    public async Task<byte[]> RunDocBuilderAsync(string scriptResourceName, string outputFileName, CancellationToken cancellationToken = default)
+    {
+        var assembly = typeof(AspireAppFixture).Assembly;
+
+        await using var scriptStream = assembly.GetManifestResourceStream($"ASC.Files.Tests.Data.{scriptResourceName}")
+            ?? throw new FileNotFoundException(
+                $"Embedded docbuilder script '{scriptResourceName}' not found.", scriptResourceName);
+
+        using var scriptBuffer = new MemoryStream();
+        await scriptStream.CopyToAsync(scriptBuffer, cancellationToken);
+        var scriptBytes = scriptBuffer.ToArray();
+
+        // Serve the script over an ephemeral HTTP listener that the editors container reaches via host.docker.internal.
+        // documentserver may issue multiple requests (HEAD/GET/retry) so the listener must accept connections in a loop.
+        using var listener = new TcpListener(IPAddress.Any, 0);
+        listener.Start();
+        var port = ((IPEndPoint)listener.LocalEndpoint).Port;
+
+        using var serveCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        var serveTask = ServeScriptLoopAsync(listener, scriptBytes, serveCts.Token);
+        HttpResponseMessage? response = null;
+
+        try
+        {
+            var scriptUrl = $"http://host.docker.internal:{port}/{scriptResourceName}";
+
+            // documentserver has JWT_ENABLED=true, so wrap the original payload into a signed token.
+            var payloadJson = $"{{\"async\":false,\"url\":\"{scriptUrl}\"}}";
+            var tokenJson = $"{{\"payload\":{payloadJson}}}";
+            var jwt = CreateJwtHs256(tokenJson, EditorsJwtSecret);
+            var signedBody = $"{{\"async\":false,\"url\":\"{scriptUrl}\",\"token\":\"{jwt}\"}}";
+
+            // 502/504 from documentserver's nginx is usually a transient docservice startup race — retry a few times.
+            const int maxAttempts = 5;
+            string? lastErrorBody = null;
+            HttpStatusCode lastStatus = 0;
+
+            for (var attempt = 1; attempt <= maxAttempts; attempt++)
+            {
+                response?.Dispose();
+
+                using var requestContent = new StringContent(signedBody, Encoding.UTF8, "application/json");
+                using var request = new HttpRequestMessage(HttpMethod.Post, "docbuilder")
+                {
+                    Content = requestContent
+                };
+                request.Headers.TryAddWithoutValidation("AuthorizationJwt", $"Bearer {jwt}");
+
+                response = await EditorsHttpClient.SendAsync(request, cancellationToken);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    break;
+                }
+
+                lastStatus = response.StatusCode;
+                lastErrorBody = await response.Content.ReadAsStringAsync(cancellationToken);
+
+                if ((int)response.StatusCode is not (502 or 503 or 504))
+                {
+                    break;
+                }
+
+                await Task.Delay(TimeSpan.FromSeconds(attempt), cancellationToken);
+            }
+
+            if (response is null || !response.IsSuccessStatusCode)
+            {
+                throw new InvalidOperationException(
+                    $"docbuilder request failed after retries. Status: {lastStatus}. Body: {lastErrorBody}");
+            }
+
+            await using var bodyStream = await response.Content.ReadAsStreamAsync(cancellationToken);
+            using var doc = await JsonDocument.ParseAsync(bodyStream, cancellationToken: cancellationToken);
+
+            if (!doc.RootElement.TryGetProperty("urls", out var urls)
+                || !urls.TryGetProperty(outputFileName, out var outputUrlElement)
+                || outputUrlElement.GetString() is not { } outputUrl)
+            {
+                throw new InvalidOperationException(
+                    $"docbuilder response did not contain url for '{outputFileName}'. Body: {doc.RootElement.GetRawText()}");
+            }
+
+            // The result URL points to the editors host as seen from inside the container; only the path is portable.
+            var outputPath = new Uri(outputUrl).PathAndQuery;
+            return await EditorsHttpClient.GetByteArrayAsync(outputPath, cancellationToken);
+        }
+        finally
+        {
+            response?.Dispose();
+            await serveCts.CancelAsync();
+            listener.Stop();
+            try { await serveTask; } catch { /* listener stopped */ }
+        }
+    }
+
+    private static async Task ServeScriptLoopAsync(TcpListener listener, byte[] scriptBytes, CancellationToken cancellationToken)
+    {
+        while (!cancellationToken.IsCancellationRequested)
+        {
+            TcpClient client;
+            try
+            {
+                client = await listener.AcceptTcpClientAsync(cancellationToken);
+            }
+            catch (OperationCanceledException) { return; }
+            catch (ObjectDisposedException) { return; }
+            catch (SocketException) { return; }
+
+            _ = HandleScriptRequestAsync(client, scriptBytes, cancellationToken);
+        }
+    }
+
+    private static async Task HandleScriptRequestAsync(TcpClient client, byte[] scriptBytes, CancellationToken cancellationToken)
+    {
+        try
+        {
+            using (client)
+            await using (var stream = client.GetStream())
+            {
+                // Drain the request line + headers
+                var requestBuffer = new byte[4096];
+                var totalRead = 0;
+                while (totalRead < requestBuffer.Length)
+                {
+                    var read = await stream.ReadAsync(requestBuffer.AsMemory(totalRead), cancellationToken);
+                    if (read == 0)
+                    {
+                        break;
+                    }
+                    totalRead += read;
+                    var headerEnd = Encoding.ASCII.GetString(requestBuffer, 0, totalRead).IndexOf("\r\n\r\n", StringComparison.Ordinal);
+                    if (headerEnd >= 0)
+                    {
+                        break;
+                    }
+                }
+
+                var method = ExtractMethod(requestBuffer, totalRead);
+                var headers = $"HTTP/1.1 200 OK\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Length: {scriptBytes.Length}\r\nConnection: close\r\n\r\n";
+                var headerBytes = Encoding.ASCII.GetBytes(headers);
+                await stream.WriteAsync(headerBytes, cancellationToken);
+
+                if (!string.Equals(method, "HEAD", StringComparison.OrdinalIgnoreCase))
+                {
+                    await stream.WriteAsync(scriptBytes, cancellationToken);
+                }
+
+                await stream.FlushAsync(cancellationToken);
+            }
+        }
+        catch
+        {
+            // best-effort
+        }
+    }
+
+    private static string ExtractMethod(byte[] buffer, int length)
+    {
+        var spaceIndex = Array.IndexOf(buffer, (byte)' ', 0, length);
+        return spaceIndex > 0 ? Encoding.ASCII.GetString(buffer, 0, spaceIndex) : string.Empty;
+    }
+
+    private static string CreateJwtHs256(string payloadJson, string secret)
+    {
+        static string Base64Url(byte[] data) =>
+            Convert.ToBase64String(data).TrimEnd('=').Replace('+', '-').Replace('/', '_');
+
+        var header = Base64Url(Encoding.UTF8.GetBytes("{\"alg\":\"HS256\",\"typ\":\"JWT\"}"));
+        var payload = Base64Url(Encoding.UTF8.GetBytes(payloadJson));
+        using var hmac = new System.Security.Cryptography.HMACSHA256(Encoding.UTF8.GetBytes(secret));
+        var signature = Base64Url(hmac.ComputeHash(Encoding.UTF8.GetBytes($"{header}.{payload}")));
+        return $"{header}.{payload}.{signature}";
     }
 
     private HttpClient CreateHttpClientNoCookies(string resourceName, string? path = null)

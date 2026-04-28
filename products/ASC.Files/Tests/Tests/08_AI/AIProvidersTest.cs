@@ -136,5 +136,50 @@ public class AIProvidersTest(AspireAppFixture fixture) : BaseTest(fixture)
         updated.Id.Should().BeGreaterThan(0);
         updated.SendFormToExternalDB.Should().BeTrue();
         updated.SaveFormAsXLSX.Should().BeTrue();
+
+        // Generate the leave-application form PDF via OnlyOffice DocumentBuilder
+        const string formScript = "leave_application_form.docbuilder";
+        const string formFileName = "leave_application_form.pdf";
+
+        var formPdfBytes = await _runDocBuilderAsync(formScript, formFileName, TestContext.Current.CancellationToken);
+        formPdfBytes.Should().NotBeNullOrEmpty();
+
+        // Upload the generated PDF form to the form room
+        var settings = (await _filesSettingsApi.GetFilesSettingsAsync(TestContext.Current.CancellationToken)).Response;
+
+        var uploadSession = (await _filesOperationsApi.CreateUploadSessionInFolderAsync(
+            updated.Id,
+            new SessionRequest(formFileName, formPdfBytes.LongLength),
+            cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        var chunkSize = (int)settings.ChunkUploadSize;
+        var chunkNumber = 1;
+        var offset = 0;
+
+        while (offset < formPdfBytes.Length)
+        {
+            var size = Math.Min(chunkSize, formPdfBytes.Length - offset);
+            using var chunkStream = new MemoryStream(formPdfBytes, offset, size);
+
+            await _filesOperationsApi.UploadAsyncSessionAsync(
+                updated.Id,
+                uploadSession.Id,
+                chunkNumber,
+                new FileParameter(chunkStream),
+                TestContext.Current.CancellationToken);
+
+            offset += size;
+            chunkNumber++;
+        }
+
+        var uploadedFile = (await _filesOperationsApi.FinalizeSessionAsync(
+            updated.Id,
+            uploadSession.Id,
+            TestContext.Current.CancellationToken)).Response;
+
+        uploadedFile.Should().NotBeNull();
+        uploadedFile.Uploaded.Should().BeTrue();
+        uploadedFile.File.Should().NotBeNull();
+        uploadedFile.File.Title.Should().Be(formFileName);
     }
 }

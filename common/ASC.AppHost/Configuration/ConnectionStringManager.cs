@@ -251,7 +251,10 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             .WithEnvironment("JWT_ENABLED", "true")
             .WithEnvironment("JWT_SECRET", "secret")
             .WithEnvironment("JWT_HEADER", "AuthorizationJwt")
-            .WithBindMount(Path.Combine(basePath, "Data"), "/var/www/onlyoffice/Data");
+            .WithBindMount(Path.Combine(basePath, "Data"), "/var/www/onlyoffice/Data")
+            .WithHttpEndpoint(targetPort: 80, name: "http")
+            .WithHttpHealthCheck("/healthcheck", endpointName: "http")
+            .WithContainerRuntimeArgs("--add-host", $"{Constants.HostDockerInternal}:host-gateway");
 
 
         return this;
@@ -664,3 +667,4 @@ internal static class RedisResourceBuilderExtensions
             : ResourceCommandState.Disabled;
     }
 }
+

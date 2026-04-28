@@ -47,6 +47,8 @@
     <ItemGroup>
       <None Remove="Data\new.docx" />
       <EmbeddedResource Include="Data\new.docx" />
+      <None Remove="Data\leave_application_form.docbuilder" />
+      <EmbeddedResource Include="Data\leave_application_form.docbuilder" />
     </ItemGroup>
 
 </Project>

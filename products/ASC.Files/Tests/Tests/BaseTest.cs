@@ -68,6 +68,7 @@ public class BaseTest(
     protected readonly AuthorizationApi _authorizationApi = fixture.AuthorizationApi;
 
     private readonly Func<Task> _resetDatabase = fixture.ResetDatabaseAsync;
+    protected readonly Func<string, string, CancellationToken, Task<byte[]>> _runDocBuilderAsync = fixture.RunDocBuilderAsync;
 
     //   FileShare.None
     public static TheoryData<FileShare> ValidFileShare =>
