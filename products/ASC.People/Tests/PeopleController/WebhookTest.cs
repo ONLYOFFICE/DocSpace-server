@@ -138,9 +138,9 @@ public class WebhookTest(AspireAppFixture fixture) : BaseTest(fixture)
         triggers.Should().NotBeNull();
         triggers.Response.Should().NotBeNull();
 
-        //var trigger = triggers.Response.FirstOrDefault(x => x.Id == WebhookTrigger.UserCreated);
+        //var trigger = triggers.Response.FirstOrDefault(x => x.Id == (long)WebhookTrigger.UserCreated);
         //trigger.Should().NotBeNull();
-        //trigger.Available.Should().Be(false);
+        //trigger!.Available.Should().Be(false);
 
         var createWebhooksConfigRequestsDto = new CreateWebhooksConfigRequestsDto(
             "test",
