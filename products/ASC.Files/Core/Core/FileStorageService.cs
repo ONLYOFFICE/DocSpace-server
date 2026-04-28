@@ -3940,6 +3940,22 @@ public class FileStorageService //: IFileStorageService
 
         entry.NotFoundIfNull();
 
+        if (!requiredAuth)
+        {
+            var settings = await filesSettingsHelper.GetExternalSharingSettingsAsync();
+            if (settings.DisableShareLinkSetting)
+            {
+                if (entry.RootFolderType == FolderType.USER && settings.ExternalShareApplyToDocumentsSetting)
+                {
+                    requiredAuth = true;
+                }
+                else if (entry.RootFolderType == FolderType.VirtualRooms && settings.ExternalShareApplyToRoomsSetting)
+                {
+                    requiredAuth = true;
+                }
+            }
+        }
+
         //hack for the form-filling room. return a link to a file with the room key.
         if (share is FileShare.FillForms && entry is File<T>)
         {
