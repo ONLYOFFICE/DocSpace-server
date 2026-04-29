@@ -587,7 +587,7 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
                                         var pins = await TagDao.GetTagsAsync(Guid.Empty, [TagType.Pin], new List<FileEntry<T>> { folder }).ToListAsync();
                                         if (pins.Count > 0)
                                         {
-                                            await TagDao.RemoveTagsAsync(pins);
+                                            await TagDao.RemoveTagsAsync(folder, pins.Select(r=> r.Id).ToList());
                                         }
 
                                         if (!isThirdPartyRoom)

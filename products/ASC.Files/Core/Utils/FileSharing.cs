@@ -583,7 +583,7 @@ public class FileSharingAceHelper(
         }
 
         await fileMarker.RemoveMarkAsNewAsync(entry);
-        await tagDao.RemoveTagsAsync(tags);
+        await tagDao.RemoveTagsAsync(entry, tags.Select(t => t.Id).ToList());
         await socketManager.RemoveFromFavoritesAsync(entry, [currentId]);
         await socketManager.RemoveFromRecentAsync(entry, [currentId]);
 
