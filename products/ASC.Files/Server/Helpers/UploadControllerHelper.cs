@@ -36,7 +36,6 @@ public class UploadControllerHelper(
     ChunkedUploadSessionHelper chunkedUploadSessionHelper,
     TenantManager tenantManager,
     IDaoFactory daoFactory,
-    FileSecurity fileSecurity,
     FileChecker fileChecker,
     WebhookManager webhookManager,
     IEventBus eventBus,
