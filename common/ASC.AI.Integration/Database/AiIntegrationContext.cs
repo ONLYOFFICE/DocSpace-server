@@ -29,11 +29,15 @@ namespace ASC.AI.Integration.Database;
 public partial class AiIntegrationContext(DbContextOptions<AiIntegrationContext> options) : BaseDbContext(options)
 {
     public DbSet<DbProfile> Profiles { get; set; }
+    public DbSet<DbThread> Threads { get; set; }
+    public DbSet<DbMessage> Messages { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         ModelBuilderWrapper.From(modelBuilder, Database)
             .AddDbTenant()
-            .AddDbProfiles();
+            .AddDbProfiles()
+            .AddDbThreads()
+            .AddDbMessages();
     }
 }

@@ -126,9 +126,19 @@ public class ProfilesStorage(IDbContextFactory<AiIntegrationContext> dbContextFa
 
     public async Task DeleteAsync(int tenantId, int id)
     {
-        await using var context = await dbContextFactory.CreateDbContextAsync();
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        var strategy = dbContext.Database.CreateExecutionStrategy();
 
-        await context.DeleteProfileAsync(tenantId, id);
+        await strategy.ExecuteAsync(async () =>
+        {
+            await using var context = await dbContextFactory.CreateDbContextAsync();
+            await using var transaction = await context.Database.BeginTransactionAsync();
+
+            await context.ClearThreadsProfileAsync(tenantId, id);
+            await context.DeleteProfileAsync(tenantId, id);
+
+            await transaction.CommitAsync();
+        });
     }
 
     private async Task<string?> EncryptKeyAsync(string? key)

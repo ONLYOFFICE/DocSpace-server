@@ -24,19 +24,12 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-global using System.ComponentModel.DataAnnotations;
-global using System.Security.Cryptography;
+namespace ASC.AI.Integration.Messages;
 
-global using Microsoft.EntityFrameworkCore;
-global using Microsoft.Extensions.DependencyInjection;
-
-global using ASC.Common;
-global using ASC.Core.Common.EF;
-global using ASC.Core.Common.EF.Model;
-global using ASC.Security.Cryptography;
-
-global using ASC.AI.Integration.Database;
-global using ASC.AI.Integration.Database.Models;
-global using ASC.AI.Integration.Messages;
-global using ASC.AI.Integration.Profiles;
-global using ASC.AI.Integration.Threads;
+public class Message
+{
+    public Guid Id { get; init; }
+    public Guid ThreadId { get; init; }
+    public required string Contents { get; init; }
+    public DateTime Timestamp { get; init; }
+}
