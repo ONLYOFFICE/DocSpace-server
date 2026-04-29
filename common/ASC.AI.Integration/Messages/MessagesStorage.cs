@@ -69,13 +69,9 @@ public class MessagesStorage(IDbContextFactory<AiIntegrationContext> dbContextFa
         var skip = startIndex ?? 0;
         var take = limit ?? int.MaxValue;
 
-        var result = new List<Message>();
-        await foreach (var entity in context.GetMessagesByThreadAsync(tenantId, threadId, skip, take))
-        {
-            result.Add(ToDomainEntity(entity));
-        }
-
-        return result;
+        return await context.GetMessagesByThreadAsync(tenantId, threadId, skip, take)
+            .Select(ToDomainEntity)
+            .ToListAsync();
     }
 
     public async Task UpdateAsync(int tenantId, Guid messageId, string contents)

@@ -57,13 +57,8 @@ public class AssignmentsStorage(IDbContextFactory<AiIntegrationContext> dbContex
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        var result = new Dictionary<string, int>();
-        await foreach (var entity in context.GetAllAssignmentsAsync(tenantId))
-        {
-            result[entity.ActionType] = entity.ProfileId;
-        }
-
-        return result;
+        return await context.GetAllAssignmentsAsync(tenantId)
+            .ToDictionaryAsync(x => x.ActionType, x => x.ProfileId);
     }
 
     public async Task<int> UpdateAsync(int tenantId, string actionType, int profileId)
@@ -89,11 +84,8 @@ public class AssignmentsStorage(IDbContextFactory<AiIntegrationContext> dbContex
             await using var transaction = await context.Database.BeginTransactionAsync();
 
             var actionTypes = assignments.Keys.ToArray();
-            var existing = new Dictionary<string, DbAssignment>(actionTypes.Length);
-            await foreach (var entity in context.GetAssignmentsByTypesAsync(tenantId, actionTypes))
-            {
-                existing[entity.ActionType] = entity;
-            }
+            var existing = await context.GetAssignmentsByTypesAsync(tenantId, actionTypes)
+                .ToDictionaryAsync(x => x.ActionType);
 
             var now = DateTime.UtcNow;
             foreach (var (actionType, profileId) in assignments)

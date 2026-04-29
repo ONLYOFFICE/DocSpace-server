@@ -62,13 +62,9 @@ public class ThreadsStorage(IDbContextFactory<AiIntegrationContext> dbContextFac
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        var result = new List<Thread>();
-        await foreach (var entity in context.GetAllThreadsAsync(tenantId))
-        {
-            result.Add(ToDomainEntity(entity));
-        }
-
-        return result;
+        return await context.GetAllThreadsAsync(tenantId)
+            .Select(ToDomainEntity)
+            .ToListAsync();
     }
 
     public async Task UpdateAsync(int tenantId, Guid threadId, string? title)
