@@ -31,6 +31,7 @@ public partial class AiIntegrationContext(DbContextOptions<AiIntegrationContext>
     public DbSet<DbProfile> Profiles { get; set; }
     public DbSet<DbThread> Threads { get; set; }
     public DbSet<DbMessage> Messages { get; set; }
+    public DbSet<DbAssignment> Assignments { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -38,6 +39,7 @@ public partial class AiIntegrationContext(DbContextOptions<AiIntegrationContext>
             .AddDbTenant()
             .AddDbProfiles()
             .AddDbThreads()
-            .AddDbMessages();
+            .AddDbMessages()
+            .AddDbAssignments();
     }
 }

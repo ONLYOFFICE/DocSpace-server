@@ -35,6 +35,7 @@ global using ASC.Core.Common.EF;
 global using ASC.Core.Common.EF.Model;
 global using ASC.Security.Cryptography;
 
+global using ASC.AI.Integration.Assignments;
 global using ASC.AI.Integration.Database;
 global using ASC.AI.Integration.Database.Models;
 global using ASC.AI.Integration.Messages;
