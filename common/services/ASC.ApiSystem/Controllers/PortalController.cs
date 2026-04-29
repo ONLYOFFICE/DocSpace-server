@@ -741,16 +741,29 @@ public class PortalController(
         model.FirstName = string.IsNullOrWhiteSpace(model.FirstName) ? "Administrator" : model.FirstName.Trim();
         model.LastName = (model.LastName ?? "").Trim();
 
+        var language = model.Language ?? string.Empty;
+        var tz = timeZonesProvider.GetCurrentTimeZoneInfo(language);
+
+        if (!string.IsNullOrEmpty(model.TimeZoneName))
+        {
+            tz = TimeZoneConverter.GetTimeZone(model.TimeZoneName.Trim(), false) ?? tz;
+        }
+
+        var lang = timeZonesProvider.GetCurrentCulture(language);
+
         var info = new TenantRegistrationInfo
         {
             Name = configuration["web:portal-name"] ?? "",
             Address = portalName,
-            Culture = timeZonesProvider.GetCurrentCulture(""),
+            Culture = lang,
             FirstName = model.FirstName,
             LastName = model.LastName,
             PasswordHash = passwordHasher.GetClientPassword(Guid.NewGuid().ToString()),
             Email = model.Email,
-            TimeZoneInfo = timeZonesProvider.GetCurrentTimeZoneInfo("")
+            TimeZoneInfo = tz,
+            Spam = model.Spam,
+            Calls = model.Calls,
+            HostedRegion = model.Region
         };
 
         Tenant t;
@@ -767,7 +780,7 @@ public class PortalController(
             if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
             {
                 t.PaymentId = await coreSettings.GetKeyAsync(t.Id);
-                await apiSystemHelper.AddTenantToCacheAsync(t.GetTenantDomain(coreSettings), null);
+                await apiSystemHelper.AddTenantToCacheAsync(t.GetTenantDomain(coreSettings), model.AWSRegion);
             }
 
             option.LogDebug("ProvisionAsync: registered tenant, portalName = {0}, elapsed {1} ms.", portalName, sw.ElapsedMilliseconds);

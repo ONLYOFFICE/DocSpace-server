@@ -67,10 +67,50 @@ public class ProvisionPortalRequestDto
     public RecaptchaType RecaptchaType { get; set; }
 
     /// <summary>
+    /// Specifies if the ONLYOFFICE newsletter is allowed or not.
+    /// </summary>
+    /// <example>true</example>
+    public bool Spam { get; set; }
+
+    /// <summary>
+    /// Specifies if the calls are available for the current tenant or not.
+    /// </summary>
+    /// <example>true</example>
+    public bool Calls { get; set; }
+
+    /// <summary>
     /// The application key.
     /// </summary>
     /// <example>app-key-123</example>
     public string AppKey { get; set; }
+
+    /// <summary>
+    /// The portal language.
+    /// </summary>
+    /// <example>en-US</example>
+    [StringLength(7)]
+    public string Language { get; set; }
+
+    /// <summary>
+    /// The portal time zone name.
+    /// </summary>
+    /// <example>UTC</example>
+    [StringLength(255)]
+    public string TimeZoneName { get; set; }
+
+    /// <summary>
+    /// The portal region.
+    /// </summary>
+    /// <example>us-east</example>
+    [StringLength(20)]
+    public string Region { get; set; }
+
+    /// <summary>
+    /// The portal AWS region.
+    /// </summary>
+    /// <example>us-east-1</example>
+    [JsonPropertyName("awsRegion")]
+    public string AWSRegion { get; set; }
 
     /// <summary>
     /// The OAuth provider configuration.
