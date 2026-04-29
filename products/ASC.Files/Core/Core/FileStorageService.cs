@@ -3940,20 +3940,9 @@ public class FileStorageService //: IFileStorageService
 
         entry.NotFoundIfNull();
 
-        if (!requiredAuth)
+        if (!requiredAuth && await externalShare.IsGloballyRestrictedAsync(entry))
         {
-            var settings = await filesSettingsHelper.GetExternalSharingSettingsAsync();
-            if (settings.DisableShareLinkSetting)
-            {
-                if (entry.RootFolderType == FolderType.USER && settings.ExternalShareApplyToDocumentsSetting)
-                {
-                    requiredAuth = true;
-                }
-                else if (entry.RootFolderType == FolderType.VirtualRooms && settings.ExternalShareApplyToRoomsSetting)
-                {
-                    requiredAuth = true;
-                }
-            }
+            requiredAuth = true;
         }
 
         //hack for the form-filling room. return a link to a file with the room key.
@@ -4329,20 +4318,9 @@ public class FileStorageService //: IFileStorageService
             ? await daoFactory.GetFileDao<T>().GetFileAsync(entryId)
             : await daoFactory.GetFolderDao<T>().GetFolderAsync(entryId);
 
-        if (!requiredAuth && entry != null)
+        if (!requiredAuth && entry != null && await externalShare.IsGloballyRestrictedAsync(entry))
         {
-            var settings = await filesSettingsHelper.GetExternalSharingSettingsAsync();
-            if (settings.DisableShareLinkSetting)
-            {
-                if (entry.RootFolderType == FolderType.USER && settings.ExternalShareApplyToDocumentsSetting)
-                {
-                    requiredAuth = true;
-                }
-                else if (entry.RootFolderType == FolderType.VirtualRooms && settings.ExternalShareApplyToRoomsSetting)
-                {
-                    requiredAuth = true;
-                }
-            }
+            requiredAuth = true;
         }
 
         //hack for the form-filling room. return a link to a file with the room key.
