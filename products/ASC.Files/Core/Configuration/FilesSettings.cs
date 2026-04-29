@@ -528,11 +528,11 @@ public class FilesSettingsHelper(
 
         return new ExternalSharingSettingsDto
         {
-            ExternalShare = inDto.ExternalShare,
-            DefaultShareLinkInternal = inDto.DefaultShareLinkInternal,
-            ExternalShareApplyToDocuments = inDto.ExternalShareApplyToDocuments,
-            ExternalShareApplyToRooms = inDto.ExternalShareApplyToRooms,
-            BlockExistingLinksOnRestrict = inDto.BlockExistingLinksOnRestrict
+            ExternalShare = !settings.DisableShareLinkSetting,
+            DefaultShareLinkInternal = settings.DefaultShareLinkInternalSetting,
+            ExternalShareApplyToDocuments = settings.ExternalShareApplyToDocumentsSetting,
+            ExternalShareApplyToRooms = settings.ExternalShareApplyToRoomsSetting,
+            BlockExistingLinksOnRestrict = settings.BlockExistingLinksOnRestrictSetting
         };
     }
 
