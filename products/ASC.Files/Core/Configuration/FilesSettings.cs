@@ -467,6 +467,7 @@ public class FilesSettingsHelper(
     {
         return (await LoadForCurrentUser()).OpenEditorInSameTab;
     }
+
     public async Task SetOrganizeRoomsGroupingAsync(bool value)
     {
         var setting = await LoadForCurrentUser();
@@ -479,7 +480,7 @@ public class FilesSettingsHelper(
         return (await LoadForCurrentUser()).OrganizeRoomsGrouping;
     }
 
-    public async Task<FilesSettings> GetExternalSharingSettingsAsync()
+    public async Task<FilesSettings> GetTenantFilesSettingsAsync()
     {
         return await settingsManager.LoadAsync<FilesSettings>();
     }
