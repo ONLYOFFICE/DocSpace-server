@@ -24,18 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Text.Json;
-
-using ASC.Core.Common;
-using ASC.FederatedLogin;
-using ASC.FederatedLogin.LoginProviders;
-using ASC.FederatedLogin.Profile;
-using ASC.Files.Core.Helpers;
-using ASC.Files.Core.Utils;
-using ASC.Web.Api.Core;
-
-using CsvHelper.Configuration;
-
 namespace ASC.ApiSystem.Controllers;
 
 [Scope]
@@ -65,7 +53,8 @@ public class PortalController(
         DocumentServiceLicense documentServiceLicense,
         CsvFileHelper csvFileHelper,
         CsvFileUploader csvFileUploader,
-        ShortUrl shortUrl)
+        ShortUrl shortUrl,
+        ConsumerFactory consumerFactory)
     : ControllerBase
 {
     private readonly char[] _alphabetArray = Enumerable.Range('a', 26).Union(Enumerable.Range('0', 10)).Select(x => (char)x).ToArray();
@@ -275,8 +264,7 @@ public class PortalController(
             return StatusCode(StatusCodes.Status500InternalServerError, new
             {
                 error = "registerNewTenantError",
-                message = e.Message,
-                stacktrace = e.StackTrace
+                message = e.Message
             });
         }
 
@@ -574,8 +562,7 @@ public class PortalController(
             return StatusCode(StatusCodes.Status500InternalServerError, new
             {
                 error = "registerNewTenantError",
-                message = e.Message,
-                stacktrace = e.StackTrace
+                message = e.Message
             });
         }
 
@@ -641,6 +628,243 @@ public class PortalController(
         });
     }
 
+
+    /// <remarks>
+    /// Registers a new portal and immediately configures the specified OAuth provider, so the owner can sign in
+    /// without a password. Supports any provider registered in the system.
+    /// Provider keys are matched to the consumer's managed keys by conventional suffix (clientId, clientSecret,
+    /// baseUrl, redirectUrl/redirectUri).
+    /// </remarks>
+    /// <summary>
+    /// Provision a portal with an OAuth provider
+    /// </summary>
+    /// <path>apisystem/portal/provision</path>
+    [Tags("Portal")]
+    [SwaggerResponse(200, "Ok", typeof(IActionResult))]
+    [HttpPost("provision")]
+    [Authorize(AuthenticationSchemes = "auth:allowskip:registerportal")]
+    public async ValueTask<IActionResult> ProvisionAsync(ProvisionPortalRequestDto model)
+    {
+        if (model == null)
+        {
+            return BadRequest(new
+            {
+                error = "paramsEmpty",
+                message = "Model is required"
+            });
+        }
+
+        if (!ModelState.IsValid)
+        {
+            var messages = new List<string>();
+            foreach (var k in ModelState.Keys)
+            {
+                messages.Add(ModelState[k].Errors.FirstOrDefault().ErrorMessage);
+            }
+
+            return BadRequest(new
+            {
+                error = "params",
+                message = JsonSerializer.Serialize(messages.ToArray())
+            });
+        }
+
+        if (string.IsNullOrWhiteSpace(model.Email))
+        {
+            return BadRequest(new
+            {
+                error = "emailEmpty",
+                message = "Email is required"
+            });
+        }
+
+        model.Email = model.Email.Trim().ToLowerInvariant();
+
+        var providerName = (model.Provider.Name ?? "").Trim().ToLowerInvariant();
+        if (!ProviderManager.AuthProviders.Contains(providerName))
+        {
+            return BadRequest(new
+            {
+                error = "unknownProvider",
+                message = $"Provider '{providerName}' is not supported"
+            });
+        }
+
+        var consumer = consumerFactory.GetByKey(providerName);
+        if (consumer is not ILoginProvider)
+        {
+            return BadRequest(new
+            {
+                error = "unknownProvider",
+                message = $"Provider '{providerName}' is not supported"
+            });
+        }
+
+        var (portalName, nameError) = await GetRandomPortalName($"{DefaultPrefix}-{providerName}");
+        if (string.IsNullOrEmpty(portalName))
+        {
+            return BadRequest(new
+            {
+                error = "portalNameEmpty",
+                message = nameError ?? "PortalName is required"
+            });
+        }
+
+        var sw = Stopwatch.StartNew();
+        var clientIp = commonMethods.GetClientIp();
+        var rateModel = new TenantModel { Email = model.Email, PortalName = portalName };
+
+        if (commonMethods.CheckMuchRegistration(rateModel, clientIp, sw))
+        {
+            return BadRequest(new
+            {
+                error = "tooMuchAttempts",
+                message = "Too much attempts already"
+            });
+        }
+
+        var recaptchaModel = new TenantModel
+        {
+            Email = model.Email,
+            PortalName = portalName,
+            RecaptchaResponse = model.RecaptchaResponse,
+            RecaptchaType = model.RecaptchaType,
+            AppKey = model.AppKey,
+        };
+
+        var recaptchaError = await GetRecaptchaError(recaptchaModel, clientIp, sw);
+        if (recaptchaError != null)
+        {
+            return BadRequest(recaptchaError);
+        }
+
+        model.FirstName = string.IsNullOrWhiteSpace(model.FirstName) ? "Administrator" : model.FirstName.Trim();
+        model.LastName = (model.LastName ?? "").Trim();
+
+        var info = new TenantRegistrationInfo
+        {
+            Name = configuration["web:portal-name"] ?? "",
+            Address = portalName,
+            Culture = timeZonesProvider.GetCurrentCulture(""),
+            FirstName = model.FirstName,
+            LastName = model.LastName,
+            PasswordHash = passwordHasher.GetClientPassword(Guid.NewGuid().ToString()),
+            Email = model.Email,
+            TimeZoneInfo = timeZonesProvider.GetCurrentTimeZoneInfo("")
+        };
+
+        Tenant t;
+        try
+        {
+            t = await hostedSolution.RegisterTenantAsync(info);
+            tenantManager.SetCurrentTenant(t);
+
+            var cspDomains = string.IsNullOrEmpty(model.Provider.CspDomain)
+                ? (IEnumerable<string>)null
+                : [model.Provider.CspDomain];
+            await cspSettingsHelper.SaveAsync(cspDomains);
+
+            if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
+            {
+                t.PaymentId = await coreSettings.GetKeyAsync(t.Id);
+                await apiSystemHelper.AddTenantToCacheAsync(t.GetTenantDomain(coreSettings), null);
+            }
+
+            option.LogDebug("ProvisionAsync: registered tenant, portalName = {0}, elapsed {1} ms.", portalName, sw.ElapsedMilliseconds);
+        }
+        catch (Exception e)
+        {
+            option.LogError(e, "ProvisionAsync: tenant registration failed");
+
+            return StatusCode(StatusCodes.Status500InternalServerError, new
+            {
+                error = "registerNewTenantError",
+                message = e.Message
+            });
+        }
+
+        var trialQuota = configuration["quota:id"];
+        if (!string.IsNullOrEmpty(trialQuota) && int.TryParse(trialQuota, out var trialQuotaId))
+        {
+            var dueDate = DateTime.MaxValue;
+            if (int.TryParse(configuration["quota:due"], out var dueTrial))
+            {
+                dueDate = DateTime.UtcNow.AddDays(dueTrial);
+            }
+
+            var tariff = new Tariff
+            {
+                Quotas = [new Quota(trialQuotaId, 1)],
+                DueDate = dueDate
+            };
+            await hostedSolution.SetTariffAsync(t.Id, tariff);
+        }
+
+        // Map generic OAuth fields to the provider's managed key names by conventional suffix.
+        // Supports keys like providerClientId, providerClientSecret, providerBaseUrl, etc.
+        (string Suffix, string Value)[] fieldMap =
+        [
+            ("clientid",     model.Provider.ClientId),
+            ("clientsecret", model.Provider.ClientSecret),
+            ("baseurl",      model.Provider.BaseUrl),
+            ("redirecturl",  model.Provider.RedirectUri),
+            ("redirecturi",  model.Provider.RedirectUri),
+        ];
+
+        var providerConfigured = false;
+        string providerConfigurationError = null;
+
+        // Storage scope:
+        //   SaaS mode (Standalone=false): Consumer.SetAsync uses TenantManager.GetCurrentTenantId(),
+        //              which returns t.Id at this point (set above via SetCurrentTenant). ConsumerFactory
+        //              resolves consumers from the same request ILifetimeScope, so the TenantManager
+        //              instance is shared — credentials are written to the new tenant's storage only.
+        //   Standalone (Standalone=true): Consumer.SetAsync always uses Tenant.DefaultTenant (-1),
+        //              a single shared record for the entire installation. Multiple calls with the same
+        //              provider type will overwrite each other. This is the same behavior as
+        //              POST /api/2.0/settings/authservice — an architectural property of Consumer.
+        try
+        {
+            foreach (var managedKey in consumer.ManagedKeys)
+            {
+                var lowerKey = managedKey.ToLowerInvariant();
+                foreach (var (suffix, value) in fieldMap)
+                {
+                    if (string.IsNullOrEmpty(value) || !lowerKey.EndsWith(suffix, StringComparison.Ordinal))
+                    {
+                        continue;
+                    }
+
+                    await consumer.SetAsync(managedKey, value);
+                    providerConfigured = true;
+                    break;
+                }
+            }
+
+            option.LogDebug("ProvisionAsync: configured OAuth provider, portalName={0}, provider={1}, elapsed {2} ms.", portalName, providerName, sw.ElapsedMilliseconds);
+        }
+        catch (Exception e)
+        {
+            option.LogError(e, "ProvisionAsync: OAuth configuration failed, provider={0}", providerName);
+            providerConfigured = false;
+            providerConfigurationError = e.Message;
+        }
+
+        var portalDomain = t.GetTenantDomain(coreSettings);
+        var scheme = commonMethods.GetRequestScheme();
+
+        option.LogDebug("ProvisionAsync: finish portalName = {0}, provider={1}, elapsed {2} ms.", portalName, providerName, sw.ElapsedMilliseconds);
+
+        sw.Stop();
+
+        return Ok(new
+        {
+            reference = $"{scheme}{Uri.SchemeDelimiter}{portalDomain}",
+            tenant = commonMethods.ToTenantWrapper(t),
+            providerConfigured,
+            providerConfigurationError
+        });
+    }
 
     /// <remarks>
     /// Deletes a portal with a name specified in the request.
@@ -897,8 +1121,7 @@ public class PortalController(
             return StatusCode(StatusCodes.Status500InternalServerError, new
             {
                 error = "error",
-                message = ex.Message,
-                stacktrace = ex.StackTrace
+                message = ex.Message
             });
         }
     }
@@ -984,8 +1207,7 @@ public class PortalController(
             return StatusCode(StatusCodes.Status500InternalServerError, new
             {
                 error = "error",
-                message = ex.Message,
-                stacktrace = ex.StackTrace
+                message = ex.Message
             });
         }
     }
@@ -1170,9 +1392,9 @@ public class PortalController(
 
     #region Validate Method
 
-    private async Task<(string, object)> GetRandomPortalName()
+    private async Task<(string, object)> GetRandomPortalName(string aliasPrefix = null)
     {
-        var prefix = configuration["web:alias:prefix"] ?? DefaultPrefix;
+        var prefix = aliasPrefix ?? configuration["web:alias:prefix"] ?? DefaultPrefix;
         var randomLength = int.Parse(configuration["web:alias:random-length"] ?? DefaultRandomLength.ToString());
 
         if (prefix.Length + randomLength > tenantDomainValidator.MaxLength || prefix.Length + randomLength < tenantDomainValidator.MinLength)
@@ -1266,7 +1488,7 @@ public class PortalController(
         catch (Exception ex)
         {
             option.LogError(ex, "CheckExistingNamePortal");
-            error = new { error = "error", message = ex.Message, stacktrace = ex.StackTrace };
+            error = new { error = "error", message = ex.Message };
             return (false, error);
         }
 
