@@ -24,19 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Text.Json;
-
-using ASC.Core.Common;
-using ASC.Core.Common.Configuration;
-using ASC.FederatedLogin;
-using ASC.FederatedLogin.LoginProviders;
-using ASC.FederatedLogin.Profile;
-using ASC.Files.Core.Helpers;
-using ASC.Files.Core.Utils;
-using ASC.Web.Api.Core;
-
-using CsvHelper.Configuration;
-
 namespace ASC.ApiSystem.Controllers;
 
 [Scope]
@@ -277,8 +264,7 @@ public class PortalController(
             return StatusCode(StatusCodes.Status500InternalServerError, new
             {
                 error = "registerNewTenantError",
-                message = e.Message,
-                stacktrace = e.StackTrace
+                message = e.Message
             });
         }
 
@@ -576,8 +562,7 @@ public class PortalController(
             return StatusCode(StatusCodes.Status500InternalServerError, new
             {
                 error = "registerNewTenantError",
-                message = e.Message,
-                stacktrace = e.StackTrace
+                message = e.Message
             });
         }
 
@@ -684,6 +669,17 @@ public class PortalController(
             });
         }
 
+        if (string.IsNullOrWhiteSpace(model.Email))
+        {
+            return BadRequest(new
+            {
+                error = "emailEmpty",
+                message = "Email is required"
+            });
+        }
+
+        model.Email = model.Email.Trim().ToLowerInvariant();
+
         var providerName = (model.Provider.Name ?? "").Trim().ToLowerInvariant();
         if (!ProviderManager.AuthProviders.Contains(providerName))
         {
@@ -704,18 +700,14 @@ public class PortalController(
             });
         }
 
-        var (portalName, nameError) = await GetRandomPortalName();
+        var (portalName, nameError) = await GetRandomPortalName($"{DefaultPrefix}-{providerName}");
         if (string.IsNullOrEmpty(portalName))
         {
-            return BadRequest(nameError ?? "PortalName is required");
-        }
-
-        portalName = $"{portalName}-{providerName}";
-        model.Email = model.Email.Trim().ToLowerInvariant();
-
-        if (string.IsNullOrEmpty(model.Email))
-        {
-            return BadRequest(nameError ?? "Email is required");
+            return BadRequest(new
+            {
+                error = "portalNameEmpty",
+                message = nameError ?? "PortalName is required"
+            });
         }
 
         var sw = Stopwatch.StartNew();
@@ -758,8 +750,7 @@ public class PortalController(
             LastName = model.LastName,
             PasswordHash = passwordHasher.GetClientPassword(Guid.NewGuid().ToString()),
             Email = model.Email,
-            TimeZoneInfo = timeZonesProvider.GetCurrentTimeZoneInfo(""),
-            //ActivationStatus = EmployeeActivationStatus.Activated
+            TimeZoneInfo = timeZonesProvider.GetCurrentTimeZoneInfo("")
         };
 
         Tenant t;
@@ -788,44 +779,8 @@ public class PortalController(
             return StatusCode(StatusCodes.Status500InternalServerError, new
             {
                 error = "registerNewTenantError",
-                message = e.Message,
-                stacktrace = e.StackTrace
+                message = e.Message
             });
-        }
-
-        // Map generic OAuth fields to the provider's managed key names by conventional suffix.
-        // Supports keys like providerClientId, providerClientSecret, providerBaseUrl, etc.
-        (string Suffix, string Value)[] fieldMap =
-        [
-            ("clientid",     model.Provider.ClientId),
-            ("clientsecret", model.Provider.ClientSecret),
-            ("baseurl",      model.Provider.BaseUrl),
-            ("redirecturl",  model.Provider.RedirectUri),
-            ("redirecturi",  model.Provider.RedirectUri),
-        ];
-
-        try
-        {
-            foreach (var managedKey in consumer.ManagedKeys)
-            {
-                var lowerKey = managedKey.ToLowerInvariant();
-                foreach (var (suffix, value) in fieldMap)
-                {
-                    if (string.IsNullOrEmpty(value) || !lowerKey.EndsWith(suffix, StringComparison.Ordinal))
-                    {
-                        continue;
-                    }
-
-                    await consumer.SetAsync(managedKey, value);
-                    break;
-                }
-            }
-
-            option.LogDebug("ProvisionAsync: configured OAuth provider, portalName={0}, provider={1}, elapsed {2} ms.", portalName, providerName, sw.ElapsedMilliseconds);
-        }
-        catch (Exception e)
-        {
-            option.LogError(e, "ProvisionAsync: OAuth configuration failed, provider={0}", providerName);
         }
 
         var trialQuota = configuration["quota:id"];
@@ -845,6 +800,56 @@ public class PortalController(
             await hostedSolution.SetTariffAsync(t.Id, tariff);
         }
 
+        // Map generic OAuth fields to the provider's managed key names by conventional suffix.
+        // Supports keys like providerClientId, providerClientSecret, providerBaseUrl, etc.
+        (string Suffix, string Value)[] fieldMap =
+        [
+            ("clientid",     model.Provider.ClientId),
+            ("clientsecret", model.Provider.ClientSecret),
+            ("baseurl",      model.Provider.BaseUrl),
+            ("redirecturl",  model.Provider.RedirectUri),
+            ("redirecturi",  model.Provider.RedirectUri),
+        ];
+
+        var providerConfigured = false;
+        string providerConfigurationError = null;
+
+        // Storage scope:
+        //   SaaS mode (Standalone=false): Consumer.SetAsync uses TenantManager.GetCurrentTenantId(),
+        //              which returns t.Id at this point (set above via SetCurrentTenant). ConsumerFactory
+        //              resolves consumers from the same request ILifetimeScope, so the TenantManager
+        //              instance is shared — credentials are written to the new tenant's storage only.
+        //   Standalone (Standalone=true): Consumer.SetAsync always uses Tenant.DefaultTenant (-1),
+        //              a single shared record for the entire installation. Multiple calls with the same
+        //              provider type will overwrite each other. This is the same behavior as
+        //              POST /api/2.0/settings/authservice — an architectural property of Consumer.
+        try
+        {
+            foreach (var managedKey in consumer.ManagedKeys)
+            {
+                var lowerKey = managedKey.ToLowerInvariant();
+                foreach (var (suffix, value) in fieldMap)
+                {
+                    if (string.IsNullOrEmpty(value) || !lowerKey.EndsWith(suffix, StringComparison.Ordinal))
+                    {
+                        continue;
+                    }
+
+                    await consumer.SetAsync(managedKey, value);
+                    providerConfigured = true;
+                    break;
+                }
+            }
+
+            option.LogDebug("ProvisionAsync: configured OAuth provider, portalName={0}, provider={1}, elapsed {2} ms.", portalName, providerName, sw.ElapsedMilliseconds);
+        }
+        catch (Exception e)
+        {
+            option.LogError(e, "ProvisionAsync: OAuth configuration failed, provider={0}", providerName);
+            providerConfigured = false;
+            providerConfigurationError = e.Message;
+        }
+
         var portalDomain = t.GetTenantDomain(coreSettings);
         var scheme = commonMethods.GetRequestScheme();
 
@@ -855,7 +860,9 @@ public class PortalController(
         return Ok(new
         {
             reference = $"{scheme}{Uri.SchemeDelimiter}{portalDomain}",
-            tenant = commonMethods.ToTenantWrapper(t)
+            tenant = commonMethods.ToTenantWrapper(t),
+            providerConfigured,
+            providerConfigurationError
         });
     }
 
@@ -1114,8 +1121,7 @@ public class PortalController(
             return StatusCode(StatusCodes.Status500InternalServerError, new
             {
                 error = "error",
-                message = ex.Message,
-                stacktrace = ex.StackTrace
+                message = ex.Message
             });
         }
     }
@@ -1201,8 +1207,7 @@ public class PortalController(
             return StatusCode(StatusCodes.Status500InternalServerError, new
             {
                 error = "error",
-                message = ex.Message,
-                stacktrace = ex.StackTrace
+                message = ex.Message
             });
         }
     }
@@ -1387,9 +1392,9 @@ public class PortalController(
 
     #region Validate Method
 
-    private async Task<(string, object)> GetRandomPortalName()
+    private async Task<(string, object)> GetRandomPortalName(string aliasPrefix = null)
     {
-        var prefix = configuration["web:alias:prefix"] ?? DefaultPrefix;
+        var prefix = aliasPrefix ?? configuration["web:alias:prefix"] ?? DefaultPrefix;
         var randomLength = int.Parse(configuration["web:alias:random-length"] ?? DefaultRandomLength.ToString());
 
         if (prefix.Length + randomLength > tenantDomainValidator.MaxLength || prefix.Length + randomLength < tenantDomainValidator.MinLength)
@@ -1483,7 +1488,7 @@ public class PortalController(
         catch (Exception ex)
         {
             option.LogError(ex, "CheckExistingNamePortal");
-            error = new { error = "error", message = ex.Message, stacktrace = ex.StackTrace };
+            error = new { error = "error", message = ex.Message };
             return (false, error);
         }
 
