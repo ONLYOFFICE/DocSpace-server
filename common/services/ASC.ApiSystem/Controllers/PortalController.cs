@@ -863,16 +863,15 @@ public class PortalController(
             providerConfigurationError = e.Message;
         }
 
-        var portalDomain = t.GetTenantDomain(coreSettings);
         var scheme = commonMethods.GetRequestScheme();
-
+        var reference = commonMethods.CreateReference(t.Id, scheme, t.GetTenantDomain(coreSettings), info.Email);
         option.LogDebug("ProvisionAsync: finish portalName = {0}, provider={1}, elapsed {2} ms.", portalName, providerName, sw.ElapsedMilliseconds);
 
         sw.Stop();
 
         return Ok(new
         {
-            reference = $"{scheme}{Uri.SchemeDelimiter}{portalDomain}",
+            reference,
             tenant = commonMethods.ToTenantWrapper(t),
             providerConfigured,
             providerConfigurationError
