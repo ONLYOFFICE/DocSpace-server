@@ -181,5 +181,132 @@ public class AIProvidersTest(AspireAppFixture fixture) : BaseTest(fixture)
         uploadedFile.Uploaded.Should().BeTrue();
         uploadedFile.File.Should().NotBeNull();
         uploadedFile.File.Title.Should().Be(formFileName);
+
+        var formFileId = uploadedFile.File.Id;
+
+        // Invite several test users and grant them FillForms access to the form room.
+        const int fillerCount = 3;
+        var fillers = new List<User>(fillerCount);
+        for (var i = 0; i < fillerCount; i++)
+        {
+            fillers.Add(await Initializer.InviteContact(EmployeeType.User));
+        }
+
+        await _filesClient.Authenticate(Initializer.Owner);
+
+        await _roomsApi.SetRoomSecurityAsync(updated.Id, new RoomInvitationRequest
+        {
+            Invitations = fillers
+                .Select(u => new RoomInvitation { Id = u.Id, Access = FileShare.FillForms })
+                .ToList()
+        }, TestContext.Current.CancellationToken);
+
+        // Map every invited user to a form role so they are allowed to fill the form.
+        var formRoles = fillers
+            .Select((u, idx) => new FormRole
+            {
+                UserId = u.Id,
+                RoomId = updated.Id,
+                RoleName = $"Filler {idx + 1}",
+                RoleColor = "ffefbf",
+                Sequence = idx + 1
+            })
+            .ToList();
+
+        await _filesApi.SaveFormRoleMappingAsync(
+            formFileId.ToString(),
+            new SaveFormRoleMappingDtoInteger(formFileId, formRoles),
+            TestContext.Current.CancellationToken);
+
+        // Owner enables filling on the form.
+        await _filesApi.StartFillingFileAsync(formFileId, TestContext.Current.CancellationToken);
+
+        const string filledFormScript = "filled_leave_application_form.docbuilder";
+        const string filledFormResultName = "filled_leave_application_form.pdf";
+
+        var submissions = new (User User, string FirstName, string LastName, string StartDate, string EndDate, string Destination)[]
+        {
+            (fillers[0], "John",  "Doe",    "01/05/2026", "10/05/2026", "Riga, Latvia"),
+            (fillers[1], "Anna",  "Smith",  "15/06/2026", "29/06/2026", "Lisbon, Portugal"),
+            (fillers[2], "Peter", "Ivanov", "03/08/2026", "17/08/2026", "Tbilisi, Georgia")
+        };
+
+        foreach (var s in submissions)
+        {
+            // Authenticate as filler and let DocSpace create the user's draft (mimics opening the form in the editor).
+            await _filesClient.Authenticate(s.User);
+
+
+            // var draftEditorUrl = (await _filesApi.CheckFillFormDraftAsync(
+            //     formFileId,
+            //     new CheckFillFormDraft(version: 1, action: "edit"),
+            //     TestContext.Current.CancellationToken)).Response;
+            //
+            // draftEditorUrl.Should().NotBeNullOrEmpty();
+            //
+            // var draftFileId = ExtractFileIdFromEditorUrl(draftEditorUrl);
+
+            var draftFileId = (await _filesApi.OpenEditFileAsync(formFileId, cancellationToken: TestContext.Current.CancellationToken)).Response.File.Id;
+
+            // Generate a per-user filled PDF.
+            var argumentJson =
+                $"{{\"first_name\":\"{s.FirstName}\"," +
+                $"\"last_name\":\"{s.LastName}\"," +
+                $"\"start_date\":\"{s.StartDate}\"," +
+                $"\"end_date\":\"{s.EndDate}\"," +
+                $"\"vacation_destination\":\"{s.Destination}\"}}";
+
+            var filledPdfBytes = await _runDocBuilderWithArgAsync(
+                filledFormScript,
+                filledFormResultName,
+                argumentJson,
+                TestContext.Current.CancellationToken);
+
+            filledPdfBytes.Should().NotBeNullOrEmpty();
+
+            // Simulate the docservice "force-save" callback: serve the filled PDF on a temporary URL the
+            // DocSpace process can reach, and ask DocSpace to replace the draft content with it.
+            // DocSpace runs as a .NET project on the host, so reach it via localhost.
+            var savedFile = await _fixture.ServeBytesOverHttpAsync(
+                filledPdfBytes,
+                $"submission_{s.LastName.ToLowerInvariant()}.pdf",
+                "application/pdf",
+                "localhost",
+                async downloadUri => (await _filesApi.SaveEditingFileFromFormAsync(
+                    draftFileId,
+                    downloadUri: downloadUri,
+                    fileExtension: "pdf",
+                    forcesave: true,
+                    cancellationToken: TestContext.Current.CancellationToken)).Response,
+                TestContext.Current.CancellationToken);
+
+            savedFile.Should().NotBeNull();
+            savedFile.Id.Should().Be(draftFileId);
+        }
+
+        await _filesClient.Authenticate(Initializer.Owner);
+    }
+
+    private static int ExtractFileIdFromEditorUrl(string editorUrl)
+    {
+        // Editor URL ends with something like "/products/files/doceditor?fileId=42#message/..."
+        // We just need the fileId query parameter.
+        var hashIdx = editorUrl.IndexOf('#');
+        var trimmed = hashIdx >= 0 ? editorUrl[..hashIdx] : editorUrl;
+
+        var queryIdx = trimmed.IndexOf('?');
+        if (queryIdx < 0)
+        {
+            throw new InvalidOperationException($"Editor URL has no query string: {editorUrl}");
+        }
+
+        var query = HttpUtility.ParseQueryString(trimmed[(queryIdx + 1)..]);
+        var fileId = query["fileId"];
+        if (string.IsNullOrEmpty(fileId) || !int.TryParse(fileId, out var id))
+        {
+            throw new InvalidOperationException($"Could not extract fileId from editor URL: {editorUrl}");
+        }
+
+        return id;
     }
 }

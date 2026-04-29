@@ -1,0 +1,85 @@
+// =====================================================================
+//  Filled Leave Application — produces a flat PDF rendered with values
+//  passed via the docbuilder `argument` field. Used in integration tests
+//  to simulate per-user form submissions.
+//
+//  Expected Argument shape:
+//      {
+//        "first_name":           "John",
+//        "last_name":            "Doe",
+//        "start_date":           "01/05/2026",
+//        "end_date":             "10/05/2026",
+//        "vacation_destination": "Riga, Latvia"
+//      }
+// =====================================================================
+
+builder.CreateFile("docx");
+const oDocument = Api.GetDocument();
+
+// ----- colours -----
+const BRAND = [31, 58, 95];
+const MUTED = [136, 136, 136];
+
+// ----- argument -----
+var args = (typeof Argument !== "undefined" && Argument) ? Argument : {};
+function val(key, fallback) {
+    return (args && args[key] != null && args[key] !== "") ? String(args[key]) : (fallback || "");
+}
+
+// ----- helpers -----
+function addParagraph(opts) {
+    opts = opts || {};
+    const p = Api.CreateParagraph();
+    if (opts.jc)            p.SetJc(opts.jc);
+    if (opts.spacingBefore) p.SetSpacingBefore(opts.spacingBefore);
+    if (opts.spacingAfter)  p.SetSpacingAfter(opts.spacingAfter);
+    oDocument.Push(p);
+    return p;
+}
+
+function addText(paragraph, text, opts) {
+    opts = opts || {};
+    const r = paragraph.AddText(text);
+    if (opts.bold)   r.SetBold(true);
+    if (opts.italic) r.SetItalic(true);
+    if (opts.size)   r.SetFontSize(opts.size);
+    if (opts.color)  r.SetColor(opts.color[0], opts.color[1], opts.color[2]);
+    return r;
+}
+
+function addField(label, value) {
+    const labelP = addParagraph({ spacingBefore: 200, spacingAfter: 60 });
+    addText(labelP, label, { bold: true, size: 22, color: BRAND });
+
+    const valueP = addParagraph({ spacingAfter: 120 });
+    addText(valueP, value || "—", { size: 22 });
+}
+
+// ----- header -----
+const firstP = oDocument.GetElement(0);
+addText(firstP, "LEAVE APPLICATION FORM", { bold: true, size: 36, color: BRAND });
+firstP.SetJc("center");
+firstP.SetSpacingAfter(120);
+
+const subtitle = addParagraph({ jc: "center", spacingAfter: 240 });
+addText(subtitle, "Submitted leave request.", { italic: true, size: 22, color: MUTED });
+
+// ----- filled values -----
+addField("First Name",           val("first_name"));
+addField("Last Name",            val("last_name"));
+addField("Start Date",           val("start_date"));
+addField("End Date",             val("end_date"));
+addField("Vacation Destination", val("vacation_destination"));
+
+// ----- signature -----
+addParagraph({ spacingBefore: 480 });
+const sig = addParagraph();
+addText(sig, "Employee Signature: " + val("first_name") + " " + val("last_name") + "     ", { size: 22 });
+addText(sig, "Date: " + val("submission_date", val("start_date")), { size: 22 });
+
+const footer = addParagraph({ jc: "center", spacingBefore: 480 });
+addText(footer, "Leave Application Form  •  Generated for internal use",
+        { italic: true, size: 16, color: MUTED });
+
+builder.SaveFile("pdf", "filled_leave_application_form.pdf");
+builder.CloseFile();

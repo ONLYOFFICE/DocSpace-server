@@ -49,6 +49,8 @@
       <EmbeddedResource Include="Data\new.docx" />
       <None Remove="Data\leave_application_form.docbuilder" />
       <EmbeddedResource Include="Data\leave_application_form.docbuilder" />
+      <None Remove="Data\filled_leave_application_form.docbuilder" />
+      <EmbeddedResource Include="Data\filled_leave_application_form.docbuilder" />
     </ItemGroup>
 
 </Project>

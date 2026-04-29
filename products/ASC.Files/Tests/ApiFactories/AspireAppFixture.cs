@@ -250,7 +250,10 @@ public class AspireAppFixture : IAsyncLifetime
         await commandService.ExecuteCommandAsync("cache", "clear-cache", CancellationToken.None);
     }
 
-    public async Task<byte[]> RunDocBuilderAsync(string scriptResourceName, string outputFileName, CancellationToken cancellationToken = default)
+    public Task<byte[]> RunDocBuilderAsync(string scriptResourceName, string outputFileName, CancellationToken cancellationToken = default) =>
+        RunDocBuilderAsync(scriptResourceName, outputFileName, argumentJson: null, cancellationToken);
+
+    public async Task<byte[]> RunDocBuilderAsync(string scriptResourceName, string outputFileName, string? argumentJson, CancellationToken cancellationToken = default)
     {
         var assembly = typeof(AspireAppFixture).Assembly;
 
@@ -262,40 +265,40 @@ public class AspireAppFixture : IAsyncLifetime
         await scriptStream.CopyToAsync(scriptBuffer, cancellationToken);
         var scriptBytes = scriptBuffer.ToArray();
 
-        // Serve the script over an ephemeral HTTP listener that the editors container reaches via host.docker.internal.
-        // documentserver may issue multiple requests (HEAD/GET/retry) so the listener must accept connections in a loop.
-        using var listener = new TcpListener(IPAddress.Any, 0);
-        listener.Start();
-        var port = ((IPEndPoint)listener.LocalEndpoint).Port;
+        // The script must be reachable from the documentserver container, so use host.docker.internal.
+        return await ServeBytesOverHttpAsync(
+            scriptBytes,
+            scriptResourceName,
+            "text/plain; charset=utf-8",
+            "host.docker.internal",
+            scriptUrl => CallDocBuilderAsync(scriptUrl, outputFileName, argumentJson, cancellationToken),
+            cancellationToken);
+    }
 
-        using var serveCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        var serveTask = ServeScriptLoopAsync(listener, scriptBytes, serveCts.Token);
+    private async Task<byte[]> CallDocBuilderAsync(string scriptUrl, string outputFileName, string? argumentJson, CancellationToken cancellationToken)
+    {
+        var argumentFragment = string.IsNullOrEmpty(argumentJson) ? string.Empty : $",\"argument\":{argumentJson}";
+
+        // documentserver has JWT_ENABLED=true, so wrap the original payload into a signed token.
+        var payloadJson = $"{{\"async\":false,\"url\":\"{scriptUrl}\"{argumentFragment}}}";
+        var tokenJson = $"{{\"payload\":{payloadJson}}}";
+        var jwt = CreateJwtHs256(tokenJson, EditorsJwtSecret);
+        var signedBody = $"{{\"async\":false,\"url\":\"{scriptUrl}\"{argumentFragment},\"token\":\"{jwt}\"}}";
+
+        // 502/504 from documentserver's nginx is usually a transient docservice startup race — retry a few times.
+        const int maxAttempts = 5;
         HttpResponseMessage? response = null;
+        string? lastErrorBody = null;
+        HttpStatusCode lastStatus = 0;
 
         try
         {
-            var scriptUrl = $"http://host.docker.internal:{port}/{scriptResourceName}";
-
-            // documentserver has JWT_ENABLED=true, so wrap the original payload into a signed token.
-            var payloadJson = $"{{\"async\":false,\"url\":\"{scriptUrl}\"}}";
-            var tokenJson = $"{{\"payload\":{payloadJson}}}";
-            var jwt = CreateJwtHs256(tokenJson, EditorsJwtSecret);
-            var signedBody = $"{{\"async\":false,\"url\":\"{scriptUrl}\",\"token\":\"{jwt}\"}}";
-
-            // 502/504 from documentserver's nginx is usually a transient docservice startup race — retry a few times.
-            const int maxAttempts = 5;
-            string? lastErrorBody = null;
-            HttpStatusCode lastStatus = 0;
-
             for (var attempt = 1; attempt <= maxAttempts; attempt++)
             {
                 response?.Dispose();
 
                 using var requestContent = new StringContent(signedBody, Encoding.UTF8, "application/json");
-                using var request = new HttpRequestMessage(HttpMethod.Post, "docbuilder")
-                {
-                    Content = requestContent
-                };
+                using var request = new HttpRequestMessage(HttpMethod.Post, "docbuilder") { Content = requestContent };
                 request.Headers.TryAddWithoutValidation("AuthorizationJwt", $"Bearer {jwt}");
 
                 response = await EditorsHttpClient.SendAsync(request, cancellationToken);
@@ -340,13 +343,42 @@ public class AspireAppFixture : IAsyncLifetime
         finally
         {
             response?.Dispose();
+        }
+    }
+
+    /// <summary>
+    /// Spawns an ephemeral HTTP listener that serves <paramref name="bytes"/> at <c>http://{hostnameForUrl}:{port}/{fileName}</c>
+    /// for the duration of <paramref name="action"/>. The listener handles GET/HEAD and survives multiple connections.
+    /// </summary>
+    public async Task<TResult> ServeBytesOverHttpAsync<TResult>(
+        byte[] bytes,
+        string fileName,
+        string contentType,
+        string hostnameForUrl,
+        Func<string, Task<TResult>> action,
+        CancellationToken cancellationToken = default)
+    {
+        using var listener = new TcpListener(IPAddress.Any, 0);
+        listener.Start();
+        var port = ((IPEndPoint)listener.LocalEndpoint).Port;
+
+        using var serveCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        var serveTask = ServeBytesLoopAsync(listener, bytes, contentType, serveCts.Token);
+
+        try
+        {
+            var url = $"http://{hostnameForUrl}:{port}/{fileName}";
+            return await action(url);
+        }
+        finally
+        {
             await serveCts.CancelAsync();
             listener.Stop();
             try { await serveTask; } catch { /* listener stopped */ }
         }
     }
 
-    private static async Task ServeScriptLoopAsync(TcpListener listener, byte[] scriptBytes, CancellationToken cancellationToken)
+    private static async Task ServeBytesLoopAsync(TcpListener listener, byte[] bytes, string contentType, CancellationToken cancellationToken)
     {
         while (!cancellationToken.IsCancellationRequested)
         {
@@ -359,11 +391,11 @@ public class AspireAppFixture : IAsyncLifetime
             catch (ObjectDisposedException) { return; }
             catch (SocketException) { return; }
 
-            _ = HandleScriptRequestAsync(client, scriptBytes, cancellationToken);
+            _ = HandleBytesRequestAsync(client, bytes, contentType, cancellationToken);
         }
     }
 
-    private static async Task HandleScriptRequestAsync(TcpClient client, byte[] scriptBytes, CancellationToken cancellationToken)
+    private static async Task HandleBytesRequestAsync(TcpClient client, byte[] bytes, string contentType, CancellationToken cancellationToken)
     {
         try
         {
@@ -389,13 +421,13 @@ public class AspireAppFixture : IAsyncLifetime
                 }
 
                 var method = ExtractMethod(requestBuffer, totalRead);
-                var headers = $"HTTP/1.1 200 OK\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Length: {scriptBytes.Length}\r\nConnection: close\r\n\r\n";
+                var headers = $"HTTP/1.1 200 OK\r\nContent-Type: {contentType}\r\nContent-Length: {bytes.Length}\r\nConnection: close\r\n\r\n";
                 var headerBytes = Encoding.ASCII.GetBytes(headers);
                 await stream.WriteAsync(headerBytes, cancellationToken);
 
                 if (!string.Equals(method, "HEAD", StringComparison.OrdinalIgnoreCase))
                 {
-                    await stream.WriteAsync(scriptBytes, cancellationToken);
+                    await stream.WriteAsync(bytes, cancellationToken);
                 }
 
                 await stream.FlushAsync(cancellationToken);

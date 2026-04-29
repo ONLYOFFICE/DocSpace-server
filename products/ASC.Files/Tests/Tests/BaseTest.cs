@@ -69,6 +69,8 @@ public class BaseTest(
 
     private readonly Func<Task> _resetDatabase = fixture.ResetDatabaseAsync;
     protected readonly Func<string, string, CancellationToken, Task<byte[]>> _runDocBuilderAsync = fixture.RunDocBuilderAsync;
+    protected readonly Func<string, string, string?, CancellationToken, Task<byte[]>> _runDocBuilderWithArgAsync = fixture.RunDocBuilderAsync;
+    protected readonly AspireAppFixture _fixture = fixture;
 
     //   FileShare.None
     public static TheoryData<FileShare> ValidFileShare =>
@@ -98,7 +100,7 @@ public class BaseTest(
 
     public async ValueTask InitializeAsync()
     {
-        await Initializer.InitializeAsync(fixture);
+        await Initializer.InitializeAsync(_fixture);
     }
 
     public async ValueTask DisposeAsync()
