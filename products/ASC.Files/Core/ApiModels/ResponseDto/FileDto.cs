@@ -199,6 +199,12 @@ public class FileDto<T> : FileEntryDto<T>
     public string InProcessFolderTitle { get; set; }
 
     /// <summary>
+    /// The ID of the FormFillingFolderDone folder that corresponds to this original form.
+    /// </summary>
+    /// <example>55</example>
+    public int? ResultsFolderId { get; set; }
+
+    /// <summary>
     /// The file draft information with its location.
     /// </summary>
     /// <example>{"folderId": 10, "folderTitle": "In Process", "fileId": 123, "fileTitle": "Draft.pdf"}</example>
@@ -584,6 +590,11 @@ public class FileDtoHelper(
 
             result.Security[FileSecurity.FilesSecurityActions.UpdateXlsx] = isOriginalForm
                 && result.Security[FileSecurity.FilesSecurityActions.Edit];
+
+            if (isOriginalForm && formFilling.ResultsFolderId is int resultsFolderId)
+            {
+                result.ResultsFolderId = resultsFolderId;
+            }
 
             if (currentRoom is { FolderType: FolderType.VirtualDataRoom })
             {

@@ -222,6 +222,12 @@ public class FolderDto<T> : FileEntryDto<T>
     /// Specifies whether to send form data to external database.
     /// </summary>
     public bool? SendFormToExternalDB { get; set; }
+
+    /// <summary>
+    /// The original form ID that corresponds to this FormFillingFolderDone folder.
+    /// </summary>
+    /// <example>42</example>
+    public int? OriginalFormId { get; set; }
 }
 
 [Scope]
@@ -568,6 +574,7 @@ public class FolderDtoHelper(
                 var originalFormId = completedFormProperties?.FormFilling?.OriginalFormId ?? 0;
                 if (originalFormId != 0)
                 {
+                    result.OriginalFormId = originalFormId;
                     var originalForm = await fileDao.GetFileAsync(originalFormId);
                     canUpdateXlsx = originalForm != null && await _fileSecurity.CanEditAsync(originalForm);
                 }
