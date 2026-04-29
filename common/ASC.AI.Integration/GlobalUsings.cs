@@ -38,6 +38,7 @@ global using ASC.Security.Cryptography;
 global using ASC.AI.Integration.Assignments;
 global using ASC.AI.Integration.Database;
 global using ASC.AI.Integration.Database.Models;
+global using ASC.AI.Integration.McpServers;
 global using ASC.AI.Integration.Messages;
 global using ASC.AI.Integration.Profiles;
 global using ASC.AI.Integration.Threads;
