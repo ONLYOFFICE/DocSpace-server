@@ -380,19 +380,28 @@ public abstract class UploadController<T>(
     public async Task<List<string>> CheckUploadAsync(CheckUploadRequestDto<T> model)
     {
         var folderId = model.FolderId;
-        var filesTitle = model.Check.FilesTitle;
+        var filesTitle = model.Check?.FilesTitle;
+
+        if (filesTitle == null)
+        {
+            throw new ArgumentNullException(nameof(filesTitle));
+        }
 
         var folderDao = daoFactory.GetFolderDao<T>();
         var fileDao = daoFactory.GetFileDao<T>();
         var toFolder = await folderDao.GetFolderAsync(folderId);
+
         if (toFolder == null)
         {
             throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
         }
+
+
         if (!await fileSecurity.CanCreateAsync(toFolder))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_Create);
         }
+
         if (toFolder.FolderType == FolderType.FillingFormsRoom && toFolder.RootFolderType == FolderType.RoomTemplates && filesTitle.Any(r => FileUtility.GetFileExtension(r) != ".pdf"))
         {
             throw new Exception(FilesCommonResource.ErrorMessage_UploadToFormRoom);
