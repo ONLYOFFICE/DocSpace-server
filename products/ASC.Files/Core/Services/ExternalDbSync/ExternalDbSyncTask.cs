@@ -158,7 +158,7 @@ public class ExternalDbSyncTask : ExternalDbSyncTaskBase
                 {
                     if (!processedFormIds.Contains(file.Id))
                     {
-                        Forms.Add(new ExternalDbSyncFormResultDto { Id = file.Id, Title = file.Title, Success = false, Error = "Not indexed" });
+                        Forms.Add(new ExternalDbSyncFormResultDto { Id = file.Id, Title = file.Title, Success = false, Error = FilesCommonResource.ErrorMessage_ExternalDbNotIndexed });
                     }
                 }
             }

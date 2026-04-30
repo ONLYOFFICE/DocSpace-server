@@ -1314,10 +1314,6 @@ public class FileStorageService //: IFileStorageService
                     }
                 }
 
-                if (sendFormToExternalDBChanged && updateData.SendFormToExternalDB.Value && folder.Id is int intRoomId)
-                {
-                    await externalDbSyncService.StartSyncAsync(intRoomId);
-                }
             }
 
             if (titleChanged)
