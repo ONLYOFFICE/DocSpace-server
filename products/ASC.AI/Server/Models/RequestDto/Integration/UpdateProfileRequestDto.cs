@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2026
+// (c) Copyright Ascensio System SIA 2009-2026
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,33 +24,26 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.AI.Extensions;
-using ASC.AI.Integration.Extensions;
+using ASC.AI.Integration.Profiles;
 
-namespace ASC.AI;
+namespace ASC.AI.Models.RequestDto.Integration;
 
-public class Startup : BaseStartup
+public class UpdateProfileRequestDto
 {
-    public Startup(IConfiguration configuration) : base(configuration)
-    {
-        if (configuration.GetSection("RabbitMQ").GetChildren().Any() &&
-            string.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
-        {
-            configuration["RabbitMQ:ClientProvidedName"] = Program.AppName;
-        }
-    }
+    [FromRoute(Name = "id")]
+    public required string Id { get; init; }
 
-    public override async Task ConfigureServices(WebApplicationBuilder builder)
-    {
-        var services = builder.Services;
+    [FromBody]
+    public required UpdateProfileBody Body { get; init; }
+}
 
-        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-
-        services.AddMemoryCache();
-
-        await base.ConfigureServices(builder);
-
-        services.AddAiServerServices();
-        services.AddAiIntegrationServices();
-    }
+public class UpdateProfileBody
+{
+    public required string Name { get; init; }
+    public required string ProviderType { get; init; }
+    public required string BaseUrl { get; init; }
+    public string? Key { get; init; }
+    public required string ModelId { get; init; }
+    public bool? Reasoning { get; init; }
+    public Capabilities? Capabilities { get; init; }
 }

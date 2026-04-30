@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2026
+// (c) Copyright Ascensio System SIA 2009-2026
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,33 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.AI.Extensions;
-using ASC.AI.Integration.Extensions;
+namespace ASC.AI.Models.RequestDto.Integration;
 
-namespace ASC.AI;
-
-public class Startup : BaseStartup
+public class CreateProfilesRequestDto
 {
-    public Startup(IConfiguration configuration) : base(configuration)
-    {
-        if (configuration.GetSection("RabbitMQ").GetChildren().Any() &&
-            string.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
-        {
-            configuration["RabbitMQ:ClientProvidedName"] = Program.AppName;
-        }
-    }
-
-    public override async Task ConfigureServices(WebApplicationBuilder builder)
-    {
-        var services = builder.Services;
-
-        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-
-        services.AddMemoryCache();
-
-        await base.ConfigureServices(builder);
-
-        services.AddAiServerServices();
-        services.AddAiIntegrationServices();
-    }
+    public required IReadOnlyList<CreateProfileRequestDto> Profiles { get; init; }
 }
