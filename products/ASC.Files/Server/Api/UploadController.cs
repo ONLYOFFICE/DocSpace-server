@@ -375,9 +375,9 @@ public abstract class UploadController<T>(
     /// <path>api/2.0/files/{folderId}/upload/check</path>
     /// <collection>list</collection>
     [Tags("Files / Folders")]
-    [SwaggerResponse(200, "Inserted file", typeof(List<string>))]
+    [SwaggerResponse(200, "Inserted file", typeof(HashSet<string>))]
     [HttpPost("{folderId}/upload/check")]
-    public async Task<List<string>> CheckUploadAsync(CheckUploadRequestDto<T> model)
+    public async Task<HashSet<string>> CheckUploadAsync(CheckUploadRequestDto<T> model)
     {
         var folderId = model.FolderId;
         var filesTitle = model.Check?.FilesTitle;
@@ -407,7 +407,7 @@ public abstract class UploadController<T>(
             throw new Exception(FilesCommonResource.ErrorMessage_UploadToFormRoom);
         }
 
-        var result = new List<string>();
+        var result = new HashSet<string>();
 
         foreach (var title in filesTitle)
         {
