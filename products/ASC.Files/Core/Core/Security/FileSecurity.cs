@@ -1533,7 +1533,7 @@ public class FileSecurity(
                         }
                     }
 
-                    if (action == FilesSecurityActions.Duplicate && isRoom && !folder.SettingsDenyDownload)
+                    if (action is FilesSecurityActions.Duplicate or FilesSecurityActions.Copy && isRoom && !folder.SettingsDenyDownload)
                     {
                         return true;
                     }

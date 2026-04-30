@@ -104,7 +104,6 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
     private readonly bool _copy;
     private readonly int _daoFolderId;
     private readonly IDictionary<string, StringValues> _headers;
-    private readonly Dictionary<T, Folder<T>> _parentRooms = new();
     private readonly FileConflictResolveType _resolveType;
     private readonly string _thirdPartyFolderId;
     private readonly bool _toFillOut;
