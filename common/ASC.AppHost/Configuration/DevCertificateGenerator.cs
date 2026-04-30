@@ -33,15 +33,15 @@ namespace ASC.AppHost.Configuration;
 public static class DevCertificateGenerator
 {
     private const string Subject = "CN=localhost";
-    private static readonly string[] _dnsNames = ["localhost", "*.localhost"];
+    private static readonly string[] _dnsNames = ["localhost", "*.dev.localhost"];
 
     public static (string CertDir, string CrtFileName, string KeyFileName) EnsureCertificate(string appHostDirectory)
     {
         var certDir = Path.Combine(appHostDirectory, "certs");
         Directory.CreateDirectory(certDir);
 
-        const string crtFileName = "docspace.localhost.crt";
-        const string keyFileName = "docspace.localhost.key";
+        const string crtFileName = "docspace.dev.localhost.crt";
+        const string keyFileName = "docspace.dev.localhost.key";
 
         var crtPath = Path.Combine(certDir, crtFileName);
         var keyPath = Path.Combine(certDir, keyFileName);
@@ -122,7 +122,7 @@ public static class DevCertificateGenerator
             using var store = new X509Store(StoreName.Root, StoreLocation.CurrentUser);
             store.Open(OpenFlags.ReadWrite);
 
-            foreach (var staleSubject in new[] { "docspace.localhost", "localhost" })
+            foreach (var staleSubject in new[] { "docspace.dev.localhost", "localhost" })
             {
                 var stale = store.Certificates.Find(X509FindType.FindBySubjectName, staleSubject, false);
                 foreach (var old in stale)
@@ -160,8 +160,8 @@ public static class DevCertificateGenerator
         if (OperatingSystem.IsLinux())
         {
             Console.WriteLine("[AppHost] Dev certificate generated. To trust it on Linux run (as root):");
-            Console.WriteLine($"  sudo cp '{crtPath}' /usr/local/share/ca-certificates/docspace.localhost.crt && sudo update-ca-certificates");
-            Console.WriteLine("  # For Chrome/Firefox (NSS): certutil -d sql:$HOME/.pki/nssdb -A -t \"C,,\" -n docspace.localhost -i '" + crtPath + "'");
+            Console.WriteLine($"  sudo cp '{crtPath}' /usr/local/share/ca-certificates/docspace.dev.localhost.crt && sudo update-ca-certificates");
+            Console.WriteLine("  # For Chrome/Firefox (NSS): certutil -d sql:$HOME/.pki/nssdb -A -t \"C,,\" -n docspace.dev.localhost -i '" + crtPath + "'");
             File.WriteAllText(trustMarkerPath, cert.Thumbprint);
         }
     }

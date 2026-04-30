@@ -30,7 +30,7 @@ public static class Constants
 {
     public const int AppHostPort = 8092;
     public const int AppHostHttpsPort = 443;
-    public const string AppHostHttpsHost = "docspace.localhost";
+    public const string AppHostHttpsHost = "docspace.dev.localhost";
 
     public const int RestyPort = 8092;
     public const int RestyHttpsPort = 443;

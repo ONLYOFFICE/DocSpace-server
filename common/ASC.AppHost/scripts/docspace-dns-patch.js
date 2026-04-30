@@ -1,14 +1,14 @@
-// Resolves docspace.localhost to 127.0.0.1 for Node.js processes.
+// Resolves docspace.dev.localhost to 127.0.0.1 for Node.js processes.
 // Node does not honor RFC 6761 for .localhost TLDs like browsers do.
 // Required so SSR services (login/doceditor/management) can fetch
-// https://docspace.localhost/... when the outer page is served via HTTPS.
+// https://docspace.dev.localhost/... when the outer page is served via HTTPS.
 "use strict";
 
 console.log("[docspace-dns-patch] loaded in pid", process.pid);
 
 const dns = require("dns");
 
-const HOSTNAME = "docspace.localhost";
+const HOSTNAME = "docspace.dev.localhost";
 const LOOPBACK_V4 = "127.0.0.1";
 const LOOPBACK_V6 = "::1";
 
