@@ -44,7 +44,7 @@ public partial class AiIntegrationContext(DbContextOptions<AiIntegrationContext>
             .AddDbThreads()
             .AddDbMessages()
             .AddDbAssignments()
-            .AddDbMcpServers()
+            .AddDbServers()
             .AddDbToolPrefs()
             .AddDbPreferences();
     }

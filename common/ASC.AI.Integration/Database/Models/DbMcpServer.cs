@@ -49,7 +49,7 @@ public class DbMcpServer : BaseEntity
 
 public static class DbMcpServerExtension
 {
-    public static ModelBuilderWrapper AddDbMcpServers(this ModelBuilderWrapper modelBuilder)
+    public static ModelBuilderWrapper AddDbServers(this ModelBuilderWrapper modelBuilder)
     {
         modelBuilder.Entity<DbMcpServer>().Navigation(e => e.Tenant).AutoInclude(false);
 
