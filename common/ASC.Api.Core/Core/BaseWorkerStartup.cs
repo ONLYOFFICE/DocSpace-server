@@ -69,9 +69,6 @@ public class BaseWorkerStartup(IConfiguration configuration)
 
 
         services.RegisterFeature();
-
-        services.AddStartupTask<WarmupServicesStartupTask>().TryAddSingleton(services);
-
         services.AddMemoryCache();
 
         var connectionMultiplexer = await services.GetRedisConnectionMultiplexerAsync(Configuration, GetType().Namespace);
