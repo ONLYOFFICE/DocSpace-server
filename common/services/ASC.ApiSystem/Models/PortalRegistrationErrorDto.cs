@@ -29,7 +29,7 @@ namespace ASC.ApiSystem.Models;
 /// <summary>
 /// Universal error response for all portal registration operations
 /// </summary>
-public record PortalRegistrationErrorDto : ErrorDto
+public sealed record PortalRegistrationErrorDto : ErrorDto
 {
     /// <summary>
     /// The available portal names.

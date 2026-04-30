@@ -44,6 +44,7 @@ global using ASC.Api.Core.Extensions;
 global using ASC.ApiSystem;
 global using ASC.ApiSystem.Classes;
 global using ASC.ApiSystem.Controllers;
+global using ASC.ApiSystem.Extensions;
 global using ASC.ApiSystem.Interfaces;
 global using ASC.ApiSystem.Log;
 global using ASC.ApiSystem.Models;

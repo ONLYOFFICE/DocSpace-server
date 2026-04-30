@@ -254,7 +254,7 @@ public class PortalController(
 
         return Ok(new
         {
-            tenant = commonMethods.ToTenantResponseDto(tenant),
+            tenant = await commonMethods.ToTenantResponseDto(tenant),
             removed = !wizardSettings.Completed
         });
     }
@@ -318,7 +318,7 @@ public class PortalController(
 
         return Ok(new
         {
-            tenant = commonMethods.ToTenantResponseDto(tenant)
+            tenant = await commonMethods.ToTenantResponseDto(tenant)
         });
     }
 
@@ -407,11 +407,11 @@ public class PortalController(
                     var owner = owners.FirstOrDefault(o => o.Id == t.OwnerId);
                     var wizardSettings = await settingsManager.LoadAsync<WizardSettings>(t.Id);
 
-                    result.Add(commonMethods.ToTenantResponseDto(t, quotaUsage, owner, wizardSettings));
+                    result.Add(await commonMethods.ToTenantResponseDto(t, quotaUsage, owner, wizardSettings));
                 }
                 else
                 {
-                    result.Add(commonMethods.ToTenantResponseDto(t));
+                    result.Add(await commonMethods.ToTenantResponseDto(t));
                 }
             }
 
@@ -499,7 +499,7 @@ public class PortalController(
                 let domain = tenant.GetTenantDomain(coreSettings)
                 let portalName = $"{scheme}{Uri.SchemeDelimiter}{domain}"
                 let portalLink = commonMethods.CreateReference(tenant.Id, scheme, domain, model.Email)
-                select new SimpleTenantWrapper(portalName, portalLink);
+                select new TenantWrapper(portalName, portalLink);
 
             return Ok(new
             {
@@ -518,11 +518,11 @@ public class PortalController(
         }
     }
 
-    private record SimpleTenantWrapper(string PortalName, string PortalLink);
+    private record TenantWrapper(string PortalName, string PortalLink);
 
-    private async Task<List<SimpleTenantWrapper>> GetTenantsByThirdPartyProfileAsync(LoginProfile  profile)
+    private async Task<List<TenantWrapper>> GetTenantsByThirdPartyProfileAsync(LoginProfile profile)
     {
-        var result = new List<SimpleTenantWrapper>();
+        var result = new List<TenantWrapper>();
         if (profile == null)
         {
             return result;
@@ -565,7 +565,7 @@ public class PortalController(
             var domain = tenant.GetTenantDomain(coreSettings);
             var portalName = $"{scheme}{Uri.SchemeDelimiter}{domain}";
             var portalLink = commonMethods.CreateReference(tenant.Id, scheme, domain, user.Email);
-            result.Add(new SimpleTenantWrapper(portalName, portalLink));
+            result.Add(new TenantWrapper(portalName, portalLink));
         }
 
         return result;

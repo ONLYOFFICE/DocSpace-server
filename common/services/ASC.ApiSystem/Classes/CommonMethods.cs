@@ -41,10 +41,10 @@ public class CommonMethods(
     TenantManager tenantManager,
     IHttpClientFactory clientFactory)
 {
-    public TenantResponseDto ToTenantResponseDto(Tenant t, QuotaUsageDto quotaUsage = null, TenantOwnerDto owner = null, WizardSettings wizardSettings = null)
+    public async Task<TenantResponseDto> ToTenantResponseDto(Tenant t, QuotaUsageDto quotaUsage = null, TenantOwnerDto owner = null, WizardSettings wizardSettings = null)
     {
-        var tenantQuotaSettings = hostedSolution.GetTenantQuotaSettings(t.Id).Result;
-        var tariffMaxTotalSize = hostedSolution.GetTenantQuotaAsync(t.Id).Result.MaxTotalSize;
+        var tenantQuotaSettings = await hostedSolution.GetTenantQuotaSettings(t.Id);
+        var tariffMaxTotalSize = (await hostedSolution.GetTenantQuotaAsync(t.Id)).MaxTotalSize;
         var timeZone = TimeZoneConverter.GetTimeZone(t.TimeZone);
 
         return new TenantResponseDto
