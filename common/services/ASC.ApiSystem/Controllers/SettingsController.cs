@@ -80,10 +80,10 @@ public class SettingsController(
 
         if (string.IsNullOrEmpty(model.Key))
         {
-            return BadRequest(new
+            return BadRequest(new ErrorDto
             {
-                error = "params",
-                message = "Key is required"
+                Error = "params",
+                Message = "Key is required"
             });
         }
 
@@ -116,19 +116,19 @@ public class SettingsController(
 
         if (string.IsNullOrEmpty(model.Key))
         {
-            return BadRequest(new
+            return BadRequest(new ErrorDto
             {
-                error = "params",
-                message = "Key is required"
+                Error = "params",
+                Message = "Key is required"
             });
         }
 
         if (string.IsNullOrEmpty(model.Value))
         {
-            return BadRequest(new
+            return BadRequest(new ErrorDto
             {
-                error = "params",
-                message = "Value is empty"
+                Error = "params",
+                Message = "Value is empty"
             });
         }
 
@@ -136,10 +136,10 @@ public class SettingsController(
         {
             if (Uri.CheckHostName(model.Value) != UriHostNameType.Dns)
             {
-                return BadRequest(new
+                return BadRequest(new ErrorDto
                 {
-                    error = "params",
-                    message = "BaseDomain is not valid"
+                    Error = "params",
+                    Message = "BaseDomain is not valid"
                 });
             }
         }
@@ -171,19 +171,19 @@ public class SettingsController(
     {
         if (model == null || string.IsNullOrEmpty(model.HostName))
         {
-            return BadRequest(new
+            return BadRequest(new ErrorDto
             {
-                error = "hostNameEmpty",
-                message = "HostName is required"
+                Error = "hostNameEmpty",
+                Message = "HostName is required"
             });
         }
 
         if (Uri.CheckHostName(model.HostName) != UriHostNameType.Dns)
         {
-            return BadRequest(new
+            return BadRequest(new ErrorDto
             {
-                error = "hostNameInvalid",
-                message = "HostName is not valid"
+                Error = "hostNameInvalid",
+                Message = "HostName is not valid"
             });
         }
 
@@ -213,17 +213,17 @@ public class SettingsController(
 
     #region private methods
 
-    private async Task<(bool, int, object)> GetTenantAsync(SettingsModel model)
+    private async Task<(bool, int, ErrorDto)> GetTenantAsync(SettingsModel model)
     {
-        object error;
+        ErrorDto error;
         var tenantId = -1;
 
         if (model == null)
         {
-            error = new
+            error = new ErrorDto
             {
-                error = "portalNameEmpty",
-                message = "PortalName is required"
+                Error = "portalNameEmpty",
+                Message = "PortalName is required"
             };
 
             logger.LogError("Model is null");
@@ -240,10 +240,10 @@ public class SettingsController(
         var (success, tenant) = await commonMethods.TryGetTenantAsync(model);
         if (!success)
         {
-            error = new
+            error = new ErrorDto
             {
-                error = "portalNameEmpty",
-                message = "PortalName is required"
+                Error = "portalNameEmpty",
+                Message = "PortalName is required"
             };
 
             logger.LogError("Model without tenant");
@@ -253,10 +253,10 @@ public class SettingsController(
 
         if (tenant == null)
         {
-            error = new
+            error = new ErrorDto
             {
-                error = "portalNameNotFound",
-                message = "Portal not found"
+                Error = "portalNameNotFound",
+                Message = "Portal not found"
             };
 
             logger.LogError("Tenant not found");
