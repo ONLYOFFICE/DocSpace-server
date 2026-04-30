@@ -106,7 +106,7 @@ public class CommonMethods(
 
         if (skipAndReturnUrl)
         {
-            log.LogDebug($"SendMethod {apiMethod} skiped");
+            log.DebugSendMethodSkipped(apiMethod);
             return url;
         }
 
@@ -121,7 +121,7 @@ public class CommonMethods(
 #pragma warning restore CA2000
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
 
-            log.LogDebug($"SendMethod {apiMethod} result = {response.StatusCode}");
+            log.DebugSendMethodResult(apiMethod, response.StatusCode);
 
             if (response.StatusCode != HttpStatusCode.OK)
             {
@@ -131,7 +131,7 @@ public class CommonMethods(
         }
         catch (Exception ex)
         {
-            log.LogError(ex, $"SendMethod {apiMethod} error");
+            log.ErrorSendMethod(apiMethod, ex);
             return url;
         }
 
@@ -240,7 +240,7 @@ public class CommonMethods(
             return false;
         }
 
-        log.LogDebug("clientIP = {0}", clientIP);
+        log.DebugClientIp(clientIP);
 
         var cacheKey = "ip_" + clientIP;
 
@@ -274,7 +274,7 @@ public class CommonMethods(
             return false;
         }
 
-        log.LogDebug("PortalName = {PortalName}; Too much requests from ip: {Ip}", model.PortalName, clientIP);
+        log.DebugTooMuchRequests(model.PortalName, clientIP);
         sw.Stop();
 
         return true;
@@ -361,16 +361,16 @@ public class CommonMethods(
                 return true;
             }
 
-            log.LogDebug("Recaptcha error: {0}", resp);
+            log.DebugRecaptchaResponseError(resp);
 
             if (recaptchData.ErrorCodes is { Count: > 0 })
             {
-                log.LogDebug("Recaptcha api returns errors: {0}", resp);
+                log.DebugRecaptchaApiErrors(resp);
             }
         }
         catch (Exception ex)
         {
-            log.LogError(ex, "ValidateRecaptcha");
+            log.ErrorValidateRecaptcha(ex);
         }
         return false;
     }

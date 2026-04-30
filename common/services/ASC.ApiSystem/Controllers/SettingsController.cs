@@ -144,7 +144,7 @@ public class SettingsController(
             }
         }
 
-        logger.LogDebug("Set {0} value {1} for {2}", model.Key, model.Value, tenantId.ToString());
+        logger.DebugSaveSetting(model.Key, model.Value, tenantId);
 
         await coreSettings.SaveSettingAsync(model.Key, model.Value, tenantId);
 
@@ -200,7 +200,7 @@ public class SettingsController(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "checkdomain " + model.HostName);
+            logger.ErrorCheckDomain(model.HostName, ex);
 
             return Ok(new
             {
@@ -226,7 +226,7 @@ public class SettingsController(
                 Message = "PortalName is required"
             };
 
-            logger.LogError("Model is null");
+            logger.ErrorModelIsNull();
 
             return (false, tenantId, error);
         }
@@ -246,7 +246,7 @@ public class SettingsController(
                 Message = "PortalName is required"
             };
 
-            logger.LogError("Model without tenant");
+            logger.ErrorModelWithoutTenant();
 
             return (false, tenantId, error);
         }
@@ -259,7 +259,7 @@ public class SettingsController(
                 Message = "Portal not found"
             };
 
-            logger.LogError("Tenant not found");
+            logger.ErrorTenantNotFound();
 
             return (false, tenantId, error);
         }
