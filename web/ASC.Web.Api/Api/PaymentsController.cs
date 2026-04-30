@@ -867,7 +867,7 @@ public class PaymentController(
             return null;
         }
 
-        var participantDisplayNames = await report.GetParticipantDisplayNamesAsync(displayUserSettingsHelper);
+        var participantDisplayNames = await report.GetParticipantDisplayNamesAsync(displayUserSettingsHelper, true);
         var logoText = await tenantLogoManager.GetLogoTextAsync();
 
         return new ReportDto(report, apiDateTimeHelper, participantDisplayNames, filter.ServiceName, logoText);

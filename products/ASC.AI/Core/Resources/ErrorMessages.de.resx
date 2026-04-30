@@ -183,4 +183,10 @@
   <data name="ProviderNameExists" xml:space="preserve">
     <value>Anbietername bereits vorhanden</value>
   </data>
+  <data name="ModelDisabled" xml:space="preserve">
+    <value>Das Modell wurde durch die Einstellungen Ihres Anbieters deaktiviert.</value>
+  </data>
+  <data name="ServerAlreadyAdded" xml:space="preserve">
+    <value>Der Server wurde dem Agenten bereits hinzugefügt</value>
+  </data>
 </root>

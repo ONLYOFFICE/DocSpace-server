@@ -53,7 +53,7 @@ public class GenerateFormTool(FileStorageService fileService, EditorToolCallStat
                 {
                     ParentId = resultStorageId,
                     Title = $"{fileName}{extension}"
-                }, ignoreTemplates: false);
+                }, ignoreTemplates: true);
 
                 await callStateStore.SetAsync(file.Id, new EditorToolCallState
                 {

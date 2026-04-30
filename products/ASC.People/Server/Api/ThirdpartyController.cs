@@ -219,6 +219,7 @@ public class ThirdpartyController(
                 (user, quotaLimit) = await CreateNewUser(
                     thirdPartyProfile.FirstName,
                     thirdPartyProfile.LastName,
+                    thirdPartyProfile.DisplayName,
                     email,
                     passwordHash,
                     employeeType,
@@ -332,7 +333,7 @@ public class ThirdpartyController(
         messageService.Send(MessageAction.UserUnlinkedSocialAccount, GetMeaningfulProviderName(inDto.Provider));
     }
 
-    private async Task<(UserInfo, bool)> CreateNewUser(string firstName, string lastName, string email, string passwordHash, EmployeeType employeeType, bool fromInviteLink,
+    private async Task<(UserInfo, bool)> CreateNewUser(string firstName, string lastName, string displayName, string email, string passwordHash, EmployeeType employeeType, bool fromInviteLink,
         bool inviteByEmail, string cultureName, Guid? invitedBy, bool autoGenaratedEmail)
     {
         if (SetupInfo.IsSecretEmail(email))
@@ -357,8 +358,13 @@ public class ThirdpartyController(
             user.CreatedBy = invitedBy;
         }
 
+        if (string.IsNullOrWhiteSpace(firstName) && string.IsNullOrWhiteSpace(lastName) && !string.IsNullOrWhiteSpace(displayName))
+        {
+            firstName = displayName;
+        }
+
         user.FirstName = string.IsNullOrWhiteSpace(firstName) ? UserControlsCommonResource.UnknownFirstName : firstName;
-        user.LastName = string.IsNullOrWhiteSpace(lastName) ? UserControlsCommonResource.UnknownLastName : lastName;
+        user.LastName = string.IsNullOrWhiteSpace(lastName) ? string.Empty : lastName;
         user.Email = email;
 
         if (autoGenaratedEmail)

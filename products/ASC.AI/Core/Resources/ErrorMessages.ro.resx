@@ -183,4 +183,10 @@
   <data name="ProviderNameExists" xml:space="preserve">
     <value>Numele furnizorului există deja</value>
   </data>
+  <data name="ServerAlreadyAdded" xml:space="preserve">
+    <value>Serverul a fost deja adăugat la agent</value>
+  </data>
+  <data name="ModelDisabled" xml:space="preserve">
+    <value>Modelul a fost dezactivat de setările furnizorului dvs.</value>
+  </data>
 </root>

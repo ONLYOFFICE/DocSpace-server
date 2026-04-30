@@ -27,7 +27,8 @@
 namespace ASC.Files.Helpers;
 
 [Scope]
-public class FilesControllerHelper(IServiceProvider serviceProvider,
+public class FilesControllerHelper(
+    IServiceProvider serviceProvider,
         FilesSettingsHelper filesSettingsHelper,
         FileUploader fileUploader,
         SocketManager socketManager,
@@ -165,10 +166,6 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         return await _fileDtoHelper.GetAsync(file);
     }
 
-    public async Task<EditHistoryDataDto> GetEditDiffUrlAsync<T>(T fileId, int version = 0)
-    {
-        return await _fileStorageService.GetEditDiffUrlAsync(fileId, version);
-    }
 
     public async Task<FillingFormResultDto<T>> GetFillResultAsync<T>(T formId)
     {

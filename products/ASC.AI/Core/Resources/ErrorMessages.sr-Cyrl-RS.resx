@@ -183,4 +183,10 @@
   <data name="ProviderNameExists" xml:space="preserve">
     <value>Назив провајдера већ постоји</value>
   </data>
+  <data name="ModelDisabled" xml:space="preserve">
+    <value>Модел је онемогућен подешавањима вашег провајдера.</value>
+  </data>
+  <data name="ServerAlreadyAdded" xml:space="preserve">
+    <value>Сервер је већ додат агенту</value>
+  </data>
 </root>

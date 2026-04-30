@@ -2215,4 +2215,16 @@ $TrulyYours</value>
 
 $TrulyYours</value>
   </data>
+  <data name="ActionFileCreatedInSharedForMe" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; 创建了新文档：&lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; 位于：&lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionFileEditedInSharedForMe" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; 编辑了文档：&lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; 位于：&lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionFileUploadedInSharedForMe" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; 上传了新文档：&lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; 位于：&lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionNewCommentInSharedForMe" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; 为文档版本添加了新评论：&lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; 位于：&lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+  </data>
 </root>
