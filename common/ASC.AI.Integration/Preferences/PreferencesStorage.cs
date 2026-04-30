@@ -24,28 +24,34 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Integration.Database;
+namespace ASC.AI.Integration.Preferences;
 
-public partial class AiIntegrationContext(DbContextOptions<AiIntegrationContext> options) : BaseDbContext(options)
+[Scope]
+public class PreferencesStorage(IDbContextFactory<AiIntegrationContext> dbContextFactory)
 {
-    public DbSet<DbProfile> Profiles { get; set; }
-    public DbSet<DbThread> Threads { get; set; }
-    public DbSet<DbMessage> Messages { get; set; }
-    public DbSet<DbAssignment> Assignments { get; set; }
-    public DbSet<DbMcpServer> McpServers { get; set; }
-    public DbSet<DbToolPrefs> ToolPrefs { get; set; }
-    public DbSet<DbPreferences> Preferences { get; set; }
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    public async Task<bool?> ReadDeepModeAsync(int tenantId)
     {
-        ModelBuilderWrapper.From(modelBuilder, Database)
-            .AddDbTenant()
-            .AddDbProfiles()
-            .AddDbThreads()
-            .AddDbMessages()
-            .AddDbAssignments()
-            .AddDbMcpServers()
-            .AddDbToolPrefs()
-            .AddDbPreferences();
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
+        return await context.GetDeepModeAsync(tenantId);
+    }
+
+    public async Task UpsertDeepModeAsync(int tenantId, bool value)
+    {
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
+        await context.Preferences.AddOrUpdateAsync(new DbPreferences
+        {
+            TenantId = tenantId,
+            DeepMode = value
+        });
+        await context.SaveChangesAsync();
+    }
+
+    public async Task DeletePreferencesAsync(int tenantId)
+    {
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
+        await context.DeletePreferencesAsync(tenantId);
     }
 }

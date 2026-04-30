@@ -26,26 +26,35 @@
 
 namespace ASC.AI.Integration.Database;
 
-public partial class AiIntegrationContext(DbContextOptions<AiIntegrationContext> options) : BaseDbContext(options)
+public partial class AiIntegrationContext
 {
-    public DbSet<DbProfile> Profiles { get; set; }
-    public DbSet<DbThread> Threads { get; set; }
-    public DbSet<DbMessage> Messages { get; set; }
-    public DbSet<DbAssignment> Assignments { get; set; }
-    public DbSet<DbMcpServer> McpServers { get; set; }
-    public DbSet<DbToolPrefs> ToolPrefs { get; set; }
-    public DbSet<DbPreferences> Preferences { get; set; }
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    [PreCompileQuery([PreCompileQuery.DefaultInt])]
+    public Task<bool?> GetDeepModeAsync(int tenantId)
     {
-        ModelBuilderWrapper.From(modelBuilder, Database)
-            .AddDbTenant()
-            .AddDbProfiles()
-            .AddDbThreads()
-            .AddDbMessages()
-            .AddDbAssignments()
-            .AddDbMcpServers()
-            .AddDbToolPrefs()
-            .AddDbPreferences();
+        return PreferencesQueriesContainer.GetDeepModeAsync(this, tenantId);
     }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt])]
+    public Task<int> DeletePreferencesAsync(int tenantId)
+    {
+        return PreferencesQueriesContainer.DeletePreferencesAsync(this, tenantId);
+    }
+}
+
+static file class PreferencesQueriesContainer
+{
+    public static readonly Func<AiIntegrationContext, int, Task<bool?>> GetDeepModeAsync =
+        EF.CompileAsyncQuery(
+            (AiIntegrationContext ctx, int tenantId) =>
+                ctx.Preferences
+                    .Where(x => x.TenantId == tenantId)
+                    .Select(x => x.DeepMode)
+                    .FirstOrDefault());
+
+    public static readonly Func<AiIntegrationContext, int, Task<int>> DeletePreferencesAsync =
+        EF.CompileAsyncQuery(
+            (AiIntegrationContext ctx, int tenantId) =>
+                ctx.Preferences
+                    .Where(x => x.TenantId == tenantId)
+                    .ExecuteDelete());
 }
