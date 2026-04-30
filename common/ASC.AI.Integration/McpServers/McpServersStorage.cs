@@ -78,6 +78,10 @@ public class McpServersStorage(IDbContextFactory<AiIntegrationContext> dbContext
             await using var context = await dbContextFactory.CreateDbContextAsync();
             await using var transaction = await context.Database.BeginTransactionAsync();
 
+            var oldNames = await context.GetAllMcpServersAsync(tenantId)
+                .Select(x => x.Name)
+                .ToListAsync();
+
             await context.DeleteAllMcpServersAsync(tenantId);
 
             if (servers.Count > 0)
@@ -97,14 +101,32 @@ public class McpServersStorage(IDbContextFactory<AiIntegrationContext> dbContext
                 await context.SaveChangesAsync();
             }
 
+            foreach (var name in oldNames)
+            {
+                if (!servers.ContainsKey(name))
+                {
+                    await context.DeleteToolPrefsByServerTypeAsync(tenantId, name);
+                }
+            }
+
             await transaction.CommitAsync();
         });
     }
 
     public async Task DeleteAsync(int tenantId, string name)
     {
-        await using var context = await dbContextFactory.CreateDbContextAsync();
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        var strategy = dbContext.Database.CreateExecutionStrategy();
 
-        await context.DeleteMcpServerAsync(tenantId, name);
+        await strategy.ExecuteAsync(async () =>
+        {
+            await using var context = await dbContextFactory.CreateDbContextAsync();
+            await using var transaction = await context.Database.BeginTransactionAsync();
+
+            await context.DeleteMcpServerAsync(tenantId, name);
+            await context.DeleteToolPrefsByServerTypeAsync(tenantId, name);
+
+            await transaction.CommitAsync();
+        });
     }
 }

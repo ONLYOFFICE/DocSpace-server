@@ -42,3 +42,4 @@ global using ASC.AI.Integration.McpServers;
 global using ASC.AI.Integration.Messages;
 global using ASC.AI.Integration.Profiles;
 global using ASC.AI.Integration.Threads;
+global using ASC.AI.Integration.ToolPrefs;

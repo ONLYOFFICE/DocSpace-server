@@ -33,6 +33,7 @@ public partial class AiIntegrationContext(DbContextOptions<AiIntegrationContext>
     public DbSet<DbMessage> Messages { get; set; }
     public DbSet<DbAssignment> Assignments { get; set; }
     public DbSet<DbMcpServer> McpServers { get; set; }
+    public DbSet<DbToolPrefs> ToolPrefs { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -42,6 +43,7 @@ public partial class AiIntegrationContext(DbContextOptions<AiIntegrationContext>
             .AddDbThreads()
             .AddDbMessages()
             .AddDbAssignments()
-            .AddDbMcpServers();
+            .AddDbMcpServers()
+            .AddDbToolPrefs();
     }
 }
