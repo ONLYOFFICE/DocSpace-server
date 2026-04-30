@@ -586,4 +586,7 @@ Najwyższy poziom kompatybilności z docx, xlsx, pptx.</value>
   <data name="User" xml:space="preserve">
     <value>Użytkownik</value>
   </data>
+  <data name="ErrorMessage_AiServicesDisabled" xml:space="preserve">
+    <value>Usługi AI są wyłączone dla bieżącego portalu</value>
+  </data>
 </root>

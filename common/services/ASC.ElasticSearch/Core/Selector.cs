@@ -231,6 +231,13 @@ public class Selector<T>(IServiceProvider serviceProvider)
         };
     }
 
+    public Selector<T> NotExists<TProperty>(Expression<Func<T, TProperty>> selector)
+    {
+        _queryContainer = _queryContainer && !_queryContainerDescriptor.Exists(e => e.Field(new Field(selector)));
+
+        return this;
+    }
+
     public Selector<T> Not(Expression<Func<Selector<T>, Selector<T>>> selector)
     {
         return new Selector<T>(_serviceProvider)

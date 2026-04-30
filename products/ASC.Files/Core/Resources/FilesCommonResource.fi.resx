@@ -586,4 +586,7 @@ Paras yhteensopivuus docx:n, xlsx:n, pptx:n kanssa.</value>
   <data name="User" xml:space="preserve">
     <value>Käyttäjä</value>
   </data>
+  <data name="ErrorMessage_AiServicesDisabled" xml:space="preserve">
+    <value>Tekoälypalvelut on poistettu käytöstä nykyisessä portaalissa</value>
+  </data>
 </root>

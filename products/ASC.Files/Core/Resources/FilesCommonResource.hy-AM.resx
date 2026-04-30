@@ -586,4 +586,7 @@
   <data name="User" xml:space="preserve">
     <value>Օգտատեր</value>
   </data>
+  <data name="ErrorMessage_AiServicesDisabled" xml:space="preserve">
+    <value>ԱԲ ծառայությունները անջատված են ընթացիկ պորտալի համար</value>
+  </data>
 </root>

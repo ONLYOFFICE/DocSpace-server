@@ -1188,4 +1188,10 @@
   <data name="ScheduledBackupDeleted" xml:space="preserve">
     <value>Запланированное резервное копирование отменено</value>
   </data>
+  <data name="AIAccessDisabled" xml:space="preserve">
+    <value>ИИ-сервисы были отключены</value>
+  </data>
+  <data name="AIAccessEnabled" xml:space="preserve">
+    <value>ИИ-сервисы были включены</value>
+  </data>
 </root>

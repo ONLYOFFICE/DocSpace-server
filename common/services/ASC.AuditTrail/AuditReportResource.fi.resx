@@ -1155,4 +1155,43 @@
   <data name="WhiteLabelSettingsLogoTextUpdated" xml:space="preserve">
     <value>Brändinimi päivitetty</value>
   </data>
+  <data name="AIAccessDisabled" xml:space="preserve">
+    <value>Tekoälypalvelut on poistettu käytöstä</value>
+  </data>
+  <data name="AIAccessEnabled" xml:space="preserve">
+    <value>Tekoälypalvelut on otettu käyttöön</value>
+  </data>
+  <data name="AIDefaultProviderDeleted" xml:space="preserve">
+    <value>Oletuspalveluntarjoaja poistettu</value>
+  </data>
+  <data name="AIDefaultProviderSet" xml:space="preserve">
+    <value>Oletus-tekoälypalveluntarjoaja asetettu: Nimi: {0}, Oletusmalli: {1}</value>
+  </data>
+  <data name="BackupCancelled" xml:space="preserve">
+    <value>Varmuuskopiointi peruutettu</value>
+  </data>
+  <data name="DocumentsDefaultTemplatesSettingsUpdated" xml:space="preserve">
+    <value>Oletusmallin asetukset päivitetty: {0}</value>
+  </data>
+  <data name="FileNotSavedDueToRoomQuota" xml:space="preserve">
+    <value>Huoneet [{0}]. Tiedostoa ei tallennettu: {1} – huoneen tallennuskiintiö ylitetty.</value>
+  </data>
+  <data name="FileNotSavedDueToUserQuota" xml:space="preserve">
+    <value>Käyttäjät [{0}]. Tiedostoa ei tallennettu: {1} – käyttäjän tallennuskiintiö ylitetty.</value>
+  </data>
+  <data name="FileSavedButRoomQuotaExceeded" xml:space="preserve">
+    <value>Huoneet [{0}]. Tiedosto päivitetty: {1}, huoneen tallennuskiintiö ylitetty.</value>
+  </data>
+  <data name="FileSavedButUserQuotaExceeded" xml:space="preserve">
+    <value>Käyttäjät [{0}]. Tiedosto päivitetty: {1}, käyttäjän tallennuskiintiö ylitetty.</value>
+  </data>
+  <data name="RestoreCancelled" xml:space="preserve">
+    <value>Palautus peruutettu</value>
+  </data>
+  <data name="RestoreStarted" xml:space="preserve">
+    <value>Palautus aloitettu</value>
+  </data>
+  <data name="ScheduledBackupDeleted" xml:space="preserve">
+    <value>Ajoitettu varmuuskopio poistettu</value>
+  </data>
 </root>

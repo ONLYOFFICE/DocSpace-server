@@ -70,7 +70,8 @@ public class AggregateFormDataTool(
             [Description("Use the difference between two DateTime columns as the value for SUM/AVG/MIN/MAX. Format: \"col_a col_b [UNIT]\" — UNIT is optional and defaults to DAYS. Allowed units: DAYS, HOURS, MINUTES. Example: \"col_created col_submitted HOURS\" computes AVG(hours elapsed between creation and submission). Use this instead of valueColumn when aggregating over a time difference.")] string? dateDiffValueExpr = null,
             [Description("Post-aggregation filter on the aggregate result (HAVING clause). Format: 'OPERATOR value' — e.g. '> 5' keeps only groups where the count/sum exceeds 5, '= 0' keeps only groups with zero. Only applies when groupByColumn is set. Operators: =, !=, <, >, <=, >=. Use this instead of fetching all groups and filtering manually.")] string? having = null,
             [Description("Exclude from results any groupByColumn values that appear in rows matching these filter conditions (generates NOT IN subquery). Use to answer 'which entities had NO records matching X?' — e.g. 'which employees had no records in 2025?'. Format: same as filters — \"column OPERATOR value\". Combine with excludeDatePartFilters for date-based exclusion.")] IEnumerable<string>? excludeFilters = null,
-            [Description("Exclude from results any groupByColumn values that appear in rows matching these date-part conditions (generates NOT IN subquery). Format: same as datePartFilters — \"column DATE_PART OPERATOR value\". Example: excludeDatePartFilters=[\"col_date YEAR = 2025\"] excludes entities that have ANY record in 2025. Combine with excludeFilters for additional conditions.")] IEnumerable<string>? excludeDatePartFilters = null)
+            [Description("Exclude from results any groupByColumn values that appear in rows matching these date-part conditions (generates NOT IN subquery). Format: same as datePartFilters — \"column DATE_PART OPERATOR value\". Example: excludeDatePartFilters=[\"col_date YEAR = 2025\"] excludes entities that have ANY record in 2025. Combine with excludeFilters for additional conditions.")] IEnumerable<string>? excludeDatePartFilters = null,
+            [Description("When true, returns a single number — the count of distinct groups that satisfy the query conditions. Use when the question asks 'how many X+Y pairs/groups had more than N records?' and you need only the total count, not the list of groups. Requires groupByColumn to be set.")] bool countGroupsOnly = false)
         {
             try
             {
@@ -128,7 +129,8 @@ public class AggregateFormDataTool(
                     groupByDatePart, secondGroupByColumn, secondGroupByDatePart,
                     parsedDatePartFilters, parsedDateDiffFilter, parsedDateDiffAggregate,
                     havingFilter: having, thirdGroupByColumn: thirdGroupByColumn, thirdGroupByDatePart: thirdGroupByDatePart,
-                    excludeFilters: parsedExcludeFilters, excludeDatePartFilters: parsedExcludeDatePartFilters);
+                    excludeFilters: parsedExcludeFilters, excludeDatePartFilters: parsedExcludeDatePartFilters,
+                    countGroupsOnly: countGroupsOnly);
                 return new ToolResponse<string> { Data = result };
             }
             catch (Exception e)

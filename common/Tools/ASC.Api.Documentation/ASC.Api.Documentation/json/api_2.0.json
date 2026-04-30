@@ -11904,16 +11904,16 @@
         "tags": [
           "Settings / TFA settings"
         ],
-        "summary": "Get confirmation email",
-        "description": "Returns the confirmation email URL for authorization via SMS or TFA application.",
-        "operationId": "getTfaConfirmUrl",
+        "summary": "Get TFA confirmation data",
+        "description": "Returns the confirmation data for authorization via SMS or TFA application.",
+        "operationId": "getTfaConfirmData",
         "responses": {
           "200": {
-            "description": "Confirmation email URL",
+            "description": "TFA confirmation data",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/StringWrapper"
+                  "$ref": "#/components/schemas/TfaConfirmDataWrapper"
                 }
               }
             }
@@ -11958,8 +11958,8 @@
         "tags": [
           "Settings / TFA settings"
         ],
-        "summary": "Get a confirmation email for updating TFA settings",
-        "description": "Returns the confirmation email URL for updating TFA settings.",
+        "summary": "Updates TFA settings",
+        "description": "Updates TFA settings and returns the confirmation URL for authorization via SMS or TFA application.",
         "operationId": "updateTfaSettingsLink",
         "requestBody": {
           "content": {
@@ -11972,7 +11972,7 @@
         },
         "responses": {
           "200": {
-            "description": "Confirmation email URL",
+            "description": "TFA confirmation URL",
             "content": {
               "application/json": {
                 "schema": {
@@ -12093,7 +12093,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ObjectArrayWrapper"
+                  "$ref": "#/components/schemas/TfaAppCodeArrayWrapper"
                 }
               }
             }
@@ -12150,7 +12150,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ObjectArrayWrapper"
+                  "$ref": "#/components/schemas/TfaAppCodeArrayWrapper"
                 }
               }
             }
@@ -12921,7 +12921,7 @@
                       "type": "object",
                       "additionalProperties": {
                         "type": "integer",
-                        "format": "int32"
+                        "format": "int64"
                       }
                     },
                     "count": {
@@ -19842,49 +19842,6 @@
         "description": "The notification type.",
         "x-enum-type": "integer"
       },
-      "ObjectArrayWrapper": {
-        "type": "object",
-        "properties": {
-          "response": {
-            "type": "array",
-            "items": {
-              "type": "object"
-            }
-          },
-          "count": {
-            "type": "integer",
-            "description": "The total number of items in the response",
-            "format": "int32"
-          },
-          "links": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "href": {
-                  "type": "string",
-                  "description": "URL of the link"
-                },
-                "action": {
-                  "type": "string",
-                  "description": "Action associated with the link"
-                }
-              }
-            },
-            "description": "List of links related to the response"
-          },
-          "status": {
-            "type": "integer",
-            "description": "HTTP status code of the response",
-            "format": "int32"
-          },
-          "statusCode": {
-            "type": "integer",
-            "description": "HTTP status code of the response (duplicate of status)",
-            "format": "int32"
-          }
-        }
-      },
       "ObjectWrapper": {
         "type": "object",
         "properties": {
@@ -24574,6 +24531,132 @@
           }
         }
       },
+      "TfaAppCodeArrayWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TfaAppCodeDto"
+            }
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
+      "TfaAppCodeDto": {
+        "type": "object",
+        "properties": {
+          "isUsed": {
+            "type": "boolean",
+            "description": "The TFA app code usage status.",
+            "example": true
+          },
+          "code": {
+            "type": "string",
+            "description": "The TFA app code.",
+            "nullable": true,
+            "example": 123456
+          }
+        },
+        "additionalProperties": false,
+        "description": "The TFA app code."
+      },
+      "TfaConfirmDataDto": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "The confirmation URL.",
+            "nullable": true,
+            "example": "https://example.com/confirm?type=TfaAuth&key=abc123"
+          },
+          "cookieName": {
+            "type": "string",
+            "description": "The confirmation cookie name.",
+            "nullable": true,
+            "example": "asc_confirm_key_TfaAuth"
+          },
+          "cookieValue": {
+            "type": "string",
+            "description": "The confirmation cookie value.",
+            "nullable": true,
+            "example": "1234567890.abcdef"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The TFA confirmation data."
+      },
+      "TfaConfirmDataWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/TfaConfirmDataDto"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
       "TfaRequestsDto": {
         "type": "object",
         "properties": {
@@ -24702,7 +24785,7 @@
       },
       "TfaSettingsDto": {
         "required": [
-          "avaliable",
+          "available",
           "enabled",
           "id",
           "title"
@@ -24726,7 +24809,7 @@
             "description": "Indicates whether the TFA configuration is currently active.",
             "example": true
           },
-          "avaliable": {
+          "available": {
             "type": "boolean",
             "description": "Indicates whether the TFA configuration can be used.",
             "example": true

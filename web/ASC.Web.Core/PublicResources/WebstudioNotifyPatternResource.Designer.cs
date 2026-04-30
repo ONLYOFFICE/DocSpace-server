@@ -106,6 +106,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; created a new document: &lt;a href=&quot;{1}&quot; style=&quot;color:#FF6F3D;&quot;&gt;{2}&lt;/a&gt; in: &lt;a href=&quot;{3}&quot; style=&quot;color:#FF6F3D;&quot;&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;.
+        /// </summary>
+        public static string ActionFileCreatedInSharedForMe {
+            get {
+                return ResourceManager.GetString("ActionFileCreatedInSharedForMe", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; edited the document: &lt;a href=&quot;{1}&quot; style=&quot;color:#FF6F3D;&quot;&gt;{2}&lt;/a&gt; in the room: &lt;a href=&quot;{3}&quot; style=&quot;color:#FF6F3D;&quot;&gt;{4}&lt;/a&gt;.
         /// </summary>
         public static string ActionFileEdited {
@@ -115,11 +124,29 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; edited the document: &lt;a href=&quot;{1}&quot; style=&quot;color:#FF6F3D;&quot;&gt;{2}&lt;/a&gt; in: &lt;a href=&quot;{3}&quot; style=&quot;color:#FF6F3D;&quot;&gt;{4}&lt;/a&gt;.
+        /// </summary>
+        public static string ActionFileEditedInSharedForMe {
+            get {
+                return ResourceManager.GetString("ActionFileEditedInSharedForMe", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; uploaded a new document: &lt;a href=&quot;{1}&quot; style=&quot;color:#FF6F3D;&quot;&gt;{2}&lt;/a&gt; in the room: &lt;a href=&quot;{3}&quot; style=&quot;color:#FF6F3D;&quot;&gt;{4}&lt;/a&gt;.
         /// </summary>
         public static string ActionFileUploaded {
             get {
                 return ResourceManager.GetString("ActionFileUploaded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; uploaded a new document: &lt;a href=&quot;{1}&quot; style=&quot;color:#FF6F3D;&quot;&gt;{2}&lt;/a&gt; in: &lt;a href=&quot;{3}&quot; style=&quot;color:#FF6F3D;&quot;&gt;{4}&lt;/a&gt;.
+        /// </summary>
+        public static string ActionFileUploadedInSharedForMe {
+            get {
+                return ResourceManager.GetString("ActionFileUploadedInSharedForMe", resourceCulture);
             }
         }
         
@@ -138,6 +165,15 @@ namespace ASC.Web.Core.PublicResources {
         public static string ActionNewComment {
             get {
                 return ResourceManager.GetString("ActionNewComment", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; added a new comment to the document version: &lt;a href=&quot;{1}&quot; style=&quot;color:#FF6F3D;&quot;&gt;{2}&lt;/a&gt; in: &lt;a href=&quot;{3}&quot; style=&quot;color:#FF6F3D;&quot;&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;.
+        /// </summary>
+        public static string ActionNewCommentInSharedForMe {
+            get {
+                return ResourceManager.GetString("ActionNewCommentInSharedForMe", resourceCulture);
             }
         }
         

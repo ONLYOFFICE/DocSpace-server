@@ -701,7 +701,8 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         string? thirdGroupByColumn = null,
         string? thirdGroupByDatePart = null,
         IEnumerable<QueryFilter>? excludeFilters = null,
-        IEnumerable<DatePartFilter>? excludeDatePartFilters = null)
+        IEnumerable<DatePartFilter>? excludeDatePartFilters = null,
+        bool countGroupsOnly = false)
     {
         ValidateTableName(tableName);
 
@@ -850,7 +851,16 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
                 sql.Append($" HAVING {aggExpr} {havingParts[0]} {havingParts[1]}");
             }
 
-            sql.Append(" ORDER BY result DESC LIMIT 1000");
+            if (countGroupsOnly)
+            {
+                var innerSql = sql.ToString();
+                sql.Clear();
+                sql.Append($"SELECT COUNT(*) AS result FROM ({innerSql}) AS sub");
+            }
+            else
+            {
+                sql.Append(" ORDER BY result DESC LIMIT 1000");
+            }
         }
         // No GROUP BY → aggregate returns exactly one row; LIMIT is intentionally omitted.
 

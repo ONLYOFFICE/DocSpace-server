@@ -535,7 +535,7 @@
     <value>ID di OneDrive</value>
   </data>
   <data name="Consumersskydriveappsecret" xml:space="preserve">
-    <value>Chiave di OneDrive</value>
+    <value>Segreto client</value>
   </data>
   <data name="ConsumersSkyDriveDescription" xml:space="preserve">
     <value>Collega l'applicazione per gestire file e cartelle in OneDrive.</value>
@@ -595,10 +595,10 @@
     <value>X</value>
   </data>
   <data name="ConsumerstwitterAccessTokenSecret_Default" xml:space="preserve">
-    <value>Client Secret</value>
+    <value>Segreto client</value>
   </data>
   <data name="ConsumerstwitterAccessToken_Default" xml:space="preserve">
-    <value>Client ID</value>
+    <value>ID client</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
     <value>Collega l'applicazione per registrarsi al portale utilizzando l'account X.</value>
@@ -667,7 +667,7 @@
     <value>ID Client</value>
   </data>
   <data name="ConsumersyahooClientSecret" xml:space="preserve">
-    <value>Client Secret</value>
+    <value>Segreto client</value>
   </data>
   <data name="ConsumersYahooDescription" xml:space="preserve">
     <value>Collegare l'applicazione per importare i contatti di Yahoo.</value>
@@ -706,10 +706,10 @@
     <value>Abilita questa app per consentire ai tuoi utenti di accedere a {LogoText} utilizzando i loro account Zoom. {0}Vai al sito web Zoom Developers e crea una nuova integrazione dell'app {LogoText}. Inserisci i dati che hai ricevuto qui sotto:</value>
   </data>
   <data name="CouldNotRecoverPasswordForLdapUser" xml:space="preserve">
-    <value>Il recupero della password è vietato per un utente LDAP</value>
+    <value>la procedura di recupero password è vietato per un utente LDAP</value>
   </data>
   <data name="CouldNotRecoverPasswordForSsoUser" xml:space="preserve">
-    <value>la procedura di recupero password è proibita per l'utente SSO</value>
+    <value>la procedura di recupero password è vietato per l'utente SSO</value>
   </data>
   <data name="CustomNamingPeopleSchema" xml:space="preserve">
     <value>Personalizzato</value>
@@ -1289,5 +1289,95 @@
   </data>
   <data name="WhatsNewSubscriptionName" xml:space="preserve">
     <value>Cosa c'è di nuovo</value>
+  </data>
+  <data name="AccountingCustomerOperationAgent" xml:space="preserve">
+    <value>Agente</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_chat" xml:space="preserve">
+    <value>Chat</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_fetch" xml:space="preserve">
+    <value>Scansione web</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_search" xml:space="preserve">
+    <value>Ricerca web</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-tools" xml:space="preserve">
+    <value>Crediti IA</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_fetch" xml:space="preserve">
+    <value>Fonti</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_search" xml:space="preserve">
+    <value>Risultati</value>
+  </data>
+  <data name="ConsumersdatabaseType" xml:space="preserve">
+    <value>Tipo di database</value>
+  </data>
+  <data name="ConsumersdbHost" xml:space="preserve">
+    <value>Host</value>
+  </data>
+  <data name="ConsumersdbName" xml:space="preserve">
+    <value>Nome del database</value>
+  </data>
+  <data name="ConsumersdbPassword" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="ConsumersdbPort" xml:space="preserve">
+    <value>Porta</value>
+  </data>
+  <data name="ConsumersdbSsl" xml:space="preserve">
+    <value>Usa SSL</value>
+  </data>
+  <data name="ConsumersdbUser" xml:space="preserve">
+    <value>Utente</value>
+  </data>
+  <data name="ConsumersExternalDb" xml:space="preserve">
+    <value>Connessione al database</value>
+  </data>
+  <data name="ConsumersExternalDbDescription" xml:space="preserve">
+    <value>Archivia i risultati del modulo in un database esterno come MySQL o SQLite.</value>
+  </data>
+  <data name="ConsumersExternalDbInstruction" xml:space="preserve">
+    <value>Connetti un database esterno per archiviare i risultati del modulo.</value>
+  </data>
+  <data name="ConsumersExternalDbSqliteStandaloneOnly" xml:space="preserve">
+    <value>SQLite è disponibile solo nelle installazioni standalone.</value>
+  </data>
+  <data name="ConsumersExternalDbTestConnection" xml:space="preserve">
+    <value>Testa connessione</value>
+  </data>
+  <data name="ConsumersNextcloud" xml:space="preserve">
+    <value>Nextcloud</value>
+  </data>
+  <data name="ConsumersNextcloudBaseUrl" xml:space="preserve">
+    <value>Inserisci l'indirizzo URL dell'istanza Nextcloud.</value>
+  </data>
+  <data name="ConsumersNextcloudClientId" xml:space="preserve">
+    <value>ID client</value>
+  </data>
+  <data name="ConsumersNextcloudClientSecret" xml:space="preserve">
+    <value>Segreto client</value>
+  </data>
+  <data name="ConsumersNextcloudDescription" xml:space="preserve">
+    <value>Consenti all'applicazione di accedere al portale utilizzando un account Nextcloud.</value>
+  </data>
+  <data name="ConsumersNextcloudInstruction" xml:space="preserve">
+    <value>Consenti all'applicazione di accedere al portale utilizzando un account Nextcloud.</value>
+  </data>
+  <data name="ConsumerssqliteFilePath" xml:space="preserve">
+    <value>Percorso file SQLite</value>
+  </data>
+  <data name="CouldNotRecoverPasswordForAutoGeneratedEmail" xml:space="preserve">
+    <value>la procedura di recupero password è vietato per gli indirizzi e-mail generati automaticamente</value>
+  </data>
+  <data name="TariffsFeature_embedding_wallet" xml:space="preserve">
+    <value>Incorporamento IA</value>
+  </data>
+  <data name="TariffsFeature_embedding_wallet_price_count" xml:space="preserve">
+    <value>Un'unità di misura dell'incorporamento che i grandi modelli linguistici (LLM) possono gestire</value>
+  </data>
+  <data name="UserAuthenticationFailed" xml:space="preserve">
+    <value>Autenticazione utente non riuscita</value>
   </data>
 </root>

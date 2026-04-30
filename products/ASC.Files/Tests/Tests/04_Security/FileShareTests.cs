@@ -1233,4 +1233,55 @@ public class FileShareTests(
         response = await _sharingApi.GetFileSecurityInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken);
         response.Response.Should().Contain(r=> r.SharedToUser.Id == myguest.Id && r.Access == FileShare.Read);
     }
+
+    [Theory]
+    [InlineData(EmployeeType.DocSpaceAdmin)]
+    [InlineData(EmployeeType.RoomAdmin)]
+    [InlineData(EmployeeType.User)]
+    public async Task FileShare_UserSharesFileFromMy_WithNonGuestTypes_Success(EmployeeType targetType)
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var user = await Initializer.InviteContact(EmployeeType.User);
+        var target = await Initializer.InviteContact(targetType);
+
+        await _filesClient.Authenticate(user);
+        var file = await CreateFileInMy("file.docx", user);
+
+        var securityRequest = new SecurityInfoSimpleRequestDto
+        {
+            Share = [new() { ShareTo = target.Id, Access = FileShare.Read }]
+        };
+
+        // Act
+        await _sharingApi.SetFileSecurityInfoAsync(file.Id, securityRequest, TestContext.Current.CancellationToken);
+
+        // Assert
+        var response = await _sharingApi.GetFileSecurityInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken);
+        response.Response.Should().Contain(r => r.SharedToUser.Id == target.Id && r.Access == FileShare.Read);
+    }
+
+    [Fact]
+    public async Task FileShare_UserSharesFileFromMy_WithGuestNotBelongingToUser_ReturnEmpty()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var user = await Initializer.InviteContact(EmployeeType.User);
+        var guest = await Initializer.InviteContact(EmployeeType.Guest);
+
+        await _filesClient.Authenticate(user);
+        var file = await CreateFileInMy("file.docx", user);
+
+        var securityRequest = new SecurityInfoSimpleRequestDto
+        {
+            Share = [new() { ShareTo = guest.Id, Access = FileShare.Read }]
+        };
+
+        // Act
+        await _sharingApi.SetFileSecurityInfoAsync(file.Id, securityRequest, TestContext.Current.CancellationToken);
+
+        // Assert
+        var response = await _sharingApi.GetFileSecurityInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken);
+        response.Response.Should().NotContain(r => r.SharedToUser.Id == guest.Id);
+    }
 }

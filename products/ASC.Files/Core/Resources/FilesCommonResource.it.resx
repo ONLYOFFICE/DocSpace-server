@@ -577,4 +577,16 @@ Massima compatibilità con docx, xlsx, pptx.</value>
   <data name="User" xml:space="preserve">
     <value>Utente</value>
   </data>
+  <data name="AgentManager" xml:space="preserve">
+    <value>Manager dell'agente</value>
+  </data>
+  <data name="ErrorMessage_AiServicesDisabled" xml:space="preserve">
+    <value>I servizi IA sono disattivati per il portale corrente</value>
+  </data>
+  <data name="KnowledgeFolder" xml:space="preserve">
+    <value>Conoscenza</value>
+  </data>
+  <data name="ResultStorageFolder" xml:space="preserve">
+    <value>Archiviazione dei risultati</value>
+  </data>
 </root>

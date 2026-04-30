@@ -14728,6 +14728,28 @@
         "additionalProperties": false,
         "description": "The config parameter which contains the information about the action in the document that will be scrolled to."
       },
+      "AiModelCapabilities": {
+        "type": "object",
+        "properties": {
+          "vision": {
+            "type": "boolean",
+            "description": "Indicates whether the model supports image and vision input.",
+            "example": true
+          },
+          "toolCalling": {
+            "type": "boolean",
+            "description": "Indicates whether the model supports tool (function) calling.",
+            "example": true
+          },
+          "thinking": {
+            "type": "boolean",
+            "description": "Indicates whether the model supports extended thinking and reasoning.",
+            "example": false
+          }
+        },
+        "additionalProperties": false,
+        "description": "The AI model capabilities."
+      },
       "AnonymousConfigDto": {
         "required": [
           "request"
@@ -15351,7 +15373,11 @@
           "thinking": {
             "type": "boolean",
             "description": "Indicates whether the model supports extended thinking mode.",
-            "example": false
+            "example": false,
+            "deprecated": true
+          },
+          "capabilities": {
+            "$ref": "#/components/schemas/AiModelCapabilities"
           },
           "internal": {
             "type": "boolean",
@@ -28389,6 +28415,11 @@
           },
           "task": {
             "$ref": "#/components/schemas/DocumentBuilderTaskDto"
+          },
+          "isNewFile": {
+            "type": "boolean",
+            "description": "Specifies whether the XLSX report file is newly created or an existing file will be updated.",
+            "example": true
           }
         },
         "additionalProperties": false,
