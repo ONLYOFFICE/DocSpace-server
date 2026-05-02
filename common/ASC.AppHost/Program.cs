@@ -137,9 +137,9 @@ var clientBasePath = Path.Combine(basePath, "client");
 
 if (!skipClient)
 {
-    var (certDir, crtFileName, _) = DevCertificateGenerator.EnsureCertificate(builder.AppHostDirectory);
+    var certDir = DevCertificateGenerator.EnsureCertificate(basePath);
     var dnsPatchPath = Path.Combine(builder.AppHostDirectory, "scripts", "docspace-dns-patch.js").Replace('\\', '/');
-    var crtPath = Path.Combine(certDir, crtFileName);
+    var crtPath = Path.Combine(certDir, DevCertificateGenerator.CrtFileName);
 
     startPackages = builder.AddJavaScriptApp("onlyoffice-client", clientBasePath, "start")
         .WithPnpm()

@@ -34,17 +34,16 @@ public static class DevCertificateGenerator
 {
     private const string Subject = "CN=localhost";
     private static readonly string[] _dnsNames = ["localhost", "*.dev.localhost"];
+    public const string CrtFileName = "docspace.dev.localhost.crt";
+    private const string KeyFileName = "docspace.dev.localhost.key";
 
-    public static (string CertDir, string CrtFileName, string KeyFileName) EnsureCertificate(string appHostDirectory)
+    public static string EnsureCertificate(string basePath)
     {
-        var certDir = Path.Combine(appHostDirectory, "certs");
+        var certDir = Path.Combine(basePath, "Data", "certs");
         Directory.CreateDirectory(certDir);
 
-        const string crtFileName = "docspace.dev.localhost.crt";
-        const string keyFileName = "docspace.dev.localhost.key";
-
-        var crtPath = Path.Combine(certDir, crtFileName);
-        var keyPath = Path.Combine(certDir, keyFileName);
+        var crtPath = Path.Combine(certDir, CrtFileName);
+        var keyPath = Path.Combine(certDir, KeyFileName);
 
         var trustMarkerPath = Path.Combine(certDir, ".trusted");
 
@@ -55,7 +54,7 @@ public static class DevCertificateGenerator
                 && HasAllDnsNames(existing, _dnsNames)
                 && IsTrusted(existing, trustMarkerPath))
             {
-                return (certDir, crtFileName, keyFileName);
+                return certDir;
             }
         }
 
@@ -83,7 +82,7 @@ public static class DevCertificateGenerator
 
         TrustCertificate(cert, crtPath, trustMarkerPath);
 
-        return (certDir, crtFileName, keyFileName);
+        return certDir;
     }
 
     private static bool HasAllDnsNames(X509Certificate2 cert, IEnumerable<string> expected)

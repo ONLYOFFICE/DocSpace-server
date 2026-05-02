@@ -1,6 +1,5 @@
 **/obj/
 **/bin/
-common/ASC.AppHost/certs/
 *.suo
 *.user
 .vs/
