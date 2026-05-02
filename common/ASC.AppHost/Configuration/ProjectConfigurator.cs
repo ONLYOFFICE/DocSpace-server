@@ -74,13 +74,7 @@ public class ProjectConfigurator(
         project.WithEnvironment("core:base-domain", isStandalone ? "localhost" : "")
             .WithEnvironment("ai:mcp:0:endpoint", new UriBuilder(Uri.UriSchemeHttp, "localhost", Constants.DocSpaceMcpPort) + "mcp");
 
-        // Trust loopback + docker bridge networks so ForwardedHeadersMiddleware
-        // picks up X-Forwarded-Proto/Host from the dev OpenResty proxy.
-        project.WithEnvironment("core:hosting:forwardedHeadersOptions:knownNetworks:0", "127.0.0.1/8")
-            .WithEnvironment("core:hosting:forwardedHeadersOptions:knownNetworks:1", "::1/128")
-            .WithEnvironment("core:hosting:forwardedHeadersOptions:knownNetworks:2", "10.0.0.0/8")
-            .WithEnvironment("core:hosting:forwardedHeadersOptions:knownNetworks:3", "172.16.0.0/12")
-            .WithEnvironment("core:hosting:forwardedHeadersOptions:knownNetworks:4", "192.168.0.0/16");
+        ConfigureForwardedHeadersNetworks(project);
 
         // Map the dev HTTPS host to the default standalone tenant.
         project.WithEnvironment("CORE__LOCAL_ADDRESSES", Constants.AppHostHttpsHost);
@@ -154,11 +148,7 @@ public class ProjectConfigurator(
 
         resourceBuilder.WithEnvironment("core:base-domain", isStandalone ? "localhost" : "");
 
-        resourceBuilder.WithEnvironment("core:hosting:forwardedHeadersOptions:knownNetworks:0", "127.0.0.1/8")
-            .WithEnvironment("core:hosting:forwardedHeadersOptions:knownNetworks:1", "::1/128")
-            .WithEnvironment("core:hosting:forwardedHeadersOptions:knownNetworks:2", "10.0.0.0/8")
-            .WithEnvironment("core:hosting:forwardedHeadersOptions:knownNetworks:3", "172.16.0.0/12")
-            .WithEnvironment("core:hosting:forwardedHeadersOptions:knownNetworks:4", "192.168.0.0/16");
+        ConfigureForwardedHeadersNetworks(resourceBuilder);
 
         resourceBuilder.WithEnvironment("CORE__LOCAL_ADDRESSES", Constants.AppHostHttpsHost);
 
@@ -357,5 +347,16 @@ public class ProjectConfigurator(
             .WithBindMount(Path.Combine(basePath, "Data"), "/data")
             .WithBindMount(Path.Combine(basePath, "Logs"), "/logs")
             .WithEnvironment("log:dir", "/logs");
+    }
+
+    private static void ConfigureForwardedHeadersNetworks<T>(IResourceBuilder<T> project) where T : IResourceWithEnvironment
+    {
+        // Trust loopback + docker bridge networks so ForwardedHeadersMiddleware
+        // picks up X-Forwarded-Proto/Host from the dev OpenResty proxy.
+        project.WithEnvironment("core:hosting:forwardedHeadersOptions:knownNetworks:0", "127.0.0.1/8")
+            .WithEnvironment("core:hosting:forwardedHeadersOptions:knownNetworks:1", "::1/128")
+            .WithEnvironment("core:hosting:forwardedHeadersOptions:knownNetworks:2", "10.0.0.0/8")
+            .WithEnvironment("core:hosting:forwardedHeadersOptions:knownNetworks:3", "172.16.0.0/12")
+            .WithEnvironment("core:hosting:forwardedHeadersOptions:knownNetworks:4", "192.168.0.0/16");
     }
 }
