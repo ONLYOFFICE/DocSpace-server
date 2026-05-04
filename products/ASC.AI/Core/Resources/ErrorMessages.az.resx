@@ -183,4 +183,10 @@
   <data name="ProviderNameExists" xml:space="preserve">
     <value>Provayder adı artıq mövcuddur</value>
   </data>
+  <data name="ModelDisabled" xml:space="preserve">
+    <value>Model, provayderin parametrləri tərəfindən deaktiv edilib.</value>
+  </data>
+  <data name="ServerAlreadyAdded" xml:space="preserve">
+    <value>Server artıq agentə əlavə edilib</value>
+  </data>
 </root>

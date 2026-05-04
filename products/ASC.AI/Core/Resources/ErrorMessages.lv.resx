@@ -183,4 +183,10 @@
   <data name="ProviderNameExists" xml:space="preserve">
     <value>Pakalpojumu sniedzēja nosaukums jau pastāv</value>
   </data>
+  <data name="ModelDisabled" xml:space="preserve">
+    <value>Modelis ir atspējots jūsu pakalpojumu sniedzēja iestatījumu dēļ.</value>
+  </data>
+  <data name="ServerAlreadyAdded" xml:space="preserve">
+    <value>Serveris jau ir pievienots agentam</value>
+  </data>
 </root>

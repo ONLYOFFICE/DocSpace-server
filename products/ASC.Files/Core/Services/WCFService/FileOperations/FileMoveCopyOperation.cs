@@ -104,7 +104,6 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
     private readonly bool _copy;
     private readonly int _daoFolderId;
     private readonly IDictionary<string, StringValues> _headers;
-    private readonly Dictionary<T, Folder<T>> _parentRooms = new();
     private readonly FileConflictResolveType _resolveType;
     private readonly string _thirdPartyFolderId;
     private readonly bool _toFillOut;
@@ -587,7 +586,7 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
                                         var pins = await TagDao.GetTagsAsync(Guid.Empty, [TagType.Pin], new List<FileEntry<T>> { folder }).ToListAsync();
                                         if (pins.Count > 0)
                                         {
-                                            await TagDao.RemoveTagsAsync(pins);
+                                            await TagDao.RemoveTagsAsync(folder, pins.Select(r=> r.Id).ToList());
                                         }
 
                                         if (!isThirdPartyRoom)

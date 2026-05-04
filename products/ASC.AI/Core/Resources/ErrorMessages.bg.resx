@@ -183,4 +183,10 @@
   <data name="ProviderNameExists" xml:space="preserve">
     <value>Името на доставчика вече съществува</value>
   </data>
+  <data name="ModelDisabled" xml:space="preserve">
+    <value>Моделът е деактивиран от настройките на вашия доставчик.</value>
+  </data>
+  <data name="ServerAlreadyAdded" xml:space="preserve">
+    <value>Сървърът вече е добавен към агента</value>
+  </data>
 </root>

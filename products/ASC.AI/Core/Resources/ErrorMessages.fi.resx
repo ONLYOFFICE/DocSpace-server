@@ -183,4 +183,10 @@
   <data name="ProviderNameExists" xml:space="preserve">
     <value>Palveluntarjoajan nimi on jo olemassa</value>
   </data>
+  <data name="ModelDisabled" xml:space="preserve">
+    <value>Malli on poistettu käytöstä palveluntarjoajasi asetusten vuoksi.</value>
+  </data>
+  <data name="ServerAlreadyAdded" xml:space="preserve">
+    <value>Palvelin on jo lisätty agentille</value>
+  </data>
 </root>

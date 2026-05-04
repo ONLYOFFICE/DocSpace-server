@@ -355,7 +355,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
 
                 await commandService.ExecuteCommandAsync(
                     resourceId: context.ResourceName,
-                    commandName: "resource-stop",
+                    commandName: "stop",
                     cancellationToken: context.CancellationToken);
 
                 await Task.Delay(500, context.CancellationToken);

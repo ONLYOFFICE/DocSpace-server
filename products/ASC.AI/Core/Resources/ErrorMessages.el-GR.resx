@@ -183,4 +183,10 @@
   <data name="ProviderNameExists" xml:space="preserve">
     <value>Το όνομα παρόχου υπάρχει ήδη</value>
   </data>
+  <data name="ModelDisabled" xml:space="preserve">
+    <value>Το μοντέλο έχει απενεργοποιηθεί από τις ρυθμίσεις του παρόχου σας.</value>
+  </data>
+  <data name="ServerAlreadyAdded" xml:space="preserve">
+    <value>Ο διακομιστής έχει ήδη προστεθεί στον πράκτορα</value>
+  </data>
 </root>
