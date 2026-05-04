@@ -1,0 +1,15 @@
+
+    public partial class {{classname}}
+    {
+{{#oneOf}}
+        /// <summary>
+        /// Converts a compatible oneOf value to <see cref="{{classname}}" />.
+        /// </summary>
+        /// <param name="actualInstance">The value to wrap.</param>
+        public static implicit operator {{classname}}({{{.}}} actualInstance)
+        {
+            return new {{classname}}(actualInstance);
+        }
+
+{{/oneOf}}
+    }

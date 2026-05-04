@@ -82,6 +82,7 @@ global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.Options;
 global using Microsoft.Extensions.Primitives;
 global using Microsoft.Net.Http.Headers;
+global using Microsoft.OpenApi;
 
 global using NetEscapades.EnumGenerators;
 
@@ -97,6 +98,8 @@ global using RabbitMQ.Client.Events;
 global using StackExchange.Redis;
 global using StackExchange.Redis.Extensions.Core;
 global using StackExchange.Redis.Extensions.Core.Abstractions;
+
+global using Swashbuckle.AspNetCore.SwaggerGen;
 
 global using ZiggyCreatures.Caching.Fusion;
 

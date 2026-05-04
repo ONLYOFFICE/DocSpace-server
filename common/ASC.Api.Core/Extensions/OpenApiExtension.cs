@@ -103,9 +103,11 @@ public static class OpenApiExtension
             c.DocumentFilter<TagDescriptionsDocumentFilter>();
             c.OperationFilter<SwaggerCustomOperationFilter>();
             c.OperationFilter<ContentTypeOperationFilter>();
+            c.OperationFilter<PolymorphicFolderIdOperationFilter>();
             c.OperationFilter<AllowAnonymousFilter>();
             c.DocumentFilter<SwaggerSuccessApiResponseFilter>();
             c.EnableAnnotations();
+            c.SchemaFilter<PolymorphicFolderIdSchemaFilter>();
             c.SchemaFilter<CustomInheritanceSchemaFilter>();
 
             var serverTemplate = configuration.GetValue<string>("openApi:server") ?? "";
