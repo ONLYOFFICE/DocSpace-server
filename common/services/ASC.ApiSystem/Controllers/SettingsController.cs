@@ -1,25 +1,25 @@
 // (c) Copyright Ascensio System SIA 2009-2026
-// 
+//
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
+//
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
+//
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-// 
+//
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -29,14 +29,12 @@ namespace ASC.ApiSystem.Controllers;
 [Scope]
 [ApiController]
 [Route("[controller]")]
-public class SettingsController(CommonMethods commonMethods,
-        CoreSettings coreSettings,
-        ILogger<SettingsController> option)
+public class SettingsController(
+        ILogger<SettingsController> logger,
+        CommonMethods commonMethods,
+        CoreSettings coreSettings)
     : ControllerBase
 {
-    private CommonMethods CommonMethods { get; } = commonMethods;
-    private CoreSettings CoreSettings { get; } = coreSettings;
-    private ILogger<SettingsController> Log { get; } = option;
 
     #region For TEST api
 
@@ -82,14 +80,14 @@ public class SettingsController(CommonMethods commonMethods,
 
         if (string.IsNullOrEmpty(model.Key))
         {
-            return BadRequest(new
+            return BadRequest(new ErrorDto
             {
-                error = "params",
-                message = "Key is required"
+                Error = "params",
+                Message = "Key is required"
             });
         }
 
-        var settings = await CoreSettings.GetSettingAsync(model.Key, tenantId);
+        var settings = await coreSettings.GetSettingAsync(model.Key, tenantId);
 
         return Ok(new
         {
@@ -118,19 +116,19 @@ public class SettingsController(CommonMethods commonMethods,
 
         if (string.IsNullOrEmpty(model.Key))
         {
-            return BadRequest(new
+            return BadRequest(new ErrorDto
             {
-                error = "params",
-                message = "Key is required"
+                Error = "params",
+                Message = "Key is required"
             });
         }
 
         if (string.IsNullOrEmpty(model.Value))
         {
-            return BadRequest(new
+            return BadRequest(new ErrorDto
             {
-                error = "params",
-                message = "Value is empty"
+                Error = "params",
+                Message = "Value is empty"
             });
         }
 
@@ -138,19 +136,19 @@ public class SettingsController(CommonMethods commonMethods,
         {
             if (Uri.CheckHostName(model.Value) != UriHostNameType.Dns)
             {
-                return BadRequest(new
+                return BadRequest(new ErrorDto
                 {
-                    error = "params",
-                    message = "BaseDomain is not valid"
+                    Error = "params",
+                    Message = "BaseDomain is not valid"
                 });
             }
         }
 
-        Log.LogDebug("Set {0} value {1} for {2}", model.Key, model.Value, tenantId.ToString());
+        logger.DebugSaveSetting(model.Key, model.Value, tenantId);
 
-        await CoreSettings.SaveSettingAsync(model.Key, model.Value, tenantId);
+        await coreSettings.SaveSettingAsync(model.Key, model.Value, tenantId);
 
-        var settings = await CoreSettings.GetSettingAsync(model.Key, tenantId);
+        var settings = await coreSettings.GetSettingAsync(model.Key, tenantId);
 
         return Ok(new
         {
@@ -173,25 +171,25 @@ public class SettingsController(CommonMethods commonMethods,
     {
         if (model == null || string.IsNullOrEmpty(model.HostName))
         {
-            return BadRequest(new
+            return BadRequest(new ErrorDto
             {
-                error = "hostNameEmpty",
-                message = "HostName is required"
+                Error = "hostNameEmpty",
+                Message = "HostName is required"
             });
         }
 
         if (Uri.CheckHostName(model.HostName) != UriHostNameType.Dns)
         {
-            return BadRequest(new
+            return BadRequest(new ErrorDto
             {
-                error = "hostNameInvalid",
-                message = "HostName is not valid"
+                Error = "hostNameInvalid",
+                Message = "HostName is not valid"
             });
         }
 
         try
         {
-            var currentHostIps = await CommonMethods.GetHostIpsAsync();
+            var currentHostIps = await commonMethods.GetHostIpsAsync();
 
             var hostIps = (await Dns.GetHostAddressesAsync(model.HostName)).Select(ip => ip.ToString());
 
@@ -202,7 +200,7 @@ public class SettingsController(CommonMethods commonMethods,
         }
         catch (Exception ex)
         {
-            Log.LogError(ex, "checkdomain " + model.HostName);
+            logger.ErrorCheckDomain(model.HostName, ex);
 
             return Ok(new
             {
@@ -215,20 +213,20 @@ public class SettingsController(CommonMethods commonMethods,
 
     #region private methods
 
-    private async Task<(bool, int, object)> GetTenantAsync(SettingsModel model)
+    private async Task<(bool, int, ErrorDto)> GetTenantAsync(SettingsModel model)
     {
-        object error;
+        ErrorDto error;
         var tenantId = -1;
 
         if (model == null)
         {
-            error = new
+            error = new ErrorDto
             {
-                error = "portalNameEmpty",
-                message = "PortalName is required"
+                Error = "portalNameEmpty",
+                Message = "PortalName is required"
             };
 
-            Log.LogError("Model is null");
+            logger.ErrorModelIsNull();
 
             return (false, tenantId, error);
         }
@@ -239,29 +237,29 @@ public class SettingsController(CommonMethods commonMethods,
             return (true, tenantId, null);
         }
 
-        var (success, tenant) = await CommonMethods.TryGetTenantAsync(model);
+        var (success, tenant) = await commonMethods.TryGetTenantAsync(model);
         if (!success)
         {
-            error = new
+            error = new ErrorDto
             {
-                error = "portalNameEmpty",
-                message = "PortalName is required"
+                Error = "portalNameEmpty",
+                Message = "PortalName is required"
             };
 
-            Log.LogError("Model without tenant");
+            logger.ErrorModelWithoutTenant();
 
             return (false, tenantId, error);
         }
 
         if (tenant == null)
         {
-            error = new
+            error = new ErrorDto
             {
-                error = "portalNameNotFound",
-                message = "Portal not found"
+                Error = "portalNameNotFound",
+                Message = "Portal not found"
             };
 
-            Log.LogError("Tenant not found");
+            logger.ErrorTenantNotFound();
 
             return (false, tenantId, error);
         }
