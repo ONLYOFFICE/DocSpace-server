@@ -32,12 +32,22 @@ const engine = new AssignmentsEngine({ storage });
 
 export const assignmentsController = {
   resolveForAction: asyncHandler(async (req, res) => {
-    const result = await engine.resolveForAction(req.query.actionType);
+    const actionType = req.query.actionType;
+    if (!actionType) {
+      res.json(null);
+      return;
+    }
+    const result = await engine.resolveForAction(actionType);
     res.json(result);
   }),
 
   tryResolveForAction: asyncHandler(async (req, res) => {
-    const result = await engine.tryResolveForAction(req.query.actionType);
+    const actionType = req.query.actionType;
+    if (!actionType) {
+      res.json(null);
+      return;
+    }
+    const result = await engine.tryResolveForAction(actionType);
     res.json(result);
   }),
 
@@ -59,7 +69,12 @@ export const assignmentsController = {
   }),
 
   getAssignment: asyncHandler(async (req, res) => {
-    const result = await engine.getAssignment(req.query.actionType);
+    const actionType = req.query.actionType;
+    if (!actionType) {
+      res.json({ profileId: null });
+      return;
+    }
+    const result = await engine.getAssignment(actionType);
     res.json({ profileId: result });
   }),
 

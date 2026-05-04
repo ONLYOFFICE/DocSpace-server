@@ -49,6 +49,10 @@ export const profilesController = {
 
   listModels: asyncHandler(async (req, res) => {
     const profileId = req.query.profileId;
+    if (!profileId) {
+      res.json([]);
+      return;
+    }
     const models = await engine.listModels(profileId);
     res.json(models);
   }),
@@ -60,7 +64,12 @@ export const profilesController = {
   }),
 
   getById: asyncHandler(async (req, res) => {
-    const profile = await engine.getById(req.query.id);
+    const id = req.query.id;
+    if (!id) {
+      res.json(null);
+      return;
+    }
+    const profile = await engine.getById(id);
     res.json(profile ?? null);
   }),
 

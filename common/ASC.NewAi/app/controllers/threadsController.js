@@ -84,6 +84,10 @@ export const threadsController = {
 
   readMessages: asyncHandler(async (req, res) => {
     const threadId = req.query.threadId;
+    if (!threadId) {
+      res.json([]);
+      return;
+    }
     const limit = parseInt10(req.query.limit);
     const startIndex = parseInt10(req.query.startIndex);
     const messages = await engine.readMessages(threadId, limit, startIndex);
@@ -91,12 +95,22 @@ export const threadsController = {
   }),
 
   getById: asyncHandler(async (req, res) => {
-    const thread = await engine.getById(req.query.threadId);
+    const threadId = req.query.threadId;
+    if (!threadId) {
+      res.json(null);
+      return;
+    }
+    const thread = await engine.getById(threadId);
     res.json(thread);
   }),
 
   getMessageById: asyncHandler(async (req, res) => {
-    const message = await engine.getMessageById(req.query.messageId);
+    const messageId = req.query.messageId;
+    if (!messageId) {
+      res.json(null);
+      return;
+    }
+    const message = await engine.getMessageById(messageId);
     res.json(message);
   }),
 

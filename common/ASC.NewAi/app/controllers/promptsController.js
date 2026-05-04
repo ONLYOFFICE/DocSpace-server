@@ -94,12 +94,22 @@ export const promptsController = {
   }),
 
   getById: asyncHandler(async (req, res) => {
-    const prompt = await engine.getById(req.query.id);
+    const id = req.query.id;
+    if (!id) {
+      res.json(null);
+      return;
+    }
+    const prompt = await engine.getById(id);
     res.json(prompt);
   }),
 
   getFolderById: asyncHandler(async (req, res) => {
-    const folder = await engine.getFolderById(req.query.id);
+    const id = req.query.id;
+    if (!id) {
+      res.json(null);
+      return;
+    }
+    const folder = await engine.getFolderById(id);
     res.json(folder);
   }),
 };

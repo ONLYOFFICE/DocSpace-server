@@ -50,7 +50,12 @@ export const toolsController = {
   }),
 
   getCustomServer: asyncHandler(async (req, res) => {
-    const config = await engine.getCustomServer(req.query.name);
+    const name = req.query.name;
+    if (!name) {
+      res.json(null);
+      return;
+    }
+    const config = await engine.getCustomServer(name);
     res.json(config);
   }),
 
@@ -77,6 +82,10 @@ export const toolsController = {
 
   isToolDisabled: asyncHandler(async (req, res) => {
     const { serverType, toolName } = req.query;
+    if (!serverType || !toolName) {
+      res.json({ value: false });
+      return;
+    }
     const value = await engine.isToolDisabled(serverType, toolName);
     res.json({ value });
   }),
@@ -94,6 +103,10 @@ export const toolsController = {
 
   isAllowAlways: asyncHandler(async (req, res) => {
     const { serverType, toolName } = req.query;
+    if (!serverType || !toolName) {
+      res.json({ value: false });
+      return;
+    }
     const value = await engine.isAllowAlways(serverType, toolName);
     res.json({ value });
   }),
