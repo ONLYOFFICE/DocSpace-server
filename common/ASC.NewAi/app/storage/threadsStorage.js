@@ -24,66 +24,78 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-import { randomUUID } from "crypto";
+import { aiService, AiServiceHttpError } from "./httpClient.js";
 
-export class InMemoryThreadsStorage {
-  #threads = new Map();
+const PATH = "/integration/threads";
 
+function dtoToThread(dto) {
+  if (!dto) {
+    return null;
+  }
+  return {
+    threadId: dto.id,
+    title: dto.title,
+    lastEditDate: dto.lastEditDate,
+    profileId: dto.profileId ?? undefined,
+  };
+}
+
+export class HttpThreadsStorage {
   async create(title, profileId) {
-    const thread = {
-      threadId: randomUUID(),
+    const dto = await aiService.post(PATH, {
       title,
-      lastEditDate: Date.now(),
-      profileId,
-    };
-    this.#threads.set(thread.threadId, thread);
-    return { ...thread };
+      profileId: profileId ?? null,
+    });
+    return dtoToThread(dto);
   }
 
   async readById(threadId) {
-    const t = this.#threads.get(threadId);
-    return t ? { ...t } : null;
+    try {
+      const dto = await aiService.get(`${PATH}/${encodeURIComponent(threadId)}`);
+      return dtoToThread(dto);
+    } catch (err) {
+      if (err instanceof AiServiceHttpError && err.status === 404) {
+        return null;
+      }
+      throw err;
+    }
   }
 
   async readAll() {
-    return [...this.#threads.values()]
-      .map((t) => ({ ...t }))
-      .sort((a, b) => (b.lastEditDate ?? 0) - (a.lastEditDate ?? 0));
+    const dtos = await aiService.get(PATH);
+    return Array.isArray(dtos) ? dtos.map(dtoToThread) : [];
   }
 
   async update(threadId, title) {
-    const t = this.#threads.get(threadId);
-    if (!t) {
+    if (title === undefined) {
       return;
     }
-    if (title !== undefined) {
-      t.title = title;
-    }
+    await aiService.put(`${PATH}/${encodeURIComponent(threadId)}`, { title });
   }
 
   async touch(threadId, lastEditDate, updates) {
-    const t = this.#threads.get(threadId);
-    if (!t) {
-      return;
-    }
-    t.lastEditDate = lastEditDate;
+    const body = { lastEditDate, profileId: null, clearProfile: false };
     if (updates && "profileId" in updates) {
-      t.profileId = updates.profileId ?? undefined;
+      if (updates.profileId === null) {
+        body.clearProfile = true;
+      } else if (updates.profileId !== undefined) {
+        body.profileId = updates.profileId;
+      }
     }
+    await aiService.patch(
+      `${PATH}/${encodeURIComponent(threadId)}/touch`,
+      body,
+    );
   }
 
   async delete(threadId) {
-    this.#threads.delete(threadId);
-  }
-
-  // Internal helper for adapter-level cascade — not part of the public interface.
-  _seed(threads) {
-    for (const t of threads) {
-      this.#threads.set(t.threadId, { ...t });
+    try {
+      await aiService.delete(`${PATH}/${encodeURIComponent(threadId)}`);
+    } catch (err) {
+      if (err instanceof AiServiceHttpError && err.status === 404) {
+        return;
+      }
+      throw err;
     }
-  }
-
-  _clear() {
-    this.#threads.clear();
   }
 }
