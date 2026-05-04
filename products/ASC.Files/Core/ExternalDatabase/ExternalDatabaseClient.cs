@@ -526,23 +526,25 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         };
     }
 
-    private static string BuildDateDiffExpr(string startCol, string endCol, ExternalDatabaseType dbType, char q, string unit = "DAYS")
+    private static string BuildDateDiffExpr(string startCol, string endCol, ExternalDatabaseType dbType, char q, string unit = "DAYS", bool inclusive = false)
     {
+        var plus1 = inclusive ? " + 1" : "";
+
         if (dbType == ExternalDatabaseType.MySql)
         {
             return unit switch
             {
-                "HOURS"   => $"ABS(TIMESTAMPDIFF(HOUR, {q}{startCol}{q}, {q}{endCol}{q}))",
-                "MINUTES" => $"ABS(TIMESTAMPDIFF(MINUTE, {q}{startCol}{q}, {q}{endCol}{q}))",
-                _         => $"ABS(DATEDIFF({q}{startCol}{q}, {q}{endCol}{q}))"
+                "HOURS"   => $"ABS(TIMESTAMPDIFF(HOUR, {q}{startCol}{q}, {q}{endCol}{q})){plus1}",
+                "MINUTES" => $"ABS(TIMESTAMPDIFF(MINUTE, {q}{startCol}{q}, {q}{endCol}{q})){plus1}",
+                _         => $"ABS(DATEDIFF({q}{startCol}{q}, {q}{endCol}{q})){plus1}"
             };
         }
 
         return unit switch
         {
-            "HOURS"   => $"ABS(CAST((julianday({q}{endCol}{q}) - julianday({q}{startCol}{q})) * 24 AS INTEGER))",
-            "MINUTES" => $"ABS(CAST((julianday({q}{endCol}{q}) - julianday({q}{startCol}{q})) * 1440 AS INTEGER))",
-            _         => $"ABS(CAST(julianday({q}{endCol}{q}) - julianday({q}{startCol}{q}) AS INTEGER))"
+            "HOURS"   => $"ABS(CAST((julianday({q}{endCol}{q}) - julianday({q}{startCol}{q})) * 24 AS INTEGER)){plus1}",
+            "MINUTES" => $"ABS(CAST((julianday({q}{endCol}{q}) - julianday({q}{startCol}{q})) * 1440 AS INTEGER)){plus1}",
+            _         => $"ABS(CAST(julianday({q}{endCol}{q}) - julianday({q}{startCol}{q}) AS INTEGER)){plus1}"
         };
     }
 
@@ -766,7 +768,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         var q = dbType == ExternalDatabaseType.MySql ? '`' : '"';
 
         string? innerExpr = dateDiffAggregate != null
-            ? BuildDateDiffExpr(dateDiffAggregate.StartColumn, dateDiffAggregate.EndColumn, dbType, q, dateDiffAggregate.Unit)
+            ? BuildDateDiffExpr(dateDiffAggregate.StartColumn, dateDiffAggregate.EndColumn, dbType, q, dateDiffAggregate.Unit, inclusive: true)
             : valueColumn != null ? $"{q}{valueColumn}{q}" : null;
 
         var aggExpr = upperFn switch
