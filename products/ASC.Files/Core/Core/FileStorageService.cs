@@ -3425,8 +3425,14 @@ public class FileStorageService //: IFileStorageService
                 }
             }
 
-            var tags = await tagDao.GetTagsAsync(user, [TagType.Recent, TagType.Favorite], sharedEntries).ToListAsync();
-            await tagDao.RemoveTagsAsync(tags);
+            var tags = await tagDao.GetTagsAsync(user, [TagType.Recent, TagType.Favorite], sharedEntries)
+                .Select(r=> r.Id)
+                .ToListAsync();
+
+            foreach (var entry in sharedEntries)
+            {
+                await tagDao.RemoveTagsAsync(entry, tags);
+            }
 
             await fileDao.ReassignFilesAsync(toUser, fileIds);
             await folderDao.ReassignFoldersAsync(toUser, folderIds);
