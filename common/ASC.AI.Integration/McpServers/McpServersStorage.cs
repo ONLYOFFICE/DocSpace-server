@@ -110,12 +110,10 @@ public class McpServersStorage(IDbContextFactory<AiIntegrationContext> dbContext
                 await context.SaveChangesAsync();
             }
 
-            foreach (var name in oldNames)
+            var removedNames = oldNames.Where(name => !servers.ContainsKey(name)).ToList();
+            if (removedNames.Count > 0)
             {
-                if (!servers.ContainsKey(name))
-                {
-                    await context.DeleteToolPrefsByServerTypeAsync(tenantId, name);
-                }
+                await context.DeleteToolPrefsByServerTypesAsync(tenantId, removedNames);
             }
 
             await transaction.CommitAsync();

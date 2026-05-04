@@ -46,6 +46,12 @@ public partial class AiIntegrationContext
         return ToolPrefsQueriesContainer.DeleteToolPrefsByServerTypeAsync(this, tenantId, serverType);
     }
 
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    public Task<int> DeleteToolPrefsByServerTypesAsync(int tenantId, IEnumerable<string> serverTypes)
+    {
+        return ToolPrefsQueriesContainer.DeleteToolPrefsByServerTypesAsync(this, tenantId, serverTypes);
+    }
+
     [PreCompileQuery([PreCompileQuery.DefaultInt])]
     public Task<int> DeleteAllToolPrefsAsync(int tenantId)
     {
@@ -75,6 +81,13 @@ static file class ToolPrefsQueriesContainer
             (AiIntegrationContext ctx, int tenantId, string serverType) =>
                 ctx.ToolPrefs
                     .Where(x => x.TenantId == tenantId && x.ServerType == serverType)
+                    .ExecuteDelete());
+
+    public static readonly Func<AiIntegrationContext, int, IEnumerable<string>, Task<int>> DeleteToolPrefsByServerTypesAsync =
+        EF.CompileAsyncQuery(
+            (AiIntegrationContext ctx, int tenantId, IEnumerable<string> serverTypes) =>
+                ctx.ToolPrefs
+                    .Where(x => x.TenantId == tenantId && serverTypes.Contains(x.ServerType))
                     .ExecuteDelete());
 
     public static readonly Func<AiIntegrationContext, int, Task<int>> DeleteAllToolPrefsAsync =
