@@ -28,5 +28,5 @@ namespace ASC.Api.Documentation.Commands;
 
 public class GenerateJavaSdkCommand : SdkCommandBase
 {
-    public override string Name => "Java";
+    protected override string Name => "Java";
 }

@@ -8,7 +8,7 @@ public sealed class CSharpSdkCommandSettings : CommandSettings
 
     public override ValidationResult Validate()
     {
-        Configuration = Configuration?.Trim() ?? string.Empty;
+        Configuration = Configuration.Trim();
 
         return string.IsNullOrWhiteSpace(Configuration)
             ? ValidationResult.Error("Configuration cannot be empty.")

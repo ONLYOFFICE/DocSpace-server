@@ -28,7 +28,7 @@ namespace ASC.Api.Documentation.Commands;
 
 public class GenerateCSharpSdkCommand : SdkCommandBase<CSharpSdkCommandSettings>
 {
-    public override string Name => "CSharp";
+    protected override string Name => "CSharp";
 
     public override ValidationResult Validate(CommandContext context, CSharpSdkCommandSettings settings)
     {

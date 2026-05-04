@@ -28,5 +28,5 @@ namespace ASC.Api.Documentation.Commands;
 
 public class GeneratePhpSdkCommand : SdkCommandBase
 {
-    public override string Name => "Php";
+    protected override string Name => "Php";
 }

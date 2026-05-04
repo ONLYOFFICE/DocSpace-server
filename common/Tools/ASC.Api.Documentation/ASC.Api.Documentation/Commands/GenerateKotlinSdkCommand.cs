@@ -28,5 +28,5 @@ namespace ASC.Api.Documentation.Commands;
 
 public class GenerateKotlinSdkCommand : SdkCommandBase
 {
-    public override string Name => "Kotlin";
+    protected override string Name => "Kotlin";
 }

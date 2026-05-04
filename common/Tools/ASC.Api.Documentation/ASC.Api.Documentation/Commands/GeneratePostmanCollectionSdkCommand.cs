@@ -28,5 +28,5 @@ namespace ASC.Api.Documentation.Commands;
 
 public class GeneratePostmanCollectionSdkCommand : SdkCommandBase
 {
-    public override string Name => "PostmanCollection";
+    protected override string Name => "PostmanCollection";
 }

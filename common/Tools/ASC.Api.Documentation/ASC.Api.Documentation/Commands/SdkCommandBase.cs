@@ -29,9 +29,9 @@ namespace ASC.Api.Documentation.Commands;
 public abstract class SdkCommandBase<TSettings> : AsyncCommand<TSettings>
     where TSettings : CommandSettings
 {
-    public abstract string Name { get; }
+    protected abstract string Name { get; }
 
-    protected virtual string WorkingDirectory => SdkPaths.WorkingDirectory;
+    protected string WorkingDirectory => SdkPaths.WorkingDirectory;
 
     public override ValidationResult Validate(CommandContext context, TSettings settings) =>
         ToolRunner.ValidateAvailable("openapi-generator-cli", "version");
@@ -56,6 +56,4 @@ public abstract class SdkCommandBase<TSettings> : AsyncCommand<TSettings>
     }
 }
 
-public abstract class SdkCommandBase : SdkCommandBase<NoArgumentsCommandSettings>
-{
-}
+public abstract class SdkCommandBase : SdkCommandBase<NoArgumentsCommandSettings>;

@@ -57,10 +57,8 @@ internal static class ToolRunner
 
         try
         {
-            using var process = new Process
-            {
-                StartInfo = startInfo,
-            };
+            using var process = new Process();
+            process.StartInfo = startInfo;
 
             var standardOutput = new StringBuilder();
             var standardError = new StringBuilder();
@@ -163,43 +161,6 @@ internal static class ToolRunner
         }
     }
 
-    private static async Task<ToolRunResult> RunAndCaptureAsync(
-        string toolName,
-        IReadOnlyList<string> arguments,
-        string? workingDirectory = null,
-        CancellationToken cancellationToken = default)
-    {
-        var resolvedTool = ResolveTool(toolName);
-        var startInfo = CreateStartInfo(resolvedTool, arguments, workingDirectory);
-
-        try
-        {
-            using var process = Process.Start(startInfo);
-            if (process is null)
-            {
-                throw new ToolExecutionException(
-                    $"Resolved '{toolName}' to '{resolvedTool.Path}', but the process was not created.");
-            }
-
-            var outputTask = process.StandardOutput.ReadToEndAsync(cancellationToken);
-            var errorTask = process.StandardError.ReadToEndAsync(cancellationToken);
-
-            await process.WaitForExitAsync(cancellationToken);
-
-            return new ToolRunResult(
-                process.ExitCode,
-                await outputTask,
-                await errorTask,
-                resolvedTool.Path);
-        }
-        catch (Exception ex) when (ex is Win32Exception or FileNotFoundException or InvalidOperationException)
-        {
-            throw new ToolExecutionException(
-                $"Resolved '{toolName}' to '{resolvedTool.Path}', but it could not be started: {ex.Message}",
-                ex);
-        }
-    }
-
     private static ProcessStartInfo CreateStartInfo(
         ResolvedTool resolvedTool,
         IReadOnlyList<string> arguments,
@@ -207,7 +168,7 @@ internal static class ToolRunner
     {
         var startInfo = new ProcessStartInfo
         {
-            FileName = resolvedTool.RequiresCommandShell ? "cmd.exe" : resolvedTool.Path,
+            FileName = resolvedTool.IsCommandShellRequired ? "cmd.exe" : resolvedTool.Path,
             UseShellExecute = false,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
@@ -218,7 +179,7 @@ internal static class ToolRunner
             startInfo.WorkingDirectory = workingDirectory;
         }
 
-        if (resolvedTool.RequiresCommandShell)
+        if (resolvedTool.IsCommandShellRequired)
         {
             startInfo.Arguments = $"/d /s /c {BuildCommandShellInvocation(resolvedTool.Path, arguments)}";
             return startInfo;
@@ -247,7 +208,7 @@ internal static class ToolRunner
                 throw new ToolExecutionException($"Tool path '{fullPath}' does not exist.");
             }
 
-            return new ResolvedTool(fullPath, RequiresCommandShell(fullPath));
+            return new ResolvedTool(fullPath, CheckRequiresCommandShell(fullPath));
         }
 
         var pathEntries = (Environment.GetEnvironmentVariable("PATH") ?? string.Empty)
@@ -269,7 +230,7 @@ internal static class ToolRunner
                     continue;
                 }
 
-                return new ResolvedTool(candidate, RequiresCommandShell(candidate));
+                return new ResolvedTool(candidate, CheckRequiresCommandShell(candidate));
             }
         }
 
@@ -306,7 +267,7 @@ internal static class ToolRunner
         return value.Contains(Path.DirectorySeparatorChar) || value.Contains(Path.AltDirectorySeparatorChar);
     }
 
-    private static bool RequiresCommandShell(string path)
+    private static bool CheckRequiresCommandShell(string path)
     {
         if (!OperatingSystem.IsWindows())
         {
@@ -410,7 +371,7 @@ internal static class ToolRunner
         return markers.Any(marker => line.Contains(marker, StringComparison.OrdinalIgnoreCase));
     }
 
-    private sealed record ResolvedTool(string Path, bool RequiresCommandShell);
+    private sealed record ResolvedTool(string Path, bool IsCommandShellRequired);
 
     private sealed record ToolRunResult(int ExitCode, string StandardOutput, string StandardError, string ResolvedPath);
 

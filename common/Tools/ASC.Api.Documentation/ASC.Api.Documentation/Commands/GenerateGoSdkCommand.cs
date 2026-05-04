@@ -28,5 +28,5 @@ namespace ASC.Api.Documentation.Commands;
 
 public class GenerateGoSdkCommand : SdkCommandBase
 {
-    public override string Name => "Go";
+    protected override string Name => "Go";
 }

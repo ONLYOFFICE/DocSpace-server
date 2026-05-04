@@ -28,7 +28,7 @@ namespace ASC.Api.Documentation.Commands;
 
 public class GenerateTypeScriptSdkCommand : SdkCommandBase
 {
-    public override string Name => "TypeScript";
+    protected override string Name => "TypeScript";
 
     public override ValidationResult Validate(CommandContext context, NoArgumentsCommandSettings settings)
     {

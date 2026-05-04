@@ -28,5 +28,5 @@ namespace ASC.Api.Documentation.Commands;
 
 public class GeneratePythonSdkCommand : SdkCommandBase
 {
-    public override string Name => "Python";
+    protected override string Name => "Python";
 }

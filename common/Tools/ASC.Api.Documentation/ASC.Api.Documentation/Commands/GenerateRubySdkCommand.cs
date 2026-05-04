@@ -28,5 +28,5 @@ namespace ASC.Api.Documentation.Commands;
 
 public class GenerateRubySdkCommand : SdkCommandBase
 {
-    public override string Name => "Ruby";
+    protected override string Name => "Ruby";
 }

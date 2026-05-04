@@ -26,6 +26,4 @@
 
 namespace ASC.Api.Documentation.Commands;
 
-public sealed class NoArgumentsCommandSettings : CommandSettings
-{
-}
+public sealed class NoArgumentsCommandSettings : CommandSettings;

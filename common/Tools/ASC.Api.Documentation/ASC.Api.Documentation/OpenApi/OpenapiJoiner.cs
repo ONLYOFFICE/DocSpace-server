@@ -42,7 +42,8 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
 
         return 0;
     }
-    public static async Task JoinAsync(string outputPath, string[] inputFiles, Action<double>? progress = null, CancellationToken cancellationToken = default)
+
+    private static async Task JoinAsync(string outputPath, string[] inputFiles, Action<double>? progress = null, CancellationToken cancellationToken = default)
     {
         if (inputFiles == null || inputFiles.Length == 0)
         {
@@ -52,7 +53,7 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
         JsonObject? result = null;
         var usedOperationIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-        double totalSteps = inputFiles.Length + 1; 
+        double totalSteps = inputFiles.Length + 1;
         double currentStep = 0;
 
         foreach (var file in inputFiles)

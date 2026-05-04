@@ -28,5 +28,5 @@ namespace ASC.Api.Documentation.Commands;
 
 public class GenerateSwift6SdkCommand : SdkCommandBase
 {
-    public override string Name => "Swift6";
+    protected override string Name => "Swift6";
 }
