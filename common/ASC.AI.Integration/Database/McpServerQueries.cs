@@ -40,6 +40,12 @@ public partial class AiIntegrationContext
         return McpServerQueriesContainer.GetAllMcpServersAsync(this, tenantId);
     }
 
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    public IAsyncEnumerable<string> GetExistingMcpServerNamesAsync(int tenantId, IEnumerable<string> names)
+    {
+        return McpServerQueriesContainer.GetExistingMcpServerNamesAsync(this, tenantId, names);
+    }
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, null, null])]
     public Task<int> UpdateMcpServerConfigAsync(int tenantId, string name, string config)
     {
@@ -73,6 +79,13 @@ static file class McpServerQueriesContainer
                     .Where(x => x.TenantId == tenantId)
                     .OrderBy(x => x.Name)
                     .AsQueryable());
+
+    public static readonly Func<AiIntegrationContext, int, IEnumerable<string>, IAsyncEnumerable<string>> GetExistingMcpServerNamesAsync =
+        EF.CompileAsyncQuery(
+            (AiIntegrationContext ctx, int tenantId, IEnumerable<string> names) =>
+                ctx.McpServers
+                    .Where(x => x.TenantId == tenantId && names.Contains(x.Name))
+                    .Select(x => x.Name));
 
     public static readonly Func<AiIntegrationContext, int, string, string, Task<int>> UpdateMcpServerConfigAsync =
         EF.CompileAsyncQuery(

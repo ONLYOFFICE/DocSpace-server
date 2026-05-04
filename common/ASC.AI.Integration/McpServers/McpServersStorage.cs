@@ -79,6 +79,11 @@ public class McpServersStorage(IDbContextFactory<AiIntegrationContext> dbContext
 
     public async Task ReplaceAllAsync(int tenantId, IReadOnlyDictionary<string, string> servers)
     {
+        if (servers.Count == 0)
+        {
+            return;
+        }
+
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var strategy = dbContext.Database.CreateExecutionStrategy();
 
@@ -87,16 +92,25 @@ public class McpServersStorage(IDbContextFactory<AiIntegrationContext> dbContext
             await using var context = await dbContextFactory.CreateDbContextAsync();
             await using var transaction = await context.Database.BeginTransactionAsync();
 
-            var oldNames = await context.GetAllMcpServersAsync(tenantId)
-                .Select(x => x.Name)
-                .ToListAsync();
+            var existingNames = await context.GetExistingMcpServerNamesAsync(tenantId, servers.Keys)
+                .ToHashSetAsync();
 
-            await context.DeleteAllMcpServersAsync(tenantId);
-
-            if (servers.Count > 0)
+            var now = DateTime.UtcNow;
+            foreach (var (name, config) in servers)
             {
-                var now = DateTime.UtcNow;
-                foreach (var (name, config) in servers)
+                if (existingNames.Contains(name))
+                {
+                    var entity = new DbMcpServer
+                    {
+                        TenantId = tenantId,
+                        Name = name,
+                        Config = config,
+                        CreatedAt = default
+                    };
+                    context.McpServers.Attach(entity);
+                    context.Entry(entity).Property(x => x.Config).IsModified = true;
+                }
+                else
                 {
                     context.McpServers.Add(new DbMcpServer
                     {
@@ -106,16 +120,9 @@ public class McpServersStorage(IDbContextFactory<AiIntegrationContext> dbContext
                         CreatedAt = now
                     });
                 }
-
-                await context.SaveChangesAsync();
             }
 
-            var removedNames = oldNames.Where(name => !servers.ContainsKey(name)).ToList();
-            if (removedNames.Count > 0)
-            {
-                await context.DeleteToolPrefsByServerTypesAsync(tenantId, removedNames);
-            }
-
+            await context.SaveChangesAsync();
             await transaction.CommitAsync();
         });
     }
