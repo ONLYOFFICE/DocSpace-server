@@ -100,6 +100,7 @@ export const aiService = {
   get: (path, opts) => aiServiceRequest("GET", path, opts),
   post: (path, body, opts) => aiServiceRequest("POST", path, { ...opts, body }),
   put: (path, body, opts) => aiServiceRequest("PUT", path, { ...opts, body }),
+  patch: (path, body, opts) => aiServiceRequest("PATCH", path, { ...opts, body }),
   delete: (path, opts) => aiServiceRequest("DELETE", path, opts),
 };
 

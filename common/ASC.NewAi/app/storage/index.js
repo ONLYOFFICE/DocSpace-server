@@ -31,13 +31,13 @@ import { InMemoryPreferencesStorage } from "./preferencesStorage.js";
 import { HttpProfilesStorage } from "./profilesStorage.js";
 import { InMemoryPromptFoldersStorage } from "./promptFoldersStorage.js";
 import { InMemoryPromptsStorage } from "./promptsStorage.js";
-import { InMemoryThreadsStorage } from "./threadsStorage.js";
+import { HttpThreadsStorage } from "./threadsStorage.js";
 import { InMemoryToolPrefsStorage } from "./toolPrefsStorage.js";
 import { InMemoryWebSearchStorage } from "./webSearchStorage.js";
 
 export class InMemoryStorageAdapter {
   constructor() {
-    this.threads = new InMemoryThreadsStorage();
+    this.threads = new HttpThreadsStorage();
     this.messages = new InMemoryMessagesStorage();
     this.profiles = new HttpProfilesStorage();
     this.prompts = new InMemoryPromptsStorage();
@@ -54,7 +54,6 @@ export class InMemoryStorageAdapter {
   }
 
   async close() {
-    this.threads._clear();
     this.messages._clear();
     this.prompts._clear();
     this.promptFolders._clear();
@@ -80,15 +79,6 @@ async function seedMockData(adapter) {
       Default: firstProfileId,
       Chat: firstProfileId,
     });
-
-    adapter.threads._seed([
-      {
-        threadId: "mock-thread-1",
-        title: "Welcome thread",
-        lastEditDate: Date.now(),
-        profileId: firstProfileId,
-      },
-    ]);
   }
 }
 
