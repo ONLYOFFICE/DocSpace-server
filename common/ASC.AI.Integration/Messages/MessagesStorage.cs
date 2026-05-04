@@ -24,20 +24,16 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Thread = ASC.AI.Integration.Threads.Thread;
+
 namespace ASC.AI.Integration.Messages;
 
 [Scope]
 public class MessagesStorage(IDbContextFactory<AiIntegrationContext> dbContextFactory)
 {
-    public async Task<Message?> CreateAsync(int tenantId, Guid threadId, string contents)
+    public async Task<Message> CreateAsync(int tenantId, Guid threadId, string contents)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
-
-        var thread = await context.GetThreadAsync(tenantId, threadId);
-        if (thread == null)
-        {
-            return null;
-        }
 
         var entity = new DbMessage
         {
@@ -54,12 +50,12 @@ public class MessagesStorage(IDbContextFactory<AiIntegrationContext> dbContextFa
         return ToDomainEntity(entity);
     }
 
-    public async Task<Message?> ReadByIdAsync(int tenantId, Guid messageId)
+    public async Task<ThreadMessage?> ReadByIdAsync(int tenantId, Guid messageId)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        var entity = await context.GetMessageAsync(tenantId, messageId);
-        return entity == null ? null : ToDomainEntity(entity);
+        var entity = await context.GetMessageWithThreadAsync(tenantId, messageId);
+        return entity == null ? null : ToThreadMessageEntity(entity);
     }
 
     public async Task<List<Message>> ReadByThreadAsync(int tenantId, Guid threadId, int? limit = null, int? startIndex = null)
@@ -103,6 +99,28 @@ public class MessagesStorage(IDbContextFactory<AiIntegrationContext> dbContextFa
             ThreadId = entity.ThreadId,
             Contents = entity.Contents,
             Timestamp = entity.Timestamp
+        };
+    }
+
+    private static ThreadMessage ToThreadMessageEntity(DbMessage entity)
+    {
+        return new ThreadMessage
+        {
+            Message = ToDomainEntity(entity),
+            Thread = ToThreadDomainEntity(entity.Thread)
+        };
+    }
+
+    private static Thread ToThreadDomainEntity(DbThread entity)
+    {
+        return new Thread
+        {
+            Id = entity.Id,
+            Title = entity.Title,
+            ProfileId = entity.ProfileId,
+            CreatedBy = entity.CreatedBy,
+            LastEditDate = entity.LastEditDate,
+            CreatedAt = entity.CreatedAt
         };
     }
 }

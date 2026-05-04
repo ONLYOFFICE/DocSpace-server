@@ -34,6 +34,12 @@ public partial class AiIntegrationContext
         return MessageQueriesContainer.GetMessageAsync(this, tenantId, id);
     }
 
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    public Task<DbMessage?> GetMessageWithThreadAsync(int tenantId, Guid id)
+    {
+        return MessageQueriesContainer.GetMessageWithThreadAsync(this, tenantId, id);
+    }
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, 0, int.MaxValue])]
     public IAsyncEnumerable<DbMessage> GetMessagesByThreadAsync(int tenantId, Guid threadId, int skip, int take)
     {
@@ -65,6 +71,13 @@ static file class MessageQueriesContainer
         EF.CompileAsyncQuery(
             (AiIntegrationContext ctx, int tenantId, Guid id) =>
                 ctx.Messages.FirstOrDefault(x => x.TenantId == tenantId && x.Id == id));
+
+    public static readonly Func<AiIntegrationContext, int, Guid, Task<DbMessage?>> GetMessageWithThreadAsync =
+        EF.CompileAsyncQuery(
+            (AiIntegrationContext ctx, int tenantId, Guid id) =>
+                ctx.Messages
+                    .Include(x => x.Thread)
+                    .FirstOrDefault(x => x.TenantId == tenantId && x.Id == id));
 
     public static readonly Func<AiIntegrationContext, int, Guid, int, int, IAsyncEnumerable<DbMessage>> GetMessagesByThreadAsync =
         EF.CompileAsyncQuery(

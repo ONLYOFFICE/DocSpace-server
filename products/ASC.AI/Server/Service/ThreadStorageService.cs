@@ -132,6 +132,12 @@ public class ThreadStorageService(
         await storage.DeleteAsync(tenantId, id);
     }
 
+    public async Task AssertAccessAsync(Thread thread)
+    {
+        await AssertUserHasAccessAsync(_allowedTypes);
+        AssertOwner(thread);
+    }
+
     private void AssertOwner(Thread thread)
     {
         if (thread.CreatedBy != CurrentUserId)
