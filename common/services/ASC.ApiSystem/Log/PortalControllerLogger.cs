@@ -28,33 +28,6 @@ namespace ASC.ApiSystem.Log;
 
 internal static partial class PortalControllerLogger
 {
-    [LoggerMessage(LogLevel.Debug, "PortalName = {portalName}; Elapsed ms. CheckExistingNamePortal: {elapsed}")]
-    public static partial void DebugCheckExistingNamePortal(this ILogger logger, string portalName, long elapsed);
-
-    [LoggerMessage(LogLevel.Debug, "PortalName = {portalName}; language = {language}, culture = {culture}")]
-    public static partial void DebugLanguageCulture(this ILogger logger, string portalName, string language, string culture);
-
-    [LoggerMessage(LogLevel.Debug, "PortalName = {portalName}; Elapsed ms. HostedSolution.RegisterTenant: {elapsed}")]
-    public static partial void DebugRegisterTenant(this ILogger logger, string portalName, long elapsed);
-
-    [LoggerMessage(LogLevel.Debug, "PortalName = {portalName}; Elapsed ms. CreateReferenceByCookie: {elapsed}")]
-    public static partial void DebugCreateReference(this ILogger logger, string portalName, long elapsed);
-
-    [LoggerMessage(LogLevel.Debug, "CheckValidName failed: {name}; Elapsed ms.: {elapsed}")]
-    public static partial void DebugCheckValidNameFailed(this ILogger logger, string name, long elapsed);
-
-    [LoggerMessage(LogLevel.Debug, "ProvisionAsync: configured OAuth provider, portalName = {portalName}, provider = {provider}, elapsed {elapsed} ms.")]
-    public static partial void DebugProvisionOAuthConfigured(this ILogger logger, string portalName, string provider, long elapsed);
-
-    [LoggerMessage(LogLevel.Debug, "ProvisionAsync: finish portalName = {portalName}, provider = {provider}, elapsed {elapsed} ms.")]
-    public static partial void DebugProvisionFinish(this ILogger logger, string portalName, string provider, long elapsed);
-
-    [LoggerMessage(LogLevel.Error, "ProvisionAsync: OAuth configuration failed, provider = {provider}")]
-    public static partial void ErrorProvisionOAuthFailed(this ILogger logger, string provider, Exception exception);
-
-    [LoggerMessage(LogLevel.Error, "Third-party profile processing failed")]
-    public static partial void ErrorThirdPartyProfile(this ILogger logger, Exception exception);
-
     [LoggerMessage(LogLevel.Error, "Model without tenant")]
     public static partial void ErrorModelWithoutTenant(this ILogger logger);
 
@@ -67,12 +40,6 @@ internal static partial class PortalControllerLogger
     [LoggerMessage(LogLevel.Error, "SignInToPortalAsync failed")]
     public static partial void ErrorSignInToPortal(this ILogger logger, Exception exception);
 
-    [LoggerMessage(LogLevel.Debug, "PortalName = {portalName}; Elapsed ms. ValidateRecaptcha via app key: {appKey} {elapsed}")]
-    public static partial void DebugRecaptchaByAppKey(this ILogger logger, string portalName, string appKey, long elapsed);
-
-    [LoggerMessage(LogLevel.Debug, "PortalName = {portalName}; Elapsed ms. ValidateRecaptcha error: {elapsed} {data}")]
-    public static partial void DebugRecaptchaError(this ILogger logger, string portalName, long elapsed, string data);
-
-    [LoggerMessage(LogLevel.Debug, "PortalName = {portalName}; Elapsed ms. ValidateRecaptcha: {elapsed} {data}")]
-    public static partial void DebugRecaptchaSuccess(this ILogger logger, string portalName, long elapsed, string data);
+    [LoggerMessage(LogLevel.Error, "Third-party profile processing failed")]
+    public static partial void ErrorWithThirdPartyProfile(this ILogger logger, Exception exception);
 }

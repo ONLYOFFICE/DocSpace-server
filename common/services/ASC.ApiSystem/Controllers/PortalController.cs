@@ -487,7 +487,7 @@ public class PortalController(
                 }
                 catch (Exception e)
                 {
-                    logger.ErrorThirdPartyProfile(e);
+                    logger.ErrorWithThirdPartyProfile(e);
                 }
             }
 
