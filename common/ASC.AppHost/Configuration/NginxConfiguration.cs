@@ -105,6 +105,7 @@ public static class NginxConfiguration
             { "SERVICE_IDENTITY_API", $"http://{Constants.IdentityRegistrationContainer}:{Constants.IdentityRegistrationPort}" },
             { "SERVICE_IDENTITY", $"http://{Constants.IdentityAuthorizationContainer}:{Constants.IdentityAuthorizationPort}" },
             { "SERVICE_SSOAUTH", $"http://{Constants.HostDockerInternal}:9834" },
+            { "SERVICE_NEW_AI", $"http://{Constants.HostDockerInternal}:{Constants.NewAiPort}" },
             { "SERVICE_SOCKET", $"http://{Constants.HostDockerInternal}:9899" },
             { "SERVICE_LOGIN", $"http://{Constants.HostDockerInternal}:5011" },
             { "SERVICE_SDK", $"http://{Constants.HostDockerInternal}:5099" },

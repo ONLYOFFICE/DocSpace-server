@@ -33,6 +33,7 @@ public static class Constants
     public const int RestyPort = 8092;
     public const int SocketIoPort = 9899;
     public const int SsoAuthPort = 9834;
+    public const int NewAiPort = 9837;
     public const int WebDavPort = 1900;
     public const int IdentityRegistrationPort = 9090;
     public const int IdentityAuthorizationPort = 8080;

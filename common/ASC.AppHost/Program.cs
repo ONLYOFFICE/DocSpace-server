@@ -89,7 +89,8 @@ switch (launchProfile)
             .AddProject<ASC_AI_Worker>(Constants.AiWorkerPort)
             .AddProject<ASC_TelegramService>(Constants.TelegramPort)
             .AddSocketIO()
-            .AddSsoAuth();
+            .AddSsoAuth()
+            .AddNewAi();
 
         break;
     default:
@@ -125,6 +126,7 @@ switch (launchProfile)
             .AddProject<ASC_TelegramService>(Constants.TelegramPort)
             .AddSocketIO()
             .AddSsoAuth()
+            .AddNewAi()
             .AddWebDav()
             .AddIdentity();
 
