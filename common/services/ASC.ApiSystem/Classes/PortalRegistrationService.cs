@@ -95,6 +95,7 @@ public class PortalRegistrationService(
         (var portalName, error) = await EnsurePortalNameAsync(model.PortalName);
         if (string.IsNullOrEmpty(portalName))
         {
+            sw.Stop();
             return (null, error ?? new PortalRegistrationErrorDto { Error = "portalNameEmpty", Message = "PortalName is required" }, StatusCodes.Status400BadRequest);
         }
 
@@ -104,6 +105,7 @@ public class PortalRegistrationService(
         error = await ValidateRegistrationAsync(model, sw);
         if (error != null)
         {
+            sw.Stop();
             return (null, error, StatusCodes.Status400BadRequest);
         }
 
@@ -189,6 +191,7 @@ public class PortalRegistrationService(
         (var portalName, error) = await GetRandomPortalNameAsync();
         if (string.IsNullOrEmpty(portalName))
         {
+            sw.Stop();
             return (null, error ?? new PortalRegistrationErrorDto { Error = "portalNameEmpty", Message = "PortalName is required" }, StatusCodes.Status400BadRequest);
         }
 
@@ -198,6 +201,7 @@ public class PortalRegistrationService(
         error = await ValidateRegistrationAsync(model, sw);
         if (error != null)
         {
+            sw.Stop();
             return (null, error, StatusCodes.Status400BadRequest);
         }
 
@@ -271,6 +275,7 @@ public class PortalRegistrationService(
         var error = await ValidateRegistrationAsync(rateModel, sw);
         if (error != null)
         {
+            sw.Stop();
             return (null, error, StatusCodes.Status400BadRequest);
         }
 
@@ -302,6 +307,7 @@ public class PortalRegistrationService(
         var (t, reference, _, regError) = await RegisterPortalFlowAsync(info, model, sw, model.AWSRegion, cspDomains);
         if (regError != null)
         {
+            sw.Stop();
             return (null, regError, StatusCodes.Status500InternalServerError);
         }
 
