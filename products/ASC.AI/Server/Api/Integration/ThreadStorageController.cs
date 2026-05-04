@@ -36,48 +36,47 @@ namespace ASC.AI.Api.Integration;
 [AiFeature]
 [ControllerName("ai")]
 [ApiExplorerSettings(IgnoreApi = true)]
-public class ProfilesController(ProfilesService profilesService) : ControllerBase
+public class ThreadStorageController(ThreadStorageService threadStorageService) : ControllerBase
 {
-    [HttpPost("integration/profiles")]
-    public async Task<ProfileDto> CreateAsync(CreateProfileRequestDto inDto)
+    [HttpPost("integration/threads")]
+    public async Task<ThreadDto> CreateAsync(CreateThreadRequestDto inDto)
     {
-        var created = await profilesService.CreateAsync(ProfileMapper.MapToProfileData(inDto));
-        return ProfileMapper.MapToDto(created);
+        var created = await threadStorageService.CreateAsync(inDto.Title, inDto.ProfileId);
+        return ThreadMapper.MapToDto(created);
     }
 
-    [HttpPost("integration/profiles/batch")]
-    public async Task<IReadOnlyList<ProfileDto>> CreateManyAsync(CreateProfilesRequestDto inDto)
+    [HttpGet("integration/threads/{id}")]
+    public async Task<ThreadDto> ReadByIdAsync(ReadThreadRequestDto inDto)
     {
-        var profiles = inDto.Profiles.Select(ProfileMapper.MapToProfileData).ToList();
-        var created = await profilesService.CreateManyAsync(profiles);
-        return created.Select(ProfileMapper.MapToDto).ToList();
+        var thread = await threadStorageService.ReadByIdAsync(inDto.Id);
+        return ThreadMapper.MapToDto(thread);
     }
 
-    [HttpGet("integration/profiles/{id}")]
-    public async Task<ProfileDto> ReadByIdAsync(ReadProfileRequestDto inDto)
+    [HttpGet("integration/threads")]
+    public async Task<List<ThreadDto>> ReadAllAsync()
     {
-        var profile = await profilesService.ReadByIdAsync(inDto.Id);
-        return ProfileMapper.MapToDto(profile);
+        var threads = await threadStorageService.ReadAllAsync();
+        return threads.Select(ThreadMapper.MapToDto).ToList();
     }
 
-    [HttpGet("integration/profiles")]
-    public async Task<List<ProfileDto>> ReadAllAsync()
+    [HttpPut("integration/threads/{id}")]
+    public async Task<IActionResult> UpdateAsync(UpdateThreadRequestDto inDto)
     {
-        var profiles = await profilesService.ReadAllAsync();
-        return profiles.Select(ProfileMapper.MapToDto).ToList();
+        await threadStorageService.UpdateAsync(inDto.Id, inDto.Body.Title);
+        return NoContent();
     }
 
-    [HttpPut("integration/profiles/{id}")]
-    public async Task<ProfileDto> UpdateAsync(UpdateProfileRequestDto inDto)
+    [HttpPatch("integration/threads/{id}/touch")]
+    public async Task<IActionResult> TouchAsync(TouchThreadRequestDto inDto)
     {
-        var updated = await profilesService.UpdateAsync(ProfileMapper.MapToProfile(inDto));
-        return ProfileMapper.MapToDto(updated);
+        await threadStorageService.TouchAsync(inDto.Id, inDto.Body.LastEditDate, inDto.Body.ProfileId, inDto.Body.ClearProfile);
+        return NoContent();
     }
 
-    [HttpDelete("integration/profiles/{id}")]
-    public async Task<IActionResult> DeleteAsync(DeleteProfileRequestDto inDto)
+    [HttpDelete("integration/threads/{id}")]
+    public async Task<IActionResult> DeleteAsync(DeleteThreadRequestDto inDto)
     {
-        await profilesService.DeleteAsync(inDto.Id);
+        await threadStorageService.DeleteAsync(inDto.Id);
         return NoContent();
     }
 }

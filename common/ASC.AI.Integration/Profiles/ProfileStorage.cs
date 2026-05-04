@@ -27,8 +27,11 @@
 namespace ASC.AI.Integration.Profiles;
 
 [Scope]
-public class ProfilesStorage(IDbContextFactory<AiIntegrationContext> dbContextFactory, InstanceCrypto crypto)
+public class ProfileStorage(IDbContextFactory<AiIntegrationContext> dbContextFactory, InstanceCrypto crypto)
 {
+    public static string GetLockKey(int tenantId, int profileId) => $"ai_integration_profile_{tenantId}_{profileId}";
+
+
     public async Task<Profile> CreateAsync(int tenantId, ProfileData profile)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();

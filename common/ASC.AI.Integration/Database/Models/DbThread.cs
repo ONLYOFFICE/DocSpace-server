@@ -36,6 +36,7 @@ public class DbThread : BaseEntity
     public required string Title { get; set; }
 
     public int? ProfileId { get; set; }
+    public Guid CreatedBy { get; init; }
     public DateTime LastEditDate { get; set; }
     public DateTime CreatedAt { get; init; }
 
@@ -88,6 +89,12 @@ public static class DbThreadExtension
             entity.Property(e => e.ProfileId)
                 .HasColumnName("profile_id");
 
+            entity.Property(e => e.CreatedBy)
+                .HasColumnName("created_by")
+                .HasColumnType("char(36)")
+                .HasCharSet("utf8")
+                .UseCollation("utf8_general_ci");
+
             entity.Property(e => e.LastEditDate)
                 .HasColumnName("last_edit_date")
                 .HasColumnType("datetime");
@@ -101,6 +108,9 @@ public static class DbThreadExtension
 
             entity.HasIndex(e => new { e.TenantId, e.ProfileId })
                 .HasDatabaseName("IX_tenant_id_profile_id");
+
+            entity.HasIndex(e => new { e.TenantId, e.CreatedBy })
+                .HasDatabaseName("IX_tenant_id_created_by");
         });
     }
 
@@ -129,6 +139,10 @@ public static class DbThreadExtension
             entity.Property(e => e.ProfileId)
                 .HasColumnName("profile_id");
 
+            entity.Property(e => e.CreatedBy)
+                .HasColumnName("created_by")
+                .HasColumnType("uuid");
+
             entity.Property(e => e.LastEditDate)
                 .HasColumnName("last_edit_date")
                 .HasColumnType("timestamp without time zone");
@@ -142,6 +156,9 @@ public static class DbThreadExtension
 
             entity.HasIndex(e => new { e.TenantId, e.ProfileId })
                 .HasDatabaseName("IX_ai_integration_threads_tenant_id_profile_id");
+
+            entity.HasIndex(e => new { e.TenantId, e.CreatedBy })
+                .HasDatabaseName("IX_ai_integration_threads_tenant_id_created_by");
         });
     }
 }

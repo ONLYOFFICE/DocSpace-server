@@ -25,16 +25,18 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.AI.Integration.Profiles;
+using ASC.Common.Threading.DistributedLock.Abstractions;
 using ASC.Core.Users;
 
 namespace ASC.AI.Service;
 
 [Scope]
-public class ProfilesService(
+public class ProfileStorageService(
     UserManager userManager,
     AuthContext authContext,
     TenantManager tenantManager,
-    ProfilesStorage storage) : IntegrationServiceBase(userManager, authContext)
+    ProfileStorage storage,
+    IDistributedLockProvider distributedLockProvider) : IntegrationServiceBase(userManager, authContext)
 {
     public async Task<Profile> CreateAsync(ProfileData profile)
     {
@@ -77,6 +79,12 @@ public class ProfilesService(
     {
         await AssertUserHasAccessAsync([EmployeeType.DocSpaceAdmin]);
 
-        await storage.DeleteAsync(tenantManager.GetCurrentTenantId(), int.Parse(id));
+        var tenantId = tenantManager.GetCurrentTenantId();
+        var parsedId = int.Parse(id);
+
+        await using (await distributedLockProvider.TryAcquireFairLockAsync(ProfileStorage.GetLockKey(tenantId, parsedId)))
+        {
+            await storage.DeleteAsync(tenantId, parsedId);
+        }
     }
 }

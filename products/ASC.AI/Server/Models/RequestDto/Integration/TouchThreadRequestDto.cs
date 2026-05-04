@@ -24,20 +24,20 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Core.Users;
+namespace ASC.AI.Models.RequestDto.Integration;
 
-namespace ASC.AI.Service;
-
-public abstract class IntegrationServiceBase(UserManager userManager, AuthContext authContext)
+public class TouchThreadRequestDto
 {
-    protected Guid CurrentUserId => authContext.CurrentAccount.ID;
+    [FromRoute(Name = "id")]
+    public required Guid Id { get; init; }
 
-    protected async Task AssertUserHasAccessAsync(IEnumerable<EmployeeType> types)
-    {
-        var type = await userManager.GetUserTypeAsync(CurrentUserId);
-        if (!types.Contains(type))
-        {
-            throw new SecurityException();
-        }
-    }
+    [FromBody]
+    public required TouchThreadBody Body { get; init; }
+}
+
+public class TouchThreadBody
+{
+    public required long LastEditDate { get; init; }
+    public string? ProfileId { get; init; }
+    public bool ClearProfile { get; init; }
 }

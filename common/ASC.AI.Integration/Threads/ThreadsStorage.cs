@@ -29,7 +29,7 @@ namespace ASC.AI.Integration.Threads;
 [Scope]
 public class ThreadsStorage(IDbContextFactory<AiIntegrationContext> dbContextFactory)
 {
-    public async Task<Thread> CreateAsync(int tenantId, string title, int? profileId = null)
+    public async Task<Thread> CreateAsync(int tenantId, Guid createdBy, string title, int? profileId = null)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
@@ -40,6 +40,7 @@ public class ThreadsStorage(IDbContextFactory<AiIntegrationContext> dbContextFac
             TenantId = tenantId,
             Title = title,
             ProfileId = profileId,
+            CreatedBy = createdBy,
             LastEditDate = now,
             CreatedAt = now
         };
@@ -58,11 +59,11 @@ public class ThreadsStorage(IDbContextFactory<AiIntegrationContext> dbContextFac
         return entity == null ? null : ToDomainEntity(entity);
     }
 
-    public async Task<List<Thread>> ReadAllAsync(int tenantId)
+    public async Task<List<Thread>> ReadAllAsync(int tenantId, Guid createdBy)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        return await context.GetAllThreadsAsync(tenantId)
+        return await context.GetAllThreadsAsync(tenantId, createdBy)
             .Select(ToDomainEntity)
             .ToListAsync();
     }
@@ -107,6 +108,7 @@ public class ThreadsStorage(IDbContextFactory<AiIntegrationContext> dbContextFac
             Id = entity.Id,
             Title = entity.Title,
             ProfileId = entity.ProfileId,
+            CreatedBy = entity.CreatedBy,
             LastEditDate = entity.LastEditDate,
             CreatedAt = entity.CreatedAt
         };
