@@ -34,7 +34,8 @@ public interface IAiProviderDao
         string url,
         string key,
         ProviderType type,
-        string defaultModel);
+        string defaultModel,
+        List<AiModelSettings>? modelSettings = null);
 
     Task<AiProvider?> GetProviderAsync(int tenantId, int id, bool forceSystemProvider = false);
 
@@ -46,13 +47,16 @@ public interface IAiProviderDao
 
     Task<bool> IsProviderNameExistsAsync(int tenantId, string title, int excludedProviderId = 0);
 
-    Task<AiProvider> UpdateProviderAsync(int tenantId, AiProvider provider);
+    Task<AiProvider> UpdateProviderAsync(int tenantId, AiProvider provider, List<AiModelSettings>? modelSettings = null);
 
     Task DeleteProviders(int tenantId, HashSet<int> ids);
 
-    Task<DefaultAiProvider> SetDefaultProviderAsync(int tenantId, AiProvider provider, string defaultModel);
+    Task<DefaultAiProviderSettings> SetDefaultProviderAsync(int tenantId, AiProvider provider, string defaultModel);
 
-    Task<DefaultAiProvider?> GetDefaultProviderAsync(int tenantId);
+    Task<DefaultAiProviderSettings?> GetDefaultProviderAsync(int tenantId);
 
     Task<int?> GetFirstProviderIdAsync(int tenantId);
+
+    Task<Dictionary<string, AiModelSettings>> GetModelSettingsAsync(int tenantId, int providerId, ProviderType type);
+    Task<AiModelSettings?> GetModelSettingAsync(int tenantId, int providerId, string modelId);
 }

@@ -209,7 +209,8 @@ internal class FolderDao(
         SubjectFilter? subjectFilter,
         Guid subjectOwnerId,
         IEnumerable<string> subjectEntriesIds,
-        IEnumerable<int> parentsIds)
+        IEnumerable<int> parentsIds = null,
+        int? groupId = null)
     {
         if (CheckInvalidFilters(filterTypes) || provider != ProviderFilter.None)
         {
@@ -225,7 +226,7 @@ internal class FolderDao(
         var q = GetFolderQuery(filesDbContext, f => roomsIds.Contains(f.Id) || (f.CreateBy == _authContext.CurrentAccount.ID && parentsIds != null && parentsIds.Contains(f.ParentId)));
 
         q = !withSubfolders ?
-            BuildRoomsQuery(filesDbContext, q, filter, tags, subjectId, searchByTags, withoutTags, searchByTypes, false, excludeSubject, subjectFilter, subjectOwnerId, subjectEntriesIds) :
+            BuildRoomsQuery(filesDbContext, q, filter, tags, subjectId, searchByTags, withoutTags, searchByTypes, false, excludeSubject, subjectFilter, subjectOwnerId, subjectEntriesIds, groupId: groupId) :
             BuildRoomsWithSubfoldersQuery(filesDbContext, roomsIds, filter, tags, searchByTags, searchByTypes, withoutTags, excludeSubject, subjectId, subjectFilter, subjectOwnerId, subjectEntriesIds);
 
         if (!string.IsNullOrEmpty(searchText))
@@ -1894,16 +1895,7 @@ internal class FolderDao(
                         select rs.Indexing).FirstOrDefault() && f.EntryId == r.Id && f.TenantId == tenantId && f.EntryType == FileEntryType.Folder
                     select f.Order
                 ).FirstOrDefault(),
-                Settings = filesDbContext.RoomSettings.Where(x => x.TenantId == tenantId && x.RoomId == r.Id).Distinct().FirstOrDefault(),
-                ChatProviderType = r.FolderType == FolderType.AiRoom
-                    ? filesDbContext.RoomSettings
-                        .Where(rs => rs.TenantId == tenantId && rs.RoomId == r.Id)
-                        .Join(filesDbContext.AiProviders,
-                            rs => rs.ChatProviderId,
-                            p => p.Id,
-                            (rs, p) => (ProviderType?)p.Type)
-                        .FirstOrDefault()
-                    : null
+                Settings = filesDbContext.RoomSettings.Where(x => x.TenantId == tenantId && x.RoomId == r.Id).Distinct().FirstOrDefault()
             });
     }
 
@@ -2341,8 +2333,6 @@ public class DbFolderQuery
     public List<SubjectType> UserShared { get; set; }
     public bool ParentShared { get; set; }
     public int Order { get; set; }
-
-    public ProviderType? ChatProviderType { get; set; }
 
     public DbFolder Origin { get; set; }
     public DbFolder OriginRoom { get; set; }

@@ -1,17 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
-  <!-- 
-    Microsoft ResX Schema 
-    
+  <!--
+    Microsoft ResX Schema
+
     Version 2.0
-    
-    The primary goals of this format is to allow a simple XML format 
-    that is mostly human readable. The generation and parsing of the 
-    various data types are done through the TypeConverter classes 
+
+    The primary goals of this format is to allow a simple XML format
+    that is mostly human readable. The generation and parsing of the
+    various data types are done through the TypeConverter classes
     associated with the data types.
-    
+
     Example:
-    
+
     ... ado.net/XML headers & schema ...
     <resheader name="resmimetype">text/microsoft-resx</resheader>
     <resheader name="version">2.0</resheader>
@@ -26,36 +26,36 @@
         <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
         <comment>This is a comment</comment>
     </data>
-                
-    There are any number of "resheader" rows that contain simple 
+
+    There are any number of "resheader" rows that contain simple
     name/value pairs.
-    
-    Each data row contains a name, and value. The row also contains a 
-    type or mimetype. Type corresponds to a .NET class that support 
-    text/value conversion through the TypeConverter architecture. 
-    Classes that don't support this are serialized and stored with the 
+
+    Each data row contains a name, and value. The row also contains a
+    type or mimetype. Type corresponds to a .NET class that support
+    text/value conversion through the TypeConverter architecture.
+    Classes that don't support this are serialized and stored with the
     mimetype set.
-    
-    The mimetype is used for serialized objects, and tells the 
-    ResXResourceReader how to depersist the object. This is currently not 
+
+    The mimetype is used for serialized objects, and tells the
+    ResXResourceReader how to depersist the object. This is currently not
     extensible. For a given mimetype the value must be set accordingly:
-    
-    Note - application/x-microsoft.net.object.binary.base64 is the format 
-    that the ResXResourceWriter will generate, however the reader can 
+
+    Note - application/x-microsoft.net.object.binary.base64 is the format
+    that the ResXResourceWriter will generate, however the reader can
     read any of the formats listed below.
-    
+
     mimetype: application/x-microsoft.net.object.binary.base64
-    value   : The object must be serialized with 
+    value   : The object must be serialized with
             : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
             : and then encoded with base64 encoding.
-    
+
     mimetype: application/x-microsoft.net.object.soap.base64
-    value   : The object must be serialized with 
+    value   : The object must be serialized with
             : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
             : and then encoded with base64 encoding.
 
     mimetype: application/x-microsoft.net.object.bytearray.base64
-    value   : The object must be serialized into a byte array 
+    value   : The object must be serialized into a byte array
             : using a System.ComponentModel.TypeConverter
             : and then encoded with base64 encoding.
     -->
@@ -139,7 +139,7 @@
     <value>Määrä</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>Tekoälytyökalut</value>
+    <value>{LogoText} AI</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Varmuuskopio</value>
@@ -442,7 +442,7 @@
     <value>Sovelluksen Client ID</value>
   </data>
   <data name="ConsumersmicrosoftClientSecret" xml:space="preserve">
-    <value>Client Secret</value>
+    <value>Asiakassalaisuus</value>
   </data>
   <data name="ConsumersMicrosoftDescription" xml:space="preserve">
     <value>Ota käyttöön sovellus kirjautuaksesi sisään portaaliin käyttäen Microsoft-tiliä.</value>
@@ -535,7 +535,7 @@
     <value>SovellusID</value>
   </data>
   <data name="Consumersskydriveappsecret" xml:space="preserve">
-    <value>Client secret</value>
+    <value>Asiakassalaisuus</value>
   </data>
   <data name="ConsumersSkyDriveDescription" xml:space="preserve">
     <value>Yhdistä sovellus jotta voit hallita OneDrive tiedostoja ja kansioita.</value>
@@ -595,10 +595,10 @@
     <value>X</value>
   </data>
   <data name="ConsumerstwitterAccessTokenSecret_Default" xml:space="preserve">
-    <value>Client Secret</value>
+    <value>Asiakassalaisuus</value>
   </data>
   <data name="ConsumerstwitterAccessToken_Default" xml:space="preserve">
-    <value>Client ID</value>
+    <value>Asiakas ID</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
     <value>Yhdistä sovellus jotta voit kirjautua sisään käyttämällä X tiliä.</value>
@@ -664,10 +664,10 @@
     <value>Yahoo</value>
   </data>
   <data name="ConsumersyahooClientId" xml:space="preserve">
-    <value>Client ID</value>
+    <value>Asiakas ID</value>
   </data>
   <data name="ConsumersyahooClientSecret" xml:space="preserve">
-    <value>Client Secret</value>
+    <value>Asiakassalaisuus</value>
   </data>
   <data name="ConsumersYahooDescription" xml:space="preserve">
     <value>Ota sovellus käyttöön tuodaksesi käyttäjiä Yahoo-palvelusta.</value>
@@ -1153,7 +1153,7 @@
     <value>Tekoälyagenttien määrän ei tulisi ylittää {0}</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>Tekoälytyökalut</value>
+    <value>{LogoText} AI</value>
   </data>
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
     <value>Ota käyttöön DocSpacessasi tekoälyominaisuudet tehostaaksesi tuottavuutta.</value>
@@ -1289,5 +1289,95 @@
   </data>
   <data name="WhatsNewSubscriptionName" xml:space="preserve">
     <value>Uutta</value>
+  </data>
+  <data name="AccountingCustomerOperationAgent" xml:space="preserve">
+    <value>Agentti</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_chat" xml:space="preserve">
+    <value>Keskustelu</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_fetch" xml:space="preserve">
+    <value>Verkkosivustojen indeksointi</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_search" xml:space="preserve">
+    <value>Verkkohaku</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-tools" xml:space="preserve">
+    <value>Tekoälykrediipit</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_fetch" xml:space="preserve">
+    <value>Lähteet</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_search" xml:space="preserve">
+    <value>Tulokset</value>
+  </data>
+  <data name="ConsumersdbHost" xml:space="preserve">
+    <value>Isäntä</value>
+  </data>
+  <data name="ConsumersdatabaseType" xml:space="preserve">
+    <value>Tietokantatyyppi</value>
+  </data>
+  <data name="ConsumersdbName" xml:space="preserve">
+    <value>Tietokannan nimi</value>
+  </data>
+  <data name="ConsumersdbPassword" xml:space="preserve">
+    <value>Salasana</value>
+  </data>
+  <data name="ConsumersdbPort" xml:space="preserve">
+    <value>Portti</value>
+  </data>
+  <data name="ConsumersdbSsl" xml:space="preserve">
+    <value>Käytä SSL:ää</value>
+  </data>
+  <data name="ConsumersdbUser" xml:space="preserve">
+    <value>Käyttäjä</value>
+  </data>
+  <data name="ConsumersExternalDb" xml:space="preserve">
+    <value>Tietokantayhteys</value>
+  </data>
+  <data name="ConsumersExternalDbDescription" xml:space="preserve">
+    <value>Tallenna lomakkeen tulokset ulkoiseen tietokantaan, kuten MySQL tai SQLite.</value>
+  </data>
+  <data name="ConsumersExternalDbInstruction" xml:space="preserve">
+    <value>Yhdistä ulkoinen tietokanta lomakkeen tulosten tallentamiseksi.</value>
+  </data>
+  <data name="ConsumersExternalDbSqliteStandaloneOnly" xml:space="preserve">
+    <value>SQLite on saatavilla vain erillisissä asennuksissa.</value>
+  </data>
+  <data name="ConsumersExternalDbTestConnection" xml:space="preserve">
+    <value>Testaa yhteys</value>
+  </data>
+  <data name="ConsumersNextcloud" xml:space="preserve">
+    <value>Nextcloud</value>
+  </data>
+  <data name="ConsumersNextcloudBaseUrl" xml:space="preserve">
+    <value>Anna Nextcloud-instanssin URL-osoite.</value>
+  </data>
+  <data name="ConsumersNextcloudClientId" xml:space="preserve">
+    <value>Asiakas ID</value>
+  </data>
+  <data name="ConsumersNextcloudClientSecret" xml:space="preserve">
+    <value>Asiakassalaisuus</value>
+  </data>
+  <data name="ConsumersNextcloudDescription" xml:space="preserve">
+    <value>Salli sovelluksen kirjautua portaaliin Nextcloud-tilillä.</value>
+  </data>
+  <data name="ConsumersNextcloudInstruction" xml:space="preserve">
+    <value>Salli sovelluksen kirjautua portaaliin Nextcloud-tilillä.</value>
+  </data>
+  <data name="ConsumerssqliteFilePath" xml:space="preserve">
+    <value>SQLite-tiedostopolku</value>
+  </data>
+  <data name="CouldNotRecoverPasswordForAutoGeneratedEmail" xml:space="preserve">
+    <value>Salasanan palautus on kielletty automaattisesti luoduille sähköpostiosoitteille</value>
+  </data>
+  <data name="TariffsFeature_embedding_wallet" xml:space="preserve">
+    <value>Tekoälyupotus</value>
+  </data>
+  <data name="TariffsFeature_embedding_wallet_price_count" xml:space="preserve">
+    <value>Upotuksen mittayksikkö, jota suuret kielimallit (LLM) voivat käsitellä</value>
+  </data>
+  <data name="UserAuthenticationFailed" xml:space="preserve">
+    <value>Käyttäjän todennus epäonnistui</value>
   </data>
 </root>

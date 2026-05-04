@@ -250,7 +250,9 @@ public class FolderDtoHelper(
     FileSharing fileSharing,
     EntryStatusManager entryStatusManager,
     AiAccessibility accessibility,
-    AiConfiguration aiConfiguration)
+    AiModelSettingsResolver modelSettingsResolver,
+    AiConfiguration aiConfiguration,
+    AiModelSettingsLoader modelSettingsLoader)
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, fileSharing, urlShortener)
 {
     private readonly EmployeeDtoHelper _employeeWrapperHelper = employeeWrapperHelper;
@@ -260,7 +262,8 @@ public class FolderDtoHelper(
         List<FileShareRecord<string>> currentUserRecords = null,
         string order = null,
         IFolder contextFolder = null,
-        AiStatus aiStatus = null)
+        AiStatus aiStatus = null,
+        AiModelSettingsResult modelSettingsResult = null)
     {
         var result = await GetFolderWrapperAsync(folder);
         result.ParentId = folder.ParentId;
@@ -395,33 +398,62 @@ public class FolderDtoHelper(
 
         if (folder.SettingsChatParameters != null)
         {
+            ProviderType? providerType = null;
+            var hasModelSettings = true;
+
             if (folder.SettingsChatProviderId == AiGateway.ProviderId)
             {
-                folder.ChatProviderType = ProviderType.PortalAi;
+                providerType = ProviderType.PortalAi;
 
                 if (!aiStatus.GatewayEnabled)
                 {
                     folder.SettingsChatProviderId = 0;
                 }
             }
+            else
+            {
+                modelSettingsResult ??= await modelSettingsLoader.LoadForEntriesAsync([], folder);
+                if (modelSettingsResult?.Providers?.TryGetValue(folder.SettingsChatProviderId, out var meta) == true)
+                {
+                    providerType = meta.Type;
+                    hasModelSettings = meta.HasModelSettings;
+                }
+            }
 
             var modelId = folder.SettingsChatProviderId == 0 ? null : folder.SettingsChatParameters.ModelId;
-            var model = modelId != null && folder.ChatProviderType.HasValue
-                ? aiConfiguration.GetModel(folder.ChatProviderType.Value, modelId)
-                : null;
+            if (modelId != null && providerType.HasValue)
+            {
+                var resolvedModelId = aiConfiguration.ResolveModelId(providerType.Value, modelId);
+                if (resolvedModelId != modelId)
+                {
+                    modelId = resolvedModelId;
+                    folder.SettingsChatParameters = folder.SettingsChatParameters with { ModelId = modelId };
+                }
+            }
+
+            ModelSettings resolved = null;
+            if (modelId != null && providerType.HasValue)
+            {
+                AiModelSettings dbSettings = null;
+                modelSettingsResult?.Settings?.TryGetValue((folder.SettingsChatProviderId, modelId), out dbSettings);
+                resolved = modelSettingsResolver.Resolve(providerType.Value, modelId, dbSettings, hasModelSettings);
+            }
+
+            var model = resolved is { IsEnabled: true } ? resolved : null;
 
             ChatMultimodalSettingsDto multimodal = null;
-            if (model?.Multimodal?.Image != null)
+            if (model?.Capabilities is { Vision: true })
             {
                 multimodal = new ChatMultimodalSettingsDto
                 {
                     Image = new ChatImageMultimodalSettingsDto
                     {
-                        Formats = model.Multimodal.Image.Formats
+                        Formats = AiConfiguration.SupportedImageFormats
                     }
                 };
             }
 
+#pragma warning disable CS0618 // Obsolete
             result.ChatSettings = new ChatSettingsDto
             {
                 ProviderId = folder.SettingsChatProviderId,
@@ -429,8 +461,10 @@ public class FolderDtoHelper(
                 ModelAlias = model?.Alias,
                 Prompt = folder.SettingsChatParameters.Prompt,
                 Multimodal = multimodal,
-                Thinking = model?.Thinking ?? false
+                Thinking = model?.Capabilities?.Thinking ?? false,
+                Capabilities = model?.Capabilities
             };
+#pragma warning restore CS0618
         }
 
         if (contextFolder is { FolderType: FolderType.Recent } or { FolderType: FolderType.Favorites })

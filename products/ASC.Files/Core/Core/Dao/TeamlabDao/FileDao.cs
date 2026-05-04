@@ -193,27 +193,11 @@ internal class FileDao(
         var searchByText = !string.IsNullOrEmpty(searchText);
         var searchByExtension = !extension.IsNullOrEmpty();
 
-        if (extension.IsNullOrEmpty())
-        {
-            extension = [""];
-        }
-
         if (searchByText || searchByExtension)
         {
-            var searchIds = new List<int>();
-            var success = false;
-            foreach (var e in extension)
-            {
-                var func = GetFuncForSearch(null, null, filterType, subjectGroup, subjectID, searchText, e, searchInContent);
+            var func = GetFuncForSearch(null, null, filterType, subjectGroup, subjectID, searchText, extension, searchInContent);
 
-                (success, var result) = await factoryIndexer.TrySelectIdsAsync(s => func(s).In(r => r.Id, fileIds.ToArray()));
-
-                if (!success)
-                {
-                    break;
-                }
-                searchIds = searchIds.Concat(result).ToList();
-            }
+            var (success, searchIds) = await factoryIndexer.TrySelectIdsAsync(s => func(s).In(r => r.Id, fileIds.ToArray()));
 
             if (success)
             {
@@ -1846,26 +1830,11 @@ internal class FileDao(
         var searchByText = !string.IsNullOrEmpty(searchText);
         var searchByExtension = !extension.IsNullOrEmpty();
 
-        if (extension.IsNullOrEmpty())
-        {
-            extension = [""];
-        }
-
         if (searchByText || searchByExtension)
         {
-            var searchIds = new List<int>();
-            var success = false;
-            foreach (var e in extension)
-            {
-                var func = GetFuncForSearch(null, null, filterType, subjectGroup, subjectID, searchText, e, searchInContent);
+            var func = GetFuncForSearch(null, null, filterType, subjectGroup, subjectID, searchText, extension, searchInContent);
 
-                (success, var result) = await factoryIndexer.TrySelectIdsAsync(s => func(s));
-                if (!success)
-                {
-                    break;
-                }
-                searchIds = searchIds.Concat(result).ToList();
-            }
+            var (success, searchIds) = await factoryIndexer.TrySelectIdsAsync(s => func(s));
 
             if (success)
             {
@@ -2250,7 +2219,7 @@ internal class FileDao(
     #endregion
 
     private Func<Selector<DbFile>, Selector<DbFile>> GetFuncForSearch(int? parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
-        string extension, bool searchInContent, bool withSubfolders = false)
+        string[] extensions, bool searchInContent, bool withSubfolders = false)
     {
         return s =>
         {
@@ -2261,17 +2230,18 @@ internal class FileDao(
                 result = searchInContent ? s.MatchAll(searchText) : s.Match(r => r.Title, searchText);
             }
 
-            if (!string.IsNullOrEmpty(extension))
+            var nonEmptyExtensions = extensions?.Where(e => !string.IsNullOrEmpty(e)).ToArray();
+            if (nonEmptyExtensions is { Length: > 0 })
             {
-                var pattern = $"*{extension}";
+                var patterns = nonEmptyExtensions.Select(e => $"*{e}").ToArray();
 
                 if (result != null)
                 {
-                    result.Match(r => r.Title, pattern);
+                    result.MatchAny(r => r.Title, patterns);
                 }
                 else
                 {
-                    result = s.Match(r => r.Title, pattern);
+                    result = s.MatchAny(r => r.Title, patterns);
                 }
             }
 
@@ -2619,11 +2589,6 @@ internal class FileDao(
         var searchByText = !string.IsNullOrEmpty(searchText);
         var searchByExtension = !extension.IsNullOrEmpty();
 
-        if (extension.IsNullOrEmpty())
-        {
-            extension = [""];
-        }
-
         if (withSubfolders && (searchByText || searchByExtension || filterType != FilterType.None || subjectID != Guid.Empty))
         {
             q = GetFileQuery(filesDbContext, r => r.CurrentVersion)
@@ -2634,22 +2599,11 @@ internal class FileDao(
 
         if (searchByText || searchByExtension)
         {
-            var searchIds = new List<int>();
-            var success = false;
+            var func = GetFuncForSearch(parentId, null, filterType, subjectGroup, subjectID, searchText, extension, searchInContent);
 
-            foreach (var e in extension)
-            {
-                var func = GetFuncForSearch(parentId, null, filterType, subjectGroup, subjectID, searchText, e, searchInContent);
+            Expression<Func<Selector<DbFile>, Selector<DbFile>>> expression = s => func(s);
 
-                Expression<Func<Selector<DbFile>, Selector<DbFile>>> expression = s => func(s);
-
-                (success, var result) = await factoryIndexer.TrySelectIdsAsync(expression);
-                if (!success)
-                {
-                    break;
-                }
-                searchIds = searchIds.Concat(result).ToList();
-            }
+            var (success, searchIds) = await factoryIndexer.TrySelectIdsAsync(expression);
 
             if (searchInContent && formsItemDto != null)
             {
@@ -2769,28 +2723,13 @@ internal class FileDao(
         var searchByText = !string.IsNullOrEmpty(searchText);
         var searchByExtension = !extension.IsNullOrEmpty();
 
-        if (extension.IsNullOrEmpty())
-        {
-            extension = [string.Empty];
-        }
-
         if (searchByText || searchByExtension)
         {
-            var searchIds = new List<int>();
-            var success = false;
-            foreach (var e in extension)
-            {
-                var func = GetFuncForSearch(null, null, filterType, subjectGroup, subjectId, searchText, e, searchInContent);
+            var func = GetFuncForSearch(null, null, filterType, subjectGroup, subjectId, searchText, extension, searchInContent);
 
-                Expression<Func<Selector<DbFile>, Selector<DbFile>>> expression = s => func(s);
+            Expression<Func<Selector<DbFile>, Selector<DbFile>>> expression = s => func(s);
 
-                (success, var result) = await factoryIndexer.TrySelectIdsAsync(expression);
-                if (!success)
-                {
-                    break;
-                }
-                searchIds = searchIds.Concat(result).ToList();
-            }
+            var (success, searchIds) = await factoryIndexer.TrySelectIdsAsync(expression);
 
             if (success)
             {

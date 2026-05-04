@@ -30,4 +30,6 @@ public class ModelInfo
 {
     public required string Id { get; init; }
     public int Created { get; init; }
+    public string? Alias { get; init; }
+    public AiModelCapabilities? Capabilities { get; init; }
 }

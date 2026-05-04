@@ -33,14 +33,17 @@ namespace ASC.Core.Common.AI;
 public class AiConfiguration
 {
     public int MaxImageSize { get; private set; }
+    public static readonly FrozenSet<string> SupportedImageFormats =
+        ((HashSet<string>)[".jpeg", ".jpg", ".gif", ".webp", ".png"])
+        .ToFrozenSet(StringComparer.OrdinalIgnoreCase);
 
     private readonly FrozenDictionary<ProviderType, ProviderSettingsData> _settings;
-    private readonly FrozenDictionary<(ProviderType, string), ModelSettings> _modelsByProvider;
+    private readonly FrozenDictionary<(ProviderType, string), ModelSettingsData> _modelsByProvider;
     private readonly FrozenDictionary<(ProviderType, string), string> _modelIdMigrations;
     private readonly FrozenDictionary<string, string> _aliasByModelId;
     private readonly FrozenDictionary<string, EffortSettingsData> _effortSettings;
 
-    public AiConfiguration(IConfiguration configuration, CoreBaseSettings coreBaseSettings)
+    public AiConfiguration(IConfiguration configuration)
     {
         var section = configuration.GetSection("ai");
         var providers = section.GetSection("providers").Get<List<ProviderSettingsData>>() ?? [];
@@ -48,15 +51,12 @@ public class AiConfiguration
         var effort = section.GetSection("effort").Get<Dictionary<string, EffortSettingsData>>() ?? [];
 
         MaxImageSize = maxImgSize > 0 ? maxImgSize : 0;
-        _effortSettings = effort.ToFrozenDictionary(e => 
+        _effortSettings = effort.ToFrozenDictionary(e =>
             e.Key, e => e.Value, StringComparer.OrdinalIgnoreCase);
 
-        _settings = coreBaseSettings.Standalone
-            ? providers.ToFrozenDictionary(p => p.Type)
-            : providers.Where(p => p.Type != ProviderType.OpenAiCompatible)
-                .ToFrozenDictionary(p => p.Type);
+        _settings = providers.ToFrozenDictionary(p => p.Type);
 
-        var modelsByProvider = new Dictionary<(ProviderType, string), ModelSettings>();
+        var modelsByProvider = new Dictionary<(ProviderType, string), ModelSettingsData>();
         var modelIdMigrations = new Dictionary<(ProviderType, string), string>();
         var aliasByModelId = new Dictionary<string, string>();
 
@@ -100,13 +100,13 @@ public class AiConfiguration
         return _settings.Values.Where(x => x.Enabled);
     }
 
-    public HashSet<string>? GetSupportedModels(ProviderType type)
+    public HashSet<string>? GetRecommendedModels(ProviderType type)
     {
         var models = _settings.GetValueOrDefault(type)?.Models;
         return models?.Select(m => m.Id).ToHashSet();
     }
 
-    public ModelSettings? GetModel(ProviderType type, string modelId)
+    public ModelSettingsData? GetModel(ProviderType type, string modelId)
     {
         return _modelsByProvider.GetValueOrDefault((type, modelId));
     }

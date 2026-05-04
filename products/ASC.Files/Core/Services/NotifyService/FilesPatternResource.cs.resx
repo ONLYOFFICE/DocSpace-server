@@ -298,4 +298,18 @@ $Message</value>
   <data name="subject_YourTurnFormFilling" xml:space="preserve">
     <value>Oznámení DocSpace.</value>
   </data>
+  <data name="pattern_AgentRemoved" xml:space="preserve">
+    <value>$__AuthorName odstranil agenta AI
+
+$__AuthorName odstranil agenta AI: $RoomTitle</value>
+  </data>
+  <data name="pattern_AgentUpdateAccessForUser_push" xml:space="preserve">
+    <value>Vaše role v agentovi AI "$RoomTitle" byla změněna na "$RoomRole"</value>
+  </data>
+  <data name="pattern_InvitedToAgent_push" xml:space="preserve">
+    <value>Byli jste pozváni do agenta AI "$RoomTitle"</value>
+  </data>
+  <data name="subject_AgentRemoved" xml:space="preserve">
+    <value>Upozornění DocSpace. Agent AI odstraněn</value>
+  </data>
 </root>

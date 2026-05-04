@@ -38,6 +38,7 @@ global using ASC.AI.Models.ResponseDto;
 global using ASC.AI.Models.RequestDto;
 global using ASC.AI.Core.MCP;
 global using ASC.AI.Core.MCP.Data;
+global using ASC.AI.Core.MCP.Transport;
 global using ASC.AI.Core.Settings;
 global using ASC.AI.Core.Retrieval.Web;
 global using ASC.AI.Core.Retrieval.Knowledge;

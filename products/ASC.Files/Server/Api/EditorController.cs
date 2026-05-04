@@ -394,12 +394,13 @@ public abstract class EditorController<T>(
     [HttpPost("{fileId}/xlsx")]
     public async Task<XlsxReportResponseDto> GenerateXlsx(FileIdRequestDto<int> inDto)
     {
-        var (task, form) = await fileStorageService.GenerateXlsxAsync(inDto.FileId);
+        var (task, form, isNewFile) = await fileStorageService.GenerateXlsxAsync(inDto.FileId);
 
         return new XlsxReportResponseDto
         {
             Form = await _fileDtoHelper.GetAsync(form),
-            Task = DocumentBuilderTaskDto.Get(task)
+            Task = DocumentBuilderTaskDto.Get(task),
+            IsNewFile = isNewFile
         };
     }
 

@@ -24,19 +24,20 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Provider.Data;
+namespace ASC.AI.Core.Provider.Model;
 
-public class DefaultAiProvider
+public class OpenAiCompatibleModelClient(HttpClient httpClient, string url, string apiKey) : OpenAiModelClientBase(httpClient, url, apiKey)
 {
-    public int ProviderId { get; set; }
-    public required string DefaultModel { get; set; }
-    public string? ProviderTitle { get; set; }
-    public ProviderType? ProviderType { get; set; }
-}
+    protected override async Task<IEnumerable<ModelInfo>> GetModelsDataAsync(HttpResponseMessage response)
+    {
+        var content = await response.Content.ReadFromJsonAsync<Response>();
+        return content?.Data == null
+            ? []
+            : content.Data.OrderByDescending(x => x.Created);
+    }
 
-[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
-    PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
-public static partial class DefaultAiProviderMapper
-{
-    public static partial DefaultAiProvider Map(this DbDefaultAiProvider source);
+    private class Response
+    {
+        public required List<ModelInfo> Data { get; init; }
+    }
 }

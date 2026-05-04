@@ -412,7 +412,7 @@ internal class ProviderFileDao(
     {
         if (toFolderId is int tId)
         {
-            return await CopyFileAsync(fileId, tId) as File<TTo>;
+            return await CopyFileAsync(fileId, tId, Guid.Empty) as File<TTo>;
         }
 
         if (toFolderId is string tsId)

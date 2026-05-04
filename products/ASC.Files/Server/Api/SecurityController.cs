@@ -222,6 +222,12 @@ public abstract class SecurityController<T>(
     [HttpGet("folder/{folderId}/group/{groupId:guid}/share")]
     public async IAsyncEnumerable<GroupMemberSecurityRequestDto> GetGroupsMembersWithFolderSecurity(GroupMemberSecurityFolderRequestDto<T> inDto)
     {
+
+        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+
         var offset = inDto.StartIndex;
         var count = inDto.Count;
         var text = inDto.Text;
@@ -255,6 +261,11 @@ public abstract class SecurityController<T>(
     [HttpGet("file/{fileId}/group/{groupId:guid}/share")]
     public async IAsyncEnumerable<GroupMemberSecurityRequestDto> GetGroupsMembersWithFileSecurity(GroupMemberSecurityFileRequestDto<T> inDto)
     {
+        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+
         var offset = inDto.StartIndex;
         var count = inDto.Count;
         var text = inDto.Text;

@@ -26,11 +26,10 @@
 
 namespace ASC.Api.Core;
 
-public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment hostEnvironment)
+public class BaseWorkerStartup(IConfiguration configuration)
 {
     protected IConfiguration Configuration { get; } = configuration;
-    protected IHostEnvironment HostEnvironment { get; } = hostEnvironment;
-    protected DIHelper DIHelper { get; } = new();
+    private DIHelper DIHelper { get; } = new();
 
     private bool OpenTelemetryEnabled { get; } = configuration.GetValue<bool>("openTelemetry:enable");
 
@@ -70,9 +69,6 @@ public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment ho
 
 
         services.RegisterFeature();
-
-        services.AddStartupTask<WarmupServicesStartupTask>().TryAddSingleton(services);
-
         services.AddMemoryCache();
 
         var connectionMultiplexer = await services.GetRedisConnectionMultiplexerAsync(Configuration, GetType().Namespace);

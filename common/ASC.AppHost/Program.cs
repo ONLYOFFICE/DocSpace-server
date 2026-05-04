@@ -28,12 +28,18 @@
 
 var builder = DistributedApplication.CreateBuilder(args);
 IResourceBuilder<JavaScriptAppResource>? playwright = null;
-var basePath = Path.GetFullPath(Path.Combine("..", "..", ".."));
+var basePath = Path.GetFullPath(Path.Combine(builder.AppHostDirectory, "..", "..", ".."));
 var isDocker = string.Compare(builder.Configuration["Docker"], "true", StringComparison.OrdinalIgnoreCase) == 0;
 var skipClient = string.Compare(builder.Configuration["SKIP_CLIENT"], "true", StringComparison.OrdinalIgnoreCase) == 0;
 
 var launchProfile = builder.Configuration["DOTNET_LAUNCH_PROFILE"];
+var otelFileLogging = string.Compare(builder.Configuration["OTEL_FILE_LOGGING"], "true", StringComparison.OrdinalIgnoreCase) == 0;
 var connectionManager = new ConnectionStringManager(builder, basePath).AddEditors();
+
+if (otelFileLogging)
+{
+    connectionManager.AddOpenTelemetryCollector();
+}
 
 var configurator = new ProjectConfigurator(builder, connectionManager, basePath, isDocker);
 switch (launchProfile)
@@ -43,7 +49,7 @@ switch (launchProfile)
             .AddMySql(withDataVolume: false)
             .AddRabbitMq()
             .AddRedis()
-            .AddOpensearch(withDashboard: false, fixedPort: false);
+            .AddOpensearch(withDashboard: false, fixedPort: false, withDataVolume: false);
 
         configurator
             .AddProject<ASC_Files>(Constants.FilesPort)

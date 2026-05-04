@@ -1,25 +1,25 @@
 ﻿// (c) Copyright Ascensio System SIA 2009-2026
-// 
+//
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
+//
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
+//
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-// 
+//
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -53,7 +53,12 @@ public class ProviderController(
     [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
     public async Task<AiProviderDto> AddProviderAsync(CreateProviderRequestDto inDto)
     {
-        var provider = await providerService.AddProviderAsync(inDto.Title, inDto.Url, inDto.Key, inDto.Type);
+        var provider = await providerService.AddProviderAsync(
+            inDto.Title,
+            inDto.Url,
+            inDto.Key,
+            inDto.Type,
+            MapModelSettings(inDto.ModelSettings));
 
         messageService.Send(MessageAction.AIProviderCreated, MessageTarget.Create(provider.Id), provider.Title);
 
@@ -75,18 +80,18 @@ public class ProviderController(
     public async Task<List<AiProviderDto>> GetProvidersAsync(PaginatedRequestDto inDto)
     {
         var totalCountTask = providerService.GetProvidersTotalCountAsync();
-        
+
         var providers = await providerService.GetProvidersAsync(inDto.StartIndex, inDto.Count)
             .Select(providerMapper.MapToDto)
             .ToListAsync();
 
         var totalCount = await totalCountTask;
-        
+
         apiContext.SetCount(providers.Count).SetTotalCount(totalCount);
 
         return providers;
     }
-    
+
     /// <summary>
     /// Update an AI provider
     /// </summary>
@@ -104,7 +109,9 @@ public class ProviderController(
     [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
     public async Task<AiProviderDto> UpdateProviderAsync(UpdateProviderRequestDto inDto)
     {
-        var provider = await providerService.UpdateProviderAsync(inDto.Id, inDto.Body.Title, inDto.Body.Url, inDto.Body.Key);
+        var modelSettings = MapModelSettings(inDto.Body.ModelSettings);
+
+        var provider = await providerService.UpdateProviderAsync(inDto.Id, inDto.Body.Title, inDto.Body.Url, inDto.Body.Key, modelSettings);
 
         messageService.Send(MessageAction.AIProviderUpdated, MessageTarget.Create(provider.Id), provider.Title);
 
@@ -166,6 +173,53 @@ public class ProviderController(
     }
 
     /// <summary>
+    /// Preview models for a new AI provider
+    /// </summary>
+    /// <remarks>
+    /// Connects to the specified AI provider using the provided credentials and returns the available models
+    /// with their default settings. This is used to preview models before saving the provider.
+    /// Recommended models are enabled by default with configuration-defined settings.
+    /// Additional models are disabled by default with empty capabilities.
+    /// </remarks>
+    /// <path>api/2.0/ai/providers/models/preview</path>
+    /// <collection>list</collection>
+    [Tags("AI / Providers")]
+    [SwaggerResponse(200, "List of models with default settings", typeof(List<ModelSettingsDto>))]
+    [SwaggerResponse(400, "Invalid connection data or unsupported provider type")]
+    [SwaggerResponse(403, "You don't have enough permission to manage providers")]
+    [HttpPost("providers/models/preview")]
+    [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
+    public async Task<List<ModelSettingsDto>> PreviewProviderModelsAsync(PreviewProviderModelsRequestDto inDto)
+    {
+        var models = await providerService.GetPreviewModelsAsync(inDto.Type, inDto.Url, inDto.Key);
+
+        return models.Select(x => x.MapToDto()).ToList();
+    }
+
+    /// <summary>
+    /// Get all models for a provider with their settings
+    /// </summary>
+    /// <remarks>
+    /// Returns the full list of AI models available from a provider, including both recommended and additional models.
+    /// Each model includes its current settings: enabled state, display alias, and capabilities (vision, tool calling, thinking).
+    /// Recommended models are enabled by default and their alias and capabilities come from configuration.
+    /// Additional models are disabled by default and can be configured by the admin.
+    /// </remarks>
+    /// <path>api/2.0/ai/providers/{providerId}/models</path>
+    /// <collection>list</collection>
+    [Tags("AI / Providers")]
+    [SwaggerResponse(200, "List of models with settings", typeof(List<ModelSettingsDto>))]
+    [SwaggerResponse(403, "You don't have enough permission to manage providers")]
+    [SwaggerResponse(404, "Provider not found")]
+    [HttpGet("providers/{providerId}/models")]
+    public async Task<List<ModelSettingsDto>> GetProviderModelsAsync(GetProviderModelsRequestDto inDto)
+    {
+        var models = await providerService.GetModelsWithSettingsAsync(inDto.ProviderId);
+
+        return models.Select(x => x.MapToDto()).ToList();
+    }
+
+    /// <summary>
     /// Set the default AI provider
     /// </summary>
     /// <remarks>
@@ -201,5 +255,10 @@ public class ProviderController(
         var result = await providerService.GetDefaultProviderAsync();
 
         return result?.MapToDto();
+    }
+
+    private static List<AiModelSettings>? MapModelSettings(HashSet<ModelSettingsItemDto>? items)
+    {
+        return items is not { Count: > 0 } ? null : items.Select(x => x.Map()).ToList();
     }
 }

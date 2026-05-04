@@ -60,6 +60,7 @@ public partial class FilesDbContext(DbContextOptions<FilesDbContext> dbContextOp
     public DbSet<DbMcpServerSettings> McpServerSettings { get; set; }
     public DbSet<DbAiProvider> AiProviders { get; set; }
     public DbSet<DbChatMessageAttachment> MessageAttachments { get; set; }
+    public DbSet<DbAiModelSettings> AiModelSettings { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -94,6 +95,7 @@ public partial class FilesDbContext(DbContextOptions<FilesDbContext> dbContextOp
             .AddDbUserChatSettings()
             .AddDbMcpServerSettings()
             .AddDbAiProviders()
+            .AddDbAiModelSettings()
             .AddDbChatMessageAttachment()
             .AddDbFunctions();
     }

@@ -1155,4 +1155,43 @@
   <data name="WhiteLabelSettingsLogoTextUpdated" xml:space="preserve">
     <value>Názov značky bol aktualizovaný</value>
   </data>
+  <data name="AIAccessDisabled" xml:space="preserve">
+    <value>Služby AI boli deaktivované</value>
+  </data>
+  <data name="AIAccessEnabled" xml:space="preserve">
+    <value>Služby AI boli aktivované</value>
+  </data>
+  <data name="AIDefaultProviderDeleted" xml:space="preserve">
+    <value>Predvolený poskytovateľ bol odstránený</value>
+  </data>
+  <data name="AIDefaultProviderSet" xml:space="preserve">
+    <value>Predvolený poskytovateľ AI nastavený: Názov: {0}, Predvolený model: {1}</value>
+  </data>
+  <data name="BackupCancelled" xml:space="preserve">
+    <value>Zálohovanie zrušené</value>
+  </data>
+  <data name="DocumentsDefaultTemplatesSettingsUpdated" xml:space="preserve">
+    <value>Predvolené nastavenia šablóny aktualizované: {0}</value>
+  </data>
+  <data name="FileNotSavedDueToRoomQuota" xml:space="preserve">
+    <value>Miestnosti [{0}]. Súbor nebol uložený: {1} – prekročená kvóta úložiska miestnosti.</value>
+  </data>
+  <data name="FileNotSavedDueToUserQuota" xml:space="preserve">
+    <value>Používatelia [{0}]. Súbor nebol uložený: {1} – prekročená kvóta úložiska používateľa.</value>
+  </data>
+  <data name="FileSavedButRoomQuotaExceeded" xml:space="preserve">
+    <value>Miestnosti [{0}]. Súbor aktualizovaný: {1}, prekročená kvóta úložiska miestnosti.</value>
+  </data>
+  <data name="FileSavedButUserQuotaExceeded" xml:space="preserve">
+    <value>Používatelia [{0}]. Súbor aktualizovaný: {1}, prekročená kvóta úložiska používateľa.</value>
+  </data>
+  <data name="RestoreCancelled" xml:space="preserve">
+    <value>Obnovenie zrušené</value>
+  </data>
+  <data name="RestoreStarted" xml:space="preserve">
+    <value>Obnovenie spustené</value>
+  </data>
+  <data name="ScheduledBackupDeleted" xml:space="preserve">
+    <value>Plánované zálohovanie odstránené</value>
+  </data>
 </root>

@@ -83,7 +83,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
     }
 
     public IAsyncEnumerable<Folder<string>> GetRoomsAsync(IEnumerable<string> roomsIds, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText, bool withSubfolders, bool withoutTags,
-        bool excludeSubject, ProviderFilter provider, SubjectFilter? subjectFilter, Guid subjectOwnerId, IEnumerable<string> subjectEntriesIds, IEnumerable<int> parentsIds = null)
+        bool excludeSubject, ProviderFilter provider, SubjectFilter? subjectFilter, Guid subjectOwnerId, IEnumerable<string> subjectEntriesIds, IEnumerable<int> parentsIds = null, int? groupId = null)
     {
         var result = AsyncEnumerable.Empty<Folder<string>>();
 

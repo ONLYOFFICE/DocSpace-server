@@ -41,6 +41,10 @@ public static class AiServerServiceExtensions
         services.AddSingleton<IToolPermissionRequester, RedisToolPermissionRequester>();
         services.AddSingleton<IToolPermissionProvider, RedisToolPermissionProvider>();
 
+        services.AddTransient<McpContentTypeHandler>();
+        services.AddHttpClient(McpContentTypeHandler.HttpClientName)
+            .AddHttpMessageHandler<McpContentTypeHandler>();
+
         return services;
     }
 }

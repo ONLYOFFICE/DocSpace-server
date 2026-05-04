@@ -90,6 +90,11 @@ public class ProjectConfigurator(
 
         connectionManager.AddBaseConfig(project, isDocker);
         connectionManager.AddWaitFor(project);
+
+        if (connectionManager.HasOtelCollector)
+        {
+            project.WithEnvironment("OTEL_FILE_EXPORTER_ENDPOINT", connectionManager.GetOtelCollectorEndpoint(isDocker: false));
+        }
     }
 
     private void AddProjectDocker<TProject>(int projectPort) where TProject : IProjectMetadata, new()
@@ -167,6 +172,11 @@ public class ProjectConfigurator(
         foreach (var env in otlEnvs)
         {
             resourceBuilder.WithEnvironment(env.Key, env.Value);
+        }
+
+        if (connectionManager.HasOtelCollector)
+        {
+            resourceBuilder.WithEnvironment("OTEL_FILE_EXPORTER_ENDPOINT", connectionManager.GetOtelCollectorEndpoint(isDocker: true));
         }
 
         resourceBuilder.WithOtlpExporter();

@@ -119,6 +119,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
         var userManager = serviceProvider.GetService<UserManager>();
         var tenantUtil = serviceProvider.GetService<TenantUtil>();
         var displayUserSettingsHelper = serviceProvider.GetService<DisplayUserSettingsHelper>();
+        var tenantLogoManager = serviceProvider.GetService<TenantLogoManager>();
         var tempPath = serviceProvider.GetService<TempPath>();
 
         var tenant = tenantManager.GetCurrentTenant();
@@ -195,6 +196,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
                 tariffService,
                 tenantUtil,
                 displayUserSettingsHelper,
+                tenantLogoManager,
                 tenant.Id,
                 filter);
 
@@ -222,6 +224,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
         TariffService tariffService,
         TenantUtil tenantUtil,
         DisplayUserSettingsHelper displayUserSettingsHelper,
+        TenantLogoManager tenantLogoManager,
         int tenantId,
         OperationFilter filter)
     {
@@ -241,11 +244,12 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
                 break;
             }
 
-            var participantDisplayNames = await report.GetParticipantDisplayNamesAsync(displayUserSettingsHelper);
+            var participantDisplayNames = await report.GetParticipantDisplayNamesAsync(displayUserSettingsHelper, false);
+            var logoText = await tenantLogoManager.GetLogoTextAsync();
 
             foreach (var operation in report.Collection)
             {
-                var (description, unitOfMeasurement, quantity) = WalletServiceDescriptionManager.GetServiceDescriptionAndUom(operation, filter.ServiceName, operation.Metadata);
+                var (description, unitOfMeasurement, quantity) = WalletServiceDescriptionManager.GetServiceDescriptionAndUom(operation, filter.ServiceName, operation.Metadata, logoText);
                 var (agentId, agentTitle) = WalletServiceDescriptionManager.GetAgentInfo(operation.Metadata);
 
                 operation.Description = description;

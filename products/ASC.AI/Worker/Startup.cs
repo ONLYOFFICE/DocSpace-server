@@ -24,12 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Microsoft.AspNetCore.Builder;
+
 namespace ASC.AI.Worker;
 
 public class Startup : BaseWorkerStartup
 {
-    public Startup(IConfiguration configuration, IHostEnvironment hostEnvironment)
-        : base(configuration, hostEnvironment)
+    public Startup(IConfiguration configuration) : base(configuration)
     {
         if (configuration.GetSection("RabbitMQ").GetChildren().Any() &&
             string.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))

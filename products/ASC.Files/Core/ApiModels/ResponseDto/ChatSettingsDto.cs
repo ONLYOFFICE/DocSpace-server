@@ -58,13 +58,20 @@ public class ChatSettingsDto
     /// <summary>
     /// The multimodal settings for the chat model.
     /// </summary>
+    [Obsolete("Use Capabilities instead")]
     public ChatMultimodalSettingsDto Multimodal { get; init; }
 
     /// <summary>
     /// Indicates whether the model supports extended thinking mode.
     /// </summary>
     /// <example>false</example>
+    [Obsolete("Use Capabilities instead")]
     public bool Thinking { get; init; }
+
+    /// <summary>
+    /// The model capabilities.
+    /// </summary>
+    public AiModelCapabilities Capabilities { get; init; }
 
     /// <summary>
     /// Indicates whether this is an internal AI gateway provider.

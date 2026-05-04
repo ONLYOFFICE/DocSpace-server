@@ -40,9 +40,10 @@ public class CachedAiProviderDao(
         string url,
         string key,
         ProviderType type,
-        string defaultModel)
+        string defaultModel,
+        List<AiModelSettings>? modelSettings = null)
     {
-        var result = await providerDao.AddProviderAsync(tenantId, title, url, key, type, defaultModel);
+        var result = await providerDao.AddProviderAsync(tenantId, title, url, key, type, defaultModel, modelSettings);
 
         if (!result.IsDefault)
         {
@@ -80,9 +81,9 @@ public class CachedAiProviderDao(
         return providerDao.IsProviderNameExistsAsync(tenantId, title, excludedProviderId);
     }
 
-    public async Task<AiProvider> UpdateProviderAsync(int tenantId, AiProvider provider)
+    public async Task<AiProvider> UpdateProviderAsync(int tenantId, AiProvider provider, List<AiModelSettings>? modelSettings = null)
     {
-        provider = await providerDao.UpdateProviderAsync(tenantId, provider);
+        provider = await providerDao.UpdateProviderAsync(tenantId, provider, modelSettings);
 
         await InvalidateDefaultProviderCacheAsync(tenantId);
 
@@ -103,7 +104,7 @@ public class CachedAiProviderDao(
         await InvalidateFirstProviderCacheAsync(tenantId);
     }
 
-    public async Task<DefaultAiProvider> SetDefaultProviderAsync(int tenantId, AiProvider provider, string defaultModel)
+    public async Task<DefaultAiProviderSettings> SetDefaultProviderAsync(int tenantId, AiProvider provider, string defaultModel)
     {
         var result = await providerDao.SetDefaultProviderAsync(tenantId, provider, defaultModel);
 
@@ -112,12 +113,12 @@ public class CachedAiProviderDao(
         return result;
     }
 
-    public async Task<DefaultAiProvider?> GetDefaultProviderAsync(int tenantId)
+    public async Task<DefaultAiProviderSettings?> GetDefaultProviderAsync(int tenantId)
     {
         var cacheKey = GetDefaultProviderCacheKey(tenantId);
 
-        var cached = await cache.TryGetAsync<DefaultAiProvider>(cacheKey);
-        DefaultAiProvider? result;
+        var cached = await cache.TryGetAsync<DefaultAiProviderSettings>(cacheKey);
+        DefaultAiProviderSettings? result;
 
         if (cached.HasValue)
         {
@@ -163,6 +164,16 @@ public class CachedAiProviderDao(
         }
 
         return result;
+    }
+
+    public Task<Dictionary<string, AiModelSettings>> GetModelSettingsAsync(int tenantId, int providerId, ProviderType type)
+    {
+        return providerDao.GetModelSettingsAsync(tenantId, providerId, type);
+    }
+
+    public Task<AiModelSettings?> GetModelSettingAsync(int tenantId, int providerId, string modelId)
+    {
+        return providerDao.GetModelSettingAsync(tenantId, providerId, modelId);
     }
 
     private static string GetDefaultProviderCacheKey(int tenantId)

@@ -40,6 +40,7 @@ public class BaseTest(
     protected readonly UsersApi _portalUsersApi = fixture.PortalUsersApi;
     protected readonly UserTypeApi _userTypeApi = fixture.UserTypeApi;
     protected readonly CommonSettingsApi _commonSettingsApi = fixture.CommonSettingsApi;
+    protected readonly WebhooksApi _webhooksApi = fixture.WebhooksApi;
     private readonly Func<Task> _resetDatabase = fixture.ResetDatabaseAsync;
 
     public async ValueTask InitializeAsync()

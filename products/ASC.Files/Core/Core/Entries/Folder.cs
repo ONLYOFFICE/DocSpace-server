@@ -281,11 +281,6 @@ public class Folder<T> : FileEntry<T>, IFolder
     public ChatParameters SettingsChatParameters { get; set; }
 
     /// <summary>
-    /// The chat provider type configured for the folder.
-    /// </summary>
-    public ProviderType? ChatProviderType { get; set; }
-    
-    /// <summary>
     /// Specifies if the files can be downloaded from this folder or not.
     /// </summary>
     public bool SettingsDenyDownload { get; set; }
@@ -347,7 +342,7 @@ public class Folder<T> : FileEntry<T>, IFolder
 
 [Scope]
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
-public partial class FolderMapper(IServiceProvider serviceProvider, TenantDateTimeConverter tenantDateTimeConverter, FilesMappingAction filesMappingAction, AiConfiguration aiConfiguration)
+public partial class FolderMapper(IServiceProvider serviceProvider, TenantDateTimeConverter tenantDateTimeConverter, FilesMappingAction filesMappingAction)
 {
     private partial Folder<int> Map(DbFolderQuery source);
 
@@ -372,17 +367,6 @@ public partial class FolderMapper(IServiceProvider serviceProvider, TenantDateTi
         {
             result.Shared = dbFolderQuery.UserShared.Any(r => r is SubjectType.ExternalLink or SubjectType.PrimaryExternalLink);
             result.SharedForUser = dbFolderQuery.UserShared.Any(r => r is SubjectType.Group or SubjectType.User);
-        }
-
-        if (!result.ChatProviderType.HasValue || result.SettingsChatParameters?.ModelId == null)
-        {
-            return result;
-        }
-
-        var resolved = aiConfiguration.ResolveModelId(result.ChatProviderType.Value, result.SettingsChatParameters.ModelId);
-        if (resolved != result.SettingsChatParameters.ModelId)
-        {
-            result.SettingsChatParameters = result.SettingsChatParameters with { ModelId = resolved };
         }
 
         return result;

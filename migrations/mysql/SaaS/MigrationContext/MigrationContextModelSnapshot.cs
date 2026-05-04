@@ -1551,6 +1551,55 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasAnnotation("MySql:CharSet", "utf8");
                 });
 
+            modelBuilder.Entity("ASC.Core.Common.EF.Model.Ai.DbAiModelSettings", b =>
+                {
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<int>("ProviderId")
+                        .HasColumnType("int")
+                        .HasColumnName("provider_id");
+
+                    b.Property<string>("ModelId")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("model_id")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<string>("Alias")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("alias")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<string>("Capabilities")
+                        .HasColumnType("json")
+                        .HasColumnName("capabilities")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<bool>("IsEnabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("is_enabled")
+                        .HasDefaultValueSql("'0'");
+
+                    b.HasKey("TenantId", "ProviderId", "ModelId")
+                        .HasName("PRIMARY");
+
+                    b.HasIndex("ProviderId");
+
+                    b.HasIndex("TenantId", "ProviderId")
+                        .HasDatabaseName("IX_tenant_id_provider_id");
+
+                    b.ToTable("ai_model_settings", (string)null);
+
+                    b.HasAnnotation("MySql:CharSet", "utf8");
+                });
+
             modelBuilder.Entity("ASC.Core.Common.EF.Model.Ai.DbAiProvider", b =>
                 {
                     b.Property<int>("Id")
@@ -1562,6 +1611,12 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Property<DateTime>("CreatedOn")
                         .HasColumnType("datetime")
                         .HasColumnName("created_on");
+
+                    b.Property<bool>("HasModelSettings")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("has_model_settings")
+                        .HasDefaultValueSql("'0'");
 
                     b.Property<string>("Key")
                         .IsRequired()
@@ -4615,7 +4670,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("tinyint(1)")
                         .HasColumnName("save_form_as_xlsx")
-                        .HasDefaultValueSql("0");
+                        .HasDefaultValueSql("1");
 
                     b.Property<bool>("SendFormToExternalDB")
                         .ValueGeneratedOnAdd()
@@ -5710,6 +5765,25 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Tenant");
+                });
+
+            modelBuilder.Entity("ASC.Core.Common.EF.Model.Ai.DbAiModelSettings", b =>
+                {
+                    b.HasOne("ASC.Core.Common.EF.Model.Ai.DbAiProvider", "Provider")
+                        .WithMany()
+                        .HasForeignKey("ProviderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Provider");
 
                     b.Navigation("Tenant");
                 });
