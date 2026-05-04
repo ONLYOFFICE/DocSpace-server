@@ -986,7 +986,7 @@ public class PortalController(
     {
         if (securityContext.CurrentAccount.ID != tenant.OwnerId)
         {
-            throw new Exception(Resource.ErrorAccessDenied);
+            throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
         if (!coreBaseSettings.Standalone)
