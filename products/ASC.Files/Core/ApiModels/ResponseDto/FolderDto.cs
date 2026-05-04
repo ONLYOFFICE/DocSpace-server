@@ -581,10 +581,12 @@ public class FolderDtoHelper(
             }
 
             result.Security[FileSecurity.FilesSecurityActions.UpdateXlsx] = canUpdateXlsx;
+            result.Security[FileSecurity.FilesSecurityActions.AnalyzeResponses] = canUpdateXlsx;
         }
         else
         {
             result.Security[FileSecurity.FilesSecurityActions.UpdateXlsx] = false;
+            result.Security[FileSecurity.FilesSecurityActions.AnalyzeResponses] = false;
         }
 
         if (folder.FolderType.IsPublicSystemFolder())
