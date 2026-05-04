@@ -1,0 +1,31 @@
+{
+  "name": "asc-new-ai",
+  "version": "1.0.0",
+  "description": "ASC New AI service",
+  "homepage": "http://www.onlyoffice.com",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "nodemon app.js"
+  },
+  "dependencies": {
+    "@aws-sdk/client-cloudwatch-logs": "^3.199.0",
+    "@onlyoffice/ai-chat": "file:./onlyoffice-ai-chat-0.2.4.tgz",
+    "body-parser": "1.19.0",
+    "cookie-parser": "1.4.5",
+    "cors": "^2.8.5",
+    "date-and-time": "^2.4.1",
+    "express": "4.17.1",
+    "morgan": "1.10.0",
+    "nconf": "^0.10.0",
+    "nodemon": "2.0.4",
+    "winston": "^3.8.2",
+    "winston-cloudwatch": "^6.1.1",
+    "winston-daily-rotate-file": "^4.5.5"
+  },
+  "engines": {
+    "node": ">=20",
+    "yarn": ">=4"
+  },
+  "packageManager": "yarn@4.1.0"
+}

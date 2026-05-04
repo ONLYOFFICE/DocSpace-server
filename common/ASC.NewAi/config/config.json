@@ -1,0 +1,24 @@
+{
+  "app": {
+    "name": "ONLYOFFICE New AI Service",
+    "port": 9837,
+    "appsettings": "../../../../buildtools/config",
+    "environment": "Development",
+    "logName": "web.newai.%DATE%.log",
+    "proxy": {
+      "url": "http://localhost:8092"
+    }
+  },
+  "logger": {
+    "file": {
+      "level": "debug",
+      "handleExceptions": true,
+      "humanReadableUnhandledException": true,
+      "json": false,
+      "datePattern": "MM-DD",
+      "zippedArchive": true,
+      "maxSize": "50m",
+      "maxFiles": "30d"
+    }
+  }
+}

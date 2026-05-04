@@ -260,6 +260,40 @@ public class ProjectConfigurator(
         return this;
     }
 
+    public ProjectConfigurator AddNewAi()
+    {
+        var name = "onlyoffice-newAi";
+        var path = Path.Combine("..", "ASC.NewAi");
+        var port = Constants.NewAiPort;
+
+        if (isDocker)
+        {
+            var resourceBuilder = builder
+                .AddDockerfile(name, path)
+                .WithImageTag("dev")
+                .WithEnvironment("log:dir", "/logs")
+                .WithEnvironment("log:name", "newAi")
+                .WithEnvironment("API_HOST", new UriBuilder(Uri.UriSchemeHttp, Constants.OpenRestyContainer, Constants.RestyPort).ToString())
+                .WithEnvironment("app:appsettings", "/buildtools/config")
+                .WithHttpEndpoint(port, port, isProxied: false)
+                .WithHttpHealthCheck("/health")
+                .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
+
+            AddBaseBind(resourceBuilder);
+        }
+        else
+        {
+            builder.AddJavaScriptApp(name, path, "start")
+                .WithYarn()
+                .WithEnvironment("NODE_ENV", "development")
+                .WithHttpEndpoint(targetPort: port)
+                .WithHttpHealthCheck("/health")
+                .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
+        }
+
+        return this;
+    }
+
     public ProjectConfigurator AddWebDav()
     {
         var name = "onlyoffice-webDav";
