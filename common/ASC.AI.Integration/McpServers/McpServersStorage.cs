@@ -45,12 +45,21 @@ public class McpServersStorage(IDbContextFactory<AiIntegrationContext> dbContext
         await context.SaveChangesAsync();
     }
 
-    public async Task<string?> ReadByNameAsync(int tenantId, string name)
+    public async Task<McpServer?> ReadByNameAsync(int tenantId, string name)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
         var entity = await context.GetMcpServerAsync(tenantId, name);
-        return entity?.Config;
+        if (entity == null)
+        {
+            return null;
+        }
+
+        return new McpServer
+        {
+            Name = entity.Name,
+            Config = entity.Config
+        };
     }
 
     public async Task<Dictionary<string, string>> ReadAllAsync(int tenantId)
@@ -61,11 +70,11 @@ public class McpServersStorage(IDbContextFactory<AiIntegrationContext> dbContext
             .ToDictionaryAsync(x => x.Name, x => x.Config);
     }
 
-    public async Task<int> UpdateAsync(int tenantId, string name, string config)
+    public async Task<bool> UpdateAsync(int tenantId, string name, string config)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        return await context.UpdateMcpServerConfigAsync(tenantId, name, config);
+        return await context.UpdateMcpServerConfigAsync(tenantId, name, config) > 0;
     }
 
     public async Task ReplaceAllAsync(int tenantId, IReadOnlyDictionary<string, string> servers)
