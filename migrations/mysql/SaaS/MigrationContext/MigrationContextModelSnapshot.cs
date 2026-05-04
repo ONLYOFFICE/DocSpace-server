@@ -249,22 +249,21 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
             modelBuilder.Entity("ASC.AI.Integration.Database.Models.DbPreferences", b =>
                 {
                     b.Property<int>("TenantId")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int")
-                        .HasColumnName("tenant_id")
-                        .HasAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn);
+                        .HasColumnName("tenant_id");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("created_by")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<bool?>("DeepMode")
                         .HasColumnType("tinyint(1)")
                         .HasColumnName("deep_mode");
 
-                    b.Property<int>("TenantId1")
-                        .HasColumnType("int");
-
-                    b.HasKey("TenantId")
+                    b.HasKey("TenantId", "CreatedBy")
                         .HasName("PRIMARY");
-
-                    b.HasIndex("TenantId1");
 
                     b.ToTable("ai_integration_preferences", (string)null);
 
@@ -6017,7 +6016,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 {
                     b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
                         .WithMany()
-                        .HasForeignKey("TenantId1")
+                        .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

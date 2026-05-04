@@ -39,17 +39,17 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 name: "ai_integration_preferences",
                 columns: table => new
                 {
-                    tenant_id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    deep_mode = table.Column<bool>(type: "tinyint(1)", nullable: true),
-                    TenantId1 = table.Column<int>(type: "int", nullable: false)
+                    tenant_id = table.Column<int>(type: "int", nullable: false),
+                    created_by = table.Column<Guid>(type: "char(36)", nullable: false, collation: "utf8_general_ci")
+                        .Annotation("MySql:CharSet", "utf8"),
+                    deep_mode = table.Column<bool>(type: "tinyint(1)", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PRIMARY", x => x.tenant_id);
+                    table.PrimaryKey("PRIMARY", x => new { x.tenant_id, x.created_by });
                     table.ForeignKey(
-                        name: "FK_ai_integration_preferences_tenants_tenants_TenantId1",
-                        column: x => x.TenantId1,
+                        name: "FK_ai_integration_preferences_tenants_tenants_tenant_id",
+                        column: x => x.tenant_id,
                         principalTable: "tenants_tenants",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
@@ -99,6 +99,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     title = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false, collation: "utf8_general_ci")
                         .Annotation("MySql:CharSet", "utf8"),
                     profile_id = table.Column<int>(type: "int", nullable: true),
+                    created_by = table.Column<Guid>(type: "char(36)", nullable: false, collation: "utf8_general_ci")
+                        .Annotation("MySql:CharSet", "utf8"),
                     last_edit_date = table.Column<DateTime>(type: "datetime", nullable: false),
                     created_at = table.Column<DateTime>(type: "datetime", nullable: false)
                 },
@@ -121,13 +123,15 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     tenant_id = table.Column<int>(type: "int", nullable: false),
                     server_type = table.Column<string>(type: "varchar(128)", maxLength: 128, nullable: false, collation: "utf8_general_ci")
                         .Annotation("MySql:CharSet", "utf8"),
+                    created_by = table.Column<Guid>(type: "char(36)", nullable: false, collation: "utf8_general_ci")
+                        .Annotation("MySql:CharSet", "utf8"),
                     tools = table.Column<string>(type: "json", nullable: false)
                         .Annotation("MySql:CharSet", "utf8"),
                     created_at = table.Column<DateTime>(type: "datetime", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PRIMARY", x => new { x.tenant_id, x.server_type });
+                    table.PrimaryKey("PRIMARY", x => new { x.tenant_id, x.server_type, x.created_by });
                     table.ForeignKey(
                         name: "FK_ai_integration_tool_prefs_tenants_tenants_tenant_id",
                         column: x => x.tenant_id,
@@ -201,14 +205,14 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 columns: new[] { "tenant_id", "thread_id", "timestamp" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_ai_integration_preferences_TenantId1",
-                table: "ai_integration_preferences",
-                column: "TenantId1");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_tenant_id_id",
                 table: "ai_integration_profiles",
                 columns: new[] { "tenant_id", "id" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_tenant_id_created_by",
+                table: "ai_integration_threads",
+                columns: new[] { "tenant_id", "created_by" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_tenant_id_last_edit_date",
@@ -219,6 +223,11 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 name: "IX_tenant_id_profile_id",
                 table: "ai_integration_threads",
                 columns: new[] { "tenant_id", "profile_id" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_tenant_id_created_by",
+                table: "ai_integration_tool_prefs",
+                columns: new[] { "tenant_id", "created_by" });
         }
 
         /// <inheritdoc />

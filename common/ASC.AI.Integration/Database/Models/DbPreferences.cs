@@ -29,6 +29,7 @@ namespace ASC.AI.Integration.Database.Models;
 public class DbPreferences : BaseEntity
 {
     public int TenantId { get; init; }
+    public Guid CreatedBy { get; init; }
 
     public bool? DeepMode { get; set; }
 
@@ -36,7 +37,7 @@ public class DbPreferences : BaseEntity
 
     public override object[] GetKeys()
     {
-        return [TenantId];
+        return [TenantId, CreatedBy];
     }
 }
 
@@ -60,11 +61,17 @@ public static class DbPreferencesExtension
             entity.ToTable("ai_integration_preferences")
                 .HasCharSet("utf8");
 
-            entity.HasKey(e => e.TenantId)
+            entity.HasKey(e => new { e.TenantId, e.CreatedBy })
                 .HasName("PRIMARY");
 
             entity.Property(e => e.TenantId)
                 .HasColumnName("tenant_id");
+
+            entity.Property(e => e.CreatedBy)
+                .HasColumnName("created_by")
+                .HasColumnType("char(36)")
+                .HasCharSet("utf8")
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.DeepMode)
                 .HasColumnName("deep_mode")
@@ -78,12 +85,16 @@ public static class DbPreferencesExtension
         {
             entity.ToTable("ai_integration_preferences");
 
-            entity.HasKey(e => e.TenantId)
+            entity.HasKey(e => new { e.TenantId, e.CreatedBy })
                 .HasName("pk_ai_integration_preferences");
 
             entity.Property(e => e.TenantId)
                 .HasColumnName("tenant_id")
                 .HasColumnType("integer");
+
+            entity.Property(e => e.CreatedBy)
+                .HasColumnName("created_by")
+                .HasColumnType("uuid");
 
             entity.Property(e => e.DeepMode)
                 .HasColumnName("deep_mode")

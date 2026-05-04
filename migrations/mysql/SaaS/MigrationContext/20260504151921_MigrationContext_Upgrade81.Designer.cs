@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     [DbContext(typeof(MigrationContext))]
-    [Migration("20260504085750_MigrationContext_Upgrade82")]
-    partial class MigrationContext_Upgrade82
+    [Migration("20260504151921_MigrationContext_Upgrade81")]
+    partial class MigrationContext_Upgrade81
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -252,22 +252,21 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
             modelBuilder.Entity("ASC.AI.Integration.Database.Models.DbPreferences", b =>
                 {
                     b.Property<int>("TenantId")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int")
-                        .HasColumnName("tenant_id")
-                        .HasAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn);
+                        .HasColumnName("tenant_id");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("created_by")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<bool?>("DeepMode")
                         .HasColumnType("tinyint(1)")
                         .HasColumnName("deep_mode");
 
-                    b.Property<int>("TenantId1")
-                        .HasColumnType("int");
-
-                    b.HasKey("TenantId")
+                    b.HasKey("TenantId", "CreatedBy")
                         .HasName("PRIMARY");
-
-                    b.HasIndex("TenantId1");
 
                     b.ToTable("ai_integration_preferences", (string)null);
 
@@ -414,6 +413,12 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("created_by")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime")
                         .HasColumnName("created_at");
@@ -423,8 +428,11 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("json")
                         .HasColumnName("tools");
 
-                    b.HasKey("TenantId", "ServerType")
+                    b.HasKey("TenantId", "ServerType", "CreatedBy")
                         .HasName("PRIMARY");
+
+                    b.HasIndex("TenantId", "CreatedBy")
+                        .HasDatabaseName("IX_tenant_id_created_by");
 
                     b.ToTable("ai_integration_tool_prefs", (string)null);
 
@@ -6011,7 +6019,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 {
                     b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
                         .WithMany()
-                        .HasForeignKey("TenantId1")
+                        .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

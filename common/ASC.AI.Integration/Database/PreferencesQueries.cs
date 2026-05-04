@@ -28,33 +28,33 @@ namespace ASC.AI.Integration.Database;
 
 public partial class AiIntegrationContext
 {
-    [PreCompileQuery([PreCompileQuery.DefaultInt])]
-    public Task<bool?> GetDeepModeAsync(int tenantId)
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    public Task<bool?> GetDeepModeAsync(int tenantId, Guid userId)
     {
-        return PreferencesQueriesContainer.GetDeepModeAsync(this, tenantId);
+        return PreferencesQueriesContainer.GetDeepModeAsync(this, tenantId, userId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt])]
-    public Task<int> DeletePreferencesAsync(int tenantId)
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    public Task<int> DeletePreferencesAsync(int tenantId, Guid userId)
     {
-        return PreferencesQueriesContainer.DeletePreferencesAsync(this, tenantId);
+        return PreferencesQueriesContainer.DeletePreferencesAsync(this, tenantId, userId);
     }
 }
 
 static file class PreferencesQueriesContainer
 {
-    public static readonly Func<AiIntegrationContext, int, Task<bool?>> GetDeepModeAsync =
+    public static readonly Func<AiIntegrationContext, int, Guid, Task<bool?>> GetDeepModeAsync =
         EF.CompileAsyncQuery(
-            (AiIntegrationContext ctx, int tenantId) =>
+            (AiIntegrationContext ctx, int tenantId, Guid userId) =>
                 ctx.Preferences
-                    .Where(x => x.TenantId == tenantId)
+                    .Where(x => x.TenantId == tenantId && x.CreatedBy == userId)
                     .Select(x => x.DeepMode)
                     .FirstOrDefault());
 
-    public static readonly Func<AiIntegrationContext, int, Task<int>> DeletePreferencesAsync =
+    public static readonly Func<AiIntegrationContext, int, Guid, Task<int>> DeletePreferencesAsync =
         EF.CompileAsyncQuery(
-            (AiIntegrationContext ctx, int tenantId) =>
+            (AiIntegrationContext ctx, int tenantId, Guid userId) =>
                 ctx.Preferences
-                    .Where(x => x.TenantId == tenantId)
+                    .Where(x => x.TenantId == tenantId && x.CreatedBy == userId)
                     .ExecuteDelete());
 }
