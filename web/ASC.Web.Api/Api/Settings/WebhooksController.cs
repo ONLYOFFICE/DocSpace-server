@@ -348,12 +348,14 @@ public class WebhooksController(
     {
         var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
 
-        return Enum.GetValues<WebhookTrigger>().Select(t => new WebhookTriggerDto
-        {
-            Name = t.ToCustomString(),
-            Id = (long)t,
-            Available = t.IsAvailableFor(userType)
-        });
+        return Enum.GetValues<WebhookTrigger>()
+            .OrderBy(t => t.GetOrder())
+            .Select(t => new WebhookTriggerDto
+            {
+                Name = t.ToCustomString(),
+                Id = (long)t,
+                Available = t.IsAvailableFor(userType)
+            });
     }
 
     private async Task<bool> CheckAdminPermissionsAsync()

@@ -54,6 +54,11 @@ public class WebhookManager(
             var formChecker =  serviceProvider.GetService<WebhookSubmittedFormAccessChecker<T>>();
             var formData = await GetSubmittedFormData(fileEntry);
 
+            if (formData.OriginalForm is null)
+            {
+                return;
+            }
+
             await webhookPublisher.PublishAsync(trigger, formChecker, formData, formData.OriginalForm.Id);
             return;
         }
@@ -74,14 +79,16 @@ public class WebhookManager(
     private async Task<SubmittedFormData<T>> GetSubmittedFormData<T>(FileEntry<T> fileEntry)
     {
         var fileDao = daoFactory.GetFileDao<T>();
+        var submittedForm = await fileDao.GetFileAsync(fileEntry.Id);
         var data = new SubmittedFormData<T>
         {
-            SubmittedForm = await fileDao.GetFileAsync(fileEntry.Id)
+            SubmittedForm = submittedForm
         };
 
         var properties = await fileDao.GetProperties(fileEntry.Id);
-        if (properties?.FormFilling == null)
+        if (properties?.FormFilling == null || Equals(properties.FormFilling.OriginalFormId, default(T)))
         {
+            data.OriginalForm = submittedForm;
             return data;
         }
 
