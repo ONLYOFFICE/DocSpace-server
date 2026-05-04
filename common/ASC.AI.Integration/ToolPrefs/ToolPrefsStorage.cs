@@ -29,15 +29,15 @@ namespace ASC.AI.Integration.ToolPrefs;
 [Scope]
 public class ToolPrefsStorage(IDbContextFactory<AiIntegrationContext> dbContextFactory)
 {
-    public async Task<Dictionary<string, List<string>>> ReadDisabledAsync(int tenantId)
+    public async Task<Dictionary<string, List<string>>> ReadDisabledAsync(int tenantId, Guid createdBy)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        return await context.GetAllToolPrefsAsync(tenantId)
+        return await context.GetAllToolPrefsAsync(tenantId, createdBy)
             .ToDictionaryAsync(x => x.ServerType, x => x.Tools);
     }
 
-    public async Task UpsertDisabledAsync(int tenantId, IReadOnlyDictionary<string, List<string>> disabled)
+    public async Task UpsertDisabledAsync(int tenantId, Guid createdBy, IReadOnlyDictionary<string, List<string>> disabled)
     {
         if (disabled.Count == 0)
         {
@@ -52,7 +52,7 @@ public class ToolPrefsStorage(IDbContextFactory<AiIntegrationContext> dbContextF
             await using var context = await dbContextFactory.CreateDbContextAsync();
             await using var transaction = await context.Database.BeginTransactionAsync();
 
-            var existingKeys = await context.GetExistingToolPrefsServerTypesAsync(tenantId, disabled.Keys)
+            var existingKeys = await context.GetExistingToolPrefsServerTypesAsync(tenantId, createdBy, disabled.Keys)
                 .ToHashSetAsync();
 
             var now = DateTime.UtcNow;
@@ -64,6 +64,7 @@ public class ToolPrefsStorage(IDbContextFactory<AiIntegrationContext> dbContextF
                     {
                         TenantId = tenantId,
                         ServerType = serverType,
+                        CreatedBy = createdBy,
                         Tools = tools,
                         CreatedAt = default
                     };
@@ -76,6 +77,7 @@ public class ToolPrefsStorage(IDbContextFactory<AiIntegrationContext> dbContextF
                     {
                         TenantId = tenantId,
                         ServerType = serverType,
+                        CreatedBy = createdBy,
                         Tools = tools,
                         CreatedAt = now
                     });
@@ -87,10 +89,10 @@ public class ToolPrefsStorage(IDbContextFactory<AiIntegrationContext> dbContextF
         });
     }
 
-    public async Task DeleteDisabledAsync(int tenantId)
+    public async Task DeleteDisabledAsync(int tenantId, Guid createdBy)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        await context.DeleteAllToolPrefsAsync(tenantId);
+        await context.DeleteAllToolPrefsAsync(tenantId, createdBy);
     }
 }

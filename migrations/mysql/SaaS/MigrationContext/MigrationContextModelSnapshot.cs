@@ -411,6 +411,12 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("created_by")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime")
                         .HasColumnName("created_at");
@@ -420,8 +426,11 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("json")
                         .HasColumnName("tools");
 
-                    b.HasKey("TenantId", "ServerType")
+                    b.HasKey("TenantId", "ServerType", "CreatedBy")
                         .HasName("PRIMARY");
+
+                    b.HasIndex("TenantId", "CreatedBy")
+                        .HasDatabaseName("IX_tenant_id_created_by");
 
                     b.ToTable("ai_integration_tool_prefs", (string)null);
 

@@ -34,6 +34,8 @@ public class DbToolPrefs : BaseEntity
     [Required]
     public required string ServerType { get; init; }
 
+    public Guid CreatedBy { get; init; }
+
     [Required]
     public required List<string> Tools { get; set; }
 
@@ -43,7 +45,7 @@ public class DbToolPrefs : BaseEntity
 
     public override object[] GetKeys()
     {
-        return [TenantId, ServerType];
+        return [TenantId, ServerType, CreatedBy];
     }
 }
 
@@ -67,7 +69,7 @@ public static class DbToolPrefsExtension
             entity.ToTable("ai_integration_tool_prefs")
                 .HasCharSet("utf8");
 
-            entity.HasKey(e => new { e.TenantId, e.ServerType })
+            entity.HasKey(e => new { e.TenantId, e.ServerType, e.CreatedBy })
                 .HasName("PRIMARY");
 
             entity.Property(e => e.TenantId)
@@ -79,6 +81,12 @@ public static class DbToolPrefsExtension
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
+            entity.Property(e => e.CreatedBy)
+                .HasColumnName("created_by")
+                .HasColumnType("char(36)")
+                .HasCharSet("utf8")
+                .UseCollation("utf8_general_ci");
+
             entity.Property(e => e.Tools)
                 .HasColumnName("tools")
                 .HasColumnType("json");
@@ -86,6 +94,9 @@ public static class DbToolPrefsExtension
             entity.Property(e => e.CreatedAt)
                 .HasColumnName("created_at")
                 .HasColumnType("datetime");
+
+            entity.HasIndex(e => new { e.TenantId, e.CreatedBy })
+                .HasDatabaseName("IX_tenant_id_created_by");
         });
     }
 
@@ -95,7 +106,7 @@ public static class DbToolPrefsExtension
         {
             entity.ToTable("ai_integration_tool_prefs");
 
-            entity.HasKey(e => new { e.TenantId, e.ServerType })
+            entity.HasKey(e => new { e.TenantId, e.ServerType, e.CreatedBy })
                 .HasName("pk_ai_integration_tool_prefs");
 
             entity.Property(e => e.TenantId)
@@ -107,6 +118,10 @@ public static class DbToolPrefsExtension
                 .HasColumnType("character varying")
                 .HasMaxLength(128);
 
+            entity.Property(e => e.CreatedBy)
+                .HasColumnName("created_by")
+                .HasColumnType("uuid");
+
             entity.Property(e => e.Tools)
                 .HasColumnName("tools")
                 .HasColumnType("jsonb");
@@ -114,6 +129,9 @@ public static class DbToolPrefsExtension
             entity.Property(e => e.CreatedAt)
                 .HasColumnName("created_at")
                 .HasColumnType("timestamp without time zone");
+
+            entity.HasIndex(e => new { e.TenantId, e.CreatedBy })
+                .HasDatabaseName("IX_ai_integration_tool_prefs_tenant_id_created_by");
         });
     }
 }
