@@ -89,7 +89,12 @@ public class ExternalDbSyncTask : ExternalDbSyncTaskBase
                 r.Where(s => s.RoomId, _roomId)
                  .Limit(0, BaseIndexer<DbFormsMetadataSearch>.QueryLimit));
 
-            if (!success || forms.Count == 0)
+            if (!success)
+            {
+                throw new InvalidOperationException("Failed to query form metadata from search index.");
+            }
+
+            if (forms.Count == 0)
             {
                 logger.WarnNoFormsFound(_roomId);
             }
@@ -116,7 +121,7 @@ public class ExternalDbSyncTask : ExternalDbSyncTaskBase
                     var version = originalForm?.Version ?? form.OriginalFormVersion;
                     var synced = await formFillingReportCreator.ExportMissingFromOpenSearchAsync(form.OriginalFormId, version, _roomId);
 
-                    Forms.Add(new ExternalDbSyncFormResultDto { Id = form.OriginalFormId, Title = title, Success = synced, Error = synced ? null : "Sync failed" });
+                    Forms.Add(new ExternalDbSyncFormResultDto { Id = form.OriginalFormId, Title = title, Success = synced, Error = synced ? null : FilesCommonResource.ErrorMessage_ExternalDbSyncFailed });
                 }
                 catch (Exception ex)
                 {

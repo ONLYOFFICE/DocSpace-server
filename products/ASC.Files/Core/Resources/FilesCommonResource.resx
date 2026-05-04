@@ -593,4 +593,7 @@ Highest compatibility with docx, xlsx, pptx.</value>
   <data name="ErrorMessage_ExternalDbNotIndexed" xml:space="preserve">
     <value>The database table will be created after the first form submission. There is no data yet to generate its structure.</value>
   </data>
+  <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
+    <value>Failed to synchronize form data to external database.</value>
+  </data>
 </root>
