@@ -1,0 +1,17 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <BuildType Name="Debug" />
+    <BuildType Name="Release" />
+  </Configurations>
+  <Project Path="ASC.Api.Documentation/ASC.Api.Documentation.csproj" />
+  <Project Path="../../../products/ASC.AI/Server/ASC.AI.csproj" />
+  <Project Path="../../../products/ASC.Files/Server/ASC.Files.csproj" />
+  <Project Path="../../../products/ASC.People/Server/ASC.People.csproj" />
+  <Project Path="../../services/ASC.ApiSystem/ASC.ApiSystem.csproj" />
+  <Project Path="../../services/ASC.Data.Backup/ASC.Data.Backup.csproj" />
+  <Project Path="../../../web/ASC.Web.Api/ASC.Web.Api.csproj" />
+  <Properties Name="MSBuild">
+    <Property Name="GenerateApiDocs" Value="true" />
+  </Properties>
+</Solution>
