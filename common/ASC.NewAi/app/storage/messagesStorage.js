@@ -24,80 +24,99 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-import { randomUUID } from "crypto";
+import { aiService, AiServiceHttpError } from "./httpClient.js";
 
-export class InMemoryMessagesStorage {
-  #byId = new Map();
-  #byThread = new Map();
+const THREADS_PATH = "/integration/threads";
+const MESSAGES_PATH = "/integration/messages";
 
+function serializeContents(message) {
+  return JSON.stringify(message);
+}
+
+function parseContents(contents) {
+  if (typeof contents !== "string") {
+    return contents ?? {};
+  }
+  try {
+    return JSON.parse(contents);
+  } catch {
+    return { content: contents };
+  }
+}
+
+function dtoToMessage(dto) {
+  if (!dto) {
+    return null;
+  }
+  const body = parseContents(dto.contents);
+  return {
+    ...body,
+    id: dto.id,
+    createdAt: dto.timestamp,
+  };
+}
+
+export class HttpMessagesStorage {
   async create(threadId, message) {
-    const stored = {
-      ...message,
-      id: randomUUID(),
-      createdAt: Date.now(),
-    };
-    this.#byId.set(stored.id, { threadId, message: stored });
-    if (!this.#byThread.has(threadId)) {
-      this.#byThread.set(threadId, []);
-    }
-    this.#byThread.get(threadId).push(stored);
-    return { ...stored };
+    const dto = await aiService.post(
+      `${THREADS_PATH}/${encodeURIComponent(threadId)}/messages`,
+      { contents: serializeContents(message) },
+    );
+    return dtoToMessage(dto);
   }
 
   async readById(messageId) {
-    const entry = this.#byId.get(messageId);
-    return entry ? { ...entry.message } : null;
+    try {
+      const dto = await aiService.get(`${MESSAGES_PATH}/${encodeURIComponent(messageId)}`);
+      return dtoToMessage(dto);
+    } catch (err) {
+      if (err instanceof AiServiceHttpError && err.status === 404) {
+        return null;
+      }
+      throw err;
+    }
   }
 
-  async readByThread(threadId, limit, startIndex = 0) {
-    const list = this.#byThread.get(threadId) ?? [];
-    const sorted = [...list].sort((a, b) => (a.createdAt ?? 0) - (b.createdAt ?? 0));
-    const start = startIndex ?? 0;
-    const end = limit !== undefined ? start + limit : undefined;
-    return sorted.slice(start, end).map((m) => ({ ...m }));
+  async readByThread(threadId, limit, startIndex) {
+    const query = {};
+    if (limit !== undefined && limit !== null) {
+      query.limit = limit;
+    }
+    if (startIndex !== undefined && startIndex !== null) {
+      query.startIndex = startIndex;
+    }
+    const dtos = await aiService.get(
+      `${THREADS_PATH}/${encodeURIComponent(threadId)}/messages`,
+      Object.keys(query).length > 0 ? { query } : undefined,
+    );
+    return Array.isArray(dtos) ? dtos.map(dtoToMessage) : [];
   }
 
   async update(messageId, message) {
-    const entry = this.#byId.get(messageId);
-    if (!entry) {
-      return;
-    }
-    const updated = { ...message, id: messageId, createdAt: Date.now() };
-    entry.message = updated;
-    const list = this.#byThread.get(entry.threadId);
-    if (list) {
-      const idx = list.findIndex((m) => m.id === messageId);
-      if (idx >= 0) {
-        list[idx] = updated;
-      }
-    }
+    await aiService.put(`${MESSAGES_PATH}/${encodeURIComponent(messageId)}`, {
+      contents: serializeContents(message),
+    });
   }
 
   async delete(messageId) {
-    const entry = this.#byId.get(messageId);
-    if (!entry) {
-      return;
-    }
-    this.#byId.delete(messageId);
-    const list = this.#byThread.get(entry.threadId);
-    if (list) {
-      const idx = list.findIndex((m) => m.id === messageId);
-      if (idx >= 0) {
-        list.splice(idx, 1);
+    try {
+      await aiService.delete(`${MESSAGES_PATH}/${encodeURIComponent(messageId)}`);
+    } catch (err) {
+      if (err instanceof AiServiceHttpError && err.status === 404) {
+        return;
       }
+      throw err;
     }
   }
 
   async deleteByThread(threadId) {
-    const list = this.#byThread.get(threadId) ?? [];
-    for (const m of list) {
-      this.#byId.delete(m.id);
+    try {
+      await aiService.delete(`${THREADS_PATH}/${encodeURIComponent(threadId)}/messages`);
+    } catch (err) {
+      if (err instanceof AiServiceHttpError && err.status === 404) {
+        return;
+      }
+      throw err;
     }
-    this.#byThread.delete(threadId);
-  }
-
-  _clear() {
-    this.#byId.clear();
-    this.#byThread.clear();
   }
 }

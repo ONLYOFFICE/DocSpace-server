@@ -26,7 +26,7 @@
 
 import { InMemoryAssignmentsStorage } from "./assignmentsStorage.js";
 import { InMemoryMcpServersStorage } from "./mcpServersStorage.js";
-import { InMemoryMessagesStorage } from "./messagesStorage.js";
+import { HttpMessagesStorage } from "./messagesStorage.js";
 import { InMemoryPreferencesStorage } from "./preferencesStorage.js";
 import { HttpProfilesStorage } from "./profilesStorage.js";
 import { InMemoryPromptFoldersStorage } from "./promptFoldersStorage.js";
@@ -38,7 +38,7 @@ import { InMemoryWebSearchStorage } from "./webSearchStorage.js";
 export class InMemoryStorageAdapter {
   constructor() {
     this.threads = new HttpThreadsStorage();
-    this.messages = new InMemoryMessagesStorage();
+    this.messages = new HttpMessagesStorage();
     this.profiles = new HttpProfilesStorage();
     this.prompts = new InMemoryPromptsStorage();
     this.promptFolders = new InMemoryPromptFoldersStorage();
@@ -54,7 +54,6 @@ export class InMemoryStorageAdapter {
   }
 
   async close() {
-    this.messages._clear();
     this.prompts._clear();
     this.promptFolders._clear();
     this.assignments._clear();
