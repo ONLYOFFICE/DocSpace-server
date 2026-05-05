@@ -201,7 +201,7 @@ public class PortalRegistrationService(
         model.PortalName = portalName;
         logger.DebugCheckExistingNamePortal(model.PortalName, sw.ElapsedMilliseconds);
 
-        error = await ValidateRegistrationAsync(model, sw);
+        error = await ValidateRegistrationAsync(model, sw, checkRecaptcha: false);
         if (error != null)
         {
             sw.Stop();
@@ -392,7 +392,7 @@ public class PortalRegistrationService(
         return null;
     }
 
-    public async Task<PortalRegistrationErrorDto> ValidateRegistrationAsync(TenantModel model, Stopwatch sw)
+    public async Task<PortalRegistrationErrorDto> ValidateRegistrationAsync(TenantModel model, Stopwatch sw, bool checkRecaptcha = true)
     {
         var clientIp = commonMethods.GetClientIp();
 
@@ -403,6 +403,11 @@ public class PortalRegistrationService(
                 Error = "tooMuchAttempts",
                 Message = "Too much attempts already"
             };
+        }
+
+        if (!checkRecaptcha)
+        {
+            return null;
         }
 
         return await GetRecaptchaErrorAsync(model, clientIp, sw);
