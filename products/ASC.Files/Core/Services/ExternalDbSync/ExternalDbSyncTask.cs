@@ -38,7 +38,13 @@ public class ExternalDbSyncTask : ExternalDbSyncTaskBase
     private Guid _userId;
     private int _roomId;
 
-    public List<ExternalDbSyncFormResultDto> Forms { get; set; } = [];
+    private List<ExternalDbSyncFormResultDto> _forms = [];
+
+    public List<ExternalDbSyncFormResultDto>? FinalForms
+    {
+        get => IsCompleted ? _forms : null;
+        set => _forms = value ?? [];
+    }
 
     public ExternalDbSyncTask() { }
 
@@ -125,12 +131,12 @@ public class ExternalDbSyncTask : ExternalDbSyncTaskBase
                     var version = originalForm?.Version ?? form.OriginalFormVersion;
                     var synced = await formFillingReportCreator.ExportMissingFromOpenSearchAsync(form.OriginalFormId, version, _roomId);
 
-                    Forms.Add(new ExternalDbSyncFormResultDto { Id = form.OriginalFormId, Title = title, Success = synced, Error = synced ? null : FilesCommonResource.ErrorMessage_ExternalDbSyncFailed });
+                    _forms.Add(new ExternalDbSyncFormResultDto { Id = form.OriginalFormId, Title = title, Success = synced, Error = synced ? null : FilesCommonResource.ErrorMessage_ExternalDbSyncFailed });
                 }
                 catch (Exception ex)
                 {
                     logger.ErrorSyncFormFailed(ex, form.OriginalFormId, _roomId);
-                    Forms.Add(new ExternalDbSyncFormResultDto { Id = form.OriginalFormId, Title = title, Success = false, Error = ex.Message });
+                    _forms.Add(new ExternalDbSyncFormResultDto { Id = form.OriginalFormId, Title = title, Success = false, Error = ex.Message });
                 }
 
                 processed++;
@@ -159,7 +165,7 @@ public class ExternalDbSyncTask : ExternalDbSyncTaskBase
                 .Prepend(_roomId)
                 .ToList();
 
-            var processedFormIds = Forms.Select(f => f.Id).ToHashSet();
+            var processedFormIds = _forms.Select(f => f.Id).ToHashSet();
 
             foreach (var folderId in formFolderIds)
             {
@@ -167,7 +173,7 @@ public class ExternalDbSyncTask : ExternalDbSyncTaskBase
                 {
                     if (!processedFormIds.Contains(file.Id))
                     {
-                        Forms.Add(new ExternalDbSyncFormResultDto { Id = file.Id, Title = file.Title, Success = false, Error = FilesCommonResource.ErrorMessage_ExternalDbNotIndexed });
+                        _forms.Add(new ExternalDbSyncFormResultDto { Id = file.Id, Title = file.Title, Success = false, Error = FilesCommonResource.ErrorMessage_ExternalDbNotIndexed });
                     }
                 }
             }

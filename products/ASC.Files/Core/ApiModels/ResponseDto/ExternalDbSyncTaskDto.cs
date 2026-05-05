@@ -77,7 +77,7 @@ public class ExternalDbSyncTaskDto
                 Percentage = (int)task.Percentage,
                 IsCompleted = task.IsCompleted,
                 Status = task.Status,
-                Forms = task.Forms.ToList()
+                Forms = task.FinalForms?.ToList() ?? []
             };
     }
 }
