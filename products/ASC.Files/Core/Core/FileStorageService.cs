@@ -5577,7 +5577,7 @@ public class FileStorageService //: IFileStorageService
 
         if (!await fileSecurity.CanEditAsync(room))
         {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
         return await externalDbSyncService.StartSyncAsync(roomId)
