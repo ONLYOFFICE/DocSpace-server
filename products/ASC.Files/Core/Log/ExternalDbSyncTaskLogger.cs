@@ -37,6 +37,9 @@ internal static partial class ExternalDbSyncTaskLogger
     [LoggerMessage(LogLevel.Warning, "ExternalDbSyncTask: no form metadata found in OpenSearch for room {roomId}.")]
     public static partial void WarnNoFormsFound(this ILogger<ExternalDbSyncTask> logger, int roomId);
 
+    [LoggerMessage(LogLevel.Warning, "ExternalDbSyncTask: form metadata query for room {roomId} reached the index limit of {limit}. Some forms may not have been synced.")]
+    public static partial void WarnQueryLimitReached(this ILogger<ExternalDbSyncTask> logger, int roomId, int limit);
+
     [LoggerMessage(LogLevel.Error, "ExternalDbSyncTask: failed to sync form {formId} in room {roomId}.")]
     public static partial void ErrorSyncFormFailed(this ILogger<ExternalDbSyncTask> logger, Exception exception, int formId, int roomId);
 }

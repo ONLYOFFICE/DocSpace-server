@@ -98,6 +98,10 @@ public class ExternalDbSyncTask : ExternalDbSyncTaskBase
             {
                 logger.WarnNoFormsFound(_roomId);
             }
+            else if (forms.Count == BaseIndexer<DbFormsMetadataSearch>.QueryLimit)
+            {
+                logger.WarnQueryLimitReached(_roomId, BaseIndexer<DbFormsMetadataSearch>.QueryLimit);
+            }
 
             var originalForms = forms.Count > 0
                 ? await fileDao.GetFilesAsync(forms.Select(f => f.OriginalFormId).Distinct()).ToDictionaryAsync(f => f.Id)
