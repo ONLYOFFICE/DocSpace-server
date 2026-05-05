@@ -39,7 +39,7 @@ public static class NginxConfiguration
         var isArm64 = System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture == System.Runtime.InteropServices.Architecture.Arm64;
 
         var certDir = DevCertificateGenerator.EnsureCertificate(basePath);
-        var sslConfPath = Path.Combine(builder.AppHostDirectory, "nginx", "docspace-ssl.conf");
+        var sslConfPath = Path.Combine(builder.AppHostDirectory, "nginx", "docspace-ssl.conf.template");
 
         var openResty = builder.AddContainer(Constants.OpenRestyContainer, "openresty/openresty", "1.27.1.2-10-alpine" + (isArm64 ? "-arm64" : ""))
             .WithBindMount(Path.Combine(basePath, "buildtools", "config", "nginx"), "/etc/nginx/conf.d/")
@@ -50,7 +50,7 @@ public static class NginxConfiguration
             .WithBindMount(Path.Combine(clientBasePath, "packages", "login"), "/var/www/login")
             .WithBindMount(Path.Combine(clientBasePath, "packages", "management"), "/var/www/management")
             .WithBindMount(certDir, "/etc/nginx/certs/", isReadOnly: true)
-            .WithBindMount(sslConfPath, "/etc/nginx/conf.d/docspace-ssl.conf", isReadOnly: true)
+            .WithBindMount(sslConfPath, "/etc/nginx/dev-templates/docspace-ssl.conf.template", isReadOnly: true)
             .WithContainerRuntimeArgs(
                 "-p", $"0.0.0.0:{Constants.AppHostPort}:{Constants.RestyPort}",
                 "-p", $"0.0.0.0:{Constants.AppHostHttpsPort}:{Constants.RestyHttpsPort}");
@@ -67,9 +67,15 @@ public static class NginxConfiguration
             openResty.WithEnvironment(key, value);
         }
 
+        // Variables consumed by the dev SSL vhost template. Keep them separate
+        // from serviceUrls so the existing upstream-map envsubst is not affected.
+        const string sslEnvVar = "RESTY_HTTP_PORT";
+        openResty.WithEnvironment(sslEnvVar, Constants.RestyPort.ToString());
+
         openResty.WithArgs("/bin/sh", "-c",
             $"apk add --no-cache gettext && " +
             $"envsubst '{string.Join(' ', serviceUrls.Select(r => $"${r.Key}"))}' < /etc/nginx/includes/onlyoffice-upstream-map.conf.template > /etc/nginx/includes/onlyoffice-upstream-map.conf && " +
+            $"envsubst '${sslEnvVar}' < /etc/nginx/dev-templates/docspace-ssl.conf.template > /etc/nginx/conf.d/docspace-ssl.conf && " +
             $"/usr/local/openresty/bin/openresty -g 'daemon off;'");
 
         return openResty;

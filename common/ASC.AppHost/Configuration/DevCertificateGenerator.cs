@@ -51,9 +51,24 @@ public static class DevCertificateGenerator
         {
             var existing = X509CertificateLoader.LoadCertificateFromFile(crtPath);
             if (existing.NotAfter > DateTime.UtcNow.AddDays(7)
-                && HasAllDnsNames(existing, _dnsNames)
-                && IsTrusted(existing, trustMarkerPath))
+                && HasAllDnsNames(existing, _dnsNames))
             {
+                if (IsTrusted(existing, trustMarkerPath))
+                {
+                    return certDir;
+                }
+
+                // Cert on disk is fine but trust is missing. Don't regenerate —
+                // re-trust on Windows/macOS, just re-print instructions on Linux
+                // (where trust requires manual user action).
+                if (OperatingSystem.IsLinux())
+                {
+                    PrintLinuxTrustInstructions(crtPath, trustMarkerPath, existing.Thumbprint);
+                }
+                else
+                {
+                    TrustCertificate(existing, crtPath, trustMarkerPath);
+                }
                 return certDir;
             }
         }
@@ -79,6 +94,13 @@ public static class DevCertificateGenerator
 
         File.WriteAllText(crtPath, cert.ExportCertificatePem());
         File.WriteAllText(keyPath, rsa.ExportPkcs8PrivateKeyPem());
+
+        // Restrict the private key to the current user (0600) on Unix-like systems.
+        // On Windows the file inherits the user's profile ACL, which is already restrictive.
+        if (!OperatingSystem.IsWindows())
+        {
+            File.SetUnixFileMode(keyPath, UnixFileMode.UserRead | UnixFileMode.UserWrite);
+        }
 
         TrustCertificate(cert, crtPath, trustMarkerPath);
 
@@ -158,11 +180,23 @@ public static class DevCertificateGenerator
 
         if (OperatingSystem.IsLinux())
         {
-            Console.WriteLine("[AppHost] Dev certificate generated. To trust it on Linux run (as root):");
-            Console.WriteLine($"  sudo cp '{crtPath}' /usr/local/share/ca-certificates/docspace.dev.localhost.crt && sudo update-ca-certificates");
-            Console.WriteLine("  # For Chrome/Firefox (NSS): certutil -d sql:$HOME/.pki/nssdb -A -t \"C,,\" -n docspace.dev.localhost -i '" + crtPath + "'");
-            File.WriteAllText(trustMarkerPath, cert.Thumbprint);
+            PrintLinuxTrustInstructions(crtPath, trustMarkerPath, cert.Thumbprint);
         }
+    }
+
+    private static void PrintLinuxTrustInstructions(string crtPath, string trustMarkerPath, string thumbprint)
+    {
+        // On Linux trust must be granted manually. We deliberately do NOT write
+        // the .trusted marker automatically — otherwise IsTrusted would lie on
+        // the next run and the instructions would never be shown again even if
+        // the user never actually trusted the cert. The user is asked to create
+        // the marker themselves after running the trust commands, so the prompt
+        // persists across restarts until trust is in place.
+        Console.WriteLine("[AppHost] Dev certificate present but not marked as trusted. To trust it on Linux run (as root):");
+        Console.WriteLine($"  sudo cp '{crtPath}' /usr/local/share/ca-certificates/docspace.dev.localhost.crt && sudo update-ca-certificates");
+        Console.WriteLine($"  # For Chrome/Firefox (NSS): certutil -d sql:$HOME/.pki/nssdb -A -t \"C,,\" -n docspace.dev.localhost -i '{crtPath}'");
+        Console.WriteLine("  # Once trusted, silence this message by creating the marker file:");
+        Console.WriteLine($"  echo '{thumbprint}' > '{trustMarkerPath}'");
     }
 
     private static int RunProcess(string fileName, string[] args)

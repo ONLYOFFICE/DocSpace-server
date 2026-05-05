@@ -349,14 +349,29 @@ public class ProjectConfigurator(
             .WithEnvironment("log:dir", "/logs");
     }
 
-    private static void ConfigureForwardedHeadersNetworks<T>(IResourceBuilder<T> project) where T : IResourceWithEnvironment
+    private void ConfigureForwardedHeadersNetworks<T>(IResourceBuilder<T> project) where T : IResourceWithEnvironment
     {
-        // Trust loopback + docker bridge networks so ForwardedHeadersMiddleware
-        // picks up X-Forwarded-Proto/Host from the dev OpenResty proxy.
+        // Defense in depth: this configuration trusts X-Forwarded-* headers from
+        // entire RFC1918 ranges, which would let any host on a shared LAN spoof
+        // HTTPS/Host. AppHost is dev-only, but guard against accidental reuse
+        // outside Development.
+        if (!builder.Environment.IsDevelopment())
+        {
+            return;
+        }
+
+        // Loopback always — OpenResty proxies to backends via 127.0.0.1
+        // when services run on the host directly.
         project.WithEnvironment("core:hosting:forwardedHeadersOptions:knownNetworks:0", "127.0.0.1/8")
-            .WithEnvironment("core:hosting:forwardedHeadersOptions:knownNetworks:1", "::1/128")
-            .WithEnvironment("core:hosting:forwardedHeadersOptions:knownNetworks:2", "10.0.0.0/8")
-            .WithEnvironment("core:hosting:forwardedHeadersOptions:knownNetworks:3", "172.16.0.0/12")
-            .WithEnvironment("core:hosting:forwardedHeadersOptions:knownNetworks:4", "192.168.0.0/16");
+            .WithEnvironment("core:hosting:forwardedHeadersOptions:knownNetworks:1", "::1/128");
+
+        // Docker bridge networks — only needed when backends run in containers
+        // and receive traffic from the OpenResty container via the bridge.
+        if (isDocker)
+        {
+            project.WithEnvironment("core:hosting:forwardedHeadersOptions:knownNetworks:2", "10.0.0.0/8")
+                .WithEnvironment("core:hosting:forwardedHeadersOptions:knownNetworks:3", "172.16.0.0/12")
+                .WithEnvironment("core:hosting:forwardedHeadersOptions:knownNetworks:4", "192.168.0.0/16");
+        }
     }
 }
