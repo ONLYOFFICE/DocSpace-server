@@ -182,7 +182,7 @@ public class ExternalDbSyncTask : ExternalDbSyncTaskBase
         {
             logger.ErrorWithException(e);
             Exception = e;
-            Status = DistributedTaskStatus.Failted;
+            Status = DistributedTaskStatus.Failted; // TODO: rename to Failed when the enum typo is fixed
         }
         finally
         {
