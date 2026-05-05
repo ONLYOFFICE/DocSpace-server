@@ -26,43 +26,7 @@
 
 namespace ASC.AI.Integration.Preferences;
 
-[Scope]
-public class PreferencesStorage(IDbContextFactory<AiIntegrationContext> dbContextFactory)
+public class Preferences
 {
-    public async Task<Preferences?> ReadAsync(int tenantId, Guid userId)
-    {
-        await using var context = await dbContextFactory.CreateDbContextAsync();
-
-        var entity = await context.GetPreferencesAsync(tenantId, userId);
-        if (entity == null)
-        {
-            return null;
-        }
-
-        return new Preferences
-        {
-            DeepMode = entity.DeepMode
-        };
-    }
-
-    public async Task UpsertAsync(int tenantId, Guid userId, Preferences preferences)
-    {
-        await using var context = await dbContextFactory.CreateDbContextAsync();
-
-        await context.Preferences.AddOrUpdateAsync(new DbPreferences
-        {
-            TenantId = tenantId,
-            CreatedBy = userId,
-            DeepMode = preferences.DeepMode
-        });
-
-        await context.SaveChangesAsync();
-    }
-
-    public async Task DeleteAsync(int tenantId, Guid userId)
-    {
-        await using var context = await dbContextFactory.CreateDbContextAsync();
-
-        await context.DeletePreferencesAsync(tenantId, userId);
-    }
+    public bool? DeepMode { get; init; }
 }

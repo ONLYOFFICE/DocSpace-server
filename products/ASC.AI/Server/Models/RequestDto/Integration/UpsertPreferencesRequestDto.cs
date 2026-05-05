@@ -24,45 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Integration.Preferences;
+namespace ASC.AI.Models.RequestDto.Integration;
 
-[Scope]
-public class PreferencesStorage(IDbContextFactory<AiIntegrationContext> dbContextFactory)
+public class UpsertPreferencesRequestDto
 {
-    public async Task<Preferences?> ReadAsync(int tenantId, Guid userId)
-    {
-        await using var context = await dbContextFactory.CreateDbContextAsync();
-
-        var entity = await context.GetPreferencesAsync(tenantId, userId);
-        if (entity == null)
-        {
-            return null;
-        }
-
-        return new Preferences
-        {
-            DeepMode = entity.DeepMode
-        };
-    }
-
-    public async Task UpsertAsync(int tenantId, Guid userId, Preferences preferences)
-    {
-        await using var context = await dbContextFactory.CreateDbContextAsync();
-
-        await context.Preferences.AddOrUpdateAsync(new DbPreferences
-        {
-            TenantId = tenantId,
-            CreatedBy = userId,
-            DeepMode = preferences.DeepMode
-        });
-
-        await context.SaveChangesAsync();
-    }
-
-    public async Task DeleteAsync(int tenantId, Guid userId)
-    {
-        await using var context = await dbContextFactory.CreateDbContextAsync();
-
-        await context.DeletePreferencesAsync(tenantId, userId);
-    }
+    public bool? DeepMode { get; init; }
 }

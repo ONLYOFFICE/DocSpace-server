@@ -24,45 +24,40 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Integration.Preferences;
+using ASC.AI.Models.RequestDto.Integration;
+using ASC.AI.Service;
+
+using PreferencesDto = ASC.AI.Models.ResponseDto.Integration.PreferencesDto;
+using PreferencesMapper = ASC.AI.Models.ResponseDto.Integration.PreferencesMapper;
+
+namespace ASC.AI.Api.Integration;
 
 [Scope]
-public class PreferencesStorage(IDbContextFactory<AiIntegrationContext> dbContextFactory)
+[DefaultRoute]
+[ApiController]
+[AiFeature]
+[ControllerName("ai")]
+[ApiExplorerSettings(IgnoreApi = true)]
+public class PreferencesStorageController(PreferencesStorageService preferencesStorageService) : ControllerBase
 {
-    public async Task<Preferences?> ReadAsync(int tenantId, Guid userId)
+    [HttpGet("integration/preferences")]
+    public async Task<PreferencesDto?> ReadAsync()
     {
-        await using var context = await dbContextFactory.CreateDbContextAsync();
-
-        var entity = await context.GetPreferencesAsync(tenantId, userId);
-        if (entity == null)
-        {
-            return null;
-        }
-
-        return new Preferences
-        {
-            DeepMode = entity.DeepMode
-        };
+        var preferences = await preferencesStorageService.ReadAsync();
+        return preferences == null ? null : PreferencesMapper.MapToDto(preferences);
     }
 
-    public async Task UpsertAsync(int tenantId, Guid userId, Preferences preferences)
+    [HttpPut("integration/preferences")]
+    public async Task<IActionResult> UpsertAsync(UpsertPreferencesRequestDto inDto)
     {
-        await using var context = await dbContextFactory.CreateDbContextAsync();
-
-        await context.Preferences.AddOrUpdateAsync(new DbPreferences
-        {
-            TenantId = tenantId,
-            CreatedBy = userId,
-            DeepMode = preferences.DeepMode
-        });
-
-        await context.SaveChangesAsync();
+        await preferencesStorageService.UpsertAsync(PreferencesMapper.MapToPreferences(inDto));
+        return NoContent();
     }
 
-    public async Task DeleteAsync(int tenantId, Guid userId)
+    [HttpDelete("integration/preferences")]
+    public async Task<IActionResult> DeleteAsync()
     {
-        await using var context = await dbContextFactory.CreateDbContextAsync();
-
-        await context.DeletePreferencesAsync(tenantId, userId);
+        await preferencesStorageService.DeleteAsync();
+        return NoContent();
     }
 }

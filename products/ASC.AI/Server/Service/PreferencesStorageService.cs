@@ -24,45 +24,40 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Integration.Preferences;
+using ASC.AI.Integration.Preferences;
+using ASC.Core.Users;
+
+using Preferences = ASC.AI.Integration.Preferences.Preferences;
+
+namespace ASC.AI.Service;
 
 [Scope]
-public class PreferencesStorage(IDbContextFactory<AiIntegrationContext> dbContextFactory)
+public class PreferencesStorageService(
+    UserManager userManager,
+    AuthContext authContext,
+    TenantManager tenantManager,
+    PreferencesStorage storage) : IntegrationServiceBase(userManager, authContext)
 {
-    public async Task<Preferences?> ReadAsync(int tenantId, Guid userId)
+    private static readonly EmployeeType[] _allowedTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin];
+
+    public async Task<Preferences?> ReadAsync()
     {
-        await using var context = await dbContextFactory.CreateDbContextAsync();
+        await AssertUserHasAccessAsync(_allowedTypes);
 
-        var entity = await context.GetPreferencesAsync(tenantId, userId);
-        if (entity == null)
-        {
-            return null;
-        }
-
-        return new Preferences
-        {
-            DeepMode = entity.DeepMode
-        };
+        return await storage.ReadAsync(tenantManager.GetCurrentTenantId(), CurrentUserId);
     }
 
-    public async Task UpsertAsync(int tenantId, Guid userId, Preferences preferences)
+    public async Task UpsertAsync(Preferences preferences)
     {
-        await using var context = await dbContextFactory.CreateDbContextAsync();
+        await AssertUserHasAccessAsync(_allowedTypes);
 
-        await context.Preferences.AddOrUpdateAsync(new DbPreferences
-        {
-            TenantId = tenantId,
-            CreatedBy = userId,
-            DeepMode = preferences.DeepMode
-        });
-
-        await context.SaveChangesAsync();
+        await storage.UpsertAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, preferences);
     }
 
-    public async Task DeleteAsync(int tenantId, Guid userId)
+    public async Task DeleteAsync()
     {
-        await using var context = await dbContextFactory.CreateDbContextAsync();
+        await AssertUserHasAccessAsync(_allowedTypes);
 
-        await context.DeletePreferencesAsync(tenantId, userId);
+        await storage.DeleteAsync(tenantManager.GetCurrentTenantId(), CurrentUserId);
     }
 }

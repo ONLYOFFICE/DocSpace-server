@@ -24,45 +24,22 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Integration.Preferences;
+using ASC.AI.Models.RequestDto.Integration;
 
-[Scope]
-public class PreferencesStorage(IDbContextFactory<AiIntegrationContext> dbContextFactory)
+using Preferences = ASC.AI.Integration.Preferences.Preferences;
+
+namespace ASC.AI.Models.ResponseDto.Integration;
+
+public class PreferencesDto
 {
-    public async Task<Preferences?> ReadAsync(int tenantId, Guid userId)
-    {
-        await using var context = await dbContextFactory.CreateDbContextAsync();
+    public bool? DeepMode { get; init; }
+}
 
-        var entity = await context.GetPreferencesAsync(tenantId, userId);
-        if (entity == null)
-        {
-            return null;
-        }
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
+    PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class PreferencesMapper
+{
+    public static partial PreferencesDto MapToDto(Preferences preferences);
 
-        return new Preferences
-        {
-            DeepMode = entity.DeepMode
-        };
-    }
-
-    public async Task UpsertAsync(int tenantId, Guid userId, Preferences preferences)
-    {
-        await using var context = await dbContextFactory.CreateDbContextAsync();
-
-        await context.Preferences.AddOrUpdateAsync(new DbPreferences
-        {
-            TenantId = tenantId,
-            CreatedBy = userId,
-            DeepMode = preferences.DeepMode
-        });
-
-        await context.SaveChangesAsync();
-    }
-
-    public async Task DeleteAsync(int tenantId, Guid userId)
-    {
-        await using var context = await dbContextFactory.CreateDbContextAsync();
-
-        await context.DeletePreferencesAsync(tenantId, userId);
-    }
+    public static partial Preferences MapToPreferences(UpsertPreferencesRequestDto dto);
 }
