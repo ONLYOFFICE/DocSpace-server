@@ -93,7 +93,18 @@ public class PaymentController(
             return null;
         }
 
+        if (!Uri.TryCreate(inDto.BackUrl, UriKind.Absolute, out var parsedUri))
+        {
+            throw new ArgumentException("Invalid URI format");
+        }
+
         var tenant = tenantManager.GetCurrentTenant();
+
+        var tenantDomain = tenant.GetTenantDomain(coreSettings);
+        if (parsedUri.Host != tenantDomain)
+        {
+            throw new ArgumentException("Invalid URI host");
+        }
 
         var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
         if (customerInfo != null)
