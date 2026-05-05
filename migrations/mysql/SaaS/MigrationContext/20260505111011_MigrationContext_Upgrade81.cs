@@ -1,5 +1,4 @@
 using System;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -60,8 +59,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 name: "ai_integration_profiles",
                 columns: table => new
                 {
-                    id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "utf8_general_ci")
+                        .Annotation("MySql:CharSet", "utf8"),
                     tenant_id = table.Column<int>(type: "int", nullable: false),
                     name = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false, collation: "utf8_general_ci")
                         .Annotation("MySql:CharSet", "utf8"),
@@ -98,7 +97,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     tenant_id = table.Column<int>(type: "int", nullable: false),
                     title = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false, collation: "utf8_general_ci")
                         .Annotation("MySql:CharSet", "utf8"),
-                    profile_id = table.Column<int>(type: "int", nullable: true),
+                    profile_id = table.Column<Guid>(type: "char(36)", nullable: true, collation: "utf8_general_ci")
+                        .Annotation("MySql:CharSet", "utf8"),
                     created_by = table.Column<Guid>(type: "char(36)", nullable: false, collation: "utf8_general_ci")
                         .Annotation("MySql:CharSet", "utf8"),
                     last_edit_date = table.Column<DateTime>(type: "datetime", nullable: false),
@@ -148,7 +148,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     tenant_id = table.Column<int>(type: "int", nullable: false),
                     action_type = table.Column<string>(type: "varchar(64)", maxLength: 64, nullable: false, collation: "utf8_general_ci")
                         .Annotation("MySql:CharSet", "utf8"),
-                    profile_id = table.Column<int>(type: "int", nullable: false),
+                    profile_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "utf8_general_ci")
+                        .Annotation("MySql:CharSet", "utf8"),
                     created_at = table.Column<DateTime>(type: "datetime", nullable: false)
                 },
                 constraints: table =>

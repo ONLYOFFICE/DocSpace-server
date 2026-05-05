@@ -29,5 +29,5 @@ namespace ASC.AI.Models.RequestDto.Integration;
 public class DeleteProfileRequestDto
 {
     [FromRoute(Name = "id")]
-    public required string Id { get; init; }
+    public required Guid Id { get; init; }
 }

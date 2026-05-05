@@ -31,7 +31,7 @@ namespace ASC.AI.Models.RequestDto.Integration;
 public class UpdateProfileRequestDto
 {
     [FromRoute(Name = "id")]
-    public required string Id { get; init; }
+    public required Guid Id { get; init; }
 
     [FromBody]
     public required UpdateProfileBody Body { get; init; }

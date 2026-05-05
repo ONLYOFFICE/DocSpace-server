@@ -29,7 +29,7 @@ namespace ASC.AI.Integration.Assignments;
 [Scope]
 public class AssignmentsStorage(IDbContextFactory<AiIntegrationContext> dbContextFactory)
 {
-    public async Task CreateAsync(int tenantId, string actionType, int profileId)
+    public async Task CreateAsync(int tenantId, string actionType, Guid profileId)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
@@ -45,7 +45,7 @@ public class AssignmentsStorage(IDbContextFactory<AiIntegrationContext> dbContex
         await context.SaveChangesAsync();
     }
 
-    public async Task<int?> ReadByTypeAsync(int tenantId, string actionType)
+    public async Task<Guid?> ReadByTypeAsync(int tenantId, string actionType)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
@@ -53,7 +53,7 @@ public class AssignmentsStorage(IDbContextFactory<AiIntegrationContext> dbContex
         return entity?.ProfileId;
     }
 
-    public async Task<Dictionary<string, int>> ReadAllAsync(int tenantId)
+    public async Task<Dictionary<string, Guid>> ReadAllAsync(int tenantId)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
@@ -61,14 +61,14 @@ public class AssignmentsStorage(IDbContextFactory<AiIntegrationContext> dbContex
             .ToDictionaryAsync(x => x.ActionType, x => x.ProfileId);
     }
 
-    public async Task<bool> UpdateAsync(int tenantId, string actionType, int profileId)
+    public async Task<bool> UpdateAsync(int tenantId, string actionType, Guid profileId)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
         return await context.UpdateAssignmentProfileAsync(tenantId, actionType, profileId) > 0;
     }
 
-    public async Task UpsertManyAsync(int tenantId, IReadOnlyDictionary<string, int> assignments)
+    public async Task UpsertManyAsync(int tenantId, IReadOnlyDictionary<string, Guid> assignments)
     {
         if (assignments.Count == 0)
         {

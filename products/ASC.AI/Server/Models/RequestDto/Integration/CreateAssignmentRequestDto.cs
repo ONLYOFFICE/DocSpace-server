@@ -29,5 +29,5 @@ namespace ASC.AI.Models.RequestDto.Integration;
 public class CreateAssignmentRequestDto
 {
     public required string ActionType { get; init; }
-    public required string ProfileId { get; init; }
+    public required Guid ProfileId { get; init; }
 }

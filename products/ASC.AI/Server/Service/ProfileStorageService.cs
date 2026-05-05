@@ -52,11 +52,11 @@ public class ProfileStorageService(
         return await storage.CreateManyAsync(tenantManager.GetCurrentTenantId(), profiles);
     }
 
-    public async Task<Profile> ReadByIdAsync(string id)
+    public async Task<Profile> ReadByIdAsync(Guid id)
     {
         await AssertUserHasAccessAsync([EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin]);
 
-        var profile = await storage.ReadByIdAsync(tenantManager.GetCurrentTenantId(), int.Parse(id));
+        var profile = await storage.ReadByIdAsync(tenantManager.GetCurrentTenantId(), id);
 
         return profile ?? throw new ItemNotFoundException();
     }
@@ -75,16 +75,15 @@ public class ProfileStorageService(
         return await storage.UpdateAsync(tenantManager.GetCurrentTenantId(), profile);
     }
 
-    public async Task DeleteAsync(string id)
+    public async Task DeleteAsync(Guid id)
     {
         await AssertUserHasAccessAsync([EmployeeType.DocSpaceAdmin]);
 
         var tenantId = tenantManager.GetCurrentTenantId();
-        var parsedId = int.Parse(id);
 
-        await using (await distributedLockProvider.TryAcquireFairLockAsync(ProfileStorage.GetLockKey(tenantId, parsedId)))
+        await using (await distributedLockProvider.TryAcquireFairLockAsync(ProfileStorage.GetLockKey(tenantId, id)))
         {
-            await storage.DeleteAsync(tenantId, parsedId);
+            await storage.DeleteAsync(tenantId, id);
         }
     }
 }

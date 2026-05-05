@@ -38,6 +38,6 @@ public class TouchThreadRequestDto
 public class TouchThreadBody
 {
     public required long LastEditDate { get; init; }
-    public string? ProfileId { get; init; }
+    public Guid? ProfileId { get; init; }
     public bool ClearProfile { get; init; }
 }

@@ -29,7 +29,7 @@ namespace ASC.AI.Integration.Threads;
 [Scope]
 public class ThreadsStorage(IDbContextFactory<AiIntegrationContext> dbContextFactory)
 {
-    public async Task<Thread> CreateAsync(int tenantId, Guid createdBy, string title, int? profileId = null)
+    public async Task<Thread> CreateAsync(int tenantId, Guid createdBy, string title, Guid? profileId = null)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
@@ -79,7 +79,7 @@ public class ThreadsStorage(IDbContextFactory<AiIntegrationContext> dbContextFac
         await context.UpdateThreadTitleAsync(tenantId, threadId, title);
     }
 
-    public async Task TouchAsync(int tenantId, Guid threadId, DateTime lastEditDate, int? profileId = null, bool clearProfile = false)
+    public async Task TouchAsync(int tenantId, Guid threadId, DateTime lastEditDate, Guid? profileId = null, bool clearProfile = false)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 

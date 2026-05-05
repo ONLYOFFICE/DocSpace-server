@@ -164,9 +164,11 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("datetime")
                         .HasColumnName("created_at");
 
-                    b.Property<int>("ProfileId")
-                        .HasColumnType("int")
-                        .HasColumnName("profile_id");
+                    b.Property<Guid>("ProfileId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("profile_id")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.HasKey("TenantId", "ActionType")
                         .HasName("PRIMARY");
@@ -272,11 +274,12 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
             modelBuilder.Entity("ASC.AI.Integration.Database.Models.DbProfile", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("char(36)")
                         .HasColumnName("id")
-                        .HasAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn);
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("BaseUrl")
                         .IsRequired()
@@ -368,9 +371,11 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("datetime")
                         .HasColumnName("last_edit_date");
 
-                    b.Property<int?>("ProfileId")
-                        .HasColumnType("int")
-                        .HasColumnName("profile_id");
+                    b.Property<Guid?>("ProfileId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("profile_id")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("Title")
                         .IsRequired()

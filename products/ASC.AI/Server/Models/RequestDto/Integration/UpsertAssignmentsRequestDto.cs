@@ -28,5 +28,5 @@ namespace ASC.AI.Models.RequestDto.Integration;
 
 public class UpsertAssignmentsRequestDto
 {
-    public required IReadOnlyDictionary<string, string> Assignments { get; init; }
+    public required IReadOnlyDictionary<string, Guid> Assignments { get; init; }
 }

@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Globalization;
-
 using ASC.AI.Integration.Assignments;
 using ASC.Core.Users;
 
@@ -41,45 +39,42 @@ public class AssignmentsStorageService(
     private static readonly EmployeeType[] _writeTypes = [EmployeeType.DocSpaceAdmin];
     private static readonly EmployeeType[] _readTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin];
 
-    public async Task CreateAsync(string actionType, string profileId)
+    public async Task CreateAsync(string actionType, Guid profileId)
     {
         await AssertUserHasAccessAsync(_writeTypes);
 
-        await storage.CreateAsync(tenantManager.GetCurrentTenantId(), actionType, ParseProfileId(profileId));
+        await storage.CreateAsync(tenantManager.GetCurrentTenantId(), actionType, profileId);
     }
 
-    public async Task<string?> ReadByTypeAsync(string actionType)
+    public async Task<Guid?> ReadByTypeAsync(string actionType)
     {
         await AssertUserHasAccessAsync(_readTypes);
 
-        var profileId = await storage.ReadByTypeAsync(tenantManager.GetCurrentTenantId(), actionType);
-        return profileId?.ToString(CultureInfo.InvariantCulture);
+        return await storage.ReadByTypeAsync(tenantManager.GetCurrentTenantId(), actionType);
     }
 
-    public async Task<Dictionary<string, string>> ReadAllAsync()
+    public async Task<Dictionary<string, Guid>> ReadAllAsync()
     {
         await AssertUserHasAccessAsync(_readTypes);
 
-        var assignments = await storage.ReadAllAsync(tenantManager.GetCurrentTenantId());
-        return assignments.ToDictionary(x => x.Key, x => x.Value.ToString(CultureInfo.InvariantCulture));
+        return await storage.ReadAllAsync(tenantManager.GetCurrentTenantId());
     }
 
-    public async Task UpdateAsync(string actionType, string profileId)
+    public async Task UpdateAsync(string actionType, Guid profileId)
     {
         await AssertUserHasAccessAsync(_writeTypes);
 
-        if (!await storage.UpdateAsync(tenantManager.GetCurrentTenantId(), actionType, ParseProfileId(profileId)))
+        if (!await storage.UpdateAsync(tenantManager.GetCurrentTenantId(), actionType, profileId))
         {
             throw new ItemNotFoundException($"Assignment for action type '{actionType}' was not found");
         }
     }
 
-    public async Task UpsertManyAsync(IReadOnlyDictionary<string, string> assignments)
+    public async Task UpsertManyAsync(IReadOnlyDictionary<string, Guid> assignments)
     {
         await AssertUserHasAccessAsync(_writeTypes);
 
-        var parsed = assignments.ToDictionary(x => x.Key, x => ParseProfileId(x.Value));
-        await storage.UpsertManyAsync(tenantManager.GetCurrentTenantId(), parsed);
+        await storage.UpsertManyAsync(tenantManager.GetCurrentTenantId(), assignments);
     }
 
     public async Task DeleteAsync(string actionType)
@@ -94,15 +89,5 @@ public class AssignmentsStorageService(
         await AssertUserHasAccessAsync(_writeTypes);
 
         await storage.DeleteManyAsync(tenantManager.GetCurrentTenantId(), actionTypes);
-    }
-
-    private static int ParseProfileId(string profileId)
-    {
-        if (!int.TryParse(profileId, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed))
-        {
-            throw new ArgumentException($"Invalid profile id '{profileId}'", nameof(profileId));
-        }
-
-        return parsed;
     }
 }

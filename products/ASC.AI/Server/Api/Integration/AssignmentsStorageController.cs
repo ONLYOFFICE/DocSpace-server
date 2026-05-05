@@ -44,13 +44,13 @@ public class AssignmentsStorageController(AssignmentsStorageService assignmentsS
     }
 
     [HttpGet("integration/assignments/{actionType}")]
-    public async Task<string?> ReadByTypeAsync(ReadAssignmentRequestDto inDto)
+    public async Task<Guid?> ReadByTypeAsync(ReadAssignmentRequestDto inDto)
     {
         return await assignmentsStorageService.ReadByTypeAsync(inDto.ActionType);
     }
 
     [HttpGet("integration/assignments")]
-    public async Task<Dictionary<string, string>> ReadAllAsync()
+    public async Task<Dictionary<string, Guid>> ReadAllAsync()
     {
         return await assignmentsStorageService.ReadAllAsync();
     }
