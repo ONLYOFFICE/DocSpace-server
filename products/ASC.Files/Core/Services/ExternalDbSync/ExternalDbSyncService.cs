@@ -38,7 +38,7 @@ public class ExternalDbSyncService(
     {
         if (!externalDatabaseClient.IsEnabled())
         {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_BadRequest);
+            return null;
         }
 
         var tenantId = tenantManager.GetCurrentTenantId();
