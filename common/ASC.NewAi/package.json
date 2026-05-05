@@ -9,8 +9,11 @@
     "start": "nodemon app.js"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.60.0",
     "@aws-sdk/client-cloudwatch-logs": "^3.199.0",
-    "@onlyoffice/ai-chat": "file:./onlyoffice-ai-chat-0.2.4.tgz",
+    "@google/genai": "^1.30.0",
+    "@mistralai/mistralai": "^1.11.0",
+    "@onlyoffice/ai-chat": "file:./onlyoffice-ai-chat-0.2.9.tgz",
     "body-parser": "1.19.0",
     "cookie-parser": "1.4.5",
     "cors": "^2.8.5",
@@ -19,6 +22,7 @@
     "morgan": "1.10.0",
     "nconf": "^0.10.0",
     "nodemon": "2.0.4",
+    "openai": "^5.22.0",
     "winston": "^3.8.2",
     "winston-cloudwatch": "^6.1.1",
     "winston-daily-rotate-file": "^4.5.5"

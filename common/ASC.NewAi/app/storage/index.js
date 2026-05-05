@@ -25,14 +25,14 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 import { InMemoryAssignmentsStorage } from "./assignmentsStorage.js";
-import { InMemoryMcpServersStorage } from "./mcpServersStorage.js";
+import { HttpMcpServersStorage } from "./mcpServersStorage.js";
 import { HttpMessagesStorage } from "./messagesStorage.js";
 import { InMemoryPreferencesStorage } from "./preferencesStorage.js";
 import { HttpProfilesStorage } from "./profilesStorage.js";
 import { InMemoryPromptFoldersStorage } from "./promptFoldersStorage.js";
 import { InMemoryPromptsStorage } from "./promptsStorage.js";
 import { HttpThreadsStorage } from "./threadsStorage.js";
-import { InMemoryToolPrefsStorage } from "./toolPrefsStorage.js";
+import { HttpToolPrefsStorage } from "./toolPrefsStorage.js";
 import { InMemoryWebSearchStorage } from "./webSearchStorage.js";
 
 export class InMemoryStorageAdapter {
@@ -44,8 +44,8 @@ export class InMemoryStorageAdapter {
     this.promptFolders = new InMemoryPromptFoldersStorage();
     this.assignments = new InMemoryAssignmentsStorage();
     this.preferences = new InMemoryPreferencesStorage();
-    this.mcpServers = new InMemoryMcpServersStorage();
-    this.toolPrefs = new InMemoryToolPrefsStorage();
+    this.mcpServers = new HttpMcpServersStorage();
+    this.toolPrefs = new HttpToolPrefsStorage();
     this.webSearch = new InMemoryWebSearchStorage();
   }
 
@@ -58,7 +58,6 @@ export class InMemoryStorageAdapter {
     this.promptFolders._clear();
     this.assignments._clear();
     this.preferences._clear();
-    this.mcpServers._clear();
     this.toolPrefs._clear();
     this.webSearch._clear();
   }

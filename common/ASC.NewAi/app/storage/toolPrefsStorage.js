@@ -24,34 +24,48 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-export class InMemoryToolPrefsStorage {
-  #disabled = null;
+import { aiService, AiServiceHttpError } from "./httpClient.js";
+
+const DISABLED_PATH = "/integration/tool-prefs/disabled";
+
+// `allowAlways` is not exposed by the AI service yet — keep it in-memory until
+// the backend grows the matching endpoints.
+export class HttpToolPrefsStorage {
   #allowAlways = null;
 
   async createDisabled(disabled) {
-    if (this.#disabled !== null) {
-      throw new Error("disabled tools already set");
-    }
-    this.#disabled = { ...disabled };
+    await aiService.put(DISABLED_PATH, { disabled });
   }
 
   async readDisabled() {
-    return this.#disabled ? { ...this.#disabled } : {};
+    try {
+      const map = await aiService.get(DISABLED_PATH);
+      return map && typeof map === "object" ? map : {};
+    } catch (err) {
+      if (err instanceof AiServiceHttpError && err.status === 404) {
+        return {};
+      }
+      throw err;
+    }
   }
 
   async updateDisabled(disabled) {
-    if (this.#disabled === null) {
-      throw new Error("disabled tools not set");
-    }
-    this.#disabled = { ...disabled };
+    await aiService.put(DISABLED_PATH, { disabled });
   }
 
   async upsertDisabled(disabled) {
-    this.#disabled = { ...disabled };
+    await aiService.put(DISABLED_PATH, { disabled });
   }
 
   async deleteDisabled() {
-    this.#disabled = null;
+    try {
+      await aiService.delete(DISABLED_PATH);
+    } catch (err) {
+      if (err instanceof AiServiceHttpError && err.status === 404) {
+        return;
+      }
+      throw err;
+    }
   }
 
   async createAllowAlways(tokens) {
@@ -81,7 +95,6 @@ export class InMemoryToolPrefsStorage {
   }
 
   _clear() {
-    this.#disabled = null;
     this.#allowAlways = null;
   }
 }

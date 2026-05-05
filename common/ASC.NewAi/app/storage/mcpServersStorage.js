@@ -24,48 +24,71 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-export class InMemoryMcpServersStorage {
-  #servers = new Map();
+import { aiService, AiServiceHttpError } from "./httpClient.js";
 
+const PATH = "/integration/mcp-servers";
+
+function parseConfig(raw) {
+  if (raw === null || raw === undefined) {
+    return null;
+  }
+  if (typeof raw !== "string") {
+    return raw;
+  }
+  return JSON.parse(raw);
+}
+
+export class HttpMcpServersStorage {
   async create(name, config) {
-    if (this.#servers.has(name)) {
-      throw new Error(`MCP server "${name}" already exists`);
-    }
-    this.#servers.set(name, { ...config });
+    await aiService.post(PATH, { name, config: JSON.stringify(config) });
   }
 
   async readByName(name) {
-    const c = this.#servers.get(name);
-    return c ? { ...c } : null;
+    try {
+      const dto = await aiService.get(`${PATH}/${encodeURIComponent(name)}`);
+      return dto ? parseConfig(dto.config) : null;
+    } catch (err) {
+      if (err instanceof AiServiceHttpError && err.status === 404) {
+        return null;
+      }
+      throw err;
+    }
   }
 
   async readAll() {
+    const map = await aiService.get(PATH);
+    if (!map || typeof map !== "object") {
+      return {};
+    }
     const result = {};
-    for (const [n, c] of this.#servers.entries()) {
-      result[n] = { ...c };
+    for (const [n, raw] of Object.entries(map)) {
+      result[n] = parseConfig(raw);
     }
     return result;
   }
 
   async update(name, config) {
-    if (!this.#servers.has(name)) {
-      throw new Error(`MCP server "${name}" not found`);
-    }
-    this.#servers.set(name, { ...config });
+    await aiService.put(`${PATH}/${encodeURIComponent(name)}`, {
+      config: JSON.stringify(config),
+    });
   }
 
   async replaceAll(servers) {
-    this.#servers.clear();
+    const payload = {};
     for (const [n, c] of Object.entries(servers)) {
-      this.#servers.set(n, { ...c });
+      payload[n] = JSON.stringify(c);
     }
+    await aiService.put(PATH, { servers: payload });
   }
 
   async delete(name) {
-    this.#servers.delete(name);
-  }
-
-  _clear() {
-    this.#servers.clear();
+    try {
+      await aiService.delete(`${PATH}/${encodeURIComponent(name)}`);
+    } catch (err) {
+      if (err instanceof AiServiceHttpError && err.status === 404) {
+        return;
+      }
+      throw err;
+    }
   }
 }
