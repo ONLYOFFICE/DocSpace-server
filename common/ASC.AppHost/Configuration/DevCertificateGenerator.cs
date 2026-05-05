@@ -37,6 +37,10 @@ public static class DevCertificateGenerator
     public const string CrtFileName = "docspace.dev.localhost.crt";
     private const string KeyFileName = "docspace.dev.localhost.key";
 
+    // X.509 OIDs (RFC 5280).
+    private const string OidSubjectAlternativeName = "2.5.29.17";
+    private const string OidEnhancedKeyUsageServerAuth = "1.3.6.1.5.5.7.3.1";
+
     public static string EnsureCertificate(string basePath)
     {
         var certDir = Path.Combine(basePath, "Data", "certs");
@@ -89,7 +93,7 @@ public static class DevCertificateGenerator
         request.CertificateExtensions.Add(new X509KeyUsageExtension(
             X509KeyUsageFlags.DigitalSignature | X509KeyUsageFlags.KeyEncipherment, true));
         request.CertificateExtensions.Add(new X509EnhancedKeyUsageExtension(
-            [new Oid("1.3.6.1.5.5.7.3.1")], true));
+            [new Oid(OidEnhancedKeyUsageServerAuth)], true));
 
         using var cert = request.CreateSelfSigned(
             DateTimeOffset.UtcNow.AddDays(-1),
@@ -112,7 +116,7 @@ public static class DevCertificateGenerator
 
     private static bool HasAllDnsNames(X509Certificate2 cert, IEnumerable<string> expected)
     {
-        var sanExt = cert.Extensions["2.5.29.17"];
+        var sanExt = cert.Extensions[OidSubjectAlternativeName];
         if (sanExt is null)
         {
             return false;
