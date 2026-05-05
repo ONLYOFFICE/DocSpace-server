@@ -16,4 +16,4 @@ COPY . .
 EXPOSE 9837
 
 # Command to run the application
-CMD ["node", "app.js"]
+CMD ["yarn", "serve"]
