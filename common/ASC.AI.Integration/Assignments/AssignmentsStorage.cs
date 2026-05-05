@@ -61,11 +61,11 @@ public class AssignmentsStorage(IDbContextFactory<AiIntegrationContext> dbContex
             .ToDictionaryAsync(x => x.ActionType, x => x.ProfileId);
     }
 
-    public async Task<int> UpdateAsync(int tenantId, string actionType, int profileId)
+    public async Task<bool> UpdateAsync(int tenantId, string actionType, int profileId)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        return await context.UpdateAssignmentProfileAsync(tenantId, actionType, profileId);
+        return await context.UpdateAssignmentProfileAsync(tenantId, actionType, profileId) > 0;
     }
 
     public async Task UpsertManyAsync(int tenantId, IReadOnlyDictionary<string, int> assignments)
