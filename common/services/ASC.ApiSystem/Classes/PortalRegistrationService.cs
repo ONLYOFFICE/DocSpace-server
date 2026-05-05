@@ -102,7 +102,7 @@ public class PortalRegistrationService(
         model.PortalName = portalName;
         logger.DebugCheckExistingNamePortal(model.PortalName, sw.ElapsedMilliseconds);
 
-        error = await ValidateRegistrationAsync(model, sw);
+        error = await ValidateRegistrationAsync(model, sw, true);
         if (error != null)
         {
             sw.Stop();
@@ -201,7 +201,7 @@ public class PortalRegistrationService(
         model.PortalName = portalName;
         logger.DebugCheckExistingNamePortal(model.PortalName, sw.ElapsedMilliseconds);
 
-        error = await ValidateRegistrationAsync(model, sw, checkRecaptcha: false);
+        error = await ValidateRegistrationAsync(model, sw, false);
         if (error != null)
         {
             sw.Stop();
@@ -275,7 +275,7 @@ public class PortalRegistrationService(
         var sw = Stopwatch.StartNew();
         var rateModel = new TenantModel { Email = model.Email, PortalName = portalName, RecaptchaResponse = model.RecaptchaResponse, RecaptchaType = model.RecaptchaType, AppKey = model.AppKey };
 
-        var error = await ValidateRegistrationAsync(rateModel, sw);
+        var error = await ValidateRegistrationAsync(rateModel, sw, true);
         if (error != null)
         {
             sw.Stop();
@@ -392,7 +392,7 @@ public class PortalRegistrationService(
         return null;
     }
 
-    public async Task<PortalRegistrationErrorDto> ValidateRegistrationAsync(TenantModel model, Stopwatch sw, bool checkRecaptcha = true)
+    public async Task<PortalRegistrationErrorDto> ValidateRegistrationAsync(TenantModel model, Stopwatch sw, bool checkRecaptcha)
     {
         var clientIp = commonMethods.GetClientIp();
 
