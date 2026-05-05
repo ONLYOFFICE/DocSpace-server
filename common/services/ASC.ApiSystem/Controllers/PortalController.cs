@@ -448,11 +448,9 @@ public class PortalController(
     {
         try
         {
-            var sw = Stopwatch.StartNew();
-
             var clientIp = commonMethods.GetClientIp();
 
-            if (commonMethods.CheckMuchRegistration(model, clientIp, sw))
+            if (commonMethods.CheckMuchRegistration(model, clientIp))
             {
                 if (string.IsNullOrEmpty(model.RecaptchaResponse))
                 {
@@ -463,7 +461,7 @@ public class PortalController(
                     });
                 }
 
-                var error = await portalRegistrationService.GetRecaptchaErrorAsync(model, clientIp, sw);
+                var error = await portalRegistrationService.GetRecaptchaErrorAsync(model, clientIp);
 
                 if (error != null)
                 {
