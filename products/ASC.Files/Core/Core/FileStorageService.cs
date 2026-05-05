@@ -5580,8 +5580,7 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
         }
 
-        return await externalDbSyncService.StartSyncAsync(roomId)
-            ?? throw new InvalidOperationException(FilesCommonResource.ErrorMessage_BadRequest);
+        return await externalDbSyncService.StartSyncAsync(roomId);
     }
 
     public async Task<ExternalDbSyncTask> GetExternalDbSyncTaskAsync(int roomId)

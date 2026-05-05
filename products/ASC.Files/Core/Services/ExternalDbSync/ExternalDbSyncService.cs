@@ -28,7 +28,6 @@ namespace ASC.Files.Core.Services.ExternalDbSync;
 
 [Transient]
 public class ExternalDbSyncService(
-    IServiceProvider serviceProvider,
     TenantManager tenantManager,
     IEventBus eventBus,
     ExternalDbSyncTaskManager taskManager,
@@ -39,19 +38,15 @@ public class ExternalDbSyncService(
     {
         if (!externalDatabaseClient.IsEnabled())
         {
-            return null;
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_BadRequest);
         }
 
         var tenantId = tenantManager.GetCurrentTenantId();
         var userId = authContext.CurrentAccount.ID;
 
-        var task = serviceProvider.GetService<ExternalDbSyncTask>();
-        task.Init(tenantId, userId, roomId, ExternalDbSyncTaskManager.GetTaskId(tenantId, roomId));
-        var taskProgress = await taskManager.PublishTaskAsync(task);
-
         await eventBus.PublishAsync(new ExternalDbRoomSyncIntegrationEvent(userId, tenantId, roomId));
 
-        return taskProgress;
+        return await taskManager.GetTask(tenantId, roomId);
     }
 
     public async Task<ExternalDbSyncTask> GetTaskAsync(int roomId)
