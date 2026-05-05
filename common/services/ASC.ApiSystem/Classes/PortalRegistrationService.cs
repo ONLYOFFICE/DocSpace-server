@@ -162,12 +162,15 @@ public class PortalRegistrationService(
         {
             if (string.IsNullOrEmpty(model.Password))
             {
-                model.Password = Guid.NewGuid().ToString();
+                model.PasswordHash = passwordHasher.GetClientPassword(Guid.NewGuid().ToString());
             }
-            if (!CheckPasswordAndHash(model, out var error1))
+            else
             {
-                sw.Stop();
-                return (null, error1, StatusCodes.Status400BadRequest);
+                if (!CheckPasswordAndHash(model, out var error1))
+                {
+                    sw.Stop();
+                    return (null, error1, StatusCodes.Status400BadRequest);
+                }
             }
         }
 
