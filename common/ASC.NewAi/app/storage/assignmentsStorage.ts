@@ -24,66 +24,72 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+import { aiService, AiServiceHttpError } from "./httpClient.js";
+import { isObject } from "../narrow.js";
 import type { AssignmentsStorage, ActionType } from "@onlyoffice/ai-chat/core";
 
-export class InMemoryAssignmentsStorage implements AssignmentsStorage {
-  // ActionType is a string-literal union; storing as Map<string, string> avoids
-  // narrowing casts when iterating Object.entries(...) below.
-  readonly #map = new Map<string, string>();
+const PATH = "/integration/assignments";
 
+export class HttpAssignmentsStorage implements AssignmentsStorage {
   async create(actionType: ActionType, profileId: string): Promise<void> {
-    if (this.#map.has(actionType)) {
-      throw new Error(`Assignment for "${actionType}" already exists`);
-    }
-    this.#map.set(actionType, profileId);
+    await aiService.post(PATH, { actionType, profileId });
   }
 
   async readByType(actionType: ActionType): Promise<string | null> {
-    return this.#map.get(actionType) ?? null;
+    try {
+      const raw = await aiService.get(`${PATH}/${encodeURIComponent(actionType)}`);
+      return typeof raw === "string" ? raw : null;
+    } catch (err) {
+      if (err instanceof AiServiceHttpError && err.status === 404) {
+        return null;
+      }
+      throw err;
+    }
   }
 
   async readAll(): Promise<Partial<Record<ActionType, string>>> {
+    const raw = await aiService.get(PATH);
+    if (!isObject(raw)) {
+      return {};
+    }
     const result: Partial<Record<ActionType, string>> = {};
-    for (const [k, v] of this.#map.entries()) {
-      Object.assign(result, { [k]: v });
+    for (const [key, value] of Object.entries(raw)) {
+      if (typeof value === "string") {
+        Object.assign(result, { [key]: value });
+      }
     }
     return result;
   }
 
   async update(actionType: ActionType, profileId: string): Promise<void> {
-    if (!this.#map.has(actionType)) {
-      throw new Error(`No assignment for "${actionType}"`);
-    }
-    this.#map.set(actionType, profileId);
+    await aiService.put(`${PATH}/${encodeURIComponent(actionType)}`, { profileId });
   }
 
   async upsertMany(assignments: Partial<Record<ActionType, string>>): Promise<void> {
+    const payload: Record<string, string> = {};
     for (const [k, v] of Object.entries(assignments)) {
-      if (v !== undefined) {
-        this.#map.set(k, v);
+      if (typeof v === "string") {
+        payload[k] = v;
       }
     }
+    await aiService.put(PATH, { assignments: payload });
   }
 
   async delete(actionType: ActionType): Promise<void> {
-    this.#map.delete(actionType);
+    try {
+      await aiService.delete(`${PATH}/${encodeURIComponent(actionType)}`);
+    } catch (err) {
+      if (err instanceof AiServiceHttpError && err.status === 404) {
+        return;
+      }
+      throw err;
+    }
   }
 
   async deleteMany(actionTypes: ActionType[]): Promise<void> {
-    for (const t of actionTypes) {
-      this.#map.delete(t);
+    if (actionTypes.length === 0) {
+      return;
     }
-  }
-
-  _seed(entries: Partial<Record<ActionType, string>>): void {
-    for (const [k, v] of Object.entries(entries)) {
-      if (v !== undefined) {
-        this.#map.set(k, v);
-      }
-    }
-  }
-
-  _clear(): void {
-    this.#map.clear();
+    await aiService.delete(PATH, { body: { actionTypes } });
   }
 }

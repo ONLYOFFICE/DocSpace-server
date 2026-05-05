@@ -24,38 +24,48 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+import { aiService, AiServiceHttpError } from "./httpClient.js";
+import { isObject, getBoolean } from "../narrow.js";
 import type { PreferencesStorage } from "@onlyoffice/ai-chat/core";
 
-export class InMemoryPreferencesStorage implements PreferencesStorage {
-  #deepMode: boolean | null = null;
+const PATH = "/integration/preferences";
 
+export class HttpPreferencesStorage implements PreferencesStorage {
   async createDeepMode(value: boolean): Promise<void> {
-    if (this.#deepMode !== null) {
-      throw new Error("deepMode is already set");
-    }
-    this.#deepMode = value;
+    await aiService.put(PATH, { deepMode: value });
   }
 
   async readDeepMode(): Promise<boolean | null> {
-    return this.#deepMode;
+    try {
+      const raw = await aiService.get(PATH);
+      if (!isObject(raw)) {
+        return null;
+      }
+      return getBoolean(raw, "deepMode") ?? null;
+    } catch (err) {
+      if (err instanceof AiServiceHttpError && err.status === 404) {
+        return null;
+      }
+      throw err;
+    }
   }
 
   async updateDeepMode(value: boolean): Promise<void> {
-    if (this.#deepMode === null) {
-      throw new Error("deepMode is not set");
-    }
-    this.#deepMode = value;
+    await aiService.put(PATH, { deepMode: value });
   }
 
   async upsertDeepMode(value: boolean): Promise<void> {
-    this.#deepMode = value;
+    await aiService.put(PATH, { deepMode: value });
   }
 
   async deleteDeepMode(): Promise<void> {
-    this.#deepMode = null;
-  }
-
-  _clear(): void {
-    this.#deepMode = null;
+    try {
+      await aiService.delete(PATH);
+    } catch (err) {
+      if (err instanceof AiServiceHttpError && err.status === 404) {
+        return;
+      }
+      throw err;
+    }
   }
 }
