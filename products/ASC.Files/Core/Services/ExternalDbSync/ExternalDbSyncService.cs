@@ -42,11 +42,17 @@ public class ExternalDbSyncService(
         }
 
         var tenantId = tenantManager.GetCurrentTenantId();
-        var userId = authContext.CurrentAccount.ID;
 
+        var existingTask = await taskManager.GetTask(tenantId, roomId);
+        if (existingTask is { IsCompleted: false })
+        {
+            return existingTask;
+        }
+
+        var userId = authContext.CurrentAccount.ID;
         await eventBus.PublishAsync(new ExternalDbRoomSyncIntegrationEvent(userId, tenantId, roomId));
 
-        return await taskManager.GetTask(tenantId, roomId);
+        return new ExternalDbSyncTask { Id = ExternalDbSyncTaskManager.GetTaskId(tenantId, roomId), Status = DistributedTaskStatus.Created };
     }
 
     public async Task<ExternalDbSyncTask> GetTaskAsync(int roomId)
