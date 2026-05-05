@@ -44,18 +44,18 @@ public class ThreadStorageService(
 {
     private static readonly EmployeeType[] _allowedTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin];
 
-    public async Task<Thread> CreateAsync(string title, string? profileId = null)
+    public async Task<Thread> CreateAsync(string title, Guid? profileId = null)
     {
         await AssertUserHasAccessAsync(_allowedTypes);
 
         var tenantId = tenantManager.GetCurrentTenantId();
 
-        if (string.IsNullOrEmpty(profileId))
+        if (!profileId.HasValue)
         {
             return await storage.CreateAsync(tenantId, CurrentUserId, title);
         }
 
-        var id = int.Parse(profileId);
+        var id = profileId.Value;
 
         await using (await distributedLockProvider.TryAcquireFairLockAsync(ProfileStorage.GetLockKey(tenantId, id)))
         {
@@ -94,7 +94,7 @@ public class ThreadStorageService(
         await storage.UpdateAsync(tenantId, id, title);
     }
 
-    public async Task TouchAsync(Guid id, long lastEditDate, string? profileId = null, bool clearProfile = false)
+    public async Task TouchAsync(Guid id, long lastEditDate, Guid? profileId = null, bool clearProfile = false)
     {
         await AssertUserHasAccessAsync(_allowedTypes);
 
@@ -105,13 +105,13 @@ public class ThreadStorageService(
 
         var lastEditDateUtc = DateTimeOffset.FromUnixTimeMilliseconds(lastEditDate).UtcDateTime;
 
-        if (clearProfile || string.IsNullOrEmpty(profileId))
+        if (clearProfile || !profileId.HasValue)
         {
             await storage.TouchAsync(tenantId, id, lastEditDateUtc, null, clearProfile);
             return;
         }
 
-        var parsedProfileId = int.Parse(profileId);
+        var parsedProfileId = profileId.Value;
 
         await using (await distributedLockProvider.TryAcquireFairLockAsync(ProfileStorage.GetLockKey(tenantId, parsedProfileId)))
         {
@@ -146,7 +146,7 @@ public class ThreadStorageService(
         }
     }
 
-    private async Task AssertProfileExistsAsync(int tenantId, int profileId)
+    private async Task AssertProfileExistsAsync(int tenantId, Guid profileId)
     {
         _ = await profileStorage.ReadByIdAsync(tenantId, profileId)
             ?? throw new ItemNotFoundException($"Profile with id '{profileId}' was not found");

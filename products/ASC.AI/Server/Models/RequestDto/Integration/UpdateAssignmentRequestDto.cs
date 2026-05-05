@@ -26,8 +26,16 @@
 
 namespace ASC.AI.Models.RequestDto.Integration;
 
-public class CreateThreadRequestDto
+public class UpdateAssignmentRequestDto
 {
-    public required string Title { get; init; }
-    public Guid? ProfileId { get; init; }
+    [FromRoute(Name = "actionType")]
+    public required string ActionType { get; init; }
+
+    [FromBody]
+    public required UpdateAssignmentBody Body { get; init; }
+}
+
+public class UpdateAssignmentBody
+{
+    public required Guid ProfileId { get; init; }
 }

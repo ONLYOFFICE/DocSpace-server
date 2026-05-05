@@ -24,10 +24,40 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Models.RequestDto.Integration;
+using ASC.AI.Models.RequestDto.Integration;
+using ASC.AI.Service;
 
-public class CreateThreadRequestDto
+using PreferencesDto = ASC.AI.Models.ResponseDto.Integration.PreferencesDto;
+using PreferencesMapper = ASC.AI.Models.ResponseDto.Integration.PreferencesMapper;
+
+namespace ASC.AI.Api.Integration;
+
+[Scope]
+[DefaultRoute]
+[ApiController]
+[AiFeature]
+[ControllerName("ai")]
+[ApiExplorerSettings(IgnoreApi = true)]
+public class PreferencesStorageController(PreferencesStorageService preferencesStorageService) : ControllerBase
 {
-    public required string Title { get; init; }
-    public Guid? ProfileId { get; init; }
+    [HttpGet("integration/preferences")]
+    public async Task<PreferencesDto?> ReadAsync()
+    {
+        var preferences = await preferencesStorageService.ReadAsync();
+        return preferences == null ? null : PreferencesMapper.MapToDto(preferences);
+    }
+
+    [HttpPut("integration/preferences")]
+    public async Task<IActionResult> UpsertAsync(UpsertPreferencesRequestDto inDto)
+    {
+        await preferencesStorageService.UpsertAsync(PreferencesMapper.MapToPreferences(inDto));
+        return NoContent();
+    }
+
+    [HttpDelete("integration/preferences")]
+    public async Task<IActionResult> DeleteAsync()
+    {
+        await preferencesStorageService.DeleteAsync();
+        return NoContent();
+    }
 }

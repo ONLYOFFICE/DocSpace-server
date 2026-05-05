@@ -46,8 +46,8 @@ public partial class AiIntegrationContext
         return AssignmentQueriesContainer.GetAssignmentsByTypesAsync(this, tenantId, actionTypes);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null, PreCompileQuery.DefaultInt])]
-    public Task<int> UpdateAssignmentProfileAsync(int tenantId, string actionType, int profileId)
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null, PreCompileQuery.DefaultGuid])]
+    public Task<int> UpdateAssignmentProfileAsync(int tenantId, string actionType, Guid profileId)
     {
         return AssignmentQueriesContainer.UpdateAssignmentProfileAsync(this, tenantId, actionType, profileId);
     }
@@ -86,9 +86,9 @@ static file class AssignmentQueriesContainer
                 ctx.Assignments
                     .Where(x => x.TenantId == tenantId && actionTypes.Contains(x.ActionType)));
 
-    public static readonly Func<AiIntegrationContext, int, string, int, Task<int>> UpdateAssignmentProfileAsync =
+    public static readonly Func<AiIntegrationContext, int, string, Guid, Task<int>> UpdateAssignmentProfileAsync =
         EF.CompileAsyncQuery(
-            (AiIntegrationContext ctx, int tenantId, string actionType, int profileId) =>
+            (AiIntegrationContext ctx, int tenantId, string actionType, Guid profileId) =>
                 ctx.Assignments
                     .Where(x => x.TenantId == tenantId && x.ActionType == actionType)
                     .ExecuteUpdate(x => x.SetProperty(y => y.ProfileId, profileId)));

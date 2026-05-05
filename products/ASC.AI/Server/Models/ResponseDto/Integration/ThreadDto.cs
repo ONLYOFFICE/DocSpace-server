@@ -32,7 +32,7 @@ public class ThreadDto
 {
     public required Guid Id { get; init; }
     public required string Title { get; init; }
-    public string? ProfileId { get; init; }
+    public Guid? ProfileId { get; init; }
     public long LastEditDate { get; init; }
     public long CreatedAt { get; init; }
 }
@@ -42,8 +42,6 @@ public class ThreadDto
 public static partial class ThreadMapper
 {
     public static partial ThreadDto MapToDto(Thread thread);
-
-    private static string MapIdToString(int id) => id.ToString();
 
     private static long MapDateTimeToMs(DateTime dateTime) =>
         new DateTimeOffset(DateTime.SpecifyKind(dateTime, DateTimeKind.Utc)).ToUnixTimeMilliseconds();

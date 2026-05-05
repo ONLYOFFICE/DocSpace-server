@@ -26,8 +26,8 @@
 
 namespace ASC.AI.Models.RequestDto.Integration;
 
-public class CreateThreadRequestDto
+public class DeleteAssignmentRequestDto
 {
-    public required string Title { get; init; }
-    public Guid? ProfileId { get; init; }
+    [FromRoute(Name = "actionType")]
+    public required string ActionType { get; init; }
 }

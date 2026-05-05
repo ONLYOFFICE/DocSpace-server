@@ -26,8 +26,13 @@
 
 namespace ASC.AI.Models.RequestDto.Integration;
 
-public class CreateThreadRequestDto
+public class DeleteAssignmentsRequestDto
 {
-    public required string Title { get; init; }
-    public Guid? ProfileId { get; init; }
+    [FromBody]
+    public required DeleteAssignmentsRequestBody Body { get; init; }
+}
+
+public class DeleteAssignmentsRequestBody
+{
+    public required IReadOnlyCollection<string> ActionTypes { get; init; }
 }

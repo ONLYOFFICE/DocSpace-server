@@ -26,8 +26,7 @@
 
 namespace ASC.AI.Models.RequestDto.Integration;
 
-public class CreateThreadRequestDto
+public class UpsertAssignmentsRequestDto
 {
-    public required string Title { get; init; }
-    public Guid? ProfileId { get; init; }
+    public required IReadOnlyDictionary<string, Guid> Assignments { get; init; }
 }

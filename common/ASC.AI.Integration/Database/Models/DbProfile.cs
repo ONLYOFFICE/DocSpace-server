@@ -28,7 +28,7 @@ namespace ASC.AI.Integration.Database.Models;
 
 public class DbProfile : BaseEntity
 {
-    public int Id { get; init; }
+    public Guid Id { get; init; }
     public int TenantId { get; init; }
 
     [MaxLength(255)]
@@ -86,7 +86,9 @@ public static class DbProfileExtension
 
             entity.Property(e => e.Id)
                 .HasColumnName("id")
-                .ValueGeneratedOnAdd();
+                .HasColumnType("char(36)")
+                .HasCharSet("utf8")
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.TenantId)
                 .HasColumnName("tenant_id");
@@ -147,7 +149,7 @@ public static class DbProfileExtension
 
             entity.Property(e => e.Id)
                 .HasColumnName("id")
-                .ValueGeneratedOnAdd();
+                .HasColumnType("uuid");
 
             entity.Property(e => e.TenantId)
                 .HasColumnName("tenant_id")

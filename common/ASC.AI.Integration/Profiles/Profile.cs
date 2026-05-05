@@ -28,7 +28,7 @@ namespace ASC.AI.Integration.Profiles;
 
 public class Profile
 {
-    public int Id { get; init; }
+    public Guid Id { get; init; }
     public required string Name { get; init; }
     public required string ProviderType { get; init; }
     public required string BaseUrl { get; init; }

@@ -31,7 +31,7 @@ namespace ASC.AI.Models.ResponseDto.Integration;
 
 public class ProfileDto
 {
-    public required string Id { get; init; }
+    public required Guid Id { get; init; }
     public required string Name { get; init; }
     public required string ProviderType { get; init; }
     public required string BaseUrl { get; init; }
@@ -59,10 +59,6 @@ public static partial class ProfileMapper
     [MapProperty($"{nameof(UpdateProfileRequestDto.Body)}.{nameof(UpdateProfileBody.Reasoning)}", nameof(Profile.Reasoning))]
     [MapProperty($"{nameof(UpdateProfileRequestDto.Body)}.{nameof(UpdateProfileBody.Capabilities)}", nameof(Profile.Capabilities))]
     public static partial Profile MapToProfile(UpdateProfileRequestDto dto);
-
-    private static string MapIdToString(int id) => id.ToString();
-
-    private static int MapIdToInt(string id) => int.Parse(id);
 
     private static long MapDateTimeToMs(DateTime dateTime) =>
         new DateTimeOffset(DateTime.SpecifyKind(dateTime, DateTimeKind.Utc)).ToUnixTimeMilliseconds();

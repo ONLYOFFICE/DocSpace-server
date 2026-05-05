@@ -35,7 +35,7 @@ public class DbThread : BaseEntity
     [Required]
     public required string Title { get; set; }
 
-    public int? ProfileId { get; set; }
+    public Guid? ProfileId { get; set; }
     public Guid CreatedBy { get; init; }
     public DateTime LastEditDate { get; set; }
     public DateTime CreatedAt { get; init; }
@@ -87,7 +87,10 @@ public static class DbThreadExtension
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.ProfileId)
-                .HasColumnName("profile_id");
+                .HasColumnName("profile_id")
+                .HasColumnType("char(36)")
+                .HasCharSet("utf8")
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.CreatedBy)
                 .HasColumnName("created_by")
@@ -137,7 +140,8 @@ public static class DbThreadExtension
                 .HasMaxLength(255);
 
             entity.Property(e => e.ProfileId)
-                .HasColumnName("profile_id");
+                .HasColumnName("profile_id")
+                .HasColumnType("uuid");
 
             entity.Property(e => e.CreatedBy)
                 .HasColumnName("created_by")

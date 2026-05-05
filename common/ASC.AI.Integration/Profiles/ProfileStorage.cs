@@ -29,7 +29,7 @@ namespace ASC.AI.Integration.Profiles;
 [Scope]
 public class ProfileStorage(IDbContextFactory<AiIntegrationContext> dbContextFactory, InstanceCrypto crypto)
 {
-    public static string GetLockKey(int tenantId, int profileId) => $"ai_integration_profile_{tenantId}_{profileId}";
+    public static string GetLockKey(int tenantId, Guid profileId) => $"ai_integration_profile_{tenantId}_{profileId}";
 
 
     public async Task<Profile> CreateAsync(int tenantId, ProfileData profile)
@@ -37,7 +37,7 @@ public class ProfileStorage(IDbContextFactory<AiIntegrationContext> dbContextFac
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
         var encryptedKey = await EncryptKeyAsync(profile.Key);
-        var entity = ToDbEntity(tenantId, profile, encryptedKey, DateTime.UtcNow);
+        var entity = ToDbEntity(Guid.CreateVersion7(), tenantId, profile, encryptedKey, DateTime.UtcNow);
 
         await context.Profiles.AddAsync(entity);
         await context.SaveChangesAsync();
@@ -59,7 +59,7 @@ public class ProfileStorage(IDbContextFactory<AiIntegrationContext> dbContextFac
         var entities = new List<DbProfile>(profiles.Count);
         foreach (var p in profiles)
         {
-            entities.Add(ToDbEntity(tenantId, p, await EncryptKeyAsync(p.Key), now));
+            entities.Add(ToDbEntity(Guid.CreateVersion7(), tenantId, p, await EncryptKeyAsync(p.Key), now));
         }
 
         await strategy.ExecuteAsync(async () =>
@@ -79,7 +79,7 @@ public class ProfileStorage(IDbContextFactory<AiIntegrationContext> dbContextFac
         return result;
     }
 
-    public async Task<Profile?> ReadByIdAsync(int tenantId, int id)
+    public async Task<Profile?> ReadByIdAsync(int tenantId, Guid id)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
@@ -127,7 +127,7 @@ public class ProfileStorage(IDbContextFactory<AiIntegrationContext> dbContextFac
         return profile;
     }
 
-    public async Task DeleteAsync(int tenantId, int id)
+    public async Task DeleteAsync(int tenantId, Guid id)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var strategy = dbContext.Database.CreateExecutionStrategy();
@@ -166,10 +166,11 @@ public class ProfileStorage(IDbContextFactory<AiIntegrationContext> dbContextFac
         }
     }
 
-    private static DbProfile ToDbEntity(int tenantId, ProfileData profile, string? encryptedKey, DateTime createdAt)
+    private static DbProfile ToDbEntity(Guid id, int tenantId, ProfileData profile, string? encryptedKey, DateTime createdAt)
     {
         return new DbProfile
         {
+            Id = id,
             TenantId = tenantId,
             Name = profile.Name,
             ProviderType = profile.ProviderType,

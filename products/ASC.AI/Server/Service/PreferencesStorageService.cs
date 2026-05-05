@@ -24,10 +24,40 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Models.RequestDto.Integration;
+using ASC.AI.Integration.Preferences;
+using ASC.Core.Users;
 
-public class CreateThreadRequestDto
+using Preferences = ASC.AI.Integration.Preferences.Preferences;
+
+namespace ASC.AI.Service;
+
+[Scope]
+public class PreferencesStorageService(
+    UserManager userManager,
+    AuthContext authContext,
+    TenantManager tenantManager,
+    PreferencesStorage storage) : IntegrationServiceBase(userManager, authContext)
 {
-    public required string Title { get; init; }
-    public Guid? ProfileId { get; init; }
+    private static readonly EmployeeType[] _allowedTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin];
+
+    public async Task<Preferences?> ReadAsync()
+    {
+        await AssertUserHasAccessAsync(_allowedTypes);
+
+        return await storage.ReadAsync(tenantManager.GetCurrentTenantId(), CurrentUserId);
+    }
+
+    public async Task UpsertAsync(Preferences preferences)
+    {
+        await AssertUserHasAccessAsync(_allowedTypes);
+
+        await storage.UpsertAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, preferences);
+    }
+
+    public async Task DeleteAsync()
+    {
+        await AssertUserHasAccessAsync(_allowedTypes);
+
+        await storage.DeleteAsync(tenantManager.GetCurrentTenantId(), CurrentUserId);
+    }
 }

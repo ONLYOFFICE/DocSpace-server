@@ -24,10 +24,22 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Models.RequestDto.Integration;
+using ASC.AI.Models.RequestDto.Integration;
 
-public class CreateThreadRequestDto
+using Preferences = ASC.AI.Integration.Preferences.Preferences;
+
+namespace ASC.AI.Models.ResponseDto.Integration;
+
+public class PreferencesDto
 {
-    public required string Title { get; init; }
-    public Guid? ProfileId { get; init; }
+    public bool? DeepMode { get; init; }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
+    PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class PreferencesMapper
+{
+    public static partial PreferencesDto MapToDto(Preferences preferences);
+
+    public static partial Preferences MapToPreferences(UpsertPreferencesRequestDto dto);
 }

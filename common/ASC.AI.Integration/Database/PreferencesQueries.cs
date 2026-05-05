@@ -29,9 +29,9 @@ namespace ASC.AI.Integration.Database;
 public partial class AiIntegrationContext
 {
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
-    public Task<bool?> GetDeepModeAsync(int tenantId, Guid userId)
+    public Task<DbPreferences?> GetPreferencesAsync(int tenantId, Guid userId)
     {
-        return PreferencesQueriesContainer.GetDeepModeAsync(this, tenantId, userId);
+        return PreferencesQueriesContainer.GetPreferencesAsync(this, tenantId, userId);
     }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
@@ -43,13 +43,11 @@ public partial class AiIntegrationContext
 
 static file class PreferencesQueriesContainer
 {
-    public static readonly Func<AiIntegrationContext, int, Guid, Task<bool?>> GetDeepModeAsync =
+    public static readonly Func<AiIntegrationContext, int, Guid, Task<DbPreferences?>> GetPreferencesAsync =
         EF.CompileAsyncQuery(
             (AiIntegrationContext ctx, int tenantId, Guid userId) =>
                 ctx.Preferences
-                    .Where(x => x.TenantId == tenantId && x.CreatedBy == userId)
-                    .Select(x => x.DeepMode)
-                    .FirstOrDefault());
+                    .FirstOrDefault(x => x.TenantId == tenantId && x.CreatedBy == userId));
 
     public static readonly Func<AiIntegrationContext, int, Guid, Task<int>> DeletePreferencesAsync =
         EF.CompileAsyncQuery(

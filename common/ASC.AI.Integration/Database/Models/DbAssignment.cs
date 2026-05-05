@@ -34,7 +34,7 @@ public class DbAssignment : BaseEntity
     [Required]
     public required string ActionType { get; init; }
 
-    public int ProfileId { get; set; }
+    public Guid ProfileId { get; set; }
     public DateTime CreatedAt { get; init; }
 
     public DbTenant Tenant { get; init; } = null!;
@@ -80,7 +80,10 @@ public static class DbAssignmentExtension
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.ProfileId)
-                .HasColumnName("profile_id");
+                .HasColumnName("profile_id")
+                .HasColumnType("char(36)")
+                .HasCharSet("utf8")
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.CreatedAt)
                 .HasColumnName("created_at")
@@ -108,7 +111,7 @@ public static class DbAssignmentExtension
 
             entity.Property(e => e.ProfileId)
                 .HasColumnName("profile_id")
-                .HasColumnType("integer");
+                .HasColumnType("uuid");
 
             entity.Property(e => e.CreatedAt)
                 .HasColumnName("created_at")
