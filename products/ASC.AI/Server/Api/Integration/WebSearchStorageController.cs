@@ -24,25 +24,40 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-global using System.ComponentModel.DataAnnotations;
-global using System.Security.Cryptography;
+using ASC.AI.Models.RequestDto.Integration;
+using ASC.AI.Service;
 
-global using Microsoft.EntityFrameworkCore;
-global using Microsoft.Extensions.DependencyInjection;
+using WebSearchConfigDto = ASC.AI.Models.ResponseDto.Integration.WebSearchConfigDto;
+using WebSearchConfigMapper = ASC.AI.Models.ResponseDto.Integration.WebSearchConfigMapper;
 
-global using ASC.Common;
-global using ASC.Core.Common.EF;
-global using ASC.Core.Common.EF.Model;
-global using ASC.Core.Common.Settings;
-global using ASC.Security.Cryptography;
+namespace ASC.AI.Api.Integration;
 
-global using ASC.AI.Integration.Assignments;
-global using ASC.AI.Integration.Database;
-global using ASC.AI.Integration.Database.Models;
-global using ASC.AI.Integration.McpServers;
-global using ASC.AI.Integration.Messages;
-global using ASC.AI.Integration.Preferences;
-global using ASC.AI.Integration.Profiles;
-global using ASC.AI.Integration.Threads;
-global using ASC.AI.Integration.ToolPrefs;
-global using ASC.AI.Integration.WebSearch;
+[Scope]
+[DefaultRoute]
+[ApiController]
+[AiFeature]
+[ControllerName("ai")]
+[ApiExplorerSettings(IgnoreApi = true)]
+public class WebSearchStorageController(WebSearchStorageService webSearchStorageService) : ControllerBase
+{
+    [HttpGet("integration/web-search")]
+    public async Task<WebSearchConfigDto?> ReadAsync()
+    {
+        var config = await webSearchStorageService.ReadAsync();
+        return config == null ? null : WebSearchConfigMapper.MapToDto(config);
+    }
+
+    [HttpPut("integration/web-search")]
+    public async Task<IActionResult> UpsertAsync(UpsertWebSearchConfigRequestDto inDto)
+    {
+        await webSearchStorageService.UpsertAsync(WebSearchConfigMapper.MapToConfig(inDto));
+        return NoContent();
+    }
+
+    [HttpDelete("integration/web-search")]
+    public async Task<IActionResult> DeleteAsync()
+    {
+        await webSearchStorageService.DeleteAsync();
+        return NoContent();
+    }
+}

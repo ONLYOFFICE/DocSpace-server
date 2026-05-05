@@ -24,25 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-global using System.ComponentModel.DataAnnotations;
-global using System.Security.Cryptography;
+namespace ASC.AI.Models.RequestDto.Integration;
 
-global using Microsoft.EntityFrameworkCore;
-global using Microsoft.Extensions.DependencyInjection;
+public class UpsertWebSearchConfigRequestDto
+{
+    public required string Provider { get; init; }
 
-global using ASC.Common;
-global using ASC.Core.Common.EF;
-global using ASC.Core.Common.EF.Model;
-global using ASC.Core.Common.Settings;
-global using ASC.Security.Cryptography;
+    public string? Key { get; init; }
 
-global using ASC.AI.Integration.Assignments;
-global using ASC.AI.Integration.Database;
-global using ASC.AI.Integration.Database.Models;
-global using ASC.AI.Integration.McpServers;
-global using ASC.AI.Integration.Messages;
-global using ASC.AI.Integration.Preferences;
-global using ASC.AI.Integration.Profiles;
-global using ASC.AI.Integration.Threads;
-global using ASC.AI.Integration.ToolPrefs;
-global using ASC.AI.Integration.WebSearch;
+    public string? BaseUrl { get; init; }
+}
