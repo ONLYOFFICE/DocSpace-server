@@ -74,6 +74,7 @@ async function seedMockData(adapter: InMemoryStorageAdapter): Promise<void> {
 
   if (firstProfileId) {
     adapter.assignments._seed({
+      Default: firstProfileId,
       Chat: firstProfileId,
     });
   }
