@@ -93,6 +93,13 @@ public class PaymentController(
             return null;
         }
 
+        ArgumentNullException.ThrowIfNull(inDto?.Quantity);
+
+        if (inDto.Quantity.Any(item => item.Value <= 0))
+        {
+            throw new ArgumentException("Invalid quantity");
+        }
+
         if (!Uri.TryCreate(inDto.BackUrl, UriKind.Absolute, out var parsedUri))
         {
             throw new ArgumentException("Invalid URI format");
@@ -123,7 +130,7 @@ public class PaymentController(
         // TODO: Temporary restriction.
         // Possibility to buy only one product per transaction.
         // Only monthly tariff available for purchase.
-        if (inDto.Quantity.Count != 1 || !monthQuotas.Any(q => q.Name == inDto.Quantity.First().Key))
+        if (inDto.Quantity.Count != 1 || monthQuotas.All(q => q.Name != inDto.Quantity.First().Key))
         {
             return null;
         }
