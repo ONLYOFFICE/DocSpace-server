@@ -73,8 +73,11 @@ public static class DevCertificateGenerator
             }
         }
 
-        using var rsa = RSA.Create(2048);
-        var request = new CertificateRequest(Subject, rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+        // 3072-bit RSA + SHA-384 — scores 100% on the SSL Labs "Key Exchange"
+        // category and contributes to an A+ overall rating. Keep PKCS#1 v1.5
+        // for the cert signature (broadest validator compatibility).
+        using var rsa = RSA.Create(3072);
+        var request = new CertificateRequest(Subject, rsa, HashAlgorithmName.SHA384, RSASignaturePadding.Pkcs1);
 
         var sanBuilder = new SubjectAlternativeNameBuilder();
         foreach (var name in _dnsNames)
