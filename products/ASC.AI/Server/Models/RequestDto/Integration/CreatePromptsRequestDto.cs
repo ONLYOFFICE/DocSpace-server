@@ -24,35 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Integration.Database;
+namespace ASC.AI.Models.RequestDto.Integration;
 
-public partial class AiIntegrationContext
+public class CreatePromptsRequestDto
 {
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
-    public Task<DbPreference?> GetPreferencesAsync(int tenantId, Guid userId)
-    {
-        return PreferencesQueriesContainer.GetPreferencesAsync(this, tenantId, userId);
-    }
-
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
-    public Task<int> DeletePreferencesAsync(int tenantId, Guid userId)
-    {
-        return PreferencesQueriesContainer.DeletePreferencesAsync(this, tenantId, userId);
-    }
-}
-
-static file class PreferencesQueriesContainer
-{
-    public static readonly Func<AiIntegrationContext, int, Guid, Task<DbPreference?>> GetPreferencesAsync =
-        EF.CompileAsyncQuery(
-            (AiIntegrationContext ctx, int tenantId, Guid userId) =>
-                ctx.Preferences
-                    .FirstOrDefault(x => x.TenantId == tenantId && x.CreatedBy == userId));
-
-    public static readonly Func<AiIntegrationContext, int, Guid, Task<int>> DeletePreferencesAsync =
-        EF.CompileAsyncQuery(
-            (AiIntegrationContext ctx, int tenantId, Guid userId) =>
-                ctx.Preferences
-                    .Where(x => x.TenantId == tenantId && x.CreatedBy == userId)
-                    .ExecuteDelete());
+    public required IReadOnlyList<CreatePromptRequestDto> Prompts { get; init; }
 }

@@ -43,6 +43,7 @@ global using ASC.AI.Integration.McpServers;
 global using ASC.AI.Integration.Messages;
 global using ASC.AI.Integration.Preferences;
 global using ASC.AI.Integration.Profiles;
+global using ASC.AI.Integration.Prompts;
 global using ASC.AI.Integration.Threads;
 global using ASC.AI.Integration.ToolPrefs;
 global using ASC.AI.Integration.WebSearch;

@@ -24,35 +24,24 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Integration.Database;
+using ASC.AI.Integration.Prompts;
 
-public partial class AiIntegrationContext
+namespace ASC.AI.Models.ResponseDto.Integration;
+
+public class PromptFolderDto
 {
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
-    public Task<DbPreference?> GetPreferencesAsync(int tenantId, Guid userId)
-    {
-        return PreferencesQueriesContainer.GetPreferencesAsync(this, tenantId, userId);
-    }
-
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
-    public Task<int> DeletePreferencesAsync(int tenantId, Guid userId)
-    {
-        return PreferencesQueriesContainer.DeletePreferencesAsync(this, tenantId, userId);
-    }
+    public required Guid Id { get; init; }
+    public required string Name { get; init; }
+    public long CreatedAt { get; init; }
+    public long UpdatedAt { get; init; }
 }
 
-static file class PreferencesQueriesContainer
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
+    PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class PromptFolderMapper
 {
-    public static readonly Func<AiIntegrationContext, int, Guid, Task<DbPreference?>> GetPreferencesAsync =
-        EF.CompileAsyncQuery(
-            (AiIntegrationContext ctx, int tenantId, Guid userId) =>
-                ctx.Preferences
-                    .FirstOrDefault(x => x.TenantId == tenantId && x.CreatedBy == userId));
+    public static partial PromptFolderDto MapToDto(PromptFolder folder);
 
-    public static readonly Func<AiIntegrationContext, int, Guid, Task<int>> DeletePreferencesAsync =
-        EF.CompileAsyncQuery(
-            (AiIntegrationContext ctx, int tenantId, Guid userId) =>
-                ctx.Preferences
-                    .Where(x => x.TenantId == tenantId && x.CreatedBy == userId)
-                    .ExecuteDelete());
+    private static long MapDateTimeToMs(DateTime dateTime) =>
+        new DateTimeOffset(DateTime.SpecifyKind(dateTime, DateTimeKind.Utc)).ToUnixTimeMilliseconds();
 }

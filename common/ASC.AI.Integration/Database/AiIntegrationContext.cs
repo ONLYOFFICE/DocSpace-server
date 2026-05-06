@@ -34,7 +34,9 @@ public partial class AiIntegrationContext(DbContextOptions<AiIntegrationContext>
     public DbSet<DbAssignment> Assignments { get; set; }
     public DbSet<DbMcpServer> McpServers { get; set; }
     public DbSet<DbToolPreference> ToolPrefs { get; set; }
-    public DbSet<DbPreferences> Preferences { get; set; }
+    public DbSet<DbPreference> Preferences { get; set; }
+    public DbSet<DbPromptFolder> PromptFolders { get; set; }
+    public DbSet<DbPrompt> Prompts { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -46,6 +48,8 @@ public partial class AiIntegrationContext(DbContextOptions<AiIntegrationContext>
             .AddDbAssignments()
             .AddDbServers()
             .AddDbToolPrefs()
-            .AddDbPreferences();
+            .AddDbPreferences()
+            .AddDbPromptFolders()
+            .AddDbPrompts();
     }
 }

@@ -49,7 +49,7 @@ public class PreferencesStorage(IDbContextFactory<AiIntegrationContext> dbContex
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        await context.Preferences.AddOrUpdateAsync(new DbPreferences
+        await context.Preferences.AddOrUpdateAsync(new DbPreference
         {
             TenantId = tenantId,
             CreatedBy = userId,

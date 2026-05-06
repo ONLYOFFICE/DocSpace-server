@@ -26,7 +26,7 @@
 
 namespace ASC.AI.Integration.Database.Models;
 
-public class DbPreferences : BaseEntity
+public class DbPreference : BaseEntity
 {
     public int TenantId { get; init; }
     public Guid CreatedBy { get; init; }
@@ -45,7 +45,7 @@ public static class DbPreferencesExtension
 {
     public static ModelBuilderWrapper AddDbPreferences(this ModelBuilderWrapper modelBuilder)
     {
-        modelBuilder.Entity<DbPreferences>().Navigation(e => e.Tenant).AutoInclude(false);
+        modelBuilder.Entity<DbPreference>().Navigation(e => e.Tenant).AutoInclude(false);
 
         modelBuilder
             .Add(MySqlAddDbPreferences, Provider.MySql)
@@ -56,7 +56,7 @@ public static class DbPreferencesExtension
 
     public static void MySqlAddDbPreferences(this ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<DbPreferences>(entity =>
+        modelBuilder.Entity<DbPreference>(entity =>
         {
             entity.ToTable("ai_integration_preferences")
                 .HasCharSet("utf8");
@@ -81,7 +81,7 @@ public static class DbPreferencesExtension
 
     public static void PgSqlAddDbPreferences(this ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<DbPreferences>(entity =>
+        modelBuilder.Entity<DbPreference>(entity =>
         {
             entity.ToTable("ai_integration_preferences");
 

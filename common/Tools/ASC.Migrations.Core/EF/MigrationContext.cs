@@ -154,7 +154,9 @@ public class MigrationContext : DbContext
     public DbSet<DbAssignment> Assignments { get; set; }
     public DbSet<DbServer> Servers { get; set; }
     public DbSet<DbToolPreference> ToolPrefs { get; set; }
-    public DbSet<DbPreferences> Preferences { get; set; }
+    public DbSet<DbPreference> Preferences { get; set; }
+    public DbSet<DbPromptFolder> PromptFolders { get; set; }
+    public DbSet<DbPrompt> Prompts { get; set; }
 
     public MigrationContext(DbContextOptions<MigrationContext> options) : base(options) { }
 
@@ -250,6 +252,8 @@ public class MigrationContext : DbContext
             .AddDbAssignments()
             .AddDbServers()
             .AddDbToolPrefs()
-            .AddDbPreferences();
+            .AddDbPreferences()
+            .AddDbPromptFolders()
+            .AddDbPrompts();
     }
 }
