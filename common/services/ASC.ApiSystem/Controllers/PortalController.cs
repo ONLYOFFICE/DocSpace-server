@@ -676,6 +676,7 @@ public class PortalController(
         });
     }
 
+    [NonAction]
     public ErrorDto ValidateModelState(ModelStateDictionary modelState)
     {
         if (!modelState.IsValid)
