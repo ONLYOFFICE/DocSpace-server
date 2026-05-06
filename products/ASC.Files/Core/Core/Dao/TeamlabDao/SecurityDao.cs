@@ -1,25 +1,25 @@
 // (c) Copyright Ascensio System SIA 2009-2026
-// 
+//
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
+//
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
+//
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-// 
+//
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -108,7 +108,7 @@ internal abstract class SecurityBaseDao<T>(
                 {
                     List<string> thirdPartyFolders = [];
                     List<int> internalFolders = [];
-                    
+
                     if (internalEntryId != 0)
                     {
                         var foldersInt = await context.FolderIdsAsync(internalEntryId).ToListAsync();
@@ -120,7 +120,7 @@ internal abstract class SecurityBaseDao<T>(
                     {
                         thirdPartyFolders.Add(entryId);
                     }
-                    
+
                     await context.DeleteForSetShareAsync(r.TenantId, r.Subject, internalFolders, thirdPartyFolders, FileEntryType.Folder);
                 }
                 else
@@ -146,8 +146,8 @@ internal abstract class SecurityBaseDao<T>(
                     await context.DeleteTagsAsync(tenantId);
                 }
 
-                if (r.EntryType is FileEntryType.Folder && 
-                    r.EntryId is int entryIdInt && 
+                if (r.EntryType is FileEntryType.Folder &&
+                    r.EntryId is int entryIdInt &&
                     r.SubjectType is SubjectType.User or SubjectType.Group)
                 {
                     await context.RemoveUserRoomChatsAsync(tenantId, entryIdInt, r.Subject);
@@ -162,7 +162,7 @@ internal abstract class SecurityBaseDao<T>(
         else
         {
             var (thirdPartyId, internalId) = await mapping.MappingIdAsync(r.EntryId, true);
-            
+
             var toInsert = mapper.MapFileShareRecordToDbFilesSecurity(r);
             toInsert.EntryId = thirdPartyId;
             toInsert.InternalEntryId = internalId;
@@ -717,10 +717,10 @@ internal abstract class SecurityBaseDao<T>(
             q = q.Where(g => g.Name.ToLower().Contains(text));
         }
 
-        var q1 = excludeShared ? 
+        var q1 = excludeShared ?
             q.Where(g => !filesDbContext.Security.Any(s => s.TenantId == tenantId && s.EntryType == entry.FileEntryType && s.EntryId == entryId && s.Subject == g.Id) && !parentUserIds.Contains(g.Id))
                 .OrderBy(g => g.Name)
-                .Select(g => new GroupWithShared { Group = g, Shared = false }) : 
+                .Select(g => new GroupWithShared { Group = g, Shared = false }) :
             from @group in q
               join security in filesDbContext.Security.Where(s => s.TenantId == tenantId && s.EntryId == entryId && s.EntryType == entry.FileEntryType)
                   on @group.Id equals security.Subject into joinedSet
@@ -1048,6 +1048,15 @@ internal abstract class SecurityBaseDao<T>(
         await filesDbContext.SaveChangesAsync();
     }
 
+    public async Task<int> UpdateShareByFolderTypesAsync(Guid subject, IEnumerable<FolderType> folderTypes, FileShare share)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        return await filesDbContext.UpdateShareByFolderTypesAsync(tenantId, subject, folderTypes, share);
+    }
+
     public async IAsyncEnumerable<FileShareRecord<T>> GetPureSharesAsync(FileEntry<T> entry, IEnumerable<Guid> subjects)
     {
         if (subjects == null || !subjects.Any())
@@ -1118,17 +1127,17 @@ internal abstract class SecurityBaseDao<T>(
 
         return result;
     }
-    
+
     private async Task<IQueryable<DbFilesSecurity>> GetPureSharesQuery(int tenantId, FileEntry<T> entry, ShareFilterType filterType, FilesDbContext filesDbContext)
     {
         var (entryId, _) = await daoFactory.GetMapping<T>().MappingIdAsync(entry.Id);
         var (_, entryParentId) = await daoFactory.GetMapping<T>().MappingIdAsync(entry.ParentId);
-        
+
         var q = filesDbContext.Security
             .Where(s => s.TenantId == Microsoft.EntityFrameworkCore.EF.Constant(tenantId) && s.EntryId == entryId && s.EntryType == Microsoft.EntityFrameworkCore.EF.Constant(entry.FileEntryType));
 
         if (filterType is ShareFilterType.User or ShareFilterType.Group or ShareFilterType.UserOrGroup)
-        { 
+        {
             var q1 = filesDbContext.Security
                 .Where(s => s.TenantId == Microsoft.EntityFrameworkCore.EF.Constant(tenantId) && s.EntryId == entryId && s.EntryType == Microsoft.EntityFrameworkCore.EF.Constant(entry.FileEntryType) ||
                             !filesDbContext.Security.Any(f => f.TenantId == Microsoft.EntityFrameworkCore.EF.Constant(tenantId) && f.EntryId == entryId && f.EntryType == Microsoft.EntityFrameworkCore.EF.Constant(entry.FileEntryType) && f.Subject == s.Subject) &&
@@ -1146,7 +1155,7 @@ internal abstract class SecurityBaseDao<T>(
                                 .Contains(s.InternalEntryId))
                 .GroupBy(s => s.Subject)
                 .Select(s => s.OrderBy(r=> r.InternalEntryId).LastOrDefault());
-            
+
             q = filesDbContext.Security.FromSqlRaw(q1.ToQueryString());
         }
 
@@ -1183,7 +1192,7 @@ internal class SecurityDao(
         IDistributedLockProvider distributedLockProvider)
     : SecurityBaseDao<int>(daoFactory, userManager, dbContextFactory, tenantManager, tenantUtil, setupInfo, maxTotalSizeStatistic, settingsManager, authContext, serviceProvider, mapper, distributedLockProvider), ISecurityDao<int>
 {
-    public async Task<IEnumerable<FileShareRecord<int>>> GetSharesAsync(FileEntry<int> entry, IEnumerable<Guid> subjects = null)
+    public async Task<IEnumerable<FileShareRecord<int>>> GetSharesAsync(FileEntry<int> entry, HashSet<Guid> subjects = null)
     {
         if (entry == null)
         {
@@ -1238,7 +1247,7 @@ internal class SecurityDao(
             q = q.Concat(q1);
         }
 
-        if (subjects != null && subjects.Any())
+        if (subjects is { Count: > 0 })
         {
             q = q.Where(r => subjects.Contains(r.Subject));
         }
@@ -1269,7 +1278,7 @@ internal class ThirdPartySecurityDao(
         IDistributedLockProvider distributedLockProvider)
     : SecurityBaseDao<string>(daoFactory, userManager, dbContextFactory, tenantManager, tenantUtil, setupInfo, maxTotalSizeStatistic, settingsManager, authContext, serviceProvider, mapper, distributedLockProvider), ISecurityDao<string>
 {
-    public async Task<IEnumerable<FileShareRecord<string>>> GetSharesAsync(FileEntry<string> entry, IEnumerable<Guid> subjects = null)
+    public async Task<IEnumerable<FileShareRecord<string>>> GetSharesAsync(FileEntry<string> entry, HashSet<Guid> subjects = null)
     {
         var result = new List<FileShareRecord<string>>();
 

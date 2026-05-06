@@ -1,25 +1,25 @@
 // (c) Copyright Ascensio System SIA 2009-2026
-// 
+//
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
+//
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
+//
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-// 
+//
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -31,19 +31,19 @@ public partial class FilesDbContext
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultInt])]
     public Task<DbFileQuery> DbFileQueryAsync(int tenantId, Guid userId, int fileId)
     {
-        return FileQueries.DbFileQueryAsync(this, tenantId, userId, fileId);
+        return FileQueries.DbFileQueryAsync(this, tenantId, userId, fileId, fileId.ToString());
     }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task<DbFileQuery> DbFileQueryByFileVersionAsync(int tenantId, Guid userId, int fileId, int fileVersion)
     {
-        return FileQueries.DbFileQueryByFileVersionAsync(this, tenantId, userId, fileId, fileVersion);
+        return FileQueries.DbFileQueryByFileVersionAsync(this, tenantId, userId, fileId, fileId.ToString(), fileVersion);
     }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task<DbFileQuery> DbFileQueryFileStableAsync(int tenantId, Guid userId, int fileId, int fileVersion)
     {
-        return FileQueries.DbFileQueryFileStableAsync(this, tenantId, userId, fileId, fileVersion);
+        return FileQueries.DbFileQueryFileStableAsync(this, tenantId, userId, fileId, fileId.ToString(), fileVersion);
     }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt, null, PreCompileQuery.DefaultInt])]
@@ -341,19 +341,19 @@ public partial class FilesDbContext
     {
         return FileQueries.UpdateDbFilesCategoryForcesaveAsync(this, tenantId, fileId, fileVersion, category, forcesave);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, VectorizationStatus.Completed])]
     public Task<int> UpdateVectorizationStatusAsync(int tenantId, int fileId, VectorizationStatus status)
     {
         return FileQueries.UpdateVectorizationStatusAsync(this, tenantId, fileId, status, DateTime.UtcNow);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, null, VectorizationStatus.Completed])]
     public Task<int> UpdateVectorizationStatusesAsync(int tenantId, IEnumerable<int> fileIds, VectorizationStatus status)
     {
         return FileQueries.UpdateVectorizationStatusesAsync(this, tenantId, fileIds, status, DateTime.UtcNow);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task<int> DeleteVectorizationStatusAsync(int tenantId, int fileId)
     {
@@ -369,9 +369,9 @@ public partial class FilesDbContext
 
 static file class FileQueries
 {
-    public static readonly Func<FilesDbContext, int, Guid, int, Task<DbFileQuery>> DbFileQueryAsync =
+    public static readonly Func<FilesDbContext, int, Guid, int, string, Task<DbFileQuery>> DbFileQueryAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, Guid userId, int fileId) =>
+            (FilesDbContext ctx, int tenantId, Guid userId, int fileId, string fileIdForTagLink) =>
                 ctx.Files
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.Id == fileId && r.CurrentVersion)
@@ -411,9 +411,10 @@ static file class FileQueries
                             select f.Order
                         ).FirstOrDefault(),
                         LastOpened = ctx.TagLink
-                            .Where(a => a.EntryId == fileId.ToString() &&
-                                        a.CreateBy == userId &&
-                                        a.TenantId == tenantId)
+                            .Where(a =>
+                                a.EntryId == fileIdForTagLink &&
+                                a.CreateBy == userId &&
+                                a.TenantId == tenantId)
                             .Select(a => a.CreateOn)
                             .FirstOrDefault(),
                         VectorizationStatus = ctx.FileVectorization
@@ -421,9 +422,9 @@ static file class FileQueries
                     })
                     .SingleOrDefault());
 
-    public static readonly Func<FilesDbContext, int, Guid, int, int, Task<DbFileQuery>> DbFileQueryByFileVersionAsync =
+    public static readonly Func<FilesDbContext, int, Guid, int, string, int, Task<DbFileQuery>> DbFileQueryByFileVersionAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, Guid userId, int fileId, int fileVersion) =>
+            (FilesDbContext ctx, int tenantId, Guid userId, int fileId, string fileIdForTagLink, int fileVersion) =>
                 ctx.Files
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.Id == fileId && r.Version == fileVersion)
@@ -450,17 +451,18 @@ static file class FileQueries
                             x.EntryType == FileEntryType.Folder &&
                             ctx.Tree.Any(t => t.FolderId == r.ParentId && t.ParentId == x.InternalEntryId)),
                         LastOpened = ctx.TagLink
-                            .Where(a => a.EntryId == fileId.ToString() &&
-                                        a.CreateBy == userId &&
-                                        a.TenantId == tenantId)
+                            .Where(a =>
+                                a.EntryId == fileIdForTagLink &&
+                                a.CreateBy == userId &&
+                                a.TenantId == tenantId)
                             .Select(a => a.CreateOn)
                             .FirstOrDefault()
                     })
                     .SingleOrDefault());
 
-    public static readonly Func<FilesDbContext, int, Guid, int, int, Task<DbFileQuery>> DbFileQueryFileStableAsync =
+    public static readonly Func<FilesDbContext, int, Guid, int, string, int, Task<DbFileQuery>> DbFileQueryFileStableAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, Guid userId, int fileId, int fileVersion) =>
+            (FilesDbContext ctx, int tenantId, Guid userId, int fileId, string fileIdForTagLink, int fileVersion) =>
                 ctx.Files
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.Id == fileId && r.Forcesave == ForcesaveType.None)
@@ -480,9 +482,10 @@ static file class FileQueries
                                 select f
                             ).FirstOrDefault(),
                         LastOpened = ctx.TagLink
-                            .Where(a => a.EntryId == fileId.ToString() &&
-                                        a.CreateBy == userId &&
-                                        a.TenantId == tenantId)
+                            .Where(a =>
+                                a.EntryId == fileIdForTagLink &&
+                                a.CreateBy == userId &&
+                                a.TenantId == tenantId)
                             .Select(a => a.CreateOn)
                             .FirstOrDefault()
                     })
@@ -1055,7 +1058,7 @@ static file class FileQueries
                     .ExecuteUpdate(f => f
                         .SetProperty(p => p.Category, category)
                         .SetProperty(p => p.Forcesave, forcesave)));
-    
+
     public static readonly Func<FilesDbContext, int, int, VectorizationStatus, DateTime, Task<int>> UpdateVectorizationStatusAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, int fileId, VectorizationStatus status, DateTime date) =>
@@ -1065,7 +1068,7 @@ static file class FileQueries
                     .ExecuteUpdate(f => f
                         .SetProperty(x => x.Status, status)
                         .SetProperty(x => x.UpdatedOn, date)));
-    
+
     public static readonly Func<FilesDbContext, int, IEnumerable<int>, VectorizationStatus, DateTime, Task<int>> UpdateVectorizationStatusesAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, IEnumerable<int> filesIds, VectorizationStatus status, DateTime date) =>
@@ -1074,7 +1077,7 @@ static file class FileQueries
                     .ExecuteUpdate(f => f
                         .SetProperty(x => x.Status, status)
                         .SetProperty(x => x.UpdatedOn, date)));
-    
+
     public static readonly Func<FilesDbContext, int, int, Task<int>> DeleteVectorizationStatusAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, int fileId) =>

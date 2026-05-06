@@ -54,4 +54,10 @@ public class CreateProviderRequestDto
     /// </summary>
     /// <example>sk-example-key-123</example>
     public required string Key { get; set; }
+
+    /// <summary>
+    /// Optional list of model settings to configure atomically with the provider creation.
+    /// </summary>
+    /// <example>[{"modelId": "claude-opus-4-1-20250805", "isEnabled": true, "alias": "Claude Opus 4.1", "capabilities": {"vision": true, "toolCalling": true, "thinking": false}}]</example>
+    public HashSet<ModelSettingsItemDto>? ModelSettings { get; set; }
 }

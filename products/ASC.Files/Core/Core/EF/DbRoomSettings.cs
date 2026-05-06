@@ -139,7 +139,7 @@ public static class DbRoomSettingsExtension
 
                 entity.Property(e => e.SaveFormAsXLSX)
                     .HasColumnName("save_form_as_xlsx")
-                    .HasDefaultValueSql("0");
+                    .HasDefaultValueSql("1");
             });
         }
 
@@ -200,7 +200,7 @@ public static class DbRoomSettingsExtension
 
                 entity.Property(e => e.SaveFormAsXLSX)
                     .HasColumnName("save_form_as_xlsx")
-                    .HasDefaultValueSql("false");
+                    .HasDefaultValueSql("true");
             });
         }
     }

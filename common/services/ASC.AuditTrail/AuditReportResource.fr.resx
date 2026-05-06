@@ -1131,4 +1131,67 @@
   <data name="WebpluginUploaded" xml:space="preserve">
     <value>Plugin téléchargé : {0}</value>
   </data>
+  <data name="AIAccessDisabled" xml:space="preserve">
+    <value>Les services IA ont été désactivés</value>
+  </data>
+  <data name="AIAccessEnabled" xml:space="preserve">
+    <value>Les services IA ont été activés</value>
+  </data>
+  <data name="AIDefaultProviderDeleted" xml:space="preserve">
+    <value>Fournisseur par défaut a été supprimé</value>
+  </data>
+  <data name="AIDefaultProviderSet" xml:space="preserve">
+    <value>Fournisseur IA par défaut défini : Nom : {0}, Modèle par défaut : {1}</value>
+  </data>
+  <data name="BackupCancelled" xml:space="preserve">
+    <value>Sauvegarde annulée</value>
+  </data>
+  <data name="DocumentsDefaultTemplatesSettingsUpdated" xml:space="preserve">
+    <value>Paramètres du modèle par défaut ont été mis à jour : {0}</value>
+  </data>
+  <data name="FileNotSavedDueToRoomQuota" xml:space="preserve">
+    <value>Salles [{0}]. Fichier non enregistré : {1} – quota de stockage de la salle est dépassé.</value>
+  </data>
+  <data name="FileNotSavedDueToUserQuota" xml:space="preserve">
+    <value>Utilisateurs [{0}]. Fichier non enregistré : {1} – quota de stockage de l'utilisateur est dépassé.</value>
+  </data>
+  <data name="FileSavedButRoomQuotaExceeded" xml:space="preserve">
+    <value>Salles [{0}]. Fichier mis à jour : {1}, dépassant le quota de stockage de la salle.</value>
+  </data>
+  <data name="FileSavedButUserQuotaExceeded" xml:space="preserve">
+    <value>Utilisateurs [{0}]. Fichier mis à jour : {1}, dépassant le quota de stockage de l'utilisateur.</value>
+  </data>
+  <data name="InvitationSettingsUpdated" xml:space="preserve">
+    <value>Paramètres d'invitation mis à jour</value>
+  </data>
+  <data name="IPRestrictionsSettingsUpdated" xml:space="preserve">
+    <value>Paramètres de sécurité IP mis à jour</value>
+  </data>
+  <data name="LoginSettingsUpdated" xml:space="preserve">
+    <value>Paramètres de protection contre les attaques par force brute mis à jour</value>
+  </data>
+  <data name="RestoreCancelled" xml:space="preserve">
+    <value>Restauration annulée</value>
+  </data>
+  <data name="RestoreStarted" xml:space="preserve">
+    <value>Restauration démarrée</value>
+  </data>
+  <data name="ScheduledBackupDeleted" xml:space="preserve">
+    <value>Sauvegarde planifiée supprimée</value>
+  </data>
+  <data name="WhiteLabelAdditionalSettingsUpdated" xml:space="preserve">
+    <value>Paramètres d'image de marque supplémentaires mis à jour</value>
+  </data>
+  <data name="WhiteLabelCompanySettingsUpdated" xml:space="preserve">
+    <value>Paramètres des informations sur la société mis à jour</value>
+  </data>
+  <data name="WhiteLabelMailSettingsUpdated" xml:space="preserve">
+    <value>Paramètres de messagerie mis à jour</value>
+  </data>
+  <data name="WhiteLabelSettingsLogosUpdated" xml:space="preserve">
+    <value>Paramètres du logo mis à jour</value>
+  </data>
+  <data name="WhiteLabelSettingsLogoTextUpdated" xml:space="preserve">
+    <value>Nom de marque mis à jour</value>
+  </data>
 </root>

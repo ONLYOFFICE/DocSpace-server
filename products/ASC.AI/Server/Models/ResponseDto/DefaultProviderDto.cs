@@ -48,11 +48,23 @@ public class DefaultProviderDto
     /// </summary>
     /// <example>OpenAI</example>
     public string? ProviderTitle { get; init; }
+
+    /// <summary>
+    /// AI provider type (e.g., OpenAi, Anthropic, GoogleAi).
+    /// </summary>
+    /// <example>0</example>
+    public ProviderType ProviderType { get; init; }
+
+    /// <summary>
+    /// Display alias of the default model.
+    /// </summary>
+    /// <example>GPT-4o</example>
+    public string? DefaultModelAlias { get; init; }
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
     PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
 public static partial class DefaultProviderMapper
 {
-    public static partial DefaultProviderDto MapToDto(this DefaultAiProvider provider);
+    public static partial DefaultProviderDto MapToDto(this DefaultAiProvider source);
 }

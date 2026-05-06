@@ -452,9 +452,9 @@ public class FileDtoHelper(
 
         await Task.WhenAll(getFileTask, badgesTask, fileStateTask);
 
-        var result = getFileTask.Result;
-        var isEnabledBadges = badgesTask.Result;
-        var fileState = fileStateTask.Result;
+        var result = await getFileTask;
+        var isEnabledBadges = await badgesTask;
+        var fileState = await fileStateTask;
 
         file.SetFileState(fileState);
 
@@ -497,9 +497,9 @@ public class FileDtoHelper(
             var currentFolderTask = folderDao.GetFolderAsync(file.ParentId);
             await Task.WhenAll(linkedIdTask, propertiesTask, currentFolderTask);
 
-            var linkedId = linkedIdTask.Result;
-            var properties = propertiesTask.Result;
-            var currentFolder = currentFolderTask.Result;
+            var linkedId = await linkedIdTask;
+            var properties = await propertiesTask;
+            var currentFolder = await currentFolderTask;
 
             Folder<T> currentRoom;
             if (!currentFolder.IsRoom && file.RootFolderType is FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates or FolderType.DefaultTemplates)

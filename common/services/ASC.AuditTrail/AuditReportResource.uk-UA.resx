@@ -1155,4 +1155,43 @@
   <data name="WhiteLabelSettingsLogoTextUpdated" xml:space="preserve">
     <value>Назву бренду оновлено</value>
   </data>
+  <data name="AIAccessDisabled" xml:space="preserve">
+    <value>Служби AІ було вимкнено</value>
+  </data>
+  <data name="AIAccessEnabled" xml:space="preserve">
+    <value>Служби AІ було увімкнено</value>
+  </data>
+  <data name="AIDefaultProviderDeleted" xml:space="preserve">
+    <value>Постачальника за замовчуванням видалено</value>
+  </data>
+  <data name="AIDefaultProviderSet" xml:space="preserve">
+    <value>Постачальника AІ за замовчуванням встановлено: Назва: {0}, Модель за замовчуванням: {1}</value>
+  </data>
+  <data name="BackupCancelled" xml:space="preserve">
+    <value>Резервне копіювання скасовано</value>
+  </data>
+  <data name="DocumentsDefaultTemplatesSettingsUpdated" xml:space="preserve">
+    <value>Стандартні налаштування шаблону оновлено: {0}</value>
+  </data>
+  <data name="FileNotSavedDueToRoomQuota" xml:space="preserve">
+    <value>Кімнати [{0}]. Файл не збережено: {1} – перевищено квоту сховища кімнати.</value>
+  </data>
+  <data name="FileNotSavedDueToUserQuota" xml:space="preserve">
+    <value>Користувачі [{0}]. Файл не збережено: {1} – перевищено квоту сховища користувача.</value>
+  </data>
+  <data name="FileSavedButRoomQuotaExceeded" xml:space="preserve">
+    <value>Кімнати [{0}]. Файл оновлено: {1}, перевищено квоту сховища кімнати.</value>
+  </data>
+  <data name="FileSavedButUserQuotaExceeded" xml:space="preserve">
+    <value>Користувачі [{0}]. Файл оновлено: {1}, перевищено квоту сховища користувача.</value>
+  </data>
+  <data name="RestoreCancelled" xml:space="preserve">
+    <value>Відновлення скасовано</value>
+  </data>
+  <data name="RestoreStarted" xml:space="preserve">
+    <value>Відновлення розпочато</value>
+  </data>
+  <data name="ScheduledBackupDeleted" xml:space="preserve">
+    <value>Заплановане резервне копіювання видалено</value>
+  </data>
 </root>

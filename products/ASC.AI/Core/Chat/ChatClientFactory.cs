@@ -50,6 +50,7 @@ public class ChatClientFactory(
 
         switch (options.Provider)
         {
+            case ProviderType.XAi:
             case ProviderType.OpenAi:
                 {
                     var openAiClient = CreateOpenAiClient(options);
@@ -116,6 +117,11 @@ public class ChatClientFactory(
                     // CA2000: OpenRouterChatClient wraps a chat client, ownership transferred
 #pragma warning disable CA2000
                     builder = new OpenRouterChatClient(chatClient.AsIChatClient(), options.Metadata).AsBuilder();
+                    builder.ConfigureOptions(x =>
+                    {
+                        x.AdditionalProperties ??= new AdditionalPropertiesDictionary();
+                        x.AdditionalProperties.TryAdd("strict", false);
+                    });
 #pragma warning restore CA2000
                     break;
                 }

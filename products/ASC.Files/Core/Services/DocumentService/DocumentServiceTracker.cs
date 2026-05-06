@@ -530,18 +530,28 @@ public class DocumentServiceTrackerHelper(
             }
         }
 
-        var isFormSubmit = forceSave && fileData.ForceSaveType == TrackerData.ForceSaveInitiator.UserSubmit;
+        var isUserSubmit = forceSave && fileData.ForceSaveType == TrackerData.ForceSaveInitiator.UserSubmit;
+        var isFormSubmit = false;
+        if (isUserSubmit)
+        {
+            var fileProperties = await fileDao.GetProperties(fileId);
+            isFormSubmit = fileProperties?.FormFilling is { } ff
+                && !Equals(ff.OriginalFormId, default(T));
+        }
 
-        await filesMessageService.SendAsync(
-            isFormSubmit ? MessageAction.FormSubmit : MessageAction.UserFileUpdated,
-            file,
-            MessageInitiator.DocsService,
-            userName,
-            file.Title
-        );
+        if (!isUserSubmit || isFormSubmit)
+        {
+            await filesMessageService.SendAsync(
+                isFormSubmit ? MessageAction.FormSubmit : MessageAction.UserFileUpdated,
+                file,
+                MessageInitiator.DocsService,
+                userName,
+                file.Title
+            );
+        }
 
         await webhookManager.PublishAsync(
-            isFormSubmit ? WebhookTrigger.FormSubmit : WebhookTrigger.FileUpdated,
+            isUserSubmit ? WebhookTrigger.FormSubmit : WebhookTrigger.FileUpdated,
             file
         );
 

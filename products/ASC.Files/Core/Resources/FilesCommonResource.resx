@@ -495,7 +495,7 @@ Highest compatibility with docx, xlsx, pptx.</value>
     <value>Collaborator</value>
   </data>
   <data name="RoleEnum_Comment" xml:space="preserve">
-    <value>Сommenter</value>
+    <value>Commenter</value>
   </data>
   <data name="RoleEnum_ContentCreator" xml:space="preserve">
     <value>Content Creator</value>

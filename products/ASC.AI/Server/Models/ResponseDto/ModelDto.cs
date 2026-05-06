@@ -50,6 +50,17 @@ public class ModelDto
     public required string ModelId { get; init; }
 
     /// <summary>
+    /// The display name for the model.
+    /// </summary>
+    /// <example>GPT-4o</example>
+    public string? Alias { get; init; }
+
+    /// <summary>
+    /// The model capabilities (vision, tool calling, thinking).
+    /// </summary>
+    public AiModelCapabilities? Capabilities { get; init; }
+
+    /// <summary>
     /// The pricing information for the model (per 1M tokens). Only available for the System AI provider.
     /// </summary>
     public AiChatPrice? Price { get; init; }

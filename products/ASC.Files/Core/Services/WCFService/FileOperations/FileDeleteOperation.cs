@@ -175,6 +175,8 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
         var authContext = scope.ServiceProvider.GetService<AuthContext>();
         var notifyClient = scope.ServiceProvider.GetService<NotifyClient>();
         var permissionsManager = scope.ServiceProvider.GetService<DeletePermissionsCheck<T>>();
+        var tenantQuotaFeatureStatHelper = scope.ServiceProvider.GetService<TenantQuotaFeatureStatHelper>();
+        var quotaSocketManager = scope.ServiceProvider.GetService<QuotaSocketManager>();
 
         var (fileMarker, filesMessageService, roomLogoManager) = scopeClass;
         roomLogoManager.EnableAudit = false;
@@ -256,6 +258,12 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
 
                             await filesMessageService.SendAsync(action, folder, _headers, folder.Id.ToString(), folder.ProviderKey);
                             await webhookManager.PublishAsync(webhookTrigger, webhookConfigs, folder);
+
+                            if (isRoom && folder.RootFolderType is FolderType.VirtualRooms or FolderType.Archive)
+                            {
+                                var (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountRoomFeature, int>();
+                                _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
+                            }
                         }
                     }
 
@@ -311,6 +319,12 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
                                 }
 
                                 await webhookManager.PublishAsync(webhookTrigger, webhookConfigs, folder);
+
+                                if (isRoom && folder.RootFolderType is FolderType.VirtualRooms or FolderType.Archive)
+                                {
+                                    var (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountRoomFeature, int>();
+                                    _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
+                                }
                             }
 
                             ProcessedFolder(folderId);
@@ -390,6 +404,12 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
                                     }
 
                                     await webhookManager.PublishAsync(webhookTrigger, webhookConfigs, folder);
+
+                                    if (isRoom && folder.RootFolderType is FolderType.VirtualRooms or FolderType.Archive)
+                                    {
+                                        var (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountRoomFeature, int>();
+                                        _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
+                                    }
                                 }
                             }
                             else

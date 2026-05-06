@@ -59,6 +59,18 @@ public class TenantManager(
         {
             // ignore
         }
+
+        // Additional host names that should resolve to the default local tenant.
+        // Consumed by dev setups that front the app with a friendly HTTPS host
+        // (e.g. Aspire AppHost publishes docspace.dev.localhost on :443 → openresty → backend).
+        var extraAliases = Environment.GetEnvironmentVariable("CORE__LOCAL_ADDRESSES");
+        if (!string.IsNullOrWhiteSpace(extraAliases))
+        {
+            foreach (var alias in extraAliases.Split([',', ';', ' '], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            {
+                _thisCompAddresses.Add(alias.ToLowerInvariant());
+            }
+        }
     }
 
 
@@ -348,7 +360,7 @@ public class TenantManager(
         return result;
     }
 
-    public Dictionary<string, decimal> GetProductPriceInfo(string productId, bool wallet)
+    public async Task<Dictionary<string, decimal>> GetProductPriceInfoAsync(string productId, bool wallet)
     {
         if (string.IsNullOrEmpty(productId))
         {
@@ -356,8 +368,8 @@ public class TenantManager(
         }
 
         var tenant = GetCurrentTenant(false);
-        var prices = tariffService.GetProductPriceInfoAsync(tenant?.PartnerId, wallet, [productId]).Result;
-        return prices.TryGetValue(productId, out var price) ? price : null;
+        var prices = await tariffService.GetProductPriceInfoAsync(tenant?.PartnerId, wallet, [productId]);
+        return prices.GetValueOrDefault(productId);
     }
 
     public async Task<TenantQuota> SaveTenantQuotaAsync(TenantQuota quota)

@@ -52,7 +52,7 @@ public class OauthGenericTransportBuilder(
         // CA2000: OauthMessageHandler, HttpClient, and HttpClientTransport all owned by MCP client
 #pragma warning disable CA2000
         var oauthHandler = new OauthMessageHandler(
-            httpMessageHandlerFactory.CreateHandler(),
+            httpMessageHandlerFactory.CreateHandler(McpContentTypeHandler.HttpClientName),
             mcpDao,
             context,
             oauthTokenHelper);

@@ -57,7 +57,7 @@ public class FormFillingReportCreator(
 
         if (settingsSaveFormAsXLSX)
         {
-            await exportToXLSX.UpdateXlsxReport(roomId, originalFormId, originalFormVersion);
+            await exportToXLSX.UpdateXlsxReport(roomId, originalFormId, originalFormVersion, isNewFile: false);
         }
     }
 
@@ -129,18 +129,31 @@ public class FormFillingReportCreator(
             return;
         }
 
+        factoryIndexerFormMetadata.Refresh();
         var (metaSuccess, metaResult) = await factoryIndexerFormMetadata.TrySelectAsync(r =>
             r.Where(s => s.OriginalFormId, originalFormId)
              .Where(s => s.OriginalFormVersion, originalFormVersion));
 
         var rawMetadata = metaSuccess ? metaResult.FirstOrDefault()?.Metadata ?? [] : [];
         var normalizedMeta = NormalizeMetadata(rawMetadata).ToList();
-        var columnDefinitions = BuildColumnDefinitions(normalizedMeta).ToList();
 
-        if (columnDefinitions.Count == 0)
+        if (normalizedMeta.Count == 0)
         {
-            return;
+            var derivedMeta = missing
+                .Where(s => s.FormsData != null)
+                .SelectMany(s => s.FormsData)
+                .Where(f => !string.IsNullOrEmpty(f.Key) && !string.IsNullOrEmpty(f.Type) && IsExportableField(f))
+                .GroupBy(f => f.Key)
+                .Select(g => new FormMetadata { Key = g.Key, Type = g.First().Type });
+            normalizedMeta = NormalizeMetadata(derivedMeta).ToList();
+
+            if (normalizedMeta.Count == 0)
+            {
+                return;
+            }
         }
+
+        var columnDefinitions = BuildColumnDefinitions(normalizedMeta).ToList();
 
         var culture = tenantManager.GetCurrentTenant().GetCulture();
 
@@ -202,24 +215,106 @@ public class FormFillingReportCreator(
     public async Task<IEnumerable<DbFormsItemDataSearch>> GetFormFillingResults(int roomId, int originalFormId, int originalFormVersion)
     {
         factoryIndexerForm.Refresh();
-        var (success, result) = await factoryIndexerForm.TrySelectAsync(r => r.Where(s => s.RoomId, roomId).Where(s => s.OriginalFormId, originalFormId).Where(s => s.OriginalFormVersion, originalFormVersion));
+        var (success, result) = await factoryIndexerForm.TrySelectAsync(r => r
+            .Where(s => s.RoomId, roomId)
+            .Where(s => s.OriginalFormId, originalFormId)
+            .Where(s => s.OriginalFormVersion, originalFormVersion));
 
-        if (success)
-        {
-            var sortedResult = result
-                .Select(item =>
-                {
-                    var formValue = item.FormsData?.FirstOrDefault(f => f.Key == "FormNumber").Value;
-                    int.TryParse(formValue, out var number);
-                    return (item, number);
-                })
+        return success ? SortByFormNumber(result) : [];
+    }
+
+    private static List<DbFormsItemDataSearch> SortByFormNumber(IReadOnlyCollection<DbFormsItemDataSearch> result)
+    {
+        return result
+            .Select(item =>
+            {
+                var formValue = item.FormsData?.FirstOrDefault(f => f.Key == "FormNumber")?.Value;
+                int.TryParse(formValue, out var number);
+                return (item, number);
+            })
             .OrderBy(x => x.number)
             .Select(x => x.item)
             .ToList();
+    }
 
-            return sortedResult;
+    public async Task MigrateFormVersionAsync(int roomId, int originalFormId, int targetVersion)
+    {
+        factoryIndexerForm.Refresh();
+
+        var (oldSuccess, oldRecords) = await factoryIndexerForm.TrySelectAsync(r =>
+            r.Where(s => s.RoomId, roomId)
+             .Where(s => s.OriginalFormId, originalFormId)
+             .Or(
+                 s => s.NotExists(x => x.OriginalFormVersion),
+                 s => s.Where(x => x.OriginalFormVersion, 0))
+             .Limit(0, 1));
+
+        if (!oldSuccess || oldRecords.Count == 0)
+        {
+            return;
         }
-        return [];
+
+        var (newSuccess, newRecords) = await factoryIndexerForm.TrySelectAsync(r =>
+            r.Where(s => s.RoomId, roomId)
+             .Where(s => s.OriginalFormId, originalFormId)
+             .Where(s => s.OriginalFormVersion, targetVersion)
+             .Limit(0, 1));
+
+        if (!newSuccess || newRecords.Count == 0)
+        {
+            return;
+        }
+
+        var oldKeys = (oldRecords.First().FormsData ?? [])
+            .Where(f => !string.IsNullOrEmpty(f.Type))
+            .Select(f => f.Key)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        var newKeys = (newRecords.First().FormsData ?? [])
+            .Where(f => !string.IsNullOrEmpty(f.Type))
+            .Select(f => f.Key)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        if (newKeys.Count == 0 || !oldKeys.SetEquals(newKeys))
+        {
+            return;
+        }
+
+        var migrateData = new DbFormsItemDataSearch { OriginalFormVersion = targetVersion };
+
+        await factoryIndexerForm.UpdateAsync(
+            migrateData,
+            r => r.Where(s => s.RoomId, roomId)
+                   .Where(s => s.OriginalFormId, originalFormId)
+                   .NotExists(s => s.OriginalFormVersion),
+            immediately: true,
+            s => (object)s.OriginalFormVersion);
+
+        await factoryIndexerForm.UpdateAsync(
+            migrateData,
+            r => r.Where(s => s.RoomId, roomId)
+                   .Where(s => s.OriginalFormId, originalFormId)
+                   .Where(s => s.OriginalFormVersion, 0),
+            immediately: true,
+            s => (object)s.OriginalFormVersion);
+
+        var metaMigrateData = new DbFormsMetadataSearch { OriginalFormVersion = targetVersion };
+
+        await factoryIndexerFormMetadata.UpdateAsync(
+            metaMigrateData,
+            r => r.Where(s => s.RoomId, roomId)
+                   .Where(s => s.OriginalFormId, originalFormId)
+                   .NotExists(s => s.OriginalFormVersion),
+            immediately: true,
+            s => (object)s.OriginalFormVersion);
+
+        await factoryIndexerFormMetadata.UpdateAsync(
+            metaMigrateData,
+            r => r.Where(s => s.RoomId, roomId)
+                   .Where(s => s.OriginalFormId, originalFormId)
+                   .Where(s => s.OriginalFormVersion, 0),
+            immediately: true,
+            s => (object)s.OriginalFormVersion);
     }
 
     public static string GetTableName(int originalFormId, int originalFormVersion)
@@ -301,8 +396,8 @@ public class FormFillingReportCreator(
                 FormsData = formNumber.Concat(fromData.FormsData)
             };
 
-            _ = factoryIndexerForm.IndexAsync(searchItems);
-            _ = factoryIndexerFormMetadata.IndexAsync(new DbFormsMetadataSearch
+            await factoryIndexerForm.IndexAsync(searchItems, waitForCompletion: true);
+            await factoryIndexerFormMetadata.IndexAsync(new DbFormsMetadataSearch
             {
                 Id = DbFormsMetadataSearch.ComputeId(originalFormId, originalFormVersion),
                 TenantId = tenantId,
@@ -310,7 +405,7 @@ public class FormFillingReportCreator(
                 OriginalFormVersion = originalFormVersion,
                 RoomId = roomId,
                 Metadata = fromMetaData
-            });
+            }, waitForCompletion: true);
         }
 
         return (fromData, fromMetaData: fromMetaData);

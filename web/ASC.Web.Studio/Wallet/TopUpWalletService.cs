@@ -51,7 +51,7 @@ public class TopUpWalletService(
 {
     private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
 
-    protected override TimeSpan ExecuteTaskPeriod { get; set; } = TimeSpan.Parse(configuration["core:accounting:topupperiod"] ?? "0:5:0", CultureInfo.InvariantCulture);
+    protected override TimeSpan ExecuteTaskPeriod { get; set; } = TimeSpan.Parse(configuration["core:accounting:topupperiod"] ?? "0:3:0", CultureInfo.InvariantCulture);
 
 
     private static readonly JsonSerializerOptions _options = new()

@@ -65,7 +65,8 @@ public class AiModuleSpecifics(Helpers helpers) : ModuleSpecificsBase(helpers)
         },
         new("ai_mcp_server_states", "tenant_id"),
         new("ai_mcp_room_servers", "tenant_id"),
-        new("ai_mcp_server_settings", "tenant_id")
+        new("ai_mcp_server_settings", "tenant_id"),
+        new("ai_model_settings", "tenant_id")
     ];
 
     private readonly RelationInfo[] _tableRelations =
@@ -78,7 +79,8 @@ public class AiModuleSpecifics(Helpers helpers) : ModuleSpecificsBase(helpers)
         new("files_folder", "id", "ai_mcp_room_servers", "room_id"),
         new("files_folder", "id", "ai_user_chat_settings", "room_id"),
         new("ai_chats", "id", "ai_chats_messages", "chat_id"),
-        new("ai_mcp_servers", "id", "ai_mcp_server_states", "id")
+        new("ai_mcp_servers", "id", "ai_mcp_server_states", "id"),
+        new("ai_providers", "id", "ai_model_settings", "provider_id")
     ];
     
     protected override string GetSelectCommandConditionText(int tenantId, TableInfo table)

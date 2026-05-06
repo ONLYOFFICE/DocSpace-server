@@ -132,7 +132,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to AI tools.
+        ///   Looks up a localized string similar to {LogoText} AI.
         /// </summary>
         public static string AccountingCustomerOperationServiceDesc_ai_tools {
             get {
@@ -2580,7 +2580,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Сhanges to system plugins are prohibited.
+        ///   Looks up a localized string similar to Changes to system plugins are prohibited.
         /// </summary>
         public static string ErrorWebPluginForbiddenSystem {
             get {
@@ -3444,7 +3444,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to AI tools.
+        ///   Looks up a localized string similar to {LogoText} AI.
         /// </summary>
         public static string TariffsFeature_aitools_wallet {
             get {

@@ -29,8 +29,11 @@ namespace ASC.AppHost.Configuration;
 public static class Constants
 {
     public const int AppHostPort = 8092;
+    public const int AppHostHttpsPort = 443;
+    public const string AppHostHttpsHost = "docspace.dev.localhost";
 
     public const int RestyPort = 8092;
+    public const int RestyHttpsPort = 443;
     public const int SocketIoPort = 9899;
     public const int SsoAuthPort = 9834;
     public const int WebDavPort = 1900;
@@ -57,12 +60,16 @@ public static class Constants
     public const int TelegramPort = 5050;
     public const int MonolithPort = 5027;
 
+    public const int OtelCollectorGrpcPort = 4317;
+    public const int OtelCollectorHttpPort = 4318;
+
     public const string HostDockerInternal = "host.docker.internal";
     public const string OpenRestyContainer = "onlyoffice-openresty";
     public const string EditorsContainer = "onlyoffice-editors";
     public const string OpensearchContainer = "opensearch";
     public const string SocketIoContainer = "onlyoffice-socketIO";
     public const string DocSpaceMcpContainer = "onlyoffice-docspace-mcp";
+    public const string OtelCollectorContainer = "onlyoffice-otel-collector";
 
     public const string IdentityRegistrationContainer = "onlyoffice-identity-registration";
     public const string IdentityAuthorizationContainer = "onlyoffice-identity-authorization";

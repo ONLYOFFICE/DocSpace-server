@@ -88,7 +88,7 @@
         <!-- Maven and Java Versions -->
         <maven.compiler.plugin.vesrion>3.14.0</maven.compiler.plugin.vesrion>
         <maven.documentation.plugin.version>1.4</maven.documentation.plugin.version>
-        <maven.formatter.plugin.version>2.24</maven.formatter.plugin.version>
+        <maven.formatter.plugin.version>2.29</maven.formatter.plugin.version>
         <maven.surefire.plugin.version>3.5.3</maven.surefire.plugin.version>
     </properties>
 

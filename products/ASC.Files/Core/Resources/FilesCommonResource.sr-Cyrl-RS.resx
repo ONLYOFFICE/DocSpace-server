@@ -586,4 +586,7 @@
   <data name="User" xml:space="preserve">
     <value>Корисник</value>
   </data>
+  <data name="ErrorMessage_AiServicesDisabled" xml:space="preserve">
+    <value>ВИ услуге су онемогућене за тренутни портал</value>
+  </data>
 </root>

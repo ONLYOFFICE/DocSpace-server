@@ -74,6 +74,11 @@ public class ProjectConfigurator(
         project.WithEnvironment("core:base-domain", isStandalone ? "localhost" : "")
             .WithEnvironment("ai:mcp:0:endpoint", new UriBuilder(Uri.UriSchemeHttp, "localhost", Constants.DocSpaceMcpPort) + "mcp");
 
+        ConfigureForwardedHeadersNetworks(project);
+
+        // Map the dev HTTPS host to the default standalone tenant.
+        project.WithEnvironment("CORE__LOCAL_ADDRESSES", Constants.AppHostHttpsHost);
+
 
         switch (builder.Configuration["APP_EDITION"])
         {
@@ -90,6 +95,11 @@ public class ProjectConfigurator(
 
         connectionManager.AddBaseConfig(project, isDocker);
         connectionManager.AddWaitFor(project);
+
+        if (connectionManager.HasOtelCollector)
+        {
+            project.WithEnvironment("OTEL_FILE_EXPORTER_ENDPOINT", connectionManager.GetOtelCollectorEndpoint(isDocker: false));
+        }
     }
 
     private void AddProjectDocker<TProject>(int projectPort) where TProject : IProjectMetadata, new()
@@ -138,6 +148,10 @@ public class ProjectConfigurator(
 
         resourceBuilder.WithEnvironment("core:base-domain", isStandalone ? "localhost" : "");
 
+        ConfigureForwardedHeadersNetworks(resourceBuilder);
+
+        resourceBuilder.WithEnvironment("CORE__LOCAL_ADDRESSES", Constants.AppHostHttpsHost);
+
         AddBaseBind(resourceBuilder);
 
         if (projectPort != 0)
@@ -167,6 +181,11 @@ public class ProjectConfigurator(
         foreach (var env in otlEnvs)
         {
             resourceBuilder.WithEnvironment(env.Key, env.Value);
+        }
+
+        if (connectionManager.HasOtelCollector)
+        {
+            resourceBuilder.WithEnvironment("OTEL_FILE_EXPORTER_ENDPOINT", connectionManager.GetOtelCollectorEndpoint(isDocker: true));
         }
 
         resourceBuilder.WithOtlpExporter();
@@ -203,6 +222,7 @@ public class ProjectConfigurator(
             var resourceBuilder = builder.AddJavaScriptApp(name, path, "start")
                 .WithYarn()
                 .WithEnvironment("NODE_ENV", "development")
+                .WithEnvironment("API_HOST", $"http://localhost:{Constants.AppHostPort.ToString()}")
                 .WithEnvironment("Redis:Hosts:0:Host", () => connectionManager.Redis?.Host ?? string.Empty)
                 .WithEnvironment("Redis:Hosts:0:Port", () => connectionManager.Redis?.Port ?? string.Empty)
                 .WithEnvironment("REDIS_ENABLED", redisEnabled.ToString().ToLower())
@@ -242,6 +262,7 @@ public class ProjectConfigurator(
             builder.AddJavaScriptApp(name, path, "start")
                 .WithYarn()
                 .WithEnvironment("NODE_ENV", "development")
+                .WithEnvironment("API_HOST", $"http://localhost:{Constants.AppHostPort.ToString()}")
                 .WithHttpEndpoint(targetPort: port)
                 .WithHttpHealthCheck("/health")
                 .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
@@ -326,5 +347,31 @@ public class ProjectConfigurator(
             .WithBindMount(Path.Combine(basePath, "Data"), "/data")
             .WithBindMount(Path.Combine(basePath, "Logs"), "/logs")
             .WithEnvironment("log:dir", "/logs");
+    }
+
+    private void ConfigureForwardedHeadersNetworks<T>(IResourceBuilder<T> project) where T : IResourceWithEnvironment
+    {
+        // Defense in depth: this configuration trusts X-Forwarded-* headers from
+        // entire RFC1918 ranges, which would let any host on a shared LAN spoof
+        // HTTPS/Host. AppHost is dev-only, but guard against accidental reuse
+        // outside Development.
+        if (!builder.Environment.IsDevelopment())
+        {
+            return;
+        }
+
+        // Loopback always — OpenResty proxies to backends via 127.0.0.1
+        // when services run on the host directly.
+        project.WithEnvironment("core:hosting:forwardedHeadersOptions:knownNetworks:0", "127.0.0.1/8")
+            .WithEnvironment("core:hosting:forwardedHeadersOptions:knownNetworks:1", "::1/128");
+
+        // Docker bridge networks — only needed when backends run in containers
+        // and receive traffic from the OpenResty container via the bridge.
+        if (isDocker)
+        {
+            project.WithEnvironment("core:hosting:forwardedHeadersOptions:knownNetworks:2", "10.0.0.0/8")
+                .WithEnvironment("core:hosting:forwardedHeadersOptions:knownNetworks:3", "172.16.0.0/12")
+                .WithEnvironment("core:hosting:forwardedHeadersOptions:knownNetworks:4", "192.168.0.0/16");
+        }
     }
 }

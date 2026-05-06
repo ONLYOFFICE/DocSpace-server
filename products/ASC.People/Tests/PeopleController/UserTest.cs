@@ -89,7 +89,7 @@ public class UserTest(AspireAppFixture fixture) : BaseTest(fixture)
 
         exception.ErrorCode.Should().Be(403);
 
-        // Update self - can't disable, cant change type, but can update other fields
+        // Update self - can't disable, can't change type, but can update other fields
         var user = await _profilesApi.UpdateMemberAsync(
                 docspaceAdmin1.Id.ToString(),
                 new UpdateMemberRequestDto()
@@ -107,7 +107,7 @@ public class UserTest(AspireAppFixture fixture) : BaseTest(fixture)
         user.Response.FirstName.Should().Be("UpdatedFirstName");
         user.Response.LastName.Should().Be("UpdatedLastName");
         user.Response.Status.Should().Be(EmployeeStatus.Active);
-        user.Response.IsAdmin.Should().Be(false);
+        user.Response.IsAdmin.Should().Be(true);
         user.Response.IsVisitor.Should().Be(false);
 
         var groups = await _groupApi.GetGroupByUserIdAsync(

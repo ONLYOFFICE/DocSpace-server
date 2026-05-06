@@ -123,6 +123,7 @@ public class MigrationContext : DbContext
     public DbSet<DbChatMessageAttachment> ChatMessageAttachments { get; set; }
     public DbSet<DbAiProvider> AiProviders { get; set; }
     public DbSet<DbDefaultAiProvider> DefaultAiProviders { get; set; }
+    public DbSet<DbAiModelSettings> AiModelSettings { get; set; }
     
     public DbSet<DbMcpServer> McpServers { get; set; }
     public DbSet<DbMcpServerState> McpServerStates { get; set; }
@@ -221,6 +222,7 @@ public class MigrationContext : DbContext
             .AddDbUserChatSettings()
             .AddInvitationLink()
             .AddDbDefaultAiProviders()
+            .AddDbAiModelSettings()
             .AddDbChatMessageAttachment()
             .AddDbFileKeys()
             .AddDbUserChatSettings();

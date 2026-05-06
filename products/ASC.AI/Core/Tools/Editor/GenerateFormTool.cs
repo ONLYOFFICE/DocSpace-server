@@ -46,14 +46,14 @@ public class GenerateFormTool(FileStorageService fileService, EditorToolCallStat
             [Description("Detailed description of the form or template to generate, including purpose, structure")] string description)
         {
             const string extension = ".pdf";
-            
+
             try
             {
                 var file = await fileService.CreateNewFileAsync(new FileModel<int, int>
                 {
                     ParentId = resultStorageId,
                     Title = $"{fileName}{extension}"
-                });
+                }, ignoreTemplates: true);
 
                 await callStateStore.SetAsync(file.Id, new EditorToolCallState
                 {

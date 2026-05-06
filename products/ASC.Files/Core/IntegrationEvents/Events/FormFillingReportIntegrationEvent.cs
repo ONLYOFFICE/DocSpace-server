@@ -34,13 +34,14 @@ public record FormFillingReportIntegrationEvent : IntegrationEvent
 
     }
 
-    public FormFillingReportIntegrationEvent(Guid createBy, int tenantId, int roomId, int originalFormId, int originalFormVersion, string baseUri, bool terminate = false, IDictionary<string, string> headers = null)
+    public FormFillingReportIntegrationEvent(Guid createBy, int tenantId, int roomId, int originalFormId, int originalFormVersion, string baseUri, bool terminate = false, bool isNewFile = false, IDictionary<string, string> headers = null)
     : base(createBy, tenantId)
     {
         RoomId = roomId;
         OriginalFormId = originalFormId;
         OriginalFormVersion = originalFormVersion;
         Terminate = terminate;
+        IsNewFile = isNewFile;
         BaseUri = baseUri;
         Headers = headers;
     }
@@ -62,4 +63,7 @@ public record FormFillingReportIntegrationEvent : IntegrationEvent
 
     [ProtoMember(6)]
     public int OriginalFormVersion { get; set; }
+
+    [ProtoMember(7)]
+    public bool IsNewFile { get; set; }
 }
