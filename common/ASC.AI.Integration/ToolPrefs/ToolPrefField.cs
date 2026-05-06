@@ -24,28 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Integration.Database;
+namespace ASC.AI.Integration.ToolPrefs;
 
-public partial class AiIntegrationContext(DbContextOptions<AiIntegrationContext> options) : BaseDbContext(options)
+public enum ToolPrefField
 {
-    public DbSet<DbProfile> Profiles { get; set; }
-    public DbSet<DbThread> Threads { get; set; }
-    public DbSet<DbMessage> Messages { get; set; }
-    public DbSet<DbAssignment> Assignments { get; set; }
-    public DbSet<DbMcpServer> McpServers { get; set; }
-    public DbSet<DbToolPreference> ToolPrefs { get; set; }
-    public DbSet<DbPreferences> Preferences { get; set; }
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        ModelBuilderWrapper.From(modelBuilder, Database)
-            .AddDbTenant()
-            .AddDbProfiles()
-            .AddDbThreads()
-            .AddDbMessages()
-            .AddDbAssignments()
-            .AddDbServers()
-            .AddDbToolPrefs()
-            .AddDbPreferences();
-    }
+    Disabled,
+    AllowAlways
 }

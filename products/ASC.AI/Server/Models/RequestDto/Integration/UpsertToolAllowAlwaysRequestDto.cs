@@ -24,36 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.AI.Models.RequestDto.Integration;
-using ASC.AI.Service;
+namespace ASC.AI.Models.RequestDto.Integration;
 
-namespace ASC.AI.Api.Integration;
-
-[Scope]
-[DefaultRoute]
-[ApiController]
-[AiFeature]
-[ControllerName("ai")]
-[ApiExplorerSettings(IgnoreApi = true)]
-public class ToolPrefsStorageController(ToolPrefsStorageService toolPrefsStorageService) : ControllerBase
+public class UpsertToolAllowAlwaysRequestDto
 {
-    [HttpGet("integration/tool-prefs/disabled")]
-    public async Task<Dictionary<string, List<string>>> ReadDisabledAsync()
-    {
-        return await toolPrefsStorageService.ReadDisabledAsync();
-    }
-
-    [HttpPut("integration/tool-prefs/disabled")]
-    public async Task<IActionResult> UpsertDisabledAsync(UpsertToolPrefsRequestDto inDto)
-    {
-        await toolPrefsStorageService.UpsertDisabledAsync(inDto.Disabled);
-        return NoContent();
-    }
-
-    [HttpDelete("integration/tool-prefs/disabled")]
-    public async Task<IActionResult> DeleteDisabledAsync()
-    {
-        await toolPrefsStorageService.DeleteDisabledAsync();
-        return NoContent();
-    }
+    public required IReadOnlyDictionary<string, HashSet<string>> AllowAlways { get; init; }
 }

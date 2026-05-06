@@ -25,49 +25,36 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.AI.Integration.ToolPrefs;
-using ASC.Core.Users;
+using ASC.AI.Models.RequestDto.Integration;
+using ASC.AI.Service;
 
-namespace ASC.AI.Service;
+namespace ASC.AI.Api.Integration;
 
 [Scope]
-public class ToolPrefsStorageService(
-    UserManager userManager,
-    AuthContext authContext,
-    TenantManager tenantManager,
-    ToolPrefsStorage storage) : IntegrationServiceBase(userManager, authContext)
+[DefaultRoute]
+[ApiController]
+[AiFeature]
+[ControllerName("ai")]
+[ApiExplorerSettings(IgnoreApi = true)]
+public class ToolPreferenceStorageController(ToolPrefsStorageService toolPrefsStorageService) : ControllerBase
 {
-    private static readonly EmployeeType[] _allowedTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin];
-
+    [HttpGet("integration/tool-prefs")]
     public async Task<Dictionary<string, ToolPreference>> ReadAsync()
     {
-        await AssertUserHasAccessAsync(_allowedTypes);
-
-        return await storage.ReadAllAsync(tenantManager.GetCurrentTenantId(), CurrentUserId);
+        return await toolPrefsStorageService.ReadAsync();
     }
 
-    public async Task UpsertDisabledAsync(IReadOnlyDictionary<string, HashSet<string>> disabled)
+    [HttpPut("integration/tool-prefs/disabled")]
+    public async Task<IActionResult> UpsertDisabledAsync(UpsertToolPrefsRequestDto inDto)
     {
-        await AssertUserHasAccessAsync(_allowedTypes);
-
-        if (disabled.Count == 0)
-        {
-            return;
-        }
-
-        var items = disabled.ToDictionary(kv => kv.Key, kv => new ToolPreference { Disabled = kv.Value });
-        await storage.UpsertAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, items);
+        await toolPrefsStorageService.UpsertDisabledAsync(inDto.Disabled);
+        return NoContent();
     }
 
-    public async Task UpsertAllowAlwaysAsync(IReadOnlyDictionary<string, HashSet<string>> allowAlways)
+    [HttpPut("integration/tool-prefs/allow-always")]
+    public async Task<IActionResult> UpsertAllowAlwaysAsync(UpsertToolAllowAlwaysRequestDto inDto)
     {
-        await AssertUserHasAccessAsync(_allowedTypes);
-
-        if (allowAlways.Count == 0)
-        {
-            return;
-        }
-
-        var items = allowAlways.ToDictionary(kv => kv.Key, kv => new ToolPreference { AllowAlways = kv.Value });
-        await storage.UpsertAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, items);
+        await toolPrefsStorageService.UpsertAllowAlwaysAsync(inDto.AllowAlways);
+        return NoContent();
     }
 }

@@ -26,7 +26,7 @@
 
 namespace ASC.AI.Integration.Database.Models;
 
-public class DbToolPrefs : BaseEntity
+public class DbToolPreference : BaseEntity
 {
     public int TenantId { get; init; }
 
@@ -36,8 +36,9 @@ public class DbToolPrefs : BaseEntity
 
     public Guid CreatedBy { get; init; }
 
-    [Required]
-    public required List<string> Tools { get; set; }
+    public HashSet<string>? Disabled { get; set; }
+
+    public HashSet<string>? AllowAlways { get; set; }
 
     public DateTime CreatedAt { get; init; }
 
@@ -45,7 +46,7 @@ public class DbToolPrefs : BaseEntity
 
     public override object[] GetKeys()
     {
-        return [TenantId, ServerType, CreatedBy];
+        return [TenantId, CreatedBy, ServerType];
     }
 }
 
@@ -53,7 +54,7 @@ public static class DbToolPrefsExtension
 {
     public static ModelBuilderWrapper AddDbToolPrefs(this ModelBuilderWrapper modelBuilder)
     {
-        modelBuilder.Entity<DbToolPrefs>().Navigation(e => e.Tenant).AutoInclude(false);
+        modelBuilder.Entity<DbToolPreference>().Navigation(e => e.Tenant).AutoInclude(false);
 
         modelBuilder
             .Add(MySqlAddDbToolPrefs, Provider.MySql)
@@ -64,22 +65,16 @@ public static class DbToolPrefsExtension
 
     public static void MySqlAddDbToolPrefs(this ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<DbToolPrefs>(entity =>
+        modelBuilder.Entity<DbToolPreference>(entity =>
         {
-            entity.ToTable("ai_integration_tool_prefs")
+            entity.ToTable("ai_integration_tool_preferences")
                 .HasCharSet("utf8");
 
-            entity.HasKey(e => new { e.TenantId, e.ServerType, e.CreatedBy })
+            entity.HasKey(e => new { e.TenantId, e.CreatedBy, e.ServerType })
                 .HasName("PRIMARY");
 
             entity.Property(e => e.TenantId)
                 .HasColumnName("tenant_id");
-
-            entity.Property(e => e.ServerType)
-                .HasColumnName("server_type")
-                .HasColumnType("varchar(128)")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.CreatedBy)
                 .HasColumnName("created_by")
@@ -87,51 +82,65 @@ public static class DbToolPrefsExtension
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.Tools)
-                .HasColumnName("tools")
+            entity.Property(e => e.ServerType)
+                .HasColumnName("server_type")
+                .HasColumnType("varchar(128)")
+                .HasCharSet("utf8")
+                .UseCollation("utf8_general_ci");
+
+            entity.PrimitiveCollection(e => e.Disabled)
+                .HasColumnName("disabled")
+                .HasColumnType("json");
+
+            entity.PrimitiveCollection(e => e.AllowAlways)
+                .HasColumnName("allow_always")
                 .HasColumnType("json");
 
             entity.Property(e => e.CreatedAt)
                 .HasColumnName("created_at")
                 .HasColumnType("datetime");
 
-            entity.HasIndex(e => new { e.TenantId, e.CreatedBy })
-                .HasDatabaseName("IX_tenant_id_created_by");
+            entity.HasIndex(e => new { e.TenantId, e.ServerType })
+                .HasDatabaseName("IX_tenant_id_server_type");
         });
     }
 
     public static void PgSqlAddDbToolPrefs(this ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<DbToolPrefs>(entity =>
+        modelBuilder.Entity<DbToolPreference>(entity =>
         {
-            entity.ToTable("ai_integration_tool_prefs");
+            entity.ToTable("ai_integration_tool_preferences");
 
-            entity.HasKey(e => new { e.TenantId, e.ServerType, e.CreatedBy })
-                .HasName("pk_ai_integration_tool_prefs");
+            entity.HasKey(e => new { e.TenantId, e.CreatedBy, e.ServerType })
+                .HasName("pk_ai_integration_tool_preferences");
 
             entity.Property(e => e.TenantId)
                 .HasColumnName("tenant_id")
                 .HasColumnType("integer");
+
+            entity.Property(e => e.CreatedBy)
+                .HasColumnName("created_by")
+                .HasColumnType("uuid");
 
             entity.Property(e => e.ServerType)
                 .HasColumnName("server_type")
                 .HasColumnType("character varying")
                 .HasMaxLength(128);
 
-            entity.Property(e => e.CreatedBy)
-                .HasColumnName("created_by")
-                .HasColumnType("uuid");
+            entity.PrimitiveCollection(e => e.Disabled)
+                .HasColumnName("disabled")
+                .HasColumnType("jsonb");
 
-            entity.Property(e => e.Tools)
-                .HasColumnName("tools")
+            entity.PrimitiveCollection(e => e.AllowAlways)
+                .HasColumnName("allow_always")
                 .HasColumnType("jsonb");
 
             entity.Property(e => e.CreatedAt)
                 .HasColumnName("created_at")
                 .HasColumnType("timestamp without time zone");
 
-            entity.HasIndex(e => new { e.TenantId, e.CreatedBy })
-                .HasDatabaseName("IX_ai_integration_tool_prefs_tenant_id_created_by");
+            entity.HasIndex(e => new { e.TenantId, e.ServerType })
+                .HasDatabaseName("IX_ai_integration_tool_preferences_tenant_id_server_type");
         });
     }
 }

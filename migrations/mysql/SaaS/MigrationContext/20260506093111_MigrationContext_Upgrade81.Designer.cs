@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     [DbContext(typeof(MigrationContext))]
-    [Migration("20260505111011_MigrationContext_Upgrade81")]
+    [Migration("20260506093111_MigrationContext_Upgrade81")]
     partial class MigrationContext_Upgrade81
     {
         /// <inheritdoc />
@@ -405,11 +405,17 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasAnnotation("MySql:CharSet", "utf8");
                 });
 
-            modelBuilder.Entity("ASC.AI.Integration.Database.Models.DbToolPrefs", b =>
+            modelBuilder.Entity("ASC.AI.Integration.Database.Models.DbToolPreference", b =>
                 {
                     b.Property<int>("TenantId")
                         .HasColumnType("int")
                         .HasColumnName("tenant_id");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("created_by")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("ServerType")
                         .HasMaxLength(128)
@@ -418,28 +424,25 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("char(36)")
-                        .HasColumnName("created_by")
-                        .UseCollation("utf8_general_ci")
-                        .HasAnnotation("MySql:CharSet", "utf8");
+                    b.PrimitiveCollection<string>("AllowAlways")
+                        .HasColumnType("json")
+                        .HasColumnName("allow_always");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime")
                         .HasColumnName("created_at");
 
-                    b.PrimitiveCollection<string>("Tools")
-                        .IsRequired()
+                    b.PrimitiveCollection<string>("Disabled")
                         .HasColumnType("json")
-                        .HasColumnName("tools");
+                        .HasColumnName("disabled");
 
-                    b.HasKey("TenantId", "ServerType", "CreatedBy")
+                    b.HasKey("TenantId", "CreatedBy", "ServerType")
                         .HasName("PRIMARY");
 
-                    b.HasIndex("TenantId", "CreatedBy")
-                        .HasDatabaseName("IX_tenant_id_created_by");
+                    b.HasIndex("TenantId", "ServerType")
+                        .HasDatabaseName("IX_tenant_id_server_type");
 
-                    b.ToTable("ai_integration_tool_prefs", (string)null);
+                    b.ToTable("ai_integration_tool_preferences", (string)null);
 
                     b.HasAnnotation("MySql:CharSet", "utf8");
                 });
@@ -6053,7 +6056,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Navigation("Tenant");
                 });
 
-            modelBuilder.Entity("ASC.AI.Integration.Database.Models.DbToolPrefs", b =>
+            modelBuilder.Entity("ASC.AI.Integration.Database.Models.DbToolPreference", b =>
                 {
                     b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
                         .WithMany()

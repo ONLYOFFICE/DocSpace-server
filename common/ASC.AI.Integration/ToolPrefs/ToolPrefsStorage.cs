@@ -29,17 +29,17 @@ namespace ASC.AI.Integration.ToolPrefs;
 [Scope]
 public class ToolPrefsStorage(IDbContextFactory<AiIntegrationContext> dbContextFactory)
 {
-    public async Task<Dictionary<string, List<string>>> ReadDisabledAsync(int tenantId, Guid createdBy)
+    public async Task<Dictionary<string, ToolPreference>> ReadAllAsync(int tenantId, Guid createdBy)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
         return await context.GetAllToolPrefsAsync(tenantId, createdBy)
-            .ToDictionaryAsync(x => x.ServerType, x => x.Tools);
+            .ToDictionaryAsync(x => x.ServerType, ToDomain);
     }
 
-    public async Task UpsertDisabledAsync(int tenantId, Guid createdBy, IReadOnlyDictionary<string, List<string>> disabled)
+    public async Task UpsertAsync(int tenantId, Guid createdBy, IReadOnlyDictionary<string, ToolPreference> items)
     {
-        if (disabled.Count == 0)
+        if (items.Count == 0)
         {
             return;
         }
@@ -52,33 +52,45 @@ public class ToolPrefsStorage(IDbContextFactory<AiIntegrationContext> dbContextF
             await using var context = await dbContextFactory.CreateDbContextAsync();
             await using var transaction = await context.Database.BeginTransactionAsync();
 
-            var existingKeys = await context.GetExistingToolPrefsServerTypesAsync(tenantId, createdBy, disabled.Keys)
+            var existingKeys = await context.GetExistingToolPrefsServerTypesAsync(tenantId, createdBy, items.Keys)
                 .ToHashSetAsync();
 
             var now = DateTime.UtcNow;
-            foreach (var (serverType, tools) in disabled)
+            foreach (var (serverType, item) in items)
             {
                 if (existingKeys.Contains(serverType))
                 {
-                    var entity = new DbToolPrefs
+                    var entity = new DbToolPreference
                     {
                         TenantId = tenantId,
                         ServerType = serverType,
                         CreatedBy = createdBy,
-                        Tools = tools,
+                        Disabled = item.Disabled,
+                        AllowAlways = item.AllowAlways,
                         CreatedAt = default
                     };
+
                     context.ToolPrefs.Attach(entity);
-                    context.Entry(entity).Property(x => x.Tools).IsModified = true;
+
+                    if (item.Disabled != null)
+                    {
+                        context.Entry(entity).Property(x => x.Disabled).IsModified = true;
+                    }
+
+                    if (item.AllowAlways != null)
+                    {
+                        context.Entry(entity).Property(x => x.AllowAlways).IsModified = true;
+                    }
                 }
                 else
                 {
-                    context.ToolPrefs.Add(new DbToolPrefs
+                    context.ToolPrefs.Add(new DbToolPreference
                     {
                         TenantId = tenantId,
                         ServerType = serverType,
                         CreatedBy = createdBy,
-                        Tools = tools,
+                        Disabled = item.Disabled,
+                        AllowAlways = item.AllowAlways,
                         CreatedAt = now
                     });
                 }
@@ -89,10 +101,9 @@ public class ToolPrefsStorage(IDbContextFactory<AiIntegrationContext> dbContextF
         });
     }
 
-    public async Task DeleteDisabledAsync(int tenantId, Guid createdBy)
+    private static ToolPreference ToDomain(DbToolPreference entity) => new()
     {
-        await using var context = await dbContextFactory.CreateDbContextAsync();
-
-        await context.DeleteAllToolPrefsAsync(tenantId, createdBy);
-    }
+        Disabled = entity.Disabled,
+        AllowAlways = entity.AllowAlways
+    };
 }

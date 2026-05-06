@@ -153,7 +153,7 @@ public class MigrationContext : DbContext
     public DbSet<DbMessage> Messages { get; set; }
     public DbSet<DbAssignment> Assignments { get; set; }
     public DbSet<DbServer> Servers { get; set; }
-    public DbSet<DbToolPrefs> ToolPrefs { get; set; }
+    public DbSet<DbToolPreference> ToolPrefs { get; set; }
     public DbSet<DbPreferences> Preferences { get; set; }
 
     public MigrationContext(DbContextOptions<MigrationContext> options) : base(options) { }

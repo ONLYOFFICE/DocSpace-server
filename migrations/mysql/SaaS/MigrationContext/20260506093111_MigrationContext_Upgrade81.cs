@@ -117,7 +117,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 .Annotation("MySql:CharSet", "utf8");
 
             migrationBuilder.CreateTable(
-                name: "ai_integration_tool_prefs",
+                name: "ai_integration_tool_preferences",
                 columns: table => new
                 {
                     tenant_id = table.Column<int>(type: "int", nullable: false),
@@ -125,15 +125,17 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .Annotation("MySql:CharSet", "utf8"),
                     created_by = table.Column<Guid>(type: "char(36)", nullable: false, collation: "utf8_general_ci")
                         .Annotation("MySql:CharSet", "utf8"),
-                    tools = table.Column<string>(type: "json", nullable: false)
+                    disabled = table.Column<string>(type: "json", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8"),
+                    allow_always = table.Column<string>(type: "json", nullable: true)
                         .Annotation("MySql:CharSet", "utf8"),
                     created_at = table.Column<DateTime>(type: "datetime", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PRIMARY", x => new { x.tenant_id, x.server_type, x.created_by });
+                    table.PrimaryKey("PRIMARY", x => new { x.tenant_id, x.created_by, x.server_type });
                     table.ForeignKey(
-                        name: "FK_ai_integration_tool_prefs_tenants_tenants_tenant_id",
+                        name: "FK_ai_integration_tool_preferences_tenants_tenants_tenant_id",
                         column: x => x.tenant_id,
                         principalTable: "tenants_tenants",
                         principalColumn: "id",
@@ -226,9 +228,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 columns: new[] { "tenant_id", "profile_id" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_tenant_id_created_by",
-                table: "ai_integration_tool_prefs",
-                columns: new[] { "tenant_id", "created_by" });
+                name: "IX_tenant_id_server_type",
+                table: "ai_integration_tool_preferences",
+                columns: new[] { "tenant_id", "server_type" });
         }
 
         /// <inheritdoc />
@@ -247,7 +249,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 name: "ai_integration_preferences");
 
             migrationBuilder.DropTable(
-                name: "ai_integration_tool_prefs");
+                name: "ai_integration_tool_preferences");
 
             migrationBuilder.DropTable(
                 name: "ai_integration_profiles");
