@@ -78,7 +78,7 @@ public static class FilesWorkerServiceExtensions
             }
         }
 
-        services.RegisterQueue<ExternalDbSyncTask>();
+        services.RegisterQueue<ExternalDbSyncTask>(10);
         services.RegisterQueue<RoomIndexExportTask>();
         services.RegisterQueue<FileDeleteOperation>(10);
         services.RegisterQueue<FileMoveCopyOperation>(10);
