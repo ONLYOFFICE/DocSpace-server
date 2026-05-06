@@ -42,6 +42,11 @@ public class ExternalDbRoomSyncIntegrationEventHandler(
         {
             logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
 
+            if (!@event.Redelivered && await taskManager.IsTooBusy())
+            {
+                throw new IntegrationEventRejectExeption(@event.Id);
+            }
+
             try
             {
                 await tenantManager.SetCurrentTenantAsync(@event.TenantId);

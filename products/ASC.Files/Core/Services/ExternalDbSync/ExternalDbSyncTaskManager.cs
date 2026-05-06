@@ -32,6 +32,7 @@ public class ExternalDbSyncTaskManager
     private const string TaskIdPrefix = "ExternalDbSyncTask";
 
     private readonly SemaphoreSlim _semaphore = new(1);
+    private readonly SemaphoreSlim _busyCheckLock = new(1, 1);
     private readonly DistributedTaskQueue<ExternalDbSyncTask> _queue;
 
     public ExternalDbSyncTaskManager(IDistributedTaskQueueFactory queueFactory)
@@ -44,6 +45,20 @@ public class ExternalDbSyncTaskManager
     public async Task<ExternalDbSyncTask> GetTask(int tenantId, int roomId)
     {
         return await _queue.PeekTask(GetTaskId(tenantId, roomId));
+    }
+
+    public async Task<bool> IsTooBusy()
+    {
+        await _busyCheckLock.WaitAsync();
+        try
+        {
+            var instanceTasks = await _queue.GetAllTasks(DistributedTaskQueue<ExternalDbSyncTask>.INSTANCE_ID);
+            return _queue.MaxThreadsCount < instanceTasks.Count;
+        }
+        finally
+        {
+            _busyCheckLock.Release();
+        }
     }
 
     public Task<ExternalDbSyncTask> PublishTaskAsync(ExternalDbSyncTask task) => StartTaskCoreAsync(task, enqueue: false);

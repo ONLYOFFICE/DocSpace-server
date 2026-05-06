@@ -43,6 +43,7 @@ global using ASC.Core.Tenants;
 global using ASC.ElasticSearch;
 global using ASC.ElasticSearch.Service;
 global using ASC.EventBus.Abstractions;
+global using ASC.EventBus.Exceptions;
 global using ASC.EventBus.Log;
 global using ASC.Files.Core;
 global using ASC.Files.Core.Core;
