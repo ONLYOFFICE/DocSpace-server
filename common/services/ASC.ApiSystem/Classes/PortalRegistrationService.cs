@@ -75,11 +75,8 @@ public class PortalRegistrationService(
 
     public async Task<(PortalRegistrationResponseDto Response, PortalRegistrationErrorDto Error, int StatusCode)> HandleRegisterAsync(TenantModel model)
     {
-        var sw = Stopwatch.StartNew();
-
         if (!CheckPasswordAndHash(model, out var error))
         {
-            sw.Stop();
             return (null, error, StatusCodes.Status400BadRequest);
         }
 
@@ -88,24 +85,21 @@ public class PortalRegistrationService(
 
         if (!CheckValidName(model.FirstName + model.LastName, out error))
         {
-            sw.Stop();
             return (null, error, StatusCodes.Status400BadRequest);
         }
 
         (var portalName, error) = await EnsurePortalNameAsync(model.PortalName);
         if (string.IsNullOrEmpty(portalName))
         {
-            sw.Stop();
             return (null, error ?? new PortalRegistrationErrorDto { Error = "portalNameEmpty", Message = "PortalName is required" }, StatusCodes.Status400BadRequest);
         }
 
         model.PortalName = portalName;
-        logger.DebugCheckExistingNamePortal(model.PortalName, sw.ElapsedMilliseconds);
+        logger.DebugCheckExistingNamePortal(model.PortalName);
 
-        error = await ValidateRegistrationAsync(model, sw);
+        error = await ValidateRegistrationAsync(model, true);
         if (error != null)
         {
-            sw.Stop();
             return (null, error, StatusCodes.Status400BadRequest);
         }
 
@@ -130,14 +124,11 @@ public class PortalRegistrationService(
             model.PartnerId,
             model.Campaign);
 
-        var (t, reference, sendCongratulationsAddress, regError) = await RegisterPortalFlowAsync(info, model, sw, model.AWSRegion);
+        var (t, reference, sendCongratulationsAddress, regError) = await RegisterPortalFlowAsync(info, model, model.AWSRegion);
         if (regError != null)
         {
-            sw.Stop();
             return (null, regError, StatusCodes.Status500InternalServerError);
         }
-
-        sw.Stop();
 
         return (new PortalRegistrationResponseDto
         {
@@ -156,18 +147,18 @@ public class PortalRegistrationService(
             return (null, new PortalRegistrationErrorDto { Error = "emailEmpty", Message = "Email is required" }, StatusCodes.Status400BadRequest);
         }
 
-        var sw = Stopwatch.StartNew();
-
         if (string.IsNullOrEmpty(model.PasswordHash))
         {
             if (string.IsNullOrEmpty(model.Password))
             {
-                model.Password = Guid.NewGuid().ToString();
+                model.PasswordHash = passwordHasher.GetClientPassword(Guid.NewGuid().ToString());
             }
-            if (!CheckPasswordAndHash(model, out var error1))
+            else
             {
-                sw.Stop();
-                return (null, error1, StatusCodes.Status400BadRequest);
+                if (!CheckPasswordAndHash(model, out var error1))
+                {
+                    return (null, error1, StatusCodes.Status400BadRequest);
+                }
             }
         }
 
@@ -184,24 +175,22 @@ public class PortalRegistrationService(
 
             if (error != null)
             {
-                logger.DebugCheckValidNameFailed(fullName, sw.ElapsedMilliseconds);
+                logger.DebugCheckValidNameFailed(fullName);
             }
         }
 
         (var portalName, error) = await GetRandomPortalNameAsync();
         if (string.IsNullOrEmpty(portalName))
         {
-            sw.Stop();
             return (null, error ?? new PortalRegistrationErrorDto { Error = "portalNameEmpty", Message = "PortalName is required" }, StatusCodes.Status400BadRequest);
         }
 
         model.PortalName = portalName;
-        logger.DebugCheckExistingNamePortal(model.PortalName, sw.ElapsedMilliseconds);
+        logger.DebugCheckExistingNamePortal(model.PortalName);
 
-        error = await ValidateRegistrationAsync(model, sw);
+        error = await ValidateRegistrationAsync(model, false);
         if (error != null)
         {
-            sw.Stop();
             return (null, error, StatusCodes.Status400BadRequest);
         }
 
@@ -229,14 +218,11 @@ public class PortalRegistrationService(
             model.Campaign,
             activationStatus);
 
-        var (t, reference, sendCongratulationsAddress, regError) = await RegisterPortalFlowAsync(info, model, sw, model.AWSRegion, loginProfile: loginProfile);
+        var (t, reference, sendCongratulationsAddress, regError) = await RegisterPortalFlowAsync(info, model, model.AWSRegion, loginProfile: loginProfile);
         if (regError != null)
         {
-            sw.Stop();
             return (null, regError, StatusCodes.Status500InternalServerError);
         }
-
-        sw.Stop();
 
         return (new PortalRegistrationResponseDto
         {
@@ -269,14 +255,30 @@ public class PortalRegistrationService(
             return (null, nameError ?? new PortalRegistrationErrorDto { Error = "portalNameEmpty", Message = "PortalName is required" }, StatusCodes.Status400BadRequest);
         }
 
-        var sw = Stopwatch.StartNew();
+        model.PortalName = portalName;
+        logger.DebugCheckExistingNamePortal(model.PortalName);
+
         var rateModel = new TenantModel { Email = model.Email, PortalName = portalName, RecaptchaResponse = model.RecaptchaResponse, RecaptchaType = model.RecaptchaType, AppKey = model.AppKey };
 
-        var error = await ValidateRegistrationAsync(rateModel, sw);
+        var error = await ValidateRegistrationAsync(rateModel, true);
         if (error != null)
         {
-            sw.Stop();
             return (null, error, StatusCodes.Status400BadRequest);
+        }
+
+        if (string.IsNullOrEmpty(model.PasswordHash))
+        {
+            if (string.IsNullOrEmpty(model.Password))
+            {
+                model.PasswordHash = passwordHasher.GetClientPassword(Guid.NewGuid().ToString());
+            }
+            else
+            {
+                if (!CheckPasswordAndHash(model, out var error1))
+                {
+                    return (null, error1, StatusCodes.Status400BadRequest);
+                }
+            }
         }
 
         model.FirstName = string.IsNullOrWhiteSpace(model.FirstName) ? "Administrator" : model.FirstName.Trim();
@@ -286,11 +288,11 @@ public class PortalRegistrationService(
         logger.DebugLanguageCulture(portalName, model.Language, lang.DisplayName);
 
         var info = BuildTenantRegistrationInfo(
-            portalName,
+            model.PortalName,
             model.FirstName,
             model.LastName,
             model.Email,
-            passwordHasher.GetClientPassword(Guid.NewGuid().ToString()),
+            model.PasswordHash,
             model.Phone,
             model.Industry,
             model.Spam,
@@ -304,18 +306,13 @@ public class PortalRegistrationService(
             ? (IEnumerable<string>)null
             : [model.Provider.CspDomain];
 
-        var (t, reference, _, regError) = await RegisterPortalFlowAsync(info, model, sw, model.AWSRegion, cspDomains);
+        var (t, reference, _, regError) = await RegisterPortalFlowAsync(info, model, model.AWSRegion, cspDomains);
         if (regError != null)
         {
-            sw.Stop();
             return (null, regError, StatusCodes.Status500InternalServerError);
         }
 
-        var (providerConfigured, providerConfigurationError) = await ConfigureOAuthAsync(consumer, model.Provider, portalName, sw);
-
-        logger.DebugProvisionFinish(portalName, providerName, sw.ElapsedMilliseconds);
-
-        sw.Stop();
+        var (providerConfigured, providerConfigurationError) = await ConfigureOAuthAsync(consumer, model.Provider, portalName);
 
         return (new PortalRegistrationResponseDto
         {
@@ -363,13 +360,13 @@ public class PortalRegistrationService(
         return true;
     }
 
-    public async Task<PortalRegistrationErrorDto> GetRecaptchaErrorAsync(TenantModel model, string clientIp, Stopwatch sw)
+    public async Task<PortalRegistrationErrorDto> GetRecaptchaErrorAsync(TenantModel model, string clientIp)
     {
         if (commonConstants.RecaptchaRequired && !commonMethods.IsTestEmail(model.Email))
         {
             if (!string.IsNullOrEmpty(model.AppKey) && commonConstants.AppSecretKeys.Contains(model.AppKey))
             {
-                logger.DebugRecaptchaByAppKey(model.PortalName, model.AppKey, sw.ElapsedMilliseconds);
+                logger.DebugRecaptchaByAppKey(model.PortalName, model.AppKey);
                 return null;
             }
 
@@ -377,23 +374,22 @@ public class PortalRegistrationService(
 
             if (!await commonMethods.ValidateRecaptcha(model.RecaptchaType, model.RecaptchaResponse, clientIp))
             {
-                logger.DebugRecaptchaError(model.PortalName, sw.ElapsedMilliseconds, data);
-                sw.Stop();
+                logger.DebugRecaptchaError(model.PortalName, data);
 
                 return new PortalRegistrationErrorDto { Error = "recaptchaInvalid", Message = "Recaptcha is invalid", ClientIP = clientIp };
             }
 
-            logger.DebugRecaptchaSuccess(model.PortalName, sw.ElapsedMilliseconds, data);
+            logger.DebugRecaptchaSuccess(model.PortalName, data);
         }
 
         return null;
     }
 
-    public async Task<PortalRegistrationErrorDto> ValidateRegistrationAsync(TenantModel model, Stopwatch sw)
+    public async Task<PortalRegistrationErrorDto> ValidateRegistrationAsync(TenantModel model, bool checkRecaptcha)
     {
         var clientIp = commonMethods.GetClientIp();
 
-        if (commonMethods.CheckMuchRegistration(model, clientIp, sw))
+        if (commonMethods.CheckMuchRegistration(model, clientIp))
         {
             return new PortalRegistrationErrorDto
             {
@@ -402,7 +398,12 @@ public class PortalRegistrationService(
             };
         }
 
-        return await GetRecaptchaErrorAsync(model, clientIp, sw);
+        if (!checkRecaptcha)
+        {
+            return null;
+        }
+
+        return await GetRecaptchaErrorAsync(model, clientIp);
     }
 
     public async Task<(LoginProfile Profile, bool AutoGeneratedEmail)> ProcessThirdPartyProfileAsync(TenantModel model)
@@ -613,7 +614,7 @@ public class PortalRegistrationService(
         return info;
     }
 
-    public async Task<(bool Success, string Error)> ConfigureOAuthAsync(Consumer consumer, ProvisionProviderDto providerModel, string portalName, Stopwatch sw)
+    public async Task<(bool Success, string Error)> ConfigureOAuthAsync(Consumer consumer, ProvisionProviderDto providerModel, string portalName)
     {
         (string Suffix, string Value)[] fieldMap =
         [
@@ -641,12 +642,12 @@ public class PortalRegistrationService(
                 }
             }
 
-            logger.DebugProvisionOAuthConfigured(portalName, consumer.Name, sw.ElapsedMilliseconds);
+            logger.DebugProvisionOAuthConfigured(portalName, consumer.Name);
             return (true, null);
         }
         catch (Exception e)
         {
-            logger.ErrorProvisionOAuthFailed(consumer.Name, e);
+            logger.ErrorProvisionOAuthFailed(portalName, consumer.Name, e);
             return (false, e.Message);
         }
     }
@@ -654,7 +655,6 @@ public class PortalRegistrationService(
     public async Task<(Tenant Tenant, string Reference, string SendCongratulationsAddress, PortalRegistrationErrorDto Error)> RegisterPortalFlowAsync(
         TenantRegistrationInfo info,
         TenantModel model,
-        Stopwatch sw,
         string awsRegion,
         IEnumerable<string> cspDomains = null,
         LoginProfile loginProfile = null)
@@ -669,8 +669,6 @@ public class PortalRegistrationService(
         {
             await accountLinker.AddLinkAsync(t.OwnerId, loginProfile);
         }
-
-        logger.DebugRegisterTenant(t.Alias, sw.ElapsedMilliseconds);
 
         await ApplyTrialQuotaAsync(t.Id);
 
@@ -690,7 +688,6 @@ public class PortalRegistrationService(
         }
 
         var reference = commonMethods.CreateReference(t.Id, scheme, t.GetTenantDomain(coreSettings), info.Email, isFirst);
-        logger.DebugCreateReference(t.Alias, sw.ElapsedMilliseconds);
 
         return (t, reference, sendCongratulationsAddress, null);
     }

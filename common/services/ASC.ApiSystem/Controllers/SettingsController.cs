@@ -32,7 +32,8 @@ namespace ASC.ApiSystem.Controllers;
 public class SettingsController(
         ILogger<SettingsController> logger,
         CommonMethods commonMethods,
-        CoreSettings coreSettings)
+        CoreSettings coreSettings,
+        CoreBaseSettings coreBaseSettings)
     : ControllerBase
 {
 
@@ -72,6 +73,15 @@ public class SettingsController(
     [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
     public async Task<IActionResult> GetSettingsAsync([FromQuery] SettingsModel model)
     {
+        if (!coreBaseSettings.Standalone)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new ErrorDto
+            {
+                Error = "error",
+                Message = "Method for server edition only."
+            });
+        }
+
         var (succ, tenantId, error) = await GetTenantAsync(model);
         if (!succ)
         {
@@ -108,6 +118,15 @@ public class SettingsController(
     [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
     public async Task<IActionResult> SaveSettingsAsync([FromBody] SettingsModel model)
     {
+        if (!coreBaseSettings.Standalone)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new ErrorDto
+            {
+                Error = "error",
+                Message = "Method for server edition only."
+            });
+        }
+
         var (succ, tenantId, error) = await GetTenantAsync(model);
         if (!succ)
         {
@@ -169,6 +188,15 @@ public class SettingsController(
     [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
     public async Task<IActionResult> CheckDomain([FromBody] DomainModel model)
     {
+        if (!coreBaseSettings.Standalone)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new ErrorDto
+            {
+                Error = "error",
+                Message = "Method for server edition only."
+            });
+        }
+
         if (model == null || string.IsNullOrEmpty(model.HostName))
         {
             return BadRequest(new ErrorDto

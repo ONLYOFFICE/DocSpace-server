@@ -233,7 +233,7 @@ public class CommonMethods(
         return regex.IsMatch(email);
     }
 
-    public bool CheckMuchRegistration(TenantModel model, string clientIP, Stopwatch sw)
+    public bool CheckMuchRegistration(TenantModel model, string clientIP)
     {
         if (IsTestEmail(model.Email))
         {
@@ -275,7 +275,6 @@ public class CommonMethods(
         }
 
         log.DebugTooMuchRequests(model.PortalName, clientIP);
-        sw.Stop();
 
         return true;
     }
