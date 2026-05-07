@@ -58,11 +58,11 @@ public class PromptStorage(IDbContextFactory<AiIntegrationContext> dbContextFact
         return ToDomainEntity(entity);
     }
 
-    public async Task CreateManyAsync(int tenantId, Guid createdBy, IReadOnlyList<PromptCreateData> prompts)
+    public async Task<IEnumerable<Prompt>> CreateManyAsync(int tenantId, Guid createdBy, IReadOnlyList<PromptCreateData> prompts)
     {
         if (prompts.Count == 0)
         {
-            return;
+            return [];
         }
 
         var now = DateTime.UtcNow;
@@ -76,7 +76,7 @@ public class PromptStorage(IDbContextFactory<AiIntegrationContext> dbContextFact
             FolderId = p.FolderId,
             CreatedAt = now,
             UpdatedAt = now
-        }).ToList();
+        }).ToArray();
 
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var strategy = dbContext.Database.CreateExecutionStrategy();
@@ -88,6 +88,8 @@ public class PromptStorage(IDbContextFactory<AiIntegrationContext> dbContextFact
             context.Prompts.AddRange(entities);
             await context.SaveChangesAsync();
         });
+
+        return entities.Select(ToDomainEntity);
     }
 
     public async Task<Prompt?> ReadByIdAsync(int tenantId, Guid createdBy, Guid id)
@@ -98,7 +100,7 @@ public class PromptStorage(IDbContextFactory<AiIntegrationContext> dbContextFact
         return entity == null ? null : ToDomainEntity(entity);
     }
 
-    public async Task<List<Prompt>> ReadAllAsync(int tenantId, Guid createdBy)
+    public async Task<IEnumerable<Prompt>> ReadAllAsync(int tenantId, Guid createdBy)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
@@ -107,7 +109,7 @@ public class PromptStorage(IDbContextFactory<AiIntegrationContext> dbContextFact
             .ToListAsync();
     }
 
-    public async Task<List<Prompt>> ReadByFolderIdAsync(int tenantId, Guid createdBy, Guid? folderId)
+    public async Task<IEnumerable<Prompt>> ReadByFolderIdAsync(int tenantId, Guid createdBy, Guid? folderId)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
