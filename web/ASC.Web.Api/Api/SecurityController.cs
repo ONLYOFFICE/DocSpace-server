@@ -411,6 +411,11 @@ public class SecurityController(
             return null;
         }
 
+        if (!await cspSettingsHelper.ExistsInCacheAsync())
+        {
+            await cspSettingsHelper.SaveAsync(settings.Domains, false);
+        }
+
         return new CspDto
         {
             Domains = settings.Domains ?? [],

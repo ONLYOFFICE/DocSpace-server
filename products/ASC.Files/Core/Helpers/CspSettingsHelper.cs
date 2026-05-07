@@ -330,6 +330,24 @@ public class CspSettingsHelper(
         await hybridCache.RemoveAsync(headerKey);
     }
 
+    public async Task<bool> ExistsInCacheAsync()
+    {
+        var tenant = tenantManager.GetCurrentTenant();
+        var domain = tenant.GetTenantDomain(coreSettings);
+        var key = GetKey(domain);
+
+        try
+        {
+            var val = await hybridCache.GetOrDefaultAsync<string>(key);
+            return !string.IsNullOrEmpty(val);
+        }
+        catch (FusionCacheSerializationException)
+        {
+            var val = await distributedCache.GetStringAsync(key);
+            return !string.IsNullOrEmpty(val);
+        }
+    }
+
     private static string GetKey(string domain)
     {
         return $"csp:{domain}";
