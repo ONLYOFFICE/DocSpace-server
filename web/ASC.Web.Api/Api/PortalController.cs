@@ -697,7 +697,7 @@ public class PortalController(
             tenantManager.SetCurrentTenant(tenant);
 
             messageService.Send(MessageAction.PortalRenamed, MessageTarget.Create(tenant.Id), oldAlias, newAlias, dateTime: messageDate);
-            await cspSettingsHelper.RenameDomain(oldDomain, tenant.GetTenantDomain(coreSettings));
+            await cspSettingsHelper.RenameDomainAsync(oldDomain, tenant.GetTenantDomain(coreSettings));
 
             if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
             {
@@ -836,7 +836,7 @@ public class PortalController(
 
         var current = await settingsManager.LoadAsync<CspSettings>();
         await cspSettingsHelper.SaveAsync(current.Domains, false);
-        await cspSettingsHelper.UpdateBaseDomain();
+        await cspSettingsHelper.UpdateBaseDomainAsync();
     }
 
     /// <remarks>
@@ -857,7 +857,7 @@ public class PortalController(
         await tenantManager.SaveTenantAsync(tenant);
         messageService.Send(MessageAction.PortalDeactivated);
 
-        await cspSettingsHelper.UpdateBaseDomain();
+        await cspSettingsHelper.UpdateBaseDomainAsync();
     }
 
     /// <remarks>
@@ -897,8 +897,8 @@ public class PortalController(
 
         messageService.Send(MessageAction.PortalDeleted);
 
-        await cspSettingsHelper.RemoveFromCache(tenantDomain);
-        await cspSettingsHelper.UpdateBaseDomain();
+        await cspSettingsHelper.RemoveFromCacheAsync(tenantDomain);
+        await cspSettingsHelper.UpdateBaseDomainAsync();
 
         if (!coreBaseSettings.Standalone && !quota.Free && tariff.State >= TariffState.Paid)
         {

@@ -141,7 +141,7 @@ public class CspSettingsHelper(
         return await settingsManager.LoadAsync<CspSettings>(lastModified);
     }
 
-    public async Task RenameDomain(string oldDomain, string newDomain)
+    public async Task RenameDomainAsync(string oldDomain, string newDomain)
     {
         var oldKey = GetKey(oldDomain);
 
@@ -163,7 +163,7 @@ public class CspSettingsHelper(
         }
     }
 
-    public async Task UpdateBaseDomain()
+    public async Task UpdateBaseDomainAsync()
     {
         if (!coreBaseSettings.Standalone)
         {
@@ -324,7 +324,7 @@ public class CspSettingsHelper(
         return headerValue;
     }
 
-    public async Task RemoveFromCache(string domain)
+    public async Task RemoveFromCacheAsync(string domain)
     {
         var headerKey = GetKey(domain);
         await hybridCache.RemoveAsync(headerKey);
