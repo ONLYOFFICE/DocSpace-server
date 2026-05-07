@@ -150,7 +150,7 @@ public class GroupController(
 
         ArgumentException.ThrowIfNullOrWhiteSpace(inDto.GroupName);
 
-        var userIds = inDto.Members?.ToHashSet() ?? new HashSet<Guid>();
+        var userIds = inDto.Members?.ToHashSet() ?? [];
         userIds.Add(inDto.GroupManager);
 
         foreach (var userId in userIds)
