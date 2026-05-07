@@ -834,6 +834,8 @@ public class PortalController(
         tenant.SetStatus(TenantStatus.Active);
         await tenantManager.SaveTenantAsync(tenant);
 
+        var current = await settingsManager.LoadAsync<CspSettings>();
+        await cspSettingsHelper.SaveAsync(current.Domains, false);
         await cspSettingsHelper.UpdateBaseDomain();
     }
 
@@ -895,6 +897,7 @@ public class PortalController(
 
         messageService.Send(MessageAction.PortalDeleted);
 
+        await cspSettingsHelper.RemoveFromCache(tenantDomain);
         await cspSettingsHelper.UpdateBaseDomain();
 
         if (!coreBaseSettings.Standalone && !quota.Free && tariff.State >= TariffState.Paid)
