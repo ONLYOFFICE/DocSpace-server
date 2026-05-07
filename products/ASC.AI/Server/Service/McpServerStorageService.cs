@@ -36,7 +36,9 @@ public class McpServerStorageService(
     UserManager userManager,
     AuthContext authContext,
     TenantManager tenantManager,
-    McpServersStorage storage) : IntegrationServiceBase(userManager, authContext)
+    McpServersStorage storage,
+    IDaoFactory daoFactory,
+    FileSecurity fileSecurity) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity)
 {
     private static readonly EmployeeType[] _writeTypes = [EmployeeType.DocSpaceAdmin];
     private static readonly EmployeeType[] _readTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin];

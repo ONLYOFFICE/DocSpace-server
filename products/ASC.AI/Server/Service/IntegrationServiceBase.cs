@@ -28,7 +28,11 @@ using ASC.Core.Users;
 
 namespace ASC.AI.Service;
 
-public abstract class IntegrationServiceBase(UserManager userManager, AuthContext authContext)
+public abstract class IntegrationServiceBase(
+    UserManager userManager,
+    AuthContext authContext,
+    IDaoFactory daoFactory,
+    FileSecurity fileSecurity)
 {
     protected Guid CurrentUserId => authContext.CurrentAccount.ID;
 
@@ -36,6 +40,17 @@ public abstract class IntegrationServiceBase(UserManager userManager, AuthContex
     {
         var type = await userManager.GetUserTypeAsync(CurrentUserId);
         if (!types.Contains(type))
+        {
+            throw new SecurityException();
+        }
+    }
+
+    protected async Task AssertEntryAccessAsync(int entryId)
+    {
+        var folder = await daoFactory.GetFolderDao<int>().GetFolderAsync(entryId)
+            ?? throw new ItemNotFoundException();
+
+        if (!await fileSecurity.CanUseChatAsync(folder))
         {
             throw new SecurityException();
         }

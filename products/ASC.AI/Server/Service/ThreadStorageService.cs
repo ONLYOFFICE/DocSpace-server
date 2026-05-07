@@ -40,19 +40,28 @@ public class ThreadStorageService(
     TenantManager tenantManager,
     ThreadsStorage storage,
     ProfileStorage profileStorage,
-    IDistributedLockProvider distributedLockProvider) : IntegrationServiceBase(userManager, authContext)
+    IDistributedLockProvider distributedLockProvider,
+    IDaoFactory daoFactory,
+    FileSecurity fileSecurity) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity)
 {
     private static readonly EmployeeType[] _allowedTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin];
 
-    public async Task<Thread> CreateAsync(string title, Guid? profileId = null)
+    public async Task<Thread> CreateAsync(string title, Guid? profileId = null, string? entityId = null)
     {
         await AssertUserHasAccessAsync(_allowedTypes);
+
+        int? entryId = entityId == null ? null : int.Parse(entityId);
+
+        if (entryId.HasValue)
+        {
+            await AssertEntryAccessAsync(entryId.Value);
+        }
 
         var tenantId = tenantManager.GetCurrentTenantId();
 
         if (!profileId.HasValue)
         {
-            return await storage.CreateAsync(tenantId, CurrentUserId, title);
+            return await storage.CreateAsync(tenantId, CurrentUserId, title, entryId: entryId);
         }
 
         var id = profileId.Value;
@@ -60,7 +69,7 @@ public class ThreadStorageService(
         await using (await distributedLockProvider.TryAcquireFairLockAsync(ProfileStorage.GetLockKey(tenantId, id)))
         {
             await AssertProfileExistsAsync(tenantId, id);
-            return await storage.CreateAsync(tenantId, CurrentUserId, title, id);
+            return await storage.CreateAsync(tenantId, CurrentUserId, title, id, entryId);
         }
     }
 
@@ -75,11 +84,13 @@ public class ThreadStorageService(
         return thread;
     }
 
-    public async Task<List<Thread>> ReadAllAsync()
+    public async Task<IEnumerable<Thread>> ReadAllAsync(string? entityId = null)
     {
         await AssertUserHasAccessAsync(_allowedTypes);
 
-        return await storage.ReadAllAsync(tenantManager.GetCurrentTenantId(), CurrentUserId);
+        int? entryId = entityId == null ? null : int.Parse(entityId);
+
+        return await storage.ReadAllAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, entryId);
     }
 
     public async Task UpdateAsync(Guid id, string? title)

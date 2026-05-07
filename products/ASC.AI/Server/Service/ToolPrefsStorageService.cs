@@ -34,7 +34,9 @@ public class ToolPrefsStorageService(
     UserManager userManager,
     AuthContext authContext,
     TenantManager tenantManager,
-    ToolPrefsStorage storage) : IntegrationServiceBase(userManager, authContext)
+    ToolPrefsStorage storage,
+    IDaoFactory daoFactory,
+    FileSecurity fileSecurity) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity)
 {
     private static readonly EmployeeType[] _allowedTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin];
 
