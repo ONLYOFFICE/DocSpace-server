@@ -11945,7 +11945,7 @@
         ]
       }
     },
-    "/api/2.0/files/rooms/{id}/external_db_sync": {
+    "/api/2.0/files/rooms/{id}/externalDbSync": {
       "post": {
         "tags": [
           "Rooms"
