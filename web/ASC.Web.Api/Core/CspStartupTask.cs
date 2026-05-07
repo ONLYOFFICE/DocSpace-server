@@ -57,12 +57,6 @@ public class CspStartupTask(
 
         var currentHeaderValue = await helper.CreateHeaderAsync(null, false);
 
-        if (string.IsNullOrEmpty(oldHeaderValue))
-        {
-            await cache.SetAsync(HeaderKey, currentHeaderValue, token: cancellationToken);
-            return;
-        }
-
         if (oldHeaderValue != currentHeaderValue || oldScheme)
         {
             var tenantService = provider.GetService<ITenantService>();
