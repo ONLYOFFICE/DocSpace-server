@@ -148,6 +148,8 @@ public class GroupController(
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_EditGroups, Constants.Action_AddRemoveUser);
 
+        ArgumentException.ThrowIfNullOrWhiteSpace(inDto.GroupName);
+
         var group = await userManager.SaveGroupInfoAsync(new GroupInfo { Name = inDto.GroupName });
 
         await TransferUserToDepartmentAsync(inDto.GroupManager, group, true);
