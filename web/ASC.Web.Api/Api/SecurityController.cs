@@ -419,32 +419,6 @@ public class SecurityController(
     }
 
     /// <remarks>
-    /// Reset and returns the CSP (Content Security Policy) settings for the current portal.
-    /// </remarks>
-    /// <summary>
-    /// Reset CSP settings
-    /// </summary>
-    /// <path>api/2.0/security/csp</path>
-    /// <requiresAuthorization>false</requiresAuthorization>
-    [ApiExplorerSettings(IgnoreApi = true)]
-    [Tags("Security / CSP")]
-    [SwaggerResponse(200, "Ok", typeof(CspDto))]
-    [AllowAnonymous]
-    [EnableCors(PolicyName = CorsPoliciesEnums.AllowAllCorsPolicyName)]
-    [HttpPut("csp")]
-    public async Task<CspDto> ResetCspSettings()
-    {
-        var settings = await settingsManager.LoadAsync<CspSettings>();
-        var header = await cspSettingsHelper.SaveAsync(settings.Domains, false);
-
-        return new CspDto
-        {
-            Domains = settings.Domains ?? [],
-            Header = header
-        };
-    }
-
-    /// <remarks>
     /// Generates a JWT token for communication between login (client) and identity services.
     /// </remarks>
     /// <summary>
