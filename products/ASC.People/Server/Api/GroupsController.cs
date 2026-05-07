@@ -148,6 +148,19 @@ public class GroupController(
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_EditGroups, Constants.Action_AddRemoveUser);
 
+        ArgumentException.ThrowIfNullOrWhiteSpace(inDto.GroupName);
+
+        var userIds = inDto.Members?.ToHashSet() ?? [];
+        userIds.Add(inDto.GroupManager);
+
+        foreach (var userId in userIds)
+        {
+            if (!await ValidateUserAsync(userId))
+            {
+                throw new ArgumentException(Resource.ErrorUserNotFound);
+            }
+        }
+
         var group = await userManager.SaveGroupInfoAsync(new GroupInfo { Name = inDto.GroupName });
 
         await TransferUserToDepartmentAsync(inDto.GroupManager, group, true);
@@ -392,9 +405,9 @@ public class GroupController(
         return group;
     }
 
-    private async Task TransferUserToDepartmentAsync(Guid userId, GroupInfo group, bool setAsManager)
+    private async Task TransferUserToDepartmentAsync(Guid userId, GroupInfo group, bool setAsManager, bool validate = true)
     {
-        if (!await ValidateUserAsync(userId))
+        if (validate && !await ValidateUserAsync(userId))
         {
             return;
         }
