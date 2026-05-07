@@ -58,6 +58,11 @@ public class FileUploader(
         var dao = daoFactory.GetFileDao<T>();
         file = await dao.SaveFileAsync(file, data);
 
+        if (file.IsForm)
+        {
+            await StopFormFillingIfNeededAsync(file.Id, dao);
+        }
+
         var linkDao = daoFactory.GetLinkDao<T>();
         await linkDao.DeleteAllLinkAsync(file.Id);
 
@@ -349,6 +354,11 @@ public class FileUploader(
                     await cloneStreamForSave.DisposeAsync();
                 }
 
+                if (!uploadSession.UseChunks && uploadSession.File?.IsForm == true)
+                {
+                    await StopFormFillingIfNeededAsync(uploadSession.File.Id, dao);
+                }
+
                 return uploadSession;
             }
         }
@@ -365,6 +375,11 @@ public class FileUploader(
         var dao = daoFactory.GetFileDao<T>();
 
         uploadSession.File = await dao.FinalizeUploadSessionAsync(uploadSession);
+
+        if (uploadSession.File.IsForm)
+        {
+            await StopFormFillingIfNeededAsync(uploadSession.File.Id, dao);
+        }
 
         await chunkedUploadSessionHolder.RemoveSessionAsync(uploadSession);
 
@@ -403,6 +418,17 @@ public class FileUploader(
         var folderDao = daoFactory.GetFolderDao<T>();
 
         return await folderDao.GetMaxUploadSizeAsync(folderId, chunkedUpload);
+    }
+
+    private async Task StopFormFillingIfNeededAsync<T>(T fileId, IFileDao<T> dao)
+    {
+        var properties = await dao.GetProperties(fileId);
+        if (properties?.FormFilling is { StartFilling: true })
+        {
+            properties.FormFilling.StartFilling = false;
+            properties.FormFilling.IsVersionChanged = true;
+            await dao.SaveProperties(fileId, properties);
+        }
     }
 
     #endregion
