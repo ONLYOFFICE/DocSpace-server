@@ -582,7 +582,7 @@ public class FileDtoHelper(
                 && Equals(file.Id, formFilling.OriginalFormId);
 
             result.Security[FileSecurity.FilesSecurityActions.UpdateXlsx] = isOriginalForm
-                && result.Security[FileSecurity.FilesSecurityActions.Edit];
+                && (result.Security[FileSecurity.FilesSecurityActions.Edit] || file.Access == FileShare.ContentCreator);
 
             if (currentRoom is { FolderType: FolderType.VirtualDataRoom })
             {
@@ -642,7 +642,7 @@ public class FileDtoHelper(
                 if (xlsxFolder.FolderType == FolderType.FormFillingFolderDone)
                 {
                     var originalForm = await fileDao.GetFileAsync(xlsxFormFilling.OriginalFormId);
-                    canUpdateXlsx = originalForm != null && await _fileSecurity.CanEditAsync(originalForm);
+                    canUpdateXlsx = originalForm != null && (await _fileSecurity.CanEditAsync(originalForm) || file.Access == FileShare.ContentCreator);
                 }
             }
 
