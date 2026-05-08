@@ -833,7 +833,12 @@ public class PaymentController(
             return null;
         }
 
-        await CheckWalletServiceName(inDto.ServiceName);
+        var walletService = await CheckWalletServiceName(inDto.ServiceName);
+        if (walletService == TenantWalletService.AITools)
+        {
+            //TODO: crutch for compatibility
+            return await GetCustomerAiBalance(inDto);
+        }
 
         var result = await tariffService.GetCustomerServiceQuotaAsync(tenant.Id, inDto.ServiceName, inDto.Refresh);
         return result;
@@ -1295,7 +1300,13 @@ public class PaymentController(
             throw new ItemNotFoundException("Service could not be found");
         }
 
-        var customerParticipantName = securityContext.CurrentAccount.ID.ToString();
+        //TODO: crutch for compatibility
+        return await CreditAiBalance(new CreditAiBalanceRequestDto
+        {
+            Amount = inDto.Quantity
+        });
+
+        /*var customerParticipantName = securityContext.CurrentAccount.ID.ToString();
         var details = $"{inDto.ServiceName} {inDto.Quantity}";
 
         var result = await tariffService.MakeServicePaymentAsync(tenant.Id, inDto.ServiceName, inDto.Quantity, customerParticipantName, metadata: null);
@@ -1309,7 +1320,7 @@ public class PaymentController(
             });
         }
 
-        return result;
+        return result;*/
     }
 
     /// <summary>
@@ -1344,6 +1355,12 @@ public class PaymentController(
         await DemandPayerAsync(customerInfo);
 
         var supportedCurrencies = tariffService.GetSupportedAccountingCurrencies();
+
+        if (string.IsNullOrEmpty(inDto.Currency))
+        {
+            inDto.Currency = supportedCurrencies.FirstOrDefault();
+        }
+
         if (!supportedCurrencies.Contains(inDto.Currency))
         {
             throw new ArgumentException("Unsupported currency");
@@ -1353,7 +1370,7 @@ public class PaymentController(
         var aiToolsQuota = quotaList.FirstOrDefault(x => x.TenantId == (int)TenantWalletService.AITools);
         if (aiToolsQuota == null)
         {
-            throw new ItemNotFoundException("Backup quota not found");
+            throw new ItemNotFoundException("AiTools quota not found");
         }
 
         var result = await tariffService.MakeAiCreditAsync(tenant.Id, inDto.Amount, inDto.Currency);
