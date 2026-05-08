@@ -1319,6 +1319,7 @@ public class PaymentController(
     /// Credits AI quota to the customer AI sub-account from their main balance.
     /// Requires the customer to have a configured payment method.
     /// </remarks>
+    /// <path>api/2.0/portal/payment/creditaibalance</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The AI credit operation result", typeof(ServicePayment))]
     [SwaggerResponse(403, "No permissions to perform this action")]
@@ -1378,7 +1379,7 @@ public class PaymentController(
     /// The prices are returned in the configured currency and normalized per million tokens.
     /// Requires administrator permissions to access.
     /// </remarks>
-    /// <path>api/2.0/portal/payment/aiprices</path>
+    /// <path>api/2.0/portal/payment/ai-prices</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "Prices for AI models", typeof(AiPricesResponse))]
     [SwaggerResponse(403, "No permissions to perform this action")]
