@@ -229,11 +229,13 @@ public class EditorConfigurationDto
     /// <summary>
     /// The recent configuration of the editor.
     /// </summary>
+    /// <example>[]</example>
     public List<RecentConfig> Recent { get; set; }
 
     /// <summary>
     /// The templates of the editor configuration.
     /// </summary>
+    /// <example>[]</example>
     public List<TemplatesConfig> Templates { get; set; }
 
     /// <summary>
@@ -533,11 +535,13 @@ public class InfoConfigDto
     /// <summary>
     /// The sharing settings of the file.
     /// </summary>
+    /// <example>[]</example>
     public List<AceShortWrapper> SharingSettings { get; set; }
 
     /// <summary>
     /// The editor type of the file.
     /// </summary>
+    /// <example>0</example>
     public EditorType Type { get; set; }
 
     /// <summary>
