@@ -29,7 +29,7 @@ namespace ASC.AI.Integration.Threads;
 [Scope]
 public class ThreadsStorage(IDbContextFactory<AiIntegrationContext> dbContextFactory)
 {
-    public async Task<Thread> CreateAsync(int tenantId, Guid createdBy, string title, Guid? profileId = null)
+    public async Task<Thread> CreateAsync(int tenantId, Guid createdBy, string title, Guid? profileId = null, int? entryId = null)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
@@ -40,6 +40,7 @@ public class ThreadsStorage(IDbContextFactory<AiIntegrationContext> dbContextFac
             TenantId = tenantId,
             Title = title,
             ProfileId = profileId,
+            EntryId = entryId,
             CreatedBy = createdBy,
             LastEditDate = now,
             CreatedAt = now
@@ -59,11 +60,15 @@ public class ThreadsStorage(IDbContextFactory<AiIntegrationContext> dbContextFac
         return entity == null ? null : ToDomainEntity(entity);
     }
 
-    public async Task<List<Thread>> ReadAllAsync(int tenantId, Guid createdBy)
+    public async Task<IEnumerable<Thread>> ReadAllAsync(int tenantId, Guid createdBy, int? entryId = null)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        return await context.GetAllThreadsAsync(tenantId, createdBy)
+        var threads = entryId.HasValue
+            ? context.GetAllThreadsByEntryAsync(tenantId, createdBy, entryId.Value)
+            : context.GetAllThreadsAsync(tenantId, createdBy);
+
+        return await threads
             .Select(ToDomainEntity)
             .ToListAsync();
     }
@@ -108,6 +113,7 @@ public class ThreadsStorage(IDbContextFactory<AiIntegrationContext> dbContextFac
             Id = entity.Id,
             Title = entity.Title,
             ProfileId = entity.ProfileId,
+            EntryId = entity.EntryId,
             CreatedBy = entity.CreatedBy,
             LastEditDate = entity.LastEditDate,
             CreatedAt = entity.CreatedAt

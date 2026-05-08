@@ -31,6 +31,7 @@ public class Thread
     public Guid Id { get; init; }
     public required string Title { get; init; }
     public Guid? ProfileId { get; init; }
+    public int? EntryId { get; init; }
     public Guid CreatedBy { get; init; }
     public DateTime LastEditDate { get; init; }
     public DateTime CreatedAt { get; init; }

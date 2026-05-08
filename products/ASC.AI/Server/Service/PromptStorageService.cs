@@ -35,7 +35,9 @@ public class PromptStorageService(
     AuthContext authContext,
     TenantManager tenantManager,
     PromptStorage storage,
-    PromptFolderStorage folderStorage) : IntegrationServiceBase(userManager, authContext)
+    PromptFolderStorage folderStorage,
+    IDaoFactory daoFactory,
+    FileSecurity fileSecurity) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity)
 {
     private static readonly EmployeeType[] _allowedTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin];
 
@@ -53,11 +55,11 @@ public class PromptStorageService(
         return await storage.CreateAsync(tenantId, CurrentUserId, name, text, folderId);
     }
 
-    public async Task CreateManyAsync(IReadOnlyList<PromptCreateData> prompts)
+    public async Task<IEnumerable<Prompt>> CreateManyAsync(IReadOnlyList<PromptCreateData> prompts)
     {
         await AssertUserHasAccessAsync(_allowedTypes);
 
-        await storage.CreateManyAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, prompts);
+        return await storage.CreateManyAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, prompts);
     }
 
     public async Task<Prompt> ReadByIdAsync(Guid id)
@@ -69,14 +71,14 @@ public class PromptStorageService(
         return prompt ?? throw new ItemNotFoundException();
     }
 
-    public async Task<List<Prompt>> ReadAllAsync()
+    public async Task<IEnumerable<Prompt>> ReadAllAsync()
     {
         await AssertUserHasAccessAsync(_allowedTypes);
 
         return await storage.ReadAllAsync(tenantManager.GetCurrentTenantId(), CurrentUserId);
     }
 
-    public async Task<List<Prompt>> ReadByFolderIdAsync(Guid? folderId)
+    public async Task<IEnumerable<Prompt>> ReadByFolderIdAsync(Guid? folderId)
     {
         await AssertUserHasAccessAsync(_allowedTypes);
 

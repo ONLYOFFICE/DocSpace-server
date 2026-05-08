@@ -46,11 +46,11 @@ public class PromptStorageController(PromptStorageService promptStorageService) 
     }
 
     [HttpPost("integration/prompts/batch")]
-    public async Task<IActionResult> CreateManyAsync(CreatePromptsRequestDto inDto)
+    public async Task<IEnumerable<PromptDto>> CreateManyAsync(CreatePromptsRequestDto inDto)
     {
         var prompts = inDto.Prompts.Select(PromptMapper.MapToCreateData).ToList();
-        await promptStorageService.CreateManyAsync(prompts);
-        return NoContent();
+        var created = await promptStorageService.CreateManyAsync(prompts);
+        return created.Select(PromptMapper.MapToDto);
     }
 
     [HttpGet("integration/prompts/{id}")]
@@ -61,17 +61,17 @@ public class PromptStorageController(PromptStorageService promptStorageService) 
     }
 
     [HttpGet("integration/prompts")]
-    public async Task<List<PromptDto>> ReadAllAsync()
+    public async Task<IEnumerable<PromptDto>> ReadAllAsync()
     {
         var prompts = await promptStorageService.ReadAllAsync();
-        return prompts.Select(PromptMapper.MapToDto).ToList();
+        return prompts.Select(PromptMapper.MapToDto);
     }
 
     [HttpGet("integration/prompt-folders/{id}/prompts")]
-    public async Task<List<PromptDto>> ReadByFolderAsync(ReadPromptsByFolderRequestDto inDto)
+    public async Task<IEnumerable<PromptDto>> ReadByFolderAsync(ReadPromptsByFolderRequestDto inDto)
     {
         var prompts = await promptStorageService.ReadByFolderIdAsync(inDto.Id);
-        return prompts.Select(PromptMapper.MapToDto).ToList();
+        return prompts.Select(PromptMapper.MapToDto);
     }
 
     [HttpPut("integration/prompts/{id}")]

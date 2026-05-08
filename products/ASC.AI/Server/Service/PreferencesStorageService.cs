@@ -36,7 +36,9 @@ public class PreferencesStorageService(
     UserManager userManager,
     AuthContext authContext,
     TenantManager tenantManager,
-    PreferencesStorage storage) : IntegrationServiceBase(userManager, authContext)
+    PreferencesStorage storage,
+    IDaoFactory daoFactory,
+    FileSecurity fileSecurity) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity)
 {
     private static readonly EmployeeType[] _allowedTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin];
 

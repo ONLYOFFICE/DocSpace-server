@@ -40,6 +40,12 @@ public partial class AiIntegrationContext
         return ThreadQueriesContainer.GetAllThreadsAsync(this, tenantId, createdBy);
     }
 
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultInt])]
+    public IAsyncEnumerable<DbThread> GetAllThreadsByEntryAsync(int tenantId, Guid createdBy, int entryId)
+    {
+        return ThreadQueriesContainer.GetAllThreadsByEntryAsync(this, tenantId, createdBy, entryId);
+    }
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, null])]
     public Task<int> UpdateThreadTitleAsync(int tenantId, Guid id, string title)
     {
@@ -82,7 +88,15 @@ static file class ThreadQueriesContainer
         EF.CompileAsyncQuery(
             (AiIntegrationContext ctx, int tenantId, Guid createdBy) =>
                 ctx.Threads
-                    .Where(x => x.TenantId == tenantId && x.CreatedBy == createdBy)
+                    .Where(x => x.TenantId == tenantId && x.CreatedBy == createdBy && x.EntryId == null)
+                    .OrderByDescending(x => x.LastEditDate)
+                    .AsQueryable());
+
+    public static readonly Func<AiIntegrationContext, int, Guid, int, IAsyncEnumerable<DbThread>> GetAllThreadsByEntryAsync =
+        EF.CompileAsyncQuery(
+            (AiIntegrationContext ctx, int tenantId, Guid createdBy, int entryId) =>
+                ctx.Threads
+                    .Where(x => x.TenantId == tenantId && x.CreatedBy == createdBy && x.EntryId == entryId)
                     .OrderByDescending(x => x.LastEditDate)
                     .AsQueryable());
 

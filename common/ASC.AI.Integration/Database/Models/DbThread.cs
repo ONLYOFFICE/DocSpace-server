@@ -33,11 +33,12 @@ public class DbThread : BaseEntity
 
     [MaxLength(255)]
     [Required]
-    public required string Title { get; set; }
+    public required string Title { get; init; }
 
-    public Guid? ProfileId { get; set; }
+    public Guid? ProfileId { get; init; }
+    public int? EntryId { get; init; }
     public Guid CreatedBy { get; init; }
-    public DateTime LastEditDate { get; set; }
+    public DateTime LastEditDate { get; init; }
     public DateTime CreatedAt { get; init; }
 
     public DbTenant Tenant { get; init; } = null!;
@@ -92,6 +93,10 @@ public static class DbThreadExtension
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
+            entity.Property(e => e.EntryId)
+                .HasColumnName("entry_id")
+                .HasColumnType("int");
+
             entity.Property(e => e.CreatedBy)
                 .HasColumnName("created_by")
                 .HasColumnType("char(36)")
@@ -142,6 +147,10 @@ public static class DbThreadExtension
             entity.Property(e => e.ProfileId)
                 .HasColumnName("profile_id")
                 .HasColumnType("uuid");
+
+            entity.Property(e => e.EntryId)
+                .HasColumnName("entry_id")
+                .HasColumnType("integer");
 
             entity.Property(e => e.CreatedBy)
                 .HasColumnName("created_by")

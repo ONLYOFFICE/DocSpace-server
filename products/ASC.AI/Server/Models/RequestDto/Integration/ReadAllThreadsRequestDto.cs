@@ -24,29 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Thread = ASC.AI.Integration.Threads.Thread;
+namespace ASC.AI.Models.RequestDto.Integration;
 
-namespace ASC.AI.Models.ResponseDto.Integration;
-
-public class ThreadDto
+public class ReadAllThreadsRequestDto
 {
-    public required Guid Id { get; init; }
-    public required string Title { get; init; }
-    public Guid? ProfileId { get; init; }
+    [FromQuery(Name = "entityId")]
     public string? EntityId { get; init; }
-    public long LastEditDate { get; init; }
-    public long CreatedAt { get; init; }
-}
-
-[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
-    PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
-public static partial class ThreadMapper
-{
-    [MapProperty(nameof(Thread.EntryId), nameof(ThreadDto.EntityId))]
-    public static partial ThreadDto MapToDto(Thread thread);
-
-    private static long MapDateTimeToMs(DateTime dateTime) =>
-        new DateTimeOffset(DateTime.SpecifyKind(dateTime, DateTimeKind.Utc)).ToUnixTimeMilliseconds();
-
-    private static string? MapEntryIdToString(int? entryId) => entryId?.ToString();
 }

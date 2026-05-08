@@ -118,6 +118,7 @@ public class MessagesStorage(IDbContextFactory<AiIntegrationContext> dbContextFa
             Id = entity.Id,
             Title = entity.Title,
             ProfileId = entity.ProfileId,
+            EntryId = entity.EntryId,
             CreatedBy = entity.CreatedBy,
             LastEditDate = entity.LastEditDate,
             CreatedAt = entity.CreatedAt

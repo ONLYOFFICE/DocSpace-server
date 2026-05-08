@@ -41,7 +41,7 @@ public class ThreadStorageController(ThreadStorageService threadStorageService) 
     [HttpPost("integration/threads")]
     public async Task<ThreadDto> CreateAsync(CreateThreadRequestDto inDto)
     {
-        var created = await threadStorageService.CreateAsync(inDto.Title, inDto.ProfileId);
+        var created = await threadStorageService.CreateAsync(inDto.Title, inDto.ProfileId, inDto.EntityId);
         return ThreadMapper.MapToDto(created);
     }
 
@@ -53,10 +53,10 @@ public class ThreadStorageController(ThreadStorageService threadStorageService) 
     }
 
     [HttpGet("integration/threads")]
-    public async Task<List<ThreadDto>> ReadAllAsync()
+    public async Task<IEnumerable<ThreadDto>> ReadAllAsync(ReadAllThreadsRequestDto inDto)
     {
-        var threads = await threadStorageService.ReadAllAsync();
-        return threads.Select(ThreadMapper.MapToDto).ToList();
+        var threads = await threadStorageService.ReadAllAsync(inDto.EntityId);
+        return threads.Select(ThreadMapper.MapToDto);
     }
 
     [HttpPut("integration/threads/{id}")]

@@ -24,29 +24,22 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Thread = ASC.AI.Integration.Threads.Thread;
+namespace ASC.Files.Core.EF;
 
-namespace ASC.AI.Models.ResponseDto.Integration;
-
-public class ThreadDto
+public partial class FilesDbContext
 {
-    public required Guid Id { get; init; }
-    public required string Title { get; init; }
-    public Guid? ProfileId { get; init; }
-    public string? EntityId { get; init; }
-    public long LastEditDate { get; init; }
-    public long CreatedAt { get; init; }
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    public Task DeleteThreadsAsync(int tenantId, int folderId)
+    {
+        return ThreadQueries.DeleteThreadsAsync(this, tenantId, folderId);
+    }
 }
 
-[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
-    PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
-public static partial class ThreadMapper
+static file class ThreadQueries
 {
-    [MapProperty(nameof(Thread.EntryId), nameof(ThreadDto.EntityId))]
-    public static partial ThreadDto MapToDto(Thread thread);
-
-    private static long MapDateTimeToMs(DateTime dateTime) =>
-        new DateTimeOffset(DateTime.SpecifyKind(dateTime, DateTimeKind.Utc)).ToUnixTimeMilliseconds();
-
-    private static string? MapEntryIdToString(int? entryId) => entryId?.ToString();
+    public static readonly Func<FilesDbContext, int, int, Task> DeleteThreadsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx, int tenantId, int folderId) =>
+            ctx.Threads
+                .Where(x => x.TenantId == tenantId && x.EntryId == folderId)
+                .ExecuteDelete());
 }

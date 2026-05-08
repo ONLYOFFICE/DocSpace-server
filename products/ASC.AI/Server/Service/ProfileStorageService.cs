@@ -36,7 +36,9 @@ public class ProfileStorageService(
     AuthContext authContext,
     TenantManager tenantManager,
     ProfileStorage storage,
-    IDistributedLockProvider distributedLockProvider) : IntegrationServiceBase(userManager, authContext)
+    IDistributedLockProvider distributedLockProvider,
+    IDaoFactory daoFactory,
+    FileSecurity fileSecurity) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity)
 {
     public async Task<Profile> CreateAsync(ProfileData profile)
     {

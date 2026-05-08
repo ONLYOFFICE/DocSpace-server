@@ -34,7 +34,9 @@ public class WebSearchStorageService(
     UserManager userManager,
     AuthContext authContext,
     TenantManager tenantManager,
-    WebSearchStorage storage) : IntegrationServiceBase(userManager, authContext)
+    WebSearchStorage storage,
+    IDaoFactory daoFactory,
+    FileSecurity fileSecurity) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity)
 {
     private static readonly EmployeeType[] _writeTypes = [EmployeeType.DocSpaceAdmin];
     private static readonly EmployeeType[] _readTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin];
