@@ -840,6 +840,38 @@ public class PaymentController(
     }
 
     /// <remarks>
+    /// Returns the AI quota balance of a customer from the accounting service.
+    /// </remarks>
+    /// <summary>
+    /// Get the customer AI balance
+    /// </summary>
+    /// <path>api/2.0/portal/payment/customer/aibalance</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The customer AI balance", typeof(Balance))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [HttpGet("customer/aibalance")]
+    public async Task<Balance> GetCustomerAiBalance(PaymentInformationRequestDto inDto)
+    {
+        if (!tariffService.IsConfigured())
+        {
+            throw new InvalidOperationException("Tariff service is not configured");
+        }
+
+        await DemandAdminAsync();
+
+        var tenant = tenantManager.GetCurrentTenant();
+
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+        if (customerInfo == null)
+        {
+            return null;
+        }
+
+        var result = await tariffService.GetCustomerAiBalanceAsync(tenant.Id, inDto.Refresh);
+        return result;
+    }
+
+    /// <remarks>
     /// Returns the report of customer operations from the accounting service.
     /// </remarks>
     /// <summary>
@@ -1273,6 +1305,64 @@ public class PaymentController(
             await ChangeTenantWalletServiceState(new ChangeWalletServiceStateRequestDto
             {
                 Service = walletService,
+                Enabled = true
+            });
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Credit AI balance
+    /// </summary>
+    /// <remarks>
+    /// Credits AI quota to the customer AI sub-account from their main balance.
+    /// Requires the customer to have a configured payment method.
+    /// </remarks>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The AI credit operation result", typeof(ServicePayment))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(404, "Customer could not be found")]
+    [HttpPost("creditaibalance")]
+    [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
+    public async Task<ServicePayment> CreditAiBalance(CreditAiBalanceRequestDto inDto)
+    {
+        if (!tariffService.IsConfigured())
+        {
+            throw new InvalidOperationException("Tariff service is not configured");
+        }
+
+        var tenant = tenantManager.GetCurrentTenant();
+
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+        if (customerInfo is not { PaymentMethodStatus: PaymentMethodStatus.Set })
+        {
+            throw new ItemNotFoundException("Customer could not be found");
+        }
+
+        await DemandPayerAsync(customerInfo);
+
+        var supportedCurrencies = tariffService.GetSupportedAccountingCurrencies();
+        if (!supportedCurrencies.Contains(inDto.Currency))
+        {
+            throw new ArgumentException("Unsupported currency");
+        }
+
+        var quotaList = await tenantManager.GetTenantQuotasAsync(true, true);
+        var aiToolsQuota = quotaList.FirstOrDefault(x => x.TenantId == (int)TenantWalletService.AITools);
+        if (aiToolsQuota == null)
+        {
+            throw new ItemNotFoundException("Backup quota not found");
+        }
+
+        var result = await tariffService.MakeAiCreditAsync(tenant.Id, inDto.Amount, inDto.Currency);
+        if (result != null)
+        {
+            var details = $"{aiToolsQuota.ServiceName} {inDto.Amount} {inDto.Currency}";
+            messageService.Send(MessageAction.CustomerOperationPerformed, null, details);
+            await ChangeTenantWalletServiceState(new ChangeWalletServiceStateRequestDto
+            {
+                Service = TenantWalletService.AITools,
                 Enabled = true
             });
         }

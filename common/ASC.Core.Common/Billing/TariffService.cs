@@ -426,6 +426,10 @@ public class TariffService(
         return $"{tenantId}:accounting:{serviceName}:quota";
     }
 
+    internal static string GetAccountingAiBalanceCacheKey(int tenantId)
+    {
+        return $"{tenantId}:accounting:ai:balance";
+    }
 
     private async Task ClearCacheAsync(int tenantId)
     {
@@ -1247,6 +1251,47 @@ public class TariffService(
         return balance;
     }
 
+    public async Task<Balance> GetCustomerAiBalanceAsync(int tenantId, bool refresh = false)
+    {
+        if (!accountingClient.Configured)
+        {
+            return null;
+        }
+
+        var cacheKey = GetAccountingAiBalanceCacheKey(tenantId);
+
+        var balance = refresh ? null : await GetFromCache<Balance>(cacheKey);
+
+        if (balance != null)
+        {
+            return balance.IsDefault() ? null : balance;
+        }
+
+        await using (await distributedLockProvider.TryAcquireLockAsync($"{cacheKey}_lock"))
+        {
+            balance = refresh ? null : await GetFromCache<Balance>(cacheKey);
+
+            if (balance != null)
+            {
+                return balance.IsDefault() ? null : balance;
+            }
+
+            try
+            {
+                var portalId = await coreSettings.GetKeyAsync(tenantId);
+                balance = await accountingClient.GetCustomerAiBalanceAsync(portalId, true);
+                await hybridCache.SetAsync(cacheKey, balance, TimeSpan.FromMinutes(10));
+            }
+            catch (Exception error)
+            {
+                LogError(error, tenantId.ToString());
+                await hybridCache.SetAsync(cacheKey, new Balance(), TimeSpan.FromMinutes(10));
+            }
+        }
+
+        return balance;
+    }
+
     public async Task<Session> OpenCustomerSessionAsync(int tenantId, string serviceName, string externalRef, int quantity, int duration)
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
@@ -1284,12 +1329,29 @@ public class TariffService(
         return result;
     }
 
+    public async Task<ServicePayment> MakeAiCreditAsync(int tenantId, decimal amount, string currency)
+    {
+        var portalId = await coreSettings.GetKeyAsync(tenantId);
+        var result = await accountingClient.MakeAiCreditAsync(portalId, amount, currency);
+        await hybridCache.RemoveAsync(GetAccountingAiBalanceCacheKey(tenantId));
+        await hybridCache.RemoveAsync(GetAccountingBalanceCacheKey(tenantId));
+        return result;
+    }
+
     public async Task<Report> GetCustomerOperationsAsync(int tenantId, OperationFilter filter)
     {
         try
         {
             var portalId = await coreSettings.GetKeyAsync(tenantId);
-            return await accountingClient.GetCustomerOperationsAsync(portalId, filter);
+
+            var isAiService = false;
+            if (!string.IsNullOrEmpty(filter.ServiceName))
+            {
+                var aiQuota = await quotaService.GetTenantQuotaAsync((int)TenantWalletService.AITools);
+                isAiService = aiQuota != null && aiQuota.ServiceName == filter.ServiceName;
+            }
+
+            return await accountingClient.GetCustomerOperationsAsync(portalId, filter, isAiService);
         }
         catch (Exception error)
         {

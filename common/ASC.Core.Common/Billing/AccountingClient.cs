@@ -81,6 +81,11 @@ public class AccountingClient
         return await RequestAsync<Balance>(HttpMethod.Get, $"/customer/{portalId}/quota/{serviceName}", addPolicy: addPolicy);
     }
 
+    public async Task<Balance> GetCustomerAiBalanceAsync(string portalId, bool addPolicy = false)
+    {
+        return await RequestAsync<Balance>(HttpMethod.Get, $"/customer/{portalId}/balance/ai", addPolicy: addPolicy);
+    }
+
     public async Task<Session> OpenCustomerSessionAsync(string portalId, string serviceName, string externalRef, int quantity, int duration)
     {
         var data = new
@@ -145,7 +150,32 @@ public class AccountingClient
         return await RequestAsync<ServicePayment>(HttpMethod.Post, "/operation/servicePayment", data: data);
     }
 
-    public async Task<Report> GetCustomerOperationsAsync(string portalId, OperationFilter filter)
+    public async Task<ServicePayment> MakeAiCreditAsync(string portalId, decimal amount, string currency)
+    {
+        var data = new AiCreditOperation
+        {
+            CustomerName = portalId,
+            Sum = (double)amount,
+            Currency = currency
+        };
+
+        return await RequestAsync<ServicePayment>(HttpMethod.Post, "/operation/AiCredit", data: data);
+    }
+
+    public async Task<Report> GetCustomerOperationsAsync(string portalId, OperationFilter filter, bool isAiService)
+    {
+        var queryParams = FilterToNameValueCollection(filter);
+
+        var path = filter.WriteOffServiceQuota && !string.IsNullOrEmpty(filter.ServiceName)
+            ? isAiService
+                ? $"/customer/{portalId}/operations/ai"
+                : $"/customer/{portalId}/quota-detail/{filter.ServiceName}"
+            : $"/customer/{portalId}/operations";
+
+        return await RequestAsync<Report>(HttpMethod.Get, path, queryParams);
+    }
+
+    private static NameValueCollection FilterToNameValueCollection(OperationFilter filter)
     {
         var queryParams = new NameValueCollection();
 
@@ -223,11 +253,7 @@ public class AccountingClient
             queryParams.Add("serviceName", filter.ServiceName);
         }
 
-        var path = filter.WriteOffServiceQuota && !string.IsNullOrEmpty(filter.ServiceName)
-            ? $"/customer/{portalId}/quota-detail/{filter.ServiceName}"
-            : $"/customer/{portalId}/operations";
-
-        return await RequestAsync<Report>(HttpMethod.Get, path, queryParams);
+        return queryParams;
     }
 
     public async Task<List<Currency>> GetAllCurrenciesAsync()
@@ -911,6 +937,13 @@ public class ServicePayment
     /// </summary>
     /// <example>2024-01-15T10:30:00Z</example>
     public DateTime? EndDate { get; init; }
+}
+
+public class AiCreditOperation
+{
+    public double Sum { get; init; }
+    public string Currency { get; init; }
+    public string CustomerName { get; init; }
 }
 
 public static class AccountingHttpClientExtension
