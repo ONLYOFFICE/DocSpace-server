@@ -24,16 +24,23 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Common.Threading.DistributedLock.Abstractions;
+
 namespace ASC.AI.Integration.Preferences;
 
 [Scope]
-public class PreferencesStorage(IDbContextFactory<AiIntegrationContext> dbContextFactory)
+public class PreferencesStorage(
+    IDbContextFactory<AiIntegrationContext> dbContextFactory,
+    IDistributedLockProvider distributedLockProvider)
 {
-    public async Task<Preferences?> ReadAsync(int tenantId, Guid userId)
+    public async Task<Preferences?> ReadAsync(int tenantId, Guid userId, int? entryId = null)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        var entity = await context.GetPreferencesAsync(tenantId, userId);
+        var entity = entryId.HasValue
+            ? await context.GetPreferencesByEntryAsync(tenantId, userId, entryId.Value)
+            : await context.GetPreferencesAsync(tenantId, userId);
+
         if (entity == null)
         {
             return null;
@@ -45,24 +52,70 @@ public class PreferencesStorage(IDbContextFactory<AiIntegrationContext> dbContex
         };
     }
 
-    public async Task UpsertAsync(int tenantId, Guid userId, Preferences preferences)
+    public async Task UpsertAsync(int tenantId, Guid userId, Preferences preferences, int? entryId = null)
     {
-        await using var context = await dbContextFactory.CreateDbContextAsync();
-
-        await context.Preferences.AddOrUpdateAsync(new DbPreference
+        await using (await distributedLockProvider.TryAcquireFairLockAsync(GetLockKey(tenantId, userId, entryId)))
         {
-            TenantId = tenantId,
-            CreatedBy = userId,
-            DeepMode = preferences.DeepMode
-        });
+            await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+            var strategy = dbContext.Database.CreateExecutionStrategy();
 
-        await context.SaveChangesAsync();
+            await strategy.ExecuteAsync(async () =>
+            {
+                await using var context = await dbContextFactory.CreateDbContextAsync();
+
+                var existing = entryId.HasValue
+                    ? await context.GetPreferencesByEntryAsync(tenantId, userId, entryId.Value)
+                    : await context.GetPreferencesAsync(tenantId, userId);
+
+                if (existing != null)
+                {
+                    var entity = new DbPreference
+                    {
+                        Id = existing.Id,
+                        TenantId = tenantId,
+                        CreatedBy = userId,
+                        EntryId = entryId,
+                        DeepMode = preferences.DeepMode
+                    };
+
+                    context.Preferences.Attach(entity);
+                    context.Entry(entity).Property(x => x.DeepMode).IsModified = true;
+                }
+                else
+                {
+                    context.Preferences.Add(new DbPreference
+                    {
+                        Id = Guid.CreateVersion7(),
+                        TenantId = tenantId,
+                        CreatedBy = userId,
+                        EntryId = entryId,
+                        DeepMode = preferences.DeepMode
+                    });
+                }
+
+                await context.SaveChangesAsync();
+            });
+        }
     }
 
-    public async Task DeleteAsync(int tenantId, Guid userId)
+    public async Task DeleteAsync(int tenantId, Guid userId, int? entryId = null)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        await context.DeletePreferencesAsync(tenantId, userId);
+        if (entryId.HasValue)
+        {
+            await context.DeletePreferencesByEntryAsync(tenantId, userId, entryId.Value);
+        }
+        else
+        {
+            await context.DeletePreferencesAsync(tenantId, userId);
+        }
+    }
+
+    private static string GetLockKey(int tenantId, Guid userId, int? entryId)
+    {
+        return entryId.HasValue
+            ? $"ai_integration_preferences_{tenantId}_{userId}_{entryId.Value}"
+            : $"ai_integration_preferences_{tenantId}_{userId}";
     }
 }

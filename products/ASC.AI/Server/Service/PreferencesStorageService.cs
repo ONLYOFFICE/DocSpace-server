@@ -42,24 +42,45 @@ public class PreferencesStorageService(
 {
     private static readonly EmployeeType[] _allowedTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin];
 
-    public async Task<Preferences?> ReadAsync()
+    public async Task<Preferences?> ReadAsync(string? entityId = null)
     {
         await AssertUserHasAccessAsync(_allowedTypes);
 
-        return await storage.ReadAsync(tenantManager.GetCurrentTenantId(), CurrentUserId);
+        int? entryId = entityId == null ? null : int.Parse(entityId);
+
+        if (entryId.HasValue)
+        {
+            await AssertEntryAccessAsync(entryId.Value);
+        }
+
+        return await storage.ReadAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, entryId);
     }
 
-    public async Task UpsertAsync(Preferences preferences)
+    public async Task UpsertAsync(Preferences preferences, string? entityId = null)
     {
         await AssertUserHasAccessAsync(_allowedTypes);
 
-        await storage.UpsertAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, preferences);
+        int? entryId = entityId == null ? null : int.Parse(entityId);
+
+        if (entryId.HasValue)
+        {
+            await AssertEntryAccessAsync(entryId.Value);
+        }
+
+        await storage.UpsertAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, preferences, entryId);
     }
 
-    public async Task DeleteAsync()
+    public async Task DeleteAsync(string? entityId = null)
     {
         await AssertUserHasAccessAsync(_allowedTypes);
 
-        await storage.DeleteAsync(tenantManager.GetCurrentTenantId(), CurrentUserId);
+        int? entryId = entityId == null ? null : int.Parse(entityId);
+
+        if (entryId.HasValue)
+        {
+            await AssertEntryAccessAsync(entryId.Value);
+        }
+
+        await storage.DeleteAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, entryId);
     }
 }

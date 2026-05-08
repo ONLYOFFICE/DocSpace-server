@@ -29,4 +29,5 @@ namespace ASC.AI.Models.RequestDto.Integration;
 public class UpsertPreferencesRequestDto
 {
     public bool? DeepMode { get; init; }
+    public string? EntityId { get; init; }
 }
