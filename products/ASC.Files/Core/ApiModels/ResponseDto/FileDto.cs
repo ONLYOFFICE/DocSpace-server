@@ -241,6 +241,13 @@ public class FileDto<T> : FileEntryDto<T>
     public VectorizationStatus? VectorizationStatus { get; set; }
 
     /// <summary>
+    /// The name of the table in the external database that corresponds to this form.
+    /// </summary>
+    /// <example>form_123_v1</example>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string ExternalDbTableName { get; set; }
+
+    /// <summary>
     /// The dimensions (width and height) of the image file in pixels.
     /// This property is populated only for image files that can be viewed (supported formats like PNG, JPEG, GIF, BMP, etc.).
     /// For non-image files, this property remains null.
@@ -571,6 +578,7 @@ public class FileDtoHelper(
             if (formFilling != null)
             {
                 result.StartFilling = formFilling.StartFilling;
+                result.ExternalDbTableName = formFilling.ExternalDbTableName;
                 if (!Equals(linkedId, default(T)))
                 {
                     var draftLocation = new DraftLocation<T> { FolderId = formFilling.ToFolderId, FolderTitle = formFilling.Title, FileId = linkedId };

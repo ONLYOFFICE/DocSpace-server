@@ -131,6 +131,17 @@ public class ExternalDbSyncTask : ExternalDbSyncTaskBase
                     var version = originalForm?.Version ?? form.OriginalFormVersion;
                     var synced = await formFillingReportCreator.ExportMissingFromOpenSearchAsync(form.OriginalFormId, version, _roomId);
 
+                    if (synced)
+                    {
+                        var tableName = FormFillingReportCreator.GetTableName(form.OriginalFormId, version);
+                        var properties = await fileDao.GetProperties(form.OriginalFormId);
+                        if (properties?.FormFilling != null)
+                        {
+                            properties.FormFilling.ExternalDbTableName = tableName;
+                            await fileDao.SaveProperties(form.OriginalFormId, properties);
+                        }
+                    }
+
                     _forms.Add(new ExternalDbSyncFormResultDto { Id = form.OriginalFormId, Title = title, Success = synced, Error = synced ? null : FilesCommonResource.ErrorMessage_ExternalDbSyncFailed });
                 }
                 catch (Exception ex)

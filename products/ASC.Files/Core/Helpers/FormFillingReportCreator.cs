@@ -88,6 +88,14 @@ public class FormFillingReportCreator(
         var rowData = BuildRowData(parsed.Data, normalizedMeta, fileId, culture);
 
         await externalDatabaseClient.CreateTableAndUpsertAsync(tableName, columnDefinitions, rowData, keyColumn: "form_id");
+
+        var fileDao = daoFactory.GetFileDao<int>();
+        var properties = await fileDao.GetProperties(originalFormId);
+        if (properties?.FormFilling != null && properties.FormFilling.ExternalDbTableName != tableName)
+        {
+            properties.FormFilling.ExternalDbTableName = tableName;
+            await fileDao.SaveProperties(originalFormId, properties);
+        }
     }
 
     public async Task<bool> ExportMissingFromOpenSearchAsync(int originalFormId, int originalFormVersion, int roomId)
