@@ -107,13 +107,6 @@ public class PaymentController(
         }
 
         var tenant = tenantManager.GetCurrentTenant();
-
-        var tenantDomain = tenant.GetTenantDomain(coreSettings);
-        if (parsedUri.Host != tenantDomain)
-        {
-            throw new ArgumentException("Invalid URI host");
-        }
-
         var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
         if (customerInfo != null)
         {
