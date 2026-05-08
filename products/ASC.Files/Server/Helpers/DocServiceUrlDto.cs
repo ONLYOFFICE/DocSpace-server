@@ -27,49 +27,62 @@
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 /// <summary>
-/// The provider information.
+/// The document service URL parameters.
 /// </summary>
-public record ProviderDto(string Name, string Key, bool Connected, bool Oauth = false, string RedirectUrl = null, bool RequiredConnectionUrl = false, string ClientId = null)
+public class DocServiceUrlDto
 {
     /// <summary>
-    /// The provider name.
+    /// The version of the document service.
     /// </summary>
-    /// <example>GoogleDrive</example>
-    public string Name { get; init; } = Name;
+    /// <example>8.0.1</example>
+    public required string Version { get; set; }
 
     /// <summary>
-    /// The provider key.
+    /// The document service URL API.
     /// </summary>
-    /// <example>google-drive</example>
-    public string Key { get; init; } = Key;
+    /// <example>http://localhost/api</example>
+    public required string DocServiceUrlApi { get; set; }
 
     /// <summary>
-    /// Specifies whether the provider is connected.
+    /// The document service URL.
+    /// </summary>
+    /// <example>http://localhost/docservice</example>
+    public required string DocServiceUrl { get; set; }
+
+
+    /// <summary>
+    /// The URL used to preload the document service scripts.
+    /// </summary>
+    /// <example>http://localhost/preload</example>
+    public required string DocServicePreloadUrl { get; set; }
+
+    /// <summary>
+    /// The internal document service URL.
+    /// </summary>
+    /// <example>http://localhost/internal</example>
+    public required string DocServiceUrlInternal { get; set; }
+
+    /// <summary>
+    /// The document service portal URL.
+    /// </summary>
+    /// <example>http://localhost/portal</example>
+    public required string DocServicePortalUrl { get; set; }
+
+    /// <summary>
+    /// The document service signature header.
+    /// </summary>
+    /// <example>Authorization</example>
+    public required string DocServiceSignatureHeader { get; set; }
+
+    /// <summary>
+    /// Specifies if the document service SSL verification is enabled.
     /// </summary>
     /// <example>true</example>
-    public bool Connected { get; init; } = Connected;
+    public required bool DocServiceSslVerification { get; set; }
 
     /// <summary>
-    /// Specifies if the provider is OAuth.
+    /// Specifies if the document service is default.
     /// </summary>
     /// <example>true</example>
-    public bool Oauth { get; init; } = Oauth;
-
-    /// <summary>
-    /// The provider redirect URL.
-    /// </summary>
-    /// <example>http://localhost/redirect</example>
-    public string RedirectUrl { get; init; } = RedirectUrl;
-
-    /// <summary>
-    /// The required connection URL flag.
-    /// </summary>
-    /// <example>false</example>
-    public bool RequiredConnectionUrl { get; init; } = RequiredConnectionUrl;
-
-    /// <summary>
-    /// The provider OAuth client ID.
-    /// </summary>
-    /// <example>client-id-123</example>
-    public string ClientId { get; init; } = ClientId;
+    public required bool IsDefault { get; set; }
 }

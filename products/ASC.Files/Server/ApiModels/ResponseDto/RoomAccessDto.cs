@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2026
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,49 +27,37 @@
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 /// <summary>
-/// The provider information.
+/// The room security parameters.
 /// </summary>
-public record ProviderDto(string Name, string Key, bool Connected, bool Oauth = false, string RedirectUrl = null, bool RequiredConnectionUrl = false, string ClientId = null)
+public class RoomSecurityDto
 {
     /// <summary>
-    /// The provider name.
+    /// The list of room members.
     /// </summary>
-    /// <example>GoogleDrive</example>
-    public string Name { get; init; } = Name;
+    /// <example>[{"access": 1, "isOwner": false}]</example>
+    public IEnumerable<FileShareDto> Members { get; set; }
 
     /// <summary>
-    /// The provider key.
+    /// The warning message.
     /// </summary>
-    /// <example>google-drive</example>
-    public string Key { get; init; } = Key;
+    /// <example>Warning message</example>
+    public string Warning { get; set; }
 
     /// <summary>
-    /// Specifies whether the provider is connected.
+    /// The error type.
     /// </summary>
-    /// <example>true</example>
-    public bool Connected { get; init; } = Connected;
+    /// <example>0</example>
+    public RoomSecurityError Error { get; set; }
+}
 
-    /// <summary>
-    /// Specifies if the provider is OAuth.
-    /// </summary>
-    /// <example>true</example>
-    public bool Oauth { get; init; } = Oauth;
+/// <summary>
+/// The error type.
+/// </summary>
+public enum RoomSecurityError
+{
+    [Description("None")]
+    None,
 
-    /// <summary>
-    /// The provider redirect URL.
-    /// </summary>
-    /// <example>http://localhost/redirect</example>
-    public string RedirectUrl { get; init; } = RedirectUrl;
-
-    /// <summary>
-    /// The required connection URL flag.
-    /// </summary>
-    /// <example>false</example>
-    public bool RequiredConnectionUrl { get; init; } = RequiredConnectionUrl;
-
-    /// <summary>
-    /// The provider OAuth client ID.
-    /// </summary>
-    /// <example>client-id-123</example>
-    public string ClientId { get; init; } = ClientId;
+    [Description("Form role blocking deletion")]
+    FormRoleBlockingDeletion
 }

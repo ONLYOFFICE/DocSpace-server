@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+global using System.Collections.Immutable;
+global using System.ComponentModel;
 global using System.ComponentModel.DataAnnotations;
 global using System.Globalization;
 global using System.Security;
@@ -108,6 +110,8 @@ global using Microsoft.Extensions.DependencyInjection.Extensions;
 global using Microsoft.Extensions.Hosting.WindowsServices;
 
 global using Newtonsoft.Json.Linq;
+
+global using Riok.Mapperly.Abstractions;
 
 global using Swashbuckle.AspNetCore.Annotations;
 

@@ -1,75 +1,44 @@
 // (c) Copyright Ascensio System SIA 2009-2026
-// 
+//
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
+//
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
+//
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-// 
+//
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Core.ApiModels.ResponseDto;
+namespace ASC.Files.Core.Core;
 
 /// <summary>
-/// The provider information.
+/// The "Complete &amp; Submit" button settings.
 /// </summary>
-public record ProviderDto(string Name, string Key, bool Connected, bool Oauth = false, string RedirectUrl = null, bool RequiredConnectionUrl = false, string ClientId = null)
+public class SubmitForm
 {
     /// <summary>
-    /// The provider name.
-    /// </summary>
-    /// <example>GoogleDrive</example>
-    public string Name { get; init; } = Name;
-
-    /// <summary>
-    /// The provider key.
-    /// </summary>
-    /// <example>google-drive</example>
-    public string Key { get; init; } = Key;
-
-    /// <summary>
-    /// Specifies whether the provider is connected.
+    /// Specifies whether the "Complete  &amp; Submit" button will be displayed or hidden on the top toolbar.
     /// </summary>
     /// <example>true</example>
-    public bool Connected { get; init; } = Connected;
-
+    public bool Visible { get; set; }
     /// <summary>
-    /// Specifies if the provider is OAuth.
+    /// A message displayed after forms are submitted.
     /// </summary>
-    /// <example>true</example>
-    public bool Oauth { get; init; } = Oauth;
-
-    /// <summary>
-    /// The provider redirect URL.
-    /// </summary>
-    /// <example>http://localhost/redirect</example>
-    public string RedirectUrl { get; init; } = RedirectUrl;
-
-    /// <summary>
-    /// The required connection URL flag.
-    /// </summary>
-    /// <example>false</example>
-    public bool RequiredConnectionUrl { get; init; } = RequiredConnectionUrl;
-
-    /// <summary>
-    /// The provider OAuth client ID.
-    /// </summary>
-    /// <example>client-id-123</example>
-    public string ClientId { get; init; } = ClientId;
+    /// <example>Form submitted successfully</example>
+    public string ResultMessage { get; set; }
 }

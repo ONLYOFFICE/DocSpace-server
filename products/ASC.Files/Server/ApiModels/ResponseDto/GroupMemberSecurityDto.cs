@@ -27,49 +27,43 @@
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 /// <summary>
-/// The provider information.
+/// The group member security information.
 /// </summary>
-public record ProviderDto(string Name, string Key, bool Connected, bool Oauth = false, string RedirectUrl = null, bool RequiredConnectionUrl = false, string ClientId = null)
+public class GroupMemberSecurityRequestDto
 {
     /// <summary>
-    /// The provider name.
+    /// The group member parameters.
     /// </summary>
-    /// <example>GoogleDrive</example>
-    public string Name { get; init; } = Name;
+    /// <example>{"displayName": "John Doe"}</example>
+    public required EmployeeFullDto User { get; init; }
 
     /// <summary>
-    /// The provider key.
+    /// The group access rights to the files.
     /// </summary>
-    /// <example>google-drive</example>
-    public string Key { get; init; } = Key;
+    /// <example>1</example>
+    public required FileShare GroupAccess { get; init; }
 
     /// <summary>
-    /// Specifies whether the provider is connected.
+    /// The group member access rights to the files.
     /// </summary>
-    /// <example>true</example>
-    public bool Connected { get; init; } = Connected;
+    /// <example>2</example>
+    public FileShare? UserAccess { get; init; }
 
     /// <summary>
-    /// Specifies if the provider is OAuth.
-    /// </summary>
-    /// <example>true</example>
-    public bool Oauth { get; init; } = Oauth;
-
-    /// <summary>
-    /// The provider redirect URL.
-    /// </summary>
-    /// <example>http://localhost/redirect</example>
-    public string RedirectUrl { get; init; } = RedirectUrl;
-
-    /// <summary>
-    /// The required connection URL flag.
+    /// Specifies if the group access rights are overridden or not.
     /// </summary>
     /// <example>false</example>
-    public bool RequiredConnectionUrl { get; init; } = RequiredConnectionUrl;
+    public required bool Overridden { get; init; }
 
     /// <summary>
-    /// The provider OAuth client ID.
+    /// Specifies if the group member can edit the group access rights or not.
     /// </summary>
-    /// <example>client-id-123</example>
-    public string ClientId { get; init; } = ClientId;
+    /// <example>true</example>
+    public required bool CanEditAccess { get; init; }
+
+    /// <summary>
+    /// Specifies if the group member is a group owner or not.
+    /// </summary>
+    /// <example>false</example>
+    public required bool Owner { get; init; }
 }

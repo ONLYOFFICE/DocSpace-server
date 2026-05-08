@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2026
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,49 +27,51 @@
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 /// <summary>
-/// The provider information.
+/// The result of file convertion operation.
 /// </summary>
-public record ProviderDto(string Name, string Key, bool Connected, bool Oauth = false, string RedirectUrl = null, bool RequiredConnectionUrl = false, string ClientId = null)
+public class ConversationResultDto
 {
     /// <summary>
-    /// The provider name.
+    /// The conversion operation ID.
     /// </summary>
-    /// <example>GoogleDrive</example>
-    public string Name { get; init; } = Name;
+    /// <example>12345</example>
+    public required string Id { get; set; }
 
     /// <summary>
-    /// The provider key.
+    /// The conversion operation type.
     /// </summary>
-    /// <example>google-drive</example>
-    public string Key { get; init; } = Key;
+    /// <example>0</example>
+    [JsonPropertyName("Operation")]
+    public required FileOperationType OperationType { get; set; }
 
     /// <summary>
-    /// Specifies whether the provider is connected.
+    /// The conversion operation progress.
+    /// </summary>
+    /// <example>50</example>
+    public required int Progress { get; set; }
+
+    /// <summary>
+    /// The source file for the conversion.
+    /// </summary>
+    /// <example>document.docx</example>
+    public string Source { get; set; }
+
+    /// <summary>
+    /// The resulting file after the conversion.
+    /// </summary>
+    /// <example>{"id": 10, "title": "converted_file.pdf"}</example>
+    [JsonPropertyName("result")]
+    public object File { get; set; }
+
+    /// <summary>
+    /// The conversion operation error message.
+    /// </summary>
+    /// <example>Conversion failed</example>
+    public string Error { get; set; }
+
+    /// <summary>
+    /// Specifies if the conversion operation is processed or not.
     /// </summary>
     /// <example>true</example>
-    public bool Connected { get; init; } = Connected;
-
-    /// <summary>
-    /// Specifies if the provider is OAuth.
-    /// </summary>
-    /// <example>true</example>
-    public bool Oauth { get; init; } = Oauth;
-
-    /// <summary>
-    /// The provider redirect URL.
-    /// </summary>
-    /// <example>http://localhost/redirect</example>
-    public string RedirectUrl { get; init; } = RedirectUrl;
-
-    /// <summary>
-    /// The required connection URL flag.
-    /// </summary>
-    /// <example>false</example>
-    public bool RequiredConnectionUrl { get; init; } = RequiredConnectionUrl;
-
-    /// <summary>
-    /// The provider OAuth client ID.
-    /// </summary>
-    /// <example>client-id-123</example>
-    public string ClientId { get; init; } = ClientId;
+    public string Processed { get; set; }
 }

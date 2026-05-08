@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2026
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,49 +27,61 @@
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 /// <summary>
-/// The provider information.
+/// The room template status.
 /// </summary>
-public record ProviderDto(string Name, string Key, bool Connected, bool Oauth = false, string RedirectUrl = null, bool RequiredConnectionUrl = false, string ClientId = null)
+public class RoomTemplateStatusDto
 {
     /// <summary>
-    /// The provider name.
+    /// The room template ID.
     /// </summary>
-    /// <example>GoogleDrive</example>
-    public string Name { get; init; } = Name;
+    /// <example>123</example>
+    public required int TemplateId { get; set; }
 
     /// <summary>
-    /// The provider key.
+    /// The progress of the room template creation process.
     /// </summary>
-    /// <example>google-drive</example>
-    public string Key { get; init; } = Key;
+    /// <example>75.5</example>
+    public required double Progress { get; set; }
 
     /// <summary>
-    /// Specifies whether the provider is connected.
+    /// The error message that is sent when the room template is not created successfully.
     /// </summary>
-    /// <example>true</example>
-    public bool Connected { get; init; } = Connected;
+    /// <example>Template creation failed</example>
+    public string Error { get; set; }
 
     /// <summary>
-    /// Specifies if the provider is OAuth.
-    /// </summary>
-    /// <example>true</example>
-    public bool Oauth { get; init; } = Oauth;
-
-    /// <summary>
-    /// The provider redirect URL.
-    /// </summary>
-    /// <example>http://localhost/redirect</example>
-    public string RedirectUrl { get; init; } = RedirectUrl;
-
-    /// <summary>
-    /// The required connection URL flag.
+    /// Specifies whether the process of creating the room template is completed.
     /// </summary>
     /// <example>false</example>
-    public bool RequiredConnectionUrl { get; init; } = RequiredConnectionUrl;
+    public required bool IsCompleted { get; set; }
+}
+
+/// <summary>
+/// The progress parameters of creating a room from the template.
+/// </summary>
+public class RoomFromTemplateStatusDto
+{
+    /// <summary>
+    /// The room ID.
+    /// </summary>
+    /// <example>456</example>
+    public required int RoomId { get; set; }
 
     /// <summary>
-    /// The provider OAuth client ID.
+    /// The progress of creating a room from the template.
     /// </summary>
-    /// <example>client-id-123</example>
-    public string ClientId { get; init; } = ClientId;
+    /// <example>50.0</example>
+    public required double Progress { get; set; }
+
+    /// <summary>
+    /// The error message that is sent when a room is not created successfully from the template.
+    /// </summary>
+    /// <example>Room creation failed</example>
+    public required string Error { get; set; }
+
+    /// <summary>
+    /// Specifies whether the process of creating a room from the template is completed.
+    /// </summary>
+    /// <example>false</example>
+    public required bool IsCompleted { get; set; }
 }

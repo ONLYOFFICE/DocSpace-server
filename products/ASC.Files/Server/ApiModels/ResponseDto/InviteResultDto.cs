@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2026
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,49 +27,25 @@
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 /// <summary>
-/// The provider information.
+/// The information about the invitation process.
 /// </summary>
-public record ProviderDto(string Name, string Key, bool Connected, bool Oauth = false, string RedirectUrl = null, bool RequiredConnectionUrl = false, string ClientId = null)
+public class InviteResultDto
 {
     /// <summary>
-    /// The provider name.
+    /// The email address that is used to send an invitation.
     /// </summary>
-    /// <example>GoogleDrive</example>
-    public string Name { get; init; } = Name;
+    /// <example>user@example.com</example>
+    public string Email { get; set; }
 
     /// <summary>
-    /// The provider key.
-    /// </summary>
-    /// <example>google-drive</example>
-    public string Key { get; init; } = Key;
-
-    /// <summary>
-    /// Specifies whether the provider is connected.
+    /// Specifies if the invitation process is successfully or not.
     /// </summary>
     /// <example>true</example>
-    public bool Connected { get; init; } = Connected;
+    public bool Success { get; set; }
 
     /// <summary>
-    /// Specifies if the provider is OAuth.
+    /// The message sent after the successful invitation process.
     /// </summary>
-    /// <example>true</example>
-    public bool Oauth { get; init; } = Oauth;
-
-    /// <summary>
-    /// The provider redirect URL.
-    /// </summary>
-    /// <example>http://localhost/redirect</example>
-    public string RedirectUrl { get; init; } = RedirectUrl;
-
-    /// <summary>
-    /// The required connection URL flag.
-    /// </summary>
-    /// <example>false</example>
-    public bool RequiredConnectionUrl { get; init; } = RequiredConnectionUrl;
-
-    /// <summary>
-    /// The provider OAuth client ID.
-    /// </summary>
-    /// <example>client-id-123</example>
-    public string ClientId { get; init; } = ClientId;
+    /// <example>Invitation sent successfully</example>
+    public string Message { get; set; }
 }
