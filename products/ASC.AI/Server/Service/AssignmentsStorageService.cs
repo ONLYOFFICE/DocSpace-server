@@ -25,7 +25,6 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.AI.Integration.Assignments;
-using ASC.Common.Threading.DistributedLock.Abstractions;
 using ASC.Core.Users;
 
 namespace ASC.AI.Service;
@@ -36,7 +35,6 @@ public class AssignmentsStorageService(
     AuthContext authContext,
     TenantManager tenantManager,
     AssignmentsStorage storage,
-    IDistributedLockProvider distributedLockProvider,
     IDaoFactory daoFactory,
     FileSecurity fileSecurity) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity)
 {
@@ -54,14 +52,9 @@ public class AssignmentsStorageService(
             await AssertEntryAccessAsync(entryId.Value);
         }
 
-        var tenantId = tenantManager.GetCurrentTenantId();
-
-        await using (await distributedLockProvider.TryAcquireFairLockAsync(GetLockKey(tenantId, entryId)))
+        if (!await storage.CreateAsync(tenantManager.GetCurrentTenantId(), actionType, profileId, entryId))
         {
-            if (!await storage.CreateAsync(tenantId, actionType, profileId, entryId))
-            {
-                throw new InvalidOperationException($"Assignment for action type '{actionType}' already exists");
-            }
+            throw new InvalidOperationException($"Assignment for action type '{actionType}' already exists");
         }
     }
 
@@ -121,12 +114,7 @@ public class AssignmentsStorageService(
             await AssertEntryAccessAsync(entryId.Value);
         }
 
-        var tenantId = tenantManager.GetCurrentTenantId();
-
-        await using (await distributedLockProvider.TryAcquireFairLockAsync(GetLockKey(tenantId, entryId)))
-        {
-            await storage.UpsertManyAsync(tenantId, assignments, entryId);
-        }
+        await storage.UpsertManyAsync(tenantManager.GetCurrentTenantId(), assignments, entryId);
     }
 
     public async Task DeleteAsync(string actionType)
@@ -141,12 +129,5 @@ public class AssignmentsStorageService(
         await AssertUserHasAccessAsync(_writeTypes);
 
         await storage.DeleteManyAsync(tenantManager.GetCurrentTenantId(), actionTypes);
-    }
-
-    private static string GetLockKey(int tenantId, int? entryId)
-    {
-        return entryId.HasValue
-            ? $"ai_integration_assignments_{tenantId}_{entryId.Value}"
-            : $"ai_integration_assignments_{tenantId}";
     }
 }

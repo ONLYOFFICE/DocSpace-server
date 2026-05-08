@@ -24,38 +24,50 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Common.Threading.DistributedLock.Abstractions;
+
 namespace ASC.AI.Integration.Assignments;
 
 [Scope]
-public class AssignmentsStorage(IDbContextFactory<AiIntegrationContext> dbContextFactory)
+public class AssignmentsStorage(
+    IDbContextFactory<AiIntegrationContext> dbContextFactory,
+    IDistributedLockProvider distributedLockProvider)
 {
     public async Task<bool> CreateAsync(int tenantId, string actionType, Guid profileId, int? entryId = null)
     {
-        await using var context = await dbContextFactory.CreateDbContextAsync();
-
-        var existing = entryId.HasValue
-            ? await context.GetAssignmentByEntryAsync(tenantId, actionType, entryId.Value)
-            : await context.GetAssignmentAsync(tenantId, actionType);
-
-        if (existing != null)
+        await using (await distributedLockProvider.TryAcquireFairLockAsync(GetLockKey(tenantId, entryId)))
         {
-            return false;
+            await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+            var strategy = dbContext.Database.CreateExecutionStrategy();
+
+            return await strategy.ExecuteAsync(async () =>
+            {
+                await using var context = await dbContextFactory.CreateDbContextAsync();
+
+                var existing = entryId.HasValue
+                    ? await context.GetAssignmentByEntryAsync(tenantId, actionType, entryId.Value)
+                    : await context.GetAssignmentAsync(tenantId, actionType);
+
+                if (existing != null)
+                {
+                    return false;
+                }
+
+                context.Assignments.Add(new DbAssignment
+                {
+                    Id = Guid.CreateVersion7(),
+                    TenantId = tenantId,
+                    ActionType = actionType,
+                    ProfileId = profileId,
+                    EntryId = entryId,
+                    CreatedAt = DateTime.UtcNow
+                });
+
+                await context.SaveChangesAsync();
+
+                return true;
+            });
         }
-
-        var entity = new DbAssignment
-        {
-            Id = Guid.CreateVersion7(),
-            TenantId = tenantId,
-            ActionType = actionType,
-            ProfileId = profileId,
-            EntryId = entryId,
-            CreatedAt = DateTime.UtcNow
-        };
-
-        context.Assignments.Add(entity);
-        await context.SaveChangesAsync();
-
-        return true;
     }
 
     public async Task<Guid?> ReadByTypeAsync(int tenantId, string actionType, int? entryId = null)
@@ -98,53 +110,54 @@ public class AssignmentsStorage(IDbContextFactory<AiIntegrationContext> dbContex
             return;
         }
 
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-        var strategy = dbContext.Database.CreateExecutionStrategy();
-
-        await strategy.ExecuteAsync(async () =>
+        await using (await distributedLockProvider.TryAcquireFairLockAsync(GetLockKey(tenantId, entryId)))
         {
-            await using var context = await dbContextFactory.CreateDbContextAsync();
-            await using var transaction = await context.Database.BeginTransactionAsync();
+            await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+            var strategy = dbContext.Database.CreateExecutionStrategy();
 
-            var existingByType = await (entryId.HasValue
-                    ? context.GetAssignmentsByTypesAndEntryAsync(tenantId, entryId.Value, assignments.Keys)
-                    : context.GetAssignmentsByTypesAsync(tenantId, assignments.Keys))
-                .ToDictionaryAsync(x => x.ActionType, x => x.Id);
-
-            var now = DateTime.UtcNow;
-            foreach (var (actionType, profileId) in assignments)
+            await strategy.ExecuteAsync(async () =>
             {
-                if (existingByType.TryGetValue(actionType, out var existingId))
-                {
-                    var entity = new DbAssignment
-                    {
-                        Id = existingId,
-                        TenantId = tenantId,
-                        ActionType = actionType,
-                        EntryId = entryId,
-                        ProfileId = profileId,
-                        CreatedAt = default
-                    };
-                    context.Assignments.Attach(entity);
-                    context.Entry(entity).Property(x => x.ProfileId).IsModified = true;
-                }
-                else
-                {
-                    context.Assignments.Add(new DbAssignment
-                    {
-                        Id = Guid.CreateVersion7(),
-                        TenantId = tenantId,
-                        ActionType = actionType,
-                        ProfileId = profileId,
-                        EntryId = entryId,
-                        CreatedAt = now
-                    });
-                }
-            }
+                await using var context = await dbContextFactory.CreateDbContextAsync();
 
-            await context.SaveChangesAsync();
-            await transaction.CommitAsync();
-        });
+                var existingByType = await (entryId.HasValue
+                        ? context.GetAssignmentsByTypesAndEntryAsync(tenantId, entryId.Value, assignments.Keys)
+                        : context.GetAssignmentsByTypesAsync(tenantId, assignments.Keys))
+                    .ToDictionaryAsync(x => x.ActionType, x => x.Id);
+
+                var now = DateTime.UtcNow;
+                foreach (var (actionType, profileId) in assignments)
+                {
+                    if (existingByType.TryGetValue(actionType, out var existingId))
+                    {
+                        var entity = new DbAssignment
+                        {
+                            Id = existingId,
+                            TenantId = tenantId,
+                            ActionType = actionType,
+                            EntryId = entryId,
+                            ProfileId = profileId,
+                            CreatedAt = default
+                        };
+                        context.Assignments.Attach(entity);
+                        context.Entry(entity).Property(x => x.ProfileId).IsModified = true;
+                    }
+                    else
+                    {
+                        context.Assignments.Add(new DbAssignment
+                        {
+                            Id = Guid.CreateVersion7(),
+                            TenantId = tenantId,
+                            ActionType = actionType,
+                            ProfileId = profileId,
+                            EntryId = entryId,
+                            CreatedAt = now
+                        });
+                    }
+                }
+
+                await context.SaveChangesAsync();
+            });
+        }
     }
 
     public async Task DeleteAsync(int tenantId, string actionType, int? entryId = null)
@@ -178,5 +191,12 @@ public class AssignmentsStorage(IDbContextFactory<AiIntegrationContext> dbContex
         {
             await context.DeleteAssignmentsByTypesAsync(tenantId, actionTypes);
         }
+    }
+
+    private static string GetLockKey(int tenantId, int? entryId)
+    {
+        return entryId.HasValue
+            ? $"ai_integration_assignments_{tenantId}_{entryId.Value}"
+            : $"ai_integration_assignments_{tenantId}";
     }
 }
