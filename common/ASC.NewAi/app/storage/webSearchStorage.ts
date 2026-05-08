@@ -24,38 +24,78 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+import { aiService, AiServiceHttpError } from "./httpClient.js";
+import { isObject, getString } from "../narrow.js";
 import type { WebSearchStorage, WebSearchConfig } from "@onlyoffice/ai-chat/core";
 
-export class InMemoryWebSearchStorage implements WebSearchStorage {
-  #config: WebSearchConfig | null = null;
+const PATH = "/integration/web-search";
 
-  async create(config: WebSearchConfig): Promise<void> {
-    if (this.#config !== null) {
-      throw new Error("web search config already set");
+function toBody(config: WebSearchConfig): Record<string, unknown> {
+  const body: Record<string, unknown> = { provider: config.provider };
+  if (config.key !== undefined) {
+    body["key"] = config.key;
+  }
+  if (config.baseUrl !== undefined) {
+    body["baseUrl"] = config.baseUrl;
+  }
+  return body;
+}
+
+function parseConfig(raw: unknown): WebSearchConfig | null {
+  if (!isObject(raw)) {
+    return null;
+  }
+  const provider = getString(raw, "provider");
+  if (!provider) {
+    return null;
+  }
+  const config: WebSearchConfig = { provider };
+  const key = getString(raw, "key");
+  if (key !== undefined) {
+    config.key = key;
+  }
+  const baseUrl = getString(raw, "baseUrl");
+  if (baseUrl !== undefined) {
+    config.baseUrl = baseUrl;
+  }
+  return config;
+}
+
+export class HttpWebSearchStorage implements WebSearchStorage {
+  // The AI service exposes a single global web-search singleton; entityId
+  // scoping is not supported server-side and is ignored here.
+  async create(config: WebSearchConfig, _entityId?: string): Promise<void> {
+    await aiService.put(PATH, toBody(config));
+  }
+
+  async read(_entityId?: string): Promise<WebSearchConfig | null> {
+    try {
+      const raw = await aiService.get(PATH);
+      return parseConfig(raw);
+    } catch (err) {
+      if (err instanceof AiServiceHttpError && err.status === 404) {
+        return null;
+      }
+      throw err;
     }
-    this.#config = { ...config };
   }
 
-  async read(): Promise<WebSearchConfig | null> {
-    return this.#config ? { ...this.#config } : null;
+  async update(config: WebSearchConfig, _entityId?: string): Promise<void> {
+    await aiService.put(PATH, toBody(config));
   }
 
-  async update(config: WebSearchConfig): Promise<void> {
-    if (this.#config === null) {
-      throw new Error("web search config not set");
+  async upsert(config: WebSearchConfig, _entityId?: string): Promise<void> {
+    await aiService.put(PATH, toBody(config));
+  }
+
+  async delete(_entityId?: string): Promise<void> {
+    try {
+      await aiService.delete(PATH);
+    } catch (err) {
+      if (err instanceof AiServiceHttpError && err.status === 404) {
+        return;
+      }
+      throw err;
     }
-    this.#config = { ...config };
-  }
-
-  async upsert(config: WebSearchConfig): Promise<void> {
-    this.#config = { ...config };
-  }
-
-  async delete(): Promise<void> {
-    this.#config = null;
-  }
-
-  _clear(): void {
-    this.#config = null;
   }
 }

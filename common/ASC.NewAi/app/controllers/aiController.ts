@@ -29,6 +29,7 @@ import type {
   SendInput,
   SendCustomInput,
   SendStreamInput,
+  RegenerateStreamInput,
   ApproveToolCallInput,
   DenyToolCallInput,
 } from "@onlyoffice/ai-chat/core";
@@ -72,6 +73,10 @@ export const aiController = {
 
   sendWithStream: asyncHandler<SendStreamInput>(async (req, res) => {
     await streamNdjson(res, engine.sendWithStream(req.body));
+  }),
+
+  regenerateStream: asyncHandler<RegenerateStreamInput>(async (req, res) => {
+    await streamNdjson(res, engine.regenerateStream(req.body));
   }),
 
   approveToolCall: asyncHandler<ApproveToolCallInput>(async (req, res) => {

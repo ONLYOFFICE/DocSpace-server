@@ -24,85 +24,135 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-import { randomUUID } from "crypto";
+import { aiService, AiServiceHttpError } from "./httpClient.js";
+import { isObject, getString, getNumber } from "../narrow.js";
 import type { PromptsStorage, Prompt } from "@onlyoffice/ai-chat/core";
 
-export class InMemoryPromptsStorage implements PromptsStorage {
-  readonly #prompts = new Map<string, Prompt>();
+const PATH = "/integration/prompts";
+const FOLDERS_PATH = "/integration/prompt-folders";
 
+function parsePrompt(raw: unknown): Prompt | null {
+  if (!isObject(raw)) {
+    return null;
+  }
+  const id = getString(raw, "id");
+  const name = getString(raw, "name");
+  const text = getString(raw, "text");
+  const createdAt = getNumber(raw, "createdAt");
+  const updatedAt = getNumber(raw, "updatedAt");
+  if (!id || name === undefined || text === undefined || createdAt === undefined || updatedAt === undefined) {
+    return null;
+  }
+  const folderId = getString(raw, "folderId");
+  const prompt: Prompt = { id, name, text, createdAt, updatedAt };
+  if (folderId) {
+    prompt.folderId = folderId;
+  }
+  return prompt;
+}
+
+function parsePromptList(raw: unknown): Prompt[] {
+  if (!Array.isArray(raw)) {
+    throw new Error("AI service returned a non-array prompt list");
+  }
+  return raw.map((item, i) => {
+    const p = parsePrompt(item);
+    if (!p) {
+      throw new Error(`AI service returned an invalid prompt at index ${i}`);
+    }
+    return p;
+  });
+}
+
+export class HttpPromptsStorage implements PromptsStorage {
   async create(input: Omit<Prompt, "id" | "createdAt" | "updatedAt">): Promise<Prompt> {
-    const now = Date.now();
-    const stored: Prompt = {
-      ...input,
-      id: randomUUID(),
-      createdAt: now,
-      updatedAt: now,
-    };
-    this.#prompts.set(stored.id, stored);
-    return { ...stored };
+    const body: Record<string, unknown> = { name: input.name, text: input.text };
+    if (input.folderId) {
+      body["folderId"] = input.folderId;
+    }
+    const raw = await aiService.post(PATH, body);
+    const prompt = parsePrompt(raw);
+    if (!prompt) {
+      throw new Error("AI service returned an invalid prompt payload");
+    }
+    return prompt;
   }
 
-  async createMany(prompts: Prompt[]): Promise<void> {
-    for (const p of prompts) {
-      this.#prompts.set(p.id, { ...p });
+  async createMany(
+    prompts: Omit<Prompt, "id" | "createdAt" | "updatedAt">[],
+  ): Promise<Prompt[]> {
+    if (prompts.length === 0) {
+      return [];
     }
+    // The C# `POST /integration/prompts/batch` endpoint currently
+    // returns `NoContent` and so cannot deliver server-assigned ids
+    // back to us. Until it returns the persisted list we fan out as
+    // N parallel single-creates — slower for large bundles, but
+    // preserves input order and is correct.
+    return Promise.all(prompts.map((p) => this.create(p)));
   }
 
   async readById(id: string): Promise<Prompt | null> {
-    const p = this.#prompts.get(id);
-    return p ? { ...p } : null;
+    try {
+      const raw = await aiService.get(`${PATH}/${encodeURIComponent(id)}`);
+      return parsePrompt(raw);
+    } catch (err) {
+      if (err instanceof AiServiceHttpError && err.status === 404) {
+        return null;
+      }
+      throw err;
+    }
   }
 
   async readAll(): Promise<Prompt[]> {
-    return [...this.#prompts.values()]
-      .map((p) => ({ ...p }))
-      .sort((a, b) => b.createdAt - a.createdAt);
+    const raw = await aiService.get(PATH);
+    return parsePromptList(raw).sort((a, b) => b.createdAt - a.createdAt);
   }
 
   async readByFolderId(folderId: string | null): Promise<Prompt[]> {
-    return [...this.#prompts.values()]
-      .filter((p) => (folderId === null ? !p.folderId : p.folderId === folderId))
-      .map((p) => ({ ...p }))
-      .sort((a, b) => b.createdAt - a.createdAt);
+    if (folderId === null) {
+      const all = await this.readAll();
+      return all.filter((p) => !p.folderId);
+    }
+    const raw = await aiService.get(
+      `${FOLDERS_PATH}/${encodeURIComponent(folderId)}/prompts`,
+    );
+    return parsePromptList(raw).sort((a, b) => b.createdAt - a.createdAt);
   }
 
   async update(
     id: string,
     updates: { name?: string; text?: string; folderId?: string | null },
   ): Promise<void> {
-    const p = this.#prompts.get(id);
-    if (!p) {
-      return;
-    }
+    const body: Record<string, unknown> = {};
     if (updates.name !== undefined) {
-      p.name = updates.name;
+      body["name"] = updates.name;
     }
     if (updates.text !== undefined) {
-      p.text = updates.text;
+      body["text"] = updates.text;
     }
     if ("folderId" in updates) {
-      if (updates.folderId === null) {
-        delete p.folderId;
-      } else if (updates.folderId !== undefined) {
-        p.folderId = updates.folderId;
-      }
+      body["changeFolder"] = true;
+      body["folderId"] = updates.folderId ?? null;
     }
-    p.updatedAt = Date.now();
+    await aiService.put(`${PATH}/${encodeURIComponent(id)}`, body);
   }
 
   async delete(id: string): Promise<void> {
-    this.#prompts.delete(id);
-  }
-
-  async deleteByFolder(folderId: string): Promise<void> {
-    for (const [id, p] of this.#prompts.entries()) {
-      if (p.folderId === folderId) {
-        this.#prompts.delete(id);
+    try {
+      await aiService.delete(`${PATH}/${encodeURIComponent(id)}`);
+    } catch (err) {
+      if (err instanceof AiServiceHttpError && err.status === 404) {
+        return;
       }
+      throw err;
     }
   }
 
-  _clear(): void {
-    this.#prompts.clear();
+  async deleteByFolder(folderId: string): Promise<void> {
+    // Server-side folder delete cascades; this is a fallback for callers
+    // that intentionally want to clear a folder without removing it.
+    const prompts = await this.readByFolderId(folderId);
+    await Promise.all(prompts.map((p) => this.delete(p.id)));
   }
 }

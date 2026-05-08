@@ -24,55 +24,96 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-import { randomUUID } from "crypto";
+import { aiService, AiServiceHttpError } from "./httpClient.js";
+import { isObject, getString, getNumber } from "../narrow.js";
 import type { PromptFoldersStorage, PromptFolder } from "@onlyoffice/ai-chat/core";
 
-export class InMemoryPromptFoldersStorage implements PromptFoldersStorage {
-  readonly #folders = new Map<string, PromptFolder>();
+const PATH = "/integration/prompt-folders";
 
+function parseFolder(raw: unknown): PromptFolder | null {
+  if (!isObject(raw)) {
+    return null;
+  }
+  const id = getString(raw, "id");
+  const name = getString(raw, "name");
+  const createdAt = getNumber(raw, "createdAt");
+  const updatedAt = getNumber(raw, "updatedAt");
+  if (!id || name === undefined || createdAt === undefined || updatedAt === undefined) {
+    return null;
+  }
+  return { id, name, createdAt, updatedAt };
+}
+
+function parseFolderList(raw: unknown): PromptFolder[] {
+  if (!Array.isArray(raw)) {
+    throw new Error("AI service returned a non-array prompt folder list");
+  }
+  return raw.map((item, i) => {
+    const f = parseFolder(item);
+    if (!f) {
+      throw new Error(`AI service returned an invalid prompt folder at index ${i}`);
+    }
+    return f;
+  });
+}
+
+export class HttpPromptFoldersStorage implements PromptFoldersStorage {
   async create(input: Omit<PromptFolder, "id" | "createdAt" | "updatedAt">): Promise<PromptFolder> {
-    const now = Date.now();
-    const stored: PromptFolder = {
-      ...input,
-      id: randomUUID(),
-      createdAt: now,
-      updatedAt: now,
-    };
-    this.#folders.set(stored.id, stored);
-    return { ...stored };
+    const raw = await aiService.post(PATH, { name: input.name });
+    const folder = parseFolder(raw);
+    if (!folder) {
+      throw new Error("AI service returned an invalid prompt folder payload");
+    }
+    return folder;
   }
 
-  async createMany(folders: PromptFolder[]): Promise<void> {
-    for (const f of folders) {
-      this.#folders.set(f.id, { ...f });
+  async createMany(
+    folders: Omit<PromptFolder, "id" | "createdAt" | "updatedAt">[],
+  ): Promise<PromptFolder[]> {
+    if (folders.length === 0) {
+      return [];
     }
+    const raw = await aiService.post(`${PATH}/batch`, {
+      names: folders.map((f) => f.name),
+    });
+    const persisted = parseFolderList(raw);
+    if (persisted.length !== folders.length) {
+      throw new Error(
+        `AI service returned ${persisted.length} folders for ${folders.length} inputs`,
+      );
+    }
+    return persisted;
   }
 
   async readById(id: string): Promise<PromptFolder | null> {
-    const f = this.#folders.get(id);
-    return f ? { ...f } : null;
+    try {
+      const raw = await aiService.get(`${PATH}/${encodeURIComponent(id)}`);
+      return parseFolder(raw);
+    } catch (err) {
+      if (err instanceof AiServiceHttpError && err.status === 404) {
+        return null;
+      }
+      throw err;
+    }
   }
 
   async readAll(): Promise<PromptFolder[]> {
-    return [...this.#folders.values()]
-      .map((f) => ({ ...f }))
-      .sort((a, b) => b.createdAt - a.createdAt);
+    const raw = await aiService.get(PATH);
+    return parseFolderList(raw).sort((a, b) => b.createdAt - a.createdAt);
   }
 
   async update(id: string, name: string): Promise<void> {
-    const f = this.#folders.get(id);
-    if (!f) {
-      return;
-    }
-    f.name = name;
-    f.updatedAt = Date.now();
+    await aiService.put(`${PATH}/${encodeURIComponent(id)}`, { name });
   }
 
   async delete(id: string): Promise<void> {
-    this.#folders.delete(id);
-  }
-
-  _clear(): void {
-    this.#folders.clear();
+    try {
+      await aiService.delete(`${PATH}/${encodeURIComponent(id)}`);
+    } catch (err) {
+      if (err instanceof AiServiceHttpError && err.status === 404) {
+        return;
+      }
+      throw err;
+    }
   }
 }

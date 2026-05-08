@@ -26,40 +26,38 @@
 
 import type { StorageAdapter } from "@onlyoffice/ai-chat/core";
 
+import { InMemoryAttachmentsStorage } from "./attachmentsStorage.js";
 import { HttpAssignmentsStorage } from "./assignmentsStorage.js";
 import { HttpMcpServersStorage } from "./mcpServersStorage.js";
 import { HttpMessagesStorage } from "./messagesStorage.js";
 import { HttpPreferencesStorage } from "./preferencesStorage.js";
 import { HttpProfilesStorage } from "./profilesStorage.js";
-import { InMemoryPromptFoldersStorage } from "./promptFoldersStorage.js";
-import { InMemoryPromptsStorage } from "./promptsStorage.js";
+import { HttpPromptFoldersStorage } from "./promptFoldersStorage.js";
+import { HttpPromptsStorage } from "./promptsStorage.js";
 import { HttpThreadsStorage } from "./threadsStorage.js";
 import { HttpToolPrefsStorage } from "./toolPrefsStorage.js";
-import { InMemoryWebSearchStorage } from "./webSearchStorage.js";
+import { HttpWebSearchStorage } from "./webSearchStorage.js";
 
 export class HttpStorageAdapter implements StorageAdapter {
   public threads = new HttpThreadsStorage();
   public messages = new HttpMessagesStorage();
   public profiles = new HttpProfilesStorage();
-  public prompts = new InMemoryPromptsStorage();
-  public promptFolders = new InMemoryPromptFoldersStorage();
+  public prompts = new HttpPromptsStorage();
+  public promptFolders = new HttpPromptFoldersStorage();
   public assignments = new HttpAssignmentsStorage();
   public preferences = new HttpPreferencesStorage();
   public mcpServers = new HttpMcpServersStorage();
   public toolPrefs = new HttpToolPrefsStorage();
-  public webSearch = new InMemoryWebSearchStorage();
+  public webSearch = new HttpWebSearchStorage();
+  public attachments = new InMemoryAttachmentsStorage();
 
   async init(): Promise<void> {
-    // No-op: HTTP-backed storages have nothing to initialize locally, and the
-    // remaining in-memory ones (prompts, promptFolders, webSearch) are empty
-    // by construction.
+    // No-op: every storage is HTTP-backed; nothing to initialize locally.
   }
 
   async close(): Promise<void> {
-    this.prompts._clear();
-    this.promptFolders._clear();
     this.toolPrefs._clear();
-    this.webSearch._clear();
+    this.attachments._clear();
   }
 }
 
