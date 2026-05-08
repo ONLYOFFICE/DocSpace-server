@@ -384,6 +384,8 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
                 continue;
             }
 
+            CheckPropertyXmlDocFromMetadata(context, methodDeclaration, typeSymbol, propertySymbol);
+
             if (propertySymbol.Type is INamedTypeSymbol { IsGenericType: true } namedTypeSymbol && IsSystemNamespace(namedTypeSymbol))
             {
                 var typeArgument = namedTypeSymbol.TypeArguments.FirstOrDefault();
@@ -401,69 +403,116 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
                 {
                     CheckPropertiesFromMetadata(context, methodDeclaration, propertySymbol.Type);
                 }
+            }
+        }
+    }
 
+    private static void CheckPropertyXmlDocFromMetadata(SyntaxNodeAnalysisContext context, MethodDeclarationSyntax methodDeclaration, ITypeSymbol typeSymbol, IPropertySymbol propertySymbol)
+    {
+        var xmlDoc = propertySymbol.GetDocumentationCommentXml();
+
+        if (string.IsNullOrWhiteSpace(xmlDoc))
+        {
+            xmlDoc = TryLoadXmlDocFromAssemblyFile(context, propertySymbol);
+        }
+
+        if (string.IsNullOrWhiteSpace(xmlDoc))
+        {
+            return;
+        }
+
+        if (!xmlDoc.Contains("<summary>"))
+        {
+            context.ReportDiagnostic(Diagnostic.Create(
+                _modelDtoSummaryRule,
+                methodDeclaration.Identifier.GetLocation(),
+                typeSymbol.Name,
+                propertySymbol.Name));
+        }
+
+        if (!xmlDoc.Contains("<example>"))
+        {
+            context.ReportDiagnostic(Diagnostic.Create(
+                _modelDtoExampleRule,
+                methodDeclaration.Identifier.GetLocation(),
+                typeSymbol.Name,
+                propertySymbol.Name));
+        }
+    }
+
+    private static string? TryLoadXmlDocFromAssemblyFile(SyntaxNodeAnalysisContext context, IPropertySymbol propertySymbol)
+    {
+        if (context.Compilation.GetMetadataReference(propertySymbol.ContainingAssembly) is not PortableExecutableReference peRef ||
+            string.IsNullOrEmpty(peRef.FilePath))
+        {
+            return null;
+        }
+
+        foreach (var xmlPath in EnumerateXmlPathCandidates(peRef.FilePath))
+        {
+            var doc = _xmlDocCache.GetOrAdd(xmlPath, path =>
+            {
+                try { return XDocument.Load(path); }
+                catch { return null; }
+            });
+
+            if (doc is null)
+            {
                 continue;
             }
 
-            var xmlDoc = propertySymbol.GetDocumentationCommentXml();
-
-            if (string.IsNullOrWhiteSpace(xmlDoc))
+            var docId = propertySymbol.GetDocumentationCommentId();
+            if (docId is null)
             {
-                var reference = context.Compilation.GetMetadataReference(propertySymbol.ContainingAssembly);
-                if (reference is PortableExecutableReference peRef)
-                {
-                    var xmlPath = Path.ChangeExtension(peRef.FilePath, ".xml");
-
-                    if (string.IsNullOrEmpty(xmlPath))
-                    {
-                        return;
-                    }
-
-                    var doc = _xmlDocCache.GetOrAdd(xmlPath, path =>
-                    {
-                        try { return XDocument.Load(path); }
-                        catch { return null; }
-                    });
-
-                    if (doc is null)
-                    {
-                        return;
-                    }
-
-                    var docId = propertySymbol.GetDocumentationCommentId();
-                    if (docId is null)
-                    {
-                        continue;
-                    }
-
-                    xmlDoc = doc.Descendants("member").FirstOrDefault(e =>
-                    {
-                        var name = e.Attribute("name")?.Value;
-                        return name == docId.Replace("{`0}", "`1") ||
-                               name == docId.Replace($"{{{typeof(int).FullName!}}}", "`1") ||
-                               name == docId.Replace($"{{{typeof(string).FullName!}}}", "`1") ||
-                               name == docId.Replace($"{{{typeof(JsonElement).FullName!}}}", "`1")
-                               ;
-                    })?.ToString();
-                }
+                return null;
             }
 
-            if (string.IsNullOrWhiteSpace(xmlDoc) || !xmlDoc.Contains("<summary>"))
+            var member = doc.Descendants("member").FirstOrDefault(e =>
             {
-                context.ReportDiagnostic(Diagnostic.Create(
-                    _modelDtoSummaryRule,
-                    methodDeclaration.Identifier.GetLocation(),
-                    typeSymbol.Name,
-                    propertySymbol.Name));
+                var name = e.Attribute("name")?.Value;
+                return name == docId ||
+                       name == docId.Replace("{`0}", "`1") ||
+                       name == docId.Replace($"{{{typeof(int).FullName!}}}", "`1") ||
+                       name == docId.Replace($"{{{typeof(string).FullName!}}}", "`1") ||
+                       name == docId.Replace($"{{{typeof(JsonElement).FullName!}}}", "`1");
+            });
+
+            if (member is not null)
+            {
+                return member.ToString();
+            }
+        }
+
+        return null;
+    }
+
+    private static IEnumerable<string> EnumerateXmlPathCandidates(string assemblyPath)
+    {
+        var primary = Path.ChangeExtension(assemblyPath, ".xml");
+        yield return primary;
+
+        var dir = Path.GetDirectoryName(assemblyPath);
+        var name = Path.GetFileNameWithoutExtension(assemblyPath);
+        if (string.IsNullOrEmpty(dir) || string.IsNullOrEmpty(name))
+        {
+            yield break;
+        }
+
+        // ref assemblies live under obj/.../ref(int)/ — XML is in the sibling implementation folder
+        var refMarkers = new[] { $"{Path.DirectorySeparatorChar}ref{Path.DirectorySeparatorChar}", $"{Path.DirectorySeparatorChar}refint{Path.DirectorySeparatorChar}" };
+        foreach (var marker in refMarkers)
+        {
+            var idx = dir.LastIndexOf(marker);
+            if (idx < 0)
+            {
+                continue;
             }
 
-            if (string.IsNullOrWhiteSpace(xmlDoc) || !xmlDoc.Contains("<example>"))
+            var implDir = dir.Remove(idx, marker.Length - 1);
+            var candidate = Path.Combine(implDir, name + ".xml");
+            if (candidate != primary)
             {
-                context.ReportDiagnostic(Diagnostic.Create(
-                    _modelDtoExampleRule,
-                    methodDeclaration.Identifier.GetLocation(),
-                    typeSymbol.Name,
-                    propertySymbol.Name));
+                yield return candidate;
             }
         }
     }
