@@ -212,6 +212,41 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
         return false;
     }
 
+    /// <summary>
+    /// Determines whether a property of the given type should have an <c>&lt;example&gt;</c> XML tag.
+    /// Examples are required for leaf types (primitives, strings, dates, GUIDs, enums) and generic system
+    /// collections (List, Dictionary, etc.), but NOT for properties whose type is a custom complex object —
+    /// Swagger generates the example for those from the inner properties recursively.
+    /// </summary>
+    private static bool RequiresExample(ITypeSymbol? typeSymbol)
+    {
+        if (typeSymbol is null)
+        {
+            return false;
+        }
+
+        // Unwrap Nullable<T>
+        if (typeSymbol is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T } nullable)
+        {
+            typeSymbol = nullable.TypeArguments[0];
+        }
+
+        // System / Microsoft types (int, string, bool, DateTime, Guid, List<>, Dictionary<>, ...) — leaf
+        if (IsSystemNamespace(typeSymbol))
+        {
+            return true;
+        }
+
+        // Enums — leaf
+        if (typeSymbol.TypeKind == TypeKind.Enum)
+        {
+            return true;
+        }
+
+        // Custom complex object — Swagger composes the example from the inner properties
+        return false;
+    }
+
     private static void CheckDocumentation(SyntaxNodeAnalysisContext context, MethodDeclarationSyntax methodDeclaration, ConcurrentDictionary<string, bool> reportedTypes)
     {
         var xmlTrivia = methodDeclaration.GetLeadingTrivia()
@@ -292,10 +327,9 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
             return;
         }
 
-        var syntaxReferences = returnTypeSymbol.DeclaringSyntaxReferences;
-        if (syntaxReferences.Length > 0)
+        if (returnTypeSymbol.DeclaringSyntaxReferences.Length > 0)
         {
-            CheckPropertiesFromSyntax(context, syntaxReferences);
+            CheckPropertiesFromSyntax(context, returnTypeSymbol);
         }
         else
         {
@@ -306,58 +340,66 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
         }
     }
 
-    private static void CheckPropertiesFromSyntax(SyntaxNodeAnalysisContext context, ImmutableArray<SyntaxReference> syntaxReferences)
+    private static void CheckPropertiesFromSyntax(SyntaxNodeAnalysisContext context, ITypeSymbol typeSymbol)
     {
-        foreach (var syntaxReference in syntaxReferences)
+        foreach (var member in typeSymbol.GetMembers())
         {
-            var syntaxNode = syntaxReference.GetSyntax();
-
-            if (syntaxNode is not ClassDeclarationSyntax modelDeclaration)
+            if (member is not IPropertySymbol propertySymbol ||
+                propertySymbol.IsStatic ||
+                propertySymbol.IsImplicitlyDeclared ||
+                propertySymbol.DeclaredAccessibility != Accessibility.Public)
             {
                 continue;
             }
 
-            foreach (var prop in modelDeclaration.ChildNodes().OfType<PropertyDeclarationSyntax>())
+            if (propertySymbol.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax() is not PropertyDeclarationSyntax prop)
             {
-                if (!HasXmlDocumentation(prop))
-                {
-                    context.ReportDiagnostic(Diagnostic.Create(
-                        _modelDtoSummaryRule,
-                        prop.Identifier.GetLocation(),
-                        modelDeclaration.Identifier.Text,
-                        prop.Identifier.Text));
-                }
-                var xmlTrivia = prop.GetLeadingTrivia()
-                    .FirstOrDefault(t => t.IsKind(SyntaxKind.SingleLineDocumentationCommentTrivia) ||
-                                         t.IsKind(SyntaxKind.MultiLineDocumentationCommentTrivia));
+                continue;
+            }
 
-                if (xmlTrivia == default || xmlTrivia.GetStructure() is not DocumentationCommentTriviaSyntax xmlStructure)
-                {
-                    continue;
-                }
+            if (!HasXmlDocumentation(prop))
+            {
+                context.ReportDiagnostic(Diagnostic.Create(
+                    _modelDtoSummaryRule,
+                    prop.Identifier.GetLocation(),
+                    typeSymbol.Name,
+                    propertySymbol.Name));
+            }
 
-                var xmlElementSyntaxes = xmlStructure.Content.OfType<XmlElementSyntax>().ToList();
+            var xmlTrivia = prop.GetLeadingTrivia()
+                .FirstOrDefault(t => t.IsKind(SyntaxKind.SingleLineDocumentationCommentTrivia) ||
+                                     t.IsKind(SyntaxKind.MultiLineDocumentationCommentTrivia));
 
-                var summaryExists = xmlElementSyntaxes.Any(e => e.StartTag.Name.ToString() == "summary");
-                if (!summaryExists)
-                {
-                    context.ReportDiagnostic(Diagnostic.Create(
-                        _modelDtoSummaryRule,
-                        prop.Identifier.GetLocation(),
-                        modelDeclaration.Identifier.Text,
-                        prop.Identifier.Text));
-                }
+            if (xmlTrivia == default || xmlTrivia.GetStructure() is not DocumentationCommentTriviaSyntax xmlStructure)
+            {
+                continue;
+            }
 
-                var exampleExists = xmlElementSyntaxes.Any(e => e.StartTag.Name.ToString() == "example");
-                if (!exampleExists)
-                {
-                    context.ReportDiagnostic(Diagnostic.Create(
-                        _modelDtoExampleRule,
-                        prop.Identifier.GetLocation(),
-                        modelDeclaration.Identifier.Text,
-                        prop.Identifier.Text));
-                }
+            var xmlElementSyntaxes = xmlStructure.Content.OfType<XmlElementSyntax>().ToList();
 
+            var summaryExists = xmlElementSyntaxes.Any(e => e.StartTag.Name.ToString() == "summary");
+            if (!summaryExists)
+            {
+                context.ReportDiagnostic(Diagnostic.Create(
+                    _modelDtoSummaryRule,
+                    prop.Identifier.GetLocation(),
+                    typeSymbol.Name,
+                    propertySymbol.Name));
+            }
+
+            if (!RequiresExample(propertySymbol.Type))
+            {
+                continue;
+            }
+
+            var exampleExists = xmlElementSyntaxes.Any(e => e.StartTag.Name.ToString() == "example");
+            if (!exampleExists)
+            {
+                context.ReportDiagnostic(Diagnostic.Create(
+                    _modelDtoExampleRule,
+                    prop.Identifier.GetLocation(),
+                    typeSymbol.Name,
+                    propertySymbol.Name));
             }
         }
     }
@@ -430,7 +472,7 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
                 propertySymbol.Name));
         }
 
-        if (!xmlDoc.Contains("<example>"))
+        if (RequiresExample(propertySymbol.Type) && !xmlDoc.Contains("<example>"))
         {
             context.ReportDiagnostic(Diagnostic.Create(
                 _modelDtoExampleRule,
