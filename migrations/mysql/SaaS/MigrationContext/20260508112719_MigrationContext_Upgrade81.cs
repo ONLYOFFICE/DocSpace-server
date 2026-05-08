@@ -174,17 +174,19 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 name: "ai_integration_assignments",
                 columns: table => new
                 {
+                    id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "utf8_general_ci")
+                        .Annotation("MySql:CharSet", "utf8"),
                     tenant_id = table.Column<int>(type: "int", nullable: false),
                     action_type = table.Column<string>(type: "varchar(64)", maxLength: 64, nullable: false, collation: "utf8_general_ci")
                         .Annotation("MySql:CharSet", "utf8"),
-                    entry_id = table.Column<int>(type: "int", nullable: false),
                     profile_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "utf8_general_ci")
                         .Annotation("MySql:CharSet", "utf8"),
+                    entry_id = table.Column<int>(type: "int", nullable: true),
                     created_at = table.Column<DateTime>(type: "datetime", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PRIMARY", x => new { x.tenant_id, x.action_type, x.entry_id });
+                    table.PrimaryKey("PRIMARY", x => x.id);
                     table.ForeignKey(
                         name: "FK_ai_integration_assignments_ai_integration_profiles_profile_id",
                         column: x => x.profile_id,
@@ -265,6 +267,11 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 name: "IX_ai_integration_assignments_profile_id",
                 table: "ai_integration_assignments",
                 column: "profile_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_tenant_id_action_type_entry_id",
+                table: "ai_integration_assignments",
+                columns: new[] { "tenant_id", "action_type", "entry_id" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_tenant_id_thread_id_timestamp",

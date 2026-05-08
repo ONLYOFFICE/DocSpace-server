@@ -28,6 +28,7 @@ namespace ASC.AI.Integration.Database.Models;
 
 public class DbAssignment : BaseEntity
 {
+    public Guid Id { get; init; }
     public int TenantId { get; init; }
 
     [MaxLength(64)]
@@ -35,7 +36,7 @@ public class DbAssignment : BaseEntity
     public required string ActionType { get; init; }
 
     public Guid ProfileId { get; set; }
-    public int EntryId { get; init; }
+    public int? EntryId { get; init; }
     public DateTime CreatedAt { get; init; }
 
     public DbTenant Tenant { get; init; } = null!;
@@ -43,7 +44,7 @@ public class DbAssignment : BaseEntity
 
     public override object[] GetKeys()
     {
-        return [TenantId, ActionType, EntryId];
+        return [Id];
     }
 }
 
@@ -68,8 +69,14 @@ public static class DbAssignmentExtension
             entity.ToTable("ai_integration_assignments")
                 .HasCharSet("utf8");
 
-            entity.HasKey(e => new { e.TenantId, e.ActionType, e.EntryId })
+            entity.HasKey(e => e.Id)
                 .HasName("PRIMARY");
+
+            entity.Property(e => e.Id)
+                .HasColumnName("id")
+                .HasColumnType("char(36)")
+                .HasCharSet("utf8")
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.TenantId)
                 .HasColumnName("tenant_id");
@@ -93,6 +100,9 @@ public static class DbAssignmentExtension
             entity.Property(e => e.CreatedAt)
                 .HasColumnName("created_at")
                 .HasColumnType("datetime");
+
+            entity.HasIndex(e => new { e.TenantId, e.ActionType, e.EntryId })
+                .HasDatabaseName("IX_tenant_id_action_type_entry_id");
         });
     }
 
@@ -102,8 +112,12 @@ public static class DbAssignmentExtension
         {
             entity.ToTable("ai_integration_assignments");
 
-            entity.HasKey(e => new { e.TenantId, e.ActionType, e.EntryId })
+            entity.HasKey(e => e.Id)
                 .HasName("pk_ai_integration_assignments");
+
+            entity.Property(e => e.Id)
+                .HasColumnName("id")
+                .HasColumnType("uuid");
 
             entity.Property(e => e.TenantId)
                 .HasColumnName("tenant_id")
@@ -125,6 +139,9 @@ public static class DbAssignmentExtension
             entity.Property(e => e.CreatedAt)
                 .HasColumnName("created_at")
                 .HasColumnType("timestamp without time zone");
+
+            entity.HasIndex(e => new { e.TenantId, e.ActionType, e.EntryId })
+                .HasDatabaseName("ix_ai_integration_assignments_tenant_id_action_type_entry_id");
         });
     }
 }

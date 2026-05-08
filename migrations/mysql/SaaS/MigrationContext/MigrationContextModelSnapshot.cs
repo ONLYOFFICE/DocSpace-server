@@ -149,24 +149,28 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
             modelBuilder.Entity("ASC.AI.Integration.Database.Models.DbAssignment", b =>
                 {
-                    b.Property<int>("TenantId")
-                        .HasColumnType("int")
-                        .HasColumnName("tenant_id");
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)")
+                        .HasColumnName("id")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("ActionType")
+                        .IsRequired()
                         .HasMaxLength(64)
                         .HasColumnType("varchar(64)")
                         .HasColumnName("action_type")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
-                    b.Property<int>("EntryId")
-                        .HasColumnType("int")
-                        .HasColumnName("entry_id");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime")
                         .HasColumnName("created_at");
+
+                    b.Property<int?>("EntryId")
+                        .HasColumnType("int")
+                        .HasColumnName("entry_id");
 
                     b.Property<Guid>("ProfileId")
                         .HasColumnType("char(36)")
@@ -174,10 +178,17 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
-                    b.HasKey("TenantId", "ActionType", "EntryId")
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id")
                         .HasName("PRIMARY");
 
                     b.HasIndex("ProfileId");
+
+                    b.HasIndex("TenantId", "ActionType", "EntryId")
+                        .HasDatabaseName("IX_tenant_id_action_type_entry_id");
 
                     b.ToTable("ai_integration_assignments", (string)null);
 

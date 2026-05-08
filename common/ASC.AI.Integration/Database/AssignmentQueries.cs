@@ -28,28 +28,52 @@ namespace ASC.AI.Integration.Database;
 
 public partial class AiIntegrationContext
 {
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null, PreCompileQuery.DefaultInt])]
-    public Task<DbAssignment?> GetAssignmentAsync(int tenantId, string actionType, int entryId)
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    public Task<DbAssignment?> GetAssignmentAsync(int tenantId, string actionType)
     {
-        return AssignmentQueriesContainer.GetAssignmentAsync(this, tenantId, actionType, entryId);
+        return AssignmentQueriesContainer.GetAssignmentAsync(this, tenantId, actionType);
+    }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null, PreCompileQuery.DefaultInt])]
+    public Task<DbAssignment?> GetAssignmentByEntryAsync(int tenantId, string actionType, int entryId)
+    {
+        return AssignmentQueriesContainer.GetAssignmentByEntryAsync(this, tenantId, actionType, entryId);
+    }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt])]
+    public IAsyncEnumerable<DbAssignment> GetAllAssignmentsAsync(int tenantId)
+    {
+        return AssignmentQueriesContainer.GetAllAssignmentsAsync(this, tenantId);
     }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
-    public IAsyncEnumerable<DbAssignment> GetAllAssignmentsAsync(int tenantId, int entryId)
+    public IAsyncEnumerable<DbAssignment> GetAllAssignmentsByEntryAsync(int tenantId, int entryId)
     {
-        return AssignmentQueriesContainer.GetAllAssignmentsAsync(this, tenantId, entryId);
+        return AssignmentQueriesContainer.GetAllAssignmentsByEntryAsync(this, tenantId, entryId);
+    }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    public IAsyncEnumerable<DbAssignment> GetAssignmentsByTypesAsync(int tenantId, IEnumerable<string> actionTypes)
+    {
+        return AssignmentQueriesContainer.GetAssignmentsByTypesAsync(this, tenantId, actionTypes);
     }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, null])]
-    public IAsyncEnumerable<string> GetExistingAssignmentTypesAsync(int tenantId, int entryId, IEnumerable<string> actionTypes)
+    public IAsyncEnumerable<DbAssignment> GetAssignmentsByTypesAndEntryAsync(int tenantId, int entryId, IEnumerable<string> actionTypes)
     {
-        return AssignmentQueriesContainer.GetExistingAssignmentTypesAsync(this, tenantId, entryId, actionTypes);
+        return AssignmentQueriesContainer.GetAssignmentsByTypesAndEntryAsync(this, tenantId, entryId, actionTypes);
+    }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null, PreCompileQuery.DefaultGuid])]
+    public Task<int> UpdateAssignmentProfileAsync(int tenantId, string actionType, Guid profileId)
+    {
+        return AssignmentQueriesContainer.UpdateAssignmentProfileAsync(this, tenantId, actionType, profileId);
     }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt, null, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
-    public Task<int> UpdateAssignmentProfileAsync(int tenantId, string actionType, int entryId, Guid profileId)
+    public Task<int> UpdateAssignmentProfileByEntryAsync(int tenantId, string actionType, int entryId, Guid profileId)
     {
-        return AssignmentQueriesContainer.UpdateAssignmentProfileAsync(this, tenantId, actionType, entryId, profileId);
+        return AssignmentQueriesContainer.UpdateAssignmentProfileByEntryAsync(this, tenantId, actionType, entryId, profileId);
     }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
@@ -58,21 +82,46 @@ public partial class AiIntegrationContext
         return AssignmentQueriesContainer.DeleteAssignmentAsync(this, tenantId, actionType);
     }
 
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null, PreCompileQuery.DefaultInt])]
+    public Task<int> DeleteAssignmentByEntryAsync(int tenantId, string actionType, int entryId)
+    {
+        return AssignmentQueriesContainer.DeleteAssignmentByEntryAsync(this, tenantId, actionType, entryId);
+    }
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
     public Task<int> DeleteAssignmentsByTypesAsync(int tenantId, IEnumerable<string> actionTypes)
     {
         return AssignmentQueriesContainer.DeleteAssignmentsByTypesAsync(this, tenantId, actionTypes);
     }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, null])]
+    public Task<int> DeleteAssignmentsByTypesAndEntryAsync(int tenantId, int entryId, IEnumerable<string> actionTypes)
+    {
+        return AssignmentQueriesContainer.DeleteAssignmentsByTypesAndEntryAsync(this, tenantId, entryId, actionTypes);
+    }
 }
 
 static file class AssignmentQueriesContainer
 {
-    public static readonly Func<AiIntegrationContext, int, string, int, Task<DbAssignment?>> GetAssignmentAsync =
+    public static readonly Func<AiIntegrationContext, int, string, Task<DbAssignment?>> GetAssignmentAsync =
+        EF.CompileAsyncQuery(
+            (AiIntegrationContext ctx, int tenantId, string actionType) =>
+                ctx.Assignments.FirstOrDefault(x => x.TenantId == tenantId && x.ActionType == actionType && x.EntryId == null));
+
+    public static readonly Func<AiIntegrationContext, int, string, int, Task<DbAssignment?>> GetAssignmentByEntryAsync =
         EF.CompileAsyncQuery(
             (AiIntegrationContext ctx, int tenantId, string actionType, int entryId) =>
                 ctx.Assignments.FirstOrDefault(x => x.TenantId == tenantId && x.ActionType == actionType && x.EntryId == entryId));
 
-    public static readonly Func<AiIntegrationContext, int, int, IAsyncEnumerable<DbAssignment>> GetAllAssignmentsAsync =
+    public static readonly Func<AiIntegrationContext, int, IAsyncEnumerable<DbAssignment>> GetAllAssignmentsAsync =
+        EF.CompileAsyncQuery(
+            (AiIntegrationContext ctx, int tenantId) =>
+                ctx.Assignments
+                    .Where(x => x.TenantId == tenantId && x.EntryId == null)
+                    .OrderBy(x => x.ActionType)
+                    .AsQueryable());
+
+    public static readonly Func<AiIntegrationContext, int, int, IAsyncEnumerable<DbAssignment>> GetAllAssignmentsByEntryAsync =
         EF.CompileAsyncQuery(
             (AiIntegrationContext ctx, int tenantId, int entryId) =>
                 ctx.Assignments
@@ -80,14 +129,26 @@ static file class AssignmentQueriesContainer
                     .OrderBy(x => x.ActionType)
                     .AsQueryable());
 
-    public static readonly Func<AiIntegrationContext, int, int, IEnumerable<string>, IAsyncEnumerable<string>> GetExistingAssignmentTypesAsync =
+    public static readonly Func<AiIntegrationContext, int, IEnumerable<string>, IAsyncEnumerable<DbAssignment>> GetAssignmentsByTypesAsync =
+        EF.CompileAsyncQuery(
+            (AiIntegrationContext ctx, int tenantId, IEnumerable<string> actionTypes) =>
+                ctx.Assignments
+                    .Where(x => x.TenantId == tenantId && x.EntryId == null && actionTypes.Contains(x.ActionType)));
+
+    public static readonly Func<AiIntegrationContext, int, int, IEnumerable<string>, IAsyncEnumerable<DbAssignment>> GetAssignmentsByTypesAndEntryAsync =
         EF.CompileAsyncQuery(
             (AiIntegrationContext ctx, int tenantId, int entryId, IEnumerable<string> actionTypes) =>
                 ctx.Assignments
-                    .Where(x => x.TenantId == tenantId && x.EntryId == entryId && actionTypes.Contains(x.ActionType))
-                    .Select(x => x.ActionType));
+                    .Where(x => x.TenantId == tenantId && x.EntryId == entryId && actionTypes.Contains(x.ActionType)));
 
-    public static readonly Func<AiIntegrationContext, int, string, int, Guid, Task<int>> UpdateAssignmentProfileAsync =
+    public static readonly Func<AiIntegrationContext, int, string, Guid, Task<int>> UpdateAssignmentProfileAsync =
+        EF.CompileAsyncQuery(
+            (AiIntegrationContext ctx, int tenantId, string actionType, Guid profileId) =>
+                ctx.Assignments
+                    .Where(x => x.TenantId == tenantId && x.ActionType == actionType && x.EntryId == null)
+                    .ExecuteUpdate(x => x.SetProperty(y => y.ProfileId, profileId)));
+
+    public static readonly Func<AiIntegrationContext, int, string, int, Guid, Task<int>> UpdateAssignmentProfileByEntryAsync =
         EF.CompileAsyncQuery(
             (AiIntegrationContext ctx, int tenantId, string actionType, int entryId, Guid profileId) =>
                 ctx.Assignments
@@ -98,13 +159,27 @@ static file class AssignmentQueriesContainer
         EF.CompileAsyncQuery(
             (AiIntegrationContext ctx, int tenantId, string actionType) =>
                 ctx.Assignments
-                    .Where(x => x.TenantId == tenantId && x.ActionType == actionType && x.EntryId == 0)
+                    .Where(x => x.TenantId == tenantId && x.ActionType == actionType && x.EntryId == null)
+                    .ExecuteDelete());
+
+    public static readonly Func<AiIntegrationContext, int, string, int, Task<int>> DeleteAssignmentByEntryAsync =
+        EF.CompileAsyncQuery(
+            (AiIntegrationContext ctx, int tenantId, string actionType, int entryId) =>
+                ctx.Assignments
+                    .Where(x => x.TenantId == tenantId && x.ActionType == actionType && x.EntryId == entryId)
                     .ExecuteDelete());
 
     public static readonly Func<AiIntegrationContext, int, IEnumerable<string>, Task<int>> DeleteAssignmentsByTypesAsync =
         EF.CompileAsyncQuery(
             (AiIntegrationContext ctx, int tenantId, IEnumerable<string> actionTypes) =>
                 ctx.Assignments
-                    .Where(x => x.TenantId == tenantId && x.EntryId == 0 && actionTypes.Contains(x.ActionType))
+                    .Where(x => x.TenantId == tenantId && x.EntryId == null && actionTypes.Contains(x.ActionType))
+                    .ExecuteDelete());
+
+    public static readonly Func<AiIntegrationContext, int, int, IEnumerable<string>, Task<int>> DeleteAssignmentsByTypesAndEntryAsync =
+        EF.CompileAsyncQuery(
+            (AiIntegrationContext ctx, int tenantId, int entryId, IEnumerable<string> actionTypes) =>
+                ctx.Assignments
+                    .Where(x => x.TenantId == tenantId && x.EntryId == entryId && actionTypes.Contains(x.ActionType))
                     .ExecuteDelete());
 }

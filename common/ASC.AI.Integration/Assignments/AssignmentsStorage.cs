@@ -29,28 +29,43 @@ namespace ASC.AI.Integration.Assignments;
 [Scope]
 public class AssignmentsStorage(IDbContextFactory<AiIntegrationContext> dbContextFactory)
 {
-    public async Task CreateAsync(int tenantId, string actionType, Guid profileId, int? entryId = null)
+    public async Task<bool> CreateAsync(int tenantId, string actionType, Guid profileId, int? entryId = null)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
+        var existing = entryId.HasValue
+            ? await context.GetAssignmentByEntryAsync(tenantId, actionType, entryId.Value)
+            : await context.GetAssignmentAsync(tenantId, actionType);
+
+        if (existing != null)
+        {
+            return false;
+        }
+
         var entity = new DbAssignment
         {
+            Id = Guid.CreateVersion7(),
             TenantId = tenantId,
             ActionType = actionType,
             ProfileId = profileId,
-            EntryId = entryId ?? 0,
+            EntryId = entryId,
             CreatedAt = DateTime.UtcNow
         };
 
         context.Assignments.Add(entity);
         await context.SaveChangesAsync();
+
+        return true;
     }
 
     public async Task<Guid?> ReadByTypeAsync(int tenantId, string actionType, int? entryId = null)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        var entity = await context.GetAssignmentAsync(tenantId, actionType, entryId ?? 0);
+        var entity = entryId.HasValue
+            ? await context.GetAssignmentByEntryAsync(tenantId, actionType, entryId.Value)
+            : await context.GetAssignmentAsync(tenantId, actionType);
+
         return entity?.ProfileId;
     }
 
@@ -58,15 +73,22 @@ public class AssignmentsStorage(IDbContextFactory<AiIntegrationContext> dbContex
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        return await context.GetAllAssignmentsAsync(tenantId, entryId ?? 0)
-            .ToDictionaryAsync(x => x.ActionType, x => x.ProfileId);
+        var assignments = entryId.HasValue
+            ? context.GetAllAssignmentsByEntryAsync(tenantId, entryId.Value)
+            : context.GetAllAssignmentsAsync(tenantId);
+
+        return await assignments.ToDictionaryAsync(x => x.ActionType, x => x.ProfileId);
     }
 
     public async Task<bool> UpdateAsync(int tenantId, string actionType, Guid profileId, int? entryId = null)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        return await context.UpdateAssignmentProfileAsync(tenantId, actionType, entryId ?? 0, profileId) > 0;
+        var affected = entryId.HasValue
+            ? await context.UpdateAssignmentProfileByEntryAsync(tenantId, actionType, entryId.Value, profileId)
+            : await context.UpdateAssignmentProfileAsync(tenantId, actionType, profileId);
+
+        return affected > 0;
     }
 
     public async Task UpsertManyAsync(int tenantId, IReadOnlyDictionary<string, Guid> assignments, int? entryId = null)
@@ -76,8 +98,6 @@ public class AssignmentsStorage(IDbContextFactory<AiIntegrationContext> dbContex
             return;
         }
 
-        var entry = entryId ?? 0;
-
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var strategy = dbContext.Database.CreateExecutionStrategy();
 
@@ -86,19 +106,22 @@ public class AssignmentsStorage(IDbContextFactory<AiIntegrationContext> dbContex
             await using var context = await dbContextFactory.CreateDbContextAsync();
             await using var transaction = await context.Database.BeginTransactionAsync();
 
-            var existingTypes = await context.GetExistingAssignmentTypesAsync(tenantId, entry, assignments.Keys)
-                .ToHashSetAsync();
+            var existingByType = await (entryId.HasValue
+                    ? context.GetAssignmentsByTypesAndEntryAsync(tenantId, entryId.Value, assignments.Keys)
+                    : context.GetAssignmentsByTypesAsync(tenantId, assignments.Keys))
+                .ToDictionaryAsync(x => x.ActionType, x => x.Id);
 
             var now = DateTime.UtcNow;
             foreach (var (actionType, profileId) in assignments)
             {
-                if (existingTypes.Contains(actionType))
+                if (existingByType.TryGetValue(actionType, out var existingId))
                 {
                     var entity = new DbAssignment
                     {
+                        Id = existingId,
                         TenantId = tenantId,
                         ActionType = actionType,
-                        EntryId = entry,
+                        EntryId = entryId,
                         ProfileId = profileId,
                         CreatedAt = default
                     };
@@ -109,10 +132,11 @@ public class AssignmentsStorage(IDbContextFactory<AiIntegrationContext> dbContex
                 {
                     context.Assignments.Add(new DbAssignment
                     {
+                        Id = Guid.CreateVersion7(),
                         TenantId = tenantId,
                         ActionType = actionType,
                         ProfileId = profileId,
-                        EntryId = entry,
+                        EntryId = entryId,
                         CreatedAt = now
                     });
                 }
@@ -123,14 +147,21 @@ public class AssignmentsStorage(IDbContextFactory<AiIntegrationContext> dbContex
         });
     }
 
-    public async Task DeleteAsync(int tenantId, string actionType)
+    public async Task DeleteAsync(int tenantId, string actionType, int? entryId = null)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        await context.DeleteAssignmentAsync(tenantId, actionType);
+        if (entryId.HasValue)
+        {
+            await context.DeleteAssignmentByEntryAsync(tenantId, actionType, entryId.Value);
+        }
+        else
+        {
+            await context.DeleteAssignmentAsync(tenantId, actionType);
+        }
     }
 
-    public async Task DeleteManyAsync(int tenantId, IReadOnlyCollection<string> actionTypes)
+    public async Task DeleteManyAsync(int tenantId, IReadOnlyCollection<string> actionTypes, int? entryId = null)
     {
         if (actionTypes.Count == 0)
         {
@@ -139,6 +170,13 @@ public class AssignmentsStorage(IDbContextFactory<AiIntegrationContext> dbContex
 
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        await context.DeleteAssignmentsByTypesAsync(tenantId, actionTypes);
+        if (entryId.HasValue)
+        {
+            await context.DeleteAssignmentsByTypesAndEntryAsync(tenantId, entryId.Value, actionTypes);
+        }
+        else
+        {
+            await context.DeleteAssignmentsByTypesAsync(tenantId, actionTypes);
+        }
     }
 }
