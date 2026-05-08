@@ -30,4 +30,7 @@ public class ReadAssignmentRequestDto
 {
     [FromRoute(Name = "actionType")]
     public required string ActionType { get; init; }
+
+    [FromQuery(Name = "entityId")]
+    public string? EntityId { get; init; }
 }

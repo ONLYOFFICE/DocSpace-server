@@ -62,6 +62,7 @@ public partial class FilesDbContext(DbContextOptions<FilesDbContext> dbContextOp
     public DbSet<DbChatMessageAttachment> MessageAttachments { get; set; }
     public DbSet<DbAiModelSettings> AiModelSettings { get; set; }
     public DbSet<DbThread> Threads { get; set; }
+    public DbSet<DbAssignment> Assignments { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -99,6 +100,8 @@ public partial class FilesDbContext(DbContextOptions<FilesDbContext> dbContextOp
             .AddDbAiModelSettings()
             .AddDbChatMessageAttachment()
             .AddDbThreads()
+            .AddDbProfiles()
+            .AddDbAssignments()
             .AddDbFunctions();
     }
 }

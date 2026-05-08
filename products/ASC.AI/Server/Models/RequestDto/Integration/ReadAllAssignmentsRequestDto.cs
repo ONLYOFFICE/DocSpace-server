@@ -26,8 +26,8 @@
 
 namespace ASC.AI.Models.RequestDto.Integration;
 
-public class UpsertAssignmentsRequestDto
+public class ReadAllAssignmentsRequestDto
 {
-    public required IReadOnlyDictionary<string, Guid> Assignments { get; init; }
+    [FromQuery(Name = "entityId")]
     public string? EntityId { get; init; }
 }

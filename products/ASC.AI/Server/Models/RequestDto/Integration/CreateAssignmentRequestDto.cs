@@ -30,4 +30,5 @@ public class CreateAssignmentRequestDto
 {
     public required string ActionType { get; init; }
     public required Guid ProfileId { get; init; }
+    public string? EntityId { get; init; }
 }

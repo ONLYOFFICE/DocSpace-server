@@ -35,6 +35,7 @@ public class DbAssignment : BaseEntity
     public required string ActionType { get; init; }
 
     public Guid ProfileId { get; set; }
+    public int EntryId { get; init; }
     public DateTime CreatedAt { get; init; }
 
     public DbTenant Tenant { get; init; } = null!;
@@ -42,7 +43,7 @@ public class DbAssignment : BaseEntity
 
     public override object[] GetKeys()
     {
-        return [TenantId, ActionType];
+        return [TenantId, ActionType, EntryId];
     }
 }
 
@@ -67,7 +68,7 @@ public static class DbAssignmentExtension
             entity.ToTable("ai_integration_assignments")
                 .HasCharSet("utf8");
 
-            entity.HasKey(e => new { e.TenantId, e.ActionType })
+            entity.HasKey(e => new { e.TenantId, e.ActionType, e.EntryId })
                 .HasName("PRIMARY");
 
             entity.Property(e => e.TenantId)
@@ -85,6 +86,10 @@ public static class DbAssignmentExtension
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
+            entity.Property(e => e.EntryId)
+                .HasColumnName("entry_id")
+                .HasColumnType("int");
+
             entity.Property(e => e.CreatedAt)
                 .HasColumnName("created_at")
                 .HasColumnType("datetime");
@@ -97,7 +102,7 @@ public static class DbAssignmentExtension
         {
             entity.ToTable("ai_integration_assignments");
 
-            entity.HasKey(e => new { e.TenantId, e.ActionType })
+            entity.HasKey(e => new { e.TenantId, e.ActionType, e.EntryId })
                 .HasName("pk_ai_integration_assignments");
 
             entity.Property(e => e.TenantId)
@@ -112,6 +117,10 @@ public static class DbAssignmentExtension
             entity.Property(e => e.ProfileId)
                 .HasColumnName("profile_id")
                 .HasColumnType("uuid");
+
+            entity.Property(e => e.EntryId)
+                .HasColumnName("entry_id")
+                .HasColumnType("integer");
 
             entity.Property(e => e.CreatedAt)
                 .HasColumnName("created_at")

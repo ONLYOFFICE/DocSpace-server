@@ -40,31 +40,31 @@ public class AssignmentsStorageController(AssignmentsStorageService assignmentsS
     [HttpPost("integration/assignments")]
     public async Task CreateAsync(CreateAssignmentRequestDto inDto)
     {
-        await assignmentsStorageService.CreateAsync(inDto.ActionType, inDto.ProfileId);
+        await assignmentsStorageService.CreateAsync(inDto.ActionType, inDto.ProfileId, inDto.EntityId);
     }
 
     [HttpGet("integration/assignments/{actionType}")]
     public async Task<Guid?> ReadByTypeAsync(ReadAssignmentRequestDto inDto)
     {
-        return await assignmentsStorageService.ReadByTypeAsync(inDto.ActionType);
+        return await assignmentsStorageService.ReadByTypeAsync(inDto.ActionType, inDto.EntityId);
     }
 
     [HttpGet("integration/assignments")]
-    public async Task<Dictionary<string, Guid>> ReadAllAsync()
+    public async Task<Dictionary<string, Guid>> ReadAllAsync(ReadAllAssignmentsRequestDto inDto)
     {
-        return await assignmentsStorageService.ReadAllAsync();
+        return await assignmentsStorageService.ReadAllAsync(inDto.EntityId);
     }
 
     [HttpPut("integration/assignments/{actionType}")]
     public async Task UpdateAsync(UpdateAssignmentRequestDto inDto)
     {
-        await assignmentsStorageService.UpdateAsync(inDto.ActionType, inDto.Body.ProfileId);
+        await assignmentsStorageService.UpdateAsync(inDto.ActionType, inDto.Body.ProfileId, inDto.Body.EntityId);
     }
 
     [HttpPut("integration/assignments")]
     public async Task UpsertManyAsync(UpsertAssignmentsRequestDto inDto)
     {
-        await assignmentsStorageService.UpsertManyAsync(inDto.Assignments);
+        await assignmentsStorageService.UpsertManyAsync(inDto.Assignments, inDto.EntityId);
     }
 
     [HttpDelete("integration/assignments/{actionType}")]

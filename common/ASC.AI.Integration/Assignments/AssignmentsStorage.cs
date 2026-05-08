@@ -29,7 +29,7 @@ namespace ASC.AI.Integration.Assignments;
 [Scope]
 public class AssignmentsStorage(IDbContextFactory<AiIntegrationContext> dbContextFactory)
 {
-    public async Task CreateAsync(int tenantId, string actionType, Guid profileId)
+    public async Task CreateAsync(int tenantId, string actionType, Guid profileId, int? entryId = null)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
@@ -38,6 +38,7 @@ public class AssignmentsStorage(IDbContextFactory<AiIntegrationContext> dbContex
             TenantId = tenantId,
             ActionType = actionType,
             ProfileId = profileId,
+            EntryId = entryId ?? 0,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -45,35 +46,37 @@ public class AssignmentsStorage(IDbContextFactory<AiIntegrationContext> dbContex
         await context.SaveChangesAsync();
     }
 
-    public async Task<Guid?> ReadByTypeAsync(int tenantId, string actionType)
+    public async Task<Guid?> ReadByTypeAsync(int tenantId, string actionType, int? entryId = null)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        var entity = await context.GetAssignmentAsync(tenantId, actionType);
+        var entity = await context.GetAssignmentAsync(tenantId, actionType, entryId ?? 0);
         return entity?.ProfileId;
     }
 
-    public async Task<Dictionary<string, Guid>> ReadAllAsync(int tenantId)
+    public async Task<Dictionary<string, Guid>> ReadAllAsync(int tenantId, int? entryId = null)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        return await context.GetAllAssignmentsAsync(tenantId)
+        return await context.GetAllAssignmentsAsync(tenantId, entryId ?? 0)
             .ToDictionaryAsync(x => x.ActionType, x => x.ProfileId);
     }
 
-    public async Task<bool> UpdateAsync(int tenantId, string actionType, Guid profileId)
+    public async Task<bool> UpdateAsync(int tenantId, string actionType, Guid profileId, int? entryId = null)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        return await context.UpdateAssignmentProfileAsync(tenantId, actionType, profileId) > 0;
+        return await context.UpdateAssignmentProfileAsync(tenantId, actionType, entryId ?? 0, profileId) > 0;
     }
 
-    public async Task UpsertManyAsync(int tenantId, IReadOnlyDictionary<string, Guid> assignments)
+    public async Task UpsertManyAsync(int tenantId, IReadOnlyDictionary<string, Guid> assignments, int? entryId = null)
     {
         if (assignments.Count == 0)
         {
             return;
         }
+
+        var entry = entryId ?? 0;
 
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var strategy = dbContext.Database.CreateExecutionStrategy();
@@ -83,19 +86,24 @@ public class AssignmentsStorage(IDbContextFactory<AiIntegrationContext> dbContex
             await using var context = await dbContextFactory.CreateDbContextAsync();
             await using var transaction = await context.Database.BeginTransactionAsync();
 
-            var actionTypes = assignments.Keys.ToArray();
-            var existing = await context.GetAssignmentsByTypesAsync(tenantId, actionTypes)
-                .ToDictionaryAsync(x => x.ActionType);
+            var existingTypes = await context.GetExistingAssignmentTypesAsync(tenantId, entry, assignments.Keys)
+                .ToHashSetAsync();
 
             var now = DateTime.UtcNow;
             foreach (var (actionType, profileId) in assignments)
             {
-                if (existing.TryGetValue(actionType, out var entity))
+                if (existingTypes.Contains(actionType))
                 {
-                    if (entity.ProfileId != profileId)
+                    var entity = new DbAssignment
                     {
-                        entity.ProfileId = profileId;
-                    }
+                        TenantId = tenantId,
+                        ActionType = actionType,
+                        EntryId = entry,
+                        ProfileId = profileId,
+                        CreatedAt = default
+                    };
+                    context.Assignments.Attach(entity);
+                    context.Entry(entity).Property(x => x.ProfileId).IsModified = true;
                 }
                 else
                 {
@@ -104,6 +112,7 @@ public class AssignmentsStorage(IDbContextFactory<AiIntegrationContext> dbContex
                         TenantId = tenantId,
                         ActionType = actionType,
                         ProfileId = profileId,
+                        EntryId = entry,
                         CreatedAt = now
                     });
                 }

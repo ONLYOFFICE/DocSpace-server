@@ -41,42 +41,77 @@ public class AssignmentsStorageService(
     private static readonly EmployeeType[] _writeTypes = [EmployeeType.DocSpaceAdmin];
     private static readonly EmployeeType[] _readTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin];
 
-    public async Task CreateAsync(string actionType, Guid profileId)
+    public async Task CreateAsync(string actionType, Guid profileId, string? entityId = null)
     {
         await AssertUserHasAccessAsync(_writeTypes);
 
-        await storage.CreateAsync(tenantManager.GetCurrentTenantId(), actionType, profileId);
+        int? entryId = entityId == null ? null : int.Parse(entityId);
+
+        if (entryId.HasValue)
+        {
+            await AssertEntryAccessAsync(entryId.Value);
+        }
+
+        await storage.CreateAsync(tenantManager.GetCurrentTenantId(), actionType, profileId, entryId);
     }
 
-    public async Task<Guid?> ReadByTypeAsync(string actionType)
+    public async Task<Guid?> ReadByTypeAsync(string actionType, string? entityId = null)
     {
         await AssertUserHasAccessAsync(_readTypes);
 
-        return await storage.ReadByTypeAsync(tenantManager.GetCurrentTenantId(), actionType);
+        int? entryId = entityId == null ? null : int.Parse(entityId);
+
+        if (entryId.HasValue)
+        {
+            await AssertEntryAccessAsync(entryId.Value);
+        }
+
+        return await storage.ReadByTypeAsync(tenantManager.GetCurrentTenantId(), actionType, entryId);
     }
 
-    public async Task<Dictionary<string, Guid>> ReadAllAsync()
+    public async Task<Dictionary<string, Guid>> ReadAllAsync(string? entityId = null)
     {
         await AssertUserHasAccessAsync(_readTypes);
 
-        return await storage.ReadAllAsync(tenantManager.GetCurrentTenantId());
+        int? entryId = entityId == null ? null : int.Parse(entityId);
+
+        if (entryId.HasValue)
+        {
+            await AssertEntryAccessAsync(entryId.Value);
+        }
+
+        return await storage.ReadAllAsync(tenantManager.GetCurrentTenantId(), entryId);
     }
 
-    public async Task UpdateAsync(string actionType, Guid profileId)
+    public async Task UpdateAsync(string actionType, Guid profileId, string? entityId = null)
     {
         await AssertUserHasAccessAsync(_writeTypes);
 
-        if (!await storage.UpdateAsync(tenantManager.GetCurrentTenantId(), actionType, profileId))
+        int? entryId = entityId == null ? null : int.Parse(entityId);
+
+        if (entryId.HasValue)
+        {
+            await AssertEntryAccessAsync(entryId.Value);
+        }
+
+        if (!await storage.UpdateAsync(tenantManager.GetCurrentTenantId(), actionType, profileId, entryId))
         {
             throw new ItemNotFoundException($"Assignment for action type '{actionType}' was not found");
         }
     }
 
-    public async Task UpsertManyAsync(IReadOnlyDictionary<string, Guid> assignments)
+    public async Task UpsertManyAsync(IReadOnlyDictionary<string, Guid> assignments, string? entityId = null)
     {
         await AssertUserHasAccessAsync(_writeTypes);
 
-        await storage.UpsertManyAsync(tenantManager.GetCurrentTenantId(), assignments);
+        int? entryId = entityId == null ? null : int.Parse(entityId);
+
+        if (entryId.HasValue)
+        {
+            await AssertEntryAccessAsync(entryId.Value);
+        }
+
+        await storage.UpsertManyAsync(tenantManager.GetCurrentTenantId(), assignments, entryId);
     }
 
     public async Task DeleteAsync(string actionType)

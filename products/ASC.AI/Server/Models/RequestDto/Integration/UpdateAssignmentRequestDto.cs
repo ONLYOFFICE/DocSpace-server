@@ -38,4 +38,5 @@ public class UpdateAssignmentRequestDto
 public class UpdateAssignmentBody
 {
     public required Guid ProfileId { get; init; }
+    public string? EntityId { get; init; }
 }
