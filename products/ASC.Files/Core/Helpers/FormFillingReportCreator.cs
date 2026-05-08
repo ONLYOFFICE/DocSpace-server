@@ -514,6 +514,7 @@ public class FormFillingReportCreator(
     private static IEnumerable<FormMetadata> NormalizeMetadata(IEnumerable<FormMetadata> metaData)
     {
         return metaData
+            .Where(m => m.Type != "picture" && m.Type != "signature")
             .GroupBy(m => m.Type == "radio"
                 ? $"radio::{NormalizeColumnName(m.Key)}"
                 : NormalizeColumnName(m.Key))
