@@ -532,7 +532,6 @@ public class FileDtoHelper(
                     else
                     {
                         result.Security[FileSecurity.FilesSecurityActions.FillForms] = true;
-                        result.Security[FileSecurity.FilesSecurityActions.StopFilling] = true;
                     }
                 }
                 else
