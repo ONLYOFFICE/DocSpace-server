@@ -170,6 +170,10 @@ public class FileStorageService //: IFileStorageService
 
         if (!await fileSecurity.CanReadAsync(folder))
         {
+            if (!securityContext.CurrentAccount.IsAuthenticated)
+            {
+                throw new AuthenticationException();
+            }
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ReadFolder);
         }
 
