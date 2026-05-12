@@ -479,9 +479,12 @@ public class PaymentController(
     /// <collection>list</collection>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "List of available portal currencies", typeof(IAsyncEnumerable<CurrenciesDto>))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("currencies")]
     public async IAsyncEnumerable<CurrenciesDto> GetPaymentCurrencies()
     {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
         var defaultRegion = regionHelper.GetDefaultRegionInfo();
         var currentRegion = await regionHelper.GetCurrentRegionInfoAsync();
 
