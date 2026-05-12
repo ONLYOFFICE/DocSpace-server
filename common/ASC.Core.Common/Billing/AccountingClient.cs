@@ -79,12 +79,6 @@ public class AccountingClient
         return await RequestAsync<Balance>(HttpMethod.Get, $"/customer/{portalId}/balance", addPolicy: addPolicy);
     }
 
-    public async Task<Balance> GetCustomerServiceQuotaAsync(string portalId, string serviceName, bool addPolicy = false)
-    {
-        return await RequestAsync<Balance>(HttpMethod.Get, $"/customer/{portalId}/quota/{serviceName}",
-            addPolicy: addPolicy);
-    }
-
     public async Task<Balance> GetCustomerAiBalanceAsync(string portalId, bool addPolicy = false)
     {
         return await RequestAsync<Balance>(HttpMethod.Get, $"/customer/{portalId}/balance/ai", addPolicy: addPolicy);
@@ -130,16 +124,6 @@ public class AccountingClient
         var jsonBody = JsonSerializer.Serialize(data, _serializationOptions);
 
         _ = await RequestAsync<string>(HttpMethod.Post, "/operation/sessionComplete", jsonBody: jsonBody);
-    }
-
-    public async Task<ServicePayment> MakeServicePaymentAsync(string portalId, string serviceName, int quantity,
-        string customerParticipantName, Dictionary<string, string> metadata = null)
-    {
-        var data = new ServicePaymentOperation(portalId, serviceName, quantity, customerParticipantName, metadata);
-
-        var jsonBody = JsonSerializer.Serialize(data, _serializationOptions);
-
-        return await RequestAsync<ServicePayment>(HttpMethod.Post, "/operation/servicePayment", jsonBody: jsonBody);
     }
 
     public async Task<ServicePayment> MakeAiCreditAsync(string portalId, decimal amount, string currency,
@@ -924,13 +908,6 @@ file record SessionCompleteOperation(
     string CustomerName,
     string ServiceName,
     int SessionId,
-    int Quantity,
-    string CustomerParticipantName,
-    Dictionary<string, string> Metadata);
-
-file record ServicePaymentOperation(
-    string CustomerName,
-    string ServiceName,
     int Quantity,
     string CustomerParticipantName,
     Dictionary<string, string> Metadata);

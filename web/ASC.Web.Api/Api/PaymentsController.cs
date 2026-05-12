@@ -816,32 +816,18 @@ public class PaymentController(
     [SwaggerResponse(200, "The service quota", typeof(Balance))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("customer/servicequota")]
+    [Obsolete("Use api/2.0/portal/payment/customer/aibalance instead")]
     public async Task<Balance> GetCustomerServiceQuota(CustomerServiceQuotaRequestDto inDto)
     {
-        if (!tariffService.IsConfigured())
-        {
-            throw new InvalidOperationException("Tariff service is not configured");
-        }
-
-        await DemandAdminAsync();
-
-        var tenant = tenantManager.GetCurrentTenant();
-
-        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
-        if (customerInfo == null)
-        {
-            return null;
-        }
-
         var walletService = await CheckWalletServiceName(inDto.ServiceName);
-        if (walletService == TenantWalletService.AITools)
+
+        // For now, only ai-tools available for purchasing!
+        if (walletService != TenantWalletService.AITools)
         {
-            //TODO: crutch for compatibility
-            return await GetCustomerAiBalance(inDto);
+            throw new ItemNotFoundException("Service could not be found");
         }
 
-        var result = await tariffService.GetCustomerServiceQuotaAsync(tenant.Id, inDto.ServiceName, inDto.Refresh);
-        return result;
+        return await GetCustomerAiBalance(inDto);
     }
 
     /// <remarks>
@@ -1273,23 +1259,9 @@ public class PaymentController(
     [SwaggerResponse(404, "Customer or service could not be found")]
     [HttpPost("buywalletservice")]
     [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
+    [Obsolete("Use api/2.0/portal/payment/creditaibalance instead")]
     public async Task<ServicePayment> BuyWalletService(BuyWalletServiceRequestDto inDto)
     {
-        if (!tariffService.IsConfigured())
-        {
-            throw new InvalidOperationException("Tariff service is not configured");
-        }
-
-        var tenant = tenantManager.GetCurrentTenant();
-
-        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
-        if (customerInfo is not { PaymentMethodStatus: PaymentMethodStatus.Set })
-        {
-            throw new ItemNotFoundException("Customer could not be found");
-        }
-
-        await DemandPayerAsync(customerInfo);
-
         var walletService = await CheckWalletServiceName(inDto.ServiceName);
 
         // For now, only ai-tools available for purchasing!
@@ -1298,27 +1270,10 @@ public class PaymentController(
             throw new ItemNotFoundException("Service could not be found");
         }
 
-        //TODO: crutch for compatibility
         return await CreditAiBalance(new CreditAiBalanceRequestDto
         {
             Amount = inDto.Quantity
         });
-
-        /*var customerParticipantName = securityContext.CurrentAccount.ID.ToString();
-        var details = $"{inDto.ServiceName} {inDto.Quantity}";
-
-        var result = await tariffService.MakeServicePaymentAsync(tenant.Id, inDto.ServiceName, inDto.Quantity, customerParticipantName, metadata: null);
-        if (result != null)
-        {
-            messageService.Send(MessageAction.CustomerOperationPerformed, null, details);
-            await ChangeTenantWalletServiceState(new ChangeWalletServiceStateRequestDto
-            {
-                Service = walletService,
-                Enabled = true
-            });
-        }
-
-        return result;*/
     }
 
     /// <summary>

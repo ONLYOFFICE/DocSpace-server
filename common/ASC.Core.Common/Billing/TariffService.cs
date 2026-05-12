@@ -421,11 +421,6 @@ public class TariffService(
         return $"{tenantId}:accounting:balance";
     }
 
-    internal static string GetAccountingServiceQuotaCacheKey(int tenantId, string serviceName)
-    {
-        return $"{tenantId}:accounting:{serviceName}:quota";
-    }
-
     internal static string GetAccountingAiBalanceCacheKey(int tenantId)
     {
         return $"{tenantId}:accounting:ai:balance";
@@ -1210,47 +1205,6 @@ public class TariffService(
         return balance;
     }
 
-    public async Task<Balance> GetCustomerServiceQuotaAsync(int tenantId, string serviceName, bool refresh = false)
-    {
-        if (!accountingClient.Configured)
-        {
-            return null;
-        }
-
-        var cacheKey = GetAccountingServiceQuotaCacheKey(tenantId, serviceName);
-
-        var balance = refresh ? null : await GetFromCache<Balance>(cacheKey);
-
-        if (balance != null)
-        {
-            return balance.IsDefault() ? null : balance;
-        }
-
-        await using (await distributedLockProvider.TryAcquireLockAsync($"{cacheKey}_lock"))
-        {
-            balance = refresh ? null : await GetFromCache<Balance>(cacheKey);
-
-            if (balance != null)
-            {
-                return balance.IsDefault() ? null : balance;
-            }
-
-            try
-            {
-                var portalId = await coreSettings.GetKeyAsync(tenantId);
-                balance = await accountingClient.GetCustomerServiceQuotaAsync(portalId, serviceName, true);
-                await hybridCache.SetAsync(cacheKey, balance, TimeSpan.FromMinutes(10));
-            }
-            catch (Exception error)
-            {
-                LogError(error, tenantId.ToString());
-                await hybridCache.SetAsync(cacheKey, new Balance(), TimeSpan.FromMinutes(10));
-            }
-        }
-
-        return balance;
-    }
-
     public async Task<Balance> GetCustomerAiBalanceAsync(int tenantId, bool refresh = false)
     {
         if (!accountingClient.Configured)
@@ -1318,15 +1272,6 @@ public class TariffService(
         await accountingClient.CompleteCustomerSessionAsync(portalId, serviceName, sessionId, quantity, customerParticipantName, metadata);
         await hybridCache.RemoveAsync(GetAccountingBalanceCacheKey(tenantId));
         return true;
-    }
-
-    public async Task<ServicePayment> MakeServicePaymentAsync(int tenantId, string serviceName, int quantity, string customerParticipantName, Dictionary<string, string> metadata = null)
-    {
-        var portalId = await coreSettings.GetKeyAsync(tenantId);
-        var result = await accountingClient.MakeServicePaymentAsync(portalId, serviceName, quantity, customerParticipantName, metadata);
-        await hybridCache.RemoveAsync(GetAccountingServiceQuotaCacheKey(tenantId, serviceName));
-        await hybridCache.RemoveAsync(GetAccountingBalanceCacheKey(tenantId));
-        return result;
     }
 
     public async Task<ServicePayment> MakeAiCreditAsync(int tenantId, decimal amount, string currency, string customerParticipantName, Dictionary<string, string> metadata = null)
