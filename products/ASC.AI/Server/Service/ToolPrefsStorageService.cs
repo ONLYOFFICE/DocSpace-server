@@ -40,14 +40,21 @@ public class ToolPrefsStorageService(
 {
     private static readonly EmployeeType[] _allowedTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin];
 
-    public async Task<Dictionary<string, ToolPreference>> ReadAsync()
+    public async Task<IReadOnlyDictionary<string, ToolPreference>> ReadAsync(string? entityId = null)
     {
         await AssertUserHasAccessAsync(_allowedTypes);
 
-        return await storage.ReadAllAsync(tenantManager.GetCurrentTenantId(), CurrentUserId);
+        int? entryId = entityId == null ? null : int.Parse(entityId);
+
+        if (entryId.HasValue)
+        {
+            await AssertEntryAccessAsync(entryId.Value);
+        }
+
+        return await storage.ReadAllAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, entryId);
     }
 
-    public async Task UpsertDisabledAsync(IReadOnlyDictionary<string, HashSet<string>> disabled)
+    public async Task UpsertDisabledAsync(IReadOnlyDictionary<string, HashSet<string>> disabled, string? entityId = null)
     {
         await AssertUserHasAccessAsync(_allowedTypes);
 
@@ -56,11 +63,18 @@ public class ToolPrefsStorageService(
             return;
         }
 
+        int? entryId = entityId == null ? null : int.Parse(entityId);
+
+        if (entryId.HasValue)
+        {
+            await AssertEntryAccessAsync(entryId.Value);
+        }
+
         var items = disabled.ToDictionary(kv => kv.Key, kv => new ToolPreference { Disabled = kv.Value });
-        await storage.UpsertAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, items);
+        await storage.UpsertAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, items, entryId);
     }
 
-    public async Task UpsertAllowAlwaysAsync(IReadOnlyDictionary<string, HashSet<string>> allowAlways)
+    public async Task UpsertAllowAlwaysAsync(IReadOnlyDictionary<string, HashSet<string>> allowAlways, string? entityId = null)
     {
         await AssertUserHasAccessAsync(_allowedTypes);
 
@@ -69,7 +83,14 @@ public class ToolPrefsStorageService(
             return;
         }
 
+        int? entryId = entityId == null ? null : int.Parse(entityId);
+
+        if (entryId.HasValue)
+        {
+            await AssertEntryAccessAsync(entryId.Value);
+        }
+
         var items = allowAlways.ToDictionary(kv => kv.Key, kv => new ToolPreference { AllowAlways = kv.Value });
-        await storage.UpsertAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, items);
+        await storage.UpsertAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, items, entryId);
     }
 }

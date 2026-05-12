@@ -38,4 +38,5 @@ public class UpdateMcpServerRequestDto
 public class UpdateMcpServerBody
 {
     public required string Config { get; init; }
+    public string? EntityId { get; init; }
 }

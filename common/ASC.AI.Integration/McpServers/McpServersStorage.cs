@@ -24,110 +24,146 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Common.Threading.DistributedLock.Abstractions;
+
 namespace ASC.AI.Integration.McpServers;
 
 [Scope]
-public class McpServersStorage(IDbContextFactory<AiIntegrationContext> dbContextFactory)
+public class McpServersStorage(
+    IDbContextFactory<AiIntegrationContext> dbContextFactory,
+    IDistributedLockProvider distributedLockProvider)
 {
-    public async Task CreateAsync(int tenantId, string name, string config)
+    public async Task<bool> CreateAsync(int tenantId, string name, string config, int? entryId = null)
     {
-        await using var context = await dbContextFactory.CreateDbContextAsync();
-
-        var entity = new DbMcpServer
+        await using (await distributedLockProvider.TryAcquireFairLockAsync(GetLockKey(tenantId, entryId)))
         {
-            TenantId = tenantId,
-            Name = name,
-            Config = config,
-            CreatedAt = DateTime.UtcNow
-        };
+            await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+            var strategy = dbContext.Database.CreateExecutionStrategy();
 
-        context.McpServers.Add(entity);
-        await context.SaveChangesAsync();
-    }
+            return await strategy.ExecuteAsync(async () =>
+            {
+                await using var context = await dbContextFactory.CreateDbContextAsync();
 
-    public async Task<McpServer?> ReadByNameAsync(int tenantId, string name)
-    {
-        await using var context = await dbContextFactory.CreateDbContextAsync();
+                var existing = entryId.HasValue
+                    ? await context.GetMcpServerByEntryAsync(tenantId, name, entryId.Value)
+                    : await context.GetMcpServerAsync(tenantId, name);
 
-        var entity = await context.GetMcpServerAsync(tenantId, name);
-        if (entity == null)
-        {
-            return null;
+                if (existing != null)
+                {
+                    return false;
+                }
+
+                context.McpServers.Add(new DbMcpServer
+                {
+                    Id = Guid.CreateVersion7(),
+                    TenantId = tenantId,
+                    Name = name,
+                    Config = config,
+                    EntryId = entryId,
+                    CreatedAt = DateTime.UtcNow
+                });
+
+                await context.SaveChangesAsync();
+
+                return true;
+            });
         }
+    }
 
-        return new McpServer
+    public async Task<McpServer?> ReadByNameAsync(int tenantId, string name, int? entryId = null)
+    {
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
+        var entity = entryId.HasValue
+            ? await context.GetMcpServerByEntryAsync(tenantId, name, entryId.Value)
+            : await context.GetMcpServerAsync(tenantId, name);
+
+        return entity == null ? null : ToDomain(entity);
+    }
+
+    public async Task<IReadOnlyList<McpServer>> ReadAllAsync(int tenantId, int? entryId = null)
+    {
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
+        var servers = entryId.HasValue
+            ? context.GetAllMcpServersByEntryAsync(tenantId, entryId.Value)
+            : context.GetAllMcpServersAsync(tenantId);
+
+        return await servers.Select(ToDomain).ToListAsync();
+    }
+
+    public async Task<bool> UpdateAsync(int tenantId, string name, string config, int? entryId = null)
+    {
+        await using (await distributedLockProvider.TryAcquireFairLockAsync(GetLockKey(tenantId, entryId)))
         {
-            Name = entity.Name,
-            Config = entity.Config
-        };
+            await using var context = await dbContextFactory.CreateDbContextAsync();
+
+            var affected = entryId.HasValue
+                ? await context.UpdateMcpServerConfigByEntryAsync(tenantId, name, entryId.Value, config)
+                : await context.UpdateMcpServerConfigAsync(tenantId, name, config);
+
+            return affected > 0;
+        }
     }
 
-    public async Task<Dictionary<string, string>> ReadAllAsync(int tenantId)
-    {
-        await using var context = await dbContextFactory.CreateDbContextAsync();
-
-        return await context.GetAllMcpServersAsync(tenantId)
-            .ToDictionaryAsync(x => x.Name, x => x.Config);
-    }
-
-    public async Task<bool> UpdateAsync(int tenantId, string name, string config)
-    {
-        await using var context = await dbContextFactory.CreateDbContextAsync();
-
-        return await context.UpdateMcpServerConfigAsync(tenantId, name, config) > 0;
-    }
-
-    public async Task ReplaceAllAsync(int tenantId, IReadOnlyDictionary<string, string> servers)
+    public async Task ReplaceAllAsync(int tenantId, IReadOnlyDictionary<string, string> servers, int? entryId = null)
     {
         if (servers.Count == 0)
         {
             return;
         }
 
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-        var strategy = dbContext.Database.CreateExecutionStrategy();
-
-        await strategy.ExecuteAsync(async () =>
+        await using (await distributedLockProvider.TryAcquireFairLockAsync(GetLockKey(tenantId, entryId)))
         {
-            await using var context = await dbContextFactory.CreateDbContextAsync();
-            await using var transaction = await context.Database.BeginTransactionAsync();
+            await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+            var strategy = dbContext.Database.CreateExecutionStrategy();
 
-            var existingNames = await context.GetExistingMcpServerNamesAsync(tenantId, servers.Keys)
-                .ToHashSetAsync();
-
-            var now = DateTime.UtcNow;
-            foreach (var (name, config) in servers)
+            await strategy.ExecuteAsync(async () =>
             {
-                if (existingNames.Contains(name))
-                {
-                    var entity = new DbMcpServer
-                    {
-                        TenantId = tenantId,
-                        Name = name,
-                        Config = config,
-                        CreatedAt = default
-                    };
-                    context.McpServers.Attach(entity);
-                    context.Entry(entity).Property(x => x.Config).IsModified = true;
-                }
-                else
-                {
-                    context.McpServers.Add(new DbMcpServer
-                    {
-                        TenantId = tenantId,
-                        Name = name,
-                        Config = config,
-                        CreatedAt = now
-                    });
-                }
-            }
+                await using var context = await dbContextFactory.CreateDbContextAsync();
 
-            await context.SaveChangesAsync();
-            await transaction.CommitAsync();
-        });
+                var existingByName = await (entryId.HasValue
+                        ? context.GetMcpServersByNamesAndEntryAsync(tenantId, entryId.Value, servers.Keys)
+                        : context.GetMcpServersByNamesAsync(tenantId, servers.Keys))
+                    .ToDictionaryAsync(x => x.Name, x => x.Id);
+
+                var now = DateTime.UtcNow;
+                foreach (var (name, config) in servers)
+                {
+                    if (existingByName.TryGetValue(name, out var existingId))
+                    {
+                        var entity = new DbMcpServer
+                        {
+                            Id = existingId,
+                            TenantId = tenantId,
+                            Name = name,
+                            Config = config,
+                            EntryId = entryId,
+                            CreatedAt = default
+                        };
+                        context.McpServers.Attach(entity);
+                        context.Entry(entity).Property(x => x.Config).IsModified = true;
+                    }
+                    else
+                    {
+                        context.McpServers.Add(new DbMcpServer
+                        {
+                            Id = Guid.CreateVersion7(),
+                            TenantId = tenantId,
+                            Name = name,
+                            Config = config,
+                            EntryId = entryId,
+                            CreatedAt = now
+                        });
+                    }
+                }
+
+                await context.SaveChangesAsync();
+            });
+        }
     }
 
-    public async Task DeleteAsync(int tenantId, string name)
+    public async Task DeleteAsync(int tenantId, string name, int? entryId = null)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var strategy = dbContext.Database.CreateExecutionStrategy();
@@ -137,10 +173,31 @@ public class McpServersStorage(IDbContextFactory<AiIntegrationContext> dbContext
             await using var context = await dbContextFactory.CreateDbContextAsync();
             await using var transaction = await context.Database.BeginTransactionAsync();
 
-            await context.DeleteMcpServerAsync(tenantId, name);
-            await context.DeleteToolPrefsByServerTypeAsync(tenantId, name);
+            if (entryId.HasValue)
+            {
+                await context.DeleteMcpServerByEntryAsync(tenantId, name, entryId.Value);
+                await context.DeleteToolPrefsByServerTypeAndEntryAsync(tenantId, name, entryId.Value);
+            }
+            else
+            {
+                await context.DeleteMcpServerAsync(tenantId, name);
+                await context.DeleteToolPrefsByServerTypeAsync(tenantId, name);
+            }
 
             await transaction.CommitAsync();
         });
+    }
+
+    private static McpServer ToDomain(DbMcpServer entity) => new()
+    {
+        Name = entity.Name,
+        Config = entity.Config
+    };
+
+    private static string GetLockKey(int tenantId, int? entryId)
+    {
+        return entryId.HasValue
+            ? $"ai_integration_mcp_servers_{tenantId}_{entryId.Value}"
+            : $"ai_integration_mcp_servers_{tenantId}";
     }
 }

@@ -39,22 +39,22 @@ namespace ASC.AI.Api.Integration;
 public class ToolPreferenceStorageController(ToolPrefsStorageService toolPrefsStorageService) : ControllerBase
 {
     [HttpGet("integration/tool-prefs")]
-    public async Task<Dictionary<string, ToolPreference>> ReadAsync()
+    public async Task<IReadOnlyDictionary<string, ToolPreference>> ReadAsync(ReadToolPrefsRequestDto inDto)
     {
-        return await toolPrefsStorageService.ReadAsync();
+        return await toolPrefsStorageService.ReadAsync(inDto.EntityId);
     }
 
     [HttpPut("integration/tool-prefs/disabled")]
     public async Task<IActionResult> UpsertDisabledAsync(UpsertToolPrefsRequestDto inDto)
     {
-        await toolPrefsStorageService.UpsertDisabledAsync(inDto.Disabled);
+        await toolPrefsStorageService.UpsertDisabledAsync(inDto.Disabled, inDto.EntityId);
         return NoContent();
     }
 
     [HttpPut("integration/tool-prefs/allow-always")]
     public async Task<IActionResult> UpsertAllowAlwaysAsync(UpsertToolAllowAlwaysRequestDto inDto)
     {
-        await toolPrefsStorageService.UpsertAllowAlwaysAsync(inDto.AllowAlways);
+        await toolPrefsStorageService.UpsertAllowAlwaysAsync(inDto.AllowAlways, inDto.EntityId);
         return NoContent();
     }
 }

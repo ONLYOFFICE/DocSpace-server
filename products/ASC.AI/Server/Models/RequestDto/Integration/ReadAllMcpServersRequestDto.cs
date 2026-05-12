@@ -24,22 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Core.EF;
+namespace ASC.AI.Models.RequestDto.Integration;
 
-public partial class FilesDbContext
+public class ReadAllMcpServersRequestDto
 {
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
-    public Task DeleteAssignmentsAsync(int tenantId, int folderId)
-    {
-        return AssignmentQueries.DeleteAssignmentsAsync(this, tenantId, folderId);
-    }
-}
-
-static file class AssignmentQueries
-{
-    public static readonly Func<FilesDbContext, int, int, Task> DeleteAssignmentsAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx, int tenantId, int folderId) =>
-            ctx.Assignments
-                .Where(x => x.TenantId == tenantId && x.EntryId == folderId)
-                .ExecuteDelete());
+    [FromQuery(Name = "entityId")]
+    public string? EntityId { get; init; }
 }

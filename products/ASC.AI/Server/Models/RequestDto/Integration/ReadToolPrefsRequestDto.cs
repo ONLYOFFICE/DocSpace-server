@@ -26,9 +26,8 @@
 
 namespace ASC.AI.Models.RequestDto.Integration;
 
-public class CreateMcpServerRequestDto
+public class ReadToolPrefsRequestDto
 {
-    public required string Name { get; init; }
-    public required string Config { get; init; }
+    [FromQuery(Name = "entityId")]
     public string? EntityId { get; init; }
 }

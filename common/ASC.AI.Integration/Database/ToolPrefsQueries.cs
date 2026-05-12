@@ -34,16 +34,34 @@ public partial class AiIntegrationContext
         return ToolPrefsQueriesContainer.GetAllToolPrefsAsync(this, tenantId, createdBy);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, null])]
-    public IAsyncEnumerable<string> GetExistingToolPrefsServerTypesAsync(int tenantId, Guid createdBy, IEnumerable<string> serverTypes)
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultInt])]
+    public IAsyncEnumerable<DbToolPreference> GetAllToolPrefsByEntryAsync(int tenantId, Guid createdBy, int entryId)
     {
-        return ToolPrefsQueriesContainer.GetExistingToolPrefsServerTypesAsync(this, tenantId, createdBy, serverTypes);
+        return ToolPrefsQueriesContainer.GetAllToolPrefsByEntryAsync(this, tenantId, createdBy, entryId);
+    }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, null])]
+    public IAsyncEnumerable<DbToolPreference> GetToolPrefsByServerTypesAsync(int tenantId, Guid createdBy, IEnumerable<string> serverTypes)
+    {
+        return ToolPrefsQueriesContainer.GetToolPrefsByServerTypesAsync(this, tenantId, createdBy, serverTypes);
+    }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultInt, null])]
+    public IAsyncEnumerable<DbToolPreference> GetToolPrefsByServerTypesAndEntryAsync(int tenantId, Guid createdBy, int entryId, IEnumerable<string> serverTypes)
+    {
+        return ToolPrefsQueriesContainer.GetToolPrefsByServerTypesAndEntryAsync(this, tenantId, createdBy, entryId, serverTypes);
     }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
     public Task<int> DeleteToolPrefsByServerTypeAsync(int tenantId, string serverType)
     {
         return ToolPrefsQueriesContainer.DeleteToolPrefsByServerTypeAsync(this, tenantId, serverType);
+    }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null, PreCompileQuery.DefaultInt])]
+    public Task<int> DeleteToolPrefsByServerTypeAndEntryAsync(int tenantId, string serverType, int entryId)
+    {
+        return ToolPrefsQueriesContainer.DeleteToolPrefsByServerTypeAndEntryAsync(this, tenantId, serverType, entryId);
     }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
@@ -71,22 +89,42 @@ static file class ToolPrefsQueriesContainer
         EF.CompileAsyncQuery(
             (AiIntegrationContext ctx, int tenantId, Guid createdBy) =>
                 ctx.ToolPrefs
-                    .Where(x => x.TenantId == tenantId && x.CreatedBy == createdBy)
+                    .Where(x => x.TenantId == tenantId && x.CreatedBy == createdBy && x.EntryId == null)
                     .OrderBy(x => x.ServerType)
                     .AsQueryable());
 
-    public static readonly Func<AiIntegrationContext, int, Guid, IEnumerable<string>, IAsyncEnumerable<string>> GetExistingToolPrefsServerTypesAsync =
+    public static readonly Func<AiIntegrationContext, int, Guid, int, IAsyncEnumerable<DbToolPreference>> GetAllToolPrefsByEntryAsync =
+        EF.CompileAsyncQuery(
+            (AiIntegrationContext ctx, int tenantId, Guid createdBy, int entryId) =>
+                ctx.ToolPrefs
+                    .Where(x => x.TenantId == tenantId && x.CreatedBy == createdBy && x.EntryId == entryId)
+                    .OrderBy(x => x.ServerType)
+                    .AsQueryable());
+
+    public static readonly Func<AiIntegrationContext, int, Guid, IEnumerable<string>, IAsyncEnumerable<DbToolPreference>> GetToolPrefsByServerTypesAsync =
         EF.CompileAsyncQuery(
             (AiIntegrationContext ctx, int tenantId, Guid createdBy, IEnumerable<string> serverTypes) =>
                 ctx.ToolPrefs
-                    .Where(x => x.TenantId == tenantId && x.CreatedBy == createdBy && serverTypes.Contains(x.ServerType))
-                    .Select(x => x.ServerType));
+                    .Where(x => x.TenantId == tenantId && x.CreatedBy == createdBy && x.EntryId == null && serverTypes.Contains(x.ServerType)));
+
+    public static readonly Func<AiIntegrationContext, int, Guid, int, IEnumerable<string>, IAsyncEnumerable<DbToolPreference>> GetToolPrefsByServerTypesAndEntryAsync =
+        EF.CompileAsyncQuery(
+            (AiIntegrationContext ctx, int tenantId, Guid createdBy, int entryId, IEnumerable<string> serverTypes) =>
+                ctx.ToolPrefs
+                    .Where(x => x.TenantId == tenantId && x.CreatedBy == createdBy && x.EntryId == entryId && serverTypes.Contains(x.ServerType)));
 
     public static readonly Func<AiIntegrationContext, int, string, Task<int>> DeleteToolPrefsByServerTypeAsync =
         EF.CompileAsyncQuery(
             (AiIntegrationContext ctx, int tenantId, string serverType) =>
                 ctx.ToolPrefs
-                    .Where(x => x.TenantId == tenantId && x.ServerType == serverType)
+                    .Where(x => x.TenantId == tenantId && x.ServerType == serverType && x.EntryId == null)
+                    .ExecuteDelete());
+
+    public static readonly Func<AiIntegrationContext, int, string, int, Task<int>> DeleteToolPrefsByServerTypeAndEntryAsync =
+        EF.CompileAsyncQuery(
+            (AiIntegrationContext ctx, int tenantId, string serverType, int entryId) =>
+                ctx.ToolPrefs
+                    .Where(x => x.TenantId == tenantId && x.ServerType == serverType && x.EntryId == entryId)
                     .ExecuteDelete());
 
     public static readonly Func<AiIntegrationContext, int, Guid, Task<int>> ClearToolPrefsDisabledAsync =

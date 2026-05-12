@@ -63,6 +63,8 @@ public partial class FilesDbContext(DbContextOptions<FilesDbContext> dbContextOp
     public DbSet<DbAiModelSettings> AiModelSettings { get; set; }
     public DbSet<DbThread> Threads { get; set; }
     public DbSet<DbAssignment> Assignments { get; set; }
+    public DbSet<DbMcpServer> McpServers { get; set; }
+    public DbSet<DbToolPreference> ToolPrefs { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -102,6 +104,8 @@ public partial class FilesDbContext(DbContextOptions<FilesDbContext> dbContextOp
             .AddDbThreads()
             .AddDbProfiles()
             .AddDbAssignments()
+            .AddDbServers()
+            .AddDbToolPrefs()
             .AddDbFunctions();
     }
 }

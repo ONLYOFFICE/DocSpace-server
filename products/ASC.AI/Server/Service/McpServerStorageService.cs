@@ -43,49 +43,94 @@ public class McpServerStorageService(
     private static readonly EmployeeType[] _writeTypes = [EmployeeType.DocSpaceAdmin];
     private static readonly EmployeeType[] _readTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin];
 
-    public async Task CreateAsync(string name, string config)
+    public async Task CreateAsync(string name, string config, string? entityId = null)
     {
         await AssertUserHasAccessAsync(_writeTypes);
 
-        await storage.CreateAsync(tenantManager.GetCurrentTenantId(), name, config);
+        int? entryId = entityId == null ? null : int.Parse(entityId);
+
+        if (entryId.HasValue)
+        {
+            await AssertEntryAccessAsync(entryId.Value);
+        }
+
+        if (!await storage.CreateAsync(tenantManager.GetCurrentTenantId(), name, config, entryId))
+        {
+            throw new InvalidOperationException($"MCP server with name '{name}' already exists");
+        }
     }
 
-    public async Task<McpServer> ReadByNameAsync(string name)
+    public async Task<McpServer> ReadByNameAsync(string name, string? entityId = null)
     {
         await AssertUserHasAccessAsync(_readTypes);
 
-        return await storage.ReadByNameAsync(tenantManager.GetCurrentTenantId(), name)
+        int? entryId = entityId == null ? null : int.Parse(entityId);
+
+        if (entryId.HasValue)
+        {
+            await AssertEntryAccessAsync(entryId.Value);
+        }
+
+        return await storage.ReadByNameAsync(tenantManager.GetCurrentTenantId(), name, entryId)
             ?? throw new ItemNotFoundException($"MCP server with name '{name}' was not found");
     }
 
-    public async Task<Dictionary<string, string>> ReadAllAsync()
+    public async Task<IReadOnlyList<McpServer>> ReadAllAsync(string? entityId = null)
     {
         await AssertUserHasAccessAsync(_readTypes);
 
-        return await storage.ReadAllAsync(tenantManager.GetCurrentTenantId());
+        int? entryId = entityId == null ? null : int.Parse(entityId);
+
+        if (entryId.HasValue)
+        {
+            await AssertEntryAccessAsync(entryId.Value);
+        }
+
+        return await storage.ReadAllAsync(tenantManager.GetCurrentTenantId(), entryId);
     }
 
-    public async Task UpdateAsync(string name, string config)
+    public async Task UpdateAsync(string name, string config, string? entityId = null)
     {
         await AssertUserHasAccessAsync(_writeTypes);
 
-        if (!await storage.UpdateAsync(tenantManager.GetCurrentTenantId(), name, config))
+        int? entryId = entityId == null ? null : int.Parse(entityId);
+
+        if (entryId.HasValue)
+        {
+            await AssertEntryAccessAsync(entryId.Value);
+        }
+
+        if (!await storage.UpdateAsync(tenantManager.GetCurrentTenantId(), name, config, entryId))
         {
             throw new ItemNotFoundException($"MCP server with name '{name}' was not found");
         }
     }
 
-    public async Task ReplaceAllAsync(IReadOnlyDictionary<string, string> servers)
+    public async Task ReplaceAllAsync(IReadOnlyDictionary<string, string> servers, string? entityId = null)
     {
         await AssertUserHasAccessAsync(_writeTypes);
 
-        await storage.ReplaceAllAsync(tenantManager.GetCurrentTenantId(), servers);
+        int? entryId = entityId == null ? null : int.Parse(entityId);
+
+        if (entryId.HasValue)
+        {
+            await AssertEntryAccessAsync(entryId.Value);
+        }
+
+        await storage.ReplaceAllAsync(tenantManager.GetCurrentTenantId(), servers, entryId);
     }
 
-    public async Task DeleteAsync(string name)
+    public async Task DeleteAsync(string name, string? entityId = null)
     {
         await AssertUserHasAccessAsync(_writeTypes);
 
-        await storage.DeleteAsync(tenantManager.GetCurrentTenantId(), name);
+        int? entryId = entityId == null ? null : int.Parse(entityId);
+
+        if (entryId.HasValue)
+        {
+            await AssertEntryAccessAsync(entryId.Value);
+        }
+
+        await storage.DeleteAsync(tenantManager.GetCurrentTenantId(), name, entryId);
     }
 }

@@ -30,4 +30,7 @@ public class DeleteMcpServerRequestDto
 {
     [FromRoute(Name = "name")]
     public required string Name { get; init; }
+
+    [FromQuery(Name = "entityId")]
+    public string? EntityId { get; init; }
 }

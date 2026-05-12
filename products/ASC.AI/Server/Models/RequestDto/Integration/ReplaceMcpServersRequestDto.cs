@@ -29,4 +29,5 @@ namespace ASC.AI.Models.RequestDto.Integration;
 public class ReplaceMcpServersRequestDto
 {
     public required IReadOnlyDictionary<string, string> Servers { get; init; }
+    public string? EntityId { get; init; }
 }

@@ -28,16 +28,17 @@ namespace ASC.AI.Integration.Database.Models;
 
 public class DbToolPreference : BaseEntity
 {
+    public Guid Id { get; init; }
     public int TenantId { get; init; }
+    public Guid CreatedBy { get; init; }
 
     [MaxLength(128)]
     [Required]
     public required string ServerType { get; init; }
 
-    public Guid CreatedBy { get; init; }
+    public int? EntryId { get; init; }
 
     public HashSet<string>? Disabled { get; set; }
-
     public HashSet<string>? AllowAlways { get; set; }
 
     public DateTime CreatedAt { get; init; }
@@ -46,7 +47,7 @@ public class DbToolPreference : BaseEntity
 
     public override object[] GetKeys()
     {
-        return [TenantId, CreatedBy, ServerType];
+        return [Id];
     }
 }
 
@@ -70,8 +71,14 @@ public static class DbToolPrefsExtension
             entity.ToTable("ai_integration_tool_preferences")
                 .HasCharSet("utf8");
 
-            entity.HasKey(e => new { e.TenantId, e.CreatedBy, e.ServerType })
+            entity.HasKey(e => e.Id)
                 .HasName("PRIMARY");
+
+            entity.Property(e => e.Id)
+                .HasColumnName("id")
+                .HasColumnType("char(36)")
+                .HasCharSet("utf8")
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.TenantId)
                 .HasColumnName("tenant_id");
@@ -88,6 +95,10 @@ public static class DbToolPrefsExtension
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
+            entity.Property(e => e.EntryId)
+                .HasColumnName("entry_id")
+                .HasColumnType("int");
+
             entity.PrimitiveCollection(e => e.Disabled)
                 .HasColumnName("disabled")
                 .HasColumnType("json");
@@ -100,8 +111,8 @@ public static class DbToolPrefsExtension
                 .HasColumnName("created_at")
                 .HasColumnType("datetime");
 
-            entity.HasIndex(e => new { e.TenantId, e.ServerType })
-                .HasDatabaseName("IX_tenant_id_server_type");
+            entity.HasIndex(e => new { e.TenantId, e.CreatedBy, e.ServerType, e.EntryId })
+                .HasDatabaseName("IX_tenant_id_created_by_server_type_entry_id");
         });
     }
 
@@ -111,8 +122,12 @@ public static class DbToolPrefsExtension
         {
             entity.ToTable("ai_integration_tool_preferences");
 
-            entity.HasKey(e => new { e.TenantId, e.CreatedBy, e.ServerType })
+            entity.HasKey(e => e.Id)
                 .HasName("pk_ai_integration_tool_preferences");
+
+            entity.Property(e => e.Id)
+                .HasColumnName("id")
+                .HasColumnType("uuid");
 
             entity.Property(e => e.TenantId)
                 .HasColumnName("tenant_id")
@@ -127,6 +142,10 @@ public static class DbToolPrefsExtension
                 .HasColumnType("character varying")
                 .HasMaxLength(128);
 
+            entity.Property(e => e.EntryId)
+                .HasColumnName("entry_id")
+                .HasColumnType("integer");
+
             entity.PrimitiveCollection(e => e.Disabled)
                 .HasColumnName("disabled")
                 .HasColumnType("jsonb");
@@ -139,8 +158,8 @@ public static class DbToolPrefsExtension
                 .HasColumnName("created_at")
                 .HasColumnType("timestamp without time zone");
 
-            entity.HasIndex(e => new { e.TenantId, e.ServerType })
-                .HasDatabaseName("IX_ai_integration_tool_preferences_tenant_id_server_type");
+            entity.HasIndex(e => new { e.TenantId, e.CreatedBy, e.ServerType, e.EntryId })
+                .HasDatabaseName("ix_ai_integration_tool_preferences_tenant_id_created_by_server_type_entry_id");
         });
     }
 }

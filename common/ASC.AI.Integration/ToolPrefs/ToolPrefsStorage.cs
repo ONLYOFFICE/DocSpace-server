@@ -29,15 +29,18 @@ namespace ASC.AI.Integration.ToolPrefs;
 [Scope]
 public class ToolPrefsStorage(IDbContextFactory<AiIntegrationContext> dbContextFactory)
 {
-    public async Task<Dictionary<string, ToolPreference>> ReadAllAsync(int tenantId, Guid createdBy)
+    public async Task<IReadOnlyDictionary<string, ToolPreference>> ReadAllAsync(int tenantId, Guid createdBy, int? entryId = null)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        return await context.GetAllToolPrefsAsync(tenantId, createdBy)
-            .ToDictionaryAsync(x => x.ServerType, ToDomain);
+        var rows = entryId.HasValue
+            ? context.GetAllToolPrefsByEntryAsync(tenantId, createdBy, entryId.Value)
+            : context.GetAllToolPrefsAsync(tenantId, createdBy);
+
+        return await rows.ToDictionaryAsync(x => x.ServerType, ToDomain);
     }
 
-    public async Task UpsertAsync(int tenantId, Guid createdBy, IReadOnlyDictionary<string, ToolPreference> items)
+    public async Task UpsertAsync(int tenantId, Guid createdBy, IReadOnlyDictionary<string, ToolPreference> items, int? entryId = null)
     {
         if (items.Count == 0)
         {
@@ -50,21 +53,24 @@ public class ToolPrefsStorage(IDbContextFactory<AiIntegrationContext> dbContextF
         await strategy.ExecuteAsync(async () =>
         {
             await using var context = await dbContextFactory.CreateDbContextAsync();
-            await using var transaction = await context.Database.BeginTransactionAsync();
 
-            var existingKeys = await context.GetExistingToolPrefsServerTypesAsync(tenantId, createdBy, items.Keys)
-                .ToHashSetAsync();
+            var existingByType = await (entryId.HasValue
+                    ? context.GetToolPrefsByServerTypesAndEntryAsync(tenantId, createdBy, entryId.Value, items.Keys)
+                    : context.GetToolPrefsByServerTypesAsync(tenantId, createdBy, items.Keys))
+                .ToDictionaryAsync(x => x.ServerType, x => x.Id);
 
             var now = DateTime.UtcNow;
             foreach (var (serverType, item) in items)
             {
-                if (existingKeys.Contains(serverType))
+                if (existingByType.TryGetValue(serverType, out var existingId))
                 {
                     var entity = new DbToolPreference
                     {
+                        Id = existingId,
                         TenantId = tenantId,
-                        ServerType = serverType,
                         CreatedBy = createdBy,
+                        ServerType = serverType,
+                        EntryId = entryId,
                         Disabled = item.Disabled,
                         AllowAlways = item.AllowAlways,
                         CreatedAt = default
@@ -86,9 +92,11 @@ public class ToolPrefsStorage(IDbContextFactory<AiIntegrationContext> dbContextF
                 {
                     context.ToolPrefs.Add(new DbToolPreference
                     {
+                        Id = Guid.CreateVersion7(),
                         TenantId = tenantId,
-                        ServerType = serverType,
                         CreatedBy = createdBy,
+                        ServerType = serverType,
+                        EntryId = entryId,
                         Disabled = item.Disabled,
                         AllowAlways = item.AllowAlways,
                         CreatedAt = now
@@ -97,7 +105,6 @@ public class ToolPrefsStorage(IDbContextFactory<AiIntegrationContext> dbContextF
             }
 
             await context.SaveChangesAsync();
-            await transaction.CommitAsync();
         });
     }
 

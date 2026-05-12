@@ -29,4 +29,5 @@ namespace ASC.AI.Models.RequestDto.Integration;
 public class UpsertToolAllowAlwaysRequestDto
 {
     public required IReadOnlyDictionary<string, HashSet<string>> AllowAlways { get; init; }
+    public string? EntityId { get; init; }
 }

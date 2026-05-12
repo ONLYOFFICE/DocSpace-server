@@ -28,6 +28,7 @@ namespace ASC.AI.Integration.Database.Models;
 
 public class DbMcpServer : BaseEntity
 {
+    public Guid Id { get; init; }
     public int TenantId { get; init; }
 
     [MaxLength(128)]
@@ -37,13 +38,15 @@ public class DbMcpServer : BaseEntity
     [Required]
     public required string Config { get; set; }
 
+    public int? EntryId { get; init; }
+
     public DateTime CreatedAt { get; init; }
 
     public DbTenant Tenant { get; init; } = null!;
 
     public override object[] GetKeys()
     {
-        return [TenantId, Name];
+        return [Id];
     }
 }
 
@@ -67,8 +70,14 @@ public static class DbMcpServerExtension
             entity.ToTable("ai_integration_mcp_servers")
                 .HasCharSet("utf8");
 
-            entity.HasKey(e => new { e.TenantId, e.Name })
+            entity.HasKey(e => e.Id)
                 .HasName("PRIMARY");
+
+            entity.Property(e => e.Id)
+                .HasColumnName("id")
+                .HasColumnType("char(36)")
+                .HasCharSet("utf8")
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.TenantId)
                 .HasColumnName("tenant_id");
@@ -83,9 +92,16 @@ public static class DbMcpServerExtension
                 .HasColumnName("config")
                 .HasColumnType("json");
 
+            entity.Property(e => e.EntryId)
+                .HasColumnName("entry_id")
+                .HasColumnType("int");
+
             entity.Property(e => e.CreatedAt)
                 .HasColumnName("created_at")
                 .HasColumnType("datetime");
+
+            entity.HasIndex(e => new { e.TenantId, e.Name, e.EntryId })
+                .HasDatabaseName("IX_tenant_id_name_entry_id");
         });
     }
 
@@ -95,8 +111,12 @@ public static class DbMcpServerExtension
         {
             entity.ToTable("ai_integration_mcp_servers");
 
-            entity.HasKey(e => new { e.TenantId, e.Name })
+            entity.HasKey(e => e.Id)
                 .HasName("pk_ai_integration_mcp_servers");
+
+            entity.Property(e => e.Id)
+                .HasColumnName("id")
+                .HasColumnType("uuid");
 
             entity.Property(e => e.TenantId)
                 .HasColumnName("tenant_id")
@@ -111,9 +131,16 @@ public static class DbMcpServerExtension
                 .HasColumnName("config")
                 .HasColumnType("jsonb");
 
+            entity.Property(e => e.EntryId)
+                .HasColumnName("entry_id")
+                .HasColumnType("integer");
+
             entity.Property(e => e.CreatedAt)
                 .HasColumnName("created_at")
                 .HasColumnType("timestamp without time zone");
+
+            entity.HasIndex(e => new { e.TenantId, e.Name, e.EntryId })
+                .HasDatabaseName("ix_ai_integration_mcp_servers_tenant_id_name_entry_id");
         });
     }
 }
