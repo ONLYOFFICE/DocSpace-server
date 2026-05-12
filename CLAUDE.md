@@ -70,6 +70,7 @@ dotnet run --project .aspire/AppHost  # Run via Aspire orchestration
 - **Controllers**: `*Controller`
 - **DTOs**: `*RequestDto`, `*ResponseDto`
 - **Custom attributes**: `[Singleton]`, `[Scope]`, `[DefaultRoute]`, `[ControllerName]`
+- **Route segments**: camelCase (e.g., `{id}/externalDbSync`, `fromTemplate`) — never snake_case or kebab-case
 
 ### Style (enforced via `.editorconfig`)
 - **Indentation**: 4 spaces (no tabs); 2 spaces for XML/JSON/YAML

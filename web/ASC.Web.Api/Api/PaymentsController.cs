@@ -459,9 +459,12 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/prices</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "List of available portal prices", typeof(Dictionary<string, decimal>))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("prices")]
     public async Task<Dictionary<string, decimal>> GetPortalPrices()
     {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
         var currency = await regionHelper.GetCurrencyFromRequestAsync();
         var result = (await tenantManager.GetProductPriceInfoAsync())
             .ToDictionary(pr => pr.Key, pr => pr.Value.GetValueOrDefault(currency, 0));
@@ -479,9 +482,12 @@ public class PaymentController(
     /// <collection>list</collection>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "List of available portal currencies", typeof(IAsyncEnumerable<CurrenciesDto>))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("currencies")]
     public async IAsyncEnumerable<CurrenciesDto> GetPaymentCurrencies()
     {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
         var defaultRegion = regionHelper.GetDefaultRegionInfo();
         var currentRegion = await regionHelper.GetCurrentRegionInfoAsync();
 
