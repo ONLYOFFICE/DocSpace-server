@@ -15,16 +15,19 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 name: "ai_integration_mcp_servers",
                 columns: table => new
                 {
+                    id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "utf8_general_ci")
+                        .Annotation("MySql:CharSet", "utf8"),
                     tenant_id = table.Column<int>(type: "int", nullable: false),
                     name = table.Column<string>(type: "varchar(128)", maxLength: 128, nullable: false, collation: "utf8_general_ci")
                         .Annotation("MySql:CharSet", "utf8"),
                     config = table.Column<string>(type: "json", nullable: false)
                         .Annotation("MySql:CharSet", "utf8"),
+                    entry_id = table.Column<int>(type: "int", nullable: true),
                     created_at = table.Column<DateTime>(type: "datetime", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PRIMARY", x => new { x.tenant_id, x.name });
+                    table.PrimaryKey("PRIMARY", x => x.id);
                     table.ForeignKey(
                         name: "FK_ai_integration_mcp_servers_tenants_tenants_tenant_id",
                         column: x => x.tenant_id,
@@ -38,14 +41,17 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 name: "ai_integration_preferences",
                 columns: table => new
                 {
+                    id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "utf8_general_ci")
+                        .Annotation("MySql:CharSet", "utf8"),
                     tenant_id = table.Column<int>(type: "int", nullable: false),
                     created_by = table.Column<Guid>(type: "char(36)", nullable: false, collation: "utf8_general_ci")
                         .Annotation("MySql:CharSet", "utf8"),
+                    entry_id = table.Column<int>(type: "int", nullable: true),
                     deep_mode = table.Column<bool>(type: "tinyint(1)", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PRIMARY", x => new { x.tenant_id, x.created_by });
+                    table.PrimaryKey("PRIMARY", x => x.id);
                     table.ForeignKey(
                         name: "FK_ai_integration_preferences_tenants_tenants_tenant_id",
                         column: x => x.tenant_id,
@@ -147,11 +153,14 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 name: "ai_integration_tool_preferences",
                 columns: table => new
                 {
-                    tenant_id = table.Column<int>(type: "int", nullable: false),
-                    server_type = table.Column<string>(type: "varchar(128)", maxLength: 128, nullable: false, collation: "utf8_general_ci")
+                    id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "utf8_general_ci")
                         .Annotation("MySql:CharSet", "utf8"),
+                    tenant_id = table.Column<int>(type: "int", nullable: false),
                     created_by = table.Column<Guid>(type: "char(36)", nullable: false, collation: "utf8_general_ci")
                         .Annotation("MySql:CharSet", "utf8"),
+                    server_type = table.Column<string>(type: "varchar(128)", maxLength: 128, nullable: false, collation: "utf8_general_ci")
+                        .Annotation("MySql:CharSet", "utf8"),
+                    entry_id = table.Column<int>(type: "int", nullable: true),
                     disabled = table.Column<string>(type: "json", nullable: true)
                         .Annotation("MySql:CharSet", "utf8"),
                     allow_always = table.Column<string>(type: "json", nullable: true)
@@ -160,7 +169,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PRIMARY", x => new { x.tenant_id, x.created_by, x.server_type });
+                    table.PrimaryKey("PRIMARY", x => x.id);
                     table.ForeignKey(
                         name: "FK_ai_integration_tool_preferences_tenants_tenants_tenant_id",
                         column: x => x.tenant_id,
@@ -274,9 +283,19 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 columns: new[] { "tenant_id", "action_type", "entry_id" });
 
             migrationBuilder.CreateIndex(
+                name: "IX_tenant_id_name_entry_id",
+                table: "ai_integration_mcp_servers",
+                columns: new[] { "tenant_id", "name", "entry_id" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_tenant_id_thread_id_timestamp",
                 table: "ai_integration_messages",
                 columns: new[] { "tenant_id", "thread_id", "timestamp" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_tenant_id_created_by_entry_id",
+                table: "ai_integration_preferences",
+                columns: new[] { "tenant_id", "created_by", "entry_id" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_tenant_id_id",
@@ -319,9 +338,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 columns: new[] { "tenant_id", "profile_id" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_tenant_id_server_type",
+                name: "IX_tenant_id_created_by_server_type_entry_id",
                 table: "ai_integration_tool_preferences",
-                columns: new[] { "tenant_id", "server_type" });
+                columns: new[] { "tenant_id", "created_by", "server_type", "entry_id" });
         }
 
         /// <inheritdoc />

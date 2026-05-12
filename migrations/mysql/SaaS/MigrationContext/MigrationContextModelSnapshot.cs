@@ -197,14 +197,10 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
             modelBuilder.Entity("ASC.AI.Integration.Database.Models.DbMcpServer", b =>
                 {
-                    b.Property<int>("TenantId")
-                        .HasColumnType("int")
-                        .HasColumnName("tenant_id");
-
-                    b.Property<string>("Name")
-                        .HasMaxLength(128)
-                        .HasColumnType("varchar(128)")
-                        .HasColumnName("name")
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)")
+                        .HasColumnName("id")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
@@ -217,8 +213,27 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("datetime")
                         .HasColumnName("created_at");
 
-                    b.HasKey("TenantId", "Name")
+                    b.Property<int?>("EntryId")
+                        .HasColumnType("int")
+                        .HasColumnName("entry_id");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("varchar(128)")
+                        .HasColumnName("name")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id")
                         .HasName("PRIMARY");
+
+                    b.HasIndex("TenantId", "Name", "EntryId")
+                        .HasDatabaseName("IX_tenant_id_name_entry_id");
 
                     b.ToTable("ai_integration_mcp_servers", (string)null);
 
@@ -265,9 +280,12 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
             modelBuilder.Entity("ASC.AI.Integration.Database.Models.DbPreference", b =>
                 {
-                    b.Property<int>("TenantId")
-                        .HasColumnType("int")
-                        .HasColumnName("tenant_id");
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)")
+                        .HasColumnName("id")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("char(36)")
@@ -279,8 +297,19 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("tinyint(1)")
                         .HasColumnName("deep_mode");
 
-                    b.HasKey("TenantId", "CreatedBy")
+                    b.Property<int?>("EntryId")
+                        .HasColumnType("int")
+                        .HasColumnName("entry_id");
+
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id")
                         .HasName("PRIMARY");
+
+                    b.HasIndex("TenantId", "CreatedBy", "EntryId")
+                        .HasDatabaseName("IX_tenant_id_created_by_entry_id");
 
                     b.ToTable("ai_integration_preferences", (string)null);
 
@@ -533,20 +562,10 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
             modelBuilder.Entity("ASC.AI.Integration.Database.Models.DbToolPreference", b =>
                 {
-                    b.Property<int>("TenantId")
-                        .HasColumnType("int")
-                        .HasColumnName("tenant_id");
-
-                    b.Property<Guid>("CreatedBy")
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)")
-                        .HasColumnName("created_by")
-                        .UseCollation("utf8_general_ci")
-                        .HasAnnotation("MySql:CharSet", "utf8");
-
-                    b.Property<string>("ServerType")
-                        .HasMaxLength(128)
-                        .HasColumnType("varchar(128)")
-                        .HasColumnName("server_type")
+                        .HasColumnName("id")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
@@ -558,15 +577,37 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("datetime")
                         .HasColumnName("created_at");
 
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("created_by")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
                     b.PrimitiveCollection<string>("Disabled")
                         .HasColumnType("json")
                         .HasColumnName("disabled");
 
-                    b.HasKey("TenantId", "CreatedBy", "ServerType")
+                    b.Property<int?>("EntryId")
+                        .HasColumnType("int")
+                        .HasColumnName("entry_id");
+
+                    b.Property<string>("ServerType")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("varchar(128)")
+                        .HasColumnName("server_type")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id")
                         .HasName("PRIMARY");
 
-                    b.HasIndex("TenantId", "ServerType")
-                        .HasDatabaseName("IX_tenant_id_server_type");
+                    b.HasIndex("TenantId", "CreatedBy", "ServerType", "EntryId")
+                        .HasDatabaseName("IX_tenant_id_created_by_server_type_entry_id");
 
                     b.ToTable("ai_integration_tool_preferences", (string)null);
 
