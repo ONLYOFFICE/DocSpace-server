@@ -5641,7 +5641,8 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException();
         }
     }
-    private Exception GenerateException(Exception error, bool warning = false)
+
+    private Exception GenerateException<T>(T error, bool warning = false) where T : Exception
     {
         if (warning || error is ItemNotFoundException or SecurityException or ArgumentException or TenantQuotaException or InvalidOperationException)
         {
@@ -5659,7 +5660,7 @@ public class FileStorageService //: IFileStorageService
                 : error;
         }
 
-        return new InvalidOperationException(error.Message, error);
+        return error;
     }
 
     private async Task<AceWrapper> SetExternalLinkAsync<T>(FileEntry<T> entry, Guid linkId, FileShare share, string title, DateTime expirationDate = default,
