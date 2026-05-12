@@ -1967,6 +1967,7 @@ public class FileStorageService //: IFileStorageService
             var properties = await fileDao.GetProperties(fileId) ?? new EntryProperties<T> { FormFilling = new FormFillingProperties<T>() };
             properties.FormFilling.StartFilling = true;
             properties.FormFilling.OriginalFormId = fileId;
+            properties.FormFilling.StartedByUserId = authContext.CurrentAccount.ID;
 
             await fileDao.SaveProperties(fileId, properties);
             await socketManager.CreateFileAsync(file);
@@ -5267,6 +5268,7 @@ public class FileStorageService //: IFileStorageService
                 if (room.FolderType == FolderType.FillingFormsRoom)
                 {
                     properties.FormFilling.StartFilling = true;
+                    properties.FormFilling.StartedByUserId = authContext.CurrentAccount.ID;
                 }
 
                 break;
@@ -5444,7 +5446,7 @@ public class FileStorageService //: IFileStorageService
             properties = fileProperties;
         }
 
-        if (!await fileSecurity.CanEditAsync(form))
+        if (!await fileSecurity.CanUpdateXlsxAsync(form))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
         }
@@ -5538,7 +5540,7 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException();
         }
 
-        if (!await fileSecurity.CanEditAsync(form))
+        if (!await fileSecurity.CanUpdateXlsxAsync(form))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
         }

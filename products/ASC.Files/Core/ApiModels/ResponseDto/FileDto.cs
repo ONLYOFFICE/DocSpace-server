@@ -545,7 +545,6 @@ public class FileDtoHelper(
                     else
                     {
                         result.Security[FileSecurity.FilesSecurityActions.FillForms] = true;
-                        result.Security[FileSecurity.FilesSecurityActions.StopFilling] = true;
                     }
                 }
                 else
@@ -597,7 +596,7 @@ public class FileDtoHelper(
                 && Equals(file.Id, formFilling.OriginalFormId);
 
             result.Security[FileSecurity.FilesSecurityActions.UpdateXlsx] = isOriginalForm
-                && result.Security[FileSecurity.FilesSecurityActions.Edit];
+                && (result.Security[FileSecurity.FilesSecurityActions.Edit] || file.Access == FileShare.ContentCreator);
 
             if (isOriginalForm && formFilling.ResultsFolderId is int resultsFolderId)
             {
@@ -662,7 +661,7 @@ public class FileDtoHelper(
                 if (xlsxFolder.FolderType == FolderType.FormFillingFolderDone)
                 {
                     var originalForm = await fileDao.GetFileAsync(xlsxFormFilling.OriginalFormId);
-                    canUpdateXlsx = originalForm != null && await _fileSecurity.CanEditAsync(originalForm);
+                    canUpdateXlsx = originalForm != null && (await _fileSecurity.CanEditAsync(originalForm) || file.Access == FileShare.ContentCreator);
                 }
             }
 
