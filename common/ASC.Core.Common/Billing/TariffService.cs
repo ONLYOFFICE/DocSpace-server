@@ -1329,10 +1329,10 @@ public class TariffService(
         return result;
     }
 
-    public async Task<ServicePayment> MakeAiCreditAsync(int tenantId, decimal amount, string currency)
+    public async Task<ServicePayment> MakeAiCreditAsync(int tenantId, decimal amount, string currency, string customerParticipantName, Dictionary<string, string> metadata = null)
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
-        var result = await accountingClient.MakeAiCreditAsync(portalId, amount, currency);
+        var result = await accountingClient.MakeAiCreditAsync(portalId, amount, currency, customerParticipantName, metadata);
         await hybridCache.RemoveAsync(GetAccountingAiBalanceCacheKey(tenantId));
         await hybridCache.RemoveAsync(GetAccountingBalanceCacheKey(tenantId));
         return result;

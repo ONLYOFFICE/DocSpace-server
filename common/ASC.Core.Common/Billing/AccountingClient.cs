@@ -56,13 +56,16 @@ public class AccountingClient
 
     public AccountingClient(IConfiguration configuration, ICache cache, IHttpClientFactory httpClientFactory)
     {
-        _configuration = configuration.GetSection("core:accounting").Get<AccountingConfiguration>() ?? new AccountingConfiguration();
+        _configuration = configuration.GetSection("core:accounting").Get<AccountingConfiguration>() ??
+                         new AccountingConfiguration();
         _cache = cache;
         _httpClientFactory = httpClientFactory;
 
         _configuration.Url = (_configuration.Url ?? "").Trim().TrimEnd('/');
 
-        _configuration.Currencies = _configuration.Currencies == null || _configuration.Currencies.Count == 0 ? ["USD"] : _configuration.Currencies;
+        _configuration.Currencies = _configuration.Currencies == null || _configuration.Currencies.Count == 0
+            ? ["USD"]
+            : _configuration.Currencies;
 
         if (!string.IsNullOrEmpty(_configuration.Url))
         {
@@ -78,7 +81,8 @@ public class AccountingClient
 
     public async Task<Balance> GetCustomerServiceQuotaAsync(string portalId, string serviceName, bool addPolicy = false)
     {
-        return await RequestAsync<Balance>(HttpMethod.Get, $"/customer/{portalId}/quota/{serviceName}", addPolicy: addPolicy);
+        return await RequestAsync<Balance>(HttpMethod.Get, $"/customer/{portalId}/quota/{serviceName}",
+            addPolicy: addPolicy);
     }
 
     public async Task<Balance> GetCustomerAiBalanceAsync(string portalId, bool addPolicy = false)
@@ -86,18 +90,14 @@ public class AccountingClient
         return await RequestAsync<Balance>(HttpMethod.Get, $"/customer/{portalId}/balance/ai", addPolicy: addPolicy);
     }
 
-    public async Task<Session> OpenCustomerSessionAsync(string portalId, string serviceName, string externalRef, int quantity, int duration)
+    public async Task<Session> OpenCustomerSessionAsync(string portalId, string serviceName, string externalRef,
+        int quantity, int duration)
     {
-        var data = new
-        {
-            CustomerName = portalId,
-            ServiceName = serviceName,
-            ExternalRef = externalRef,
-            Quantity = quantity,
-            Duration = duration
-        };
+        var data = new SessionOpenOperation(portalId, serviceName, externalRef, quantity, duration);
 
-        return await RequestAsync<Session>(HttpMethod.Post, "/session/open", data: data);
+        var jsonBody = JsonSerializer.Serialize(data, _serializationOptions);
+
+        return await RequestAsync<Session>(HttpMethod.Post, "/session/open", jsonBody: jsonBody);
     }
 
     public async Task CloseCustomerSessionAsync(int sessionId)
@@ -121,45 +121,35 @@ public class AccountingClient
         return await RequestAsync<Session>(HttpMethod.Put, $"/session/extend", queryParams);
     }
 
-    public async Task CompleteCustomerSessionAsync(string portalId, string serviceName, int sessionId, int quantity, string customerParticipantName, Dictionary<string, string> metadata = null)
+    public async Task CompleteCustomerSessionAsync(string portalId, string serviceName, int sessionId, int quantity,
+        string customerParticipantName, Dictionary<string, string> metadata = null)
     {
-        var data = new
-        {
-            CustomerName = portalId,
-            ServiceName = serviceName,
-            SessionId = sessionId,
-            Quantity = quantity,
-            CustomerParticipantName = customerParticipantName,
-            Metadata = metadata
-        };
+        var data = new SessionCompleteOperation(portalId, serviceName, sessionId, quantity, customerParticipantName,
+            metadata);
 
-        _ = await RequestAsync<string>(HttpMethod.Post, "/operation/sessionComplete", data: data);
+        var jsonBody = JsonSerializer.Serialize(data, _serializationOptions);
+
+        _ = await RequestAsync<string>(HttpMethod.Post, "/operation/sessionComplete", jsonBody: jsonBody);
     }
 
-    public async Task<ServicePayment> MakeServicePaymentAsync(string portalId, string serviceName, int quantity, string customerParticipantName, Dictionary<string, string> metadata = null)
+    public async Task<ServicePayment> MakeServicePaymentAsync(string portalId, string serviceName, int quantity,
+        string customerParticipantName, Dictionary<string, string> metadata = null)
     {
-        var data = new
-        {
-            CustomerName = portalId,
-            ServiceName = serviceName,
-            Quantity = quantity,
-            CustomerParticipantName = customerParticipantName,
-            Metadata = metadata
-        };
+        var data = new ServicePaymentOperation(portalId, serviceName, quantity, customerParticipantName, metadata);
 
-        return await RequestAsync<ServicePayment>(HttpMethod.Post, "/operation/servicePayment", data: data);
+        var jsonBody = JsonSerializer.Serialize(data, _serializationOptions);
+
+        return await RequestAsync<ServicePayment>(HttpMethod.Post, "/operation/servicePayment", jsonBody: jsonBody);
     }
 
-    public async Task<ServicePayment> MakeAiCreditAsync(string portalId, decimal amount, string currency)
+    public async Task<ServicePayment> MakeAiCreditAsync(string portalId, decimal amount, string currency,
+        string customerParticipantName, Dictionary<string, string> metadata = null)
     {
-        var data = new AiCreditOperation
-        {
-            CustomerName = portalId,
-            Sum = (double)amount,
-            Currency = currency
-        };
+        var data = new AiCreditOperation(portalId, (double)amount, currency, customerParticipantName, metadata);
 
-        return await RequestAsync<ServicePayment>(HttpMethod.Post, "/operation/AiCredit", data: data);
+        var jsonBody = JsonSerializer.Serialize(data, _serializationOptions);
+
+        return await RequestAsync<ServicePayment>(HttpMethod.Post, "/operation/AiCredit", jsonBody: jsonBody);
     }
 
     public async Task<Report> GetCustomerOperationsAsync(string portalId, OperationFilter filter, bool isAiService)
@@ -214,28 +204,14 @@ public class AccountingClient
             queryParams.Add("limit", filter.Limit.Value.ToString());
         }
 
-        if (filter.Types.HasValue && filter.Types is not OperationType.Any)
+        if (filter.Type.HasValue)
         {
-            foreach (var operationType in Enum.GetValues<OperationType>())
-            {
-                if (operationType is OperationType.Any || !filter.Types.Value.HasFlag(operationType))
-                {
-                    continue;
-                }
-                queryParams.Add("types", operationType.ToString());
-            }
+            queryParams.Add("types", filter.Type.Value.ToString());
         }
 
-        if (filter.Status.HasValue && filter.Status is not OperationStatus.Any)
+        if (filter.Status.HasValue)
         {
-            foreach (var operationStatus in Enum.GetValues<OperationStatus>())
-            {
-                if (operationStatus is OperationStatus.Any || !filter.Status.Value.HasFlag(operationStatus))
-                {
-                    continue;
-                }
-                queryParams.Add("status", operationStatus.ToString());
-            }
+            queryParams.Add("status", filter.Status.Value.ToString());
         }
 
         if (!string.IsNullOrEmpty(filter.OrderBy))
@@ -313,7 +289,7 @@ public class AccountingClient
         return result;
     }
 
-    private async Task<T> RequestAsync<T>(HttpMethod httpMethod, string path, NameValueCollection queryParams = null, object data = null, bool addPolicy = false)
+    private async Task<T> RequestAsync<T>(HttpMethod httpMethod, string path, NameValueCollection queryParams = null, string jsonBody = null, bool addPolicy = false)
     {
         if (!Configured)
         {
@@ -347,11 +323,9 @@ public class AccountingClient
         var httpClient = _httpClientFactory.CreateClient(addPolicy ? HttpClientName : "");
         httpClient.Timeout = TimeSpan.FromMilliseconds(60000);
 
-        if (data != null)
+        if (!string.IsNullOrEmpty(jsonBody))
         {
-            var body = JsonSerializer.Serialize(data, _serializationOptions);
-
-            request.Content = new StringContent(body, Encoding.UTF8, "application/json");
+            request.Content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
         }
 
         try
@@ -440,65 +414,65 @@ public enum OperationOrderType
 /// <summary>
 /// The operation type
 /// </summary>
-[Flags]
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum OperationType
 {
-    [Description("Any")]
-    Any = 0,
     [Description("Unknown")]
-    Unknown = 1 << 0,
+    Unknown,
     [Description("ServicePayment")]
-    ServicePayment = 1 << 1,
+    ServicePayment,
     [Description("PackagePayment")]
-    PackagePayment = 1 << 2,
-    [Description("ServiceUsage")]
-    ServiceUsage = 1 << 3,
+    PackagePayment,
+    [Description("AiServicePayment")]
+    AiServicePayment,
     [Description("Deposit")]
-    Deposit = 1 << 4,
+    Deposit,
     [Description("ReceiveProviderInvoice")]
-    ReceiveProviderInvoice = 1 << 5,
+    ReceiveProviderInvoice,
     [Description("ProcessProviderInvoice")]
-    ProcessProviderInvoice = 1 << 6,
+    ProcessProviderInvoice,
     [Description("WriteOffServiceProfit")]
-    WriteOffServiceProfit = 1 << 7,
+    WriteOffServiceProfit,
     [Description("Profit")]
-    Profit = 1 << 8,
+    Profit,
     [Description("PartnerAccrual")]
-    PartnerAccrual = 1 << 9,
+    PartnerAccrual,
     [Description("ProviderPayment")]
-    ProviderPayment = 1 << 10,
+    ProviderPayment,
     [Description("PartnerPayment")]
-    PartnerPayment = 1 << 11,
+    PartnerPayment,
     [Description("Refund")]
-    Refund = 1 << 12,
+    Refund,
     [Description("BankDeposit")]
-    BankDeposit = 1 << 13,
+    BankDeposit,
     [Description("BankWithdrawal")]
-    BankWithdrawal = 1 << 14,
+    BankWithdrawal,
     [Description("GoodwillCredit")]
-    GoodwillCredit = 1 << 15,
+    GoodwillCredit,
     [Description("WriteOffProfit")]
-    WriteOffProfit = 1 << 16,
+    WriteOffProfit,
     [Description("WriteOffDifferenceCurrency")]
-    WriteOffDifferenceCurrency = 1 << 17
+    WriteOffDifferenceCurrency,
+    [Description("AiDebit")]
+    AiDebit,
+    [Description("AiCredit")]
+    AiCredit
 }
 
 /// <summary>
 /// The operation status
 /// </summary>
-[Flags]
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum OperationStatus
 {
-    [Description("Any")]
-    Any = 0,
     [Description("Pending")]
-    Pending = 1 << 0,
+    Pending,
     [Description("Completed")]
-    Completed = 1 << 1,
+    Completed,
     [Description("Rejected")]
-    Rejected = 1 << 2,
+    Rejected,
     [Description("Canceled")]
-    Canceled = 1 << 3
+    Canceled
 }
 
 /// <summary>
@@ -543,11 +517,11 @@ public class OperationFilter
     /// </summary>
     public int? Limit { get; set; }
     /// <summary>
-    /// List of operation types to filter by.
+    /// The operation type to filter by.
     /// </summary>
-    public OperationType? Types { get; init; }
+    public OperationType? Type { get; init; }
     /// <summary>
-    /// List of operation status to filter by.
+    /// The operation status to filter by.
     /// </summary>
     public OperationStatus? Status { get; init; }
     /// <summary>
@@ -851,13 +825,19 @@ public class Operation
     /// <summary>
     /// Original name of the participant.
     /// </summary>
-    /// <example>ACME Corp</example>
+    /// <example>My Own Corporation</example>
     public string ParticipantName { get; set; }
+
+    /// <summary>
+    /// Type of the operation
+    /// </summary>
+    /// <example>Unknown</example>
+    public OperationType Type { get; set; }
 
     /// <summary>
     /// Display name of the participant.
     /// </summary>
-    /// <example>ACME Corp</example>
+    /// <example>My Own Corporation</example>
     public string ParticipantDisplayName { get; set; }
 
     /// <summary>
@@ -939,12 +919,34 @@ public class ServicePayment
     public DateTime? EndDate { get; init; }
 }
 
-public class AiCreditOperation
-{
-    public double Sum { get; init; }
-    public string Currency { get; init; }
-    public string CustomerName { get; init; }
-}
+file record SessionOpenOperation(
+    string CustomerName,
+    string ServiceName,
+    string ExternalRef,
+    int Quantity,
+    int Duration);
+
+file record SessionCompleteOperation(
+    string CustomerName,
+    string ServiceName,
+    int SessionId,
+    int Quantity,
+    string CustomerParticipantName,
+    Dictionary<string, string> Metadata);
+
+file record ServicePaymentOperation(
+    string CustomerName,
+    string ServiceName,
+    int Quantity,
+    string CustomerParticipantName,
+    Dictionary<string, string> Metadata);
+
+file record AiCreditOperation(
+    string CustomerName,
+    double Sum,
+    string Currency,
+    string CustomerParticipantName,
+    Dictionary<string, string> Metadata);
 
 public static class AccountingHttpClientExtension
 {

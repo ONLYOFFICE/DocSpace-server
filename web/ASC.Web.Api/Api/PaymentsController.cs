@@ -924,7 +924,7 @@ public class PaymentController(
             Debit = inDto.Debit,
             Offset = inDto.Offset,
             Limit = inDto.Limit,
-            Types = inDto.Types,
+            Type = inDto.Type,
             Status = inDto.Status,
             OrderBy = inDto.OrderBy,
             OrderType = inDto.OrderType
@@ -1002,7 +1002,7 @@ public class PaymentController(
             inDto.ParticipantName,
             inDto.Credit,
             inDto.Debit,
-            inDto.Types,
+            inDto.Type,
             inDto.Status,
             inDto.OrderBy,
             inDto.OrderType,
@@ -1373,7 +1373,8 @@ public class PaymentController(
             throw new ItemNotFoundException("AiTools quota not found");
         }
 
-        var result = await tariffService.MakeAiCreditAsync(tenant.Id, inDto.Amount, inDto.Currency);
+        var customerParticipantName = securityContext.CurrentAccount.ID.ToString();
+        var result = await tariffService.MakeAiCreditAsync(tenant.Id, inDto.Amount, inDto.Currency, customerParticipantName, metadata: null);
         if (result != null)
         {
             var details = $"{aiToolsQuota.ServiceName} {inDto.Amount} {inDto.Currency}";

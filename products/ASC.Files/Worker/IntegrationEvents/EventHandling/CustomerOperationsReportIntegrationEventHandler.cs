@@ -70,7 +70,7 @@ public class CustomerOperationsReportIntegrationEventHandler(
                     @event.ParticipantName,
                     @event.Credit,
                     @event.Debit,
-                    @event.Types,
+                    @event.Type,
                     @event.Status,
                     @event.OrderBy,
                     @event.OrderType); 

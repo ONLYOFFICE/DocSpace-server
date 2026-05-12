@@ -186,7 +186,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
                 ParticipantName = taskData.ParticipantName,
                 Credit = taskData.Credit,
                 Debit = taskData.Debit,
-                Types = taskData.Types,
+                Type = taskData.Type,
                 Status = taskData.Status,
                 OrderBy = taskData.OrderBy,
                 OrderType = taskData.OrderType
@@ -317,7 +317,7 @@ public record CustomerOperationsReportTaskData(
     string ParticipantName,
     bool? Credit,
     bool? Debit,
-    OperationType? Types,
+    OperationType? Type,
     OperationStatus? Status,
     string OrderBy,
     OperationOrderType? OrderType
