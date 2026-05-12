@@ -5178,7 +5178,7 @@ public class FileStorageService //: IFileStorageService
 
         if (form == null)
         {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
         if (!await DocSpaceHelper.IsFormOrCompletedForm(form, daoFactory))
         {
