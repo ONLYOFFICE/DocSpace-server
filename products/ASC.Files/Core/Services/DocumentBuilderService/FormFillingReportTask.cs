@@ -126,7 +126,7 @@ public class FormFillingReportTask : DocumentBuilderTask<int, FormFillingReportT
         var headers = _data.Headers != null
             ? _data.Headers.ToDictionary(x => x.Key, x => new StringValues(x.Value))
             : [];
-        await filesMessageService.SendAsync(_data.IsNewFile ? MessageAction.FileCreated : MessageAction.FileUpdated, resultFile, headers: headers);
+        await filesMessageService.SendAsync(_data.IsNewFile ? MessageAction.FileCreated : MessageAction.FileUpdated, resultFile, headers, resultFile.Title);
 
         return resultFile;
     }
