@@ -26,6 +26,8 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
+#nullable enable
+
 /// <summary>
 /// The external DB synchronization task parameters.
 /// </summary>
@@ -64,6 +66,7 @@ public class ExternalDbSyncTaskDto
     /// <summary>
     /// The synchronization results for all original forms in the room.
     /// </summary>
+    /// <example>[{"id": 42, "title": "Application.pdf", "success": true, "error": null}]</example>
     public required List<ExternalDbSyncFormResultDto> Forms { get; set; }
 
     public static ExternalDbSyncTaskDto? Get(ExternalDbSyncTask task)

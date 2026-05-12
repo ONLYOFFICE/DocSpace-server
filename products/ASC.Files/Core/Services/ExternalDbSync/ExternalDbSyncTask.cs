@@ -26,6 +26,8 @@
 
 namespace ASC.Files.Core.Services.ExternalDbSync;
 
+#nullable enable
+
 [JsonPolymorphic(UnknownDerivedTypeHandling = JsonUnknownDerivedTypeHandling.FallBackToNearestAncestor)]
 [JsonDerivedType(typeof(ExternalDbSyncTask), "ExternalDbSyncTask")]
 public abstract class ExternalDbSyncTaskBase : DistributedTaskProgress { }
@@ -33,7 +35,7 @@ public abstract class ExternalDbSyncTaskBase : DistributedTaskProgress { }
 [Transient]
 public class ExternalDbSyncTask : ExternalDbSyncTaskBase
 {
-    private readonly IServiceScopeFactory _serviceScopeFactory;
+    private readonly IServiceScopeFactory? _serviceScopeFactory;
     private int _tenantId;
     private Guid _userId;
     private int _roomId;
