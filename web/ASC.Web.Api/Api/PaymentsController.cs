@@ -618,6 +618,11 @@ public class PaymentController(
             throw new ArgumentException(Resource.ErrorNotCorrectEmail);
         }
 
+        if (string.IsNullOrEmpty(inDto.UserName))
+        {
+            throw new ArgumentException(Resource.ErrorIncorrectUserName);
+        }
+
         if (string.IsNullOrEmpty(inDto.Message))
         {
             throw new ArgumentException(Resource.ErrorEmptyMessage);
