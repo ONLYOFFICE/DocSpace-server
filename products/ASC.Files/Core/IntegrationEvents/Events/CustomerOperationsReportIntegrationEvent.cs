@@ -38,7 +38,6 @@ public record CustomerOperationsReportIntegrationEvent : IntegrationEvent
         int tenantId,
         string baseUri,
         string serviceName,
-        bool writeOffServiceQuota,
         DateTime? startDate = null,
         DateTime? endDate = null,
         string participantName = null,
@@ -54,7 +53,6 @@ public record CustomerOperationsReportIntegrationEvent : IntegrationEvent
     {
         BaseUri = baseUri;
         ServiceName = serviceName;
-        WriteOffServiceQuota = writeOffServiceQuota;
         StartDate = startDate;
         EndDate = endDate;
         ParticipantName = participantName;
@@ -106,7 +104,4 @@ public record CustomerOperationsReportIntegrationEvent : IntegrationEvent
 
     [ProtoMember(13)]
     public OperationOrderType? OrderType  { get; set; }
-
-    [ProtoMember(14)]
-    public bool WriteOffServiceQuota { get; set; }
 }

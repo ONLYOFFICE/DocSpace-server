@@ -156,10 +156,8 @@ public class AccountingClient
     {
         var queryParams = FilterToNameValueCollection(filter);
 
-        var path = filter.WriteOffServiceQuota && !string.IsNullOrEmpty(filter.ServiceName)
-            ? isAiService
-                ? $"/customer/{portalId}/operations/ai"
-                : $"/customer/{portalId}/quota-detail/{filter.ServiceName}"
+        var path = isAiService
+            ? $"/customer/{portalId}/operations/ai"
             : $"/customer/{portalId}/operations";
 
         return await RequestAsync<Report>(HttpMethod.Get, path, queryParams);
@@ -484,10 +482,6 @@ public class OperationFilter
     /// The service name.
     /// </summary>
     public string ServiceName { get; set; }
-    /// <summary>
-    /// Write-off of the quota for the service
-    /// </summary>
-    public bool WriteOffServiceQuota { get; set; }
     /// <summary>
     /// The start date of the period to filter operations from (inclusive).
     /// </summary>

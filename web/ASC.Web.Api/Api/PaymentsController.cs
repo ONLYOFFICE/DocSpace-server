@@ -916,7 +916,6 @@ public class PaymentController(
         var filter = new OperationFilter
         {
             ServiceName = inDto.ServiceName,
-            WriteOffServiceQuota = inDto.WriteOffServiceQuota,
             UtcStartDate = utcStartDate,
             UtcEndDate = utcEndDate,
             ParticipantName = inDto.ParticipantName,
@@ -996,7 +995,6 @@ public class PaymentController(
             tenantId,
             baseUri,
             inDto.ServiceName,
-            inDto.WriteOffServiceQuota,
             inDto.StartDate,
             inDto.EndDate,
             inDto.ParticipantName,
@@ -1072,7 +1070,7 @@ public class PaymentController(
             throw new ItemNotFoundException("Customer could not be found");
         }
 
-        var evt = new CustomerOperationsReportIntegrationEvent(securityContext.CurrentAccount.ID, tenantId, null, null, false, terminate: true);
+        var evt = new CustomerOperationsReportIntegrationEvent(securityContext.CurrentAccount.ID, tenantId, null, null, terminate: true);
 
         await eventBus.PublishAsync(evt);
     }
