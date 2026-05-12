@@ -246,8 +246,12 @@ dotnet_diagnostic.CA1805.severity = warning
 dotnet_diagnostic.CA1841.severity = warning
 dotnet_diagnostic.SYSLIB1006.severity = silent
 dotnet_diagnostic.SYSLIB1015.severity = silent
-# CA2000: Dispose objects before losing scope
-dotnet_diagnostic.CA2000.severity = warning
+# CA2000: Dispose objects before losing scope.
+# Disabled because flow analysis on this codebase costs ~94% of all analyzer time
+# (~14s wall-clock on ASC.Files.Core alone). IDE0068 + IDisposableAnalyzers + the
+# `using` declaration / `await using` style cover the same intent at a fraction of
+# the cost; in-editor live analysis still flags real leaks while you type.
+dotnet_diagnostic.CA2000.severity = none
 # IDE0068: Use recommended dispose pattern (detects missing using)
 dotnet_diagnostic.IDE0068.severity = warning
 
