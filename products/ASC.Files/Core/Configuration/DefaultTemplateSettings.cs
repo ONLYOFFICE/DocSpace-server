@@ -53,50 +53,9 @@ public class DefaultTemplateSettingsHelper(IServiceProvider serviceProvider,
     IFileDao<int> fileDao,
     IFileDao<string> fileThirdPartyDao,
     IFolderDao<int> folderDao,
-    ExternalShare externalShare,
-    CommonLinkUtility commonLinkUtility,
-    FilesLinkUtility filesLinkUtility,
     FilesMessageService fileMessageService,
     FileChecker fileChecker)
 {
-    public async Task<DefaultTemplateSettingsDto> ConvertToDtoAsync(DefaultTemplateSettings settings)
-    {
-        var fileIds = settings.Items.Where(i => i.SelectedFile != null).Select(i => i.SelectedFile.Value);
-        var fileTitles = (await fileDao.GetFilesAsync(fileIds).ToListAsync()).ToDictionary(f => f.Id, f => f);
-
-        return new DefaultTemplateSettingsDto
-        {
-            Items = settings.Items
-                .Select(asDto)
-                .OrderBy(template =>
-                {
-                    var index = _extensionsSortOrder.IndexOf(template.FileExtension);
-                    return index == -1 ? int.MaxValue : index;
-                })
-                .ThenBy(template => template.FileExtension)
-        };
-
-        DefaultTemplateItemDto asDto(DefaultTempalteItem item)
-        {
-            var result = new DefaultTemplateItemDto
-            {
-                FileExtension = item.FileExtension
-            };
-
-            if (item.SelectedFile.HasValue)
-            {
-                var file = fileTitles[item.SelectedFile.Value];
-                result.SelectedFile = item.SelectedFile;
-                result.FileTitle = file.Title;
-                result.LastModified = file.ModifiedOn;
-                result.ViewUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileDownloadUrl(file.Id)));
-                result.FileSize = file.ContentLength;
-            }
-
-            return result;
-        }
-    }
-
     public async Task<DefaultTemplateSettings> GetSettingsAsync()
     {
         var settings = await settingsManager.LoadAsync<DefaultTemplateSettings>();
@@ -257,6 +216,4 @@ public class DefaultTemplateSettingsHelper(IServiceProvider serviceProvider,
 
         return extensions;
     }
-
-    private static readonly List<string> _extensionsSortOrder = [".docx", ".xlsx", ".pptx", ".pdf"];
 }

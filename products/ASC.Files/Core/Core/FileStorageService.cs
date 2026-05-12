@@ -104,7 +104,8 @@ public class FileStorageService //: IFileStorageService
     FileSharingHelper fileSharingHelper,
     AiGateway gateway,
     FormFillingReportCreator formFillingReportCreator,
-    ExportToXLSX exportToXLSX)
+    ExportToXLSX exportToXLSX,
+    ExternalDbSyncService externalDbSyncService)
 {
     private readonly ILogger _logger = optionMonitor.CreateLogger("ASC.Files");
 
@@ -1314,6 +1315,7 @@ public class FileStorageService //: IFileStorageService
                             lifetime.DeletePermanently.ToString());
                     }
                 }
+
             }
 
             if (titleChanged)
@@ -5178,7 +5180,11 @@ public class FileStorageService //: IFileStorageService
 
         if (form == null)
         {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+        if (!await fileSecurity.CanReadAsync(form))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
         }
         if (!await DocSpaceHelper.IsFormOrCompletedForm(form, daoFactory))
         {
@@ -5565,6 +5571,43 @@ public class FileStorageService //: IFileStorageService
         return exportToXLSX.GetXlsxTaskAsync(formId);
     }
 
+    public async Task<ExternalDbSyncTask> StartExternalDbSyncAsync(int roomId)
+    {
+        var folderDao = daoFactory.GetFolderDao<int>();
+        var room = await folderDao.GetFolderAsync(roomId).NotFoundIfNull();
+
+        if (room.FolderType != FolderType.FillingFormsRoom)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
+        if (!await fileSecurity.CanEditAsync(room))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
+        return await externalDbSyncService.StartSyncAsync(roomId)
+            ?? throw new BadHttpRequestException(FilesCommonResource.ErrorMessage_BadRequest);
+    }
+
+    public async Task<ExternalDbSyncTask> GetExternalDbSyncTaskAsync(int roomId)
+    {
+        var folderDao = daoFactory.GetFolderDao<int>();
+        var room = await folderDao.GetFolderAsync(roomId).NotFoundIfNull();
+
+        if (room.FolderType != FolderType.FillingFormsRoom)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
+        if (!await fileSecurity.CanEditAsync(room))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
+        return await externalDbSyncService.GetTaskAsync(roomId);
+    }
+
     private async Task CheckRoomAvailability<T>(T roomId)
     {
         var folderDao = daoFactory.GetFolderDao<T>();
@@ -5598,7 +5641,8 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException();
         }
     }
-    private Exception GenerateException(Exception error, bool warning = false)
+
+    private Exception GenerateException<T>(T error, bool warning = false) where T : Exception
     {
         if (warning || error is ItemNotFoundException or SecurityException or ArgumentException or TenantQuotaException or InvalidOperationException)
         {
@@ -5616,7 +5660,7 @@ public class FileStorageService //: IFileStorageService
                 : error;
         }
 
-        return new InvalidOperationException(error.Message, error);
+        return error;
     }
 
     private async Task<AceWrapper> SetExternalLinkAsync<T>(FileEntry<T> entry, Guid linkId, FileShare share, string title, DateTime expirationDate = default,

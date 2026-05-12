@@ -3731,6 +3731,9 @@ public class FileSecurity(
         UseChat,
 
         [Description("Update xlsx")]
-        UpdateXlsx
+        UpdateXlsx,
+
+        [Description("Analyze responses")]
+        AnalyzeResponses
     }
 }

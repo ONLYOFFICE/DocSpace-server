@@ -24,10 +24,14 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+global using System.Collections.Immutable;
+global using System.ComponentModel;
+global using System.ComponentModel.DataAnnotations;
 global using System.Globalization;
 global using System.Security;
 global using System.Text;
 global using System.Text.Json;
+global using System.Text.Json.Serialization;
 global using System.Text.RegularExpressions;
 
 global using ASC.Api.Core;
@@ -41,6 +45,7 @@ global using ASC.Common.Threading;
 global using ASC.Common.Web;
 global using ASC.Core;
 global using ASC.Core.Billing;
+global using ASC.Core.Common;
 global using ASC.Core.Common.EF;
 global using ASC.Core.Common.Settings;
 global using ASC.Core.Tenants;
@@ -50,6 +55,7 @@ global using ASC.Data.Backup.EF.Context;
 global using ASC.EventBus.Abstractions;
 global using ASC.FederatedLogin.Helpers;
 global using ASC.FederatedLogin.LoginProviders;
+global using ASC.Files.ApiModels.RequestDto;
 global using ASC.Files.Core;
 global using ASC.Files.Core.ApiModels;
 global using ASC.Files.Core.ApiModels.RequestDto;
@@ -65,6 +71,7 @@ global using ASC.Files.Core.RoomTemplates;
 global using ASC.Files.Core.RoomTemplates.Events;
 global using ASC.Files.Core.Security;
 global using ASC.Files.Core.Services.DocumentBuilderService;
+global using ASC.Files.Core.Services.ExternalDbSync;
 global using ASC.Files.Core.VirtualRooms;
 global using ASC.Files.Extension;
 global using ASC.Files.Helpers;
@@ -104,6 +111,8 @@ global using Microsoft.Extensions.DependencyInjection.Extensions;
 global using Microsoft.Extensions.Hosting.WindowsServices;
 
 global using Newtonsoft.Json.Linq;
+
+global using Riok.Mapperly.Abstractions;
 
 global using Swashbuckle.AspNetCore.Annotations;
 

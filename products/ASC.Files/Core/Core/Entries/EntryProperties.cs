@@ -142,6 +142,11 @@ public class FormFillingProperties<T>
 
     public bool? CollectFillForm { get; set; }
 
+    /// <summary>
+    /// The name of the table in the external database that corresponds to this form.
+    /// </summary>
+    public string ExternalDbTableName { get; set; }
+
 }
 
 /// <summary>

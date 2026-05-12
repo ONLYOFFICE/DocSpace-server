@@ -1,7 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Nullable>enable</Nullable>
+    <!-- See ASC.Migrations.MySql.SaaS.csproj for rationale. -->
+    <Nullable>disable</Nullable>
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
     <DefineConstants>$(DefineConstants)</DefineConstants>
   </PropertyGroup>
 

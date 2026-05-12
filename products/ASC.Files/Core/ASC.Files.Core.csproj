@@ -20,6 +20,7 @@
     <PackageReference Include="Google.Apis.Drive.v3" />
     <PackageReference Include="HtmlAgilityPack" />
     <PackageReference Include="Joonasw.AspNetCore.SecurityHeaders" />
+    <PackageReference Include="Magick.NET-Q8-AnyCPU" />
     <PackageReference Include="Microsoft.Extensions.AI.Abstractions" />
     <PackageReference Include="Microsoft.Extensions.AI.OpenAI" />
     <PackageReference Include="Microsoft.OneDriveSDK" />
