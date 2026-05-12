@@ -24,9 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.AI.Models.RequestDto.Integration;
-using ASC.AI.Service;
-
 using McpServerDto = ASC.AI.Models.ResponseDto.Integration.McpServerDto;
 using McpServerMapper = ASC.AI.Models.ResponseDto.Integration.McpServerMapper;
 

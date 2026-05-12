@@ -25,7 +25,6 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.AI.Integration.WebSearch;
-using ASC.Core.Users;
 
 namespace ASC.AI.Service;
 
