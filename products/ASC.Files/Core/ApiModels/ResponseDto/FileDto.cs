@@ -199,6 +199,12 @@ public class FileDto<T> : FileEntryDto<T>
     public string InProcessFolderTitle { get; set; }
 
     /// <summary>
+    /// The ID of the FormFillingFolderDone folder that corresponds to this original form.
+    /// </summary>
+    /// <example>55</example>
+    public int? ResultsFolderId { get; set; }
+
+    /// <summary>
     /// The file draft information with its location.
     /// </summary>
     /// <example>{"folderId": 10, "folderTitle": "In Process", "fileId": 123, "fileTitle": "Draft.pdf"}</example>
@@ -233,6 +239,13 @@ public class FileDto<T> : FileEntryDto<T>
     /// </summary>
     /// <example>0</example>
     public VectorizationStatus? VectorizationStatus { get; set; }
+
+    /// <summary>
+    /// The name of the table in the external database that corresponds to this form.
+    /// </summary>
+    /// <example>form_123_v1</example>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string ExternalDbTableName { get; set; }
 
     /// <summary>
     /// The dimensions (width and height) of the image file in pixels.
@@ -564,6 +577,7 @@ public class FileDtoHelper(
             if (formFilling != null)
             {
                 result.StartFilling = formFilling.StartFilling;
+                result.ExternalDbTableName = formFilling.ExternalDbTableName;
                 if (!Equals(linkedId, default(T)))
                 {
                     var draftLocation = new DraftLocation<T> { FolderId = formFilling.ToFolderId, FolderTitle = formFilling.Title, FileId = linkedId };
@@ -583,6 +597,11 @@ public class FileDtoHelper(
 
             result.Security[FileSecurity.FilesSecurityActions.UpdateXlsx] = isOriginalForm
                 && (result.Security[FileSecurity.FilesSecurityActions.Edit] || file.Access == FileShare.ContentCreator);
+
+            if (isOriginalForm && formFilling.ResultsFolderId is int resultsFolderId)
+            {
+                result.ResultsFolderId = resultsFolderId;
+            }
 
             if (currentRoom is { FolderType: FolderType.VirtualDataRoom })
             {

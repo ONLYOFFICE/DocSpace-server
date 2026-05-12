@@ -81,6 +81,13 @@ public class GetFolderRequestDto<T>
     public ApplyFilterOption? ApplyFilterOption { get; set; }
 
     /// <summary>
+    /// Specifies whether to include files from subfolders in the results.
+    /// </summary>
+    /// <example>true</example>
+    [FromQuery(Name = "withSubFolders")]
+    public bool? WithSubFolders { get; set; }
+
+    /// <summary>
     /// Specifies whether to search for the specific file extension.
     /// </summary>
     /// <example>.docx</example>
