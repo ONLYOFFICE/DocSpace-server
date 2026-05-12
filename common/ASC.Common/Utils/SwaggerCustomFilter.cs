@@ -268,3 +268,69 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
                type == typeof(JsonElement);
     }
 }
+
+public class UploadRequestDtoSchemaFilter : ISchemaFilter
+{
+    public void Apply(IOpenApiSchema schema, SchemaFilterContext context)
+    {
+        if (context.Type?.Name != "UploadRequestDto" || context.MemberInfo != null)
+        {
+            return;
+        }
+
+        if (schema.Properties == null)
+        {
+            return;
+        }
+
+        ReplaceProperty(schema, "file", new OpenApiSchema
+        {
+            Type = JsonSchemaType.String | JsonSchemaType.Null,
+            Format = "binary"
+        });
+
+        ReplaceProperty(schema, "files", new OpenApiSchema
+        {
+            Type = JsonSchemaType.Array | JsonSchemaType.Null,
+            Items = new OpenApiSchema
+            {
+                Type = JsonSchemaType.String,
+                Format = "binary"
+            }
+        });
+
+        ReplaceProperty(schema, "contentType", new OpenApiSchema
+        {
+            Type = JsonSchemaType.String | JsonSchemaType.Null
+        });
+
+        ReplaceProperty(schema, "contentDisposition", new OpenApiSchema
+        {
+            Type = JsonSchemaType.String | JsonSchemaType.Null
+        });
+
+        schema.Properties.Remove("stream");
+    }
+
+    private static void ReplaceProperty(IOpenApiSchema owner, string name, OpenApiSchema replacement)
+    {
+        if (!owner.Properties.TryGetValue(name, out var existing))
+        {
+            return;
+        }
+
+        var existingSchema = existing as OpenApiSchema;
+
+        if (existingSchema?.Description is { Length: > 0 } description)
+        {
+            replacement.Description = description;
+        }
+
+        if (existingSchema?.Example != null)
+        {
+            replacement.Example = existingSchema.Example;
+        }
+
+        owner.Properties[name] = replacement;
+    }
+}

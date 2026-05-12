@@ -28,6 +28,9 @@ namespace ASC.Api.Documentation;
 
 public class OpenapiJoiner : AsyncCommand<JoinSettings>
 {
+    private const string FolderUploadPath = "/api/2.0/files/{folderId}/upload";
+    private const string MyUploadPath = "/api/2.0/files/@my/upload";
+
     public override async Task<int> ExecuteAsync(CommandContext context, JoinSettings settings, CancellationToken cancellationToken)
     {
         await AnsiConsole.Progress()
@@ -88,8 +91,11 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
         SortTagGroups(result);
         EnumCleaner.Clean(result);
         FixMultipartFormData(result);
+        FixSdkUploadEndpointOperations(result);
+        FixSdkUploadRequestDtoSchema(result);
         RemoveFormCollectionSchema(result);
         ApplyDeepObjectStyle(result);
+        InjectErrorSchemas(result);
 
         var options = new JsonSerializerOptions
         {
@@ -612,6 +618,167 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
         }
 
         return false;
+    }
+
+    private static void FixSdkUploadRequestDtoSchema(JsonObject root)
+    {
+        if (root["components"] is not JsonObject components ||
+            components["schemas"] is not JsonObject schemas ||
+            schemas["UploadRequestDto"] is not JsonObject uploadDto ||
+            uploadDto["properties"] is not JsonObject properties)
+        {
+            return;
+        }
+
+        ReplacePropertySchema(properties, "file", new JsonObject
+        {
+            ["type"] = "string",
+            ["format"] = "binary",
+            ["nullable"] = true
+        });
+
+        ReplacePropertySchema(properties, "files", new JsonObject
+        {
+            ["type"] = "array",
+            ["nullable"] = true,
+            ["items"] = new JsonObject
+            {
+                ["type"] = "string",
+                ["format"] = "binary"
+            }
+        });
+
+        ReplacePropertySchema(properties, "contentType", new JsonObject
+        {
+            ["type"] = "string",
+            ["nullable"] = true
+        });
+
+        ReplacePropertySchema(properties, "contentDisposition", new JsonObject
+        {
+            ["type"] = "string",
+            ["nullable"] = true
+        });
+
+        properties.Remove("stream");
+    }
+
+    private static void ReplacePropertySchema(JsonObject properties, string key, JsonObject newSchema)
+    {
+        if (properties[key] is not JsonObject existing)
+        {
+            return;
+        }
+
+        if (existing["description"]?.DeepClone() is { } description)
+        {
+            newSchema["description"] = description;
+        }
+
+        if (existing["example"]?.DeepClone() is { } example)
+        {
+            newSchema["example"] = example;
+        }
+
+        properties[key] = newSchema;
+    }
+
+    private static JsonObject CreateUploadRequestBody()
+    {
+        return new JsonObject
+        {
+            ["required"] = false,
+            ["content"] = new JsonObject
+            {
+                ["multipart/form-data"] = new JsonObject
+                {
+                    ["schema"] = new JsonObject
+                    {
+                        ["$ref"] = "#/components/schemas/UploadRequestDto"
+                    }
+                }
+            }
+        };
+    }
+
+    private static void FixSdkUploadEndpointOperations(JsonObject root)
+    {
+        if (!root.TryGetPropertyValue("paths", out var pathsNode))
+        {
+            return;
+        }
+
+        var paths = pathsNode!.AsObject();
+
+        if (paths.TryGetPropertyValue(FolderUploadPath, out var folderUploadNode) &&
+            folderUploadNode is JsonObject folderUpload &&
+            folderUpload.TryGetPropertyValue("post", out var folderPostNode) &&
+            folderPostNode is JsonObject folderPost)
+        {
+            folderPost["requestBody"] = CreateUploadRequestBody();
+        }
+
+        if (paths.TryGetPropertyValue(MyUploadPath, out var myUploadNode) &&
+            myUploadNode is JsonObject myUpload &&
+            myUpload.TryGetPropertyValue("post", out var myPostNode) &&
+            myPostNode is JsonObject myPost)
+        {
+            if (myPost.TryGetPropertyValue("parameters", out var paramsNode) &&
+                paramsNode is JsonArray paramsArray)
+            {
+                var toRemove = paramsArray
+                    .OfType<JsonObject>()
+                    .FirstOrDefault(p => p["name"]?.ToString() == "inDto" && p["in"]?.ToString() == "query");
+
+                if (toRemove != null)
+                {
+                    _ = paramsArray.Remove(toRemove);
+                }
+
+                if (paramsArray.Count == 0)
+                {
+                    _ = myPost.Remove("parameters");
+                }
+            }
+
+            myPost["requestBody"] = CreateUploadRequestBody();
+        }
+    }
+
+    private static void InjectErrorSchemas(JsonObject root)
+    {
+        if (root["components"]?["schemas"] is not JsonObject schemas)
+        {
+            return;
+        }
+
+        if (schemas.ContainsKey("CommonApiError") || schemas.ContainsKey("ErrorApiResponse"))
+        {
+            return;
+        }
+
+        schemas["CommonApiError"] = JsonNode.Parse("""
+            {
+                "type": "object",
+                "properties": {
+                    "message": { "type": "string",  "description": "Human-readable error message" },
+                    "type":    { "type": "string",  "description": "Exception type name" },
+                    "stack":   { "type": "string",  "description": "Stack trace (debug mode only)" },
+                    "hresult": { "type": "integer", "format": "int32", "description": "HRESULT error code" }
+                }
+            }
+            """)!;
+
+        schemas["ErrorApiResponse"] = JsonNode.Parse("""
+            {
+                "type": "object",
+                "properties": {
+                    "status":     { "type": "integer", "format": "int32", "description": "1 = error" },
+                    "statusCode": { "type": "string",  "description": "HTTP status code name" },
+                    "error":      { "$ref": "#/components/schemas/CommonApiError" }
+                }
+            }
+            """)!;
     }
 
     private static bool JsonDeepEquals(JsonNode a, JsonNode b)

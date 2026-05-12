@@ -88,6 +88,10 @@ public class MyTypeScriptAxiosClientCodegen extends TypeScriptAxiosClientCodegen
         if (supportsES6) {
             supportingFiles.add(new SupportingFile("tsconfig.esm.mustache", "", "tsconfig.esm.json"));
         }
+
+        supportingFiles.add(new SupportingFile(
+            "docspace-api-error.mustache", "", "docspace-api-error.ts"
+        ));
     }
 
     @Override

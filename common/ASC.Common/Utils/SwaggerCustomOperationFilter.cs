@@ -101,3 +101,42 @@ public class SwaggerOperationIdFilter : IOperationFilter
         }
     }
 }
+
+public class UploadOperationFilter : IOperationFilter
+{
+    private static readonly HashSet<string> _uploadRoutes = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "api/2.0/files/{folderId}/upload",
+        "api/2.0/files/@my/upload"
+    };
+
+    public void Apply(OpenApiOperation operation, OperationFilterContext context)
+    {
+        if (!_uploadRoutes.Contains(context.ApiDescription.RelativePath) ||
+            !string.Equals(context.ApiDescription.HttpMethod, "POST", StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        var inDto = operation.Parameters
+            .OfType<OpenApiParameter>()
+            .FirstOrDefault(p => p.Name == "inDto" && p.In == ParameterLocation.Query);
+
+        if (inDto != null)
+        {
+            operation.Parameters.Remove(inDto);
+        }
+
+        operation.RequestBody = new OpenApiRequestBody
+        {
+            Required = false,
+            Content = new Dictionary<string, OpenApiMediaType>
+            {
+                ["multipart/form-data"] = new OpenApiMediaType
+                {
+                    Schema = new OpenApiSchemaReference("UploadRequestDto")
+                }
+            }
+        };
+    }
+}

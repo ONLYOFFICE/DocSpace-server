@@ -96,6 +96,7 @@ public static class OpenApiExtension
 
             c.AddScalarFilters();
             c.SchemaFilter<SwaggerSchemaCustomFilter>();
+            c.SchemaFilter<UploadRequestDtoSchemaFilter>();
             c.DocumentFilter<LowercaseDocumentFilter>();
             c.SchemaFilter<DerivedSchemaFilter>();
             c.DocumentFilter<HideRouteDocumentFilter>("/api/2.0/capabilities.json");
@@ -104,6 +105,7 @@ public static class OpenApiExtension
             c.OperationFilter<SwaggerCustomOperationFilter>();
             c.OperationFilter<ContentTypeOperationFilter>();
             c.OperationFilter<AllowAnonymousFilter>();
+            c.OperationFilter<UploadOperationFilter>();
             c.DocumentFilter<SwaggerSuccessApiResponseFilter>();
             c.EnableAnnotations();
             c.SchemaFilter<CustomInheritanceSchemaFilter>();
