@@ -165,7 +165,7 @@ public class GroupController(
         }
 
         var group = await userManager.SaveGroupInfoAsync(new GroupInfo { Name = inDto.GroupName });
-        
+
         if (inDto.GroupManager != Guid.Empty)
         {
             await TransferUserToDepartmentAsync(inDto.GroupManager, group, true);
