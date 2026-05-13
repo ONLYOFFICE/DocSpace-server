@@ -44,7 +44,7 @@ public static partial class AttachmentMapper
 {
     public static partial AttachmentDto MapToDto(AttachmentResult result);
 
-    private static string MapKindToString(AttachmentKind kind) => kind.ToString();
+    private static string MapKindToString(AttachmentKind kind) => kind.ToStringLowerFast();
 
     private static long MapDateTimeToMs(DateTime dateTime) =>
         new DateTimeOffset(DateTime.SpecifyKind(dateTime, DateTimeKind.Utc)).ToUnixTimeMilliseconds();
