@@ -29,26 +29,32 @@ namespace ASC.AI.Integration.Attachments;
 [Scope]
 public class AttachmentsStorage(IDbContextFactory<AiIntegrationContext> dbContextFactory)
 {
-    public async Task<Attachment> CreateAsync(int tenantId, CreateAttachmentParams data)
+    public async Task<List<Attachment>> CreateManyAsync(int tenantId, IReadOnlyList<CreateAttachmentParams> data)
     {
-        await using var context = await dbContextFactory.CreateDbContextAsync();
+        if (data.Count == 0)
+        {
+            return [];
+        }
 
-        var entity = new DbAttachment
+        var now = DateTime.UtcNow;
+        var entities = data.Select(p => new DbAttachment
         {
             Id = Guid.CreateVersion7(),
             TenantId = tenantId,
-            Kind = data.Kind,
-            Title = data.Title,
-            Content = data.Content,
-            EntryId = data.EntryId,
-            ThirdpartyEntryId = data.ThirdpartyEntryId,
-            CreatedAt = DateTime.UtcNow
-        };
+            Kind = p.Kind,
+            Title = p.Title,
+            Content = p.Content,
+            EntryId = p.EntryId,
+            ThirdpartyEntryId = p.ThirdpartyEntryId,
+            CreatedAt = now
+        }).ToArray();
 
-        context.Attachments.Add(entity);
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
+        context.Attachments.AddRange(entities);
         await context.SaveChangesAsync();
 
-        return ToDomainEntity(entity);
+        return entities.Select(ToDomainEntity).ToList();
     }
 
     public async Task<Attachment?> ReadByIdAsync(int tenantId, Guid id)
