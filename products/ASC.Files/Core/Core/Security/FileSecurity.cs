@@ -1573,6 +1573,7 @@ public class FileSecurity(
                     FilesSecurityActions.FillingStatus or
                     FilesSecurityActions.ResetFilling or
                     FilesSecurityActions.StopFilling or
+                    FilesSecurityActions.UpdateXlsx or
                     FilesSecurityActions.SubmitToFormGallery or
                     FilesSecurityActions.CopyLink or
                                      FilesSecurityActions.OpenForm
@@ -1664,7 +1665,9 @@ public class FileSecurity(
 
                         if (action == FilesSecurityActions.UpdateXlsx)
                         {
-                            return hasFullAccessToForm && formFilling?.StartFilling == true;
+                            var isOwnOrStartedByUser = shareRecord is { Share: FileShare.ContentCreator } &&
+                                (file.CreateBy.Equals(userId) || formFilling?.StartedByUserId == userId);
+                            return userHasFullAccess || shareRecord is { Share: FileShare.RoomManager } || isOwnOrStartedByUser;
                         }
 
                         if (action == FilesSecurityActions.StartFilling)
