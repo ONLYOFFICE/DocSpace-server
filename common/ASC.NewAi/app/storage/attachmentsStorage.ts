@@ -24,67 +24,180 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-import { randomUUID } from "crypto";
+import { aiService, AiServiceHttpError } from "./httpClient.js";
+import { getNumber, getString, isObject } from "../narrow.js";
+import logger from "../log.js";
 import type { AttachmentsStorage, Attachment } from "@onlyoffice/ai-chat/core";
 
-// Placeholder in-memory store. Replace with an HTTP-backed implementation
-// once an AttachmentsStorageController exists in ASC.AI/Server/Api/Integration.
-export class InMemoryAttachmentsStorage implements AttachmentsStorage {
-  readonly #items = new Map<string, Attachment>();
+const PATH = "/integration/attachments";
 
+// The C# `AttachmentsStorageController` exposes a DocSpace-specific shape
+// (`POST /integration/attachments { entryIds: [...] }`) and does not provide
+// `update`, `deleteByMessage`, or `deleteByThread`. The fields `path`,
+// `messageId`, `threadId`, and `entityId` aren't carried in `AttachmentDto`.
+// Cascade-on-message/thread cleanup is expected to happen server-side.
+// Methods missing from the backend are no-ops here with a warning log.
+
+function dtoToAttachment(raw: unknown): Attachment | null {
+  if (!isObject(raw)) {
+    return null;
+  }
+  const id = getString(raw, "id");
+  const title = getString(raw, "title");
+  const kindRaw = getString(raw, "kind");
+  const createdAt = getNumber(raw, "createdAt");
+  if (id === undefined || title === undefined || kindRaw === undefined) {
+    return null;
+  }
+  const kind = kindRaw.toLowerCase() === "image" ? "image" : "file";
+  const result: Attachment = {
+    id,
+    kind,
+    title,
+    createdAt: createdAt ?? Date.now(),
+  };
+  const content = getString(raw, "content");
+  if (content !== undefined) {
+    result.content = content;
+  }
+  const base64 = getString(raw, "dataUrl") ?? getString(raw, "base64");
+  if (base64 !== undefined) {
+    result.base64 = base64;
+  }
+  return result;
+}
+
+export class HttpAttachmentsStorage implements AttachmentsStorage {
   async create(input: Omit<Attachment, "id" | "createdAt">): Promise<Attachment> {
-    const stored: Attachment = { ...input, id: randomUUID(), createdAt: Date.now() };
-    this.#items.set(stored.id, stored);
-    return { ...stored };
+    const [result] = await this.createMany([input]);
+    if (!result) {
+      throw new Error("ai service returned no attachment");
+    }
+    return result;
   }
 
-  async readById(id: string): Promise<Attachment | null> {
-    const a = this.#items.get(id);
-    return a ? { ...a } : null;
-  }
-
-  async readManyByIds(ids: string[]): Promise<(Attachment | null)[]> {
-    return ids.map((id) => {
-      const a = this.#items.get(id);
-      return a ? { ...a } : null;
+  async createMany(
+    inputs: Omit<Attachment, "id" | "createdAt">[],
+  ): Promise<Attachment[]> {
+    if (inputs.length === 0) {
+      return [];
+    }
+    // The C# endpoint creates attachments from DocSpace file entry ids.
+    // `input.path` carries the host-supplied entry id; without it the
+    // backend has nothing to look up (e.g. image drafts with raw base64
+    // are not supported).
+    const entryIds: string[] = [];
+    for (const input of inputs) {
+      if (!input.path) {
+        throw new Error(
+          "HttpAttachmentsStorage.createMany requires `input.path` "
+            + "(DocSpace entry id) on every item; raw payload attachments "
+            + "are not supported by the backend.",
+        );
+      }
+      entryIds.push(input.path);
+    }
+    const raw = await aiService.post(PATH, { entryIds });
+    const list = Array.isArray(raw) ? raw : [];
+    // The C# `CreateManyAsync` accepts a HashSet and may not preserve order;
+    // re-align the response to the input order by matching on `path`.
+    const byPath = new Map<string, Attachment>();
+    for (const item of list) {
+      const a = dtoToAttachment(item);
+      if (!a) {
+        continue;
+      }
+      // The backend echoes the entry id as the attachment's path/title; the
+      // mapper above sets `path` to undefined, so fall back to title.
+      const key = a.title;
+      byPath.set(key, a);
+    }
+    return entryIds.map((entryId) => {
+      const matched = byPath.get(entryId);
+      if (!matched) {
+        throw new Error(`ai service did not return attachment for entryId=${entryId}`);
+      }
+      return matched;
     });
   }
 
+  async readById(id: string): Promise<Attachment | null> {
+    try {
+      const raw = await aiService.get(`${PATH}/${encodeURIComponent(id)}`);
+      return dtoToAttachment(raw);
+    } catch (err) {
+      if (err instanceof AiServiceHttpError && err.status === 404) {
+        return null;
+      }
+      throw err;
+    }
+  }
+
+  async readManyByIds(ids: string[]): Promise<(Attachment | null)[]> {
+    if (ids.length === 0) {
+      return [];
+    }
+    const raw = await aiService.post(`${PATH}/read`, { ids });
+    const list = Array.isArray(raw) ? raw : [];
+    const byId = new Map<string, Attachment>();
+    for (const item of list) {
+      const a = dtoToAttachment(item);
+      if (a) {
+        byId.set(a.id, a);
+      }
+    }
+    return ids.map((id) => byId.get(id) ?? null);
+  }
+
   async update(id: string, patch: Partial<Attachment>): Promise<void> {
-    const a = this.#items.get(id);
-    if (!a) {
+    await this.updateManyByIds([id], patch);
+  }
+
+  async updateManyByIds(ids: string[], patch: Partial<Attachment>): Promise<void> {
+    if (ids.length === 0) {
       return;
     }
-    this.#items.set(id, { ...a, ...patch, id: a.id, createdAt: a.createdAt });
+    // The C# side only supports message-binding via `PUT /integration/attachments`
+    // — `{ids, messageId}`. Other patches (threadId, entityId, content, etc.)
+    // are not actionable on the backend and are silently skipped.
+    if (patch.messageId === undefined) {
+      logger.debug(
+        `HttpAttachmentsStorage.updateManyByIds skipped: no messageId in patch; count=${ids.length}`,
+      );
+      return;
+    }
+    await aiService.put(PATH, { ids, messageId: patch.messageId });
   }
 
   async delete(id: string): Promise<void> {
-    this.#items.delete(id);
+    try {
+      await aiService.delete(`${PATH}/${encodeURIComponent(id)}`);
+    } catch (err) {
+      if (err instanceof AiServiceHttpError && err.status === 404) {
+        return;
+      }
+      throw err;
+    }
   }
 
   async deleteMany(ids: string[]): Promise<void> {
-    for (const id of ids) {
-      this.#items.delete(id);
+    if (ids.length === 0) {
+      return;
     }
+    await aiService.delete(PATH, { body: { ids } });
   }
 
   async deleteByMessage(messageId: string): Promise<void> {
-    for (const [id, a] of this.#items.entries()) {
-      if (a.messageId === messageId) {
-        this.#items.delete(id);
-      }
-    }
+    // Cascade on message delete is handled server-side; no client-side action.
+    logger.debug(
+      `HttpAttachmentsStorage.deleteByMessage is a no-op (cascade is server-side); messageId=${messageId}`,
+    );
   }
 
   async deleteByThread(threadId: string): Promise<void> {
-    for (const [id, a] of this.#items.entries()) {
-      if (a.threadId === threadId) {
-        this.#items.delete(id);
-      }
-    }
-  }
-
-  _clear(): void {
-    this.#items.clear();
+    // Cascade on thread delete is handled server-side; no client-side action.
+    logger.debug(
+      `HttpAttachmentsStorage.deleteByThread is a no-op (cascade is server-side); threadId=${threadId}`,
+    );
   }
 }

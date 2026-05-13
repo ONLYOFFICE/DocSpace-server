@@ -26,7 +26,7 @@
 
 import type { StorageAdapter } from "@onlyoffice/ai-chat/core";
 
-import { InMemoryAttachmentsStorage } from "./attachmentsStorage.js";
+import { HttpAttachmentsStorage } from "./attachmentsStorage.js";
 import { HttpAssignmentsStorage } from "./assignmentsStorage.js";
 import { HttpMcpServersStorage } from "./mcpServersStorage.js";
 import { HttpMessagesStorage } from "./messagesStorage.js";
@@ -49,7 +49,7 @@ export class HttpStorageAdapter implements StorageAdapter {
   public mcpServers = new HttpMcpServersStorage();
   public toolPrefs = new HttpToolPrefsStorage();
   public webSearch = new HttpWebSearchStorage();
-  public attachments = new InMemoryAttachmentsStorage();
+  public attachments = new HttpAttachmentsStorage();
 
   async init(): Promise<void> {
     // No-op: every storage is HTTP-backed; nothing to initialize locally.
@@ -57,7 +57,6 @@ export class HttpStorageAdapter implements StorageAdapter {
 
   async close(): Promise<void> {
     this.toolPrefs._clear();
-    this.attachments._clear();
   }
 }
 

@@ -24,20 +24,27 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-import { aiService, AiServiceHttpError } from "./httpClient.js";
+import { aiService, AiServiceHttpError, type QueryValue } from "./httpClient.js";
 import { isObject } from "../narrow.js";
 import type { AssignmentsStorage, ActionType } from "@onlyoffice/ai-chat/core";
 
 const PATH = "/integration/assignments";
 
+function entityIdQuery(entityId: string | undefined): Record<string, QueryValue> | undefined {
+  return entityId ? { entityId } : undefined;
+}
+
 export class HttpAssignmentsStorage implements AssignmentsStorage {
-  async create(actionType: ActionType, profileId: string): Promise<void> {
-    await aiService.post(PATH, { actionType, profileId });
+  async create(actionType: ActionType, profileId: string, entityId?: string): Promise<void> {
+    await aiService.post(PATH, { actionType, profileId, entityId });
   }
 
-  async readByType(actionType: ActionType): Promise<string | null> {
+  async readByType(actionType: ActionType, entityId?: string): Promise<string | null> {
     try {
-      const raw = await aiService.get(`${PATH}/${encodeURIComponent(actionType)}`);
+      const raw = await aiService.get(
+        `${PATH}/${encodeURIComponent(actionType)}`,
+        entityId ? { query: entityIdQuery(entityId) } : undefined,
+      );
       return typeof raw === "string" ? raw : null;
     } catch (err) {
       if (err instanceof AiServiceHttpError && err.status === 404) {
@@ -61,23 +68,28 @@ export class HttpAssignmentsStorage implements AssignmentsStorage {
     return result;
   }
 
-  async update(actionType: ActionType, profileId: string): Promise<void> {
-    await aiService.put(`${PATH}/${encodeURIComponent(actionType)}`, { profileId });
+  async update(actionType: ActionType, profileId: string, entityId?: string): Promise<void> {
+    await aiService.put(`${PATH}/${encodeURIComponent(actionType)}`, { profileId, entityId });
   }
 
-  async upsertMany(assignments: Partial<Record<ActionType, string>>): Promise<void> {
+  async upsertMany(
+    assignments: Partial<Record<ActionType, string>>,
+    entityId?: string,
+  ): Promise<void> {
     const payload: Record<string, string> = {};
     for (const [k, v] of Object.entries(assignments)) {
       if (typeof v === "string") {
         payload[k] = v;
       }
     }
-    await aiService.put(PATH, { assignments: payload });
+    await aiService.put(PATH, { assignments: payload, entityId });
   }
 
-  async delete(actionType: ActionType): Promise<void> {
+  async delete(actionType: ActionType, entityId?: string): Promise<void> {
     try {
-      await aiService.delete(`${PATH}/${encodeURIComponent(actionType)}`);
+      await aiService.delete(`${PATH}/${encodeURIComponent(actionType)}`, {
+        query: entityIdQuery(entityId),
+      });
     } catch (err) {
       if (err instanceof AiServiceHttpError && err.status === 404) {
         return;
@@ -86,10 +98,13 @@ export class HttpAssignmentsStorage implements AssignmentsStorage {
     }
   }
 
-  async deleteMany(actionTypes: ActionType[]): Promise<void> {
+  async deleteMany(actionTypes: ActionType[], entityId?: string): Promise<void> {
     if (actionTypes.length === 0) {
       return;
     }
-    await aiService.delete(PATH, { body: { actionTypes } });
+    await aiService.delete(PATH, {
+      body: { actionTypes },
+      query: entityIdQuery(entityId),
+    });
   }
 }
