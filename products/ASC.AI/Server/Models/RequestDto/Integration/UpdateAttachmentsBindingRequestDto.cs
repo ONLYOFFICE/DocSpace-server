@@ -24,16 +24,16 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Integration.Attachments;
+namespace ASC.AI.Models.RequestDto.Integration;
 
-public class Attachment
+public class UpdateAttachmentsBindingRequestDto
 {
-    public Guid Id { get; init; }
-    public AttachmentKind Kind { get; init; }
-    public required string Title { get; init; }
-    public string? Content { get; init; }
-    public Guid? MessageId { get; init; }
-    public int? EntryId { get; init; }
-    public string? ThirdpartyEntryId { get; init; }
-    public DateTime CreatedAt { get; init; }
+    [FromBody]
+    public required UpdateAttachmentsBindingRequestBody Body { get; init; }
+}
+
+public class UpdateAttachmentsBindingRequestBody
+{
+    public required HashSet<Guid> Ids { get; init; }
+    public required Guid MessageId { get; init; }
 }

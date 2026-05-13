@@ -40,10 +40,10 @@ public partial class AiIntegrationContext
         return AttachmentQueriesContainer.GetAttachmentsByIdsAsync(this, tenantId, ids);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultGuid])]
-    public Task<int> UpdateAttachmentBindingAsync(int tenantId, Guid id, Guid threadId, Guid messageId)
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null, PreCompileQuery.DefaultGuid])]
+    public Task<int> UpdateAttachmentBindingsByIdsAsync(int tenantId, IEnumerable<Guid> ids, Guid messageId)
     {
-        return AttachmentQueriesContainer.UpdateAttachmentBindingAsync(this, tenantId, id, threadId, messageId);
+        return AttachmentQueriesContainer.UpdateAttachmentBindingsByIdsAsync(this, tenantId, ids, messageId);
     }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
@@ -72,13 +72,12 @@ static file class AttachmentQueriesContainer
                 ctx.Attachments
                     .Where(x => x.TenantId == tenantId && ids.Contains(x.Id)));
 
-    public static readonly Func<AiIntegrationContext, int, Guid, Guid, Guid, Task<int>> UpdateAttachmentBindingAsync =
+    public static readonly Func<AiIntegrationContext, int, IEnumerable<Guid>, Guid, Task<int>> UpdateAttachmentBindingsByIdsAsync =
         EF.CompileAsyncQuery(
-            (AiIntegrationContext ctx, int tenantId, Guid id, Guid threadId, Guid messageId) =>
+            (AiIntegrationContext ctx, int tenantId, IEnumerable<Guid> ids, Guid messageId) =>
                 ctx.Attachments
-                    .Where(x => x.TenantId == tenantId && x.Id == id)
+                    .Where(x => x.TenantId == tenantId && ids.Contains(x.Id))
                     .ExecuteUpdate(x => x
-                        .SetProperty(y => y.ThreadId, threadId)
                         .SetProperty(y => y.MessageId, messageId)));
 
     public static readonly Func<AiIntegrationContext, int, Guid, Task<int>> DeleteAttachmentAsync =

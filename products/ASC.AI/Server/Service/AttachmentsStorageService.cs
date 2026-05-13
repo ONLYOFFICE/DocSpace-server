@@ -117,6 +117,11 @@ public class AttachmentsStorageService(
         }
     }
 
+    public async Task UpdateManyAsync(HashSet<Guid> ids, Guid messageId)
+    {
+        await storage.UpdateManyAsync(tenantManager.GetCurrentTenantId(), ids, messageId);
+    }
+
     public async Task DeleteAsync(Guid id)
     {
         await storage.DeleteAsync(tenantManager.GetCurrentTenantId(), id);

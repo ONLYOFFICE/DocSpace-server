@@ -79,11 +79,16 @@ public class AttachmentsStorage(IDbContextFactory<AiIntegrationContext> dbContex
             .ToListAsync();
     }
 
-    public async Task UpdateAsync(int tenantId, Guid id, Guid threadId, Guid messageId)
+    public async Task UpdateManyAsync(int tenantId, HashSet<Guid> ids, Guid messageId)
     {
+        if (ids.Count == 0)
+        {
+            return;
+        }
+
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        await context.UpdateAttachmentBindingAsync(tenantId, id, threadId, messageId);
+        await context.UpdateAttachmentBindingsByIdsAsync(tenantId, ids, messageId);
     }
 
     public async Task DeleteAsync(int tenantId, Guid id)
@@ -114,7 +119,6 @@ public class AttachmentsStorage(IDbContextFactory<AiIntegrationContext> dbContex
             Title = entity.Title,
             Content = entity.Content,
             MessageId = entity.MessageId,
-            ThreadId = entity.ThreadId,
             EntryId = entity.EntryId,
             ThirdpartyEntryId = entity.ThirdpartyEntryId,
             CreatedAt = entity.CreatedAt

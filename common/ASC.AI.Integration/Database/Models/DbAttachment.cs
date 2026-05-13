@@ -40,7 +40,6 @@ public class DbAttachment : BaseEntity
     public string? Content { get; init; }
 
     public Guid? MessageId { get; set; }
-    public Guid? ThreadId { get; set; }
     public int? EntryId { get; init; }
 
     [MaxLength(32)]
@@ -49,7 +48,6 @@ public class DbAttachment : BaseEntity
     public DateTime CreatedAt { get; init; }
 
     public DbTenant Tenant { get; init; } = null!;
-    public DbThread? Thread { get; init; }
     public DbMessage? Message { get; init; }
 
     public override object[] GetKeys()
@@ -63,7 +61,6 @@ public static class DbAttachmentExtension
     public static ModelBuilderWrapper AddDbAttachments(this ModelBuilderWrapper modelBuilder)
     {
         modelBuilder.Entity<DbAttachment>().Navigation(e => e.Tenant).AutoInclude(false);
-        modelBuilder.Entity<DbAttachment>().Navigation(e => e.Thread).AutoInclude(false);
         modelBuilder.Entity<DbAttachment>().Navigation(e => e.Message).AutoInclude(false);
 
         modelBuilder
@@ -114,12 +111,6 @@ public static class DbAttachmentExtension
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.ThreadId)
-                .HasColumnName("thread_id")
-                .HasColumnType("char(36)")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
-
             entity.Property(e => e.EntryId)
                 .HasColumnName("entry_id")
                 .HasColumnType("int");
@@ -134,21 +125,14 @@ public static class DbAttachmentExtension
                 .HasColumnName("created_at")
                 .HasColumnType("datetime");
 
-            entity.HasOne(e => e.Thread)
-                .WithMany()
-                .HasForeignKey(e => new { e.TenantId, e.ThreadId })
-                .OnDelete(DeleteBehavior.Cascade);
-
             entity.HasOne(e => e.Message)
                 .WithMany()
                 .HasForeignKey(e => new { e.TenantId, e.MessageId })
+                .HasPrincipalKey(e => new { e.TenantId, e.Id })
                 .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasIndex(e => new { e.TenantId, e.MessageId })
                 .HasDatabaseName("IX_tenant_id_message_id");
-
-            entity.HasIndex(e => new { e.TenantId, e.ThreadId })
-                .HasDatabaseName("IX_tenant_id_thread_id");
 
             entity.HasIndex(e => new { e.TenantId, e.EntryId })
                 .HasDatabaseName("IX_tenant_id_entry_id");
@@ -192,10 +176,6 @@ public static class DbAttachmentExtension
                 .HasColumnName("message_id")
                 .HasColumnType("uuid");
 
-            entity.Property(e => e.ThreadId)
-                .HasColumnName("thread_id")
-                .HasColumnType("uuid");
-
             entity.Property(e => e.EntryId)
                 .HasColumnName("entry_id")
                 .HasColumnType("integer");
@@ -208,21 +188,14 @@ public static class DbAttachmentExtension
                 .HasColumnName("created_at")
                 .HasColumnType("timestamp without time zone");
 
-            entity.HasOne(e => e.Thread)
-                .WithMany()
-                .HasForeignKey(e => new { e.TenantId, e.ThreadId })
-                .OnDelete(DeleteBehavior.Cascade);
-
             entity.HasOne(e => e.Message)
                 .WithMany()
                 .HasForeignKey(e => new { e.TenantId, e.MessageId })
+                .HasPrincipalKey(e => new { e.TenantId, e.Id })
                 .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasIndex(e => new { e.TenantId, e.MessageId })
                 .HasDatabaseName("ix_ai_integration_attachments_tenant_id_message_id");
-
-            entity.HasIndex(e => new { e.TenantId, e.ThreadId })
-                .HasDatabaseName("ix_ai_integration_attachments_tenant_id_thread_id");
 
             entity.HasIndex(e => new { e.TenantId, e.EntryId })
                 .HasDatabaseName("ix_ai_integration_attachments_tenant_id_entry_id");

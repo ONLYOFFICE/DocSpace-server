@@ -60,6 +60,13 @@ public class AttachmentsStorageController(AttachmentsStorageService attachmentsS
             .ToListAsync();
     }
 
+    [HttpPut("integration/attachments")]
+    public async Task<IActionResult> UpdateBindingAsync(UpdateAttachmentsBindingRequestDto inDto)
+    {
+        await attachmentsStorageService.UpdateManyAsync(inDto.Body.Ids, inDto.Body.MessageId);
+        return NoContent();
+    }
+
     [HttpDelete("integration/attachments/{id}")]
     public async Task<IActionResult> DeleteAsync(DeleteAttachmentRequestDto inDto)
     {
