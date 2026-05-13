@@ -386,7 +386,7 @@ public class GroupController(
 
         var group = await GetGroupInfoAsync(inDto.Id);
 
-        foreach (var userId in inDto.Members.Members)
+        foreach (var userId in inDto.Members?.Members ?? [])
         {
             await RemoveUserFromDepartmentAsync(userId, group);
         }
