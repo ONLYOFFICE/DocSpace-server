@@ -72,6 +72,7 @@ global using ASC.Files.Core.Vectorization;
 global using ASC.Files.Core.Vectorization.Settings;
 global using ASC.Files.Core.Resources;
 global using ASC.Files.Core.Security;
+global using ASC.Files.Core.Utils;
 global using ASC.MessagingSystem.Core;
 global using ASC.MessagingSystem.EF.Model;
 global using ASC.Web.Api.Models;
@@ -85,6 +86,7 @@ global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.RateLimiting;
 global using Microsoft.Extensions.AI;
 
+global using System.ComponentModel;
 global using System.ComponentModel.DataAnnotations;
 global using System.Text;
 global using System.Text.Json;

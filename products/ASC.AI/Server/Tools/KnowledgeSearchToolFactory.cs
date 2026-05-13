@@ -24,13 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.ComponentModel;
-
-using ASC.AI.Tools.Core;
-using ASC.Files.Core.Utils;
-
-using Microsoft.Extensions.AI;
-
 namespace ASC.AI.Tools;
 
 [Scope(typeof(IAiToolFactory))]
@@ -49,10 +42,61 @@ public class KnowledgeSearchToolFactory(
         "other organizational knowledge stored in DocSpace.";
 
     private const string Prompt =
-        "When the user asks about company policies, procedures, internal reports, documentation or any " +
-        "organizational knowledge stored in the workspace, call docspace_knowledge_search before answering " +
-        "from your own memory. Prefer specific, focused queries over broad ones; you may call the tool " +
-        "multiple times with different phrasings if the first result is weak.";
+        """
+        **CRITICAL: ALWAYS use knowledge base search for ANY user question or information request.**
+        This is a mandatory requirement: before providing any substantive answer, you MUST perform a knowledge base search. No exceptions except for the minimal cases listed below.
+        **MANDATORY knowledge base search for:**
+        - ANY user question or information request
+        - ANY topic, keyword, or noun phrase
+        - Generic questions that might have internal context
+        - Technical questions of any kind
+        - Questions phrased as "tell me," "explain," "what is," "how to," "show me," etc.
+        - Unclear or ambiguous queries
+        - Before using general knowledge to answer anything
+        - Even if you think you know the answer
+        **The ONLY exceptions (when you may skip knowledge base search):**
+        - Simple greetings: "hi," "hello," "hey"
+        - Simple thanks: "thanks," "thank you"
+        - Meta-questions about your capabilities: "what can you do?"
+        - Pure creative requests with no information need: "write me a poem about cats"
+        **If unsure whether to search: ALWAYS SEARCH.**
+        Search strategy:
+        - **First action for any substantive message: search knowledge base**
+        - Use searches liberally and proactively
+        - If initial search results are insufficient, refine queries with different keywords
+        - Avoid more than two back-to-back searches for the same information
+        - Each search query should be distinct and not redundant
+        - Can be used in combination with web search for comprehensive answers
+        **Citation requirements for knowledge base results:**
+        - You MUST cite all information from knowledge base search results
+        - Citation format: Some fact [Document title](/doceditor?fileId=XXX)
+        - Use the document name without extension as the link text
+        - One piece of information can have multiple citations: Some fact [Doc1](/doceditor?fileId=61) [Doc2](/doceditor?fileId=62)
+        - If multiple lines use the same source, group them together with one citation
+        - **CRITICAL: Use URLs EXACTLY as provided in search results**
+          - URLs come in format `/doceditor?fileId=XXX`
+          - DO NOT modify, expand, or change these URLs
+          - DO NOT add domain, protocol, or base path
+          - Simply copy the URL directly: [Policy](/doceditor?fileId=61)
+        Example citation:
+        - Search returns: title="Company Policy.pdf", url="/doceditor?fileId=61"
+        - Your response: "According to our policy [Company Policy](/doceditor?fileId=61), employees can..."
+        **IMPORTANT: Never ask permission to search.**
+        Just search immediately and seamlessly.
+        **Examples - ALL require knowledge base search:**
+        - User asks "What is OAuth?" → Search knowledge base FIRST
+        - User asks "Tell me about Python" → Search knowledge base FIRST
+        - User asks "How does Redis work?" → Search knowledge base FIRST
+        - User writes "machine learning" → Search knowledge base FIRST
+        - User asks "What's the deadline?" → Search knowledge base FIRST
+        - User asks "Explain async/await" → Search knowledge base FIRST
+        - User asks "quarterly report" → Search knowledge base FIRST
+        **After knowledge base search:**
+        - If results are found: use them in your answer with proper citations
+        - If no results found: you may use general knowledge or web search
+        - You can combine knowledge base results with web search for comprehensive answers
+        Remember: **DEFAULT ACTION = SEARCH KNOWLEDGE BASE. Always search first, answer second.**
+        """;
 
     public bool Owns(string toolName)
     {
@@ -61,6 +105,11 @@ public class KnowledgeSearchToolFactory(
 
     public async IAsyncEnumerable<AiTool> BuildAsync(ToolContext context)
     {
+        if (context.AgentId <= 0)
+        {
+            yield break;
+        }
+
         if (!await aiAccessibility.IsVectorizationEnabledAsync())
         {
             yield break;
