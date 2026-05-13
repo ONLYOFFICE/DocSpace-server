@@ -26,6 +26,7 @@
 
 namespace ASC.AI.Integration.Attachments;
 
+[EnumExtensions]
 public enum AttachmentKind
 {
     File = 0,

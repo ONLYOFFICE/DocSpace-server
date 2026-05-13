@@ -27,24 +27,19 @@
 global using System.ComponentModel.DataAnnotations;
 global using System.Security.Cryptography;
 
-global using Microsoft.EntityFrameworkCore;
-global using Microsoft.Extensions.DependencyInjection;
+global using ASC.AI.Integration.Attachments;
+global using ASC.AI.Integration.Database;
+global using ASC.AI.Integration.Database.Models;
+global using ASC.AI.Integration.Profiles;
 
 global using ASC.Common;
+global using ASC.Common.Threading.DistributedLock.Abstractions;
 global using ASC.Core.Common.EF;
 global using ASC.Core.Common.EF.Model;
 global using ASC.Core.Common.Settings;
 global using ASC.Security.Cryptography;
 
-global using ASC.AI.Integration.Assignments;
-global using ASC.AI.Integration.Attachments;
-global using ASC.AI.Integration.Database;
-global using ASC.AI.Integration.Database.Models;
-global using ASC.AI.Integration.McpServers;
-global using ASC.AI.Integration.Messages;
-global using ASC.AI.Integration.Preferences;
-global using ASC.AI.Integration.Profiles;
-global using ASC.AI.Integration.Prompts;
-global using ASC.AI.Integration.Threads;
-global using ASC.AI.Integration.ToolPrefs;
-global using ASC.AI.Integration.WebSearch;
+global using Microsoft.EntityFrameworkCore;
+global using Microsoft.Extensions.DependencyInjection;
+
+global using NetEscapades.EnumGenerators;
