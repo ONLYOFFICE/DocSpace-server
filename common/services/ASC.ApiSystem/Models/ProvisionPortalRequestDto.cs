@@ -29,93 +29,21 @@ namespace ASC.ApiSystem.Models;
 /// <summary>
 /// The request parameters for provisioning a portal with an OAuth provider.
 /// </summary>
-public class ProvisionPortalRequestDto
+public class ProvisionPortalRequestDto : TenantModel
 {
-    /// <summary>
-    /// The email address of the portal owner.
-    /// </summary>
-    /// <example>admin@example.com</example>
-    [Required]
-    [EmailAddress]
-    [StringLength(255)]
-    public string Email { get; set; }
-
-    /// <summary>
-    /// The first name of the portal owner.
-    /// </summary>
-    /// <example>John</example>
-    [StringLength(255)]
-    public string FirstName { get; set; }
-
-    /// <summary>
-    /// The last name of the portal owner.
-    /// </summary>
-    /// <example>Doe</example>
-    [StringLength(255)]
-    public string LastName { get; set; }
-
-    /// <summary>
-    /// The user's response to the CAPTCHA challenge.
-    /// </summary>
-    /// <example>03AGdBq24rvY...</example>
-    public string RecaptchaResponse { get; set; }
-
-    /// <summary>
-    /// The type of CAPTCHA validation used.
-    /// </summary>
-    /// <example>0</example>
-    public RecaptchaType RecaptchaType { get; set; }
-
-    /// <summary>
-    /// Specifies if the ONLYOFFICE newsletter is allowed or not.
-    /// </summary>
-    /// <example>true</example>
-    public bool Spam { get; set; }
-
-    /// <summary>
-    /// Specifies if the calls are available for the current tenant or not.
-    /// </summary>
-    /// <example>true</example>
-    public bool Calls { get; set; }
-
-    /// <summary>
-    /// The application key.
-    /// </summary>
-    /// <example>app-key-123</example>
-    public string AppKey { get; set; }
-
-    /// <summary>
-    /// The portal language.
-    /// </summary>
-    /// <example>en-US</example>
-    [StringLength(7)]
-    public string Language { get; set; }
-
-    /// <summary>
-    /// The portal time zone name.
-    /// </summary>
-    /// <example>UTC</example>
-    [StringLength(255)]
-    public string TimeZoneName { get; set; }
-
-    /// <summary>
-    /// The portal region.
-    /// </summary>
-    /// <example>us-east</example>
-    [StringLength(20)]
-    public string Region { get; set; }
-
-    /// <summary>
-    /// The portal AWS region.
-    /// </summary>
-    /// <example>us-east-1</example>
-    [JsonPropertyName("awsRegion")]
-    public string AWSRegion { get; set; }
-
     /// <summary>
     /// The OAuth provider configuration.
     /// </summary>
-    /// <example>{"name":"provider_name","clientId":"abc123","clientSecret":"secret"}</example>
+    /// <example>
+    /// {
+    /// "name": "provider_name",
+    /// "clientId": "abc123",
+    /// "clientSecret": "secret",
+    /// "baseUrl": "https://provider.example.com",
+    /// "redirectUri": "https://provider.example.com/oauth",
+    /// "cspDomain": "https://provider.example.com"
+    /// }
+    /// </example>
     [Required]
     public ProvisionProviderDto Provider { get; set; }
 }

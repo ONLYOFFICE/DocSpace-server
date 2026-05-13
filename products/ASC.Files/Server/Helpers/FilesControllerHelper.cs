@@ -158,6 +158,8 @@ public class FilesControllerHelper(
 
     private async Task<FileDto<T>> CreateFileAsync<T>(T folderId, string title, string content, string extension, bool updateIfExist)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(title);
+
         using var memStream = new MemoryStream(Encoding.UTF8.GetBytes(content));
         var file = await _fileUploader.ExecAsync(folderId,
                           title.EndsWith(extension, StringComparison.OrdinalIgnoreCase) ? title : title + extension,

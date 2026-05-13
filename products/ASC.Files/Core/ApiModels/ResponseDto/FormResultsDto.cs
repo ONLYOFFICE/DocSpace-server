@@ -46,11 +46,13 @@ public class FormSubmissionsDto
     /// <summary>
     /// The form field metadata.
     /// </summary>
+    /// <example>[]</example>
     public IEnumerable<FormMetadata> Metadata { get; set; }
 
     /// <summary>
     /// All submissions.
     /// </summary>
+    /// <example>[]</example>
     public IEnumerable<FormResultsDto> Submissions { get; set; }
 }
 

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2026
+// (c) Copyright Ascensio System SIA 2009-2026
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,7 +24,103 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Api.Documentation;
+var sdkCommands = new[]
+{
+    "CSharp",
+    "Python",
+    "PostmanCollection",
+    "TypeScript",
+    "Java",
+    "Kotlin",
+    "Php",
+    "Swift6",
+    "Go",
+    "Ruby"
+};
 
-var app = new CommandApp<OpenapiJoiner>();
-app.Run(args);
+var app = new CommandApp();
+
+app.Configure(config =>
+{
+    config.AddCommand<GenerateCSharpSdkCommand>("CSharp");
+    config.AddCommand<GeneratePythonSdkCommand>("Python");
+    config.AddCommand<GeneratePostmanCollectionSdkCommand>("PostmanCollection");
+    config.AddCommand<GenerateTypeScriptSdkCommand>("TypeScript");
+    config.AddCommand<GenerateJavaSdkCommand>("Java");
+    config.AddCommand<GenerateKotlinSdkCommand>("Kotlin");
+    config.AddCommand<GeneratePhpSdkCommand>("Php");
+    config.AddCommand<GenerateSwift6SdkCommand>("Swift6");
+    config.AddCommand<GenerateGoSdkCommand>("Go");
+    config.AddCommand<GenerateRubySdkCommand>("Ruby");
+});
+
+var joinExitCode = new CommandApp<OpenapiJoiner>().Run(Array.Empty<string>());
+if (joinExitCode != 0)
+{
+    return joinExitCode;
+}
+
+if (args.Length == 0)
+{
+    var selectAll = "Generate All SDK";
+    var selectManage = "Choose SDK For Generation";
+    var action = AnsiConsole.Prompt(
+        new SelectionPrompt<string>()
+            .Title("Select an [green]action[/]:")
+            .AddChoices(selectAll, selectManage));
+
+    if (action == selectAll)
+    {
+        return RunCommands(app, sdkCommands);
+    }
+
+    while (true)
+    {
+        var selected = AnsiConsole.Prompt(
+            new MultiSelectionPrompt<string>()
+                .Title("Select [green]SDK[/] for generation:")
+                .InstructionsText("[grey](Space - Select, Enter - Confirm)[/]")
+                .NotRequired()
+                .AddChoices(sdkCommands));
+
+        if (selected.Count > 0)
+        {
+            return RunCommands(app, selected);
+        }
+
+        AnsiConsole.MarkupLine("[red]You need to select at least one SDK.[/]");
+    }
+}
+
+var buildExitCode = BuildSdkGenerator();
+if (buildExitCode != 0)
+{
+    return buildExitCode;
+}
+
+return app.Run(args);
+
+static int RunCommands(CommandApp app, IEnumerable<string> commands)
+{
+    var buildExitCode = BuildSdkGenerator();
+    if (buildExitCode != 0)
+    {
+        return buildExitCode;
+    }
+
+    foreach (var command in commands)
+    {
+        var exitCode = app.Run([command]);
+        if (exitCode != 0)
+        {
+            return exitCode;
+        }
+    }
+
+    return 0;
+}
+
+static int BuildSdkGenerator()
+{
+    return new CommandApp<BuildSdkGeneratorCommand>().Run(Array.Empty<string>());
+}

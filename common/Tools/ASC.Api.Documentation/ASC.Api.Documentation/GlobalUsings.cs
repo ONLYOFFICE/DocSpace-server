@@ -31,5 +31,11 @@ global using System.Text.Json.Nodes;
 global using Spectre.Console;
 global using Spectre.Console.Cli;
 
-global using YamlDotNet.Serialization;
-global using YamlDotNet.Serialization.NamingConventions;
+global using ASC.Api.Documentation;
+global using ASC.Api.Documentation.Commands;
+
+global using System.ComponentModel;
+global using System.Diagnostics;
+global using System.Text;
+
+global using Microsoft.Extensions.Configuration;

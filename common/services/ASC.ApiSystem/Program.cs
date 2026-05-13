@@ -27,6 +27,8 @@
 using Autofac;
 using ASC.Common.DependencyInjection;
 
+using NLog;
+
 var options = new WebApplicationOptions
 {
     Args = args,

@@ -103,11 +103,13 @@ public class UpdateRoomRequest
     /// <summary>
     /// Specifies whether to send form data to external database.
     /// </summary>
+    /// <example>false</example>
     public bool? SendFormToExternalDB { get; set; }
 
     /// <summary>
     /// Specifies whether to save form data as XLSX file.
     /// </summary>
+    /// <example>false</example>
     public bool? SaveFormAsXLSX { get; set; }
 }
 
