@@ -29,6 +29,7 @@ import type { Application, RequestHandler, Router } from "express";
 import {
   DEFAULT_AI_ROUTES,
   DEFAULT_ASSIGNMENTS_ROUTES,
+  DEFAULT_ATTACHMENTS_ROUTES,
   DEFAULT_PREFERENCES_ROUTES,
   DEFAULT_PROFILES_ROUTES,
   DEFAULT_PROMPTS_ROUTES,
@@ -40,6 +41,7 @@ import type { RouteSpec } from "@onlyoffice/ai-chat/core";
 import logger from "./log.js";
 import { aiController } from "./controllers/aiController.js";
 import { assignmentsController } from "./controllers/assignmentsController.js";
+import { attachmentsController } from "./controllers/attachmentsController.js";
 import { preferencesController } from "./controllers/preferencesController.js";
 import { profilesController } from "./controllers/profilesController.js";
 import { promptsController } from "./controllers/promptsController.js";
@@ -61,6 +63,7 @@ interface EngineBinding {
 const ENGINE_BINDINGS: ReadonlyArray<EngineBinding> = [
   { name: "ai", routes: DEFAULT_AI_ROUTES, controller: aiController },
   { name: "assignments", routes: DEFAULT_ASSIGNMENTS_ROUTES, controller: assignmentsController },
+  { name: "attachments", routes: DEFAULT_ATTACHMENTS_ROUTES, controller: attachmentsController },
   { name: "preferences", routes: DEFAULT_PREFERENCES_ROUTES, controller: preferencesController },
   { name: "profiles", routes: DEFAULT_PROFILES_ROUTES, controller: profilesController },
   { name: "prompts", routes: DEFAULT_PROMPTS_ROUTES, controller: promptsController },
