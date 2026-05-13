@@ -1436,7 +1436,7 @@ public class FileStorageService //: IFileStorageService
         var folder = await folderDao.GetFolderAsync(folderId);
         if (folder == null)
         {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FolderNotFound);
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
         }
 
         var canEdit = folder.IsRoom
