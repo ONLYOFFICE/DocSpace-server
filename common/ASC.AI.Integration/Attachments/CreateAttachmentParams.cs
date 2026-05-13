@@ -24,34 +24,39 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Integration.Database;
+namespace ASC.AI.Integration.Attachments;
 
-public partial class AiIntegrationContext(DbContextOptions<AiIntegrationContext> options) : BaseDbContext(options)
+public class CreateAttachmentParams
 {
-    public DbSet<DbProfile> Profiles { get; set; }
-    public DbSet<DbThread> Threads { get; set; }
-    public DbSet<DbMessage> Messages { get; set; }
-    public DbSet<DbAssignment> Assignments { get; set; }
-    public DbSet<DbMcpServer> McpServers { get; set; }
-    public DbSet<DbToolPreference> ToolPrefs { get; set; }
-    public DbSet<DbPreference> Preferences { get; set; }
-    public DbSet<DbPromptFolder> PromptFolders { get; set; }
-    public DbSet<DbPrompt> Prompts { get; set; }
-    public DbSet<DbAttachment> Attachments { get; set; }
+    public required AttachmentKind Kind { get; init; }
+    public required string Title { get; init; }
+    public string? Content { get; init; }
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    private readonly int? _entryId;
+    public int? EntryId
     {
-        ModelBuilderWrapper.From(modelBuilder, Database)
-            .AddDbTenant()
-            .AddDbProfiles()
-            .AddDbThreads()
-            .AddDbMessages()
-            .AddDbAssignments()
-            .AddDbServers()
-            .AddDbToolPrefs()
-            .AddDbPreferences()
-            .AddDbPromptFolders()
-            .AddDbPrompts()
-            .AddDbAttachments();
+        get => _entryId;
+        init
+        {
+            if (value.HasValue && _thirdpartyEntryId != null)
+            {
+                throw new ArgumentException("Only one of EntryId or ThirdpartyEntryId may be set.");
+            }
+            _entryId = value;
+        }
+    }
+
+    private readonly string? _thirdpartyEntryId;
+    public string? ThirdpartyEntryId
+    {
+        get => _thirdpartyEntryId;
+        init
+        {
+            if (value != null && _entryId.HasValue)
+            {
+                throw new ArgumentException("Only one of EntryId or ThirdpartyEntryId may be set.");
+            }
+            _thirdpartyEntryId = value;
+        }
     }
 }

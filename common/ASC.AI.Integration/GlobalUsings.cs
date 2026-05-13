@@ -37,6 +37,7 @@ global using ASC.Core.Common.Settings;
 global using ASC.Security.Cryptography;
 
 global using ASC.AI.Integration.Assignments;
+global using ASC.AI.Integration.Attachments;
 global using ASC.AI.Integration.Database;
 global using ASC.AI.Integration.Database.Models;
 global using ASC.AI.Integration.McpServers;

@@ -65,6 +65,7 @@ public partial class FilesDbContext(DbContextOptions<FilesDbContext> dbContextOp
     public DbSet<DbAssignment> Assignments { get; set; }
     public DbSet<DbMcpServer> McpServers { get; set; }
     public DbSet<DbToolPreference> ToolPrefs { get; set; }
+    public DbSet<DbAttachment> Attachments { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -106,6 +107,7 @@ public partial class FilesDbContext(DbContextOptions<FilesDbContext> dbContextOp
             .AddDbAssignments()
             .AddDbServers()
             .AddDbToolPrefs()
+            .AddDbAttachments()
             .AddDbFunctions();
     }
 }

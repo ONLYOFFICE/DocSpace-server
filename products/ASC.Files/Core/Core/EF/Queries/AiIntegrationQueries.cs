@@ -51,6 +51,12 @@ public partial class FilesDbContext
     {
         return AiIntegrationQueries.DeleteMcpServerToolPrefsAsync(this, tenantId, folderId);
     }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    public Task DeleteAttachmentsAsync(int tenantId, int folderId)
+    {
+        return AiIntegrationQueries.DeleteAttachmentsAsync(this, tenantId, folderId);
+    }
 }
 
 static file class AiIntegrationQueries
@@ -76,6 +82,12 @@ static file class AiIntegrationQueries
     public static readonly Func<FilesDbContext, int, int, Task> DeleteMcpServerToolPrefsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx, int tenantId, int folderId) =>
             ctx.ToolPrefs
+                .Where(x => x.TenantId == tenantId && x.EntryId == folderId)
+                .ExecuteDelete());
+
+    public static readonly Func<FilesDbContext, int, int, Task> DeleteAttachmentsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx, int tenantId, int folderId) =>
+            ctx.Attachments
                 .Where(x => x.TenantId == tenantId && x.EntryId == folderId)
                 .ExecuteDelete());
 }
