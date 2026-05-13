@@ -1614,7 +1614,7 @@ public class FileStorageService //: IFileStorageService
 
             if (!canCreate)
             {
-                folder = null;
+                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
             }
         }
 
