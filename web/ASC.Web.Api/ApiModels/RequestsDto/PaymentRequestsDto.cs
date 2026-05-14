@@ -93,19 +93,6 @@ public class QuotasRequestDto
 }
 
 /// <summary>
-/// The request parameters for getting service quota.
-/// </summary>
-public class CustomerServiceQuotaRequestDto: PaymentInformationRequestDto
-{
-    /// <summary>
-    /// The service name.
-    /// </summary>
-    /// <example>backup</example>
-    [FromQuery(Name = "serviceName")]
-    public string ServiceName { get; set; }
-}
-
-/// <summary>
 /// The request parameters for specifying payment quantity.
 /// </summary>
 public class QuantityRequestDto
@@ -164,26 +151,8 @@ public class TopUpDepositRequestDto
     /// The three-character ISO 4217 currency symbol.
     /// </summary>
     /// <example>USD</example>
+    [StringLength(3)]
     public string Currency { get; set; }
-}
-
-/// <summary>
-/// The request parameters for buying wallet service.
-/// </summary>
-public class BuyWalletServiceRequestDto
-{
-    /// <summary>
-    /// Number of services provided.
-    /// </summary>
-    /// <example>1</example>
-    [Range(1, 999999)]
-    public int Quantity { get; set; }
-
-    /// <summary>
-    /// The service name.
-    /// </summary>
-    /// <example>backup</example>
-    public string ServiceName { get; set; }
 }
 
 /// <summary>
@@ -217,6 +186,26 @@ public class ChangeWalletServiceStateRequestDto
     /// </summary>
     /// <example>true</example>
     public bool Enabled { get; set; }
+}
+
+/// <summary>
+/// The request parameters for crediting AI quota to the customer AI subaccount.
+/// </summary>
+public class CreditAiBalanceRequestDto
+{
+    /// <summary>
+    /// The amount to transfer from the main balance to the AI subaccount.
+    /// </summary>
+    /// <example>100.00</example>
+    [Range(0.01, 999999)]
+    public decimal Amount { get; set; }
+
+    /// <summary>
+    /// The three-character ISO 4217 currency symbol.
+    /// </summary>
+    /// <example>USD</example>
+    [StringLength(3)]
+    public string Currency { get; set; }
 }
 
 /// <summary>
