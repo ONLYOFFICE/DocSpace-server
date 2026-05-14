@@ -55,7 +55,8 @@ switch (launchProfile)
             .AddProject<ASC_Files>(Constants.FilesPort)
             .AddProject<ASC_Files_Worker>(Constants.FilesWorkerPort)
             .AddProject<ASC_People>(Constants.PeoplePort)
-            .AddProject<ASC_Web_Api>(Constants.WebApiPort);
+            .AddProject<ASC_Web_Api>(Constants.WebApiPort)
+            .AddProject<ASC_AI>(Constants.AiPort);
 
         break;
     case "preview":
