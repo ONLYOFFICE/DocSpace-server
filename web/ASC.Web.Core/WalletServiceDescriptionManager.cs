@@ -81,7 +81,7 @@ public class WalletServiceDescriptionManager
                     break;
                 case OperationType.AiCredit:
                     serviceName = "ai-tools";
-                    quantity = (int)operation.Debit; // round
+                    quantity = (int)operation.Debit; // truncate
                     break;
             }
         }
