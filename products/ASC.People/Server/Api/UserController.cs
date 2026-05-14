@@ -88,8 +88,9 @@ public class UserController(
     BruteForceLoginManager bruteForceLoginManager,
     SetupInfo setupInfo,
     IdentityClient client,
-    GroupFullDtoHelper groupFullDtoHelper)
-    : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
+    GroupFullDtoHelper groupFullDtoHelper,
+    IUrlValidator urlValidator)
+    : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor, urlValidator)
 {
     /// <remarks>
     /// Returns the user claims.
@@ -186,6 +187,12 @@ public class UserController(
 
         await UpdateContactsAsync(inDto.Contacts, user, false);
 
+        Uri validatedPhotoUri = null;
+        if (inDto.Files != _userPhotoManager.GetDefaultPhotoAbsoluteWebPath())
+        {
+            validatedPhotoUri = await ValidatePhotoUrlAsync(inDto.Files);
+        }
+
         cache.Insert("REWRITE_URL" + tenantManager.GetCurrentTenantId(), HttpContext.Request.GetDisplayUrl(), TimeSpan.FromMinutes(5));
         user = await userManagerWrapper.AddUserAsync(user, inDto.PasswordHash, false, false, inDto.Type,
             false, true, true);
@@ -200,9 +207,9 @@ public class UserController(
 
         await UpdateDepartmentsAsync(inDto.Department, user);
 
-        if (inDto.Files != _userPhotoManager.GetDefaultPhotoAbsoluteWebPath())
+        if (validatedPhotoUri != null)
         {
-            await UpdatePhotoUrlAsync(inDto.Files, user);
+            await DownloadAndSavePhotoAsync(validatedPhotoUri, user);
         }
 
         await webhookManager.PublishAsync(WebhookTrigger.UserCreated, user);
@@ -333,6 +340,12 @@ public class UserController(
 
         await UpdateContactsAsync(inDto.Contacts, user, false);
 
+        Uri validatedPhotoUri = null;
+        if (inDto.Files != _userPhotoManager.GetDefaultPhotoAbsoluteWebPath())
+        {
+            validatedPhotoUri = await ValidatePhotoUrlAsync(inDto.Files);
+        }
+
         cache.Insert("REWRITE_URL" + tenantManager.GetCurrentTenantId(), HttpContext.Request.GetDisplayUrl(), TimeSpan.FromMinutes(5));
 
         var quotaLimit = false;
@@ -366,9 +379,9 @@ public class UserController(
 
         await UpdateDepartmentsAsync(inDto.Department, user);
 
-        if (inDto.Files != _userPhotoManager.GetDefaultPhotoAbsoluteWebPath())
+        if (validatedPhotoUri != null)
         {
-            await UpdatePhotoUrlAsync(inDto.Files, user);
+            await DownloadAndSavePhotoAsync(validatedPhotoUri, user);
         }
 
         if (inDto.IsUser.GetValueOrDefault(false))
@@ -1941,12 +1954,18 @@ public class UserController(
             //     user.WorkFromDate = null;
             // }
 
+            Uri validatedPhotoUri = null;
+            if (inDto.UpdateMember.Files != await _userPhotoManager.GetPhotoAbsoluteWebPath(user.Id))
+            {
+                validatedPhotoUri = await ValidatePhotoUrlAsync(inDto.UpdateMember.Files);
+            }
+
             await UpdateContactsAsync(inDto.UpdateMember.Contacts, user);
             await UpdateDepartmentsAsync(inDto.UpdateMember.Department, user);
 
-            if (inDto.UpdateMember.Files != await _userPhotoManager.GetPhotoAbsoluteWebPath(user.Id))
+            if (validatedPhotoUri != null)
             {
-                await UpdatePhotoUrlAsync(inDto.UpdateMember.Files, user);
+                await DownloadAndSavePhotoAsync(validatedPhotoUri, user);
             }
 
             changed = true;
