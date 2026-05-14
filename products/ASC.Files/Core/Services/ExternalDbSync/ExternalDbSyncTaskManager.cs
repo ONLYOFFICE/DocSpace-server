@@ -27,18 +27,13 @@
 namespace ASC.Files.Core.Services.ExternalDbSync;
 
 [Singleton]
-public class ExternalDbSyncTaskManager
+public class ExternalDbSyncTaskManager(IDistributedTaskQueueFactory queueFactory) : IDisposable
 {
     private const string TaskIdPrefix = "ExternalDbSyncTask";
 
     private readonly SemaphoreSlim _semaphore = new(1);
     private readonly SemaphoreSlim _busyCheckLock = new(1, 1);
-    private readonly DistributedTaskQueue<ExternalDbSyncTask> _queue;
-
-    public ExternalDbSyncTaskManager(IDistributedTaskQueueFactory queueFactory)
-    {
-        _queue = queueFactory.CreateQueue<ExternalDbSyncTask>();
-    }
+    private readonly DistributedTaskQueue<ExternalDbSyncTask> _queue = queueFactory.CreateQueue<ExternalDbSyncTask>();
 
     public static string GetTaskId(int tenantId, int roomId) => $"{TaskIdPrefix}_{tenantId}_{roomId}";
 
@@ -99,5 +94,11 @@ public class ExternalDbSyncTaskManager
         {
             _semaphore.Release();
         }
+    }
+
+    public void Dispose()
+    {
+        _semaphore?.Dispose();
+        _busyCheckLock?.Dispose();
     }
 }

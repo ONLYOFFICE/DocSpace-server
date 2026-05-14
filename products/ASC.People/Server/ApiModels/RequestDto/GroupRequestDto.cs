@@ -41,7 +41,6 @@ public class GroupRequestDto
     /// The group manager ID.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
-    [Required]
     public Guid GroupManager { get; set; }
 
     /// <summary>

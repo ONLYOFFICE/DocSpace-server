@@ -26,6 +26,8 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
+#nullable enable
+
 /// <summary>
 /// The result of an external DB synchronization for a single form.
 /// </summary>

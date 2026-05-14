@@ -864,7 +864,7 @@ public class FileMarker(
     {
         if (folder == null)
         {
-            throw new ArgumentNullException(nameof(folder), FilesCommonResource.ErrorMessage_FolderNotFound);
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
         }
 
         if (!await fileSecurity.CanReadAsync(folder))
