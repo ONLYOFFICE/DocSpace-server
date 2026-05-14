@@ -406,6 +406,10 @@ public class FileSecurity(
     {
         return await CanAsync(entry, userId, FilesSecurityActions.ResetFilling);
     }
+    public async Task<bool> CanUpdateXlsxAsync<T>(FileEntry<T> entry)
+    {
+        return await CanAsync(entry, authContext.CurrentAccount.ID, FilesSecurityActions.UpdateXlsx);
+    }
 
     public async Task<bool> CanFillFormsAsync<T>(FileEntry<T> entry)
     {
@@ -1562,6 +1566,7 @@ public class FileSecurity(
                     FilesSecurityActions.FillingStatus or
                     FilesSecurityActions.ResetFilling or
                     FilesSecurityActions.StopFilling or
+                    FilesSecurityActions.UpdateXlsx or
                     FilesSecurityActions.SubmitToFormGallery or
                     FilesSecurityActions.CopyLink or
                                      FilesSecurityActions.OpenForm
@@ -1641,7 +1646,21 @@ public class FileSecurity(
 
                         if (action == FilesSecurityActions.StopFilling)
                         {
-                            return (userHasFullAccess || shareRecord is { Share: FileShare.RoomManager } || shareRecord is { Share: FileShare.ContentCreator } && file.CreateBy.Equals(userId));
+                            var isOwnOrStartedByUser = shareRecord is { Share: FileShare.ContentCreator } &&
+                                (file.CreateBy.Equals(userId) || formFilling?.StartedByUserId == userId);
+                            return userHasFullAccess || shareRecord is { Share: FileShare.RoomManager } || isOwnOrStartedByUser;
+                        }
+
+                        if (action == FilesSecurityActions.Edit && formFilling?.StartFilling == true && shareRecord is { Share: FileShare.ContentCreator })
+                        {
+                            return userHasFullAccess || file.CreateBy.Equals(userId) || formFilling.StartedByUserId == userId;
+                        }
+
+                        if (action == FilesSecurityActions.UpdateXlsx)
+                        {
+                            var isOwnOrStartedByUser = shareRecord is { Share: FileShare.ContentCreator } &&
+                                (file.CreateBy.Equals(userId) || formFilling?.StartedByUserId == userId);
+                            return userHasFullAccess || shareRecord is { Share: FileShare.RoomManager } || isOwnOrStartedByUser;
                         }
 
                         if (action == FilesSecurityActions.StartFilling)
@@ -2024,7 +2043,23 @@ public class FileSecurity(
                                 return true;
                             }
                         }
-                        else if (file != null && e.Access == FileShare.FillForms && e.CreateBy == userId)
+
+                        if (e.Access == FileShare.ContentCreator && file != null &&
+                            parentFolders.LastOrDefault()?.FolderType is FolderType.FormFillingFolderDone or FolderType.FormFillingFolderInProgress)
+                        {
+                            var fileProperties = await cacheFileDao.GetProperties(file.Id);
+                            var formFillingProps = fileProperties?.FormFilling;
+                            if (formFillingProps != null && !Equals(formFillingProps.OriginalFormId, default(T)))
+                            {
+                                var originalForm = await cacheFileDao.GetFileAsync(formFillingProps.OriginalFormId);
+                                if (originalForm?.CreateBy == authContext.CurrentAccount.ID)
+                                {
+                                    return true;
+                                }
+                            }
+                        }
+
+                        if (file != null && e.Access == FileShare.FillForms && e.CreateBy == userId)
                         {
                             var folderDao = daoFactory.GetFolderDao<T>();
                             var parentFolder = await folderDao.GetFolderAsync(file.ParentId);
@@ -3710,6 +3745,9 @@ public class FileSecurity(
         UseChat,
 
         [Description("Update xlsx")]
-        UpdateXlsx
+        UpdateXlsx,
+
+        [Description("Analyze responses")]
+        AnalyzeResponses
     }
 }

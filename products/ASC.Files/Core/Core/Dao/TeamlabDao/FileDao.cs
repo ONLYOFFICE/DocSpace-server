@@ -3108,4 +3108,16 @@ internal class CacheFileDao(ILogger<FileDao> logger,
         return result;
     }
 
+    private readonly ConcurrentDictionary<int, File<int>> _cacheFile = new();
+    public new async Task<File<int>> GetFileAsync(int fileId)
+    {
+        if (!_cacheFile.TryGetValue(fileId, out var result))
+        {
+            result = await base.GetFileAsync(fileId);
+            _cacheFile.TryAdd(fileId, result);
+        }
+
+        return result;
+    }
+
 }

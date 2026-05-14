@@ -67,19 +67,12 @@ public class Startup
         services.AddBaseDbContextPool<CoreDbContext>();
         services.AddBaseDbContextPool<TenantDbContext>();
         services.AddBaseDbContextPool<UserDbContext>();
-        services.AddBaseDbContextPool<TelegramDbContext>();
-        services.AddBaseDbContextPool<FirebaseDbContext>();
         services.AddBaseDbContextPool<CustomDbContext>();
-        services.AddBaseDbContextPool<UrlShortenerDbContext>();
         services.AddBaseDbContextPool<WebstudioDbContext>();
-        services.AddBaseDbContextPool<InstanceRegistrationContext>();
-        services.AddBaseDbContextPool<IntegrationEventLogContext>();
         services.AddBaseDbContextPool<MessagesContext>();
         services.AddBaseDbContextPool<WebhooksDbContext>();
         services.AddBaseDbContextPool<FilesDbContext>();
         services.AddBaseDbContextPool<ApiKeysDbContext>();
-
-        services.AddSession();
 
         _diHelper.Configure(services);
         _diHelper.Scan();
@@ -122,7 +115,6 @@ public class Startup
         services.AddHybridCache(connectionMultiplexer)
                 .AddMemoryCache(connectionMultiplexer)
                 .AddEventBus(_configuration)
-                .AddDistributedTaskQueue()
                 .AddCacheNotify(_configuration)
                 .AddDistributedLock(_configuration)
                 .AddHeartBeat(_configuration);
@@ -149,9 +141,6 @@ public class Startup
 
         services.AddBillingHttpClient();
         services.AddAccountingHttpClient();
-        services.AddSingleton(Channel.CreateUnbounded<NotifyRequest>());
-        services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Reader);
-        services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Writer);
 
         services.AddApiSystemAuthServices();
     }

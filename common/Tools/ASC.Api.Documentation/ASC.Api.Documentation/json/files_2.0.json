@@ -4476,6 +4476,15 @@
             "example": 1
           },
           {
+            "name": "withSubFolders",
+            "in": "query",
+            "description": "Specifies whether to include files from subfolders in the results.",
+            "schema": {
+              "type": "boolean",
+              "example": true
+            }
+          },
+          {
             "name": "extension",
             "in": "query",
             "description": "Specifies whether to search for the specific file extension.",
@@ -12650,6 +12659,150 @@
         ]
       }
     },
+    "/api/2.0/files/rooms/{id}/externalDbSync": {
+      "post": {
+        "tags": [
+          "Rooms"
+        ],
+        "summary": "Start external DB sync",
+        "description": "Triggers external DB synchronization for all form templates in the specified filling forms room.",
+        "operationId": "startExternalDbSync",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The room ID.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Synchronization task information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExternalDbSyncTaskWrapper"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "External DB is not configured"
+          },
+          "403": {
+            "description": "You do not have enough permissions to perform this action"
+          },
+          "404": {
+            "description": "Room not found"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "Rooms"
+        ],
+        "summary": "Get external DB sync status",
+        "description": "Returns the status of the external DB synchronization task for the specified filling forms room.",
+        "operationId": "getExternalDbSyncStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The room ID.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Synchronization task information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExternalDbSyncTaskWrapper"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Room not found"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
     "/api/2.0/files/rooms/{id}": {
       "get": {
         "tags": [
@@ -17244,6 +17397,16 @@
           },
           "chatSettings": {
             "$ref": "#/components/schemas/ChatSettings"
+          },
+          "sendFormToExternalDB": {
+            "type": "boolean",
+            "description": "Specifies whether to send form data to external database.",
+            "nullable": true
+          },
+          "saveFormAsXLSX": {
+            "type": "boolean",
+            "description": "Specifies whether to save form data as XLSX file.",
+            "nullable": true
           }
         },
         "additionalProperties": false,
@@ -19346,6 +19509,124 @@
           }
         }
       },
+      "ExternalDbSyncFormResultDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "The form file ID.",
+            "format": "int32",
+            "example": 42
+          },
+          "title": {
+            "type": "string",
+            "description": "The form file title.",
+            "nullable": true,
+            "example": "Application.pdf"
+          },
+          "success": {
+            "type": "boolean",
+            "description": "Specifies whether the synchronization succeeded for this form.",
+            "example": true
+          },
+          "error": {
+            "type": "string",
+            "description": "The error message if the synchronization failed for this form.",
+            "nullable": true,
+            "example": "Connection refused"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The result of an external DB synchronization for a single form."
+      },
+      "ExternalDbSyncTaskDto": {
+        "required": [
+          "forms",
+          "id",
+          "isCompleted",
+          "percentage",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The task ID.",
+            "nullable": true,
+            "example": "ExternalDbSyncTask_1_42"
+          },
+          "error": {
+            "type": "string",
+            "description": "The error message if the synchronization failed.",
+            "nullable": true,
+            "example": "Connection refused"
+          },
+          "percentage": {
+            "type": "integer",
+            "description": "The progress percentage of the synchronization.",
+            "format": "int32",
+            "example": 75
+          },
+          "isCompleted": {
+            "type": "boolean",
+            "description": "Specifies whether the synchronization is completed or not.",
+            "example": false
+          },
+          "status": {
+            "$ref": "#/components/schemas/DistributedTaskStatus"
+          },
+          "forms": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExternalDbSyncFormResultDto"
+            },
+            "description": "The synchronization results for all original forms in the room.",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "The external DB synchronization task parameters."
+      },
+      "ExternalDbSyncTaskWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/ExternalDbSyncTaskDto"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
       "ExternalShareDto": {
         "required": [
           "isAuthenticated",
@@ -19696,6 +19977,13 @@
                 "description": "The InProcess folder title of the file.",
                 "nullable": true,
                 "example": "In Process"
+              },
+              "resultsFolderId": {
+                "type": "integer",
+                "description": "The ID of the FormFillingFolderDone folder that corresponds to this original form.",
+                "format": "int32",
+                "nullable": true,
+                "example": 55
               },
               "draftLocation": {
                 "$ref": "#/components/schemas/DraftLocationInteger"
@@ -20225,6 +20513,9 @@
                   },
                   "UpdateXlsx": {
                     "type": "boolean"
+                  },
+                  "AnalyzeResponses": {
+                    "type": "boolean"
                   }
                 },
                 "additionalProperties": false,
@@ -20521,6 +20812,9 @@
                     "type": "boolean"
                   },
                   "UpdateXlsx": {
+                    "type": "boolean"
+                  },
+                  "AnalyzeResponses": {
                     "type": "boolean"
                   }
                 },
@@ -22860,6 +23154,13 @@
                 "type": "boolean",
                 "description": "Specifies whether to send form data to external database.",
                 "nullable": true
+              },
+              "originalFormId": {
+                "type": "integer",
+                "description": "The original form ID that corresponds to this FormFillingFolderDone folder.",
+                "format": "int32",
+                "nullable": true,
+                "example": 42
               }
             }
           }
@@ -23011,6 +23312,13 @@
                 "type": "boolean",
                 "description": "Specifies whether to send form data to external database.",
                 "nullable": true
+              },
+              "originalFormId": {
+                "type": "integer",
+                "description": "The original form ID that corresponds to this FormFillingFolderDone folder.",
+                "format": "int32",
+                "nullable": true,
+                "example": 42
               }
             }
           }
