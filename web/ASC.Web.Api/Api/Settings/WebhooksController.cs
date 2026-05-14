@@ -42,7 +42,6 @@ public class WebhooksController(
     MessageService messageService,
     SettingsManager settingsManager,
     PasswordSettingsManager passwordSettingsManager,
-    IHttpClientFactory clientFactory,
     WebhooksConfigDtoHelper webhooksConfigDtoHelper,
     IUrlValidator urlValidator)
     : BaseSettingsController(fusionCache, webItemManager)
@@ -424,14 +423,35 @@ public class WebhooksController(
             throw new ArgumentException(validationResult.ErrorMessage);
         }
 
-        var httpClientName = "customHttpClient";
+        var pinnedIp = validationResult.ResolvedAddresses[0];
+        var port = validationResult.ParsedUri.Port;
+
+        var handler = new SocketsHttpHandler
+        {
+            AllowAutoRedirect = false,
+            ConnectCallback = async (context, cancellationToken) =>
+            {
+                var socket = new Socket(pinnedIp.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                socket.NoDelay = true;
+                try
+                {
+                    await socket.ConnectAsync(new IPEndPoint(pinnedIp, port), cancellationToken);
+                    return new NetworkStream(socket, ownsSocket: true);
+                }
+                catch
+                {
+                    socket.Dispose();
+                    throw;
+                }
+            }
+        };
 
         if (Uri.UriSchemeHttps.Equals(validationResult.ParsedUri.Scheme, StringComparison.OrdinalIgnoreCase) && !ssl)
         {
-            httpClientName = "customHttpClientSslIgnore";
+            handler.SslOptions.RemoteCertificateValidationCallback = (_, _, _, _) => true;
         }
 
-        using var httpClient = clientFactory.CreateClient(httpClientName);
+        using var httpClient = new HttpClient(handler, disposeHandler: true);
         using var request = new HttpRequestMessage(HttpMethod.Head, validationResult.ParsedUri);
         using var response = await httpClient.SendAsync(request);
 

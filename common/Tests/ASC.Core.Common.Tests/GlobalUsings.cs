@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 global using System.Collections.Concurrent;
+global using System.Net;
 
 global using ASC.Core.Common.Security;
 global using ASC.Notify.Cron;

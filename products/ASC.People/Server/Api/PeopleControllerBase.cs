@@ -34,7 +34,6 @@ public abstract class PeopleControllerBase(
     PermissionContext permissionContext,
     ApiContext apiContext,
     UserPhotoManager userPhotoManager,
-    IHttpClientFactory httpClientFactory,
     IHttpContextAccessor httpContextAccessor,
     IUrlValidator urlValidator)
     : ApiControllerBase
@@ -43,7 +42,6 @@ public abstract class PeopleControllerBase(
     protected readonly PermissionContext _permissionContext = permissionContext;
     protected readonly ApiContext _apiContext = apiContext;
     protected readonly UserPhotoManager _userPhotoManager = userPhotoManager;
-    protected readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
     protected readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
     protected readonly IUrlValidator _urlValidator = urlValidator;
 
@@ -88,8 +86,8 @@ public abstract class PeopleControllerBase(
     /// Validates photo URL against SSRF attacks. Does NOT download the file.
     /// </summary>
     /// <param name="url">The URL to validate</param>
-    /// <returns>Parsed and validated URI, or null if URL is empty</returns>
-    protected async Task<Uri> ValidatePhotoUrlAsync(string url)
+    /// <returns>Validation result containing the parsed URI and resolved addresses, or null if URL is empty</returns>
+    protected async Task<UrlValidationResult> ValidatePhotoUrlAsync(string url)
     {
         if (string.IsNullOrEmpty(url))
         {
@@ -118,28 +116,50 @@ public abstract class PeopleControllerBase(
             throw new SecurityException($"Photo URL validation failed: {validationResult.ErrorMessage}");
         }
 
-        return validationResult.ParsedUri;
+        return validationResult;
     }
 
     /// <summary>
-    /// Downloads photo from validated URI and saves it.
+    /// Downloads photo from a validated URL and saves it.
+    /// Uses the already-resolved IP addresses from <paramref name="photoValidation"/> to pin the TCP
+    /// connection, preventing DNS rebinding between validation and download.
     /// </summary>
-    /// <param name="photoUri">The validated photo URI</param>
+    /// <param name="photoValidation">The validation result containing the URI and resolved addresses</param>
     /// <param name="user">The user to update photo for</param>
-    protected async Task DownloadAndSavePhotoAsync(Uri photoUri, UserInfo user)
+    protected async Task DownloadAndSavePhotoAsync(UrlValidationResult photoValidation, UserInfo user)
     {
-        if (photoUri == null)
+        if (photoValidation == null)
         {
-            throw new ArgumentNullException(nameof(photoUri));
+            throw new ArgumentNullException(nameof(photoValidation));
         }
 
         await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(user.Id), Constants.Action_EditUser);
 
-        using var request = new HttpRequestMessage(HttpMethod.Get, photoUri);
+        var pinnedIp = photoValidation.ResolvedAddresses[0];
+        var port = photoValidation.ParsedUri.Port;
 
-        // Use named HttpClient with AllowAutoRedirect = false to prevent SSRF via redirect chain
-        var httpClient = _httpClientFactory.CreateClient("customHttpClient");
+        var handler = new SocketsHttpHandler
+        {
+            AllowAutoRedirect = false,
+            ConnectCallback = async (context, cancellationToken) =>
+            {
+                var socket = new Socket(pinnedIp.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                socket.NoDelay = true;
+                try
+                {
+                    await socket.ConnectAsync(new IPEndPoint(pinnedIp, port), cancellationToken);
+                    return new NetworkStream(socket, ownsSocket: true);
+                }
+                catch
+                {
+                    socket.Dispose();
+                    throw;
+                }
+            }
+        };
 
+        using var httpClient = new HttpClient(handler, disposeHandler: true);
+        using var request = new HttpRequestMessage(HttpMethod.Get, photoValidation.ParsedUri);
         using var response = await httpClient.SendAsync(request);
 
         if (!response.IsSuccessStatusCode)

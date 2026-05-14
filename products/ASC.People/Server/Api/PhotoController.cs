@@ -44,11 +44,10 @@ public class PhotoController(
     SettingsManager settingsManager,
     FileSizeComment fileSizeComment,
     SetupInfo setupInfo,
-    IHttpClientFactory httpClientFactory,
     IHttpContextAccessor httpContextAccessor,
     UserWebhookManager webhookManager,
     IUrlValidator urlValidator)
-    : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor, urlValidator)
+    : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpContextAccessor, urlValidator)
 {
     /// <remarks>
     /// Creates the user photo thumbnails by coordinates of the original image specified in the request.
@@ -191,8 +190,8 @@ public class PhotoController(
 
         if (inDto.UpdatePhoto.Files != await _userPhotoManager.GetPhotoAbsoluteWebPath(user.Id))
         {
-            var validatedPhotoUri = await ValidatePhotoUrlAsync(inDto.UpdatePhoto.Files);
-            await DownloadAndSavePhotoAsync(validatedPhotoUri, user);
+            var photoValidation = await ValidatePhotoUrlAsync(inDto.UpdatePhoto.Files);
+            await DownloadAndSavePhotoAsync(photoValidation, user);
         }
 
         await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);

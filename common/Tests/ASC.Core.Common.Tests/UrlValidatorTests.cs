@@ -489,4 +489,17 @@ public class UrlValidatorTests
         result3.IsValid.Should().BeFalse();
         result3.Blacklisted.Should().BeTrue();
     }
+
+    [Fact]
+    public async Task ValidateAsync_DirectPublicIp_ShouldPopulateResolvedAddresses()
+    {
+        var url = "https://1.1.1.1/";
+
+        var result = await _urlValidator.ValidateAsync(url);
+
+        result.IsValid.Should().BeTrue();
+        result.ResolvedAddresses.Should().NotBeNull();
+        result.ResolvedAddresses.Should().HaveCountGreaterThanOrEqualTo(1);
+        result.ResolvedAddresses[0].Should().Be(IPAddress.Parse("1.1.1.1"));
+    }
 }

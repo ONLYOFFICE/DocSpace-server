@@ -67,7 +67,8 @@ public class UrlValidationOptions
 /// <param name="ErrorMessage">Error message if validation failed.</param>
 /// <param name="Blacklisted">True if URL resolves to a blacklisted IP address.</param>
 /// <param name="ParsedUri">Parsed URI object if validation succeeded.</param>
-public record UrlValidationResult(bool IsValid, string ErrorMessage = null, bool Blacklisted = false, Uri ParsedUri = null);
+/// <param name="ResolvedAddresses">IP addresses resolved during validation. Populated on success so callers can pin TCP connections to the already-checked IPs, preventing DNS rebinding.</param>
+public record UrlValidationResult(bool IsValid, string ErrorMessage = null, bool Blacklisted = false, Uri ParsedUri = null, IPAddress[] ResolvedAddresses = null);
 
 [Singleton]
 public class UrlValidator(
@@ -132,7 +133,7 @@ public class UrlValidator(
                 return new UrlValidationResult(false, "URL host is in the blacklist", true);
             }
 
-            return new UrlValidationResult(true, ParsedUri: parsedUri);
+            return new UrlValidationResult(true, ParsedUri: parsedUri, ResolvedAddresses: [directIp]);
         }
 
         // 5. Resolve DNS and validate all resolved IP addresses
@@ -161,7 +162,7 @@ public class UrlValidator(
             return new UrlValidationResult(false, "URL resolves to a blacklisted IP address", true);
         }
 
-        return new UrlValidationResult(true, ParsedUri: parsedUri);
+        return new UrlValidationResult(true, ParsedUri: parsedUri, ResolvedAddresses: addresses);
     }
 
     private bool IsBlacklisted(IPAddress[] addresses, string[] customBlacklist, out IPAddress blockedAddress)
