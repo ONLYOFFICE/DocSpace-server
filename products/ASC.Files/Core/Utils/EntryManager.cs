@@ -2049,8 +2049,13 @@ public class EntryManager(IDaoFactory daoFactory,
         if (resultFolder is not { FolderType: FolderType.FormFillingFolderDone })
         {
             var readyFormFolder = await folderDao.GetFoldersAsync(room.Id, FolderType.ReadyFormFolder)
-                .FirstOrDefaultAsync()
-                ?? throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FolderNotFound);
+                .FirstOrDefaultAsync();
+
+            if (readyFormFolder == null)
+            {
+                var (readyFolderId, _) = await InitSystemFormFillingFolders(room.Id, folderDao, form.CreateBy);
+                readyFormFolder = await folderDao.GetFolderAsync(readyFolderId);
+            }
 
             var resultsFolderId = await CreateFormFillingFolder(title, readyFormFolder.Id, FolderType.FormFillingFolderDone, form.CreateBy, folderDao);
             formFilling.ResultsFileID = await CreateFillResultsFile(resultsFolderId, form.CreateBy, title, fileDao);
