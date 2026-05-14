@@ -108,6 +108,7 @@ public class WebhookSender(
             var requestPayload = JsonSerializer.Serialize(webhookPayload, _jsonSerializerOptions);
             string requestHeaders = null;
 
+            UrlValidator.SetPinnedConnection(validationResult);
             var httpClientName = entry.Config.SSL ? WebhookHttpClient : WebhookHttpClientSslIgnore;
             var httpClient = clientFactory.CreateClient(httpClientName);
 
@@ -263,17 +264,23 @@ public static class WebhookSenderExtension
 
         services.AddHttpClient(WebhookSender.WebhookHttpClient)
             .SetHandlerLifetime(lifeTime)
-            .ConfigurePrimaryHttpMessageHandler(_ => new HttpClientHandler
+            .ConfigurePrimaryHttpMessageHandler(_ => new SocketsHttpHandler
             {
-                AllowAutoRedirect = false
+                AllowAutoRedirect = false,
+                ConnectCallback = UrlValidator.PinnedConnectCallback
             });
 
         services.AddHttpClient(WebhookSender.WebhookHttpClientSslIgnore)
             .SetHandlerLifetime(lifeTime)
-            .ConfigurePrimaryHttpMessageHandler(_ => new HttpClientHandler
+            .ConfigurePrimaryHttpMessageHandler(_ =>
             {
-                AllowAutoRedirect = false,
-                ServerCertificateCustomValidationCallback = (_, _, _, _) => true
+                var handler = new SocketsHttpHandler
+                {
+                    AllowAutoRedirect = false,
+                    ConnectCallback = UrlValidator.PinnedConnectCallback
+                };
+                handler.SslOptions.RemoteCertificateValidationCallback = (_, _, _, _) => true;
+                return handler;
             });
 
         services.AddResiliencePipeline<string, HttpResponseMessage>(WebhookSender.WebhookResiliencePipeline, pipelineBuilder =>

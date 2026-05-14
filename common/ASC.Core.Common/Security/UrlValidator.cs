@@ -93,6 +93,31 @@ public class UrlValidator(
 
     private readonly string[] _blacklist = configuration.GetSection("webhooks:blacklist").Get<string[]>() ?? _defaultBlacklist;
 
+    public static readonly AsyncLocal<IPAddress> PinnedIp = new();
+
+    public static void SetPinnedConnection(UrlValidationResult result)
+    {
+        PinnedIp.Value = result.ResolvedAddresses[0];
+    }
+
+    public static async ValueTask<Stream> PinnedConnectCallback(SocketsHttpConnectionContext context, CancellationToken ct)
+    {
+        var ip = PinnedIp.Value
+            ?? throw new InvalidOperationException($"No pinned IP set for {context.DnsEndPoint.Host}. Call UrlValidator.SetPinnedConnection before sending.");
+        var socket = new Socket(ip.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+        socket.NoDelay = true;
+        try
+        {
+            await socket.ConnectAsync(new IPEndPoint(ip, context.DnsEndPoint.Port), ct);
+            return new NetworkStream(socket, ownsSocket: true);
+        }
+        catch
+        {
+            socket.Dispose();
+            throw;
+        }
+    }
+
     public async Task<UrlValidationResult> ValidateAsync(string url, UrlValidationOptions options = null)
     {
         options ??= new UrlValidationOptions();

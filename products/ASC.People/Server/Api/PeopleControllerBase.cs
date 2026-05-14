@@ -135,27 +135,12 @@ public abstract class PeopleControllerBase(
 
         await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(user.Id), Constants.Action_EditUser);
 
-        var pinnedIp = photoValidation.ResolvedAddresses[0];
-        var port = photoValidation.ParsedUri.Port;
+        UrlValidator.SetPinnedConnection(photoValidation);
 
         var handler = new SocketsHttpHandler
         {
             AllowAutoRedirect = false,
-            ConnectCallback = async (context, cancellationToken) =>
-            {
-                var socket = new Socket(pinnedIp.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-                socket.NoDelay = true;
-                try
-                {
-                    await socket.ConnectAsync(new IPEndPoint(pinnedIp, port), cancellationToken);
-                    return new NetworkStream(socket, ownsSocket: true);
-                }
-                catch
-                {
-                    socket.Dispose();
-                    throw;
-                }
-            }
+            ConnectCallback = UrlValidator.PinnedConnectCallback
         };
 
         using var httpClient = new HttpClient(handler, disposeHandler: true);

@@ -26,9 +26,7 @@
 
 global using System.ComponentModel;
 global using System.ComponentModel.DataAnnotations;
-global using System.Net;
 global using System.Net.Mail;
-global using System.Net.Sockets;
 global using System.Security;
 global using System.Security.Claims;
 global using System.Text.Json;
