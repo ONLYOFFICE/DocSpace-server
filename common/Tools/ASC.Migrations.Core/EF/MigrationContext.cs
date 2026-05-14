@@ -143,6 +143,7 @@ public class MigrationContext : DbContext
     public DbSet<DbUserChatSettings> UserChatSettings { get; set; }
 
     public DbSet<InvitationLink> InvitationLinks { get; set; }
+    public DbSet<DbAppSettings> AppSettings { get; set; }
 
     public MigrationContext(DbContextOptions<MigrationContext> options) : base(options) { }
 
@@ -232,6 +233,7 @@ public class MigrationContext : DbContext
             .AddInvitationLink()
             .AddDbDefaultAiProviders()
             .AddDbAiModelSettings()
-            .AddDbChatMessageAttachment();
+            .AddDbChatMessageAttachment()
+            .AddAppSettings();
     }
 }

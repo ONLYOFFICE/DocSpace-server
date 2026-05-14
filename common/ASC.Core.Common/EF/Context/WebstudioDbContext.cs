@@ -31,6 +31,7 @@ public partial class WebstudioDbContext(DbContextOptions<WebstudioDbContext> opt
     public DbSet<DbTenant> Tenants { get; set; }
     public DbSet<DbWebstudioSettings> WebstudioSettings { get; set; }
     public DbSet<DbWebstudioIndex> WebstudioIndex { get; set; }
+    public DbSet<DbAppSettings> AppSettings { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -39,6 +40,7 @@ public partial class WebstudioDbContext(DbContextOptions<WebstudioDbContext> opt
             .AddWebstudioSettings()
             .AddDbWebstudioIndex()
             .AddDbTenant()
+            .AddAppSettings()
             .AddDbFunctions();
     }
 }
