@@ -28,7 +28,7 @@ import { ThreadsEngine } from "@onlyoffice/ai-chat/core";
 import type { Profile, OpenOrCreateInput } from "@onlyoffice/ai-chat/core";
 import type { ThreadMessageLike } from "@assistant-ui/react";
 import { storage } from "../storage/index.js";
-import { asyncHandler } from "./_helpers.js";
+import { asyncHandler, unpackPositional } from "./_helpers.js";
 import { asString, parseInt10 } from "../narrow.js";
 
 const engine = new ThreadsEngine({ storage });
@@ -85,21 +85,25 @@ export const threadsController = {
     res.json(result);
   }),
 
-  appendUserMessage: asyncHandler<AppendUserMessageBody>(async (req, res) => {
-    const { threadId, message, profileId } = req.body;
-    const messageId = await engine.appendUserMessage(threadId, message, profileId);
+  appendUserMessage: asyncHandler(async (req, res) => {
+    const args = unpackPositional(req.body, ["threadId", "message", "profileId"] as const);
+    const messageId = await engine.appendUserMessage(
+      args.threadId as string,
+      args.message as ThreadMessageInput,
+      args.profileId as string | undefined,
+    );
     res.json({ messageId });
   }),
 
-  touch: asyncHandler<TouchBody>(async (req, res) => {
-    const { threadId, profileId } = req.body;
-    await engine.touch(threadId, profileId);
+  touch: asyncHandler(async (req, res) => {
+    const args = unpackPositional(req.body, ["threadId", "profileId"] as const);
+    await engine.touch(args.threadId as string, args.profileId as string | undefined);
     res.json({ success: true });
   }),
 
-  rename: asyncHandler<RenameBody>(async (req, res) => {
-    const { threadId, title } = req.body;
-    await engine.rename(threadId, title);
+  rename: asyncHandler(async (req, res) => {
+    const args = unpackPositional(req.body, ["threadId", "title"] as const);
+    await engine.rename(args.threadId as string, args.title as string);
     res.json({ success: true });
   }),
 
@@ -123,9 +127,9 @@ export const threadsController = {
     res.json({ success: true });
   }),
 
-  regenerateTitle: asyncHandler<RegenerateTitleBody>(async (req, res) => {
-    const { threadId, profile } = req.body;
-    const title = await engine.regenerateTitle(threadId, profile);
+  regenerateTitle: asyncHandler(async (req, res) => {
+    const args = unpackPositional(req.body, ["threadId", "profile"] as const);
+    const title = await engine.regenerateTitle(args.threadId as string, args.profile as Profile);
     res.json({ title });
   }),
 
@@ -166,9 +170,9 @@ export const threadsController = {
     res.json(message);
   }),
 
-  updateMessage: asyncHandler<UpdateMessageBody>(async (req, res) => {
-    const { messageId, message } = req.body;
-    await engine.updateMessage(messageId, message);
+  updateMessage: asyncHandler(async (req, res) => {
+    const args = unpackPositional(req.body, ["messageId", "message"] as const);
+    await engine.updateMessage(args.messageId as string, args.message as ThreadMessageInput);
     res.json({ success: true });
   }),
 

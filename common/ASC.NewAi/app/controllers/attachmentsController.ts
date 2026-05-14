@@ -26,7 +26,7 @@
 
 import { AttachmentsEngine } from "@onlyoffice/ai-chat/core";
 import { storage } from "../storage/index.js";
-import { asyncHandler } from "./_helpers.js";
+import { asyncHandler, unpackPositional } from "./_helpers.js";
 
 const engine = new AttachmentsEngine({ storage });
 
@@ -43,88 +43,74 @@ interface ImageInput {
   title?: string;
 }
 
-interface SaveFileBody {
-  input: FileInput;
-  entityId?: string;
-}
-
-interface SaveFilesManyBody {
-  inputs: FileInput[];
-  entityId?: string;
-}
-
-interface SaveImageBody {
-  input: ImageInput;
-  entityId?: string;
-}
-
-interface SaveImagesManyBody {
-  inputs: ImageInput[];
-  entityId?: string;
-}
-
-interface IdBody {
-  id: string;
-}
-
-interface IdsBody {
-  ids: string[];
-}
-
-interface LinkToMessageBody {
-  ids: string[];
-  messageId: string;
-  threadId: string;
-}
-
 export const attachmentsController = {
-  saveFile: asyncHandler<SaveFileBody>(async (req, res) => {
-    const { input, entityId } = req.body;
-    const result = await engine.saveFile(input, entityId);
+  saveFile: asyncHandler(async (req, res) => {
+    const args = unpackPositional(req.body, ["input", "entityId"] as const);
+    const result = await engine.saveFile(
+      args.input as FileInput,
+      args.entityId as string | undefined,
+    );
     res.json(result);
   }),
 
-  saveFilesMany: asyncHandler<SaveFilesManyBody>(async (req, res) => {
-    const { inputs, entityId } = req.body;
-    const result = await engine.saveFilesMany(inputs ?? [], entityId);
+  saveFilesMany: asyncHandler(async (req, res) => {
+    const args = unpackPositional(req.body, ["inputs", "entityId"] as const);
+    const result = await engine.saveFilesMany(
+      (args.inputs as FileInput[]) ?? [],
+      args.entityId as string | undefined,
+    );
     res.json(result);
   }),
 
-  saveImage: asyncHandler<SaveImageBody>(async (req, res) => {
-    const { input, entityId } = req.body;
-    const result = await engine.saveImage(input, entityId);
+  saveImage: asyncHandler(async (req, res) => {
+    const args = unpackPositional(req.body, ["input", "entityId"] as const);
+    const result = await engine.saveImage(
+      args.input as ImageInput,
+      args.entityId as string | undefined,
+    );
     res.json(result);
   }),
 
-  saveImagesMany: asyncHandler<SaveImagesManyBody>(async (req, res) => {
-    const { inputs, entityId } = req.body;
-    const result = await engine.saveImagesMany(inputs ?? [], entityId);
+  saveImagesMany: asyncHandler(async (req, res) => {
+    const args = unpackPositional(req.body, ["inputs", "entityId"] as const);
+    const result = await engine.saveImagesMany(
+      (args.inputs as ImageInput[]) ?? [],
+      args.entityId as string | undefined,
+    );
     res.json(result);
   }),
 
-  get: asyncHandler<IdBody>(async (req, res) => {
-    const result = await engine.get(req.body.id);
+  get: asyncHandler(async (req, res) => {
+    const args = unpackPositional(req.body, ["id"] as const);
+    const result = await engine.get(args.id as string);
     res.json(result);
   }),
 
-  getMany: asyncHandler<IdsBody>(async (req, res) => {
-    const result = await engine.getMany(req.body.ids ?? []);
+  getMany: asyncHandler(async (req, res) => {
+    const args = unpackPositional(req.body, ["ids"] as const);
+    const result = await engine.getMany((args.ids as string[]) ?? []);
     res.json(result);
   }),
 
-  delete: asyncHandler<IdBody>(async (req, res) => {
-    await engine.delete(req.body.id);
+  delete: asyncHandler(async (req, res) => {
+    const args = unpackPositional(req.body, ["id"] as const);
+    await engine.delete(args.id as string);
     res.json({ success: true });
   }),
 
-  deleteMany: asyncHandler<IdsBody>(async (req, res) => {
-    await engine.deleteMany(req.body.ids ?? []);
+  deleteMany: asyncHandler(async (req, res) => {
+    const args = unpackPositional(req.body, ["ids"] as const);
+    await engine.deleteMany((args.ids as string[]) ?? []);
     res.json({ success: true });
   }),
 
-  linkToMessage: asyncHandler<LinkToMessageBody>(async (req, res) => {
-    const { ids, messageId, threadId } = req.body;
-    await engine.linkToMessage(ids ?? [], messageId, threadId);
+  linkToMessage: asyncHandler(async (req, res) => {
+    const args = unpackPositional(req.body, ["ids", "messageId", "threadId"] as const);
+    await engine.linkToMessage(
+      (args.ids as string[]) ?? [],
+      args.messageId as string,
+      args.threadId as string,
+    );
     res.json({ success: true });
   }),
 };

@@ -56,7 +56,7 @@ export class HttpStorageAdapter implements StorageAdapter {
   }
 
   async close(): Promise<void> {
-    this.toolPrefs._clear();
+    // No-op: every storage is HTTP-backed; nothing to release locally.
   }
 }
 

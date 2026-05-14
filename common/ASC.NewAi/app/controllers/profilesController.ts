@@ -25,7 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 import { ProfilesEngine } from "@onlyoffice/ai-chat/core";
-import type { Profile, CreateProfileInput } from "@onlyoffice/ai-chat/core";
+import type { Profile, CreateProfileInput, ProviderType } from "@onlyoffice/ai-chat/core";
 import { storage } from "../storage/index.js";
 import { asyncHandler } from "./_helpers.js";
 import { asString } from "../narrow.js";
@@ -38,6 +38,12 @@ interface IdBody {
 
 interface ProfileIdBody {
   profileId?: string;
+}
+
+interface ListProviderModelsBody {
+  providerType?: ProviderType;
+  baseUrl?: string;
+  apiKey?: string;
 }
 
 export const profilesController = {
@@ -59,6 +65,20 @@ export const profilesController = {
     }
     await engine.delete(id);
     res.json({ success: true });
+  }),
+
+  listProviderModels: asyncHandler<ListProviderModelsBody>(async (req, res) => {
+    const { providerType, baseUrl, apiKey } = req.body ?? {};
+    if (!providerType || !baseUrl) {
+      res.status(400).json({ error: "providerType and baseUrl required" });
+      return;
+    }
+    const models = await engine.listProviderModels({
+      providerType,
+      baseUrl,
+      apiKey: apiKey ?? "",
+    });
+    res.json(models);
   }),
 
   listModels: asyncHandler(async (req, res) => {

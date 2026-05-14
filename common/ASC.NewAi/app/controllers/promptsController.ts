@@ -27,7 +27,7 @@
 import { PromptsEngine } from "@onlyoffice/ai-chat/core";
 import type { CreatePromptInput, PromptBundle } from "@onlyoffice/ai-chat/core";
 import { storage } from "../storage/index.js";
-import { asyncHandler } from "./_helpers.js";
+import { asyncHandler, unpackPositional } from "./_helpers.js";
 import { asString } from "../narrow.js";
 
 const engine = new PromptsEngine({ storage });
@@ -68,15 +68,17 @@ export const promptsController = {
     res.json(result);
   }),
 
-  update: asyncHandler<UpdateBody>(async (req, res) => {
-    const { id, ...updates } = req.body;
-    const result = await engine.update(id, updates);
+  update: asyncHandler(async (req, res) => {
+    const args = unpackPositional(req.body, ["id", "updates"] as const);
+    const updates = (args.updates as Partial<UpdateBody>) ?? {};
+    const result = await engine.update(args.id as string, updates);
     res.json(result);
   }),
 
-  move: asyncHandler<MoveBody>(async (req, res) => {
-    const { id, folderId } = req.body;
-    const result = await engine.move(id, folderId ?? null);
+  move: asyncHandler(async (req, res) => {
+    const args = unpackPositional(req.body, ["id", "folderId"] as const);
+    const folderId = args.folderId === undefined ? null : (args.folderId as string | null);
+    const result = await engine.move(args.id as string, folderId);
     res.json(result);
   }),
 
@@ -104,14 +106,15 @@ export const promptsController = {
     res.json(result);
   }),
 
-  createFolder: asyncHandler<CreateFolderBody>(async (req, res) => {
-    const result = await engine.createFolder(req.body.name);
+  createFolder: asyncHandler(async (req, res) => {
+    const args = unpackPositional(req.body, ["name"] as const);
+    const result = await engine.createFolder(args.name as string);
     res.json(result);
   }),
 
-  renameFolder: asyncHandler<RenameFolderBody>(async (req, res) => {
-    const { id, name } = req.body;
-    const result = await engine.renameFolder(id, name);
+  renameFolder: asyncHandler(async (req, res) => {
+    const args = unpackPositional(req.body, ["id", "name"] as const);
+    const result = await engine.renameFolder(args.id as string, args.name as string);
     res.json(result);
   }),
 
@@ -135,9 +138,11 @@ export const promptsController = {
     res.json(bundle);
   }),
 
-  importBundle: asyncHandler<ImportBody>(async (req, res) => {
-    const { bundle, mode } = req.body;
-    const result = await engine.importBundle(bundle, mode ? { mode } : undefined);
+  importBundle: asyncHandler(async (req, res) => {
+    const args = unpackPositional(req.body, ["bundle", "options"] as const);
+    const bundle = args.bundle as PromptBundle;
+    const options = args.options as { mode?: "merge" | "replace" } | undefined;
+    const result = await engine.importBundle(bundle, options);
     res.json(result);
   }),
 

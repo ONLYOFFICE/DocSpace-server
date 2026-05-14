@@ -26,13 +26,9 @@
 
 import { PreferencesEngine } from "@onlyoffice/ai-chat/core";
 import { storage } from "../storage/index.js";
-import { asyncHandler } from "./_helpers.js";
+import { asyncHandler, unpackPositional } from "./_helpers.js";
 
 const engine = new PreferencesEngine({ storage });
-
-interface DeepModeBody {
-  value?: unknown;
-}
 
 export const preferencesController = {
   getDeepMode: asyncHandler(async (_req, res) => {
@@ -40,8 +36,9 @@ export const preferencesController = {
     res.json({ value });
   }),
 
-  setDeepMode: asyncHandler<DeepModeBody>(async (req, res) => {
-    await engine.setDeepMode(Boolean(req.body?.value));
+  setDeepMode: asyncHandler(async (req, res) => {
+    const args = unpackPositional(req.body, ["value", "entityId"] as const);
+    await engine.setDeepMode(Boolean(args.value));
     res.json({ success: true });
   }),
 

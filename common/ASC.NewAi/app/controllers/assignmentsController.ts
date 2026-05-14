@@ -24,46 +24,20 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-import { AssignmentsEngine } from "@onlyoffice/ai-chat/core";
-import type { ActionType } from "@onlyoffice/ai-chat/core";
+import { AssignmentsEngine, ActionType } from "@onlyoffice/ai-chat/core";
 import { storage } from "../storage/index.js";
-import { asyncHandler } from "./_helpers.js";
+import { asyncHandler, unpackPositional } from "./_helpers.js";
 import { asString } from "../narrow.js";
 
 const engine = new AssignmentsEngine({ storage });
 
-const ACTION_TYPES = new Set<string>([
-  "Chat",
-  "Summarization",
-  "Translation",
-  "TextAnalyze",
-  "ImageGeneration",
-  "OCR",
-  "Vision",
-]);
+const ACTION_TYPES = new Set<string>(Object.values(ActionType));
 
 function asActionType(value: unknown): ActionType | undefined {
-  if (typeof value !== "string") {
+  if (typeof value !== "string" || !ACTION_TYPES.has(value)) {
     return undefined;
   }
-  if (!ACTION_TYPES.has(value)) {
-    return undefined;
-  }
-  // narrowed to one of the union members at runtime; TS allows the implicit
-  // widening because ActionType is a subtype of string and the runtime check
-  // is exhaustive.
-  switch (value) {
-    case "Chat":
-    case "Summarization":
-    case "Translation":
-    case "TextAnalyze":
-    case "ImageGeneration":
-    case "OCR":
-    case "Vision":
-      return value;
-    default:
-      return undefined;
-  }
+  return value as ActionType;
 }
 
 interface AssignBody {
@@ -104,9 +78,10 @@ export const assignmentsController = {
     res.json(result);
   }),
 
-  assign: asyncHandler<AssignBody>(async (req, res) => {
-    const actionType = asActionType(req.body.actionType);
-    const { profileId } = req.body;
+  assign: asyncHandler(async (req, res) => {
+    const args = unpackPositional(req.body, ["actionType", "profileId"] as const);
+    const actionType = asActionType(args.actionType);
+    const profileId = typeof args.profileId === "string" ? args.profileId : undefined;
     if (!actionType || !profileId) {
       res.status(400).json({ error: "actionType and profileId required" });
       return;
@@ -115,8 +90,9 @@ export const assignmentsController = {
     res.json(result);
   }),
 
-  unassign: asyncHandler<UnassignBody>(async (req, res) => {
-    const raw = req.body?.actionType ?? asString(req.query["actionType"]);
+  unassign: asyncHandler(async (req, res) => {
+    const args = unpackPositional(req.body, ["actionType"] as const);
+    const raw = args.actionType ?? asString(req.query["actionType"]);
     const actionType = asActionType(raw);
     if (!actionType) {
       res.status(400).json({ error: "actionType required" });

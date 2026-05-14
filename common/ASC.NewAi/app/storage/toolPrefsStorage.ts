@@ -24,43 +24,94 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-import { aiService, AiServiceHttpError } from "./httpClient.js";
+import { aiService, AiServiceHttpError, type QueryValue } from "./httpClient.js";
 import { isObject } from "../narrow.js";
 import type { ToolPrefsStorage } from "@onlyoffice/ai-chat/core";
 
-const DISABLED_PATH = "/integration/tool-prefs/disabled";
+const BASE_PATH = "/integration/tool-prefs";
+const DISABLED_PATH = `${BASE_PATH}/disabled`;
+const ALLOW_ALWAYS_PATH = `${BASE_PATH}/allow-always`;
+
+function entityIdQuery(entityId: string | undefined): Record<string, QueryValue> | undefined {
+  return entityId ? { entityId } : undefined;
+}
+
+function readToolPrefsRaw(entityId: string | undefined): Promise<unknown> {
+  const query = entityIdQuery(entityId);
+  return aiService.get(BASE_PATH, query ? { query } : undefined);
+}
+
+function pickStringArray(pref: unknown, key: string): string[] {
+  if (!isObject(pref)) {
+    return [];
+  }
+  const value = pref[key];
+  if (!Array.isArray(value)) {
+    return [];
+  }
+  const result: string[] = [];
+  for (const item of value) {
+    if (typeof item === "string") {
+      result.push(item);
+    }
+  }
+  return result;
+}
 
 function parseDisabled(raw: unknown): Record<string, string[]> {
   if (!isObject(raw)) {
     return {};
   }
   const result: Record<string, string[]> = {};
-  for (const [key, value] of Object.entries(raw)) {
-    if (Array.isArray(value)) {
-      const tools: string[] = [];
-      for (const item of value) {
-        if (typeof item === "string") {
-          tools.push(item);
-        }
-      }
-      result[key] = tools;
+  for (const [serverType, pref] of Object.entries(raw)) {
+    const disabled = pickStringArray(pref, "disabled");
+    if (disabled.length > 0) {
+      result[serverType] = disabled;
     }
   }
   return result;
 }
 
-// `allowAlways` is not exposed by the AI service yet — keep it in-memory until
-// the backend grows the matching endpoints.
-export class HttpToolPrefsStorage implements ToolPrefsStorage {
-  #allowAlways: string[] | null = null;
+function parseAllowAlwaysTokens(raw: unknown): string[] {
+  if (!isObject(raw)) {
+    return [];
+  }
+  const tokens: string[] = [];
+  for (const [serverType, pref] of Object.entries(raw)) {
+    for (const toolName of pickStringArray(pref, "allowAlways")) {
+      tokens.push(`${serverType}_${toolName}`);
+    }
+  }
+  return tokens;
+}
 
-  async createDisabled(disabled: Record<string, string[]>): Promise<void> {
-    await aiService.put(DISABLED_PATH, { disabled });
+// Engine composes tokens as `${serverType}_${toolName}`. Split on the first
+// underscore — tool names may contain `_`, server types are not expected to.
+function groupAllowAlwaysTokens(tokens: string[]): Record<string, string[]> {
+  const grouped: Record<string, string[]> = {};
+  for (const token of tokens) {
+    const idx = token.indexOf("_");
+    if (idx <= 0 || idx === token.length - 1) {
+      continue;
+    }
+    const serverType = token.slice(0, idx);
+    const toolName = token.slice(idx + 1);
+    (grouped[serverType] ??= []).push(toolName);
+  }
+  return grouped;
+}
+
+export class HttpToolPrefsStorage implements ToolPrefsStorage {
+  async createDisabled(
+    disabled: Record<string, string[]>,
+    entityId?: string,
+  ): Promise<void> {
+    await aiService.put(DISABLED_PATH, { disabled, entityId });
   }
 
-  async readDisabled(): Promise<Record<string, string[]>> {
+  async readDisabled(entityId?: string): Promise<Record<string, string[]>> {
     try {
-      const raw = await aiService.get(DISABLED_PATH);
+      const raw = await readToolPrefsRaw(entityId);
       return parseDisabled(raw);
     } catch (err) {
       if (err instanceof AiServiceHttpError && err.status === 404) {
@@ -70,52 +121,59 @@ export class HttpToolPrefsStorage implements ToolPrefsStorage {
     }
   }
 
-  async updateDisabled(disabled: Record<string, string[]>): Promise<void> {
-    await aiService.put(DISABLED_PATH, { disabled });
+  async updateDisabled(
+    disabled: Record<string, string[]>,
+    entityId?: string,
+  ): Promise<void> {
+    await aiService.put(DISABLED_PATH, { disabled, entityId });
   }
 
-  async upsertDisabled(disabled: Record<string, string[]>): Promise<void> {
-    await aiService.put(DISABLED_PATH, { disabled });
+  async upsertDisabled(
+    disabled: Record<string, string[]>,
+    entityId?: string,
+  ): Promise<void> {
+    await aiService.put(DISABLED_PATH, { disabled, entityId });
   }
 
-  async deleteDisabled(): Promise<void> {
+  async deleteDisabled(entityId?: string): Promise<void> {
+    // No DELETE endpoint on the C# side; clear by upserting an empty map.
+    await aiService.put(DISABLED_PATH, { disabled: {}, entityId });
+  }
+
+  async createAllowAlways(tokens: string[], entityId?: string): Promise<void> {
+    await aiService.put(ALLOW_ALWAYS_PATH, {
+      allowAlways: groupAllowAlwaysTokens(tokens),
+      entityId,
+    });
+  }
+
+  async readAllowAlways(entityId?: string): Promise<string[]> {
     try {
-      await aiService.delete(DISABLED_PATH);
+      const raw = await readToolPrefsRaw(entityId);
+      return parseAllowAlwaysTokens(raw);
     } catch (err) {
       if (err instanceof AiServiceHttpError && err.status === 404) {
-        return;
+        return [];
       }
       throw err;
     }
   }
 
-  async createAllowAlways(tokens: string[]): Promise<void> {
-    if (this.#allowAlways !== null) {
-      throw new Error("allowAlways tokens already set");
-    }
-    this.#allowAlways = [...tokens];
+  async updateAllowAlways(tokens: string[], entityId?: string): Promise<void> {
+    await aiService.put(ALLOW_ALWAYS_PATH, {
+      allowAlways: groupAllowAlwaysTokens(tokens),
+      entityId,
+    });
   }
 
-  async readAllowAlways(): Promise<string[]> {
-    return this.#allowAlways ? [...this.#allowAlways] : [];
+  async upsertAllowAlways(tokens: string[], entityId?: string): Promise<void> {
+    await aiService.put(ALLOW_ALWAYS_PATH, {
+      allowAlways: groupAllowAlwaysTokens(tokens),
+      entityId,
+    });
   }
 
-  async updateAllowAlways(tokens: string[]): Promise<void> {
-    if (this.#allowAlways === null) {
-      throw new Error("allowAlways tokens not set");
-    }
-    this.#allowAlways = [...tokens];
-  }
-
-  async upsertAllowAlways(tokens: string[]): Promise<void> {
-    this.#allowAlways = [...tokens];
-  }
-
-  async deleteAllowAlways(): Promise<void> {
-    this.#allowAlways = null;
-  }
-
-  _clear(): void {
-    this.#allowAlways = null;
+  async deleteAllowAlways(entityId?: string): Promise<void> {
+    await aiService.put(ALLOW_ALWAYS_PATH, { allowAlways: {}, entityId });
   }
 }

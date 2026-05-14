@@ -27,7 +27,7 @@
 import { ToolsEngine } from "@onlyoffice/ai-chat/core";
 import type { McpServerConfig } from "@onlyoffice/ai-chat/core";
 import { storage } from "../storage/index.js";
-import { asyncHandler } from "./_helpers.js";
+import { asyncHandler, unpackPositional } from "./_helpers.js";
 import { asString } from "../narrow.js";
 
 const engine = new ToolsEngine({ storage });
@@ -53,15 +53,23 @@ interface AllowAlwaysBody {
 }
 
 export const toolsController = {
-  addCustomServer: asyncHandler<CustomServerBody>(async (req, res) => {
-    const { name, config } = req.body;
-    const result = await engine.addCustomServer(name, config);
+  addCustomServer: asyncHandler(async (req, res) => {
+    const args = unpackPositional(req.body, ["name", "config", "entityId"] as const);
+    const result = await engine.addCustomServer(
+      args.name as string,
+      args.config as McpServerConfig,
+      args.entityId as string | undefined,
+    );
     res.json(result);
   }),
 
-  updateCustomServer: asyncHandler<CustomServerBody>(async (req, res) => {
-    const { name, config } = req.body;
-    const result = await engine.updateCustomServer(name, config);
+  updateCustomServer: asyncHandler(async (req, res) => {
+    const args = unpackPositional(req.body, ["name", "config", "entityId"] as const);
+    const result = await engine.updateCustomServer(
+      args.name as string,
+      args.config as McpServerConfig,
+      args.entityId as string | undefined,
+    );
     res.json(result);
   }),
 
@@ -90,14 +98,23 @@ export const toolsController = {
     res.json(servers);
   }),
 
-  replaceAllCustomServers: asyncHandler<Record<string, McpServerConfig>>(async (req, res) => {
-    const result = await engine.replaceAllCustomServers(req.body ?? {});
+  replaceAllCustomServers: asyncHandler(async (req, res) => {
+    const args = unpackPositional(req.body, ["map", "entityId"] as const);
+    const map = (args.map as Record<string, McpServerConfig>) ?? {};
+    const result = await engine.replaceAllCustomServers(
+      map,
+      args.entityId as string | undefined,
+    );
     res.json(result);
   }),
 
-  setDisabled: asyncHandler<DisabledBody>(async (req, res) => {
-    const { serverType, toolNames } = req.body;
-    await engine.setDisabled(serverType, toolNames ?? []);
+  setDisabled: asyncHandler(async (req, res) => {
+    const args = unpackPositional(req.body, ["serverType", "toolNames", "entityId"] as const);
+    await engine.setDisabled(
+      args.serverType as string,
+      (args.toolNames as string[]) ?? [],
+      args.entityId as string | undefined,
+    );
     res.json({ success: true });
   }),
 
@@ -117,9 +134,17 @@ export const toolsController = {
     res.json({ value });
   }),
 
-  setAllowAlways: asyncHandler<AllowAlwaysBody>(async (req, res) => {
-    const { serverType, toolName, value } = req.body;
-    await engine.setAllowAlways(serverType, toolName, Boolean(value));
+  setAllowAlways: asyncHandler(async (req, res) => {
+    const args = unpackPositional(
+      req.body,
+      ["serverType", "toolName", "value", "entityId"] as const,
+    );
+    await engine.setAllowAlways(
+      args.serverType as string,
+      args.toolName as string,
+      Boolean(args.value),
+      args.entityId as string | undefined,
+    );
     res.json({ success: true });
   }),
 

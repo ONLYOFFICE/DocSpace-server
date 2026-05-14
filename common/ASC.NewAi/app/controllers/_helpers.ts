@@ -47,6 +47,75 @@ function errorMessage(err: unknown): string {
   return String(err);
 }
 
+/**
+ * Library's ApiProvider serializes route arguments as a positional JSON
+ * array (`JSON.stringify(args.length === 1 ? args[0] : args)`) — so a
+ * call like `assign(actionType, profileId)` arrives as `[a, b]`. Legacy
+ * DocSpace clients used named fields. Accept both: positional array
+ * mapped to `names`, or a named object with the same keys.
+ */
+export function unpackPositional<T extends string>(
+  body: unknown,
+  names: readonly T[],
+): Partial<Record<T, unknown>> {
+  if (names.length === 0) {
+    return {};
+  }
+  // Single-arg routes: ApiProvider sends the value directly as the body
+  // (no wrapping), so `body` IS the arg — be it a string, array, or
+  // object. Wrap it under the single name. Legacy callers that send
+  // `{name: value}` are detected via the `name in body` check.
+  if (names.length === 1) {
+    const first = names[0] as T;
+    if (
+      typeof body === "object"
+      && body !== null
+      && !Array.isArray(body)
+      && first in body
+    ) {
+      return body as Partial<Record<T, unknown>>;
+    }
+    if (body === undefined || body === null) {
+      return {};
+    }
+    const out: Partial<Record<T, unknown>> = {};
+    out[first] = body;
+    return out;
+  }
+  // Multi-arg routes: ApiProvider sends a positional JSON array. Legacy
+  // callers send a named object. Differentiate by shape.
+  if (Array.isArray(body)) {
+    const out: Partial<Record<T, unknown>> = {};
+    names.forEach((name, i) => {
+      out[name] = body[i];
+    });
+    return out;
+  }
+  if (typeof body === "object" && body !== null) {
+    return body as Partial<Record<T, unknown>>;
+  }
+  return {};
+}
+
+function errorDetails(err: unknown): string {
+  if (err instanceof Error) {
+    const parts = [`${err.name}: ${err.message}`];
+    if (err.stack) {
+      parts.push(err.stack);
+    }
+    const cause = (err as { cause?: unknown }).cause;
+    if (cause !== undefined) {
+      parts.push(`cause: ${errorDetails(cause)}`);
+    }
+    return parts.join("\n");
+  }
+  try {
+    return JSON.stringify(err);
+  } catch {
+    return String(err);
+  }
+}
+
 export function asyncHandler<ReqBody = unknown, ReqQuery = Record<string, unknown>>(
   handler: AsyncHandler<ReqBody, ReqQuery>,
 ): RequestHandler<Record<string, string>, unknown, ReqBody, ReqQuery> {
@@ -54,10 +123,9 @@ export function asyncHandler<ReqBody = unknown, ReqQuery = Record<string, unknow
     try {
       await handler(req, res, next);
     } catch (err) {
-      const msg = errorMessage(err);
-      logger.error(`${req.method} ${req.originalUrl} failed: ${msg}`);
+      logger.error(`${req.method} ${req.originalUrl} failed: ${errorDetails(err)}`);
       if (!res.headersSent) {
-        res.status(500).json({ error: msg });
+        res.status(500).json({ error: errorMessage(err) });
       } else {
         res.end();
       }
@@ -79,6 +147,7 @@ export async function streamNdjson(
       res.write(`${JSON.stringify(event)}\n`);
     }
   } catch (err) {
+    logger.error(`stream aborted: ${errorDetails(err)}`);
     res.write(`${JSON.stringify({ type: "error", message: errorMessage(err) })}\n`);
   } finally {
     res.end();
