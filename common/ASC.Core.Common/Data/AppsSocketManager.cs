@@ -28,6 +28,7 @@ using System.Threading.Channels;
 
 namespace ASC.Core.Common.Data;
 
+[Scope]
 public class AppsSocketManager(
     ITariffService tariffService,
     TenantManager tenantManager,
