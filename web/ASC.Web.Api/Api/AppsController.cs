@@ -37,6 +37,7 @@ namespace ASC.Web.Api.Controllers;
 [ControllerName("apps")]
 public class AppsController(
     AppSettingsService appSettingsService,
+    AppsSocketManager appsSocketManager,
     PermissionContext permissionContext,
     TenantManager tenantManager) : ControllerBase
 {
@@ -120,6 +121,8 @@ public class AppsController(
 
         var tenantId = tenantManager.GetCurrentTenantId();
         var app = await appSettingsService.SetEnabledAsync(tenantId, inDto.Id, inDto.Body.Enabled);
+
+        await appsSocketManager.ChangeAppEnabledAsync(app.Id, app.Enabled);
 
         return MapToDto(app);
     }
