@@ -50,6 +50,7 @@ public class WebPlugin
     public string Settings { get; set; }
     public Dictionary<string,string> NameLocale { get; set; }
     public Dictionary<string,string> DescriptionLocale { get; set; }
+    public string Runtime { get; set; }
 
     public WebPlugin Clone()
     {
