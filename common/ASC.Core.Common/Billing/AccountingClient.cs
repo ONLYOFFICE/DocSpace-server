@@ -465,7 +465,7 @@ public class OperationFilter
     /// <summary>
     /// The service name.
     /// </summary>
-    public string ServiceName { get; set; }
+    public string ServiceName { get; init; }
     /// <summary>
     /// The start date of the period to filter operations from (inclusive).
     /// </summary>
