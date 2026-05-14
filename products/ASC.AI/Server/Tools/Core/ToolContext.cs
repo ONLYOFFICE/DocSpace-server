@@ -29,4 +29,5 @@ namespace ASC.AI.Tools.Core;
 public class ToolContext
 {
     public int AgentId { get; init; }
+    public int FormId { get; init; }
 }
