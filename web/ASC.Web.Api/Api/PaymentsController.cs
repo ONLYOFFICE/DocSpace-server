@@ -817,31 +817,6 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Returns the service quota from the accounting service.
-    /// </remarks>
-    /// <summary>
-    /// Get the service quota
-    /// </summary>
-    /// <path>api/2.0/portal/payment/customer/servicequota</path>
-    [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The service quota", typeof(Balance))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
-    [HttpGet("customer/servicequota")]
-    [Obsolete("Use api/2.0/portal/payment/customer/aibalance instead")]
-    public async Task<Balance> GetCustomerServiceQuota(CustomerServiceQuotaRequestDto inDto)
-    {
-        var walletService = await CheckWalletServiceName(inDto.ServiceName);
-
-        // For now, only ai-tools available for purchasing!
-        if (walletService != TenantWalletService.AITools)
-        {
-            throw new ItemNotFoundException("Service could not be found");
-        }
-
-        return await GetCustomerAiBalance(inDto);
-    }
-
-    /// <remarks>
     /// Returns the AI quota balance of a customer from the accounting service.
     /// </remarks>
     /// <summary>
@@ -1253,38 +1228,6 @@ public class PaymentController(
         }
 
         return settings;
-    }
-
-    /// <summary>
-    /// Purchases a wallet service with the specified quantity.
-    /// </summary>
-    /// <remarks>
-    /// This method processes a payment for a wallet service using the configured payment method.
-    /// Requires the tariff service to be configured and a valid payment method to be set for the customer.
-    /// Rate limiting is applied according to the payments API policy.
-    /// </remarks>
-    /// <path>api/2.0/portal/payment/buywalletservice</path>
-    [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The service payment information", typeof(ServicePayment))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
-    [SwaggerResponse(404, "Customer or service could not be found")]
-    [HttpPost("buywalletservice")]
-    [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
-    [Obsolete("Use api/2.0/portal/payment/creditaibalance instead")]
-    public async Task<ServicePayment> BuyWalletService(BuyWalletServiceRequestDto inDto)
-    {
-        var walletService = await CheckWalletServiceName(inDto.ServiceName);
-
-        // For now, only ai-tools available for purchasing!
-        if (walletService != TenantWalletService.AITools)
-        {
-            throw new ItemNotFoundException("Service could not be found");
-        }
-
-        return await CreditAiBalance(new CreditAiBalanceRequestDto
-        {
-            Amount = inDto.Quantity
-        });
     }
 
     /// <summary>
