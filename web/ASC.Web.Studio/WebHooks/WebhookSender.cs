@@ -223,11 +223,6 @@ public class WebhookSender(
     private static async Task DisableWebhook(UrlValidationResult validationResult, DbWebhooksLog entry, DbWorker dbWorker,
         MessageService messageService)
     {
-        if (validationResult.IsValid)
-        {
-            return;
-        }
-
         if (validationResult.Blacklisted)
         {
             await dbWorker.RemoveWebhookConfigAsync(entry.ConfigId);

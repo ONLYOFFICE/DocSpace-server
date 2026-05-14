@@ -90,7 +90,7 @@ public class UrlValidator(
         "fe80::/10"
     ];
 
-    private string[] Blacklist => field ??= configuration.GetSection("webhooks:blacklist").Get<string[]>() ?? _defaultBlacklist;
+    private readonly string[] _blacklist = configuration.GetSection("webhooks:blacklist").Get<string[]>() ?? _defaultBlacklist;
 
     public async Task<UrlValidationResult> ValidateAsync(string url, UrlValidationOptions options = null)
     {
@@ -168,10 +168,10 @@ public class UrlValidator(
     {
         blockedAddress = null;
 
-        var allRestrictions = Blacklist;
+        var allRestrictions = _blacklist;
         if (customBlacklist is { Length: > 0 })
         {
-            allRestrictions = [.. Blacklist, .. customBlacklist];
+            allRestrictions = [.. _blacklist, .. customBlacklist];
         }
 
         foreach (var address in addresses)
