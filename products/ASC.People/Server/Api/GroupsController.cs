@@ -151,7 +151,10 @@ public class GroupController(
         ArgumentException.ThrowIfNullOrWhiteSpace(inDto.GroupName);
 
         var userIds = inDto.Members?.ToHashSet() ?? [];
-        userIds.Add(inDto.GroupManager);
+        if (inDto.GroupManager != Guid.Empty)
+        {
+            userIds.Add(inDto.GroupManager);
+        }
 
         foreach (var userId in userIds)
         {
@@ -163,7 +166,10 @@ public class GroupController(
 
         var group = await userManager.SaveGroupInfoAsync(new GroupInfo { Name = inDto.GroupName });
 
-        await TransferUserToDepartmentAsync(inDto.GroupManager, group, true);
+        if (inDto.GroupManager != Guid.Empty)
+        {
+            await TransferUserToDepartmentAsync(inDto.GroupManager, group, true);
+        }
 
         if (inDto.Members != null)
         {
@@ -386,7 +392,7 @@ public class GroupController(
 
         var group = await GetGroupInfoAsync(inDto.Id);
 
-        foreach (var userId in inDto.Members.Members)
+        foreach (var userId in inDto.Members?.Members ?? [])
         {
             await RemoveUserFromDepartmentAsync(userId, group);
         }
