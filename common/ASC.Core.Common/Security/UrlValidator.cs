@@ -70,7 +70,7 @@ public class UrlValidationOptions
 /// <param name="ResolvedAddresses">IP addresses resolved during validation. Populated on success so callers can pin TCP connections to the already-checked IPs, preventing DNS rebinding.</param>
 public record UrlValidationResult(bool IsValid, string ErrorMessage = null, bool Blacklisted = false, Uri ParsedUri = null, IPAddress[] ResolvedAddresses = null);
 
-[Singleton]
+[Singleton(typeof(IUrlValidator))]
 public class UrlValidator(
     IConfiguration configuration,
     ILogger<UrlValidator> logger) : IUrlValidator
