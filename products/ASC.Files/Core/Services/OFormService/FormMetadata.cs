@@ -50,5 +50,6 @@ public class FormMetadata
     /// <summary>
     /// The list of possible values for the form field.
     /// </summary>
+    /// <example>[]</example>
     public List<string>? PossibleValues { get; set; }
 }

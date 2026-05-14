@@ -1331,7 +1331,6 @@ public class EntryManager(IDaoFactory daoFactory,
 
         var fileDao = daoFactory.GetFileDao<T>();
         var file = await fileDao.GetFileAsync(fileId);
-        var fileForceSave = file.Forcesave;
 
         if (file == null)
         {
@@ -1490,7 +1489,7 @@ public class EntryManager(IDaoFactory daoFactory,
                 }
             }
 
-            if (file.IsForm && file.IsCompletedForm && fileForceSave != ForcesaveType.None)
+            if (file.IsForm && file.IsCompletedForm && file.Forcesave != ForcesaveType.None)
             {
                 await fileDao.UpdateCategoryAsync(file.Id, file.Version, (int)FilterType.PdfForm);
                 return file;

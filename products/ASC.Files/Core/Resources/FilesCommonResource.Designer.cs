@@ -484,6 +484,24 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///  Looks up a localized string similar to The database table will be created after the first form submission. There is no data yet to generate its structure..
+        /// </summary>
+        public static string ErrorMessage_ExternalDbNotIndexed {
+            get {
+                return ResourceManager.GetString("ErrorMessage_ExternalDbNotIndexed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to synchronize form data to external database..
+        /// </summary>
+        public static string ErrorMessage_ExternalDbSyncFailed {
+            get {
+                return ResourceManager.GetString("ErrorMessage_ExternalDbSyncFailed", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to The required file was not found.
         /// </summary>
         public static string ErrorMessage_FileNotFound {

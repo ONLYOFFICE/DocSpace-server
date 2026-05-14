@@ -5354,6 +5354,9 @@
                   },
                   "UpdateXlsx": {
                     "type": "boolean"
+                  },
+                  "AnalyzeResponses": {
+                    "type": "boolean"
                   }
                 },
                 "additionalProperties": false,
@@ -5971,6 +5974,13 @@
                 "type": "boolean",
                 "description": "Specifies whether to send form data to external database.",
                 "nullable": true
+              },
+              "originalFormId": {
+                "type": "integer",
+                "description": "The original form ID that corresponds to this FormFillingFolderDone folder.",
+                "format": "int32",
+                "nullable": true,
+                "example": 42
               }
             }
           }

@@ -88,9 +88,17 @@ public class FormFillingReportCreator(
         var rowData = BuildRowData(parsed.Data, normalizedMeta, fileId, culture);
 
         await externalDatabaseClient.CreateTableAndUpsertAsync(tableName, columnDefinitions, rowData, keyColumn: "form_id");
+
+        var fileDao = daoFactory.GetFileDao<int>();
+        var properties = await fileDao.GetProperties(originalFormId);
+        if (properties?.FormFilling != null && properties.FormFilling.ExternalDbTableName != tableName)
+        {
+            properties.FormFilling.ExternalDbTableName = tableName;
+            await fileDao.SaveProperties(originalFormId, properties);
+        }
     }
 
-    public async Task ExportMissingFromOpenSearchAsync(int originalFormId, int originalFormVersion, int roomId)
+    public async Task<bool> ExportMissingFromOpenSearchAsync(int originalFormId, int originalFormVersion, int roomId)
     {
         var tableName = GetTableName(originalFormId, originalFormVersion);
 
@@ -102,9 +110,14 @@ public class FormFillingReportCreator(
              .Where(s => s.OriginalFormId, originalFormId)
              .Where(s => s.OriginalFormVersion, originalFormVersion));
 
-        if (!osCountSuccess || osCount <= dbCount)
+        if (!osCountSuccess)
         {
-            return;
+            return false;
+        }
+
+        if (osCount <= dbCount)
+        {
+            return true;
         }
 
         var existingIds = await externalDatabaseClient.GetExistingFormIdsAsync(tableName);
@@ -115,9 +128,14 @@ public class FormFillingReportCreator(
              .Where(s => s.OriginalFormVersion, originalFormVersion)
              .Limit(0, BaseIndexer<DbFormsItemDataSearch>.QueryLimit));
 
-        if (!success || allSubmissions.Count == 0)
+        if (!success)
         {
-            return;
+            return false;
+        }
+
+        if (allSubmissions.Count == 0)
+        {
+            return true;
         }
 
         var missing = allSubmissions
@@ -126,7 +144,7 @@ public class FormFillingReportCreator(
 
         if (missing.Count == 0)
         {
-            return;
+            return true;
         }
 
         factoryIndexerFormMetadata.Refresh();
@@ -149,13 +167,14 @@ public class FormFillingReportCreator(
 
             if (normalizedMeta.Count == 0)
             {
-                return;
+                return false;
             }
         }
 
         var columnDefinitions = BuildColumnDefinitions(normalizedMeta).ToList();
 
         var culture = tenantManager.GetCurrentTenant().GetCulture();
+        var hadFailure = false;
 
         foreach (var item in missing)
         {
@@ -182,8 +201,11 @@ public class FormFillingReportCreator(
             catch (Exception ex)
             {
                 logger.ErrorGapSyncUpsertFailed(ex, item.Id, tableName);
+                hadFailure = true;
             }
         }
+
+        return !hadFailure;
     }
 
     public async Task<IEnumerable<FormsItemData>> GetFormsFields(int folderId)
@@ -500,6 +522,7 @@ public class FormFillingReportCreator(
     private static IEnumerable<FormMetadata> NormalizeMetadata(IEnumerable<FormMetadata> metaData)
     {
         return metaData
+            .Where(m => m.Type != "picture" && m.Type != "signature")
             .GroupBy(m => m.Type == "radio"
                 ? $"radio::{NormalizeColumnName(m.Key)}"
                 : NormalizeColumnName(m.Key))

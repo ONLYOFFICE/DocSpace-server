@@ -802,6 +802,9 @@
               }
             }
           },
+          "400": {
+            "description": "Invalid request parameters"
+          },
           "403": {
             "description": "No permissions to perform this action"
           },
@@ -868,8 +871,14 @@
               }
             }
           },
+          "400": {
+            "description": "Invalid request parameters"
+          },
           "403": {
             "description": "No permissions to perform this action"
+          },
+          "404": {
+            "description": "Customer could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -934,8 +943,17 @@
               }
             }
           },
+          "400": {
+            "description": "Invalid request parameters"
+          },
+          "402": {
+            "description": "Tariff is not paid"
+          },
           "403": {
             "description": "No permissions to perform this action"
+          },
+          "404": {
+            "description": "Customer could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -1000,8 +1018,14 @@
               }
             }
           },
+          "400": {
+            "description": "Invalid request parameters"
+          },
           "403": {
             "description": "No permissions to perform this action"
+          },
+          "404": {
+            "description": "Customer could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -1285,6 +1309,9 @@
               }
             }
           },
+          "403": {
+            "description": "No permissions to perform this action"
+          },
           "401": {
             "description": "Unauthorized"
           }
@@ -1338,6 +1365,9 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "No permissions to perform this action"
           },
           "401": {
             "description": "Unauthorized"
@@ -1404,6 +1434,12 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "No permissions to perform this action"
+          },
+          "404": {
+            "description": "Service could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -1531,6 +1567,9 @@
           },
           "400": {
             "description": "Incorrect email or message text is empty"
+          },
+          "403": {
+            "description": "No permissions to perform this action"
           },
           "429": {
             "description": "Request limit is exceeded"
@@ -1734,8 +1773,14 @@
               }
             }
           },
+          "400": {
+            "description": "Invalid request parameters"
+          },
           "403": {
             "description": "No permissions to perform this action"
+          },
+          "404": {
+            "description": "Customer could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -1881,9 +1926,6 @@
           },
           "403": {
             "description": "No permissions to perform this action"
-          },
-          "404": {
-            "description": "Service could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -2122,7 +2164,7 @@
         },
         "responses": {
           "200": {
-            "description": "Ok",
+            "description": "Operation execution status",
             "content": {
               "application/json": {
                 "schema": {
@@ -2135,7 +2177,7 @@
             "description": "No permissions to perform this action"
           },
           "404": {
-            "description": "Service could not be found"
+            "description": "Customer or service could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -2180,7 +2222,7 @@
         "operationId": "getCustomerOperationsReport",
         "responses": {
           "200": {
-            "description": "Ok",
+            "description": "Operation execution status",
             "content": {
               "application/json": {
                 "schema": {
@@ -2188,6 +2230,12 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "No permissions to perform this action"
+          },
+          "404": {
+            "description": "Customer could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -2233,6 +2281,12 @@
         "responses": {
           "200": {
             "description": "Ok"
+          },
+          "403": {
+            "description": "No permissions to perform this action"
+          },
+          "404": {
+            "description": "Customer could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -2354,6 +2408,9 @@
           },
           "403": {
             "description": "No permissions to perform this action"
+          },
+          "404": {
+            "description": "Customer could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -2478,6 +2535,9 @@
           "403": {
             "description": "No permissions to perform this action"
           },
+          "404": {
+            "description": "Customer could not be found"
+          },
           "401": {
             "description": "Unauthorized"
           }
@@ -2545,7 +2605,7 @@
             "description": "No permissions to perform this action"
           },
           "404": {
-            "description": "Service could not be found"
+            "description": "Customer or service could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -2724,6 +2784,9 @@
           },
           "403": {
             "description": "No permissions to perform this action"
+          },
+          "404": {
+            "description": "Customer could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -3378,6 +3441,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "The user could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -12907,56 +12973,15 @@
           "Settings / Webhooks"
         ],
         "summary": "Get webhook triggers",
-        "description": "Returns a list of triggers for a webhook.",
+        "description": "Returns a list of triggers for a webhook with their availability for the current user.",
         "operationId": "getWebhookTriggers",
         "responses": {
           "200": {
-            "description": "List of triggers for a webhook",
+            "description": "List of triggers with availability for the current user",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "response": {
-                      "type": "object",
-                      "additionalProperties": {
-                        "type": "integer",
-                        "format": "int64"
-                      }
-                    },
-                    "count": {
-                      "type": "integer",
-                      "description": "The total number of items in the response",
-                      "format": "int32"
-                    },
-                    "links": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "href": {
-                            "type": "string",
-                            "description": "URL of the link"
-                          },
-                          "action": {
-                            "type": "string",
-                            "description": "Action associated with the link"
-                          }
-                        }
-                      },
-                      "description": "List of links related to the response"
-                    },
-                    "status": {
-                      "type": "integer",
-                      "description": "HTTP status code of the response",
-                      "format": "int32"
-                    },
-                    "statusCode": {
-                      "type": "integer",
-                      "description": "HTTP status code of the response (duplicate of status)",
-                      "format": "int32"
-                    }
-                  }
+                  "$ref": "#/components/schemas/WebhookTriggerArrayWrapper"
                 }
               }
             }
@@ -20526,12 +20551,17 @@
         }
       },
       "PaymentUrlRequestDto": {
+        "required": [
+          "backUrl"
+        ],
         "type": "object",
         "properties": {
           "backUrl": {
+            "maxLength": 255,
+            "minLength": 0,
             "type": "string",
             "description": "The URL where the user will be redirected after payment processing.",
-            "nullable": true,
+            "format": "uri",
             "example": "https://example.com"
           },
           "quantity": {
@@ -25913,10 +25943,12 @@
               "FormStopped",
               "AgentCreated",
               "AgentUpdated",
-              "AgentDeleted"
+              "AgentDeleted",
+              "FileDownloaded",
+              "FolderDownloaded"
             ],
             "type": "string",
-            "description": "[All - *, UserCreated - user.created, UserInvited - user.invited, UserUpdated - user.updated, UserDeleted - user.deleted, GroupCreated - group.created, GroupUpdated - group.updated, GroupDeleted - group.deleted, FileCreated - file.created, FileUploaded - file.uploaded, FileUpdated - file.updated, FileTrashed - file.trashed, FileDeleted - file.deleted, FileRestored - file.restored, FileCopied - file.copied, FileMoved - file.moved, FolderCreated - folder.created, FolderUpdated - folder.updated, FolderTrashed - folder.trashed, FolderDeleted - folder.deleted, FolderRestored - folder.restored, FolderCopied - folder.copied, FolderMoved - folder.moved, RoomCreated - room.created, RoomUpdated - room.updated, RoomArchived - room.archived, RoomDeleted - room.deleted, RoomRestored - room.restored, RoomCopied - room.copied, FormSubmit - form.submit, FormFilledOut - form.filled.out, FormStopped - form.stopped, AgentCreated - agent.created, AgentUpdated - agent.updated, AgentDeleted - agent.deleted]",
+            "description": "[All - *, UserCreated - user.created, UserInvited - user.invited, UserUpdated - user.updated, UserDeleted - user.deleted, GroupCreated - group.created, GroupUpdated - group.updated, GroupDeleted - group.deleted, FileCreated - file.created, FileUploaded - file.uploaded, FileUpdated - file.updated, FileTrashed - file.trashed, FileDeleted - file.deleted, FileRestored - file.restored, FileCopied - file.copied, FileMoved - file.moved, FolderCreated - folder.created, FolderUpdated - folder.updated, FolderTrashed - folder.trashed, FolderDeleted - folder.deleted, FolderRestored - folder.restored, FolderCopied - folder.copied, FolderMoved - folder.moved, RoomCreated - room.created, RoomUpdated - room.updated, RoomArchived - room.archived, RoomDeleted - room.deleted, RoomRestored - room.restored, RoomCopied - room.copied, FormSubmit - form.submit, FormFilledOut - form.filled.out, FormStopped - form.stopped, AgentCreated - agent.created, AgentUpdated - agent.updated, AgentDeleted - agent.deleted, FileDownloaded - file.downloaded, FolderDownloaded - folder.downloaded]",
             "example": "All"
           },
           {
@@ -25992,12 +26024,81 @@
               "FormStopped",
               "AgentCreated",
               "AgentUpdated",
-              "AgentDeleted"
+              "AgentDeleted",
+              "FileDownloaded",
+              "FolderDownloaded"
             ]
           }
         ],
         "description": "The webhook trigger type.",
         "x-enum-type": "integer"
+      },
+      "WebhookTriggerArrayWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WebhookTriggerDto"
+            }
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
+      "WebhookTriggerDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The trigger name.",
+            "nullable": true,
+            "example": "file.created"
+          },
+          "id": {
+            "type": "integer",
+            "description": "The trigger bit value.",
+            "format": "int64",
+            "example": 128
+          },
+          "available": {
+            "type": "boolean",
+            "description": "Specifies whether this trigger is available for the current user's role.",
+            "example": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "The webhook trigger with its availability for the current user."
       },
       "WebhooksConfigDto": {
         "required": [
