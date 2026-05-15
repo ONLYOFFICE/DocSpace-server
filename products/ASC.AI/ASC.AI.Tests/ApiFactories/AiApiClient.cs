@@ -53,6 +53,15 @@ public class AiApiClient(HttpClient client)
         return await client.PutAsync(path, content, cancellationToken);
     }
 
+    public async Task<HttpResponseMessage> PatchAsync(string path, object? body, CancellationToken cancellationToken)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Patch, path)
+        {
+            Content = JsonContent.Create(body, options: JsonOptions)
+        };
+        return await client.SendAsync(request, cancellationToken);
+    }
+
     public async Task<HttpResponseMessage> GetAsync(string path, CancellationToken cancellationToken)
     {
         return await client.GetAsync(path, cancellationToken);

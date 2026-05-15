@@ -32,6 +32,7 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     protected const string ProfilesPath = "/api/2.0/ai/integration/profiles";
     protected const string ProfilesBatchPath = "/api/2.0/ai/integration/profiles/batch";
     protected const string AssignmentsPath = "/api/2.0/ai/integration/assignments";
+    protected const string ThreadsPath = "/api/2.0/ai/integration/threads";
 
     private static readonly JsonSerializerOptions _readJsonOptions = new()
     {
@@ -116,6 +117,31 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
 
         using var response = await Ai.GetAsync(path, TestContext.Current.CancellationToken);
         return await Ai.ReadAsync<Dictionary<string, Guid>>(response, TestContext.Current.CancellationToken);
+    }
+
+    protected async Task<ThreadDto> CreateThreadAsync(string? title = null, Guid? profileId = null, string? entityId = null)
+    {
+        using var response = await Ai.PostAsync(
+            ThreadsPath,
+            new { title = title ?? $"thread-{Guid.NewGuid():N}", profileId, entityId },
+            TestContext.Current.CancellationToken);
+        return await Ai.ReadAsync<ThreadDto>(response, TestContext.Current.CancellationToken);
+    }
+
+    protected async Task<ThreadDto> ReadThreadAsync(Guid id)
+    {
+        using var response = await Ai.GetAsync($"{ThreadsPath}/{id}", TestContext.Current.CancellationToken);
+        return await Ai.ReadAsync<ThreadDto>(response, TestContext.Current.CancellationToken);
+    }
+
+    protected async Task<List<ThreadDto>> ReadAllThreadsAsync(string? entityId = null)
+    {
+        var path = entityId is null
+            ? ThreadsPath
+            : $"{ThreadsPath}?entityId={entityId}";
+
+        using var response = await Ai.GetAsync(path, TestContext.Current.CancellationToken);
+        return await Ai.ReadAsync<List<ThreadDto>>(response, TestContext.Current.CancellationToken);
     }
 
     protected async Task<int> CreateRoomAsync(string? title = null)
