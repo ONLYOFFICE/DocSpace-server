@@ -42,5 +42,8 @@ public enum AdditionalFilterOption
     MyFilesAndFolders,
 
     [Description("Forms with filling role")]
-    FormsWithFillingRole
+    FormsWithFillingRole,
+
+    [Description("FFR started forms")]
+    FfrStartedForms
 }

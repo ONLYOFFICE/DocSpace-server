@@ -2266,7 +2266,16 @@ internal class FolderDao(
                                         foldersContainingMyFiles.Contains(x.tree.FolderId))
                             .Select(x => x.folder.Id);
 
-                        q = q.Where(f => parentFolderIds.Contains(f.Id) || f.FolderType == FolderType.DEFAULT);
+                        q = q.Where(f => parentFolderIds.Contains(f.Id) ||
+                            (f.FolderType == FolderType.DEFAULT &&
+                             filesDbContext.Files.Any(file =>
+                                 file.ParentId == f.Id &&
+                                 file.TenantId == tenantId &&
+                                 pdfCategories.Contains(file.Category) &&
+                                 filesDbContext.FilesProperties.Any(p =>
+                                     p.EntryId == file.Id.ToString() &&
+                                     p.TenantId == tenantId &&
+                                     p.StartFilling == true))));
                         break;
 
                     default:
