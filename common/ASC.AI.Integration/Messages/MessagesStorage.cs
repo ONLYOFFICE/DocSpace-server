@@ -44,7 +44,7 @@ public class MessagesStorage(IDbContextFactory<AiIntegrationContext> dbContextFa
             Timestamp = DateTime.UtcNow
         };
 
-        await context.Messages.AddAsync(entity);
+        context.Messages.Add(entity);
         await context.SaveChangesAsync();
 
         return ToDomainEntity(entity);

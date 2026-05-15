@@ -39,7 +39,7 @@ public class ProfileStorage(IDbContextFactory<AiIntegrationContext> dbContextFac
         var encryptedKey = await EncryptKeyAsync(profile.Key);
         var entity = ToDbEntity(Guid.CreateVersion7(), tenantId, profile, encryptedKey, DateTime.UtcNow);
 
-        await context.Profiles.AddAsync(entity);
+        context.Profiles.Add(entity);
         await context.SaveChangesAsync();
 
         return ToDomainEntity(entity, profile.Key);
@@ -52,8 +52,7 @@ public class ProfileStorage(IDbContextFactory<AiIntegrationContext> dbContextFac
             return [];
         }
 
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-        var strategy = dbContext.Database.CreateExecutionStrategy();
+        await using var context = await dbContextFactory.CreateDbContextAsync();
 
         var now = DateTime.UtcNow;
         var entities = new List<DbProfile>(profiles.Count);
@@ -62,16 +61,8 @@ public class ProfileStorage(IDbContextFactory<AiIntegrationContext> dbContextFac
             entities.Add(ToDbEntity(Guid.CreateVersion7(), tenantId, p, await EncryptKeyAsync(p.Key), now));
         }
 
-        await strategy.ExecuteAsync(async () =>
-        {
-            await using var context = await dbContextFactory.CreateDbContextAsync();
-            await using var transaction = await context.Database.BeginTransactionAsync();
-
-            await context.Profiles.AddRangeAsync(entities);
-            await context.SaveChangesAsync();
-
-            await transaction.CommitAsync();
-        });
+        context.Profiles.AddRange(entities);
+        await context.SaveChangesAsync();
 
         var result = new List<Profile>(entities.Count);
         result.AddRange(entities.Select((t, i) => ToDomainEntity(t, profiles[i].Key)));

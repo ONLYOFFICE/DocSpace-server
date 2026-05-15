@@ -46,7 +46,7 @@ public class ThreadsStorage(IDbContextFactory<AiIntegrationContext> dbContextFac
             CreatedAt = now
         };
 
-        await context.Threads.AddAsync(entity);
+        context.Threads.Add(entity);
         await context.SaveChangesAsync();
 
         return ToDomainEntity(entity);

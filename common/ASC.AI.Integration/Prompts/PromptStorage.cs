@@ -44,16 +44,10 @@ public class PromptStorage(IDbContextFactory<AiIntegrationContext> dbContextFact
             UpdatedAt = now
         };
 
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-        var strategy = dbContext.Database.CreateExecutionStrategy();
+        await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        await strategy.ExecuteAsync(async () =>
-        {
-            await using var context = await dbContextFactory.CreateDbContextAsync();
-
-            context.Prompts.Add(entity);
-            await context.SaveChangesAsync();
-        });
+        context.Prompts.Add(entity);
+        await context.SaveChangesAsync();
 
         return ToDomainEntity(entity);
     }
@@ -78,16 +72,10 @@ public class PromptStorage(IDbContextFactory<AiIntegrationContext> dbContextFact
             UpdatedAt = now
         }).ToArray();
 
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-        var strategy = dbContext.Database.CreateExecutionStrategy();
+        await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        await strategy.ExecuteAsync(async () =>
-        {
-            await using var context = await dbContextFactory.CreateDbContextAsync();
-
-            context.Prompts.AddRange(entities);
-            await context.SaveChangesAsync();
-        });
+        context.Prompts.AddRange(entities);
+        await context.SaveChangesAsync();
 
         return entities.Select(ToDomainEntity);
     }
@@ -120,28 +108,18 @@ public class PromptStorage(IDbContextFactory<AiIntegrationContext> dbContextFact
 
     public async Task<bool> UpdateAsync(int tenantId, Guid createdBy, Guid id, string name, string text, Guid? folderId)
     {
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-        var strategy = dbContext.Database.CreateExecutionStrategy();
+        await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        return await strategy.ExecuteAsync(async () =>
-        {
-            await using var context = await dbContextFactory.CreateDbContextAsync();
-            var affected = await context.UpdatePromptAsync(tenantId, createdBy, id, name, text, folderId, DateTime.UtcNow);
-            return affected > 0;
-        });
+        var affected = await context.UpdatePromptAsync(tenantId, createdBy, id, name, text, folderId, DateTime.UtcNow);
+        return affected > 0;
     }
 
     public async Task<bool> DeleteAsync(int tenantId, Guid createdBy, Guid id)
     {
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-        var strategy = dbContext.Database.CreateExecutionStrategy();
+        await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        return await strategy.ExecuteAsync(async () =>
-        {
-            await using var context = await dbContextFactory.CreateDbContextAsync();
-            var affected = await context.DeletePromptAsync(tenantId, createdBy, id);
-            return affected > 0;
-        });
+        var affected = await context.DeletePromptAsync(tenantId, createdBy, id);
+        return affected > 0;
     }
 
     private static Prompt ToDomainEntity(DbPrompt entity)
