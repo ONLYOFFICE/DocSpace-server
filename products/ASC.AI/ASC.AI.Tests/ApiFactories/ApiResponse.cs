@@ -24,10 +24,34 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Tools.Core;
+namespace ASC.AI.Tests.ApiFactories;
 
-public class ToolContext
+public class ApiResponse<T>
 {
-    public int AgentId { get; init; }
-    public int FormId { get; init; }
+    [JsonPropertyName("response")]
+    public T? Response { get; init; }
+
+    [JsonPropertyName("status")]
+    public int Status { get; init; }
+
+    [JsonPropertyName("statusCode")]
+    public int StatusCode { get; init; }
+}
+
+public class WizardSettingsResponse
+{
+    public string? WizardToken { get; init; }
+    public PasswordHasherSettings? PasswordHash { get; init; }
+}
+
+public class PasswordHasherSettings
+{
+    public int Size { get; init; }
+    public int Iterations { get; init; }
+    public string Salt { get; init; } = "";
+}
+
+public class AuthTokenResponse
+{
+    public string Token { get; init; } = "";
 }

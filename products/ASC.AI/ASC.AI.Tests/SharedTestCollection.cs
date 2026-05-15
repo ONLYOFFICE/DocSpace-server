@@ -24,10 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Tools.Core;
+namespace ASC.AI.Tests;
 
-public class ToolContext
-{
-    public int AgentId { get; init; }
-    public int FormId { get; init; }
-}
+[CollectionDefinition("Test Collection")]
+public class SharedTestCollection :
+    ICollectionFixture<AspireAppFixture>;

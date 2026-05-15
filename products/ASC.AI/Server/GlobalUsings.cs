@@ -64,6 +64,7 @@ global using ASC.Core.Common.Settings;
 global using ASC.Core.Tenants;
 global using ASC.Core.Users;
 global using ASC.Files.Core;
+global using ASC.Files.Core.ExternalDatabase;
 global using ASC.Files.Core.Helpers;
 global using ASC.Files.Core.Text;
 global using ASC.Files.Core.ApiModels.RequestDto;

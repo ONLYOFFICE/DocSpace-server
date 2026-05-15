@@ -24,10 +24,47 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Tools.Core;
+extern alias ASCAi;
 
-public class ToolContext
-{
-    public int AgentId { get; init; }
-    public int FormId { get; init; }
-}
+global using System.Data.Common;
+global using System.Net;
+global using System.Net.Http.Headers;
+global using System.Net.Http.Json;
+global using System.Text;
+global using System.Text.Encodings.Web;
+global using System.Text.Json;
+global using System.Text.Json.Serialization;
+global using System.Web;
+
+global using ASC.AI.Tests.ApiFactories;
+global using ASC.AI.Tests.Data;
+global using ASC.Core.Common.EF;
+
+global using Aspire.Hosting;
+global using Aspire.Hosting.Testing;
+
+global using Bogus;
+
+global using FluentAssertions;
+
+global using Microsoft.AspNetCore.Cryptography.KeyDerivation;
+global using Microsoft.Extensions.Configuration;
+
+global using MySql.Data.MySqlClient;
+
+global using Npgsql;
+
+global using Respawn;
+global using Respawn.Graph;
+
+global using Xunit;
+
+global using ASC.AI.Integration.Profiles;
+global using ASC.Core.Users;
+
+global using CreateProfileRequestDto = ASCAi::ASC.AI.Models.RequestDto.Integration.CreateProfileRequestDto;
+global using CreateProfilesRequestDto = ASCAi::ASC.AI.Models.RequestDto.Integration.CreateProfilesRequestDto;
+global using ProfileDto = ASCAi::ASC.AI.Models.ResponseDto.Integration.ProfileDto;
+global using UpdateProfileBody = ASCAi::ASC.AI.Models.RequestDto.Integration.UpdateProfileBody;
+
+global using Task = System.Threading.Tasks.Task;
