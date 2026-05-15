@@ -147,6 +147,7 @@ public class MigrationContext : DbContext
     public DbSet<DbUserChatSettings> UserChatSettings { get; set; }
 
     public DbSet<InvitationLink> InvitationLinks { get; set; }
+    public DbSet<DbAppSettings> AppSettings { get; set; }
 
     public DbSet<DbProfile> Profiles { get; set; }
     public DbSet<DbThread> Threads { get; set; }
@@ -247,6 +248,7 @@ public class MigrationContext : DbContext
             .AddDbDefaultAiProviders()
             .AddDbAiModelSettings()
             .AddDbChatMessageAttachment()
+            .AddAppSettings()
             .AddDbProfiles()
             .AddDbThreads()
             .AddDbMessages()

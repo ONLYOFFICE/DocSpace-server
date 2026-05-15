@@ -123,7 +123,7 @@ public class CustomTagsService(
 
     public async Task<Folder<T>> AddRoomTagsAsync<T>(T folderId, List<string> names)
     {
-        var folder = await daoFactory.GetFolderDao<T>().GetFolderAsync(folderId);
+        var folder = await daoFactory.GetFolderDao<T>().GetFolderAsync(folderId) ?? throw new ItemNotFoundException();
 
         var isDocSpaceAdmin = await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID);
 
@@ -164,7 +164,7 @@ public class CustomTagsService(
 
     public async Task<Folder<T>> DeleteRoomTagsAsync<T>(T folderId, List<string> names)
     {
-        var folder = await daoFactory.GetFolderDao<T>().GetFolderAsync(folderId);
+        var folder = await daoFactory.GetFolderDao<T>().GetFolderAsync(folderId) ?? throw new ItemNotFoundException();
 
         var isDocSpaceAdmin = await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID);
 
