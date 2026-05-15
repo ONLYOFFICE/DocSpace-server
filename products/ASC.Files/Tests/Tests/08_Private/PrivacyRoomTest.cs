@@ -64,6 +64,24 @@ public class PrivacyRoomTest(AspireAppFixture fixture) : BaseTest(fixture)
     }
 
     [Fact]
+    public async Task CreateRoom_Private_WithUserKeys_ThrowsException()
+    {
+        await _filesClient.Authenticate(Initializer.Owner);
+
+        var docspaceAdmin = await Initializer.InviteContact(EmployeeType.DocSpaceAdmin);
+
+        await _filesClient.Authenticate(docspaceAdmin);
+
+        var createRequest = new CreateRoomRequestDto(
+            title: "private room",
+            roomType: RoomType.CustomRoom,
+            @private: true
+        );
+
+        await Assert.ThrowsAsync<ApiException>(async () => await _roomsApi.CreateRoomAsync(createRequest, TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
     public async Task SetFileAccess()
     {
         await _filesClient.Authenticate(Initializer.Owner);
@@ -144,9 +162,16 @@ public class PrivacyRoomTest(AspireAppFixture fixture) : BaseTest(fixture)
     }
 
     [Fact]
-    public async Task InvitePrivateRoom()
+    public async Task Invite_PrivateRoom_WithUserKeys_ThrowsException()
     {
         await _filesClient.Authenticate(Initializer.Owner);
+
+        var docspaceAdmin = await Initializer.InviteContact(EmployeeType.DocSpaceAdmin);
+        await _filesClient.Authenticate(docspaceAdmin);
+
+        var (userPublicKeyOwner, userPrivateKeyEncOwner, _) = ExportPublicAndPrivateKeys();
+
+        await _privacyRoomApi.SetKeysAsync(new EncryptionKeyRequestDto(Guid.Empty, userPublicKeyOwner, userPrivateKeyEncOwner), cancellationToken: TestContext.Current.CancellationToken);
 
         var createRequest = new CreateRoomRequestDto(
             title: "private room",
@@ -173,7 +198,7 @@ public class PrivacyRoomTest(AspireAppFixture fixture) : BaseTest(fixture)
 
         await _privacyRoomApi.SetKeysAsync(new EncryptionKeyRequestDto(Guid.Empty, userPublicKey, userPrivateKeyEnc), cancellationToken: TestContext.Current.CancellationToken);
 
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(docspaceAdmin);
 
         var security = await _roomsApi.SetRoomSecurityAsync(createdRoom.Id, new RoomInvitationRequest
         {
@@ -182,7 +207,6 @@ public class PrivacyRoomTest(AspireAppFixture fixture) : BaseTest(fixture)
                 new RoomInvitation { Id = roomAdmin1.Id, Access = FileShare.ContentCreator }
             ]
         }, TestContext.Current.CancellationToken);
-
 
         security.Response.Members.Should().Contain(r=> r.SharedToUser.Id == roomAdmin1.Id && r.Access == FileShare.ContentCreator);
     }
