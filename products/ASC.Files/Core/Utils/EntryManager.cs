@@ -1531,7 +1531,8 @@ public class EntryManager(IDaoFactory daoFactory,
         var properties = await fileDao.GetProperties(file.Id);
         if (properties?.FormFilling == null
             || properties.FormFilling.OriginalFormVersion == 0
-            || properties.FormFilling.OriginalFormVersion == file.Version)
+            || properties.FormFilling.OriginalFormVersion == file.Version
+            || !Equals(properties.FormFilling.OriginalFormId, file.Id))
         {
             return;
         }
