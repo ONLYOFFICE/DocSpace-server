@@ -1,25 +1,25 @@
 // (c) Copyright Ascensio System SIA 2009-2026
-// 
+//
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
+//
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
+//
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-// 
+//
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -77,68 +77,63 @@ public class PrivacyRoomControllerCommon(
     /// <remarks>
     /// Retrieves a specific user encryption key based on the provided filter conditions.
     /// </remarks>
-    /// <param name="id">The optional identifier of the encryption key to filter by.</param>
-    /// <param name="type">The optional type of the encryption key to filter by.</param>
-    /// <param name="version">The optional version of the encryption key to filter by.</param>
-    /// <param name="publicKey">The optional public key to filter by.</param>
-    /// <param name="privateKeyEnc">The optional encrypted private key to filter by.</param>
     /// <returns>The encryption key data transfer object that matches the provided filter conditions, or null if no match is found.</returns>
     [HttpGet("keys/filter")]
-    public async Task<EncryptionKeyDto> GetUserKeysByFilter(Guid? id, EncryptionKeyType? type, string version, string publicKey, string privateKeyEnc)
+    public async Task<EncryptionKeyDto> GetUserKeysByFilter([FromQuery] GetUserKeysByFilterRequestDto inDto)
     {
         await Demand();
 
         return (await encryptionKeyPairHelper.GetKeyPairAsync()).FirstOrDefault(r =>
         {
             var result = false;
-            
-            if (id.HasValue)
+
+            if (inDto.Id.HasValue)
             {
-                if (r.Id != id)
+                if (r.Id != inDto.Id)
                 {
                     return false;
                 }
 
                 result = true;
             }
-            
-            // if (type.HasValue)
-            // {                
-            //     if (r.Type != type.Value)
+
+            // if (inDto.Type.HasValue)
+            // {
+            //     if (r.Type != inDto.Type.Value)
             //     {
             //         return false;
             //     }
-            //     
+            //
             //     result = true;
             // }
             //
-            // if (!string.IsNullOrEmpty(version))
+            // if (!string.IsNullOrEmpty(inDto.Version))
             // {
-            //     if (!r.Version.Equals(version, StringComparison.OrdinalIgnoreCase))
+            //     if (!r.Version.Equals(inDto.Version, StringComparison.OrdinalIgnoreCase))
             //     {
             //         return false;
             //     }
-            //     
+            //
             //     result = true;
             // }
-            
-            if (!string.IsNullOrEmpty(publicKey))
+
+            if (!string.IsNullOrEmpty(inDto.PublicKey))
             {
-                if (!r.PublicKey.Equals(publicKey, StringComparison.OrdinalIgnoreCase))
+                if (!r.PublicKey.Equals(inDto.PublicKey, StringComparison.OrdinalIgnoreCase))
                 {
                     return false;
                 }
-                
+
                 result = true;
             }
-            
-            if (!string.IsNullOrEmpty(privateKeyEnc))
+
+            if (!string.IsNullOrEmpty(inDto.PrivateKeyEnc))
             {
-                if (!r.PrivateKeyEnc.Equals(privateKeyEnc, StringComparison.OrdinalIgnoreCase))
+                if (!r.PrivateKeyEnc.Equals(inDto.PrivateKeyEnc, StringComparison.OrdinalIgnoreCase))
                 {
                     return false;
                 }
-                
+
                 result = true;
             }
 
@@ -183,14 +178,13 @@ public class PrivacyRoomControllerCommon(
     /// <remarks>
     /// Deletes an encryption key and removes it from the system based on the provided key identifier.
     /// </remarks>
-    /// <param name="id">The unique identifier of the encryption key to be deleted.</param>
     /// <returns>The task result contains a collection of remaining encryption key data transfer objects after the deletion.</returns>
     [HttpDelete("keys/{id:guid}")]
-    public async Task<IEnumerable<EncryptionKeyDto>> DeleteKeys(Guid id)
+    public async Task<IEnumerable<EncryptionKeyDto>> DeleteKeys(DeleteEncryptionKeyRequestDto inDto)
     {
         await Demand();
 
-        return await encryptionKeyPairHelper.DeleteAsync(id);
+        return await encryptionKeyPairHelper.DeleteAsync(inDto.Id);
     }
 
     /// <summary>
@@ -235,7 +229,7 @@ public class PrivacyRoomControllerCommon(
 
         return inDto.Enable;
     }
-    
+
     private async Task Demand()
     {
         await permissionContext.DemandPermissionsAsync(new UserSecurityProvider(authContext.CurrentAccount.ID), Constants.Action_EditUser);
@@ -245,7 +239,7 @@ public class PrivacyRoomControllerCommon(
             throw new SecurityException();
         }
     }
-    
+
     private async Task<IEnumerable<EncryptionKeyDto>> CreateKeysAsync(IEnumerable<EncryptionKeyRequestDto> inDto, bool replace)
     {
         await Demand();

@@ -109,7 +109,7 @@ public class FilesControllerThirdparty(
     UserManager userManager,
     AuthContext authContext,
     GlobalStore globalStore,
-    BaseCommonLinkUtility baseCommonLinkUtility, 
+    BaseCommonLinkUtility baseCommonLinkUtility,
     EncryptionKeyPairDtoHelper encryptionKeyPairDtoHelper)
     : FilesController<string>(
         filesControllerHelper,
@@ -130,7 +130,7 @@ public class FilesControllerThirdparty(
         userManager,
         authContext,
         globalStore,
-        baseCommonLinkUtility, 
+        baseCommonLinkUtility,
         encryptionKeyPairDtoHelper);
 
 public abstract class FilesController<T>(
@@ -152,7 +152,7 @@ public abstract class FilesController<T>(
     UserManager userManager,
     AuthContext authContext,
     GlobalStore globalStore,
-    BaseCommonLinkUtility baseCommonLinkUtility, 
+    BaseCommonLinkUtility baseCommonLinkUtility,
     EncryptionKeyPairDtoHelper encryptionKeyPairDtoHelper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
@@ -762,10 +762,19 @@ public abstract class FilesController<T>(
     {
         return fileStorageService.GetSubmissionsByFormId(inDto.FileId);
     }
-    
+
+    /// <summary>
+    /// Get file encryption information
+    /// </summary>
+    /// <remarks>
+    /// Returns the encryption information for a file with the specified identifier, including user encryption keys and file-specific encryption keys.
+    /// </remarks>
     /// <path>api/2.0/files/file/{fileId}/access</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200)]
+    [SwaggerResponse(200, "File encryption information", typeof(FileEncryptionInfoDto))]
+    [SwaggerResponse(400, "Invalid operation")]
+    [SwaggerResponse(403, "You don't have enough permission to read the file")]
+    [SwaggerResponse(404, "File not found")]
     [HttpGet("{fileId}/access")]
     public async Task<FileEncryptionInfoDto> GetEncryptionInfoAsync(T fileId)
     {
@@ -780,7 +789,7 @@ public abstract class FilesController<T>(
         {
             throw new InvalidOperationException( FilesCommonResource.ErrorMessage_SecurityException);
         }
-        
+
         var userKeys = await encryptionKeyPairDtoHelper.GetKeyPairAsync();
         var fileKeys = await fileDao.GetFileKeys(fileId, authContext.CurrentAccount.ID);
 
@@ -790,10 +799,18 @@ public abstract class FilesController<T>(
             FileKeys = fileKeys
         };
     }
-    
+
+    /// <summary>
+    /// Set file encryption information
+    /// </summary>
+    /// <remarks>
+    /// Sets or updates the encryption keys for a file with the specified identifier. This allows updating the file's encryption configuration.
+    /// </remarks>
     /// <path>api/2.0/files/file/{fileId}/access</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200)]
+    [SwaggerResponse(200, "Encryption information successfully updated")]
+    [SwaggerResponse(403, "You don't have enough permission to edit the file")]
+    [SwaggerResponse(404, "File not found")]
     [HttpPut("{fileId}/access")]
     public async Task SetEncryptionInfoAsync(AccessRequestDto<T> inDto)
     {

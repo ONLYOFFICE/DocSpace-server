@@ -75,7 +75,6 @@ public class FileStorageService //: IFileStorageService
     OFormRequestManager oFormRequestManager,
     ThumbnailSettings thumbnailSettings,
     FileShareParamsHelper fileShareParamsHelper,
-    EncryptionLoginProvider encryptionLoginProvider,
     CountRoomChecker countRoomChecker,
     CountAIAgentChecker countAIAgentChecker,
     InvitationService invitationService,
@@ -795,8 +794,6 @@ public class FileStorageService //: IFileStorageService
     {
         ArgumentNullException.ThrowIfNull(folderFactory);
 
-        List<AceWrapper> aces = null;
-
         var folder = await folderFactory();
         if (folder == null)
         {
@@ -927,7 +924,7 @@ public class FileStorageService //: IFileStorageService
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_Create);
         }
-        
+
         // if (isRoom && privacy && await encryptionLoginProvider.GetKeysAsync(authContext.CurrentAccount.ID) == null)
         // {
         //     var userInfo = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
@@ -4786,7 +4783,7 @@ public class FileStorageService //: IFileStorageService
 
         return [.. fileKeyPair];
     }
-    
+
 
     public async Task SetEncryptionInfoAsync<T>(T fileId, IEnumerable<AccessRequestKeyDto> keys)
     {
@@ -4807,7 +4804,7 @@ public class FileStorageService //: IFileStorageService
             await fileDao.SetFileKey(fileId, k.UserId, k.PublicKeyId, k.PrivateKeyEnc);
         }
     }
-    
+
     public async IAsyncEnumerable<FileEntry> ChangeOwnerAsync<T>(IEnumerable<T> foldersId, IEnumerable<T> filesId, Guid userId, FileShare newShare = FileShare.RoomManager)
     {
         var userInfo = await userManager.GetUsersAsync(userId);
@@ -5849,7 +5846,7 @@ public class FileStorageService //: IFileStorageService
 
         return dict.Values.ToList();
     }
-    
+
 
     private async Task DetermineParentRoomType<T>(FileEntry<T> entry)
     {
