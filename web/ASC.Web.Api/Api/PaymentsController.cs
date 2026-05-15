@@ -1247,6 +1247,7 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/creditaibalance</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The AI credit operation result", typeof(ServicePayment))]
+    [SwaggerResponse(400, "Unsupported currency or insufficient balance")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(404, "Customer could not be found")]
     [HttpPost("creditaibalance")]
