@@ -2771,6 +2771,8 @@
         "tags": [
           "Files / Files"
         ],
+        "summary": "Get file encryption information",
+        "description": "Returns the encryption information for a file with the specified identifier, including user encryption keys and file-specific encryption keys.",
         "operationId": "getEncryptionInfo",
         "parameters": [
           {
@@ -2785,7 +2787,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "File encryption information",
             "content": {
               "application/json": {
                 "schema": {
@@ -2793,6 +2795,15 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Invalid operation"
+          },
+          "403": {
+            "description": "You don't have enough permission to read the file"
+          },
+          "404": {
+            "description": "File not found"
           },
           "401": {
             "description": "Unauthorized"
@@ -2832,6 +2843,8 @@
         "tags": [
           "Files / Files"
         ],
+        "summary": "Set file encryption information",
+        "description": "Sets or updates the encryption keys for a file with the specified identifier. This allows updating the file's encryption configuration.",
         "operationId": "setEncryptionInfo",
         "parameters": [
           {
@@ -2858,7 +2871,13 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Encryption information successfully updated"
+          },
+          "403": {
+            "description": "You don't have enough permission to edit the file"
+          },
+          "404": {
+            "description": "File not found"
           },
           "401": {
             "description": "Unauthorized"
@@ -11700,7 +11719,8 @@
             "description": "The optional identifier of the encryption key to filter by.",
             "schema": {
               "type": "string",
-              "format": "uuid"
+              "format": "uuid",
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           },
           {
@@ -11709,6 +11729,16 @@
             "description": "The optional type of the encryption key to filter by.",
             "schema": {
               "$ref": "#/components/schemas/EncryptionKeyType"
+            },
+            "example": "Crypt"
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "description": "The optional version of the encryption key to filter by.",
+            "schema": {
+              "type": "string",
+              "example": "1"
             }
           },
           {
@@ -11716,7 +11746,8 @@
             "in": "query",
             "description": "The optional public key to filter by.",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "example": "some public key"
             }
           },
           {
@@ -11724,7 +11755,8 @@
             "in": "query",
             "description": "The optional encrypted private key to filter by.",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "example": "some encrypted private key"
             }
           }
         ],
@@ -11856,7 +11888,8 @@
             "required": true,
             "schema": {
               "type": "string",
-              "format": "uuid"
+              "format": "uuid",
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -19438,6 +19471,10 @@
       "EncryptionKeyRequestDto": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
           "publicKey": {
             "type": "string",
             "nullable": true
