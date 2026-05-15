@@ -2589,6 +2589,9 @@
           "403": {
             "description": "You do not have enough permissions to view the form roles"
           },
+          "404": {
+            "description": "The required file was not found"
+          },
           "401": {
             "description": "Unauthorized"
           }
@@ -11945,7 +11948,7 @@
         ]
       }
     },
-    "/api/2.0/files/rooms/{id}/externalDbSync": {
+    "/api/2.0/files/rooms/{id}/externaldbsync": {
       "post": {
         "tags": [
           "Rooms"
@@ -16669,12 +16672,14 @@
           "sendFormToExternalDB": {
             "type": "boolean",
             "description": "Specifies whether to send form data to external database.",
-            "nullable": true
+            "nullable": true,
+            "example": false
           },
           "saveFormAsXLSX": {
             "type": "boolean",
             "description": "Specifies whether to save form data as XLSX file.",
-            "nullable": true
+            "nullable": true,
+            "example": false
           }
         },
         "additionalProperties": false,
@@ -16706,7 +16711,7 @@
         "properties": {
           "title": {
             "maxLength": 165,
-            "minLength": 0,
+            "minLength": 1,
             "type": "string",
             "description": "The file title for text or HTML file.",
             "nullable": true,
@@ -18136,7 +18141,8 @@
               "$ref": "#/components/schemas/RecentConfig"
             },
             "description": "The recent configuration of the editor.",
-            "nullable": true
+            "nullable": true,
+            "example": [ ]
           },
           "templates": {
             "type": "array",
@@ -18144,7 +18150,8 @@
               "$ref": "#/components/schemas/TemplatesConfig"
             },
             "description": "The templates of the editor configuration.",
-            "nullable": true
+            "nullable": true,
+            "example": [ ]
           },
           "user": {
             "$ref": "#/components/schemas/UserConfig"
@@ -18720,7 +18727,15 @@
               "$ref": "#/components/schemas/ExternalDbSyncFormResultDto"
             },
             "description": "The synchronization results for all original forms in the room.",
-            "nullable": true
+            "nullable": true,
+            "example": [
+              {
+                "id": 42,
+                "title": "Application.pdf",
+                "success": true,
+                "error": null
+              }
+            ]
           }
         },
         "additionalProperties": false,
@@ -19178,6 +19193,12 @@
               },
               "vectorizationStatus": {
                 "$ref": "#/components/schemas/VectorizationStatus"
+              },
+              "externalDbTableName": {
+                "type": "string",
+                "description": "The name of the table in the external database that corresponds to this form.",
+                "nullable": true,
+                "example": "form_123_v1"
               },
               "dimensions": {
                 "$ref": "#/components/schemas/Size"
@@ -22197,12 +22218,14 @@
               "saveFormAsXLSX": {
                 "type": "boolean",
                 "description": "Specifies whether to save form data as XLSX file.",
-                "nullable": true
+                "nullable": true,
+                "example": false
               },
               "sendFormToExternalDB": {
                 "type": "boolean",
                 "description": "Specifies whether to send form data to external database.",
-                "nullable": true
+                "nullable": true,
+                "example": false
               },
               "originalFormId": {
                 "type": "integer",
@@ -22355,12 +22378,14 @@
               "saveFormAsXLSX": {
                 "type": "boolean",
                 "description": "Specifies whether to save form data as XLSX file.",
-                "nullable": true
+                "nullable": true,
+                "example": false
               },
               "sendFormToExternalDB": {
                 "type": "boolean",
                 "description": "Specifies whether to send form data to external database.",
-                "nullable": true
+                "nullable": true,
+                "example": false
               },
               "originalFormId": {
                 "type": "integer",
@@ -22801,7 +22826,8 @@
               "type": "string"
             },
             "description": "The list of possible values for the form field.",
-            "nullable": true
+            "nullable": true,
+            "example": [ ]
           }
         },
         "additionalProperties": false
@@ -22994,7 +23020,8 @@
               "$ref": "#/components/schemas/FormMetadata"
             },
             "description": "The form field metadata.",
-            "nullable": true
+            "nullable": true,
+            "example": [ ]
           },
           "submissions": {
             "type": "array",
@@ -23002,7 +23029,8 @@
               "$ref": "#/components/schemas/FormResultsDto"
             },
             "description": "All submissions.",
-            "nullable": true
+            "nullable": true,
+            "example": [ ]
           }
         },
         "additionalProperties": false
@@ -23542,7 +23570,8 @@
               "$ref": "#/components/schemas/AceShortWrapper"
             },
             "description": "The sharing settings of the file.",
-            "nullable": true
+            "nullable": true,
+            "example": [ ]
           },
           "type": {
             "$ref": "#/components/schemas/EditorType"
@@ -27895,12 +27924,14 @@
           "sendFormToExternalDB": {
             "type": "boolean",
             "description": "Specifies whether to send form data to external database.",
-            "nullable": true
+            "nullable": true,
+            "example": false
           },
           "saveFormAsXLSX": {
             "type": "boolean",
             "description": "Specifies whether to save form data as XLSX file.",
-            "nullable": true
+            "nullable": true,
+            "example": false
           }
         },
         "additionalProperties": false,
