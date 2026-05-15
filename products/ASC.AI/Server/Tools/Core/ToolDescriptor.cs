@@ -26,4 +26,6 @@
 
 namespace ASC.AI.Tools.Core;
 
-public record ToolDescriptor(string Name, JsonElement Parameters, string Prompt);
+public record ToolDescriptor(string Name, JsonElement Parameters);
+
+public record ToolListResponse(string Prompt, IReadOnlyList<ToolDescriptor> Tools);

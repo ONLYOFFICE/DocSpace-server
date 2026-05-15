@@ -35,7 +35,7 @@ namespace ASC.AI.Api.Integration;
 public class ToolsController(ToolService toolService) : ControllerBase
 {
     [HttpPost("integration/tools/list")]
-    public async Task<IReadOnlyList<ToolDescriptor>> ListAsync(ToolContext inDto)
+    public async Task<ToolListResponse> ListAsync(ToolContext inDto)
     {
         return await toolService.GetToolsAsync(inDto);
     }

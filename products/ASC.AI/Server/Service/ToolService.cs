@@ -29,19 +29,27 @@ namespace ASC.AI.Service;
 [Scope]
 public class ToolService(IServiceProvider serviceProvider)
 {
-    public async Task<IReadOnlyList<ToolDescriptor>> GetToolsAsync(ToolContext context)
+    public async Task<ToolListResponse> GetToolsAsync(ToolContext context)
     {
+        var prompt = new StringBuilder();
         var descriptors = new List<ToolDescriptor>();
 
         foreach (var factory in serviceProvider.GetServices<IAiToolFactory>())
         {
-            await foreach (var tool in factory.BuildAsync(context))
+            var bundle = await factory.BuildAsync(context);
+            if (!string.IsNullOrEmpty(bundle.Prompt))
             {
-                descriptors.Add(new ToolDescriptor(tool.Name, tool.Function.JsonSchema, tool.Prompt));
+                if (prompt.Length > 0)
+                {
+                    prompt.Append("\n\n");
+                }
+                prompt.Append(bundle.Prompt);
             }
+
+            descriptors.AddRange(bundle.Tools.Select(tool => new ToolDescriptor(tool.Name, tool.Function.JsonSchema)));
         }
 
-        return descriptors;
+        return new ToolListResponse(prompt.ToString(), descriptors);
     }
 
     public async Task<IReadOnlyList<ToolCallResult>> CallAsync(
@@ -51,24 +59,19 @@ public class ToolService(IServiceProvider serviceProvider)
         var factories = serviceProvider.GetServices<IAiToolFactory>().ToArray();
         var targetNames = calls.Select(c => c.Name).ToHashSet(StringComparer.Ordinal);
         var functions = new Dictionary<string, AIFunction>(StringComparer.Ordinal);
+        var visited = new HashSet<IAiToolFactory>();
 
-        foreach (var name in targetNames)
+        foreach (var factory in targetNames.Select(
+                     name => factories.FirstOrDefault(
+                         f => f.Owns(name))).OfType<IAiToolFactory>().Where(visited.Add))
         {
-            var factory = factories.FirstOrDefault(f => f.Owns(name));
-            if (factory is null)
+            var bundle = await factory.BuildAsync(context);
+            foreach (var tool in bundle.Tools)
             {
-                continue;
-            }
-
-            await foreach (var tool in factory.BuildAsync(context))
-            {
-                if (tool.Name != name)
+                if (targetNames.Contains(tool.Name))
                 {
-                    continue;
+                    functions[tool.Name] = tool.Function;
                 }
-
-                functions[name] = tool.Function;
-                break;
             }
         }
 

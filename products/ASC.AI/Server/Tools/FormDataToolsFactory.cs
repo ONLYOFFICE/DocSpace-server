@@ -38,7 +38,7 @@ public class FormDataToolsFactory(
     private const string AggregateName = "aggregated_form_data";
     private const string SelfJoinName = "self_join_form_data";
 
-    private static readonly HashSet<string> ToolNames = new(StringComparer.Ordinal)
+    private static readonly HashSet<string> _toolNames = new(StringComparer.Ordinal)
     {
         QueryName,
         AggregateName,
@@ -190,47 +190,44 @@ public class FormDataToolsFactory(
 
     public bool Owns(string toolName)
     {
-        return ToolNames.Contains(toolName);
+        return _toolNames.Contains(toolName);
     }
 
-    public async IAsyncEnumerable<AiTool> BuildAsync(ToolContext context)
+    public async Task<ToolBundle> BuildAsync(ToolContext context)
     {
-        if (context.FormId <= 0)
+        if (context.FormId <= 0 || !externalDatabaseClient.IsEnabled())
         {
-            yield break;
-        }
-
-        if (!externalDatabaseClient.IsEnabled())
-        {
-            yield break;
+            return ToolBundle.Empty;
         }
 
         var init = await TryInitAsync(context.FormId);
         if (init is null)
         {
-            yield break;
+            return ToolBundle.Empty;
         }
 
         var (tableName, rowCount, columns, allowedColumns, pkColumn) = init;
         var schemaText = FormatSchema(tableName, rowCount, columns);
 
-        yield return new AiTool(
-            AggregateName,
-            FormDataRules + "\n\n" + schemaText,
-            MakeAggregateFunction(tableName, allowedColumns, columns));
+        var prompt =
+            $"""
+             {FormDataRules}
 
-        yield return new AiTool(
-            QueryName,
-            string.Empty,
-            MakeQueryFunction(tableName, allowedColumns, columns, rowCount));
+             {schemaText}
+             """;
+
+        var tools = new List<AiTool>
+        {
+            new(AggregateName, MakeAggregateFunction(tableName, allowedColumns, columns)),
+            new(QueryName, MakeQueryFunction(tableName, allowedColumns, columns, rowCount))
+        };
 
         if (columns.Count >= 2)
         {
-            yield return new AiTool(
-                SelfJoinName,
-                string.Empty,
-                MakeSelfJoinFunction(tableName, allowedColumns, columns, pkColumn));
+            tools.Add(new AiTool(SelfJoinName, MakeSelfJoinFunction(tableName, allowedColumns, columns, pkColumn)));
         }
+
+        return new ToolBundle(prompt, tools);
     }
 
     private async Task<InitData?> TryInitAsync(int fileId)
@@ -280,13 +277,22 @@ public class FormDataToolsFactory(
         IReadOnlyCollection<string> allowedColumns,
         IReadOnlyList<DbColumnDefinition> columns)
     {
-        var description = BuildAggregateDescription(tableName, columns);
+        var description =
+            $"""
+             Compute statistics and distributions over form submissions directly in the database.
+             Analyses ALL rows server-side regardless of table size — there is no row limit on the input.
+             Use this instead of '{QueryName}' for ANY counting, grouping, percentage, ratio, average, sum, min, max, top N, ranking, or trend question.
+             Supports single-column, two-column, or three-column GROUP BY; HAVING; NOT IN exclusion subqueries; date-part extraction (YEAR/MONTH/WEEK/DAYOFYEAR/QUARTER/DAYOFWEEK); and aggregation over date differences.
+             Combine multiple values of the same date part with IN — two separate '=' filters for the same column are ANDed and always return zero rows.
+             SUM/AVG require Integer columns; use COUNT_DISTINCT for string columns. NULL awareness: COUNT(*) includes NULLs, COUNT(valueColumn) excludes them.
+             {FormatTableAndColumns(tableName, columns)}
+             """;
 
         return AIFunctionFactory.Create(Function, new AIFunctionFactoryOptions
         {
             Name = AggregateName,
             Description = description,
-            SerializerOptions = FlexibleJsonOptions
+            SerializerOptions = _flexibleJsonOptions
         });
 
         Task<string> Function(
@@ -307,7 +313,7 @@ public class FormDataToolsFactory(
             [Description("Exclude groupByColumn values that appear in rows matching these date-part conditions (generates NOT IN subquery). Example: excludeDatePartFilters=[\"col_date YEAR = 2025\"] returns only entities with no record in 2025.")] IEnumerable<string>? excludeDatePartFilters = null,
             [Description("When true, returns a single number — the count of distinct groups satisfying the query. Requires groupByColumn. Use when the question asks for a single count of qualifying groups rather than the list.")] bool countGroupsOnly = false)
         {
-            if (groupByColumn != null && ValidDateParts.Contains(groupByColumn))
+            if (groupByColumn != null && _validDateParts.Contains(groupByColumn))
             {
                 throw new ArgumentException(
                     $"'{groupByColumn}' is a date-part keyword, not a column name. " +
@@ -317,7 +323,7 @@ public class FormDataToolsFactory(
             if (groupByColumn != null && groupByColumn.Contains(' ') && !groupByColumn.Contains('('))
             {
                 var gParts = groupByColumn.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
-                if (gParts.Length == 2 && ValidDateParts.Contains(gParts[1].Trim()))
+                if (gParts.Length == 2 && _validDateParts.Contains(gParts[1].Trim()))
                 {
                     groupByDatePart ??= gParts[1].Trim().ToUpperInvariant();
                     groupByColumn = gParts[0].Trim();
@@ -365,13 +371,22 @@ public class FormDataToolsFactory(
         IReadOnlyList<DbColumnDefinition> columns,
         long rowCount)
     {
-        var description = BuildQueryDescription(tableName, rowCount, columns);
+        var description =
+            $"""
+             Retrieve specific rows from form submission data.
+             Use ONLY to display individual records — 'show me', 'list', 'find the rows', 'which records'.
+             PROHIBITED for any counting, summing, averaging, grouping, or statistics — use '{AggregateName}' for those.
+             Returns at most {ExternalDatabaseClient.MaxRowsPerRequest} rows per call (out of {rowCount:N0} total).
+             Always specify selectColumns (only the columns you need) and filters to narrow the result set.
+             NULL awareness: use IS NULL / IS NOT NULL filters to control inclusion of nulls.
+             {FormatTableAndColumns(tableName, columns)}
+             """;
 
         return AIFunctionFactory.Create(Function, new AIFunctionFactoryOptions
         {
             Name = QueryName,
             Description = description,
-            SerializerOptions = FlexibleJsonOptions
+            SerializerOptions = _flexibleJsonOptions
         });
 
         Task<string> Function(
@@ -407,13 +422,23 @@ public class FormDataToolsFactory(
         IReadOnlyList<DbColumnDefinition> columns,
         string pkColumn)
     {
-        var description = BuildSelfJoinDescription(tableName, columns);
+        var description =
+            $"""
+             Compare every record against every other record (self-join) to find related pairs: overlapping time periods, scheduling conflicts, concurrent events, or any "find pairs where ..." question.
+             Do NOT use '{QueryName}' to fetch rows for manual comparison — always use this tool instead.
+             Each joinCondition compares record A (left) vs record B (right) with plain column names — never add a_/b_ prefixes (those appear only in output).
+             Operators: =, !=, <, >, <=, >=. Overlap pattern (date-only, inclusive): ["col_start <= col_end", "col_end >= col_start"]. Strict pattern (datetime): ["col_start < col_end", "col_end > col_start"].
+             For same-entity overlaps add an equality condition on the entity column. For same-calendar-day add cross-row YEAR and DAYOFYEAR conditions.
+             Returns at most 500 pairs per call. Apply filters or datePartFilters to narrow the pair space on large tables.
+             NULL awareness: NULL values never match — pre-filter with IS NOT NULL.
+             {FormatTableAndColumns(tableName, columns)}
+             """;
 
         return AIFunctionFactory.Create(Function, new AIFunctionFactoryOptions
         {
             Name = SelfJoinName,
             Description = description,
-            SerializerOptions = FlexibleJsonOptions
+            SerializerOptions = _flexibleJsonOptions
         });
 
         Task<string> Function(
@@ -463,9 +488,9 @@ public class FormDataToolsFactory(
             var cond = rawCond.Trim();
             var parts = cond.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
-            if (parts.Length >= 3 && ValidDateParts.Contains(parts[1]))
+            if (parts.Length >= 3 && _validDateParts.Contains(parts[1]))
             {
-                if (parts.Length >= 5 && ValidDateParts.Contains(parts[4]))
+                if (parts.Length >= 5 && _validDateParts.Contains(parts[4]))
                 {
                     parsed.Add(new SelfJoinCondition(parts[0], parts[2].ToUpperInvariant(), parts[3], parts[1].ToUpperInvariant()));
                 }
@@ -476,7 +501,7 @@ public class FormDataToolsFactory(
             }
             else if (parts.Length == 3)
             {
-                var dp = ValidDateParts.FirstOrDefault(d =>
+                var dp = _validDateParts.FirstOrDefault(d =>
                     parts[0].EndsWith("_" + d, StringComparison.OrdinalIgnoreCase) &&
                     parts[2].EndsWith("_" + d, StringComparison.OrdinalIgnoreCase));
                 if (dp != null)
@@ -513,66 +538,27 @@ public class FormDataToolsFactory(
 
     private static string FormatSchema(string tableName, long rowCount, IEnumerable<DbColumnDefinition> columns)
     {
-        var sb = new StringBuilder();
-        sb.AppendLine($"## Form Submissions ({rowCount} total, stored in external database)");
-        sb.AppendLine($"Table: {tableName}");
-        sb.AppendLine("Schema:");
-        foreach (var col in columns)
+        var columnLines = columns.Select(col =>
         {
-            sb.Append($"- {col.Name} ({col.Type})");
-            if (col.EnumValues?.Count > 0)
-            {
-                sb.Append($": {string.Join(", ", col.EnumValues)}");
-            }
-            sb.AppendLine();
-        }
-        return sb.ToString();
+            var line = $"- {col.Name} ({col.Type})";
+            return col.EnumValues?.Count > 0
+                ? $"{line}: {string.Join(", ", col.EnumValues)}"
+                : line;
+        });
+
+        return $"""
+                <form_data_schema>
+                ## Form Submissions ({rowCount} total, stored in external database)
+                Table: {tableName}
+                Schema:
+                {string.Join("\n", columnLines)}
+                </form_data_schema>
+                """;
     }
 
-    private static string BuildAggregateDescription(string tableName, IEnumerable<DbColumnDefinition> columns)
+    private static string FormatTableAndColumns(string tableName, IEnumerable<DbColumnDefinition> columns)
     {
-        var sb = new StringBuilder();
-        sb.Append("Compute statistics and distributions over form submissions directly in the database. ");
-        sb.Append("Analyses ALL rows server-side regardless of table size — there is no row limit on the input. ");
-        sb.Append($"Use this instead of '{QueryName}' for ANY counting, grouping, percentage, ratio, average, sum, min, max, top N, ranking, or trend question. ");
-        sb.Append("Supports single-column, two-column, or three-column GROUP BY; HAVING; NOT IN exclusion subqueries; date-part extraction (YEAR/MONTH/WEEK/DAYOFYEAR/QUARTER/DAYOFWEEK); and aggregation over date differences. ");
-        sb.Append("Combine multiple values of the same date part with IN — two separate '=' filters for the same column are ANDed and always return zero rows. ");
-        sb.Append("SUM/AVG require Integer columns; use COUNT_DISTINCT for string columns. NULL awareness: COUNT(*) includes NULLs, COUNT(valueColumn) excludes them. ");
-        sb.Append($"Table: '{tableName}'. ");
-        sb.Append("Available columns: ");
-        sb.Append(string.Join(", ", columns.Select(FormatColumn)));
-        return sb.ToString();
-    }
-
-    private static string BuildQueryDescription(string tableName, long rowCount, IEnumerable<DbColumnDefinition> columns)
-    {
-        var sb = new StringBuilder();
-        sb.Append("Retrieve specific rows from form submission data. ");
-        sb.Append("Use ONLY to display individual records — 'show me', 'list', 'find the rows', 'which records'. ");
-        sb.Append($"PROHIBITED for any counting, summing, averaging, grouping, or statistics — use '{AggregateName}' for those. ");
-        sb.Append($"Returns at most {ExternalDatabaseClient.MaxRowsPerRequest} rows per call (out of {rowCount:N0} total). ");
-        sb.Append("Always specify selectColumns (only the columns you need) and filters to narrow the result set. ");
-        sb.Append("NULL awareness: use IS NULL / IS NOT NULL filters to control inclusion of nulls. ");
-        sb.Append($"Table: '{tableName}'. ");
-        sb.Append("Available columns: ");
-        sb.Append(string.Join(", ", columns.Select(FormatColumn)));
-        return sb.ToString();
-    }
-
-    private static string BuildSelfJoinDescription(string tableName, IEnumerable<DbColumnDefinition> columns)
-    {
-        var sb = new StringBuilder();
-        sb.Append("Compare every record against every other record (self-join) to find related pairs: overlapping time periods, scheduling conflicts, concurrent events, or any \"find pairs where ...\" question. ");
-        sb.Append($"Do NOT use '{QueryName}' to fetch rows for manual comparison — always use this tool instead. ");
-        sb.Append("Each joinCondition compares record A (left) vs record B (right) with plain column names — never add a_/b_ prefixes (those appear only in output). ");
-        sb.Append("Operators: =, !=, <, >, <=, >=. Overlap pattern (date-only, inclusive): [\"col_start <= col_end\", \"col_end >= col_start\"]. Strict pattern (datetime): [\"col_start < col_end\", \"col_end > col_start\"]. ");
-        sb.Append("For same-entity overlaps add an equality condition on the entity column. For same-calendar-day add cross-row YEAR and DAYOFYEAR conditions. ");
-        sb.Append("Returns at most 500 pairs per call. Apply filters or datePartFilters to narrow the pair space on large tables. ");
-        sb.Append("NULL awareness: NULL values never match — pre-filter with IS NOT NULL. ");
-        sb.Append($"Table: '{tableName}'. ");
-        sb.Append("Available columns: ");
-        sb.Append(string.Join(", ", columns.Select(FormatColumn)));
-        return sb.ToString();
+        return $"Table: '{tableName}'. Available columns: {string.Join(", ", columns.Select(FormatColumn))}";
     }
 
     private static string FormatColumn(DbColumnDefinition c)
@@ -586,10 +572,10 @@ public class FormDataToolsFactory(
         return desc;
     }
 
-    private static readonly HashSet<string> ValidDateParts =
+    private static readonly HashSet<string> _validDateParts =
         new(["YEAR", "MONTH", "WEEK", "DAYOFYEAR", "QUARTER", "DAYOFWEEK"], StringComparer.OrdinalIgnoreCase);
 
-    private static readonly JsonSerializerOptions FlexibleJsonOptions = new(JsonSerializerDefaults.Web)
+    private static readonly JsonSerializerOptions _flexibleJsonOptions = new(JsonSerializerDefaults.Web)
     {
         TypeInfoResolver = new System.Text.Json.Serialization.Metadata.DefaultJsonTypeInfoResolver(),
         Converters = { FlexibleStringArrayJsonConverter.Instance }
@@ -637,19 +623,19 @@ public class FormDataToolsFactory(
                 }
             }
 
-            if (parts.Length >= 4 && ValidDateParts.Contains(parts[1]))
+            if (parts.Length >= 4 && _validDateParts.Contains(parts[1]))
             {
                 datePart.Add(f);
                 continue;
             }
 
-            if (parts.Length >= 4 && parts[1] == "-")
+            if (parts is [_, "-", _, _, ..])
             {
                 autoDiff ??= $"{parts[0]} {string.Join(" ", parts[2..])}";
                 continue;
             }
 
-            if (parts.Length == 4 && !ValidDateParts.Contains(parts[1]) && int.TryParse(parts[3], out _))
+            if (parts.Length == 4 && !_validDateParts.Contains(parts[1]) && int.TryParse(parts[3], out _))
             {
                 autoDiff ??= $"{parts[0]} {parts[1]} {parts[2]} {parts[3]}";
                 continue;

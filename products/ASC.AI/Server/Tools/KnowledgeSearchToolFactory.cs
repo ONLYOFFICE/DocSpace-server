@@ -43,6 +43,7 @@ public class KnowledgeSearchToolFactory(
 
     private const string Prompt =
         """
+        <knowledge_search_tool_usage_rules>
         **CRITICAL: ALWAYS use knowledge base search for ANY user question or information request.**
         This is a mandatory requirement: before providing any substantive answer, you MUST perform a knowledge base search. No exceptions except for the minimal cases listed below.
         **MANDATORY knowledge base search for:**
@@ -96,6 +97,7 @@ public class KnowledgeSearchToolFactory(
         - If no results found: you may use general knowledge or web search
         - You can combine knowledge base results with web search for comprehensive answers
         Remember: **DEFAULT ACTION = SEARCH KNOWLEDGE BASE. Always search first, answer second.**
+        </knowledge_search_tool_usage_rules>
         """;
 
     public bool Owns(string toolName)
@@ -103,16 +105,11 @@ public class KnowledgeSearchToolFactory(
         return toolName == Name;
     }
 
-    public async IAsyncEnumerable<AiTool> BuildAsync(ToolContext context)
+    public async Task<ToolBundle> BuildAsync(ToolContext context)
     {
-        if (context.AgentId <= 0)
+        if (context.AgentId <= 0 || !await aiAccessibility.IsVectorizationEnabledAsync())
         {
-            yield break;
-        }
-
-        if (!await aiAccessibility.IsVectorizationEnabledAsync())
-        {
-            yield break;
+            return ToolBundle.Empty;
         }
 
         var folderDao = daoFactory.GetFolderDao<int>();
@@ -120,16 +117,16 @@ public class KnowledgeSearchToolFactory(
         var agent = await folderDao.GetFolderAsync(context.AgentId);
         if (agent is null || !await fileSecurity.CanUseChatAsync(agent))
         {
-            yield break;
+            return ToolBundle.Empty;
         }
 
         var knowledge = await folderDao.GetFoldersAsync(agent.Id, FolderType.Knowledge).FirstAsync();
         if (knowledge is null || knowledge.FilesCount == 0)
         {
-            yield break;
+            return ToolBundle.Empty;
         }
 
-        yield return new AiTool(Name, Prompt, MakeFunction(agent));
+        return new ToolBundle(Prompt, [new AiTool(Name, MakeFunction(agent))]);
     }
 
     private AIFunction MakeFunction(Folder<int> agent)

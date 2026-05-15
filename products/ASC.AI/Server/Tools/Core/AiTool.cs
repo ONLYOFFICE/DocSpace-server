@@ -24,8 +24,11 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Microsoft.Extensions.AI;
-
 namespace ASC.AI.Tools.Core;
 
-public record AiTool(string Name, string Prompt, AIFunction Function);
+public record AiTool(string Name, AIFunction Function);
+
+public record ToolBundle(string Prompt, IReadOnlyList<AiTool> Tools)
+{
+    public static readonly ToolBundle Empty = new(string.Empty, []);
+}
