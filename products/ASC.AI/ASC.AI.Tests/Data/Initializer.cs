@@ -80,6 +80,15 @@ public static class Initializer
             }
 
             await fixture.AiHttpClient.Authenticate(Owner);
+
+            await fixture.FilesHttpClient.Authenticate(Owner);
+            using (var rootFoldersResponse = await fixture.FilesApi.GetAsync(
+                "/api/2.0/files/@root",
+                TestContext.Current.CancellationToken))
+            {
+                rootFoldersResponse.EnsureSuccessStatusCode();
+            }
+
             await fixture.BackupTables();
 
             _initialized = true;

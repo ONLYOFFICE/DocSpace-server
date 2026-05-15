@@ -37,16 +37,18 @@ public class AspireAppFixture : IAsyncLifetime
     private Respawner _respawner = null!;
     private Provider _provider;
 
-    private readonly List<string> _tablesToBackup = ["core_user", "core_usersecurity"];
+    private readonly List<string> _tablesToBackup = ["files_folder", "files_folder_tree", "core_user", "core_usersecurity", "files_bunch_objects"];
     private readonly List<string> _tablesToIgnore = ["core_acl", "core_settings", "core_subscription", "core_subscriptionmethod", "core_usergroup", "login_events", "tenants_tenants", "tenants_quota", "webstudio_settings"];
 
     public HttpClient AiHttpClient { get; private set; } = null!;
     public HttpClient PeopleHttpClient { get; private set; } = null!;
     public HttpClient WebApiHttpClient { get; private set; } = null!;
+    public HttpClient FilesHttpClient { get; private set; } = null!;
 
     public AiApiClient AiApi { get; private set; } = null!;
     public AiApiClient PeopleApi { get; private set; } = null!;
     public AiApiClient WebApi { get; private set; } = null!;
+    public AiApiClient FilesApi { get; private set; } = null!;
 
     public async ValueTask InitializeAsync()
     {
@@ -70,13 +72,15 @@ public class AspireAppFixture : IAsyncLifetime
         const string onlyofficeAi = "onlyoffice-ai";
         const string onlyofficePeople = "onlyoffice-people";
         const string onlyofficeWebApi = "onlyoffice-web-api";
+        const string onlyofficeFiles = "onlyoffice-files";
 
         var resourceNotifications = _app.ResourceNotifications;
         var waitForAi = resourceNotifications.WaitForResourceHealthyAsync(onlyofficeAi);
         var waitForPeople = resourceNotifications.WaitForResourceHealthyAsync(onlyofficePeople);
         var waitForApi = resourceNotifications.WaitForResourceHealthyAsync(onlyofficeWebApi);
+        var waitForFiles = resourceNotifications.WaitForResourceHealthyAsync(onlyofficeFiles);
 
-        await Task.WhenAll(waitForAi, waitForPeople, waitForApi);
+        await Task.WhenAll(waitForAi, waitForPeople, waitForApi, waitForFiles);
 
         var dbConnectionString = await _app.GetConnectionStringAsync("docspace");
 
@@ -88,10 +92,12 @@ public class AspireAppFixture : IAsyncLifetime
         AiHttpClient = CreateHttpClientNoCookies(onlyofficeAi);
         PeopleHttpClient = CreateHttpClientNoCookies(onlyofficePeople);
         WebApiHttpClient = CreateHttpClientNoCookies(onlyofficeWebApi);
+        FilesHttpClient = CreateHttpClientNoCookies(onlyofficeFiles);
 
         AiApi = new AiApiClient(AiHttpClient);
         PeopleApi = new AiApiClient(PeopleHttpClient);
         WebApi = new AiApiClient(WebApiHttpClient);
+        FilesApi = new AiApiClient(FilesHttpClient);
 
         var tablesToIgnore = _tablesToIgnore.Select(t => new Table(t)).ToList();
         tablesToIgnore.AddRange(_tablesToBackup.Select(r => new Table(MakeCopyTableName(r))));

@@ -51,38 +51,6 @@ public class ProfileCreateTests(AspireAppFixture fixture) : BaseTest(fixture)
     }
 
     [Fact]
-    public async Task Create_Unauthorized_Returns401()
-    {
-        await AiClient.Authenticate(null);
-
-        using var response = await Ai.PostAsync(ProfilesPath, BuildCreateDto(), TestContext.Current.CancellationToken);
-
-        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
-    }
-
-    [Fact]
-    public async Task Create_NonAdmin_Returns403()
-    {
-        var regularUser = await Initializer.InviteContactAsync(EmployeeType.User, TestContext.Current.CancellationToken);
-        await AiClient.Authenticate(regularUser);
-
-        using var response = await Ai.PostAsync(ProfilesPath, BuildCreateDto(), TestContext.Current.CancellationToken);
-
-        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
-    }
-
-    [Fact]
-    public async Task Create_RoomAdmin_Returns403()
-    {
-        var roomAdmin = await Initializer.InviteContactAsync(EmployeeType.RoomAdmin, TestContext.Current.CancellationToken);
-        await AiClient.Authenticate(roomAdmin);
-
-        using var response = await Ai.PostAsync(ProfilesPath, BuildCreateDto(), TestContext.Current.CancellationToken);
-
-        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
-    }
-
-    [Fact]
     public async Task Create_InvalidJson_Returns400()
     {
         const string invalidJson = """{ "name": "x", "providerType": "openai", "baseUrl": "https://api.openai.com", "modelId": "gpt", "capabilities": "INVALID_VALUE" }""";

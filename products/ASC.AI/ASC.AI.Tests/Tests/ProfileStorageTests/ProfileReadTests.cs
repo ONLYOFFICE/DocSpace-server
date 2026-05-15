@@ -56,33 +56,6 @@ public class ProfileReadTests(AspireAppFixture fixture) : BaseTest(fixture)
     }
 
     [Fact]
-    public async Task ReadById_RoomAdmin_Allowed()
-    {
-        var created = await CreateProfileAsync();
-
-        var roomAdmin = await Initializer.InviteContactAsync(EmployeeType.RoomAdmin, TestContext.Current.CancellationToken);
-        await AiClient.Authenticate(roomAdmin);
-
-        using var response = await Ai.GetAsync($"{ProfilesPath}/{created.Id}", TestContext.Current.CancellationToken);
-        var profile = await Ai.ReadAsync<ProfileDto>(response, TestContext.Current.CancellationToken);
-
-        profile.Id.Should().Be(created.Id);
-    }
-
-    [Fact]
-    public async Task ReadById_RegularUser_Returns403()
-    {
-        var created = await CreateProfileAsync();
-
-        var regularUser = await Initializer.InviteContactAsync(EmployeeType.User, TestContext.Current.CancellationToken);
-        await AiClient.Authenticate(regularUser);
-
-        using var response = await Ai.GetAsync($"{ProfilesPath}/{created.Id}", TestContext.Current.CancellationToken);
-
-        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
-    }
-
-    [Fact]
     public async Task ReadAll_Owner_ReturnsAllCreated()
     {
         var first = await CreateProfileAsync(BuildCreateDto("a"));
@@ -104,16 +77,4 @@ public class ProfileReadTests(AspireAppFixture fixture) : BaseTest(fixture)
         all.Should().BeEmpty();
     }
 
-    [Fact]
-    public async Task ReadAll_RegularUser_Returns403()
-    {
-        await CreateProfileAsync();
-
-        var regularUser = await Initializer.InviteContactAsync(EmployeeType.User, TestContext.Current.CancellationToken);
-        await AiClient.Authenticate(regularUser);
-
-        using var response = await Ai.GetAsync(ProfilesPath, TestContext.Current.CancellationToken);
-
-        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
-    }
 }

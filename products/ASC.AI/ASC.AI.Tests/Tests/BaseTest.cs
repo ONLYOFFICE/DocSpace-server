@@ -31,6 +31,13 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
 {
     protected const string ProfilesPath = "/api/2.0/ai/integration/profiles";
     protected const string ProfilesBatchPath = "/api/2.0/ai/integration/profiles/batch";
+    protected const string AssignmentsPath = "/api/2.0/ai/integration/assignments";
+
+    private static readonly JsonSerializerOptions _readJsonOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        PropertyNameCaseInsensitive = true
+    };
 
     protected readonly AspireAppFixture Fixture = fixture;
     protected readonly HttpClient AiClient = fixture.AiHttpClient;
@@ -79,4 +86,60 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         using var response = await Ai.PostAsync(ProfilesPath, dto, TestContext.Current.CancellationToken);
         return await Ai.ReadAsync<ProfileDto>(response, TestContext.Current.CancellationToken);
     }
+
+    protected async Task CreateAssignmentAsync(string actionType, Guid profileId, string? entityId = null)
+    {
+        using var response = await Ai.PostAsync(
+            AssignmentsPath,
+            new { actionType, profileId, entityId },
+            TestContext.Current.CancellationToken);
+        response.EnsureSuccessStatusCode();
+    }
+
+    protected async Task<Guid?> ReadAssignmentAsync(string actionType, string? entityId = null)
+    {
+        var path = BuildScopedAssignmentPath(actionType, entityId);
+        using var response = await Ai.GetAsync(path, TestContext.Current.CancellationToken);
+        response.EnsureSuccessStatusCode();
+
+        var wrapper = await response.Content.ReadFromJsonAsync<ApiResponse<Guid?>>(
+            _readJsonOptions,
+            TestContext.Current.CancellationToken);
+        return wrapper?.Response;
+    }
+
+    protected async Task<Dictionary<string, Guid>> ReadAllAssignmentsAsync(string? entityId = null)
+    {
+        var path = entityId is null
+            ? AssignmentsPath
+            : $"{AssignmentsPath}?entityId={entityId}";
+
+        using var response = await Ai.GetAsync(path, TestContext.Current.CancellationToken);
+        return await Ai.ReadAsync<Dictionary<string, Guid>>(response, TestContext.Current.CancellationToken);
+    }
+
+    protected async Task<int> CreateRoomAsync(string? title = null)
+    {
+        await Fixture.FilesHttpClient.Authenticate(Initializer.Owner);
+
+        var body = new
+        {
+            title = title ?? $"room-{Guid.NewGuid():N}",
+            roomType = "AiRoom"
+        };
+
+        using var response = await Fixture.FilesApi.PostAsync(
+            "/api/2.0/files/rooms",
+            body,
+            TestContext.Current.CancellationToken);
+        var room = await Fixture.FilesApi.ReadAsync<RoomFolderDto>(response, TestContext.Current.CancellationToken);
+        return room.Id;
+    }
+
+    private static string BuildScopedAssignmentPath(string actionType, string? entityId) =>
+        entityId is null
+            ? $"{AssignmentsPath}/{actionType}"
+            : $"{AssignmentsPath}/{actionType}?entityId={entityId}";
+
+    private sealed record RoomFolderDto(int Id);
 }

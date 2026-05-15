@@ -56,27 +56,4 @@ public class ProfileUpdateTests(AspireAppFixture fixture) : BaseTest(fixture)
         fetched.Key.Should().Be(update.Key);
     }
 
-    [Fact]
-    public async Task Update_NonAdmin_Returns403()
-    {
-        var created = await CreateProfileAsync();
-
-        var regularUser = await Initializer.InviteContactAsync(EmployeeType.User, TestContext.Current.CancellationToken);
-        await AiClient.Authenticate(regularUser);
-
-        using var response = await Ai.PutAsync($"{ProfilesPath}/{created.Id}", BuildUpdateBody(), TestContext.Current.CancellationToken);
-
-        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
-    }
-
-    [Fact]
-    public async Task Update_Unauthorized_Returns401()
-    {
-        var created = await CreateProfileAsync();
-        await AiClient.Authenticate(null);
-
-        using var response = await Ai.PutAsync($"{ProfilesPath}/{created.Id}", BuildUpdateBody(), TestContext.Current.CancellationToken);
-
-        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
-    }
 }

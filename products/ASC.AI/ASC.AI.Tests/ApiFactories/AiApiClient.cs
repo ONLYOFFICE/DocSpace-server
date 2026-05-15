@@ -63,6 +63,15 @@ public class AiApiClient(HttpClient client)
         return await client.DeleteAsync(path, cancellationToken);
     }
 
+    public async Task<HttpResponseMessage> DeleteAsync(string path, object? body, CancellationToken cancellationToken)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Delete, path)
+        {
+            Content = JsonContent.Create(body, options: JsonOptions)
+        };
+        return await client.SendAsync(request, cancellationToken);
+    }
+
     public async Task<T> ReadAsync<T>(HttpResponseMessage response, CancellationToken cancellationToken)
     {
         response.EnsureSuccessStatusCode();

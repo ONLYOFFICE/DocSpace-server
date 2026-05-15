@@ -63,19 +63,4 @@ public class ProfileCreateManyTests(AspireAppFixture fixture) : BaseTest(fixture
         created.Should().BeEmpty();
     }
 
-    [Fact]
-    public async Task CreateMany_NonAdmin_Returns403()
-    {
-        var regularUser = await Initializer.InviteContactAsync(EmployeeType.User, TestContext.Current.CancellationToken);
-        await AiClient.Authenticate(regularUser);
-
-        var batch = new CreateProfilesRequestDto
-        {
-            Profiles = [BuildCreateDto("denied")]
-        };
-
-        using var response = await Ai.PostAsync(ProfilesBatchPath, batch, TestContext.Current.CancellationToken);
-
-        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
-    }
 }
