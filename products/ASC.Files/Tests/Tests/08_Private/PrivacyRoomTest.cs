@@ -143,6 +143,50 @@ public class PrivacyRoomTest(AspireAppFixture fixture) : BaseTest(fixture)
         AreStreamsEqual(decryptTempStream, stream).Should().BeTrue();
     }
 
+    [Fact]
+    public async Task InvitePrivateRoom()
+    {
+        await _filesClient.Authenticate(Initializer.Owner);
+
+        var createRequest = new CreateRoomRequestDto(
+            title: "private room",
+            roomType: RoomType.CustomRoom,
+            @private: true
+        );
+
+        var createdRoom = (await _roomsApi.CreateRoomAsync(createRequest, TestContext.Current.CancellationToken)).Response;
+
+        var roomAdmin1 = await Initializer.InviteContact(EmployeeType.RoomAdmin);
+
+        await Assert.ThrowsAsync<ApiException>(async () =>
+            await _roomsApi.SetRoomSecurityAsync(createdRoom.Id, new RoomInvitationRequest
+            {
+                Invitations =
+                [
+                    new RoomInvitation { Id = roomAdmin1.Id, Access = FileShare.ContentCreator }
+                ]
+            }, TestContext.Current.CancellationToken));
+
+        await _filesClient.Authenticate(roomAdmin1);
+
+        var (userPublicKey, userPrivateKeyEnc, userPassword) = ExportPublicAndPrivateKeys();
+
+        await _privacyRoomApi.SetKeysAsync(new EncryptionKeyRequestDto(Guid.Empty, userPublicKey, userPrivateKeyEnc), cancellationToken: TestContext.Current.CancellationToken);
+
+        await _filesClient.Authenticate(Initializer.Owner);
+
+        var security = await _roomsApi.SetRoomSecurityAsync(createdRoom.Id, new RoomInvitationRequest
+        {
+            Invitations =
+            [
+                new RoomInvitation { Id = roomAdmin1.Id, Access = FileShare.ContentCreator }
+            ]
+        }, TestContext.Current.CancellationToken);
+
+
+        security.Response.Members.Should().Contain(r=> r.SharedToUser.Id == roomAdmin1.Id && r.Access == FileShare.ContentCreator);
+    }
+
     private static Key ExportPublicAndPrivateKeys()
     {
         using var rsa = RSA.Create(2048);
