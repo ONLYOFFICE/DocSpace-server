@@ -26,7 +26,7 @@
 
 namespace ASC.Web.Core;
 
-public class WalletServiceDescriptionManager()
+public class WalletServiceDescriptionManager
 {
     private static readonly Dictionary<string, string> _mapping = new()
     {
@@ -51,9 +51,9 @@ public class WalletServiceDescriptionManager()
             serviceName = "disk-storage";
         }
 
-        if (string.IsNullOrEmpty(serviceName))
+        if (operation.Type == OperationType.AiServicePayment)
         {
-            if (!string.IsNullOrEmpty(filterServiceName))
+            if (string.IsNullOrEmpty(serviceName) && !string.IsNullOrEmpty(filterServiceName))
             {
                 serviceName = filterServiceName;
             }
@@ -73,8 +73,17 @@ public class WalletServiceDescriptionManager()
 
         if (string.IsNullOrEmpty(serviceName))
         {
-            serviceName = "top-up";
-            quantity = 0;
+            switch (operation.Type)
+            {
+                case OperationType.Deposit:
+                    serviceName = "top-up";
+                    quantity = 0;
+                    break;
+                case OperationType.AiCredit:
+                    serviceName = "ai-tools";
+                    quantity = (int)operation.Debit; // truncate
+                    break;
+            }
         }
 
         var description = (Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceDesc_{serviceName}") ?? "").Replace("{LogoText}", logoText);

@@ -7149,6 +7149,9 @@
           "403": {
             "description": "You do not have enough permissions to view the form roles"
           },
+          "404": {
+            "description": "The required file was not found"
+          },
           "401": {
             "description": "Unauthorized"
           }
@@ -16485,7 +16488,7 @@
         ]
       }
     },
-    "/api/2.0/files/rooms/{id}/externalDbSync": {
+    "/api/2.0/files/rooms/{id}/externaldbsync": {
       "post": {
         "tags": [
           "Rooms"
@@ -29194,6 +29197,9 @@
               }
             }
           },
+          "403": {
+            "description": "No permissions to perform this action"
+          },
           "401": {
             "description": "Unauthorized"
           }
@@ -29247,6 +29253,9 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "No permissions to perform this action"
           },
           "401": {
             "description": "Unauthorized"
@@ -29889,24 +29898,15 @@
         ]
       }
     },
-    "/api/2.0/portal/payment/customer/servicequota": {
+    "/api/2.0/portal/payment/customer/aibalance": {
       "get": {
         "tags": [
           "Portal / Payment"
         ],
-        "summary": "Get the service quota",
-        "description": "Returns the service quota from the accounting service.",
-        "operationId": "getCustomerServiceQuota",
+        "summary": "Get the customer AI balance",
+        "description": "Returns the AI quota balance of a customer from the accounting service.",
+        "operationId": "getCustomerAiBalance",
         "parameters": [
-          {
-            "name": "serviceName",
-            "in": "query",
-            "description": "The service name.",
-            "schema": {
-              "type": "string",
-              "example": "backup"
-            }
-          },
           {
             "name": "refresh",
             "in": "query",
@@ -29919,7 +29919,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The service quota",
+            "description": "The customer AI balance",
             "content": {
               "application/json": {
                 "schema": {
@@ -30005,15 +30005,6 @@
             }
           },
           {
-            "name": "WriteOffServiceQuota",
-            "in": "query",
-            "description": "Write-off of the quota for the service",
-            "schema": {
-              "type": "boolean",
-              "example": false
-            }
-          },
-          {
             "name": "StartDate",
             "in": "query",
             "description": "The report start date.",
@@ -30039,7 +30030,7 @@
             "description": "The participant name.",
             "schema": {
               "type": "string",
-              "example": "ACME Corp"
+              "example": "My Own Corporation"
             }
           },
           {
@@ -30061,9 +30052,9 @@
             }
           },
           {
-            "name": "Types",
+            "name": "Type",
             "in": "query",
-            "description": "List of operation types to filter by.",
+            "description": "The operation type to filter by.",
             "schema": {
               "$ref": "#/components/schemas/OperationType"
             },
@@ -30072,7 +30063,7 @@
           {
             "name": "Status",
             "in": "query",
-            "description": "List of operation status to filter by.",
+            "description": "The operation status to filter by.",
             "schema": {
               "$ref": "#/components/schemas/OperationStatus"
             },
@@ -30577,26 +30568,26 @@
         ]
       }
     },
-    "/api/2.0/portal/payment/buywalletservice": {
+    "/api/2.0/portal/payment/creditaibalance": {
       "post": {
         "tags": [
           "Portal / Payment"
         ],
-        "summary": "Purchases a wallet service with the specified quantity.",
-        "description": "This method processes a payment for a wallet service using the configured payment method.\r\nRequires the tariff service to be configured and a valid payment method to be set for the customer.\r\nRate limiting is applied according to the payments API policy.",
-        "operationId": "buyWalletService",
+        "summary": "Credit AI balance",
+        "description": "Credits AI quota to the customer AI sub-account from their main balance.\r\nRequires the customer to have a configured payment method.",
+        "operationId": "creditAiBalance",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/BuyWalletServiceRequestDto"
+                "$ref": "#/components/schemas/CreditAiBalanceRequestDto"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "The service payment information",
+            "description": "The AI credit operation result",
             "content": {
               "application/json": {
                 "schema": {
@@ -30609,7 +30600,7 @@
             "description": "No permissions to perform this action"
           },
           "404": {
-            "description": "Customer or service could not be found"
+            "description": "Customer could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -43546,12 +43537,14 @@
               "saveFormAsXLSX": {
                 "type": "boolean",
                 "description": "Specifies whether to save form data as XLSX file.",
-                "nullable": true
+                "nullable": true,
+                "example": false
               },
               "sendFormToExternalDB": {
                 "type": "boolean",
                 "description": "Specifies whether to send form data to external database.",
-                "nullable": true
+                "nullable": true,
+                "example": false
               },
               "originalFormId": {
                 "type": "integer",
@@ -45239,12 +45232,14 @@
           "sendFormToExternalDB": {
             "type": "boolean",
             "description": "Specifies whether to send form data to external database.",
-            "nullable": true
+            "nullable": true,
+            "example": false
           },
           "saveFormAsXLSX": {
             "type": "boolean",
             "description": "Specifies whether to save form data as XLSX file.",
-            "nullable": true
+            "nullable": true,
+            "example": false
           }
         },
         "additionalProperties": false,
@@ -47948,12 +47943,14 @@
           "sendFormToExternalDB": {
             "type": "boolean",
             "description": "Specifies whether to send form data to external database.",
-            "nullable": true
+            "nullable": true,
+            "example": false
           },
           "saveFormAsXLSX": {
             "type": "boolean",
             "description": "Specifies whether to save form data as XLSX file.",
-            "nullable": true
+            "nullable": true,
+            "example": false
           }
         },
         "additionalProperties": false,
@@ -47985,7 +47982,7 @@
         "properties": {
           "title": {
             "maxLength": 165,
-            "minLength": 0,
+            "minLength": 1,
             "type": "string",
             "description": "The file title for text or HTML file.",
             "nullable": true,
@@ -49327,7 +49324,8 @@
               "$ref": "#/components/schemas/RecentConfig"
             },
             "description": "The recent configuration of the editor.",
-            "nullable": true
+            "nullable": true,
+            "example": []
           },
           "templates": {
             "type": "array",
@@ -49335,7 +49333,8 @@
               "$ref": "#/components/schemas/TemplatesConfig"
             },
             "description": "The templates of the editor configuration.",
-            "nullable": true
+            "nullable": true,
+            "example": []
           },
           "user": {
             "$ref": "#/components/schemas/UserConfig"
@@ -49780,7 +49779,15 @@
               "$ref": "#/components/schemas/ExternalDbSyncFormResultDto"
             },
             "description": "The synchronization results for all original forms in the room.",
-            "nullable": true
+            "nullable": true,
+            "example": [
+              {
+                "id": 42,
+                "title": "Application.pdf",
+                "success": true,
+                "error": null
+          }
+            ]
           }
         },
         "additionalProperties": false,
@@ -50217,6 +50224,12 @@
               },
               "vectorizationStatus": {
                 "$ref": "#/components/schemas/VectorizationStatus"
+              },
+              "externalDbTableName": {
+                "type": "string",
+                "description": "The name of the table in the external database that corresponds to this form.",
+                "nullable": true,
+                "example": "form_123_v1"
               },
               "dimensions": {
                 "$ref": "#/components/schemas/Size"
@@ -52336,12 +52349,14 @@
               "saveFormAsXLSX": {
                 "type": "boolean",
                 "description": "Specifies whether to save form data as XLSX file.",
-                "nullable": true
+                "nullable": true,
+                "example": false
               },
               "sendFormToExternalDB": {
                 "type": "boolean",
                 "description": "Specifies whether to send form data to external database.",
-                "nullable": true
+                "nullable": true,
+                "example": false
               },
               "originalFormId": {
                 "type": "integer",
@@ -52554,7 +52569,8 @@
               "type": "string"
             },
             "description": "The list of possible values for the form field.",
-            "nullable": true
+            "nullable": true,
+            "example": []
           }
         },
         "additionalProperties": false
@@ -52747,7 +52763,8 @@
               "$ref": "#/components/schemas/FormMetadata"
             },
             "description": "The form field metadata.",
-            "nullable": true
+            "nullable": true,
+            "example": []
           },
           "submissions": {
             "type": "array",
@@ -52755,7 +52772,8 @@
               "$ref": "#/components/schemas/FormResultsDto"
             },
             "description": "All submissions.",
-            "nullable": true
+            "nullable": true,
+            "example": []
           }
         },
         "additionalProperties": false
@@ -53295,7 +53313,8 @@
               "$ref": "#/components/schemas/AceShortWrapper"
             },
             "description": "The sharing settings of the file.",
-            "nullable": true
+            "nullable": true,
+            "example": []
           },
           "type": {
             "$ref": "#/components/schemas/EditorType"
@@ -58615,7 +58634,7 @@
       },
       "GroupRequestDto": {
         "required": [
-          "groupManager"
+          "groupName"
         ],
         "type": "object",
         "properties": {
@@ -58640,7 +58659,7 @@
           },
           "groupName": {
             "maxLength": 128,
-            "minLength": 0,
+            "minLength": 1,
             "type": "string",
             "description": "The group name.",
             "nullable": true,
@@ -60233,7 +60252,7 @@
             "example": "Auth-Key"
           },
           "value": {
-            "maxLength": 255,
+            "maxLength": 4000,
             "minLength": 0,
             "type": "string",
             "description": "The authorization key value.",
@@ -60686,27 +60705,6 @@
         },
         "additionalProperties": false
       },
-      "BuyWalletServiceRequestDto": {
-        "type": "object",
-        "properties": {
-          "quantity": {
-            "maximum": 999999,
-            "minimum": 1,
-            "type": "integer",
-            "description": "Number of services provided.",
-            "format": "int32",
-            "example": 1
-          },
-          "serviceName": {
-            "type": "string",
-            "description": "The service name.",
-            "nullable": true,
-            "example": "backup"
-          }
-        },
-        "additionalProperties": false,
-        "description": "The request parameters for buying wallet service."
-      },
       "CapabilitiesDto": {
         "required": [
           "identityServerEnabled",
@@ -61001,7 +60999,7 @@
             "type": "string",
             "description": "The company name.",
             "nullable": true,
-            "example": "Acme Corporation"
+            "example": "My Own Corporation"
           },
           "site": {
             "type": "string",
@@ -61370,6 +61368,29 @@
         },
         "additionalProperties": false,
         "description": "The request parameters for creating the webhook configuration."
+      },
+      "CreditAiBalanceRequestDto": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "maximum": 999999,
+            "minimum": 0.01,
+            "type": "number",
+            "description": "The amount to transfer from the main balance to the AI subaccount.",
+            "format": "double",
+            "example": 100.00
+          },
+          "currency": {
+            "maxLength": 3,
+            "minLength": 0,
+            "type": "string",
+            "description": "The three-character ISO 4217 currency symbol.",
+            "nullable": true,
+            "example": "USD"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The request parameters for crediting AI quota to the customer AI subaccount."
       },
       "CspDto": {
         "required": [
@@ -61819,11 +61840,6 @@
             "nullable": true,
             "example": "backup"
           },
-          "writeOffServiceQuota": {
-            "type": "boolean",
-            "description": "Write-off of the quota for the service",
-            "example": false
-          },
           "startDate": {
             "type": "string",
             "description": "The report start date.",
@@ -61842,7 +61858,7 @@
             "type": "string",
             "description": "The participant name.",
             "nullable": true,
-            "example": "ACME Corp"
+            "example": "My Own Corporation"
           },
           "credit": {
             "type": "boolean",
@@ -61856,7 +61872,7 @@
             "nullable": true,
             "example": false
           },
-          "types": {
+          "type": {
             "$ref": "#/components/schemas/OperationType"
           },
           "status": {
@@ -64206,6 +64222,9 @@
             "description": "AI Agent name.",
             "nullable": true,
             "example": "My AI Agent"
+          },
+          "type": {
+            "$ref": "#/components/schemas/OperationType"
           }
         },
         "additionalProperties": false,
@@ -64225,18 +64244,16 @@
         ]
       },
       "OperationStatus": {
-        "description": "[0 - Any, 1 - Pending, 2 - Completed, 4 - Rejected, 8 - Canceled]",
+        "description": "[0 - Pending, 1 - Completed, 2 - Rejected, 3 - Canceled]",
         "enum": [
           0,
           1,
           2,
-          4,
-          8
+          3
         ],
         "type": "integer",
         "example": 0,
         "x-enum-varnames": [
-          "Any",
           "Pending",
           "Completed",
           "Rejected",
@@ -64244,36 +64261,36 @@
         ]
       },
       "OperationType": {
-        "description": "[0 - Any, 1 - Unknown, 2 - ServicePayment, 4 - PackagePayment, 8 - ServiceUsage, 16 - Deposit, 32 - ReceiveProviderInvoice, 64 - ProcessProviderInvoice, 128 - WriteOffServiceProfit, 256 - Profit, 512 - PartnerAccrual, 1024 - ProviderPayment, 2048 - PartnerPayment, 4096 - Refund, 8192 - BankDeposit, 16384 - BankWithdrawal, 32768 - GoodwillCredit, 65536 - WriteOffProfit, 131072 - WriteOffDifferenceCurrency]",
+        "description": "[0 - Unknown, 1 - ServicePayment, 2 - PackagePayment, 3 - AiServicePayment, 4 - Deposit, 5 - ReceiveProviderInvoice, 6 - ProcessProviderInvoice, 7 - WriteOffServiceProfit, 8 - Profit, 9 - PartnerAccrual, 10 - ProviderPayment, 11 - PartnerPayment, 12 - Refund, 13 - BankDeposit, 14 - BankWithdrawal, 15 - GoodwillCredit, 16 - WriteOffProfit, 17 - WriteOffDifferenceCurrency, 18 - AiDebit, 19 - AiCredit]",
         "enum": [
           0,
           1,
           2,
+          3,
           4,
+          5,
+          6,
+          7,
           8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
           16,
-          32,
-          64,
-          128,
-          256,
-          512,
-          1024,
-          2048,
-          4096,
-          8192,
-          16384,
-          32768,
-          65536,
-          131072
+          17,
+          18,
+          19
         ],
         "type": "integer",
         "example": 0,
         "x-enum-varnames": [
-          "Any",
           "Unknown",
           "ServicePayment",
           "PackagePayment",
-          "ServiceUsage",
+          "AiServicePayment",
           "Deposit",
           "ReceiveProviderInvoice",
           "ProcessProviderInvoice",
@@ -64287,7 +64304,9 @@
           "BankWithdrawal",
           "GoodwillCredit",
           "WriteOffProfit",
-          "WriteOffDifferenceCurrency"
+          "WriteOffDifferenceCurrency",
+          "AiDebit",
+          "AiCredit"
         ]
       },
       "OwnerChangeInstructionsDto": {
@@ -68814,6 +68833,8 @@
             "example": 1
           },
           "currency": {
+            "maxLength": 3,
+            "minLength": 0,
             "type": "string",
             "description": "The three-character ISO 4217 currency symbol.",
             "nullable": true,
