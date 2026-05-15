@@ -51,9 +51,9 @@ public class WalletServiceDescriptionManager
             serviceName = "disk-storage";
         }
 
-        if (string.IsNullOrEmpty(serviceName))
+        if (operation.Type == OperationType.AiServicePayment)
         {
-            if (!string.IsNullOrEmpty(filterServiceName))
+            if (string.IsNullOrEmpty(serviceName) && !string.IsNullOrEmpty(filterServiceName))
             {
                 serviceName = filterServiceName;
             }

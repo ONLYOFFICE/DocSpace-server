@@ -5968,12 +5968,14 @@
               "saveFormAsXLSX": {
                 "type": "boolean",
                 "description": "Specifies whether to save form data as XLSX file.",
-                "nullable": true
+                "nullable": true,
+                "example": false
               },
               "sendFormToExternalDB": {
                 "type": "boolean",
                 "description": "Specifies whether to send form data to external database.",
-                "nullable": true
+                "nullable": true,
+                "example": false
               },
               "originalFormId": {
                 "type": "integer",
@@ -7866,12 +7868,14 @@
           "sendFormToExternalDB": {
             "type": "boolean",
             "description": "Specifies whether to send form data to external database.",
-            "nullable": true
+            "nullable": true,
+            "example": false
           },
           "saveFormAsXLSX": {
             "type": "boolean",
             "description": "Specifies whether to save form data as XLSX file.",
-            "nullable": true
+            "nullable": true,
+            "example": false
           }
         },
         "additionalProperties": false,
