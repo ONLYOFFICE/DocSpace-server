@@ -31,7 +31,7 @@ public class AssignmentsStorage(
     IDbContextFactory<AiIntegrationContext> dbContextFactory,
     IDistributedLockProvider distributedLockProvider)
 {
-    public async Task<bool> CreateAsync(int tenantId, string actionType, Guid profileId, int? entryId = null)
+    public async Task<bool> CreateAsync(int tenantId, ActionType actionType, Guid profileId, int? entryId = null)
     {
         await using (await distributedLockProvider.TryAcquireFairLockAsync(GetLockKey(tenantId, entryId)))
         {
@@ -68,7 +68,7 @@ public class AssignmentsStorage(
         }
     }
 
-    public async Task<Guid?> ReadByTypeAsync(int tenantId, string actionType, int? entryId = null)
+    public async Task<Guid?> ReadByTypeAsync(int tenantId, ActionType actionType, int? entryId = null)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
@@ -79,7 +79,7 @@ public class AssignmentsStorage(
         return entity?.ProfileId;
     }
 
-    public async Task<Dictionary<string, Guid>> ReadAllAsync(int tenantId, int? entryId = null)
+    public async Task<Dictionary<ActionType, Guid>> ReadAllAsync(int tenantId, int? entryId = null)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
@@ -90,7 +90,7 @@ public class AssignmentsStorage(
         return await assignments.ToDictionaryAsync(x => x.ActionType, x => x.ProfileId);
     }
 
-    public async Task<bool> UpdateAsync(int tenantId, string actionType, Guid profileId, int? entryId = null)
+    public async Task<bool> UpdateAsync(int tenantId, ActionType actionType, Guid profileId, int? entryId = null)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
@@ -101,7 +101,7 @@ public class AssignmentsStorage(
         return affected > 0;
     }
 
-    public async Task UpsertManyAsync(int tenantId, IReadOnlyDictionary<string, Guid> assignments, int? entryId = null)
+    public async Task UpsertManyAsync(int tenantId, IReadOnlyDictionary<ActionType, Guid> assignments, int? entryId = null)
     {
         if (assignments.Count == 0)
         {
@@ -158,7 +158,7 @@ public class AssignmentsStorage(
         }
     }
 
-    public async Task DeleteAsync(int tenantId, string actionType, int? entryId = null)
+    public async Task DeleteAsync(int tenantId, ActionType actionType, int? entryId = null)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
@@ -172,7 +172,7 @@ public class AssignmentsStorage(
         }
     }
 
-    public async Task DeleteManyAsync(int tenantId, IReadOnlyCollection<string> actionTypes, int? entryId = null)
+    public async Task DeleteManyAsync(int tenantId, IReadOnlyCollection<ActionType> actionTypes, int? entryId = null)
     {
         if (actionTypes.Count == 0)
         {

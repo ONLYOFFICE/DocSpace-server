@@ -31,11 +31,9 @@ public class DbAssignment : BaseEntity
     public Guid Id { get; init; }
     public int TenantId { get; init; }
 
-    [MaxLength(64)]
-    [Required]
-    public required string ActionType { get; init; }
+    public required ActionType ActionType { get; init; }
 
-    public Guid ProfileId { get; set; }
+    public Guid ProfileId { get; init; }
     public int? EntryId { get; init; }
     public DateTime CreatedAt { get; init; }
 
@@ -83,9 +81,7 @@ public static class DbAssignmentExtension
 
             entity.Property(e => e.ActionType)
                 .HasColumnName("action_type")
-                .HasColumnType("varchar(64)")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .HasColumnType("int");
 
             entity.Property(e => e.ProfileId)
                 .HasColumnName("profile_id")
@@ -125,8 +121,7 @@ public static class DbAssignmentExtension
 
             entity.Property(e => e.ActionType)
                 .HasColumnName("action_type")
-                .HasColumnType("character varying")
-                .HasMaxLength(64);
+                .HasColumnType("integer");
 
             entity.Property(e => e.ProfileId)
                 .HasColumnName("profile_id")

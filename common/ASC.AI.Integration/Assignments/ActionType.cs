@@ -24,23 +24,18 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-global using System.ComponentModel.DataAnnotations;
-global using System.Security.Cryptography;
+namespace ASC.AI.Integration.Assignments;
 
-global using ASC.AI.Integration.Assignments;
-global using ASC.AI.Integration.Attachments;
-global using ASC.AI.Integration.Database;
-global using ASC.AI.Integration.Database.Models;
-global using ASC.AI.Integration.Profiles;
-
-global using ASC.Common;
-global using ASC.Common.Threading.DistributedLock.Abstractions;
-global using ASC.Core.Common.EF;
-global using ASC.Core.Common.EF.Model;
-global using ASC.Core.Common.Settings;
-global using ASC.Security.Cryptography;
-
-global using Microsoft.EntityFrameworkCore;
-global using Microsoft.Extensions.DependencyInjection;
-
-global using NetEscapades.EnumGenerators;
+[EnumExtensions]
+public enum ActionType
+{
+    Default,
+    Chat,
+    Code,
+    Summarization,
+    Translation,
+    TextAnalyze,
+    ImageGeneration,
+    OCR,
+    Vision
+}

@@ -37,44 +37,54 @@ public class AssignmentsStorageController(AssignmentsStorageService assignmentsS
     [HttpPost("integration/assignments")]
     public async Task CreateAsync(CreateAssignmentRequestDto inDto)
     {
-        await assignmentsStorageService.CreateAsync(inDto.ActionType, inDto.ProfileId, inDto.EntityId);
+        await assignmentsStorageService.CreateAsync(ParseActionType(inDto.ActionType), inDto.ProfileId, inDto.EntityId);
     }
 
     [HttpGet("integration/assignments/{actionType}")]
     public async Task<Guid?> ReadByTypeAsync(ReadAssignmentRequestDto inDto)
     {
-        return await assignmentsStorageService.ReadByTypeAsync(inDto.ActionType, inDto.EntityId);
+        return await assignmentsStorageService.ReadByTypeAsync(ParseActionType(inDto.ActionType), inDto.EntityId);
     }
 
     [HttpGet("integration/assignments")]
     public async Task<Dictionary<string, Guid>> ReadAllAsync(ReadAllAssignmentsRequestDto inDto)
     {
-        return await assignmentsStorageService.ReadAllAsync(inDto.EntityId);
+        var assignments = await assignmentsStorageService.ReadAllAsync(inDto.EntityId);
+        return assignments.ToDictionary(x => x.Key.ToStringFast(), x => x.Value);
     }
 
     [HttpPut("integration/assignments/{actionType}")]
     public async Task UpdateAsync(UpdateAssignmentRequestDto inDto)
     {
-        await assignmentsStorageService.UpdateAsync(inDto.ActionType, inDto.Body.ProfileId, inDto.Body.EntityId);
+        await assignmentsStorageService.UpdateAsync(ParseActionType(inDto.ActionType), inDto.Body.ProfileId, inDto.Body.EntityId);
     }
 
     [HttpPut("integration/assignments")]
     public async Task UpsertManyAsync(UpsertAssignmentsRequestDto inDto)
     {
-        await assignmentsStorageService.UpsertManyAsync(inDto.Assignments, inDto.EntityId);
+        var assignments = inDto.Assignments.ToDictionary(x => ParseActionType(x.Key), x => x.Value);
+        await assignmentsStorageService.UpsertManyAsync(assignments, inDto.EntityId);
     }
 
     [HttpDelete("integration/assignments/{actionType}")]
     public async Task<IActionResult> DeleteAsync(DeleteAssignmentRequestDto inDto)
     {
-        await assignmentsStorageService.DeleteAsync(inDto.ActionType);
+        await assignmentsStorageService.DeleteAsync(ParseActionType(inDto.ActionType));
         return NoContent();
     }
 
     [HttpDelete("integration/assignments")]
     public async Task<IActionResult> DeleteManyAsync(DeleteAssignmentsRequestDto inDto)
     {
-        await assignmentsStorageService.DeleteManyAsync(inDto.Body.ActionTypes);
+        var actionTypes = inDto.Body.ActionTypes.Select(ParseActionType).ToArray();
+        await assignmentsStorageService.DeleteManyAsync(actionTypes);
         return NoContent();
+    }
+
+    private static ActionType ParseActionType(string value)
+    {
+        return !ActionTypeExtensions.TryParse(value, ignoreCase: true, out var actionType)
+            ? throw new ArgumentException($@"Unknown action type '{value}'", nameof(value))
+            : actionType;
     }
 }

@@ -38,7 +38,7 @@ public class AssignmentsStorageService(
     private static readonly EmployeeType[] _writeTypes = [EmployeeType.DocSpaceAdmin];
     private static readonly EmployeeType[] _readTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin];
 
-    public async Task CreateAsync(string actionType, Guid profileId, string? entityId = null)
+    public async Task CreateAsync(ActionType actionType, Guid profileId, string? entityId = null)
     {
         await AssertUserHasAccessAsync(_writeTypes);
 
@@ -51,11 +51,11 @@ public class AssignmentsStorageService(
 
         if (!await storage.CreateAsync(tenantManager.GetCurrentTenantId(), actionType, profileId, entryId))
         {
-            throw new InvalidOperationException($"Assignment for action type '{actionType}' already exists");
+            throw new InvalidOperationException($"Assignment for action type '{actionType.ToStringFast()}' already exists");
         }
     }
 
-    public async Task<Guid?> ReadByTypeAsync(string actionType, string? entityId = null)
+    public async Task<Guid?> ReadByTypeAsync(ActionType actionType, string? entityId = null)
     {
         await AssertUserHasAccessAsync(_readTypes);
 
@@ -69,7 +69,7 @@ public class AssignmentsStorageService(
         return await storage.ReadByTypeAsync(tenantManager.GetCurrentTenantId(), actionType, entryId);
     }
 
-    public async Task<Dictionary<string, Guid>> ReadAllAsync(string? entityId = null)
+    public async Task<Dictionary<ActionType, Guid>> ReadAllAsync(string? entityId = null)
     {
         await AssertUserHasAccessAsync(_readTypes);
 
@@ -83,7 +83,7 @@ public class AssignmentsStorageService(
         return await storage.ReadAllAsync(tenantManager.GetCurrentTenantId(), entryId);
     }
 
-    public async Task UpdateAsync(string actionType, Guid profileId, string? entityId = null)
+    public async Task UpdateAsync(ActionType actionType, Guid profileId, string? entityId = null)
     {
         await AssertUserHasAccessAsync(_writeTypes);
 
@@ -96,11 +96,11 @@ public class AssignmentsStorageService(
 
         if (!await storage.UpdateAsync(tenantManager.GetCurrentTenantId(), actionType, profileId, entryId))
         {
-            throw new ItemNotFoundException($"Assignment for action type '{actionType}' was not found");
+            throw new ItemNotFoundException($"Assignment for action type '{actionType.ToStringFast()}' was not found");
         }
     }
 
-    public async Task UpsertManyAsync(IReadOnlyDictionary<string, Guid> assignments, string? entityId = null)
+    public async Task UpsertManyAsync(IReadOnlyDictionary<ActionType, Guid> assignments, string? entityId = null)
     {
         await AssertUserHasAccessAsync(_writeTypes);
 
@@ -114,14 +114,14 @@ public class AssignmentsStorageService(
         await storage.UpsertManyAsync(tenantManager.GetCurrentTenantId(), assignments, entryId);
     }
 
-    public async Task DeleteAsync(string actionType)
+    public async Task DeleteAsync(ActionType actionType)
     {
         await AssertUserHasAccessAsync(_writeTypes);
 
         await storage.DeleteAsync(tenantManager.GetCurrentTenantId(), actionType);
     }
 
-    public async Task DeleteManyAsync(IReadOnlyCollection<string> actionTypes)
+    public async Task DeleteManyAsync(IReadOnlyCollection<ActionType> actionTypes)
     {
         await AssertUserHasAccessAsync(_writeTypes);
 
