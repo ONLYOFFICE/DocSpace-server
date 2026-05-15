@@ -817,17 +817,17 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Returns the service quota from the accounting service.
+    /// Returns the AI quota balance of a customer from the accounting service.
     /// </remarks>
     /// <summary>
-    /// Get the service quota
+    /// Get the customer AI balance
     /// </summary>
-    /// <path>api/2.0/portal/payment/customer/servicequota</path>
+    /// <path>api/2.0/portal/payment/customer/aibalance</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The service quota", typeof(Balance))]
+    [SwaggerResponse(200, "The customer AI balance", typeof(Balance))]
     [SwaggerResponse(403, "No permissions to perform this action")]
-    [HttpGet("customer/servicequota")]
-    public async Task<Balance> GetCustomerServiceQuota(CustomerServiceQuotaRequestDto inDto)
+    [HttpGet("customer/aibalance")]
+    public async Task<Balance> GetCustomerAiBalance(PaymentInformationRequestDto inDto)
     {
         if (!tariffService.IsConfigured())
         {
@@ -844,9 +844,7 @@ public class PaymentController(
             return null;
         }
 
-        await CheckWalletServiceName(inDto.ServiceName);
-
-        var result = await tariffService.GetCustomerServiceQuotaAsync(tenant.Id, inDto.ServiceName, inDto.Refresh);
+        var result = await tariffService.GetCustomerAiBalanceAsync(tenant.Id, inDto.Refresh);
         return result;
     }
 
@@ -890,7 +888,6 @@ public class PaymentController(
         var filter = new OperationFilter
         {
             ServiceName = inDto.ServiceName,
-            WriteOffServiceQuota = inDto.WriteOffServiceQuota,
             UtcStartDate = utcStartDate,
             UtcEndDate = utcEndDate,
             ParticipantName = inDto.ParticipantName,
@@ -898,7 +895,7 @@ public class PaymentController(
             Debit = inDto.Debit,
             Offset = inDto.Offset,
             Limit = inDto.Limit,
-            Types = inDto.Types,
+            Type = inDto.Type,
             Status = inDto.Status,
             OrderBy = inDto.OrderBy,
             OrderType = inDto.OrderType
@@ -970,13 +967,12 @@ public class PaymentController(
             tenantId,
             baseUri,
             inDto.ServiceName,
-            inDto.WriteOffServiceQuota,
             inDto.StartDate,
             inDto.EndDate,
             inDto.ParticipantName,
             inDto.Credit,
             inDto.Debit,
-            inDto.Types,
+            inDto.Type,
             inDto.Status,
             inDto.OrderBy,
             inDto.OrderType,
@@ -1046,7 +1042,7 @@ public class PaymentController(
             throw new ItemNotFoundException("Customer could not be found");
         }
 
-        var evt = new CustomerOperationsReportIntegrationEvent(securityContext.CurrentAccount.ID, tenantId, null, null, false, terminate: true);
+        var evt = new CustomerOperationsReportIntegrationEvent(securityContext.CurrentAccount.ID, tenantId, null, null, terminate: true);
 
         await eventBus.PublishAsync(evt);
     }
@@ -1235,21 +1231,20 @@ public class PaymentController(
     }
 
     /// <summary>
-    /// Purchases a wallet service with the specified quantity.
+    /// Credit AI balance
     /// </summary>
     /// <remarks>
-    /// This method processes a payment for a wallet service using the configured payment method.
-    /// Requires the tariff service to be configured and a valid payment method to be set for the customer.
-    /// Rate limiting is applied according to the payments API policy.
+    /// Credits AI quota to the customer AI sub-account from their main balance.
+    /// Requires the customer to have a configured payment method.
     /// </remarks>
-    /// <path>api/2.0/portal/payment/buywalletservice</path>
+    /// <path>api/2.0/portal/payment/creditaibalance</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The service payment information", typeof(ServicePayment))]
+    [SwaggerResponse(200, "The AI credit operation result", typeof(ServicePayment))]
     [SwaggerResponse(403, "No permissions to perform this action")]
-    [SwaggerResponse(404, "Customer or service could not be found")]
-    [HttpPost("buywalletservice")]
+    [SwaggerResponse(404, "Customer could not be found")]
+    [HttpPost("creditaibalance")]
     [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
-    public async Task<ServicePayment> BuyWalletService(BuyWalletServiceRequestDto inDto)
+    public async Task<ServicePayment> CreditAiBalance(CreditAiBalanceRequestDto inDto)
     {
         if (!tariffService.IsConfigured())
         {
@@ -1266,24 +1261,34 @@ public class PaymentController(
 
         await DemandPayerAsync(customerInfo);
 
-        var walletService = await CheckWalletServiceName(inDto.ServiceName);
+        var supportedCurrencies = tariffService.GetSupportedAccountingCurrencies();
 
-        // For now, only ai-tools available for purchasing!
-        if (walletService != TenantWalletService.AITools)
+        if (string.IsNullOrEmpty(inDto.Currency))
         {
-            throw new ItemNotFoundException("Service could not be found");
+            inDto.Currency = supportedCurrencies.FirstOrDefault();
+        }
+
+        if (!supportedCurrencies.Contains(inDto.Currency))
+        {
+            throw new ArgumentException("Unsupported currency");
+        }
+
+        var quotaList = await tenantManager.GetTenantQuotasAsync(true, true);
+        var aiToolsQuota = quotaList.FirstOrDefault(x => x.TenantId == (int)TenantWalletService.AITools);
+        if (aiToolsQuota == null)
+        {
+            throw new ItemNotFoundException("AiTools quota not found");
         }
 
         var customerParticipantName = securityContext.CurrentAccount.ID.ToString();
-        var details = $"{inDto.ServiceName} {inDto.Quantity}";
-
-        var result = await tariffService.MakeServicePaymentAsync(tenant.Id, inDto.ServiceName, inDto.Quantity, customerParticipantName, metadata: null);
+        var result = await tariffService.MakeAiCreditAsync(tenant.Id, inDto.Amount, inDto.Currency, customerParticipantName, metadata: null);
         if (result != null)
         {
+            var details = $"{aiToolsQuota.ServiceName} {inDto.Amount} {inDto.Currency}";
             messageService.Send(MessageAction.CustomerOperationPerformed, null, details);
             await ChangeTenantWalletServiceState(new ChangeWalletServiceStateRequestDto
             {
-                Service = walletService,
+                Service = TenantWalletService.AITools,
                 Enabled = true
             });
         }
@@ -1299,7 +1304,7 @@ public class PaymentController(
     /// The prices are returned in the configured currency and normalized per million tokens.
     /// Requires administrator permissions to access.
     /// </remarks>
-    /// <path>api/2.0/portal/payment/aiprices</path>
+    /// <path>api/2.0/portal/payment/ai-prices</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "Prices for AI models", typeof(AiPricesResponse))]
     [SwaggerResponse(403, "No permissions to perform this action")]

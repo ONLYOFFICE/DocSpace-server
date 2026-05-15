@@ -421,11 +421,10 @@ public class TariffService(
         return $"{tenantId}:accounting:balance";
     }
 
-    internal static string GetAccountingServiceQuotaCacheKey(int tenantId, string serviceName)
+    internal static string GetAccountingAiBalanceCacheKey(int tenantId)
     {
-        return $"{tenantId}:accounting:{serviceName}:quota";
+        return $"{tenantId}:accounting:ai:balance";
     }
-
 
     private async Task ClearCacheAsync(int tenantId)
     {
@@ -1206,14 +1205,14 @@ public class TariffService(
         return balance;
     }
 
-    public async Task<Balance> GetCustomerServiceQuotaAsync(int tenantId, string serviceName, bool refresh = false)
+    public async Task<Balance> GetCustomerAiBalanceAsync(int tenantId, bool refresh = false)
     {
         if (!accountingClient.Configured)
         {
             return null;
         }
 
-        var cacheKey = GetAccountingServiceQuotaCacheKey(tenantId, serviceName);
+        var cacheKey = GetAccountingAiBalanceCacheKey(tenantId);
 
         var balance = refresh ? null : await GetFromCache<Balance>(cacheKey);
 
@@ -1234,7 +1233,7 @@ public class TariffService(
             try
             {
                 var portalId = await coreSettings.GetKeyAsync(tenantId);
-                balance = await accountingClient.GetCustomerServiceQuotaAsync(portalId, serviceName, true);
+                balance = await accountingClient.GetCustomerAiBalanceAsync(portalId, true);
                 await hybridCache.SetAsync(cacheKey, balance, TimeSpan.FromMinutes(10));
             }
             catch (Exception error)
@@ -1275,11 +1274,11 @@ public class TariffService(
         return true;
     }
 
-    public async Task<ServicePayment> MakeServicePaymentAsync(int tenantId, string serviceName, int quantity, string customerParticipantName, Dictionary<string, string> metadata = null)
+    public async Task<ServicePayment> MakeAiCreditAsync(int tenantId, decimal amount, string currency, string customerParticipantName, Dictionary<string, string> metadata = null)
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
-        var result = await accountingClient.MakeServicePaymentAsync(portalId, serviceName, quantity, customerParticipantName, metadata);
-        await hybridCache.RemoveAsync(GetAccountingServiceQuotaCacheKey(tenantId, serviceName));
+        var result = await accountingClient.MakeAiCreditAsync(portalId, amount, currency, customerParticipantName, metadata);
+        await hybridCache.RemoveAsync(GetAccountingAiBalanceCacheKey(tenantId));
         await hybridCache.RemoveAsync(GetAccountingBalanceCacheKey(tenantId));
         return result;
     }
@@ -1289,7 +1288,15 @@ public class TariffService(
         try
         {
             var portalId = await coreSettings.GetKeyAsync(tenantId);
-            return await accountingClient.GetCustomerOperationsAsync(portalId, filter);
+
+            var isAiService = false;
+            if (!string.IsNullOrEmpty(filter.ServiceName))
+            {
+                var aiQuota = await quotaService.GetTenantQuotaAsync((int)TenantWalletService.AITools);
+                isAiService = aiQuota != null && aiQuota.ServiceName == filter.ServiceName;
+            }
+
+            return await accountingClient.GetCustomerOperationsAsync(portalId, filter, isAiService);
         }
         catch (Exception error)
         {

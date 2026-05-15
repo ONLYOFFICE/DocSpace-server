@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using OperationType = ASC.Core.Billing.OperationType;
+
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
@@ -162,6 +164,11 @@ public class OperationDto
     /// </summary>
     /// <example>My AI Agent</example>
     public string AgentTitle { get; set; }
+    /// <summary>
+    /// Type of the operation
+    /// </summary>
+    /// <example>Unknown</example>
+    public OperationType Type { get; set; }
 
     public OperationDto(Operation operation, ApiDateTimeHelper apiDateTimeHelper, Dictionary<string, string> participantDisplayNames, string filterServiceName, string logoText)
     {
@@ -183,6 +190,7 @@ public class OperationDto
             : operation.ParticipantName;
         AgentId = agentId;
         AgentTitle = agentTitle;
+        Type = operation.Type;
     }
 }
 
