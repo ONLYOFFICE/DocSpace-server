@@ -57,8 +57,7 @@ public class FileSharingAceHelper(
     ExternalShare externalShare,
     SettingsManager settingsManager,
     PasswordSettingsManager passwordSettingsManager,
-    EncryptionLoginProvider encryptionLoginProvider,
-    DisplayUserSettingsHelper displayUserSettingsHelper)
+    EncryptionLoginProvider encryptionLoginProvider)
 {
     private const int MaxInvitationLinks = 1;
 

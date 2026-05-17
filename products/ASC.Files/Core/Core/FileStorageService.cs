@@ -4792,7 +4792,7 @@ public class FileStorageService //: IFileStorageService
     }
 
 
-    public async Task SetEncryptionInfoAsync<T>(T fileId, IEnumerable<AccessRequestKeyDto> keys)
+    public async Task SetEncryptionInfoAsync<T>(T fileId, IEnumerable<(Guid UserId, Guid PublicKeyId, string PrivateKeyEnc)> keys)
     {
         var fileDao = daoFactory.GetFileDao<T>();
         var file = await fileDao.GetFileAsync(fileId);
