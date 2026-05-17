@@ -933,10 +933,9 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_Create);
         }
 
-        if (isRoom && privacy && await encryptionLoginProvider.GetKeysAsync(authContext.CurrentAccount.ID) == null)
+        if (isRoom && privacy)
         {
-            var userInfo = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
-            throw new InvalidOperationException($"The user {userInfo.DisplayUserName(displayUserSettingsHelper)} does not have an encryption key");
+            await encryptionLoginProvider.ThrowIfKeysAreNotSetAsync(authContext.CurrentAccount.ID);
         }
 
         var tenantId = tenantManager.GetCurrentTenantId();
@@ -4844,6 +4843,11 @@ public class FileStorageService //: IFileStorageService
             if (folder.ProviderEntry && !isRoom)
             {
                 continue;
+            }
+
+            if (isRoom && folder.SettingsPrivate)
+            {
+                await encryptionLoginProvider.ThrowIfKeysAreNotSetAsync(userId);
             }
 
             var newFolder = folder;
