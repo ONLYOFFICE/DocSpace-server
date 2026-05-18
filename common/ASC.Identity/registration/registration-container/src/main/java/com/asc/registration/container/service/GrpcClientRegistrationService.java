@@ -35,6 +35,7 @@ import com.google.protobuf.Timestamp;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.devh.boot.grpc.server.service.GrpcService;
 
 /**
@@ -44,6 +45,7 @@ import net.devh.boot.grpc.server.service.GrpcService;
  * ClientRegistrationServiceGrpc.ClientRegistrationServiceImplBase} to integrate with gRPC
  * infrastructure and handle requests.
  */
+@Slf4j
 @GrpcService
 @RequiredArgsConstructor
 public class GrpcClientRegistrationService
@@ -67,10 +69,10 @@ public class GrpcClientRegistrationService
           ClientResponse.newBuilder()
               .setClientId(client.getClientId())
               .setClientSecret(client.getClientSecret())
-              .setDescription(client.getDescription())
-              .setWebsiteUrl(client.getWebsiteUrl())
-              .setTermsUrl(client.getTermsUrl())
-              .setPolicyUrl(client.getPolicyUrl())
+              .setDescription(client.getDescription() != null ? client.getDescription() : "")
+              .setWebsiteUrl(client.getWebsiteUrl() != null ? client.getWebsiteUrl() : "")
+              .setTermsUrl(client.getTermsUrl() != null ? client.getTermsUrl() : "")
+              .setPolicyUrl(client.getPolicyUrl() != null ? client.getPolicyUrl() : "")
               .addAllAuthenticationMethods(client.getAuthenticationMethods())
               .setTenant(client.getTenant())
               .addAllRedirectUris(client.getRedirectUris())
@@ -79,13 +81,13 @@ public class GrpcClientRegistrationService
               .addAllScopes(client.getScopes())
               .setCreatedOn(
                   Timestamp.newBuilder()
-                      .setSeconds(client.getCreatedOn().getSecond())
+                      .setSeconds(client.getCreatedOn().toEpochSecond())
                       .setNanos(client.getCreatedOn().getNano())
                       .build())
               .setCreatedBy(client.getCreatedBy())
               .setModifiedOn(
                   Timestamp.newBuilder()
-                      .setSeconds(client.getModifiedOn().getSecond())
+                      .setSeconds(client.getModifiedOn().toEpochSecond())
                       .setNanos(client.getModifiedOn().getNano())
                       .build())
               .setModifiedBy(client.getModifiedBy())
@@ -94,6 +96,7 @@ public class GrpcClientRegistrationService
               .build());
       responseObserver.onCompleted();
     } catch (Exception e) {
+      log.error("Failed to retrieve client with id: {}", request.getClientId(), e);
       responseObserver.onError(
           Status.NOT_FOUND
               .withDescription("Could not find client with id " + request.getClientId())

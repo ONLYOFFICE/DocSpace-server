@@ -244,6 +244,67 @@
                     <skip>false</skip>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-grpc-netty-shaded-for-native-exclude-config</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>io.grpc</groupId>
+                                    <artifactId>grpc-netty-shaded</artifactId>
+                                    <version>${grpc.version}</version>
+                                    <outputDirectory>${project.build.directory}/native-image-deps</outputDirectory>
+                                    <destFileName>grpc-netty-shaded.jar</destFileName>
+                                </artifactItem>
+                            </artifactItems>
+                            <overWriteReleases>true</overWriteReleases>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>delete-broken-logback-aot</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <delete file="${project.build.directory}/spring-aot/main/resources/META-INF/spring/logback-pattern-rules" quiet="true"/>
+                                <delete file="${project.build.directory}/spring-aot/main/resources/META-INF/spring/logback-model" quiet="true"/>
+                                <delete file="${project.build.directory}/classes/META-INF/spring/logback-pattern-rules" quiet="true"/>
+                                <delete file="${project.build.directory}/classes/META-INF/spring/logback-model" quiet="true"/>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.graalvm.buildtools</groupId>
+                <artifactId>native-maven-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <buildArgs>
+                        <buildArg>--no-fallback</buildArg>
+                        <buildArg>-H:+ReportExceptionStackTraces</buildArg>
+                        <buildArg>-Djava.net.preferIPv4Stack=true</buildArg>
+                        <buildArg>--exclude-config</buildArg>
+                        <buildArg>${project.build.directory}/native-image-deps/grpc-netty-shaded.jar</buildArg>
+                        <buildArg>^/META-INF/native-image/io.grpc.netty.shaded.io.netty/netty-codec-http2/native-image.properties$</buildArg>
+                    </buildArgs>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>

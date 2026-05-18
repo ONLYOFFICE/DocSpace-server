@@ -62,6 +62,7 @@
         <dependency.maven.check.plugin.version>12.2.0</dependency.maven.check.plugin.version>
         <depgraph.maven.plugin.version>4.0.3</depgraph.maven.plugin.version>
         <flyway.version>12.3.0</flyway.version>
+        <graal.version>25.0.2</graal.version>
         <grpc.version>1.80.0</grpc.version>
         <grpc.starter.version>3.1.0.RELEASE</grpc.starter.version>
         <jsystemd.version>4.0.0</jsystemd.version>

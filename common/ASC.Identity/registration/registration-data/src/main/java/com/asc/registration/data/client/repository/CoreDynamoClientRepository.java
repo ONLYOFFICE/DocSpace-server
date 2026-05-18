@@ -28,6 +28,7 @@
 package com.asc.registration.data.client.repository;
 
 import com.asc.registration.core.domain.exception.ClientNotFoundException;
+import com.asc.registration.data.client.converter.SetDynamoAttributeConverter;
 import com.asc.registration.data.client.entity.ClientDynamoEntity;
 import com.asc.registration.service.exception.ExceededClientsPerResourceException;
 import java.time.ZonedDateTime;
@@ -39,8 +40,11 @@ import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Repository;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
+import software.amazon.awssdk.enhanced.dynamodb.EnhancedType;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.StaticAttributeTags;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.StaticTableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.model.*;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
@@ -57,8 +61,144 @@ public class CoreDynamoClientRepository implements DynamoClientRepository {
   private final int CLIENTS_PER_TENANT_LIMIT = 100;
   private final int CLIENTS_PER_USER_LIMIT = 10;
 
+  private static final SetDynamoAttributeConverter SET_CONVERTER =
+      new SetDynamoAttributeConverter();
+
   private static final TableSchema<ClientDynamoEntity> CLIENT_SCHEMA =
-      TableSchema.fromBean(ClientDynamoEntity.class);
+      StaticTableSchema.builder(ClientDynamoEntity.class)
+          .newItemSupplier(ClientDynamoEntity::new)
+          .addAttribute(
+              String.class,
+              a ->
+                  a.name("client_id")
+                      .getter(ClientDynamoEntity::getClientId)
+                      .setter(ClientDynamoEntity::setClientId)
+                      .tags(StaticAttributeTags.primaryPartitionKey()))
+          .addAttribute(
+              Long.class,
+              a ->
+                  a.name("tenant_id")
+                      .getter(ClientDynamoEntity::getTenantId)
+                      .setter(ClientDynamoEntity::setTenantId)
+                      .tags(StaticAttributeTags.secondaryPartitionKey("tenant-created-index")))
+          .addAttribute(
+              String.class,
+              a ->
+                  a.name("client_secret")
+                      .getter(ClientDynamoEntity::getClientSecret)
+                      .setter(ClientDynamoEntity::setClientSecret))
+          .addAttribute(
+              String.class,
+              a ->
+                  a.name("name")
+                      .getter(ClientDynamoEntity::getName)
+                      .setter(ClientDynamoEntity::setName))
+          .addAttribute(
+              String.class,
+              a ->
+                  a.name("description")
+                      .getter(ClientDynamoEntity::getDescription)
+                      .setter(ClientDynamoEntity::setDescription))
+          .addAttribute(
+              String.class,
+              a ->
+                  a.name("logo")
+                      .getter(ClientDynamoEntity::getLogo)
+                      .setter(ClientDynamoEntity::setLogo))
+          .addAttribute(
+              EnhancedType.setOf(String.class),
+              a ->
+                  a.name("authentication_methods")
+                      .getter(ClientDynamoEntity::getAuthenticationMethods)
+                      .setter(ClientDynamoEntity::setAuthenticationMethods)
+                      .attributeConverter(SET_CONVERTER))
+          .addAttribute(
+              String.class,
+              a ->
+                  a.name("website_url")
+                      .getter(ClientDynamoEntity::getWebsiteUrl)
+                      .setter(ClientDynamoEntity::setWebsiteUrl))
+          .addAttribute(
+              String.class,
+              a ->
+                  a.name("terms_url")
+                      .getter(ClientDynamoEntity::getTermsUrl)
+                      .setter(ClientDynamoEntity::setTermsUrl))
+          .addAttribute(
+              String.class,
+              a ->
+                  a.name("policy_url")
+                      .getter(ClientDynamoEntity::getPolicyUrl)
+                      .setter(ClientDynamoEntity::setPolicyUrl))
+          .addAttribute(
+              EnhancedType.setOf(String.class),
+              a ->
+                  a.name("redirect_uris")
+                      .getter(ClientDynamoEntity::getRedirectUris)
+                      .setter(ClientDynamoEntity::setRedirectUris)
+                      .attributeConverter(SET_CONVERTER))
+          .addAttribute(
+              EnhancedType.setOf(String.class),
+              a ->
+                  a.name("allowed_origins")
+                      .getter(ClientDynamoEntity::getAllowedOrigins)
+                      .setter(ClientDynamoEntity::setAllowedOrigins)
+                      .attributeConverter(SET_CONVERTER))
+          .addAttribute(
+              String.class,
+              a ->
+                  a.name("logout_redirect_uri")
+                      .getter(ClientDynamoEntity::getLogoutRedirectUri)
+                      .setter(ClientDynamoEntity::setLogoutRedirectUri))
+          .addAttribute(
+              Boolean.class,
+              a ->
+                  a.name("accessible")
+                      .getter(ClientDynamoEntity::isAccessible)
+                      .setter(ClientDynamoEntity::setAccessible))
+          .addAttribute(
+              Boolean.class,
+              a ->
+                  a.name("enabled")
+                      .getter(ClientDynamoEntity::isEnabled)
+                      .setter(ClientDynamoEntity::setEnabled))
+          .addAttribute(
+              EnhancedType.setOf(String.class),
+              a ->
+                  a.name("scopes")
+                      .getter(ClientDynamoEntity::getScopes)
+                      .setter(ClientDynamoEntity::setScopes)
+                      .attributeConverter(SET_CONVERTER))
+          .addAttribute(
+              String.class,
+              a ->
+                  a.name("created_on")
+                      .getter(ClientDynamoEntity::getCreatedOn)
+                      .setter(ClientDynamoEntity::setCreatedOn)
+                      .tags(
+                          StaticAttributeTags.secondarySortKey(
+                              List.of("tenant-created-index", "creator-created-index"))))
+          .addAttribute(
+              String.class,
+              a ->
+                  a.name("created_by")
+                      .getter(ClientDynamoEntity::getCreatedBy)
+                      .setter(ClientDynamoEntity::setCreatedBy)
+                      .tags(StaticAttributeTags.secondaryPartitionKey("creator-created-index")))
+          .addAttribute(
+              String.class,
+              a ->
+                  a.name("modified_on")
+                      .getter(ClientDynamoEntity::getModifiedOn)
+                      .setter(ClientDynamoEntity::setModifiedOn))
+          .addAttribute(
+              String.class,
+              a ->
+                  a.name("modified_by")
+                      .getter(ClientDynamoEntity::getModifiedBy)
+                      .setter(ClientDynamoEntity::setModifiedBy))
+          .build();
+
   private final DynamoDbEnhancedClient dynamoDbEnhancedClient;
   private final DynamoDbTable<ClientDynamoEntity> clientTable;
 
