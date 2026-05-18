@@ -43,9 +43,7 @@ public class PrivacyRoomTest(AspireAppFixture fixture) : BaseTest(fixture)
     {
         await _filesClient.Authenticate(Initializer.Owner);
 
-        var (publicKey, privateKey, _) = ExportPublicAndPrivateKeys();
-
-        var keys = (await _privacyRoomApi.SetKeysAsync(new EncryptionKeyRequestDto(Guid.Empty, publicKey, privateKey), cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var (publicKey, privateKey, _, keys) = await ExportPublicAndPrivateKeys();
 
         keys.Should().NotBeNull();
         keys.Should().HaveCount(1);
@@ -87,9 +85,8 @@ public class PrivacyRoomTest(AspireAppFixture fixture) : BaseTest(fixture)
         await _filesClient.Authenticate(Initializer.Owner);
 
         var settings = (await _filesSettingsApi.GetFilesSettingsAsync(TestContext.Current.CancellationToken)).Response;
-        var (userPublicKey, userPrivateKeyEnc, userPassword) = ExportPublicAndPrivateKeys();
+        var (userPublicKey, _, userPassword, userKeys) = await ExportPublicAndPrivateKeys();
 
-        var userKeys = (await _privacyRoomApi.SetKeysAsync(new EncryptionKeyRequestDto(Guid.Empty, userPublicKey, userPrivateKeyEnc), cancellationToken: TestContext.Current.CancellationToken)).Response;
         var userKey = userKeys[0];
 
         var createRequest = new CreateRoomRequestDto(
@@ -128,10 +125,26 @@ public class PrivacyRoomTest(AspireAppFixture fixture) : BaseTest(fixture)
         }
 
         var resultFile = (await _filesOperationsApi.FinalizeSessionAsync(createdRoom.Id, createdSession.Id, TestContext.Current.CancellationToken)).Response;
-
         var fileId = resultFile.Id;
-
         List<AccessRequestKeyDto> keys = [new(roomKeys[0].UserId, roomKeys[0].Id, filePrivateKeyEnc)];
+
+
+        var roomAdmin1 = await Initializer.InviteContact(EmployeeType.RoomAdmin);
+        await _filesClient.Authenticate(roomAdmin1);
+        await ExportPublicAndPrivateKeys();
+        await _filesClient.Authenticate(Initializer.Owner);
+        await _roomsApi.SetRoomSecurityAsync(createdRoom.Id, new RoomInvitationRequest
+        {
+            Invitations =
+            [
+                new RoomInvitation { Id = roomAdmin1.Id, Access = FileShare.ContentCreator }
+            ]
+        }, TestContext.Current.CancellationToken);
+
+        await _filesClient.Authenticate(roomAdmin1);
+        await Assert.ThrowsAsync<ApiException>(async () => await _filesApi.SetEncryptionInfoAsync(fileId, keys, cancellationToken: TestContext.Current.CancellationToken));
+
+        await _filesClient.Authenticate(Initializer.Owner);
         await _filesApi.SetEncryptionInfoAsync(fileId, keys, cancellationToken: TestContext.Current.CancellationToken);
 
         var result = (await _filesApi.GetEncryptionInfoAsync(fileId, cancellationToken: TestContext.Current.CancellationToken)).Response;
@@ -169,9 +182,7 @@ public class PrivacyRoomTest(AspireAppFixture fixture) : BaseTest(fixture)
         var docspaceAdmin = await Initializer.InviteContact(EmployeeType.DocSpaceAdmin);
         await _filesClient.Authenticate(docspaceAdmin);
 
-        var (userPublicKeyOwner, userPrivateKeyEncOwner, _) = ExportPublicAndPrivateKeys();
-
-        await _privacyRoomApi.SetKeysAsync(new EncryptionKeyRequestDto(Guid.Empty, userPublicKeyOwner, userPrivateKeyEncOwner), cancellationToken: TestContext.Current.CancellationToken);
+        await ExportPublicAndPrivateKeys();
 
         var createRequest = new CreateRoomRequestDto(
             title: "private room",
@@ -194,9 +205,7 @@ public class PrivacyRoomTest(AspireAppFixture fixture) : BaseTest(fixture)
 
         await _filesClient.Authenticate(roomAdmin1);
 
-        var (userPublicKey, userPrivateKeyEnc, userPassword) = ExportPublicAndPrivateKeys();
-
-        await _privacyRoomApi.SetKeysAsync(new EncryptionKeyRequestDto(Guid.Empty, userPublicKey, userPrivateKeyEnc), cancellationToken: TestContext.Current.CancellationToken);
+        await ExportPublicAndPrivateKeys();
 
         await _filesClient.Authenticate(docspaceAdmin);
 
@@ -211,7 +220,7 @@ public class PrivacyRoomTest(AspireAppFixture fixture) : BaseTest(fixture)
         security.Response.Members.Should().Contain(r=> r.SharedToUser.Id == roomAdmin1.Id && r.Access == FileShare.ContentCreator);
     }
 
-    private static Key ExportPublicAndPrivateKeys()
+    private async Task<Key> ExportPublicAndPrivateKeys()
     {
         using var rsa = RSA.Create(2048);
         var publicKey = Convert.ToBase64String(rsa.ExportSubjectPublicKeyInfo());
@@ -223,7 +232,10 @@ public class PrivacyRoomTest(AspireAppFixture fixture) : BaseTest(fixture)
         var password = Initializer.FakerMember.Generate().Password;
 
         var privateKey = Convert.ToBase64String(rsa.ExportEncryptedPkcs8PrivateKey(password, pbeParameters));
-        return new Key(publicKey, privateKey, password);
+
+        var keys = (await _privacyRoomApi.SetKeysAsync(new EncryptionKeyRequestDto(Guid.Empty, publicKey, privateKey), cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        return new Key(publicKey, privateKey, password, keys);
     }
 
     private static string DecryptPrivateEncKey(string encryptedPrivateKey, string password)
@@ -266,8 +278,4 @@ public class PrivacyRoomTest(AspireAppFixture fixture) : BaseTest(fixture)
     }
 }
 
-public record Key(string PublicKey, string PrivateKey, string Password);
-public record SessionData(Session Data);
-public record Session(string Location);
-public record FileData(File Data);
-public record File(int Id);
+public record Key(string PublicKey, string PrivateKey, string Password, List<EncryptionKeyDto> Keys);

@@ -4809,13 +4809,22 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
+        var parentRoom = await DocSpaceHelper.GetParentRoom(file, daoFactory.GetCacheFolderDao<T>());
+        if(!await fileSharingHelper.CanSetAccessAsync(parentRoom))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
         foreach (var k in keys)
         {
             if (!await fileSecurity.CanReadAsync(file, k.UserId))
             {
                 throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
             }
+        }
 
+        foreach (var k in keys)
+        {
             await fileDao.SetFileKey(fileId, k.UserId, k.PublicKeyId, k.PrivateKeyEnc);
         }
     }
