@@ -144,6 +144,7 @@ public abstract class PeopleControllerBase(
         };
 
         using var httpClient = new HttpClient(handler, disposeHandler: true);
+        httpClient.Timeout = TimeSpan.FromSeconds(10);
         using var request = new HttpRequestMessage(HttpMethod.Get, photoValidation.ParsedUri);
         using var response = await httpClient.SendAsync(request);
 

@@ -437,6 +437,7 @@ public class WebhooksController(
         }
 
         using var httpClient = new HttpClient(handler, disposeHandler: true);
+        httpClient.Timeout = TimeSpan.FromSeconds(10);
         using var request = new HttpRequestMessage(HttpMethod.Head, validationResult.ParsedUri);
         using var response = await httpClient.SendAsync(request);
 
