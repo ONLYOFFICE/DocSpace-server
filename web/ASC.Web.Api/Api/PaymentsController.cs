@@ -1336,7 +1336,7 @@ public class PaymentController(
     [HttpGet("ai-prices")]
     public async Task<AiPricesDto> GetAiPrices()
     {
-        if (!tariffService.IsConfigured())
+        if (!tariffService.IsConfigured() || !aiGateway.Configured)
         {
             throw new InvalidOperationException("Tariff service is not configured");
         }
@@ -1417,7 +1417,7 @@ public class PaymentController(
     [HttpGet("ai-model/restrictions")]
     public async Task<RestrictedModelsResponse> GetRestrictedAiModels()
     {
-        if (!tariffService.IsConfigured())
+        if (!tariffService.IsConfigured() || !aiGateway.Configured)
         {
             throw new InvalidOperationException("Tariff service is not configured");
         }
@@ -1443,12 +1443,12 @@ public class PaymentController(
     [HttpPut("ai-model/restrictions")]
     public async Task<RestrictedModelsResponse> SetRestrictedAiModels(SetRestrictedAiModelsRequestDto inDto)
     {
-        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-
-        if (!tariffService.IsConfigured())
+        if (!tariffService.IsConfigured() || !aiGateway.Configured)
         {
             throw new InvalidOperationException("Tariff service is not configured");
         }
+
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var tenant = tenantManager.GetCurrentTenant();
 
