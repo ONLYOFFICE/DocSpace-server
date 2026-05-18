@@ -495,6 +495,12 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
 
                         await socketManager.DeleteFileAsync(file, action: async () => await FileDao.MoveFileAsync(file.Id, _trashId, file.RootFolderType == FolderType.USER));
 
+                        if (file.Id is int trashedFormFileId)
+                        {
+                            var factoryIndexerForm = scope.ServiceProvider.GetService<FactoryIndexerForm>();
+                            await factoryIndexerForm.DeleteAsync(r => r.Where(s => s.Id, trashedFormFileId));
+                        }
+
                         if (isNeedSendActions)
                         {
                             await filesMessageService.SendAsync(MessageAction.FileMovedToTrash, file, _headers, file.Title);
