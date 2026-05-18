@@ -214,11 +214,18 @@ public class FormFillingReportTask : DocumentBuilderTask<int, FormFillingReportT
         var customColorThemesSettings = await settingsManager.LoadAsync<CustomColorThemesSettings>();
         var selectedColorTheme = customColorThemesSettings.Themes.First(x => x.Id == customColorThemesSettings.Selected);
 
+        var sheetName = properties?.FormFilling?.Title;
+        if (string.IsNullOrEmpty(sheetName))
+        {
+            var form = await daoFactory.GetFileDao<int>().GetFileAsync(originalFormId);
+            sheetName = Path.GetFileNameWithoutExtension(form?.Title ?? string.Empty);
+        }
+
         var data = new
         {
             resources = new
             {
-                sheetName = properties.FormFilling.Title
+                sheetName
             },
 
             themeColors = new

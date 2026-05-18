@@ -1983,6 +1983,8 @@ public class FileStorageService //: IFileStorageService
             }
 
             var properties = await fileDao.GetProperties(fileId) ?? new EntryProperties<T> { FormFilling = new FormFillingProperties<T>() };
+            properties.FormFilling.RoomId = folder.Id;
+            properties.FormFilling.Title = Path.GetFileNameWithoutExtension(file.Title);
             properties.FormFilling.StartFilling = true;
             properties.FormFilling.OriginalFormId = fileId;
             properties.FormFilling.StartedByUserId = authContext.CurrentAccount.ID;
@@ -5349,8 +5351,17 @@ public class FileStorageService //: IFileStorageService
         var resultsFile = await resultsFileTask;
         var room = await roomTask;
 
-        if (room == null ||
-            formFilling.RoomId != room.Id)
+        if (room == null)
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (formFilling.RoomId == 0)
+        {
+            formFilling.RoomId = room.Id;
+            await fileDao.SaveProperties(form.Id, properties);
+        }
+        else if (formFilling.RoomId != room.Id)
         {
             throw new InvalidOperationException();
         }
@@ -5490,9 +5501,17 @@ public class FileStorageService //: IFileStorageService
         var room = await roomTask;
         var resultFolder = await resultFolderTask;
 
-        if (room == null ||
-            formFilling.RoomId != room.Id ||
-            room.FolderType != FolderType.FillingFormsRoom)
+        if (room == null || room.FolderType != FolderType.FillingFormsRoom)
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (formFilling.RoomId == 0)
+        {
+            formFilling.RoomId = room.Id;
+            await fileDao.SaveProperties(form.Id, properties);
+        }
+        else if (formFilling.RoomId != room.Id)
         {
             throw new InvalidOperationException();
         }
