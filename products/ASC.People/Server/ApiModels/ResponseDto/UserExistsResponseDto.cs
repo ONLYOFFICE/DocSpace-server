@@ -42,7 +42,7 @@ public class UserExistsResponseDto
     /// Specifies whether the user exists or not.
     /// </summary>
     /// <example>true</example>
-    public required bool Exist { get; set; }
+    public required bool Exists { get; set; }
 
     /// <summary>
     /// The user status, if the user exists.
