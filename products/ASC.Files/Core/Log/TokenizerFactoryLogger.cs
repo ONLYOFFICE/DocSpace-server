@@ -31,38 +31,10 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using Microsoft.ML.Tokenizers;
+namespace ASC.Files.Core.Log;
 
-namespace ASC.Files.Core.Text;
-
-[Singleton]
-public class TokenizerFactory(ILogger<TokenizerFactory> logger)
+internal static partial class TokenizerFactoryLogger
 {
-    private readonly ConcurrentDictionary<string, Func<string, int>> _cache = new();
-
-    public Func<string, int> GetTokenCounter(string modelId)
-    {
-        ArgumentException.ThrowIfNullOrEmpty(modelId);
-
-        return _cache.GetOrAdd(modelId, CreateTokenCounter);
-    }
-
-    private Func<string, int> CreateTokenCounter(string modelId)
-    {
-        try
-        {
-            var tokenizer = TiktokenTokenizer.CreateForModel(modelId);
-            return text => tokenizer.CountTokens(text);
-        }
-        catch (Exception e) when (e is NotSupportedException or ArgumentException)
-        {
-            logger.WarningTokenizerFallback(modelId, e);
-            return HeuristicTokenCounter;
-        }
-    }
-
-    private static int HeuristicTokenCounter(string text)
-    {
-        return text.Length >> 2; // ~4 chars per token.
-    }
+    [LoggerMessage(LogLevel.Warning, "Tiktoken does not recognise embedding model '{modelId}'; falling back to heuristic token counter (chars / 4)")]
+    public static partial void WarningTokenizerFallback(this ILogger<TokenizerFactory> logger, string modelId, Exception exception);
 }

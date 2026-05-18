@@ -48,28 +48,31 @@ public class JsonDocumentProcessingStrategy : IDocumentProcessingStrategy
         ChunkerSettings settings,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        using var reader = new StreamReader(content, Encoding.UTF8, leaveOpen: true);
-        var text = await reader.ReadToEndAsync(cancellationToken);
-        cancellationToken.ThrowIfCancellationRequested();
-
-        if (string.IsNullOrWhiteSpace(text))
-        {
-            yield break;
-        }
-
         JsonDocument? document = null;
-        var parseFailed = false;
         try
         {
-            document = JsonDocument.Parse(text);
+            document = await JsonDocument.ParseAsync(content, cancellationToken: cancellationToken);
         }
         catch (JsonException)
         {
-            parseFailed = true;
+            // Stream may have been partially consumed by the failed parse — fall back to plain-text chunking.
         }
 
-        if (parseFailed)
+        if (document is null)
         {
+            if (content.CanSeek)
+            {
+                content.Position = 0;
+            }
+
+            using var reader = new StreamReader(content, Encoding.UTF8, leaveOpen: true);
+            var text = await reader.ReadToEndAsync(cancellationToken);
+
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                yield break;
+            }
+
             foreach (var chunk in TextChunkingHelper.Split(text, settings))
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -77,11 +80,6 @@ public class JsonDocumentProcessingStrategy : IDocumentProcessingStrategy
             }
 
             yield break;
-        }
-
-        if (document == null)
-        {
-            throw new InvalidOperationException("JSON document parsing did not produce a result.");
         }
 
         using (document)
