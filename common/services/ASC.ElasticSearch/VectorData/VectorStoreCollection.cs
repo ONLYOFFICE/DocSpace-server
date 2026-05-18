@@ -194,26 +194,24 @@ public class VectorStoreCollection<TRecord>(
 
         if (immediate)
         {
-            await DeleteAsync(searchOptions, cancellationToken);
+            await DeleteCoreAsync(searchOptions, cancellationToken);
             return;
         }
-        
-        var task = new Task(async void () =>
+
+        _ = Task.Factory.StartNew(async () =>
         {
             try
             {
-                await DeleteAsync(searchOptions, cancellationToken);
+                await DeleteCoreAsync(searchOptions, cancellationToken);
             }
             catch (Exception e)
             {
                 logger.ErrorWithException("Failed to delete file vector data", e);
             }
-        }, cancellationToken, TaskCreationOptions.LongRunning);
-        
-        task.Start(scheduler);
+        }, CancellationToken.None, TaskCreationOptions.LongRunning, scheduler).Unwrap();
     }
 
-    private async Task DeleteAsync(VectorSearchOptions<TRecord>? searchOptions = null, CancellationToken cancellationToken = default)
+    private async Task DeleteCoreAsync(VectorSearchOptions<TRecord>? searchOptions = null, CancellationToken cancellationToken = default)
     {
         var request = new DeleteByQueryRequest(name);
         
