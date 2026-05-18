@@ -33,6 +33,7 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     protected const string ProfilesBatchPath = "/api/2.0/ai/integration/profiles/batch";
     protected const string AssignmentsPath = "/api/2.0/ai/integration/assignments";
     protected const string ThreadsPath = "/api/2.0/ai/integration/threads";
+    protected const string MessagesPath = "/api/2.0/ai/integration/messages";
 
     private static readonly JsonSerializerOptions _readJsonOptions = new()
     {
@@ -142,6 +143,58 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
 
         using var response = await Ai.GetAsync(path, TestContext.Current.CancellationToken);
         return await Ai.ReadAsync<List<ThreadDto>>(response, TestContext.Current.CancellationToken);
+    }
+
+    protected static string BuildMessageContents(string? text = null) =>
+        $$"""[{"$type":"text","text":"{{text ?? $"message-{Guid.NewGuid():N}"}}"}]""";
+
+    protected static bool JsonEquals(string? left, string? right)
+    {
+        if (left is null || right is null)
+        {
+            return left == right;
+        }
+
+        return System.Text.Json.Nodes.JsonNode.DeepEquals(
+            System.Text.Json.Nodes.JsonNode.Parse(left),
+            System.Text.Json.Nodes.JsonNode.Parse(right));
+    }
+
+    protected async Task<MessageDto> CreateMessageAsync(Guid threadId, string? contents = null)
+    {
+        using var response = await Ai.PostAsync(
+            $"{ThreadsPath}/{threadId}/messages",
+            new { contents = contents ?? BuildMessageContents() },
+            TestContext.Current.CancellationToken);
+        return await Ai.ReadAsync<MessageDto>(response, TestContext.Current.CancellationToken);
+    }
+
+    protected async Task<MessageDto> ReadMessageAsync(Guid id)
+    {
+        using var response = await Ai.GetAsync($"{MessagesPath}/{id}", TestContext.Current.CancellationToken);
+        return await Ai.ReadAsync<MessageDto>(response, TestContext.Current.CancellationToken);
+    }
+
+    protected async Task<List<MessageDto>> ReadMessagesByThreadAsync(Guid threadId, int? limit = null, int? startIndex = null)
+    {
+        var query = new List<string>();
+        if (limit is not null)
+        {
+            query.Add($"limit={limit}");
+        }
+        if (startIndex is not null)
+        {
+            query.Add($"startIndex={startIndex}");
+        }
+
+        var path = $"{ThreadsPath}/{threadId}/messages";
+        if (query.Count > 0)
+        {
+            path += "?" + string.Join("&", query);
+        }
+
+        using var response = await Ai.GetAsync(path, TestContext.Current.CancellationToken);
+        return await Ai.ReadAsync<List<MessageDto>>(response, TestContext.Current.CancellationToken);
     }
 
     protected async Task<int> CreateRoomAsync(string? title = null)
