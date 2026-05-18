@@ -39,7 +39,7 @@ namespace ASC.Files.Tests.Tests._08_Privacy;
 public class PrivacyRoomTest(AspireAppFixture fixture) : BaseTest(fixture)
 {
     [Fact]
-    public async Task CRUDUserPrivateKey()
+    public async Task CRUD_UserPrivateKey()
     {
         await _filesClient.Authenticate(Initializer.Owner);
 
@@ -82,7 +82,7 @@ public class PrivacyRoomTest(AspireAppFixture fixture) : BaseTest(fixture)
     }
 
     [Fact]
-    public async Task SetFileAccess()
+    public async Task SetFileAccess_PrivateRoom_WithUserKeys_ReturnsOk()
     {
         await _filesClient.Authenticate(Initializer.Owner);
 

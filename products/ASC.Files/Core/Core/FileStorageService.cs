@@ -4801,13 +4801,19 @@ public class FileStorageService //: IFileStorageService
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
+
         if (!await fileSecurity.CanReadAsync(file))
         {
-            throw new InvalidOperationException( FilesCommonResource.ErrorMessage_SecurityException);
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
         foreach (var k in keys)
         {
+            if (!await fileSecurity.CanReadAsync(file, k.UserId))
+            {
+                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
+            }
+
             await fileDao.SetFileKey(fileId, k.UserId, k.PublicKeyId, k.PrivateKeyEnc);
         }
     }
