@@ -2,7 +2,7 @@ ARG REGISTRATION_JAR
 ARG AUTHORIZATION_JAR
 
 # Stage 1: Create custom JRE with jlink
-FROM eclipse-temurin:21-jdk-alpine AS jre-builder
+FROM eclipse-temurin:25-jdk-alpine AS jre-builder
 
 RUN $JAVA_HOME/bin/jlink \
     --add-modules java.base,java.logging,java.sql,java.naming,java.management,jdk.management,java.instrument,java.security.jgss,java.desktop,jdk.unsupported,java.compiler,jdk.crypto.ec,java.net.http,jdk.httpserver \
@@ -13,14 +13,14 @@ RUN $JAVA_HOME/bin/jlink \
     --output /custom-jre
 
 # Stage 2: Extract from registration JAR
-FROM eclipse-temurin:21-jdk-alpine AS extractor-reg
+FROM eclipse-temurin:25-jdk-alpine AS extractor-reg
 ARG REGISTRATION_JAR
 WORKDIR /extract
 COPY ${REGISTRATION_JAR} app.jar
 RUN java -Djarmode=tools -jar app.jar extract --launcher --destination extracted
 
 # Stage 3: Extract from authorization JAR
-FROM eclipse-temurin:21-jdk-alpine AS extractor-auth
+FROM eclipse-temurin:25-jdk-alpine AS extractor-auth
 ARG AUTHORIZATION_JAR
 WORKDIR /extract
 COPY ${AUTHORIZATION_JAR} app.jar

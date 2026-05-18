@@ -188,6 +188,8 @@ public abstract class AbstractRegistrationServiceIT {
         .allowPkce(true)
         .isPublic(true)
         .allowedOrigins(Set.of("https://updated.example.com"))
+        .redirectUris(Set.of("https://updated.example.com/redirect"))
+        .scopes(Set.of("files:read", "openid"))
         .build();
   }
 

@@ -37,6 +37,8 @@ import com.asc.common.utilities.validation.URLCollection;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.io.Serializable;
@@ -128,6 +130,7 @@ public class UpdateClientRequest implements Serializable {
 
   /** The allowed origins for the client. */
   @JsonProperty("allowed_origins")
+  @NotNull(message = "allowed origins must not be null")
   @URLCollection
   @Size(
       min = 1,
@@ -137,4 +140,22 @@ public class UpdateClientRequest implements Serializable {
       description = "The allowed origins for the client",
       example = "[\"http://allowed.origin\"]")
   private Set<String> allowedOrigins;
+
+  /** The redirect URIs for the client. */
+  @JsonProperty("redirect_uris")
+  @NotNull(message = "redirect uris must not be null")
+  @URLCollection
+  @Size(
+      min = 1,
+      max = 12,
+      message = "redirect uris must contain at least 1 and at most 12 addresses")
+  @Schema(
+      description = "The redirect URIs for the client",
+      example = "[\"https://example.com/callback\"]")
+  private Set<String> redirectUris;
+
+  /** The scopes for the client. This field cannot be empty. */
+  @NotEmpty(message = "scopes field can not be empty")
+  @Schema(description = "The scopes for the client", example = "[\"files:read\", \"files:write\"]")
+  private Set<String> scopes;
 }
