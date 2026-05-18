@@ -1,28 +1,35 @@
-// (c) Copyright Ascensio System SIA 2009-2026
-//
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
-//
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
-//
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// Copyright (C) Ascensio System SIA, 2009-2026
+// 
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
+// 
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
+// 
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
+// 
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
+// 
+// No trademark rights are granted under this License.
+// 
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 using ImageMagick;
 
@@ -199,6 +206,12 @@ public class FileDto<T> : FileEntryDto<T>
     public string InProcessFolderTitle { get; set; }
 
     /// <summary>
+    /// The ID of the FormFillingFolderDone folder that corresponds to this original form.
+    /// </summary>
+    /// <example>55</example>
+    public int? ResultsFolderId { get; set; }
+
+    /// <summary>
     /// The file draft information with its location.
     /// </summary>
     /// <example>{"folderId": 10, "folderTitle": "In Process", "fileId": 123, "fileTitle": "Draft.pdf"}</example>
@@ -233,6 +246,13 @@ public class FileDto<T> : FileEntryDto<T>
     /// </summary>
     /// <example>0</example>
     public VectorizationStatus? VectorizationStatus { get; set; }
+
+    /// <summary>
+    /// The name of the table in the external database that corresponds to this form.
+    /// </summary>
+    /// <example>form_123_v1</example>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string ExternalDbTableName { get; set; }
 
     /// <summary>
     /// The dimensions (width and height) of the image file in pixels.
@@ -452,9 +472,9 @@ public class FileDtoHelper(
 
         await Task.WhenAll(getFileTask, badgesTask, fileStateTask);
 
-        var result = getFileTask.Result;
-        var isEnabledBadges = badgesTask.Result;
-        var fileState = fileStateTask.Result;
+        var result = await getFileTask;
+        var isEnabledBadges = await badgesTask;
+        var fileState = await fileStateTask;
 
         file.SetFileState(fileState);
 
@@ -497,9 +517,9 @@ public class FileDtoHelper(
             var currentFolderTask = folderDao.GetFolderAsync(file.ParentId);
             await Task.WhenAll(linkedIdTask, propertiesTask, currentFolderTask);
 
-            var linkedId = linkedIdTask.Result;
-            var properties = propertiesTask.Result;
-            var currentFolder = currentFolderTask.Result;
+            var linkedId = await linkedIdTask;
+            var properties = await propertiesTask;
+            var currentFolder = await currentFolderTask;
 
             Folder<T> currentRoom;
             if (!currentFolder.IsRoom && file.RootFolderType is FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates or FolderType.DefaultTemplates)
@@ -532,7 +552,6 @@ public class FileDtoHelper(
                     else
                     {
                         result.Security[FileSecurity.FilesSecurityActions.FillForms] = true;
-                        result.Security[FileSecurity.FilesSecurityActions.StopFilling] = true;
                     }
                 }
                 else
@@ -565,6 +584,7 @@ public class FileDtoHelper(
             if (formFilling != null)
             {
                 result.StartFilling = formFilling.StartFilling;
+                result.ExternalDbTableName = formFilling.ExternalDbTableName;
                 if (!Equals(linkedId, default(T)))
                 {
                     var draftLocation = new DraftLocation<T> { FolderId = formFilling.ToFolderId, FolderTitle = formFilling.Title, FileId = linkedId };
@@ -583,7 +603,12 @@ public class FileDtoHelper(
                 && Equals(file.Id, formFilling.OriginalFormId);
 
             result.Security[FileSecurity.FilesSecurityActions.UpdateXlsx] = isOriginalForm
-                && result.Security[FileSecurity.FilesSecurityActions.Edit];
+                && (result.Security[FileSecurity.FilesSecurityActions.Edit] || file.Access == FileShare.ContentCreator);
+
+            if (isOriginalForm && formFilling.ResultsFolderId is int resultsFolderId)
+            {
+                result.ResultsFolderId = resultsFolderId;
+            }
 
             if (currentRoom is { FolderType: FolderType.VirtualDataRoom })
             {
@@ -643,7 +668,7 @@ public class FileDtoHelper(
                 if (xlsxFolder.FolderType == FolderType.FormFillingFolderDone)
                 {
                     var originalForm = await fileDao.GetFileAsync(xlsxFormFilling.OriginalFormId);
-                    canUpdateXlsx = originalForm != null && await _fileSecurity.CanEditAsync(originalForm);
+                    canUpdateXlsx = originalForm != null && (await _fileSecurity.CanEditAsync(originalForm) || file.Access == FileShare.ContentCreator);
                 }
             }
 
@@ -709,7 +734,7 @@ public class FileDtoHelper(
                 var room = parents.FirstOrDefault(f => f.IsRoom);
                 if (room != null)
                 {
-                    result.OwnedBy = await _employeeWrapperHelper.GetAsync(room.CreateBy);
+                    result.OwnedBy = authContext.IsAuthenticated ? await _employeeWrapperHelper.GetAsync(room.CreateBy) : null;
                 }
             }
 

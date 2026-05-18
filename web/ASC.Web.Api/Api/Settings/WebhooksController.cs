@@ -1,28 +1,35 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 using Microsoft.AspNetCore.RateLimiting;
 
@@ -44,6 +51,7 @@ public class WebhooksController(
     PasswordSettingsManager passwordSettingsManager,
     IHttpClientFactory clientFactory,
     IConfiguration configuration,
+    ILogger<WebhooksController> logger,
     WebhooksConfigDtoHelper webhooksConfigDtoHelper)
     : BaseSettingsController(fusionCache, webItemManager)
 {
@@ -57,6 +65,7 @@ public class WebhooksController(
     /// <collection>list</collection>
     [Tags("Settings / Webhooks")]
     [SwaggerResponse(200, "List of tenant webhooks with their config parameters", typeof(IAsyncEnumerable<WebhooksConfigWithStatusDto>))]
+    [SwaggerResponse(403, "Access denied")]
     [HttpGet("webhook")]
     public async IAsyncEnumerable<WebhooksConfigWithStatusDto> GetTenantWebhooks()
     {
@@ -77,12 +86,14 @@ public class WebhooksController(
     /// <path>api/2.0/settings/webhook</path>
     [Tags("Settings / Webhooks")]
     [SwaggerResponse(200, "Tenant webhook with its config parameters", typeof(WebhooksConfigDto))]
+    [SwaggerResponse(400, "Invalid or empty parameters")]
+    [SwaggerResponse(403, "Access denied")]
     [HttpPost("webhook")]
     public async Task<WebhooksConfigDto> CreateWebhook(CreateWebhooksConfigRequestsDto inDto)
     {
         _ = await CheckAdminPermissionsAsync();
 
-        await CheckWebhook(inDto.Name, inDto.Uri, inDto.SecretKey, inDto.SSL, true);
+        await CheckWebhook(inDto.Name, inDto.Uri, inDto.SecretKey, inDto.SSL, inDto.Triggers, true);
 
         var webhook = await dbWorker.AddWebhookConfig(inDto.Name, inDto.Uri, inDto.SecretKey, inDto.Enabled, inDto.SSL, inDto.Triggers, inDto.TargetId);
 
@@ -100,10 +111,13 @@ public class WebhooksController(
     /// <path>api/2.0/settings/webhook</path>
     [Tags("Settings / Webhooks")]
     [SwaggerResponse(200, "Updated tenant webhook with its config parameters", typeof(WebhooksConfigDto))]
+    [SwaggerResponse(400, "Invalid or empty parameters")]
+    [SwaggerResponse(403, "Access denied")]
+    [SwaggerResponse(404, "Item not found")]
     [HttpPut("webhook")]
     public async Task<WebhooksConfigDto> UpdateWebhook(UpdateWebhooksConfigRequestsDto inDto)
     {
-        await CheckWebhook(inDto.Name, inDto.Uri, inDto.SecretKey, inDto.SSL, false);
+        await CheckWebhook(inDto.Name, inDto.Uri, inDto.SecretKey, inDto.SSL, inDto.Triggers, false);
 
         var existingWebhook = await dbWorker.GetWebhookConfig(tenantManager.GetCurrentTenantId(), inDto.Id);
 
@@ -148,6 +162,9 @@ public class WebhooksController(
     /// <path>api/2.0/settings/webhook/enable</path>
     [Tags("Settings / Webhooks")]
     [SwaggerResponse(200, "Enable or disable tenant webhook", typeof(WebhooksConfigDto))]
+    [SwaggerResponse(400, "Invalid or empty parameters")]
+    [SwaggerResponse(403, "Access denied")]
+    [SwaggerResponse(404, "Item not found")]
     [HttpPut("webhook/enable")]
     public async Task<WebhooksConfigDto> EnableWebhook(UpdateWebhooksConfigRequestsDto inDto)
     {
@@ -168,7 +185,7 @@ public class WebhooksController(
 
         if (inDto.Enabled)
         {
-            await CheckWebhook(existingWebhook.Name, existingWebhook.Uri, existingWebhook.SecretKey, existingWebhook.SSL, false);
+            await CheckWebhook(existingWebhook.Name, existingWebhook.Uri, existingWebhook.SecretKey, existingWebhook.SSL, existingWebhook.Triggers, false);
         }
 
         existingWebhook.Enabled = inDto.Enabled;
@@ -189,6 +206,8 @@ public class WebhooksController(
     /// <path>api/2.0/settings/webhook</path>
     [Tags("Settings / Webhooks")]
     [SwaggerResponse(200, "Tenant webhook with its config parameters", typeof(WebhooksConfigDto))]
+    [SwaggerResponse(403, "Access denied")]
+    [SwaggerResponse(404, "Item not found")]
     [HttpDelete("webhook/{id:int}")]
     public async Task<WebhooksConfigDto> RemoveWebhook(IdRequestDto<int> inDto)
     {
@@ -224,6 +243,7 @@ public class WebhooksController(
     /// <collection>list</collection>
     [Tags("Settings / Webhooks")]
     [SwaggerResponse(200, "Logs of the webhook activities", typeof(IAsyncEnumerable<WebhooksLogDto>))]
+    [SwaggerResponse(403, "Access denied")]
     [HttpGet("webhooks/log")]
     public async IAsyncEnumerable<WebhooksLogDto> GetWebhooksLogs(WebhookLogsRequestDto inDto)
     {
@@ -251,6 +271,7 @@ public class WebhooksController(
     [Tags("Settings / Webhooks")]
     [SwaggerResponse(200, "Logs of the webhook activities", typeof(WebhooksLogDto))]
     [SwaggerResponse(400, "Id incorrect")]
+    [SwaggerResponse(403, "Access denied")]
     [SwaggerResponse(404, "Item not found")]
     [HttpPut("webhook/{id:int}/retry")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
@@ -291,6 +312,7 @@ public class WebhooksController(
     /// <collection>list</collection>
     [Tags("Settings / Webhooks")]
     [SwaggerResponse(200, "Logs of the webhook activities", typeof(IAsyncEnumerable<WebhooksLogDto>))]
+    [SwaggerResponse(403, "Access denied")]
     [HttpPut("webhook/retry")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async IAsyncEnumerable<WebhooksLogDto> RetryWebhooks(WebhookRetryRequestsDto inDto)
@@ -319,7 +341,7 @@ public class WebhooksController(
     }
 
     /// <remarks>
-    /// Returns a list of triggers for a webhook.
+    /// Returns a list of triggers for a webhook with their availability for the current user.
     /// </remarks>
     /// <summary>
     /// Get webhook triggers
@@ -327,11 +349,20 @@ public class WebhooksController(
     /// <path>api/2.0/settings/webhook/triggers</path>
     /// <collection>list</collection>
     [Tags("Settings / Webhooks")]
-    [SwaggerResponse(200, "List of triggers for a webhook", typeof(Dictionary<string, int>))]
+    [SwaggerResponse(200, "List of triggers with availability for the current user", typeof(IEnumerable<WebhookTriggerDto>))]
     [HttpGet("webhook/triggers")]
-    public Dictionary<string, int> GetWebhookTriggers()
+    public async Task<IEnumerable<WebhookTriggerDto>> GetWebhookTriggers()
     {
-        return Enum.GetValues<WebhookTrigger>().ToDictionary(item => item.ToCustomString(), item => (int)item);
+        var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
+
+        return Enum.GetValues<WebhookTrigger>()
+            .OrderBy(t => t.GetOrder())
+            .Select(t => new WebhookTriggerDto
+            {
+                Name = t.ToCustomString(),
+                Id = (long)t,
+                Available = t.IsAvailableFor(userType)
+            });
     }
 
     private async Task<bool> CheckAdminPermissionsAsync()
@@ -358,10 +389,28 @@ public class WebhooksController(
         return false;
     }
 
-    private async Task CheckWebhook(string name, string uri, string secret, bool ssl, bool creation)
+    private async Task CheckWebhook(string name, string uri, string secret, bool ssl, WebhookTrigger triggers, bool creation)
     {
         ArgumentNullException.ThrowIfNull(name);
         ArgumentNullException.ThrowIfNull(uri);
+
+        if (triggers != WebhookTrigger.All)
+        {
+            var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
+
+            foreach (var trigger in Enum.GetValues<WebhookTrigger>())
+            {
+                if (trigger == WebhookTrigger.All)
+                {
+                    continue;
+                }
+
+                if (triggers.HasFlag(trigger) && !trigger.IsAvailableFor(userType))
+                {
+                    throw new ArgumentException("Trigger is not available");
+                }
+            }
+        }
 
         if (creation || !string.IsNullOrEmpty(secret))
         {
@@ -374,25 +423,46 @@ public class WebhooksController(
 
         var restrictions = configuration.GetSection("webhooks:blacklist").Get<List<string>>() ?? [];
 
-        if (Uri.TryCreate(uri, UriKind.Absolute, out var parsedUri) &&
-            IPAddress.TryParse(parsedUri.Host, out _) &&
+        if (!Uri.TryCreate(uri, UriKind.Absolute, out var parsedUri))
+        {
+            throw new ArgumentException("Invalid URI format");
+        }
+
+        if (IPAddress.TryParse(parsedUri.Host, out _) &&
             restrictions.Any(r => IPAddressRange.MatchIPs(parsedUri.Host, r)))
         {
             throw new ArgumentException();
         }
 
-        var httpClientName = "";
-
-        if (Uri.UriSchemeHttps.Equals(parsedUri.Scheme.ToLower(), StringComparison.OrdinalIgnoreCase) && !ssl)
+        IPAddress[] addresses;
+        try
         {
-            httpClientName = "defaultHttpClientSslIgnore";
+            addresses = await Dns.GetHostAddressesAsync(parsedUri.Host);
+        }
+        catch (Exception e)
+        {
+            var errorMsg = $"DNS resolution failed for {parsedUri.Host}";
+            logger.WarningWithException(errorMsg, e);
+            throw new ArgumentException(errorMsg);
+        }
+
+        if (addresses.Any(a => restrictions.Any(r => IPAddressRange.MatchIPs(a.ToString(), r))))
+        {
+            throw new ArgumentException();
+        }
+
+        var httpClientName = "customHttpClient";
+
+        if (Uri.UriSchemeHttps.Equals(parsedUri.Scheme, StringComparison.OrdinalIgnoreCase) && !ssl)
+        {
+            httpClientName = "customHttpClientSslIgnore";
         }
 
         using var httpClient = clientFactory.CreateClient(httpClientName);
         using var request = new HttpRequestMessage(HttpMethod.Head, uri);
         using var response = await httpClient.SendAsync(request);
 
-        if (!response.IsSuccessStatusCode)
+        if (response is not { IsSuccessStatusCode: true })
         {
             throw new ArgumentException(Resource.ErrorWebhookUrlNotAvaliable);
         }

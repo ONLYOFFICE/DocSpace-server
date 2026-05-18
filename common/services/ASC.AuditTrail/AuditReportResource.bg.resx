@@ -1131,4 +1131,67 @@
   <data name="WebpluginUploaded" xml:space="preserve">
     <value>Качен плъгин: {0}</value>
   </data>
+  <data name="AIAccessDisabled" xml:space="preserve">
+    <value>AI услугите са деактивирани</value>
+  </data>
+  <data name="AIAccessEnabled" xml:space="preserve">
+    <value>AI услугите са активирани</value>
+  </data>
+  <data name="AIDefaultProviderDeleted" xml:space="preserve">
+    <value>Доставчикът по подразбиране е изтрит</value>
+  </data>
+  <data name="AIDefaultProviderSet" xml:space="preserve">
+    <value>Зададен AI доставчик по подразбиране: Име: {0}, Модел по подразбиране: {1}</value>
+  </data>
+  <data name="BackupCancelled" xml:space="preserve">
+    <value>Архивирането е отменено</value>
+  </data>
+  <data name="DocumentsDefaultTemplatesSettingsUpdated" xml:space="preserve">
+    <value>Настройките на шаблона по подразбиране са актуализирани: {0}</value>
+  </data>
+  <data name="FileNotSavedDueToRoomQuota" xml:space="preserve">
+    <value>Стаи [{0}]. Файлът не е запазен: {1} – надвишена квота за съхранение на стаята.</value>
+  </data>
+  <data name="FileNotSavedDueToUserQuota" xml:space="preserve">
+    <value>Потребители [{0}]. Файлът не е запазен: {1} – надвишена квота за съхранение на потребителя.</value>
+  </data>
+  <data name="FileSavedButRoomQuotaExceeded" xml:space="preserve">
+    <value>Стаи [{0}]. Файлът е актуализиран: {1}, надвишавайки квотата за съхранение на стаята.</value>
+  </data>
+  <data name="FileSavedButUserQuotaExceeded" xml:space="preserve">
+    <value>Потребители [{0}]. Файлът е актуализиран: {1}, надвишавайки квотата за съхранение на потребителя.</value>
+  </data>
+  <data name="InvitationSettingsUpdated" xml:space="preserve">
+    <value>Настройките за покани са актуализирани</value>
+  </data>
+  <data name="IPRestrictionsSettingsUpdated" xml:space="preserve">
+    <value>Настройките за IP сигурност са актуализирани</value>
+  </data>
+  <data name="LoginSettingsUpdated" xml:space="preserve">
+    <value>Настройките за защита от груба сила са актуализирани</value>
+  </data>
+  <data name="RestoreCancelled" xml:space="preserve">
+    <value>Възстановяването е отменено</value>
+  </data>
+  <data name="RestoreStarted" xml:space="preserve">
+    <value>Възстановяването е стартирано</value>
+  </data>
+  <data name="ScheduledBackupDeleted" xml:space="preserve">
+    <value>Планираното архивиране е изтрито</value>
+  </data>
+  <data name="WhiteLabelAdditionalSettingsUpdated" xml:space="preserve">
+    <value>Допълнителните настройки за брандиране са актуализирани</value>
+  </data>
+  <data name="WhiteLabelCompanySettingsUpdated" xml:space="preserve">
+    <value>Настройките с информация за компанията са актуализирани</value>
+  </data>
+  <data name="WhiteLabelMailSettingsUpdated" xml:space="preserve">
+    <value>Настройките за поща са актуализирани</value>
+  </data>
+  <data name="WhiteLabelSettingsLogosUpdated" xml:space="preserve">
+    <value>Настройките за лого са актуализирани</value>
+  </data>
+  <data name="WhiteLabelSettingsLogoTextUpdated" xml:space="preserve">
+    <value>Името на марката е актуализирано</value>
+  </data>
 </root>

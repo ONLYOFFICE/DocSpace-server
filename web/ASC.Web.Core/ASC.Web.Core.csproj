@@ -531,7 +531,9 @@
   <ItemGroup>
     <PackageReference Include="AWSSDK.DynamoDBv2" />
     <PackageReference Include="GoogleAuthenticator" />
-    <PackageReference Include="Magick.NET-Q8-AnyCPU" />
+    <PackageReference Include="Magick.NET-Q8-AnyCPU">
+      <PrivateAssets>compile</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="SkiaSharp" />
     <PackageReference Include="SkiaSharp.NativeAssets.Linux" />
     <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" />

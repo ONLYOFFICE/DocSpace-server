@@ -586,4 +586,7 @@ Sicherheit durch garantierte 100%ige Kompatibilität mit docx, xslx und pptx For
   <data name="User" xml:space="preserve">
     <value>Benutzer</value>
   </data>
+  <data name="ErrorMessage_AiServicesDisabled" xml:space="preserve">
+    <value>KI-Dienste sind für das aktuelle Portal deaktiviert</value>
+  </data>
 </root>

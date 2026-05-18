@@ -1,0 +1,7 @@
+module github.com/ONLYOFFICE/docspace-api-sdk-go-sample
+
+go 1.22
+
+require {{goModulePath}}{{^goModulePath}}{{packageImportPath}}{{/goModulePath}}{{#isGoSubmodule}}/{{packageName}}{{/isGoSubmodule}} v{{packageVersion}}
+
+replace {{goModulePath}}{{^goModulePath}}{{packageImportPath}}{{/goModulePath}}{{#isGoSubmodule}}/{{packageName}}{{/isGoSubmodule}} => ../..{{#isGoSubmodule}}/{{packageName}}{{/isGoSubmodule}}

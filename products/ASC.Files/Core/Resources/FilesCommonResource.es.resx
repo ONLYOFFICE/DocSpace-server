@@ -586,4 +586,7 @@
   <data name="User" xml:space="preserve">
     <value>Usuario</value>
   </data>
+  <data name="ErrorMessage_AiServicesDisabled" xml:space="preserve">
+    <value>Los servicios de IA están desactivados para el portal actual</value>
+  </data>
 </root>

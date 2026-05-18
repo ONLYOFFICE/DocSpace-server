@@ -586,4 +586,7 @@ Het beste geschikt voor docx, xlsx, pptx.</value>
   <data name="User" xml:space="preserve">
     <value>Gebruiker</value>
   </data>
+  <data name="ErrorMessage_AiServicesDisabled" xml:space="preserve">
+    <value>AI-services zijn uitgeschakeld voor het huidige portaal</value>
+  </data>
 </root>

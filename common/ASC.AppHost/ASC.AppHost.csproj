@@ -8,6 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Aspire.Hosting.AppHost" />
         <PackageReference Include="Aspire.Hosting.JavaScript" />
         <PackageReference Include="Aspire.Hosting.MySql" />
         <PackageReference Include="Aspire.Hosting.RabbitMQ" />

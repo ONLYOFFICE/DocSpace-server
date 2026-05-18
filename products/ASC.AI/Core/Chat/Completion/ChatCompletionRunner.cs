@@ -1,28 +1,35 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2026
-//
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
-//
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
-//
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// 
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
+// 
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
+// 
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
+// 
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
+// 
+// No trademark rights are granted under this License.
+// 
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.AI.Core.Chat.Completion;
 
@@ -37,7 +44,6 @@ public class ChatCompletionRunner(
     AttachmentHandler attachmentHandler,
     DataContentLoader dataContentLoader,
     SocketManager socketManager,
-    ChatNameGenerator chatNameGenerator,
     IServiceScopeFactory serviceScopeFactory)
 {
     public async Task<ChatCompletionGenerator> StartNewChatAsync(
@@ -66,7 +72,7 @@ public class ChatCompletionRunner(
             context.Attachments = attachments;
         }
 
-        var client = chatClientFactory.Create(context.ClientOptions, context.Tools);
+        var client = chatClientFactory.Create(context.ClientOptions, authContext.CurrentAccount.ID, context.Tools);
 
         return new ChatCompletionGenerator(
             client,
@@ -74,7 +80,6 @@ public class ChatCompletionRunner(
             socketManager,
             messages,
             chatHistory,
-            chatNameGenerator,
             context,
             serviceScopeFactory,
             attachmentHandler);
@@ -104,9 +109,17 @@ public class ChatCompletionRunner(
 
         var attachments = await GetAttachmentsAsync(context, files).ToListAsync();
 
+        string? restoredSchemaContext = null;
+        if (!context.Tools.ContainsSystemTool(SystemToolType.FormDataQuery) &&
+            !context.Tools.ContainsSystemTool(SystemToolType.FormDataAggregate) &&
+            !context.Tools.ContainsSystemTool(SystemToolType.FormDataSelfJoin))
+        {
+            restoredSchemaContext = await RestoreFormDataToolsAsync(context, chat.Id);
+        }
+
         var systemMessage = BuildSystemMessage(context);
 
-        var userMessage = FormatUserMessage(message, attachments);
+        var userMessage = FormatUserMessage(message, attachments, restoredSchemaContext);
 
         var historyAdapter = HistoryHelper.GetAdapter(context.ClientOptions.Provider, dataContentLoader);
         var messages = await chatHistory.GetMessagesAsync(chatId, historyAdapter, systemMessage, userMessage)
@@ -120,7 +133,7 @@ public class ChatCompletionRunner(
             context.Attachments = attachments;
         }
 
-        var client = chatClientFactory.Create(context.ClientOptions, context.Tools);
+        var client = chatClientFactory.Create(context.ClientOptions, authContext.CurrentAccount.ID, context.Tools);
 
         return new ChatCompletionGenerator(
             client,
@@ -128,7 +141,6 @@ public class ChatCompletionRunner(
             socketManager,
             messages,
             chatHistory,
-            chatNameGenerator,
             context,
             serviceScopeFactory,
             attachmentHandler);
@@ -147,6 +159,37 @@ public class ChatCompletionRunner(
             context.Tools.ContainsSystemTool(SystemToolType.FormDataQuery) ||
             context.Tools.ContainsSystemTool(SystemToolType.FormDataAggregate) ||
             context.Tools.ContainsSystemTool(SystemToolType.FormDataSelfJoin)));
+
+    private async Task<string?> RestoreFormDataToolsAsync(ChatExecutionContext context, Guid chatId)
+    {
+        var fileId = await chatHistory.GetLastFormFileIdAsync(chatId);
+        if (fileId == null)
+        {
+            return null;
+        }
+
+        var result = await attachmentHandler.GetFormDataToolsAsync(fileId.Value);
+        if (result == null)
+        {
+            return null;
+        }
+
+        foreach (var tool in result.Value.Tools)
+        {
+            var toolType = tool.Context.Name == AggregateFormDataTool.Name
+                ? SystemToolType.FormDataAggregate
+                : tool.Context.Name == SelfJoinFormDataTool.Name
+                    ? SystemToolType.FormDataSelfJoin
+                    : SystemToolType.FormDataQuery;
+
+            if (!context.Tools.ContainsSystemTool(toolType))
+            {
+                context.Tools.AddTool(toolType, tool);
+            }
+        }
+
+        return result.Value.SchemaContext;
+    }
 
     private async IAsyncEnumerable<AttachmentMessageContent> GetAttachmentsAsync(
         ChatExecutionContext context,
@@ -200,15 +243,21 @@ public class ChatCompletionRunner(
         throw new ArgumentException(string.Format(ErrorMessages.AttachmentProcessFailed, names));
     }
 
-    private static ChatMessage FormatUserMessage(string message, List<AttachmentMessageContent> attachments)
+    private static ChatMessage FormatUserMessage(string message, List<AttachmentMessageContent> attachments, string? schemaContext = null)
     {
-        if (attachments.Count == 0)
+        if (attachments.Count == 0 && schemaContext == null)
         {
             return new ChatMessage(ChatRole.User, message);
         }
 
-        var contents = new List<AIContent>(attachments.Count + 1);
+        var contents = new List<AIContent>(attachments.Count + 2);
         contents.AddRange(attachments.Select(attachment => attachment.ToAiContent()));
+
+        if (schemaContext != null)
+        {
+            contents.Add(new TextContent($"[ACTIVE DATASET — use ONLY these column names for tool calls]{schemaContext}"));
+        }
+
         contents.Add(new TextContent($"##User query: {message}"));
 
         return new ChatMessage { Role = ChatRole.User, Contents = contents };

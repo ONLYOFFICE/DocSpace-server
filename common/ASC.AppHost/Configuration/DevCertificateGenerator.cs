@@ -1,0 +1,238 @@
+// Copyright (C) Ascensio System SIA, 2009-2026
+// 
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
+// 
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
+// 
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
+// 
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
+// 
+// No trademark rights are granted under this License.
+// 
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
+
+using System.Diagnostics;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
+
+namespace ASC.AppHost.Configuration;
+
+public static class DevCertificateGenerator
+{
+    private const string Subject = "CN=localhost";
+    private static readonly string[] _dnsNames = ["localhost", "*.dev.localhost"];
+    public const string CrtFileName = "docspace.dev.localhost.crt";
+    private const string KeyFileName = "docspace.dev.localhost.key";
+
+    // X.509 OIDs (RFC 5280).
+    private const string OidSubjectAlternativeName = "2.5.29.17";
+    private const string OidEnhancedKeyUsageServerAuth = "1.3.6.1.5.5.7.3.1";
+
+    public static string EnsureCertificate(string basePath)
+    {
+        var certDir = Path.Combine(basePath, "Data", "certs");
+        Directory.CreateDirectory(certDir);
+
+        var crtPath = Path.Combine(certDir, CrtFileName);
+        var keyPath = Path.Combine(certDir, KeyFileName);
+
+        var trustMarkerPath = Path.Combine(certDir, ".trusted");
+
+        if (File.Exists(crtPath) && File.Exists(keyPath))
+        {
+            var existing = X509CertificateLoader.LoadCertificateFromFile(crtPath);
+            if (existing.NotAfter > DateTime.UtcNow.AddDays(7)
+                && HasAllDnsNames(existing, _dnsNames))
+            {
+                if (IsTrusted(existing, trustMarkerPath))
+                {
+                    return certDir;
+                }
+
+                // Cert on disk is fine but trust is missing. Don't regenerate —
+                // re-trust on Windows/macOS, just re-print instructions on Linux
+                // (where trust requires manual user action).
+                if (OperatingSystem.IsLinux())
+                {
+                    PrintLinuxTrustInstructions(crtPath, trustMarkerPath, existing.Thumbprint);
+                }
+                else
+                {
+                    TrustCertificate(existing, crtPath, trustMarkerPath);
+                }
+                return certDir;
+            }
+        }
+
+        // 3072-bit RSA + SHA-384 — scores 100% on the SSL Labs "Key Exchange"
+        // category and contributes to an A+ overall rating. Keep PKCS#1 v1.5
+        // for the cert signature (broadest validator compatibility).
+        using var rsa = RSA.Create(3072);
+        var request = new CertificateRequest(Subject, rsa, HashAlgorithmName.SHA384, RSASignaturePadding.Pkcs1);
+
+        var sanBuilder = new SubjectAlternativeNameBuilder();
+        foreach (var name in _dnsNames)
+        {
+            sanBuilder.AddDnsName(name);
+        }
+        request.CertificateExtensions.Add(sanBuilder.Build());
+        request.CertificateExtensions.Add(new X509BasicConstraintsExtension(false, false, 0, true));
+        request.CertificateExtensions.Add(new X509KeyUsageExtension(
+            X509KeyUsageFlags.DigitalSignature | X509KeyUsageFlags.KeyEncipherment, true));
+        request.CertificateExtensions.Add(new X509EnhancedKeyUsageExtension(
+            [new Oid(OidEnhancedKeyUsageServerAuth)], true));
+
+        using var cert = request.CreateSelfSigned(
+            DateTimeOffset.UtcNow.AddDays(-1),
+            DateTimeOffset.UtcNow.AddYears(2));
+
+        File.WriteAllText(crtPath, cert.ExportCertificatePem());
+        File.WriteAllText(keyPath, rsa.ExportPkcs8PrivateKeyPem());
+
+        // Restrict the private key to the current user (0600) on Unix-like systems.
+        // On Windows the file inherits the user's profile ACL, which is already restrictive.
+        if (!OperatingSystem.IsWindows())
+        {
+            File.SetUnixFileMode(keyPath, UnixFileMode.UserRead | UnixFileMode.UserWrite);
+        }
+
+        TrustCertificate(cert, crtPath, trustMarkerPath);
+
+        return certDir;
+    }
+
+    private static bool HasAllDnsNames(X509Certificate2 cert, IEnumerable<string> expected)
+    {
+        var sanExt = cert.Extensions[OidSubjectAlternativeName];
+        if (sanExt is null)
+        {
+            return false;
+        }
+
+        var decoded = new AsnEncodedData(sanExt.Oid, sanExt.RawData).Format(true);
+        return expected.All(name => decoded.Contains(name, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static bool IsTrusted(X509Certificate2 cert, string trustMarkerPath)
+    {
+        if (OperatingSystem.IsWindows())
+        {
+            using var store = new X509Store(StoreName.Root, StoreLocation.CurrentUser);
+            store.Open(OpenFlags.ReadOnly);
+            return store.Certificates.Find(X509FindType.FindByThumbprint, cert.Thumbprint, false).Count > 0;
+        }
+
+        if (!File.Exists(trustMarkerPath))
+        {
+            return false;
+        }
+
+        return File.ReadAllText(trustMarkerPath).Trim() == cert.Thumbprint;
+    }
+
+    private static void TrustCertificate(X509Certificate2 cert, string crtPath, string trustMarkerPath)
+    {
+        if (OperatingSystem.IsWindows())
+        {
+            using var store = new X509Store(StoreName.Root, StoreLocation.CurrentUser);
+            store.Open(OpenFlags.ReadWrite);
+
+            foreach (var staleSubject in new[] { "docspace.dev.localhost", "localhost" })
+            {
+                var stale = store.Certificates.Find(X509FindType.FindBySubjectName, staleSubject, false);
+                foreach (var old in stale)
+                {
+                    store.Remove(old);
+                }
+            }
+
+            store.Add(cert);
+            return;
+        }
+
+        if (OperatingSystem.IsMacOS())
+        {
+            Console.WriteLine("[AppHost] Installing dev certificate into the login keychain (password prompt may appear)...");
+
+            var keychain = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                "Library", "Keychains", "login.keychain-db");
+
+            var exitCode = RunProcess("security",
+                ["add-trusted-cert", "-r", "trustRoot", "-k", keychain, crtPath]);
+
+            if (exitCode == 0)
+            {
+                File.WriteAllText(trustMarkerPath, cert.Thumbprint);
+            }
+            else
+            {
+                Console.WriteLine($"[AppHost] 'security add-trusted-cert' exited with code {exitCode}. Trust the certificate manually: {crtPath}");
+            }
+            return;
+        }
+
+        if (OperatingSystem.IsLinux())
+        {
+            PrintLinuxTrustInstructions(crtPath, trustMarkerPath, cert.Thumbprint);
+        }
+    }
+
+    private static void PrintLinuxTrustInstructions(string crtPath, string trustMarkerPath, string thumbprint)
+    {
+        // On Linux trust must be granted manually. We deliberately do NOT write
+        // the .trusted marker automatically — otherwise IsTrusted would lie on
+        // the next run and the instructions would never be shown again even if
+        // the user never actually trusted the cert. The user is asked to create
+        // the marker themselves after running the trust commands, so the prompt
+        // persists across restarts until trust is in place.
+        Console.WriteLine("[AppHost] Dev certificate present but not marked as trusted. To trust it on Linux run (as root):");
+        Console.WriteLine($"  sudo cp '{crtPath}' /usr/local/share/ca-certificates/docspace.dev.localhost.crt && sudo update-ca-certificates");
+        Console.WriteLine($"  # For Chrome/Firefox (NSS): certutil -d sql:$HOME/.pki/nssdb -A -t \"C,,\" -n docspace.dev.localhost -i '{crtPath}'");
+        Console.WriteLine("  # Once trusted, silence this message by creating the marker file:");
+        Console.WriteLine($"  echo '{thumbprint}' > '{trustMarkerPath}'");
+    }
+
+    private static int RunProcess(string fileName, string[] args)
+    {
+        var psi = new ProcessStartInfo
+        {
+            FileName = fileName,
+            UseShellExecute = false,
+            RedirectStandardOutput = false,
+            RedirectStandardError = false
+        };
+        foreach (var a in args)
+        {
+            psi.ArgumentList.Add(a);
+        }
+
+        using var proc = Process.Start(psi);
+        if (proc is null)
+        {
+            return -1;
+        }
+        proc.WaitForExit();
+        return proc.ExitCode;
+    }
+}

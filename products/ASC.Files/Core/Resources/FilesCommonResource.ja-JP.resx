@@ -577,4 +577,16 @@ docx、xlsx、pptxとの100％の互換性が保証されています。</value>
   <data name="User" xml:space="preserve">
     <value>ユーザー</value>
   </data>
+  <data name="ErrorMessage_AiServicesDisabled" xml:space="preserve">
+    <value>現在のポータルではAIサービスが無効になっています</value>
+  </data>
+  <data name="FolderNameForReassignedData" xml:space="preserve">
+    <value>ユーザー {0} {1} のドキュメント</value>
+  </data>
+  <data name="KnowledgeFolder" xml:space="preserve">
+    <value>ナレッジ</value>
+  </data>
+  <data name="ResultStorageFolder" xml:space="preserve">
+    <value>結果ストレージ</value>
+  </data>
 </root>

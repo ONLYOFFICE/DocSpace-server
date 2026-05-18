@@ -1131,4 +1131,67 @@
   <data name="WebpluginUploaded" xml:space="preserve">
     <value>Plugin otpremljen: {0}</value>
   </data>
+  <data name="AIAccessDisabled" xml:space="preserve">
+    <value>AI usluge su onemogućene</value>
+  </data>
+  <data name="AIAccessEnabled" xml:space="preserve">
+    <value>AI usluge su omogućene</value>
+  </data>
+  <data name="AIDefaultProviderDeleted" xml:space="preserve">
+    <value>Podrazumevani provajder obrisan</value>
+  </data>
+  <data name="AIDefaultProviderSet" xml:space="preserve">
+    <value>Podrazumevani AI provajder postavljen: Naziv: {0}, Podrazumevani model: {1}</value>
+  </data>
+  <data name="BackupCancelled" xml:space="preserve">
+    <value>Rezervna kopija otkazana</value>
+  </data>
+  <data name="DocumentsDefaultTemplatesSettingsUpdated" xml:space="preserve">
+    <value>Podrazumevana podešavanja šablona ažurirana: {0}</value>
+  </data>
+  <data name="FileNotSavedDueToRoomQuota" xml:space="preserve">
+    <value>Sobe [{0}]. Fajl nije sačuvan: {1} – prekoračena kvota skladišta za sobu.</value>
+  </data>
+  <data name="FileNotSavedDueToUserQuota" xml:space="preserve">
+    <value>Korisnici [{0}]. Fajl nije sačuvan: {1} – prekoračena kvota skladišta za korisnika.</value>
+  </data>
+  <data name="FileSavedButRoomQuotaExceeded" xml:space="preserve">
+    <value>Sobe [{0}]. Fajl ažuriran: {1}, prekoračena kvota skladišta sobe.</value>
+  </data>
+  <data name="FileSavedButUserQuotaExceeded" xml:space="preserve">
+    <value>Korisnici [{0}]. Fajl ažuriran: {1}, prekoračena kvota skladišta korisnika.</value>
+  </data>
+  <data name="InvitationSettingsUpdated" xml:space="preserve">
+    <value>Podešavanja pozivnica ažurirana</value>
+  </data>
+  <data name="IPRestrictionsSettingsUpdated" xml:space="preserve">
+    <value>Podešavanja IP bezbednosti ažurirana</value>
+  </data>
+  <data name="LoginSettingsUpdated" xml:space="preserve">
+    <value>Podešavanja zaštite od napada grubom silom ažurirana</value>
+  </data>
+  <data name="RestoreCancelled" xml:space="preserve">
+    <value>Obnavljanje otkazano</value>
+  </data>
+  <data name="RestoreStarted" xml:space="preserve">
+    <value>Obnavljanje pokrenuto</value>
+  </data>
+  <data name="ScheduledBackupDeleted" xml:space="preserve">
+    <value>Zakazana rezervna kopija obrisana</value>
+  </data>
+  <data name="WhiteLabelAdditionalSettingsUpdated" xml:space="preserve">
+    <value>Dodatna podešavanja brendiranja ažurirana</value>
+  </data>
+  <data name="WhiteLabelCompanySettingsUpdated" xml:space="preserve">
+    <value>Podešavanja informacija o kompaniji ažurirana</value>
+  </data>
+  <data name="WhiteLabelMailSettingsUpdated" xml:space="preserve">
+    <value>Podešavanja pošte ažurirana</value>
+  </data>
+  <data name="WhiteLabelSettingsLogosUpdated" xml:space="preserve">
+    <value>Podešavanja logotipa ažurirana</value>
+  </data>
+  <data name="WhiteLabelSettingsLogoTextUpdated" xml:space="preserve">
+    <value>Naziv brenda ažuriran</value>
+  </data>
 </root>
