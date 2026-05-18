@@ -146,7 +146,8 @@ native-binary-registration: check-profile
 	mvn $(MAVEN_BATCH) install -DskipTests $(MAVEN_FMT_SKIP) \
 		-pl infrastructure/infrastructure-configuration,registration/registration-data -am -q
 	@echo "Compiling registration native binary..."
-	mvn $(MAVEN_BATCH) -Pnative package -DskipTests $(MAVEN_FMT_SKIP) $(MAVEN_NATIVE_PROFILES) \
+	mvn $(MAVEN_BATCH) -Pnative install -DskipTests $(MAVEN_FMT_SKIP) $(MAVEN_NATIVE_PROFILES) \
+		-Dspring-boot.build-image.skip=true \
 		-pl registration/registration-container -am
 	mvn $(MAVEN_BATCH) -Pnative native:compile -DskipTests $(MAVEN_FMT_SKIP) $(MAVEN_NATIVE_PROFILES) \
 		-pl registration/registration-container
@@ -160,7 +161,8 @@ native-binary-authorization: check-profile
 	mvn $(MAVEN_BATCH) install -DskipTests $(MAVEN_FMT_SKIP) \
 		-pl infrastructure/infrastructure-configuration -am -q
 	@echo "Compiling authorization native binary..."
-	mvn $(MAVEN_BATCH) -Pnative package -DskipTests $(MAVEN_FMT_SKIP) $(MAVEN_NATIVE_PROFILES) \
+	mvn $(MAVEN_BATCH) -Pnative install -DskipTests $(MAVEN_FMT_SKIP) $(MAVEN_NATIVE_PROFILES) \
+		-Dspring-boot.build-image.skip=true \
 		-pl authorization/authorization-container -am
 	mvn $(MAVEN_BATCH) -Pnative native:compile -DskipTests $(MAVEN_FMT_SKIP) $(MAVEN_NATIVE_PROFILES) \
 		-pl authorization/authorization-container
