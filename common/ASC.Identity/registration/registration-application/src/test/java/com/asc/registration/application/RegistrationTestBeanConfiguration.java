@@ -128,6 +128,7 @@ public class RegistrationTestBeanConfiguration {
   public ClientApplicationService clientApplicationService(
       Validator validator,
       ClientCacheService clientCacheService,
+      ScopeApplicationService scopeApplicationService,
       AuthorizationMessagePublisher<TenantClientsRemovedEvent> tenantClientsRemovedPublisher,
       AuthorizationMessagePublisher<UserClientsRemovedEvent> userClientsRemovedPublisher,
       AuthorizationMessagePublisher<ClientCacheTenantRemoveEvent> clientCacheTenantRemovePublisher,
@@ -137,6 +138,7 @@ public class RegistrationTestBeanConfiguration {
     return new CoreClientApplicationService(
         validator,
         clientCacheService,
+        scopeApplicationService,
         tenantClientsRemovedPublisher,
         userClientsRemovedPublisher,
         clientCacheTenantRemovePublisher,
