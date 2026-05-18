@@ -47,7 +47,7 @@ public class PhotoController(
     IHttpContextAccessor httpContextAccessor,
     UserWebhookManager webhookManager,
     IUrlValidator urlValidator)
-    : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpContextAccessor, urlValidator)
+    : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpContextAccessor, urlValidator, setupInfo)
 {
     /// <remarks>
     /// Creates the user photo thumbnails by coordinates of the original image specified in the request.
@@ -235,7 +235,7 @@ public class PhotoController(
 
                 var userPhoto = inDto.File;
 
-                if (userPhoto.Length > setupInfo.MaxImageUploadSize)
+                if (userPhoto.Length > _setupInfo.MaxImageUploadSize)
                 {
                     result.Success = false;
                     result.Message = fileSizeComment.FileImageSizeExceptionString;
@@ -254,7 +254,7 @@ public class PhotoController(
 
                 if (autosave)
                 {
-                    if (data.Length > setupInfo.MaxImageUploadSize)
+                    if (data.Length > _setupInfo.MaxImageUploadSize)
                     {
                         throw new ImageSizeLimitException();
                     }
@@ -279,7 +279,7 @@ public class PhotoController(
                 }
                 else
                 {
-                    result.Data = await _userPhotoManager.SaveTempPhoto(data, setupInfo.MaxImageUploadSize, UserPhotoManager.OriginalFotoSize.Width, UserPhotoManager.OriginalFotoSize.Height);
+                    result.Data = await _userPhotoManager.SaveTempPhoto(data, _setupInfo.MaxImageUploadSize, UserPhotoManager.OriginalFotoSize.Width, UserPhotoManager.OriginalFotoSize.Height);
                 }
 
                 result.Success = true;

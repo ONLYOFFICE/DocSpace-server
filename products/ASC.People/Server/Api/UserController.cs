@@ -89,7 +89,7 @@ public class UserController(
     IdentityClient client,
     GroupFullDtoHelper groupFullDtoHelper,
     IUrlValidator urlValidator)
-    : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpContextAccessor, urlValidator)
+    : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpContextAccessor, urlValidator, setupInfo)
 {
     /// <remarks>
     /// Returns the user claims.
@@ -1742,7 +1742,7 @@ public class UserController(
                 }
             }
         }
-        else if (!string.IsNullOrEmpty(setupInfo.HcaptchaPublicKey) || !string.IsNullOrEmpty(setupInfo.RecaptchaPublicKey))
+        else if (!string.IsNullOrEmpty(_setupInfo.HcaptchaPublicKey) || !string.IsNullOrEmpty(_setupInfo.RecaptchaPublicKey))
         {
             var requestIp = MessageSettings.GetIP(_httpContextAccessor.HttpContext?.Request);
             var secretEmail = SetupInfo.IsSecretEmail(inDto.Email);

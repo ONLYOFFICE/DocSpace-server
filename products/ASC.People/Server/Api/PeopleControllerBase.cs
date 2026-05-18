@@ -35,7 +35,8 @@ public abstract class PeopleControllerBase(
     ApiContext apiContext,
     UserPhotoManager userPhotoManager,
     IHttpContextAccessor httpContextAccessor,
-    IUrlValidator urlValidator)
+    IUrlValidator urlValidator,
+    SetupInfo setupInfo)
     : ApiControllerBase
 {
     protected readonly UserManager _userManager = userManager;
@@ -44,6 +45,7 @@ public abstract class PeopleControllerBase(
     protected readonly UserPhotoManager _userPhotoManager = userPhotoManager;
     protected readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
     protected readonly IUrlValidator _urlValidator = urlValidator;
+    protected readonly SetupInfo _setupInfo = setupInfo;
 
     protected async Task<UserInfo> GetUserInfoAsync(string userNameOrId)
     {
@@ -153,7 +155,17 @@ public abstract class PeopleControllerBase(
             throw new InvalidOperationException($"Failed to download photo: {response.StatusCode}");
         }
 
+        var contentLength = response.Content.Headers.ContentLength;
+        if (contentLength.HasValue && contentLength.Value > _setupInfo.MaxImageUploadSize)
+        {
+            throw new ImageSizeLimitException();
+        }
+
         var imageByteArray = await response.Content.ReadAsByteArrayAsync();
+        if (imageByteArray.Length > _setupInfo.MaxImageUploadSize)
+        {
+            throw new ImageSizeLimitException();
+        }
 
         await _userPhotoManager.SaveOrUpdatePhoto(user.Id, imageByteArray);
     }
