@@ -1,28 +1,37 @@
-// (c) Copyright Ascensio System SIA 2009-2026
-//
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
-//
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
-//
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// Copyright (C) Ascensio System SIA, 2009-2026
+// 
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
+// 
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
+// 
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
+// 
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
+// 
+// No trademark rights are granted under this License.
+// 
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
+
+using System.Security.Authentication;
 
 namespace ASC.Web.Files.Services.WCFService;
 
@@ -102,7 +111,8 @@ public class FileStorageService //: IFileStorageService
     FileSharingHelper fileSharingHelper,
     AiGateway gateway,
     FormFillingReportCreator formFillingReportCreator,
-    ExportToXLSX exportToXLSX)
+    ExportToXLSX exportToXLSX,
+    ExternalDbSyncService externalDbSyncService)
 {
     private readonly ILogger _logger = optionMonitor.CreateLogger("ASC.Files");
 
@@ -162,11 +172,15 @@ public class FileStorageService //: IFileStorageService
 
         if (folder == null)
         {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FolderNotFound);
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
         }
 
         if (!await fileSecurity.CanReadAsync(folder))
         {
+            if (!securityContext.CurrentAccount.IsAuthenticated)
+            {
+                throw new AuthenticationException();
+            }
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ReadFolder);
         }
 
@@ -197,14 +211,21 @@ public class FileStorageService //: IFileStorageService
 
             Folder<T> parentRoom = null;
 
+            if (parent == null)
+            {
+                throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+            }
+
             if (parent.RootFolderType == FolderType.VirtualRooms)
             {
                 parentRoom = !parent.IsRoom && parent.FolderType != FolderType.VirtualRooms ? await folderDao.GetFirstParentTypeFromFileEntryAsync(parent) : parent;
             }
+
             if (!await fileSecurity.CanReadAsync(parent))
             {
                 throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ViewFolder);
             }
+
             (entries, _) = await entryManager.GetEntriesAsync(parent, parentRoom, 0, -1, [FilterType.FoldersOnly], false, Guid.Empty, Guid.Empty, string.Empty, [], false, false, new OrderBy(SortedByType.AZ, true));
         }
         catch (Exception e)
@@ -1312,6 +1333,7 @@ public class FileStorageService //: IFileStorageService
                             lifetime.DeletePermanently.ToString());
                     }
                 }
+
             }
 
             if (titleChanged)
@@ -1428,7 +1450,7 @@ public class FileStorageService //: IFileStorageService
         var folder = await folderDao.GetFolderAsync(folderId);
         if (folder == null)
         {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FolderNotFound);
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
         }
 
         var canEdit = folder.IsRoom
@@ -1606,7 +1628,7 @@ public class FileStorageService //: IFileStorageService
 
             if (!canCreate)
             {
-                folder = null;
+                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
             }
         }
 
@@ -1854,36 +1876,29 @@ public class FileStorageService //: IFileStorageService
 
     public async Task<KeyValuePair<bool, string>> TrackEditFileAsync<T>(T fileId, Guid tabId, string docKeyForTrack, bool isFinish = false)
     {
-        try
+        if (!authContext.IsAuthenticated && await externalShare.GetLinkIdAsync() == Guid.Empty)
         {
-            if (!authContext.IsAuthenticated && await externalShare.GetLinkIdAsync() == Guid.Empty)
-            {
-                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
-            }
-
-            var (file, _) = await documentServiceHelper.GetCurFileInfoAsync(fileId, -1);
-
-            if (docKeyForTrack != await documentServiceHelper.GetDocKeyAsync(fileId, -1, DateTime.MinValue) && docKeyForTrack != await documentServiceHelper.GetDocKeyAsync(file.Id, file.Version, file.ProviderEntry ? file.ModifiedOn : file.CreateOn))
-            {
-                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
-            }
-
-            if (isFinish)
-            {
-                await fileTracker.RemoveAsync(fileId, tabId);
-                await socketManager.StopEditAsync(fileId);
-            }
-            else
-            {
-                await entryManager.TrackEditingAsync(fileId, tabId, authContext.CurrentAccount.ID, tenantManager.GetCurrentTenant());
-            }
-
-            return new KeyValuePair<bool, string>(true, string.Empty);
+            throw new AuthenticationException();
         }
-        catch (Exception ex)
+
+        var (file, _) = await documentServiceHelper.GetCurFileInfoAsync(fileId, -1);
+
+        if (docKeyForTrack != await documentServiceHelper.GetDocKeyAsync(fileId, -1, DateTime.MinValue) && docKeyForTrack != await documentServiceHelper.GetDocKeyAsync(file.Id, file.Version, file.ProviderEntry ? file.ModifiedOn : file.CreateOn))
         {
-            return new KeyValuePair<bool, string>(false, ex.Message);
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
+
+        if (isFinish)
+        {
+            await fileTracker.RemoveAsync(fileId, tabId);
+            await socketManager.StopEditAsync(fileId);
+        }
+        else
+        {
+            await entryManager.TrackEditingAsync(fileId, tabId, authContext.CurrentAccount.ID, tenantManager.GetCurrentTenant());
+        }
+
+        return new KeyValuePair<bool, string>(true, string.Empty);
     }
 
     public async Task<File<T>> SaveEditingAsync<T>(T fileId, string fileExtension, string fileUri, Stream stream, bool forceSave = false)
@@ -1970,6 +1985,7 @@ public class FileStorageService //: IFileStorageService
             var properties = await fileDao.GetProperties(fileId) ?? new EntryProperties<T> { FormFilling = new FormFillingProperties<T>() };
             properties.FormFilling.StartFilling = true;
             properties.FormFilling.OriginalFormId = fileId;
+            properties.FormFilling.StartedByUserId = authContext.CurrentAccount.ID;
 
             await fileDao.SaveProperties(fileId, properties);
             await socketManager.CreateFileAsync(file);
@@ -2008,16 +2024,16 @@ public class FileStorageService //: IFileStorageService
 
             if (!await documentServiceTrackerHelper.StartTrackAsync(fileId.ToString(), key))
             {
-                throw new Exception(FilesCommonResource.ErrorMessage_StartEditing);
+                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_StartEditing);
             }
 
             return key;
         }
-        catch (Exception e)
+        catch (Exception)
         {
             await fileTracker.RemoveAsync(fileId);
 
-            throw GenerateException(e);
+            throw;
         }
     }
 
@@ -2367,69 +2383,6 @@ public class FileStorageService //: IFileStorageService
         }
     }
 
-    public async Task<EditHistoryDataDto> GetEditDiffUrlAsync<T>(T fileId, int version = 0)
-    {
-        var fileDao = daoFactory.GetFileDao<T>();
-
-        var file = version > 0
-            ? await fileDao.GetFileAsync(fileId, version)
-            : await fileDao.GetFileAsync(fileId);
-
-        if (file == null)
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
-        }
-
-        if (!await fileSecurity.CanReadHistoryAsync(file))
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
-        }
-
-        if (file.ProviderEntry)
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_BadRequest);
-        }
-
-        var result = new EditHistoryDataDto { FileType = file.ConvertedExtension.Trim('.'), Key = await documentServiceHelper.GetDocKeyAsync(file), Url = documentServiceConnector.ReplaceCommunityAddress(pathProvider.GetFileStreamUrl(file)), Version = version };
-
-        if (await fileDao.ContainChangesAsync(file.Id, file.Version))
-        {
-            string previousKey;
-            string sourceFileUrl;
-            string sourceExt;
-
-            var history = await fileDao.GetFileHistoryAsync(file.Id).ToListAsync();
-            var previousFileStable = history.OrderByDescending(r => r.Version).FirstOrDefault(r => r.Version < file.Version);
-            if (previousFileStable != null)
-            {
-                sourceFileUrl = pathProvider.GetFileStreamUrl(previousFileStable);
-                sourceExt = previousFileStable.ConvertedExtension;
-
-                previousKey = await documentServiceHelper.GetDocKeyAsync(previousFileStable);
-            }
-            else
-            {
-                var culture = (await userManager.GetUsersAsync(authContext.CurrentAccount.ID)).GetCulture();
-                var storeTemplate = await globalStore.GetStoreTemplateAsync();
-                var fileExt = FileUtility.GetFileExtension(file.Title);
-                var path = await globalStore.GetNewDocTemplatePath(storeTemplate, fileExt, culture);
-                var uri = await storeTemplate.GetUriAsync("", path);
-
-                sourceFileUrl = baseCommonLinkUtility.GetFullAbsolutePath(uri.ToString());
-                sourceExt = fileExt.Trim('.');
-
-                previousKey = DocumentServiceConnector.GenerateRevisionId(Guid.NewGuid().ToString());
-            }
-
-            result.Previous = new EditHistoryUrl { Key = previousKey, Url = documentServiceConnector.ReplaceCommunityAddress(sourceFileUrl), FileType = sourceExt.Trim('.') };
-
-            result.ChangesUrl = documentServiceConnector.ReplaceCommunityAddress(pathProvider.GetFileChangesUrl(file));
-        }
-
-        result.Token = documentServiceHelper.GetSignature(result);
-
-        return result;
-    }
 
     public async IAsyncEnumerable<EditHistory> RestoreVersionAsync<T>(T fileId, int version, string url = null)
     {
@@ -3493,8 +3446,14 @@ public class FileStorageService //: IFileStorageService
                 }
             }
 
-            var tags = await tagDao.GetTagsAsync(user, [TagType.Recent, TagType.Favorite], sharedEntries).ToListAsync();
-            await tagDao.RemoveTagsAsync(tags);
+            var tags = await tagDao.GetTagsAsync(user, [TagType.Recent, TagType.Favorite], sharedEntries)
+                .Select(r=> r.Id)
+                .ToListAsync();
+
+            foreach (var entry in sharedEntries)
+            {
+                await tagDao.RemoveTagsAsync(entry, tags);
+            }
 
             await fileDao.ReassignFilesAsync(toUser, fileIds);
             await folderDao.ReassignFoldersAsync(toUser, folderIds);
@@ -3864,6 +3823,11 @@ public class FileStorageService //: IFileStorageService
 
     public async Task DeleteTemplatesAsync<T>(IEnumerable<T> filesId)
     {
+        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
         var tagDao = daoFactory.GetTagDao<T>();
         var fileDao = daoFactory.GetFileDao<T>();
 
@@ -5006,7 +4970,7 @@ public class FileStorageService //: IFileStorageService
     {
         if (!authContext.IsAuthenticated && await externalShare.GetLinkIdAsync() == Guid.Empty)
         {
-            throw GenerateException(new SecurityException(FilesCommonResource.ErrorMessage_SecurityException));
+            throw new AuthenticationException();
         }
 
         try
@@ -5234,7 +5198,11 @@ public class FileStorageService //: IFileStorageService
 
         if (form == null)
         {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+        if (!await fileSecurity.CanReadAsync(form))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
         }
         if (!await DocSpaceHelper.IsFormOrCompletedForm(form, daoFactory))
         {
@@ -5322,6 +5290,7 @@ public class FileStorageService //: IFileStorageService
                 if (room.FolderType == FolderType.FillingFormsRoom)
                 {
                     properties.FormFilling.StartFilling = true;
+                    properties.FormFilling.StartedByUserId = authContext.CurrentAccount.ID;
                 }
 
                 break;
@@ -5499,7 +5468,7 @@ public class FileStorageService //: IFileStorageService
             properties = fileProperties;
         }
 
-        if (!await fileSecurity.CanEditAsync(form))
+        if (!await fileSecurity.CanUpdateXlsxAsync(form))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
         }
@@ -5593,7 +5562,7 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException();
         }
 
-        if (!await fileSecurity.CanEditAsync(form))
+        if (!await fileSecurity.CanUpdateXlsxAsync(form))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
         }
@@ -5618,6 +5587,43 @@ public class FileStorageService //: IFileStorageService
     public Task<FormFillingReportTask> GetXlsxTaskAsync(int formId)
     {
         return exportToXLSX.GetXlsxTaskAsync(formId);
+    }
+
+    public async Task<ExternalDbSyncTask> StartExternalDbSyncAsync(int roomId)
+    {
+        var folderDao = daoFactory.GetFolderDao<int>();
+        var room = await folderDao.GetFolderAsync(roomId).NotFoundIfNull();
+
+        if (room.FolderType != FolderType.FillingFormsRoom)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
+        if (!await fileSecurity.CanEditAsync(room))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
+        return await externalDbSyncService.StartSyncAsync(roomId)
+            ?? throw new BadHttpRequestException(FilesCommonResource.ErrorMessage_BadRequest);
+    }
+
+    public async Task<ExternalDbSyncTask> GetExternalDbSyncTaskAsync(int roomId)
+    {
+        var folderDao = daoFactory.GetFolderDao<int>();
+        var room = await folderDao.GetFolderAsync(roomId).NotFoundIfNull();
+
+        if (room.FolderType != FolderType.FillingFormsRoom)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
+        if (!await fileSecurity.CanEditAsync(room))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
+        return await externalDbSyncService.GetTaskAsync(roomId);
     }
 
     private async Task CheckRoomAvailability<T>(T roomId)
@@ -5653,7 +5659,8 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException();
         }
     }
-    private Exception GenerateException(Exception error, bool warning = false)
+
+    private Exception GenerateException<T>(T error, bool warning = false) where T : Exception
     {
         if (warning || error is ItemNotFoundException or SecurityException or ArgumentException or TenantQuotaException or InvalidOperationException)
         {
@@ -5671,7 +5678,7 @@ public class FileStorageService //: IFileStorageService
                 : error;
         }
 
-        return new InvalidOperationException(error.Message, error);
+        return error;
     }
 
     private async Task<AceWrapper> SetExternalLinkAsync<T>(FileEntry<T> entry, Guid linkId, FileShare share, string title, DateTime expirationDate = default,

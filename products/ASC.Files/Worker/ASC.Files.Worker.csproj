@@ -9,6 +9,10 @@
   </PropertyGroup>
   
   <ItemGroup>
+    <PackageReference Include="Magick.NET-Q8-AnyCPU" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\..\common\ASC.Api.Core\ASC.Api.Core.csproj" />
     <ProjectReference Include="..\Core\ASC.Files.Core.csproj" />
   </ItemGroup>

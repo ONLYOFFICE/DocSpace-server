@@ -183,4 +183,10 @@
   <data name="ProviderNameExists" xml:space="preserve">
     <value>提供商名称已存在</value>
   </data>
+  <data name="ModelDisabled" xml:space="preserve">
+    <value>该模型已被您的提供商设置禁用。</value>
+  </data>
+  <data name="ServerAlreadyAdded" xml:space="preserve">
+    <value>该服务器已添加到代理中</value>
+  </data>
 </root>

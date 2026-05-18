@@ -183,4 +183,10 @@
   <data name="ProviderNameExists" xml:space="preserve">
     <value>Naziv provajdera već postoji</value>
   </data>
+  <data name="ModelDisabled" xml:space="preserve">
+    <value>Model je onemogućen podešavanjima vašeg provajdera.</value>
+  </data>
+  <data name="ServerAlreadyAdded" xml:space="preserve">
+    <value>Server je već dodat agentu</value>
+  </data>
 </root>
