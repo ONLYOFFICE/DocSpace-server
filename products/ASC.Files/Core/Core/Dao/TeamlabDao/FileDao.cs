@@ -1,28 +1,35 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2026
-//
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
-//
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
-//
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// 
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
+// 
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
+// 
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
+// 
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
+// 
+// No trademark rights are granted under this License.
+// 
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 using Document = ASC.ElasticSearch.Document;
 using VectorChunk = ASC.Files.Core.Vectorization.Data.Chunk;
@@ -193,27 +200,11 @@ internal class FileDao(
         var searchByText = !string.IsNullOrEmpty(searchText);
         var searchByExtension = !extension.IsNullOrEmpty();
 
-        if (extension.IsNullOrEmpty())
-        {
-            extension = [""];
-        }
-
         if (searchByText || searchByExtension)
         {
-            var searchIds = new List<int>();
-            var success = false;
-            foreach (var e in extension)
-            {
-                var func = GetFuncForSearch(null, null, filterType, subjectGroup, subjectID, searchText, e, searchInContent);
+            var func = GetFuncForSearch(null, null, filterType, subjectGroup, subjectID, searchText, extension, searchInContent);
 
-                (success, var result) = await factoryIndexer.TrySelectIdsAsync(s => func(s).In(r => r.Id, fileIds.ToArray()));
-
-                if (!success)
-                {
-                    break;
-                }
-                searchIds = searchIds.Concat(result).ToList();
-            }
+            var (success, searchIds) = await factoryIndexer.TrySelectIdsAsync(s => func(s).In(r => r.Id, fileIds.ToArray()));
 
             if (success)
             {
@@ -284,7 +275,7 @@ internal class FileDao(
     }
 
     public async IAsyncEnumerable<File<int>> GetFilesAsync(int parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension,
-        bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, int roomId = 0, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, FormsItemDto formsItemDto = null, bool applyFormStepFilter = false)
+        bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, int roomId = 0, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, FormsItemDto formsItemDto = null, bool applyFormStepFilter = false, bool applyFfrStartedFormsFilter = false)
     {
         if (filterType == FilterType.FoldersOnly || count == 0)
         {
@@ -302,6 +293,10 @@ internal class FileDao(
         if (applyFormStepFilter)
         {
             q = ApplyAdditionalFileFilters(q, filesDbContext, parentId, parentType, AdditionalFilterOption.FormsWithFillingRole);
+        }
+        if (applyFfrStartedFormsFilter)
+        {
+            q = ApplyAdditionalFileFilters(q, filesDbContext, parentId, parentType, AdditionalFilterOption.FfrStartedForms);
         }
 
         q = q.Skip(offset);
@@ -775,7 +770,7 @@ internal class FileDao(
             return 0;
         }
 
-        var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var q = await GetFilesQueryWithFilters(parentId, null, filterType, subjectGroup, subjectId, searchText, searchInContent, withSubfolders, excludeSubject, roomId, extension, filesDbContext, formsItemDto);
         if (additionalFilterOption != AdditionalFilterOption.All)
@@ -802,7 +797,7 @@ internal class FileDao(
 
     public async Task<int> GetSharedFilesCountAsync(int parentId)
     {
-        var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var q = GetSharedFilesQuery(parentId, filesDbContext);
 
@@ -811,7 +806,7 @@ internal class FileDao(
 
     public async IAsyncEnumerable<File<int>> GetSharedFilesAsync(int parentId, int offset = 0, int count = -1)
     {
-        var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var q = GetSharedFilesQuery(parentId, filesDbContext);
 
@@ -1079,6 +1074,11 @@ internal class FileDao(
         var tenantId = _tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         return await filesDbContext.DbFilesAnyAsync(tenantId, title, category, folderId);
+    }
+
+    public async Task<string> GetAvailableTitleAsync(string requestTitle, int parentFolderId)
+    {
+        return await global.GetAvailableTitleAsync(requestTitle, parentFolderId, IsExistAsync, FileEntryType.File);
     }
 
     public async Task<TTo> MoveFileAsync<TTo>(int fileId, TTo toFolderId, bool deleteLinks = false)
@@ -1394,7 +1394,7 @@ internal class FileDao(
         copy.FileStatus = file.FileStatus & ~flagsToRemove;
         copy.EditingBy = file.EditingBy;
         copy.ParentId = toFolderId;
-        copy.Title = await global.GetAvailableTitleAsync(file.Title, toFolderId, IsExistAsync, FileEntryType.File);
+        copy.Title = await GetAvailableTitleAsync(file.Title, toFolderId);
         copy.ConvertedType = file.ConvertedType;
         copy.Comment = FilesCommonResource.CommentCopy;
         copy.Encrypted = file.Encrypted;
@@ -1841,26 +1841,11 @@ internal class FileDao(
         var searchByText = !string.IsNullOrEmpty(searchText);
         var searchByExtension = !extension.IsNullOrEmpty();
 
-        if (extension.IsNullOrEmpty())
-        {
-            extension = [""];
-        }
-
         if (searchByText || searchByExtension)
         {
-            var searchIds = new List<int>();
-            var success = false;
-            foreach (var e in extension)
-            {
-                var func = GetFuncForSearch(null, null, filterType, subjectGroup, subjectID, searchText, e, searchInContent);
+            var func = GetFuncForSearch(null, null, filterType, subjectGroup, subjectID, searchText, extension, searchInContent);
 
-                (success, var result) = await factoryIndexer.TrySelectIdsAsync(s => func(s));
-                if (!success)
-                {
-                    break;
-                }
-                searchIds = searchIds.Concat(result).ToList();
-            }
+            var (success, searchIds) = await factoryIndexer.TrySelectIdsAsync(s => func(s));
 
             if (success)
             {
@@ -2245,7 +2230,7 @@ internal class FileDao(
     #endregion
 
     private Func<Selector<DbFile>, Selector<DbFile>> GetFuncForSearch(int? parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
-        string extension, bool searchInContent, bool withSubfolders = false)
+        string[] extensions, bool searchInContent, bool withSubfolders = false)
     {
         return s =>
         {
@@ -2256,17 +2241,18 @@ internal class FileDao(
                 result = searchInContent ? s.MatchAll(searchText) : s.Match(r => r.Title, searchText);
             }
 
-            if (!string.IsNullOrEmpty(extension))
+            var nonEmptyExtensions = extensions?.Where(e => !string.IsNullOrEmpty(e)).ToArray();
+            if (nonEmptyExtensions is { Length: > 0 })
             {
-                var pattern = $"*{extension}";
+                var patterns = nonEmptyExtensions.Select(e => $"*{e}").ToArray();
 
                 if (result != null)
                 {
-                    result.Match(r => r.Title, pattern);
+                    result.MatchAny(r => r.Title, patterns);
                 }
                 else
                 {
-                    result = s.Match(r => r.Title, pattern);
+                    result = s.MatchAny(r => r.Title, patterns);
                 }
             }
 
@@ -2355,6 +2341,7 @@ internal class FileDao(
         var tenantId = _tenantManager.GetCurrentTenantId();
         var currentUserId = securityContext.CurrentAccount.ID;
         var guestUserId = ASC.Core.Configuration.Constants.Guest.ID;
+        var pdfCategories = new[] { (int)FilterType.PdfForm, (int)FilterType.Pdf };
 
         switch (additionalFilterOption)
         {
@@ -2403,14 +2390,22 @@ internal class FileDao(
                 break;
 
             case AdditionalFilterOption.FormsWithFillingRole:
-                var pdfCategories = new[] { (int)FilterType.PdfForm, (int)FilterType.Pdf };
-
                 q = q.Where(file =>
                     pdfCategories.Contains(file.Category) &&
                     filesDbContext.FilesFormRoleMapping.Any(m =>
                         m.TenantId == tenantId &&
                         m.FormId == file.Id &&
                         m.UserId == currentUserId)
+                );
+                break;
+
+            case AdditionalFilterOption.FfrStartedForms:
+                q = q.Where(file =>
+                    pdfCategories.Contains(file.Category) &&
+                    filesDbContext.FilesProperties.Any(p =>
+                        p.EntryId == file.Id.ToString() &&
+                        p.TenantId == tenantId &&
+                        p.StartFilling == true)
                 );
                 break;
         }
@@ -2614,11 +2609,6 @@ internal class FileDao(
         var searchByText = !string.IsNullOrEmpty(searchText);
         var searchByExtension = !extension.IsNullOrEmpty();
 
-        if (extension.IsNullOrEmpty())
-        {
-            extension = [""];
-        }
-
         if (withSubfolders && (searchByText || searchByExtension || filterType != FilterType.None || subjectID != Guid.Empty))
         {
             q = GetFileQuery(filesDbContext, r => r.CurrentVersion)
@@ -2629,22 +2619,11 @@ internal class FileDao(
 
         if (searchByText || searchByExtension)
         {
-            var searchIds = new List<int>();
-            var success = false;
+            var func = GetFuncForSearch(parentId, null, filterType, subjectGroup, subjectID, searchText, extension, searchInContent);
 
-            foreach (var e in extension)
-            {
-                var func = GetFuncForSearch(parentId, null, filterType, subjectGroup, subjectID, searchText, e, searchInContent);
+            Expression<Func<Selector<DbFile>, Selector<DbFile>>> expression = s => func(s);
 
-                Expression<Func<Selector<DbFile>, Selector<DbFile>>> expression = s => func(s);
-
-                (success, var result) = await factoryIndexer.TrySelectIdsAsync(expression);
-                if (!success)
-                {
-                    break;
-                }
-                searchIds = searchIds.Concat(result).ToList();
-            }
+            var (success, searchIds) = await factoryIndexer.TrySelectIdsAsync(expression);
 
             if (searchInContent && formsItemDto != null)
             {
@@ -2764,28 +2743,13 @@ internal class FileDao(
         var searchByText = !string.IsNullOrEmpty(searchText);
         var searchByExtension = !extension.IsNullOrEmpty();
 
-        if (extension.IsNullOrEmpty())
-        {
-            extension = [string.Empty];
-        }
-
         if (searchByText || searchByExtension)
         {
-            var searchIds = new List<int>();
-            var success = false;
-            foreach (var e in extension)
-            {
-                var func = GetFuncForSearch(null, null, filterType, subjectGroup, subjectId, searchText, e, searchInContent);
+            var func = GetFuncForSearch(null, null, filterType, subjectGroup, subjectId, searchText, extension, searchInContent);
 
-                Expression<Func<Selector<DbFile>, Selector<DbFile>>> expression = s => func(s);
+            Expression<Func<Selector<DbFile>, Selector<DbFile>>> expression = s => func(s);
 
-                (success, var result) = await factoryIndexer.TrySelectIdsAsync(expression);
-                if (!success)
-                {
-                    break;
-                }
-                searchIds = searchIds.Concat(result).ToList();
-            }
+            var (success, searchIds) = await factoryIndexer.TrySelectIdsAsync(expression);
 
             if (success)
             {
@@ -3129,6 +3093,18 @@ internal class CacheFileDao(ILogger<FileDao> logger,
         {
             result = await base.GetProperties(fileId);
             _cacheFileProperties.TryAdd(fileId, result);
+        }
+
+        return result;
+    }
+
+    private readonly ConcurrentDictionary<int, File<int>> _cacheFile = new();
+    public new async Task<File<int>> GetFileAsync(int fileId)
+    {
+        if (!_cacheFile.TryGetValue(fileId, out var result))
+        {
+            result = await base.GetFileAsync(fileId);
+            _cacheFile.TryAdd(fileId, result);
         }
 
         return result;

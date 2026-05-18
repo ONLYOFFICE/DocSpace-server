@@ -7,6 +7,8 @@ com.example.codegen.MyJavaClientCodegen
 com.example.codegen.MyPHPClientCodegen
 com.example.codegen.MySwift6ClientCodegen
 com.example.codegen.MyKotlinClientCodegen
+com.example.codegen.MyGoClientCodegen
+com.example.codegen.MyRubyClientCodegen
 org.openapitools.codegen.languages.AdaCodegen
 org.openapitools.codegen.languages.AdaServerCodegen
 org.openapitools.codegen.languages.AndroidClientCodegen

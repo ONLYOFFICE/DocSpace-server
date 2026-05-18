@@ -1,0 +1,113 @@
+server:
+  port: 0
+  servlet:
+    session:
+      tracking-modes: cookie
+spring:
+  main:
+    banner-mode: off
+    allow-bean-definition-overriding: true
+  application:
+    name: ASC.Identity.Registration.Test
+    region: local
+    encryption:
+      type: aes
+      secret: test-encryption-secret-key
+    signature:
+      secret: 1123askdasjklasbnd
+    web:
+      api: /api/2.0
+    autoconfigure:
+      exclude:
+        - org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+  cache:
+    type: redis
+
+  threads:
+    virtual:
+      enabled: true
+client:
+  cache:
+    redis:
+      enabled: false
+      host: localhost
+      port: 6379
+      database: 0
+      ssl: false
+      username: ""
+      password: ""
+bucket4j:
+  enabled: false
+  redis:
+    host: localhost
+    port: 6379
+    database: 0
+    ssl: false
+    username: ""
+    password: ""
+  rate-limits:
+    limits:
+      - method: GET
+        capacity: 200
+        refill:
+          tokens: 200
+          period: 1
+          timeUnit: MINUTES
+      - method: POST
+        capacity: 100
+        refill:
+          tokens: 100
+          period: 1
+          timeUnit: MINUTES
+      - method: PUT
+        capacity: 100
+        refill:
+          tokens: 100
+          period: 1
+          timeUnit: MINUTES
+      - method: PATCH
+        capacity: 100
+        refill:
+          tokens: 100
+          period: 1
+          timeUnit: MINUTES
+      - method: DELETE
+        capacity: 100
+        refill:
+          tokens: 100
+          period: 1
+          timeUnit: MINUTES
+
+resilience4j:
+  ratelimiter:
+    instances:
+      globalRateLimiter:
+        limitForPeriod: 1000
+        limitRefreshPeriod: 1s
+        timeoutDuration: 0
+        registerHealthIndicator: false
+      publicRateLimiter:
+        limitForPeriod: 1000
+        limitRefreshPeriod: 1s
+        timeoutDuration: 0
+        registerHealthIndicator: false
+grpc:
+  server:
+    port: -1
+  client:
+    authorizationService:
+      address: in-process:test
+      negotiation-type: plaintext
+    registrationService:
+      address: in-process:test
+      negotiation-type: plaintext
+logging:
+  level:
+    root: WARN
+    com.asc: DEBUG
+  cloudwatch:
+    enabled: false

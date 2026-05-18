@@ -81,8 +81,8 @@ public class BaseSetUp
     [OneTimeTearDown]
     public async Task DropDb()
     {
-        var scope = _serviceProvider.CreateScope();
-        var context = scope.ServiceProvider.GetService<IDbContextFactory<WebhooksDbContext>>().CreateDbContext();
+        using var scope = _serviceProvider.CreateScope();
+        using var context = scope.ServiceProvider.GetService<IDbContextFactory<WebhooksDbContext>>().CreateDbContext();
         context.Database.EnsureDeleted();
         await _host.StopAsync();
     }

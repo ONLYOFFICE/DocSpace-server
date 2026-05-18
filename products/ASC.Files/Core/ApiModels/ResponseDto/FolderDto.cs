@@ -1,28 +1,35 @@
-// (c) Copyright Ascensio System SIA 2009-2026
-//
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
-//
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
-//
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// Copyright (C) Ascensio System SIA, 2009-2026
+// 
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
+// 
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
+// 
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
+// 
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
+// 
+// No trademark rights are granted under this License.
+// 
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
@@ -216,12 +223,20 @@ public class FolderDto<T> : FileEntryDto<T>
     /// <summary>
     /// Specifies whether to save form data as XLSX file.
     /// </summary>
+    /// <example>false</example>
     public bool? SaveFormAsXLSX {  get; set; }
 
     /// <summary>
     /// Specifies whether to send form data to external database.
     /// </summary>
+    /// <example>false</example>
     public bool? SendFormToExternalDB { get; set; }
+
+    /// <summary>
+    /// The original form ID that corresponds to this FormFillingFolderDone folder.
+    /// </summary>
+    /// <example>42</example>
+    public int? OriginalFormId { get; set; }
 }
 
 [Scope]
@@ -250,7 +265,9 @@ public class FolderDtoHelper(
     FileSharing fileSharing,
     EntryStatusManager entryStatusManager,
     AiAccessibility accessibility,
-    AiConfiguration aiConfiguration)
+    AiModelSettingsResolver modelSettingsResolver,
+    AiConfiguration aiConfiguration,
+    AiModelSettingsLoader modelSettingsLoader)
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, fileSharing, urlShortener)
 {
     private readonly EmployeeDtoHelper _employeeWrapperHelper = employeeWrapperHelper;
@@ -260,7 +277,8 @@ public class FolderDtoHelper(
         List<FileShareRecord<string>> currentUserRecords = null,
         string order = null,
         IFolder contextFolder = null,
-        AiStatus aiStatus = null)
+        AiStatus aiStatus = null,
+        AiModelSettingsResult modelSettingsResult = null)
     {
         var result = await GetFolderWrapperAsync(folder);
         result.ParentId = folder.ParentId;
@@ -318,7 +336,7 @@ public class FolderDtoHelper(
             if ((await tenantManager.GetCurrentTenantQuotaAsync()).Statistic &&
                     ((result.Security.TryGetValue(FileSecurity.FilesSecurityActions.EditRoom, out var canEdit) && canEdit) ||
                      (result.RootFolderType is FolderType.Archive or FolderType.TRASH && result.Security.TryGetValue(FileSecurity.FilesSecurityActions.Delete, out var canDelete) && canDelete) ||
-                     await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID)))
+                     (result.Security.TryGetValue(FileSecurity.FilesSecurityActions.Create, out var canCreate) && canCreate)))
             {
 
                 result.UsedSpace = folder.Counter;
@@ -395,33 +413,62 @@ public class FolderDtoHelper(
 
         if (folder.SettingsChatParameters != null)
         {
+            ProviderType? providerType = null;
+            var hasModelSettings = true;
+
             if (folder.SettingsChatProviderId == AiGateway.ProviderId)
             {
-                folder.ChatProviderType = ProviderType.PortalAi;
+                providerType = ProviderType.PortalAi;
 
                 if (!aiStatus.GatewayEnabled)
                 {
                     folder.SettingsChatProviderId = 0;
                 }
             }
+            else
+            {
+                modelSettingsResult ??= await modelSettingsLoader.LoadForEntriesAsync([], folder);
+                if (modelSettingsResult?.Providers?.TryGetValue(folder.SettingsChatProviderId, out var meta) == true)
+                {
+                    providerType = meta.Type;
+                    hasModelSettings = meta.HasModelSettings;
+                }
+            }
 
             var modelId = folder.SettingsChatProviderId == 0 ? null : folder.SettingsChatParameters.ModelId;
-            var model = modelId != null && folder.ChatProviderType.HasValue
-                ? aiConfiguration.GetModel(folder.ChatProviderType.Value, modelId)
-                : null;
+            if (modelId != null && providerType.HasValue)
+            {
+                var resolvedModelId = aiConfiguration.ResolveModelId(providerType.Value, modelId);
+                if (resolvedModelId != modelId)
+                {
+                    modelId = resolvedModelId;
+                    folder.SettingsChatParameters = folder.SettingsChatParameters with { ModelId = modelId };
+                }
+            }
+
+            ModelSettings resolved = null;
+            if (modelId != null && providerType.HasValue)
+            {
+                AiModelSettings dbSettings = null;
+                modelSettingsResult?.Settings?.TryGetValue((folder.SettingsChatProviderId, modelId), out dbSettings);
+                resolved = modelSettingsResolver.Resolve(providerType.Value, modelId, dbSettings, hasModelSettings);
+            }
+
+            var model = resolved is { IsEnabled: true } ? resolved : null;
 
             ChatMultimodalSettingsDto multimodal = null;
-            if (model?.Multimodal?.Image != null)
+            if (model?.Capabilities is { Vision: true })
             {
                 multimodal = new ChatMultimodalSettingsDto
                 {
                     Image = new ChatImageMultimodalSettingsDto
                     {
-                        Formats = model.Multimodal.Image.Formats
+                        Formats = AiConfiguration.SupportedImageFormats
                     }
                 };
             }
 
+#pragma warning disable CS0618 // Obsolete
             result.ChatSettings = new ChatSettingsDto
             {
                 ProviderId = folder.SettingsChatProviderId,
@@ -429,8 +476,10 @@ public class FolderDtoHelper(
                 ModelAlias = model?.Alias,
                 Prompt = folder.SettingsChatParameters.Prompt,
                 Multimodal = multimodal,
-                Thinking = model?.Thinking ?? false
+                Thinking = model?.Capabilities?.Thinking ?? false,
+                Capabilities = model?.Capabilities
             };
+#pragma warning restore CS0618
         }
 
         if (contextFolder is { FolderType: FolderType.Recent } or { FolderType: FolderType.Favorites })
@@ -518,6 +567,41 @@ public class FolderDtoHelper(
                     result.Security[FileSecurity.FilesSecurityActions.EditAccess] = false;
                     break;
             }
+        }
+
+        if (folder.FolderType == FolderType.FormFillingFolderDone && folder.Id is int doneFolderId)
+        {
+            var fileDao = _daoFactory.GetFileDao<int>();
+            var completedForm = await fileDao
+                .GetFilesAsync(doneFolderId, new OrderBy(SortedByType.DateAndTime, false), FilterType.PdfForm, false, Guid.Empty, null, null, false, count: 1)
+                .FirstOrDefaultAsync();
+
+            var canUpdateXlsx = false;
+            if (completedForm != null)
+            {
+                var completedFormProperties = await fileDao.GetProperties(completedForm.Id);
+                var originalFormId = completedFormProperties?.FormFilling?.OriginalFormId ?? 0;
+                if (originalFormId != 0)
+                {
+                    result.OriginalFormId = originalFormId;
+                    var originalForm = await fileDao.GetFileAsync(originalFormId);
+                    canUpdateXlsx = originalForm != null && await _fileSecurity.CanEditAsync(originalForm);
+                }
+            }
+
+            result.Security[FileSecurity.FilesSecurityActions.UpdateXlsx] = canUpdateXlsx;
+            result.Security[FileSecurity.FilesSecurityActions.AnalyzeResponses] = canUpdateXlsx;
+        }
+        else
+        {
+            result.Security[FileSecurity.FilesSecurityActions.UpdateXlsx] = false;
+            result.Security[FileSecurity.FilesSecurityActions.AnalyzeResponses] = false;
+        }
+
+        if (folder.FolderType.IsPublicSystemFolder())
+        {
+            result.CreatedBy = EmployeeDto.Default;
+            result.UpdatedBy = EmployeeDto.Default;
         }
 
         return result;

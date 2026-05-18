@@ -1,29 +1,35 @@
-// (c) Copyright Ascensio System SIA 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 //
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY; without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 //
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 //
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 //
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 //
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical
-// writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+//
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
 
 package com.asc.registration.service;
 
@@ -60,10 +66,15 @@ import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -117,39 +128,57 @@ public class ClientQueryHandlerTest {
   }
 
   @Nested
-  @DisplayName("Admin Role Tests")
+  @DisplayName("Admin role tests")
   class AdminRoleTests {
-    @Test
-    public void whenClientIsFoundByIdAndTenantId_thenReturnClientResponse() {
-      var query = new TenantClientQuery();
-      query.setClientId(clientResponse.getClientId());
-      query.setTenantId(1);
+    enum AdminSingleFetchKind {
+      CLIENT,
+      CLIENT_INFO
+    }
 
+    enum AdminPaginationKind {
+      CLIENT_INFO,
+      CLIENT_FULL
+    }
+
+    static Stream<Arguments> adminPaginationCases() {
+      return Stream.of(
+          Arguments.of(AdminPaginationKind.CLIENT_INFO, 5, "last-client-id-5"),
+          Arguments.of(AdminPaginationKind.CLIENT_INFO, 10, "last-client-id"),
+          Arguments.of(AdminPaginationKind.CLIENT_FULL, 5, "last-client-id-5"),
+          Arguments.of(AdminPaginationKind.CLIENT_FULL, 10, "last-client-id"));
+    }
+
+    @ParameterizedTest
+    @EnumSource(AdminSingleFetchKind.class)
+    public void whenClientIsFoundByIdAndTenantId_thenReturnExpectedResponse(
+        AdminSingleFetchKind kind) {
       when(clientQueryRepository.findByClientIdAndTenantId(
               any(ClientId.class), any(TenantId.class)))
           .thenReturn(Optional.of(client));
-      when(clientDataMapper.toClientResponse(any(Client.class))).thenReturn(clientResponse);
-      when(encryptionService.decrypt(anyString())).thenReturn("decryptedSecret");
 
-      var response = clientQueryHandler.getClient(Role.ROLE_ADMIN, query);
+      if (kind == AdminSingleFetchKind.CLIENT) {
+        var query = new TenantClientQuery();
+        query.setClientId(clientResponse.getClientId());
+        query.setTenantId(1);
 
-      verify(clientQueryRepository, times(1))
-          .findByClientIdAndTenantId(any(ClientId.class), any(TenantId.class));
-      verify(clientDataMapper, times(1)).toClientResponse(any(Client.class));
-      verify(encryptionService, times(1)).decrypt(anyString());
+        when(clientDataMapper.toClientResponse(any(Client.class))).thenReturn(clientResponse);
+        when(encryptionService.decrypt(anyString())).thenReturn("decryptedSecret");
 
-      assertEquals("decryptedSecret", response.getClientSecret());
-    }
+        var response = clientQueryHandler.getClient(Role.ROLE_ADMIN, query);
 
-    @Test
-    public void whenClientInfoIsFoundById_thenReturnClientInfoResponse() {
+        verify(clientQueryRepository, times(1))
+            .findByClientIdAndTenantId(any(ClientId.class), any(TenantId.class));
+        verify(clientDataMapper, times(1)).toClientResponse(any(Client.class));
+        verify(encryptionService, times(1)).decrypt(anyString());
+
+        assertEquals("decryptedSecret", response.getClientSecret());
+        return;
+      }
+
       var query = new ClientInfoQuery();
       query.setClientId(clientResponse.getClientId());
       query.setTenantId(1);
 
-      when(clientQueryRepository.findByClientIdAndTenantId(
-              any(ClientId.class), any(TenantId.class)))
-          .thenReturn(Optional.of(client));
       when(clientDataMapper.toClientInfoResponse(any(Client.class))).thenReturn(clientInfoResponse);
 
       var response = clientQueryHandler.getClientInfo(Role.ROLE_ADMIN, query);
@@ -161,62 +190,58 @@ public class ClientQueryHandlerTest {
       assertEquals(clientInfoResponse.getClientId(), response.getClientId());
     }
 
-    @Test
-    public void whenClientInfoPaginationQueryIsExecuted_thenReturnPageableResponse() {
-      var query = new ClientInfoPaginationQuery();
-      query.setTenantId(1);
-      query.setLimit(10);
-      query.setLastClientId("last-client-id");
-      query.setLastCreatedOn(ZonedDateTime.now(ZoneId.of("UTC")));
-
+    @ParameterizedTest
+    @MethodSource("adminPaginationCases")
+    public void whenPaginationQueryIsExecuted_thenReturnPageableResponse(
+        AdminPaginationKind kind, int limit, String lastClientId) {
+      var lastCreatedOn = ZonedDateTime.now(ZoneId.of("UTC"));
       var pageableResponse = new PageableResponse<Client>();
-      pageableResponse.setLimit(10);
+      pageableResponse.setLimit(limit);
       pageableResponse.setData(Set.of(client));
       pageableResponse.setLastClientId("next-client-id");
-      pageableResponse.setLastCreatedOn(ZonedDateTime.now(ZoneId.of("UTC")).plusMinutes(10));
+      pageableResponse.setLastCreatedOn(lastCreatedOn.plusMinutes(10));
 
       when(clientQueryRepository.findAllByTenantId(
-              any(TenantId.class), eq(10), eq("last-client-id"), any(ZonedDateTime.class)))
+              any(TenantId.class), eq(limit), eq(lastClientId), any(ZonedDateTime.class)))
           .thenReturn(pageableResponse);
-      when(clientDataMapper.toClientInfoResponse(any(Client.class))).thenReturn(clientInfoResponse);
 
-      var response = clientQueryHandler.getClientsInfo(Role.ROLE_ADMIN, query);
+      if (kind == AdminPaginationKind.CLIENT_INFO) {
+        var query = new ClientInfoPaginationQuery();
+        query.setTenantId(1);
+        query.setLimit(limit);
+        query.setLastClientId(lastClientId);
+        query.setLastCreatedOn(lastCreatedOn);
 
-      verify(clientQueryRepository, times(1))
-          .findAllByTenantId(
-              any(TenantId.class), eq(10), eq("last-client-id"), any(ZonedDateTime.class));
-      verify(clientDataMapper, times(1)).toClientInfoResponse(any(Client.class));
+        when(clientDataMapper.toClientInfoResponse(any(Client.class)))
+            .thenReturn(clientInfoResponse);
 
-      assertTrue(response.getData().iterator().hasNext());
-      assertEquals(
-          clientInfoResponse.getClientId(), response.getData().iterator().next().getClientId());
-      assertEquals("next-client-id", response.getLastClientId());
-    }
+        var response = clientQueryHandler.getClientsInfo(Role.ROLE_ADMIN, query);
 
-    @Test
-    public void whenTenantClientsPaginationQueryIsExecuted_thenReturnPageableResponse() {
+        verify(clientQueryRepository, times(1))
+            .findAllByTenantId(
+                any(TenantId.class), eq(limit), eq(lastClientId), any(ZonedDateTime.class));
+        verify(clientDataMapper, times(1)).toClientInfoResponse(any(Client.class));
+
+        assertTrue(response.getData().iterator().hasNext());
+        assertEquals(
+            clientInfoResponse.getClientId(), response.getData().iterator().next().getClientId());
+        assertEquals("next-client-id", response.getLastClientId());
+        return;
+      }
+
       var query = new TenantClientsPaginationQuery();
       query.setTenantId(1);
-      query.setLimit(10);
-      query.setLastClientId("last-client-id");
-      query.setLastCreatedOn(ZonedDateTime.now(ZoneId.of("UTC")));
+      query.setLimit(limit);
+      query.setLastClientId(lastClientId);
+      query.setLastCreatedOn(lastCreatedOn);
 
-      var pageableResponse = new PageableResponse<Client>();
-      pageableResponse.setLimit(10);
-      pageableResponse.setData(Set.of(client));
-      pageableResponse.setLastClientId("next-client-id");
-      pageableResponse.setLastCreatedOn(ZonedDateTime.now(ZoneId.of("UTC")).plusMinutes(10));
-
-      when(clientQueryRepository.findAllByTenantId(
-              any(TenantId.class), eq(10), eq("last-client-id"), any(ZonedDateTime.class)))
-          .thenReturn(pageableResponse);
       when(clientDataMapper.toClientResponse(any(Client.class))).thenReturn(clientResponse);
 
       var response = clientQueryHandler.getClients(Role.ROLE_ADMIN, query);
 
       verify(clientQueryRepository, times(1))
           .findAllByTenantId(
-              any(TenantId.class), eq(10), eq("last-client-id"), any(ZonedDateTime.class));
+              any(TenantId.class), eq(limit), eq(lastClientId), any(ZonedDateTime.class));
       verify(clientDataMapper, times(1)).toClientResponse(any(Client.class));
 
       assertTrue(response.getData().iterator().hasNext());
@@ -241,55 +266,52 @@ public class ClientQueryHandlerTest {
   }
 
   @Nested
-  @DisplayName("User Role Tests")
+  @DisplayName("User role tests")
   class UserRoleTests {
+    enum UserSingleFetchKind {
+      CLIENT,
+      CLIENT_INFO
+    }
 
-    @Test
-    public void whenUserClientIsFound_thenReturnClientResponse() {
-      var query = new TenantClientQuery();
-      query.setClientId(clientResponse.getClientId());
-      query.setTenantId(1);
-      query.setUserId("creator");
+    static Stream<Arguments> userNotFoundCases() {
+      return Stream.of(
+          Arguments.of(UserSingleFetchKind.CLIENT), Arguments.of(UserSingleFetchKind.CLIENT_INFO));
+    }
 
+    static Stream<Arguments> userPaginationCases() {
+      return Stream.of(Arguments.of(5, "last-client-id"), Arguments.of(3, "last-client-id-3"));
+    }
+
+    @ParameterizedTest
+    @EnumSource(UserSingleFetchKind.class)
+    public void whenUserClientIsFound_thenReturnExpectedResponse(UserSingleFetchKind kind) {
       when(clientQueryRepository.findByClientIdAndTenantIdAndCreatorId(
               any(ClientId.class), any(TenantId.class), any(UserId.class)))
           .thenReturn(Optional.of(client));
-      when(clientDataMapper.toClientResponse(any(Client.class))).thenReturn(clientResponse);
-      when(encryptionService.decrypt(anyString())).thenReturn("decryptedSecret");
 
-      var response = clientQueryHandler.getClient(Role.ROLE_USER, query);
+      if (kind == UserSingleFetchKind.CLIENT) {
+        var query = new TenantClientQuery();
+        query.setClientId(clientResponse.getClientId());
+        query.setTenantId(1);
+        query.setUserId("creator");
 
-      verify(clientQueryRepository, times(1))
-          .findByClientIdAndTenantIdAndCreatorId(
-              any(ClientId.class), any(TenantId.class), any(UserId.class));
-      assertEquals("decryptedSecret", response.getClientSecret());
-    }
+        when(clientDataMapper.toClientResponse(any(Client.class))).thenReturn(clientResponse);
+        when(encryptionService.decrypt(anyString())).thenReturn("decryptedSecret");
 
-    @Test
-    public void whenUserClientNotFound_thenThrowClientNotFoundException() {
-      var query = new TenantClientQuery();
-      query.setClientId(clientResponse.getClientId());
-      query.setTenantId(1);
-      query.setUserId("nonCreator");
+        var response = clientQueryHandler.getClient(Role.ROLE_USER, query);
 
-      when(clientQueryRepository.findByClientIdAndTenantIdAndCreatorId(
-              any(ClientId.class), any(TenantId.class), any(UserId.class)))
-          .thenReturn(Optional.empty());
+        verify(clientQueryRepository, times(1))
+            .findByClientIdAndTenantIdAndCreatorId(
+                any(ClientId.class), any(TenantId.class), any(UserId.class));
+        assertEquals("decryptedSecret", response.getClientSecret());
+        return;
+      }
 
-      assertThrows(
-          ClientNotFoundException.class, () -> clientQueryHandler.getClient(Role.ROLE_USER, query));
-    }
-
-    @Test
-    public void whenUserClientInfoIsFound_thenReturnClientInfoResponse() {
       var query = new ClientInfoQuery();
       query.setClientId(clientResponse.getClientId());
       query.setTenantId(1);
       query.setUserId("creator");
 
-      when(clientQueryRepository.findByClientIdAndTenantIdAndCreatorId(
-              any(ClientId.class), any(TenantId.class), any(UserId.class)))
-          .thenReturn(Optional.of(client));
       when(clientDataMapper.toClientInfoResponse(any(Client.class))).thenReturn(clientInfoResponse);
 
       var response = clientQueryHandler.getClientInfo(Role.ROLE_USER, query);
@@ -300,16 +322,30 @@ public class ClientQueryHandlerTest {
       assertEquals(clientInfoResponse.getClientId(), response.getClientId());
     }
 
-    @Test
-    public void whenUserClientInfoNotFound_thenThrowClientNotFoundException() {
+    @ParameterizedTest
+    @MethodSource("userNotFoundCases")
+    public void whenUserClientLookupReturnsEmpty_thenThrowClientNotFoundException(
+        UserSingleFetchKind kind) {
+      when(clientQueryRepository.findByClientIdAndTenantIdAndCreatorId(
+              any(ClientId.class), any(TenantId.class), any(UserId.class)))
+          .thenReturn(Optional.empty());
+
+      if (kind == UserSingleFetchKind.CLIENT) {
+        var query = new TenantClientQuery();
+        query.setClientId(clientResponse.getClientId());
+        query.setTenantId(1);
+        query.setUserId("nonCreator");
+
+        assertThrows(
+            ClientNotFoundException.class,
+            () -> clientQueryHandler.getClient(Role.ROLE_USER, query));
+        return;
+      }
+
       var query = new ClientInfoQuery();
       query.setClientId(clientResponse.getClientId());
       query.setTenantId(1);
       query.setUserId("nonCreator");
-
-      when(clientQueryRepository.findByClientIdAndTenantIdAndCreatorId(
-              any(ClientId.class), any(TenantId.class), any(UserId.class)))
-          .thenReturn(Optional.empty());
 
       assertThrows(
           ClientNotFoundException.class,
@@ -345,17 +381,18 @@ public class ClientQueryHandlerTest {
           () -> clientQueryHandler.getClientInfo(Role.ROLE_USER, query));
     }
 
-    @Test
-    public void whenUserClientsPaginationQuery_thenUseCreatorId() {
+    @ParameterizedTest
+    @MethodSource("userPaginationCases")
+    public void whenUserClientsPaginationQuery_thenUseCreatorId(int limit, String lastClientId) {
       var query = new ClientInfoPaginationQuery();
       query.setTenantId(1);
       query.setUserId("creator");
-      query.setLimit(5);
-      query.setLastClientId("last-client-id");
+      query.setLimit(limit);
+      query.setLastClientId(lastClientId);
       query.setLastCreatedOn(ZonedDateTime.now(ZoneId.of("UTC")));
 
       var pageableResponse = new PageableResponse<Client>();
-      pageableResponse.setLimit(5);
+      pageableResponse.setLimit(limit);
       pageableResponse.setData(Set.of(client));
       pageableResponse.setLastClientId("next-client-id");
       pageableResponse.setLastCreatedOn(ZonedDateTime.now(ZoneId.of("UTC")).plusMinutes(10));
@@ -363,8 +400,8 @@ public class ClientQueryHandlerTest {
       when(clientQueryRepository.findAllByTenantIdAndCreatorId(
               any(TenantId.class),
               any(UserId.class),
-              eq(5),
-              eq("last-client-id"),
+              eq(limit),
+              eq(lastClientId),
               any(ZonedDateTime.class)))
           .thenReturn(pageableResponse);
       when(clientDataMapper.toClientInfoResponse(any(Client.class))).thenReturn(clientInfoResponse);
@@ -375,8 +412,8 @@ public class ClientQueryHandlerTest {
           .findAllByTenantIdAndCreatorId(
               any(TenantId.class),
               any(UserId.class),
-              eq(5),
-              eq("last-client-id"),
+              eq(limit),
+              eq(lastClientId),
               any(ZonedDateTime.class));
       assertEquals("next-client-id", response.getLastClientId());
     }

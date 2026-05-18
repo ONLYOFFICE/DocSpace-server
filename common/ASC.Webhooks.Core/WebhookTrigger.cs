@@ -1,28 +1,35 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Webhooks.Core;
 
@@ -32,22 +39,32 @@ namespace ASC.Webhooks.Core;
 public enum WebhookTrigger : long
 {
     [Description("*")]
+    [AvailableFor(EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User)]
+    [Order(0)]
     All = 0,
 
 
     #region User
 
     [Description("user.created")]
-    UserCreated = 1,
+    [AvailableFor(EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin)]
+    [Order(10)]
+    UserCreated = 1L << 0,
 
     [Description("user.invited")]
-    UserInvited = 2,
+    [AvailableFor(EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin)]
+    [Order(11)]
+    UserInvited = 1L << 1,
 
     [Description("user.updated")]
-    UserUpdated = 4,
+    [AvailableFor(EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User)]
+    [Order(12)]
+    UserUpdated = 1L << 2,
 
     [Description("user.deleted")]
-    UserDeleted = 8,
+    [AvailableFor(EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User)]
+    [Order(13)]
+    UserDeleted = 1L << 3,
 
     #endregion User
 
@@ -55,13 +72,19 @@ public enum WebhookTrigger : long
     #region Group
 
     [Description("group.created")]
-    GroupCreated = 16,
+    [AvailableFor(EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin)]
+    [Order(20)]
+    GroupCreated = 1L << 4,
 
     [Description("group.updated")]
-    GroupUpdated = 32,
+    [AvailableFor(EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin)]
+    [Order(21)]
+    GroupUpdated = 1L << 5,
 
     [Description("group.deleted")]
-    GroupDeleted = 64,
+    [AvailableFor(EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin)]
+    [Order(22)]
+    GroupDeleted = 1L << 6,
 
     #endregion
 
@@ -69,28 +92,44 @@ public enum WebhookTrigger : long
     #region File
 
     [Description("file.created")]
-    FileCreated = 128,
+    [AvailableFor(EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User)]
+    [Order(30)]
+    FileCreated = 1L << 7,
 
     [Description("file.uploaded")]
-    FileUploaded = 256,
+    [AvailableFor(EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User)]
+    [Order(31)]
+    FileUploaded = 1L << 8,
 
     [Description("file.updated")]
-    FileUpdated = 512,
+    [AvailableFor(EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User)]
+    [Order(32)]
+    FileUpdated = 1L << 9,
 
     [Description("file.trashed")]
-    FileTrashed = 1024,
+    [AvailableFor(EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User)]
+    [Order(33)]
+    FileTrashed = 1L << 10,
 
     [Description("file.deleted")]
-    FileDeleted = 2048,
+    [AvailableFor(EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User)]
+    [Order(34)]
+    FileDeleted = 1L << 11,
 
     [Description("file.restored")]
-    FileRestored = 4096,
+    [AvailableFor(EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User)]
+    [Order(35)]
+    FileRestored = 1L << 12,
 
     [Description("file.copied")]
-    FileCopied = 8192,
+    [AvailableFor(EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User)]
+    [Order(36)]
+    FileCopied = 1L << 13,
 
     [Description("file.moved")]
-    FileMoved = 16384,
+    [AvailableFor(EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User)]
+    [Order(37)]
+    FileMoved = 1L << 14,
 
     #endregion
 
@@ -98,25 +137,39 @@ public enum WebhookTrigger : long
     #region Folder
 
     [Description("folder.created")]
-    FolderCreated = 32768,
+    [AvailableFor(EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User)]
+    [Order(40)]
+    FolderCreated = 1L << 15,
 
     [Description("folder.updated")]
-    FolderUpdated = 65536,
+    [AvailableFor(EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User)]
+    [Order(41)]
+    FolderUpdated = 1L << 16,
 
     [Description("folder.trashed")]
-    FolderTrashed = 131072,
+    [AvailableFor(EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User)]
+    [Order(42)]
+    FolderTrashed = 1L << 17,
 
     [Description("folder.deleted")]
-    FolderDeleted = 262144,
+    [AvailableFor(EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User)]
+    [Order(43)]
+    FolderDeleted = 1L << 18,
 
     [Description("folder.restored")]
-    FolderRestored = 524288,
+    [AvailableFor(EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User)]
+    [Order(44)]
+    FolderRestored = 1L << 19,
 
     [Description("folder.copied")]
-    FolderCopied = 1048576,
+    [AvailableFor(EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User)]
+    [Order(45)]
+    FolderCopied = 1L << 20,
 
     [Description("folder.moved")]
-    FolderMoved = 2097152,
+    [AvailableFor(EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User)]
+    [Order(46)]
+    FolderMoved = 1L << 21,
 
     #endregion
 
@@ -124,22 +177,34 @@ public enum WebhookTrigger : long
     #region Room
 
     [Description("room.created")]
-    RoomCreated = 4194304,
+    [AvailableFor(EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin)]
+    [Order(50)]
+    RoomCreated = 1L << 22,
 
     [Description("room.updated")]
-    RoomUpdated = 8388608,
+    [AvailableFor(EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User)]
+    [Order(51)]
+    RoomUpdated = 1L << 23,
 
     [Description("room.archived")]
-    RoomArchived = 16777216,
+    [AvailableFor(EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User)]
+    [Order(52)]
+    RoomArchived = 1L << 24,
 
     [Description("room.deleted")]
-    RoomDeleted = 33554432,
+    [AvailableFor(EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User)]
+    [Order(53)]
+    RoomDeleted = 1L << 25,
 
     [Description("room.restored")]
-    RoomRestored = 67108864,
+    [AvailableFor(EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User)]
+    [Order(54)]
+    RoomRestored = 1L << 26,
 
     [Description("room.copied")]
-    RoomCopied = 134217728,
+    [AvailableFor(EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin)]
+    [Order(55)]
+    RoomCopied = 1L << 27,
 
     #endregion
 
@@ -147,13 +212,19 @@ public enum WebhookTrigger : long
     #region Forms
 
     [Description("form.submit")]
-    FormSubmit = 268435456,
+    [AvailableFor(EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User)]
+    [Order(60)]
+    FormSubmit = 1L << 28,
 
     [Description("form.filled.out")]
-    FormFilledOut = 536870912,
+    [AvailableFor(EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User)]
+    [Order(61)]
+    FormFilledOut = 1L << 29,
 
     [Description("form.stopped")]
-    FormStopped = 1073741824,
+    [AvailableFor(EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User)]
+    [Order(62)]
+    FormStopped = 1L << 30,
 
     #endregion
 
@@ -161,25 +232,48 @@ public enum WebhookTrigger : long
     #region Agent
 
     [Description("agent.created")]
-    AgentCreated = 2147483648,
+    [AvailableFor(EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin)]
+    [Order(70)]
+    AgentCreated = 1L << 31,
 
     [Description("agent.updated")]
-    AgentUpdated = 4294967296,
+    [AvailableFor(EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User)]
+    [Order(71)]
+    AgentUpdated = 1L << 32,
 
     [Description("agent.deleted")]
-    AgentDeleted = 8589934592,
+    [AvailableFor(EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User)]
+    [Order(72)]
+    AgentDeleted = 1L << 33,
+
+    #endregion
+
+
+    #region Download
+
+    [Description("file.downloaded")]
+    [AvailableFor(EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User)]
+    [Order(38)]
+    FileDownloaded = 1L << 34,
+
+    [Description("folder.downloaded")]
+    [AvailableFor(EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User)]
+    [Order(47)]
+    FolderDownloaded = 1L << 35,
 
     #endregion
 }
 
 
-public static partial class WebhookTriggerExtensions
+public static class WebhookTriggerExtensions
 {
-    private static readonly Dictionary<WebhookTrigger, string> _customStrings;
+    private record WebhookTriggerInfo(string CustomString, EmployeeType[] AvailableFor, int Order);
+
+    private static readonly Dictionary<WebhookTrigger, WebhookTriggerInfo> _triggers;
 
     static WebhookTriggerExtensions()
     {
-        _customStrings = [];
+        _triggers = [];
 
         var type = typeof(WebhookTrigger);
 
@@ -187,9 +281,21 @@ public static partial class WebhookTriggerExtensions
         {
             var field = type.GetField(value.ToString());
 
-            var attribute = (DescriptionAttribute)Attribute.GetCustomAttribute(field, typeof(DescriptionAttribute));
+            if (field == null)
+            {
+                continue;
+            }
 
-            _customStrings.Add(value, attribute != null ? attribute.Description : field.Name);
+            var description = (DescriptionAttribute)Attribute.GetCustomAttribute(field, typeof(DescriptionAttribute));
+            var customString = description?.Description ?? field.Name;
+
+            var availability = (AvailableForAttribute)Attribute.GetCustomAttribute(field, typeof(AvailableForAttribute));
+            var availableFor = availability?.Roles ?? [];
+
+            var orderAttr = (OrderAttribute)Attribute.GetCustomAttribute(field, typeof(OrderAttribute));
+            var order = orderAttr?.Order ?? int.MaxValue;
+
+            _triggers.Add(value, new WebhookTriggerInfo(customString, availableFor, order));
         }
     }
 
@@ -197,12 +303,23 @@ public static partial class WebhookTriggerExtensions
     {
         public string ToCustomString()
         {
-            return _customStrings[value];
+            return _triggers[value].CustomString;
         }
 
         public string GetTargetType()
         {
-            return _customStrings[value].Split('.')[0];
+            return _triggers[value].CustomString.Split('.')[0];
+        }
+
+        public bool IsAvailableFor(EmployeeType employeeType)
+        {
+            return _triggers.TryGetValue(value, out var info)
+                && Array.IndexOf(info.AvailableFor, employeeType) >= 0;
+        }
+
+        public int GetOrder()
+        {
+            return _triggers.TryGetValue(value, out var info) ? info.Order : int.MaxValue;
         }
     }
 }

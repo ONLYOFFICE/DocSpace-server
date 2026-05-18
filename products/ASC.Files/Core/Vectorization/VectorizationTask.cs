@@ -1,28 +1,35 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 using Chunk = ASC.Files.Core.Vectorization.Data.Chunk;
 
@@ -35,7 +42,7 @@ public class VectorizationTask : DistributedTaskProgress
     private int _tenantId;
     private Guid _userId;
     private int _fileId;
-    
+
     private static TimeSpan Timeout => TimeSpan.FromMinutes(3);
     private static TimeSpan PulseInterval => Timeout / 3;
 
@@ -52,23 +59,23 @@ public class VectorizationTask : DistributedTaskProgress
         _userId = userId;
         _fileId = fileId;
     }
-    
+
     protected override async Task DoJob()
     {
         await using var scope = _serviceScopeFactory.CreateAsyncScope();
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<VectorizationTask>>();
-        
+
         SocketManager socketManager = null;
         IFileDao<int> fileDao = null;
         IHeartBeat heartBeat = null;
         VectorStoreCollection<Chunk> collection = null;
-        
+
         File<int> file = null;
 
         try
         {
             var heartBeatFactory = scope.ServiceProvider.GetRequiredService<IHeartBeatFactory>();
-            
+
             var key = VectorizationHelper.GetVectorizationKey(_fileId);
             heartBeat = await heartBeatFactory.CreateAsync(key, Timeout, PulseInterval, CancellationToken);
 
@@ -77,9 +84,9 @@ public class VectorizationTask : DistributedTaskProgress
 
             var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
             await securityContext.AuthenticateMeWithoutCookieAsync(_userId);
-            
+
             var settingsManager = scope.ServiceProvider.GetRequiredService<SettingsManager>();
-            
+
             var aiAccessSettings = await settingsManager.LoadAsync<TenantAiAccessSettings>();
             if (!aiAccessSettings.Enabled)
             {
@@ -109,7 +116,7 @@ public class VectorizationTask : DistributedTaskProgress
                 Chunk.IndexName,
                 new VectorCollectionOptions
                 {
-                    Dimension = vectorizationSettings.Model.Dimension, 
+                    Dimension = vectorizationSettings.Model.Dimension,
                     ModelId = vectorizationSettings.Model.Id
                 });
 
@@ -118,21 +125,21 @@ public class VectorizationTask : DistributedTaskProgress
             {
                 throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
             }
-            
+
             var parents = await folderDao.GetParentFoldersAsync(file.ParentId).ToListAsync();
             if (!parents.Exists(x => x.FolderType == FolderType.Knowledge))
             {
                 throw new InvalidOperationException("File is not in knowledge folder");
             }
-            
-            var room = parents.FirstOrDefault(x => x.FolderType == FolderType.AiRoom);
-            if (room == null)
+
+            var agent = parents.FirstOrDefault(x => x.FolderType == FolderType.AiRoom);
+            if (agent == null)
             {
                 throw new InvalidOperationException("File is not in ai room");
             }
 
             await collection.EnsureCollectionExistsAsync(CancellationToken);
-            var embeddingGenerator = await generatorFactory.CreateAsync();
+            var embeddingGenerator = await generatorFactory.CreateAsync(agent);
 
             await using var stream = await fileDao.GetFileStreamAsync(file);
 
@@ -152,7 +159,7 @@ public class VectorizationTask : DistributedTaskProgress
                     {
                         Id = Guid.NewGuid(),
                         TenantId = _tenantId,
-                        RoomId = room.Id,
+                        RoomId = agent.Id,
                         Title = file.Title,
                         FileId = file.Id,
                         TextEmbedding = text,
@@ -194,13 +201,13 @@ public class VectorizationTask : DistributedTaskProgress
                 if (collection != null)
                 {
                     await collection.DeleteAsync(
-                        new VectorSearchOptions<Chunk> 
+                        new VectorSearchOptions<Chunk>
                         {
-                            Filter = x => x.TenantId == _tenantId && x.FileId == _fileId 
+                            Filter = x => x.TenantId == _tenantId && x.FileId == _fileId
                         },
                         true);
                 }
-                
+
                 if (file != null && socketManager != null)
                 {
                     await socketManager.UpdateFileAsync(file);

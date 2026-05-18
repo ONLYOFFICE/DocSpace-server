@@ -1,39 +1,47 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 using ASC.AuditTrail;
 using ASC.AuditTrail.Models;
 using ASC.AuditTrail.Models.Mappings;
-using ASC.Core.Common;
 using ASC.Files.Core.Utils;
 
 namespace ASC.Files.Api;
 
 [ConstraintRoute("int")]
 public class FoldersControllerInternal(
+    IDaoFactory daoFactory,
+    FileSecurity fileSecurity,
     BreadCrumbsManager breadCrumbsManager,
     FolderContentDtoHelper folderContentDtoHelper,
     FileStorageService fileStorageService,
@@ -52,6 +60,8 @@ public class FoldersControllerInternal(
     CoreBaseSettings coreBaseSettings
     )
     : FoldersController<int>(
+        daoFactory,
+        fileSecurity,
         breadCrumbsManager,
         folderContentDtoHelper,
         fileStorageService,
@@ -63,6 +73,7 @@ public class FoldersControllerInternal(
         fileShareDtoHelper,
         apiContext)
 {
+    private readonly FileStorageService _fileStorageServiceInternal = fileStorageService;
     /// <remarks>
     /// Returns the activity history of a folder with a specified identifier.
     /// </remarks>
@@ -126,9 +137,33 @@ public class FoldersControllerInternal(
     {
         return (await formFillingReportCreator.GetFormsFields(inDto.FolderId)).Select(r => new FormsItemDto(r.Key, r.Type));
     }
+
+    /// <remarks>
+    /// Triggers asynchronous XLSX report generation for the specified form results folder.
+    /// </remarks>
+    /// <summary>Generate XLSX report by folder</summary>
+    /// <path>api/2.0/files/folder/{folderId}/xlsx</path>
+    [Tags("Files / Folders")]
+    [SwaggerResponse(200, "Ok", typeof(XlsxReportResponseDto))]
+    [SwaggerResponse(403, "You do not have enough permissions to perform this action")]
+    [SwaggerResponse(404, "The required folder was not found")]
+    [HttpPost("folder/{folderId:int}/xlsx")]
+    public async Task<XlsxReportResponseDto> GenerateXlsxByFolder(FolderIdRequestDto<int> inDto)
+    {
+        var (task, form, isNewFile) = await _fileStorageServiceInternal.GenerateXlsxByFolderAsync(inDto.FolderId);
+
+        return new XlsxReportResponseDto
+        {
+            Form = await _fileDtoHelper.GetAsync(form),
+            Task = DocumentBuilderTaskDto.Get(task),
+            IsNewFile = isNewFile
+        };
+    }
 }
 
 public class FoldersControllerThirdparty(
+    IDaoFactory daoFactory,
+    FileSecurity fileSecurity,
     BreadCrumbsManager breadCrumbsManager,
     FolderContentDtoHelper folderContentDtoHelper,
     FileStorageService fileStorageService,
@@ -139,7 +174,10 @@ public class FoldersControllerThirdparty(
     PermissionContext permissionContext,
     FileShareDtoHelper fileShareDtoHelper,
     ApiContext apiContext)
-    : FoldersController<string>(breadCrumbsManager,
+    : FoldersController<string>(
+        daoFactory,
+        fileSecurity,
+        breadCrumbsManager,
         folderContentDtoHelper,
         fileStorageService,
         fileOperationsManager,
@@ -151,6 +189,8 @@ public class FoldersControllerThirdparty(
         apiContext);
 
 public abstract class FoldersController<T>(
+    IDaoFactory daoFactory,
+    FileSecurity fileSecurity,
     BreadCrumbsManager breadCrumbsManager,
     FolderContentDtoHelper folderContentDtoHelper,
     FileStorageService fileStorageService,
@@ -237,7 +277,7 @@ public abstract class FoldersController<T>(
             formsItemDto = new FormsItemDto(inDto.FormsItemKey, inDto.FormsItemType);
         }
 
-        var folder = await folderContentDtoHelper.GetAsync(inDto.FolderId, inDto.UserIdOrGroupId, inDto.SharedBy, inDto.FilterType, inDto.RoomId, true, true, inDto.ExcludeSubject, inDto.ApplyFilterOption, inDto.SearchArea, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text, split, formsItemDto, inDto.Location);
+        var folder = await folderContentDtoHelper.GetAsync(inDto.FolderId, inDto.UserIdOrGroupId, inDto.SharedBy, inDto.FilterType, inDto.RoomId, true, inDto.WithSubFolders ?? true, inDto.ExcludeSubject, inDto.ApplyFilterOption, inDto.SearchArea, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text, split, formsItemDto, inDto.Location);
         return folder.NotFoundIfNull();
     }
 
@@ -270,6 +310,19 @@ public abstract class FoldersController<T>(
     [HttpGet("folder/{folderId}/path")]
     public async IAsyncEnumerable<FileEntryBaseDto> GetFolderPath(FolderIdRequestDto<T> inDto)
     {
+        var folderDao = daoFactory.GetFolderDao<T>();
+        var folder = await folderDao.GetFolderAsync(inDto.FolderId);
+
+        if (folder == null)
+        {
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
+
+        if (!await fileSecurity.CanReadAsync(folder))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ReadFolder);
+        }
+
         var breadCrumbs = await breadCrumbsManager.GetBreadCrumbsAsync(inDto.FolderId);
 
         foreach (var e in breadCrumbs)

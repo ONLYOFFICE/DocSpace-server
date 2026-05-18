@@ -1,0 +1,57 @@
+<Solution>
+  <Folder Name="/migrations/">
+    <Project Path="common/Tools/ASC.Migration.Runner/ASC.Migration.Runner.csproj" />
+    <Project Path="common/Tools/ASC.Migrations.Core/ASC.Migrations.Core.csproj" />
+    <Project Path="migrations/mysql/SaaS/ASC.Migrations.MySql.SaaS.csproj" />
+    <Project Path="migrations/mysql/Standalone/ASC.Migrations.MySql.Standalone.csproj" />
+    <Project Path="migrations/postgre/SaaS/ASC.Migrations.PostgreSql.SaaS.csproj" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path="Directory.Packages.props" />
+  </Folder>
+  <Project Path="common/ASC.ActiveDirectory/ASC.ActiveDirectory.csproj" />
+  <Project Path="common/ASC.Analyzers/ASC.Analyzers.csproj" />
+  <Project Path="common/ASC.Api.Core/ASC.Api.Core.csproj" />
+  <Project Path="common/ASC.AppHost/ASC.AppHost.csproj" />
+  <Project Path="common/ASC.Common/ASC.Common.csproj" />
+  <Project Path="common/ASC.Core.Common/ASC.Core.Common.csproj" />
+  <Project Path="common/ASC.Data.Backup.Core/ASC.Data.Backup.Core.csproj" />
+  <Project Path="common/ASC.Data.Encryption/ASC.Data.Encryption.csproj" />
+  <Project Path="common/ASC.Data.Reassigns/ASC.Data.Reassigns.csproj" />
+  <Project Path="common/ASC.Data.Storage/ASC.Data.Storage.csproj" />
+  <Project Path="common/ASC.EventBus.ActiveMQ/ASC.EventBus.ActiveMQ.csproj" />
+  <Project Path="common/ASC.EventBus.Extensions.Logger/ASC.EventBus.Extensions.Logger.csproj" />
+  <Project Path="common/ASC.EventBus.InMemory/ASC.EventBus.InMemory.csproj" />
+  <Project Path="common/ASC.EventBus.RabbitMQ/ASC.EventBus.RabbitMQ.csproj" />
+  <Project Path="common/ASC.EventBus.RedisMQ/ASC.EventBus.RedisMQ.csproj" />
+  <Project Path="common/ASC.EventBus/ASC.EventBus.csproj" />
+  <Project Path="common/ASC.FederatedLogin/ASC.FederatedLogin.csproj" />
+  <Project Path="common/ASC.IPSecurity/ASC.IPSecurity.csproj" />
+  <Project Path="common/ASC.MessagingSystem/ASC.MessagingSystem.csproj" />
+  <Project Path="common/ASC.Migration/ASC.Migration.Core.csproj" />
+  <Project Path="common/ASC.Webhooks.Core/ASC.Webhooks.Core.csproj" />
+  <Project Path="common/services/ASC.ApiSystem/ASC.ApiSystem.csproj" />
+  <Project Path="common/services/ASC.AuditTrail/ASC.AuditTrail.csproj" />
+  <Project Path="common/services/ASC.ClearEvents/ASC.ClearEvents.csproj" />
+  <Project Path="common/services/ASC.Data.Backup.Worker/ASC.Data.Backup.Worker.csproj" />
+  <Project Path="common/services/ASC.Data.Backup/ASC.Data.Backup.csproj" />
+  <Project Path="common/services/ASC.ElasticSearch/ASC.ElasticSearch.csproj" />
+  <Project Path="common/services/ASC.Monolith/ASC.Monolith.csproj" />
+  <Project Path="common/services/ASC.Notify/ASC.Notify.csproj" />
+  <Project Path="common/services/ASC.Studio.Notify/ASC.Studio.Notify.csproj" />
+  <Project Path="common/services/ASC.TelegramService/ASC.TelegramService.csproj" />
+  <Project Path="products/ASC.AI/Core/ASC.AI.Core.csproj" />
+  <Project Path="products/ASC.AI/Server/ASC.AI.csproj" />
+  <Project Path="products/ASC.AI/Worker/ASC.AI.Worker.csproj" />
+  <Project Path="products/ASC.Files/Core/ASC.Files.Core.csproj" />
+  <Project Path="products/ASC.Files/Server/ASC.Files.csproj" />
+  <Project Path="products/ASC.Files/Worker/ASC.Files.Worker.csproj" />
+  <Project Path="products/ASC.People/Server/ASC.People.csproj" />
+  <Project Path="web/ASC.Web.Api/ASC.Web.Api.csproj">
+    <BuildDependency Project="products/ASC.People/Server/ASC.People.csproj" />
+  </Project>
+  <Project Path="web/ASC.Web.Core/ASC.Web.Core.csproj" />
+  <Project Path="web/ASC.Web.HealthChecks.UI/ASC.Web.HealthChecks.UI.csproj" />
+  <Project Path="web/ASC.Web.Studio/ASC.Web.Studio.csproj" />
+</Solution>

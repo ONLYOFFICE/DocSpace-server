@@ -298,4 +298,18 @@ $Message</value>
   <data name="subject_YourTurnFormFilling" xml:space="preserve">
     <value>DocSpace bildirişi.</value>
   </data>
+  <data name="pattern_AgentRemoved" xml:space="preserve">
+    <value>h1. $__AuthorName bir AI agenti sildi
+
+$__AuthorName AI agentini sildi: $RoomTitle</value>
+  </data>
+  <data name="pattern_AgentUpdateAccessForUser_push" xml:space="preserve">
+    <value>Süni intellekt agenti "$RoomTitle"-dəki rolunuz "$RoomRole" olaraq dəyişdirilib</value>
+  </data>
+  <data name="pattern_InvitedToAgent_push" xml:space="preserve">
+    <value>Siz "$RoomTitle" AI agentinə dəvət edildiniz</value>
+  </data>
+  <data name="subject_AgentRemoved" xml:space="preserve">
+    <value>DocSpace bildirişi. AI agenti silindi</value>
+  </data>
 </root>

@@ -27,7 +27,7 @@ p {
     font-size: 14px;
     line-height: 21px;
     margin: 20px 0 14px;
-    word-wrap: break-word !important;
+    word-wrap: anywhere !important;
 }
 
 ol li, ul li {
@@ -38,7 +38,7 @@ ol li, ul li {
 
 a {
     color: #FF6F3D !important;
-    word-wrap: break-word !important;
+    word-wrap: anywhere !important;
 }
 
 strong {
@@ -87,5 +87,5 @@ td {
 
 a:-webkit-any-link {
     color: #FF6F3D;
-    word-wrap: break-word !important;
+    word-wrap: anywhere !important;
 }

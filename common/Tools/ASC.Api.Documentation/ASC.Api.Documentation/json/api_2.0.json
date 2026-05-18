@@ -7,7 +7,7 @@
       "url": "https://helpdesk.onlyoffice.com/hc/en-us",
       "email": "support@onlyoffice.com"
     },
-    "version": "3.6.0",
+    "version": "3.7.0",
     "x-scalar-sdk-installation": [
       {
         "lang": "Node",
@@ -802,6 +802,9 @@
               }
             }
           },
+          "400": {
+            "description": "Invalid request parameters"
+          },
           "403": {
             "description": "No permissions to perform this action"
           },
@@ -868,8 +871,14 @@
               }
             }
           },
+          "400": {
+            "description": "Invalid request parameters"
+          },
           "403": {
             "description": "No permissions to perform this action"
+          },
+          "404": {
+            "description": "Customer could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -934,8 +943,17 @@
               }
             }
           },
+          "400": {
+            "description": "Invalid request parameters"
+          },
+          "402": {
+            "description": "Tariff is not paid"
+          },
           "403": {
             "description": "No permissions to perform this action"
+          },
+          "404": {
+            "description": "Customer could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -1000,8 +1018,14 @@
               }
             }
           },
+          "400": {
+            "description": "Invalid request parameters"
+          },
           "403": {
             "description": "No permissions to perform this action"
+          },
+          "404": {
+            "description": "Customer could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -1166,6 +1190,9 @@
               }
             }
           },
+          "403": {
+            "description": "No permissions to perform this action"
+          },
           "401": {
             "description": "Unauthorized"
           }
@@ -1219,6 +1246,9 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "No permissions to perform this action"
           },
           "401": {
             "description": "Unauthorized"
@@ -1285,6 +1315,9 @@
               }
             }
           },
+          "403": {
+            "description": "No permissions to perform this action"
+          },
           "401": {
             "description": "Unauthorized"
           }
@@ -1338,6 +1371,9 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "No permissions to perform this action"
           },
           "401": {
             "description": "Unauthorized"
@@ -1404,6 +1440,12 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "No permissions to perform this action"
+          },
+          "404": {
+            "description": "Service could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -1531,6 +1573,9 @@
           },
           "400": {
             "description": "Incorrect email or message text is empty"
+          },
+          "403": {
+            "description": "No permissions to perform this action"
           },
           "429": {
             "description": "Request limit is exceeded"
@@ -1734,8 +1779,14 @@
               }
             }
           },
+          "400": {
+            "description": "Invalid request parameters"
+          },
           "403": {
             "description": "No permissions to perform this action"
+          },
+          "404": {
+            "description": "Customer could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -1840,24 +1891,15 @@
         ]
       }
     },
-    "/api/2.0/portal/payment/customer/servicequota": {
+    "/api/2.0/portal/payment/customer/aibalance": {
       "get": {
         "tags": [
           "Portal / Payment"
         ],
-        "summary": "Get the service quota",
-        "description": "Returns the service quota from the accounting service.",
-        "operationId": "getCustomerServiceQuota",
+        "summary": "Get the customer AI balance",
+        "description": "Returns the AI quota balance of a customer from the accounting service.",
+        "operationId": "getCustomerAiBalance",
         "parameters": [
-          {
-            "name": "serviceName",
-            "in": "query",
-            "description": "The service name.",
-            "schema": {
-              "type": "string",
-              "example": "backup"
-            }
-          },
           {
             "name": "refresh",
             "in": "query",
@@ -1870,7 +1912,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The service quota",
+            "description": "The customer AI balance",
             "content": {
               "application/json": {
                 "schema": {
@@ -1881,9 +1923,6 @@
           },
           "403": {
             "description": "No permissions to perform this action"
-          },
-          "404": {
-            "description": "Service could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -1959,15 +1998,6 @@
             }
           },
           {
-            "name": "WriteOffServiceQuota",
-            "in": "query",
-            "description": "Write-off of the quota for the service",
-            "schema": {
-              "type": "boolean",
-              "example": false
-            }
-          },
-          {
             "name": "StartDate",
             "in": "query",
             "description": "The report start date.",
@@ -1993,7 +2023,7 @@
             "description": "The participant name.",
             "schema": {
               "type": "string",
-              "example": "ACME Corp"
+              "example": "My Own Corporation"
             }
           },
           {
@@ -2015,9 +2045,9 @@
             }
           },
           {
-            "name": "Types",
+            "name": "Type",
             "in": "query",
-            "description": "List of operation types to filter by.",
+            "description": "The operation type to filter by.",
             "schema": {
               "$ref": "#/components/schemas/OperationType"
             },
@@ -2026,7 +2056,7 @@
           {
             "name": "Status",
             "in": "query",
-            "description": "List of operation status to filter by.",
+            "description": "The operation status to filter by.",
             "schema": {
               "$ref": "#/components/schemas/OperationStatus"
             },
@@ -2122,7 +2152,7 @@
         },
         "responses": {
           "200": {
-            "description": "Ok",
+            "description": "Operation execution status",
             "content": {
               "application/json": {
                 "schema": {
@@ -2135,7 +2165,7 @@
             "description": "No permissions to perform this action"
           },
           "404": {
-            "description": "Service could not be found"
+            "description": "Customer or service could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -2180,7 +2210,7 @@
         "operationId": "getCustomerOperationsReport",
         "responses": {
           "200": {
-            "description": "Ok",
+            "description": "Operation execution status",
             "content": {
               "application/json": {
                 "schema": {
@@ -2188,6 +2218,12 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "No permissions to perform this action"
+          },
+          "404": {
+            "description": "Customer could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -2233,6 +2269,12 @@
         "responses": {
           "200": {
             "description": "Ok"
+          },
+          "403": {
+            "description": "No permissions to perform this action"
+          },
+          "404": {
+            "description": "Customer could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -2354,6 +2396,9 @@
           },
           "403": {
             "description": "No permissions to perform this action"
+          },
+          "404": {
+            "description": "Customer could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -2478,6 +2523,9 @@
           "403": {
             "description": "No permissions to perform this action"
           },
+          "404": {
+            "description": "Customer could not be found"
+          },
           "401": {
             "description": "Unauthorized"
           }
@@ -2513,26 +2561,26 @@
         ]
       }
     },
-    "/api/2.0/portal/payment/buywalletservice": {
+    "/api/2.0/portal/payment/creditaibalance": {
       "post": {
         "tags": [
           "Portal / Payment"
         ],
-        "summary": "Purchases a wallet service with the specified quantity.",
-        "description": "This method processes a payment for a wallet service using the configured payment method.\r\nRequires the tariff service to be configured and a valid payment method to be set for the customer.\r\nRate limiting is applied according to the payments API policy.",
-        "operationId": "buyWalletService",
+        "summary": "Credit AI balance",
+        "description": "Credits AI quota to the customer AI sub-account from their main balance.\r\nRequires the customer to have a configured payment method.",
+        "operationId": "creditAiBalance",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/BuyWalletServiceRequestDto"
+                "$ref": "#/components/schemas/CreditAiBalanceRequestDto"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "The service payment information",
+            "description": "The AI credit operation result",
             "content": {
               "application/json": {
                 "schema": {
@@ -2545,7 +2593,7 @@
             "description": "No permissions to perform this action"
           },
           "404": {
-            "description": "Service could not be found"
+            "description": "Customer could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -2724,6 +2772,9 @@
           },
           "403": {
             "description": "No permissions to perform this action"
+          },
+          "404": {
+            "description": "Customer could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -3378,6 +3429,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "The user could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -11904,16 +11958,16 @@
         "tags": [
           "Settings / TFA settings"
         ],
-        "summary": "Get confirmation email",
-        "description": "Returns the confirmation email URL for authorization via SMS or TFA application.",
-        "operationId": "getTfaConfirmUrl",
+        "summary": "Get TFA confirmation data",
+        "description": "Returns the confirmation data for authorization via SMS or TFA application.",
+        "operationId": "getTfaConfirmData",
         "responses": {
           "200": {
-            "description": "Confirmation email URL",
+            "description": "TFA confirmation data",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/StringWrapper"
+                  "$ref": "#/components/schemas/TfaConfirmDataWrapper"
                 }
               }
             }
@@ -11958,8 +12012,8 @@
         "tags": [
           "Settings / TFA settings"
         ],
-        "summary": "Get a confirmation email for updating TFA settings",
-        "description": "Returns the confirmation email URL for updating TFA settings.",
+        "summary": "Updates TFA settings",
+        "description": "Updates TFA settings and returns the confirmation URL for authorization via SMS or TFA application.",
         "operationId": "updateTfaSettingsLink",
         "requestBody": {
           "content": {
@@ -11972,7 +12026,7 @@
         },
         "responses": {
           "200": {
-            "description": "Confirmation email URL",
+            "description": "TFA confirmation URL",
             "content": {
               "application/json": {
                 "schema": {
@@ -12093,7 +12147,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ObjectArrayWrapper"
+                  "$ref": "#/components/schemas/TfaAppCodeArrayWrapper"
                 }
               }
             }
@@ -12150,7 +12204,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ObjectArrayWrapper"
+                  "$ref": "#/components/schemas/TfaAppCodeArrayWrapper"
                 }
               }
             }
@@ -12281,6 +12335,9 @@
               }
             }
           },
+          "403": {
+            "description": "Access denied"
+          },
           "401": {
             "description": "Unauthorized"
           }
@@ -12342,6 +12399,12 @@
               }
             }
           },
+          "400": {
+            "description": "Invalid or empty parameters"
+          },
+          "403": {
+            "description": "Access denied"
+          },
           "401": {
             "description": "Unauthorized"
           }
@@ -12402,6 +12465,15 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Invalid or empty parameters"
+          },
+          "403": {
+            "description": "Access denied"
+          },
+          "404": {
+            "description": "Item not found"
           },
           "401": {
             "description": "Unauthorized"
@@ -12465,6 +12537,15 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Invalid or empty parameters"
+          },
+          "403": {
+            "description": "Access denied"
+          },
+          "404": {
+            "description": "Item not found"
           },
           "401": {
             "description": "Unauthorized"
@@ -12532,6 +12613,12 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "Access denied"
+          },
+          "404": {
+            "description": "Item not found"
           },
           "401": {
             "description": "Unauthorized"
@@ -12688,6 +12775,9 @@
               }
             }
           },
+          "403": {
+            "description": "Access denied"
+          },
           "401": {
             "description": "Unauthorized"
           }
@@ -12758,6 +12848,9 @@
           "400": {
             "description": "Id incorrect"
           },
+          "403": {
+            "description": "Access denied"
+          },
           "404": {
             "description": "Item not found"
           },
@@ -12824,6 +12917,9 @@
               }
             }
           },
+          "403": {
+            "description": "Access denied"
+          },
           "401": {
             "description": "Unauthorized"
           }
@@ -12865,56 +12961,15 @@
           "Settings / Webhooks"
         ],
         "summary": "Get webhook triggers",
-        "description": "Returns a list of triggers for a webhook.",
+        "description": "Returns a list of triggers for a webhook with their availability for the current user.",
         "operationId": "getWebhookTriggers",
         "responses": {
           "200": {
-            "description": "List of triggers for a webhook",
+            "description": "List of triggers with availability for the current user",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "response": {
-                      "type": "object",
-                      "additionalProperties": {
-                        "type": "integer",
-                        "format": "int32"
-                      }
-                    },
-                    "count": {
-                      "type": "integer",
-                      "description": "The total number of items in the response",
-                      "format": "int32"
-                    },
-                    "links": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "href": {
-                            "type": "string",
-                            "description": "URL of the link"
-                          },
-                          "action": {
-                            "type": "string",
-                            "description": "Action associated with the link"
-                          }
-                        }
-                      },
-                      "description": "List of links related to the response"
-                    },
-                    "status": {
-                      "type": "integer",
-                      "description": "HTTP status code of the response",
-                      "format": "int32"
-                    },
-                    "statusCode": {
-                      "type": "integer",
-                      "description": "HTTP status code of the response (duplicate of status)",
-                      "format": "int32"
-                    }
-                  }
+                  "$ref": "#/components/schemas/WebhookTriggerArrayWrapper"
                 }
               }
             }
@@ -14118,7 +14173,7 @@
             "example": "Auth-Key"
           },
           "value": {
-            "maxLength": 255,
+            "maxLength": 4000,
             "minLength": 0,
             "type": "string",
             "description": "The authorization key value.",
@@ -14611,27 +14666,6 @@
           }
         }
       },
-      "BuyWalletServiceRequestDto": {
-        "type": "object",
-        "properties": {
-          "quantity": {
-            "maximum": 999999,
-            "minimum": 1,
-            "type": "integer",
-            "description": "Number of services provided.",
-            "format": "int32",
-            "example": 1
-          },
-          "serviceName": {
-            "type": "string",
-            "description": "The service name.",
-            "nullable": true,
-            "example": "backup"
-          }
-        },
-        "additionalProperties": false,
-        "description": "The request parameters for buying wallet service."
-      },
       "CapabilitiesDto": {
         "required": [
           "identityServerEnabled",
@@ -14926,7 +14960,7 @@
             "type": "string",
             "description": "The company name.",
             "nullable": true,
-            "example": "Acme Corporation"
+            "example": "My Own Corporation"
           },
           "site": {
             "type": "string",
@@ -15348,6 +15382,29 @@
         },
         "additionalProperties": false,
         "description": "The request parameters for creating the webhook configuration."
+      },
+      "CreditAiBalanceRequestDto": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "maximum": 999999,
+            "minimum": 0.01,
+            "type": "number",
+            "description": "The amount to transfer from the main balance to the AI subaccount.",
+            "format": "double",
+            "example": 100.00
+          },
+          "currency": {
+            "maxLength": 3,
+            "minLength": 0,
+            "type": "string",
+            "description": "The three-character ISO 4217 currency symbol.",
+            "nullable": true,
+            "example": "USD"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The request parameters for crediting AI quota to the customer AI subaccount."
       },
       "CspDto": {
         "required": [
@@ -15815,11 +15872,6 @@
             "nullable": true,
             "example": "backup"
           },
-          "writeOffServiceQuota": {
-            "type": "boolean",
-            "description": "Write-off of the quota for the service",
-            "example": false
-          },
           "startDate": {
             "type": "string",
             "description": "The report start date.",
@@ -15838,7 +15890,7 @@
             "type": "string",
             "description": "The participant name.",
             "nullable": true,
-            "example": "ACME Corp"
+            "example": "My Own Corporation"
           },
           "credit": {
             "type": "boolean",
@@ -15852,7 +15904,7 @@
             "nullable": true,
             "example": false
           },
-          "types": {
+          "type": {
             "$ref": "#/components/schemas/OperationType"
           },
           "status": {
@@ -16554,12 +16606,6 @@
             "description": "The HTML-encoded user's display name formatted according to the default format for the current culture.",
             "nullable": true,
             "example": "Mike Zanyatski"
-          },
-          "title": {
-            "type": "string",
-            "description": "The user title.",
-            "nullable": true,
-            "example": "Manager"
           },
           "avatar": {
             "type": "string",
@@ -18105,10 +18151,11 @@
               "Wordpress",
               "Yahoo",
               "Yandex",
-              "Github"
+              "Github",
+              "Nextcloud"
             ],
             "type": "string",
-            "description": "[Facebook - Facebook, Google - Google, Dropbox - Dropbox, Docusign - Docusign, Box - Box, OneDrive - OneDrive, GosUslugi - GosUslugi, LinkedIn - LinkedIn, MailRu - MailRu, VK - VK, Wordpress - Wordpress, Yahoo - Yahoo, Yandex - Yandex, Github - Github]",
+            "description": "[Facebook - Facebook, Google - Google, Dropbox - Dropbox, Docusign - Docusign, Box - Box, OneDrive - OneDrive, GosUslugi - GosUslugi, LinkedIn - LinkedIn, MailRu - MailRu, VK - VK, Wordpress - Wordpress, Yahoo - Yahoo, Yandex - Yandex, Github - Github, Nextcloud - Nextcloud]",
             "example": "Facebook"
           },
           {
@@ -18126,10 +18173,11 @@
               10,
               11,
               12,
-              13
+              13,
+              14
             ],
             "type": "integer",
-            "description": "[0 - Facebook, 1 - Google, 2 - Dropbox, 3 - Docusign, 4 - Box, 5 - OneDrive, 6 - GosUslugi, 7 - LinkedIn, 8 - MailRu, 9 - VK, 10 - Wordpress, 11 - Yahoo, 12 - Yandex, 13 - Github]",
+            "description": "[0 - Facebook, 1 - Google, 2 - Dropbox, 3 - Docusign, 4 - Box, 5 - OneDrive, 6 - GosUslugi, 7 - LinkedIn, 8 - MailRu, 9 - VK, 10 - Wordpress, 11 - Yahoo, 12 - Yandex, 13 - Github, 14 - Nextcloud]",
             "example": 0,
             "x-enum-varnames": [
               "Facebook",
@@ -18145,7 +18193,8 @@
               "Wordpress",
               "Yahoo",
               "Yandex",
-              "Github"
+              "Github",
+              "Nextcloud"
             ]
           }
         ],
@@ -19803,49 +19852,6 @@
         "description": "The notification type.",
         "x-enum-type": "integer"
       },
-      "ObjectArrayWrapper": {
-        "type": "object",
-        "properties": {
-          "response": {
-            "type": "array",
-            "items": {
-              "type": "object"
-            }
-          },
-          "count": {
-            "type": "integer",
-            "description": "The total number of items in the response",
-            "format": "int32"
-          },
-          "links": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "href": {
-                  "type": "string",
-                  "description": "URL of the link"
-                },
-                "action": {
-                  "type": "string",
-                  "description": "Action associated with the link"
-                }
-              }
-            },
-            "description": "List of links related to the response"
-          },
-          "status": {
-            "type": "integer",
-            "description": "HTTP status code of the response",
-            "format": "int32"
-          },
-          "statusCode": {
-            "type": "integer",
-            "description": "HTTP status code of the response (duplicate of status)",
-            "format": "int32"
-          }
-        }
-      },
       "ObjectWrapper": {
         "type": "object",
         "properties": {
@@ -19951,6 +19957,21 @@
             "description": "The participant display name.",
             "nullable": true,
             "example": "Example Name"
+          },
+          "agentId": {
+            "type": "string",
+            "description": "AI Agent id.",
+            "nullable": true,
+            "example": 123
+          },
+          "agentTitle": {
+            "type": "string",
+            "description": "AI Agent name.",
+            "nullable": true,
+            "example": "My AI Agent"
+          },
+          "type": {
+            "$ref": "#/components/schemas/OperationType"
           }
         },
         "additionalProperties": false,
@@ -19988,29 +20009,26 @@
         "oneOf": [
           {
             "enum": [
-              "Any",
               "Pending",
               "Completed",
               "Rejected",
               "Canceled"
             ],
             "type": "string",
-            "description": "[Any - Any, Pending - Pending, Completed - Completed, Rejected - Rejected, Canceled - Canceled]",
-            "example": "Any"
+            "description": "[Pending - Pending, Completed - Completed, Rejected - Rejected, Canceled - Canceled]",
+            "example": "Pending"
           },
           {
             "enum": [
               0,
               1,
               2,
-              4,
-              8
+              3
             ],
             "type": "integer",
-            "description": "[0 - Any, 1 - Pending, 2 - Completed, 4 - Rejected, 8 - Canceled]",
+            "description": "[0 - Pending, 1 - Completed, 2 - Rejected, 3 - Canceled]",
             "example": 0,
             "x-enum-varnames": [
-              "Any",
               "Pending",
               "Completed",
               "Rejected",
@@ -20025,11 +20043,10 @@
         "oneOf": [
           {
             "enum": [
-              "Any",
               "Unknown",
               "ServicePayment",
               "PackagePayment",
-              "ServiceUsage",
+              "AiServicePayment",
               "Deposit",
               "ReceiveProviderInvoice",
               "ProcessProviderInvoice",
@@ -20043,43 +20060,45 @@
               "BankWithdrawal",
               "GoodwillCredit",
               "WriteOffProfit",
-              "WriteOffDifferenceCurrency"
+              "WriteOffDifferenceCurrency",
+              "AiDebit",
+              "AiCredit"
             ],
             "type": "string",
-            "description": "[Any - Any, Unknown - Unknown, ServicePayment - ServicePayment, PackagePayment - PackagePayment, ServiceUsage - ServiceUsage, Deposit - Deposit, ReceiveProviderInvoice - ReceiveProviderInvoice, ProcessProviderInvoice - ProcessProviderInvoice, WriteOffServiceProfit - WriteOffServiceProfit, Profit - Profit, PartnerAccrual - PartnerAccrual, ProviderPayment - ProviderPayment, PartnerPayment - PartnerPayment, Refund - Refund, BankDeposit - BankDeposit, BankWithdrawal - BankWithdrawal, GoodwillCredit - GoodwillCredit, WriteOffProfit - WriteOffProfit, WriteOffDifferenceCurrency - WriteOffDifferenceCurrency]",
-            "example": "Any"
+            "description": "[Unknown - Unknown, ServicePayment - ServicePayment, PackagePayment - PackagePayment, AiServicePayment - AiServicePayment, Deposit - Deposit, ReceiveProviderInvoice - ReceiveProviderInvoice, ProcessProviderInvoice - ProcessProviderInvoice, WriteOffServiceProfit - WriteOffServiceProfit, Profit - Profit, PartnerAccrual - PartnerAccrual, ProviderPayment - ProviderPayment, PartnerPayment - PartnerPayment, Refund - Refund, BankDeposit - BankDeposit, BankWithdrawal - BankWithdrawal, GoodwillCredit - GoodwillCredit, WriteOffProfit - WriteOffProfit, WriteOffDifferenceCurrency - WriteOffDifferenceCurrency, AiDebit - AiDebit, AiCredit - AiCredit]",
+            "example": "Unknown"
           },
           {
             "enum": [
               0,
               1,
               2,
+              3,
               4,
+              5,
+              6,
+              7,
               8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              15,
               16,
-              32,
-              64,
-              128,
-              256,
-              512,
-              1024,
-              2048,
-              4096,
-              8192,
-              16384,
-              32768,
-              65536,
-              131072
+              17,
+              18,
+              19
             ],
             "type": "integer",
-            "description": "[0 - Any, 1 - Unknown, 2 - ServicePayment, 4 - PackagePayment, 8 - ServiceUsage, 16 - Deposit, 32 - ReceiveProviderInvoice, 64 - ProcessProviderInvoice, 128 - WriteOffServiceProfit, 256 - Profit, 512 - PartnerAccrual, 1024 - ProviderPayment, 2048 - PartnerPayment, 4096 - Refund, 8192 - BankDeposit, 16384 - BankWithdrawal, 32768 - GoodwillCredit, 65536 - WriteOffProfit, 131072 - WriteOffDifferenceCurrency]",
+            "description": "[0 - Unknown, 1 - ServicePayment, 2 - PackagePayment, 3 - AiServicePayment, 4 - Deposit, 5 - ReceiveProviderInvoice, 6 - ProcessProviderInvoice, 7 - WriteOffServiceProfit, 8 - Profit, 9 - PartnerAccrual, 10 - ProviderPayment, 11 - PartnerPayment, 12 - Refund, 13 - BankDeposit, 14 - BankWithdrawal, 15 - GoodwillCredit, 16 - WriteOffProfit, 17 - WriteOffDifferenceCurrency, 18 - AiDebit, 19 - AiCredit]",
             "example": 0,
             "x-enum-varnames": [
-              "Any",
               "Unknown",
               "ServicePayment",
               "PackagePayment",
-              "ServiceUsage",
+              "AiServicePayment",
               "Deposit",
               "ReceiveProviderInvoice",
               "ProcessProviderInvoice",
@@ -20093,7 +20112,9 @@
               "BankWithdrawal",
               "GoodwillCredit",
               "WriteOffProfit",
-              "WriteOffDifferenceCurrency"
+              "WriteOffDifferenceCurrency",
+              "AiDebit",
+              "AiCredit"
             ]
           }
         ],
@@ -20518,12 +20539,17 @@
         }
       },
       "PaymentUrlRequestDto": {
+        "required": [
+          "backUrl"
+        ],
         "type": "object",
         "properties": {
           "backUrl": {
+            "maxLength": 255,
+            "minLength": 0,
             "type": "string",
             "description": "The URL where the user will be redirected after payment processing.",
-            "nullable": true,
+            "format": "uri",
             "example": "https://example.com"
           },
           "quantity": {
@@ -24523,6 +24549,132 @@
           }
         }
       },
+      "TfaAppCodeArrayWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TfaAppCodeDto"
+            }
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
+      "TfaAppCodeDto": {
+        "type": "object",
+        "properties": {
+          "isUsed": {
+            "type": "boolean",
+            "description": "The TFA app code usage status.",
+            "example": true
+          },
+          "code": {
+            "type": "string",
+            "description": "The TFA app code.",
+            "nullable": true,
+            "example": 123456
+          }
+        },
+        "additionalProperties": false,
+        "description": "The TFA app code."
+      },
+      "TfaConfirmDataDto": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "The confirmation URL.",
+            "nullable": true,
+            "example": "https://example.com/confirm?type=TfaAuth&key=abc123"
+          },
+          "cookieName": {
+            "type": "string",
+            "description": "The confirmation cookie name.",
+            "nullable": true,
+            "example": "asc_confirm_key_TfaAuth"
+          },
+          "cookieValue": {
+            "type": "string",
+            "description": "The confirmation cookie value.",
+            "nullable": true,
+            "example": "1234567890.abcdef"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The TFA confirmation data."
+      },
+      "TfaConfirmDataWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/TfaConfirmDataDto"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
       "TfaRequestsDto": {
         "type": "object",
         "properties": {
@@ -24651,7 +24803,7 @@
       },
       "TfaSettingsDto": {
         "required": [
-          "avaliable",
+          "available",
           "enabled",
           "id",
           "title"
@@ -24675,7 +24827,7 @@
             "description": "Indicates whether the TFA configuration is currently active.",
             "example": true
           },
-          "avaliable": {
+          "available": {
             "type": "boolean",
             "description": "Indicates whether the TFA configuration can be used.",
             "example": true
@@ -24819,6 +24971,8 @@
             "example": 1
           },
           "currency": {
+            "maxLength": 3,
+            "minLength": 0,
             "type": "string",
             "description": "The three-character ISO 4217 currency symbol.",
             "nullable": true,
@@ -25779,10 +25933,12 @@
               "FormStopped",
               "AgentCreated",
               "AgentUpdated",
-              "AgentDeleted"
+              "AgentDeleted",
+              "FileDownloaded",
+              "FolderDownloaded"
             ],
             "type": "string",
-            "description": "[All - *, UserCreated - user.created, UserInvited - user.invited, UserUpdated - user.updated, UserDeleted - user.deleted, GroupCreated - group.created, GroupUpdated - group.updated, GroupDeleted - group.deleted, FileCreated - file.created, FileUploaded - file.uploaded, FileUpdated - file.updated, FileTrashed - file.trashed, FileDeleted - file.deleted, FileRestored - file.restored, FileCopied - file.copied, FileMoved - file.moved, FolderCreated - folder.created, FolderUpdated - folder.updated, FolderTrashed - folder.trashed, FolderDeleted - folder.deleted, FolderRestored - folder.restored, FolderCopied - folder.copied, FolderMoved - folder.moved, RoomCreated - room.created, RoomUpdated - room.updated, RoomArchived - room.archived, RoomDeleted - room.deleted, RoomRestored - room.restored, RoomCopied - room.copied, FormSubmit - form.submit, FormFilledOut - form.filled.out, FormStopped - form.stopped, AgentCreated - agent.created, AgentUpdated - agent.updated, AgentDeleted - agent.deleted]",
+            "description": "[All - *, UserCreated - user.created, UserInvited - user.invited, UserUpdated - user.updated, UserDeleted - user.deleted, GroupCreated - group.created, GroupUpdated - group.updated, GroupDeleted - group.deleted, FileCreated - file.created, FileUploaded - file.uploaded, FileUpdated - file.updated, FileTrashed - file.trashed, FileDeleted - file.deleted, FileRestored - file.restored, FileCopied - file.copied, FileMoved - file.moved, FolderCreated - folder.created, FolderUpdated - folder.updated, FolderTrashed - folder.trashed, FolderDeleted - folder.deleted, FolderRestored - folder.restored, FolderCopied - folder.copied, FolderMoved - folder.moved, RoomCreated - room.created, RoomUpdated - room.updated, RoomArchived - room.archived, RoomDeleted - room.deleted, RoomRestored - room.restored, RoomCopied - room.copied, FormSubmit - form.submit, FormFilledOut - form.filled.out, FormStopped - form.stopped, AgentCreated - agent.created, AgentUpdated - agent.updated, AgentDeleted - agent.deleted, FileDownloaded - file.downloaded, FolderDownloaded - folder.downloaded]",
             "example": "All"
           },
           {
@@ -25858,12 +26014,81 @@
               "FormStopped",
               "AgentCreated",
               "AgentUpdated",
-              "AgentDeleted"
+              "AgentDeleted",
+              "FileDownloaded",
+              "FolderDownloaded"
             ]
           }
         ],
         "description": "The webhook trigger type.",
         "x-enum-type": "integer"
+      },
+      "WebhookTriggerArrayWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WebhookTriggerDto"
+            }
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
+      "WebhookTriggerDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The trigger name.",
+            "nullable": true,
+            "example": "file.created"
+          },
+          "id": {
+            "type": "integer",
+            "description": "The trigger bit value.",
+            "format": "int64",
+            "example": 128
+          },
+          "available": {
+            "type": "boolean",
+            "description": "Specifies whether this trigger is available for the current user's role.",
+            "example": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "The webhook trigger with its availability for the current user."
       },
       "WebhooksConfigDto": {
         "required": [

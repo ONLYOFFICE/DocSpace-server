@@ -1,33 +1,41 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2026
-//
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
-//
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
-//
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// 
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
+// 
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
+// 
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
+// 
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
+// 
+// No trademark rights are granted under this License.
+// 
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Files.Core.Helpers;
 
 [Scope]
 public class FormFillingReportCreator(
+    ILogger<FormFillingReportCreator> logger,
     ExportToXLSX exportToXLSX,
     ExternalDatabaseClient externalDatabaseClient,
     IDaoFactory daoFactory,
@@ -56,11 +64,11 @@ public class FormFillingReportCreator(
 
         if (settingsSaveFormAsXLSX)
         {
-            await exportToXLSX.UpdateXlsxReport(roomId, originalFormId, originalFormVersion);
+            await exportToXLSX.UpdateXlsxReport(roomId, originalFormId, originalFormVersion, isNewFile: false);
         }
     }
 
-    public async Task ExportToExternalDbAsync(int fileId, int originalFormId, int originalFormVersion, int resultFormNumber, string formsDataUrl)
+    public async Task ExportToExternalDbAsync(int fileId, int originalFormId, int originalFormVersion, int roomId, int resultFormNumber, string formsDataUrl)
     {
 #pragma warning disable CA2000 // HttpClient is short-lived and disposed by runtime
         var httpClient = clientFactory.CreateClient();
@@ -77,15 +85,134 @@ public class FormFillingReportCreator(
         var parsed = ParseSubmitAndMetadata(data);
 
         parsed.Data.FormsData = parsed.Data.FormsData
-            .Where(f => f.Type != "picture" && f.Type != "signature")
+            .Where(IsExportableField)
             .ToList();
 
         var tableName = GetTableName(originalFormId, originalFormVersion);
         var normalizedMeta = NormalizeMetadata(parsed.MetaData).ToList();
         var columnDefinitions = BuildColumnDefinitions(normalizedMeta).ToList();
-        var rowData = BuildRowData(parsed.Data, normalizedMeta, fileId);
+        var culture = tenantManager.GetCurrentTenant().GetCulture();
+        var rowData = BuildRowData(parsed.Data, normalizedMeta, fileId, culture);
 
         await externalDatabaseClient.CreateTableAndUpsertAsync(tableName, columnDefinitions, rowData, keyColumn: "form_id");
+
+        var fileDao = daoFactory.GetFileDao<int>();
+        var properties = await fileDao.GetProperties(originalFormId);
+        if (properties?.FormFilling != null && properties.FormFilling.ExternalDbTableName != tableName)
+        {
+            properties.FormFilling.ExternalDbTableName = tableName;
+            await fileDao.SaveProperties(originalFormId, properties);
+        }
+    }
+
+    public async Task<bool> ExportMissingFromOpenSearchAsync(int originalFormId, int originalFormVersion, int roomId)
+    {
+        var tableName = GetTableName(originalFormId, originalFormVersion);
+
+        var dbCount = await externalDatabaseClient.GetTableCountAsync(tableName);
+
+        factoryIndexerForm.Refresh();
+        var (osCountSuccess, osCount) = await factoryIndexerForm.TryCountAsync(r =>
+            r.Where(s => s.RoomId, roomId)
+             .Where(s => s.OriginalFormId, originalFormId)
+             .Where(s => s.OriginalFormVersion, originalFormVersion));
+
+        if (!osCountSuccess)
+        {
+            return false;
+        }
+
+        if (osCount <= dbCount)
+        {
+            return true;
+        }
+
+        var existingIds = await externalDatabaseClient.GetExistingFormIdsAsync(tableName);
+
+        var (success, allSubmissions) = await factoryIndexerForm.TrySelectAsync(r =>
+            r.Where(s => s.RoomId, roomId)
+             .Where(s => s.OriginalFormId, originalFormId)
+             .Where(s => s.OriginalFormVersion, originalFormVersion)
+             .Limit(0, BaseIndexer<DbFormsItemDataSearch>.QueryLimit));
+
+        if (!success)
+        {
+            return false;
+        }
+
+        if (allSubmissions.Count == 0)
+        {
+            return true;
+        }
+
+        var missing = allSubmissions
+            .Where(item => !existingIds.Contains(item.Id))
+            .ToList();
+
+        if (missing.Count == 0)
+        {
+            return true;
+        }
+
+        factoryIndexerFormMetadata.Refresh();
+        var (metaSuccess, metaResult) = await factoryIndexerFormMetadata.TrySelectAsync(r =>
+            r.Where(s => s.OriginalFormId, originalFormId)
+             .Where(s => s.OriginalFormVersion, originalFormVersion));
+
+        var rawMetadata = metaSuccess ? metaResult.FirstOrDefault()?.Metadata ?? [] : [];
+        var normalizedMeta = NormalizeMetadata(rawMetadata).ToList();
+
+        if (normalizedMeta.Count == 0)
+        {
+            var derivedMeta = missing
+                .Where(s => s.FormsData != null)
+                .SelectMany(s => s.FormsData)
+                .Where(f => !string.IsNullOrEmpty(f.Key) && !string.IsNullOrEmpty(f.Type) && IsExportableField(f))
+                .GroupBy(f => f.Key)
+                .Select(g => new FormMetadata { Key = g.Key, Type = g.First().Type });
+            normalizedMeta = NormalizeMetadata(derivedMeta).ToList();
+
+            if (normalizedMeta.Count == 0)
+            {
+                return false;
+            }
+        }
+
+        var columnDefinitions = BuildColumnDefinitions(normalizedMeta).ToList();
+
+        var culture = tenantManager.GetCurrentTenant().GetCulture();
+        var hadFailure = false;
+
+        foreach (var item in missing)
+        {
+            if (item.FormsData == null)
+            {
+                logger.WarnGapSyncSkippedNoData(item.Id, tableName);
+                continue;
+            }
+
+            var filteredData = new SubmitFormsData
+            {
+                FormsData = item.FormsData
+                    .Where(IsExportableField)
+                    .ToList()
+            };
+
+            var rowData = BuildRowData(filteredData, normalizedMeta, item.Id, culture, item.CreateOn);
+
+            try
+            {
+                await externalDatabaseClient.CreateTableAndUpsertAsync(
+                    tableName, columnDefinitions, rowData, keyColumn: "form_id");
+            }
+            catch (Exception ex)
+            {
+                logger.ErrorGapSyncUpsertFailed(ex, item.Id, tableName);
+                hadFailure = true;
+            }
+        }
+
+        return !hadFailure;
     }
 
     public async Task<IEnumerable<FormsItemData>> GetFormsFields(int folderId)
@@ -117,24 +244,106 @@ public class FormFillingReportCreator(
     public async Task<IEnumerable<DbFormsItemDataSearch>> GetFormFillingResults(int roomId, int originalFormId, int originalFormVersion)
     {
         factoryIndexerForm.Refresh();
-        var (success, result) = await factoryIndexerForm.TrySelectAsync(r => r.Where(s => s.RoomId, roomId).Where(s => s.OriginalFormId, originalFormId).Where(s => s.OriginalFormVersion, originalFormVersion));
+        var (success, result) = await factoryIndexerForm.TrySelectAsync(r => r
+            .Where(s => s.RoomId, roomId)
+            .Where(s => s.OriginalFormId, originalFormId)
+            .Where(s => s.OriginalFormVersion, originalFormVersion));
 
-        if (success)
-        {
-            var sortedResult = result
-                .Select(item =>
-                {
-                    var formValue = item.FormsData?.FirstOrDefault(f => f.Key == "FormNumber").Value;
-                    int.TryParse(formValue, out var number);
-                    return (item, number);
-                })
+        return success ? SortByFormNumber(result) : [];
+    }
+
+    private static List<DbFormsItemDataSearch> SortByFormNumber(IReadOnlyCollection<DbFormsItemDataSearch> result)
+    {
+        return result
+            .Select(item =>
+            {
+                var formValue = item.FormsData?.FirstOrDefault(f => f.Key == "FormNumber")?.Value;
+                int.TryParse(formValue, out var number);
+                return (item, number);
+            })
             .OrderBy(x => x.number)
             .Select(x => x.item)
             .ToList();
+    }
 
-            return sortedResult;
+    public async Task MigrateFormVersionAsync(int roomId, int originalFormId, int targetVersion)
+    {
+        factoryIndexerForm.Refresh();
+
+        var (oldSuccess, oldRecords) = await factoryIndexerForm.TrySelectAsync(r =>
+            r.Where(s => s.RoomId, roomId)
+             .Where(s => s.OriginalFormId, originalFormId)
+             .Or(
+                 s => s.NotExists(x => x.OriginalFormVersion),
+                 s => s.Where(x => x.OriginalFormVersion, 0))
+             .Limit(0, 1));
+
+        if (!oldSuccess || oldRecords.Count == 0)
+        {
+            return;
         }
-        return [];
+
+        var (newSuccess, newRecords) = await factoryIndexerForm.TrySelectAsync(r =>
+            r.Where(s => s.RoomId, roomId)
+             .Where(s => s.OriginalFormId, originalFormId)
+             .Where(s => s.OriginalFormVersion, targetVersion)
+             .Limit(0, 1));
+
+        if (!newSuccess || newRecords.Count == 0)
+        {
+            return;
+        }
+
+        var oldKeys = (oldRecords.First().FormsData ?? [])
+            .Where(f => !string.IsNullOrEmpty(f.Type))
+            .Select(f => f.Key)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        var newKeys = (newRecords.First().FormsData ?? [])
+            .Where(f => !string.IsNullOrEmpty(f.Type))
+            .Select(f => f.Key)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        if (newKeys.Count == 0 || !oldKeys.SetEquals(newKeys))
+        {
+            return;
+        }
+
+        var migrateData = new DbFormsItemDataSearch { OriginalFormVersion = targetVersion };
+
+        await factoryIndexerForm.UpdateAsync(
+            migrateData,
+            r => r.Where(s => s.RoomId, roomId)
+                   .Where(s => s.OriginalFormId, originalFormId)
+                   .NotExists(s => s.OriginalFormVersion),
+            immediately: true,
+            s => (object)s.OriginalFormVersion);
+
+        await factoryIndexerForm.UpdateAsync(
+            migrateData,
+            r => r.Where(s => s.RoomId, roomId)
+                   .Where(s => s.OriginalFormId, originalFormId)
+                   .Where(s => s.OriginalFormVersion, 0),
+            immediately: true,
+            s => (object)s.OriginalFormVersion);
+
+        var metaMigrateData = new DbFormsMetadataSearch { OriginalFormVersion = targetVersion };
+
+        await factoryIndexerFormMetadata.UpdateAsync(
+            metaMigrateData,
+            r => r.Where(s => s.RoomId, roomId)
+                   .Where(s => s.OriginalFormId, originalFormId)
+                   .NotExists(s => s.OriginalFormVersion),
+            immediately: true,
+            s => (object)s.OriginalFormVersion);
+
+        await factoryIndexerFormMetadata.UpdateAsync(
+            metaMigrateData,
+            r => r.Where(s => s.RoomId, roomId)
+                   .Where(s => s.OriginalFormId, originalFormId)
+                   .Where(s => s.OriginalFormVersion, 0),
+            immediately: true,
+            s => (object)s.OriginalFormVersion);
     }
 
     public static string GetTableName(int originalFormId, int originalFormVersion)
@@ -216,8 +425,8 @@ public class FormFillingReportCreator(
                 FormsData = formNumber.Concat(fromData.FormsData)
             };
 
-            _ = factoryIndexerForm.IndexAsync(searchItems);
-            _ = factoryIndexerFormMetadata.IndexAsync(new DbFormsMetadataSearch
+            await factoryIndexerForm.IndexAsync(searchItems, waitForCompletion: true);
+            await factoryIndexerFormMetadata.IndexAsync(new DbFormsMetadataSearch
             {
                 Id = DbFormsMetadataSearch.ComputeId(originalFormId, originalFormVersion),
                 TenantId = tenantId,
@@ -225,7 +434,7 @@ public class FormFillingReportCreator(
                 OriginalFormVersion = originalFormVersion,
                 RoomId = roomId,
                 Metadata = fromMetaData
-            });
+            }, waitForCompletion: true);
         }
 
         return (fromData, fromMetaData: fromMetaData);
@@ -320,6 +529,7 @@ public class FormFillingReportCreator(
     private static IEnumerable<FormMetadata> NormalizeMetadata(IEnumerable<FormMetadata> metaData)
     {
         return metaData
+            .Where(m => m.Type != "picture" && m.Type != "signature")
             .GroupBy(m => m.Type == "radio"
                 ? $"radio::{NormalizeColumnName(m.Key)}"
                 : NormalizeColumnName(m.Key))
@@ -337,20 +547,26 @@ public class FormFillingReportCreator(
             var (type, enumValues) = field.Type switch
             {
                 "checkBox" => (DbColumnType.Boolean, (IReadOnlyList<string>)null),
-                "dateTime" => (DbColumnType.Date, null),
+                "dateTime" => (HasTimeComponent(field.Format) ? DbColumnType.DateTime : DbColumnType.Date, null),
                 "comboBox" or "dropDownList" or "radio" => (DbColumnType.Enum, (IReadOnlyList<string>)field.PossibleValues),
                 _ => (DbColumnType.Text, null)
             };
-            yield return new DbColumnDefinition(name, type, enumValues);
+            var label = string.IsNullOrEmpty(field.Key) ? null : field.Key;
+            yield return new DbColumnDefinition(name, type, enumValues, Label: label);
         }
     }
 
-    private static Dictionary<string, object> BuildRowData(SubmitFormsData data, IEnumerable<FormMetadata> metaData, int formId)
+    private static bool IsExportableField(FormsItemData f) => f.Type != "picture" && f.Type != "signature";
+
+    private static bool HasTimeComponent(string format) =>
+        !string.IsNullOrEmpty(format) && (format.Contains('H') || format.Contains('h'));
+
+    private static Dictionary<string, object> BuildRowData(SubmitFormsData data, IEnumerable<FormMetadata> metaData, int formId, CultureInfo culture, DateTime? createdOn = null)
     {
         var result = new Dictionary<string, object>
         {
             ["form_id"] = formId,
-            ["created_on"] = DateTime.UtcNow
+            ["created_on"] = createdOn ?? DateTime.UtcNow
         };
 
         var metaByKey = metaData.ToDictionary(m => NormalizeColumnName(m.Key));
@@ -362,7 +578,7 @@ public class FormFillingReportCreator(
             {
                 continue;
             }
-            result[column] = ConvertFieldValue(item.Value, meta) ?? DBNull.Value;
+            result[column] = ConvertFieldValue(item.Value, meta, culture) ?? DBNull.Value;
         }
 
         return result;
@@ -401,7 +617,7 @@ public class FormFillingReportCreator(
         return name.ToLower();
     }
 
-    private static object ConvertFieldValue(string value, FormMetadata meta)
+    private static object ConvertFieldValue(string value, FormMetadata meta, CultureInfo culture)
     {
         if (string.IsNullOrEmpty(value))
         {
@@ -411,16 +627,18 @@ public class FormFillingReportCreator(
         return meta.Type switch
         {
             "checkBox" => bool.TryParse(value, out var b) ? b : value,
-            "dateTime" => ParseDate(value, meta.Format),
+            "dateTime" => ParseDate(value, meta.Format, culture),
             _ => value
         };
     }
 
-    private static DateTime? ParseDate(string value, string format)
+    private static DateTime? ParseDate(string value, string format, CultureInfo culture)
     {
         if (string.IsNullOrWhiteSpace(format))
         {
-            return DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out var d) ? d : null;
+            return DateTime.TryParse(value, culture, DateTimeStyles.None, out var d)
+                || DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out d)
+                ? d : null;
         }
 
         var dotNetFormat = format
@@ -429,12 +647,15 @@ public class FormFillingReportCreator(
             .Replace("YY", "yy")
             .Replace("mm", "MM");
 
-        if (DateTime.TryParseExact(value, dotNetFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out var dt))
+        if (DateTime.TryParseExact(value, dotNetFormat, culture, DateTimeStyles.None, out var dt)
+            || DateTime.TryParseExact(value, dotNetFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
         {
             return dt;
         }
 
-        return DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out var fallback) ? fallback : null;
+        return DateTime.TryParse(value, culture, DateTimeStyles.None, out var fallback)
+            || DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out fallback)
+            ? fallback : null;
     }
 
     public class BoolToStringConverter : JsonConverter<string>

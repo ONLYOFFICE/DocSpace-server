@@ -1,30 +1,35 @@
-// (c) Copyright Ascensio System SIA 2009-2026
-//
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
-//
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
-//
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
-
-using ASC.Files.Tests.ApiFactories;
+// Copyright (C) Ascensio System SIA, 2009-2026
+// 
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
+// 
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
+// 
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
+// 
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
+// 
+// No trademark rights are granted under this License.
+// 
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Files.Tests.Tests._04_Security;
 
@@ -32,11 +37,8 @@ namespace ASC.Files.Tests.Tests._04_Security;
 [Trait("Category", "Security")]
 [Trait("Feature", "Rooms")]
 public class RoomShareTests(
-    FilesApiFactory filesFactory,
-    WepApiFactory apiFactory,
-    PeopleFactory peopleFactory,
-    FilesServiceFactory filesServiceProgram)
-    : BaseTest(filesFactory, apiFactory, peopleFactory, filesServiceProgram)
+    AspireAppFixture fixture)
+    : BaseTest(fixture)
 {
     public static TheoryData<RoomType, FileShare> DataWithFileShare => new MatrixTheoryData<RoomType, FileShare>(
         [RoomType.EditingRoom, RoomType.VirtualDataRoom],
@@ -643,7 +645,7 @@ public class RoomShareTests(
             roomsList.Should().NotBeNull();
             roomsList.Folders.Should().Contain(f => f.Title == customRoom.Title);
 
-            // Now check file access for user2 (without token) � rights should be persisted according to the last link
+            // Now check file access for user2 (without token) rights should be persisted according to the last link
             var fileInfoAsUser2 = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
             fileInfoAsUser2.Should().NotBeNull();
             fileInfoAsUser2.Access.Should().Be(access);
@@ -961,10 +963,10 @@ public class RoomShareTests(
         var response = (await _roomsApi.SetRoomLinkAsync(customRoom.Id, additionalLink1, TestContext.Current.CancellationToken)).Response;
         var shortLink = response.SharedLink.ShareLink;
 
-        await apiFactory.HttpClient.Authenticate(Initializer.Owner);
-        var fullLink = await apiFactory.HttpClient.GetAsync(shortLink, TestContext.Current.CancellationToken);
+        await _webApiClient.Authenticate(Initializer.Owner);
+        var fullLink = await _webApiClient.GetAsync(new Uri(shortLink).PathAndQuery, TestContext.Current.CancellationToken);
         var key = HttpUtility.ParseQueryString(fullLink.RequestMessage?.RequestUri?.Query!)["key"];
-        await apiFactory.AuthenticationApi.CheckConfirmAsync(new EmailValidationKeyModel(key!, uiD: Initializer.Owner.Id, type: ConfirmType.LinkInvite), TestContext.Current.CancellationToken);
+        await _authenticationApi.CheckConfirmAsync(new EmailValidationKeyModel(key!, uiD: Initializer.Owner.Id, type: ConfirmType.LinkInvite), TestContext.Current.CancellationToken);
 
         var info = (await _roomsApi.GetRoomSecurityInfoAsync(customRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
@@ -997,10 +999,10 @@ public class RoomShareTests(
         var shortInvitationLink = invitationReadLinkResponse.SharedLink.ShareLink;
 
         // User visits the Read link
-        await apiFactory.HttpClient.Authenticate(user);
-        var fullInvitationLink = await apiFactory.HttpClient.GetAsync(shortInvitationLink, TestContext.Current.CancellationToken);
+        await _webApiClient.Authenticate(user);
+        var fullInvitationLink = await _webApiClient.GetAsync(new Uri(shortInvitationLink).PathAndQuery, TestContext.Current.CancellationToken);
         var fullInvitationLinkKey = HttpUtility.ParseQueryString(fullInvitationLink.RequestMessage?.RequestUri?.Query!)["key"];
-        await apiFactory.AuthenticationApi.CheckConfirmAsync(new EmailValidationKeyModel(fullInvitationLinkKey!, uiD: owner.Id, type: ConfirmType.LinkInvite), TestContext.Current.CancellationToken);
+        await _authenticationApi.CheckConfirmAsync(new EmailValidationKeyModel(fullInvitationLinkKey!, uiD: owner.Id, type: ConfirmType.LinkInvite), TestContext.Current.CancellationToken);
 
         var info = (await _roomsApi.GetRoomSecurityInfoAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
@@ -1022,10 +1024,10 @@ public class RoomShareTests(
         var shortUpdatedInvitationLink = updatedLinkResponse.SharedLink.ShareLink;
 
         // User visits the updated link again, but personal rights must remain Read (because the user already exists in the room)
-        await apiFactory.HttpClient.Authenticate(user);
-        var fullUpdatedInvitationLink = await apiFactory.HttpClient.GetAsync(shortUpdatedInvitationLink, TestContext.Current.CancellationToken);
+        await _webApiClient.Authenticate(user);
+        var fullUpdatedInvitationLink = await _webApiClient.GetAsync(new Uri(shortUpdatedInvitationLink).PathAndQuery, TestContext.Current.CancellationToken);
         var fullUpdatedInvitationLinkKey = HttpUtility.ParseQueryString(fullUpdatedInvitationLink.RequestMessage?.RequestUri?.Query!)["key"];
-        await apiFactory.AuthenticationApi.CheckConfirmAsync(new EmailValidationKeyModel(fullUpdatedInvitationLinkKey!, uiD: owner.Id, type: ConfirmType.LinkInvite), TestContext.Current.CancellationToken);
+        await _authenticationApi.CheckConfirmAsync(new EmailValidationKeyModel(fullUpdatedInvitationLinkKey!, uiD: owner.Id, type: ConfirmType.LinkInvite), TestContext.Current.CancellationToken);
 
         var updatedInfo = (await _roomsApi.GetRoomSecurityInfoAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
 

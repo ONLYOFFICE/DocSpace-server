@@ -1,0 +1,17 @@
+<Solution>
+  <Project Path="common/ASC.ActiveDirectory/ASC.ActiveDirectory.csproj" />
+  <Project Path="common/ASC.Common/ASC.Common.csproj" />
+  <Project Path="common/ASC.Core.Common/ASC.Core.Common.csproj" />
+  <Project Path="common/ASC.Data.Backup.Core/ASC.Data.Backup.Core.csproj" />
+  <Project Path="common/ASC.Data.Storage/ASC.Data.Storage.csproj" />
+  <Project Path="common/ASC.EventBus.Extensions.Logger/ASC.EventBus.Extensions.Logger.csproj" />
+  <Project Path="common/ASC.Webhooks.Core/ASC.Webhooks.Core.csproj" />
+  <Project Path="common/Tools/ASC.Migration.Creator/ASC.Migration.Creator.csproj" />
+  <Project Path="common/Tools/ASC.Migration.Runner/ASC.Migration.Runner.csproj" />
+  <Project Path="common/Tools/ASC.Migrations.Core/ASC.Migrations.Core.csproj" />
+  <Project Path="migrations/mysql/SaaS/ASC.Migrations.MySql.SaaS.csproj" />
+  <Project Path="migrations/mysql/Standalone/ASC.Migrations.MySql.Standalone.csproj" />
+  <Project Path="migrations/postgre/SaaS/ASC.Migrations.PostgreSql.SaaS.csproj" />
+  <Project Path="migrations/postgre/Standalone/ASC.Migrations.PostgreSql.Standalone.csproj" />
+  <Project Path="products/ASC.Files/Core/ASC.Files.Core.csproj" />
+</Solution>

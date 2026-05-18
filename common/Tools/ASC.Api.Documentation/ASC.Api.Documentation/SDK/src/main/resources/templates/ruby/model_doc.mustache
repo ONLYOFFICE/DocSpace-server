@@ -1,0 +1,16 @@
+{{#models}}
+{{#model}}
+{{#isEnum}}
+# {{moduleName}}::{{classname}}
+
+## Enum
+
+{{#allowableValues}}{{#enumVars}}
+* `{{name}}` (value: `{{{value}}}`)
+{{/enumVars}}{{/allowableValues}}
+{{/isEnum}}
+{{^isEnum}}
+{{> partial_model_generic_doc}}
+{{/isEnum}}
+{{/model}}
+{{/models}}

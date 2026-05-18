@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.asc</groupId>
         <artifactId>registration</artifactId>
-        <version>1.1.0</version>
+        <version>1.1.1</version>
     </parent>
 
     <artifactId>registration-application</artifactId>
@@ -115,6 +115,23 @@
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-api</artifactId>
             <version>${springdoc.version}</version>
+        </dependency>
+
+        <!-- Testing Dependencies -->
+        <dependency>
+          <groupId>com.asc</groupId>
+          <artifactId>common-messaging</artifactId>
+          <scope>test</scope>
+        </dependency>
+        <dependency>
+          <groupId>com.asc</groupId>
+          <artifactId>registration-data</artifactId>
+          <scope>test</scope>
+        </dependency>
+        <dependency>
+          <groupId>com.asc</groupId>
+          <artifactId>registration-messaging</artifactId>
+          <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

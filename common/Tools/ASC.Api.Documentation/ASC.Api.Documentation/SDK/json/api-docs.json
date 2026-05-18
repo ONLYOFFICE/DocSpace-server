@@ -7,7 +7,7 @@
       "url": "https://helpdesk.onlyoffice.com/hc/en-us",
       "email": "support@onlyoffice.com"
     },
-    "version": "3.6.0",
+    "version": "3.7.0",
     "x-scalar-sdk-installation": [
       {
         "lang": "Node",
@@ -1242,7 +1242,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ExportChatRequestBodyInteger"
+                "$ref": "#/components/schemas/ExportChatRequestBody"
               }
             }
           },
@@ -2726,7 +2726,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ExportMessageRequestBodyInteger"
+                "$ref": "#/components/schemas/ExportMessageRequestBody"
               }
             }
           },
@@ -3082,6 +3082,148 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": []
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": []
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": []
+          }
+        ]
+      }
+    },
+    "/api/2.0/ai/providers/models/preview": {
+      "post": {
+        "tags": [
+          "AI / Providers"
+        ],
+        "summary": "Preview models for a new AI provider",
+        "description": "Connects to the specified AI provider using the provided credentials and returns the available models\r\nwith their default settings. This is used to preview models before saving the provider.\r\nRecommended models are enabled by default with configuration-defined settings.\r\nAdditional models are disabled by default with empty capabilities.",
+        "operationId": "previewProviderModels",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PreviewProviderModelsRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "List of models with default settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModelSettingsArrayWrapper"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid connection data or unsupported provider type"
+          },
+          "403": {
+            "description": "You don't have enough permission to manage providers"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": []
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": []
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": []
+          }
+        ]
+      }
+    },
+    "/api/2.0/ai/providers/{providerId}/models": {
+      "get": {
+        "tags": [
+          "AI / Providers"
+        ],
+        "summary": "Get all models for a provider with their settings",
+        "description": "Returns the full list of AI models available from a provider, including both recommended and additional models.\r\nEach model includes its current settings: enabled state, display alias, and capabilities (vision, tool calling, thinking).\r\nRecommended models are enabled by default and their alias and capabilities come from configuration.\r\nAdditional models are disabled by default and can be configured by the admin.",
+        "operationId": "getProviderModels",
+        "parameters": [
+          {
+            "name": "providerId",
+            "in": "path",
+            "description": "The identifier of the AI provider.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of models with settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModelSettingsArrayWrapper"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "You don't have enough permission to manage providers"
+          },
+          "404": {
+            "description": "Provider not found"
           },
           "401": {
             "description": "Unauthorized"
@@ -4417,6 +4559,9 @@
               }
             }
           },
+          "403": {
+            "description": "Access denied"
+          },
           "401": {
             "description": "Unauthorized"
           }
@@ -5061,13 +5206,85 @@
         ],
         "responses": {
           "200": {
-            "description": "XLSX report generation has been queued"
+            "description": "Ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/XlsxReportResponseWrapper"
+                }
+              }
+            }
           },
           "403": {
             "description": "You do not have enough permissions to perform this action"
           },
           "404": {
-            "description": "Form file not found"
+            "description": "The required file was not found"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": []
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": []
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": []
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "Files / Files"
+        ],
+        "summary": "Get XLSX report generation status",
+        "description": "Returns the status of the XLSX report generation task for the specified form.",
+        "operationId": "getXlsx",
+        "parameters": [
+          {
+            "name": "fileId",
+            "in": "path",
+            "description": "The file unique identifier.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentBuilderTaskWrapper"
+                }
+              }
+            }
           },
           "401": {
             "description": "Unauthorized"
@@ -6932,6 +7149,9 @@
           "403": {
             "description": "You do not have enough permissions to view the form roles"
           },
+          "404": {
+            "description": "The required file was not found"
+          },
           "401": {
             "description": "Unauthorized"
           }
@@ -7409,6 +7629,12 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "You don't have enough permission to perform the operation"
+          },
+          "404": {
+            "description": "File not found"
           },
           "401": {
             "description": "Unauthorized"
@@ -8192,6 +8418,79 @@
         }
       }
     },
+    "/api/2.0/files/folder/{folderId}/xlsx": {
+      "post": {
+        "tags": [
+          "Files / Folders"
+        ],
+        "summary": "Generate XLSX report by folder",
+        "description": "Triggers asynchronous XLSX report generation for the specified form results folder.",
+        "operationId": "generateXlsxByFolder",
+        "parameters": [
+          {
+            "name": "folderId",
+            "in": "path",
+            "description": "The folder unique identifier.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/XlsxReportResponseWrapper"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "You do not have enough permissions to perform this action"
+          },
+          "404": {
+            "description": "The required folder was not found"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": []
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": []
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": []
+          }
+        ]
+      }
+    },
     "/api/2.0/files/folder/{folderId}": {
       "post": {
         "tags": [
@@ -8611,6 +8910,15 @@
               "$ref": "#/components/schemas/ApplyFilterOption"
             },
             "example": 1
+          },
+          {
+            "name": "withSubFolders",
+            "in": "query",
+            "description": "Specifies whether to include files from subfolders in the results.",
+            "schema": {
+              "type": "boolean",
+              "example": true
+            }
           },
           {
             "name": "extension",
@@ -16180,6 +16488,150 @@
         ]
       }
     },
+    "/api/2.0/files/rooms/{id}/externaldbsync": {
+      "post": {
+        "tags": [
+          "Rooms"
+        ],
+        "summary": "Start external DB sync",
+        "description": "Triggers external DB synchronization for all form templates in the specified filling forms room.",
+        "operationId": "startExternalDbSync",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The room ID.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Synchronization task information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExternalDbSyncTaskWrapper"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "External DB is not configured"
+          },
+          "403": {
+            "description": "You do not have enough permissions to perform this action"
+          },
+          "404": {
+            "description": "Room not found"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": []
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": []
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": []
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "Rooms"
+        ],
+        "summary": "Get external DB sync status",
+        "description": "Returns the status of the external DB synchronization task for the specified filling forms room.",
+        "operationId": "getExternalDbSyncStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The room ID.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Synchronization task information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExternalDbSyncTaskWrapper"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Room not found"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": []
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": []
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": []
+          }
+        ]
+      }
+    },
     "/api/2.0/files/rooms/{id}": {
       "get": {
         "tags": [
@@ -18871,7 +19323,7 @@
         "tags": [
           "OAuth 2.0 / Authorization"
         ],
-        "summary": "OAuth2 authorization endpoint",
+        "summary": "OAuth2 Authorization Endpoint",
         "description": "Initiates the OAuth2 authorization flow.",
         "operationId": "authorizeOAuth",
         "parameters": [
@@ -18926,10 +19378,7 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "x-signature": []
           }
         ]
       },
@@ -18938,7 +19387,7 @@
           "OAuth 2.0 / Authorization"
         ],
         "summary": "OAuth2 consent endpoint",
-        "description": "Sends a consent request with the specified parameters.",
+        "description": "Sends consent approval",
         "operationId": "submitConsent",
         "requestBody": {
           "content": {
@@ -18976,10 +19425,7 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "x-signature": []
           }
         ]
       }
@@ -18989,8 +19435,8 @@
         "tags": [
           "OAuth 2.0 / Authorization"
         ],
-        "summary": "OAuth2 token endpoint",
-        "description": "Exchanges an authorization code specified in the request for the access token.",
+        "summary": "OAuth2 Token Endpoint",
+        "description": "Exchange authorization code for access token",
         "operationId": "exchangeToken",
         "requestBody": {
           "content": {
@@ -19030,7 +19476,7 @@
         },
         "responses": {
           "200": {
-            "description": "The authorization code was successfully exchanged for the access token",
+            "description": "Successfully exchanged authorization code for access token",
             "content": {
               "application/json": {
                 "schema": {
@@ -19067,6 +19513,26 @@
         }
       }
     },
+    "/.well-known/oauth-authorization-server": {
+      "options": {
+        "tags": [
+          "OAuth 2.0 / Discovery"
+        ],
+        "operationId": "handleOptions",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/2.0/clients/{clientId}": {
       "get": {
         "tags": [
@@ -19079,7 +19545,7 @@
           {
             "name": "clientId",
             "in": "path",
-            "description": "The client identifier.",
+            "description": "ID of the client to retrieve",
             "required": true,
             "schema": {
               "minLength": 1,
@@ -19137,7 +19603,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19147,7 +19613,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19157,7 +19623,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19167,7 +19633,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19177,7 +19643,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19185,10 +19651,7 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "x-signature": []
           }
         ]
       },
@@ -19197,13 +19660,13 @@
           "OAuth 2.0 / Client Management"
         ],
         "summary": "Update an existing OAuth2 client",
-        "description": "Updates the configuration of an existing OAuth2 client, allowing modifications to the client name, description, redirect URIs, and other settings. The client ID cannot be modified.",
+        "description": "Updates the configuration of an existing OAuth2 client. Allows modification of client name, description, redirect URIs, and other settings. The client ID cannot be modified.",
         "operationId": "updateClient",
         "parameters": [
           {
             "name": "clientId",
             "in": "path",
-            "description": "The client identifier.",
+            "description": "ID of the client to update",
             "required": true,
             "schema": {
               "minLength": 1,
@@ -19238,7 +19701,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19248,7 +19711,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19258,7 +19721,17 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported media type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19268,7 +19741,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19278,7 +19751,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19286,10 +19759,7 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "x-signature": []
           }
         ]
       },
@@ -19298,13 +19768,13 @@
           "OAuth 2.0 / Client Management"
         ],
         "summary": "Delete an OAuth2 client",
-        "description": "Permanently deletes an OAuth2 client and all associated data. All access and refresh tokens issued to this client will be invalidated. This operation cannot be undone.",
+        "description": "Permanently deletes an OAuth2 client and all associated data. This will invalidate all access tokens and refresh tokens issued to this client. This operation cannot be undone.",
         "operationId": "deleteClient",
         "parameters": [
           {
             "name": "clientId",
             "in": "path",
-            "description": "The client identifier.",
+            "description": "ID of the client to delete",
             "required": true,
             "schema": {
               "minLength": 1,
@@ -19329,7 +19799,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19339,7 +19809,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19349,7 +19819,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19359,7 +19829,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19369,7 +19839,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19377,10 +19847,7 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "x-signature": []
           }
         ]
       }
@@ -19390,27 +19857,28 @@
         "tags": [
           "OAuth 2.0 / Client Querying"
         ],
-        "summary": "Get clients",
-        "description": "Retrieves a paginated list of OAuth2 clients. The results can be paginated using the 'limit' parameter and the last seen client ID or creation date.",
+        "summary": "List clients",
+        "description": "Retrieves a paginated list of OAuth2 clients. The results can be paginated using the limit parameter and last seen client ID/creation date.",
         "operationId": "getClients",
         "parameters": [
           {
             "name": "limit",
             "in": "query",
-            "description": "The maximum number of results returned per page.",
+            "description": "Pagination limit",
             "required": true,
             "schema": {
               "maximum": 50,
               "minimum": 1,
               "type": "integer",
-              "format": "int32"
+              "format": "int32",
+              "default": 30
             },
             "example": 1
           },
           {
             "name": "last_client_id",
             "in": "query",
-            "description": "The ID of the last retrieved client.",
+            "description": "ID of the last retrieved client",
             "required": false,
             "schema": {
               "type": "string"
@@ -19420,7 +19888,7 @@
           {
             "name": "last_created_on",
             "in": "query",
-            "description": "The creation date of the last retrieved client.",
+            "description": "Date of the last retrieved client",
             "required": false,
             "schema": {
               "type": "string",
@@ -19485,17 +19953,17 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
           },
           "403": {
-            "description": "Insufficient permissions to create a client list",
+            "description": "Insufficient permissions to list clients",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19505,7 +19973,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19515,7 +19983,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19523,10 +19991,7 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "x-signature": []
           }
         ]
       },
@@ -19596,17 +20061,27 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
           },
           "403": {
-            "description": "Insufficient permissions to create a client",
+            "description": "Insufficient permissions to create client",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported media type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19616,7 +20091,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19626,7 +20101,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19634,10 +20109,62 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "x-signature": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "OAuth 2.0 / Client Management"
+        ],
+        "summary": "Delete all user OAuth2 clients",
+        "description": "Permanently deletes user OAuth2 clients and all associated data. This will invalidate all access tokens and refresh tokens issued to this client. This operation cannot be undone.",
+        "operationId": "deleteUserClients",
+        "responses": {
+          "200": {
+            "description": "Client successfully deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient permissions to delete user clients",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests - rate limit exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error occurred",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "x-signature": []
           }
         ]
       }
@@ -19647,14 +20174,14 @@
         "tags": [
           "OAuth 2.0 / Client Management"
         ],
-        "summary": "Regenerate the client secret",
+        "summary": "Regenerate client secret",
         "description": "Generates a new client secret for the specified OAuth2 client. The old secret will be immediately invalidated. This operation should be used with caution as it requires updating the secret in all client applications.",
         "operationId": "regenerateSecret",
         "parameters": [
           {
             "name": "clientId",
             "in": "path",
-            "description": "The client identifier.",
+            "description": "ID of the client to regenerate secret for",
             "required": true,
             "schema": {
               "minLength": 1,
@@ -19682,7 +20209,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19692,7 +20219,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19702,7 +20229,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19712,7 +20239,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19722,7 +20249,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19730,10 +20257,7 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "x-signature": []
           }
         ]
       }
@@ -19743,14 +20267,14 @@
         "tags": [
           "OAuth 2.0 / Client Management"
         ],
-        "summary": "Change the client activation status",
+        "summary": "Change client activation status",
         "description": "Activates or deactivates an OAuth2 client. When deactivated, the client cannot request new access tokens, but existing tokens will remain valid until they expire.",
         "operationId": "changeActivation",
         "parameters": [
           {
             "name": "clientId",
             "in": "path",
-            "description": "The client identifier.",
+            "description": "ID of the client to change activation for",
             "required": true,
             "schema": {
               "minLength": 1,
@@ -19785,7 +20309,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19795,7 +20319,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19805,7 +20329,17 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported media type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19815,7 +20349,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19825,7 +20359,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19833,10 +20367,7 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "x-signature": []
           }
         ]
       }
@@ -19846,7 +20377,7 @@
         "tags": [
           "OAuth 2.0 / Scope Management"
         ],
-        "summary": "Get available OAuth2 scopes",
+        "summary": "List available OAuth2 scopes",
         "description": "Retrieves a list of all available OAuth2 scopes for the specified tenant. The scopes define the permissions that can be requested by OAuth2 clients. The list is ordered alphabetically, with the 'openid' scope always appearing first.",
         "operationId": "getScopes",
         "responses": {
@@ -19872,17 +20403,17 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
           },
           "403": {
-            "description": "Insufficient permissions to get a list of scopes",
+            "description": "Insufficient permissions to list scopes",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19892,7 +20423,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19902,7 +20433,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19910,10 +20441,7 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "x-signature": []
           }
         ]
       }
@@ -19923,14 +20451,13 @@
         "tags": [
           "OAuth 2.0 / Client Querying"
         ],
-        "summary": "Get public client information",
-        "description": "Returns the public information for a client with the ID secified din the request.",
+        "summary": "Handles the GET request for public client information",
         "operationId": "getPublicClientInfo",
         "parameters": [
           {
             "name": "clientId",
             "in": "path",
-            "description": "The client identifier.",
+            "description": "ID of the client to retrieve",
             "required": true,
             "schema": {
               "minLength": 1,
@@ -19979,7 +20506,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -19995,14 +20522,14 @@
         "tags": [
           "OAuth 2.0 / Client Querying"
         ],
+        "summary": "Retrieves detailed information for a specific client",
         "operationId": "getClientInfo",
-        "summary": "Get detailed client information",
         "description": "Retrieves the detailed information for a client with the ID specified in the request.",
         "parameters": [
           {
             "name": "clientId",
             "in": "path",
-            "description": "The client identifier.",
+            "description": "ID of the client to retrieve",
             "required": true,
             "schema": {
               "minLength": 1,
@@ -20051,7 +20578,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -20062,10 +20589,7 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "x-signature": []
           }
         ]
       }
@@ -20075,14 +20599,14 @@
         "tags": [
           "OAuth 2.0 / Client Querying"
         ],
-        "summary": "Get detailed information of clients",
+        "summary": "Retrieves a pageable list of client information",
         "description": "Retrieves a paginated list of information for all clients.",
         "operationId": "getClientsInfo",
         "parameters": [
           {
             "name": "limit",
             "in": "query",
-            "description": "The maximum number of results returned per page.",
+            "description": "Pagination limit",
             "required": true,
             "schema": {
               "maximum": 50,
@@ -20095,7 +20619,7 @@
           {
             "name": "last_client_id",
             "in": "query",
-            "description": "The identifier of the last retrieved client.",
+            "description": "ID of the last retrieved client",
             "required": false,
             "schema": {
               "type": "string"
@@ -20105,7 +20629,7 @@
           {
             "name": "last_created_on",
             "in": "query",
-            "description": "The creation date of the last retrieved client.",
+            "description": "Date of the last retrieved client",
             "required": false,
             "schema": {
               "type": "string",
@@ -20133,7 +20657,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -20144,10 +20668,7 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "x-signature": []
           }
         ]
       }
@@ -20157,14 +20678,14 @@
         "tags": [
           "OAuth 2.0 / Client Querying"
         ],
-        "summary": "Get user consents",
+        "summary": "Retrieves a pageable list of consents",
         "description": "Retrieves a paginated list of user consents.",
         "operationId": "getConsents",
         "parameters": [
           {
             "name": "limit",
             "in": "query",
-            "description": "The maximum number of results returned per page.",
+            "description": "Pagination limit",
             "required": true,
             "schema": {
               "maximum": 50,
@@ -20177,7 +20698,7 @@
           {
             "name": "last_modified_on",
             "in": "query",
-            "description": "The date when the user consent was last modified.",
+            "description": "Date of the last retrieved consent",
             "required": false,
             "schema": {
               "type": "string",
@@ -20235,10 +20756,7 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "x-signature": []
           }
         ]
       }
@@ -20255,7 +20773,7 @@
           {
             "name": "clientId",
             "in": "path",
-            "description": "The client identifier.",
+            "description": "ID of the client to revoke consent for",
             "required": true,
             "schema": {
               "minLength": 1,
@@ -20280,7 +20798,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -20290,7 +20808,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -20300,7 +20818,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -20310,7 +20828,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -20320,7 +20838,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -20330,7 +20848,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -20338,10 +20856,64 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "x-signature": []
+          }
+        ]
+      }
+    },
+    "/api/2.0/clients/tenant": {
+      "delete": {
+        "tags": [
+          "OAuth 2.0 / Client Management"
+        ],
+        "summary": "Delete all tenant OAuth2 clients",
+        "description": "Permanently deletes tenant OAuth2 clients and all associated data. This will invalidate all access tokens and refresh tokens issued to this client. This operation cannot be undone.",
+        "operationId": "deleteTenantClients",
+        "responses": {
+          "200": {
+            "description": "Client successfully deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient permissions to delete tenant clients",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests - rate limit exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error occurred",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "x-signature": []
           }
         ]
       }
@@ -27233,6 +27805,9 @@
           "400": {
             "description": "Can not update user type"
           },
+          "403": {
+            "description": "Access denied"
+          },
           "401": {
             "description": "Unauthorized"
           }
@@ -28234,6 +28809,9 @@
               }
             }
           },
+          "400": {
+            "description": "Invalid request parameters"
+          },
           "403": {
             "description": "No permissions to perform this action"
           },
@@ -28300,8 +28878,14 @@
               }
             }
           },
+          "400": {
+            "description": "Invalid request parameters"
+          },
           "403": {
             "description": "No permissions to perform this action"
+          },
+          "404": {
+            "description": "Customer could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -28366,8 +28950,17 @@
               }
             }
           },
+          "400": {
+            "description": "Invalid request parameters"
+          },
+          "402": {
+            "description": "Tariff is not paid"
+          },
           "403": {
             "description": "No permissions to perform this action"
+          },
+          "404": {
+            "description": "Customer could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -28432,8 +29025,14 @@
               }
             }
           },
+          "400": {
+            "description": "Invalid request parameters"
+          },
           "403": {
             "description": "No permissions to perform this action"
+          },
+          "404": {
+            "description": "Customer could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -28598,6 +29197,9 @@
               }
             }
           },
+          "403": {
+            "description": "No permissions to perform this action"
+          },
           "401": {
             "description": "Unauthorized"
           }
@@ -28651,6 +29253,9 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "No permissions to perform this action"
           },
           "401": {
             "description": "Unauthorized"
@@ -28717,6 +29322,9 @@
               }
             }
           },
+          "403": {
+            "description": "No permissions to perform this action"
+          },
           "401": {
             "description": "Unauthorized"
           }
@@ -28770,6 +29378,9 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "No permissions to perform this action"
           },
           "401": {
             "description": "Unauthorized"
@@ -28836,6 +29447,12 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "No permissions to perform this action"
+          },
+          "404": {
+            "description": "Service could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -28963,6 +29580,9 @@
           },
           "400": {
             "description": "Incorrect email or message text is empty"
+          },
+          "403": {
+            "description": "No permissions to perform this action"
           },
           "429": {
             "description": "Request limit is exceeded"
@@ -29166,8 +29786,14 @@
               }
             }
           },
+          "400": {
+            "description": "Invalid request parameters"
+          },
           "403": {
             "description": "No permissions to perform this action"
+          },
+          "404": {
+            "description": "Customer could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -29272,24 +29898,15 @@
         ]
       }
     },
-    "/api/2.0/portal/payment/customer/servicequota": {
+    "/api/2.0/portal/payment/customer/aibalance": {
       "get": {
         "tags": [
           "Portal / Payment"
         ],
-        "summary": "Get the service quota",
-        "description": "Returns the service quota from the accounting service.",
-        "operationId": "getCustomerServiceQuota",
+        "summary": "Get the customer AI balance",
+        "description": "Returns the AI quota balance of a customer from the accounting service.",
+        "operationId": "getCustomerAiBalance",
         "parameters": [
-          {
-            "name": "serviceName",
-            "in": "query",
-            "description": "The service name.",
-            "schema": {
-              "type": "string",
-              "example": "backup"
-            }
-          },
           {
             "name": "refresh",
             "in": "query",
@@ -29302,7 +29919,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The service quota",
+            "description": "The customer AI balance",
             "content": {
               "application/json": {
                 "schema": {
@@ -29313,9 +29930,6 @@
           },
           "403": {
             "description": "No permissions to perform this action"
-          },
-          "404": {
-            "description": "Service could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -29391,15 +30005,6 @@
             }
           },
           {
-            "name": "WriteOffServiceQuota",
-            "in": "query",
-            "description": "Write-off of the quota for the service",
-            "schema": {
-              "type": "boolean",
-              "example": false
-            }
-          },
-          {
             "name": "StartDate",
             "in": "query",
             "description": "The report start date.",
@@ -29425,7 +30030,7 @@
             "description": "The participant name.",
             "schema": {
               "type": "string",
-              "example": "ACME Corp"
+              "example": "My Own Corporation"
             }
           },
           {
@@ -29447,9 +30052,9 @@
             }
           },
           {
-            "name": "Types",
+            "name": "Type",
             "in": "query",
-            "description": "List of operation types to filter by.",
+            "description": "The operation type to filter by.",
             "schema": {
               "$ref": "#/components/schemas/OperationType"
             },
@@ -29458,7 +30063,7 @@
           {
             "name": "Status",
             "in": "query",
-            "description": "List of operation status to filter by.",
+            "description": "The operation status to filter by.",
             "schema": {
               "$ref": "#/components/schemas/OperationStatus"
             },
@@ -29554,7 +30159,7 @@
         },
         "responses": {
           "200": {
-            "description": "Ok",
+            "description": "Operation execution status",
             "content": {
               "application/json": {
                 "schema": {
@@ -29567,7 +30172,7 @@
             "description": "No permissions to perform this action"
           },
           "404": {
-            "description": "Service could not be found"
+            "description": "Customer or service could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -29612,7 +30217,7 @@
         "operationId": "getCustomerOperationsReport",
         "responses": {
           "200": {
-            "description": "Ok",
+            "description": "Operation execution status",
             "content": {
               "application/json": {
                 "schema": {
@@ -29620,6 +30225,12 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "No permissions to perform this action"
+          },
+          "404": {
+            "description": "Customer could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -29665,6 +30276,12 @@
         "responses": {
           "200": {
             "description": "Ok"
+          },
+          "403": {
+            "description": "No permissions to perform this action"
+          },
+          "404": {
+            "description": "Customer could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -29786,6 +30403,9 @@
           },
           "403": {
             "description": "No permissions to perform this action"
+          },
+          "404": {
+            "description": "Customer could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -29910,6 +30530,9 @@
           "403": {
             "description": "No permissions to perform this action"
           },
+          "404": {
+            "description": "Customer could not be found"
+          },
           "401": {
             "description": "Unauthorized"
           }
@@ -29945,26 +30568,26 @@
         ]
       }
     },
-    "/api/2.0/portal/payment/buywalletservice": {
+    "/api/2.0/portal/payment/creditaibalance": {
       "post": {
         "tags": [
           "Portal / Payment"
         ],
-        "summary": "Purchases a wallet service with the specified quantity.",
-        "description": "This method processes a payment for a wallet service using the configured payment method.\r\nRequires the tariff service to be configured and a valid payment method to be set for the customer.\r\nRate limiting is applied according to the payments API policy.",
-        "operationId": "buyWalletService",
+        "summary": "Credit AI balance",
+        "description": "Credits AI quota to the customer AI sub-account from their main balance.\r\nRequires the customer to have a configured payment method.",
+        "operationId": "creditAiBalance",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/BuyWalletServiceRequestDto"
+                "$ref": "#/components/schemas/CreditAiBalanceRequestDto"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "The service payment information",
+            "description": "The AI credit operation result",
             "content": {
               "application/json": {
                 "schema": {
@@ -29977,7 +30600,7 @@
             "description": "No permissions to perform this action"
           },
           "404": {
-            "description": "Service could not be found"
+            "description": "Customer could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -30156,6 +30779,9 @@
           },
           "403": {
             "description": "No permissions to perform this action"
+          },
+          "404": {
+            "description": "Customer could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -30810,6 +31436,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "The user could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -39340,16 +39969,16 @@
         "tags": [
           "Settings / TFA settings"
         ],
-        "summary": "Get confirmation email",
-        "description": "Returns the confirmation email URL for authorization via SMS or TFA application.",
-        "operationId": "getTfaConfirmUrl",
+        "summary": "Get TFA confirmation data",
+        "description": "Returns the confirmation data for authorization via SMS or TFA application.",
+        "operationId": "getTfaConfirmData",
         "responses": {
           "200": {
-            "description": "Confirmation email URL",
+            "description": "TFA confirmation data",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/StringWrapper"
+                  "$ref": "#/components/schemas/TfaConfirmDataWrapper"
                 }
               }
             }
@@ -39394,8 +40023,8 @@
         "tags": [
           "Settings / TFA settings"
         ],
-        "summary": "Get a confirmation email for updating TFA settings",
-        "description": "Returns the confirmation email URL for updating TFA settings.",
+        "summary": "Updates TFA settings",
+        "description": "Updates TFA settings and returns the confirmation URL for authorization via SMS or TFA application.",
         "operationId": "updateTfaSettingsLink",
         "requestBody": {
           "content": {
@@ -39408,7 +40037,7 @@
         },
         "responses": {
           "200": {
-            "description": "Confirmation email URL",
+            "description": "TFA confirmation URL",
             "content": {
               "application/json": {
                 "schema": {
@@ -39529,7 +40158,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ObjectArrayWrapper"
+                  "$ref": "#/components/schemas/TfaAppCodeArrayWrapper"
                 }
               }
             }
@@ -39586,7 +40215,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ObjectArrayWrapper"
+                  "$ref": "#/components/schemas/TfaAppCodeArrayWrapper"
                 }
               }
             }
@@ -39717,6 +40346,9 @@
               }
             }
           },
+          "403": {
+            "description": "Access denied"
+          },
           "401": {
             "description": "Unauthorized"
           }
@@ -39778,6 +40410,12 @@
               }
             }
           },
+          "400": {
+            "description": "Invalid or empty parameters"
+          },
+          "403": {
+            "description": "Access denied"
+          },
           "401": {
             "description": "Unauthorized"
           }
@@ -39838,6 +40476,15 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Invalid or empty parameters"
+          },
+          "403": {
+            "description": "Access denied"
+          },
+          "404": {
+            "description": "Item not found"
           },
           "401": {
             "description": "Unauthorized"
@@ -39901,6 +40548,15 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Invalid or empty parameters"
+          },
+          "403": {
+            "description": "Access denied"
+          },
+          "404": {
+            "description": "Item not found"
           },
           "401": {
             "description": "Unauthorized"
@@ -39968,6 +40624,12 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "Access denied"
+          },
+          "404": {
+            "description": "Item not found"
           },
           "401": {
             "description": "Unauthorized"
@@ -40124,6 +40786,9 @@
               }
             }
           },
+          "403": {
+            "description": "Access denied"
+          },
           "401": {
             "description": "Unauthorized"
           }
@@ -40194,6 +40859,9 @@
           "400": {
             "description": "Id incorrect"
           },
+          "403": {
+            "description": "Access denied"
+          },
           "404": {
             "description": "Item not found"
           },
@@ -40260,6 +40928,9 @@
               }
             }
           },
+          "403": {
+            "description": "Access denied"
+          },
           "401": {
             "description": "Unauthorized"
           }
@@ -40301,56 +40972,15 @@
           "Settings / Webhooks"
         ],
         "summary": "Get webhook triggers",
-        "description": "Returns a list of triggers for a webhook.",
+        "description": "Returns a list of triggers for a webhook with their availability for the current user.",
         "operationId": "getWebhookTriggers",
         "responses": {
           "200": {
-            "description": "List of triggers for a webhook",
+            "description": "List of triggers with availability for the current user",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "response": {
-                      "type": "object",
-                      "additionalProperties": {
-                        "type": "integer",
-                        "format": "int32"
-                      }
-                    },
-                    "count": {
-                      "type": "integer",
-                      "description": "The total number of items in the response",
-                      "format": "int32"
-                    },
-                    "links": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "href": {
-                            "type": "string",
-                            "description": "URL of the link"
-                          },
-                          "action": {
-                            "type": "string",
-                            "description": "Action associated with the link"
-                          }
-                        }
-                      },
-                      "description": "List of links related to the response"
-                    },
-                    "status": {
-                      "type": "integer",
-                      "description": "HTTP status code of the response",
-                      "format": "int32"
-                    },
-                    "statusCode": {
-                      "type": "integer",
-                      "description": "HTTP status code of the response (duplicate of status)",
-                      "format": "int32"
-                    }
-                  }
+                  "$ref": "#/components/schemas/WebhookTriggerArrayWrapper"
                 }
               }
             }
@@ -40904,6 +41534,28 @@
         },
         "additionalProperties": false
       },
+      "AiModelCapabilities": {
+        "type": "object",
+        "properties": {
+          "vision": {
+            "type": "boolean",
+            "description": "Indicates whether the model supports image and vision input.",
+            "example": true
+          },
+          "toolCalling": {
+            "type": "boolean",
+            "description": "Indicates whether the model supports tool (function) calling.",
+            "example": true
+          },
+          "thinking": {
+            "type": "boolean",
+            "description": "Indicates whether the model supports extended thinking and reasoning.",
+            "example": false
+          }
+        },
+        "additionalProperties": false,
+        "description": "The AI model capabilities."
+      },
       "AiProviderArrayWrapper": {
         "type": "object",
         "properties": {
@@ -41393,7 +42045,11 @@
           "thinking": {
             "type": "boolean",
             "description": "Indicates whether the model supports extended thinking mode.",
-            "example": false
+            "example": false,
+            "deprecated": true
+          },
+          "capabilities": {
+            "$ref": "#/components/schemas/AiModelCapabilities"
           },
           "internal": {
             "type": "boolean",
@@ -41635,6 +42291,27 @@
             "description": "The authentication API key for the AI provider.",
             "nullable": true,
             "example": "sk-example-key-123"
+          },
+          "modelSettings": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ModelSettingsItemDto"
+            },
+            "description": "Optional list of model settings to configure atomically with the provider creation.",
+            "nullable": true,
+            "example": [
+              {
+                "modelId": "claude-opus-4-1-20250805",
+                "isEnabled": true,
+                "alias": "Claude Opus 4.1",
+                "capabilities": {
+                  "vision": true,
+                  "toolCalling": true,
+                  "thinking": false
+                }
+              }
+            ]
           }
         },
         "additionalProperties": false,
@@ -41681,6 +42358,15 @@
             "description": "AI provider title.",
             "nullable": true,
             "example": "OpenAI"
+          },
+          "providerType": {
+            "$ref": "#/components/schemas/ProviderType"
+          },
+          "defaultModelAlias": {
+            "type": "string",
+            "description": "Display alias of the default model.",
+            "nullable": true,
+            "example": "GPT-4o"
           }
         },
         "additionalProperties": false,
@@ -41850,12 +42536,6 @@
             "nullable": true,
             "example": "Mike Zanyatski"
           },
-          "title": {
-            "type": "string",
-            "description": "The user title.",
-            "nullable": true,
-            "example": "Manager"
-          },
           "avatar": {
             "type": "string",
             "description": "The user avatar.",
@@ -41921,7 +42601,7 @@
         ],
         "description": "[0 - None, 1 - Exa, 2 - PortalAi]"
       },
-      "ExportChatRequestBodyInteger": {
+      "ExportChatRequestBody": {
         "required": [
           "folderId",
           "title"
@@ -41929,9 +42609,17 @@
         "type": "object",
         "properties": {
           "folderId": {
-            "type": "integer",
-            "description": "The identifier of the destination folder where the exported document will be saved.",
-            "format": "int32",
+            "oneOf": [
+              {
+                "type": "integer",
+                "example": 1234
+              },
+              {
+                "type": "string",
+                "example": "some text"
+              }
+            ],
+            "description": "The identifier of the destination folder where the exported document will be saved.\r\nCan be an integer for internal folders or a string for third-party storage folders.",
             "example": 123
           },
           "title": {
@@ -41944,7 +42632,7 @@
         "additionalProperties": false,
         "description": "Parameters for exporting an AI chat session to a document."
       },
-      "ExportMessageRequestBodyInteger": {
+      "ExportMessageRequestBody": {
         "required": [
           "folderId",
           "title"
@@ -41952,9 +42640,17 @@
         "type": "object",
         "properties": {
           "folderId": {
-            "type": "integer",
-            "description": "The identifier of the destination folder where the exported document will be saved.",
-            "format": "int32",
+            "oneOf": [
+              {
+                "type": "integer",
+                "example": 1234
+              },
+              {
+                "type": "string",
+                "example": "some text"
+              }
+            ],
+            "description": "The identifier of the destination folder where the exported document will be saved.\r\nCan be an integer for internal folders or a string for third-party storage folders.",
             "example": 123
           },
           "title": {
@@ -42284,6 +42980,12 @@
                     "type": "boolean"
                   },
                   "UseChat": {
+                    "type": "boolean"
+                  },
+                  "UpdateXlsx": {
+                    "type": "boolean"
+                  },
+                  "AnalyzeResponses": {
                     "type": "boolean"
                   }
                 },
@@ -42835,12 +43537,21 @@
               "saveFormAsXLSX": {
                 "type": "boolean",
                 "description": "Specifies whether to save form data as XLSX file.",
-                "nullable": true
+                "nullable": true,
+                "example": false
               },
               "sendFormToExternalDB": {
                 "type": "boolean",
                 "description": "Specifies whether to send form data to external database.",
-                "nullable": true
+                "nullable": true,
+                "example": false
+              },
+              "originalFormId": {
+                "type": "integer",
+                "description": "The original form ID that corresponds to this FormFillingFolderDone folder.",
+                "format": "int32",
+                "nullable": true,
+                "example": 42
               }
             }
           }
@@ -43748,6 +44459,15 @@
             "nullable": true,
             "example": "gpt-4o"
           },
+          "alias": {
+            "type": "string",
+            "description": "The display name for the model.",
+            "nullable": true,
+            "example": "GPT-4o"
+          },
+          "capabilities": {
+            "$ref": "#/components/schemas/AiModelCapabilities"
+          },
           "price": {
             "$ref": "#/components/schemas/AiChatPrice"
           },
@@ -43757,6 +44477,117 @@
         },
         "additionalProperties": false,
         "description": "The AI model information."
+      },
+      "ModelSettingsArrayWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ModelSettingsDto"
+            }
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
+      "ModelSettingsDto": {
+        "required": [
+          "capabilities",
+          "id"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The model identifier.",
+            "nullable": true,
+            "example": "claude-sonnet-4-20250514"
+          },
+          "alias": {
+            "type": "string",
+            "description": "The display name for the model.",
+            "nullable": true,
+            "example": "Claude Sonnet 4"
+          },
+          "isEnabled": {
+            "type": "boolean",
+            "description": "Whether the model is enabled for use in chat.",
+            "example": true
+          },
+          "isRecommended": {
+            "type": "boolean",
+            "description": "Whether the model is recommended (defined in configuration).",
+            "example": true
+          },
+          "capabilities": {
+            "$ref": "#/components/schemas/AiModelCapabilities"
+          }
+        },
+        "additionalProperties": false,
+        "description": "AI model settings information."
+      },
+      "ModelSettingsItemDto": {
+        "required": [
+          "modelId"
+        ],
+        "type": "object",
+        "properties": {
+          "modelId": {
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string",
+            "description": "The model identifier.",
+            "example": "claude-opus-4-1-20250805"
+          },
+          "isEnabled": {
+            "type": "boolean",
+            "description": "Whether the model is enabled for use in chat.",
+            "example": true
+          },
+          "alias": {
+            "maxLength": 255,
+            "type": "string",
+            "description": "The display name for the model. Only applies to non-recommended models.",
+            "nullable": true,
+            "example": "Claude Opus 4.1"
+          },
+          "capabilities": {
+            "$ref": "#/components/schemas/AiModelCapabilities"
+          }
+        },
+        "additionalProperties": false,
+        "description": "A single model settings entry within a provider create or update request."
       },
       "NewItemsAgentNewItemsArrayWrapper": {
         "type": "object",
@@ -43822,6 +44653,31 @@
         },
         "additionalProperties": false,
         "description": "The new item parameters."
+      },
+      "PreviewProviderModelsRequestDto": {
+        "required": [
+          "key"
+        ],
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/ProviderType"
+          },
+          "url": {
+            "type": "string",
+            "description": "The API endpoint URL. Required for OpenAiCompatible type; optional for other types that have default URLs.",
+            "nullable": true,
+            "example": "https://api.openai.com/v1"
+          },
+          "key": {
+            "type": "string",
+            "description": "The authentication API key for the AI provider.",
+            "nullable": true,
+            "example": "sk-example-key-123"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Request parameters for previewing models available from a provider before saving it."
       },
       "ProviderSettingsArrayWrapper": {
         "type": "object",
@@ -44289,6 +45145,15 @@
             "description": "The new authentication API key for the AI provider. If null, the key is not changed.",
             "nullable": true,
             "example": "sk-example-key-123"
+          },
+          "modelSettings": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ModelSettingsItemDto"
+            },
+            "description": "Optional list of model settings changes to apply atomically with the provider update.",
+            "nullable": true
           }
         },
         "additionalProperties": false,
@@ -44367,12 +45232,14 @@
           "sendFormToExternalDB": {
             "type": "boolean",
             "description": "Specifies whether to send form data to external database.",
-            "nullable": true
+            "nullable": true,
+            "example": false
           },
           "saveFormAsXLSX": {
             "type": "boolean",
             "description": "Specifies whether to save form data as XLSX file.",
-            "nullable": true
+            "nullable": true,
+            "example": false
           }
         },
         "additionalProperties": false,
@@ -47072,6 +47939,18 @@
           },
           "chatSettings": {
             "$ref": "#/components/schemas/ChatSettings"
+          },
+          "sendFormToExternalDB": {
+            "type": "boolean",
+            "description": "Specifies whether to send form data to external database.",
+            "nullable": true,
+            "example": false
+          },
+          "saveFormAsXLSX": {
+            "type": "boolean",
+            "description": "Specifies whether to save form data as XLSX file.",
+            "nullable": true,
+            "example": false
           }
         },
         "additionalProperties": false,
@@ -47103,7 +47982,7 @@
         "properties": {
           "title": {
             "maxLength": 165,
-            "minLength": 0,
+            "minLength": 1,
             "type": "string",
             "description": "The file title for text or HTML file.",
             "nullable": true,
@@ -48445,7 +49324,8 @@
               "$ref": "#/components/schemas/RecentConfig"
             },
             "description": "The recent configuration of the editor.",
-            "nullable": true
+            "nullable": true,
+            "example": []
           },
           "templates": {
             "type": "array",
@@ -48453,7 +49333,8 @@
               "$ref": "#/components/schemas/TemplatesConfig"
             },
             "description": "The templates of the editor configuration.",
-            "nullable": true
+            "nullable": true,
+            "example": []
           },
           "user": {
             "$ref": "#/components/schemas/UserConfig"
@@ -48611,15 +49492,6 @@
                   }
                 ]
               },
-              "birthday": {
-                "$ref": "#/components/schemas/ApiDateTime"
-              },
-              "sex": {
-                "type": "string",
-                "description": "The user sex.",
-                "nullable": true,
-                "example": "male"
-              },
               "status": {
                 "$ref": "#/components/schemas/EmployeeStatus"
               },
@@ -48634,9 +49506,6 @@
                 "description": "The user department.",
                 "nullable": true,
                 "example": "Marketing"
-              },
-              "workFrom": {
-                "$ref": "#/components/schemas/ApiDateTime"
               },
               "groups": {
                 "type": "array",
@@ -48837,6 +49706,132 @@
         },
         "additionalProperties": false,
         "description": "The encryption keys of the editor configuration."
+      },
+      "ExternalDbSyncFormResultDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "The form file ID.",
+            "format": "int32",
+            "example": 42
+          },
+          "title": {
+            "type": "string",
+            "description": "The form file title.",
+            "nullable": true,
+            "example": "Application.pdf"
+          },
+          "success": {
+            "type": "boolean",
+            "description": "Specifies whether the synchronization succeeded for this form.",
+            "example": true
+          },
+          "error": {
+            "type": "string",
+            "description": "The error message if the synchronization failed for this form.",
+            "nullable": true,
+            "example": "Connection refused"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The result of an external DB synchronization for a single form."
+      },
+      "ExternalDbSyncTaskDto": {
+        "required": [
+          "forms",
+          "id",
+          "isCompleted",
+          "percentage",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The task ID.",
+            "nullable": true,
+            "example": "ExternalDbSyncTask_1_42"
+          },
+          "error": {
+            "type": "string",
+            "description": "The error message if the synchronization failed.",
+            "nullable": true,
+            "example": "Connection refused"
+          },
+          "percentage": {
+            "type": "integer",
+            "description": "The progress percentage of the synchronization.",
+            "format": "int32",
+            "example": 75
+          },
+          "isCompleted": {
+            "type": "boolean",
+            "description": "Specifies whether the synchronization is completed or not.",
+            "example": false
+          },
+          "status": {
+            "$ref": "#/components/schemas/DistributedTaskStatus"
+          },
+          "forms": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExternalDbSyncFormResultDto"
+            },
+            "description": "The synchronization results for all original forms in the room.",
+            "nullable": true,
+            "example": [
+              {
+                "id": 42,
+                "title": "Application.pdf",
+                "success": true,
+                "error": null
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "description": "The external DB synchronization task parameters."
+      },
+      "ExternalDbSyncTaskWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/ExternalDbSyncTaskDto"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
       },
       "ExternalShareDto": {
         "required": [
@@ -49168,6 +50163,13 @@
                 "nullable": true,
                 "example": "In Process"
               },
+              "resultsFolderId": {
+                "type": "integer",
+                "description": "The ID of the FormFillingFolderDone folder that corresponds to this original form.",
+                "format": "int32",
+                "nullable": true,
+                "example": 55
+              },
               "draftLocation": {
                 "$ref": "#/components/schemas/DraftLocationInteger"
               },
@@ -49222,6 +50224,12 @@
               },
               "vectorizationStatus": {
                 "$ref": "#/components/schemas/VectorizationStatus"
+              },
+              "externalDbTableName": {
+                "type": "string",
+                "description": "The name of the table in the external database that corresponds to this form.",
+                "nullable": true,
+                "example": "form_123_v1"
               },
               "dimensions": {
                 "$ref": "#/components/schemas/Size"
@@ -49526,6 +50534,12 @@
                     "type": "boolean"
                   },
                   "UseChat": {
+                    "type": "boolean"
+                  },
+                  "UpdateXlsx": {
+                    "type": "boolean"
+                  },
+                  "AnalyzeResponses": {
                     "type": "boolean"
                   }
                 },
@@ -51335,12 +52349,21 @@
               "saveFormAsXLSX": {
                 "type": "boolean",
                 "description": "Specifies whether to save form data as XLSX file.",
-                "nullable": true
+                "nullable": true,
+                "example": false
               },
               "sendFormToExternalDB": {
                 "type": "boolean",
                 "description": "Specifies whether to send form data to external database.",
-                "nullable": true
+                "nullable": true,
+                "example": false
+              },
+              "originalFormId": {
+                "type": "integer",
+                "description": "The original form ID that corresponds to this FormFillingFolderDone folder.",
+                "format": "int32",
+                "nullable": true,
+                "example": 42
               }
             }
           }
@@ -51546,7 +52569,8 @@
               "type": "string"
             },
             "description": "The list of possible values for the form field.",
-            "nullable": true
+            "nullable": true,
+            "example": []
           }
         },
         "additionalProperties": false
@@ -51739,7 +52763,8 @@
               "$ref": "#/components/schemas/FormMetadata"
             },
             "description": "The form field metadata.",
-            "nullable": true
+            "nullable": true,
+            "example": []
           },
           "submissions": {
             "type": "array",
@@ -51747,7 +52772,8 @@
               "$ref": "#/components/schemas/FormResultsDto"
             },
             "description": "All submissions.",
-            "nullable": true
+            "nullable": true,
+            "example": []
           }
         },
         "additionalProperties": false
@@ -52287,7 +53313,8 @@
               "$ref": "#/components/schemas/AceShortWrapper"
             },
             "description": "The sharing settings of the file.",
-            "nullable": true
+            "nullable": true,
+            "example": []
           },
           "type": {
             "$ref": "#/components/schemas/EditorType"
@@ -56244,15 +57271,92 @@
         "additionalProperties": false,
         "description": "The document watermark parameters."
       },
-      "ErrorResponse": {
+      "XlsxReportResponseDto": {
         "type": "object",
         "properties": {
-          "reason": {
-            "description": "The human-readable error explanation.",
-            "type": "string"
+          "form": {
+            "$ref": "#/components/schemas/FileDtoInteger"
+          },
+          "task": {
+            "$ref": "#/components/schemas/DocumentBuilderTaskDto"
+          },
+          "isNewFile": {
+            "type": "boolean",
+            "description": "Specifies whether the XLSX report file is newly created or an existing file will be updated.",
+            "example": true
           }
         },
-        "description": "The error response containing the human-readable error explanation."
+        "additionalProperties": false,
+        "description": "The XLSX report task response parameters."
+      },
+      "XlsxReportResponseWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/XlsxReportResponseDto"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
+      "ProblemDetail": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "instance": {
+            "type": "string",
+            "format": "uri"
+          },
+          "properties": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            }
+          }
+        }
       },
       "UpdateClientRequest": {
         "type": "object",
@@ -56260,48 +57364,53 @@
           "name": {
             "minLength": 1,
             "type": "string",
-            "description": "The client name.",
+            "description": "The name of the client",
             "example": "Updated Client"
           },
           "description": {
             "maxLength": 255,
             "minLength": 0,
             "type": "string",
-            "description": "The client description",
+            "description": "The description of the client",
             "example": "Updated description of the client"
           },
           "logo": {
             "minLength": 1,
             "pattern": "^data:image\\/(?:png|jpeg|jpg|svg\\+xml);base64,.*.{1,}",
             "type": "string",
-            "description": "The client logo in base64 format.",
+            "description": "The logo of the client in base64 format",
             "example": "data:image/png;base64,..."
+          },
+          "public": {
+            "type": "boolean"
           },
           "allow_pkce": {
             "type": "boolean",
-            "description": "Indicates whether PKCE is allowed for the client.",
+            "description": "Indicates whether PKCE is allowed for the client",
             "example": true
           },
           "is_public": {
             "type": "boolean",
-            "description": "Indicates whether the client is accessible by third-party tenants.",
+            "description": "Indicates whether client is accessible by third-party tenants",
             "example": false
           },
           "allowed_origins": {
+            "maxItems": 12,
+            "minItems": 1,
             "uniqueItems": true,
             "type": "array",
-            "description": "The allowed origins for the client.",
+            "description": "The allowed origins for the client",
             "example": [
               "http://allowed.origin"
             ],
             "items": {
               "type": "string",
-              "description": "The allowed origins for the client.",
+              "description": "The allowed origins for the client",
               "example": "[\"http://allowed.origin\"]"
             }
           }
         },
-        "description": "The request for updating client details."
+        "description": "Client update request containing modified client details"
       },
       "ClientResponse": {
         "type": "object",
@@ -56429,97 +57538,104 @@
             "maxLength": 255,
             "minLength": 0,
             "type": "string",
-            "description": "The client description.",
+            "description": "The description of the client",
             "example": "Description of the client"
           },
           "logo": {
             "minLength": 1,
             "pattern": "^data:image\\/(?:png|jpeg|jpg|svg\\+xml);base64,.*.{1,}",
             "type": "string",
-            "description": "The client logo in base64 format.",
+            "description": "The logo of the client in base64 format",
             "example": "data:image/png;base64,..."
           },
           "scopes": {
             "minItems": 1,
             "uniqueItems": true,
             "type": "array",
-            "description": "The client scopes.",
+            "description": "The scopes for the client",
             "example": [
               "read",
               "write"
             ],
             "items": {
               "type": "string",
-              "description": "The client scopes.",
+              "description": "The scopes for the client",
               "example": "[\"read\",\"write\"]"
             }
           },
+          "public": {
+            "type": "boolean"
+          },
           "allow_pkce": {
             "type": "boolean",
-            "description": "Indicates whether PKCE is allowed for the client.",
+            "description": "Indicates whether PKCE is allowed for the client",
             "example": true
           },
           "is_public": {
             "type": "boolean",
-            "description": "Indicates whether the client is accessible by third-party tenants.",
+            "description": "Indicates if the client is public",
             "example": false
           },
           "website_url": {
             "minLength": 1,
-            "pattern": "^(https?://)?(([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}|localhost|[a-zA-Z0-9-]+)(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$",
+            "pattern": "^(https?://)?([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$",
             "type": "string",
-            "description": "The URL to the client's website.",
+            "description": "The website URL of the client",
             "example": "http://example.com"
           },
           "terms_url": {
             "minLength": 1,
-            "pattern": "^(https?://)?(([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}|localhost|[a-zA-Z0-9-]+)(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$",
+            "pattern": "^(https?://)?([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$",
             "type": "string",
-            "description": "The URL to the client's terms of service.",
+            "description": "The terms URL of the client",
             "example": "http://example.com/terms"
           },
           "policy_url": {
             "minLength": 1,
-            "pattern": "^(https?://)?(([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}|localhost|[a-zA-Z0-9-]+)(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$",
+            "pattern": "^(https?://)?([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$",
             "type": "string",
-            "description": "The URL to the client's privacy policy.",
+            "description": "The policy URL of the client",
             "example": "http://example.com/policy"
           },
           "redirect_uris": {
+            "maxItems": 12,
+            "minItems": 1,
             "uniqueItems": true,
             "type": "array",
-            "description": "The list of allowed redirect URIs.",
+            "description": "The redirect URIs for the client",
             "example": [
               "http://example.com/redirect"
             ],
             "items": {
               "type": "string",
-              "description": "The list of allowed redirect URIs.",
+              "description": "The redirect URIs for the client",
               "example": "[\"http://example.com/redirect\"]"
             }
           },
           "allowed_origins": {
+            "maxItems": 12,
+            "minItems": 1,
             "uniqueItems": true,
             "type": "array",
-            "description": "The list of allowed CORS origins.",
+            "description": "The allowed origins for the client",
             "example": [
               "http://example.com"
             ],
             "items": {
               "type": "string",
-              "description": "The list of allowed CORS origins.",
+              "description": "The allowed origins for the client",
               "example": "[\"http://example.com\"]"
             }
           },
           "logout_redirect_uri": {
             "minLength": 1,
-            "pattern": "^(https?://)?(([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}|localhost|[a-zA-Z0-9-]+)(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$",
+            "pattern": "^(https?://)?([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$",
             "type": "string",
-            "description": "The list of allowed logout redirect URIs.",
+            "description": "The logout redirect URI for the client",
             "example": "http://example.com/logout"
           }
         },
-        "description": "The request parameters for creating a client."
+        "description": "Client creation request containing client details"
       },
       "ClientSecretResponse": {
         "type": "object",
@@ -56539,11 +57655,11 @@
         "properties": {
           "status": {
             "type": "boolean",
-            "description": "The client activation status.",
+            "description": "The activation status of the client",
             "example": true
           }
         },
-        "description": "The request parameters for changing the client activation status."
+        "description": "Client activation change request"
       },
       "ScopeResponse": {
         "type": "object",
@@ -56606,6 +57722,9 @@
             "items": {
               "type": "string"
             }
+          },
+          "public": {
+            "type": "boolean"
           },
           "client_id": {
             "type": "string",
@@ -57515,7 +58634,7 @@
       },
       "GroupRequestDto": {
         "required": [
-          "groupManager"
+          "groupName"
         ],
         "type": "object",
         "properties": {
@@ -57540,7 +58659,7 @@
           },
           "groupName": {
             "maxLength": 128,
-            "minLength": 0,
+            "minLength": 1,
             "type": "string",
             "description": "The group name.",
             "nullable": true,
@@ -57739,28 +58858,11 @@
               "00000000-0000-0000-0000-000000000000"
             ]
           },
-          "title": {
-            "maxLength": 255,
-            "minLength": 0,
-            "type": "string",
-            "description": "The user title.",
-            "nullable": true,
-            "example": "Manager"
-          },
           "location": {
             "type": "string",
             "description": "The user location.",
             "nullable": true,
             "example": "New York"
-          },
-          "sex": {
-            "$ref": "#/components/schemas/SexEnum"
-          },
-          "birthday": {
-            "$ref": "#/components/schemas/ApiDateTime"
-          },
-          "worksfrom": {
-            "$ref": "#/components/schemas/ApiDateTime"
           },
           "comment": {
             "type": "string",
@@ -57886,19 +58988,6 @@
         },
         "additionalProperties": false,
         "description": "The request for setting a group manager."
-      },
-      "SexEnum": {
-        "description": "[0 - Female, 1 - Male]",
-        "enum": [
-          0,
-          1
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
-          "Female",
-          "Male"
-        ]
       },
       "SignupAccountRequestDto": {
         "required": [
@@ -58338,28 +59427,11 @@
               "00000000-0000-0000-0000-000000000000"
             ]
           },
-          "title": {
-            "maxLength": 255,
-            "minLength": 0,
-            "type": "string",
-            "description": "The user title.",
-            "nullable": true,
-            "example": "Manager"
-          },
           "location": {
             "type": "string",
             "description": "The user location.",
             "nullable": true,
             "example": "New York"
-          },
-          "sex": {
-            "$ref": "#/components/schemas/SexEnum"
-          },
-          "birthday": {
-            "$ref": "#/components/schemas/ApiDateTime"
-          },
-          "worksfrom": {
-            "$ref": "#/components/schemas/ApiDateTime"
           },
           "comment": {
             "type": "string",
@@ -59180,7 +60252,7 @@
             "example": "Auth-Key"
           },
           "value": {
-            "maxLength": 255,
+            "maxLength": 4000,
             "minLength": 0,
             "type": "string",
             "description": "The authorization key value.",
@@ -59633,27 +60705,6 @@
         },
         "additionalProperties": false
       },
-      "BuyWalletServiceRequestDto": {
-        "type": "object",
-        "properties": {
-          "quantity": {
-            "maximum": 999999,
-            "minimum": 1,
-            "type": "integer",
-            "description": "Number of services provided.",
-            "format": "int32",
-            "example": 1
-          },
-          "serviceName": {
-            "type": "string",
-            "description": "The service name.",
-            "nullable": true,
-            "example": "backup"
-          }
-        },
-        "additionalProperties": false,
-        "description": "The request parameters for buying wallet service."
-      },
       "CapabilitiesDto": {
         "required": [
           "identityServerEnabled",
@@ -59948,7 +60999,7 @@
             "type": "string",
             "description": "The company name.",
             "nullable": true,
-            "example": "Acme Corporation"
+            "example": "My Own Corporation"
           },
           "site": {
             "type": "string",
@@ -60317,6 +61368,29 @@
         },
         "additionalProperties": false,
         "description": "The request parameters for creating the webhook configuration."
+      },
+      "CreditAiBalanceRequestDto": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "maximum": 999999,
+            "minimum": 0.01,
+            "type": "number",
+            "description": "The amount to transfer from the main balance to the AI subaccount.",
+            "format": "double",
+            "example": 100.00
+          },
+          "currency": {
+            "maxLength": 3,
+            "minLength": 0,
+            "type": "string",
+            "description": "The three-character ISO 4217 currency symbol.",
+            "nullable": true,
+            "example": "USD"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The request parameters for crediting AI quota to the customer AI subaccount."
       },
       "CspDto": {
         "required": [
@@ -60766,11 +61840,6 @@
             "nullable": true,
             "example": "backup"
           },
-          "writeOffServiceQuota": {
-            "type": "boolean",
-            "description": "Write-off of the quota for the service",
-            "example": false
-          },
           "startDate": {
             "type": "string",
             "description": "The report start date.",
@@ -60789,7 +61858,7 @@
             "type": "string",
             "description": "The participant name.",
             "nullable": true,
-            "example": "ACME Corp"
+            "example": "My Own Corporation"
           },
           "credit": {
             "type": "boolean",
@@ -60803,7 +61872,7 @@
             "nullable": true,
             "example": false
           },
-          "types": {
+          "type": {
             "$ref": "#/components/schemas/OperationType"
           },
           "status": {
@@ -62466,7 +63535,8 @@
           10,
           11,
           12,
-          13
+          13,
+          14
         ],
         "type": "integer",
         "example": 0,
@@ -62484,9 +63554,10 @@
           "Wordpress",
           "Yahoo",
           "Yandex",
-          "Github"
+          "Github",
+          "Nextcloud"
         ],
-        "description": "[0 - Facebook, 1 - Google, 2 - Dropbox, 3 - Docusign, 4 - Box, 5 - OneDrive, 6 - GosUslugi, 7 - LinkedIn, 8 - MailRu, 9 - VK, 10 - Wordpress, 11 - Yahoo, 12 - Yandex, 13 - Github]"
+        "description": "[0 - Facebook, 1 - Google, 2 - Dropbox, 3 - Docusign, 4 - Box, 5 - OneDrive, 6 - GosUslugi, 7 - LinkedIn, 8 - MailRu, 9 - VK, 10 - Wordpress, 11 - Yahoo, 12 - Yandex, 13 - Github, 14 - Nextcloud]"
       },
       "LoginSettingsDto": {
         "required": [
@@ -63139,6 +64210,21 @@
             "description": "The participant display name.",
             "nullable": true,
             "example": "Example Name"
+          },
+          "agentId": {
+            "type": "string",
+            "description": "AI Agent id.",
+            "nullable": true,
+            "example": 123
+          },
+          "agentTitle": {
+            "type": "string",
+            "description": "AI Agent name.",
+            "nullable": true,
+            "example": "My AI Agent"
+          },
+          "type": {
+            "$ref": "#/components/schemas/OperationType"
           }
         },
         "additionalProperties": false,
@@ -63158,18 +64244,16 @@
         ]
       },
       "OperationStatus": {
-        "description": "[0 - Any, 1 - Pending, 2 - Completed, 4 - Rejected, 8 - Canceled]",
+        "description": "[0 - Pending, 1 - Completed, 2 - Rejected, 3 - Canceled]",
         "enum": [
           0,
           1,
           2,
-          4,
-          8
+          3
         ],
         "type": "integer",
         "example": 0,
         "x-enum-varnames": [
-          "Any",
           "Pending",
           "Completed",
           "Rejected",
@@ -63177,36 +64261,36 @@
         ]
       },
       "OperationType": {
-        "description": "[0 - Any, 1 - Unknown, 2 - ServicePayment, 4 - PackagePayment, 8 - ServiceUsage, 16 - Deposit, 32 - ReceiveProviderInvoice, 64 - ProcessProviderInvoice, 128 - WriteOffServiceProfit, 256 - Profit, 512 - PartnerAccrual, 1024 - ProviderPayment, 2048 - PartnerPayment, 4096 - Refund, 8192 - BankDeposit, 16384 - BankWithdrawal, 32768 - GoodwillCredit, 65536 - WriteOffProfit, 131072 - WriteOffDifferenceCurrency]",
+        "description": "[0 - Unknown, 1 - ServicePayment, 2 - PackagePayment, 3 - AiServicePayment, 4 - Deposit, 5 - ReceiveProviderInvoice, 6 - ProcessProviderInvoice, 7 - WriteOffServiceProfit, 8 - Profit, 9 - PartnerAccrual, 10 - ProviderPayment, 11 - PartnerPayment, 12 - Refund, 13 - BankDeposit, 14 - BankWithdrawal, 15 - GoodwillCredit, 16 - WriteOffProfit, 17 - WriteOffDifferenceCurrency, 18 - AiDebit, 19 - AiCredit]",
         "enum": [
           0,
           1,
           2,
+          3,
           4,
+          5,
+          6,
+          7,
           8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
           16,
-          32,
-          64,
-          128,
-          256,
-          512,
-          1024,
-          2048,
-          4096,
-          8192,
-          16384,
-          32768,
-          65536,
-          131072
+          17,
+          18,
+          19
         ],
         "type": "integer",
         "example": 0,
         "x-enum-varnames": [
-          "Any",
           "Unknown",
           "ServicePayment",
           "PackagePayment",
-          "ServiceUsage",
+          "AiServicePayment",
           "Deposit",
           "ReceiveProviderInvoice",
           "ProcessProviderInvoice",
@@ -63220,7 +64304,9 @@
           "BankWithdrawal",
           "GoodwillCredit",
           "WriteOffProfit",
-          "WriteOffDifferenceCurrency"
+          "WriteOffDifferenceCurrency",
+          "AiDebit",
+          "AiCredit"
         ]
       },
       "OwnerChangeInstructionsDto": {
@@ -63625,12 +64711,17 @@
         }
       },
       "PaymentUrlRequestDto": {
+        "required": [
+          "backUrl"
+        ],
         "type": "object",
         "properties": {
           "backUrl": {
+            "maxLength": 255,
+            "minLength": 0,
             "type": "string",
             "description": "The URL where the user will be redirected after payment processing.",
-            "nullable": true,
+            "format": "uri",
             "example": "https://example.com"
           },
           "quantity": {
@@ -67336,6 +68427,132 @@
           }
         }
       },
+      "TfaAppCodeArrayWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TfaAppCodeDto"
+            }
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
+      "TfaAppCodeDto": {
+        "type": "object",
+        "properties": {
+          "isUsed": {
+            "type": "boolean",
+            "description": "The TFA app code usage status.",
+            "example": true
+          },
+          "code": {
+            "type": "string",
+            "description": "The TFA app code.",
+            "nullable": true,
+            "example": 123456
+          }
+        },
+        "additionalProperties": false,
+        "description": "The TFA app code."
+      },
+      "TfaConfirmDataDto": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "The confirmation URL.",
+            "nullable": true,
+            "example": "https://example.com/confirm?type=TfaAuth&key=abc123"
+          },
+          "cookieName": {
+            "type": "string",
+            "description": "The confirmation cookie name.",
+            "nullable": true,
+            "example": "asc_confirm_key_TfaAuth"
+          },
+          "cookieValue": {
+            "type": "string",
+            "description": "The confirmation cookie value.",
+            "nullable": true,
+            "example": "1234567890.abcdef"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The TFA confirmation data."
+      },
+      "TfaConfirmDataWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/TfaConfirmDataDto"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
       "TfaRequestsDto": {
         "type": "object",
         "properties": {
@@ -67448,7 +68665,7 @@
       },
       "TfaSettingsDto": {
         "required": [
-          "avaliable",
+          "available",
           "enabled",
           "id",
           "title"
@@ -67472,7 +68689,7 @@
             "description": "Indicates whether the TFA configuration is currently active.",
             "example": true
           },
-          "avaliable": {
+          "available": {
             "type": "boolean",
             "description": "Indicates whether the TFA configuration can be used.",
             "example": true
@@ -67616,6 +68833,8 @@
             "example": 1
           },
           "currency": {
+            "maxLength": 3,
+            "minLength": 0,
             "type": "string",
             "description": "The three-character ISO 4217 currency symbol.",
             "nullable": true,
@@ -68379,8 +69598,77 @@
           "FormStopped",
           "AgentCreated",
           "AgentUpdated",
-          "AgentDeleted"
+          "AgentDeleted",
+          "FileDownloaded",
+          "FolderDownloaded"
         ]
+      },
+      "WebhookTriggerArrayWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WebhookTriggerDto"
+            }
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
+      "WebhookTriggerDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The trigger name.",
+            "nullable": true,
+            "example": "file.created"
+          },
+          "id": {
+            "type": "integer",
+            "description": "The trigger bit value.",
+            "format": "int64",
+            "example": 128
+          },
+          "available": {
+            "type": "boolean",
+            "description": "Specifies whether this trigger is available for the current user's role.",
+            "example": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "The webhook trigger with its availability for the current user."
       },
       "WebhooksConfigDto": {
         "required": [
@@ -69132,8 +70420,12 @@
       "x-displayName": "Authorization"
     },
     {
+      "name": "OAuth 2.0 / Discovery",
+      "x-displayName": "Discovery"
+    },
+    {
       "name": "OAuth 2.0 / Client Management",
-      "description": "APIs for managing OAuth2 clients, including creation, updates, deletion, and activation.",
+      "description": "APIs for managing OAuth2 clients including creation, updates, deletion and activation",
       "x-displayName": "Client Management"
     },
     {
@@ -69466,6 +70758,7 @@
         "OAuth 2.0 / Authorization",
         "OAuth 2.0 / Client Management",
         "OAuth 2.0 / Client Querying",
+        "OAuth 2.0 / Discovery",
         "OAuth 2.0 / Scope Management"
       ]
     },

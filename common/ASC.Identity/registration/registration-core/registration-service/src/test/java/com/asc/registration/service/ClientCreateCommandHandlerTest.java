@@ -1,29 +1,35 @@
-// (c) Copyright Ascensio System SIA 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 //
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY; without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 //
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 //
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 //
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 //
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical
-// writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+//
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
 
 package com.asc.registration.service;
 
@@ -57,7 +63,8 @@ import java.time.ZonedDateTime;
 import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -72,8 +79,6 @@ public class ClientCreateCommandHandlerTest {
 
   private CreateTenantClientCommand command;
   private Audit audit;
-  private Client client;
-  private ClientResponse clientResponse;
 
   @BeforeEach
   public void setUp() {
@@ -100,10 +105,13 @@ public class ClientCreateCommandHandlerTest {
             .name("Test Client")
             .description("Test Description")
             .build();
-    client =
+  }
+
+  private static Client buildClient(String plaintextSecret) {
+    var client =
         Client.Builder.builder()
             .id(new ClientId(UUID.randomUUID()))
-            .secret(new ClientSecret("encryptedSecret"))
+            .secret(new ClientSecret(plaintextSecret))
             .authenticationMethods(Set.of(AuthenticationMethod.DEFAULT_AUTHENTICATION))
             .scopes(Set.of("read", "write"))
             .clientInfo(new ClientInfo("Test Client", "Description", "Logo URL"))
@@ -121,21 +129,26 @@ public class ClientCreateCommandHandlerTest {
             .clientVisibility(ClientVisibility.PRIVATE)
             .build();
     client.initialize(new UserId("creator"));
-    client.encryptSecret(s -> "encryptedSecret");
-    clientResponse =
+    client.encryptSecret(s -> plaintextSecret);
+    return client;
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+      strings = {"encryptedSecret", "another-plain-secret", "1234567890", "secret-with-symbols!@#"})
+  public void whenClientIsCreated_thenReturnClientResponse(String plaintextSecret) {
+    var client = buildClient(plaintextSecret);
+    var clientResponse =
         ClientResponse.builder()
             .clientId(client.getId().getValue().toString())
             .clientSecret(client.getSecret().value())
             .build();
-  }
 
-  @Test
-  public void whenClientIsCreated_thenReturnClientResponse() {
     when(clientDataMapper.toDomain(any(CreateTenantClientCommand.class))).thenReturn(client);
     when(clientDomainService.createClient(any(Audit.class), any(Client.class)))
         .thenReturn(new ClientCreatedEvent(audit, client, ZonedDateTime.now()));
     when(clientDataMapper.toClientResponse(any(Client.class))).thenReturn(clientResponse);
-    when(encryptionService.encrypt(anyString())).thenReturn("encryptedSecret");
+    when(encryptionService.encrypt(anyString())).thenReturn("encrypted-at-rest");
 
     var response = clientCreateCommandHandler.createClient(audit, command);
 
@@ -145,6 +158,6 @@ public class ClientCreateCommandHandlerTest {
     verify(clientCommandRepository, times(1)).saveClient(any(ClientEvent.class), any(Client.class));
     verify(clientDataMapper, times(1)).toClientResponse(any(Client.class));
 
-    assertEquals(client.getSecret().value(), response.getClientSecret());
+    assertEquals(plaintextSecret, response.getClientSecret());
   }
 }

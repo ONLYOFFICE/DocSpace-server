@@ -1,28 +1,35 @@
-// (c) Copyright Ascensio System SIA 2009-2026
-//
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
-//
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
-//
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// Copyright (C) Ascensio System SIA, 2009-2026
+// 
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
+// 
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
+// 
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
+// 
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
+// 
+// No trademark rights are granted under this License.
+// 
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Files.Api;
 
@@ -37,8 +44,19 @@ public class FilesControllerInternal(
     ApiContext apiContext,
     FileShareDtoHelper fileShareDtoHelper,
     HistoryApiHelper historyApiHelper,
-    IFusionCache hybridCache)
-    : FilesController<int>(filesControllerHelper,
+    IFusionCache hybridCache,
+    EditHistoryMapper editHistoryMapper,
+    IDaoFactory daoFactory,
+    FileSecurity fileSecurity,
+    DocumentServiceHelper documentServiceHelper,
+    DocumentServiceConnector documentServiceConnector,
+    PathProvider pathProvider,
+    UserManager userManager,
+    AuthContext authContext,
+    GlobalStore globalStore,
+    BaseCommonLinkUtility baseCommonLinkUtility)
+    : FilesController<int>(
+        filesControllerHelper,
         fileStorageService,
         fileOperationsManager,
         fileOperationDtoHelper,
@@ -46,7 +64,17 @@ public class FilesControllerInternal(
         fileDtoHelper,
         apiContext,
         fileShareDtoHelper,
-        hybridCache)
+        hybridCache,
+        editHistoryMapper,
+        daoFactory,
+        fileSecurity,
+        documentServiceHelper,
+        documentServiceConnector,
+        pathProvider,
+        userManager,
+        authContext,
+        globalStore,
+        baseCommonLinkUtility)
 {
     /// <remarks>
     /// Returns the list of actions performed on the file with the specified identifier.
@@ -76,8 +104,19 @@ public class FilesControllerThirdparty(
     FileDtoHelper fileDtoHelper,
     ApiContext apiContext,
     FileShareDtoHelper fileShareDtoHelper,
-    IFusionCache hybridCache)
-    : FilesController<string>(filesControllerHelper,
+    IFusionCache hybridCache,
+    EditHistoryMapper editHistoryMapper,
+    IDaoFactory daoFactory,
+    FileSecurity fileSecurity,
+    DocumentServiceHelper documentServiceHelper,
+    DocumentServiceConnector documentServiceConnector,
+    PathProvider pathProvider,
+    UserManager userManager,
+    AuthContext authContext,
+    GlobalStore globalStore,
+    BaseCommonLinkUtility baseCommonLinkUtility)
+    : FilesController<string>(
+        filesControllerHelper,
         fileStorageService,
         fileOperationsManager,
         fileOperationDtoHelper,
@@ -85,18 +124,38 @@ public class FilesControllerThirdparty(
         fileDtoHelper,
         apiContext,
         fileShareDtoHelper,
-        hybridCache);
+        hybridCache,
+        editHistoryMapper,
+        daoFactory,
+        fileSecurity,
+        documentServiceHelper,
+        documentServiceConnector,
+        pathProvider,
+        userManager,
+        authContext,
+        globalStore,
+        baseCommonLinkUtility);
 
 public abstract class FilesController<T>(
     FilesControllerHelper filesControllerHelper,
-        FileStorageService fileStorageService,
-        FileDeleteOperationsManager fileOperationsManager,
-        FileOperationDtoHelper fileOperationDtoHelper,
-        FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper,
-        ApiContext apiContext,
-        FileShareDtoHelper fileShareDtoHelper,
-        IFusionCache hybridCache)
+    FileStorageService fileStorageService,
+    FileDeleteOperationsManager fileOperationsManager,
+    FileOperationDtoHelper fileOperationDtoHelper,
+    FolderDtoHelper folderDtoHelper,
+    FileDtoHelper fileDtoHelper,
+    ApiContext apiContext,
+    FileShareDtoHelper fileShareDtoHelper,
+    IFusionCache hybridCache,
+    EditHistoryMapper editHistoryMapper,
+    IDaoFactory daoFactory,
+    FileSecurity fileSecurity,
+    DocumentServiceHelper documentServiceHelper,
+    DocumentServiceConnector documentServiceConnector,
+    PathProvider pathProvider,
+    UserManager userManager,
+    AuthContext authContext,
+    GlobalStore globalStore,
+    BaseCommonLinkUtility baseCommonLinkUtility)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <remarks>
@@ -275,7 +334,75 @@ public abstract class FilesController<T>(
     [HttpGet("file/{fileId}/edit/diff")]
     public async Task<EditHistoryDataDto> GetEditDiffUrl(EditDiffUrlRequestDto<T> inDto)
     {
-        return await filesControllerHelper.GetEditDiffUrlAsync(inDto.FileId, inDto.Version);
+        var version = inDto.Version;
+        var fileId = inDto.FileId;
+
+        var fileDao = daoFactory.GetFileDao<T>();
+
+        var file = version > 0
+            ? await fileDao.GetFileAsync(fileId, version)
+            : await fileDao.GetFileAsync(fileId);
+
+        if (file == null)
+        {
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+
+        if (!await fileSecurity.CanReadHistoryAsync(file))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
+        }
+
+        if (file.ProviderEntry)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_BadRequest);
+        }
+
+        var result = new EditHistoryDataDto
+        {
+            FileType = file.ConvertedExtension.Trim('.'),
+            Key = await documentServiceHelper.GetDocKeyAsync(file),
+            Url = documentServiceConnector.ReplaceCommunityAddress(pathProvider.GetFileStreamUrl(file)),
+            Version = version
+        };
+
+        if (await fileDao.ContainChangesAsync(file.Id, file.Version))
+        {
+            string previousKey;
+            string sourceFileUrl;
+            string sourceExt;
+
+            var history = await fileDao.GetFileHistoryAsync(file.Id).ToListAsync();
+            var previousFileStable = history.OrderByDescending(r => r.Version).FirstOrDefault(r => r.Version < file.Version);
+            if (previousFileStable != null)
+            {
+                sourceFileUrl = pathProvider.GetFileStreamUrl(previousFileStable);
+                sourceExt = previousFileStable.ConvertedExtension;
+
+                previousKey = await documentServiceHelper.GetDocKeyAsync(previousFileStable);
+            }
+            else
+            {
+                var culture = (await userManager.GetUsersAsync(authContext.CurrentAccount.ID)).GetCulture();
+                var storeTemplate = await globalStore.GetStoreTemplateAsync();
+                var fileExt = FileUtility.GetFileExtension(file.Title);
+                var path = await globalStore.GetNewDocTemplatePath(storeTemplate, fileExt, culture);
+                var uri = await storeTemplate.GetUriAsync("", path);
+
+                sourceFileUrl = baseCommonLinkUtility.GetFullAbsolutePath(uri.ToString());
+                sourceExt = fileExt.Trim('.');
+
+                previousKey = DocumentServiceConnector.GenerateRevisionId(Guid.NewGuid().ToString());
+            }
+
+            result.Previous = new EditHistoryUrl { Key = previousKey, Url = documentServiceConnector.ReplaceCommunityAddress(sourceFileUrl), FileType = sourceExt.Trim('.') };
+
+            result.ChangesUrl = documentServiceConnector.ReplaceCommunityAddress(pathProvider.GetFileChangesUrl(file));
+        }
+
+        result.Token = documentServiceHelper.GetSignature(result);
+
+        return result;
     }
 
     /// <remarks>
@@ -291,7 +418,7 @@ public abstract class FilesController<T>(
     [HttpGet("file/{fileId}/edit/history")]
     public IAsyncEnumerable<EditHistoryDto> GetEditHistory(FileIdRequestDto<T> inDto)
     {
-        return filesControllerHelper.GetEditHistoryAsync(inDto.FileId);
+        return fileStorageService.GetEditHistoryAsync(inDto.FileId).Select(editHistoryMapper.MapToDto);
     }
 
     /// <remarks>
@@ -369,7 +496,7 @@ public abstract class FilesController<T>(
     [HttpPost("file/{fileId}/restoreversion")]
     public IAsyncEnumerable<EditHistoryDto> RestoreFileVersion(RestoreVersionRequestDto<T> inDto)
     {
-        return filesControllerHelper.RestoreVersionAsync(inDto.FileId, inDto.Version, inDto.Url);
+        return fileStorageService.RestoreVersionAsync(inDto.FileId, inDto.Version, inDto.Url).Select(editHistoryMapper.MapToDto);
     }
 
     /// <remarks>
@@ -603,6 +730,7 @@ public abstract class FilesController<T>(
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Successfully retrieved all roles for the form", typeof(IEnumerable<FormRoleDto>))]
     [SwaggerResponse(403, "You do not have enough permissions to view the form roles")]
+    [SwaggerResponse(404, "The required file was not found")]
     [HttpGet("file/{fileId}/formroles")]
     public IAsyncEnumerable<FormRoleDto> GetAllFormRoles(FileIdRequestDto<T> inDto)
     {

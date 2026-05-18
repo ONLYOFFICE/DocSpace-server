@@ -1149,4 +1149,49 @@
   <data name="WhiteLabelSettingsLogoTextUpdated" xml:space="preserve">
     <value>Posodobljeno ime blagovne znamke</value>
   </data>
+  <data name="AIAccessDisabled" xml:space="preserve">
+    <value>Storitve AI so bile onemogočene</value>
+  </data>
+  <data name="AIAccessEnabled" xml:space="preserve">
+    <value>Storitve AI so bile omogočene</value>
+  </data>
+  <data name="AIDefaultProviderDeleted" xml:space="preserve">
+    <value>Privzeti ponudnik izbrisan</value>
+  </data>
+  <data name="AIDefaultProviderSet" xml:space="preserve">
+    <value>Privzeti ponudnik AI nastavljen: Ime: {0}, Privzeti model: {1}</value>
+  </data>
+  <data name="BackupCancelled" xml:space="preserve">
+    <value>Varnostno kopiranje preklicano</value>
+  </data>
+  <data name="DocumentsDefaultTemplatesSettingsUpdated" xml:space="preserve">
+    <value>Privzete nastavitve predloge posodobljene: {0}</value>
+  </data>
+  <data name="FileNotSavedDueToRoomQuota" xml:space="preserve">
+    <value>Sobe [{0}]. Datoteka ni bila shranjena: {1} – prekoračena kvota shrambe za sobo.</value>
+  </data>
+  <data name="FileNotSavedDueToUserQuota" xml:space="preserve">
+    <value>Uporabniki [{0}]. Datoteka ni bila shranjena: {1} – prekoračena kvota shrambe za uporabnika.</value>
+  </data>
+  <data name="FileSavedButRoomQuotaExceeded" xml:space="preserve">
+    <value>Sobe [{0}]. Datoteka posodobljena: {1}, prekoračena kvota shrambe sobe.</value>
+  </data>
+  <data name="FileSavedButUserQuotaExceeded" xml:space="preserve">
+    <value>Uporabniki [{0}]. Datoteka posodobljena: {1}, prekoračena kvota shrambe uporabnika.</value>
+  </data>
+  <data name="InvitationSettingsUpdated" xml:space="preserve">
+    <value>Nastavitve povabil posodobljene</value>
+  </data>
+  <data name="IPRestrictionsSettingsUpdated" xml:space="preserve">
+    <value>Nastavitve varnosti IP posodobljene</value>
+  </data>
+  <data name="RestoreCancelled" xml:space="preserve">
+    <value>Obnovitev preklicana</value>
+  </data>
+  <data name="RestoreStarted" xml:space="preserve">
+    <value>Obnovitev začeta</value>
+  </data>
+  <data name="ScheduledBackupDeleted" xml:space="preserve">
+    <value>Načrtovano varnostno kopiranje izbrisano</value>
+  </data>
 </root>

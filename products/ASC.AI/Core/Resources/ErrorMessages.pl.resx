@@ -174,4 +174,19 @@
   <data name="UnavailableServers" xml:space="preserve">
     <value>Serwery MCP są niedostępne: {0}. Sprawdź ustawienia połączenia</value>
   </data>
+  <data name="MessageNotFound" xml:space="preserve">
+    <value>Wiadomość nie została znaleziona</value>
+  </data>
+  <data name="NoModelsAvailable" xml:space="preserve">
+    <value>Brak dostępnych modeli dla tego dostawcy</value>
+  </data>
+  <data name="ProviderNameExists" xml:space="preserve">
+    <value>Nazwa dostawcy już istnieje</value>
+  </data>
+  <data name="ModelDisabled" xml:space="preserve">
+    <value>Model został wyłączony przez ustawienia Twojego dostawcy.</value>
+  </data>
+  <data name="ServerAlreadyAdded" xml:space="preserve">
+    <value>Serwer został już dodany do agenta</value>
+  </data>
 </root>

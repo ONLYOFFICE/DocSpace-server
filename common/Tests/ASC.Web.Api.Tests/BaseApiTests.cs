@@ -89,7 +89,7 @@ public class MySetUpClass
     [OneTimeTearDown]
     public void DropDb()
     {
-        var context = _scope.ServiceProvider.GetService<IDbContextFactory<UserDbContext>>().CreateDbContext();
+        using var context = _scope.ServiceProvider.GetService<IDbContextFactory<UserDbContext>>().CreateDbContext();
         context.Database.EnsureDeleted();
     }
 

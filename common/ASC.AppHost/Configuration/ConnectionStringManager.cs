@@ -1,28 +1,40 @@
-// (c) Copyright Ascensio System SIA 2009-2026
-//
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
-//
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
-//
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// Copyright (C) Ascensio System SIA, 2009-2026
+// 
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
+// 
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
+// 
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
+// 
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
+// 
+// No trademark rights are granted under this License.
+// 
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
+
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Logging;
+
+using StackExchange.Redis;
 
 #pragma warning disable ASPIREINTERACTION001
 
@@ -39,20 +51,31 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
     private IResourceBuilder<MySqlDatabaseResource>? MySqlDatabaseResource { get; set; }
     private IResourceBuilder<RabbitMQServerResource>? RabbitMqResource { get; set; }
     private IResourceBuilder<RedisResource>? RedisResource { get; set; }
-    private IResourceBuilder<ExecutableResource>? MigrateResource { get; set; }
+    private IResourceBuilder<ProjectResource>? MigrateResource { get; set; }
     private IResourceBuilder<ContainerResource>? EditorResource { get; set; }
     private IResourceBuilder<MailPitContainerResource>? MailResource { get; set; }
     private IResourceBuilder<ContainerResource>? OpensearchResource { get; set; }
 
     private IResourceBuilder<ContainerResource>? McpResource { get; set; }
+    private IResourceBuilder<ContainerResource>? OtelCollectorResource { get; set; }
     private IResourceBuilder<JavaScriptAppResource>? ApiTestResource { get; set; }
+    private IResourceBuilder<JavaScriptAppResource>? E2ETestResource { get; set; }
     private Dictionary<string, string>? _parameters;
 
+    public bool HasOtelCollector => OtelCollectorResource != null;
 
-    public ConnectionStringManager AddMySql(bool withDbGate = false)
+
+    public ConnectionStringManager AddMySql(bool withDbGate = false, bool withDataVolume = true)
     {
-        var mysqlResourceBuilder = builder.AddMySql("mysql")
-            .WithDataVolume("docspace-mysql-data");
+        var mysqlRootPassword = builder.AddParameter("mysql-root-password", "root", secret: true);
+
+        var mysqlResourceBuilder = builder.AddMySql("mysql", password: mysqlRootPassword)
+            .WithEndpoint("tcp", endpoint => endpoint.Port = 33306);
+
+        if (withDataVolume)
+        {
+            mysqlResourceBuilder = mysqlResourceBuilder.WithDataVolume("docspace-mysql-data");
+        }
 
         if (withDbGate)
         {
@@ -70,24 +93,15 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             }
         });
 
-        var executableName = OperatingSystem.IsWindows() ? "ASC.Migration.Runner.exe" : "ASC.Migration.Runner";
-        var path = Path.GetFullPath(Path.Combine("..", "Tools", "ASC.Migration.Runner", "bin", "Debug", executableName));
-
         MigrateResource = builder
-            .AddExecutable("migrate", path, Path.GetDirectoryName(path) ?? "")
+            .AddProject<ASC_Migration_Runner>("migrate")
             .WithReference(MySqlDatabaseResource)
             .WaitFor(MySqlDatabaseResource);
 
         var isStandalone = string.Compare(builder.Configuration["APP_HOSTING_STANDALONE"], "true", StringComparison.OrdinalIgnoreCase) == 0;
 
-        if (isStandalone)
-        {
-            MigrateResource.WithEnvironment("standalone", "true");
-        }
-        else
-        {
-            MigrateResource.WithEnvironment("standalone", "");
-        }
+        MigrateResource.WithEnvironment("standalone", isStandalone ? "true" : "");
+
 
         return this;
     }
@@ -115,6 +129,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
 #pragma warning disable ASPIRECERTIFICATES001
         RedisResource = builder
             .AddRedis("cache")
+            .WithClearCommand()
             .WithPassword(null)
             .WithoutHttpsCertificate();
 #pragma warning restore ASPIRECERTIFICATES001
@@ -146,6 +161,25 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
                 }
             }
         });
+
+        return this;
+    }
+
+    public ConnectionStringManager AddOpenTelemetryCollector()
+    {
+        var configPath = Path.Combine(basePath, "server", "common", "ASC.AppHost", "Configuration", "otel-collector-config.yaml");
+        var logsPath = Path.Combine(basePath, "Logs");
+
+        Directory.CreateDirectory(Path.Combine(logsPath, "otel"));
+
+        OtelCollectorResource = builder
+            .AddContainer(Constants.OtelCollectorContainer, "otel/opentelemetry-collector-contrib")
+            .WithImageTag("latest")
+            .WithBindMount(configPath, "/etc/otelcol-contrib/config.yaml")
+            .WithBindMount(logsPath, "/logs")
+            .WithArgs("--config=/etc/otelcol-contrib/config.yaml")
+            .WithHttpEndpoint(port: Constants.OtelCollectorGrpcPort, targetPort: Constants.OtelCollectorGrpcPort, name: "otlp-grpc", isProxied: false)
+            .WithHttpEndpoint(port: Constants.OtelCollectorHttpPort, targetPort: Constants.OtelCollectorHttpPort, name: "otlp-http", isProxied: false);
 
         return this;
     }
@@ -202,21 +236,40 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         return this;
     }
 
-    public ConnectionStringManager AddOpensearch()
+    public ConnectionStringManager AddOpensearch(bool withDashboard = true, bool fixedPort = true, bool withDataVolume = true)
     {
         OpensearchResource = builder
             .AddContainer(Constants.OpensearchContainer, "opensearchproject/opensearch", "2")
-            .WithHttpEndpoint(port: Constants.OpensearchPort, targetPort: Constants.OpensearchPort)
             .WithEnvironment("DISABLE_INSTALL_DEMO_CONFIG", "true")
             .WithEnvironment("plugins.security.disabled", "true")
             .WithEnvironment("discovery.type", "single-node")
             .WithEntrypoint("/bin/bash")
             .WithArgs("-c", "opensearch-plugin install ingest-attachment --batch && /usr/share/opensearch/opensearch-docker-entrypoint.sh");
 
-        builder.AddContainer("opensearch-dashboard", "opensearchproject/opensearch-dashboards", "2")
-            .WithHttpEndpoint(targetPort: 5601)
-            .WithEnvironment("OPENSEARCH_HOSTS", $"http://{Constants.OpensearchContainer}:{Constants.OpensearchPort.ToString()}")
-            .WithEnvironment("DISABLE_SECURITY_DASHBOARDS_PLUGIN", "true");
+        if (fixedPort)
+        {
+            OpensearchResource = OpensearchResource
+                .WithHttpEndpoint(port: Constants.OpensearchPort, targetPort: Constants.OpensearchPort, name: "http");
+        }
+        else
+        {
+            OpensearchResource = OpensearchResource
+                .WithHttpEndpoint(targetPort: Constants.OpensearchPort, name: "http");
+        }
+
+        if (withDataVolume)
+        {
+            OpensearchResource = OpensearchResource
+                .WithVolume("docspace-opensearch-data", "/usr/share/opensearch/data");
+        }
+
+        if (withDashboard)
+        {
+            builder.AddContainer("opensearch-dashboard", "opensearchproject/opensearch-dashboards", "2")
+                .WithHttpEndpoint(targetPort: 5601)
+                .WithEnvironment("OPENSEARCH_HOSTS", $"http://{Constants.OpensearchContainer}:{Constants.OpensearchPort.ToString()}")
+                .WithEnvironment("DISABLE_SECURITY_DASHBOARDS_PLUGIN", "true");
+        }
 
         return this;
     }
@@ -228,7 +281,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         return this;
     }
 
-    public void AddApiTest()
+    public ConnectionStringManager AddApiTest()
     {
         var docspaceOwnerEmail = builder.Configuration["OWNER_EMAIL"] ?? "test@example.com";
         var coreMachineKey = builder.Configuration["core:machinekey"] ?? "test-machine-key";
@@ -238,7 +291,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         var currentBugId = builder.Configuration["BUG_ID"];
 
         ApiTestResource = builder
-            .AddJavaScriptApp("playwright-tests", playwrightTestsPath, "test")
+            .AddJavaScriptApp("tests-api", playwrightTestsPath, "test")
             .WithNpm()
             .WithEnvironment("MACHINEKEY", coreMachineKey)
             .WithEnvironment("PKEY", "PKEY")
@@ -250,6 +303,33 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         {
             ApiTestResource.WithArgs("--", "--grep", $"BUG {currentBugId}");
         }
+
+        ApiTestResource.WithCommand(
+            name: "run-ui",
+            displayName: "Run UI",
+            executeCommand: async context =>
+            {
+                var commandService = context.ServiceProvider
+                    .GetRequiredService<ResourceCommandService>();
+
+                ApiTestResource
+                    .WithHttpEndpoint(Constants.PlaywrightUiPort, Constants.PlaywrightUiPort, "playwright-ui", isProxied: false)
+                    .WithArgs("--", "--ui", "--ui-host", "0.0.0.0", "--ui-port", Constants.PlaywrightUiPort.ToString());
+
+                await commandService.ExecuteCommandAsync(
+                    resourceId: context.ResourceName,
+                    commandName: "resource-start",
+                    cancellationToken: context.CancellationToken);
+
+                return CommandResults.Success();
+            },
+            commandOptions: new CommandOptions
+            {
+                IconName = "TestBeaker",
+                IconVariant = IconVariant.Filled,
+                Description = "Restart tests with a specific BUG ID filter"
+            }
+        );
 
         ApiTestResource.WithCommand(
             name: "run-with-bug-id",
@@ -282,7 +362,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
 
                 await commandService.ExecuteCommandAsync(
                     resourceId: context.ResourceName,
-                    commandName: "resource-stop",
+                    commandName: "stop",
                     cancellationToken: context.CancellationToken);
 
                 await Task.Delay(500, context.CancellationToken);
@@ -320,7 +400,41 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             { "auth:allowskip:default", true.ToString() },
             { "auth:allowskip:registerportal", true.ToString() }
         };
+
+        return this;
     }
+
+    public ConnectionStringManager AddE2ETest()
+    {
+        var docspaceOwnerEmail = builder.Configuration["OWNER_EMAIL"] ?? "test@example.com";
+        var coreMachineKey = builder.Configuration["core:machinekey"] ?? "test-machine-key";
+
+        var playwrightTestsPath = Path.Combine(basePath, "tests", "e2e-tests");
+
+        E2ETestResource = builder
+            .AddJavaScriptApp("tests-e2e", playwrightTestsPath, "testUI")
+            .WithNpm()
+            .WithEnvironment("MACHINEKEY", coreMachineKey)
+            .WithEnvironment("PKEY", "PKEY")
+            .WithEnvironment("LOCAL_PORTAL_DOMAIN", $"localhost:{Constants.AppHostPort.ToString()}")
+            .WithEnvironment("DOCSPACE_OWNER_EMAIL", docspaceOwnerEmail)
+            .WithArgs("--", "--ui", "--ui-host", "0.0.0.0", "--ui-port", Constants.E2ETestsUiPort.ToString())
+            .WithExplicitStart();
+
+        _parameters = new Dictionary<string, string>
+        {
+            { "web:autotest:secret-email", docspaceOwnerEmail },
+            { "core:machinekey", coreMachineKey },
+            { "auth:allowskip:default", true.ToString() },
+            { "auth:allowskip:registerportal", true.ToString() }
+        };
+
+        return this;
+    }
+
+    public string GetOtelCollectorEndpoint(bool isDocker) => isDocker
+        ? $"http://{Constants.OtelCollectorContainer}:{Constants.OtelCollectorGrpcPort}"
+        : $"http://localhost:{Constants.OtelCollectorGrpcPort}";
 
     public void AddWaitFor<T>(
         IResourceBuilder<T> resourceBuilder,
@@ -360,6 +474,11 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         if (includeMailPit && MailResource != null)
         {
             resourceBuilder.WaitFor(MailResource);
+        }
+
+        if (OtelCollectorResource != null)
+        {
+            resourceBuilder.WaitFor(OtelCollectorResource);
         }
 
         ApiTestResource?.WaitFor((IResourceBuilder<IResource>)resourceBuilder);
@@ -465,4 +584,57 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
     }
 
     public static string? SubstituteLocalhost(string? host) => host?.Replace(KnownHostNames.Localhost, KnownHostNames.DockerDesktopHostBridge);
+}
+
+internal static class RedisResourceBuilderExtensions
+{
+    public static IResourceBuilder<RedisResource> WithClearCommand(
+        this IResourceBuilder<RedisResource> builder)
+    {
+        var commandOptions = new CommandOptions
+        {
+            UpdateState = OnUpdateResourceState,
+            IconName = "AnimalRabbitOff",
+            IconVariant = IconVariant.Filled
+        };
+
+        builder.WithCommand(
+            name: "clear-cache",
+            displayName: "Clear Cache",
+            executeCommand: context => OnRunClearCacheCommandAsync(builder, context),
+            commandOptions: commandOptions);
+
+        return builder;
+    }
+
+    private static async Task<ExecuteCommandResult> OnRunClearCacheCommandAsync(
+        IResourceBuilder<RedisResource> builder,
+        ExecuteCommandContext context)
+    {
+        var connectionString = await builder.Resource.GetConnectionStringAsync() ??
+                               throw new InvalidOperationException(
+                                   $"Unable to get the '{context.ResourceName}' connection string.");
+
+        await using var connection = await ConnectionMultiplexer.ConnectAsync(connectionString);
+        var database = connection.GetDatabase();
+        await database.ExecuteAsync("FLUSHALL");
+
+        return CommandResults.Success();
+    }
+
+    private static ResourceCommandState OnUpdateResourceState(
+        UpdateCommandStateContext context)
+    {
+        var logger = context.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Updating resource state: {ResourceSnapshot}",
+                context.ResourceSnapshot);
+        }
+
+        return context.ResourceSnapshot.HealthStatus is HealthStatus.Healthy
+            ? ResourceCommandState.Enabled
+            : ResourceCommandState.Disabled;
+    }
 }
