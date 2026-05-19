@@ -37,15 +37,18 @@ internal static class AttachmentPipeline
 {
     public const string Name = "attachments";
 
-    public static void Register(OpenSearchClient client)
+    extension(OpenSearchClient client)
     {
-        client.Ingest.PutPipeline(Name, p =>
-            p.Processors(pp =>
-                pp.Attachment<Attachment>(a =>
-                        a.Field("document.data")
-                            .TargetField("document.attachment")
-                            .IndexedCharacters(-1))
-                    .Remove<Document>(x =>
-                        x.Field("document.data"))));
+        public void AddAttachmentPipeline()
+        {
+            client.Ingest.PutPipeline(Name, p =>
+                p.Processors(pp =>
+                    pp.Attachment<Attachment>(a =>
+                            a.Field("document.data")
+                                .TargetField("document.attachment")
+                                .IndexedCharacters(-1))
+                        .Remove<Document>(x =>
+                            x.Field("document.data"))));
+        }
     }
 }

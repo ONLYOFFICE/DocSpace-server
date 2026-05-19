@@ -62,21 +62,24 @@ internal static class HybridSearchPipeline
         ]
     };
 
-    public static void Register(OpenSearchClient client)
+    extension(OpenSearchClient client)
     {
-        var response = ((IOpenSearchClient)client).LowLevel.DoRequest<VoidResponse>(
-            HttpMethod.PUT,
-            $"/_search/pipeline/{Uri.EscapeDataString(Name)}",
-            PostData.String(JsonSerializer.Serialize(_body)));
-
-        if (response.ApiCall is { Success: true })
+        public void AddHybridSearchPipeline()
         {
-            return;
-        }
+            var response = ((IOpenSearchClient)client).LowLevel.DoRequest<VoidResponse>(
+                HttpMethod.PUT,
+                $"/_search/pipeline/{Uri.EscapeDataString(Name)}",
+                PostData.String(JsonSerializer.Serialize(_body)));
 
-        throw new InvalidOperationException(
-            $"Failed to register OpenSearch search pipeline '{Name}': {response.ApiCall?.DebugInformation}",
-            response.ApiCall?.OriginalException);
+            if (response.ApiCall is { Success: true })
+            {
+                return;
+            }
+
+            throw new InvalidOperationException(
+                $"Failed to register OpenSearch search pipeline '{Name}': {response.ApiCall?.DebugInformation}",
+                response.ApiCall?.OriginalException);
+        }
     }
 
     private sealed class PipelineBody
