@@ -1298,7 +1298,7 @@ public class PaymentController(
             throw new ArgumentException("Insufficient balance");
         }
 
-        var quotaList = await tenantManager.GetTenantQuotasAsync(true, true);
+        var quotaList = await tenantManager.GetTenantQuotasAsync(false, true);
         var aiToolsQuota = quotaList.FirstOrDefault(x => x.TenantId == (int)TenantWalletService.AITools);
         if (aiToolsQuota == null)
         {
@@ -1513,7 +1513,7 @@ public class PaymentController(
 
     private async Task<TenantWalletService> CheckWalletServiceName(string serviceName)
     {
-        var quotaList = await tenantManager.GetTenantQuotasAsync(true, true);
+        var quotaList = await tenantManager.GetTenantQuotasAsync(false, true);
 
         var selectedQuota = quotaList.FirstOrDefault(x =>
             x.ServiceName.Equals(serviceName, StringComparison.InvariantCultureIgnoreCase));
