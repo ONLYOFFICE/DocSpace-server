@@ -1761,6 +1761,11 @@ public class FileSecurity(
                     return false;
                 }
 
+                if (room is {SettingsPrivate: true} && folder is {IsRoom: false} && action is FilesSecurityActions.EditAccess)
+                {
+                    return false;
+                }
+
                 if (await HasFullAccessAsync(e, userId, isGuest, isRoom, isUser))
                 {
                     return true;
@@ -3378,6 +3383,11 @@ public class FileSecurity(
             }
         }
 
+        if (folder is { SettingsPrivate: true })
+        {
+            return result;
+        }
+
         foreach (var subjectType in Enum.GetValues<SubjectType>())
         {
             if (!parentRoomType.HasValue ||
@@ -3446,6 +3456,11 @@ public class FileSecurity(
                 }
             }
             linkSettings = _linkCountRoomFileSettingsAccesses;
+        }
+
+        if (room is { SettingsPrivate: true })
+        {
+            return 0;
         }
 
         if (parentRoomType.HasValue && linkSettings.TryGetValue(parentRoomType.Value, out var access) && access.TryGetValue(subjectType, out var i))
