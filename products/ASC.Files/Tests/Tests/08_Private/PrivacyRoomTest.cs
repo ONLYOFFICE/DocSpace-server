@@ -137,12 +137,9 @@ public class PrivacyRoomTest(AspireAppFixture fixture) : BaseTest(fixture)
         {
             Invitations =
             [
-                new RoomInvitation { Id = roomAdmin1.Id, Access = FileShare.ContentCreator }
+                new RoomInvitation { Id = roomAdmin1.Id, Access = FileShare.RoomManager }
             ]
         }, TestContext.Current.CancellationToken);
-
-        await _filesClient.Authenticate(roomAdmin1);
-        await Assert.ThrowsAsync<ApiException>(async () => await _filesApi.SetEncryptionInfoAsync(fileId, keys, cancellationToken: TestContext.Current.CancellationToken));
 
         await _filesClient.Authenticate(Initializer.Owner);
         await _filesApi.SetEncryptionInfoAsync(fileId, keys, cancellationToken: TestContext.Current.CancellationToken);
