@@ -4783,11 +4783,6 @@ public class FileStorageService //: IFileStorageService
 
     public async Task<List<EncryptionKeyDto>> GetEncryptionAccessAsync<T>(T fileId)
     {
-        if (!await PrivacyRoomSettings.GetEnabledAsync(settingsManager))
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
-        }
-
         var fileKeyPair = await encryptionKeyPairHelper.GetKeyPairAsync(fileId);
 
         return [.. fileKeyPair];
