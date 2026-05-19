@@ -4810,6 +4810,11 @@ public class FileStorageService //: IFileStorageService
         }
 
         var parentRoom = await DocSpaceHelper.GetParentRoom(file, daoFactory.GetCacheFolderDao<T>());
+        if (parentRoom is { SettingsPrivate: false})
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
         if(!await fileSecurity.CanCreateAsync(parentRoom))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);

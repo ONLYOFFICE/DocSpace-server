@@ -163,6 +163,7 @@ public class EncryptionKeyPairDtoHelper(
         });
 
         var fileKeysPair = (await Task.WhenAll(tasks))
+            .Where(keyPair => keyPair != null)
             .SelectMany(keyPair => keyPair);
 
         return fileKeysPair.ToList();
@@ -209,11 +210,12 @@ public class EncryptionKeyPairDtoHelper(
         });
 
         var fileKeysPair = (await Task.WhenAll(tasks))
+            .Where(keyPair => keyPair != null)
             .SelectMany(keyPair => keyPair);
 
         return fileKeysPair.ToList();
     }
-    
+
     public async Task<List<EncryptionKeyDto>> DeleteAsync(Guid id)
     {
         var currentSettings = await GetKeyPairAsync();
