@@ -28,7 +28,7 @@
         </if>
     </springProfile>
 
-    <springProfile name="default,development,dev,d">
+    <springProfile name="default,development,dev,d,minified">
         <condition class="com.asc.common.autoconfigurations.condition.PropertyIsDefinedCondition">
             <key>LOG_FILE_PATH</key>
         </condition>

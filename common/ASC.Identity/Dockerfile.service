@@ -1,7 +1,7 @@
 ARG BASE_IMAGE
 
 # Stage 1: Build the application
-FROM maven:3.9.12-eclipse-temurin-21 AS builder
+FROM maven:3.9.12-eclipse-temurin-25 AS builder
 WORKDIR /app
 
 # Copy the root pom.xml and all necessary module pom.xml files
@@ -51,7 +51,7 @@ ARG MODULE
 RUN mvn clean package -DskipTests -Dfmt.skip=true -T1 -pl ${MODULE} -am -B
 
 # Stage 2: Extract application layer only
-FROM eclipse-temurin:21-jdk-alpine AS extractor
+FROM eclipse-temurin:25-jdk-alpine AS extractor
 ARG MODULE
 WORKDIR /extract
 
