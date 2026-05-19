@@ -994,6 +994,16 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             ServiceName = "backup",
                             Visible = true,
                             Wallet = true
+                        },
+                        new
+                        {
+                            TenantId = -13,
+                            Features = "aitools",
+                            Name = "aitools",
+                            Price = 1m,
+                            ServiceName = "ai-tools",
+                            Visible = true,
+                            Wallet = true
                         });
                 });
 
