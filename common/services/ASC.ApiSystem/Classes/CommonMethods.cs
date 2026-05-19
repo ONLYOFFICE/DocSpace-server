@@ -1,30 +1,37 @@
-// (c) Copyright Ascensio System SIA 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.ApiSystem.Controllers;
+namespace ASC.ApiSystem.Classes;
 
 [Scope]
 public class CommonMethods(
@@ -41,34 +48,35 @@ public class CommonMethods(
     TenantManager tenantManager,
     IHttpClientFactory clientFactory)
 {
-    public object ToTenantWrapper(Tenant t, QuotaUsageDto quotaUsage = null, TenantOwnerDto owner = null, WizardSettings wizardSettings = null)
+    public async Task<TenantResponseDto> ToTenantResponseDto(Tenant t, QuotaUsageDto quotaUsage = null, TenantOwnerDto owner = null, WizardSettings wizardSettings = null)
     {
-        var tenantQuotaSettings = hostedSolution.GetTenantQuotaSettings(t.Id).Result;
-        var tariffMaxTotalSize = hostedSolution.GetTenantQuotaAsync(t.Id).Result.MaxTotalSize;
+        var tenantQuotaSettings = await hostedSolution.GetTenantQuotaSettings(t.Id);
+        var tariffMaxTotalSize = (await hostedSolution.GetTenantQuotaAsync(t.Id)).MaxTotalSize;
         var timeZone = TimeZoneConverter.GetTimeZone(t.TimeZone);
-        return new
+
+        return new TenantResponseDto
         {
-            created = t.CreationDateTime,
-            domain = t.GetTenantDomain(coreSettings, false),
-            mappedDomain = t.MappedDomain,
-            hostedRegion = t.HostedRegion,
-            industry = t.Industry,
-            language = t.Language,
-            name = t.Name == "" ? Resource.PortalName : t.Name,
-            ownerId = t.OwnerId,
-            paymentId = t.PaymentId,
-            partnerId = t.PartnerId,
-            portalName = t.Alias,
-            status = t.Status.ToStringFast(),
-            tenantId = t.Id,
-            timeZoneId = TimeZoneConverter.GetIanaTimeZoneId(timeZone),
-            timeZoneName = timeZone.DisplayName,
-            quotaUsage,
-            customQuota = tenantQuotaSettings.EnableQuota && tenantQuotaSettings.Quota <= tariffMaxTotalSize ?
-                    tenantQuotaSettings.Quota :
-                    tariffMaxTotalSize == long.MaxValue ? -1 : tariffMaxTotalSize,
-            owner,
-            wizardSettings
+            Created = t.CreationDateTime,
+            Domain = t.GetTenantDomain(coreSettings, false),
+            MappedDomain = t.MappedDomain,
+            HostedRegion = t.HostedRegion,
+            Industry = t.Industry,
+            Language = t.Language,
+            Name = t.Name == "" ? Resource.PortalName : t.Name,
+            OwnerId = t.OwnerId,
+            PaymentId = t.PaymentId,
+            PartnerId = t.PartnerId,
+            PortalName = t.Alias,
+            Status = t.Status.ToStringFast(),
+            TenantId = t.Id,
+            TimeZoneId = TimeZoneConverter.GetIanaTimeZoneId(timeZone),
+            TimeZoneName = timeZone.DisplayName,
+            QuotaUsage = quotaUsage,
+            CustomQuota = tenantQuotaSettings.EnableQuota && tenantQuotaSettings.Quota <= tariffMaxTotalSize
+                ? tenantQuotaSettings.Quota
+                : tariffMaxTotalSize == long.MaxValue ? -1 : tariffMaxTotalSize,
+            Owner = owner,
+            WizardSettings = wizardSettings
         };
     }
 
@@ -93,7 +101,7 @@ public class CommonMethods(
         var validationKey = emailValidationKeyProvider.GetEmailKey(tenant.OwnerId.ToString() + confirmType, tenant.Id);
         var domain = tenant.GetTenantDomain(coreSettings);
         var port = httpContextAccessor.HttpContext?.Request.Host.Port ?? 80;
-        
+
         var url = string.Format("{0}{1}{2}{3}{4}?userid={5}&key={6}",
                             requestUriScheme,
                             Uri.SchemeDelimiter,
@@ -105,7 +113,7 @@ public class CommonMethods(
 
         if (skipAndReturnUrl)
         {
-            log.LogDebug($"SendMethod {apiMethod} skiped");
+            log.DebugSendMethodSkipped(apiMethod);
             return url;
         }
 
@@ -120,7 +128,7 @@ public class CommonMethods(
 #pragma warning restore CA2000
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
 
-            log.LogDebug($"SendMethod {apiMethod} result = {response.StatusCode}");
+            log.DebugSendMethodResult(apiMethod, response.StatusCode);
 
             if (response.StatusCode != HttpStatusCode.OK)
             {
@@ -130,7 +138,7 @@ public class CommonMethods(
         }
         catch (Exception ex)
         {
-            log.LogError(ex, $"SendMethod {apiMethod} error");
+            log.ErrorSendMethod(apiMethod, ex);
             return url;
         }
 
@@ -232,14 +240,14 @@ public class CommonMethods(
         return regex.IsMatch(email);
     }
 
-    public bool CheckMuchRegistration(TenantModel model, string clientIP, Stopwatch sw)
+    public bool CheckMuchRegistration(TenantModel model, string clientIP)
     {
         if (IsTestEmail(model.Email))
         {
             return false;
         }
 
-        log.LogDebug("clientIP = {0}", clientIP);
+        log.DebugClientIp(clientIP);
 
         var cacheKey = "ip_" + clientIP;
 
@@ -273,8 +281,7 @@ public class CommonMethods(
             return false;
         }
 
-        log.LogDebug("PortalName = {PortalName}; Too much requests from ip: {Ip}", model.PortalName, clientIP);
-        sw.Stop();
+        log.DebugTooMuchRequests(model.PortalName, clientIP);
 
         return true;
     }
@@ -360,16 +367,16 @@ public class CommonMethods(
                 return true;
             }
 
-            log.LogDebug("Recaptcha error: {0}", resp);
+            log.DebugRecaptchaResponseError(resp);
 
             if (recaptchData.ErrorCodes is { Count: > 0 })
             {
-                log.LogDebug("Recaptcha api returns errors: {0}", resp);
+                log.DebugRecaptchaApiErrors(resp);
             }
         }
         catch (Exception ex)
         {
-            log.LogError(ex, "ValidateRecaptcha");
+            log.ErrorValidateRecaptcha(ex);
         }
         return false;
     }

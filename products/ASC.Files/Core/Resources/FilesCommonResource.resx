@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -589,5 +589,11 @@ Highest compatibility with docx, xlsx, pptx.</value>
   </data>
   <data name="ErrorMessage_AiServicesDisabled" xml:space="preserve">
     <value>AI services are disabled for the current portal</value>
+  </data>
+  <data name="ErrorMessage_ExternalDbNotIndexed" xml:space="preserve">
+    <value>The database table will be created after the first form submission. There is no data yet to generate its structure.</value>
+  </data>
+  <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
+    <value>Failed to synchronize form data to external database.</value>
   </data>
 </root>

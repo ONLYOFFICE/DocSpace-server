@@ -8586,7 +8586,7 @@
       },
       "GroupRequestDto": {
         "required": [
-          "groupManager"
+          "groupName"
         ],
         "type": "object",
         "properties": {
@@ -8611,7 +8611,7 @@
           },
           "groupName": {
             "maxLength": 128,
-            "minLength": 0,
+            "minLength": 1,
             "type": "string",
             "description": "The group name.",
             "nullable": true,

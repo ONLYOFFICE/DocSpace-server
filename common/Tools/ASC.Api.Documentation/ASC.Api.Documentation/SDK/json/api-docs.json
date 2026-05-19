@@ -7149,6 +7149,9 @@
           "403": {
             "description": "You do not have enough permissions to view the form roles"
           },
+          "404": {
+            "description": "The required file was not found"
+          },
           "401": {
             "description": "Unauthorized"
           }
@@ -8907,6 +8910,15 @@
               "$ref": "#/components/schemas/ApplyFilterOption"
             },
             "example": 1
+          },
+          {
+            "name": "withSubFolders",
+            "in": "query",
+            "description": "Specifies whether to include files from subfolders in the results.",
+            "schema": {
+              "type": "boolean",
+              "example": true
+            }
           },
           {
             "name": "extension",
@@ -16440,6 +16452,150 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": []
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": []
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": []
+          }
+        ]
+      }
+    },
+    "/api/2.0/files/rooms/{id}/externaldbsync": {
+      "post": {
+        "tags": [
+          "Rooms"
+        ],
+        "summary": "Start external DB sync",
+        "description": "Triggers external DB synchronization for all form templates in the specified filling forms room.",
+        "operationId": "startExternalDbSync",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The room ID.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Synchronization task information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExternalDbSyncTaskWrapper"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "External DB is not configured"
+          },
+          "403": {
+            "description": "You do not have enough permissions to perform this action"
+          },
+          "404": {
+            "description": "Room not found"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": []
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": []
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": []
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "Rooms"
+        ],
+        "summary": "Get external DB sync status",
+        "description": "Returns the status of the external DB synchronization task for the specified filling forms room.",
+        "operationId": "getExternalDbSyncStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The room ID.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Synchronization task information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExternalDbSyncTaskWrapper"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Room not found"
           },
           "401": {
             "description": "Unauthorized"
@@ -28653,6 +28809,9 @@
               }
             }
           },
+          "400": {
+            "description": "Invalid request parameters"
+          },
           "403": {
             "description": "No permissions to perform this action"
           },
@@ -28719,8 +28878,14 @@
               }
             }
           },
+          "400": {
+            "description": "Invalid request parameters"
+          },
           "403": {
             "description": "No permissions to perform this action"
+          },
+          "404": {
+            "description": "Customer could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -28785,8 +28950,17 @@
               }
             }
           },
+          "400": {
+            "description": "Invalid request parameters"
+          },
+          "402": {
+            "description": "Tariff is not paid"
+          },
           "403": {
             "description": "No permissions to perform this action"
+          },
+          "404": {
+            "description": "Customer could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -28851,8 +29025,14 @@
               }
             }
           },
+          "400": {
+            "description": "Invalid request parameters"
+          },
           "403": {
             "description": "No permissions to perform this action"
+          },
+          "404": {
+            "description": "Customer could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -29017,6 +29197,9 @@
               }
             }
           },
+          "403": {
+            "description": "No permissions to perform this action"
+          },
           "401": {
             "description": "Unauthorized"
           }
@@ -29070,6 +29253,9 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "No permissions to perform this action"
           },
           "401": {
             "description": "Unauthorized"
@@ -29136,6 +29322,9 @@
               }
             }
           },
+          "403": {
+            "description": "No permissions to perform this action"
+          },
           "401": {
             "description": "Unauthorized"
           }
@@ -29189,6 +29378,9 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "No permissions to perform this action"
           },
           "401": {
             "description": "Unauthorized"
@@ -29255,6 +29447,12 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "No permissions to perform this action"
+          },
+          "404": {
+            "description": "Service could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -29382,6 +29580,9 @@
           },
           "400": {
             "description": "Incorrect email or message text is empty"
+          },
+          "403": {
+            "description": "No permissions to perform this action"
           },
           "429": {
             "description": "Request limit is exceeded"
@@ -29585,8 +29786,14 @@
               }
             }
           },
+          "400": {
+            "description": "Invalid request parameters"
+          },
           "403": {
             "description": "No permissions to perform this action"
+          },
+          "404": {
+            "description": "Customer could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -29691,24 +29898,15 @@
         ]
       }
     },
-    "/api/2.0/portal/payment/customer/servicequota": {
+    "/api/2.0/portal/payment/customer/aibalance": {
       "get": {
         "tags": [
           "Portal / Payment"
         ],
-        "summary": "Get the service quota",
-        "description": "Returns the service quota from the accounting service.",
-        "operationId": "getCustomerServiceQuota",
+        "summary": "Get the customer AI balance",
+        "description": "Returns the AI quota balance of a customer from the accounting service.",
+        "operationId": "getCustomerAiBalance",
         "parameters": [
-          {
-            "name": "serviceName",
-            "in": "query",
-            "description": "The service name.",
-            "schema": {
-              "type": "string",
-              "example": "backup"
-            }
-          },
           {
             "name": "refresh",
             "in": "query",
@@ -29721,7 +29919,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The service quota",
+            "description": "The customer AI balance",
             "content": {
               "application/json": {
                 "schema": {
@@ -29732,9 +29930,6 @@
           },
           "403": {
             "description": "No permissions to perform this action"
-          },
-          "404": {
-            "description": "Service could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -29810,15 +30005,6 @@
             }
           },
           {
-            "name": "WriteOffServiceQuota",
-            "in": "query",
-            "description": "Write-off of the quota for the service",
-            "schema": {
-              "type": "boolean",
-              "example": false
-            }
-          },
-          {
             "name": "StartDate",
             "in": "query",
             "description": "The report start date.",
@@ -29844,7 +30030,7 @@
             "description": "The participant name.",
             "schema": {
               "type": "string",
-              "example": "ACME Corp"
+              "example": "My Own Corporation"
             }
           },
           {
@@ -29866,9 +30052,9 @@
             }
           },
           {
-            "name": "Types",
+            "name": "Type",
             "in": "query",
-            "description": "List of operation types to filter by.",
+            "description": "The operation type to filter by.",
             "schema": {
               "$ref": "#/components/schemas/OperationType"
             },
@@ -29877,7 +30063,7 @@
           {
             "name": "Status",
             "in": "query",
-            "description": "List of operation status to filter by.",
+            "description": "The operation status to filter by.",
             "schema": {
               "$ref": "#/components/schemas/OperationStatus"
             },
@@ -29973,7 +30159,7 @@
         },
         "responses": {
           "200": {
-            "description": "Ok",
+            "description": "Operation execution status",
             "content": {
               "application/json": {
                 "schema": {
@@ -29986,7 +30172,7 @@
             "description": "No permissions to perform this action"
           },
           "404": {
-            "description": "Service could not be found"
+            "description": "Customer or service could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -30031,7 +30217,7 @@
         "operationId": "getCustomerOperationsReport",
         "responses": {
           "200": {
-            "description": "Ok",
+            "description": "Operation execution status",
             "content": {
               "application/json": {
                 "schema": {
@@ -30039,6 +30225,12 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "No permissions to perform this action"
+          },
+          "404": {
+            "description": "Customer could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -30084,6 +30276,12 @@
         "responses": {
           "200": {
             "description": "Ok"
+          },
+          "403": {
+            "description": "No permissions to perform this action"
+          },
+          "404": {
+            "description": "Customer could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -30205,6 +30403,9 @@
           },
           "403": {
             "description": "No permissions to perform this action"
+          },
+          "404": {
+            "description": "Customer could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -30329,6 +30530,9 @@
           "403": {
             "description": "No permissions to perform this action"
           },
+          "404": {
+            "description": "Customer could not be found"
+          },
           "401": {
             "description": "Unauthorized"
           }
@@ -30364,26 +30568,26 @@
         ]
       }
     },
-    "/api/2.0/portal/payment/buywalletservice": {
+    "/api/2.0/portal/payment/creditaibalance": {
       "post": {
         "tags": [
           "Portal / Payment"
         ],
-        "summary": "Purchases a wallet service with the specified quantity.",
-        "description": "This method processes a payment for a wallet service using the configured payment method.\r\nRequires the tariff service to be configured and a valid payment method to be set for the customer.\r\nRate limiting is applied according to the payments API policy.",
-        "operationId": "buyWalletService",
+        "summary": "Credit AI balance",
+        "description": "Credits AI quota to the customer AI sub-account from their main balance.\r\nRequires the customer to have a configured payment method.",
+        "operationId": "creditAiBalance",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/BuyWalletServiceRequestDto"
+                "$ref": "#/components/schemas/CreditAiBalanceRequestDto"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "The service payment information",
+            "description": "The AI credit operation result",
             "content": {
               "application/json": {
                 "schema": {
@@ -30396,7 +30600,7 @@
             "description": "No permissions to perform this action"
           },
           "404": {
-            "description": "Service could not be found"
+            "description": "Customer could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -30575,6 +30779,9 @@
           },
           "403": {
             "description": "No permissions to perform this action"
+          },
+          "404": {
+            "description": "Customer could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -31229,6 +31436,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "The user could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -40762,56 +40972,15 @@
           "Settings / Webhooks"
         ],
         "summary": "Get webhook triggers",
-        "description": "Returns a list of triggers for a webhook.",
+        "description": "Returns a list of triggers for a webhook with their availability for the current user.",
         "operationId": "getWebhookTriggers",
         "responses": {
           "200": {
-            "description": "List of triggers for a webhook",
+            "description": "List of triggers with availability for the current user",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "response": {
-                      "type": "object",
-                      "additionalProperties": {
-                        "type": "integer",
-                        "format": "int64"
-                      }
-                    },
-                    "count": {
-                      "type": "integer",
-                      "description": "The total number of items in the response",
-                      "format": "int32"
-                    },
-                    "links": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "href": {
-                            "type": "string",
-                            "description": "URL of the link"
-                          },
-                          "action": {
-                            "type": "string",
-                            "description": "Action associated with the link"
-                          }
-                        }
-                      },
-                      "description": "List of links related to the response"
-                    },
-                    "status": {
-                      "type": "integer",
-                      "description": "HTTP status code of the response",
-                      "format": "int32"
-                    },
-                    "statusCode": {
-                      "type": "integer",
-                      "description": "HTTP status code of the response (duplicate of status)",
-                      "format": "int32"
-                    }
-                  }
+                  "$ref": "#/components/schemas/WebhookTriggerArrayWrapper"
                 }
               }
             }
@@ -42815,6 +42984,9 @@
                   },
                   "UpdateXlsx": {
                     "type": "boolean"
+                  },
+                  "AnalyzeResponses": {
+                    "type": "boolean"
                   }
                 },
                 "additionalProperties": false,
@@ -43365,12 +43537,21 @@
               "saveFormAsXLSX": {
                 "type": "boolean",
                 "description": "Specifies whether to save form data as XLSX file.",
-                "nullable": true
+                "nullable": true,
+                "example": false
               },
               "sendFormToExternalDB": {
                 "type": "boolean",
                 "description": "Specifies whether to send form data to external database.",
-                "nullable": true
+                "nullable": true,
+                "example": false
+              },
+              "originalFormId": {
+                "type": "integer",
+                "description": "The original form ID that corresponds to this FormFillingFolderDone folder.",
+                "format": "int32",
+                "nullable": true,
+                "example": 42
               }
             }
           }
@@ -45051,12 +45232,14 @@
           "sendFormToExternalDB": {
             "type": "boolean",
             "description": "Specifies whether to send form data to external database.",
-            "nullable": true
+            "nullable": true,
+            "example": false
           },
           "saveFormAsXLSX": {
             "type": "boolean",
             "description": "Specifies whether to save form data as XLSX file.",
-            "nullable": true
+            "nullable": true,
+            "example": false
           }
         },
         "additionalProperties": false,
@@ -47756,6 +47939,18 @@
           },
           "chatSettings": {
             "$ref": "#/components/schemas/ChatSettings"
+          },
+          "sendFormToExternalDB": {
+            "type": "boolean",
+            "description": "Specifies whether to send form data to external database.",
+            "nullable": true,
+            "example": false
+          },
+          "saveFormAsXLSX": {
+            "type": "boolean",
+            "description": "Specifies whether to save form data as XLSX file.",
+            "nullable": true,
+            "example": false
           }
         },
         "additionalProperties": false,
@@ -47787,7 +47982,7 @@
         "properties": {
           "title": {
             "maxLength": 165,
-            "minLength": 0,
+            "minLength": 1,
             "type": "string",
             "description": "The file title for text or HTML file.",
             "nullable": true,
@@ -49129,7 +49324,8 @@
               "$ref": "#/components/schemas/RecentConfig"
             },
             "description": "The recent configuration of the editor.",
-            "nullable": true
+            "nullable": true,
+            "example": []
           },
           "templates": {
             "type": "array",
@@ -49137,7 +49333,8 @@
               "$ref": "#/components/schemas/TemplatesConfig"
             },
             "description": "The templates of the editor configuration.",
-            "nullable": true
+            "nullable": true,
+            "example": []
           },
           "user": {
             "$ref": "#/components/schemas/UserConfig"
@@ -49510,6 +49707,132 @@
         "additionalProperties": false,
         "description": "The encryption keys of the editor configuration."
       },
+      "ExternalDbSyncFormResultDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "The form file ID.",
+            "format": "int32",
+            "example": 42
+          },
+          "title": {
+            "type": "string",
+            "description": "The form file title.",
+            "nullable": true,
+            "example": "Application.pdf"
+          },
+          "success": {
+            "type": "boolean",
+            "description": "Specifies whether the synchronization succeeded for this form.",
+            "example": true
+          },
+          "error": {
+            "type": "string",
+            "description": "The error message if the synchronization failed for this form.",
+            "nullable": true,
+            "example": "Connection refused"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The result of an external DB synchronization for a single form."
+      },
+      "ExternalDbSyncTaskDto": {
+        "required": [
+          "forms",
+          "id",
+          "isCompleted",
+          "percentage",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The task ID.",
+            "nullable": true,
+            "example": "ExternalDbSyncTask_1_42"
+          },
+          "error": {
+            "type": "string",
+            "description": "The error message if the synchronization failed.",
+            "nullable": true,
+            "example": "Connection refused"
+          },
+          "percentage": {
+            "type": "integer",
+            "description": "The progress percentage of the synchronization.",
+            "format": "int32",
+            "example": 75
+          },
+          "isCompleted": {
+            "type": "boolean",
+            "description": "Specifies whether the synchronization is completed or not.",
+            "example": false
+          },
+          "status": {
+            "$ref": "#/components/schemas/DistributedTaskStatus"
+          },
+          "forms": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExternalDbSyncFormResultDto"
+            },
+            "description": "The synchronization results for all original forms in the room.",
+            "nullable": true,
+            "example": [
+              {
+                "id": 42,
+                "title": "Application.pdf",
+                "success": true,
+                "error": null
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "description": "The external DB synchronization task parameters."
+      },
+      "ExternalDbSyncTaskWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/ExternalDbSyncTaskDto"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
       "ExternalShareDto": {
         "required": [
           "isAuthenticated",
@@ -49840,6 +50163,13 @@
                 "nullable": true,
                 "example": "In Process"
               },
+              "resultsFolderId": {
+                "type": "integer",
+                "description": "The ID of the FormFillingFolderDone folder that corresponds to this original form.",
+                "format": "int32",
+                "nullable": true,
+                "example": 55
+              },
               "draftLocation": {
                 "$ref": "#/components/schemas/DraftLocationInteger"
               },
@@ -49894,6 +50224,12 @@
               },
               "vectorizationStatus": {
                 "$ref": "#/components/schemas/VectorizationStatus"
+              },
+              "externalDbTableName": {
+                "type": "string",
+                "description": "The name of the table in the external database that corresponds to this form.",
+                "nullable": true,
+                "example": "form_123_v1"
               },
               "dimensions": {
                 "$ref": "#/components/schemas/Size"
@@ -50201,6 +50537,9 @@
                     "type": "boolean"
                   },
                   "UpdateXlsx": {
+                    "type": "boolean"
+                  },
+                  "AnalyzeResponses": {
                     "type": "boolean"
                   }
                 },
@@ -52010,12 +52349,21 @@
               "saveFormAsXLSX": {
                 "type": "boolean",
                 "description": "Specifies whether to save form data as XLSX file.",
-                "nullable": true
+                "nullable": true,
+                "example": false
               },
               "sendFormToExternalDB": {
                 "type": "boolean",
                 "description": "Specifies whether to send form data to external database.",
-                "nullable": true
+                "nullable": true,
+                "example": false
+              },
+              "originalFormId": {
+                "type": "integer",
+                "description": "The original form ID that corresponds to this FormFillingFolderDone folder.",
+                "format": "int32",
+                "nullable": true,
+                "example": 42
               }
             }
           }
@@ -52221,7 +52569,8 @@
               "type": "string"
             },
             "description": "The list of possible values for the form field.",
-            "nullable": true
+            "nullable": true,
+            "example": []
           }
         },
         "additionalProperties": false
@@ -52414,7 +52763,8 @@
               "$ref": "#/components/schemas/FormMetadata"
             },
             "description": "The form field metadata.",
-            "nullable": true
+            "nullable": true,
+            "example": []
           },
           "submissions": {
             "type": "array",
@@ -52422,7 +52772,8 @@
               "$ref": "#/components/schemas/FormResultsDto"
             },
             "description": "All submissions.",
-            "nullable": true
+            "nullable": true,
+            "example": []
           }
         },
         "additionalProperties": false
@@ -52962,7 +53313,8 @@
               "$ref": "#/components/schemas/AceShortWrapper"
             },
             "description": "The sharing settings of the file.",
-            "nullable": true
+            "nullable": true,
+            "example": []
           },
           "type": {
             "$ref": "#/components/schemas/EditorType"
@@ -58282,7 +58634,7 @@
       },
       "GroupRequestDto": {
         "required": [
-          "groupManager"
+          "groupName"
         ],
         "type": "object",
         "properties": {
@@ -58307,7 +58659,7 @@
           },
           "groupName": {
             "maxLength": 128,
-            "minLength": 0,
+            "minLength": 1,
             "type": "string",
             "description": "The group name.",
             "nullable": true,
@@ -59900,7 +60252,7 @@
             "example": "Auth-Key"
           },
           "value": {
-            "maxLength": 255,
+            "maxLength": 4000,
             "minLength": 0,
             "type": "string",
             "description": "The authorization key value.",
@@ -60353,27 +60705,6 @@
         },
         "additionalProperties": false
       },
-      "BuyWalletServiceRequestDto": {
-        "type": "object",
-        "properties": {
-          "quantity": {
-            "maximum": 999999,
-            "minimum": 1,
-            "type": "integer",
-            "description": "Number of services provided.",
-            "format": "int32",
-            "example": 1
-          },
-          "serviceName": {
-            "type": "string",
-            "description": "The service name.",
-            "nullable": true,
-            "example": "backup"
-          }
-        },
-        "additionalProperties": false,
-        "description": "The request parameters for buying wallet service."
-      },
       "CapabilitiesDto": {
         "required": [
           "identityServerEnabled",
@@ -60668,7 +60999,7 @@
             "type": "string",
             "description": "The company name.",
             "nullable": true,
-            "example": "Acme Corporation"
+            "example": "My Own Corporation"
           },
           "site": {
             "type": "string",
@@ -61037,6 +61368,29 @@
         },
         "additionalProperties": false,
         "description": "The request parameters for creating the webhook configuration."
+      },
+      "CreditAiBalanceRequestDto": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "maximum": 999999,
+            "minimum": 0.01,
+            "type": "number",
+            "description": "The amount to transfer from the main balance to the AI subaccount.",
+            "format": "double",
+            "example": 100.00
+          },
+          "currency": {
+            "maxLength": 3,
+            "minLength": 0,
+            "type": "string",
+            "description": "The three-character ISO 4217 currency symbol.",
+            "nullable": true,
+            "example": "USD"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The request parameters for crediting AI quota to the customer AI subaccount."
       },
       "CspDto": {
         "required": [
@@ -61486,11 +61840,6 @@
             "nullable": true,
             "example": "backup"
           },
-          "writeOffServiceQuota": {
-            "type": "boolean",
-            "description": "Write-off of the quota for the service",
-            "example": false
-          },
           "startDate": {
             "type": "string",
             "description": "The report start date.",
@@ -61509,7 +61858,7 @@
             "type": "string",
             "description": "The participant name.",
             "nullable": true,
-            "example": "ACME Corp"
+            "example": "My Own Corporation"
           },
           "credit": {
             "type": "boolean",
@@ -61523,7 +61872,7 @@
             "nullable": true,
             "example": false
           },
-          "types": {
+          "type": {
             "$ref": "#/components/schemas/OperationType"
           },
           "status": {
@@ -63873,6 +64222,9 @@
             "description": "AI Agent name.",
             "nullable": true,
             "example": "My AI Agent"
+          },
+          "type": {
+            "$ref": "#/components/schemas/OperationType"
           }
         },
         "additionalProperties": false,
@@ -63892,18 +64244,16 @@
         ]
       },
       "OperationStatus": {
-        "description": "[0 - Any, 1 - Pending, 2 - Completed, 4 - Rejected, 8 - Canceled]",
+        "description": "[0 - Pending, 1 - Completed, 2 - Rejected, 3 - Canceled]",
         "enum": [
           0,
           1,
           2,
-          4,
-          8
+          3
         ],
         "type": "integer",
         "example": 0,
         "x-enum-varnames": [
-          "Any",
           "Pending",
           "Completed",
           "Rejected",
@@ -63911,36 +64261,36 @@
         ]
       },
       "OperationType": {
-        "description": "[0 - Any, 1 - Unknown, 2 - ServicePayment, 4 - PackagePayment, 8 - ServiceUsage, 16 - Deposit, 32 - ReceiveProviderInvoice, 64 - ProcessProviderInvoice, 128 - WriteOffServiceProfit, 256 - Profit, 512 - PartnerAccrual, 1024 - ProviderPayment, 2048 - PartnerPayment, 4096 - Refund, 8192 - BankDeposit, 16384 - BankWithdrawal, 32768 - GoodwillCredit, 65536 - WriteOffProfit, 131072 - WriteOffDifferenceCurrency]",
+        "description": "[0 - Unknown, 1 - ServicePayment, 2 - PackagePayment, 3 - AiServicePayment, 4 - Deposit, 5 - ReceiveProviderInvoice, 6 - ProcessProviderInvoice, 7 - WriteOffServiceProfit, 8 - Profit, 9 - PartnerAccrual, 10 - ProviderPayment, 11 - PartnerPayment, 12 - Refund, 13 - BankDeposit, 14 - BankWithdrawal, 15 - GoodwillCredit, 16 - WriteOffProfit, 17 - WriteOffDifferenceCurrency, 18 - AiDebit, 19 - AiCredit]",
         "enum": [
           0,
           1,
           2,
+          3,
           4,
+          5,
+          6,
+          7,
           8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
           16,
-          32,
-          64,
-          128,
-          256,
-          512,
-          1024,
-          2048,
-          4096,
-          8192,
-          16384,
-          32768,
-          65536,
-          131072
+          17,
+          18,
+          19
         ],
         "type": "integer",
         "example": 0,
         "x-enum-varnames": [
-          "Any",
           "Unknown",
           "ServicePayment",
           "PackagePayment",
-          "ServiceUsage",
+          "AiServicePayment",
           "Deposit",
           "ReceiveProviderInvoice",
           "ProcessProviderInvoice",
@@ -63954,7 +64304,9 @@
           "BankWithdrawal",
           "GoodwillCredit",
           "WriteOffProfit",
-          "WriteOffDifferenceCurrency"
+          "WriteOffDifferenceCurrency",
+          "AiDebit",
+          "AiCredit"
         ]
       },
       "OwnerChangeInstructionsDto": {
@@ -64359,12 +64711,17 @@
         }
       },
       "PaymentUrlRequestDto": {
+        "required": [
+          "backUrl"
+        ],
         "type": "object",
         "properties": {
           "backUrl": {
+            "maxLength": 255,
+            "minLength": 0,
             "type": "string",
             "description": "The URL where the user will be redirected after payment processing.",
-            "nullable": true,
+            "format": "uri",
             "example": "https://example.com"
           },
           "quantity": {
@@ -68476,6 +68833,8 @@
             "example": 1
           },
           "currency": {
+            "maxLength": 3,
+            "minLength": 0,
             "type": "string",
             "description": "The three-character ISO 4217 currency symbol.",
             "nullable": true,
@@ -69239,8 +69598,77 @@
           "FormStopped",
           "AgentCreated",
           "AgentUpdated",
-          "AgentDeleted"
+          "AgentDeleted",
+          "FileDownloaded",
+          "FolderDownloaded"
         ]
+      },
+      "WebhookTriggerArrayWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WebhookTriggerDto"
+            }
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
+      "WebhookTriggerDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The trigger name.",
+            "nullable": true,
+            "example": "file.created"
+          },
+          "id": {
+            "type": "integer",
+            "description": "The trigger bit value.",
+            "format": "int64",
+            "example": 128
+          },
+          "available": {
+            "type": "boolean",
+            "description": "Specifies whether this trigger is available for the current user's role.",
+            "example": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "The webhook trigger with its availability for the current user."
       },
       "WebhooksConfigDto": {
         "required": [
