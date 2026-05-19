@@ -262,7 +262,8 @@ public class FileStorageService //: IFileStorageService
         StorageFilter storageFilter = StorageFilter.None,
         FormsItemDto formsItemDto = null,
         Location? location = null,
-        int? groupId = null)
+        int? groupId = null,
+        T parentFolderId = default)
     {
         var subjectId = string.IsNullOrEmpty(subject) ? Guid.Empty : new Guid(subject);
         var subjectOwnerIdGuid = string.IsNullOrEmpty(subjectOwnerId) ? Guid.Empty : new Guid(subjectOwnerId);
@@ -411,7 +412,8 @@ public class FileStorageService //: IFileStorageService
                 storageFilter,
                 formsItemDto,
                 location,
-                groupId);
+                groupId,
+                parentFolderId);
         }
         catch (Exception e)
         {
