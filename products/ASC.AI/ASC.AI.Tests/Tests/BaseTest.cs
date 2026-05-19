@@ -34,6 +34,7 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     protected const string AssignmentsPath = "/api/2.0/ai/integration/assignments";
     protected const string ThreadsPath = "/api/2.0/ai/integration/threads";
     protected const string MessagesPath = "/api/2.0/ai/integration/messages";
+    protected const string McpServersPath = "/api/2.0/ai/integration/mcp-servers";
 
     private static readonly JsonSerializerOptions _readJsonOptions = new()
     {
@@ -219,6 +220,38 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         entityId is null
             ? $"{AssignmentsPath}/{actionType}"
             : $"{AssignmentsPath}/{actionType}?entityId={entityId}";
+
+    protected static string BuildMcpConfig(string? url = null) =>
+        $$"""{"transport":"http","url":"{{url ?? "https://example.com/mcp"}}"}""";
+
+    protected async Task CreateMcpServerAsync(string name, string? config = null, string? entityId = null)
+    {
+        using var response = await Ai.PostAsync(
+            McpServersPath,
+            new { name, config = config ?? BuildMcpConfig(), entityId },
+            TestContext.Current.CancellationToken);
+        response.EnsureSuccessStatusCode();
+    }
+
+    protected async Task<McpServerDto> ReadMcpServerAsync(string name, string? entityId = null)
+    {
+        var path = entityId is null
+            ? $"{McpServersPath}/{name}"
+            : $"{McpServersPath}/{name}?entityId={entityId}";
+
+        using var response = await Ai.GetAsync(path, TestContext.Current.CancellationToken);
+        return await Ai.ReadAsync<McpServerDto>(response, TestContext.Current.CancellationToken);
+    }
+
+    protected async Task<List<McpServerDto>> ReadAllMcpServersAsync(string? entityId = null)
+    {
+        var path = entityId is null
+            ? McpServersPath
+            : $"{McpServersPath}?entityId={entityId}";
+
+        using var response = await Ai.GetAsync(path, TestContext.Current.CancellationToken);
+        return await Ai.ReadAsync<List<McpServerDto>>(response, TestContext.Current.CancellationToken);
+    }
 
     private sealed record RoomFolderDto(int Id);
 }
