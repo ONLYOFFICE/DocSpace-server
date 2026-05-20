@@ -298,6 +298,7 @@ public class GroupController(
         foreach (var userInfo in users)
         {
             await TransferUserToDepartmentAsync(userInfo.Id, toGroup, false);
+            await RemoveUserFromDepartmentAsync(userInfo.Id, fromGroup);
         }
 
         return await GetGroup(new DetailedInformationRequestDto { Id = inDto.ToId });
