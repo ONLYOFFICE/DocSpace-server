@@ -1,34 +1,34 @@
 ﻿// Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 #nullable enable
@@ -281,63 +281,6 @@ public class InsertFileModelBinder : IModelBinder
         if (bindingContext.GetFirstValue(nameof(result.Title), out var firstValue))
         {
             result.Title = firstValue;
-        }
-
-        if (bindingContext.HttpContext.Request.HasFormContentType)
-        {
-            result.File = bindingContext.HttpContext.Request.Form.Files.FirstOrDefault();
-        }
-
-        bindingContext.HttpContext.Request.EnableBuffering();
-
-        bindingContext.HttpContext.Request.Body.Position = 0;
-
-        result.Stream = new MemoryStream();
-        await bindingContext.HttpContext.Request.Body.CopyToAsync(result.Stream);
-        result.Stream.Position = 0;
-
-        bindingContext.Result = ModelBindingResult.Success(result);
-    }
-}
-
-public class UploadModelBinder : IModelBinder
-{
-    public async Task BindModelAsync(ModelBindingContext bindingContext)
-    {
-        ArgumentNullException.ThrowIfNull(bindingContext);
-
-        if (bindingContext is DefaultModelBindingContext defaultBindingContext && bindingContext.ValueProvider is CompositeValueProvider { Count: 0 })
-        {
-            bindingContext.ValueProvider = defaultBindingContext.OriginalValueProvider;
-        }
-
-#pragma warning disable CA2000 // DTO ownership transferred to model binding
-        var result = new UploadRequestDto();
-#pragma warning restore CA2000
-
-        if (bindingContext.GetBoolValue(nameof(result.CreateNewIfExist), out var createNewIfExist))
-        {
-            result.CreateNewIfExist = createNewIfExist;
-        }
-
-        if (bindingContext.GetBoolValue(nameof(result.KeepConvertStatus), out var keepConvertStatus))
-        {
-            result.KeepConvertStatus = keepConvertStatus;
-        }
-
-        if (bindingContext.GetBoolValue(nameof(result.StoreOriginalFileFlag), out var storeOriginalFileFlag))
-        {
-            result.StoreOriginalFileFlag = storeOriginalFileFlag;
-        }
-
-        if (bindingContext.GetFirstValue(nameof(result.ContentType), out var contentType) && !string.IsNullOrEmpty(contentType))
-        {
-            result.ContentType = new ContentType(contentType);
-        }
-
-        if (bindingContext.GetFirstValue(nameof(result.ContentDisposition), out var contentDisposition) && !string.IsNullOrEmpty(contentDisposition))
-        {
-            result.ContentDisposition = new ContentDisposition(contentDisposition);
         }
 
         if (bindingContext.HttpContext.Request.HasFormContentType)
