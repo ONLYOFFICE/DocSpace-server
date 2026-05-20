@@ -5293,6 +5293,9 @@ public class FileStorageService //: IFileStorageService
                 {
                     properties.FormFilling.StartFilling = true;
                     properties.FormFilling.StartedByUserId = authContext.CurrentAccount.ID;
+
+                    var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+                    await filesMessageService.SendAsync(MessageAction.FormStartedToFill, form, MessageInitiator.DocsService, currentUser?.DisplayUserName(false, displayUserSettingsHelper), form.Title);
                 }
 
                 break;
