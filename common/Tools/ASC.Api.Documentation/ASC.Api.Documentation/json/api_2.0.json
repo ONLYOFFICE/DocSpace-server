@@ -2589,6 +2589,9 @@
               }
             }
           },
+          "400": {
+            "description": "Unsupported currency or insufficient balance"
+          },
           "403": {
             "description": "No permissions to perform this action"
           },

@@ -442,6 +442,8 @@ public class FileStorageService //: IFileStorageService
             parent.RootFolderType == FolderType.Privacy ||
             await shareableTask;
 
+        var entriesCountBeforeFilter = entries.Count();
+
         entries = await entries
             .ToAsyncEnumerable()
             .Where(async (x, _) =>
@@ -458,6 +460,8 @@ public class FileStorageService //: IFileStorageService
 
             return x is File<int> f2 && !await fileConverter.IsConverting(f2);
         }).ToListAsync();
+
+        total -= entriesCountBeforeFilter - entries.Count();
 
         if (parentRoom != null)
         {
@@ -5322,6 +5326,9 @@ public class FileStorageService //: IFileStorageService
                 {
                     properties.FormFilling.StartFilling = true;
                     properties.FormFilling.StartedByUserId = authContext.CurrentAccount.ID;
+
+                    var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+                    await filesMessageService.SendAsync(MessageAction.FormStartedToFill, form, MessageInitiator.DocsService, currentUser?.DisplayUserName(false, displayUserSettingsHelper), form.Title);
                 }
 
                 break;

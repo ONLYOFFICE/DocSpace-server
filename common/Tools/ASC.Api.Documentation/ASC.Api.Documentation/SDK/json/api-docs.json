@@ -10674,14 +10674,53 @@
               "format": "int32",
               "example": 1
             }
+          },
+          {
+            "name": "createNewIfExist",
+            "in": "query",
+            "description": "Specifies whether to create the new file if it already exists or not.",
+            "schema": {
+              "type": "boolean",
+              "example": true
+          }
+          },
+          {
+            "name": "storeOriginalFile",
+            "in": "query",
+            "description": "Specifies whether to upload documents in the original formats as well or not.",
+            "schema": {
+              "type": "boolean",
+              "example": true
+            }
+          },
+          {
+            "name": "keepConvertStatus",
+            "in": "query",
+            "description": "Specifies whether to keep the file converting status or not.",
+            "schema": {
+              "type": "boolean",
+              "example": false
+            }
           }
         ],
         "requestBody": {
-          "description": "The request parameters for uploading a file.",
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/UploadRequestDto"
+                "type": "object",
+                "properties": {
+                  "File": {
+                    "type": "string",
+                    "description": "The file to be uploaded.",
+                    "format": "binary",
+                    "example": "binary file data"
+              }
+            }
+              },
+              "encoding": {
+                "File": {
+                  "style": "form"
+          }
               }
             }
           }
@@ -10692,7 +10731,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ObjectWrapper"
+                  "$ref": "#/components/schemas/FileIntegerArrayWrapper"
                 }
               }
             }
@@ -10906,22 +10945,62 @@
         "operationId": "uploadFileToMy",
         "parameters": [
           {
-            "name": "inDto",
+            "name": "createNewIfExist",
             "in": "query",
-            "description": "The request parameters for uploading a file.",
+            "description": "Specifies whether to create the new file if it already exists or not.",
             "schema": {
-              "$ref": "#/components/schemas/UploadRequestDto"
+              "type": "boolean",
+              "example": true
+            }
             },
-            "style": "deepObject"
+          {
+            "name": "storeOriginalFile",
+            "in": "query",
+            "description": "Specifies whether to upload documents in the original formats as well or not.",
+            "schema": {
+              "type": "boolean",
+              "example": true
+          }
+          },
+          {
+            "name": "keepConvertStatus",
+            "in": "query",
+            "description": "Specifies whether to keep the file converting status or not.",
+            "schema": {
+              "type": "boolean",
+              "example": false
+            }
           }
         ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "File": {
+                    "type": "string",
+                    "description": "The file to be uploaded.",
+                    "format": "binary",
+                    "example": "binary file data"
+                  }
+                }
+              },
+              "encoding": {
+                "File": {
+                  "style": "form"
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "Uploaded file(s)",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ObjectWrapper"
+                  "$ref": "#/components/schemas/FileIntegerArrayWrapper"
                 }
               }
             }
@@ -24874,7 +24953,7 @@
           "People / Profiles"
         ],
         "summary": "Check if a user exists by email",
-        "description": "Returns a boolean indicating whether a user with the specified email exists on the portal.",
+        "description": "Returns data indicating whether a user with the specified email exists on the portal.",
         "operationId": "checkUserExistsByEmail",
         "parameters": [
           {
@@ -24910,11 +24989,11 @@
         ],
         "responses": {
           "200": {
-            "description": "Boolean result",
+            "description": "User existence result",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/BooleanWrapper"
+                  "$ref": "#/components/schemas/UserExistsResponseWrapper"
                 }
               }
             }
@@ -31342,6 +31421,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Unsupported currency or insufficient balance"
           },
           "403": {
             "description": "No permissions to perform this action"
@@ -48163,73 +48245,6 @@
         "additionalProperties": false,
         "description": "The contact information."
       },
-      "ContentDisposition": {
-        "type": "object",
-        "properties": {
-          "dispositionType": {
-            "type": "string",
-            "nullable": true
-          },
-          "parameters": {
-            "type": "array",
-            "items": {},
-            "nullable": true,
-            "readOnly": true
-          },
-          "fileName": {
-            "type": "string",
-            "nullable": true
-          },
-          "creationDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "modificationDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "inline": {
-            "type": "boolean"
-          },
-          "readDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int64"
-          }
-        },
-        "additionalProperties": false
-      },
-      "ContentType": {
-        "type": "object",
-        "properties": {
-          "boundary": {
-            "type": "string",
-            "nullable": true
-          },
-          "charSet": {
-            "type": "string",
-            "nullable": true
-          },
-          "mediaType": {
-            "type": "string",
-            "nullable": true
-          },
-          "name": {
-            "type": "string",
-            "nullable": true
-          },
-          "parameters": {
-            "type": "array",
-            "items": {},
-            "nullable": true,
-            "readOnly": true
-          }
-        },
-        "additionalProperties": false
-      },
       "ConversationResultArrayWrapper": {
         "type": "object",
         "properties": {
@@ -55659,46 +55674,6 @@
           }
         }
       },
-      "ObjectWrapper": {
-        "type": "object",
-        "properties": {
-          "response": {
-            "type": "object"
-          },
-          "count": {
-            "type": "integer",
-            "description": "The total number of items in the response",
-            "format": "int32"
-          },
-          "links": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "href": {
-                  "type": "string",
-                  "description": "URL of the link"
-                },
-                "action": {
-                  "type": "string",
-                  "description": "Action associated with the link"
-                }
-              }
-            },
-            "description": "List of links related to the response"
-          },
-          "status": {
-            "type": "integer",
-            "description": "HTTP status code of the response",
-            "format": "int32"
-          },
-          "statusCode": {
-            "type": "integer",
-            "description": "HTTP status code of the response (duplicate of status)",
-            "format": "int32"
-          }
-        }
-      },
       "Options": {
         "type": "object",
         "properties": {
@@ -57700,62 +57675,6 @@
         },
         "additionalProperties": false,
         "description": "The request parameters for creating a tag."
-      },
-      "UploadRequestDto": {
-        "type": "object",
-        "properties": {
-          "file": {
-            "type": "string",
-            "description": "The file to be uploaded.",
-            "format": "binary",
-            "nullable": true,
-            "example": "binary file data"
-          },
-          "contentType": {
-            "$ref": "#/components/schemas/ContentType"
-          },
-          "contentDisposition": {
-            "$ref": "#/components/schemas/ContentDisposition"
-          },
-          "files": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "format": "binary"
-            },
-            "description": "The list of files when specified as multipart/form-data.",
-            "nullable": true,
-            "example": [
-              "file1.docx",
-              "file2.xlsx"
-            ]
-          },
-          "createNewIfExist": {
-            "type": "boolean",
-            "description": "Specifies whether to create the new file if it already exists or not.",
-            "example": true
-          },
-          "storeOriginalFileFlag": {
-            "type": "boolean",
-            "description": "Specifies whether to upload documents in the original formats as well or not.",
-            "nullable": true,
-            "example": true
-          },
-          "keepConvertStatus": {
-            "type": "boolean",
-            "description": "Specifies whether to keep the file converting status or not.",
-            "example": false
-          },
-          "stream": {
-            "type": "string",
-            "description": "The request input stream.",
-            "format": "binary",
-            "nullable": true,
-            "example": "binary stream data"
-          }
-        },
-        "additionalProperties": false,
-        "description": "The request parameters for uploading a file."
       },
       "UploadResultDto": {
         "type": "object",
@@ -59932,6 +59851,46 @@
         "additionalProperties": false,
         "description": "The member request."
       },
+      "ObjectWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "object"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
       "Payments": {
         "description": "[0 - Paid, 1 - Free]",
         "enum": [
@@ -60531,6 +60490,64 @@
         },
         "additionalProperties": false,
         "description": "The request parameters for updating a photo."
+      },
+      "UserExistsResponseDto": {
+        "required": [
+          "exists"
+        ],
+        "type": "object",
+        "properties": {
+          "exists": {
+            "type": "boolean",
+            "description": "Specifies whether the user exists or not.",
+            "example": true
+          },
+          "status": {
+            "$ref": "#/components/schemas/EmployeeStatus"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The user existence check response parameters."
+      },
+      "UserExistsResponseWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/UserExistsResponseDto"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
       },
       "UserInvitationRequestDto": {
         "allOf": [
