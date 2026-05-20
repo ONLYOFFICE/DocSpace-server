@@ -3788,9 +3788,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasKey("TenantId", "FileId", "UserId")
                         .HasName("PRIMARY");
 
-                    b.HasIndex("TenantId", "FileId")
-                        .HasDatabaseName("tenant_id_file_id");
-
                     b.HasIndex("TenantId", "UserId")
                         .HasDatabaseName("tenant_id_user_id");
 
