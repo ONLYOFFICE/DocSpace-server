@@ -1,34 +1,34 @@
 ﻿// Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 using Microsoft.OpenApi;
@@ -106,44 +106,5 @@ public class SwaggerOperationIdFilter : IOperationFilter
             operation.Extensions ??= new Dictionary<string, IOpenApiExtension>();
             operation.Extensions["x-shortName"] = new JsonNodeExtension(_shortName);
         }
-    }
-}
-
-public class UploadOperationFilter : IOperationFilter
-{
-    private static readonly HashSet<string> _uploadRoutes = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "api/2.0/files/{folderId}/upload",
-        "api/2.0/files/@my/upload"
-    };
-
-    public void Apply(OpenApiOperation operation, OperationFilterContext context)
-    {
-        if (!_uploadRoutes.Contains(context.ApiDescription.RelativePath) ||
-            !string.Equals(context.ApiDescription.HttpMethod, "POST", StringComparison.OrdinalIgnoreCase))
-        {
-            return;
-        }
-
-        var inDto = operation.Parameters
-            .OfType<OpenApiParameter>()
-            .FirstOrDefault(p => p.Name == "inDto" && p.In == ParameterLocation.Query);
-
-        if (inDto != null)
-        {
-            operation.Parameters.Remove(inDto);
-        }
-
-        operation.RequestBody = new OpenApiRequestBody
-        {
-            Required = false,
-            Content = new Dictionary<string, OpenApiMediaType>
-            {
-                ["multipart/form-data"] = new OpenApiMediaType
-                {
-                    Schema = new OpenApiSchemaReference("UploadRequestDto")
-                }
-            }
-        };
     }
 }
