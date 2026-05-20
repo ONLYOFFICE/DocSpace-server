@@ -869,7 +869,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         return Task.CompletedTask;
     }
     
-    public Task SetFileKey(string fileId, Guid userId, Guid publicKeyId, string privateKeyEnc)
+    public Task SetFileKey(string fileId, IEnumerable<FileKeyData> keys)
     {
         return Task.CompletedTask;
     }

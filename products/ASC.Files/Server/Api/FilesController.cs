@@ -821,7 +821,7 @@ public abstract class FilesController<T>(
     [HttpPut("{fileId}/access")]
     public async Task SetEncryptionInfoAsync(AccessRequestDto<T> inDto)
     {
-        await fileStorageService.SetEncryptionInfoAsync(inDto.FileId, inDto.Keys.Select(r=> (r.UserId, r.PublicKeyId, r.PrivateKeyEnc)));
+        await fileStorageService.SetEncryptionInfoAsync(inDto.FileId, inDto.Keys.Project());
     }
 }
 

@@ -2034,20 +2034,38 @@ internal class FileDao(
         });
     }
 
-    public async Task SetFileKey(int fileId, Guid userId, Guid publicKeyId, string privateKeyEnc)
+    public async Task SetFileKey(int fileId, IEnumerable<FileKeyData> keys)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
-        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        await filesDbContext.DbFileKeys.AddOrUpdateAsync(new DbFileKeys
+        var createOn = _tenantUtil.DateTimeNow();
+
+        var entities = keys.Select(key => new DbFileKeys
         {
             TenantId = tenantId,
             FileId = fileId,
-            UserId = userId,
-            CreateOn = _tenantUtil.DateTimeNow(),
-            PublicKeyId = publicKeyId,
-            PrivateKeyEnc = privateKeyEnc
+            UserId = key.UserId,
+            CreateOn = createOn,
+            PublicKeyId = key.PublicKeyId,
+            PrivateKeyEnc = key.PrivateKeyEnc
+        }).ToList();
+
+        var userIds = entities.Select(x => x.UserId).ToList();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var strategy = filesDbContext.Database.CreateExecutionStrategy();
+
+        await strategy.ExecuteAsync(async () =>
+        {
+            await using var context = await _dbContextFactory.CreateDbContextAsync();
+            await using var tx = await context.Database.BeginTransactionAsync();
+
+            await context.DeleteFileKeysAsync(tenantId, fileId, userIds);
+            await context.DbFileKeys.AddRangeAsync(entities);
+            await context.SaveChangesAsync();
+
+            await tx.CommitAsync();
         });
-        await filesDbContext.SaveChangesAsync();
     }
 
     public async Task<List<FileKeys>> GetFileKeys(int fileId, Guid userId)

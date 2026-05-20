@@ -136,6 +136,12 @@ public partial class FilesDbContext
     {
         return AbstractQueries.DeleteFileKeysAsync(this, entryId, tenantId);
     }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, null])]
+    public Task DeleteFileKeysAsync(int tenantId, int fileId, IEnumerable<Guid> userIds)
+    {
+        return AbstractQueries.DeleteFileKeysByUsersAsync(this, tenantId, fileId, userIds);
+    }
 }
 
 static file class AbstractQueries
@@ -283,5 +289,13 @@ static file class AbstractQueries
             ctx.DbFileKeys
                 .Where(x=> x.TenantId == tenantId)
                 .Where(x => x.FileId == fileId)
+                .ExecuteDelete());
+
+    public static readonly Func<FilesDbContext, int, int, IEnumerable<Guid>, Task> DeleteFileKeysByUsersAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx, int tenantId, int fileId, IEnumerable<Guid> userIds) =>
+            ctx.DbFileKeys
+                .Where(x => x.TenantId == tenantId)
+                .Where(x => x.FileId == fileId)
+                .Where(x => userIds.Contains(x.UserId))
                 .ExecuteDelete());
 }

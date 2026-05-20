@@ -629,11 +629,11 @@ internal class ProviderFileDao(
         return fileDao.SetVectorizationStatusAsync(selector.ConvertId(fileId), status);
     }
     
-    public Task SetFileKey(string fileId, Guid userId, Guid publicKeyId, string privateKeyEnc)
+    public Task SetFileKey(string fileId, IEnumerable<FileKeyData> keys)
     {
         var selector = _selectorFactory.GetSelector(fileId);
         var fileDao = selector.GetFileDao(fileId);
-        return fileDao.SetFileKey(selector.ConvertId(fileId), userId, publicKeyId, privateKeyEnc);
+        return fileDao.SetFileKey(selector.ConvertId(fileId), keys);
     }
     
     public Task<List<FileKeys>> GetFileKeys(string fileId, Guid userId)

@@ -4793,7 +4793,7 @@ public class FileStorageService //: IFileStorageService
     }
 
 
-    public async Task SetEncryptionInfoAsync<T>(T fileId, IEnumerable<(Guid UserId, Guid PublicKeyId, string PrivateKeyEnc)> keys)
+    public async Task SetEncryptionInfoAsync<T>(T fileId, IEnumerable<FileKeyData> keys)
     {
         var fileDao = daoFactory.GetFileDao<T>();
         var file = await fileDao.GetFileAsync(fileId);
@@ -4827,10 +4827,7 @@ public class FileStorageService //: IFileStorageService
             }
         }
 
-        foreach (var k in keys)
-        {
-            await fileDao.SetFileKey(fileId, k.UserId, k.PublicKeyId, k.PrivateKeyEnc);
-        }
+        await fileDao.SetFileKey(fileId, keys);
     }
 
     public async IAsyncEnumerable<FileEntry> ChangeOwnerAsync<T>(IEnumerable<T> foldersId, IEnumerable<T> filesId, Guid userId, FileShare newShare = FileShare.RoomManager)
