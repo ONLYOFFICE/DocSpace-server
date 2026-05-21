@@ -747,9 +747,6 @@
   <data name="PrivacyRoomDisable" xml:space="preserve">
     <value>Приватная комната отключена</value>
   </data>
-  <data name="PrivacyRoomEnable" xml:space="preserve">
-    <value>Приватная комната включена</value>
-  </data>
   <data name="ProductAccessOpened" xml:space="preserve">
     <value>Продукты [{0}]. Открыт доступ</value>
   </data>

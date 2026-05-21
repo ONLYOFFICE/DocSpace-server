@@ -1,34 +1,34 @@
 ﻿// Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 using Document = ASC.ElasticSearch.Document;
@@ -1037,6 +1037,7 @@ internal class FileDao(
             var entryEventsIds = await context.GetAuditEventsIdsAsync(fileId, FileEntryType.File).ToListAsync();
             await context.MarkAuditReferencesAsCorruptedAsync(entryEventsIds);
             await context.DeleteAuditReferencesAsync(fileId, FileEntryType.File);
+            await context.DeleteFileKeysAsync(tenantId, fileId);
 
             await context.SaveChangesAsync();
             await tx.CommitAsync();
@@ -2030,6 +2031,54 @@ internal class FileDao(
 
             await tr.CommitAsync();
         });
+    }
+
+    public async Task SetFileKey(int fileId, IEnumerable<FileKeyData> keys)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        var createOn = _tenantUtil.DateTimeNow();
+
+        var entities = keys.Select(key => new DbFileKeys
+        {
+            TenantId = tenantId,
+            FileId = fileId,
+            UserId = key.UserId,
+            CreateOn = createOn,
+            PublicKeyId = key.PublicKeyId,
+            PrivateKeyEnc = key.PrivateKeyEnc
+        }).ToList();
+
+        var userIds = entities.Select(x => x.UserId).ToList();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var strategy = filesDbContext.Database.CreateExecutionStrategy();
+
+        await strategy.ExecuteAsync(async () =>
+        {
+            await using var context = await _dbContextFactory.CreateDbContextAsync();
+            await using var tx = await context.Database.BeginTransactionAsync();
+
+            await context.DeleteFileKeysAsync(tenantId, fileId, userIds);
+            await context.DbFileKeys.AddRangeAsync(entities);
+            await context.SaveChangesAsync();
+
+            await tx.CommitAsync();
+        });
+    }
+
+    public async Task<List<FileKeys>> GetFileKeys(int fileId, Guid userId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        return await filesDbContext.DbFileKeys
+            .Where(r =>
+                r.TenantId == tenantId &&
+                r.FileId == fileId &&
+                r.UserId == userId)
+            .Project()
+            .ToListAsync();
     }
 
     public string GetUniqThumbnailPath(File<int> file, uint width, uint height)

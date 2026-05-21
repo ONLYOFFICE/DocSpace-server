@@ -7326,6 +7326,154 @@
         ]
       }
     },
+    "/api/2.0/files/{fileId}/access": {
+      "get": {
+        "tags": [
+          "Files / Files"
+        ],
+        "summary": "Get file encryption information",
+        "description": "Returns the encryption information for a file with the specified identifier, including user encryption keys and file-specific encryption keys.",
+        "operationId": "getEncryptionInfo",
+        "parameters": [
+          {
+            "name": "fileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "File encryption information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileEncryptionInfoWrapper"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid operation"
+          },
+          "403": {
+            "description": "You don't have enough permission to read the file"
+          },
+          "404": {
+            "description": "File not found"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": []
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": []
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Files / Files"
+        ],
+        "summary": "Set file encryption information",
+        "description": "Sets or updates the encryption keys for a file with the specified identifier. This allows updating the file's encryption configuration.",
+        "operationId": "setEncryptionInfo",
+        "parameters": [
+          {
+            "name": "fileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/AccessRequestKeyDto"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Encryption information successfully updated"
+          },
+          "403": {
+            "description": "You don't have enough permission to edit the file"
+          },
+          "404": {
+            "description": "File not found"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": []
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": []
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": []
+          }
+        ]
+      }
+    },
     "/api/2.0/files/@my/file": {
       "post": {
         "tags": [
@@ -10534,7 +10682,7 @@
             "schema": {
               "type": "boolean",
               "example": true
-            }
+          }
           },
           {
             "name": "storeOriginalFile",
@@ -10566,13 +10714,13 @@
                     "description": "The file to be uploaded.",
                     "format": "binary",
                     "example": "binary file data"
-                  }
-                }
+              }
+            }
               },
               "encoding": {
                 "File": {
                   "style": "form"
-                }
+          }
               }
             }
           }
@@ -10804,7 +10952,7 @@
               "type": "boolean",
               "example": true
             }
-          },
+            },
           {
             "name": "storeOriginalFile",
             "in": "query",
@@ -10812,7 +10960,7 @@
             "schema": {
               "type": "boolean",
               "example": true
-            }
+          }
           },
           {
             "name": "keepConvertStatus",
@@ -14920,6 +15068,76 @@
         ]
       }
     },
+    "/api/2.0/files/file/{fileId}/publickeys": {
+      "get": {
+        "tags": [
+          "Files / Sharing"
+        ],
+        "summary": "Get file encryption keys",
+        "description": "Returns the encryption keys to access a file with the ID specified in the request.",
+        "operationId": "getEncryptionAccess",
+        "parameters": [
+          {
+            "name": "fileId",
+            "in": "path",
+            "description": "The file unique identifier.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of encryption key pairs: encrypted private key, public key, user ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EncryptionKeyArrayWrapper"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "You do not have enough permissions to edit the file"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": []
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": []
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": []
+          }
+        ]
+      }
+    },
     "/api/2.0/files/file/{fileId}/sendeditornotify": {
       "post": {
         "tags": [
@@ -15888,6 +16106,535 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ProviderArrayWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": []
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": []
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": []
+          }
+        ]
+      }
+    },
+    "/api/2.0/privacyroom/keys": {
+      "post": {
+        "tags": [
+          "privacyroom"
+        ],
+        "summary": "Creates and sets encryption keys for the user.",
+        "description": "Creates and sets encryption keys for the user.",
+        "operationId": "setKeys",
+        "requestBody": {
+          "description": "The request object containing public and private key information.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EncryptionKeyRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EncryptionKeyArrayWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": []
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": []
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "privacyroom"
+        ],
+        "summary": "Replaces an existing encryption key with a new one for the user.",
+        "description": "Replaces an existing encryption key with a new one for the user.",
+        "operationId": "replaceKey",
+        "requestBody": {
+          "description": "The request object containing the public and private key information to replace the existing key.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EncryptionKeyRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EncryptionKeyArrayWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": []
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": []
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": []
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "privacyroom"
+        ],
+        "summary": "Retrieves encryption keys associated with the current user.",
+        "description": "Retrieves encryption keys associated with the current user.",
+        "operationId": "getUserKeys",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EncryptionKeyArrayWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": []
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": []
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": []
+          }
+        ]
+      }
+    },
+    "/api/2.0/privacyroom/keys/filter": {
+      "get": {
+        "tags": [
+          "privacyroom"
+        ],
+        "summary": "Retrieves a specific user encryption key based on the provided filter conditions.",
+        "description": "Retrieves a specific user encryption key based on the provided filter conditions.",
+        "operationId": "getUserKeysByFilter",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "description": "The optional identifier of the encryption key to filter by.",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "00000000-0000-0000-0000-000000000000"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "description": "The optional type of the encryption key to filter by.",
+            "schema": {
+              "$ref": "#/components/schemas/EncryptionKeyType"
+            },
+            "example": "Crypt"
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "description": "The optional version of the encryption key to filter by.",
+            "schema": {
+              "type": "string",
+              "example": "1"
+            }
+          },
+          {
+            "name": "publicKey",
+            "in": "query",
+            "description": "The optional public key to filter by.",
+            "schema": {
+              "type": "string",
+              "example": "some public key"
+            }
+          },
+          {
+            "name": "privateKeyEnc",
+            "in": "query",
+            "description": "The optional encrypted private key to filter by.",
+            "schema": {
+              "type": "string",
+              "example": "some encrypted private key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EncryptionKeyWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": []
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": []
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": []
+          }
+        ]
+      }
+    },
+    "/api/2.0/privacyroom/{roomId}/access": {
+      "get": {
+        "tags": [
+          "privacyroom"
+        ],
+        "summary": "Retrieves the encryption keys associated with a specific privacy room.",
+        "description": "Retrieves the encryption keys associated with a specific privacy room.",
+        "operationId": "getUserKeysForRoom",
+        "parameters": [
+          {
+            "name": "roomId",
+            "in": "path",
+            "description": "The identifier of the privacy room.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EncryptionKeyArrayWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": []
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": []
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": []
+          }
+        ]
+      }
+    },
+    "/api/2.0/privacyroom/keys/{id}": {
+      "delete": {
+        "tags": [
+          "privacyroom"
+        ],
+        "summary": "Deletes an encryption key and removes it from the system.",
+        "description": "Deletes an encryption key and removes it from the system based on the provided key identifier.",
+        "operationId": "deleteKeys",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The unique identifier of the encryption key to be deleted.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "00000000-0000-0000-0000-000000000000"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EncryptionKeyArrayWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": []
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": []
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": []
+          }
+        ]
+      }
+    },
+    "/api/2.0/privacyroom": {
+      "get": {
+        "tags": [
+          "privacyroom"
+        ],
+        "summary": "Retrieves the current settings for the Privacy Room functionality.",
+        "description": "Retrieves the current settings for the Privacy Room functionality.",
+        "operationId": "getPrivacyRoomSettings",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BooleanWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": []
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": []
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "privacyroom"
+        ],
+        "summary": "Configures the privacy room settings for the portal.",
+        "description": "Configures the privacy room settings for the portal.",
+        "operationId": "setPrivacyRoomSettings",
+        "requestBody": {
+          "description": "The request object containing the privacy room enable or disable flag.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PrivacyRoomEnableRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BooleanWrapper"
                 }
               }
             }
@@ -31094,6 +31841,9 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "No permissions to perform this action"
           },
           "401": {
             "description": "Unauthorized"
@@ -46376,6 +47126,24 @@
           }
         }
       },
+      "AccessRequestKeyDto": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "publicKeyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "privateKeyEnc": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "AceShortWrapper": {
         "type": "object",
         "properties": {
@@ -49311,7 +50079,7 @@
             "$ref": "#/components/schemas/EmbeddedConfig"
           },
           "encryptionKeys": {
-            "$ref": "#/components/schemas/EncryptionKeysConfig"
+            "$ref": "#/components/schemas/EncryptionKeyDto"
           },
           "lang": {
             "type": "string",
@@ -49696,31 +50464,150 @@
           "All"
         ]
       },
-      "EncryptionKeysConfig": {
+      "EncryptionKeyArrayWrapper": {
         "type": "object",
         "properties": {
-          "cryptoEngineId": {
-            "type": "string",
-            "description": "The crypto engine ID of the encryption key.",
-            "nullable": true,
-            "readOnly": true,
-            "example": "{FFF0E1EB-13DB-4678-B67D-FF0A41DBBCEF}"
+          "response": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EncryptionKeyDto"
+            }
           },
-          "privateKeyEnc": {
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
+      "EncryptionKeyDto": {
+        "type": "object",
+        "properties": {
+          "id": {
             "type": "string",
-            "description": "The private key.",
-            "nullable": true,
-            "example": "MIIEvQIBADANBgkqhkiG9w0BAQEFAASC..."
+            "format": "uuid"
+          },
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "date": {
+            "type": "string",
+            "format": "date-time"
           },
           "publicKey": {
             "type": "string",
-            "description": "The public key.",
+            "nullable": true
+          },
+          "privateKeyEnc": {
+            "type": "string",
+            "nullable": true
+          },
+          "cryptoEngineId": {
+            "type": "string",
             "nullable": true,
-            "example": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8A..."
+            "readOnly": true
           }
         },
-        "additionalProperties": false,
-        "description": "The encryption keys of the editor configuration."
+        "additionalProperties": false
+      },
+      "EncryptionKeyRequestDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "publicKey": {
+            "type": "string",
+            "nullable": true
+          },
+          "privateKeyEnc": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "EncryptionKeyType": {
+        "enum": [
+          0,
+          1
+        ],
+        "type": "integer",
+        "example": 0,
+        "x-enum-varnames": [
+          "Crypt",
+          "Sign"
+        ],
+        "description": "[]"
+      },
+      "EncryptionKeyWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/EncryptionKeyDto"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
       },
       "ExternalDbSyncFormResultDto": {
         "type": "object",
@@ -50255,6 +51142,66 @@
         "additionalProperties": false,
         "description": "The file parameters."
       },
+      "FileEncryptionInfoDto": {
+        "type": "object",
+        "properties": {
+          "userKeys": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EncryptionKeyDto"
+            },
+            "nullable": true
+          },
+          "fileKeys": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FileKeys"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "FileEncryptionInfoWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/FileEncryptionInfoDto"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
       "FileEntryBaseArrayWrapper": {
         "type": "object",
         "properties": {
@@ -50763,6 +51710,36 @@
             "format": "int32"
           }
         }
+      },
+      "FileKeys": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "publicKeyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "privateKeyEnc": {
+            "type": "string",
+            "nullable": true
+          },
+          "tenantId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "fileId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "createOn": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
       },
       "FileLink": {
         "required": [
@@ -54898,6 +55875,18 @@
         },
         "additionalProperties": false,
         "description": "The configuration settings to connect the special add-ons."
+      },
+      "PrivacyRoomEnableRequestDto": {
+        "type": "object",
+        "properties": {
+          "enable": {
+            "type": "boolean",
+            "description": "Specifies whether to enable the Private Room settings or not.",
+            "example": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "The request parameters for setting encryption keys."
       },
       "ProviderArrayWrapper": {
         "type": "object",
@@ -69429,6 +70418,12 @@
             },
             "description": "The web plugin localized description.",
             "nullable": true
+          },
+          "runtime": {
+            "type": "string",
+            "description": "The web plugin loading method",
+            "nullable": true,
+            "example": "module"
           }
         },
         "additionalProperties": false,

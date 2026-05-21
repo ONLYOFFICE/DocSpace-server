@@ -3752,6 +3752,50 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasAnnotation("MySql:CharSet", "utf8");
                 });
 
+            modelBuilder.Entity("ASC.Files.Core.EF.DbFileKeys", b =>
+                {
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<int>("FileId")
+                        .HasColumnType("int")
+                        .HasColumnName("file_id");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("user_id")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<DateTime>("CreateOn")
+                        .HasColumnType("datetime")
+                        .HasColumnName("create_on");
+
+                    b.Property<string>("PrivateKeyEnc")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("private_key_enc")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<Guid>("PublicKeyId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("public_key_id")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.HasKey("TenantId", "FileId", "UserId")
+                        .HasName("PRIMARY");
+
+                    b.HasIndex("TenantId", "UserId")
+                        .HasDatabaseName("tenant_id_user_id");
+
+                    b.ToTable("files_file_keys", (string)null);
+
+                    b.HasAnnotation("MySql:CharSet", "utf8");
+                });
+
             modelBuilder.Entity("ASC.Files.Core.EF.DbFileOrder", b =>
                 {
                     b.Property<int>("TenantId")
@@ -6058,6 +6102,17 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .WithMany()
                         .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tenant");
+                });
+
+            modelBuilder.Entity("ASC.Files.Core.EF.DbFileKeys", b =>
+                {
+                    b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Tenant");

@@ -282,7 +282,7 @@ public class EditorConfiguration<T>(
 {
     public PluginsConfig Plugins { get; } = pluginsConfig;
     public CustomizationConfig<T> Customization { get; } = customizationConfig;
-    public EncryptionKeysConfig EncryptionKeys { get; set; }
+    public EncryptionKeyDto EncryptionKeys { get; set; }
 
     public string Lang => UserInfo.GetCulture().Name;
 
@@ -1156,30 +1156,6 @@ public class EmbeddedConfig(BaseCommonLinkUtility baseCommonLinkUtility, FilesLi
     /// </summary>
     /// <example>top</example>
     public string ToolbarDocked => "top";
-}
-
-/// <summary>
-/// The encryption keys of the editor configuration.
-/// </summary>
-public class EncryptionKeysConfig
-{
-    /// <summary>
-    /// The crypto engine ID of the encryption key.
-    /// </summary>
-    /// <example>{FFF0E1EB-13DB-4678-B67D-FF0A41DBBCEF}</example>
-    public string CryptoEngineId => "{FFF0E1EB-13DB-4678-B67D-FF0A41DBBCEF}";
-
-    /// <summary>
-    /// The private key.
-    /// </summary>
-    /// <example>MIIEvQIBADANBgkqhkiG9w0BAQEFAASC...</example>
-    public string PrivateKeyEnc { get; set; }
-
-    /// <summary>
-    /// The public key.
-    /// </summary>
-    /// <example>MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8A...</example>
-    public string PublicKey { get; set; }
 }
 
 /// <summary>

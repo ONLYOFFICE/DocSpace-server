@@ -239,7 +239,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         {
             var folderDao = daoFactory.GetFolderDao<T>();
             var room = await DocSpaceHelper.GetParentRoom(file, folderDao);
-            locatedInPrivateRoom = DocSpaceHelper.LocatedInPrivateRoomAsync(room);
+            locatedInPrivateRoom = DocSpaceHelper.LocatedInPrivateRoom(room);
             options = GetOptions(room);
         }
 
