@@ -1215,7 +1215,6 @@ public class EntryManager(IDaoFactory daoFactory,
                         var u = a.Where(ace => ace is not { Access: FileShare.FillForms }).Select(ace => ace.Id).ToList();
 
                         await socketManager.CreateFolderAsync(formFolder, u);
-                        await filesMessageService.SendAsync(MessageAction.FolderCreated, formFolder, formFolder.Title);
                     }
                 }
                 else
@@ -1992,7 +1991,6 @@ public class EntryManager(IDaoFactory daoFactory,
         foreach (var formFolder in systemFormFillingFolders)
         {
             await socketManager.CreateFolderAsync(formFolder);
-            await filesMessageService.SendAsync(MessageAction.FolderCreated, formFolder, formFolder.Title);
         }
 
         await InitFormFillingProperties(folder.Id, Path.GetFileNameWithoutExtension(file.Title), file.Id, file.Version, inProcessFormFolderId, readyFormFolderId, folder.CreateBy, properties, fileDao, folderDao);
