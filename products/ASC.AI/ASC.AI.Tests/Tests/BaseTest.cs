@@ -35,6 +35,7 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     protected const string ThreadsPath = "/api/2.0/ai/integration/threads";
     protected const string MessagesPath = "/api/2.0/ai/integration/messages";
     protected const string McpServersPath = "/api/2.0/ai/integration/mcp-servers";
+    protected const string PreferencesPath = "/api/2.0/ai/integration/preferences";
 
     private static readonly JsonSerializerOptions _readJsonOptions = new()
     {
@@ -214,6 +215,30 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
             TestContext.Current.CancellationToken);
         var room = await Fixture.FilesApi.ReadAsync<RoomFolderDto>(response, TestContext.Current.CancellationToken);
         return room.Id;
+    }
+
+    protected async Task<PreferencesDto?> ReadPreferencesAsync(string? entityId = null)
+    {
+        var path = entityId is null
+            ? PreferencesPath
+            : $"{PreferencesPath}?entityId={entityId}";
+
+        using var response = await Ai.GetAsync(path, TestContext.Current.CancellationToken);
+        response.EnsureSuccessStatusCode();
+
+        var wrapper = await response.Content.ReadFromJsonAsync<ApiResponse<PreferencesDto>>(
+            _readJsonOptions,
+            TestContext.Current.CancellationToken);
+        return wrapper?.Response;
+    }
+
+    protected async Task UpsertPreferencesAsync(bool? deepMode, string? entityId = null)
+    {
+        using var response = await Ai.PutAsync(
+            PreferencesPath,
+            new { deepMode, entityId },
+            TestContext.Current.CancellationToken);
+        response.EnsureSuccessStatusCode();
     }
 
     private static string BuildScopedAssignmentPath(string actionType, string? entityId) =>

@@ -66,6 +66,7 @@ global using CreateProfileRequestDto = ASCAi::ASC.AI.Models.RequestDto.Integrati
 global using CreateProfilesRequestDto = ASCAi::ASC.AI.Models.RequestDto.Integration.CreateProfilesRequestDto;
 global using McpServerDto = ASCAi::ASC.AI.Models.ResponseDto.Integration.McpServerDto;
 global using MessageDto = ASCAi::ASC.AI.Models.ResponseDto.Integration.MessageDto;
+global using PreferencesDto = ASCAi::ASC.AI.Models.ResponseDto.Integration.PreferencesDto;
 global using ProfileDto = ASCAi::ASC.AI.Models.ResponseDto.Integration.ProfileDto;
 global using ThreadDto = ASCAi::ASC.AI.Models.ResponseDto.Integration.ThreadDto;
 global using UpdateProfileBody = ASCAi::ASC.AI.Models.RequestDto.Integration.UpdateProfileBody;
