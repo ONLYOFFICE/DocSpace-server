@@ -1,34 +1,34 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Files.Core.Security;
@@ -1740,6 +1740,36 @@ public class FileSecurity(
                     }
                 }
 
+                if (file != null && room is {SettingsPrivate: true} &&
+                    action is
+                        FilesSecurityActions.Convert or
+                        FilesSecurityActions.AskAi or
+                        FilesSecurityActions.Embed or
+                        FilesSecurityActions.EditAccess or
+                        FilesSecurityActions.Copy
+                    )
+                {
+                    return false;
+                }
+
+                if (folder is {SettingsPrivate: true} &&
+                    action is
+                        FilesSecurityActions.Convert or
+                        FilesSecurityActions.AskAi or
+                        FilesSecurityActions.Embed
+                    )
+                {
+                    return false;
+                }
+
+                if (room is {SettingsPrivate: true} && folder is {IsRoom: false} &&
+                    action is FilesSecurityActions.EditAccess or
+                        FilesSecurityActions.Copy or
+                        FilesSecurityActions.CopyTo)
+                {
+                    return false;
+                }
+
                 if (await HasFullAccessAsync(e, userId, isGuest, isRoom, isUser))
                 {
                     return true;
@@ -3357,6 +3387,11 @@ public class FileSecurity(
             }
         }
 
+        if (folder is { SettingsPrivate: true })
+        {
+            return result;
+        }
+
         foreach (var subjectType in Enum.GetValues<SubjectType>())
         {
             if (!parentRoomType.HasValue ||
@@ -3425,6 +3460,11 @@ public class FileSecurity(
                 }
             }
             linkSettings = _linkCountRoomFileSettingsAccesses;
+        }
+
+        if (room is { SettingsPrivate: true })
+        {
+            return 0;
         }
 
         if (parentRoomType.HasValue && linkSettings.TryGetValue(parentRoomType.Value, out var access) && access.TryGetValue(subjectType, out var i))

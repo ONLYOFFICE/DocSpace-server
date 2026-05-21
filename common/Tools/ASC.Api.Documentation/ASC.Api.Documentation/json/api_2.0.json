@@ -3009,6 +3009,9 @@
               }
             }
           },
+          "403": {
+            "description": "No permissions to perform this action"
+          },
           "401": {
             "description": "Unauthorized"
           }
@@ -25766,6 +25769,12 @@
             },
             "description": "The web plugin localized description.",
             "nullable": true
+          },
+          "runtime": {
+            "type": "string",
+            "description": "The web plugin loading method",
+            "nullable": true,
+            "example": "module"
           }
         },
         "additionalProperties": false,

@@ -1037,6 +1037,7 @@ internal class FileDao(
             var entryEventsIds = await context.GetAuditEventsIdsAsync(fileId, FileEntryType.File).ToListAsync();
             await context.MarkAuditReferencesAsCorruptedAsync(entryEventsIds);
             await context.DeleteAuditReferencesAsync(fileId, FileEntryType.File);
+            await context.DeleteFileKeysAsync(tenantId, fileId);
 
             await context.SaveChangesAsync();
             await tx.CommitAsync();
@@ -2030,6 +2031,54 @@ internal class FileDao(
 
             await tr.CommitAsync();
         });
+    }
+
+    public async Task SetFileKey(int fileId, IEnumerable<FileKeyData> keys)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        var createOn = _tenantUtil.DateTimeNow();
+
+        var entities = keys.Select(key => new DbFileKeys
+        {
+            TenantId = tenantId,
+            FileId = fileId,
+            UserId = key.UserId,
+            CreateOn = createOn,
+            PublicKeyId = key.PublicKeyId,
+            PrivateKeyEnc = key.PrivateKeyEnc
+        }).ToList();
+
+        var userIds = entities.Select(x => x.UserId).ToList();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var strategy = filesDbContext.Database.CreateExecutionStrategy();
+
+        await strategy.ExecuteAsync(async () =>
+        {
+            await using var context = await _dbContextFactory.CreateDbContextAsync();
+            await using var tx = await context.Database.BeginTransactionAsync();
+
+            await context.DeleteFileKeysAsync(tenantId, fileId, userIds);
+            await context.DbFileKeys.AddRangeAsync(entities);
+            await context.SaveChangesAsync();
+
+            await tx.CommitAsync();
+        });
+    }
+
+    public async Task<List<FileKeys>> GetFileKeys(int fileId, Guid userId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        return await filesDbContext.DbFileKeys
+            .Where(r =>
+                r.TenantId == tenantId &&
+                r.FileId == fileId &&
+                r.UserId == userId)
+            .Project()
+            .ToListAsync();
     }
 
     public string GetUniqThumbnailPath(File<int> file, uint width, uint height)

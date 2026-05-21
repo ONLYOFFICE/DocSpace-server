@@ -109,28 +109,19 @@ public class MigrationContext : DbContext
     public DbSet<DbFilesAuditReference> FilesAuditReferences { get; set; }
     public DbSet<DbFilesGroup> FilesGroup { get; set; }
     public DbSet<DbFilesRoomGroup> FilesRoomGroup { get; set; }
+    public DbSet<DbFileKeys> FileKeys { get; set; }
 
 
     public DbSet<IdentityAuthorization> IdentityAuthorizations { get; set; }
-
     public DbSet<IdentityCert> IdentityCerts { get; set; }
-
     public DbSet<IdentityClient> IdentityClients { get; set; }
-
     public DbSet<IdentityClientAllowedOrigin> IdentityClientAllowedOrigins { get; set; }
-
     public DbSet<IdentityClientAuthenticationMethod> IdentityClientAuthenticationMethods { get; set; }
-
     public DbSet<IdentityClientRedirectUri> IdentityClientRedirectUris { get; set; }
-
     public DbSet<IdentityClientScope> IdentityClientScopes { get; set; }
-
     public DbSet<IdentityConsent> IdentityConsents { get; set; }
-
     public DbSet<IdentityConsentScope> IdentityConsentScopes { get; set; }
-
     public DbSet<IdentityScope> IdentityScopes { get; set; }
-
     public DbSet<IdentityShedlock> IdentityShedlocks { get; set; }
     public DbSet<DbUserRelation> UserRelations { get; set; }
 
@@ -241,6 +232,8 @@ public class MigrationContext : DbContext
             .AddDbDefaultAiProviders()
             .AddDbAiModelSettings()
             .AddDbChatMessageAttachment()
+            .AddDbFileKeys()
+            .AddDbUserChatSettings()
             .AddAppSettings();
     }
 }
