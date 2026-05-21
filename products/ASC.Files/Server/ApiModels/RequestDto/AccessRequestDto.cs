@@ -35,17 +35,36 @@ namespace ASC.Files.ApiModels.RequestDto;
 
 public class AccessRequestDto<T>
 {
+    /// <summary>
+    /// File ID
+    /// </summary>
+    /// <example>12345</example>
     [FromRoute(Name = "fileId")]
     public required T FileId { get; set; }
 
+    /// <summary>
+    /// Collection of encryption key data for users with access to the file
+    /// </summary>
     [FromBody]
     public IEnumerable<AccessRequestKeyDto> Keys { get; set; }
 }
 
 public class AccessRequestKeyDto
 {
+    /// <summary>
+    /// User ID
+    /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     public Guid UserId { get; set; }
+    /// <summary>
+    /// Public key ID
+    /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     public Guid PublicKeyId { get; set; }
+    /// <summary>
+    /// Encrypted private key
+    /// </summary>
+    /// <example>encrypted_key_string</example>
     public string PrivateKeyEnc { get; set; }
 }
 
