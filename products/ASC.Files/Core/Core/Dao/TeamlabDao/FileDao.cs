@@ -685,7 +685,6 @@ internal class FileDao(
                                             var u = a.Where(ace => ace is not { Access: FileShare.FillForms }).Select(ace => ace.Id).ToList();
 
                                             await socketManager.CreateFolderAsync(formFolder, u);
-                                            await filesMessageService.SendAsync(MessageAction.FolderCreated, formFolder, formFolder.Title);
                                         }
                                     }
 
