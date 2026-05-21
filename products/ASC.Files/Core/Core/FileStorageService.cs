@@ -111,7 +111,6 @@ public class FileStorageService //: IFileStorageService
     AiGateway gateway,
     FormFillingReportCreator formFillingReportCreator,
     ExportToXLSX exportToXLSX,
-    FileSecurityCommon fileSecurityCommon,
     ExternalDbSyncService externalDbSyncService,
     EncryptionLoginProvider encryptionLoginProvider)
 {

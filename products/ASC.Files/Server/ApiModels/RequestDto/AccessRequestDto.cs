@@ -45,6 +45,15 @@ public class AccessRequestDto<T>
     /// <summary>
     /// Collection of encryption key data for users with access to the file
     /// </summary>
+    /// <example type="array">
+    /// [
+    ///   {
+    ///     "userId": "00000000-0000-0000-0000-000000000000",
+    ///     "publicKeyId": "00000000-0000-0000-0000-000000000000",
+    ///     "privateKeyEnc": "encrypted_key_string"
+    ///   }
+    /// ]
+    /// </example>
     [FromBody]
     public IEnumerable<AccessRequestKeyDto> Keys { get; set; }
 }
@@ -56,11 +65,13 @@ public class AccessRequestKeyDto
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     public Guid UserId { get; set; }
+
     /// <summary>
     /// Public key ID
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     public Guid PublicKeyId { get; set; }
+
     /// <summary>
     /// Encrypted private key
     /// </summary>
