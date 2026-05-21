@@ -36,6 +36,9 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     protected const string MessagesPath = "/api/2.0/ai/integration/messages";
     protected const string McpServersPath = "/api/2.0/ai/integration/mcp-servers";
     protected const string PreferencesPath = "/api/2.0/ai/integration/preferences";
+    protected const string ToolPrefsPath = "/api/2.0/ai/integration/tool-prefs";
+
+    protected const string SystemToolsServerType = "00000000-0000-0000-0000-000000000001";
 
     private static readonly JsonSerializerOptions _readJsonOptions = new()
     {
@@ -237,6 +240,38 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         using var response = await Ai.PutAsync(
             PreferencesPath,
             new { deepMode, entityId },
+            TestContext.Current.CancellationToken);
+        response.EnsureSuccessStatusCode();
+    }
+
+    protected async Task<Dictionary<string, ToolPreference>> ReadToolPrefsAsync(string? entityId = null)
+    {
+        var path = entityId is null
+            ? ToolPrefsPath
+            : $"{ToolPrefsPath}?entityId={entityId}";
+
+        using var response = await Ai.GetAsync(path, TestContext.Current.CancellationToken);
+        return await Ai.ReadAsync<Dictionary<string, ToolPreference>>(response, TestContext.Current.CancellationToken);
+    }
+
+    protected async Task UpsertDisabledToolPrefsAsync(
+        IReadOnlyDictionary<string, HashSet<string>> disabled,
+        string? entityId = null)
+    {
+        using var response = await Ai.PutAsync(
+            $"{ToolPrefsPath}/disabled",
+            new { disabled, entityId },
+            TestContext.Current.CancellationToken);
+        response.EnsureSuccessStatusCode();
+    }
+
+    protected async Task UpsertAllowAlwaysToolPrefsAsync(
+        IReadOnlyDictionary<string, HashSet<string>> allowAlways,
+        string? entityId = null)
+    {
+        using var response = await Ai.PutAsync(
+            $"{ToolPrefsPath}/allow-always",
+            new { allowAlways, entityId },
             TestContext.Current.CancellationToken);
         response.EnsureSuccessStatusCode();
     }

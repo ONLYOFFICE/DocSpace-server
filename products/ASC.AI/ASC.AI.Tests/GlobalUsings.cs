@@ -60,6 +60,7 @@ global using Respawn.Graph;
 global using Xunit;
 
 global using ASC.AI.Integration.Profiles;
+global using ASC.AI.Integration.ToolPrefs;
 global using ASC.Core.Users;
 
 global using CreateProfileRequestDto = ASCAi::ASC.AI.Models.RequestDto.Integration.CreateProfileRequestDto;
