@@ -23,12 +23,12 @@
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 using ASC.MessagingSystem.EF.Model;
@@ -45,9 +45,7 @@ namespace ASC.Api.Documents;
 public class PrivacyRoomControllerCommon(
     AuthContext authContext,
     PermissionContext permissionContext,
-    SettingsManager settingsManager,
-    EncryptionKeyPairDtoHelper encryptionKeyPairHelper,
-    MessageService messageService)
+    EncryptionKeyPairDtoHelper encryptionKeyPairHelper)
     : ControllerBase
 {
     /// <summary>
@@ -194,57 +192,9 @@ public class PrivacyRoomControllerCommon(
         return await encryptionKeyPairHelper.DeleteAsync(inDto.Id);
     }
 
-    /// <summary>
-    /// Retrieves the current settings for the Privacy Room functionality.
-    /// </summary>
-    /// <remarks>
-    /// Retrieves the current settings for the Privacy Room functionality.
-    /// </remarks>
-    /// <returns>A task result indicating whether the Privacy Room feature is enabled.</returns>
-    [HttpGet]
-    public async Task<bool> GetPrivacyRoomSettings()
-    {
-        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-
-        return await PrivacyRoomSettings.GetEnabledAsync(settingsManager);
-    }
-
-    /// <summary>
-    /// Configures the privacy room settings for the portal.
-    /// </summary>
-    /// <remarks>
-    /// Configures the privacy room settings for the portal.
-    /// </remarks>
-    /// <param name="inDto">The request object containing the privacy room enable or disable flag.</param>
-    /// <returns>A task result indicating whether the privacy room was successfully enabled or disabled.</returns>
-    [HttpPut]
-    public async Task<bool> SetPrivacyRoomSettings(PrivacyRoomEnableRequestDto inDto)
-    {
-        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-
-        if (inDto.Enable)
-        {
-            if (!PrivacyRoomSettings.IsAvailable())
-            {
-                throw new BillingException(Resource.ErrorNotAllowedOption);
-            }
-        }
-
-        await PrivacyRoomSettings.SetEnabledAsync(settingsManager, inDto.Enable);
-
-        await messageService.SendAsync(inDto.Enable ? MessageAction.PrivacyRoomEnable : MessageAction.PrivacyRoomDisable, MessageTarget.Create(authContext.CurrentAccount.ID));
-
-        return inDto.Enable;
-    }
-
     private async Task Demand()
     {
         await permissionContext.DemandPermissionsAsync(new UserSecurityProvider(authContext.CurrentAccount.ID), Constants.Action_EditUser);
-
-        if (!await PrivacyRoomSettings.GetEnabledAsync(settingsManager))
-        {
-            throw new SecurityException();
-        }
     }
 
     private async Task<IEnumerable<EncryptionKeyDto>> CreateKeysAsync(IEnumerable<EncryptionKeyRequestDto> inDto, bool replace)
