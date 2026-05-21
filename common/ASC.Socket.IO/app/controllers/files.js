@@ -118,6 +118,11 @@ module.exports = (files) => {
     files.topUpWallet(req.body);
     res.end();
   });
+
+  router.post("/top-up-ai", (req, res) => {
+    files.topUpAi(req.body);
+    res.end();
+  });
   
   router.post("/update-history", (req, res) => {
     files.updateHistory(req.body);

@@ -2365,6 +2365,23 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
+        ///We’re reaching out to inform you that the automatic top-up of the DocSpace AI balance was unsuccessful.
+        ///
+        ///We kindly ask you to manually check and update your AI balance.
+        ///
+        ///$OrangeButton
+        ///
+        ///$TrulyYours.
+        /// </summary>
+        public static string pattern_ai_auto_top_up_error {
+            get {
+                return ResourceManager.GetString("pattern_ai_auto_top_up_error", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Hello, $UserName!
+        ///
         ///We’re reaching out to inform you that the automatic top-up of the DocSpace Wallet balance was unsuccessful.
         ///
         ///We kindly ask you to manually check and update your wallet balance.
@@ -3392,6 +3409,15 @@ namespace ASC.Web.Core.PublicResources {
             }
         }
         
+        /// <summary>
+        ///   Looks up a localized string similar to Action required: Unable to auto top up the AI balance in your ${LetterLogoText} DocSpace.
+        /// </summary>
+        public static string subject_ai_auto_top_up_error {
+            get {
+                return ResourceManager.GetString("subject_ai_auto_top_up_error", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Action required: Unable to auto top up the Wallet balance in your ${LetterLogoText} DocSpace.
         /// </summary>

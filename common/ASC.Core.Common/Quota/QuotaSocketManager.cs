@@ -86,6 +86,13 @@ public class QuotaSocketManager(
         await MakeRequest("top-up-wallet", new { room, auto });
     }
 
+    public async Task TopUpAiAsync(bool auto)
+    {
+        var room = GetQuotaRoom();
+
+        await MakeRequest("top-up-ai", new { room, auto });
+    }
+
     public async Task LogoutSession(Guid userId, int loginEventId = 0, string redirectUrl = null)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();

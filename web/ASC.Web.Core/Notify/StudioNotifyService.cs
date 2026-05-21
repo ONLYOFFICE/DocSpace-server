@@ -848,6 +848,22 @@ public class StudioNotifyService(
         }
     }
 
+    public async Task SendAiAutoTopUpErrorAsync(UserInfo payer, UserInfo owner)
+    {
+        var users = new[] { payer, owner }
+            .Where(user => user != null && !string.IsNullOrEmpty(user.Email))
+            .DistinctBy(user => user.Email);
+
+        var aiAutoTopUpErrorNotifyAction = serviceProvider.GetService<AiAutoTopUpErrorNotifyAction>();
+
+        foreach (var user in users)
+        {
+            aiAutoTopUpErrorNotifyAction.Init(user);
+
+            await studioNotifyServiceHelper.SendNoticeToAsync(aiAutoTopUpErrorNotifyAction, await studioNotifyHelper.RecipientFromEmailAsync(user.Email, false), [EMailSenderName]);
+        }
+    }
+
     public async Task SendRenewSubscriptionErrorAsync(UserInfo payer, UserInfo owner)
     {
         var users = new[] { payer, owner }

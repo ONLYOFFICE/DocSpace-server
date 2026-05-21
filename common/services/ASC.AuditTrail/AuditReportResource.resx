@@ -258,6 +258,12 @@
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
     <value>Customer wallet enabled services settings updated</value>
   </data>
+  <data name="CustomerAiToppedUp" xml:space="preserve">
+    <value>Customer AI balance topped up: {0}</value>
+  </data>
+  <data name="CustomerAiAutoTopUpSettingsUpdated" xml:space="preserve">
+    <value>Customer AI auto top up settings updated</value>
+  </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Customer wallet topped up: {0}</value>
   </data>

@@ -431,6 +431,11 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:top-up-wallet", { auto });
   }
 
+  function topUpAi({ room, auto } = {}) {
+    logger.info(`AI balance topped up ${room}, auto ${auto}`);
+    filesIO.to(room).emit("s:top-up-ai", { auto });
+  }
+
   function updateHistory({ room, id, type } = {}) {
     logger.info(`update ${type} history ${id} in room ${room}`);
     filesIO.to(room).emit("s:update-history", { id, type });
@@ -631,6 +636,7 @@ module.exports = (io) => {
     changeInvitationLimitValue,
     changeWebPlugin,
     topUpWallet,
+    topUpAi,
     updateHistory,
     logoutSession,
     changeMyType,

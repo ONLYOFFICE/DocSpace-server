@@ -1102,6 +1102,88 @@ public class PaymentController(
     }
 
     /// <summary>
+    /// Gets the AI auto top up settings
+    /// </summary>
+    /// <remarks>
+    /// Returns the AI sub-account auto top up settings for the current tenant.
+    /// </remarks>
+    /// <path>api/2.0/portal/payment/aiautotopupsettings</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The AI auto top up settings", typeof(TenantAiAutoTopUpSettings))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [HttpGet("aiautotopupsettings")]
+    public async Task<TenantAiAutoTopUpSettings> GetAiAutoTopUpSettings()
+    {
+        await DemandAdminAsync();
+
+        return await settingsManager.LoadAsync<TenantAiAutoTopUpSettings>();
+    }
+
+    /// <summary>
+    /// Sets the AI auto top up settings
+    /// </summary>
+    /// <remarks>
+    /// Updates the AI sub-account auto top up settings for the current tenant.
+    /// Requires the tariff service to be configured and the user to be authorized as a payer.
+    /// </remarks>
+    /// <path>api/2.0/portal/payment/aiautotopupsettings</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The AI auto top up settings", typeof(TenantAiAutoTopUpSettings))]
+    [SwaggerResponse(400, "Unsupported currency")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(404, "Customer could not be found")]
+    [HttpPost("aiautotopupsettings")]
+    public async Task<TenantAiAutoTopUpSettings> SetAiAutoTopUpSettings(TenantAiAutoTopUpSettingsWrapper inDto)
+    {
+        if (!tariffService.IsConfigured())
+        {
+            throw new InvalidOperationException("Tariff service is not configured");
+        }
+
+        var tenant = tenantManager.GetCurrentTenant();
+
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+        if (customerInfo == null)
+        {
+            throw new ItemNotFoundException("Customer could not be found");
+        }
+
+        var aiBalance = await tariffService.GetCustomerAiBalanceAsync(tenant.Id);
+        if (aiBalance == null)
+        {
+            throw new ItemNotFoundException("Balance could not be found");
+        }
+
+        var settings = inDto?.Settings ?? new TenantAiAutoTopUpSettings();
+
+        var supportedCurrencies = tariffService.GetSupportedAccountingCurrencies();
+
+        if (string.IsNullOrEmpty(settings.Currency))
+        {
+            settings.Currency = supportedCurrencies.FirstOrDefault();
+        }
+
+        if (!supportedCurrencies.Contains(settings.Currency))
+        {
+            throw new ArgumentException("Unsupported currency");
+        }
+
+        var subAccount = aiBalance.SubAccounts.FirstOrDefault(x => x.Currency == settings.Currency);
+        if (subAccount == null)
+        {
+            throw new ItemNotFoundException("Subaccount could not be found");
+        }
+
+        await DemandPayerAsync(customerInfo);
+
+        await settingsManager.SaveAsync(settings);
+
+        messageService.Send(MessageAction.CustomerAiAutoTopUpSettingsUpdated);
+
+        return settings;
+    }
+
+    /// <summary>
     /// Set the wallet auto top up settings
     /// </summary>
     /// <remarks>
@@ -1140,7 +1222,7 @@ public class PaymentController(
 
         var settings = inDto?.Settings ?? new TenantWalletSettings();
 
-        var result = await settingsManager.SaveAsync(settings);
+        await settingsManager.SaveAsync(settings);
 
         messageService.Send(MessageAction.CustomerWalletTopUpSettingsUpdated);
 
@@ -1309,13 +1391,16 @@ public class PaymentController(
         var result = await tariffService.MakeAiCreditAsync(tenant.Id, inDto.Amount, inDto.Currency, customerParticipantName, metadata: null);
         if (result != null)
         {
-            var details = $"{aiToolsQuota.ServiceName} {inDto.Amount} {inDto.Currency}";
-            messageService.Send(MessageAction.CustomerOperationPerformed, null, details);
+            var description = $"{inDto.Amount} {inDto.Currency}";
+            messageService.Send(MessageAction.CustomerAiToppedUp, description);
+
             await ChangeTenantWalletServiceState(new ChangeWalletServiceStateRequestDto
             {
                 Service = TenantWalletService.AITools,
                 Enabled = true
             });
+
+            await quotaSocketManager.TopUpAiAsync(false);
         }
 
         return result;

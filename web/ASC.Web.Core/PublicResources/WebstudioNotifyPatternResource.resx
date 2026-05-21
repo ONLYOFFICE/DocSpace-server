@@ -2329,6 +2329,17 @@ The file encryption process on your portal "${PortalUrl}":"${PortalUrl}" has bee
 
 Your portal is available again.</value>
   </data>
+  <data name="pattern_ai_auto_top_up_error" xml:space="preserve">
+    <value>Hello, $UserName!
+
+We’re reaching out to inform you that the automatic top-up of the DocSpace AI balance was unsuccessful.
+
+We kindly ask you to manually check and update your AI balance.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_top_up_wallet_error" xml:space="preserve">
     <value>Hello, $UserName!
 
@@ -2708,6 +2719,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_storage_encryption_success" xml:space="preserve">
     <value>${LetterLogoText}. Encryption process completed</value>
+  </data>
+  <data name="subject_ai_auto_top_up_error" xml:space="preserve">
+    <value>Action required: Unable to auto top up the AI balance in your ${LetterLogoText} DocSpace</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
     <value>Action required: Unable to auto top up the Wallet balance in your ${LetterLogoText} DocSpace</value>

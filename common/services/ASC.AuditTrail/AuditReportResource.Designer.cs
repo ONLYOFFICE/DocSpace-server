@@ -502,6 +502,24 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Customer AI balance topped up: {0}.
+        /// </summary>
+        public static string CustomerAiToppedUp {
+            get {
+                return ResourceManager.GetString("CustomerAiToppedUp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Customer AI auto top up settings updated.
+        /// </summary>
+        public static string CustomerAiAutoTopUpSettingsUpdated {
+            get {
+                return ResourceManager.GetString("CustomerAiAutoTopUpSettingsUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Customer wallet topped up: {0}.
         /// </summary>
         public static string CustomerWalletToppedUp {

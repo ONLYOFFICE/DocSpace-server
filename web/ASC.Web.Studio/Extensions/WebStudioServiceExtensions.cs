@@ -64,6 +64,7 @@ public static class WebStudioServiceExtensions
         services.RegisterQueue<MigrationOperation>(timeUntilUnregisterInSeconds: 60 * 60 * 24);
 
         services.AddActivePassiveHostedService<TopUpWalletService>(configuration);
+        services.AddActivePassiveHostedService<AiAutoTopUpService>(configuration);
         services.AddActivePassiveHostedService<RenewSubscriptionService>(configuration);
 
         services.AddWebhookSenderHttpClient(configuration);
