@@ -1745,7 +1745,8 @@ public class FileSecurity(
                         FilesSecurityActions.Convert or
                         FilesSecurityActions.AskAi or
                         FilesSecurityActions.Embed or
-                        FilesSecurityActions.EditAccess
+                        FilesSecurityActions.EditAccess or
+                        FilesSecurityActions.Copy
                     )
                 {
                     return false;
@@ -1761,7 +1762,10 @@ public class FileSecurity(
                     return false;
                 }
 
-                if (room is {SettingsPrivate: true} && folder is {IsRoom: false} && action is FilesSecurityActions.EditAccess)
+                if (room is {SettingsPrivate: true} && folder is {IsRoom: false} &&
+                    action is FilesSecurityActions.EditAccess or
+                        FilesSecurityActions.Copy or
+                        FilesSecurityActions.CopyTo)
                 {
                     return false;
                 }
