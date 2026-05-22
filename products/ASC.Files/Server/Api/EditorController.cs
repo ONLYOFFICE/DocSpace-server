@@ -525,14 +525,12 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
                 return true;
             }
 
-            var success = Uri.TryCreate(url, UriKind.RelativeOrAbsolute, out var uri);
-
-            if (uri == null || uri.IsAbsoluteUri && !string.IsNullOrEmpty(uri.Query))
+            if (!Uri.TryCreate(url, UriKind.RelativeOrAbsolute, out var uri))
             {
                 return false;
             }
 
-            return success;
+            return !(uri.IsAbsoluteUri && !string.IsNullOrEmpty(uri.Query));
         }
     }
 
