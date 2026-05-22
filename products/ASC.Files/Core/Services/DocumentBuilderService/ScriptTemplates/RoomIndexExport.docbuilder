@@ -235,11 +235,11 @@ var infoTable = prepareInfo();
 
 writeTable(infoTable);
 
-oWorksheet.GetRange(toColumnName(currentColIndex) + (currentRowIndex + 1)).Select();
-
-Api.asc_freezePane();
-
 var dataTable = prepareData(currentColIndex, currentRowIndex);
+
+var freezePanes = oWorksheet.GetFreezePanes();;
+var range = Api.GetRange(toColumnName(dataTable[0].dataArray.length) + currentRowIndex);
+freezePanes.FreezeAt(range);
 
 var formattedTableRange = toColumnName(currentColIndex) + (currentRowIndex) + ":" + toColumnName(dataTable[0].dataArray.length) + (currentRowIndex + dataTable.length - 3);
 

@@ -2013,24 +2013,6 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Private Room is disabled.
-        /// </summary>
-        public static string PrivacyRoomDisable {
-            get {
-                return ResourceManager.GetString("PrivacyRoomDisable", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Private Room is enabled.
-        /// </summary>
-        public static string PrivacyRoomEnable {
-            get {
-                return ResourceManager.GetString("PrivacyRoomEnable", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Products [{0}]. Access Opened.
         /// </summary>
         public static string ProductAccessOpened {
@@ -2535,7 +2517,7 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Schedule backup deleted.
+        ///   Looks up a localized string similar to Scheduled backup deleted.
         /// </summary>
         public static string ScheduledBackupDeleted {
             get {

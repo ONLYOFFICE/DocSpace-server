@@ -1,29 +1,35 @@
-// (c) Copyright Ascensio System SIA 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 //
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY; without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 //
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 //
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 //
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 //
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical
-// writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+//
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
 
 package com.asc.registration.application.transfer;
 
@@ -31,10 +37,7 @@ import com.asc.common.utilities.validation.LogoSize;
 import com.asc.common.utilities.validation.URLCollection;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import java.io.Serializable;
 import java.util.Set;
 import lombok.AllArgsConstructor;
@@ -95,7 +98,7 @@ public class CreateClientRequest implements Serializable {
   /**
    * The name of the client. The client name length is expected to be between 3 and 256 characters.
    */
-  @NotEmpty
+  @NotBlank(message = "client name must not be empty")
   @Size(
       min = 3,
       max = 256,
@@ -118,7 +121,7 @@ public class CreateClientRequest implements Serializable {
   /**
    * The logo of the client in base64 format. The client logo is expected to be passed as base64.
    */
-  @NotEmpty
+  @NotBlank(message = "client logo must not be empty")
   @Pattern(
       regexp = "^data:image\\/(?:png|jpeg|jpg|svg\\+xml);base64,.*.{1,}",
       message = "client logo is expected to be passed as base64")
@@ -140,7 +143,7 @@ public class CreateClientRequest implements Serializable {
 
   /** The website URL of the client. The website URL is expected to be passed as a URL. */
   @JsonProperty("website_url")
-  @NotEmpty
+  @NotBlank(message = "website url must not be empty")
   @Pattern(
       regexp =
           "^(https?://)?([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$",
@@ -150,7 +153,7 @@ public class CreateClientRequest implements Serializable {
 
   /** The terms URL of the client. The terms URL is expected to be passed as a URL. */
   @JsonProperty("terms_url")
-  @NotEmpty
+  @NotBlank(message = "terms url must not be empty")
   @Pattern(
       regexp =
           "^(https?://)?([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$",
@@ -160,7 +163,7 @@ public class CreateClientRequest implements Serializable {
 
   /** The policy URL of the client. The policy URL is expected to be passed as a URL. */
   @JsonProperty("policy_url")
-  @NotEmpty
+  @NotBlank(message = "policy url must not be empty")
   @Pattern(
       regexp =
           "^(https?://)?([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$",
@@ -170,7 +173,7 @@ public class CreateClientRequest implements Serializable {
 
   /** The redirect URIs for the client. */
   @JsonProperty("redirect_uris")
-  @NotNull
+  @NotNull(message = "redirect uris must not be null")
   @URLCollection
   @Size(
       min = 1,
@@ -183,7 +186,7 @@ public class CreateClientRequest implements Serializable {
 
   /** The allowed origins for the client. */
   @JsonProperty("allowed_origins")
-  @NotNull
+  @NotNull(message = "allowed origins must not be null")
   @URLCollection
   @Size(
       min = 1,
@@ -197,7 +200,7 @@ public class CreateClientRequest implements Serializable {
    * URL.
    */
   @JsonProperty("logout_redirect_uri")
-  @NotEmpty
+  @NotBlank(message = "logout redirect uri must not be empty")
   @Pattern(
       regexp =
           "^(https?://)?([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$",

@@ -1,28 +1,35 @@
-// (c) Copyright Ascensio System SIA 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Web.Files.Utils;
 
@@ -57,6 +64,11 @@ public class FileUploader(
 
         var dao = daoFactory.GetFileDao<T>();
         file = await dao.SaveFileAsync(file, data);
+
+        if (file.IsForm)
+        {
+            await StopFormFillingIfNeededAsync(file.Id, dao);
+        }
 
         var linkDao = daoFactory.GetLinkDao<T>();
         await linkDao.DeleteAllLinkAsync(file.Id);
@@ -102,7 +114,7 @@ public class FileUploader(
 
         if (!updateIfExists && file != null)
         {
-            fileName = await global.GetAvailableTitleAsync(fileName, folderId, fileDao.IsExistAsync, FileEntryType.File);
+            fileName = await fileDao.GetAvailableTitleAsync(fileName, folderId);
         }
 
         var newFile = serviceProvider.GetService<File<T>>();
@@ -244,9 +256,9 @@ public class FileUploader(
 
         var dao = daoFactory.GetFileDao<T>();
         var folderDao = daoFactory.GetFolderDao<T>();
-        
+
         var folder = await folderDao.GetFolderAsync(folderId);
-        
+
         if (folder is { FolderType: FolderType.Knowledge })
         {
             if (!vectorizationGlobalSettings.IsSupportedContentExtraction(fileName))
@@ -259,7 +271,7 @@ public class FileUploader(
                 throw FileSizeComment.GetFileSizeException(vectorizationGlobalSettings.MaxContentLength);
             }
         }
-        
+
         var uploadSession = await dao.CreateUploadSessionAsync(file, contentLength);
 
         uploadSession.Expired = uploadSession.Created + ChunkedUploadSessionHolder.SlidingExpiration;
@@ -270,7 +282,7 @@ public class FileUploader(
         uploadSession.CultureName = CultureInfo.CurrentUICulture.Name;
         uploadSession.Encrypted = encrypted;
         uploadSession.KeepVersion = keepVersion;
-        
+
         await chunkedUploadSessionHolder.StoreSessionAsync(uploadSession);
 
         return uploadSession;
@@ -349,6 +361,11 @@ public class FileUploader(
                     await cloneStreamForSave.DisposeAsync();
                 }
 
+                if (!uploadSession.UseChunks && uploadSession.File?.IsForm == true)
+                {
+                    await StopFormFillingIfNeededAsync(uploadSession.File.Id, dao);
+                }
+
                 return uploadSession;
             }
         }
@@ -365,6 +382,11 @@ public class FileUploader(
         var dao = daoFactory.GetFileDao<T>();
 
         uploadSession.File = await dao.FinalizeUploadSessionAsync(uploadSession);
+
+        if (uploadSession.File.IsForm)
+        {
+            await StopFormFillingIfNeededAsync(uploadSession.File.Id, dao);
+        }
 
         await chunkedUploadSessionHolder.RemoveSessionAsync(uploadSession);
 
@@ -384,7 +406,7 @@ public class FileUploader(
     public async Task AbortUploadAsync<T>(string uploadId)
     {
         var uploadSession = await chunkedUploadSessionHolder.GetSessionAsync<T>(uploadId);
-        
+
         await daoFactory.GetFileDao<T>().AbortUploadSessionAsync(uploadSession);
 
         await chunkedUploadSessionHolder.RemoveSessionAsync(uploadSession);
@@ -396,13 +418,24 @@ public class FileUploader(
 
         return dao.GetTransferredBytesCountAsync(uploadSession);
     }
-    
+
 
     private async Task<long> GetMaxFileSizeAsync<T>(T folderId, bool chunkedUpload = false)
     {
         var folderDao = daoFactory.GetFolderDao<T>();
 
         return await folderDao.GetMaxUploadSizeAsync(folderId, chunkedUpload);
+    }
+
+    private async Task StopFormFillingIfNeededAsync<T>(T fileId, IFileDao<T> dao)
+    {
+        var properties = await dao.GetProperties(fileId);
+        if (properties?.FormFilling is { StartFilling: true })
+        {
+            properties.FormFilling.StartFilling = false;
+            properties.FormFilling.IsVersionChanged = true;
+            await dao.SaveProperties(fileId, properties);
+        }
     }
 
     #endregion

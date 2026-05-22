@@ -1,49 +1,58 @@
-// (c) Copyright Ascensio System SIA 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 //
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY; without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 //
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 //
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 //
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 //
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical
-// writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+//
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
 
 package com.asc.registration.application.controller.exception.handler;
 
 import com.asc.common.core.domain.exception.DomainNotFoundException;
+import com.asc.registration.application.transfer.ValidationErrorCodeResponse;
+import com.asc.registration.application.transfer.ValidationErrorResponse;
 import com.asc.registration.core.domain.exception.ClientDomainException;
 import com.asc.registration.service.exception.ExceededClientsPerResourceException;
+import com.asc.registration.service.exception.InvalidScopeException;
 import io.github.resilience4j.ratelimiter.RequestNotPermitted;
 import io.grpc.StatusRuntimeException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ValidationException;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.MessageSourceResolvable;
-import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.validation.FieldError;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -64,6 +73,24 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 public class RegistrationGlobalExceptionHandler {
   private static final URI ERROR_TYPE_URI =
       URI.create("https://api.onlyoffice.com/docspace/api-backend/get-started/basic-concepts");
+
+  /**
+   * Extracts the simple constraint name from a fully-qualified Spring validation code.
+   *
+   * <p>Spring registers constraint codes in the form {@code ConstraintName.objectName.fieldName}
+   * (e.g. {@code "Size.updateClientRequest.name"}). This method strips the object and field
+   * suffixes, returning just the constraint name (e.g. {@code "Size"}), which is required for
+   * correct mapping in {@link ValidationErrorCodeResponse#getErrorCode(String, String)}.
+   *
+   * @param code the raw constraint code from a {@link org.springframework.validation.ObjectError},
+   *     may be {@code null}
+   * @return the simple constraint name, or {@code null} if {@code code} is {@code null}
+   */
+  private static String extractConstraintCode(String code) {
+    if (code == null) return null;
+    var dot = code.indexOf('.');
+    return dot > 0 ? code.substring(0, dot) : code;
+  }
 
   /**
    * Creates a ProblemDetail with the standard type URI and instance path.
@@ -127,39 +154,90 @@ public class RegistrationGlobalExceptionHandler {
 
   /**
    * Handles {@link MethodArgumentNotValidException} exceptions resulting from failed validation of
-   * method arguments.
+   * method arguments. Returns a {@link ProblemDetail} with an additional "errors" property
+   * containing field-specific validation errors.
    *
    * @param e the {@link MethodArgumentNotValidException} containing validation error details.
    * @param request the {@link HttpServletRequest} associated with the current request.
-   * @return a {@link ProblemDetail} that includes the concatenated validation error messages.
+   * @return a {@link ProblemDetail} with field-specific errors in the "errors" property.
    */
   @ExceptionHandler(value = {MethodArgumentNotValidException.class})
   public ProblemDetail handleValidationException(
       MethodArgumentNotValidException e, HttpServletRequest request) {
-    var errors =
-        e.getAllErrors().stream()
-            .map(DefaultMessageSourceResolvable::getDefaultMessage)
-            .collect(Collectors.joining(", "));
-    return createProblemDetail(HttpStatus.BAD_REQUEST, errors, request.getRequestURI());
+    var fieldErrors = new ArrayList<ValidationErrorResponse.FieldError>();
+
+    for (var error : e.getBindingResult().getAllErrors()) {
+      String fieldName;
+      String constraintCode;
+      if (error instanceof FieldError fe) {
+        fieldName = ValidationErrorCodeResponse.normalizeFieldName(fe.getField());
+        constraintCode = extractConstraintCode(fe.getCode());
+      } else {
+        fieldName = error.getObjectName();
+        constraintCode = extractConstraintCode(error.getCode());
+      }
+
+      var message = error.getDefaultMessage();
+      fieldErrors.add(
+          new ValidationErrorResponse.FieldError(
+              fieldName,
+              ValidationErrorCodeResponse.getErrorCode(constraintCode, message),
+              message));
+    }
+
+    var problemDetail =
+        createProblemDetail(HttpStatus.BAD_REQUEST, "Validation failed", request.getRequestURI());
+    problemDetail.setProperty("errors", fieldErrors);
+    return problemDetail;
   }
 
   /**
    * Handles {@link HandlerMethodValidationException} exceptions arising from method-level
-   * validation failures.
+   * validation failures. Returns a {@link ProblemDetail} with an additional "errors" property
+   * containing field-specific validation errors.
    *
    * @param e the {@link HandlerMethodValidationException} containing details about the validation
    *     errors.
    * @param request the {@link HttpServletRequest} associated with the current request.
-   * @return a {@link ProblemDetail} that includes the concatenated error messages.
+   * @return a {@link ProblemDetail} with field-specific errors in the "errors" property.
    */
   @ExceptionHandler(value = HandlerMethodValidationException.class)
   public ProblemDetail handleValidationException(
       HandlerMethodValidationException e, HttpServletRequest request) {
-    var errors =
-        e.getAllErrors().stream()
-            .map(MessageSourceResolvable::getDefaultMessage)
-            .collect(Collectors.joining(", "));
-    return createProblemDetail(HttpStatus.BAD_REQUEST, errors, request.getRequestURI());
+    var fieldErrors = new ArrayList<ValidationErrorResponse.FieldError>();
+
+    for (var paramResult : e.getParameterValidationResults()) {
+      var paramName = paramResult.getMethodParameter().getParameterName();
+
+      for (var error : paramResult.getResolvableErrors()) {
+        String fieldName;
+        String constraintCode;
+        if (error instanceof FieldError fe) {
+          fieldName = ValidationErrorCodeResponse.normalizeFieldName(fe.getField());
+          constraintCode = extractConstraintCode(fe.getCode());
+        } else {
+          fieldName =
+              paramName != null
+                  ? ValidationErrorCodeResponse.normalizeFieldName(paramName)
+                  : "unknown";
+          if (error.getCodes() != null && error.getCodes().length > 0)
+            constraintCode = extractConstraintCode(error.getCodes()[0]);
+          else constraintCode = null;
+        }
+
+        var message = error.getDefaultMessage();
+        fieldErrors.add(
+            new ValidationErrorResponse.FieldError(
+                fieldName,
+                ValidationErrorCodeResponse.getErrorCode(constraintCode, message),
+                message));
+      }
+    }
+
+    var problemDetail =
+        createProblemDetail(HttpStatus.BAD_REQUEST, "Validation failed", request.getRequestURI());
+    problemDetail.setProperty("errors", fieldErrors);
+    return problemDetail;
   }
 
   /**
@@ -187,6 +265,27 @@ public class RegistrationGlobalExceptionHandler {
   public ProblemDetail handleAccessDeniedException(
       AuthorizationDeniedException e, HttpServletRequest request) {
     return createProblemDetail(HttpStatus.FORBIDDEN, "Access denied", request.getRequestURI());
+  }
+
+  /**
+   * Handles {@link InvalidScopeException} exceptions thrown when a request contains scope names
+   * that do not exist in the application registry.
+   *
+   * @param e the {@link InvalidScopeException} that was raised.
+   * @param request the {@link HttpServletRequest} associated with the current request.
+   * @return a {@link ProblemDetail} with field-specific scope errors in the "errors" property.
+   */
+  @ExceptionHandler(value = InvalidScopeException.class)
+  public ProblemDetail handleInvalidScopeException(
+      InvalidScopeException e, HttpServletRequest request) {
+    var problemDetail =
+        createProblemDetail(HttpStatus.BAD_REQUEST, "Validation failed", request.getRequestURI());
+    problemDetail.setProperty(
+        "errors",
+        List.of(
+            new ValidationErrorResponse.FieldError(
+                "scopes", ValidationErrorCodeResponse.ERROR_INVALID_SCOPE, e.getMessage())));
+    return problemDetail;
   }
 
   /**

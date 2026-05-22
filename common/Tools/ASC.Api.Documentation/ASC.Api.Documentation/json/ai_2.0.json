@@ -7,7 +7,7 @@
       "url": "https://helpdesk.onlyoffice.com/hc/en-us",
       "email": "support@onlyoffice.com"
     },
-    "version": "3.6.0",
+    "version": "3.7.0",
     "x-scalar-sdk-installation": [
       {
         "lang": "Node",
@@ -52,6 +52,15 @@
             "name": "subjectId",
             "in": "query",
             "description": "The filter by user ID.",
+            "schema": {
+              "type": "string",
+              "example": "00000000-0000-0000-0000-000000000000"
+            }
+          },
+          {
+            "name": "subjectOwnerId",
+            "in": "query",
+            "description": "The filter by room owner ID.",
             "schema": {
               "type": "string",
               "example": "00000000-0000-0000-0000-000000000000"
@@ -1233,7 +1242,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ExportChatRequestBodyInteger"
+                "$ref": "#/components/schemas/ExportChatRequestBody"
               }
             }
           },
@@ -2704,6 +2713,8 @@
             "description": "The unique identifier of the AI chat message to export.",
             "required": true,
             "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
               "type": "integer",
               "format": "int32",
               "example": 1
@@ -2715,7 +2726,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ExportMessageRequestBodyInteger"
+                "$ref": "#/components/schemas/ExportMessageRequestBody"
               }
             }
           },
@@ -3071,6 +3082,148 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/ai/providers/models/preview": {
+      "post": {
+        "tags": [
+          "AI / Providers"
+        ],
+        "summary": "Preview models for a new AI provider",
+        "description": "Connects to the specified AI provider using the provided credentials and returns the available models\r\nwith their default settings. This is used to preview models before saving the provider.\r\nRecommended models are enabled by default with configuration-defined settings.\r\nAdditional models are disabled by default with empty capabilities.",
+        "operationId": "previewProviderModels",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PreviewProviderModelsRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "List of models with default settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModelSettingsArrayWrapper"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid connection data or unsupported provider type"
+          },
+          "403": {
+            "description": "You don't have enough permission to manage providers"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/ai/providers/{providerId}/models": {
+      "get": {
+        "tags": [
+          "AI / Providers"
+        ],
+        "summary": "Get all models for a provider with their settings",
+        "description": "Returns the full list of AI models available from a provider, including both recommended and additional models.\r\nEach model includes its current settings: enabled state, display alias, and capabilities (vision, tool calling, thinking).\r\nRecommended models are enabled by default and their alias and capabilities come from configuration.\r\nAdditional models are disabled by default and can be configured by the admin.",
+        "operationId": "getProviderModels",
+        "parameters": [
+          {
+            "name": "providerId",
+            "in": "path",
+            "description": "The identifier of the AI provider.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of models with settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModelSettingsArrayWrapper"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "You don't have enough permission to manage providers"
+          },
+          "404": {
+            "description": "Provider not found"
           },
           "401": {
             "description": "Unauthorized"
@@ -3672,6 +3825,42 @@
         "additionalProperties": false,
         "description": "The agent new item's information."
       },
+      "AiChatPrice": {
+        "type": "object",
+        "properties": {
+          "prompt": {
+            "type": "number",
+            "format": "double"
+          },
+          "completion": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AiModelCapabilities": {
+        "type": "object",
+        "properties": {
+          "vision": {
+            "type": "boolean",
+            "description": "Indicates whether the model supports image and vision input.",
+            "example": true
+          },
+          "toolCalling": {
+            "type": "boolean",
+            "description": "Indicates whether the model supports tool (function) calling.",
+            "example": true
+          },
+          "thinking": {
+            "type": "boolean",
+            "description": "Indicates whether the model supports extended thinking and reasoning.",
+            "example": false
+          }
+        },
+        "additionalProperties": false,
+        "description": "The AI model capabilities."
+      },
       "AiProviderArrayWrapper": {
         "type": "object",
         "properties": {
@@ -3907,6 +4096,11 @@
             "description": "The tool name used by the AI assistant to launch presentation creation in the editor.",
             "nullable": true,
             "example": "generate_presentation"
+          },
+          "systemAiEnabled": {
+            "type": "boolean",
+            "description": "Indicates whether the system-level AI provider is enabled.",
+            "example": true
           }
         },
         "additionalProperties": false,
@@ -4073,6 +4267,42 @@
         "additionalProperties": false,
         "description": "The multimodal settings for the chat model."
       },
+      "ChatReasoningEffort": {
+        "oneOf": [
+          {
+            "enum": [
+              "None",
+              "Low",
+              "Medium",
+              "High",
+              "XHigh"
+            ],
+            "type": "string",
+            "description": "[]",
+            "example": "None"
+          },
+          {
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "type": "integer",
+            "description": "[]",
+            "example": 0,
+            "x-enum-varnames": [
+              "None",
+              "Low",
+              "Medium",
+              "High",
+              "XHigh"
+            ]
+          }
+        ],
+        "x-enum-type": "integer"
+      },
       "ChatSettings": {
         "type": "object",
         "properties": {
@@ -4133,6 +4363,15 @@
           },
           "multimodal": {
             "$ref": "#/components/schemas/ChatMultimodalSettingsDto"
+          },
+          "thinking": {
+            "type": "boolean",
+            "description": "Indicates whether the model supports extended thinking mode.",
+            "example": false,
+            "deprecated": true
+          },
+          "capabilities": {
+            "$ref": "#/components/schemas/AiModelCapabilities"
           },
           "internal": {
             "type": "boolean",
@@ -4374,10 +4613,49 @@
             "description": "The authentication API key for the AI provider.",
             "nullable": true,
             "example": "sk-example-key-123"
+          },
+          "modelSettings": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ModelSettingsItemDto"
+            },
+            "description": "Optional list of model settings to configure atomically with the provider creation.",
+            "nullable": true,
+            "example": [
+              {
+                "modelId": "claude-opus-4-1-20250805",
+                "isEnabled": true,
+                "alias": "Claude Opus 4.1",
+                "capabilities": {
+                  "vision": true,
+                  "toolCalling": true,
+                  "thinking": false
+                }
+              }
+            ]
           }
         },
         "additionalProperties": false,
         "description": "Request parameters for creating a new AI provider."
+      },
+      "CurrencyInfo": {
+        "required": [
+          "code",
+          "symbol"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "nullable": true
+          },
+          "symbol": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
       },
       "DefaultProviderDto": {
         "required": [
@@ -4402,6 +4680,15 @@
             "description": "AI provider title.",
             "nullable": true,
             "example": "OpenAI"
+          },
+          "providerType": {
+            "$ref": "#/components/schemas/ProviderType"
+          },
+          "defaultModelAlias": {
+            "type": "string",
+            "description": "Display alias of the default model.",
+            "nullable": true,
+            "example": "GPT-4o"
           }
         },
         "additionalProperties": false,
@@ -4562,25 +4849,28 @@
             "enum": [
               "None",
               "OpenAi",
-              "OpenRouter"
+              "OpenRouter",
+              "PortalAi"
             ],
             "type": "string",
-            "description": "[None - None, OpenAi - OpenAi, OpenRouter - OpenRouter]",
+            "description": "[None - None, OpenAi - OpenAi, OpenRouter - OpenRouter, PortalAi - PortalAi]",
             "example": "None"
           },
           {
             "enum": [
               0,
               1,
-              2
+              2,
+              3
             ],
             "type": "integer",
-            "description": "[0 - None, 1 - OpenAi, 2 - OpenRouter]",
+            "description": "[0 - None, 1 - OpenAi, 2 - OpenRouter, 3 - PortalAi]",
             "example": 0,
             "x-enum-varnames": [
               "None",
               "OpenAi",
-              "OpenRouter"
+              "OpenRouter",
+              "PortalAi"
             ]
           }
         ],
@@ -4600,12 +4890,6 @@
             "description": "The HTML-encoded user's display name formatted according to the default format for the current culture.",
             "nullable": true,
             "example": "Mike Zanyatski"
-          },
-          "title": {
-            "type": "string",
-            "description": "The user title.",
-            "nullable": true,
-            "example": "Manager"
           },
           "avatar": {
             "type": "string",
@@ -4662,29 +4946,32 @@
           {
             "enum": [
               "None",
-              "Exa"
+              "Exa",
+              "PortalAi"
             ],
             "type": "string",
-            "description": "[None - None, Exa - Exa]",
+            "description": "[None - None, Exa - Exa, PortalAi - PortalAi]",
             "example": "None"
           },
           {
             "enum": [
               0,
-              1
+              1,
+              2
             ],
             "type": "integer",
-            "description": "[0 - None, 1 - Exa]",
+            "description": "[0 - None, 1 - Exa, 2 - PortalAi]",
             "example": 0,
             "x-enum-varnames": [
               "None",
-              "Exa"
+              "Exa",
+              "PortalAi"
             ]
           }
         ],
         "x-enum-type": "integer"
       },
-      "ExportChatRequestBodyInteger": {
+      "ExportChatRequestBody": {
         "required": [
           "folderId",
           "title"
@@ -4692,9 +4979,17 @@
         "type": "object",
         "properties": {
           "folderId": {
-            "type": "integer",
-            "description": "The identifier of the destination folder where the exported document will be saved.",
-            "format": "int32",
+            "oneOf": [
+              {
+                "type": "integer",
+                "example": 1234
+              },
+              {
+                "type": "string",
+                "example": "some text"
+              }
+            ],
+            "description": "The identifier of the destination folder where the exported document will be saved.\r\nCan be an integer for internal folders or a string for third-party storage folders.",
             "example": 123
           },
           "title": {
@@ -4707,7 +5002,7 @@
         "additionalProperties": false,
         "description": "Parameters for exporting an AI chat session to a document."
       },
-      "ExportMessageRequestBodyInteger": {
+      "ExportMessageRequestBody": {
         "required": [
           "folderId",
           "title"
@@ -4715,9 +5010,17 @@
         "type": "object",
         "properties": {
           "folderId": {
-            "type": "integer",
-            "description": "The identifier of the destination folder where the exported document will be saved.",
-            "format": "int32",
+            "oneOf": [
+              {
+                "type": "integer",
+                "example": 1234
+              },
+              {
+                "type": "string",
+                "example": "some text"
+              }
+            ],
+            "description": "The identifier of the destination folder where the exported document will be saved.\r\nCan be an integer for internal folders or a string for third-party storage folders.",
             "example": 123
           },
           "title": {
@@ -5047,6 +5350,12 @@
                     "type": "boolean"
                   },
                   "UseChat": {
+                    "type": "boolean"
+                  },
+                  "UpdateXlsx": {
+                    "type": "boolean"
+                  },
+                  "AnalyzeResponses": {
                     "type": "boolean"
                   }
                 },
@@ -5659,12 +5968,21 @@
               "saveFormAsXLSX": {
                 "type": "boolean",
                 "description": "Specifies whether to save form data as XLSX file.",
-                "nullable": true
+                "nullable": true,
+                "example": false
               },
               "sendFormToExternalDB": {
                 "type": "boolean",
                 "description": "Specifies whether to send form data to external database.",
-                "nullable": true
+                "nullable": true,
+                "example": false
+              },
+              "originalFormId": {
+                "type": "integer",
+                "description": "The original form ID that corresponds to this FormFillingFolderDone folder.",
+                "format": "int32",
+                "nullable": true,
+                "example": 42
               }
             }
           }
@@ -6630,10 +6948,136 @@
             "description": "The model identifier as recognized by the AI provider (e.g., \"gpt-4o\", \"claude-sonnet-4-20250514\").",
             "nullable": true,
             "example": "gpt-4o"
+          },
+          "alias": {
+            "type": "string",
+            "description": "The display name for the model.",
+            "nullable": true,
+            "example": "GPT-4o"
+          },
+          "capabilities": {
+            "$ref": "#/components/schemas/AiModelCapabilities"
+          },
+          "price": {
+            "$ref": "#/components/schemas/AiChatPrice"
+          },
+          "currency": {
+            "$ref": "#/components/schemas/CurrencyInfo"
           }
         },
         "additionalProperties": false,
         "description": "The AI model information."
+      },
+      "ModelSettingsArrayWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ModelSettingsDto"
+            }
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
+      "ModelSettingsDto": {
+        "required": [
+          "capabilities",
+          "id"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The model identifier.",
+            "nullable": true,
+            "example": "claude-sonnet-4-20250514"
+          },
+          "alias": {
+            "type": "string",
+            "description": "The display name for the model.",
+            "nullable": true,
+            "example": "Claude Sonnet 4"
+          },
+          "isEnabled": {
+            "type": "boolean",
+            "description": "Whether the model is enabled for use in chat.",
+            "example": true
+          },
+          "isRecommended": {
+            "type": "boolean",
+            "description": "Whether the model is recommended (defined in configuration).",
+            "example": true
+          },
+          "capabilities": {
+            "$ref": "#/components/schemas/AiModelCapabilities"
+          }
+        },
+        "additionalProperties": false,
+        "description": "AI model settings information."
+      },
+      "ModelSettingsItemDto": {
+        "required": [
+          "modelId"
+        ],
+        "type": "object",
+        "properties": {
+          "modelId": {
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string",
+            "description": "The model identifier.",
+            "example": "claude-opus-4-1-20250805"
+          },
+          "isEnabled": {
+            "type": "boolean",
+            "description": "Whether the model is enabled for use in chat.",
+            "example": true
+          },
+          "alias": {
+            "maxLength": 255,
+            "type": "string",
+            "description": "The display name for the model. Only applies to non-recommended models.",
+            "nullable": true,
+            "example": "Claude Opus 4.1"
+          },
+          "capabilities": {
+            "$ref": "#/components/schemas/AiModelCapabilities"
+          }
+        },
+        "additionalProperties": false,
+        "description": "A single model settings entry within a provider create or update request."
       },
       "NewItemsAgentNewItemsArrayWrapper": {
         "type": "object",
@@ -6699,6 +7143,31 @@
         },
         "additionalProperties": false,
         "description": "The new item parameters."
+      },
+      "PreviewProviderModelsRequestDto": {
+        "required": [
+          "key"
+        ],
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/ProviderType"
+          },
+          "url": {
+            "type": "string",
+            "description": "The API endpoint URL. Required for OpenAiCompatible type; optional for other types that have default URLs.",
+            "nullable": true,
+            "example": "https://api.openai.com/v1"
+          },
+          "key": {
+            "type": "string",
+            "description": "The authentication API key for the AI provider.",
+            "nullable": true,
+            "example": "sk-example-key-123"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Request parameters for previewing models available from a provider before saving it."
       },
       "ProviderSettingsArrayWrapper": {
         "type": "object",
@@ -7122,6 +7591,9 @@
             "description": "Indicates whether the AI assistant is allowed to perform web searches when generating responses.",
             "nullable": true,
             "example": true
+          },
+          "reasoningEffort": {
+            "$ref": "#/components/schemas/ChatReasoningEffort"
           }
         },
         "additionalProperties": false,
@@ -7309,6 +7781,15 @@
             "description": "The new authentication API key for the AI provider. If null, the key is not changed.",
             "nullable": true,
             "example": "sk-example-key-123"
+          },
+          "modelSettings": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ModelSettingsItemDto"
+            },
+            "description": "Optional list of model settings changes to apply atomically with the provider update.",
+            "nullable": true
           }
         },
         "additionalProperties": false,
@@ -7387,12 +7868,14 @@
           "sendFormToExternalDB": {
             "type": "boolean",
             "description": "Specifies whether to send form data to external database.",
-            "nullable": true
+            "nullable": true,
+            "example": false
           },
           "saveFormAsXLSX": {
             "type": "boolean",
             "description": "Specifies whether to save form data as XLSX file.",
-            "nullable": true
+            "nullable": true,
+            "example": false
           }
         },
         "additionalProperties": false,
@@ -7519,6 +8002,9 @@
             "type": "boolean",
             "description": "Indicates whether the AI assistant is allowed to perform web searches when generating responses in this room.",
             "example": true
+          },
+          "reasoningEffort": {
+            "$ref": "#/components/schemas/ChatReasoningEffort"
           }
         },
         "additionalProperties": false,

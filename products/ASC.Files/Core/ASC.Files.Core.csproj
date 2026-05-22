@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
     <OutputType>Library</OutputType>
     <NoWarn>NU1701;1591</NoWarn>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
@@ -21,6 +20,7 @@
     <PackageReference Include="Google.Apis.Drive.v3" />
     <PackageReference Include="HtmlAgilityPack" />
     <PackageReference Include="Joonasw.AspNetCore.SecurityHeaders" />
+    <PackageReference Include="Magick.NET-Q8-AnyCPU" />
     <PackageReference Include="Microsoft.Extensions.AI.Abstractions" />
     <PackageReference Include="Microsoft.Extensions.AI.OpenAI" />
     <PackageReference Include="Microsoft.OneDriveSDK" />
@@ -153,44 +153,6 @@
     <EmbeddedResource Update="Services\NotifyService\FilesPatternResource.el-GR.resx">
       <DependentUpon>FilesPatternResource.resx</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Update="Services\NotifyService\FilesPatternResource.de.resx">
-      <DependentUpon>FilesPatternResource.resx</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Services\NotifyService\FilesPatternResource.es.resx">
-      <DependentUpon>FilesPatternResource.resx</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Services\NotifyService\FilesPatternResource.fr.resx">
-      <DependentUpon>FilesPatternResource.resx</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Services\NotifyService\FilesPatternResource.it.resx">
-      <DependentUpon>FilesPatternResource.resx</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Services\NotifyService\FilesPatternResource.resx">
-      <LastGenOutput>FilesPatternResource.Designer.cs</LastGenOutput>
-      <Generator>PublicResXFileCodeGenerator</Generator>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Services\NotifyService\FilesPatternResource.ru.resx">
-      <DependentUpon>FilesPatternResource.resx</DependentUpon>
-    </EmbeddedResource>
-    <None Remove="Covers\1.svg" />
-    <None Remove="Covers\2.svg" />
-    <None Remove="Covers\3.svg" />
-    <None Remove="Covers\4.svg" />
-    <None Remove="Covers\5.svg" />
-    <None Remove="Covers\6.svg" />
-    <None Remove="Covers\7.svg" />
-    <None Remove="Covers\8.svg" />
-    <None Remove="Covers\9.svg" />
-    <None Remove="Covers\10.svg" />
-    <None Remove="Covers\11.svg" />
-    <None Remove="Covers\12.svg" />
-    <None Remove="Covers\13.svg" />
-    <None Remove="Covers\14.svg" />
-    <None Remove="Covers\15.svg" />
-    <None Remove="Covers\16.svg" />
-    <None Remove="Covers\17.svg" />
-    <None Remove="Covers\18.svg" />
-    <None Remove="Covers\anchor.svg" />
     <EmbeddedResource Include="Covers\**\*.svg" />
   </ItemGroup>
   <ItemGroup>
@@ -479,12 +441,6 @@
       <DependentUpon>FilesUCResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\FilesUCResource.az.resx">
-      <DependentUpon>FilesUCResource.resx</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Resources\FilesUCResource.ar-SA.resx">
-      <DependentUpon>FilesUCResource.resx</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Resources\FilesUCResource.hy-AM.resx">
       <DependentUpon>FilesUCResource.resx</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>

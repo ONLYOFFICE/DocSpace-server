@@ -1,28 +1,35 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 //
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 //
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 //
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 //
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 //
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+//
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
 
 using System.Text.Json.Nodes;
 
@@ -146,7 +153,9 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
             var enumDescriptionDataString = new JsonArray();
             var enumVarNames = new JsonArray();
             var enumDataInt = new List<JsonNode>();
+            var enumDataLong = new List<JsonNode>();
             var enumDescriptionInt = new List<string>();
+            var enumDescriptionLong = new List<string>();
             var enumType = "integer";
 
             var jsonConverterAttr = checkType.GetCustomAttributesData() .FirstOrDefault(a => a.AttributeType == typeof(JsonConverterAttribute));
@@ -169,19 +178,37 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
                 enumVarNames.Add(enumValue.ToString());
 
                 enumDataString.Add(enumValue.ToString());
-                enumDataInt.Add(Convert.ToInt32(enumValue));
+
+                try
+                {
+                    enumDataInt.Add(Convert.ToInt32(enumValue));
+                }
+                catch (OverflowException)
+                {
+                    enumDataLong.Add(Convert.ToInt64(enumValue));
+                }
+
 
                 if (enumAttribute != null)
                 {
                     enumDescriptionDataString.Add(enumAttribute.Description);
                     enumDescriptionString.Add($"{enumValue} - {enumAttribute.Description}");
-                    enumDescriptionInt.Add($"{Convert.ToInt32(enumValue)} - {enumAttribute.Description}");
+
+                    try
+                    {
+                        enumDescriptionInt.Add($"{Convert.ToInt32(enumValue)} - {enumAttribute.Description}");
+                    }
+                    catch (OverflowException)
+                    {
+                        enumDescriptionLong.Add($"{Convert.ToInt64(enumValue)} - {enumAttribute.Description}");
+                    }
+
                 }
             }
 
             if (enumDataString.Count > 0)
             {
-                result.OneOf = new List<IOpenApiSchema>
+                var oneOf = new List<IOpenApiSchema>
                 {
                     new OpenApiSchema
                     {
@@ -189,8 +216,12 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
                         Type = JsonSchemaType.String,
                         Description = $"[{string.Join(", ", enumDescriptionString)}]",
                         Example = enumDataString[0]
-                    },
-                    new OpenApiSchema
+                    }
+                };
+
+                if (enumDataInt.Count > 0)
+                {
+                    oneOf.Add(new OpenApiSchema
                     {
                         Enum = enumDataInt,
                         Type = JsonSchemaType.Integer,
@@ -200,8 +231,24 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
                         {
                             ["x-enum-varnames"] = new JsonNodeExtension(enumVarNames)
                         }
-                    }
-                };
+                    });
+                }
+                else
+                {
+                    oneOf.Add(new OpenApiSchema
+                    {
+                        Enum = enumDataLong,
+                        Type = JsonSchemaType.Integer,
+                        Description = $"[{string.Join(", ", enumDescriptionLong)}]",
+                        Example = enumDescriptionLong[0],
+                        Extensions = new Dictionary<string, IOpenApiExtension>
+                        {
+                            ["x-enum-varnames"] = new JsonNodeExtension(enumVarNames)
+                        }
+                    });
+                }
+
+                result.OneOf = oneOf;
                 result.Enum = null;
                 result.Type = null;
                 result.Format = null;

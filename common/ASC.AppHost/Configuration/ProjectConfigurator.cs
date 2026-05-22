@@ -1,28 +1,35 @@
-// (c) Copyright Ascensio System SIA 2009-2026
-//
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
-//
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
-//
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// Copyright (C) Ascensio System SIA, 2009-2026
+// 
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
+// 
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
+// 
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
+// 
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
+// 
+// No trademark rights are granted under this License.
+// 
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 using Microsoft.Extensions.Hosting;
 
@@ -74,6 +81,11 @@ public class ProjectConfigurator(
         project.WithEnvironment("core:base-domain", isStandalone ? "localhost" : "")
             .WithEnvironment("ai:mcp:0:endpoint", new UriBuilder(Uri.UriSchemeHttp, "localhost", Constants.DocSpaceMcpPort) + "mcp");
 
+        ConfigureForwardedHeadersNetworks(project);
+
+        // Map the dev HTTPS host to the default standalone tenant.
+        project.WithEnvironment("CORE__LOCAL_ADDRESSES", Constants.AppHostHttpsHost);
+
 
         switch (builder.Configuration["APP_EDITION"])
         {
@@ -87,9 +99,14 @@ public class ProjectConfigurator(
 
                 break;
         }
-        
+
         connectionManager.AddBaseConfig(project, isDocker);
         connectionManager.AddWaitFor(project);
+
+        if (connectionManager.HasOtelCollector)
+        {
+            project.WithEnvironment("OTEL_FILE_EXPORTER_ENDPOINT", connectionManager.GetOtelCollectorEndpoint(isDocker: false));
+        }
     }
 
     private void AddProjectDocker<TProject>(int projectPort) where TProject : IProjectMetadata, new()
@@ -138,6 +155,10 @@ public class ProjectConfigurator(
 
         resourceBuilder.WithEnvironment("core:base-domain", isStandalone ? "localhost" : "");
 
+        ConfigureForwardedHeadersNetworks(resourceBuilder);
+
+        resourceBuilder.WithEnvironment("CORE__LOCAL_ADDRESSES", Constants.AppHostHttpsHost);
+
         AddBaseBind(resourceBuilder);
 
         if (projectPort != 0)
@@ -147,7 +168,7 @@ public class ProjectConfigurator(
                 .WithHttpEndpoint(projectPort, projectPort)
                 .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
         }
-        
+
         connectionManager.AddBaseConfig(resourceBuilder, isDocker);
         connectionManager.AddWaitFor(resourceBuilder);
 
@@ -167,6 +188,11 @@ public class ProjectConfigurator(
         foreach (var env in otlEnvs)
         {
             resourceBuilder.WithEnvironment(env.Key, env.Value);
+        }
+
+        if (connectionManager.HasOtelCollector)
+        {
+            resourceBuilder.WithEnvironment("OTEL_FILE_EXPORTER_ENDPOINT", connectionManager.GetOtelCollectorEndpoint(isDocker: true));
         }
 
         resourceBuilder.WithOtlpExporter();
@@ -203,6 +229,7 @@ public class ProjectConfigurator(
             var resourceBuilder = builder.AddJavaScriptApp(name, path, "start")
                 .WithYarn()
                 .WithEnvironment("NODE_ENV", "development")
+                .WithEnvironment("API_HOST", $"http://localhost:{Constants.AppHostPort.ToString()}")
                 .WithEnvironment("Redis:Hosts:0:Host", () => connectionManager.Redis?.Host ?? string.Empty)
                 .WithEnvironment("Redis:Hosts:0:Port", () => connectionManager.Redis?.Port ?? string.Empty)
                 .WithEnvironment("REDIS_ENABLED", redisEnabled.ToString().ToLower())
@@ -242,6 +269,7 @@ public class ProjectConfigurator(
             builder.AddJavaScriptApp(name, path, "start")
                 .WithYarn()
                 .WithEnvironment("NODE_ENV", "development")
+                .WithEnvironment("API_HOST", $"http://localhost:{Constants.AppHostPort.ToString()}")
                 .WithHttpEndpoint(targetPort: port)
                 .WithHttpHealthCheck("/health")
                 .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
@@ -284,19 +312,17 @@ public class ProjectConfigurator(
 
     public ProjectConfigurator AddIdentity()
     {
-        var ascIdentityRegistration = "onlyoffice-identity-registration";
-        var ascIdentityAuthorization = "onlyoffice-identity-authorization";
         var path = Path.Combine("..", "ASC.Identity");
 
         var registrationBuilder = builder
-            .AddDockerfile(ascIdentityRegistration, path)
+            .AddDockerfile(Constants.IdentityRegistrationContainer, path)
             .WithImageTag("dev")
             .WithEnvironment("log:dir", "/logs")
             .WithEnvironment("log:name", "identity.registration")
             .WithEnvironment("SERVER_PORT", Constants.IdentityRegistrationPort.ToString())
             .WithEnvironment("SPRING_PROFILES_ACTIVE", "dev,server")
             .WithEnvironment("SPRING_APPLICATION_NAME", "ASC.Identity.Registration")
-            .WithEnvironment("GRPC_CLIENT_AUTHORIZATION_ADDRESS", new UriBuilder("static", ascIdentityAuthorization, 9999).ToString())
+            .WithEnvironment("GRPC_CLIENT_AUTHORIZATION_ADDRESS", new UriBuilder("static", Constants.IdentityAuthorizationContainer, 9999).ToString())
             .WithHttpEndpoint(Constants.IdentityRegistrationPort, Constants.IdentityRegistrationPort, isProxied: false)
             .WithBuildArg("MODULE", "registration/registration-container")
             .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
@@ -304,14 +330,14 @@ public class ProjectConfigurator(
         connectionManager.AddIdentityEnv(registrationBuilder);
 
         var authorizationBuilder = builder
-            .AddDockerfile(ascIdentityAuthorization, path)
+            .AddDockerfile(Constants.IdentityAuthorizationContainer, path)
             .WithImageTag("dev")
             .WithEnvironment("log:dir", "/logs")
             .WithEnvironment("log:name", "identity.authorization")
             .WithEnvironment("SERVER_PORT", Constants.IdentityAuthorizationPort.ToString())
             .WithEnvironment("SPRING_PROFILES_ACTIVE", "dev,server")
             .WithEnvironment("SPRING_APPLICATION_NAME", "ASC.Identity.Authorization")
-            .WithEnvironment("GRPC_CLIENT_AUTHORIZATION_ADDRESS", new UriBuilder("static", ascIdentityRegistration, 8888).ToString())
+            .WithEnvironment("GRPC_CLIENT_AUTHORIZATION_ADDRESS", new UriBuilder("static", Constants.IdentityRegistrationContainer, 8888).ToString())
             .WithHttpEndpoint(Constants.IdentityAuthorizationPort, Constants.IdentityAuthorizationPort, isProxied: false)
             .WithBuildArg("MODULE", "authorization/authorization-container")
             .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
@@ -328,5 +354,31 @@ public class ProjectConfigurator(
             .WithBindMount(Path.Combine(basePath, "Data"), "/data")
             .WithBindMount(Path.Combine(basePath, "Logs"), "/logs")
             .WithEnvironment("log:dir", "/logs");
+    }
+
+    private void ConfigureForwardedHeadersNetworks<T>(IResourceBuilder<T> project) where T : IResourceWithEnvironment
+    {
+        // Defense in depth: this configuration trusts X-Forwarded-* headers from
+        // entire RFC1918 ranges, which would let any host on a shared LAN spoof
+        // HTTPS/Host. AppHost is dev-only, but guard against accidental reuse
+        // outside Development.
+        if (!builder.Environment.IsDevelopment())
+        {
+            return;
+        }
+
+        // Loopback always — OpenResty proxies to backends via 127.0.0.1
+        // when services run on the host directly.
+        project.WithEnvironment("core:hosting:forwardedHeadersOptions:knownNetworks:0", "127.0.0.1/8")
+            .WithEnvironment("core:hosting:forwardedHeadersOptions:knownNetworks:1", "::1/128");
+
+        // Docker bridge networks — only needed when backends run in containers
+        // and receive traffic from the OpenResty container via the bridge.
+        if (isDocker)
+        {
+            project.WithEnvironment("core:hosting:forwardedHeadersOptions:knownNetworks:2", "10.0.0.0/8")
+                .WithEnvironment("core:hosting:forwardedHeadersOptions:knownNetworks:3", "172.16.0.0/12")
+                .WithEnvironment("core:hosting:forwardedHeadersOptions:knownNetworks:4", "192.168.0.0/16");
+        }
     }
 }

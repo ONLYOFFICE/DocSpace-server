@@ -131,6 +131,18 @@ public class MyKotlinClientCodegen extends KotlinClientCodegen {
     }
 
     @Override
+    public void postProcessParameter(CodegenParameter parameter) {
+        super.postProcessParameter(parameter);
+        if (Boolean.TRUE.equals(parameter.isArray)
+                && Boolean.TRUE.equals(parameter.isQueryParam)
+                && !Boolean.TRUE.equals(parameter.isCollectionFormatMulti)) {
+            String itemType = (parameter.items != null) ? parameter.items.dataType : "Any";
+            parameter.vendorExtensions.put("x-csv-collection", true);
+            parameter.vendorExtensions.put("x-csv-item-type", itemType);
+        }
+    }
+
+    @Override
     public ModelsMap postProcessModels(ModelsMap objs) {
         super.postProcessModels(objs);
 
@@ -220,10 +232,17 @@ public class MyKotlinClientCodegen extends KotlinClientCodegen {
             String folderPart = parts[0];
             String classPart = (parts.length > 1) ? parts[1] : parts[0];
 
+            String sanitizedFolder = camelize(sanitizeName(folderPart));
+            String sanitizedClass = camelize(sanitizeName(classPart));
+
+            if (folderPart.startsWith("AI")) {
+                sanitizedClass = sanitizedFolder + sanitizedClass;
+            }
+
             TagParts info = new TagParts(
                 tag,
-                camelize(sanitizeName(folderPart)),
-                camelize(sanitizeName(classPart))
+                sanitizedFolder,
+                sanitizedClass
             );
 
             tagMap.put(sanitized, info);

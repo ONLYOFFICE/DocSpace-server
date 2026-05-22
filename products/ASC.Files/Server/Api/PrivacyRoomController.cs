@@ -1,187 +1,206 @@
-// (c) Copyright Ascensio System SIA 2009-2026
-// 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
-// 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
-// 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// Copyright (C) Ascensio System SIA, 2009-2026
+//
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
+//
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
+//
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
+//
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
+//
+// No trademark rights are granted under this License.
+//
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+//
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
+
+using ASC.MessagingSystem.EF.Model;
 
 namespace ASC.Api.Documents;
 
-[ConstraintRoute("int")]
-public class PrivacyRoomControllerInternal(SettingsManager settingsManager, EncryptionKeyPairDtoHelper encryptionKeyPairHelper)
-    : PrivacyRoomController<int>(settingsManager, encryptionKeyPairHelper);
-
-public class PrivacyRoomControllerThirdparty(SettingsManager settingsManager, EncryptionKeyPairDtoHelper encryptionKeyPairHelper)
-    : PrivacyRoomController<string>(settingsManager, encryptionKeyPairHelper);
-
-/// <remarks>
-/// Provides access to Private Room.
-/// </remarks>
-/// <name>privacyroom</name>
+/// <summary>
+/// Provides API endpoints for managing privacy rooms and encryption keys.
+/// </summary>
 [Scope]
 [DefaultRoute]
 [ApiController]
 [ControllerName("privacyroom")]
-public abstract class PrivacyRoomController<T>(
-    SettingsManager settingsManager,
+public class PrivacyRoomControllerCommon(
+    AuthContext authContext,
+    PermissionContext permissionContext,
     EncryptionKeyPairDtoHelper encryptionKeyPairHelper)
     : ControllerBase
 {
+    /// <summary>
+    /// Creates and sets encryption keys for the user.
+    /// </summary>
     /// <remarks>
-    /// Returns all the key pairs of the users who have access to the file with the ID specified in the request.
+    /// Creates and sets encryption keys for the user.
     /// </remarks>
-    /// <summary>Get file key pairs</summary>
-    /// <path>api/2.0/privacyroom/access/{fileId}</path>
-    /// <collection>list</collection>
-    [ApiExplorerSettings(IgnoreApi = true)]
-    [Tags("Files / Private room")]
-    [SwaggerResponse(200, "List of encryption key pairs", typeof(IEnumerable<EncryptionKeyPairDto>))]
-    [SwaggerResponse(403, "You do not have enough permissions to edit the file")]
-    [HttpGet("access/{fileId}")]
-    public async Task<IEnumerable<EncryptionKeyPairDto>> GetPublicKeysWithAccess(FileIdRequestDto<T> inDto)
+    /// <param name="inDto">The request object containing public and private key information.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains a collection of encryption key data transfer objects.</returns>
+    [HttpPost("keys")]
+    public Task<IEnumerable<EncryptionKeyDto>> SetKeys(EncryptionKeyRequestDto inDto)
     {
-        if (!await PrivacyRoomSettings.GetEnabledAsync(settingsManager))
-        {
-            throw new SecurityException();
-        }
-
-        return await encryptionKeyPairHelper.GetKeyPairAsync(inDto.FileId);
+        return CreateKeysAsync([inDto], false);
     }
-}
 
-[Scope]
-[DefaultRoute]
-[ApiController]
-[ControllerName("privacyroom")]
-public class PrivacyRoomControllerCommon(AuthContext authContext,
-        PermissionContext permissionContext,
-        SettingsManager settingsManager,
-        EncryptionKeyPairDtoHelper encryptionKeyPairHelper,
-        MessageService messageService,
-        ILoggerProvider option)
-    : ControllerBase
-{
-    private readonly ILogger _logger = option.CreateLogger("ASC.Api.Documents");
-
+    /// <summary>
+    /// Replaces an existing encryption key with a new one for the user.
+    /// </summary>
     /// <remarks>
-    /// Returns a key pair for the current user.
+    /// Replaces an existing encryption key with a new one for the user.
     /// </remarks>
-    /// <summary>Get encryption keys</summary>
-    /// <path>api/2.0/privacyroom/keys</path>
-    [ApiExplorerSettings(IgnoreApi = true)]
-    [Tags("Files / Private room")]
-    [SwaggerResponse(200, "Encryption key pair: private key, public key, user ID", typeof(EncryptionKeyPairDto))]
-    [SwaggerResponse(403, "You don't have enough permission to this operation")]
-    [HttpGet("keys")]
-    public async Task<EncryptionKeyPairDto> GetKeys()
+    /// <param name="inDto">The request object containing the public and private key information to replace the existing key.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains a collection of encryption key data transfer objects.</returns>
+    [HttpPut("keys")]
+    public Task<IEnumerable<EncryptionKeyDto>> ReplaceKey(EncryptionKeyRequestDto inDto)
     {
-        await permissionContext.DemandPermissionsAsync(new UserSecurityProvider(authContext.CurrentAccount.ID), Constants.Action_EditUser);
+        return CreateKeysAsync([inDto], true);
+    }
 
-        if (!await PrivacyRoomSettings.GetEnabledAsync(settingsManager))
+    /// <summary>
+    /// Retrieves a specific user encryption key based on the provided filter conditions.
+    /// </summary>
+    /// <remarks>
+    /// Retrieves a specific user encryption key based on the provided filter conditions.
+    /// </remarks>
+    /// <returns>The encryption key data transfer object that matches the provided filter conditions, or null if no match is found.</returns>
+    [HttpGet("keys/filter")]
+    public async Task<EncryptionKeyDto> GetUserKeysByFilter([FromQuery] GetUserKeysByFilterRequestDto inDto)
+    {
+        await Demand();
+
+        return (await encryptionKeyPairHelper.GetKeyPairAsync()).FirstOrDefault(r =>
         {
-            throw new SecurityException();
-        }
+            var result = false;
+
+            if (inDto.Id.HasValue)
+            {
+                if (r.Id != inDto.Id)
+                {
+                    return false;
+                }
+
+                result = true;
+            }
+
+            // if (inDto.Type.HasValue)
+            // {
+            //     if (r.Type != inDto.Type.Value)
+            //     {
+            //         return false;
+            //     }
+            //
+            //     result = true;
+            // }
+            //
+            // if (!string.IsNullOrEmpty(inDto.Version))
+            // {
+            //     if (!r.Version.Equals(inDto.Version, StringComparison.OrdinalIgnoreCase))
+            //     {
+            //         return false;
+            //     }
+            //
+            //     result = true;
+            // }
+
+            if (!string.IsNullOrEmpty(inDto.PublicKey))
+            {
+                if (!r.PublicKey.Equals(inDto.PublicKey, StringComparison.OrdinalIgnoreCase))
+                {
+                    return false;
+                }
+
+                result = true;
+            }
+
+            if (!string.IsNullOrEmpty(inDto.PrivateKeyEnc))
+            {
+                if (!r.PrivateKeyEnc.Equals(inDto.PrivateKeyEnc, StringComparison.OrdinalIgnoreCase))
+                {
+                    return false;
+                }
+
+                result = true;
+            }
+
+            return result;
+        });
+    }
+
+    /// <summary>
+    /// Retrieves encryption keys associated with the current user.
+    /// </summary>
+    /// <remarks>
+    /// Retrieves encryption keys associated with the current user.
+    /// </remarks>
+    /// <returns>A task that represents the asynchronous operation. The task result contains a collection of encryption key data transfer objects.</returns>
+    [HttpGet("keys")]
+    public async Task<IEnumerable<EncryptionKeyDto>> GetUserKeys()
+    {
+        await Demand();
 
         return await encryptionKeyPairHelper.GetKeyPairAsync();
     }
 
-
+    /// <summary>
+    /// Retrieves the encryption keys associated with a specific privacy room.
+    /// </summary>
     /// <remarks>
-    /// Checks if the Private Room settings are enabled or not.
+    /// Retrieves the encryption keys associated with a specific privacy room.
     /// </remarks>
-    /// <summary>Check the Private Room settings</summary>
-    /// <path>api/2.0/privacyroom</path>
-    [ApiExplorerSettings(IgnoreApi = true)]
-    [Tags("Files / Private room")]
-    [SwaggerResponse(200, "Boolean value: true - the Private Room settings are enabled, false - the Private Room settings are disabled", typeof(bool))]
-    [HttpGet("")]
-    public async Task<bool> GetPrivacyRoom()
+    /// <param name="roomId">The identifier of the privacy room.</param>
+    /// <returns>A task containing a collection of encryption key data transfer objects for the specified room.</returns>
+    [HttpGet("{roomId:int}/access")]
+    public async Task<IEnumerable<EncryptionKeyDto>> GetUserKeysForRoom(int roomId)
     {
-        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        await Demand();
 
-        return await PrivacyRoomSettings.GetEnabledAsync(settingsManager);
+        return await encryptionKeyPairHelper.GetKeyPairForRoomAsync(roomId);
     }
 
+    /// <summary>
+    /// Deletes an encryption key and removes it from the system.
+    /// </summary>
     /// <remarks>
-    /// Sets the key pair for the current user.
+    /// Deletes an encryption key and removes it from the system based on the provided key identifier.
     /// </remarks>
-    /// <summary>Set encryption keys</summary>
-    /// <path>api/2.0/privacyroom/keys</path>
-    [ApiExplorerSettings(IgnoreApi = true)]
-    [Tags("Files / Private room")]
-    [SwaggerResponse(200, "Boolean value: true - the key pair is set", typeof(PrivacyRoomKeysResponse))]
-    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
-    [HttpPut("keys")]
-    public async Task<PrivacyRoomKeysResponse> SetKeys(PrivacyRoomRequestDto inDto)
+    /// <returns>The task result contains a collection of remaining encryption key data transfer objects after the deletion.</returns>
+    [HttpDelete("keys/{id:guid}")]
+    public async Task<IEnumerable<EncryptionKeyDto>> DeleteKeys(DeleteEncryptionKeyRequestDto inDto)
+    {
+        await Demand();
+
+        return await encryptionKeyPairHelper.DeleteAsync(inDto.Id);
+    }
+
+    private async Task Demand()
     {
         await permissionContext.DemandPermissionsAsync(new UserSecurityProvider(authContext.CurrentAccount.ID), Constants.Action_EditUser);
-
-        if (!await PrivacyRoomSettings.GetEnabledAsync(settingsManager))
-        {
-            throw new SecurityException();
-        }
-
-        var keyPair = await encryptionKeyPairHelper.GetKeyPairAsync();
-        if (keyPair != null)
-        {
-            if (!string.IsNullOrEmpty(keyPair.PublicKey) && !inDto.Update)
-            {
-                return new PrivacyRoomKeysResponse { IsSet = true };
-            }
-
-            _logger.InformationUpdateAddress(authContext.CurrentAccount.ID);
-        }
-
-        await encryptionKeyPairHelper.SetKeyPairAsync(inDto.PublicKey, inDto.PrivateKeyEnc);
-
-        return new PrivacyRoomKeysResponse { IsSet = true };
     }
 
-    /// <remarks>
-    /// Enables the Private Room settings.
-    /// </remarks>
-    /// <summary>Enable the Private Room settings</summary>
-    /// <path>api/2.0/privacyroom</path>
-    [ApiExplorerSettings(IgnoreApi = true)]
-    [Tags("Files / Private room")]
-    [SwaggerResponse(200, "Boolean value: true - the Private Room settings are enabled, false - the Private Room settings are disabled", typeof(bool))]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
-    [HttpPut("")]
-    public async Task<bool> SetPrivacyRoom(PrivacyRoomEnableRequestDto inDto)
+    private async Task<IEnumerable<EncryptionKeyDto>> CreateKeysAsync(IEnumerable<EncryptionKeyRequestDto> inDto, bool replace)
     {
-        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        await Demand();
 
-        if (inDto.Enable)
-        {
-            if (!PrivacyRoomSettings.IsAvailable())
-            {
-                throw new BillingException(Resource.ErrorNotAllowedOption);
-            }
-        }
-
-        await PrivacyRoomSettings.SetEnabledAsync(settingsManager, inDto.Enable);
-
-        messageService.Send(inDto.Enable ? MessageAction.PrivacyRoomEnable : MessageAction.PrivacyRoomDisable);
-
-        return inDto.Enable;
+        return await encryptionKeyPairHelper.SetKeyPairAsync(inDto.Select(r=> r.Map()), replace);
     }
 }

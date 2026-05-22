@@ -1,29 +1,37 @@
-// (c) Copyright Ascensio System SIA 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
+using ASC.Files.Core.Services.WCFService.FileOperations;
 using ASC.Webhooks.Core.EF.Model;
 
 namespace ASC.Web.Files.Services.WCFService.FileOperations;
@@ -173,6 +181,9 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
         var fileSharing = scope.ServiceProvider.GetService<FileSharing>();
         var authContext = scope.ServiceProvider.GetService<AuthContext>();
         var notifyClient = scope.ServiceProvider.GetService<NotifyClient>();
+        var permissionsManager = scope.ServiceProvider.GetService<DeletePermissionsCheck<T>>();
+        var tenantQuotaFeatureStatHelper = scope.ServiceProvider.GetService<TenantQuotaFeatureStatHelper>();
+        var quotaSocketManager = scope.ServiceProvider.GetService<QuotaSocketManager>();
 
         var (fileMarker, filesMessageService, roomLogoManager) = scopeClass;
         roomLogoManager.EnableAudit = false;
@@ -184,6 +195,8 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
         {
             CancellationToken.ThrowIfCancellationRequested();
 
+            // Intentional re-read: must use current folder state at execution time (TOCTOU mitigation).
+            // Pre-check was done before enqueue, but permissions/locks/existence may have changed.
             var folder = await FolderDao.GetFolderAsync(folderId);
             var isRoom = folder.IsRoom;
 
@@ -191,19 +204,17 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
             checkPermissions = isRoom ? !canDelete : checkPermissions;
 
             T canCalculate = default;
-            if (folder == null)
-            {
-                Err = FilesCommonResource.ErrorMessage_FolderNotFound;
-            }
-            else if (!_immediately && folder.IsRoom)
-            {
-                Err = FilesCommonResource.ErrorMessage_SecurityException_DeleteFolder;
-            }
-            else if (!_ignoreException && checkPermissions && !canDelete)
-            {
-                canCalculate = FolderDao.CanCalculateSubitems(folderId) ? default : folderId;
 
-                Err = FilesCommonResource.ErrorMessage_SecurityException_DeleteFolder;
+            var errorMsg = await permissionsManager.CheckFolderPermissionsAsync(
+                [folder], _immediately, checkPermissions, !_ignoreException);
+            if (errorMsg != null)
+            {
+                if (!_ignoreException && checkPermissions && !canDelete)
+                {
+                    canCalculate = FolderDao.CanCalculateSubitems(folderId) ? default : folderId;
+                }
+
+                Err = errorMsg;
             }
             else
             {
@@ -229,7 +240,11 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
 
                         if (isNeedSendActions)
                         {
-                            webhookTrigger = isRoom ? WebhookTrigger.RoomDeleted : WebhookTrigger.FolderDeleted;
+                            webhookTrigger = isRoom
+                                ? folder.IsAgent
+                                    ? WebhookTrigger.AgentDeleted
+                                    : WebhookTrigger.RoomDeleted
+                                : WebhookTrigger.FolderDeleted;
                             webhookConfigs = await webhookManager.GetWebhookConfigsAsync(webhookTrigger, folder);
                         }
 
@@ -242,14 +257,20 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
 
                         if (isNeedSendActions)
                         {
-                            var action = isRoom 
-                                ? folder.FolderType == FolderType.AiRoom 
-                                    ? MessageAction.AgentDeleted 
-                                    : MessageAction.RoomDeleted 
+                            var action = isRoom
+                                ? folder.FolderType == FolderType.AiRoom
+                                    ? MessageAction.AgentDeleted
+                                    : MessageAction.RoomDeleted
                                 : MessageAction.ThirdPartyDeleted;
-                            
+
                             await filesMessageService.SendAsync(action, folder, _headers, folder.Id.ToString(), folder.ProviderKey);
                             await webhookManager.PublishAsync(webhookTrigger, webhookConfigs, folder);
+
+                            if (isRoom && folder.RootFolderType is FolderType.VirtualRooms or FolderType.Archive)
+                            {
+                                var (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountRoomFeature, int>();
+                                _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
+                            }
                         }
                     }
 
@@ -278,7 +299,11 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
 
                             if (isNeedSendActions)
                             {
-                                webhookTrigger = isRoom ? WebhookTrigger.RoomDeleted : WebhookTrigger.FolderDeleted;
+                                webhookTrigger = isRoom
+                                    ? folder.IsAgent
+                                        ? WebhookTrigger.AgentDeleted
+                                        : WebhookTrigger.RoomDeleted
+                                    : WebhookTrigger.FolderDeleted;
                                 webhookConfigs = await webhookManager.GetWebhookConfigsAsync(webhookTrigger, folder);
                             }
 
@@ -290,9 +315,9 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
                                 {
                                     await notifyClient.SendRoomRemovedAsync(folder, aces, authContext.CurrentAccount.ID);
                                     await filesMessageService.SendAsync(
-                                        folder.FolderType == FolderType.AiRoom ? MessageAction.AgentDeleted : MessageAction.RoomDeleted, 
-                                        folder, 
-                                        _headers, 
+                                        folder.FolderType == FolderType.AiRoom ? MessageAction.AgentDeleted : MessageAction.RoomDeleted,
+                                        folder,
+                                        _headers,
                                         folder.Title);
                                 }
                                 else
@@ -301,6 +326,12 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
                                 }
 
                                 await webhookManager.PublishAsync(webhookTrigger, webhookConfigs, folder);
+
+                                if (isRoom && folder.RootFolderType is FolderType.VirtualRooms or FolderType.Archive)
+                                {
+                                    var (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountRoomFeature, int>();
+                                    _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
+                                }
                             }
 
                             ProcessedFolder(folderId);
@@ -309,7 +340,6 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
                     else
                     {
                         var files = await FileDao.GetFilesAsync(folder.Id, new OrderBy(SortedByType.AZ, true), FilterType.FilesOnly, false, Guid.Empty, string.Empty, null, false, withSubfolders: true).ToListAsync();
-                        var (isError, message) = await WithErrorAsync(scope, files, true, checkPermissions);
 
                         if (folder.FolderType is FolderType.FormFillingFolderInProgress or FolderType.FormFillingFolderDone)
                         {
@@ -334,9 +364,10 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
                             await Task.WhenAll(tasks);
                         }
 
-                        if (!_ignoreException && isError)
+                        errorMsg = await permissionsManager.CheckFilePermissionsAsync(files, true, checkPermissions);
+                        if (!_ignoreException && errorMsg != null)
                         {
-                            Err = message;
+                            Err = errorMsg;
                         }
                         else
                         {
@@ -353,7 +384,11 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
 
                                 if (isNeedSendActions)
                                 {
-                                    webhookTrigger = isRoom ? WebhookTrigger.RoomDeleted : WebhookTrigger.FolderDeleted;
+                                    webhookTrigger = isRoom
+                                        ? folder.IsAgent
+                                            ? WebhookTrigger.AgentDeleted
+                                            : WebhookTrigger.RoomDeleted
+                                        : WebhookTrigger.FolderDeleted;
                                     webhookConfigs = await webhookManager.GetWebhookConfigsAsync(webhookTrigger, folder);
                                 }
 
@@ -365,9 +400,9 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
                                     {
                                         await notifyClient.SendRoomRemovedAsync(folder, aces, authContext.CurrentAccount.ID);
                                         await filesMessageService.SendAsync(
-                                            folder.FolderType == FolderType.AiRoom ? MessageAction.AgentDeleted : MessageAction.RoomDeleted, 
-                                            folder, 
-                                            _headers, 
+                                            folder.FolderType == FolderType.AiRoom ? MessageAction.AgentDeleted : MessageAction.RoomDeleted,
+                                            folder,
+                                            _headers,
                                             folder.Title);
                                     }
                                     else
@@ -376,6 +411,12 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
                                     }
 
                                     await webhookManager.PublishAsync(webhookTrigger, webhookConfigs, folder);
+
+                                    if (isRoom && folder.RootFolderType is FolderType.VirtualRooms or FolderType.Archive)
+                                    {
+                                        var (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountRoomFeature, int>();
+                                        _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
+                                    }
                                 }
                             }
                             else
@@ -400,6 +441,7 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
                     }
                 }
             }
+
             await ProgressStep(canCalculate);
         }
     }
@@ -409,6 +451,7 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
         var scopeClass = scope.ServiceProvider.GetService<FileDeleteOperationScope>();
         var socketManager = scope.ServiceProvider.GetService<SocketManager>();
         var webhookManager = scope.ServiceProvider.GetService<WebhookManager>();
+        var security = scope.ServiceProvider.GetService<DeletePermissionsCheck<T>>();
 
         var (fileMarker, filesMessageService, _) = scopeClass;
 
@@ -419,15 +462,17 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
         {
             CancellationToken.ThrowIfCancellationRequested();
 
+            // Intentional re-read: must use current file state at execution time (TOCTOU mitigation).
+            // Pre-check was done before enqueue, but permissions/locks/existence may have changed.
             var file = await FileDao.GetFileAsync(fileId);
-            var (isError, message) = await WithErrorAsync(scope, [file], false, checkPermissions);
-            if (file == null)
+            var errorMsg = await security.CheckFilePermissionsAsync([file], false, checkPermissions);
+            if (errorMsg == FilesCommonResource.ErrorMessage_FileNotFound)
             {
-                Err = FilesCommonResource.ErrorMessage_FileNotFound;
+                Err = errorMsg;
             }
-            else if (!_ignoreException && isError)
+            else if (!_ignoreException && errorMsg != null)
             {
-                Err = message;
+                Err = errorMsg;
             }
             else
             {
@@ -449,6 +494,12 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
                         }
 
                         await socketManager.DeleteFileAsync(file, action: async () => await FileDao.MoveFileAsync(file.Id, _trashId, file.RootFolderType == FolderType.USER));
+
+                        if (file.Id is int trashedFormFileId)
+                        {
+                            var factoryIndexerForm = scope.ServiceProvider.GetService<FactoryIndexerForm>();
+                            await factoryIndexerForm.DeleteAsync(r => r.Where(s => s.Id, trashedFormFileId));
+                        }
 
                         if (isNeedSendActions)
                         {
@@ -474,7 +525,7 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
                     {
                         var daoFactory = scope.ServiceProvider.GetService<IDaoFactory>();
                         var tagDao = daoFactory.GetTagDao<T>();
-                        var fromRoomTags = tagDao.GetTagsAsync(fileId, FileEntryType.File, TagType.FromRoom);
+                        var fromRoomTags = tagDao.GetTagsAsync(fileId, FileEntryType.File, TagType.FromRoom); //why no await?
                         var fromRoomTag = await fromRoomTags.FirstOrDefaultAsync();
                         var hasHeaders = _headers is { Count: > 0 };
 
@@ -531,16 +582,14 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
         var socketManager = scope.ServiceProvider.GetService<SocketManager>();
         var webhookManager = scope.ServiceProvider.GetService<WebhookManager>();
         var filesMessageService = scope.ServiceProvider.GetService<FilesMessageService>();
+        var permissionManager = scope.ServiceProvider.GetService<DeletePermissionsCheck<T>>();
 
         var file = await FileDao.GetFileAsync(fileId);
 
-        if (file == null)
+        var errorMsg = await permissionManager.CheckVersionPermissionsAsync(file);
+        if ((errorMsg == FilesCommonResource.ErrorMessage_FileNotFound) || (errorMsg == FilesCommonResource.ErrorMessage_SecurityException))
         {
-            Err = FilesCommonResource.ErrorMessage_FileNotFound;
-        }
-        else if (file.RootFolderType is FolderType.Archive or FolderType.TRASH)
-        {
-            Err = FilesCommonResource.ErrorMessage_SecurityException;
+            Err = errorMsg;
         }
         else
         {
@@ -548,15 +597,13 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
             {
                 CancellationToken.ThrowIfCancellationRequested();
 
-                var (isError, message) = await WithErrorAsync(scope, [file], false, true);
-
                 if (file.Version == v)
                 {
                     Err = FilesCommonResource.ErrorMessage_SecurityException_FileVersion;
                 }
-                else if (!_ignoreException && isError)
+                else if (!_ignoreException && errorMsg != null)
                 {
-                    Err = message;
+                    Err = errorMsg;
                 }
                 else
                 {
@@ -584,37 +631,6 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
                 await ProgressStep();
             }
         }
-    }
-
-    private async Task<(bool isError, string message)> WithErrorAsync(IServiceScope scope, IEnumerable<File<T>> files, bool folder, bool checkPermissions)
-    {
-        var lockerManager = scope.ServiceProvider.GetService<LockerManager>();
-        var fileTracker = scope.ServiceProvider.GetService<FileTrackerHelper>();
-
-        foreach (var file in files)
-        {
-            string error;
-            if (checkPermissions && !await FilesSecurity.CanDeleteAsync(file))
-            {
-                error = FilesCommonResource.ErrorMessage_SecurityException_DeleteFile;
-
-                return (true, error);
-            }
-            if (checkPermissions && await lockerManager.FileLockedForMeAsync(file.Id))
-            {
-                error = FilesCommonResource.ErrorMessage_LockedFile;
-
-                return (true, error);
-            }
-            if (await fileTracker.IsEditingAsync(file.Id, false))
-            {
-                error = folder ? FilesCommonResource.ErrorMessage_SecurityException_DeleteEditingFolder : FilesCommonResource.ErrorMessage_SecurityException_DeleteEditingFile;
-
-                return (true, error);
-            }
-        }
-
-        return (false, null);
     }
 }
 

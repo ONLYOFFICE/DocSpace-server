@@ -7,7 +7,7 @@ All URIs are relative to *https://your-docspace.onlyoffice.com*
 |--------|--------------|-------------|
 {{#operations}}
 {{#operation}}
-| [**{{operationId}}**](#{{operationIdLowerCase}}) | **{{httpMethod}}** {{path}} | {{summary}} |
+| [**{{operationId}}**](#{{operationIdLowerCase}}) | **{{httpMethod}}** {{path}} | {{{summary}}} |
 {{/operation}}
 {{/operations}}
 
@@ -28,7 +28,7 @@ For more information, see [api.onlyoffice.com]({{vendorExtensions.x-seealsoUrl}}
 {{/-last}}
 {{/allParams}}
 {{#allParams}}
-| **{{paramName}}** | {{#isFile}}**{{dataType}}**{{/isFile}}{{#isPrimitiveType}}**{{dataType}}**{{/isPrimitiveType}}{{^isPrimitiveType}}{{^isFile}}[**{{dataType}}**]({{#isContainer}}{{baseType}}{{/isContainer}}{{^isContainer}}{{vendorExtensions.x-mdModelName}}{{/isContainer}}.md){{/isFile}}{{/isPrimitiveType}} | {{description}} | {{^required}}[optional] {{/required}}{{#defaultValue}}[default to {{.}}]{{/defaultValue}} |
+| **{{paramName}}** | {{#isFile}}**{{dataType}}**{{/isFile}}{{#isPrimitiveType}}**{{dataType}}**{{/isPrimitiveType}}{{^isPrimitiveType}}{{^isFile}}[**{{dataType}}**]({{#isContainer}}{{baseType}}{{/isContainer}}{{^isContainer}}{{vendorExtensions.x-mdModelName}}{{/isContainer}}.md){{/isFile}}{{/isPrimitiveType}} | {{{description}}} | {{^required}}[optional] {{/required}}{{#defaultValue}}[default to {{.}}]{{/defaultValue}} |
 {{/allParams}}
 
 ### Return type
@@ -152,7 +152,7 @@ catch (ApiException e)
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 {{#responses}}
-| **{{code}}** | {{message}} | {{#headers}} * {{baseName}} - {{description}} <br> {{/headers}}{{^headers.0}} - {{/headers.0}} |
+| **{{code}}** | {{{message}}} | {{#headers}} * {{baseName}} - {{description}} <br> {{/headers}}{{^headers.0}} - {{/headers.0}} |
 {{/responses}}
 {{/responses.0}}
 

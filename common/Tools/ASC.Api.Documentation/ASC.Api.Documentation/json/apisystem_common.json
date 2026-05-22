@@ -7,7 +7,7 @@
       "url": "https://helpdesk.onlyoffice.com/hc/en-us",
       "email": "support@onlyoffice.com"
     },
-    "version": "3.6.0",
+    "version": "3.7.0",
     "x-scalar-sdk-installation": [
       {
         "lang": "Node",
@@ -145,6 +145,84 @@
             "application/*+xml": {
               "schema": {
                 "$ref": "#/components/schemas/TenantModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IActionResultWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/portal/provision": {
+      "post": {
+        "tags": [
+          "Portal"
+        ],
+        "summary": "Provision a portal with an OAuth provider",
+        "description": "Registers a new portal and immediately configures the specified OAuth provider, so the owner can sign in\r\nwithout a password. Supports any provider registered in the system.\r\nProvider keys are matched to the consumer's managed keys by conventional suffix (clientId, clientSecret,\r\nbaseUrl, redirectUrl/redirectUri).",
+        "operationId": "provision",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProvisionPortalRequestDto"
+              }
+            },
+            "application/xml": {
+              "schema": {
+                "$ref": "#/components/schemas/ProvisionPortalRequestDto"
+              }
+            },
+            "text/xml": {
+              "schema": {
+                "$ref": "#/components/schemas/ProvisionPortalRequestDto"
+              }
+            },
+            "application/*+xml": {
+              "schema": {
+                "$ref": "#/components/schemas/ProvisionPortalRequestDto"
               }
             }
           }
@@ -1444,6 +1522,75 @@
             "format": "int32"
           }
         }
+      },
+      "ProvisionPortalRequestDto": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/TenantModel"
+          },
+          {
+            "required": [
+              "provider"
+            ],
+            "type": "object",
+            "properties": {
+              "provider": {
+                "$ref": "#/components/schemas/ProvisionProviderDto"
+              }
+            }
+          }
+        ],
+        "additionalProperties": false,
+        "description": "The request parameters for provisioning a portal with an OAuth provider."
+      },
+      "ProvisionProviderDto": {
+        "required": [
+          "clientId",
+          "clientSecret",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "description": "The provider name.",
+            "example": "provider_name"
+          },
+          "clientId": {
+            "minLength": 1,
+            "type": "string",
+            "description": "The OAuth client ID.",
+            "example": "abc123"
+          },
+          "clientSecret": {
+            "minLength": 1,
+            "type": "string",
+            "description": "The OAuth client secret.",
+            "example": "secret"
+          },
+          "baseUrl": {
+            "type": "string",
+            "description": "The base URL of the provider instance.",
+            "nullable": true,
+            "example": "https://provider.example.com"
+          },
+          "redirectUri": {
+            "type": "string",
+            "description": "The OAuth redirect URI registered on the provider side.",
+            "nullable": true,
+            "example": "https://provider.example.com/oauth"
+          },
+          "cspDomain": {
+            "type": "string",
+            "description": "The domain to add to the portal's Content Security Policy whitelist.",
+            "nullable": true,
+            "example": "https://provider.example.com"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The OAuth provider configuration for portal provisioning."
       },
       "RecaptchaType": {
         "oneOf": [

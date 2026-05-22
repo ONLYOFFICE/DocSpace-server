@@ -84,7 +84,7 @@ jobs:
     - name: build csharp
       if: matrix.language == 'csharp'
       run: |
-        dotnet build ASC.Web.slnf
+        dotnet build ASC.Web.slnx
         dotnet build ASC.Migrations.sln -o ./ASC.Migration.Runner/service/
         
     - name: update yarn

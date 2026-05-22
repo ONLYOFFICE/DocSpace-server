@@ -5,7 +5,7 @@ All URIs are relative to *https://your-docspace.onlyoffice.com*
 
 | Method | HTTP request | Description |
 | ------------- | ------------- | ------------- |
-{{#operations}}{{#operation}}| [**{{operationId}}()**]({{classname}}.md#{{operationId}}) | **{{httpMethod}}** {{path}} | {{summary}} |
+{{#operations}}{{#operation}}| [**{{operationId}}()**]({{classname}}.md#{{operationId}}) | **{{httpMethod}}** {{path}} | {{{summary}}} |
 {{/operation}}{{/operations}}{{#operations}}{{#operation}}
 
 ## `{{{operationId}}}()`
@@ -41,7 +41,7 @@ Note: the input parameter is an associative array with the keys listed as the pa
 {{/vendorExtensions.x-group-parameters}}
 {{^allParams}}This endpoint does not need any parameter.{{/allParams}}{{#allParams}}{{#-last}}| Name | Type | Description  | Notes |
 | ------------- | ------------- | ------------- | ------------- |{{/-last}}{{/allParams}}
-{{#allParams}}| **{{paramName}}** | {{#isFile}}**{{{dataType}}}**{{/isFile}}{{#isPrimitiveType}}**{{{dataType}}}**{{/isPrimitiveType}}{{^isPrimitiveType}}{{^isFile}}[**{{{dataType}}}**](../Model/{{baseType}}.md){{/isFile}}{{/isPrimitiveType}}| {{description}} |{{^required}} [optional]{{/required}}{{#defaultValue}} [default to {{.}}]{{/defaultValue}} |
+{{#allParams}}| **{{paramName}}** | {{#isFile}}**{{{dataType}}}**{{/isFile}}{{#isPrimitiveType}}**{{{dataType}}}**{{/isPrimitiveType}}{{^isPrimitiveType}}{{^isFile}}[**{{{dataType}}}**](../Model/{{baseType}}.md){{/isFile}}{{/isPrimitiveType}}| {{{description}}} |{{^required}} [optional]{{/required}}{{#defaultValue}} [default to {{.}}]{{/defaultValue}} |
 {{/allParams}}{{#servers}}{{#-first}}| hostIndex | null|int | Host index. Defaults to null. If null, then the library will use $this->hostIndex instead | [optional] |
 | variables | array | Associative array of variables to pass to the host. Defaults to empty array. | [optional] |{{/-first}}
 {{/servers}}
