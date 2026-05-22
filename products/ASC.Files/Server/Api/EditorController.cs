@@ -440,6 +440,7 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
     [SwaggerResponse(200, "Document service information: the Document Server address, the Document Server address in the local private network, the Community Server address", typeof(DocServiceUrlDto))]
     [SwaggerResponse(400, "Invalid input urls/Mixed Active Content is not allowed. HTTPS address for Document Server is required")]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
+    //[SwaggerResponse(503, "Unable to establish a connection with the Document Server")]
     [HttpPut("docservice")]
     public async Task<DocServiceUrlDto> CheckDocServiceUrl(CheckDocServiceUrlRequestDto inDto)
     {
@@ -498,7 +499,7 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
             await filesLinkUtility.SetDocServiceSignatureHeaderAsync(currentDocServiceSecretHeader);
             await filesLinkUtility.SetDocServiceSslVerificationAsync(currentDocServiceSslVerification);
 
-            throw new ArgumentException("Unable to establish a connection with the Document Server.");
+            throw new Exception("Unable to establish a connection with the Document Server.");
         }
         var version = new DocServiceUrlRequestDto { Version = false };
         return await GetDocServiceUrl(version);
