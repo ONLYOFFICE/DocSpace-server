@@ -439,7 +439,7 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Document service information: the Document Server address, the Document Server address in the local private network, the Community Server address", typeof(DocServiceUrlDto))]
     [SwaggerResponse(400, "Invalid input urls/Mixed Active Content is not allowed. HTTPS address for Document Server is required")]
-    //[SwaggerResponse(503, "Unable to establish a connection with the Document Server")]
+    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [HttpPut("docservice")]
     public async Task<DocServiceUrlDto> CheckDocServiceUrl(CheckDocServiceUrlRequestDto inDto)
     {
@@ -456,13 +456,13 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
             !ValidateUrl(inDto.DocServiceUrlInternal) ||
             !ValidateUrl(inDto.DocServiceUrlPortal))
         {
-            throw new Exception("Invalid input urls");
+            throw new ArgumentException("Invalid input urls");
         }
 
         if (!string.IsNullOrEmpty(inDto.DocServiceSignatureSecret) &&
             string.IsNullOrEmpty(inDto.DocServiceSignatureHeader))
         {
-            throw new Exception("Invalid signature header");
+            throw new ArgumentException("Invalid signature header");
         }
 
         await filesLinkUtility.SetDocServiceUrlAsync(inDto.DocServiceUrl);
@@ -476,7 +476,7 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
         var http = new Regex(@"^http://", RegexOptions.IgnoreCase);
         if (https.IsMatch(commonLinkUtility.GetFullAbsolutePath("")) && http.IsMatch(filesLinkUtility.GetDocServiceUrl()))
         {
-            throw new Exception("Mixed Active Content is not allowed. HTTPS address for Document Server is required.");
+            throw new ArgumentException("Mixed Active Content is not allowed. HTTPS address for Document Server is required.");
         }
 
         try
@@ -498,7 +498,7 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
             await filesLinkUtility.SetDocServiceSignatureHeaderAsync(currentDocServiceSecretHeader);
             await filesLinkUtility.SetDocServiceSslVerificationAsync(currentDocServiceSslVerification);
 
-            throw new Exception("Unable to establish a connection with the Document Server.");
+            throw new ArgumentException("Unable to establish a connection with the Document Server.");
         }
         var version = new DocServiceUrlRequestDto { Version = false };
         return await GetDocServiceUrl(version);
