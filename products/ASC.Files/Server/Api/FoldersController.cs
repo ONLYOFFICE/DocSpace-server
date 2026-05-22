@@ -416,6 +416,7 @@ public abstract class FoldersController<T>(
             inDto.Id,
             FileEntryType.Folder,
             inDto.FolderLink.Access,
+            string.IsNullOrWhiteSpace(inDto.FolderLink.Title) ? null : inDto.FolderLink.Title.Trim(),
             expirationDate: inDto.FolderLink.ExpirationDate,
             requiredAuth: inDto.FolderLink.Internal,
             allowUnlimitedDate: true,
