@@ -75,6 +75,24 @@ public class RegistrationGlobalExceptionHandler {
       URI.create("https://api.onlyoffice.com/docspace/api-backend/get-started/basic-concepts");
 
   /**
+   * Extracts the simple constraint name from a fully-qualified Spring validation code.
+   *
+   * <p>Spring registers constraint codes in the form {@code ConstraintName.objectName.fieldName}
+   * (e.g. {@code "Size.updateClientRequest.name"}). This method strips the object and field
+   * suffixes, returning just the constraint name (e.g. {@code "Size"}), which is required for
+   * correct mapping in {@link ValidationErrorCodeResponse#getErrorCode(String, String)}.
+   *
+   * @param code the raw constraint code from a {@link org.springframework.validation.ObjectError},
+   *     may be {@code null}
+   * @return the simple constraint name, or {@code null} if {@code code} is {@code null}
+   */
+  private static String extractConstraintCode(String code) {
+    if (code == null) return null;
+    var dot = code.indexOf('.');
+    return dot > 0 ? code.substring(0, dot) : code;
+  }
+
+  /**
    * Creates a ProblemDetail with the standard type URI and instance path.
    *
    * @param status the HTTP status
@@ -150,11 +168,13 @@ public class RegistrationGlobalExceptionHandler {
 
     for (var error : e.getBindingResult().getAllErrors()) {
       String fieldName;
-      var constraintCode = error.getCode();
+      String constraintCode;
       if (error instanceof FieldError fe) {
         fieldName = ValidationErrorCodeResponse.normalizeFieldName(fe.getField());
+        constraintCode = extractConstraintCode(fe.getCode());
       } else {
         fieldName = error.getObjectName();
+        constraintCode = extractConstraintCode(error.getCode());
       }
 
       var message = error.getDefaultMessage();
@@ -186,22 +206,23 @@ public class RegistrationGlobalExceptionHandler {
       HandlerMethodValidationException e, HttpServletRequest request) {
     var fieldErrors = new ArrayList<ValidationErrorResponse.FieldError>();
 
-    for (var paramResult : e.getValueResults()) {
+    for (var paramResult : e.getParameterValidationResults()) {
       var paramName = paramResult.getMethodParameter().getParameterName();
-      var fieldName =
-          paramName != null ? ValidationErrorCodeResponse.normalizeFieldName(paramName) : "unknown";
 
       for (var error : paramResult.getResolvableErrors()) {
-        String constraintCode = null;
+        String fieldName;
+        String constraintCode;
         if (error instanceof FieldError fe) {
-          constraintCode = fe.getCode();
-        } else if (error.getCodes() != null && error.getCodes().length > 0) {
-          var code = error.getCodes()[0];
-          if (code.contains(".")) {
-            constraintCode = code.substring(0, code.indexOf('.'));
-          } else {
-            constraintCode = code;
-          }
+          fieldName = ValidationErrorCodeResponse.normalizeFieldName(fe.getField());
+          constraintCode = extractConstraintCode(fe.getCode());
+        } else {
+          fieldName =
+              paramName != null
+                  ? ValidationErrorCodeResponse.normalizeFieldName(paramName)
+                  : "unknown";
+          if (error.getCodes() != null && error.getCodes().length > 0)
+            constraintCode = extractConstraintCode(error.getCodes()[0]);
+          else constraintCode = null;
         }
 
         var message = error.getDefaultMessage();
