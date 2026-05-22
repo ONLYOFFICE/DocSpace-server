@@ -499,10 +499,10 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
 
             _ = await cspSettingsHelper.SaveAsync(settings.Domains ?? []);
         }
-        catch
+        catch (Exception ex)
         {
             await RestoreSettingsAsync();
-            throw new Exception("Unable to establish a connection with the Document Server.");
+            throw new Exception("Unable to establish a connection with the Document Server.", ex);
         }
 
         var version = new DocServiceUrlRequestDto { Version = false };
