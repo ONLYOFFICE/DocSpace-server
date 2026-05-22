@@ -32,4 +32,6 @@ public class AppItem
     public string Id { get; set; }
 
     public bool Enabled { get; set; }
+
+    public string Settings { get; set; }
 }
