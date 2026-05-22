@@ -466,18 +466,27 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
             throw new ArgumentException("Invalid signature header");
         }
 
-        await filesLinkUtility.SetDocServiceUrlAsync(inDto.DocServiceUrl);
-        await filesLinkUtility.SetDocServiceUrlInternalAsync(inDto.DocServiceUrlInternal);
-        await filesLinkUtility.SetDocServicePortalUrlAsync(inDto.DocServiceUrlPortal);
-        await filesLinkUtility.SetDocServiceSignatureSecretAsync(inDto.DocServiceSignatureSecret);
-        await filesLinkUtility.SetDocServiceSignatureHeaderAsync(inDto.DocServiceSignatureHeader);
-        await filesLinkUtility.SetDocServiceSslVerificationAsync(inDto.DocServiceSslVerification ?? true);
-
         var https = new Regex(@"^https://", RegexOptions.IgnoreCase);
         var http = new Regex(@"^http://", RegexOptions.IgnoreCase);
-        if (https.IsMatch(commonLinkUtility.GetFullAbsolutePath("")) && http.IsMatch(filesLinkUtility.GetDocServiceUrl()))
+
+        try
         {
-            throw new ArgumentException("Mixed Active Content is not allowed. HTTPS address for Document Server is required.");
+            await filesLinkUtility.SetDocServiceUrlAsync(inDto.DocServiceUrl);
+            await filesLinkUtility.SetDocServiceUrlInternalAsync(inDto.DocServiceUrlInternal);
+            await filesLinkUtility.SetDocServicePortalUrlAsync(inDto.DocServiceUrlPortal);
+            await filesLinkUtility.SetDocServiceSignatureSecretAsync(inDto.DocServiceSignatureSecret);
+            await filesLinkUtility.SetDocServiceSignatureHeaderAsync(inDto.DocServiceSignatureHeader);
+            await filesLinkUtility.SetDocServiceSslVerificationAsync(inDto.DocServiceSslVerification ?? true);
+
+            if (https.IsMatch(commonLinkUtility.GetFullAbsolutePath("")) && http.IsMatch(filesLinkUtility.GetDocServiceUrl()))
+            {
+                throw new ArgumentException("Mixed Active Content is not allowed. HTTPS address for Document Server is required.");
+            }
+        }
+        catch
+        {
+            await RestoreSettingsAsync();
+            throw;
         }
 
         try
@@ -490,7 +499,16 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
 
             _ = await cspSettingsHelper.SaveAsync(settings.Domains ?? []);
         }
-        catch (Exception)
+        catch
+        {
+            await RestoreSettingsAsync();
+            throw new Exception("Unable to establish a connection with the Document Server.");
+        }
+
+        var version = new DocServiceUrlRequestDto { Version = false };
+        return await GetDocServiceUrl(version);
+
+        async Task RestoreSettingsAsync()
         {
             await filesLinkUtility.SetDocServiceUrlAsync(currentDocServiceUrl);
             await filesLinkUtility.SetDocServiceUrlInternalAsync(currentDocServiceUrlInternal);
@@ -498,11 +516,7 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
             await filesLinkUtility.SetDocServiceSignatureSecretAsync(currentDocServiceSecretValue);
             await filesLinkUtility.SetDocServiceSignatureHeaderAsync(currentDocServiceSecretHeader);
             await filesLinkUtility.SetDocServiceSslVerificationAsync(currentDocServiceSslVerification);
-
-            throw new Exception("Unable to establish a connection with the Document Server.");
         }
-        var version = new DocServiceUrlRequestDto { Version = false };
-        return await GetDocServiceUrl(version);
 
         bool ValidateUrl(string url)
         {
