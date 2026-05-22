@@ -113,6 +113,11 @@ public class BaseTest(
         return await GetFolderIdAsync(FolderType.SHARE, user);
     }
 
+    protected async Task<int> GetTrashFolderIdAsync(User user)
+    {
+        return await GetFolderIdAsync(FolderType.TRASH, user);
+    }
+
     protected async Task<int> GetUserFolderIdAsync(User user)
     {
         return await GetFolderIdAsync(FolderType.USER, user);
