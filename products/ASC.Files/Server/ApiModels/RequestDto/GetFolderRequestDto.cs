@@ -74,6 +74,13 @@ public class GetFolderRequestDto<T>
     public T RoomId { get; set; }
 
     /// <summary>
+    /// The parent folder ID used to filter the folder contents by parent.
+    /// </summary>
+    /// <example>1</example>
+    [FromQuery(Name = "parentId")]
+    public T ParentId { get; set; }
+
+    /// <summary>
     /// Specifies whether to exclude search by user or group ID.
     /// </summary>
     /// <example>false</example>

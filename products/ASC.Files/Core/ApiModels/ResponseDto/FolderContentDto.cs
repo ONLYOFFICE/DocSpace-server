@@ -100,11 +100,11 @@ public class FolderContentDtoHelper(
     AiAccessibility accessibility,
     AiModelSettingsLoader modelSettingsLoader)
 {
-    public async Task<FolderContentDto<T>> GetAsync<T>(T folderId, Guid? userIdOrGroupId, Guid? sharedBy, FilterType? filterType, T roomId, bool? searchInContent, bool? withSubFolders, bool? excludeSubject, ApplyFilterOption? applyFilterOption, SearchArea? searchArea, string sortByFilter, SortOrder sortOrder, int startIndex, int limit, string text, string[] extension = null, FormsItemDto formsItemDto = null, Location? location = null)
+    public async Task<FolderContentDto<T>> GetAsync<T>(T folderId, Guid? userIdOrGroupId, Guid? sharedBy, FilterType? filterType, T roomId, bool? searchInContent, bool? withSubFolders, bool? excludeSubject, ApplyFilterOption? applyFilterOption, SearchArea? searchArea, string sortByFilter, SortOrder sortOrder, int startIndex, int limit, string text, string[] extension = null, FormsItemDto formsItemDto = null, Location? location = null, T parentId = default)
     {
         var types = filterType.HasValue ? new[] { filterType.Value } : null;
 
-        var folderContentWrapper = await ToFolderContentWrapperAsync(folderId, userIdOrGroupId ?? Guid.Empty, sharedBy ?? Guid.Empty,types, roomId, searchInContent ?? false, withSubFolders ?? false, excludeSubject ?? false, applyFilterOption ?? ApplyFilterOption.All, text, extension, searchArea ?? SearchArea.Active, formsItemDto, location, sortByFilter, sortOrder, startIndex, limit);
+        var folderContentWrapper = await ToFolderContentWrapperAsync(folderId, userIdOrGroupId ?? Guid.Empty, sharedBy ?? Guid.Empty,types, roomId, searchInContent ?? false, withSubFolders ?? false, excludeSubject ?? false, applyFilterOption ?? ApplyFilterOption.All, text, extension, searchArea ?? SearchArea.Active, formsItemDto, location, sortByFilter, sortOrder, startIndex, limit, parentId);
 
         return folderContentWrapper.NotFoundIfNull();
     }
@@ -278,7 +278,8 @@ public class FolderContentDtoHelper(
         string sortByFilter,
         SortOrder sortOrder,
         int startIndex,
-        int count)
+        int count,
+        T parentId = default)
     {
         OrderBy orderBy = null;
         if (SortedByTypeExtensions.TryParse(sortByFilter, true, out var sortBy))
@@ -304,7 +305,8 @@ public class FolderContentDtoHelper(
             applyFilterOption: applyFilterOption,
             searchArea: searchArea,
             formsItemDto: formsItemDto,
-            location: location);
+            location: location,
+            parentFolderId: parentId);
 
         return await GetAsync(folderId, items, startIndex);
     }

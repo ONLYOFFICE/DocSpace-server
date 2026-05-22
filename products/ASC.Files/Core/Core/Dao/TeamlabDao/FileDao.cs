@@ -2120,6 +2120,7 @@ internal class FileDao(
         bool excludeSubject,
         Location? location,
         int trashId,
+        int parentId,
         OrderBy orderBy,
         int offset,
         int count)
@@ -2131,7 +2132,7 @@ internal class FileDao(
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        var q = GetFilesByTagQuery(filesDbContext, tagOwner, tagType, location, trashId);
+        var q = GetFilesByTagQuery(filesDbContext, tagOwner, tagType, location, trashId, parentId);
 
         q = await GetFilesQueryWithFilters(q, filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject);
 
@@ -2169,32 +2170,6 @@ internal class FileDao(
         {
             yield return mapper.MapDbFileQueryToDbFileInternal(file);
         }
-    }
-
-    public async Task<int> GetFilesByTagCountAsync(Guid tagOwner,
-        IEnumerable<TagType> tagType,
-        FilterType filterType,
-        bool subjectGroup,
-        Guid subjectId,
-        string searchText,
-        string[] extension,
-        bool searchInContent,
-        bool excludeSubject,
-        Location? location,
-        int trashId)
-    {
-        if (filterType == FilterType.FoldersOnly)
-        {
-            return 0;
-        }
-
-        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-
-        var q = GetFilesByTagQuery(filesDbContext, tagOwner, tagType, location, trashId);
-
-        q = await GetFilesQueryWithFilters(q, filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject);
-
-        return await q.CountAsync();
     }
 
     public async Task<long> GetTransferredBytesCountAsync(ChunkedUploadSession<int> uploadSession)
@@ -2770,14 +2745,14 @@ internal class FileDao(
                 l.EntryId,
                 l.EntryType
             }), f => f.Id.ToString(), t => t.EntryId, (file, tag) => new { file, tag })
-                .Where(r => r.tag.Type == TagType.Origin && r.tag.EntryType == FileEntryType.File && filesDbContext.Folders.Where(f =>
-                        f.TenantId == tenantId && f.Id == filesDbContext.Tree.Where(t => t.FolderId == Convert.ToInt32(r.tag.Name))
-                            .OrderByDescending(t => t.Level)
-                            .Select(t => t.ParentId)
-                            .Skip(1)
-                            .FirstOrDefault())
-                    .Select(f => f.Id)
-                    .FirstOrDefault() == roomId)
+                .Where(r => r.tag.Type == TagType.Origin && r.tag.EntryType == FileEntryType.File &&
+                            filesDbContext.Folders
+                                .Any(f => f.TenantId == tenantId && f.Id ==
+                                    filesDbContext.Tree
+                                        .Where(t => t.FolderId == Convert.ToInt32(r.tag.Name) && t.ParentId == roomId)
+                                        .OrderByDescending(t => t.Level)
+                                        .Select(t => t.ParentId)
+                                        .FirstOrDefault()))
                 .Select(r => r.file);
         }
 
@@ -2855,7 +2830,7 @@ internal class FileDao(
         return q;
     }
 
-    private IQueryable<FileByTagQuery> GetFilesByTagQuery(FilesDbContext filesDbContext, Guid tagOwner, IEnumerable<TagType> tagType, Location? location, int? trashId)
+    private IQueryable<FileByTagQuery> GetFilesByTagQuery(FilesDbContext filesDbContext, Guid tagOwner, IEnumerable<TagType> tagType, Location? location, int? trashId, int? parentId)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
 
@@ -2872,6 +2847,11 @@ internal class FileDao(
         if (trashId != 0)
         {
             initQuery = initQuery.Where(r => !filesDbContext.Tree.Any(a => a.FolderId == r.f.ParentId && a.ParentId == trashId));
+        }
+
+        if (parentId != 0)
+        {
+            initQuery = initQuery.Where(r => filesDbContext.Tree.Any(a => a.FolderId == r.f.ParentId && a.ParentId == parentId));
         }
 
         var query = initQuery.Select(x => new FileByTagQuery
