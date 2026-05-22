@@ -23,12 +23,12 @@
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 #pragma warning disable ASPIREINTERACTION001
@@ -38,6 +38,7 @@ IResourceBuilder<JavaScriptAppResource>? playwright = null;
 var basePath = Path.GetFullPath(Path.Combine(builder.AppHostDirectory, "..", "..", ".."));
 var isDocker = string.Compare(builder.Configuration["Docker"], "true", StringComparison.OrdinalIgnoreCase) == 0;
 var skipClient = string.Compare(builder.Configuration["SKIP_CLIENT"], "true", StringComparison.OrdinalIgnoreCase) == 0;
+var storybook = string.Compare(builder.Configuration["STORYBOOK"], "true", StringComparison.OrdinalIgnoreCase) == 0;
 
 var launchProfile = builder.Configuration["DOTNET_LAUNCH_PROFILE"];
 var otelFileLogging = string.Compare(builder.Configuration["OTEL_FILE_LOGGING"], "true", StringComparison.OrdinalIgnoreCase) == 0;
@@ -114,7 +115,7 @@ switch (launchProfile)
                 .AddApiTest()
                 .AddE2ETest();
         }
-        
+
         configurator
             .AddProject<ASC_Files>(Constants.FilesPort)
             .AddProject<ASC_Files_Worker>(Constants.FilesWorkerPort)
@@ -153,10 +154,14 @@ if (!skipClient)
         .WithEnvironment("NODE_OPTIONS", $"--require={dnsPatchPath}")
         .WithEnvironment("NODE_EXTRA_CA_CERTS", crtPath)
         .WithEnvironment("API_HOST", $"http://localhost:{Constants.AppHostPort.ToString()}");
-    builder.AddJavaScriptApp("onlyoffice-storybook", Path.Combine(clientBasePath, "libs", "ui-kit"), "storybook")
-        .WithPnpm(false)
-        .WithEnvironment("STORYBOOK_PROXY", "true")
-        .WithEnvironment("BROWSER", "none");
+
+    if (storybook)
+    {
+        builder.AddJavaScriptApp("onlyoffice-storybook", Path.Combine(clientBasePath, "libs", "ui-kit"), "storybook")
+            .WithPnpm(false)
+            .WithEnvironment("STORYBOOK_PROXY", "true")
+            .WithEnvironment("BROWSER", "none");
+    }
 }
 
 var isPreview = builder.Configuration["DOTNET_LAUNCH_PROFILE"] == "preview";
