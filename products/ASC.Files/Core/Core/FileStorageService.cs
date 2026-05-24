@@ -3991,7 +3991,7 @@ public class FileStorageService //: IFileStorageService
 
             if (!await fileSharingHelper.CanSetAccessAsync(entry))
             {
-                return null;
+                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
             }
 
             return await SetExternalLinkAsync(
