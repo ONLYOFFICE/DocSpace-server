@@ -1,0 +1,19 @@
+<Project>
+  <PropertyGroup Condition="'$(SolutionName)' == 'ASC.Api.Documentation' OR '$(SolutionFileName)' == 'ASC.Api.Documentation.sln' OR '$(SolutionFileName)' == 'ASC.Api.Documentation.slnx' OR '$(GenerateApiDocs)' == 'true'">
+    <OpenApiGenerateDocuments>true</OpenApiGenerateDocuments>
+  </PropertyGroup>
+  <!--
+    Strip native .pdb files that come from NuGet packages (e.g. libSkiaSharp.pdb,
+    ~81 MB × ~48 hosts ≈ 3.8 GB). We never step into these C++ libraries, and
+    they bloat bin/, AV-scan time and incremental copies.
+    Our own .pdb (managed, from ASC.* projects) are untouched.
+  -->
+  <Target Name="RemoveNativePackagePdbs" AfterTargets="ResolvePackageAssets">
+    <ItemGroup>
+      <RuntimeTargetsCopyLocalItems Remove="@(RuntimeTargetsCopyLocalItems)"
+                                    Condition="'%(Extension)' == '.pdb'" />
+      <NativeCopyLocalItems Remove="@(NativeCopyLocalItems)"
+                            Condition="'%(Extension)' == '.pdb'" />
+    </ItemGroup>
+  </Target>
+</Project>

@@ -1,28 +1,35 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 //
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 //
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 //
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 //
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 //
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+//
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
 
 using ASC.Core.Common.AI;
 using ASC.Files.Core.ApiModels.ResponseDto;
@@ -82,19 +89,31 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/url</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The URL to the payment page", typeof(Uri))]
+    [SwaggerResponse(400, "Invalid request parameters")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPut("url")]
     public async Task<Uri> GetPaymentUrl(PaymentUrlRequestDto inDto)
     {
-        await DemandAdminAsync();
-
         if (!tariffService.IsConfigured())
         {
-            return null;
+            throw new InvalidOperationException("Tariff service is not configured");
+        }
+
+        await DemandAdminAsync();
+
+        ArgumentNullException.ThrowIfNull(inDto?.Quantity);
+
+        if (inDto.Quantity.Any(item => item.Value <= 0))
+        {
+            throw new ArgumentException("Invalid quantity");
+        }
+
+        if (!Uri.TryCreate(inDto.BackUrl, UriKind.Absolute, out var parsedUri))
+        {
+            throw new ArgumentException("Invalid URI format");
         }
 
         var tenant = tenantManager.GetCurrentTenant();
-
         var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
         if (customerInfo != null)
         {
@@ -112,9 +131,9 @@ public class PaymentController(
         // TODO: Temporary restriction.
         // Possibility to buy only one product per transaction.
         // Only monthly tariff available for purchase.
-        if (inDto.Quantity.Count != 1 || !monthQuotas.Any(q => q.Name == inDto.Quantity.First().Key))
+        if (inDto.Quantity.Count != 1 || monthQuotas.All(q => q.Name != inDto.Quantity.First().Key))
         {
-            return null;
+            throw new ArgumentException();
         }
 
         var currency = await regionHelper.GetCurrencyFromRequestAsync();
@@ -139,14 +158,16 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/update</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
+    [SwaggerResponse(400, "Invalid request parameters")]
     [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(404, "Customer could not be found")]
     [HttpPut("update")]
     [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
     public async Task<bool> UpdatePayment(QuantityRequestDto inDto)
     {
         if (!tariffService.IsConfigured())
         {
-            return false;
+            throw new InvalidOperationException("Tariff service is not configured");
         }
 
         var tenant = tenantManager.GetCurrentTenant();
@@ -154,7 +175,7 @@ public class PaymentController(
         var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
         if (customerInfo == null)
         {
-            return false;
+            throw new ItemNotFoundException("Customer could not be found");
         }
 
         await DemandPayerAsync(customerInfo);
@@ -164,7 +185,7 @@ public class PaymentController(
         // For the current paid tariff only quota change is available.
         if (inDto.Quantity.Count != 1)
         {
-            return false;
+            throw new ArgumentException();
         }
 
         var product = inDto.Quantity.First();
@@ -175,21 +196,21 @@ public class PaymentController(
 
         if (quota == null || quota.Wallet)
         {
-            return false;
+            throw new ArgumentException("Invalid product");
         }
 
         var currentQuota = await tenantManager.GetTenantQuotaAsync(tenant.Id);
 
         if (currentQuota.Price > 0 && currentQuota.Name != productName)
         {
-            return false;
+            throw new ArgumentException("Invalid product");
         }
 
         var tariff = await tariffService.GetTariffAsync(tenant.Id);
 
         if (tariff.Quotas.Any(q => q.Id == quota.TenantId && q.Quantity == productQty))
         {
-            return false;
+            throw new ArgumentException("Invalid quantity");
         }
 
         var currency = await regionHelper.GetCurrencyFromRequestAsync();
@@ -213,19 +234,22 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/updatewallet</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
+    [SwaggerResponse(400, "Invalid request parameters")]
+    [SwaggerResponse(402, "Tariff is not paid")]
     [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(404, "Customer could not be found")]
     [HttpPut("updatewallet")]
     [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
     public async Task<bool> UpdateWalletPayment(WalletQuantityRequestDto inDto)
     {
         if (!tariffService.IsConfigured())
         {
-            return false;
+            throw new InvalidOperationException("Tariff service is not configured");
         }
 
         if (inDto.ProductQuantityType is ProductQuantityType.Renew or ProductQuantityType.Sub)
         {
-            return false;
+            throw new ArgumentException("Invalid product quantity type");
         }
 
         var tenant = tenantManager.GetCurrentTenant();
@@ -233,7 +257,7 @@ public class PaymentController(
         var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
         if (customerInfo == null)
         {
-            return false;
+            throw new ItemNotFoundException("Customer could not be found");
         }
 
         await DemandPayerAsync(customerInfo);
@@ -243,7 +267,7 @@ public class PaymentController(
         // Wallet tariffs are always available for purchase.
         if (inDto.Quantity.Count != 1)
         {
-            return false;
+            throw new ArgumentException();
         }
 
         var product = inDto.Quantity.First();
@@ -254,21 +278,21 @@ public class PaymentController(
 
         if (quota is not { Wallet: true })
         {
-            return false;
+            throw new ArgumentException("Invalid product");
         }
 
         var tariff = await tariffService.GetTariffAsync(tenant.Id);
 
         if (tariff.State > TariffState.Paid)
         {
-            return false;
+            throw new BillingException("Tariff is not paid");
         }
 
         if (inDto.ProductQuantityType is ProductQuantityType.Set)
         {
             if (productQty.HasValue && productQty.Value != 0 && productQty.Value < 100) // min value 100Gb
             {
-                return false;
+                throw new ArgumentException("Invalid quantity");
             }
 
             // saving null value is equivalent to resetting to default
@@ -286,19 +310,19 @@ public class PaymentController(
 
         if (productQty is null or <= 0)
         {
-            return false;
+            throw new ArgumentException("Invalid quantity");
         }
 
         var hasActiveWalletQuota = tariff.Quotas.Any(q => q.Id == quota.TenantId && q.State == QuotaState.Active);
         if (!hasActiveWalletQuota && productQty < 100) // min value 100Gb
         {
-            return false;
+            throw new ArgumentException("Invalid quantity");
         }
 
         var balance = await tariffService.GetCustomerBalanceAsync(tenant.Id);
         if (balance == null)
         {
-            return false;
+            throw new ItemNotFoundException("Balance could not be found");
         }
 
         // TODO: support other currencies
@@ -306,7 +330,7 @@ public class PaymentController(
         var subAccount = balance.SubAccounts.FirstOrDefault(x => x.Currency == defaultCurrency);
         if (subAccount == null)
         {
-            return false;
+            throw new ItemNotFoundException("Subaccount could not be found");
         }
 
         var quantity = new Dictionary<string, int> { { productName, productQty.Value } };
@@ -330,18 +354,20 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/calculatewallet</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "Payment calculation", typeof(PaymentCalculation))]
+    [SwaggerResponse(400, "Invalid request parameters")]
     [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(404, "Customer could not be found")]
     [HttpPut("calculatewallet")]
     public async Task<PaymentCalculation> CalculateWalletPayment(WalletQuantityRequestDto inDto)
     {
         if (!tariffService.IsConfigured())
         {
-            return null;
+            throw new InvalidOperationException("Tariff service is not configured");
         }
 
         if (inDto.ProductQuantityType is not ProductQuantityType.Add)
         {
-            return null;
+            throw new ArgumentException("Invalid product quantity type");
         }
 
         var tenant = tenantManager.GetCurrentTenant();
@@ -349,7 +375,7 @@ public class PaymentController(
         var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
         if (customerInfo == null)
         {
-            return null;
+            throw new ItemNotFoundException("Customer could not be found");
         }
 
         await DemandPayerAsync(customerInfo);
@@ -359,7 +385,7 @@ public class PaymentController(
         // Wallet tariffs are always available for purchase.
         if (inDto.Quantity.Count != 1)
         {
-            return null;
+            throw new ArgumentException();
         }
 
         var product = inDto.Quantity.First();
@@ -370,18 +396,18 @@ public class PaymentController(
 
         if (quota is not { Wallet: true })
         {
-            return null;
+            throw new ArgumentException("Invalid product");
         }
 
         if (productQty is null or <= 0)
         {
-            return null;
+            throw new ArgumentException("Invalid quantity");
         }
 
         var balance = await tariffService.GetCustomerBalanceAsync(tenant.Id);
         if (balance == null)
         {
-            return null;
+            throw new ItemNotFoundException("Balance could not be found");
         }
 
         // TODO: support other currencies
@@ -389,7 +415,7 @@ public class PaymentController(
         var subAccount = balance.SubAccounts.FirstOrDefault(x => x.Currency == defaultCurrency);
         if (subAccount == null)
         {
-            return null;
+            throw new ItemNotFoundException("Subaccount could not be found");
         }
 
         var quantity = new Dictionary<string, int> { { productName, productQty.Value } };
@@ -414,7 +440,7 @@ public class PaymentController(
     {
         if (!tariffService.IsConfigured())
         {
-            return null;
+            throw new InvalidOperationException("Tariff service is not configured");
         }
 
         var tenant = tenantManager.GetCurrentTenant();
@@ -440,9 +466,12 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/prices</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "List of available portal prices", typeof(Dictionary<string, decimal>))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("prices")]
     public async Task<Dictionary<string, decimal>> GetPortalPrices()
     {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
         var currency = await regionHelper.GetCurrencyFromRequestAsync();
         var result = (await tenantManager.GetProductPriceInfoAsync())
             .ToDictionary(pr => pr.Key, pr => pr.Value.GetValueOrDefault(currency, 0));
@@ -460,9 +489,12 @@ public class PaymentController(
     /// <collection>list</collection>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "List of available portal currencies", typeof(IAsyncEnumerable<CurrenciesDto>))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("currencies")]
     public async IAsyncEnumerable<CurrenciesDto> GetPaymentCurrencies()
     {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
         var defaultRegion = regionHelper.GetDefaultRegionInfo();
         var currentRegion = await regionHelper.GetCurrentRegionInfoAsync();
 
@@ -484,6 +516,7 @@ public class PaymentController(
     /// <collection>list</collection>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "List of available portal quotas", typeof(IEnumerable<QuotaDto>))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("quotas")]
     public async Task<IEnumerable<QuotaDto>> GetPaymentQuotas(QuotasRequestDto inDto)
     {
@@ -511,6 +544,7 @@ public class PaymentController(
     /// <collection>list</collection>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "List of available wallet services", typeof(IEnumerable<WalletServiceDto>))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("walletservices")]
     public async Task<IEnumerable<WalletServiceDto>> GetWalletServices()
     {
@@ -528,6 +562,8 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/walletservice</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "Wallet service", typeof(WalletServiceDto))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(404, "Service could not be found")]
     [HttpGet("walletservice")]
     public async Task<WalletServiceDto> GetWalletService(GetWalletServiceRequestDto inDto)
     {
@@ -537,7 +573,7 @@ public class PaymentController(
         var quota = quotaList.FirstOrDefault(q => q.Wallet && q.TenantId == (int)inDto.Service);
         if (quota == null)
         {
-            throw new ItemNotFoundException();
+            throw new ItemNotFoundException("Service could not be found");
         }
 
         var quotaDto = await tariffHelper.ToQuotaDtoAsync(quota, false);
@@ -577,18 +613,26 @@ public class PaymentController(
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "Ok")]
     [SwaggerResponse(400, "Incorrect email or message text is empty")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(429, "Request limit is exceeded")]
     [HttpPost("request")]
     public async Task SendPaymentRequest(SalesRequestsDto inDto)
     {
+        await DemandAdminAsync();
+
         if (!inDto.Email.TestEmailRegex())
         {
-            throw new Exception(Resource.ErrorNotCorrectEmail);
+            throw new ArgumentException(Resource.ErrorNotCorrectEmail);
+        }
+
+        if (string.IsNullOrEmpty(inDto.UserName))
+        {
+            throw new ArgumentException(Resource.ErrorIncorrectUserName);
         }
 
         if (string.IsNullOrEmpty(inDto.Message))
         {
-            throw new Exception(Resource.ErrorEmptyMessage);
+            throw new ArgumentException(Resource.ErrorEmptyMessage);
         }
 
         await CheckCache("salesrequest");
@@ -611,12 +655,12 @@ public class PaymentController(
     [HttpGet("checkoutsetupurl")]
     public async Task<Uri> GetCheckoutSetupUrl(CheckoutSetupUrlRequestsDto inDto)
     {
-        await DemandAdminAsync();
-
         if (!tariffService.IsConfigured())
         {
-            return null;
+            throw new InvalidOperationException("Tariff service is not configured");
         }
+
+        await DemandAdminAsync();
 
         var tenant = tenantManager.GetCurrentTenant();
 
@@ -663,12 +707,12 @@ public class PaymentController(
     [HttpGet("customerinfo")]
     public async Task<CustomerInfoDto> GetCustomerInfo(PaymentInformationRequestDto inDto)
     {
-        await DemandAdminAsync();
-
         if (!tariffService.IsConfigured())
         {
-            return null;
+            throw new InvalidOperationException("Tariff service is not configured");
         }
+
+        await DemandAdminAsync();
 
         var tenant = tenantManager.GetCurrentTenant();
 
@@ -699,28 +743,35 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/deposit</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
+    [SwaggerResponse(400, "Invalid request parameters")]
     [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(404, "Customer could not be found")]
     [HttpPost("deposit")]
     [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
     public async Task<bool> TopUpDeposit(TopUpDepositRequestDto inDto)
     {
         if (!tariffService.IsConfigured())
         {
-            return false;
+            throw new InvalidOperationException("Tariff service is not configured");
         }
 
         var supportedCurrencies = tariffService.GetSupportedAccountingCurrencies();
         if (!supportedCurrencies.Contains(inDto.Currency))
         {
-            return false;
+            throw new ArgumentException("Unsupported currency");
         }
 
         var tenant = tenantManager.GetCurrentTenant();
 
         var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
-        if (customerInfo is not { PaymentMethodStatus: PaymentMethodStatus.Set })
+        if (customerInfo == null)
         {
-            return false;
+            throw new ItemNotFoundException("Customer could not be found");
+        }
+
+        if (customerInfo.PaymentMethodStatus != PaymentMethodStatus.Set)
+        {
+            throw new InvalidOperationException("Customer payment method is not set");
         }
 
         await DemandPayerAsync(customerInfo);
@@ -753,12 +804,12 @@ public class PaymentController(
     [HttpGet("customer/balance")]
     public async Task<Balance> GetCustomerBalance(PaymentInformationRequestDto inDto)
     {
-        await DemandAdminAsync();
-
         if (!tariffService.IsConfigured())
         {
-            return null;
+            throw new InvalidOperationException("Tariff service is not configured");
         }
+
+        await DemandAdminAsync();
 
         var tenant = tenantManager.GetCurrentTenant();
 
@@ -773,25 +824,24 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Returns the service quota from the accounting service.
+    /// Returns the AI quota balance of a customer from the accounting service.
     /// </remarks>
     /// <summary>
-    /// Get the service quota
+    /// Get the customer AI balance
     /// </summary>
-    /// <path>api/2.0/portal/payment/customer/servicequota</path>
+    /// <path>api/2.0/portal/payment/customer/aibalance</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The service quota", typeof(Balance))]
+    [SwaggerResponse(200, "The customer AI balance", typeof(Balance))]
     [SwaggerResponse(403, "No permissions to perform this action")]
-    [SwaggerResponse(404, "Service could not be found")]
-    [HttpGet("customer/servicequota")]
-    public async Task<Balance> GetCustomerServiceQuota(CustomerServiceQuotaRequestDto inDto)
+    [HttpGet("customer/aibalance")]
+    public async Task<Balance> GetCustomerAiBalance(PaymentInformationRequestDto inDto)
     {
-        await DemandAdminAsync();
-
         if (!tariffService.IsConfigured())
         {
-            return null;
+            throw new InvalidOperationException("Tariff service is not configured");
         }
+
+        await DemandAdminAsync();
 
         var tenant = tenantManager.GetCurrentTenant();
 
@@ -801,9 +851,7 @@ public class PaymentController(
             return null;
         }
 
-        await CheckWalletServiceName(inDto.ServiceName);
-
-        var result = await tariffService.GetCustomerServiceQuotaAsync(tenant.Id, inDto.ServiceName, inDto.Refresh);
+        var result = await tariffService.GetCustomerAiBalanceAsync(tenant.Id, inDto.Refresh);
         return result;
     }
 
@@ -821,12 +869,12 @@ public class PaymentController(
     [HttpGet("customer/operations")]
     public async Task<ReportDto> GetCustomerOperations([FromQuery]CustomerOperationsRequestDto inDto)
     {
-        await DemandAdminAsync();
-
         if (!tariffService.IsConfigured())
         {
-            return null;
+            throw new InvalidOperationException("Tariff service is not configured");
         }
+
+        await DemandAdminAsync();
 
         var tenant = tenantManager.GetCurrentTenant();
 
@@ -847,7 +895,6 @@ public class PaymentController(
         var filter = new OperationFilter
         {
             ServiceName = inDto.ServiceName,
-            WriteOffServiceQuota = inDto.WriteOffServiceQuota,
             UtcStartDate = utcStartDate,
             UtcEndDate = utcEndDate,
             ParticipantName = inDto.ParticipantName,
@@ -855,7 +902,7 @@ public class PaymentController(
             Debit = inDto.Debit,
             Offset = inDto.Offset,
             Limit = inDto.Limit,
-            Types = inDto.Types,
+            Type = inDto.Type,
             Status = inDto.Status,
             OrderBy = inDto.OrderBy,
             OrderType = inDto.OrderType
@@ -881,25 +928,25 @@ public class PaymentController(
     /// </summary>
     /// <path>api/2.0/portal/payment/customer/operationsreport</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "Ok", typeof(DocumentBuilderTaskDto))]
+    [SwaggerResponse(200, "Operation execution status", typeof(DocumentBuilderTaskDto))]
     [SwaggerResponse(403, "No permissions to perform this action")]
-    [SwaggerResponse(404, "Service could not be found")]
+    [SwaggerResponse(404, "Customer or service could not be found")]
     [HttpPost("customer/operationsreport")]
     public async Task<DocumentBuilderTaskDto> CreateCustomerOperationsReport(CustomerOperationsReportRequestDto inDto)
     {
-        await DemandAdminAsync();
-
         if (!tariffService.IsConfigured())
         {
-            return null;
+            throw new InvalidOperationException("Tariff service is not configured");
         }
+
+        await DemandAdminAsync();
 
         var tenantId = tenantManager.GetCurrentTenantId();
 
         var customerInfo = await tariffService.GetCustomerInfoAsync(tenantId);
         if (customerInfo == null)
         {
-            return null;
+            throw new ItemNotFoundException("Customer could not be found");
         }
 
         inDto ??= new CustomerOperationsReportRequestDto();
@@ -927,13 +974,12 @@ public class PaymentController(
             tenantId,
             baseUri,
             inDto.ServiceName,
-            inDto.WriteOffServiceQuota,
             inDto.StartDate,
             inDto.EndDate,
             inDto.ParticipantName,
             inDto.Credit,
             inDto.Debit,
-            inDto.Types,
+            inDto.Type,
             inDto.Status,
             inDto.OrderBy,
             inDto.OrderType,
@@ -950,23 +996,25 @@ public class PaymentController(
     /// <summary>Get the status of the customer operations report generation</summary>
     /// <path>api/2.0/portal/payment/customer/operationsreport</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "Ok", typeof(DocumentBuilderTaskDto))]
+    [SwaggerResponse(200, "Operation execution status", typeof(DocumentBuilderTaskDto))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(404, "Customer could not be found")]
     [HttpGet("customer/operationsreport")]
     public async Task<DocumentBuilderTaskDto> GetCustomerOperationsReport()
     {
-        await DemandAdminAsync();
-
         if (!tariffService.IsConfigured())
         {
-            return null;
+            throw new InvalidOperationException("Tariff service is not configured");
         }
+
+        await DemandAdminAsync();
 
         var tenantId = tenantManager.GetCurrentTenantId();
 
         var customerInfo = await tariffService.GetCustomerInfoAsync(tenantId);
         if (customerInfo == null)
         {
-            return null;
+            throw new ItemNotFoundException("Customer could not be found");
         }
 
         var task = await documentBuilderTaskManager.GetTask(tenantId, securityContext.CurrentAccount.ID);
@@ -981,25 +1029,27 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/customer/operationsreport</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(404, "Customer could not be found")]
     [HttpDelete("customer/operationsreport")]
     public async Task TerminateCustomerOperationsReport()
     {
-        await DemandAdminAsync();
-
         if (!tariffService.IsConfigured())
         {
-            return;
+            throw new InvalidOperationException("Tariff service is not configured");
         }
+
+        await DemandAdminAsync();
 
         var tenantId = tenantManager.GetCurrentTenantId();
 
         var customerInfo = await tariffService.GetCustomerInfoAsync(tenantId);
         if (customerInfo == null)
         {
-            return;
+            throw new ItemNotFoundException("Customer could not be found");
         }
 
-        var evt = new CustomerOperationsReportIntegrationEvent(securityContext.CurrentAccount.ID, tenantId, null, null, false, terminate: true);
+        var evt = new CustomerOperationsReportIntegrationEvent(securityContext.CurrentAccount.ID, tenantId, null, null, terminate: true);
 
         await eventBus.PublishAsync(evt);
     }
@@ -1020,7 +1070,7 @@ public class PaymentController(
     {
         if (!tariffService.IsConfigured())
         {
-            return null;
+            throw new InvalidOperationException("Tariff service is not configured");
         }
 
         await DemandAdminAsync();
@@ -1063,12 +1113,13 @@ public class PaymentController(
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The wallet auto top up settings", typeof(TenantWalletSettings))]
     [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(404, "Customer could not be found")]
     [HttpPost("topupsettings")]
     public async Task<TenantWalletSettings> SetTenantWalletSettings(TenantWalletSettingsWrapper inDto)
     {
         if (!tariffService.IsConfigured())
         {
-            return null;
+            throw new InvalidOperationException("Tariff service is not configured");
         }
 
         var tenant = tenantManager.GetCurrentTenant();
@@ -1076,13 +1127,13 @@ public class PaymentController(
         var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
         if (customerInfo == null)
         {
-            return null;
+            throw new ItemNotFoundException("Customer could not be found");
         }
 
         var balance = await tariffService.GetCustomerBalanceAsync(tenant.Id);
         if (balance == null)
         {
-            return null;
+            throw new ItemNotFoundException("Balance could not be found");
         }
 
         await DemandPayerAsync(customerInfo);
@@ -1112,7 +1163,7 @@ public class PaymentController(
     {
         if (!tariffService.IsConfigured())
         {
-            return null;
+            throw new InvalidOperationException("Tariff service is not configured");
         }
 
         await DemandAdminAsync();
@@ -1134,22 +1185,23 @@ public class PaymentController(
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The updated tenant wallet service settings", typeof(TenantWalletServiceSettings))]
     [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(404, "Customer could not be found")]
     [HttpPost("servicestate")]
     public async Task<TenantWalletServiceSettings> ChangeTenantWalletServiceState(ChangeWalletServiceStateRequestDto inDto)
     {
-        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-
         if (!tariffService.IsConfigured())
         {
-            return null;
+            throw new InvalidOperationException("Tariff service is not configured");
         }
+
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var tenant = tenantManager.GetCurrentTenant();
 
         var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
         if (customerInfo == null)
         {
-            return null;
+            throw new ItemNotFoundException("Customer could not be found");
         }
 
         await DemandPayerAsync(customerInfo);
@@ -1186,55 +1238,82 @@ public class PaymentController(
     }
 
     /// <summary>
-    /// Purchases a wallet service with the specified quantity.
+    /// Credit AI balance
     /// </summary>
     /// <remarks>
-    /// This method processes a payment for a wallet service using the configured payment method.
-    /// Requires the tariff service to be configured and a valid payment method to be set for the customer.
-    /// Rate limiting is applied according to the payments API policy.
+    /// Credits AI quota to the customer AI sub-account from their main balance.
+    /// Requires the customer to have a configured payment method.
     /// </remarks>
-    /// <path>api/2.0/portal/payment/buywalletservice</path>
+    /// <path>api/2.0/portal/payment/creditaibalance</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The service payment information", typeof(ServicePayment))]
+    [SwaggerResponse(200, "The AI credit operation result", typeof(ServicePayment))]
+    [SwaggerResponse(400, "Unsupported currency or insufficient balance")]
     [SwaggerResponse(403, "No permissions to perform this action")]
-    [SwaggerResponse(404, "Service could not be found")]
-    [HttpPost("buywalletservice")]
+    [SwaggerResponse(404, "Customer could not be found")]
+    [HttpPost("creditaibalance")]
     [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
-    public async Task<ServicePayment> BuyWalletService(BuyWalletServiceRequestDto inDto)
+    public async Task<ServicePayment> CreditAiBalance(CreditAiBalanceRequestDto inDto)
     {
         if (!tariffService.IsConfigured())
         {
-            return null;
+            throw new InvalidOperationException("Tariff service is not configured");
         }
 
         var tenant = tenantManager.GetCurrentTenant();
 
         var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
-        if (customerInfo is not { PaymentMethodStatus: PaymentMethodStatus.Set })
+        if (customerInfo == null)
         {
-            return null;
+            throw new ItemNotFoundException("Customer could not be found");
         }
 
         await DemandPayerAsync(customerInfo);
 
-        var walletService = await CheckWalletServiceName(inDto.ServiceName);
-
-        // For now, only ai-tools available for purchasing!
-        if (walletService != TenantWalletService.AITools)
+        var balance = await tariffService.GetCustomerBalanceAsync(tenant.Id);
+        if (balance == null)
         {
-            throw new ItemNotFoundException("Service could not be found");
+            throw new ItemNotFoundException("Balance could not be found");
+        }
+
+        var supportedCurrencies = tariffService.GetSupportedAccountingCurrencies();
+
+        if (string.IsNullOrEmpty(inDto.Currency))
+        {
+            inDto.Currency = supportedCurrencies.FirstOrDefault();
+        }
+
+        if (!supportedCurrencies.Contains(inDto.Currency))
+        {
+            throw new ArgumentException("Unsupported currency");
+        }
+
+        var subAccount = balance.SubAccounts.FirstOrDefault(x => x.Currency == inDto.Currency);
+        if (subAccount == null)
+        {
+            throw new ItemNotFoundException("Subaccount could not be found");
+        }
+
+        if (subAccount.Amount < inDto.Amount)
+        {
+            throw new ArgumentException("Insufficient balance");
+        }
+
+        var quotaList = await tenantManager.GetTenantQuotasAsync(true, true);
+        var aiToolsQuota = quotaList.FirstOrDefault(x => x.TenantId == (int)TenantWalletService.AITools);
+        if (aiToolsQuota == null)
+        {
+            throw new ItemNotFoundException("AiTools quota not found");
         }
 
         var customerParticipantName = securityContext.CurrentAccount.ID.ToString();
-        var details = $"{inDto.ServiceName} {inDto.Quantity}";
-
-        var result = await tariffService.MakeServicePaymentAsync(tenant.Id, inDto.ServiceName, inDto.Quantity, customerParticipantName, metadata: null);
+        var result = await tariffService.MakeAiCreditAsync(tenant.Id, inDto.Amount, inDto.Currency, customerParticipantName, metadata: null);
         if (result != null)
         {
+            var details = $"{aiToolsQuota.ServiceName} {inDto.Amount} {inDto.Currency}";
             messageService.Send(MessageAction.CustomerOperationPerformed, null, details);
             await ChangeTenantWalletServiceState(new ChangeWalletServiceStateRequestDto
             {
-                Service = walletService,
+                Service = TenantWalletService.AITools,
                 Enabled = true
             });
         }
@@ -1250,7 +1329,7 @@ public class PaymentController(
     /// The prices are returned in the configured currency and normalized per million tokens.
     /// Requires administrator permissions to access.
     /// </remarks>
-    /// <path>api/2.0/portal/payment/aiprices</path>
+    /// <path>api/2.0/portal/payment/ai-prices</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "Prices for AI models", typeof(AiPricesResponse))]
     [SwaggerResponse(403, "No permissions to perform this action")]
@@ -1259,7 +1338,7 @@ public class PaymentController(
     {
         if (!tariffService.IsConfigured())
         {
-            return null;
+            throw new InvalidOperationException("Tariff service is not configured");
         }
 
         await DemandAdminAsync();
@@ -1340,7 +1419,7 @@ public class PaymentController(
     {
         if (!tariffService.IsConfigured())
         {
-            return null;
+            throw new InvalidOperationException("Tariff service is not configured");
         }
 
         await DemandAdminAsync();
@@ -1360,6 +1439,7 @@ public class PaymentController(
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The updated list of restricted AI model IDs", typeof(RestrictedModelsResponse))]
     [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(404, "Customer could not be found")]
     [HttpPut("ai-model/restrictions")]
     public async Task<RestrictedModelsResponse> SetRestrictedAiModels(SetRestrictedAiModelsRequestDto inDto)
     {
@@ -1367,7 +1447,7 @@ public class PaymentController(
 
         if (!tariffService.IsConfigured())
         {
-            return null;
+            throw new InvalidOperationException("Tariff service is not configured");
         }
 
         var tenant = tenantManager.GetCurrentTenant();
@@ -1375,7 +1455,7 @@ public class PaymentController(
         var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
         if (customerInfo == null)
         {
-            return null;
+            throw new ItemNotFoundException("Customer could not be found");
         }
 
         await DemandPayerAsync(customerInfo);

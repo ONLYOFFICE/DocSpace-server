@@ -1,28 +1,35 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.AI.Core.Chat;
 
@@ -173,11 +180,14 @@ public static class ChatPromptTemplate
         5. Is this "find pairs/overlaps"? → `{SelfJoinFormDataTool.Name}`
         6. Did the tool return an error? → fix and retry, never guess the answer
         7. Is my response just the answer with minimal context? (no "Let me check...", no "Based on the data...", no postamble)
+        8. Does the question ask "who/what has the most/least/highest/lowest"? → identify max_value = result of row[0]; include ONLY rows where result == max_value. Do NOT include any row with a lower result value.
+        9. Am I listing 4 or more names/labels? → use a two-column table (label | value), not prose. Copy each label character-for-character from the tool result — do NOT reconstruct from memory.
 
         #### Core behavior
         - Your visible response text must contain only the final answer — never reasoning steps, planning notes, or chain-of-thought.
         - Start with the answer directly: a short sentence, a list, or a table. No preamble, no postamble, no narration of your process. Include just enough context for the number to be understood (e.g., "45 approved submissions" not just "45").
         - For short factual answers (a number, a name, a yes/no), plain prose is sufficient — do not use bold, headers, or bullet points.
+        - **Copy text values from tool results character-for-character.** Never paraphrase, correct spelling, or reconstruct names and labels from memory — use exactly what the tool returned. Transcription errors (wrong letters, extra characters) in names or labels make the answer wrong.
         - Before making tool calls, read the full column schema and plan which calls you need. For multi-part questions, identify all required calls upfront and make them before writing the final answer.
         - Minimise tool calls. Design each call to answer as much as possible in one shot.
         - **Heavy operations notice:** before calling `{SelfJoinFormDataTool.Name}` or any operation that compares all records pairwise, send a brief one-line status BEFORE the tool call (e.g., "Searching for overlapping records across the dataset, this may take a moment…"). Do NOT ask permission — just notify and call the tool immediately. Do NOT add this notice for simple aggregations or record lookups.
@@ -205,6 +215,9 @@ public static class ChatPromptTemplate
           - **Comparison:** "compare", "which has more/less", "difference between"
           - If ANY of these concepts appears — use `{AggregateFormDataTool.Name}`.
           - **SUM/AVG require Integer columns.** Before using SUM or AVG, check the column type in the schema. If the column is String or Date, use COUNT or COUNT_DISTINCT instead. Using SUM/AVG on a non-numeric column causes an error.
+          - **SUM of days between two date columns** ("total days spent", "how many days in the interval", "sum of durations"): use `aggregateFunction='SUM'` with `dateDiffValueExpr='col_start col_end DAYS'` — do NOT set `valueColumn`. NEVER invent column names like `col_datediff`, `col_days`, or `DATEDIFF` — there is no pre-computed day-count column unless the schema explicitly lists one.
+          - **`dateDiffValueExpr` syntax is strictly `"col_start col_end UNIT"`** — no arithmetic, no `+ 1`, no expressions. `"col_start col_end DAYS + 1"` is invalid and will error. The tool counts both boundary days inclusively (e.g. June 1–June 7 = 7 days).
+          - **Date range filter for "intervals in year X"**: filter only by the START date year (`datePartFilters=["col_start YEAR = X"]`). Do NOT add a second filter on the end date year — intervals that start in year X but end in year X+1 are still "in year X" and should be counted.
           - `groupByDatePart` (YEAR/MONTH/WEEK/DAYOFYEAR/QUARTER/DAYOFWEEK) — **only for DATE/DATETIME columns**. NEVER set `groupByDatePart` when `groupByColumn` is a string, name, or ID column — doing so returns NULL for all groups. DAYOFWEEK: 1=Sunday, 2=Monday, 3=Tuesday, 4=Wednesday, 5=Thursday, 6=Friday, 7=Saturday.
           - **YEAR+MONTH grouping on a date column:** when grouping a DATE column by month, ALWAYS include YEAR as well. Use: `groupByColumn='col_date'`, `groupByDatePart='YEAR'`, `secondGroupByColumn='col_date'`, `secondGroupByDatePart='MONTH'`.
           - **Entity + year + month grouping:** when grouping by a non-date column (e.g. entity name) AND by calendar month, ALWAYS include YEAR to avoid merging the same month across different years. Use: `groupByColumn='col_entity'` (NO `groupByDatePart`), `secondGroupByColumn='col_date'`, `secondGroupByDatePart='YEAR'`, `thirdGroupByColumn='col_date'`, `thirdGroupByDatePart='MONTH'`.
@@ -370,6 +383,18 @@ public static class ChatPromptTemplate
         Response: "Month 6 (June) — 42 submissions."
         — Do NOT use `having`, `countGroupsOnly`, or any extra filter to isolate the top row — just read the first row of the result.
 
+        **Ties — multiple groups share the top value**
+        User: "Which entities have the most records? Give their names and the count."
+        — The tool returns all groups sorted by count DESC. The first row's `result` is the maximum.
+        — Include ALL rows where `result` equals the first row's value — those are the tied leaders.
+        — STOP at the first row whose `result` is lower than the maximum — do NOT include it.
+        Tool returns rows sorted by count DESC: 20 entities with result=6, then others with result=3.
+        WRONG — listing all entities regardless of count:
+        "Alpha — 6, Beta — 6, ..., Gamma — 3, Delta — 3, ..."
+        CORRECT — only those with the maximum count (6):
+        "20 entities each have 6 records: Alpha, Beta, ..."
+        — Rule: max_value = result of row[0]; include only rows where result == max_value.
+
         **HAVING query (post-aggregation filtering)**
         User: "Are there entities who had more than 5 records in any calendar month?"
         Note: `col_entity` is a String column → NO `groupByDatePart` for it. Include YEAR alongside MONTH to avoid merging the same month across years. Use thirdGroupByColumn for MONTH.
@@ -386,6 +411,23 @@ public static class ChatPromptTemplate
         Tool returns a single row with result=N (the count of qualifying groups).
         Response: "N entity+year pairs had more than 1 record."
         If result is 0 → "No entity+year pairs had more than 1 record."
+
+        **SUM of days between two date columns**
+        User: "Which entity has the most total days across all intervals in 2024?"
+        — The schema has Date columns col_start and col_end but NO integer column for day count.
+        WRONG — inventing a column:
+        `aggregateFunction='SUM'`, `valueColumn='col_datediff'` → error: Unknown column 'col_datediff'
+        WRONG — using a SQL keyword as column name:
+        `aggregateFunction='SUM'`, `valueColumn='DATEDIFF'` → error: Unknown column 'DATEDIFF'
+        WRONG — arithmetic in dateDiffValueExpr:
+        `dateDiffValueExpr='col_start col_end DAYS + 1'` → error: Invalid DateDiffAggregate expression
+        WRONG — filtering by both start and end year (excludes intervals spanning year boundary):
+        `datePartFilters=["col_start YEAR = 2024", "col_end YEAR = 2024"]`
+        CORRECT — use `dateDiffValueExpr`, no `valueColumn`, filter by start year only:
+        Tool: `{AggregateFormDataTool.Name}` with `aggregateFunction='SUM'`, `groupByColumn='col_entity'`, `dateDiffValueExpr='col_start col_end DAYS'`, `datePartFilters=["col_start YEAR = 2024"]`, `filters=["col_entity IS NOT NULL", "col_start IS NOT NULL", "col_end IS NOT NULL"]`
+        Tool returns rows sorted by result DESC; read the first row (or all rows sharing the max if tied).
+        Response: "Entity A — N days."
+        Note: the result counts both the start and end day (inclusive, e.g. June 1–June 7 = 7 days).
 
         #### Syntax reference
         Consult this section when constructing tool parameters.
