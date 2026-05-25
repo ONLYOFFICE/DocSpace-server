@@ -139,7 +139,7 @@
     <value>Quantità</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>{LogoText} AI</value>
+    <value>Funzionalità IA</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Backup</value>
@@ -193,10 +193,10 @@
     <value>Il tuo messaggio è stato inviato con successo. Sarai contattato dall'amministratore del portale.</value>
   </data>
   <data name="AiAgentFreeSpaceException" xml:space="preserve">
-    <value>Spazio disponibile per gli agenti AI superato</value>
+    <value>Spazio disponibile per gli agenti IA superato</value>
   </data>
   <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
-    <value>Impossibile impostare la quota per agente AI. Il valore inserito è superiore allo spazio totale di DocSpace.</value>
+    <value>Impossibile impostare la quota per agente IA. Il valore inserito è superiore allo spazio totale di DocSpace.</value>
   </data>
   <data name="AutoRenewal" xml:space="preserve">
     <value>Rinnovo automatico</value>
@@ -1150,13 +1150,13 @@
     <value>Le istruzioni per disattivare il tuo profilo sono state inviate all'indirizzo email {0}</value>
   </data>
   <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
-    <value>Il numero di agenti AI non deve superare {0}</value>
+    <value>Il numero di agenti IA non deve superare {0}</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>{LogoText} AI</value>
+    <value>Funzionalità IA</value>
   </data>
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Attiva le funzioni AI nel tuo DocSpace per aumentare la produttività.</value>
+    <value>Attiva le funzioni IA per aumentare la produttività.</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Tracciamento accessi e azioni</value>
@@ -1165,7 +1165,10 @@
     <value>Backup</value>
   </data>
   <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
-    <value>Abilita i backup per il tuo DocSpace. I costi verranno addebitati automaticamente.</value>
+    <value>Abilita i backup. I costi verranno addebitati automaticamente.</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_additional" xml:space="preserve">
+    <value>Backup aggiuntivo</value>
   </data>
   <data name="TariffsFeature_customization" xml:space="preserve">
     <value>Branding e personalizzazione</value>

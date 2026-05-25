@@ -1,28 +1,35 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 //
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 //
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 //
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 //
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 //
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+//
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
 
 using ASC.Core.Common.AI;
 using ASC.Files.Core.ApiModels.ResponseDto;
@@ -61,7 +68,6 @@ public class PaymentController(
     ApiDateTimeHelper apiDateTimeHelper,
     EmployeeDtoHelper employeeWrapperHelper,
     DisplayUserSettingsHelper displayUserSettingsHelper,
-    TenantLogoManager tenantLogoManager,
     IEventBus eventBus,
     CommonLinkUtility commonLinkUtility,
     DocumentBuilderTaskManager<CustomerOperationsReportTask, int, CustomerOperationsReportTaskData> documentBuilderTaskManager,
@@ -817,17 +823,17 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Returns the service quota from the accounting service.
+    /// Returns the AI quota balance of a customer from the accounting service.
     /// </remarks>
     /// <summary>
-    /// Get the service quota
+    /// Get the customer AI balance
     /// </summary>
-    /// <path>api/2.0/portal/payment/customer/servicequota</path>
+    /// <path>api/2.0/portal/payment/customer/aibalance</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The service quota", typeof(Balance))]
+    [SwaggerResponse(200, "The customer AI balance", typeof(Balance))]
     [SwaggerResponse(403, "No permissions to perform this action")]
-    [HttpGet("customer/servicequota")]
-    public async Task<Balance> GetCustomerServiceQuota(CustomerServiceQuotaRequestDto inDto)
+    [HttpGet("customer/aibalance")]
+    public async Task<Balance> GetCustomerAiBalance(PaymentInformationRequestDto inDto)
     {
         if (!tariffService.IsConfigured())
         {
@@ -844,9 +850,7 @@ public class PaymentController(
             return null;
         }
 
-        await CheckWalletServiceName(inDto.ServiceName);
-
-        var result = await tariffService.GetCustomerServiceQuotaAsync(tenant.Id, inDto.ServiceName, inDto.Refresh);
+        var result = await tariffService.GetCustomerAiBalanceAsync(tenant.Id, inDto.Refresh);
         return result;
     }
 
@@ -890,7 +894,6 @@ public class PaymentController(
         var filter = new OperationFilter
         {
             ServiceName = inDto.ServiceName,
-            WriteOffServiceQuota = inDto.WriteOffServiceQuota,
             UtcStartDate = utcStartDate,
             UtcEndDate = utcEndDate,
             ParticipantName = inDto.ParticipantName,
@@ -898,7 +901,7 @@ public class PaymentController(
             Debit = inDto.Debit,
             Offset = inDto.Offset,
             Limit = inDto.Limit,
-            Types = inDto.Types,
+            Type = inDto.Type,
             Status = inDto.Status,
             OrderBy = inDto.OrderBy,
             OrderType = inDto.OrderType
@@ -911,9 +914,8 @@ public class PaymentController(
         }
 
         var participantDisplayNames = await report.GetParticipantDisplayNamesAsync(displayUserSettingsHelper, true);
-        var logoText = await tenantLogoManager.GetLogoTextAsync();
 
-        return new ReportDto(report, apiDateTimeHelper, participantDisplayNames, filter.ServiceName, logoText);
+        return new ReportDto(report, apiDateTimeHelper, participantDisplayNames, filter.ServiceName);
     }
 
     /// <remarks>
@@ -970,13 +972,12 @@ public class PaymentController(
             tenantId,
             baseUri,
             inDto.ServiceName,
-            inDto.WriteOffServiceQuota,
             inDto.StartDate,
             inDto.EndDate,
             inDto.ParticipantName,
             inDto.Credit,
             inDto.Debit,
-            inDto.Types,
+            inDto.Type,
             inDto.Status,
             inDto.OrderBy,
             inDto.OrderType,
@@ -1046,7 +1047,7 @@ public class PaymentController(
             throw new ItemNotFoundException("Customer could not be found");
         }
 
-        var evt = new CustomerOperationsReportIntegrationEvent(securityContext.CurrentAccount.ID, tenantId, null, null, false, terminate: true);
+        var evt = new CustomerOperationsReportIntegrationEvent(securityContext.CurrentAccount.ID, tenantId, null, null, terminate: true);
 
         await eventBus.PublishAsync(evt);
     }
@@ -1235,21 +1236,21 @@ public class PaymentController(
     }
 
     /// <summary>
-    /// Purchases a wallet service with the specified quantity.
+    /// Credit AI balance
     /// </summary>
     /// <remarks>
-    /// This method processes a payment for a wallet service using the configured payment method.
-    /// Requires the tariff service to be configured and a valid payment method to be set for the customer.
-    /// Rate limiting is applied according to the payments API policy.
+    /// Credits AI quota to the customer AI sub-account from their main balance.
+    /// Requires the customer to have a configured payment method.
     /// </remarks>
-    /// <path>api/2.0/portal/payment/buywalletservice</path>
+    /// <path>api/2.0/portal/payment/creditaibalance</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The service payment information", typeof(ServicePayment))]
+    [SwaggerResponse(200, "The AI credit operation result", typeof(ServicePayment))]
+    [SwaggerResponse(400, "Unsupported currency or insufficient balance")]
     [SwaggerResponse(403, "No permissions to perform this action")]
-    [SwaggerResponse(404, "Customer or service could not be found")]
-    [HttpPost("buywalletservice")]
+    [SwaggerResponse(404, "Customer could not be found")]
+    [HttpPost("creditaibalance")]
     [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
-    public async Task<ServicePayment> BuyWalletService(BuyWalletServiceRequestDto inDto)
+    public async Task<ServicePayment> CreditAiBalance(CreditAiBalanceRequestDto inDto)
     {
         if (!tariffService.IsConfigured())
         {
@@ -1259,31 +1260,58 @@ public class PaymentController(
         var tenant = tenantManager.GetCurrentTenant();
 
         var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
-        if (customerInfo is not { PaymentMethodStatus: PaymentMethodStatus.Set })
+        if (customerInfo == null)
         {
             throw new ItemNotFoundException("Customer could not be found");
         }
 
         await DemandPayerAsync(customerInfo);
 
-        var walletService = await CheckWalletServiceName(inDto.ServiceName);
-
-        // For now, only ai-tools available for purchasing!
-        if (walletService != TenantWalletService.AITools)
+        var balance = await tariffService.GetCustomerBalanceAsync(tenant.Id);
+        if (balance == null)
         {
-            throw new ItemNotFoundException("Service could not be found");
+            throw new ItemNotFoundException("Balance could not be found");
+        }
+
+        var supportedCurrencies = tariffService.GetSupportedAccountingCurrencies();
+
+        if (string.IsNullOrEmpty(inDto.Currency))
+        {
+            inDto.Currency = supportedCurrencies.FirstOrDefault();
+        }
+
+        if (!supportedCurrencies.Contains(inDto.Currency))
+        {
+            throw new ArgumentException("Unsupported currency");
+        }
+
+        var subAccount = balance.SubAccounts.FirstOrDefault(x => x.Currency == inDto.Currency);
+        if (subAccount == null)
+        {
+            throw new ItemNotFoundException("Subaccount could not be found");
+        }
+
+        if (subAccount.Amount < inDto.Amount)
+        {
+            throw new ArgumentException("Insufficient balance");
+        }
+
+        var quotaList = await tenantManager.GetTenantQuotasAsync(true, true);
+        var aiToolsQuota = quotaList.FirstOrDefault(x => x.TenantId == (int)TenantWalletService.AITools);
+        if (aiToolsQuota == null)
+        {
+            throw new ItemNotFoundException("AiTools quota not found");
         }
 
         var customerParticipantName = securityContext.CurrentAccount.ID.ToString();
-        var details = $"{inDto.ServiceName} {inDto.Quantity}";
-
-        var result = await tariffService.MakeServicePaymentAsync(tenant.Id, inDto.ServiceName, inDto.Quantity, customerParticipantName, metadata: null);
+        var result = await tariffService.MakeAiCreditAsync(tenant.Id, inDto.Amount, inDto.Currency, customerParticipantName, metadata: null);
         if (result != null)
         {
+            var details = $"{aiToolsQuota.ServiceName} {inDto.Amount} {inDto.Currency}";
             messageService.Send(MessageAction.CustomerOperationPerformed, null, details);
             await ChangeTenantWalletServiceState(new ChangeWalletServiceStateRequestDto
             {
-                Service = walletService,
+                Service = TenantWalletService.AITools,
                 Enabled = true
             });
         }
@@ -1299,7 +1327,7 @@ public class PaymentController(
     /// The prices are returned in the configured currency and normalized per million tokens.
     /// Requires administrator permissions to access.
     /// </remarks>
-    /// <path>api/2.0/portal/payment/aiprices</path>
+    /// <path>api/2.0/portal/payment/ai-prices</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "Prices for AI models", typeof(AiPricesResponse))]
     [SwaggerResponse(403, "No permissions to perform this action")]
