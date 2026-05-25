@@ -1,0 +1,51 @@
+# Tuned for an SSL Labs A+ rating:
+# * TLS 1.2 + 1.3 only (no SSLv3/TLS 1.0/1.1)
+# * Forward-secrecy ECDHE/CHACHA20 cipher suites (Mozilla "intermediate")
+# * HSTS with max-age >= 1 year, includeSubDomains, preload
+# * Modern ECDH curves (X25519 + secp384r1)
+# * Session tickets disabled (perfect forward secrecy preserved across resumes)
+# * Server cipher preference disabled per Mozilla guidance for TLS 1.3 era
+
+server {
+    listen 443 ssl;
+    http2 on;
+    server_name localhost *.dev.localhost;
+
+    ssl_certificate     /etc/nginx/certs/docspace.dev.localhost.crt;
+    ssl_certificate_key /etc/nginx/certs/docspace.dev.localhost.key;
+
+    ssl_protocols       TLSv1.2 TLSv1.3;
+    ssl_ciphers         ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305;
+    ssl_prefer_server_ciphers off;
+    ssl_ecdh_curve      X25519:secp384r1;
+
+    ssl_session_cache   shared:SSL:10m;
+    ssl_session_timeout 1d;
+    ssl_session_tickets off;
+
+    # HSTS — long-lived, covers all subdomains, preload-ready.
+    # `always` ensures it is sent on error responses too.
+    add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
+
+    client_max_body_size 4G;
+
+    location / {
+        proxy_pass http://127.0.0.1:${RESTY_HTTP_PORT};
+
+        proxy_http_version 1.1;
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header X-Forwarded-Host  $host;
+        proxy_set_header X-Forwarded-Ssl   on;
+
+        proxy_set_header Upgrade    $http_upgrade;
+        proxy_set_header Connection $proxy_connection;
+
+        proxy_read_timeout  600s;
+        proxy_send_timeout  600s;
+        proxy_buffering     off;
+        proxy_request_buffering off;
+    }
+}

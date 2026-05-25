@@ -5354,6 +5354,9 @@
                   },
                   "UpdateXlsx": {
                     "type": "boolean"
+                  },
+                  "AnalyzeResponses": {
+                    "type": "boolean"
                   }
                 },
                 "additionalProperties": false,
@@ -5965,12 +5968,21 @@
               "saveFormAsXLSX": {
                 "type": "boolean",
                 "description": "Specifies whether to save form data as XLSX file.",
-                "nullable": true
+                "nullable": true,
+                "example": false
               },
               "sendFormToExternalDB": {
                 "type": "boolean",
                 "description": "Specifies whether to send form data to external database.",
-                "nullable": true
+                "nullable": true,
+                "example": false
+              },
+              "originalFormId": {
+                "type": "integer",
+                "description": "The original form ID that corresponds to this FormFillingFolderDone folder.",
+                "format": "int32",
+                "nullable": true,
+                "example": 42
               }
             }
           }
@@ -7856,12 +7868,14 @@
           "sendFormToExternalDB": {
             "type": "boolean",
             "description": "Specifies whether to send form data to external database.",
-            "nullable": true
+            "nullable": true,
+            "example": false
           },
           "saveFormAsXLSX": {
             "type": "boolean",
             "description": "Specifies whether to save form data as XLSX file.",
-            "nullable": true
+            "nullable": true,
+            "example": false
           }
         },
         "additionalProperties": false,

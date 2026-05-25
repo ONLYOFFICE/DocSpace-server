@@ -17,6 +17,7 @@ This repository contains the **backend** for [ONLYOFFICE DocSpace](https://githu
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
   - [Quick Start](#quick-start)
+  - [HTTPS & Multi-Portal Dev Setup](#https--multi-portal-dev-setup)
   - [Launch Profiles](#launch-profiles)
   - [Development with VSCode](#development-with-vscode)
   - [Clear Aspire Docker Artifacts](#clear-aspire-docker-artifacts)
@@ -222,6 +223,32 @@ dotnet run --launch-profile development
 - Mailpit: http://localhost:56162
 
 > To run the full application with frontend, see the [client README](https://github.com/ONLYOFFICE/DocSpace-client#readme).
+
+### HTTPS & Multi-Portal Dev Setup
+
+In addition to plain HTTP on `http://localhost:8092`, the AppHost exposes the same stack over HTTPS on `https://docspace.dev.localhost` (port `443`). This is what enables cookie-based auth, secure WebSockets, and **multi-portal** development (each tenant lives on its own subdomain like `https://<alias>.dev.localhost`).
+
+Everything is set up automatically when Aspire starts — no `hosts` file edits, no admin actions:
+
+| Concern | How it's handled |
+|---------|------------------|
+| **DNS** | The `.dev.localhost` suffix resolves to `127.0.0.1` via RFC 6761 (browsers) and via a Node preload script `ASC.AppHost/scripts/docspace-dns-patch.js` injected through `NODE_OPTIONS=--require=...` for SSR (login/doceditor/management/sdk) |
+| **Certificate** | A self-signed cert with SAN `localhost`, `*.dev.localhost` is generated on first run by `DevCertificateGenerator` into `ASC.AppHost/certs/`, valid 2 years, auto-regenerated when expiring or when SAN list changes |
+| **Trust** | Auto-installed into the Current User Trusted Root store on Windows; into the login keychain on macOS (one password prompt); on Linux the AppHost prints the `update-ca-certificates` / `certutil` commands to run manually |
+| **TLS termination** | OpenResty container listens on `443`, proxies to internal HTTP `127.0.0.1:8092` with `X-Forwarded-Proto/Host/For/Ssl` headers preserved |
+| **Forwarded headers** | All backend services trust loopback + Docker bridge networks via `core:hosting:forwardedHeadersOptions:knownNetworks` so `Request.Url()` sees the original `https://...` scheme and host |
+| **Tenant resolution** | `core:base-domain` is set to `dev.localhost` in standalone mode → host `nct.dev.localhost` → tenant alias `nct`. The default standalone tenant is mapped to `docspace.dev.localhost` via the `CORE__LOCAL_ADDRESSES` env var |
+| **Next.js dev origins** | `getAllLocalIps` (in `client/packages/shared/utils/build.js`) injects `localhost` and `*.dev.localhost` into `allowedDevOrigins`, so cross-portal subdomains are accepted by all dev servers |
+
+**Usage:**
+- Default portal: `https://docspace.dev.localhost`
+- Add a new portal in the management UI with alias `foo`, then access it at `https://foo.dev.localhost`
+- HTTP on `http://localhost:8092` keeps working in parallel
+
+**Resetting the cert** (after SAN changes or when the trust marker gets out of sync):
+1. Delete `server/common/ASC.AppHost/certs/` (the `.crt`, `.key`, and `.trusted` files)
+2. On Windows, also remove any stale `localhost` / `docspace.dev.localhost` certs from `certmgr` → Trusted Root Certification Authorities → Current User
+3. Restart Aspire — a fresh cert will be issued and re-trusted
 
 ### Launch Profiles
 

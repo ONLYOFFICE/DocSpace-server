@@ -2589,6 +2589,9 @@
           "403": {
             "description": "You do not have enough permissions to view the form roles"
           },
+          "404": {
+            "description": "The required file was not found"
+          },
           "401": {
             "description": "Unauthorized"
           }
@@ -4347,6 +4350,15 @@
             "example": 1
           },
           {
+            "name": "withSubFolders",
+            "in": "query",
+            "description": "Specifies whether to include files from subfolders in the results.",
+            "schema": {
+              "type": "boolean",
+              "example": true
+            }
+          },
+          {
             "name": "extension",
             "in": "query",
             "description": "Specifies whether to search for the specific file extension.",
@@ -5952,14 +5964,53 @@
               "format": "int32",
               "example": 1
             }
+          },
+          {
+            "name": "createNewIfExist",
+            "in": "query",
+            "description": "Specifies whether to create the new file if it already exists or not.",
+            "schema": {
+              "type": "boolean",
+              "example": true
+            }
+          },
+          {
+            "name": "storeOriginalFile",
+            "in": "query",
+            "description": "Specifies whether to upload documents in the original formats as well or not.",
+            "schema": {
+              "type": "boolean",
+              "example": true
+            }
+          },
+          {
+            "name": "keepConvertStatus",
+            "in": "query",
+            "description": "Specifies whether to keep the file converting status or not.",
+            "schema": {
+              "type": "boolean",
+              "example": false
+            }
           }
         ],
         "requestBody": {
-          "description": "The request parameters for uploading a file.",
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/UploadRequestDto"
+                "type": "object",
+                "properties": {
+                  "File": {
+                    "type": "string",
+                    "description": "The file to be uploaded.",
+                    "format": "binary",
+                    "example": "binary file data"
+                  }
+                }
+              },
+              "encoding": {
+                "File": {
+                  "style": "form"
+                }
               }
             }
           }
@@ -5970,7 +6021,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ObjectWrapper"
+                  "$ref": "#/components/schemas/FileIntegerArrayWrapper"
                 }
               }
             }
@@ -6184,21 +6235,62 @@
         "operationId": "uploadFileToMy",
         "parameters": [
           {
-            "name": "inDto",
+            "name": "createNewIfExist",
             "in": "query",
-            "description": "The request parameters for uploading a file.",
+            "description": "Specifies whether to create the new file if it already exists or not.",
             "schema": {
-              "$ref": "#/components/schemas/UploadRequestDto"
+              "type": "boolean",
+              "example": true
+            }
+          },
+          {
+            "name": "storeOriginalFile",
+            "in": "query",
+            "description": "Specifies whether to upload documents in the original formats as well or not.",
+            "schema": {
+              "type": "boolean",
+              "example": true
+            }
+          },
+          {
+            "name": "keepConvertStatus",
+            "in": "query",
+            "description": "Specifies whether to keep the file converting status or not.",
+            "schema": {
+              "type": "boolean",
+              "example": false
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "File": {
+                    "type": "string",
+                    "description": "The file to be uploaded.",
+                    "format": "binary",
+                    "example": "binary file data"
+                  }
+                }
+              },
+              "encoding": {
+                "File": {
+                  "style": "form"
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "Uploaded file(s)",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ObjectWrapper"
+                  "$ref": "#/components/schemas/FileIntegerArrayWrapper"
                 }
               }
             }
@@ -11936,6 +12028,150 @@
         ]
       }
     },
+    "/api/2.0/files/rooms/{id}/externaldbsync": {
+      "post": {
+        "tags": [
+          "Rooms"
+        ],
+        "summary": "Start external DB sync",
+        "description": "Triggers external DB synchronization for all form templates in the specified filling forms room.",
+        "operationId": "startExternalDbSync",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The room ID.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Synchronization task information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExternalDbSyncTaskWrapper"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "External DB is not configured"
+          },
+          "403": {
+            "description": "You do not have enough permissions to perform this action"
+          },
+          "404": {
+            "description": "Room not found"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "Rooms"
+        ],
+        "summary": "Get external DB sync status",
+        "description": "Returns the status of the external DB synchronization task for the specified filling forms room.",
+        "operationId": "getExternalDbSyncStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The room ID.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Synchronization task information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExternalDbSyncTaskWrapper"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Room not found"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
     "/api/2.0/files/rooms/{id}": {
       "get": {
         "tags": [
@@ -15968,73 +16204,6 @@
         "additionalProperties": false,
         "description": "The contact information."
       },
-      "ContentDisposition": {
-        "type": "object",
-        "properties": {
-          "dispositionType": {
-            "type": "string",
-            "nullable": true
-          },
-          "parameters": {
-            "type": "array",
-            "items": { },
-            "nullable": true,
-            "readOnly": true
-          },
-          "fileName": {
-            "type": "string",
-            "nullable": true
-          },
-          "creationDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "modificationDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "inline": {
-            "type": "boolean"
-          },
-          "readDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int64"
-          }
-        },
-        "additionalProperties": false
-      },
-      "ContentType": {
-        "type": "object",
-        "properties": {
-          "boundary": {
-            "type": "string",
-            "nullable": true
-          },
-          "charSet": {
-            "type": "string",
-            "nullable": true
-          },
-          "mediaType": {
-            "type": "string",
-            "nullable": true
-          },
-          "name": {
-            "type": "string",
-            "nullable": true
-          },
-          "parameters": {
-            "type": "array",
-            "items": { },
-            "nullable": true,
-            "readOnly": true
-          }
-        },
-        "additionalProperties": false
-      },
       "ConversationResultArrayWrapper": {
         "type": "object",
         "properties": {
@@ -16512,6 +16681,18 @@
           },
           "chatSettings": {
             "$ref": "#/components/schemas/ChatSettings"
+          },
+          "sendFormToExternalDB": {
+            "type": "boolean",
+            "description": "Specifies whether to send form data to external database.",
+            "nullable": true,
+            "example": false
+          },
+          "saveFormAsXLSX": {
+            "type": "boolean",
+            "description": "Specifies whether to save form data as XLSX file.",
+            "nullable": true,
+            "example": false
           }
         },
         "additionalProperties": false,
@@ -16543,7 +16724,7 @@
         "properties": {
           "title": {
             "maxLength": 165,
-            "minLength": 0,
+            "minLength": 1,
             "type": "string",
             "description": "The file title for text or HTML file.",
             "nullable": true,
@@ -17973,7 +18154,8 @@
               "$ref": "#/components/schemas/RecentConfig"
             },
             "description": "The recent configuration of the editor.",
-            "nullable": true
+            "nullable": true,
+            "example": [ ]
           },
           "templates": {
             "type": "array",
@@ -17981,7 +18163,8 @@
               "$ref": "#/components/schemas/TemplatesConfig"
             },
             "description": "The templates of the editor configuration.",
-            "nullable": true
+            "nullable": true,
+            "example": [ ]
           },
           "user": {
             "$ref": "#/components/schemas/UserConfig"
@@ -18485,6 +18668,132 @@
         "additionalProperties": false,
         "description": "The encryption keys of the editor configuration."
       },
+      "ExternalDbSyncFormResultDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "The form file ID.",
+            "format": "int32",
+            "example": 42
+          },
+          "title": {
+            "type": "string",
+            "description": "The form file title.",
+            "nullable": true,
+            "example": "Application.pdf"
+          },
+          "success": {
+            "type": "boolean",
+            "description": "Specifies whether the synchronization succeeded for this form.",
+            "example": true
+          },
+          "error": {
+            "type": "string",
+            "description": "The error message if the synchronization failed for this form.",
+            "nullable": true,
+            "example": "Connection refused"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The result of an external DB synchronization for a single form."
+      },
+      "ExternalDbSyncTaskDto": {
+        "required": [
+          "forms",
+          "id",
+          "isCompleted",
+          "percentage",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The task ID.",
+            "nullable": true,
+            "example": "ExternalDbSyncTask_1_42"
+          },
+          "error": {
+            "type": "string",
+            "description": "The error message if the synchronization failed.",
+            "nullable": true,
+            "example": "Connection refused"
+          },
+          "percentage": {
+            "type": "integer",
+            "description": "The progress percentage of the synchronization.",
+            "format": "int32",
+            "example": 75
+          },
+          "isCompleted": {
+            "type": "boolean",
+            "description": "Specifies whether the synchronization is completed or not.",
+            "example": false
+          },
+          "status": {
+            "$ref": "#/components/schemas/DistributedTaskStatus"
+          },
+          "forms": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExternalDbSyncFormResultDto"
+            },
+            "description": "The synchronization results for all original forms in the room.",
+            "nullable": true,
+            "example": [
+              {
+                "id": 42,
+                "title": "Application.pdf",
+                "success": true,
+                "error": null
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "description": "The external DB synchronization task parameters."
+      },
+      "ExternalDbSyncTaskWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/ExternalDbSyncTaskDto"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
       "ExternalShareDto": {
         "required": [
           "isAuthenticated",
@@ -18836,6 +19145,13 @@
                 "nullable": true,
                 "example": "In Process"
               },
+              "resultsFolderId": {
+                "type": "integer",
+                "description": "The ID of the FormFillingFolderDone folder that corresponds to this original form.",
+                "format": "int32",
+                "nullable": true,
+                "example": 55
+              },
               "draftLocation": {
                 "$ref": "#/components/schemas/DraftLocationInteger"
               },
@@ -18890,6 +19206,12 @@
               },
               "vectorizationStatus": {
                 "$ref": "#/components/schemas/VectorizationStatus"
+              },
+              "externalDbTableName": {
+                "type": "string",
+                "description": "The name of the table in the external database that corresponds to this form.",
+                "nullable": true,
+                "example": "form_123_v1"
               },
               "dimensions": {
                 "$ref": "#/components/schemas/Size"
@@ -19304,6 +19626,9 @@
                   },
                   "UpdateXlsx": {
                     "type": "boolean"
+                  },
+                  "AnalyzeResponses": {
+                    "type": "boolean"
                   }
                 },
                 "additionalProperties": false,
@@ -19600,6 +19925,9 @@
                     "type": "boolean"
                   },
                   "UpdateXlsx": {
+                    "type": "boolean"
+                  },
+                  "AnalyzeResponses": {
                     "type": "boolean"
                   }
                 },
@@ -21903,12 +22231,21 @@
               "saveFormAsXLSX": {
                 "type": "boolean",
                 "description": "Specifies whether to save form data as XLSX file.",
-                "nullable": true
+                "nullable": true,
+                "example": false
               },
               "sendFormToExternalDB": {
                 "type": "boolean",
                 "description": "Specifies whether to send form data to external database.",
-                "nullable": true
+                "nullable": true,
+                "example": false
+              },
+              "originalFormId": {
+                "type": "integer",
+                "description": "The original form ID that corresponds to this FormFillingFolderDone folder.",
+                "format": "int32",
+                "nullable": true,
+                "example": 42
               }
             }
           }
@@ -22054,12 +22391,21 @@
               "saveFormAsXLSX": {
                 "type": "boolean",
                 "description": "Specifies whether to save form data as XLSX file.",
-                "nullable": true
+                "nullable": true,
+                "example": false
               },
               "sendFormToExternalDB": {
                 "type": "boolean",
                 "description": "Specifies whether to send form data to external database.",
-                "nullable": true
+                "nullable": true,
+                "example": false
+              },
+              "originalFormId": {
+                "type": "integer",
+                "description": "The original form ID that corresponds to this FormFillingFolderDone folder.",
+                "format": "int32",
+                "nullable": true,
+                "example": 42
               }
             }
           }
@@ -22493,7 +22839,8 @@
               "type": "string"
             },
             "description": "The list of possible values for the form field.",
-            "nullable": true
+            "nullable": true,
+            "example": [ ]
           }
         },
         "additionalProperties": false
@@ -22686,7 +23033,8 @@
               "$ref": "#/components/schemas/FormMetadata"
             },
             "description": "The form field metadata.",
-            "nullable": true
+            "nullable": true,
+            "example": [ ]
           },
           "submissions": {
             "type": "array",
@@ -22694,7 +23042,8 @@
               "$ref": "#/components/schemas/FormResultsDto"
             },
             "description": "All submissions.",
-            "nullable": true
+            "nullable": true,
+            "example": [ ]
           }
         },
         "additionalProperties": false
@@ -23234,7 +23583,8 @@
               "$ref": "#/components/schemas/AceShortWrapper"
             },
             "description": "The sharing settings of the file.",
-            "nullable": true
+            "nullable": true,
+            "example": [ ]
           },
           "type": {
             "$ref": "#/components/schemas/EditorType"
@@ -25081,46 +25431,6 @@
             "items": {
               "type": "object"
             }
-          },
-          "count": {
-            "type": "integer",
-            "description": "The total number of items in the response",
-            "format": "int32"
-          },
-          "links": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "href": {
-                  "type": "string",
-                  "description": "URL of the link"
-                },
-                "action": {
-                  "type": "string",
-                  "description": "Action associated with the link"
-                }
-              }
-            },
-            "description": "List of links related to the response"
-          },
-          "status": {
-            "type": "integer",
-            "description": "HTTP status code of the response",
-            "format": "int32"
-          },
-          "statusCode": {
-            "type": "integer",
-            "description": "HTTP status code of the response (duplicate of status)",
-            "format": "int32"
-          }
-        }
-      },
-      "ObjectWrapper": {
-        "type": "object",
-        "properties": {
-          "response": {
-            "type": "object"
           },
           "count": {
             "type": "integer",
@@ -27587,12 +27897,14 @@
           "sendFormToExternalDB": {
             "type": "boolean",
             "description": "Specifies whether to send form data to external database.",
-            "nullable": true
+            "nullable": true,
+            "example": false
           },
           "saveFormAsXLSX": {
             "type": "boolean",
             "description": "Specifies whether to save form data as XLSX file.",
-            "nullable": true
+            "nullable": true,
+            "example": false
           }
         },
         "additionalProperties": false,
@@ -27688,62 +28000,6 @@
         },
         "additionalProperties": false,
         "description": "The request parameters for creating a tag."
-      },
-      "UploadRequestDto": {
-        "type": "object",
-        "properties": {
-          "file": {
-            "type": "string",
-            "description": "The file to be uploaded.",
-            "format": "binary",
-            "nullable": true,
-            "example": "binary file data"
-          },
-          "contentType": {
-            "$ref": "#/components/schemas/ContentType"
-          },
-          "contentDisposition": {
-            "$ref": "#/components/schemas/ContentDisposition"
-          },
-          "files": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "format": "binary"
-            },
-            "description": "The list of files when specified as multipart/form-data.",
-            "nullable": true,
-            "example": [
-              "file1.docx",
-              "file2.xlsx"
-            ]
-          },
-          "createNewIfExist": {
-            "type": "boolean",
-            "description": "Specifies whether to create the new file if it already exists or not.",
-            "example": true
-          },
-          "storeOriginalFileFlag": {
-            "type": "boolean",
-            "description": "Specifies whether to upload documents in the original formats as well or not.",
-            "nullable": true,
-            "example": true
-          },
-          "keepConvertStatus": {
-            "type": "boolean",
-            "description": "Specifies whether to keep the file converting status or not.",
-            "example": false
-          },
-          "stream": {
-            "type": "string",
-            "description": "The request input stream.",
-            "format": "binary",
-            "nullable": true,
-            "example": "binary stream data"
-          }
-        },
-        "additionalProperties": false,
-        "description": "The request parameters for uploading a file."
       },
       "UploadResultDto": {
         "type": "object",

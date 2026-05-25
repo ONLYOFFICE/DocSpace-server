@@ -1,28 +1,35 @@
-// (c) Copyright Ascensio System SIA 2009-2026
-// 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
-// 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
-// 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// Copyright (C) Ascensio System SIA, 2009-2026
+//
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
+//
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
+//
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
+//
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
+//
+// No trademark rights are granted under this License.
+//
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+//
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
 
 using ASC.AuditTrail.Models;
 
@@ -56,17 +63,17 @@ public class StudioNotifyService(
     {
         var userMessageToAdminNotifyAction = serviceProvider.GetService<UserMessageToAdminNotifyAction>();
         userMessageToAdminNotifyAction.Init(email, message,culture);
-        
+
         await studioNotifyServiceHelper.SendNoticeAsync(userMessageToAdminNotifyAction);
     }
 
     public async Task SendMsgToSalesAsync(string email, string userName, string message)
     {
         var salesEmail = externalResourceSettingsHelper.Common.GetDefaultRegionalFullEntry("paymentemail");
-        
+
         var userMessageToSalesNotifyAction = serviceProvider.GetService<UserMessageToSalesNotifyAction>();
         userMessageToSalesNotifyAction.Init(email, userName, message);
-        
+
         await studioNotifyServiceHelper.SendNoticeToAsync(userMessageToSalesNotifyAction, await studioNotifyHelper.RecipientFromEmailAsync(salesEmail, false), [EMailSenderName]);
     }
 
@@ -85,13 +92,13 @@ public class StudioNotifyService(
             auditEventDate.Second,
             0,
             DateTimeKind.Utc);
-        
+
         var passwordChangeV115NotifyAction = serviceProvider.GetService<PasswordChangeV115NotifyAction>();
         await passwordChangeV115NotifyAction.Init(userInfo, auditEventDate);
-        
+
         var passwordSetNotifyAction = serviceProvider.GetService<PasswordSetNotifyAction>();
         await passwordSetNotifyAction.Init(userInfo, auditEventDate);
-        
+
         await studioNotifyServiceHelper.SendNoticeToAsync(initialPasswordAssignment ? passwordSetNotifyAction : passwordChangeV115NotifyAction, await studioNotifyHelper.RecipientFromEmailAsync(userInfo.Email, false), [EMailSenderName]);
 
         var displayUserName = userInfo.DisplayUserName(false, displayUserSettingsHelper);
@@ -103,7 +110,7 @@ public class StudioNotifyService(
     {
         var passwordChangedNotifyAction = serviceProvider.GetService<PasswordChangedNotifyAction>();
         passwordChangedNotifyAction.Init(userInfo, auditEvent);
-        
+
         await studioNotifyServiceHelper.SendNoticeToAsync(passwordChangedNotifyAction, await studioNotifyHelper.RecipientFromEmailAsync(userInfo.Email, false), [EMailSenderName]);
     }
 
@@ -124,10 +131,10 @@ public class StudioNotifyService(
             auditEventDate.Second,
             0,
             DateTimeKind.Utc);
-        
+
         var emailChangeV115NotifyAction = serviceProvider.GetService<EmailChangeV115NotifyAction>();
         await emailChangeV115NotifyAction.Init(user, email, auditEventDate);
-        
+
         await studioNotifyServiceHelper.SendNoticeToAsync(emailChangeV115NotifyAction, await studioNotifyHelper.RecipientFromEmailAsync(email, false), [EMailSenderName]);
 
         var displayUserName = user.DisplayUserName(false, displayUserSettingsHelper);
@@ -144,19 +151,19 @@ public class StudioNotifyService(
     }
 
     public async Task SendEmailRoomInviteAsync(
-        string email, 
-        string roomTitle, 
+        string email,
+        string roomTitle,
         string confirmationUrl,
         bool isAgent,
-        string culture = null, 
+        string culture = null,
         bool limitation = false)
     {
         var saasAgentInviteNotifyAction = serviceProvider.GetService<SaasAgentInviteNotifyAction>();
         saasAgentInviteNotifyAction.Init(culture, roomTitle, confirmationUrl);
-        
+
         var saasRoomInviteNotifyAction = serviceProvider.GetService<SaasRoomInviteNotifyAction>();
         saasRoomInviteNotifyAction.Init(culture, roomTitle, confirmationUrl);
-        
+
         await studioNotifyServiceHelper.SendNoticeToAsync(isAgent ? saasAgentInviteNotifyAction : saasRoomInviteNotifyAction, await studioNotifyHelper.RecipientFromEmailAsync(email, false), [EMailSenderName]);
 
         if (limitation)
@@ -169,10 +176,10 @@ public class StudioNotifyService(
     {
         var saasAgentInviteExistingUserNotifyAction = serviceProvider.GetService<SaasAgentInviteExistingUserNotifyAction>();
         saasAgentInviteExistingUserNotifyAction.Init(user, roomTitle, roomUrl);
-        
+
         var saasRoomInviteExistingUserNotifyAction = serviceProvider.GetService<SaasRoomInviteExistingUserNotifyAction>();
         saasRoomInviteExistingUserNotifyAction.Init(user, roomTitle, roomUrl);
-        
+
         await studioNotifyServiceHelper.SendNoticeToAsync(isAgent ? saasAgentInviteExistingUserNotifyAction : saasRoomInviteExistingUserNotifyAction, [user], [EMailSenderName]);
     }
 
@@ -180,7 +187,7 @@ public class StudioNotifyService(
     {
         var saasDocSpaceInviteNotifyAction = serviceProvider.GetService<SaasDocSpaceInviteNotifyAction>();
         saasDocSpaceInviteNotifyAction.Init(confirmationUrl, culture);
-        
+
         await studioNotifyServiceHelper.SendNoticeToAsync(saasDocSpaceInviteNotifyAction, await studioNotifyHelper.RecipientFromEmailAsync(email, false), [EMailSenderName]);
 
         if (limitation)
@@ -193,7 +200,7 @@ public class StudioNotifyService(
     {
         var saasDocSpaceRegistrationNotifyAction = serviceProvider.GetService<SaasDocSpaceRegistrationNotifyAction>();
         saasDocSpaceRegistrationNotifyAction.Init(confirmationUrl, culture);
-        
+
         await studioNotifyServiceHelper.SendNoticeToAsync(saasDocSpaceRegistrationNotifyAction, await studioNotifyHelper.RecipientFromEmailAsync(email, false), [EMailSenderName]);
 
         if (limitation)
@@ -201,7 +208,7 @@ public class StudioNotifyService(
             await userInvitationLimitHelper.ReduceLimit();
         }
     }
-    
+
     #endregion
 
     public async Task SendMsgMobilePhoneChangeAsync(UserInfo userInfo)
@@ -223,7 +230,7 @@ public class StudioNotifyService(
     public async ValueTask UserHasJoinAsync()
     {
         var userHasJoinNotifyAction = serviceProvider.GetService<UserHasJoinNotifyAction>();
-        
+
         await studioNotifyServiceHelper.SendNoticeAsync(userHasJoinNotifyAction);
     }
 
@@ -231,7 +238,7 @@ public class StudioNotifyService(
     {
         var joinUsersNotifyAction = serviceProvider.GetService<JoinUsersNotifyAction>();
         await joinUsersNotifyAction.Init(email, emplType, culture);
-        
+
         await studioNotifyServiceHelper.SendNoticeToAsync(joinUsersNotifyAction, await studioNotifyHelper.RecipientFromEmailAsync(email, false), [EMailSenderName]);
 
         if (limitation)
@@ -253,13 +260,13 @@ public class StudioNotifyService(
         {
             var enterpriseUserWelcomeV1NotifyAction = serviceProvider.GetService<EnterpriseUserWelcomeV1NotifyAction>();
             enterpriseUserWelcomeV1NotifyAction.Init(newUserInfo);
-            
+
             var enterpriseWhitelabelUserWelcomeCustomModeV1NotifyAction = serviceProvider.GetService<EnterpriseWhitelabelUserWelcomeCustomModeV1NotifyAction>();
             enterpriseWhitelabelUserWelcomeCustomModeV1NotifyAction.Init(newUserInfo);
-            
+
             var enterpriseWhitelabelUserWelcomeV1NotifyAction = serviceProvider.GetService<EnterpriseWhitelabelUserWelcomeV1NotifyAction>();
             enterpriseWhitelabelUserWelcomeV1NotifyAction.Init(newUserInfo);
-            
+
             var defaultRebranding = await MailWhiteLabelSettings.IsDefaultAsync(settingsManager);
             notifyAction = defaultRebranding
                                ? enterpriseUserWelcomeV1NotifyAction
@@ -271,17 +278,17 @@ public class StudioNotifyService(
         {
             var opensourceUserWelcomeV1NotifyAction = serviceProvider.GetService<OpensourceUserWelcomeV1NotifyAction>();
             opensourceUserWelcomeV1NotifyAction.Init(newUserInfo);
-            
+
             notifyAction = opensourceUserWelcomeV1NotifyAction;
         }
         else
         {
             var saasUserWelcomeV1NotifyAction = serviceProvider.GetService<SaasUserWelcomeV1NotifyAction>();
             saasUserWelcomeV1NotifyAction.Init(newUserInfo);
-            
+
             notifyAction = saasUserWelcomeV1NotifyAction;
         }
-        
+
         await studioNotifyServiceHelper.SendNoticeToAsync(notifyAction, await studioNotifyHelper.RecipientFromEmailAsync(newUserInfo.Email, false), [EMailSenderName]);
     }
 
@@ -293,15 +300,15 @@ public class StudioNotifyService(
         }
 
         INotifyAction notifyAction;
-        
+
         if (tenantExtra.Enterprise)
         {
             var enterpriseGuestWelcomeV1NotifyAction = serviceProvider.GetService<EnterpriseGuestWelcomeV1NotifyAction>();
             enterpriseGuestWelcomeV1NotifyAction.Init(newUserInfo);
-            
+
             var enterpriseWhitelabelGuestWelcomeV1NotifyAction = serviceProvider.GetService<EnterpriseWhitelabelGuestWelcomeV1NotifyAction>();
             enterpriseWhitelabelGuestWelcomeV1NotifyAction.Init(newUserInfo);
-            
+
             var defaultRebranding = await MailWhiteLabelSettings.IsDefaultAsync(settingsManager);
             notifyAction = defaultRebranding ? enterpriseGuestWelcomeV1NotifyAction : enterpriseWhitelabelGuestWelcomeV1NotifyAction;
         }
@@ -309,17 +316,17 @@ public class StudioNotifyService(
         {
             var opensourceGuestWelcomeV1NotifyAction = serviceProvider.GetService<OpensourceGuestWelcomeV1NotifyAction>();
             opensourceGuestWelcomeV1NotifyAction.Init(newUserInfo);
-            
+
             notifyAction = opensourceGuestWelcomeV1NotifyAction;
         }
         else
         {
             var saasGuestWelcomeV1NotifyAction = serviceProvider.GetService<SaasGuestWelcomeV1NotifyAction>();
             saasGuestWelcomeV1NotifyAction.Init(newUserInfo);
-            
+
             notifyAction = saasGuestWelcomeV1NotifyAction;
         }
-        
+
         await studioNotifyServiceHelper.SendNoticeToAsync(notifyAction, await studioNotifyHelper.RecipientFromEmailAsync(newUserInfo.Email, false), [EMailSenderName]);
     }
 
@@ -333,13 +340,13 @@ public class StudioNotifyService(
         INotifyAction notifyAction;
 
         if (tenantExtra.Enterprise)
-        {            
+        {
             var enterpriseUserActivationV1NotifyAction = serviceProvider.GetService<EnterpriseUserActivationV1NotifyAction>();
             await enterpriseUserActivationV1NotifyAction.Init(newUserInfo);
-            
+
             var enterpriseWhitelabelUserActivationV1NotifyAction = serviceProvider.GetService<EnterpriseWhitelabelUserActivationV1NotifyAction>();
             await enterpriseWhitelabelUserActivationV1NotifyAction.Init(newUserInfo);
-            
+
             var defaultRebranding = await MailWhiteLabelSettings.IsDefaultAsync(settingsManager);
             notifyAction = defaultRebranding ? enterpriseUserActivationV1NotifyAction : enterpriseWhitelabelUserActivationV1NotifyAction;
         }
@@ -350,7 +357,7 @@ public class StudioNotifyService(
             notifyAction = opensourceUserActivationV1NotifyAction;
         }
         else
-        {            
+        {
             var saasUserActivationV1NotifyAction = serviceProvider.GetService<SaasUserActivationV1NotifyAction>();
             await saasUserActivationV1NotifyAction.Init(newUserInfo);
             notifyAction = saasUserActivationV1NotifyAction;
@@ -367,12 +374,12 @@ public class StudioNotifyService(
         }
 
         INotifyAction notifyAction;
-        
+
         if (tenantExtra.Enterprise)
         {
             var enterpriseGuestActivationV10NotifyAction = serviceProvider.GetService<EnterpriseGuestActivationV10NotifyAction>();
             await enterpriseGuestActivationV10NotifyAction.Init(newUserInfo);
-            
+
             var enterpriseWhitelabelGuestActivationV10NotifyAction = serviceProvider.GetService<EnterpriseWhitelabelGuestActivationV10NotifyAction>();
             await enterpriseWhitelabelGuestActivationV10NotifyAction.Init(newUserInfo);
 
@@ -380,7 +387,7 @@ public class StudioNotifyService(
             notifyAction = defaultRebranding ? enterpriseGuestActivationV10NotifyAction : enterpriseWhitelabelGuestActivationV10NotifyAction;
         }
         else if (tenantExtra.Opensource)
-        {            
+        {
             var opensourceGuestActivationV11NotifyAction = serviceProvider.GetService<OpensourceGuestActivationV11NotifyAction>();
             await opensourceGuestActivationV11NotifyAction.Init(newUserInfo);
             notifyAction = opensourceGuestActivationV11NotifyAction;
@@ -391,15 +398,15 @@ public class StudioNotifyService(
             await saasGuestActivationV115NotifyAction.Init(newUserInfo);
             notifyAction = saasGuestActivationV115NotifyAction;
         }
-        
-        await studioNotifyServiceHelper.SendNoticeToAsync(notifyAction, await studioNotifyHelper.RecipientFromEmailAsync(newUserInfo.Email, false), [EMailSenderName]); 
+
+        await studioNotifyServiceHelper.SendNoticeToAsync(notifyAction, await studioNotifyHelper.RecipientFromEmailAsync(newUserInfo.Email, false), [EMailSenderName]);
     }
 
     public async Task SendMsgProfileDeletionAsync(UserInfo user)
     {
         var profileDeleteNotifyAction = serviceProvider.GetService<ProfileDeleteNotifyAction>();
         await profileDeleteNotifyAction.Init(user);
-        
+
         await studioNotifyServiceHelper.SendNoticeToAsync(profileDeleteNotifyAction, await studioNotifyHelper.RecipientFromEmailAsync(user.Email, false), [EMailSenderName]);
     }
 
@@ -410,16 +417,16 @@ public class StudioNotifyService(
         foreach (var recipient in recipients)
         {
             var culture = GetCulture(recipient);
-            
+
             var profileHasDeletedItselfNotifyAction = serviceProvider.GetService<ProfileHasDeletedItselfNotifyAction>();
             await profileHasDeletedItselfNotifyAction.Init(user, culture.Name);
-            
+
             await studioNotifyServiceHelper.SendNoticeToAsync(profileHasDeletedItselfNotifyAction, [recipient], [EMailSenderName]);
         }
     }
 
     public async Task SendMsgReassignsCompletedAsync(Guid recipientId, UserInfo fromUser, UserInfo toUser)
-    { 
+    {
         var reassignsCompletedNotifyAction = serviceProvider.GetService<ReassignsCompletedNotifyAction>();
         await reassignsCompletedNotifyAction.Init(recipientId, fromUser, toUser);
 
@@ -427,10 +434,10 @@ public class StudioNotifyService(
     }
 
     public async Task SendMsgReassignsFailedAsync(Guid recipientId, UserInfo fromUser, UserInfo toUser, string message)
-    {        
+    {
         var reassignsFailedNotifyAction = serviceProvider.GetService<ReassignsFailedNotifyAction>();
         await reassignsFailedNotifyAction.Init(recipientId, fromUser, toUser, message);
-        
+
         await studioNotifyServiceHelper.SendNoticeToAsync(reassignsFailedNotifyAction, [await studioNotifyHelper.ToRecipientAsync(recipientId)], [EMailSenderName]);
     }
 
@@ -438,10 +445,10 @@ public class StudioNotifyService(
     {
         var removeUserDataCompletedNotifyAction = serviceProvider.GetService<RemoveUserDataCompletedNotifyAction>();
         await removeUserDataCompletedNotifyAction.Init(recipientId, user, fromUserName, docsSpace, crmSpace, mailSpace, talkSpace);
-        
+
         var removeUserDataCompletedCustomModeNotifyAction = serviceProvider.GetService<RemoveUserDataCompletedCustomModeNotifyAction>();
         await removeUserDataCompletedCustomModeNotifyAction.Init(recipientId, user, fromUserName, docsSpace, crmSpace, mailSpace, talkSpace);
-        
+
         await studioNotifyServiceHelper.SendNoticeToAsync(
             coreBaseSettings.CustomMode ? removeUserDataCompletedCustomModeNotifyAction : removeUserDataCompletedNotifyAction,
             [await studioNotifyHelper.ToRecipientAsync(recipientId)],
@@ -452,7 +459,7 @@ public class StudioNotifyService(
     {
         var removeUserDataFailedNotifyAction = serviceProvider.GetService<RemoveUserDataFailedNotifyAction>();
         await removeUserDataFailedNotifyAction.Init(recipientId, user, fromUserName, message);
-        
+
         await studioNotifyServiceHelper.SendNoticeToAsync(removeUserDataFailedNotifyAction, [await studioNotifyHelper.ToRecipientAsync(recipientId)], [EMailSenderName]);
     }
 
@@ -467,7 +474,7 @@ public class StudioNotifyService(
         {
             throw new ArgumentException("User is not activated yet!");
         }
-        
+
         if (tenantExtra.Enterprise)
         {
             return;
@@ -481,21 +488,21 @@ public class StudioNotifyService(
             //notifyAction = Actions.OpensourceAdminWelcomeV1;
             //tagValues.Add(new TagValue(CommonTags.Footer, "opensource"));
         }
-        
+
         var saasAdminWelcomeV1NotifyAction = serviceProvider.GetService<SaasAdminWelcomeV1NotifyAction>();
         saasAdminWelcomeV1NotifyAction.Init(newUserInfo);
-        
+
         await studioNotifyServiceHelper.SendNoticeToAsync(saasAdminWelcomeV1NotifyAction, await studioNotifyHelper.RecipientFromEmailAsync(newUserInfo.Email, false), [EMailSenderName]);
     }
 
     public async Task SendMsgUserTypeChangedAsync(UserInfo u, string userType)
     {
         try
-        {        
+        {
             var userTypeChangedNotifyAction = serviceProvider.GetService<UserTypeChangedNotifyAction>();
             userTypeChangedNotifyAction.Init(u, userType);
-            
-            await studioNotifyServiceHelper.SendNoticeToAsync(userTypeChangedNotifyAction, await studioNotifyHelper.RecipientFromEmailAsync(u.Email, false), [EMailSenderName]);
+
+            await studioNotifyServiceHelper.SendNoticeToAsync(userTypeChangedNotifyAction, [u], [EMailSenderName]);
         }
         catch (Exception error)
         {
@@ -509,11 +516,11 @@ public class StudioNotifyService(
         {
             var userAgentRoleChangedNotifyAction = serviceProvider.GetService<UserAgentRoleChangedNotifyAction>();
             userAgentRoleChangedNotifyAction.Init(u, roomTitle, roomUrl, userRole);
-            
+
             var userRoleChangedNotifyAction = serviceProvider.GetService<UserRoleChangedNotifyAction>();
             userRoleChangedNotifyAction.Init(u, roomTitle, roomUrl, userRole);
-            
-            await studioNotifyServiceHelper.SendNoticeToAsync(isAgent ? userAgentRoleChangedNotifyAction : userRoleChangedNotifyAction, await studioNotifyHelper.RecipientFromEmailAsync(u.Email, false), [EMailSenderName]);
+
+            await studioNotifyServiceHelper.SendNoticeToAsync(isAgent ? userAgentRoleChangedNotifyAction : userRoleChangedNotifyAction, [u], [EMailSenderName]);
         }
         catch (Exception error)
         {
@@ -526,10 +533,10 @@ public class StudioNotifyService(
     public async Task SendMsgPortalDeactivationAsync(Tenant t, string deactivateUrl, string activateUrl)
     {
         var u = await userManager.GetUsersAsync(t.OwnerId);
-        
+
         var portalDeactivateNotifyAction = serviceProvider.GetService<PortalDeactivateNotifyAction>();
         portalDeactivateNotifyAction.Init(u, deactivateUrl, activateUrl);
-        
+
         await studioNotifyServiceHelper.SendNoticeToAsync(portalDeactivateNotifyAction, [u], [EMailSenderName]);
     }
 
@@ -538,10 +545,10 @@ public class StudioNotifyService(
         var u = await userManager.GetUsersAsync(t.OwnerId);
 
         var recipient = checkActivation ? [u] : await studioNotifyHelper.RecipientFromEmailAsync(u.Email, false);
-        
+
         var portalDeleteNotifyAction = serviceProvider.GetService<PortalDeleteNotifyAction>();
         portalDeleteNotifyAction.Init(u, url, showAutoRenewText);
-        
+
         await studioNotifyServiceHelper.SendNoticeToAsync(portalDeleteNotifyAction, recipient, [EMailSenderName]);
     }
 
@@ -549,7 +556,7 @@ public class StudioNotifyService(
     {
         var portalDeleteSuccessV1NotifyAction = serviceProvider.GetService<PortalDeleteSuccessV1NotifyAction>();
         portalDeleteSuccessV1NotifyAction.Init(owner, url);
-        
+
         await studioNotifyServiceHelper.SendNoticeToAsync(portalDeleteSuccessV1NotifyAction, [owner], [EMailSenderName]);
     }
 
@@ -560,10 +567,10 @@ public class StudioNotifyService(
         {
             return;
         }
-        
+
         var portalDeletedToSupportNotifyAction = serviceProvider.GetService<PortalDeletedToSupportNotifyAction>();
         portalDeletedToSupportNotifyAction.Init(owner, tenantDomain, customerInfo);
-        
+
         await studioNotifyServiceHelper.SendNoticeToAsync(portalDeletedToSupportNotifyAction, await studioNotifyHelper.RecipientFromEmailAsync(email, false), [EMailSenderName]);
     }
 
@@ -573,7 +580,7 @@ public class StudioNotifyService(
     {
         var confirmOwnerChangeNotifyAction = serviceProvider.GetService<ConfirmOwnerChangeNotifyAction>();
         confirmOwnerChangeNotifyAction.Init(owner, newOwner, confirmOwnerUpdateUrl);
-        
+
         await studioNotifyServiceHelper.SendNoticeToAsync(confirmOwnerChangeNotifyAction, [owner], [EMailSenderName]);
     }
 
@@ -587,10 +594,10 @@ public class StudioNotifyService(
             {
                 var enterpriseAdminActivationV1NotifyAction = serviceProvider.GetService<EnterpriseAdminActivationV1NotifyAction>();
                 await enterpriseAdminActivationV1NotifyAction.Init(u);
-                
+
                 var enterpriseWhitelabelAdminActivationV1NotifyAction = serviceProvider.GetService<EnterpriseWhitelabelAdminActivationV1NotifyAction>();
                 await enterpriseWhitelabelAdminActivationV1NotifyAction.Init(u);
-                
+
                 var defaultRebranding = await MailWhiteLabelSettings.IsDefaultAsync(settingsManager);
                 notifyAction = defaultRebranding ? enterpriseAdminActivationV1NotifyAction : enterpriseWhitelabelAdminActivationV1NotifyAction;
             }
@@ -637,7 +644,7 @@ public class StudioNotifyService(
                 var culture = string.IsNullOrEmpty(u.CultureName) ? tenant.GetCulture() : u.GetCulture();
                 CultureInfo.CurrentCulture = culture;
                 CultureInfo.CurrentUICulture = culture;
-                
+
                 var portalRenameNotifyAction = serviceProvider.GetService<PortalRenameNotifyAction>();
                 portalRenameNotifyAction.Init(u, oldVirtualRootPath);
 
@@ -685,10 +692,10 @@ public class StudioNotifyService(
             }
 
             var recipient = new DirectRecipient(salesEmail, null, [salesEmail], false);
-            
+
             var saasCustomModeRegDataNotifyAction = serviceProvider.GetService<SaasCustomModeRegDataNotifyAction>();
             saasCustomModeRegDataNotifyAction.Init(u);
-            
+
             await studioNotifyServiceHelper.SendNoticeToAsync(saasCustomModeRegDataNotifyAction, [recipient], [EMailSenderName]);
         }
         catch (Exception error)
@@ -704,13 +711,13 @@ public class StudioNotifyService(
     public async Task SendStorageEncryptionStartAsync(string serverRootPath)
     {
         var storageEncryptionStartNotifyAction = serviceProvider.GetService<StorageEncryptionStartNotifyAction>();
-        
+
         var users = (await userManager.GetUsersAsync()).Where(u => u.ActivationStatus.HasFlag(EmployeeActivationStatus.Activated));
 
         foreach (var u in users)
-        {        
+        {
             storageEncryptionStartNotifyAction.Init(u, serverRootPath);
-            
+
             await studioNotifyServiceHelper.SendNoticeToAsync(storageEncryptionStartNotifyAction, [await studioNotifyHelper.ToRecipientAsync(u.Id)], [EMailSenderName]);
         }
     }
@@ -718,13 +725,13 @@ public class StudioNotifyService(
     public async Task SendStorageEncryptionSuccessAsync(string serverRootPath)
     {
         var storageEncryptionSuccessNotifyAction = serviceProvider.GetService<StorageEncryptionSuccessNotifyAction>();
-        
+
         var users = (await userManager.GetUsersAsync()).Where(u => u.ActivationStatus.HasFlag(EmployeeActivationStatus.Activated));
 
         foreach (var u in users)
-        {           
+        {
             storageEncryptionSuccessNotifyAction.Init(u, serverRootPath);
-            
+
             await studioNotifyServiceHelper.SendNoticeToAsync(storageEncryptionSuccessNotifyAction, [await studioNotifyHelper.ToRecipientAsync(u.Id)], [EMailSenderName]);
         }
     }
@@ -732,13 +739,13 @@ public class StudioNotifyService(
     public async Task SendStorageEncryptionErrorAsync(string serverRootPath)
     {
         var storageEncryptionErrorNotifyAction = serviceProvider.GetService<StorageEncryptionErrorNotifyAction>();
-        
+
         var users =  await userManager.GetUsersByGroupAsync(ASC.Core.Users.Constants.GroupAdmin.ID);
 
         foreach (var u in users)
         {
             storageEncryptionErrorNotifyAction.Init(u, serverRootPath);
-            
+
             await studioNotifyServiceHelper.SendNoticeToAsync(
                 storageEncryptionErrorNotifyAction,
                 [await studioNotifyHelper.ToRecipientAsync(u.Id)],
@@ -749,13 +756,13 @@ public class StudioNotifyService(
     public async Task SendStorageDecryptionStartAsync(string serverRootPath)
     {
         var storageDecryptionStartNotifyAction = serviceProvider.GetService<StorageDecryptionStartNotifyAction>();
-        
+
         var users = (await userManager.GetUsersAsync()).Where(u => u.ActivationStatus.HasFlag(EmployeeActivationStatus.Activated));
 
         foreach (var u in users)
         {
             storageDecryptionStartNotifyAction.Init(u, serverRootPath);
-            
+
             await studioNotifyServiceHelper.SendNoticeToAsync(
                 storageDecryptionStartNotifyAction,
                 [await studioNotifyHelper.ToRecipientAsync(u.Id)],
@@ -766,13 +773,13 @@ public class StudioNotifyService(
     public async Task SendStorageDecryptionSuccessAsync(string serverRootPath)
     {
         var storageDecryptionSuccessNotifyAction = serviceProvider.GetService<StorageDecryptionSuccessNotifyAction>();
-        
+
         var users = (await userManager.GetUsersAsync()).Where(u => u.ActivationStatus.HasFlag(EmployeeActivationStatus.Activated));
 
         foreach (var u in users)
         {
             storageDecryptionSuccessNotifyAction.Init(u, serverRootPath);
-            
+
             await studioNotifyServiceHelper.SendNoticeToAsync(
                 storageDecryptionSuccessNotifyAction,
                 [await studioNotifyHelper.ToRecipientAsync(u.Id)],
@@ -783,11 +790,11 @@ public class StudioNotifyService(
     public async Task SendStorageDecryptionErrorAsync(string serverRootPath)
     {
         var storageDecryptionErrorNotifyAction = serviceProvider.GetService<StorageDecryptionErrorNotifyAction>();
-        
+
         var users = await userManager.GetUsersByGroupAsync(ASC.Core.Users.Constants.GroupAdmin.ID);
 
         foreach (var u in users)
-        {            
+        {
             storageDecryptionErrorNotifyAction.Init(u, serverRootPath);
             await studioNotifyServiceHelper.SendNoticeToAsync(
                 storageDecryptionErrorNotifyAction,
@@ -807,7 +814,7 @@ public class StudioNotifyService(
         {
             var zoomWelcomeNotifyAction = serviceProvider.GetService<ZoomWelcomeNotifyAction>();
             zoomWelcomeNotifyAction.Init(u);
-            
+
             await studioNotifyServiceHelper.SendNoticeToAsync(
                 zoomWelcomeNotifyAction,
                 await studioNotifyHelper.RecipientFromEmailAsync(u.Email, false),
@@ -830,13 +837,13 @@ public class StudioNotifyService(
         var users = new[] { payer, owner }
             .Where(user => user != null && !string.IsNullOrEmpty(user.Email))
             .DistinctBy(user => user.Email);
-        
+
         var topUpWalletErrorNotifyAction = serviceProvider.GetService<TopUpWalletErrorNotifyAction>();
-        
+
         foreach (var user in users)
         {
             topUpWalletErrorNotifyAction.Init(user);
-            
+
             await studioNotifyServiceHelper.SendNoticeToAsync(topUpWalletErrorNotifyAction, await studioNotifyHelper.RecipientFromEmailAsync(user.Email, false), [EMailSenderName]);
         }
     }
@@ -846,9 +853,9 @@ public class StudioNotifyService(
         var users = new[] { payer, owner }
             .Where(user => user != null && !string.IsNullOrEmpty(user.Email))
             .DistinctBy(user => user.Email);
-        
+
         var renewSubscriptionErrorNotifyAction = serviceProvider.GetService<RenewSubscriptionErrorNotifyAction>();
-        
+
         foreach (var user in users)
         {
             renewSubscriptionErrorNotifyAction.Init(user);
@@ -875,7 +882,7 @@ public class StudioNotifyService(
             auditEventDate.Second,
             0,
             DateTimeKind.Utc);
-        
+
         var migrationPersonalToDocspaceNotifyAction = serviceProvider.GetService<MigrationPersonalToDocspaceNotifyAction>();
         await migrationPersonalToDocspaceNotifyAction.Init(userInfo, auditEventDate);
 
@@ -895,7 +902,7 @@ public class StudioNotifyService(
     {
         var apiKeyExpiredNotifyAction = serviceProvider.GetService<ApiKeyExpiredNotifyAction>();
         apiKeyExpiredNotifyAction.Init(userInfo, keyName);
-        
+
         await studioNotifyServiceHelper.SendNoticeToAsync(apiKeyExpiredNotifyAction, [userInfo], [EMailSenderName]);
     }
 
