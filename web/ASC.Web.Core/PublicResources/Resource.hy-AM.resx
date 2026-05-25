@@ -1153,10 +1153,10 @@
     <value>ԱԲ գործակալների թիվը չպետք է գերազանցի {0}-ը</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>{LogoText} AI</value>
+    <value>ԱԲ գործառույթներ</value>
   </data>
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Միացրեք ԱԲ գործառույթները ձեր DocSpace-ում՝ արտադրողականությունը բարձրացնելու համար։</value>
+    <value>Միացրեք ԱԲ գործառույթները արտադրողականությունը բարձրացնելու համար։</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Մուտքերի և գործողությունների հետևում</value>
@@ -1165,7 +1165,10 @@
     <value>Պահուստավորում</value>
   </data>
   <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
-    <value>Միացրեք ձեր DocSpace-ի պահուստավորումը: Արժեքները կգանձվեն ավտոմատ կերպով:</value>
+    <value>Միացրեք պահուստավորումը: Արժեքները կգանձվեն ավտոմատ կերպով:</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_additional" xml:space="preserve">
+    <value>Լրացուցիչ պահուստ</value>
   </data>
   <data name="TariffsFeature_customization" xml:space="preserve">
     <value>Բրենդինգ &amp; հարմարեցում</value>

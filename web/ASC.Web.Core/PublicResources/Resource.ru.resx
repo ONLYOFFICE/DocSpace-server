@@ -1153,10 +1153,10 @@
     <value>Количество ИИ-агентов не должно превышать {0}</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>ИИ {LogoText}</value>
+    <value>Функции ИИ</value>
   </data>
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Включите функции ИИ в вашем DocSpace для повышения производительности.</value>
+    <value>Включите функции ИИ для повышения производительности.</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Отслеживание входов и действий</value>
@@ -1165,7 +1165,10 @@
     <value>Резервное копирование</value>
   </data>
   <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
-    <value>Включить резервное копирование для вашего DocSpace. Оплата будет списываться автоматически.</value>
+    <value>Включить резервное копирование. Оплата будет списываться автоматически.</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_additional" xml:space="preserve">
+    <value>Дополнительное резервное копирование</value>
   </data>
   <data name="TariffsFeature_customization" xml:space="preserve">
     <value>Брендинг и кастомизация</value>

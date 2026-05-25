@@ -1153,10 +1153,10 @@
     <value>Liczba asystentów AI nie powinna przekraczać {0}</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>{LogoText} AI</value>
+    <value>Funkcje AI</value>
   </data>
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Włącz funkcje AI w DocSpace, aby zwiększyć produktywność.</value>
+    <value>Włącz funkcje AI, aby zwiększyć produktywność.</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Śledzenie logowań i działań</value>
@@ -1165,7 +1165,10 @@
     <value>Kopia zapasowa</value>
   </data>
   <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
-    <value>Włącz kopie zapasowe w DocSpace. Koszty będą naliczane automatycznie.</value>
+    <value>Włącz kopie zapasowe. Koszty będą naliczane automatycznie.</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_additional" xml:space="preserve">
+    <value>Dodatkowa kopia zapasowa</value>
   </data>
   <data name="TariffsFeature_customization" xml:space="preserve">
     <value>Branding i personalizacja</value>

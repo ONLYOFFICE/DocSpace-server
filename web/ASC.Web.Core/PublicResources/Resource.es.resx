@@ -1153,10 +1153,10 @@
     <value>El número de agentes de IA no debe superar {0}</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>{LogoText} AI</value>
+    <value>Funciones de IA</value>
   </data>
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Active las funciones de IA en su DocSpace para aumentar la productividad.</value>
+    <value>Active las funciones de IA para aumentar la productividad.</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Seguimiento de inicios de sesión y acciones</value>
@@ -1165,7 +1165,10 @@
     <value>Copia de seguridad</value>
   </data>
   <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
-    <value>Active las copias de seguridad para su DocSpace. Los costes se facturarán automáticamente.</value>
+    <value>Active las copias de seguridad. Los costes se facturarán automáticamente.</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_additional" xml:space="preserve">
+    <value>Copia de seguridad adicional</value>
   </data>
   <data name="TariffsFeature_customization" xml:space="preserve">
     <value>Personalización de marca</value>

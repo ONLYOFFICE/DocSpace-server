@@ -1153,10 +1153,10 @@
     <value>Il numero di agenti AI non deve superare {0}</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>{LogoText} AI</value>
+    <value>Funzionalità AI</value>
   </data>
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Attiva le funzioni AI nel tuo DocSpace per aumentare la produttività.</value>
+    <value>Attiva le funzioni AI per aumentare la produttività.</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Tracciamento accessi e azioni</value>
@@ -1165,7 +1165,10 @@
     <value>Backup</value>
   </data>
   <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
-    <value>Abilita i backup per il tuo DocSpace. I costi verranno addebitati automaticamente.</value>
+    <value>Abilita i backup. I costi verranno addebitati automaticamente.</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_additional" xml:space="preserve">
+    <value>Backup aggiuntivo</value>
   </data>
   <data name="TariffsFeature_customization" xml:space="preserve">
     <value>Branding e personalizzazione</value>

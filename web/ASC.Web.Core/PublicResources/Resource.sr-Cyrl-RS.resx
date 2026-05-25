@@ -1153,10 +1153,10 @@
     <value>Број AI агената не сме прећи {0}</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>{LogoText} AI</value>
+    <value>AI функције</value>
   </data>
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Омогућите AI функције у вашем DocSpace-у да бисте повећали продуктивност.</value>
+    <value>Омогућите AI функције да бисте повећали продуктивност.</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Праћење пријава и радњи</value>
@@ -1165,7 +1165,10 @@
     <value>Бекап</value>
   </data>
   <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
-    <value>Омогући бекaпе за свој DocSpace. Трошкови ће бити наплаћени аутоматски.</value>
+    <value>Омогући бекaпе. Трошкови ће бити наплаћени аутоматски.</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_additional" xml:space="preserve">
+    <value>Додатни бекап</value>
   </data>
   <data name="TariffsFeature_customization" xml:space="preserve">
     <value>Брендирање и прилагођавање</value>

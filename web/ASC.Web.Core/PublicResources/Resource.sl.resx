@@ -1153,10 +1153,10 @@
     <value>Število AI agentov ne sme presegati {0}</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>{LogoText} AI</value>
+    <value>Funkcije AI</value>
   </data>
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Omogočite AI funkcije v svojem DocSpace za povečanje produktivnosti.</value>
+    <value>Omogočite AI funkcije za povečanje produktivnosti.</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Sledenje prijavam in dejanjem</value>
@@ -1165,7 +1165,10 @@
     <value>Varnostno kopiraj</value>
   </data>
   <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
-    <value>Omogočite varnostne kopije za svoj DocSpace. Stroški se bodo zaračunavali samodejno.</value>
+    <value>Omogočite varnostne kopije. Stroški se bodo zaračunavali samodejno.</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_additional" xml:space="preserve">
+    <value>Dodatna varnostna kopija</value>
   </data>
   <data name="TariffsFeature_customization" xml:space="preserve">
     <value>Blagovna znamka &amp; prilagoditve</value>

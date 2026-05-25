@@ -1153,10 +1153,10 @@
     <value>AIエージェントの数は {0} を超えることはできません</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>{LogoText} AI</value>
+    <value>AI機能</value>
   </data>
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>DocSpaceのAI機能を有効にして生産性を向上させましょう。</value>
+    <value>AI機能を有効にして生産性を向上させましょう。</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>ログインとアクションの追跡</value>
@@ -1165,7 +1165,10 @@
     <value>バックアップ</value>
   </data>
   <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
-    <value>DocSpaceのバックアップを有効にする。料金は自動的に請求されます。</value>
+    <value>バックアップを有効にする。料金は自動的に請求されます。</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_additional" xml:space="preserve">
+    <value>追加バックアップ</value>
   </data>
   <data name="TariffsFeature_customization" xml:space="preserve">
     <value>ブランディング＆カスタマイズ</value>

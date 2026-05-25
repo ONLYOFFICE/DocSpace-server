@@ -1153,10 +1153,10 @@
     <value>AI agentlərinin sayı {0}-dan çox olmamalıdır</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>{LogoText} AI</value>
+    <value>AI xüsusiyyətləri</value>
   </data>
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Məhsuldarlığı artırmaq üçün DocSpace-də AI xüsusiyyətlərini aktivləşdirin.</value>
+    <value>Məhsuldarlığı artırmaq üçün AI xüsusiyyətlərini aktivləşdirin.</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Giriş və hərəkətləri izləmək</value>
@@ -1165,7 +1165,10 @@
     <value>Yedəkləmə</value>
   </data>
   <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
-    <value>DocSpace-iniz üçün ehtiyat nüsxələrini aktivləşdirin. Xərclər avtomatik olaraq hesablanacaq.</value>
+    <value>Ehtiyat nüsxələrini aktivləşdirin. Xərclər avtomatik olaraq hesablanacaq.</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_additional" xml:space="preserve">
+    <value>Əlavə ehtiyat nüsxə</value>
   </data>
   <data name="TariffsFeature_customization" xml:space="preserve">
     <value>Brendləşdirmə və fərdiləşdirmə</value>
