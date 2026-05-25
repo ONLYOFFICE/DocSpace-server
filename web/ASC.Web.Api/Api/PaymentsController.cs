@@ -1337,10 +1337,7 @@ public class PaymentController(
     [HttpGet("ai-prices")]
     public async Task<AiPricesDto> GetAiPrices()
     {
-        if (!tariffService.IsConfigured() || !aiGateway.Configured)
-        {
-            throw new InvalidOperationException("Tariff service is not configured");
-        }
+        DemandAiGatewayConfiguration();
 
         await DemandAdminAsync();
 
@@ -1418,10 +1415,7 @@ public class PaymentController(
     [HttpGet("ai-model/restrictions")]
     public async Task<RestrictedModelsResponse> GetRestrictedAiModels()
     {
-        if (!tariffService.IsConfigured() || !aiGateway.Configured)
-        {
-            throw new InvalidOperationException("Tariff service is not configured");
-        }
+        DemandAiGatewayConfiguration();
 
         await DemandAdminAsync();
 
@@ -1444,10 +1438,7 @@ public class PaymentController(
     [HttpPut("ai-model/restrictions")]
     public async Task<RestrictedModelsResponse> SetRestrictedAiModels(SetRestrictedAiModelsRequestDto inDto)
     {
-        if (!tariffService.IsConfigured() || !aiGateway.Configured)
-        {
-            throw new InvalidOperationException("Tariff service is not configured");
-        }
+        DemandAiGatewayConfiguration();
 
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -1496,6 +1487,14 @@ public class PaymentController(
             {
                 throw new SecurityException($"payerEmail {customerInfo?.Email}, payerId {payer.Id}, ownerId {tenant.OwnerId}, currentId {securityContext.CurrentAccount.ID}");
             }
+        }
+    }
+
+    private void DemandAiGatewayConfiguration()
+    {
+        if (!tariffService.IsConfigured() || !aiGateway.Configured)
+        {
+            throw new InvalidOperationException("Tariff service or AI gateway is not configured");
         }
     }
 
