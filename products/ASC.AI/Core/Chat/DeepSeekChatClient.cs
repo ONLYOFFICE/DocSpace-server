@@ -44,6 +44,8 @@ public class DeepSeekChatClient(IChatClient innerClient) : IChatClient
     public Task<ChatResponse> GetResponseAsync(IEnumerable<ChatMessage> messages, ChatOptions? options = null,
         CancellationToken cancellationToken = new())
     {
+        options = DisableThinking(options);
+
         return innerClient.GetResponseAsync(messages, options, cancellationToken);
     }
 
@@ -54,6 +56,8 @@ public class DeepSeekChatClient(IChatClient innerClient) : IChatClient
     {
         if (options?.Reasoning == null || options.Reasoning.Effort == ReasoningEffort.None)
         {
+            options = DisableThinking(options);
+
             await foreach (var update in innerClient.GetStreamingResponseAsync(messages, options, cancellationToken))
             {
                 yield return update;
@@ -110,5 +114,22 @@ public class DeepSeekChatClient(IChatClient innerClient) : IChatClient
     public void Dispose()
     {
         innerClient.Dispose();
+    }
+
+    private static ChatOptions DisableThinking(ChatOptions? options)
+    {
+        options ??= new ChatOptions();
+        options.RawRepresentationFactory = _ =>
+        {
+            var completionOptions = new ChatCompletionOptions();
+            completionOptions.Patch.Set("$.thinking"u8, JsonSerializer.SerializeToUtf8Bytes(new
+            {
+                type = "disabled"
+            }));
+
+            return completionOptions;
+        };
+
+        return options;
     }
 }
