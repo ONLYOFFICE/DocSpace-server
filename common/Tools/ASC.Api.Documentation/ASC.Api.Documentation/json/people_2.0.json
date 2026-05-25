@@ -3248,7 +3248,7 @@
           "People / Profiles"
         ],
         "summary": "Check if a user exists by email",
-        "description": "Returns a boolean indicating whether a user with the specified email exists on the portal.",
+        "description": "Returns data indicating whether a user with the specified email exists on the portal.",
         "operationId": "checkUserExistsByEmail",
         "parameters": [
           {
@@ -3284,11 +3284,11 @@
         ],
         "responses": {
           "200": {
-            "description": "Boolean result",
+            "description": "User existence result",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/BooleanWrapper"
+                  "$ref": "#/components/schemas/UserExistsResponseWrapper"
                 }
               }
             }
@@ -8586,7 +8586,7 @@
       },
       "GroupRequestDto": {
         "required": [
-          "groupManager"
+          "groupName"
         ],
         "type": "object",
         "properties": {
@@ -8611,7 +8611,7 @@
           },
           "groupName": {
             "maxLength": 128,
-            "minLength": 0,
+            "minLength": 1,
             "type": "string",
             "description": "The group name.",
             "nullable": true,
@@ -9875,6 +9875,64 @@
         },
         "additionalProperties": false,
         "description": "The request parameters for updating a photo."
+      },
+      "UserExistsResponseDto": {
+        "required": [
+          "exists"
+        ],
+        "type": "object",
+        "properties": {
+          "exists": {
+            "type": "boolean",
+            "description": "Specifies whether the user exists or not.",
+            "example": true
+          },
+          "status": {
+            "$ref": "#/components/schemas/EmployeeStatus"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The user existence check response parameters."
+      },
+      "UserExistsResponseWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/UserExistsResponseDto"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
       },
       "UserInvitationRequestDto": {
         "allOf": [

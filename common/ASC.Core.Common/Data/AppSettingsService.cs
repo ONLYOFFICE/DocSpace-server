@@ -26,40 +26,27 @@
 
 namespace ASC.Core.Common.Data;
 
-public class AppInfo
-{
-    public string Id { get; set; }
-    public bool Enabled { get; set; }
-    public string Settings { get; set; }
-}
-
 [Scope]
 public class AppSettingsService(
     IDbContextFactory<WebstudioDbContext> dbContextFactory,
-    IConfiguration configuration)
+    CoreBaseSettings coreBaseSettings)
 {
-    private List<AppItem> GetDefaults()
+    public async Task<List<AppItem>> GetAppsAsync(int tenantId)
     {
-        var defaults = configuration.GetSection("apps").Get<List<AppItem>>();
-        return defaults ?? [];
-    }
-
-    public async Task<List<AppInfo>> GetAppsAsync(int tenantId)
-    {
-        var defaults = GetDefaults();
+        var defaults = coreBaseSettings.DefaultApps;
 
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var overrides = await dbContext.AppSettings
             .Where(x => x.TenantId == tenantId)
             .ToDictionaryAsync(x => x.Id);
 
-        var result = new List<AppInfo>(defaults.Count);
+        var result = new List<AppItem>(defaults.Count);
 
         foreach (var d in defaults)
         {
             overrides.TryGetValue(d.Id, out var o);
 
-            result.Add(new AppInfo
+            result.Add(new AppItem
             {
                 Id = d.Id,
                 Enabled = o?.Enabled ?? d.Enabled,
@@ -70,9 +57,9 @@ public class AppSettingsService(
         return result;
     }
 
-    public async Task<AppInfo> GetAppAsync(int tenantId, string id)
+    public async Task<AppItem> GetAppAsync(int tenantId, string id)
     {
-        var defaults = GetDefaults();
+        var defaults = coreBaseSettings.DefaultApps;
         var d = defaults.FirstOrDefault(x => x.Id == id);
         if (d == null)
         {
@@ -83,7 +70,7 @@ public class AppSettingsService(
         var o = await dbContext.AppSettings
             .FirstOrDefaultAsync(x => x.TenantId == tenantId && x.Id == id);
 
-        return new AppInfo
+        return new AppItem
         {
             Id = d.Id,
             Enabled = o?.Enabled ?? d.Enabled,
@@ -91,34 +78,30 @@ public class AppSettingsService(
         };
     }
 
-    public async Task<string> GetSettingsAsync(int tenantId, string id)
-    {
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-        return await dbContext.AppSettings
-            .Where(x => x.TenantId == tenantId && x.Id == id)
-            .Select(x => x.Settings)
-            .FirstOrDefaultAsync();
-    }
 
-    public async Task<AppInfo> SetEnabledAsync(int tenantId, string id, bool enabled)
+    public async Task<AppItem> SetEnabledAsync(int tenantId, string id, bool enabled)
     {
-        var defaults = GetDefaults();
+        var defaults = coreBaseSettings.DefaultApps;
         _ = defaults.FirstOrDefault(x => x.Id == id)
             ?? throw new ItemNotFoundException($"App '{id}' not found");
 
-        await UpsertAsync(tenantId, id, e =>
+        var result = await UpsertAsync(tenantId, id, e =>
         {
             e.Enabled = enabled;
         });
 
-        return await GetAppAsync(tenantId, id);
+        return new AppItem
+        {
+            Id = result.Id,
+            Enabled = result.Enabled,
+            Settings = result.Settings
+        };
     }
 
-    public async Task<AppInfo> SetSettingsAsync(int tenantId, string id, string settingsJson)
+    public async Task<AppItem> SetSettingsAsync(int tenantId, string id, string settingsJson)
     {
-        var defaults = GetDefaults();
-        _ = defaults.FirstOrDefault(x => x.Id == id)
-            ?? throw new ItemNotFoundException($"App '{id}' not found");
+        var defaults = coreBaseSettings.DefaultApps;
+        _ = defaults.FirstOrDefault(x => x.Id == id) ?? throw new ItemNotFoundException($"App '{id}' not found");
 
         if (!string.IsNullOrEmpty(settingsJson))
         {
@@ -132,16 +115,22 @@ public class AppSettingsService(
             }
         }
 
-        await UpsertAsync(tenantId, id, e =>
+        var result = await UpsertAsync(tenantId, id, e =>
         {
             e.Settings = settingsJson;
         });
 
-        return await GetAppAsync(tenantId, id);
+        return new AppItem
+        {
+            Id = result.Id,
+            Enabled = result.Enabled,
+            Settings = result.Settings
+        };
     }
 
-    private async Task UpsertAsync(int tenantId, string id, Action<DbAppSettings> mutate)
+    private async Task<DbAppSettings> UpsertAsync(int tenantId, string id, Action<DbAppSettings> mutate)
     {
+        var defaults = coreBaseSettings.DefaultApps;
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
 
         var entity = await dbContext.AppSettings
@@ -156,7 +145,8 @@ public class AppSettingsService(
             {
                 TenantId = tenantId,
                 Id = id,
-                LastModified = now
+                LastModified = now,
+                Enabled = defaults.FirstOrDefault(x => x.Id == id)?.Enabled ?? false
             };
             mutate(entity);
             await dbContext.AppSettings.AddAsync(entity);
@@ -168,5 +158,7 @@ public class AppSettingsService(
         }
 
         await dbContext.SaveChangesAsync();
+        return entity;
     }
 }
+

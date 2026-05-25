@@ -157,7 +157,7 @@ public class AppsController(
         return MapToDto(app);
     }
 
-    private static AppDto MapToDto(AppInfo app)
+    private static AppDto MapToDto(AppItem app)
     {
         return new AppDto
         {

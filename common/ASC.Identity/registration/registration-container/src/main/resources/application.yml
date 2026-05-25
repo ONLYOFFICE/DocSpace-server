@@ -1,4 +1,5 @@
 server:
+  max-http-request-header-size: 32KB
   servlet:
     session:
       tracking-modes: cookie

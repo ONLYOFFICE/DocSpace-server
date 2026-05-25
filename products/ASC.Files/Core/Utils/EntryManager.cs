@@ -1,28 +1,35 @@
-// (c) Copyright Ascensio System SIA 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 //
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 //
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 //
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 //
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 //
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+//
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
 
 using System.Security.Authentication;
 
@@ -355,7 +362,8 @@ public class EntryManager(IDaoFactory daoFactory,
         StorageFilter storageFilter = StorageFilter.None,
         FormsItemDto formsItemDto = null,
         Location? location = null,
-        int? groupId = null)
+        int? groupId = null,
+        T parentFolderId = default)
     {
         int total;
         var withShared = true;
@@ -366,11 +374,6 @@ public class EntryManager(IDaoFactory daoFactory,
         }
 
         if (parent.ProviderEntry && !await filesSettingsHelper.GetEnableThirdParty())
-        {
-            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFolder);
-        }
-
-        if (parent.RootFolderType == FolderType.Privacy && (!PrivacyRoomSettings.IsAvailable() || !await PrivacyRoomSettings.GetEnabledAsync(settingsManager)))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFolder);
         }
@@ -414,7 +417,7 @@ public class EntryManager(IDaoFactory daoFactory,
             var userId = authContext.CurrentAccount.ID;
 
             total = 0;
-            var files = fileDao.GetFilesByTagAsync(userId, [TagType.Recent], filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject, location, 0, new OrderBy(SortedByType.LastOpened, false), from, count);
+            var files = fileDao.GetFilesByTagAsync(userId, [TagType.Recent], filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject, location, 0, parentFolderId, new OrderBy(SortedByType.LastOpened, false), from, count);
 
             await foreach (var e in fileSecurity.CanReadAsync(files).Where(r => r.Item2).Select(t => t.Item1))
             {
@@ -439,7 +442,7 @@ public class EntryManager(IDaoFactory daoFactory,
             total = 0;
 
             var allFoldersCountTask = 0;
-            var foldersFromDb = folderDao.GetFoldersByTagAsync(userId, [TagType.Favorite], filterType, subjectGroup, subjectId, searchText, excludeSubject, location, trashId, orderBy, from, count);
+            var foldersFromDb = folderDao.GetFoldersByTagAsync(userId, [TagType.Favorite], filterType, subjectGroup, subjectId, searchText, excludeSubject, location, trashId, parentFolderId, orderBy, from, count);
             List<Folder<T>> folders = [];
 
             await foreach (var e in fileSecurity.CanReadAsync(foldersFromDb).Where(r => r.Item2).Select(t => t.Item1))
@@ -457,7 +460,7 @@ public class EntryManager(IDaoFactory daoFactory,
             var filesCount = count - folders.Count;
             var filesOffset = Math.Max(folders.Count > 0 ? 0 : from - allFoldersCountTask, 0);
 
-            var filesFromDb = fileDao.GetFilesByTagAsync(userId, [TagType.Favorite], filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject, location, trashId, orderBy, filesOffset, filesCount);
+            var filesFromDb = fileDao.GetFilesByTagAsync(userId, [TagType.Favorite], filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject, location, trashId, parentFolderId, orderBy, filesOffset, filesCount);
             List<File<T>> files = [];
 
             await foreach (var e in fileSecurity.CanReadAsync(filesFromDb).Where(r => r.Item2).Select(t => t.Item1))
@@ -587,9 +590,19 @@ public class EntryManager(IDaoFactory daoFactory,
 
                 var applyFormStepFilter = room is { FolderType: FolderType.VirtualDataRoom } && parent.ShareRecord is { Share: FileShare.FillForms };
 
+                var applyFfrStartedFormsFilter = room is { FolderType: FolderType.FillingFormsRoom }
+                    && parent.FolderType == FolderType.DEFAULT
+                    && parent.ShareRecord is { Share: FileShare.FillForms };
+
+                var filesAdditionalFilter = applyFfrStartedFormsFilter
+                    ? AdditionalFilterOption.FfrStartedForms
+                    : containingMyFiles && withSubfolders
+                        ? AdditionalFilterOption.MyFilesAndFolders
+                        : AdditionalFilterOption.All;
+
                 allFilesCountTask = fileDao.GetFilesCountAsync(parent.Id, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders, excludeSubject, roomId, formsItemDto,
-                    containingMyFiles && withSubfolders ? parent.FolderType : FolderType.DEFAULT,
-                    containingMyFiles && withSubfolders ? AdditionalFilterOption.MyFilesAndFolders : AdditionalFilterOption.All,
+                    applyFfrStartedFormsFilter ? FolderType.DEFAULT : containingMyFiles && withSubfolders ? parent.FolderType : FolderType.DEFAULT,
+                    filesAdditionalFilter,
                     applyFormStepFilter: applyFormStepFilter);
 
                 allFoldersCountTask = folderDao.GetFoldersCountAsync(parent.Id, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders, excludeSubject, roomId,
@@ -600,8 +613,8 @@ public class EntryManager(IDaoFactory daoFactory,
                 var filesOffset = Math.Max(folders.Count > 0 ? 0 : from - await allFoldersCountTask, 0);
 
                 var filesTask = fileDao.GetFilesAsync(parent.Id, orderBy, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders,
-                excludeSubject, filesOffset, filesCount, roomId, withShared, containingMyFiles && withSubfolders, parent.FolderType, formsItemDto,
-                applyFormStepFilter: applyFormStepFilter);
+                    excludeSubject, filesOffset, filesCount, roomId, withShared, containingMyFiles && withSubfolders, parent.FolderType, formsItemDto,
+                    applyFormStepFilter: applyFormStepFilter, applyFfrStartedFormsFilter: applyFfrStartedFormsFilter);
 
                 var files = await filesTask.ToListAsync();
 
@@ -1203,7 +1216,6 @@ public class EntryManager(IDaoFactory daoFactory,
                         var u = a.Where(ace => ace is not { Access: FileShare.FillForms }).Select(ace => ace.Id).ToList();
 
                         await socketManager.CreateFolderAsync(formFolder, u);
-                        await filesMessageService.SendAsync(MessageAction.FolderCreated, formFolder, formFolder.Title);
                     }
                 }
                 else
@@ -1531,7 +1543,8 @@ public class EntryManager(IDaoFactory daoFactory,
         var properties = await fileDao.GetProperties(file.Id);
         if (properties?.FormFilling == null
             || properties.FormFilling.OriginalFormVersion == 0
-            || properties.FormFilling.OriginalFormVersion == file.Version)
+            || properties.FormFilling.OriginalFormVersion == file.Version
+            || !Equals(properties.FormFilling.OriginalFormId, file.Id))
         {
             return;
         }
@@ -1932,7 +1945,7 @@ public class EntryManager(IDaoFactory daoFactory,
     {
         if (file.Encrypted)
         {
-            throw new NotSupportedException();
+            return;
         }
 
         linkId ??= await externalShare.GetLinkIdAsync();
@@ -1979,7 +1992,6 @@ public class EntryManager(IDaoFactory daoFactory,
         foreach (var formFolder in systemFormFillingFolders)
         {
             await socketManager.CreateFolderAsync(formFolder);
-            await filesMessageService.SendAsync(MessageAction.FolderCreated, formFolder, formFolder.Title);
         }
 
         await InitFormFillingProperties(folder.Id, Path.GetFileNameWithoutExtension(file.Title), file.Id, file.Version, inProcessFormFolderId, readyFormFolderId, folder.CreateBy, properties, fileDao, folderDao);
@@ -2046,8 +2058,13 @@ public class EntryManager(IDaoFactory daoFactory,
         if (resultFolder is not { FolderType: FolderType.FormFillingFolderDone })
         {
             var readyFormFolder = await folderDao.GetFoldersAsync(room.Id, FolderType.ReadyFormFolder)
-                .FirstOrDefaultAsync()
-                ?? throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FolderNotFound);
+                .FirstOrDefaultAsync();
+
+            if (readyFormFolder == null)
+            {
+                var (readyFolderId, _) = await InitSystemFormFillingFolders(room.Id, folderDao, form.CreateBy);
+                readyFormFolder = await folderDao.GetFolderAsync(readyFolderId);
+            }
 
             var resultsFolderId = await CreateFormFillingFolder(title, readyFormFolder.Id, FolderType.FormFillingFolderDone, form.CreateBy, folderDao);
             formFilling.ResultsFileID = await CreateFillResultsFile(resultsFolderId, form.CreateBy, title, fileDao);

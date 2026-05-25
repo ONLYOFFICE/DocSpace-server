@@ -12,35 +12,42 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "app_settings",
+                name: "files_file_keys",
                 columns: table => new
                 {
+                    user_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "utf8_general_ci")
+                        .Annotation("MySql:CharSet", "utf8"),
                     tenant_id = table.Column<int>(type: "int", nullable: false),
-                    id = table.Column<string>(type: "varchar(64)", maxLength: 64, nullable: false, collation: "utf8_general_ci")
+                    file_id = table.Column<int>(type: "int", nullable: false),
+                    public_key_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "utf8_general_ci")
                         .Annotation("MySql:CharSet", "utf8"),
-                    enabled = table.Column<bool>(type: "tinyint(1)", nullable: false, defaultValueSql: "'0'"),
-                    settings = table.Column<string>(type: "json", nullable: true)
+                    private_key_enc = table.Column<string>(type: "text", nullable: false, collation: "utf8_general_ci")
                         .Annotation("MySql:CharSet", "utf8"),
-                    last_modified = table.Column<DateTime>(type: "datetime", nullable: false)
+                    create_on = table.Column<DateTime>(type: "datetime", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PRIMARY", x => new { x.tenant_id, x.id });
+                    table.PrimaryKey("PRIMARY", x => new { x.tenant_id, x.file_id, x.user_id });
                     table.ForeignKey(
-                        name: "FK_app_settings_tenants_tenants_tenant_id",
+                        name: "FK_files_file_keys_tenants_tenants_tenant_id",
                         column: x => x.tenant_id,
                         principalTable: "tenants_tenants",
                         principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 })
                 .Annotation("MySql:CharSet", "utf8");
+
+            migrationBuilder.CreateIndex(
+                name: "tenant_id_user_id",
+                table: "files_file_keys",
+                columns: new[] { "tenant_id", "user_id" });
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "app_settings");
+                name: "files_file_keys");
         }
     }
 }

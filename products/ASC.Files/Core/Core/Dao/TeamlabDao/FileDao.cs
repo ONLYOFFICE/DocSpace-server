@@ -1,28 +1,35 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 //
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 //
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 //
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 //
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 //
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+//
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
 
 using Document = ASC.ElasticSearch.Document;
 using VectorChunk = ASC.Files.Core.Vectorization.Data.Chunk;
@@ -268,7 +275,7 @@ internal class FileDao(
     }
 
     public async IAsyncEnumerable<File<int>> GetFilesAsync(int parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension,
-        bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, int roomId = 0, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, FormsItemDto formsItemDto = null, bool applyFormStepFilter = false)
+        bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, int roomId = 0, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, FormsItemDto formsItemDto = null, bool applyFormStepFilter = false, bool applyFfrStartedFormsFilter = false)
     {
         if (filterType == FilterType.FoldersOnly || count == 0)
         {
@@ -286,6 +293,10 @@ internal class FileDao(
         if (applyFormStepFilter)
         {
             q = ApplyAdditionalFileFilters(q, filesDbContext, parentId, parentType, AdditionalFilterOption.FormsWithFillingRole);
+        }
+        if (applyFfrStartedFormsFilter)
+        {
+            q = ApplyAdditionalFileFilters(q, filesDbContext, parentId, parentType, AdditionalFilterOption.FfrStartedForms);
         }
 
         q = q.Skip(offset);
@@ -674,7 +685,6 @@ internal class FileDao(
                                             var u = a.Where(ace => ace is not { Access: FileShare.FillForms }).Select(ace => ace.Id).ToList();
 
                                             await socketManager.CreateFolderAsync(formFolder, u);
-                                            await filesMessageService.SendAsync(MessageAction.FolderCreated, formFolder, formFolder.Title);
                                         }
                                     }
 
@@ -1027,6 +1037,7 @@ internal class FileDao(
             var entryEventsIds = await context.GetAuditEventsIdsAsync(fileId, FileEntryType.File).ToListAsync();
             await context.MarkAuditReferencesAsCorruptedAsync(entryEventsIds);
             await context.DeleteAuditReferencesAsync(fileId, FileEntryType.File);
+            await context.DeleteFileKeysAsync(tenantId, fileId);
 
             await context.SaveChangesAsync();
             await tx.CommitAsync();
@@ -2022,6 +2033,54 @@ internal class FileDao(
         });
     }
 
+    public async Task SetFileKey(int fileId, IEnumerable<FileKeyData> keys)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        var createOn = _tenantUtil.DateTimeNow();
+
+        var entities = keys.Select(key => new DbFileKeys
+        {
+            TenantId = tenantId,
+            FileId = fileId,
+            UserId = key.UserId,
+            CreateOn = createOn,
+            PublicKeyId = key.PublicKeyId,
+            PrivateKeyEnc = key.PrivateKeyEnc
+        }).ToList();
+
+        var userIds = entities.Select(x => x.UserId).ToList();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var strategy = filesDbContext.Database.CreateExecutionStrategy();
+
+        await strategy.ExecuteAsync(async () =>
+        {
+            await using var context = await _dbContextFactory.CreateDbContextAsync();
+            await using var tx = await context.Database.BeginTransactionAsync();
+
+            await context.DeleteFileKeysAsync(tenantId, fileId, userIds);
+            await context.DbFileKeys.AddRangeAsync(entities);
+            await context.SaveChangesAsync();
+
+            await tx.CommitAsync();
+        });
+    }
+
+    public async Task<List<FileKeys>> GetFileKeys(int fileId, Guid userId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        return await filesDbContext.DbFileKeys
+            .Where(r =>
+                r.TenantId == tenantId &&
+                r.FileId == fileId &&
+                r.UserId == userId)
+            .Project()
+            .ToListAsync();
+    }
+
     public string GetUniqThumbnailPath(File<int> file, uint width, uint height)
     {
         var thumbnailName = GetThumbnailName(width, height);
@@ -2061,6 +2120,7 @@ internal class FileDao(
         bool excludeSubject,
         Location? location,
         int trashId,
+        int parentId,
         OrderBy orderBy,
         int offset,
         int count)
@@ -2072,7 +2132,7 @@ internal class FileDao(
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        var q = GetFilesByTagQuery(filesDbContext, tagOwner, tagType, location, trashId);
+        var q = GetFilesByTagQuery(filesDbContext, tagOwner, tagType, location, trashId, parentId);
 
         q = await GetFilesQueryWithFilters(q, filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject);
 
@@ -2110,32 +2170,6 @@ internal class FileDao(
         {
             yield return mapper.MapDbFileQueryToDbFileInternal(file);
         }
-    }
-
-    public async Task<int> GetFilesByTagCountAsync(Guid tagOwner,
-        IEnumerable<TagType> tagType,
-        FilterType filterType,
-        bool subjectGroup,
-        Guid subjectId,
-        string searchText,
-        string[] extension,
-        bool searchInContent,
-        bool excludeSubject,
-        Location? location,
-        int trashId)
-    {
-        if (filterType == FilterType.FoldersOnly)
-        {
-            return 0;
-        }
-
-        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-
-        var q = GetFilesByTagQuery(filesDbContext, tagOwner, tagType, location, trashId);
-
-        q = await GetFilesQueryWithFilters(q, filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject);
-
-        return await q.CountAsync();
     }
 
     public async Task<long> GetTransferredBytesCountAsync(ChunkedUploadSession<int> uploadSession)
@@ -2330,6 +2364,7 @@ internal class FileDao(
         var tenantId = _tenantManager.GetCurrentTenantId();
         var currentUserId = securityContext.CurrentAccount.ID;
         var guestUserId = ASC.Core.Configuration.Constants.Guest.ID;
+        var pdfCategories = new[] { (int)FilterType.PdfForm, (int)FilterType.Pdf };
 
         switch (additionalFilterOption)
         {
@@ -2378,14 +2413,22 @@ internal class FileDao(
                 break;
 
             case AdditionalFilterOption.FormsWithFillingRole:
-                var pdfCategories = new[] { (int)FilterType.PdfForm, (int)FilterType.Pdf };
-
                 q = q.Where(file =>
                     pdfCategories.Contains(file.Category) &&
                     filesDbContext.FilesFormRoleMapping.Any(m =>
                         m.TenantId == tenantId &&
                         m.FormId == file.Id &&
                         m.UserId == currentUserId)
+                );
+                break;
+
+            case AdditionalFilterOption.FfrStartedForms:
+                q = q.Where(file =>
+                    pdfCategories.Contains(file.Category) &&
+                    filesDbContext.FilesProperties.Any(p =>
+                        p.EntryId == file.Id.ToString() &&
+                        p.TenantId == tenantId &&
+                        p.StartFilling == true)
                 );
                 break;
         }
@@ -2702,14 +2745,14 @@ internal class FileDao(
                 l.EntryId,
                 l.EntryType
             }), f => f.Id.ToString(), t => t.EntryId, (file, tag) => new { file, tag })
-                .Where(r => r.tag.Type == TagType.Origin && r.tag.EntryType == FileEntryType.File && filesDbContext.Folders.Where(f =>
-                        f.TenantId == tenantId && f.Id == filesDbContext.Tree.Where(t => t.FolderId == Convert.ToInt32(r.tag.Name))
-                            .OrderByDescending(t => t.Level)
-                            .Select(t => t.ParentId)
-                            .Skip(1)
-                            .FirstOrDefault())
-                    .Select(f => f.Id)
-                    .FirstOrDefault() == roomId)
+                .Where(r => r.tag.Type == TagType.Origin && r.tag.EntryType == FileEntryType.File &&
+                            filesDbContext.Folders
+                                .Any(f => f.TenantId == tenantId && f.Id ==
+                                    filesDbContext.Tree
+                                        .Where(t => t.FolderId == Convert.ToInt32(r.tag.Name) && t.ParentId == roomId)
+                                        .OrderByDescending(t => t.Level)
+                                        .Select(t => t.ParentId)
+                                        .FirstOrDefault()))
                 .Select(r => r.file);
         }
 
@@ -2787,7 +2830,7 @@ internal class FileDao(
         return q;
     }
 
-    private IQueryable<FileByTagQuery> GetFilesByTagQuery(FilesDbContext filesDbContext, Guid tagOwner, IEnumerable<TagType> tagType, Location? location, int? trashId)
+    private IQueryable<FileByTagQuery> GetFilesByTagQuery(FilesDbContext filesDbContext, Guid tagOwner, IEnumerable<TagType> tagType, Location? location, int? trashId, int? parentId)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
 
@@ -2804,6 +2847,11 @@ internal class FileDao(
         if (trashId != 0)
         {
             initQuery = initQuery.Where(r => !filesDbContext.Tree.Any(a => a.FolderId == r.f.ParentId && a.ParentId == trashId));
+        }
+
+        if (parentId != 0)
+        {
+            initQuery = initQuery.Where(r => filesDbContext.Tree.Any(a => a.FolderId == r.f.ParentId && a.ParentId == parentId));
         }
 
         var query = initQuery.Select(x => new FileByTagQuery

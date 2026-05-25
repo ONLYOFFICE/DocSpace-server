@@ -1,28 +1,35 @@
-// (c) Copyright Ascensio System SIA 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 //
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 //
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 //
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 //
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 //
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+//
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
 
 using System.Security.Authentication;
 
@@ -75,7 +82,6 @@ public class FileStorageService //: IFileStorageService
     OFormRequestManager oFormRequestManager,
     ThumbnailSettings thumbnailSettings,
     FileShareParamsHelper fileShareParamsHelper,
-    EncryptionLoginProvider encryptionLoginProvider,
     CountRoomChecker countRoomChecker,
     CountAIAgentChecker countAIAgentChecker,
     InvitationService invitationService,
@@ -105,7 +111,8 @@ public class FileStorageService //: IFileStorageService
     AiGateway gateway,
     FormFillingReportCreator formFillingReportCreator,
     ExportToXLSX exportToXLSX,
-    ExternalDbSyncService externalDbSyncService)
+    ExternalDbSyncService externalDbSyncService,
+    EncryptionLoginProvider encryptionLoginProvider)
 {
     private readonly ILogger _logger = optionMonitor.CreateLogger("ASC.Files");
 
@@ -255,7 +262,8 @@ public class FileStorageService //: IFileStorageService
         StorageFilter storageFilter = StorageFilter.None,
         FormsItemDto formsItemDto = null,
         Location? location = null,
-        int? groupId = null)
+        int? groupId = null,
+        T parentFolderId = default)
     {
         var subjectId = string.IsNullOrEmpty(subject) ? Guid.Empty : new Guid(subject);
         var subjectOwnerIdGuid = string.IsNullOrEmpty(subjectOwnerId) ? Guid.Empty : new Guid(subjectOwnerId);
@@ -404,7 +412,8 @@ public class FileStorageService //: IFileStorageService
                 storageFilter,
                 formsItemDto,
                 location,
-                groupId);
+                groupId,
+                parentFolderId);
         }
         catch (Exception e)
         {
@@ -434,6 +443,8 @@ public class FileStorageService //: IFileStorageService
             parent.RootFolderType == FolderType.Privacy ||
             await shareableTask;
 
+        var entriesCountBeforeFilter = entries.Count();
+
         entries = await entries
             .ToAsyncEnumerable()
             .Where(async (x, _) =>
@@ -450,6 +461,8 @@ public class FileStorageService //: IFileStorageService
 
             return x is File<int> f2 && !await fileConverter.IsConverting(f2);
         }).ToListAsync();
+
+        total -= entriesCountBeforeFilter - entries.Count();
 
         if (parentRoom != null)
         {
@@ -794,19 +807,6 @@ public class FileStorageService //: IFileStorageService
     {
         ArgumentNullException.ThrowIfNull(folderFactory);
 
-        List<AceWrapper> aces = null;
-
-        if (privacy)
-        {
-            if (shares == null || !shares.Any())
-            {
-                throw new ArgumentNullException(nameof(shares));
-            }
-
-            aces = await GetFullAceWrappersAsync(shares);
-            await CheckEncryptionKeysAsync(aces);
-        }
-
         var folder = await folderFactory();
         if (folder == null)
         {
@@ -838,11 +838,6 @@ public class FileStorageService //: IFileStorageService
                     await SetExternalLinkAsync(folder, Guid.NewGuid(), FileShare.FillForms, FilesCommonResource.FillOutExternalLinkTitle, primary: true);
                     break;
             }
-        }
-
-        if (privacy)
-        {
-            await SetAcesForPrivateRoomAsync(folder, aces);
         }
 
         await socketManager.CreateFolderAsync(folder);
@@ -941,6 +936,11 @@ public class FileStorageService //: IFileStorageService
         if (!isRoom && parent.FolderType == FolderType.VirtualRooms)
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_Create);
+        }
+
+        if (isRoom && privacy)
+        {
+            await encryptionLoginProvider.ThrowIfKeysAreNotSetAsync(authContext.CurrentAccount.ID);
         }
 
         var tenantId = tenantManager.GetCurrentTenantId();
@@ -1976,6 +1976,8 @@ public class FileStorageService //: IFileStorageService
             }
 
             var properties = await fileDao.GetProperties(fileId) ?? new EntryProperties<T> { FormFilling = new FormFillingProperties<T>() };
+            properties.FormFilling.RoomId = folder.Id;
+            properties.FormFilling.Title = Path.GetFileNameWithoutExtension(file.Title);
             properties.FormFilling.StartFilling = true;
             properties.FormFilling.OriginalFormId = fileId;
             properties.FormFilling.StartedByUserId = authContext.CurrentAccount.ID;
@@ -3989,7 +3991,7 @@ public class FileStorageService //: IFileStorageService
 
             if (!await fileSharingHelper.CanSetAccessAsync(entry))
             {
-                return null;
+                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
             }
 
             return await SetExternalLinkAsync(
@@ -4784,16 +4786,49 @@ public class FileStorageService //: IFileStorageService
         return showSharingSettings ? await fileSharing.GetSharedInfoShortFileAsync(file) : null;
     }
 
-    public async Task<List<EncryptionKeyPairDto>> GetEncryptionAccessAsync<T>(T fileId)
+    public async Task<List<EncryptionKeyDto>> GetEncryptionAccessAsync<T>(T fileId)
     {
-        if (!await PrivacyRoomSettings.GetEnabledAsync(settingsManager))
+        var fileKeyPair = await encryptionKeyPairHelper.GetKeyPairAsync(fileId);
+
+        return [.. fileKeyPair];
+    }
+
+
+    public async Task SetEncryptionInfoAsync<T>(T fileId, IEnumerable<FileKeyData> keys)
+    {
+        var fileDao = daoFactory.GetFileDao<T>();
+        var file = await fileDao.GetFileAsync(fileId);
+
+        if (file == null)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+
+        if (!await fileSecurity.CanReadAsync(file))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
-        var fileKeyPair = await encryptionKeyPairHelper.GetKeyPairAsync(fileId);
+        var parentRoom = await DocSpaceHelper.GetParentRoom(file, daoFactory.GetCacheFolderDao<T>());
+        if (parentRoom is { SettingsPrivate: false})
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
 
-        return [.. fileKeyPair];
+        if(!await fileSecurity.CanCreateAsync(parentRoom))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
+        foreach (var k in keys)
+        {
+            if (!await fileSecurity.CanReadAsync(file, k.UserId))
+            {
+                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
+            }
+        }
+
+        await fileDao.SetFileKey(fileId, keys);
     }
 
     public async IAsyncEnumerable<FileEntry> ChangeOwnerAsync<T>(IEnumerable<T> foldersId, IEnumerable<T> filesId, Guid userId, FileShare newShare = FileShare.RoomManager)
@@ -4827,6 +4862,11 @@ public class FileStorageService //: IFileStorageService
             if (folder.ProviderEntry && !isRoom)
             {
                 continue;
+            }
+
+            if (isRoom && folder.SettingsPrivate)
+            {
+                await encryptionLoginProvider.ThrowIfKeysAreNotSetAsync(userId);
             }
 
             var newFolder = folder;
@@ -5284,6 +5324,9 @@ public class FileStorageService //: IFileStorageService
                 {
                     properties.FormFilling.StartFilling = true;
                     properties.FormFilling.StartedByUserId = authContext.CurrentAccount.ID;
+
+                    var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+                    await filesMessageService.SendAsync(MessageAction.FormStartedToFill, form, MessageInitiator.DocsService, currentUser?.DisplayUserName(false, displayUserSettingsHelper), form.Title);
                 }
 
                 break;
@@ -5342,8 +5385,17 @@ public class FileStorageService //: IFileStorageService
         var resultsFile = await resultsFileTask;
         var room = await roomTask;
 
-        if (room == null ||
-            formFilling.RoomId != room.Id)
+        if (room == null)
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (formFilling.RoomId == 0)
+        {
+            formFilling.RoomId = room.Id;
+            await fileDao.SaveProperties(form.Id, properties);
+        }
+        else if (formFilling.RoomId != room.Id)
         {
             throw new InvalidOperationException();
         }
@@ -5483,9 +5535,17 @@ public class FileStorageService //: IFileStorageService
         var room = await roomTask;
         var resultFolder = await resultFolderTask;
 
-        if (room == null ||
-            formFilling.RoomId != room.Id ||
-            room.FolderType != FolderType.FillingFormsRoom)
+        if (room == null || room.FolderType != FolderType.FillingFormsRoom)
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (formFilling.RoomId == 0)
+        {
+            formFilling.RoomId = room.Id;
+            await fileDao.SaveProperties(form.Id, properties);
+        }
+        else if (formFilling.RoomId != room.Id)
         {
             throw new InvalidOperationException();
         }
@@ -5838,29 +5898,6 @@ public class FileStorageService //: IFileStorageService
         return dict.Values.ToList();
     }
 
-    private async Task CheckEncryptionKeysAsync(IEnumerable<AceWrapper> aceWrappers)
-    {
-        var users = aceWrappers.Select(s => s.Id).ToList();
-        var keys = await encryptionLoginProvider.GetKeysAsync(users);
-
-        foreach (var user in users)
-        {
-            if (!keys.ContainsKey(user))
-            {
-                var userInfo = await userManager.GetUsersAsync(user);
-                throw new InvalidOperationException($"The user {userInfo.DisplayUserName(displayUserSettingsHelper)} does not have an encryption key");
-            }
-        }
-    }
-
-    private async Task SetAcesForPrivateRoomAsync<T>(Folder<T> room, List<AceWrapper> aces)
-    {
-        var advancedSettings = new AceAdvancedSettingsWrapper { AllowSharingPrivateRoom = true };
-
-        var aceCollection = new AceCollection<T> { Folders = [room.Id], Files = [], Aces = aces, AdvancedSettings = advancedSettings };
-
-        await SetAceObjectAsync(aceCollection, false);
-    }
 
     private async Task DetermineParentRoomType<T>(FileEntry<T> entry)
     {
