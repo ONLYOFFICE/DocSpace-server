@@ -237,7 +237,8 @@ public class QuotaHelper(
                     && TenantWalletServiceExtensions.TryParse(walletFlag.Name, true, out var service)
                     && enabledWalletServices.Contains(service);
 
-                if (walletFlag.Name == "backup" && currentQuota is { CountFreeBackup: > 0 })
+                const string backupFeatureName = "backup";
+                if (walletFlag.Name == backupFeatureName && currentQuota is { CountFreeBackup: > 0 })
                 {
                     result.Title = Resource.ResourceManager.GetString("TariffsFeature_backup_wallet_additional") ?? result.Title;
                 }
