@@ -139,7 +139,7 @@
     <value>Miktar</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>{LogoText} Yapay Zeka</value>
+    <value>Yapay Zeka özellikleri</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Yedekleme</value>
@@ -1153,10 +1153,10 @@
     <value>Yapay zekâ ajanı sayısı {0} değerini aşmamalı</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>{LogoText} Yapay Zeka</value>
+    <value>Yapay Zeka özellikleri</value>
   </data>
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Verimliliği artırmak için DocSpace üzerinde yapay zekâ özelliklerini etkinleştirin.</value>
+    <value>Verimliliği artırmak için yapay zekâ özelliklerini etkinleştirin.</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Oturum açma ve eylemleri izleme</value>
@@ -1165,7 +1165,10 @@
     <value>Yedekleme</value>
   </data>
   <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
-    <value>DocSpace'iniz için yedeklemeleri etkinleştirin. Ücretler otomatik olarak faturalandırılacaktır.</value>
+    <value>Yedeklemeleri etkinleştirin. Ücretler otomatik olarak faturalandırılacaktır.</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_additional" xml:space="preserve">
+    <value>Ek Yedekleme</value>
   </data>
   <data name="TariffsFeature_customization" xml:space="preserve">
     <value>Markalaşma ve özelleştirme</value>

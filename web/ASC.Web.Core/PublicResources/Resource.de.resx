@@ -139,7 +139,7 @@
     <value>Menge</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>{LogoText} AI</value>
+    <value>KI-Funktionen</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Backup</value>
@@ -1153,10 +1153,10 @@
     <value>Die Anzahl der KI-Agenten sollte {0} nicht überschreiten</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>{LogoText} AI</value>
+    <value>KI-Funktionen</value>
   </data>
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Aktivieren Sie KI-Funktionen in Ihrem DocSpace, um die Produktivität zu steigern.</value>
+    <value>Aktivieren Sie KI-Funktionen, um die Produktivität zu steigern.</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Verfolgen von Anmeldungen und Aktionen</value>
@@ -1165,7 +1165,10 @@
     <value>Backup</value>
   </data>
   <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
-    <value>Aktivieren Sie Backups für Ihren DocSpace. Die Kosten werden automatisch abgerechnet.</value>
+    <value>Aktivieren Sie Backups. Die Kosten werden automatisch abgerechnet.</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_additional" xml:space="preserve">
+    <value>Zusätzliches Backup</value>
   </data>
   <data name="TariffsFeature_customization" xml:space="preserve">
     <value>Branding &amp; Anpassung</value>

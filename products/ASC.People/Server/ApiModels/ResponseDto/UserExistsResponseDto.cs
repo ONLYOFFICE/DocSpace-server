@@ -31,39 +31,22 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Files.Core.Utils;
+namespace ASC.People.ApiModels.ResponseDto;
 
-[Scope]
-public class CsvFileUploader(
-    GlobalFolderHelper globalFolderHelper,
-    ILogger<CsvFileUploader> logger,
-    FileUploader fileUploader,
-    FilesLinkUtility filesLinkUtility,
-    CommonLinkUtility commonLinkUtility,
-    UserManager userManager,
-    AuthContext authContext)
+/// <summary>
+/// The user existence check response parameters.
+/// </summary>
+public class UserExistsResponseDto
 {
-    public async Task<string> UploadFile(Stream stream, string fileName)
-    {
-        try
-        {
-            var isGuest = await userManager.IsGuestAsync(authContext.CurrentAccount.ID);
-            if (isGuest)
-            {
-                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
-            }
+    /// <summary>
+    /// Specifies whether the user exists or not.
+    /// </summary>
+    /// <example>true</example>
+    public required bool Exists { get; set; }
 
-            var file = await fileUploader.ExecAsync(await globalFolderHelper.FolderMyAsync, fileName, stream.Length, stream, true);
-            var fileUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebEditorUrl(file.Id));
-
-            fileUrl += $"&options={{\"codePage\":{Encoding.UTF8.CodePage}}}";
-
-            return fileUrl;
-        }
-        catch (Exception ex)
-        {
-            logger.ErrorWhileUploading(ex);
-            throw;
-        }
-    }
+    /// <summary>
+    /// The user status, if the user exists.
+    /// </summary>
+    /// <example>1</example>
+    public EmployeeStatus? Status { get; set; }
 }
