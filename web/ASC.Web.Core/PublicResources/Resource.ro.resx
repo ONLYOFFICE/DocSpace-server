@@ -139,7 +139,7 @@
     <value>Cantitate</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>{LogoText} AI</value>
+    <value>Funcții de IA</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Copiere de rezervă</value>

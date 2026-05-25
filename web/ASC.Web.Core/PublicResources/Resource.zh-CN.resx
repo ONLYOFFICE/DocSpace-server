@@ -139,7 +139,7 @@
     <value>数量</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>AI 工具</value>
+    <value>AI 功能</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>备份</value>

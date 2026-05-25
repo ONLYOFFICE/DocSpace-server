@@ -139,7 +139,7 @@
     <value>수량</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>{LogoText} AI</value>
+    <value>AI 기능</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>백업</value>

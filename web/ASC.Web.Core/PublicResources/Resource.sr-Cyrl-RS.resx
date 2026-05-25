@@ -139,7 +139,7 @@
     <value>Колицина</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>{LogoText} AI</value>
+    <value>AI функције</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Бекап</value>

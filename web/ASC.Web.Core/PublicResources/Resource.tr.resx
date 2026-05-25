@@ -139,7 +139,7 @@
     <value>Miktar</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>{LogoText} Yapay Zeka</value>
+    <value>Yapay Zeka özellikleri</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Yedekleme</value>

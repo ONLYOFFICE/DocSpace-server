@@ -132,7 +132,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {LogoText} AI.
+        ///   Looks up a localized string similar to AI features.
         /// </summary>
         public static string AccountingCustomerOperationServiceDesc_ai_tools {
             get {

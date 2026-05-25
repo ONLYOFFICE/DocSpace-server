@@ -139,7 +139,7 @@
     <value>Количество</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>ИИ {LogoText}</value>
+    <value>Функции ИИ</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Резервное копирование</value>
