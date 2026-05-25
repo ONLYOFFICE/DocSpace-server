@@ -90,10 +90,7 @@ public class UploadControllerHelper(
             await _filesSettingsHelper.SetStoreOriginalFiles(uploadModel.StoreOriginalFileFlag.Value);
         }
 
-        if (uploadModel.File == null)
-        {
-            throw new InvalidOperationException("No input files");
-        }
+        ArgumentNullException.ThrowIfNull(uploadModel.File);
 
         var fileName = uploadModel.File.FileName;
 

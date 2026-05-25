@@ -702,6 +702,11 @@ public abstract class VirtualRoomsController<T>(
     [HttpDelete("{id}/tags")]
     public async Task<FolderDto<T>> DeleteRoomTags(BatchTagsRequestDto<T> inDto)
     {
+        foreach (var batchTagsName in inDto.BatchTags.Names)
+        {
+            ArgumentNullException.ThrowIfNull(batchTagsName, nameof(inDto.BatchTags.Names));
+        }
+
         var room = await customTagsService.DeleteRoomTagsAsync(inDto.Id, inDto.BatchTags.Names);
         return await _folderDtoHelper.GetAsync(room);
     }
