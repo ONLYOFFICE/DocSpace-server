@@ -68,7 +68,6 @@ public class PaymentController(
     ApiDateTimeHelper apiDateTimeHelper,
     EmployeeDtoHelper employeeWrapperHelper,
     DisplayUserSettingsHelper displayUserSettingsHelper,
-    TenantLogoManager tenantLogoManager,
     IEventBus eventBus,
     CommonLinkUtility commonLinkUtility,
     DocumentBuilderTaskManager<CustomerOperationsReportTask, int, CustomerOperationsReportTaskData> documentBuilderTaskManager,
@@ -915,9 +914,8 @@ public class PaymentController(
         }
 
         var participantDisplayNames = await report.GetParticipantDisplayNamesAsync(displayUserSettingsHelper, true);
-        var logoText = await tenantLogoManager.GetLogoTextAsync();
 
-        return new ReportDto(report, apiDateTimeHelper, participantDisplayNames, filter.ServiceName, logoText);
+        return new ReportDto(report, apiDateTimeHelper, participantDisplayNames, filter.ServiceName);
     }
 
     /// <remarks>
