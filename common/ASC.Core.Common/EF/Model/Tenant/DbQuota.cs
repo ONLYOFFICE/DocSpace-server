@@ -209,7 +209,7 @@ public static class DbQuotaExtension
                     ProductId = null,
                     ServiceName = "ai-tools",
                     ServiceGroup = null,
-                    Visible = false,
+                    Visible = true,
                     Wallet = true
                 }
                 );
