@@ -1249,7 +1249,7 @@ public class PaymentController(
     [SwaggerResponse(200, "The AI credit operation result", typeof(ServicePayment))]
     [SwaggerResponse(400, "Unsupported currency or insufficient balance")]
     [SwaggerResponse(403, "No permissions to perform this action")]
-    [SwaggerResponse(404, "Customer could not be found")]
+    [SwaggerResponse(404, "Customer or AiTools quota could not be found")]
     [HttpPost("creditaibalance")]
     [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
     public async Task<ServicePayment> CreditAiBalance(CreditAiBalanceRequestDto inDto)
@@ -1298,6 +1298,7 @@ public class PaymentController(
             throw new ArgumentException("Insufficient balance");
         }
 
+        // The method must throw an exception if the AiTools quota is hidden or not found in the database!
         var quotaList = await tenantManager.GetTenantQuotasAsync(false, true);
         var aiToolsQuota = quotaList.FirstOrDefault(x => x.TenantId == (int)TenantWalletService.AITools);
         if (aiToolsQuota == null)
@@ -1511,6 +1512,15 @@ public class PaymentController(
         await fusionCache.SetAsync(key, count + 1, TimeSpan.FromMinutes(_expirationMinutes));
     }
 
+    /// <summary>
+    /// Validates the service name and returns the corresponding tenant wallet service
+    /// </summary>
+    /// <remarks>
+    /// Checks if the provided service name matches any tenant quota service name and verifies that the corresponding tenant ID is a valid TenantWalletService enum value.
+    /// </remarks>
+    /// <param name="serviceName">The service name to validate</param>
+    /// <return>The corresponding TenantWalletService enum value</return>
+    /// <exception cref="ItemNotFoundException">Thrown when the quota with the corresponding service name is hidden or not found in the database.</exception>
     private async Task<TenantWalletService> CheckWalletServiceName(string serviceName)
     {
         var quotaList = await tenantManager.GetTenantQuotasAsync(false, true);
