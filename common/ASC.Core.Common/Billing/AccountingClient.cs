@@ -330,7 +330,8 @@ public class AccountingClient
                     throw new AccountingPaymentRequiredException();
                 }
 
-                if (response.StatusCode == HttpStatusCode.BadRequest && Regex.IsMatch(responseString, @"Customer( account)? '[^']*' not found"))
+                if (response.StatusCode == HttpStatusCode.BadRequest &&
+                    responseString.Contains("not found", StringComparison.OrdinalIgnoreCase))
                 {
                     throw new AccountingCustomerNotFoundException();
                 }
