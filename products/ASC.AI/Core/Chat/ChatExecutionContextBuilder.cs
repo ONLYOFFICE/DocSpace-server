@@ -109,8 +109,7 @@ public class ChatExecutionContextBuilder(
             tools = new ToolHolder();
         }
 
-        ChatReasoningEffort? reasoningEffort = chatSettings.ReasoningEffort is not ChatReasoningEffort.None
-                                               && mSettings.Capabilities.Thinking
+        ChatReasoningEffort? reasoningEffort = mSettings.Capabilities.Thinking
             ? chatSettings.ReasoningEffort
             : null;
 

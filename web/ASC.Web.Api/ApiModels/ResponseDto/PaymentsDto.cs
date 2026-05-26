@@ -222,7 +222,7 @@ public class CustomerInfoDto(CustomerInfo customerInfo, EmployeeDto employeeDto)
     /// The customer email address.
     /// </summary>
     /// <example>user@example.com</example>
-    public string Email { get; private set; } = customerInfo.Email;
+    public string Email { get; private set; } = customerInfo.Email?.ToLowerInvariant();
 
     /// <summary>
     /// The paying user.

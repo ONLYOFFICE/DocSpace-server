@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -31,39 +31,16 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.AI.Core.Provider.Model;
+namespace ASC.Core.Common.Log;
 
-public class TogetherAiModelClient(HttpClient client, string url, string apiKey) : OpenAiModelClientBase(client, url, apiKey)
+public static partial class UrlValidatorLogger
 {
-    protected override async Task<IEnumerable<ModelInfo>> GetModelsDataAsync(HttpResponseMessage response)
-    {
-        var content = await response.Content.ReadFromJsonAsync<List<TogetherAiModel>>();
-        if (content is null)
-        {
-            return [];
-        }
+    [LoggerMessage(LogLevel.Warning, "SSRF attempt blocked: URL={url}, Host={host}, IP={ipAddress}, Reason={reason}")]
+    public static partial void WarningSsrfBlocked(this ILogger<UrlValidator> logger, string url, string host, string ipAddress, string reason);
 
-        return content
-            .Where(m => m.Type is null or "chat")
-            .OrderBy(x => x.Organization ?? string.Empty)
-            .ThenByDescending(x => x.Created)
-            .Select(m => new ModelInfo
-            {
-                Id = m.Id,
-                Created = m.Created,
-                Alias = m.DisplayName
-            });
-    }
+    [LoggerMessage(LogLevel.Error, "DNS resolution failed for host {host}")]
+    public static partial void ErrorDnsResolutionFailed(this ILogger<UrlValidator> logger, string host, Exception ex);
 
-    private class TogetherAiModel
-    {
-        public required string Id { get; init; }
-        public int Created { get; init; }
-        public string? Type { get; init; }
-
-        [JsonPropertyName("display_name")]
-        public string? DisplayName { get; init; }
-
-        public string? Organization { get; init; }
-    }
+    [LoggerMessage(LogLevel.Warning, "Invalid URL format: {url}")]
+    public static partial void WarningInvalidUrlFormat(this ILogger<UrlValidator> logger, string url);
 }
