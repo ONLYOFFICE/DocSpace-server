@@ -351,10 +351,39 @@ public class ExternalShare(
         return _dbKey ??= await coreSettings.GetDocDbKeyAsync();
     }
 
+    /// <summary>
+    /// Returns <c>true</c> when an existing public link should be blocked because the admin
+    /// has both disabled external sharing for the entry's section and enabled the
+    /// "block existing links" option. Used only for access-validation paths.
+    /// </summary>
     public async Task<bool> IsGloballyRestrictedAsync(FileEntry entry)
     {
         var settings = await filesSettingsHelper.GetTenantFilesSettingsAsync();
         return IsGlobalRestrictionApplies(entry, settings);
+    }
+
+    /// <summary>
+    /// Returns <c>true</c> when creating a new public link should be prevented because the
+    /// admin has disabled external sharing for the entry's section.
+    /// Unlike <see cref="IsGloballyRestrictedAsync"/>, this does <b>not</b> consult
+    /// <c>BlockExistingLinksOnRestrict</c> — that flag controls only existing-link access,
+    /// not whether new links may be created as public.
+    /// </summary>
+    public async Task<bool> IsCreationRestrictedAsync(FileEntry entry)
+    {
+        var settings = await filesSettingsHelper.GetTenantFilesSettingsAsync();
+
+        if (!settings.DisableShareLinkSetting)
+        {
+            return false;
+        }
+
+        return entry.RootFolderType switch
+        {
+            FolderType.USER => settings.ExternalShareApplyToDocumentsSetting,
+            FolderType.VirtualRooms => settings.ExternalShareApplyToRoomsSetting,
+            _ => false
+        };
     }
 
     private static bool IsGlobalRestrictionApplies(FileEntry entry, FilesSettings settings)

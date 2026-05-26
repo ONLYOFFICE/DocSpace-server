@@ -3971,7 +3971,7 @@ public class FileStorageService //: IFileStorageService
 
         entry.NotFoundIfNull();
 
-        if (!requiredAuth && await externalShare.IsGloballyRestrictedAsync(entry))
+        if (!requiredAuth && await externalShare.IsCreationRestrictedAsync(entry))
         {
             requiredAuth = true;
         }
@@ -4349,7 +4349,7 @@ public class FileStorageService //: IFileStorageService
             ? await daoFactory.GetFileDao<T>().GetFileAsync(entryId)
             : await daoFactory.GetFolderDao<T>().GetFolderAsync(entryId);
 
-        if (!requiredAuth && entry != null && await externalShare.IsGloballyRestrictedAsync(entry))
+        if (!requiredAuth && entry != null && await externalShare.IsCreationRestrictedAsync(entry))
         {
             requiredAuth = true;
         }
