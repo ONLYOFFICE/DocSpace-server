@@ -426,6 +426,11 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:change-web-plugin", { webPluginName, enabled });
   }
 
+  function changeAppEnabled({ room, id, enabled } = {}) {
+    logger.info(`changed app enabled in room ${room}, id ${id}, enabled ${enabled}`);
+    filesIO.to(room).emit("s:change-app-enabled", { id, enabled });
+  }
+
   function topUpWallet({ room, auto } = {}) {
     logger.info(`wallet topped up ${room}, auto ${auto}`);
     filesIO.to(room).emit("s:top-up-wallet", { auto });
@@ -630,6 +635,7 @@ module.exports = (io) => {
     markAsNewFolders,
     changeInvitationLimitValue,
     changeWebPlugin,
+    changeAppEnabled,
     topUpWallet,
     updateHistory,
     logoutSession,

@@ -139,7 +139,7 @@
     <value>Množství</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>{LogoText} AI</value>
+    <value>Funkce AI</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Záloha</value>
@@ -1153,10 +1153,10 @@
     <value>Počet AI agentů by neměl překročit {0}</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>{LogoText} AI</value>
+    <value>Funkce AI</value>
   </data>
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Povolte AI funkce ve vašem DocSpace a zvyšte produktivitu.</value>
+    <value>Povolte AI funkce a zvyšte produktivitu.</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Sledování přihlášení a akcí</value>
@@ -1165,7 +1165,10 @@
     <value>Záloha</value>
   </data>
   <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
-    <value>Povolte zálohování pro váš DocSpace. Náklady budou účtovány automaticky.</value>
+    <value>Povolte zálohování. Náklady budou účtovány automaticky.</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_additional" xml:space="preserve">
+    <value>Další záloha</value>
   </data>
   <data name="TariffsFeature_customization" xml:space="preserve">
     <value>Branding a přizpůsobení</value>
