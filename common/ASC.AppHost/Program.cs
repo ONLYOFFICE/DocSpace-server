@@ -146,12 +146,11 @@ var clientBasePath = Path.Combine(basePath, "client");
 if (!skipClient)
 {
     var certDir = DevCertificateGenerator.EnsureCertificate(basePath);
-    var dnsPatchPath = Path.Combine(builder.AppHostDirectory, "scripts", "docspace-dns-patch.js").Replace('\\', '/');
     var crtPath = Path.Combine(certDir, DevCertificateGenerator.CrtFileName);
 
     startPackages = builder.AddJavaScriptApp("onlyoffice-client", clientBasePath, "start")
         .WithPnpm()
-        .WithEnvironment("NODE_OPTIONS", $"--require={dnsPatchPath}")
+        .WithEnvironment("NODE_OPTIONS", $"--use-system-ca")
         .WithEnvironment("NODE_EXTRA_CA_CERTS", crtPath)
         .WithEnvironment("API_HOST", $"http://localhost:{Constants.AppHostPort.ToString()}");
 }
