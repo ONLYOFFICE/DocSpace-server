@@ -430,8 +430,6 @@ public class WebhooksController(
             throw new ArgumentException(validationResult.ErrorMessage);
         }
 
-        UrlValidator.SetPinnedConnection(validationResult);
-
         var handler = new SocketsHttpHandler
         {
             AllowAutoRedirect = false,
@@ -446,6 +444,7 @@ public class WebhooksController(
         using var httpClient = new HttpClient(handler, disposeHandler: true);
         httpClient.Timeout = TimeSpan.FromSeconds(10);
         using var request = new HttpRequestMessage(HttpMethod.Head, validationResult.ParsedUri);
+        request.Options.Set(UrlValidator.PinnedIpKey, validationResult.ResolvedAddresses[0]);
         using var response = await httpClient.SendAsync(request);
 
         if (response is not { IsSuccessStatusCode: true })

@@ -144,8 +144,6 @@ public abstract class PeopleControllerBase(
 
         await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(user.Id), Constants.Action_EditUser);
 
-        UrlValidator.SetPinnedConnection(photoValidation);
-
         var handler = new SocketsHttpHandler
         {
             AllowAutoRedirect = false,
@@ -155,6 +153,7 @@ public abstract class PeopleControllerBase(
         using var httpClient = new HttpClient(handler, disposeHandler: true);
         httpClient.Timeout = TimeSpan.FromSeconds(10);
         using var request = new HttpRequestMessage(HttpMethod.Get, photoValidation.ParsedUri);
+        request.Options.Set(UrlValidator.PinnedIpKey, photoValidation.ResolvedAddresses[0]);
         using var response = await httpClient.SendAsync(request);
 
         if (!response.IsSuccessStatusCode)

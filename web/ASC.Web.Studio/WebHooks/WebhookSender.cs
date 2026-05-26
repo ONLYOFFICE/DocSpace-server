@@ -115,7 +115,6 @@ public class WebhookSender(
             var requestPayload = JsonSerializer.Serialize(webhookPayload, _jsonSerializerOptions);
             string requestHeaders = null;
 
-            UrlValidator.SetPinnedConnection(validationResult);
             var httpClientName = entry.Config.SSL ? WebhookHttpClient : WebhookHttpClientSslIgnore;
             var httpClient = clientFactory.CreateClient(httpClientName);
 
@@ -131,6 +130,7 @@ public class WebhookSender(
                 var response = await pipeline.ExecuteAsync(async context =>
                 {
                     var request = new HttpRequestMessage(HttpMethod.Post, validationResult.ParsedUri);
+                    request.Options.Set(UrlValidator.PinnedIpKey, validationResult.ResolvedAddresses[0]);
 
                     var retryCount = context.Properties.GetValue(RetryCountPropKey, 0);
 

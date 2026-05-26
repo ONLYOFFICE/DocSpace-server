@@ -100,17 +100,21 @@ public class UrlValidator(
 
     private readonly string[] _blacklist = configuration.GetSection("webhooks:blacklist").Get<string[]>() ?? _defaultBlacklist;
 
-    public static readonly AsyncLocal<IPAddress> PinnedIp = new();
-
-    public static void SetPinnedConnection(UrlValidationResult result)
-    {
-        PinnedIp.Value = result.ResolvedAddresses[0];
-    }
+    /// <summary>
+    /// Key used to attach the pre-validated <see cref="IPAddress"/> to an <see cref="HttpRequestMessage"/>.
+    /// Set via <c>request.Options.Set(UrlValidator.PinnedIpKey, ip)</c> before calling <c>SendAsync</c>.
+    /// </summary>
+    public static readonly HttpRequestOptionsKey<IPAddress> PinnedIpKey = new("ssrf-pinned-ip");
 
     public static async ValueTask<Stream> PinnedConnectCallback(SocketsHttpConnectionContext context, CancellationToken ct)
     {
-        var ip = PinnedIp.Value
-            ?? throw new InvalidOperationException($"No pinned IP set for {context.DnsEndPoint.Host}. Call UrlValidator.SetPinnedConnection before sending.");
+        if (!context.InitialRequestMessage.Options.TryGetValue(PinnedIpKey, out var ip) || ip is null)
+        {
+            throw new InvalidOperationException(
+                $"PinnedIpKey not set on request to {context.DnsEndPoint.Host}. " +
+                "Set request.Options.Set(UrlValidator.PinnedIpKey, ...) before SendAsync.");
+        }
+
         var socket = new Socket(ip.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
         socket.NoDelay = true;
         try
