@@ -154,14 +154,14 @@ if (!skipClient)
         .WithEnvironment("NODE_OPTIONS", $"--require={dnsPatchPath}")
         .WithEnvironment("NODE_EXTRA_CA_CERTS", crtPath)
         .WithEnvironment("API_HOST", $"http://localhost:{Constants.AppHostPort.ToString()}");
+}
 
-    if (storybook)
-    {
-        builder.AddJavaScriptApp("onlyoffice-storybook", Path.Combine(clientBasePath, "libs", "ui-kit"), "storybook")
-            .WithPnpm(false)
-            .WithEnvironment("STORYBOOK_PROXY", "true")
-            .WithEnvironment("BROWSER", "none");
-    }
+if (storybook)
+{
+    builder.AddJavaScriptApp("onlyoffice-storybook", Path.Combine(clientBasePath, "libs", "ui-kit"), "storybook")
+        .WithPnpm(false)
+        .WithEnvironment("STORYBOOK_PROXY", "true")
+        .WithEnvironment("BROWSER", "none");
 }
 
 var isPreview = builder.Configuration["DOTNET_LAUNCH_PROFILE"] == "preview";
