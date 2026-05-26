@@ -47,6 +47,8 @@ public class ProfileUpdateTests(AspireAppFixture fixture) : BaseTest(fixture)
         updated.ModelId.Should().Be(update.ModelId);
         updated.Reasoning.Should().Be(update.Reasoning);
         updated.Capabilities.Should().Be(update.Capabilities);
+        updated.UseResponsesApi.Should().Be(update.UseResponsesApi);
+        updated.CanUseTool.Should().Be(update.CanUseTool);
 
         using var getResponse = await Ai.GetAsync($"{ProfilesPath}/{created.Id}", TestContext.Current.CancellationToken);
         var fetched = await Ai.ReadAsync<ProfileDto>(getResponse, TestContext.Current.CancellationToken);
@@ -54,6 +56,8 @@ public class ProfileUpdateTests(AspireAppFixture fixture) : BaseTest(fixture)
         fetched.Name.Should().Be(update.Name);
         fetched.ProviderType.Should().Be(update.ProviderType);
         fetched.Key.Should().Be(update.Key);
+        fetched.UseResponsesApi.Should().Be(update.UseResponsesApi);
+        fetched.CanUseTool.Should().Be(update.CanUseTool);
     }
 
 }

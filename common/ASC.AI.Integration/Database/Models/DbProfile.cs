@@ -33,23 +33,25 @@ public class DbProfile : BaseEntity
 
     [MaxLength(255)]
     [Required]
-    public required string Name { get; init; }
+    public required string Name { get; set; }
 
     [MaxLength(255)]
     [Required]
-    public required string ProviderType { get; init; }
+    public required string ProviderType { get; set; }
 
     [Required]
-    public required string BaseUrl { get; init; }
+    public required string BaseUrl { get; set; }
 
-    public string? Key { get; init; }
+    public string? Key { get; set; }
 
     [MaxLength(255)]
     [Required]
-    public required string ModelId { get; init; }
+    public required string ModelId { get; set; }
 
-    public bool? Reasoning { get; init; }
-    public Capabilities? Capabilities { get; init; }
+    public bool? Reasoning { get; set; }
+    public Capabilities? Capabilities { get; set; }
+    public bool? UseResponsesApi { get; set; }
+    public bool? CanUseTool { get; set; }
 
     public DateTime CreatedAt { get; init; }
 
@@ -129,6 +131,12 @@ public static class DbProfileExtension
             entity.Property(e => e.Capabilities)
                 .HasColumnName("capabilities");
 
+            entity.Property(e => e.UseResponsesApi)
+                .HasColumnName("use_responses_api");
+
+            entity.Property(e => e.CanUseTool)
+                .HasColumnName("can_use_tool");
+
             entity.Property(e => e.CreatedAt)
                 .HasColumnName("created_at")
                 .HasColumnType("datetime");
@@ -183,6 +191,12 @@ public static class DbProfileExtension
 
             entity.Property(e => e.Capabilities)
                 .HasColumnName("capabilities");
+
+            entity.Property(e => e.UseResponsesApi)
+                .HasColumnName("use_responses_api");
+
+            entity.Property(e => e.CanUseTool)
+                .HasColumnName("can_use_tool");
 
             entity.Property(e => e.CreatedAt)
                 .HasColumnName("created_at")

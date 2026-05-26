@@ -46,6 +46,8 @@ public class ProfileCreateTests(AspireAppFixture fixture) : BaseTest(fixture)
         created.ModelId.Should().Be(dto.ModelId);
         created.Reasoning.Should().Be(dto.Reasoning);
         created.Capabilities.Should().Be(dto.Capabilities);
+        created.UseResponsesApi.Should().Be(dto.UseResponsesApi);
+        created.CanUseTool.Should().Be(dto.CanUseTool);
         created.Key.Should().Be(dto.Key);
         created.CreatedAt.Should().BeGreaterThan(0);
     }

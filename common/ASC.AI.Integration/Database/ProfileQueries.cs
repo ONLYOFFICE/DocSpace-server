@@ -40,19 +40,10 @@ public partial class AiIntegrationContext
         return Queries.GetAllProfilesAsync(this, tenantId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, null, null, null, null, null, null, null])]
-    public Task<int> UpdateProfileAsync(
-        int tenantId,
-        Guid id,
-        string name,
-        string providerType,
-        string baseUrl,
-        string? key,
-        string modelId,
-        bool? reasoning,
-        Capabilities? capabilities)
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    public Task<DbProfile?> GetProfileForUpdateAsync(int tenantId, Guid id)
     {
-        return Queries.UpdateProfileAsync(this, tenantId, id, name, providerType, baseUrl, key, modelId, reasoning, capabilities);
+        return Queries.GetProfileForUpdateAsync(this, tenantId, id);
     }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
@@ -77,19 +68,12 @@ static file class Queries
                     .OrderBy(x => x.Id)
                     .AsQueryable());
 
-    public static readonly Func<AiIntegrationContext, int, Guid, string, string, string, string?, string, bool?, Capabilities?, Task<int>> UpdateProfileAsync =
+    public static readonly Func<AiIntegrationContext, int, Guid, Task<DbProfile?>> GetProfileForUpdateAsync =
         EF.CompileAsyncQuery(
-            (AiIntegrationContext ctx, int tenantId, Guid id, string name, string providerType, string baseUrl, string? key, string modelId, bool? reasoning, Capabilities? capabilities) =>
+            (AiIntegrationContext ctx, int tenantId, Guid id) =>
                 ctx.Profiles
-                    .Where(x => x.TenantId == tenantId && x.Id == id)
-                    .ExecuteUpdate(x =>
-                        x.SetProperty(y => y.Name, name)
-                            .SetProperty(y => y.ProviderType, providerType)
-                            .SetProperty(y => y.BaseUrl, baseUrl)
-                            .SetProperty(y => y.Key, key)
-                            .SetProperty(y => y.ModelId, modelId)
-                            .SetProperty(y => y.Reasoning, reasoning)
-                            .SetProperty(y => y.Capabilities, capabilities)));
+                    .AsTracking()
+                    .FirstOrDefault(x => x.TenantId == tenantId && x.Id == id));
 
     public static readonly Func<AiIntegrationContext, int, Guid, Task<int>> DeleteProfileAsync =
         EF.CompileAsyncQuery(

@@ -39,6 +39,8 @@ public class ProfileDto
     public required string ModelId { get; init; }
     public bool? Reasoning { get; init; }
     public Capabilities? Capabilities { get; init; }
+    public bool? UseResponsesApi { get; init; }
+    public bool? CanUseTool { get; init; }
     public long CreatedAt { get; init; }
 }
 
@@ -58,6 +60,8 @@ public static partial class ProfileMapper
     [MapProperty($"{nameof(UpdateProfileRequestDto.Body)}.{nameof(UpdateProfileBody.ModelId)}", nameof(Profile.ModelId))]
     [MapProperty($"{nameof(UpdateProfileRequestDto.Body)}.{nameof(UpdateProfileBody.Reasoning)}", nameof(Profile.Reasoning))]
     [MapProperty($"{nameof(UpdateProfileRequestDto.Body)}.{nameof(UpdateProfileBody.Capabilities)}", nameof(Profile.Capabilities))]
+    [MapProperty($"{nameof(UpdateProfileRequestDto.Body)}.{nameof(UpdateProfileBody.UseResponsesApi)}", nameof(Profile.UseResponsesApi))]
+    [MapProperty($"{nameof(UpdateProfileRequestDto.Body)}.{nameof(UpdateProfileBody.CanUseTool)}", nameof(Profile.CanUseTool))]
     public static partial Profile MapToProfile(UpdateProfileRequestDto dto);
 
     private static long MapDateTimeToMs(DateTime dateTime) =>

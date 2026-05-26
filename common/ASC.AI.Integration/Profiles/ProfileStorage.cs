@@ -100,20 +100,33 @@ public class ProfileStorage(IDbContextFactory<AiIntegrationContext> dbContextFac
 
     public async Task<Profile> UpdateAsync(int tenantId, Profile profile)
     {
-        await using var context = await dbContextFactory.CreateDbContextAsync();
-
         var encryptedKey = await EncryptKeyAsync(profile.Key);
 
-        await context.UpdateProfileAsync(
-            tenantId,
-            profile.Id,
-            profile.Name,
-            profile.ProviderType,
-            profile.BaseUrl,
-            encryptedKey,
-            profile.ModelId,
-            profile.Reasoning,
-            profile.Capabilities);
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        var strategy = dbContext.Database.CreateExecutionStrategy();
+
+        await strategy.ExecuteAsync(async () =>
+        {
+            await using var context = await dbContextFactory.CreateDbContextAsync();
+
+            var entity = await context.GetProfileForUpdateAsync(tenantId, profile.Id);
+            if (entity == null)
+            {
+                return;
+            }
+
+            entity.Name = profile.Name;
+            entity.ProviderType = profile.ProviderType;
+            entity.BaseUrl = profile.BaseUrl;
+            entity.Key = encryptedKey;
+            entity.ModelId = profile.ModelId;
+            entity.Reasoning = profile.Reasoning;
+            entity.Capabilities = profile.Capabilities;
+            entity.UseResponsesApi = profile.UseResponsesApi;
+            entity.CanUseTool = profile.CanUseTool;
+
+            await context.SaveChangesAsync();
+        });
 
         return profile;
     }
@@ -170,6 +183,8 @@ public class ProfileStorage(IDbContextFactory<AiIntegrationContext> dbContextFac
             ModelId = profile.ModelId,
             Reasoning = profile.Reasoning,
             Capabilities = profile.Capabilities,
+            UseResponsesApi = profile.UseResponsesApi,
+            CanUseTool = profile.CanUseTool,
             CreatedAt = createdAt
         };
     }
@@ -186,6 +201,8 @@ public class ProfileStorage(IDbContextFactory<AiIntegrationContext> dbContextFac
             ModelId = entity.ModelId,
             Reasoning = entity.Reasoning,
             Capabilities = entity.Capabilities,
+            UseResponsesApi = entity.UseResponsesApi,
+            CanUseTool = entity.CanUseTool,
             CreatedAt = entity.CreatedAt
         };
     }

@@ -72,7 +72,9 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
             Key = "sk-test-key-" + Guid.NewGuid().ToString("N"),
             ModelId = "gpt-4o-mini",
             Reasoning = false,
-            Capabilities = Capabilities.Chat
+            Capabilities = Capabilities.Chat,
+            UseResponsesApi = false,
+            CanUseTool = true
         };
 
     protected static UpdateProfileBody BuildUpdateBody(string? name = null) =>
@@ -84,7 +86,9 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
             Key = "sk-ant-" + Guid.NewGuid().ToString("N"),
             ModelId = "claude-sonnet-4-6",
             Reasoning = true,
-            Capabilities = Capabilities.Chat | Capabilities.Vision
+            Capabilities = Capabilities.Chat | Capabilities.Vision,
+            UseResponsesApi = true,
+            CanUseTool = false
         };
 
     protected async Task<ProfileDto> CreateProfileAsync(CreateProfileRequestDto? dto = null)
