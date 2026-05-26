@@ -666,6 +666,7 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/link</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "Room security information", typeof(FileShareDto))]
+    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [SwaggerResponse(404, "Not Found")]
     [HttpGet("{id}/link")]
     public async Task<FileShareDto> GetRoomsPrimaryExternalLink(RoomIdRequestDto<T> inDto)

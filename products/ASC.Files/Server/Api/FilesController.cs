@@ -571,6 +571,7 @@ public abstract class FilesController<T>(
     /// <path>api/2.0/files/file/{id}/link</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "File security information", typeof(FileShareDto))]
+    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [SwaggerResponse(404, "Not Found")]
     [HttpPost("file/{id}/link")]
     public async Task<FileShareDto> CreateFilePrimaryExternalLink(FileLinkRequestDto<T> inDto)
@@ -596,6 +597,7 @@ public abstract class FilesController<T>(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "File security information", typeof(FileShareDto))]
+    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [SwaggerResponse(404, "Not Found")]
     [AllowAnonymous]
     [HttpGet("file/{id}/link")]
