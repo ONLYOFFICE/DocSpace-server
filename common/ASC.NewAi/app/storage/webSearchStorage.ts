@@ -25,7 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 import { aiService, AiServiceHttpError } from "./httpClient.js";
-import { isObject, getString } from "../narrow.js";
+import { isObject, getString, getBoolean } from "../narrow.js";
 import type { WebSearchStorage, WebSearchConfig } from "@onlyoffice/ai-chat/core";
 
 const PATH = "/integration/web-search";
@@ -37,6 +37,9 @@ function toBody(config: WebSearchConfig): Record<string, unknown> {
   }
   if (config.baseUrl !== undefined) {
     body["baseUrl"] = config.baseUrl;
+  }
+  if (config.isCloudProvider !== undefined) {
+    body["isCloudProvider"] = config.isCloudProvider;
   }
   return body;
 }
@@ -57,6 +60,10 @@ function parseConfig(raw: unknown): WebSearchConfig | null {
   const baseUrl = getString(raw, "baseUrl");
   if (baseUrl !== undefined) {
     config.baseUrl = baseUrl;
+  }
+  const isCloudProvider = getBoolean(raw, "isCloudProvider");
+  if (isCloudProvider !== undefined) {
+    config.isCloudProvider = isCloudProvider;
   }
   return config;
 }

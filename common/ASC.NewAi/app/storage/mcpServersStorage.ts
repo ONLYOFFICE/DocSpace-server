@@ -24,11 +24,15 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-import { aiService, AiServiceHttpError } from "./httpClient.js";
+import { aiService, AiServiceHttpError, type QueryValue } from "./httpClient.js";
 import { isObject, getString } from "../narrow.js";
 import type { McpServersStorage, McpServerConfig } from "@onlyoffice/ai-chat/core";
 
 const PATH = "/integration/mcp-servers";
+
+function entityIdQuery(entityId: string | undefined): Record<string, QueryValue> | undefined {
+  return entityId ? { entityId } : undefined;
+}
 
 function parseConfig(raw: unknown): McpServerConfig | null {
   if (raw === null || raw === undefined) {
@@ -46,13 +50,21 @@ function parseConfig(raw: unknown): McpServerConfig | null {
 }
 
 export class HttpMcpServersStorage implements McpServersStorage {
-  async create(name: string, config: McpServerConfig): Promise<void> {
-    await aiService.post(PATH, { name, config: JSON.stringify(config) });
+  async create(name: string, config: McpServerConfig, entityId?: string): Promise<void> {
+    await aiService.post(PATH, {
+      name,
+      config: JSON.stringify(config),
+      entityId: entityId ?? null,
+    });
   }
 
-  async readByName(name: string): Promise<McpServerConfig | null> {
+  async readByName(name: string, entityId?: string): Promise<McpServerConfig | null> {
     try {
-      const raw = await aiService.get(`${PATH}/${encodeURIComponent(name)}`);
+      const query = entityIdQuery(entityId);
+      const raw = await aiService.get(
+        `${PATH}/${encodeURIComponent(name)}`,
+        query ? { query } : undefined,
+      );
       if (!isObject(raw)) {
         return null;
       }
@@ -66,14 +78,25 @@ export class HttpMcpServersStorage implements McpServersStorage {
     }
   }
 
-  async readAll(): Promise<Record<string, McpServerConfig>> {
-    const raw = await aiService.get(PATH);
-    if (!isObject(raw)) {
+  // The C# `McpServerStorageController` returns `IReadOnlyList<McpServerDto>`
+  // (each `{ name, config }`), so we have to assemble the name → config map
+  // client-side rather than reading an object back.
+  async readAll(entityId?: string): Promise<Record<string, McpServerConfig>> {
+    const query = entityIdQuery(entityId);
+    const raw = await aiService.get(PATH, query ? { query } : undefined);
+    if (!Array.isArray(raw)) {
       return {};
     }
     const result: Record<string, McpServerConfig> = {};
-    for (const [name, value] of Object.entries(raw)) {
-      const cfg = parseConfig(value);
+    for (const item of raw) {
+      if (!isObject(item)) {
+        continue;
+      }
+      const name = getString(item, "name");
+      if (name === undefined) {
+        continue;
+      }
+      const cfg = parseConfig(getString(item, "config"));
       if (cfg !== null) {
         result[name] = cfg;
       }
@@ -81,23 +104,31 @@ export class HttpMcpServersStorage implements McpServersStorage {
     return result;
   }
 
-  async update(name: string, config: McpServerConfig): Promise<void> {
+  async update(name: string, config: McpServerConfig, entityId?: string): Promise<void> {
     await aiService.put(`${PATH}/${encodeURIComponent(name)}`, {
       config: JSON.stringify(config),
+      entityId: entityId ?? null,
     });
   }
 
-  async replaceAll(servers: Record<string, McpServerConfig>): Promise<void> {
+  async replaceAll(
+    servers: Record<string, McpServerConfig>,
+    entityId?: string,
+  ): Promise<void> {
     const payload: Record<string, string> = {};
     for (const [n, c] of Object.entries(servers)) {
       payload[n] = JSON.stringify(c);
     }
-    await aiService.put(PATH, { servers: payload });
+    await aiService.put(PATH, { servers: payload, entityId: entityId ?? null });
   }
 
-  async delete(name: string): Promise<void> {
+  async delete(name: string, entityId?: string): Promise<void> {
     try {
-      await aiService.delete(`${PATH}/${encodeURIComponent(name)}`);
+      const query = entityIdQuery(entityId);
+      await aiService.delete(
+        `${PATH}/${encodeURIComponent(name)}`,
+        query ? { query } : undefined,
+      );
     } catch (err) {
       if (err instanceof AiServiceHttpError && err.status === 404) {
         return;

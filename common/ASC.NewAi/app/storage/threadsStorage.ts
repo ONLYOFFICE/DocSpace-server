@@ -24,12 +24,16 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-import { aiService, AiServiceHttpError } from "./httpClient.js";
+import { aiService, AiServiceHttpError, type QueryValue } from "./httpClient.js";
 import { isObject, getString, getNumber } from "../narrow.js";
 import type { ThreadsStorage } from "@onlyoffice/ai-chat/core";
 import type { Thread } from "@onlyoffice/ai-chat/core";
 
 const PATH = "/integration/threads";
+
+function entityIdQuery(entityId: string | undefined): Record<string, QueryValue> | undefined {
+  return entityId ? { entityId } : undefined;
+}
 
 function dtoToThread(raw: unknown): Thread | null {
   if (!isObject(raw)) {
@@ -54,10 +58,11 @@ function dtoToThread(raw: unknown): Thread | null {
 }
 
 export class HttpThreadsStorage implements ThreadsStorage {
-  async create(title: string, profileId?: string): Promise<Thread> {
+  async create(title: string, profileId?: string, entityId?: string): Promise<Thread> {
     const raw = await aiService.post(PATH, {
       title,
       profileId: profileId ?? null,
+      entityId: entityId ?? null,
     });
     const thread = dtoToThread(raw);
     if (!thread) {
@@ -78,8 +83,9 @@ export class HttpThreadsStorage implements ThreadsStorage {
     }
   }
 
-  async readAll(): Promise<Thread[]> {
-    const raw = await aiService.get(PATH);
+  async readAll(entityId?: string): Promise<Thread[]> {
+    const query = entityIdQuery(entityId);
+    const raw = await aiService.get(PATH, query ? { query } : undefined);
     if (!Array.isArray(raw)) {
       return [];
     }

@@ -44,10 +44,6 @@ interface MoveBody {
   folderId?: string | null;
 }
 
-interface IdBody {
-  id?: string;
-}
-
 interface CreateFolderBody {
   name: string;
 }
@@ -82,13 +78,14 @@ export const promptsController = {
     res.json(result);
   }),
 
-  delete: asyncHandler<IdBody>(async (req, res) => {
-    const id = req.body?.id ?? asString(req.query["id"]);
-    if (!id) {
+  delete: asyncHandler(async (req, res) => {
+    const { id } = unpackPositional(req.body, ["id"] as const);
+    const idStr = typeof id === "string" ? id : asString(req.query["id"]);
+    if (!idStr) {
       res.status(400).json({ error: "id required" });
       return;
     }
-    await engine.delete(id);
+    await engine.delete(idStr);
     res.json({ success: true });
   }),
 
@@ -118,13 +115,14 @@ export const promptsController = {
     res.json(result);
   }),
 
-  deleteFolder: asyncHandler<IdBody>(async (req, res) => {
-    const id = req.body?.id ?? asString(req.query["id"]);
-    if (!id) {
+  deleteFolder: asyncHandler(async (req, res) => {
+    const { id } = unpackPositional(req.body, ["id"] as const);
+    const idStr = typeof id === "string" ? id : asString(req.query["id"]);
+    if (!idStr) {
       res.status(400).json({ error: "id required" });
       return;
     }
-    await engine.deleteFolder(id);
+    await engine.deleteFolder(idStr);
     res.json({ success: true });
   }),
 

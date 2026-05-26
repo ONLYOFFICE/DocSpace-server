@@ -70,6 +70,22 @@ function dtoToProfile(raw: unknown): Profile | undefined {
   if (capabilities !== undefined) {
     profile.capabilities = capabilities;
   }
+  const canUseTool = getBoolean(raw, "canUseTool");
+  if (canUseTool !== undefined) {
+    profile.canUseTool = canUseTool;
+  }
+  const useResponsesApi = getBoolean(raw, "useResponsesApi");
+  if (useResponsesApi !== undefined) {
+    profile.useResponsesApi = useResponsesApi;
+  }
+  const useProxy = getBoolean(raw, "useProxy");
+  if (useProxy !== undefined) {
+    profile.useProxy = useProxy;
+  }
+  const isCloudProvider = getBoolean(raw, "isCloudProvider");
+  if (isCloudProvider !== undefined) {
+    profile.isCloudProvider = isCloudProvider;
+  }
   return profile;
 }
 
@@ -82,6 +98,10 @@ function toCreateBody(input: Omit<Profile, "id" | "createdAt"> | Profile): Recor
     modelId: input.modelId,
     reasoning: input.reasoning ?? null,
     capabilities: input.capabilities ?? null,
+    canUseTool: input.canUseTool ?? null,
+    useResponsesApi: input.useResponsesApi ?? null,
+    useProxy: input.useProxy ?? null,
+    isCloudProvider: input.isCloudProvider ?? null,
   };
 }
 

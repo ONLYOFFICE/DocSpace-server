@@ -24,20 +24,25 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-import { aiService, AiServiceHttpError } from "./httpClient.js";
+import { aiService, AiServiceHttpError, type QueryValue } from "./httpClient.js";
 import { isObject, getBoolean } from "../narrow.js";
 import type { PreferencesStorage } from "@onlyoffice/ai-chat/core";
 
 const PATH = "/integration/preferences";
 
+function entityIdQuery(entityId: string | undefined): Record<string, QueryValue> | undefined {
+  return entityId ? { entityId } : undefined;
+}
+
 export class HttpPreferencesStorage implements PreferencesStorage {
-  async createDeepMode(value: boolean): Promise<void> {
-    await aiService.put(PATH, { deepMode: value });
+  async createDeepMode(value: boolean, entityId?: string): Promise<void> {
+    await aiService.put(PATH, { deepMode: value, entityId: entityId ?? null });
   }
 
-  async readDeepMode(): Promise<boolean | null> {
+  async readDeepMode(entityId?: string): Promise<boolean | null> {
     try {
-      const raw = await aiService.get(PATH);
+      const query = entityIdQuery(entityId);
+      const raw = await aiService.get(PATH, query ? { query } : undefined);
       if (!isObject(raw)) {
         return null;
       }
@@ -50,17 +55,18 @@ export class HttpPreferencesStorage implements PreferencesStorage {
     }
   }
 
-  async updateDeepMode(value: boolean): Promise<void> {
-    await aiService.put(PATH, { deepMode: value });
+  async updateDeepMode(value: boolean, entityId?: string): Promise<void> {
+    await aiService.put(PATH, { deepMode: value, entityId: entityId ?? null });
   }
 
-  async upsertDeepMode(value: boolean): Promise<void> {
-    await aiService.put(PATH, { deepMode: value });
+  async upsertDeepMode(value: boolean, entityId?: string): Promise<void> {
+    await aiService.put(PATH, { deepMode: value, entityId: entityId ?? null });
   }
 
-  async deleteDeepMode(): Promise<void> {
+  async deleteDeepMode(entityId?: string): Promise<void> {
     try {
-      await aiService.delete(PATH);
+      const query = entityIdQuery(entityId);
+      await aiService.delete(PATH, query ? { query } : undefined);
     } catch (err) {
       if (err instanceof AiServiceHttpError && err.status === 404) {
         return;

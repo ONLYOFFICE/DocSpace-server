@@ -48,7 +48,11 @@ const app = express();
 app
   .use(morgan("combined", { stream: logStream }))
   .use(cookieParser())
-  .use(bodyParser.json())
+  // strict:false lets bare JSON primitives through; @onlyoffice/ai-chat's
+  // ApiProvider serializes single-arg routes as `JSON.stringify(arg)` — e.g.
+  // `DELETE profiles/delete` arrives with body `"uuid"`, which strict-mode
+  // would reject. Handlers normalize via `unpackPositional` afterwards.
+  .use(bodyParser.json({ strict: false }))
   .use(bodyParser.urlencoded({ extended: false }))
   .use(cors())
   .use(requestContextMiddleware);

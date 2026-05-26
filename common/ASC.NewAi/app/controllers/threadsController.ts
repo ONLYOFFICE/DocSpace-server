@@ -56,14 +56,6 @@ interface RenameBody {
   title: string;
 }
 
-interface ThreadIdBody {
-  threadId?: string;
-}
-
-interface MessageIdBody {
-  messageId?: string;
-}
-
 interface RegenerateTitleBody {
   threadId: string;
   profile: Profile;
@@ -107,23 +99,25 @@ export const threadsController = {
     res.json({ success: true });
   }),
 
-  delete: asyncHandler<ThreadIdBody>(async (req, res) => {
-    const threadId = req.body?.threadId ?? asString(req.query["threadId"]);
-    if (!threadId) {
+  delete: asyncHandler(async (req, res) => {
+    const { threadId } = unpackPositional(req.body, ["threadId"] as const);
+    const idStr = typeof threadId === "string" ? threadId : asString(req.query["threadId"]);
+    if (!idStr) {
       res.status(400).json({ error: "threadId required" });
       return;
     }
-    await engine.delete(threadId);
+    await engine.delete(idStr);
     res.json({ success: true });
   }),
 
-  clearMessages: asyncHandler<ThreadIdBody>(async (req, res) => {
-    const threadId = req.body?.threadId ?? asString(req.query["threadId"]);
-    if (!threadId) {
+  clearMessages: asyncHandler(async (req, res) => {
+    const { threadId } = unpackPositional(req.body, ["threadId"] as const);
+    const idStr = typeof threadId === "string" ? threadId : asString(req.query["threadId"]);
+    if (!idStr) {
       res.status(400).json({ error: "threadId required" });
       return;
     }
-    await engine.clearMessages(threadId);
+    await engine.clearMessages(idStr);
     res.json({ success: true });
   }),
 
@@ -176,13 +170,14 @@ export const threadsController = {
     res.json({ success: true });
   }),
 
-  deleteMessage: asyncHandler<MessageIdBody>(async (req, res) => {
-    const messageId = req.body?.messageId ?? asString(req.query["messageId"]);
-    if (!messageId) {
+  deleteMessage: asyncHandler(async (req, res) => {
+    const { messageId } = unpackPositional(req.body, ["messageId"] as const);
+    const idStr = typeof messageId === "string" ? messageId : asString(req.query["messageId"]);
+    if (!idStr) {
       res.status(400).json({ error: "messageId required" });
       return;
     }
-    await engine.deleteMessage(messageId);
+    await engine.deleteMessage(idStr);
     res.json({ success: true });
   }),
 };

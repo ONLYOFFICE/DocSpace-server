@@ -27,18 +27,10 @@
 import { ProfilesEngine } from "@onlyoffice/ai-chat/core";
 import type { Profile, CreateProfileInput, ProviderType } from "@onlyoffice/ai-chat/core";
 import { storage } from "../storage/index.js";
-import { asyncHandler } from "./_helpers.js";
+import { asyncHandler, unpackPositional } from "./_helpers.js";
 import { asString } from "../narrow.js";
 
 const engine = new ProfilesEngine({ storage });
-
-interface IdBody {
-  id?: string;
-}
-
-interface ProfileIdBody {
-  profileId?: string;
-}
 
 interface ListProviderModelsBody {
   providerType?: ProviderType;
@@ -57,13 +49,14 @@ export const profilesController = {
     res.json(result);
   }),
 
-  delete: asyncHandler<IdBody>(async (req, res) => {
-    const id = req.body?.id ?? asString(req.query["id"]);
-    if (!id) {
+  delete: asyncHandler(async (req, res) => {
+    const { id } = unpackPositional(req.body, ["id"] as const);
+    const idStr = typeof id === "string" ? id : asString(req.query["id"]);
+    if (!idStr) {
       res.status(400).json({ error: "id required" });
       return;
     }
-    await engine.delete(id);
+    await engine.delete(idStr);
     res.json({ success: true });
   }),
 
@@ -91,13 +84,14 @@ export const profilesController = {
     res.json(models);
   }),
 
-  testConnection: asyncHandler<ProfileIdBody>(async (req, res) => {
-    const profileId = req.body?.profileId ?? asString(req.query["profileId"]);
-    if (!profileId) {
+  testConnection: asyncHandler(async (req, res) => {
+    const { profileId } = unpackPositional(req.body, ["profileId"] as const);
+    const idStr = typeof profileId === "string" ? profileId : asString(req.query["profileId"]);
+    if (!idStr) {
       res.status(400).json({ error: "profileId required" });
       return;
     }
-    const result = await engine.testConnection(profileId);
+    const result = await engine.testConnection(idStr);
     res.json(result);
   }),
 
