@@ -957,7 +957,8 @@ public class VirtualRoomsCommonController(
             inDto.SubjectOwnerId,
             quotaFilter: inDto.QuotaFilter ?? QuotaFilter.All,
             storageFilter: inDto.StorageFilter ?? StorageFilter.None,
-            groupId: inDto.GroupId ?? null);
+            groupId: inDto.GroupId ?? null,
+            privacyFilter: inDto.PrivacyFilter ?? RoomPrivacyFilter.None);
 
         var dto = await folderContentDtoHelper.GetAsync(parentId, content, startIndex);
 

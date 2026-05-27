@@ -117,6 +117,13 @@ public class RoomContentRequestDto
     public StorageFilter? StorageFilter { get; set; }
 
     /// <summary>
+    /// The filter by room privacy (None - 0, Private - 1, NotPrivate - 2). When omitted, all rooms are returned.
+    /// </summary>
+    /// <example>1</example>
+    [FromQuery(Name = "privacyFilter")]
+    public RoomPrivacyFilter? PrivacyFilter { get; set; }
+
+    /// <summary>
     /// Specifies the maximum number of items to retrieve.
     /// </summary>
     /// <example>25</example>

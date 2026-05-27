@@ -363,7 +363,8 @@ public class EntryManager(IDaoFactory daoFactory,
         FormsItemDto formsItemDto = null,
         Location? location = null,
         int? groupId = null,
-        T parentFolderId = default)
+        T parentFolderId = default,
+        RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None)
     {
         int total;
         var withShared = true;
@@ -516,7 +517,7 @@ public class EntryManager(IDaoFactory daoFactory,
         else if (parent.FolderType is FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates or FolderType.AiAgents && !parent.ProviderEntry)
         {
             entries = await fileSecurity.GetVirtualRoomsAsync(filterTypes, subjectId, searchText, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject,
-                provider, subjectFilter, subjectOwnerId, quotaFilter, storageFilter, groupId);
+                provider, subjectFilter, subjectOwnerId, quotaFilter, storageFilter, groupId, privacyFilter);
 
             CalculateTotal();
         }
