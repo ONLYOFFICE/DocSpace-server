@@ -534,10 +534,6 @@
     <PackageReference Include="Magick.NET-Q8-AnyCPU">
       <PrivateAssets>compile</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="SkiaSharp" />
-    <PackageReference Include="SkiaSharp.NativeAssets.Linux" />
-    <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" />
-    <PackageReference Include="Svg.Skia" />
     <PackageReference Include="Twilio" />
   </ItemGroup>
 </Project>

@@ -72,7 +72,6 @@ public class UserController(
     CoreBaseSettings coreBaseSettings,
     ApiContext apiContext,
     UserPhotoManager userPhotoManager,
-    IHttpClientFactory httpClientFactory,
     IHttpContextAccessor httpContextAccessor,
     SettingsManager settingsManager,
     InvitationService invitationService,
@@ -95,8 +94,10 @@ public class UserController(
     BruteForceLoginManager bruteForceLoginManager,
     SetupInfo setupInfo,
     IdentityClient client,
-    GroupFullDtoHelper groupFullDtoHelper)
-    : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
+    GroupFullDtoHelper groupFullDtoHelper,
+    IUrlValidator urlValidator,
+    IHttpClientFactory httpClientFactory)
+    : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpContextAccessor, urlValidator, setupInfo, httpClientFactory)
 {
     /// <remarks>
     /// Returns the user claims.
@@ -193,6 +194,12 @@ public class UserController(
 
         await UpdateContactsAsync(inDto.Contacts, user, false);
 
+        UrlValidationResult photoValidation = null;
+        if (inDto.Files != _userPhotoManager.GetDefaultPhotoAbsoluteWebPath())
+        {
+            photoValidation = await ValidatePhotoUrlAsync(inDto.Files);
+        }
+
         cache.Insert("REWRITE_URL" + tenantManager.GetCurrentTenantId(), HttpContext.Request.GetDisplayUrl(), TimeSpan.FromMinutes(5));
         user = await userManagerWrapper.AddUserAsync(user, inDto.PasswordHash, false, false, inDto.Type,
             false, true, true);
@@ -207,9 +214,9 @@ public class UserController(
 
         await UpdateDepartmentsAsync(inDto.Department, user);
 
-        if (inDto.Files != _userPhotoManager.GetDefaultPhotoAbsoluteWebPath())
+        if (photoValidation != null)
         {
-            await UpdatePhotoUrlAsync(inDto.Files, user);
+            await DownloadAndSavePhotoAsync(photoValidation, user);
         }
 
         await webhookManager.PublishAsync(WebhookTrigger.UserCreated, user);
@@ -340,6 +347,12 @@ public class UserController(
 
         await UpdateContactsAsync(inDto.Contacts, user, false);
 
+        UrlValidationResult photoValidation = null;
+        if (inDto.Files != _userPhotoManager.GetDefaultPhotoAbsoluteWebPath())
+        {
+            photoValidation = await ValidatePhotoUrlAsync(inDto.Files);
+        }
+
         cache.Insert("REWRITE_URL" + tenantManager.GetCurrentTenantId(), HttpContext.Request.GetDisplayUrl(), TimeSpan.FromMinutes(5));
 
         var quotaLimit = false;
@@ -373,9 +386,9 @@ public class UserController(
 
         await UpdateDepartmentsAsync(inDto.Department, user);
 
-        if (inDto.Files != _userPhotoManager.GetDefaultPhotoAbsoluteWebPath())
+        if (photoValidation != null)
         {
-            await UpdatePhotoUrlAsync(inDto.Files, user);
+            await DownloadAndSavePhotoAsync(photoValidation, user);
         }
 
         if (inDto.IsUser.GetValueOrDefault(false))
@@ -1743,7 +1756,7 @@ public class UserController(
                 }
             }
         }
-        else if (!string.IsNullOrEmpty(setupInfo.HcaptchaPublicKey) || !string.IsNullOrEmpty(setupInfo.RecaptchaPublicKey))
+        else if (!string.IsNullOrEmpty(_setupInfo.HcaptchaPublicKey) || !string.IsNullOrEmpty(_setupInfo.RecaptchaPublicKey))
         {
             var requestIp = MessageSettings.GetIP(_httpContextAccessor.HttpContext?.Request);
             var secretEmail = SetupInfo.IsSecretEmail(inDto.Email);
@@ -1954,12 +1967,18 @@ public class UserController(
             //     user.WorkFromDate = null;
             // }
 
+            UrlValidationResult photoValidation = null;
+            if (inDto.UpdateMember.Files != await _userPhotoManager.GetPhotoAbsoluteWebPath(user.Id))
+            {
+                photoValidation = await ValidatePhotoUrlAsync(inDto.UpdateMember.Files);
+            }
+
             await UpdateContactsAsync(inDto.UpdateMember.Contacts, user);
             await UpdateDepartmentsAsync(inDto.UpdateMember.Department, user);
 
-            if (inDto.UpdateMember.Files != await _userPhotoManager.GetPhotoAbsoluteWebPath(user.Id))
+            if (photoValidation != null)
             {
-                await UpdatePhotoUrlAsync(inDto.UpdateMember.Files, user);
+                await DownloadAndSavePhotoAsync(photoValidation, user);
             }
 
             changed = true;

@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -31,39 +31,16 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.AI.Core.Provider.Model;
+namespace ASC.Web.Core.WhiteLabel;
 
-public class TogetherAiModelClient(HttpClient client, string url, string apiKey) : OpenAiModelClientBase(client, url, apiKey)
+/// <summary>
+/// Converts logo image data to the format required for notification emails.
+/// </summary>
+public interface IWhiteLabelLogoConverter
 {
-    protected override async Task<IEnumerable<ModelInfo>> GetModelsDataAsync(HttpResponseMessage response)
-    {
-        var content = await response.Content.ReadFromJsonAsync<List<TogetherAiModel>>();
-        if (content is null)
-        {
-            return [];
-        }
-
-        return content
-            .Where(m => m.Type is null or "chat")
-            .OrderBy(x => x.Organization ?? string.Empty)
-            .ThenByDescending(x => x.Created)
-            .Select(m => new ModelInfo
-            {
-                Id = m.Id,
-                Created = m.Created,
-                Alias = m.DisplayName
-            });
-    }
-
-    private class TogetherAiModel
-    {
-        public required string Id { get; init; }
-        public int Created { get; init; }
-        public string? Type { get; init; }
-
-        [JsonPropertyName("display_name")]
-        public string? DisplayName { get; init; }
-
-        public string? Organization { get; init; }
-    }
+    /// <summary>
+    /// Converts the supplied logo data to PNG (notification format) if necessary,
+    /// returning the processed bytes and the target file extension.
+    /// </summary>
+    (byte[] data, string ext) GetNotificationLogoData(byte[] logoData, string extLogo, TenantWhiteLabelSettings tenantWhiteLabelSettings);
 }

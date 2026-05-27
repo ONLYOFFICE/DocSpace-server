@@ -139,7 +139,7 @@
     <value>Quantité</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>{LogoText} AI</value>
+    <value>Fonctionnalités IA</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Sauvegarde</value>
@@ -1153,10 +1153,10 @@
     <value>Le nombre d'agents IA ne doit pas dépasser {0}</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>{LogoText} AI</value>
+    <value>Fonctionnalités IA</value>
   </data>
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Activez les fonctionnalités IA dans votre DocSpace pour améliorer la productivité.</value>
+    <value>Activez les fonctionnalités IA pour améliorer la productivité.</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Suivi des connexions et des actions</value>
@@ -1165,7 +1165,10 @@
     <value>Sauvegarde</value>
   </data>
   <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
-    <value>Activez les sauvegardes pour votre DocSpace. Les frais seront facturés automatiquement.</value>
+    <value>Activez les sauvegardes. Les frais seront facturés automatiquement.</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_additional" xml:space="preserve">
+    <value>Sauvegarde supplémentaire</value>
   </data>
   <data name="TariffsFeature_customization" xml:space="preserve">
     <value>Personnalisation</value>

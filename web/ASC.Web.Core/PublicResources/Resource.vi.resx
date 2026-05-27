@@ -139,7 +139,7 @@
     <value>Số lượng</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>{LogoText} AI</value>
+    <value>Tính năng AI</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Sao lưu</value>
@@ -1153,10 +1153,10 @@
     <value>Số lượng AI agent không được vượt quá {0}</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>{LogoText} AI</value>
+    <value>Tính năng AI</value>
   </data>
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Bật các tính năng AI trong DocSpace của bạn để tăng năng suất.</value>
+    <value>Bật các tính năng AI để tăng năng suất.</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Theo dõi đăng nhập và hành động</value>
@@ -1165,7 +1165,10 @@
     <value>Sao lưu</value>
   </data>
   <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
-    <value>Bật tính năng sao lưu cho DocSpace của bạn. Chi phí sẽ được tự động tính phí.</value>
+    <value>Bật tính năng sao lưu. Chi phí sẽ được tự động tính phí.</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_additional" xml:space="preserve">
+    <value>Sao lưu bổ sung</value>
   </data>
   <data name="TariffsFeature_customization" xml:space="preserve">
     <value>Xây dựng thương hiệu &amp; tùy chỉnh</value>

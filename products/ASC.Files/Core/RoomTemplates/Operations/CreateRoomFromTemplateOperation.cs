@@ -155,40 +155,9 @@ public class CreateRoomFromTemplateOperation : DistributedTaskProgress
             }
 
             var fileDao = daoFactory.GetFileDao<int>();
-            var files = await fileDao.GetFilesAsync(_templateId).ToListAsync();
-            var folders = await folderDao.GetFoldersAsync(_templateId).Where(f => f.FolderType == FolderType.DEFAULT).Select(r => r.Id).ToListAsync();
             _totalCount = await fileDao.GetFilesCountAsync(_templateId, FilterType.None, false, Guid.Empty, string.Empty, null, false, true);
 
-            foreach (var file in files)
-            {
-                try
-                {
-                    await fileDao.CopyFileAsync(file, RoomId);
-                    await PublishAsync();
-                }
-                catch (Exception ex)
-                {
-                    logger.WarningCanNotCopyFile(ex);
-                }
-            }
-
-            foreach (var f in folders)
-            {
-                try
-                {
-                    var newFolder = await folderDao.CopyFolderAsync(f, RoomId, CancellationToken);
-                    var folderFiles = await fileDao.GetFilesAsync(f).ToListAsync();
-                    foreach (var file in folderFiles)
-                    {
-                        await fileDao.CopyFileAsync(file, newFolder.Id);
-                        await PublishAsync();
-                    }
-                }
-                catch (Exception ex)
-                {
-                    logger.WarningCanNotCopyFolder(ex);
-                }
-            }
+            await CopyFolderContentAsync(_templateId, RoomId, folderDao, fileDao, logger, true);
 
             if (_quota.HasValue)
             {
@@ -218,5 +187,40 @@ public class CreateRoomFromTemplateOperation : DistributedTaskProgress
         _count++;
         Percentage = _count * 0.9 / _totalCount;
         await PublishChanges();
+    }
+
+    private async Task CopyFolderContentAsync(int sourceFolderId, int targetFolderId, IFolderDao<int> folderDao, IFileDao<int> fileDao, ILogger<CreateRoomFromTemplateOperation> logger, bool filterRootFolderType)
+    {
+        await foreach (var file in fileDao.GetFilesAsync(sourceFolderId))
+        {
+            try
+            {
+                await fileDao.CopyFileAsync(file, targetFolderId);
+                await PublishAsync();
+            }
+            catch (Exception ex)
+            {
+                logger.WarningCanNotCopyFile(ex);
+            }
+        }
+
+        var subFolders = folderDao.GetFoldersAsync(sourceFolderId);
+        if (filterRootFolderType)
+        {
+            subFolders = subFolders.Where(f => f.FolderType == FolderType.DEFAULT);
+        }
+
+        await foreach (var subFolder in subFolders)
+        {
+            try
+            {
+                var newSubFolder = await folderDao.CopyFolderAsync(subFolder.Id, targetFolderId, CancellationToken);
+                await CopyFolderContentAsync(subFolder.Id, newSubFolder.Id, folderDao, fileDao, logger, false);
+            }
+            catch (Exception ex)
+            {
+                logger.WarningCanNotCopyFolder(ex);
+            }
+        }
     }
 }

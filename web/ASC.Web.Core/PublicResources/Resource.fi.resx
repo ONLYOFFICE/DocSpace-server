@@ -139,7 +139,7 @@
     <value>Määrä</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>{LogoText} AI</value>
+    <value>Tekoälyominaisuudet</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Varmuuskopio</value>
@@ -1153,10 +1153,10 @@
     <value>Tekoälyagenttien määrän ei tulisi ylittää {0}</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>{LogoText} AI</value>
+    <value>Tekoälyominaisuudet</value>
   </data>
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Ota käyttöön DocSpacessasi tekoälyominaisuudet tehostaaksesi tuottavuutta.</value>
+    <value>Ota käyttöön tekoälyominaisuudet tehostaaksesi tuottavuutta.</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Kirjautumisten ja toimien seuranta</value>
@@ -1165,7 +1165,10 @@
     <value>Varmuuskopio</value>
   </data>
   <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
-    <value>Ota varmuuskopiot käyttöön DocSpacessasi. Kustannukset laskutetaan automaattisesti.</value>
+    <value>Ota varmuuskopiot käyttöön. Kustannukset laskutetaan automaattisesti.</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_additional" xml:space="preserve">
+    <value>Lisävarmuuskopio</value>
   </data>
   <data name="TariffsFeature_customization" xml:space="preserve">
     <value>Brändäys &amp; räätälöinti</value>
