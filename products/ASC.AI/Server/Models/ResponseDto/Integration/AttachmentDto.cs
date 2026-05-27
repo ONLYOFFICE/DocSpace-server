@@ -35,6 +35,7 @@ public class AttachmentDto
     public required string Title { get; init; }
     public string? Content { get; init; }
     public string? DataUrl { get; init; }
+    public string? EntryId { get; init; }
     public long CreatedAt { get; init; }
 }
 
@@ -42,7 +43,12 @@ public class AttachmentDto
     PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
 public static partial class AttachmentMapper
 {
+    [MapperIgnoreSource(nameof(AttachmentResult.ThirdpartyEntryId))]
+    [MapPropertyFromSource(nameof(AttachmentDto.EntryId), Use = nameof(MapEntryId))]
     public static partial AttachmentDto MapToDto(AttachmentResult result);
+
+    private static string? MapEntryId(AttachmentResult result) =>
+        result.EntryId?.ToString() ?? result.ThirdpartyEntryId;
 
     private static string MapKindToString(AttachmentKind kind) => kind.ToStringLowerFast();
 

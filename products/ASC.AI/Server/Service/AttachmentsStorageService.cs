@@ -231,6 +231,8 @@ public class AttachmentsStorageService(
             Title = attachment.Title,
             Content = attachment.Content,
             DataUrl = dataUrl,
+            EntryId = attachment.EntryId,
+            ThirdpartyEntryId = attachment.ThirdpartyEntryId,
             CreatedAt = attachment.CreatedAt
         };
     }

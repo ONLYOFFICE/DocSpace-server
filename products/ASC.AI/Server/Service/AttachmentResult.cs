@@ -33,5 +33,7 @@ public class AttachmentResult
     public required string Title { get; init; }
     public string? Content { get; init; }
     public string? DataUrl { get; init; }
+    public int? EntryId { get; init; }
+    public string? ThirdpartyEntryId { get; init; }
     public DateTime CreatedAt { get; init; }
 }
