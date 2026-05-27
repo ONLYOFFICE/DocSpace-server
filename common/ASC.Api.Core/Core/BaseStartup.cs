@@ -102,6 +102,27 @@ public abstract class BaseStartup
             {
                 UseCookies = false,
             });
+        services.AddHttpClient(UrlValidator.PinnedHttpClient)
+            .SetHandlerLifetime(TimeSpan.FromMinutes(5))
+            .ConfigureHttpClient(c => c.Timeout = TimeSpan.FromSeconds(10))
+            .ConfigurePrimaryHttpMessageHandler(_ => new SocketsHttpHandler
+            {
+                AllowAutoRedirect = false,
+                ConnectCallback = UrlValidator.PinnedConnectCallback
+            });
+        services.AddHttpClient(UrlValidator.PinnedHttpClientSslIgnore)
+            .SetHandlerLifetime(TimeSpan.FromMinutes(5))
+            .ConfigureHttpClient(c => c.Timeout = TimeSpan.FromSeconds(10))
+            .ConfigurePrimaryHttpMessageHandler(_ =>
+            {
+                var handler = new SocketsHttpHandler
+                {
+                    AllowAutoRedirect = false,
+                    ConnectCallback = UrlValidator.PinnedConnectCallback
+                };
+                handler.SslOptions.RemoteCertificateValidationCallback = (_, _, _, _) => true;
+                return handler;
+            });
 
 
         services.AddExceptionHandler<CustomExceptionHandler>();
