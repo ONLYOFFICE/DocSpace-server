@@ -24,12 +24,112 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-import { aiService, AiServiceHttpError } from "./httpClient.js";
+import { randomUUID } from "node:crypto";
+
+import { aiService, AiServiceHttpError, proxyBaseUrl } from "./httpClient.js";
+import { getForwardedHeaders } from "../requestContext.js";
 import { getNumber, getString, isObject } from "../narrow.js";
 import logger from "../log.js";
 import type { AttachmentsStorage, Attachment } from "@onlyoffice/ai-chat/core";
 
 const PATH = "/integration/attachments";
+
+// In-memory cache for raw-payload drafts (device upload, dnd) that arrive
+// without a DocSpace entry id. The C# backend currently has no endpoint
+// for raw content, so we synthesize an Attachment record server-side and
+// keep it here until the message is sent (or the process restarts —
+// drafts don't survive restarts, which is acceptable for a draft).
+//
+// Lifetime: from `createMany` (or `create`) until `delete`/`deleteMany`
+// removes the id. `readById`/`readManyByIds` serve from this map first so
+// the chat-widget's image preview can pull the base64 payload back.
+const rawAttachmentCache = new Map<string, Attachment>();
+
+// DocSpace pre-signed URLs come back as host-relative paths
+// (`/storage/files/...`). `fetch()` in Node refuses relative URLs, so
+// resolve them against the DocSpace portal root (same host the AI service
+// is proxied through).
+function resolveAbsoluteUrl(url: string): string {
+  if (/^https?:\/\//i.test(url)) {
+    return url;
+  }
+  return new URL(url, proxyBaseUrl.endsWith("/") ? proxyBaseUrl : `${proxyBaseUrl}/`).toString();
+}
+
+// Quick mime sniff by magic bytes; falls back to the `Content-Type` response
+// header. Providers reject `data:application/octet-stream;…` for image_url so
+// we want a real image/* mime when possible.
+function detectImageMime(bytes: Uint8Array, fallback: string | null): string {
+  if (bytes.length >= 8
+    && bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47) {
+    return "image/png";
+  }
+  if (bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) {
+    return "image/jpeg";
+  }
+  if (bytes.length >= 4 && bytes[0] === 0x47 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x38) {
+    return "image/gif";
+  }
+  if (bytes.length >= 12
+    && bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46
+    && bytes[8] === 0x57 && bytes[9] === 0x45 && bytes[10] === 0x42 && bytes[11] === 0x50) {
+    return "image/webp";
+  }
+  if (fallback && fallback.startsWith("image/")) {
+    return fallback;
+  }
+  return "image/png";
+}
+
+async function fetchImageAsDataUrl(url: string): Promise<string | null> {
+  try {
+    // DocSpace pre-signed URLs are usually host-relative (`/storage/...`);
+    // resolve against the portal root. Forward auth cookies in case the URL
+    // still requires the caller's session (some DocSpace setups gate file
+    // streams on the user, not the signature).
+    const absolute = resolveAbsoluteUrl(url);
+    const res = await fetch(absolute, { headers: getForwardedHeaders() });
+    if (!res.ok) {
+      logger.warn(`fetchImageAsDataUrl: ${absolute} → ${res.status} ${res.statusText}`);
+      return null;
+    }
+    const buf = new Uint8Array(await res.arrayBuffer());
+    const mime = detectImageMime(buf, res.headers.get("content-type"));
+    const b64 = Buffer.from(buf).toString("base64");
+    return `data:${mime};base64,${b64}`;
+  } catch (err) {
+    logger.error(`fetchImageAsDataUrl: ${url} failed: ${err instanceof Error ? err.message : String(err)}`);
+    return null;
+  }
+}
+
+// Providers (OpenAI / Anthropic / …) require image_url to be either a public
+// URL the model can fetch or a `data:image/*;base64,…` payload. C# returns a
+// DocSpace pre-signed URL — fine for previews, useless for the LLM. Inline
+// the bytes here so `Attachment.base64` is always a real data URL.
+async function inlineImagesAsync(attachments: (Attachment | null)[]): Promise<void> {
+  const tasks: Promise<void>[] = [];
+  for (const a of attachments) {
+    if (!a || a.kind !== "image") {
+      continue;
+    }
+    const src = a.base64;
+    if (!src || src.startsWith("data:")) {
+      continue;
+    }
+    tasks.push(
+      (async () => {
+        const dataUrl = await fetchImageAsDataUrl(src);
+        if (dataUrl) {
+          a.base64 = dataUrl;
+        }
+      })(),
+    );
+  }
+  if (tasks.length > 0) {
+    await Promise.all(tasks);
+  }
+}
 
 // The C# `AttachmentsStorageController` exposes a DocSpace-specific shape
 // (`POST /integration/attachments { entryIds: [...] }`) and does not provide
@@ -99,11 +199,45 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
     if (inputs.length === 0) {
       return [];
     }
-    // The C# endpoint creates attachments from DocSpace file entry ids.
-    // `input.path` carries the host-supplied entry id; raw-payload drafts
-    // (device uploads, dnd) pass an empty string until the backend grows
-    // a raw-content path. Forwarded as-is so the C# side can decide.
-    const entryIds: string[] = inputs.map((input) => input.path ?? "");
+
+    // Synthesize records for raw-payload drafts (no `input.path`). The C#
+    // backend can't accept these yet, so we stash them in a server-local
+    // cache and serve them back through `readById`/`readManyByIds`. Keeps
+    // the chip preview alive in the composer until the message is sent.
+    const synthesized: (Attachment | null)[] = inputs.map((input) => {
+      if (input.path) return null;
+      const id = randomUUID();
+      const rec: Attachment = {
+        id,
+        kind: input.kind,
+        title: input.title,
+        createdAt: Date.now(),
+        ...(input.content !== undefined ? { content: input.content } : {}),
+        ...(input.base64 !== undefined ? { base64: input.base64 } : {}),
+        ...(input.type !== undefined ? { type: input.type } : {}),
+      };
+      rawAttachmentCache.set(id, rec);
+      return rec;
+    });
+
+    const docspaceIndices: number[] = [];
+    const entryIds: string[] = [];
+    inputs.forEach((input, i) => {
+      if (synthesized[i]) return;
+      docspaceIndices.push(i);
+      entryIds.push(input.path ?? "");
+    });
+
+    if (entryIds.length === 0) {
+      // All inputs were raw-payload — skip the C# round-trip entirely.
+      return synthesized.map((rec, i) => {
+        if (!rec) {
+          throw new Error(`createMany: missing synthesized record at index ${i}`);
+        }
+        return rec;
+      });
+    }
+
     const raw = await aiService.post(PATH, { entryIds });
     logger.debug(
       `HttpAttachmentsStorage.createMany: POST ${PATH} entryIds=${JSON.stringify(entryIds)} `
@@ -137,8 +271,12 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
           + `(missing id/title/kind/entryId); skipped=${JSON.stringify(skipped)}`,
       );
     }
-    return inputs.map((input, i) => {
-      const entryId = entryIds[i] ?? "";
+    const result = inputs.map((input, i) => {
+      const stub = synthesized[i];
+      if (stub) return stub;
+
+      const docspaceIdx = docspaceIndices.indexOf(i);
+      const entryId = entryIds[docspaceIdx] ?? "";
       const matched = byEntryId.get(entryId);
       if (!matched) {
         logger.error(
@@ -158,12 +296,20 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
       }
       return matched;
     });
+    await inlineImagesAsync(result);
+    return result;
   }
 
   async readById(id: string): Promise<Attachment | null> {
+    const cached = rawAttachmentCache.get(id);
+    if (cached) return cached;
     try {
       const raw = await aiService.get(`${PATH}/${encodeURIComponent(id)}`);
-      return dtoToAttachment(raw);
+      const a = dtoToAttachment(raw);
+      if (a) {
+        await inlineImagesAsync([a]);
+      }
+      return a;
     } catch (err) {
       if (err instanceof AiServiceHttpError && err.status === 404) {
         return null;
@@ -176,16 +322,29 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
     if (ids.length === 0) {
       return [];
     }
-    const raw = await aiService.post(`${PATH}/read`, { ids });
-    const list = Array.isArray(raw) ? raw : [];
+
+    // Split into cached (raw-payload) vs remote ids — only the latter
+    // need to hit C#.
+    const remoteIds: string[] = [];
+    for (const id of ids) {
+      if (!rawAttachmentCache.has(id)) remoteIds.push(id);
+    }
+
     const byId = new Map<string, Attachment>();
-    for (const item of list) {
-      const a = dtoToAttachment(item);
-      if (a) {
-        byId.set(a.id, a);
+    if (remoteIds.length > 0) {
+      const raw = await aiService.post(`${PATH}/read`, { ids: remoteIds });
+      const list = Array.isArray(raw) ? raw : [];
+      for (const item of list) {
+        const a = dtoToAttachment(item);
+        if (a) {
+          byId.set(a.id, a);
+        }
       }
     }
-    return ids.map((id) => byId.get(id) ?? null);
+
+    const result = ids.map((id) => rawAttachmentCache.get(id) ?? byId.get(id) ?? null);
+    await inlineImagesAsync(result);
+    return result;
   }
 
   async update(id: string, patch: Partial<Attachment>): Promise<void> {
@@ -209,6 +368,9 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
   }
 
   async delete(id: string): Promise<void> {
+    if (rawAttachmentCache.delete(id)) {
+      return;
+    }
     try {
       await aiService.delete(`${PATH}/${encodeURIComponent(id)}`);
     } catch (err) {
@@ -223,7 +385,14 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
     if (ids.length === 0) {
       return;
     }
-    await aiService.delete(PATH, { body: { ids } });
+    const remoteIds: string[] = [];
+    for (const id of ids) {
+      if (!rawAttachmentCache.delete(id)) {
+        remoteIds.push(id);
+      }
+    }
+    if (remoteIds.length === 0) return;
+    await aiService.delete(PATH, { body: { ids: remoteIds } });
   }
 
   async deleteByMessage(messageId: string): Promise<void> {
