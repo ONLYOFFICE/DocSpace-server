@@ -33,8 +33,8 @@ const PATH = "/integration/attachments";
 
 // The C# `AttachmentsStorageController` exposes a DocSpace-specific shape
 // (`POST /integration/attachments { entryIds: [...] }`) and does not provide
-// `update`, `deleteByMessage`, or `deleteByThread`. The fields `path`,
-// `messageId`, `threadId`, and `entityId` aren't carried in `AttachmentDto`.
+// `update`, `deleteByMessage`, or `deleteByThread`. The fields `messageId`,
+// `threadId`, and `entityId` aren't carried in `AttachmentDto`.
 // Cascade-on-message/thread cleanup is expected to happen server-side.
 // Methods missing from the backend are no-ops here with a warning log.
 
@@ -64,6 +64,23 @@ function dtoToAttachment(raw: unknown): Attachment | null {
   if (base64 !== undefined) {
     result.base64 = base64;
   }
+  // C# echoes the DocSpace entry id (internal int or thirdparty string,
+  // both serialized as string) in `entryId`. The chat widget's history
+  // chip renders the displayed name via `basename(path)`, so compose the
+  // path as `${entryId}/${title}` — keeps the entry id available for
+  // openFile/cascade lookups (split on "/") while making basename yield
+  // the file title.
+  const entryId = getString(raw, "entryId");
+  if (entryId !== undefined) {
+    result.path = title ? `${entryId}/${title}` : entryId;
+  }
+  // Forward-compat: pick up `type` (ONLYOFFICE file type code) once C#
+  // starts echoing it. Today it isn't included in `AttachmentDto`, so the
+  // value is back-filled from the original input in `createMany`.
+  const type = getNumber(raw, "type");
+  if (type !== undefined) {
+    result.type = type;
+  }
   return result;
 }
 
@@ -83,39 +100,61 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
       return [];
     }
     // The C# endpoint creates attachments from DocSpace file entry ids.
-    // `input.path` carries the host-supplied entry id; without it the
-    // backend has nothing to look up (e.g. image drafts with raw base64
-    // are not supported).
-    const entryIds: string[] = [];
-    for (const input of inputs) {
-      if (!input.path) {
-        throw new Error(
-          "HttpAttachmentsStorage.createMany requires `input.path` "
-            + "(DocSpace entry id) on every item; raw payload attachments "
-            + "are not supported by the backend.",
-        );
-      }
-      entryIds.push(input.path);
-    }
+    // `input.path` carries the host-supplied entry id; raw-payload drafts
+    // (device uploads, dnd) pass an empty string until the backend grows
+    // a raw-content path. Forwarded as-is so the C# side can decide.
+    const entryIds: string[] = inputs.map((input) => input.path ?? "");
     const raw = await aiService.post(PATH, { entryIds });
-    const list = Array.isArray(raw) ? raw : [];
-    // The C# `CreateManyAsync` accepts a HashSet and may not preserve order;
-    // re-align the response to the input order by matching on `path`.
-    const byPath = new Map<string, Attachment>();
-    for (const item of list) {
+    logger.debug(
+      `HttpAttachmentsStorage.createMany: POST ${PATH} entryIds=${JSON.stringify(entryIds)} `
+        + `raw response=${JSON.stringify(raw)}`,
+    );
+    if (!Array.isArray(raw)) {
+      logger.error(
+        `HttpAttachmentsStorage.createMany: backend returned non-array payload `
+          + `(type=${raw === null ? "null" : typeof raw}); raw=${JSON.stringify(raw)}`,
+      );
+      throw new Error("ai service returned a non-array response for attachments createMany");
+    }
+    // C# `AttachmentsStorageService` groups output by file kind (internal then
+    // thirdparty) and so doesn't preserve input order in mixed-kind batches.
+    // `dtoToAttachment` composes `path = "${entryId}/${title}"`; split on the
+    // first slash to get the original entry id for the order-aware match.
+    const byEntryId = new Map<string, Attachment>();
+    const skipped: unknown[] = [];
+    for (const item of raw) {
       const a = dtoToAttachment(item);
-      if (!a) {
+      if (!a || !a.path) {
+        skipped.push(item);
         continue;
       }
-      // The backend echoes the entry id as the attachment's path/title; the
-      // mapper above sets `path` to undefined, so fall back to title.
-      const key = a.title;
-      byPath.set(key, a);
+      const entryIdKey = a.path.split("/", 1)[0] ?? "";
+      byEntryId.set(entryIdKey, a);
     }
-    return entryIds.map((entryId) => {
-      const matched = byPath.get(entryId);
+    if (skipped.length > 0) {
+      logger.warn(
+        `HttpAttachmentsStorage.createMany: ${skipped.length} item(s) skipped `
+          + `(missing id/title/kind/entryId); skipped=${JSON.stringify(skipped)}`,
+      );
+    }
+    return inputs.map((input, i) => {
+      const entryId = entryIds[i] ?? "";
+      const matched = byEntryId.get(entryId);
       if (!matched) {
+        logger.error(
+          `HttpAttachmentsStorage.createMany: no match for entryId=${entryId}. `
+            + `requested=${JSON.stringify(entryIds)} `
+            + `backend entryIds=${JSON.stringify([...byEntryId.keys()])} `
+            + `raw=${JSON.stringify(raw)}`,
+        );
         throw new Error(`ai service did not return attachment for entryId=${entryId}`);
+      }
+      // C# `AttachmentDto` doesn't echo `type` (ONLYOFFICE file type code),
+      // so fall back to the value the caller supplied on input. Once C#
+      // starts echoing `type`, `dtoToAttachment` will already have set it
+      // and we won't overwrite.
+      if (matched.type === undefined && input.type !== undefined) {
+        matched.type = input.type;
       }
       return matched;
     });
