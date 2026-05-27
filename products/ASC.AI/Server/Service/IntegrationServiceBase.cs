@@ -48,7 +48,7 @@ public abstract class IntegrationServiceBase(
         var folder = await daoFactory.GetFolderDao<int>().GetFolderAsync(entryId)
             ?? throw new ItemNotFoundException();
 
-        if (!await fileSecurity.CanUseChatAsync(folder))
+        if (!await fileSecurity.CanUseAiAsync(folder))
         {
             throw new SecurityException();
         }
