@@ -148,7 +148,8 @@ public class TelegramHelper(
         }
 
 #pragma warning disable CA2000 // HttpClient and handler are owned by TelegramBotClient
-        var handler = new HttpClientHandler {
+        var handler = new SocketsHttpHandler
+        {
             UseProxy = true,
             Proxy = new WebProxy(proxy)
         };
