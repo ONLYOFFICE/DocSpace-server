@@ -88,6 +88,10 @@ public class SkiaSharpWhiteLabelLogoConverter : IWhiteLabelLogoConverter
         byte[] GetLogoDataFromJpg()
         {
             using var image = SKImage.FromEncodedData(logoData);
+            if (image is null)
+            {
+                return null;
+            }
             using var pngData = image.Encode();
             return pngData.ToArray();
         }
