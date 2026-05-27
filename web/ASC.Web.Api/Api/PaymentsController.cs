@@ -145,7 +145,8 @@ public class PaymentController(
             CultureInfo.CurrentCulture.TwoLetterISOLanguageName,
             (await userManager.GetUsersAsync(securityContext.CurrentAccount.ID)).Email,
             inDto.Quantity,
-            inDto.BackUrl);
+            inDto.BackUrl,
+            inDto.SuccessUrl);
     }
 
     /// <remarks>
@@ -690,6 +691,7 @@ public class PaymentController(
             user.Email,
             [],
             inDto.BackUrl,
+            inDto.SuccessUrl,
             true);
     }
 
