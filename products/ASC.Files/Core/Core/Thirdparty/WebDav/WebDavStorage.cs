@@ -396,6 +396,8 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
             return response;
         }
 
+        _client?.Dispose();
+
 #pragma warning disable CA2000 // HttpClient and handler are owned by WebDavClient
         var handler = new SocketsHttpHandler
         {
