@@ -27,7 +27,9 @@
 namespace ASC.AI.Integration.ToolPrefs;
 
 [Scope]
-public class ToolPrefsStorage(IDbContextFactory<AiIntegrationContext> dbContextFactory)
+public class ToolPrefsStorage(
+    IDbContextFactory<AiIntegrationContext> dbContextFactory,
+    IDistributedLockProvider distributedLockProvider)
 {
     public async Task<IReadOnlyDictionary<string, ToolPreference>> ReadAllAsync(int tenantId, Guid createdBy, int? entryId = null)
     {
@@ -47,65 +49,68 @@ public class ToolPrefsStorage(IDbContextFactory<AiIntegrationContext> dbContextF
             return;
         }
 
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-        var strategy = dbContext.Database.CreateExecutionStrategy();
-
-        await strategy.ExecuteAsync(async () =>
+        await using (await distributedLockProvider.TryAcquireFairLockAsync(GetLockKey(tenantId, createdBy, entryId)))
         {
-            await using var context = await dbContextFactory.CreateDbContextAsync();
+            await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+            var strategy = dbContext.Database.CreateExecutionStrategy();
 
-            var existingByType = await (entryId.HasValue
+            await strategy.ExecuteAsync(async () =>
+            {
+                await using var context = await dbContextFactory.CreateDbContextAsync();
+
+                var existingByType = await (entryId.HasValue
                     ? context.GetToolPrefsByServerTypesAndEntryAsync(tenantId, createdBy, entryId.Value, items.Keys)
                     : context.GetToolPrefsByServerTypesAsync(tenantId, createdBy, items.Keys))
                 .ToDictionaryAsync(x => x.ServerType, x => x.Id);
 
-            var now = DateTime.UtcNow;
-            foreach (var (serverType, item) in items)
-            {
-                if (existingByType.TryGetValue(serverType, out var existingId))
+                var now = DateTime.UtcNow;
+                foreach (var (serverType, item) in items)
                 {
-                    var entity = new DbToolPreference
+                    if (existingByType.TryGetValue(serverType, out var existingId))
                     {
-                        Id = existingId,
-                        TenantId = tenantId,
-                        CreatedBy = createdBy,
-                        ServerType = serverType,
-                        EntryId = entryId,
-                        Disabled = item.Disabled,
-                        AllowAlways = item.AllowAlways,
-                        CreatedAt = default
-                    };
+                        var entity = new DbToolPreference
+                        {
+                            Id = existingId,
+                            TenantId = tenantId,
+                            CreatedBy = createdBy,
+                            ServerType = serverType,
+                            EntryId = entryId,
+                            Disabled = item.Disabled,
+                            AllowAlways = item.AllowAlways,
+                            CreatedAt = default
+                        };
 
-                    context.ToolPrefs.Attach(entity);
+                        context.ToolPrefs.Attach(entity);
 
-                    if (item.Disabled != null)
-                    {
-                        context.Entry(entity).Property(x => x.Disabled).IsModified = true;
+                        if (item.Disabled != null)
+                        {
+                            context.Entry(entity).Property(x => x.Disabled).IsModified = true;
+                        }
+
+                        if (item.AllowAlways != null)
+                        {
+                            context.Entry(entity).Property(x => x.AllowAlways).IsModified = true;
+                        }
                     }
-
-                    if (item.AllowAlways != null)
+                    else
                     {
-                        context.Entry(entity).Property(x => x.AllowAlways).IsModified = true;
+                        context.ToolPrefs.Add(new DbToolPreference
+                        {
+                            Id = Guid.CreateVersion7(),
+                            TenantId = tenantId,
+                            CreatedBy = createdBy,
+                            ServerType = serverType,
+                            EntryId = entryId,
+                            Disabled = item.Disabled,
+                            AllowAlways = item.AllowAlways,
+                            CreatedAt = now
+                        });
                     }
                 }
-                else
-                {
-                    context.ToolPrefs.Add(new DbToolPreference
-                    {
-                        Id = Guid.CreateVersion7(),
-                        TenantId = tenantId,
-                        CreatedBy = createdBy,
-                        ServerType = serverType,
-                        EntryId = entryId,
-                        Disabled = item.Disabled,
-                        AllowAlways = item.AllowAlways,
-                        CreatedAt = now
-                    });
-                }
-            }
 
-            await context.SaveChangesAsync();
-        });
+                await context.SaveChangesAsync();
+            });
+        }
     }
 
     private static ToolPreference ToDomain(DbToolPreference entity) => new()
@@ -113,4 +118,11 @@ public class ToolPrefsStorage(IDbContextFactory<AiIntegrationContext> dbContextF
         Disabled = entity.Disabled,
         AllowAlways = entity.AllowAlways
     };
+
+    private static string GetLockKey(int tenantId, Guid createdBy, int? entryId)
+    {
+        return entryId.HasValue
+            ? $"ai_integration_tool_prefs_{tenantId}_{createdBy}_{entryId.Value}"
+            : $"ai_integration_tool_prefs_{tenantId}_{createdBy}";
+    }
 }
