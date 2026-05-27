@@ -61,20 +61,22 @@ export const assignmentsController = {
   resolveForAction: asyncHandler(async (req, res) => {
     const actionType = asActionType(req.query["actionType"]);
     if (!actionType) {
-      res.json(null);
+      res.status(400).json({ error: "actionType required" });
       return;
     }
-    const result = await engine.resolveForAction(actionType);
+    const entityId = asString(req.query["entityId"]);
+    const result = await engine.resolveForAction(actionType, entityId);
     res.json(result);
   }),
 
   tryResolveForAction: asyncHandler(async (req, res) => {
     const actionType = asActionType(req.query["actionType"]);
     if (!actionType) {
-      res.json(null);
+      res.status(400).json({ error: "actionType required" });
       return;
     }
-    const result = await engine.tryResolveForAction(actionType);
+    const entityId = asString(req.query["entityId"]);
+    const result = await engine.tryResolveForAction(actionType, entityId);
     res.json(result);
   }),
 
@@ -117,11 +119,11 @@ export const assignmentsController = {
   getAssignment: asyncHandler(async (req, res) => {
     const actionType = asActionType(req.query["actionType"]);
     if (!actionType) {
-      res.json({ profileId: null });
+      res.status(400).json({ error: "actionType required" });
       return;
     }
     const profileId = await engine.getAssignment(actionType);
-    res.json({ profileId });
+    res.json(profileId);
   }),
 
   getAllAssignments: asyncHandler(async (_req, res) => {

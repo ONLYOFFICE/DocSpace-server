@@ -119,6 +119,16 @@ export default function registerRoutes(app: Application): void {
     res.status(200).json({ status: "Healthy" });
   });
 
+  // GET responses are user/entity-scoped and must never be cached by the
+  // browser or any intermediate proxy — switching account or `entityId`
+  // would otherwise serve a stale snapshot from the previous scope.
+  router.use((req, res, next) => {
+    if (req.method === "GET") {
+      res.setHeader("Cache-Control", "no-store");
+    }
+    next();
+  });
+
   let total = 0;
   for (const binding of ENGINE_BINDINGS) {
     bindEngine(router, binding);

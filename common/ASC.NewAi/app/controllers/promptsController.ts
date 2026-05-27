@@ -90,13 +90,11 @@ export const promptsController = {
   }),
 
   list: asyncHandler(async (req, res) => {
-    if (!("folderId" in req.query)) {
-      const result = await engine.list();
-      res.json(result);
-      return;
-    }
+    // ApiProvider's fetcher drops both `null` and `undefined` folderId
+    // values from the URL, so the backend cannot distinguish them.
+    // Per spec, treat key-absent as `null` (root-level prompts).
     const folderIdRaw = req.query["folderId"];
-    const folderId = folderIdRaw === "" || folderIdRaw === undefined
+    const folderId = folderIdRaw === undefined || folderIdRaw === ""
       ? null
       : asString(folderIdRaw) ?? null;
     const result = await engine.list(folderId);
@@ -147,7 +145,7 @@ export const promptsController = {
   getById: asyncHandler(async (req, res) => {
     const id = asString(req.query["id"]);
     if (!id) {
-      res.json(null);
+      res.status(400).json({ error: "id required" });
       return;
     }
     const prompt = await engine.getById(id);
@@ -157,7 +155,7 @@ export const promptsController = {
   getFolderById: asyncHandler(async (req, res) => {
     const id = asString(req.query["id"]);
     if (!id) {
-      res.json(null);
+      res.status(400).json({ error: "id required" });
       return;
     }
     const folder = await engine.getFolderById(id);

@@ -32,26 +32,6 @@ import { asString } from "../narrow.js";
 
 const engine = new ToolsEngine({ storage });
 
-interface CustomServerBody {
-  name: string;
-  config: McpServerConfig;
-}
-
-interface NameBody {
-  name?: string;
-}
-
-interface DisabledBody {
-  serverType: string;
-  toolNames?: string[];
-}
-
-interface AllowAlwaysBody {
-  serverType: string;
-  toolName: string;
-  value?: unknown;
-}
-
 export const toolsController = {
   addCustomServer: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["name", "config", "entityId"] as const);
@@ -73,28 +53,32 @@ export const toolsController = {
     res.json(result);
   }),
 
-  removeCustomServer: asyncHandler<NameBody>(async (req, res) => {
-    const name = req.body?.name ?? asString(req.query["name"]);
+  removeCustomServer: asyncHandler(async (req, res) => {
+    const args = unpackPositional(req.body, ["name", "entityId"] as const);
+    const name = typeof args.name === "string" ? args.name : asString(req.query["name"]);
     if (!name) {
       res.status(400).json({ error: "name required" });
       return;
     }
-    await engine.removeCustomServer(name);
+    const entityId = typeof args.entityId === "string" ? args.entityId : undefined;
+    await engine.removeCustomServer(name, entityId);
     res.json({ success: true });
   }),
 
   getCustomServer: asyncHandler(async (req, res) => {
     const name = asString(req.query["name"]);
     if (!name) {
-      res.json(null);
+      res.status(400).json({ error: "name required" });
       return;
     }
-    const config = await engine.getCustomServer(name);
+    const entityId = asString(req.query["entityId"]);
+    const config = await engine.getCustomServer(name, entityId);
     res.json(config);
   }),
 
-  listCustomServers: asyncHandler(async (_req, res) => {
-    const servers = await engine.listCustomServers();
+  listCustomServers: asyncHandler(async (req, res) => {
+    const entityId = asString(req.query["entityId"]);
+    const servers = await engine.listCustomServers(entityId);
     res.json(servers);
   }),
 
@@ -118,8 +102,9 @@ export const toolsController = {
     res.json({ success: true });
   }),
 
-  getDisabled: asyncHandler(async (_req, res) => {
-    const map = await engine.getDisabled();
+  getDisabled: asyncHandler(async (req, res) => {
+    const entityId = asString(req.query["entityId"]);
+    const map = await engine.getDisabled(entityId);
     res.json(map);
   }),
 
@@ -127,11 +112,12 @@ export const toolsController = {
     const serverType = asString(req.query["serverType"]);
     const toolName = asString(req.query["toolName"]);
     if (!serverType || !toolName) {
-      res.json({ value: false });
+      res.status(400).json({ error: "serverType and toolName required" });
       return;
     }
-    const value = await engine.isToolDisabled(serverType, toolName);
-    res.json({ value });
+    const entityId = asString(req.query["entityId"]);
+    const value = await engine.isToolDisabled(serverType, toolName, entityId);
+    res.json(value);
   }),
 
   setAllowAlways: asyncHandler(async (req, res) => {
@@ -148,8 +134,9 @@ export const toolsController = {
     res.json({ success: true });
   }),
 
-  getAllowAlways: asyncHandler(async (_req, res) => {
-    const tokens = await engine.getAllowAlways();
+  getAllowAlways: asyncHandler(async (req, res) => {
+    const entityId = asString(req.query["entityId"]);
+    const tokens = await engine.getAllowAlways(entityId);
     res.json(tokens);
   }),
 
@@ -157,10 +144,11 @@ export const toolsController = {
     const serverType = asString(req.query["serverType"]);
     const toolName = asString(req.query["toolName"]);
     if (!serverType || !toolName) {
-      res.json({ value: false });
+      res.status(400).json({ error: "serverType and toolName required" });
       return;
     }
-    const value = await engine.isAllowAlways(serverType, toolName);
-    res.json({ value });
+    const entityId = asString(req.query["entityId"]);
+    const value = await engine.isAllowAlways(serverType, toolName, entityId);
+    res.json(value);
   }),
 };

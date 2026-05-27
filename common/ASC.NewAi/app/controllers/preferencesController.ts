@@ -27,28 +27,34 @@
 import { PreferencesEngine } from "@onlyoffice/ai-chat/core";
 import { storage } from "../storage/index.js";
 import { asyncHandler, unpackPositional } from "./_helpers.js";
+import { asString } from "../narrow.js";
 
 const engine = new PreferencesEngine({ storage });
 
 export const preferencesController = {
-  getDeepMode: asyncHandler(async (_req, res) => {
-    const value = await engine.getDeepMode();
-    res.json({ value });
+  getDeepMode: asyncHandler(async (req, res) => {
+    const entityId = asString(req.query["entityId"]);
+    const value = await engine.getDeepMode(entityId);
+    res.json(value);
   }),
 
   setDeepMode: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["value", "entityId"] as const);
-    await engine.setDeepMode(Boolean(args.value));
+    const entityId = typeof args.entityId === "string" ? args.entityId : undefined;
+    await engine.setDeepMode(Boolean(args.value), entityId);
     res.json({ success: true });
   }),
 
-  clearDeepMode: asyncHandler(async (_req, res) => {
-    await engine.clearDeepMode();
+  clearDeepMode: asyncHandler(async (req, res) => {
+    const { entityId } = unpackPositional(req.body, ["entityId"] as const);
+    const entityIdStr = typeof entityId === "string" ? entityId : undefined;
+    await engine.clearDeepMode(entityIdStr);
     res.json({ success: true });
   }),
 
-  isDeepModeSet: asyncHandler(async (_req, res) => {
-    const value = await engine.isDeepModeSet();
-    res.json({ value });
+  isDeepModeSet: asyncHandler(async (req, res) => {
+    const entityId = asString(req.query["entityId"]);
+    const value = await engine.isDeepModeSet(entityId);
+    res.json(value);
   }),
 };

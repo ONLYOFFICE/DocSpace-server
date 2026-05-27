@@ -77,7 +77,7 @@ export const profilesController = {
   listModels: asyncHandler(async (req, res) => {
     const profileId = asString(req.query["profileId"]);
     if (!profileId) {
-      res.json([]);
+      res.status(400).json({ error: "profileId required" });
       return;
     }
     const models = await engine.listModels(profileId);
@@ -98,7 +98,7 @@ export const profilesController = {
   getById: asyncHandler(async (req, res) => {
     const id = asString(req.query["id"]);
     if (!id) {
-      res.json(null);
+      res.status(400).json({ error: "id required" });
       return;
     }
     const profile = await engine.getById(id);

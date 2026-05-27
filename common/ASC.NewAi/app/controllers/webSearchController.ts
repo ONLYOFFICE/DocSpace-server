@@ -28,18 +28,21 @@ import { WebSearchEngine } from "@onlyoffice/ai-chat/core";
 import type { WebSearchConfig } from "@onlyoffice/ai-chat/core";
 import { storage } from "../storage/index.js";
 import { asyncHandler, unpackPositional } from "./_helpers.js";
+import { asString } from "../narrow.js";
 
 const engine = new WebSearchEngine({ storage });
 
 export const webSearchController = {
-  getActiveConfig: asyncHandler(async (_req, res) => {
-    const config = await engine.getActiveConfig();
+  getActiveConfig: asyncHandler(async (req, res) => {
+    const entityId = asString(req.query["entityId"]);
+    const config = await engine.getActiveConfig(entityId);
     res.json(config);
   }),
 
-  isConfigured: asyncHandler(async (_req, res) => {
-    const value = await engine.isConfigured();
-    res.json({ value });
+  isConfigured: asyncHandler(async (req, res) => {
+    const entityId = asString(req.query["entityId"]);
+    const value = await engine.isConfigured(entityId);
+    res.json(value);
   }),
 
   testConnection: asyncHandler<WebSearchConfig>(async (req, res) => {

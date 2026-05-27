@@ -127,15 +127,16 @@ export const threadsController = {
     res.json({ title });
   }),
 
-  list: asyncHandler(async (_req, res) => {
-    const threads = await engine.list();
+  list: asyncHandler(async (req, res) => {
+    const entityId = asString(req.query["entityId"]);
+    const threads = await engine.list(entityId);
     res.json(threads);
   }),
 
   readMessages: asyncHandler(async (req, res) => {
     const threadId = asString(req.query["threadId"]);
     if (!threadId) {
-      res.json([]);
+      res.status(400).json({ error: "threadId required" });
       return;
     }
     const limit = parseInt10(req.query["limit"]);
@@ -147,7 +148,7 @@ export const threadsController = {
   getById: asyncHandler(async (req, res) => {
     const threadId = asString(req.query["threadId"]);
     if (!threadId) {
-      res.json(null);
+      res.status(400).json({ error: "threadId required" });
       return;
     }
     const thread = await engine.getById(threadId);
@@ -157,7 +158,7 @@ export const threadsController = {
   getMessageById: asyncHandler(async (req, res) => {
     const messageId = asString(req.query["messageId"]);
     if (!messageId) {
-      res.json(null);
+      res.status(400).json({ error: "messageId required" });
       return;
     }
     const message = await engine.getMessageById(messageId);
