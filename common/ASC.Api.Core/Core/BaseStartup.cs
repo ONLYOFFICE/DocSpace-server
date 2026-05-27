@@ -87,20 +87,21 @@ public abstract class BaseStartup
 
         services.AddHttpClient();
         services.AddHttpClient("customHttpClient", _ => { })
-            .ConfigurePrimaryHttpMessageHandler(_ => new HttpClientHandler
+            .ConfigurePrimaryHttpMessageHandler(_ => new SocketsHttpHandler
             {
                 AllowAutoRedirect = false
             });
         services.AddHttpClient("customHttpClientSslIgnore", _ => { })
-            .ConfigurePrimaryHttpMessageHandler(_ => new HttpClientHandler
+            .ConfigurePrimaryHttpMessageHandler(_ =>
             {
-                AllowAutoRedirect = false,
-                ServerCertificateCustomValidationCallback = (_, _, _, _) => true
+                var handler = new SocketsHttpHandler { AllowAutoRedirect = false };
+                handler.SslOptions.RemoteCertificateValidationCallback = (_, _, _, _) => true;
+                return handler;
             });
         services.AddHttpClient("customHttpClientNoCookie", _ => { })
-            .ConfigurePrimaryHttpMessageHandler(_ => new HttpClientHandler
+            .ConfigurePrimaryHttpMessageHandler(_ => new SocketsHttpHandler
             {
-                UseCookies = false,
+                UseCookies = false
             });
         services.AddHttpClient(UrlValidator.PinnedHttpClient)
             .SetHandlerLifetime(TimeSpan.FromMinutes(5))
