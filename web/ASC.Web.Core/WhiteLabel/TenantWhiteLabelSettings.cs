@@ -31,8 +31,6 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using SKSvg = Svg.Skia.SKSvg;
-
 namespace ASC.Web.Core.WhiteLabel;
 
 public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
@@ -383,7 +381,7 @@ public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
         }
     }
 
-    internal string GetExt(WhiteLabelLogoType type, bool dark)
+    public string GetExt(WhiteLabelLogoType type, bool dark)
     {
         return type switch
         {
@@ -577,7 +575,8 @@ public class TenantWhiteLabelSettingsHelper(
     UserManager userManager,
     SettingsManager settingsManager,
     IConfiguration configuration,
-    ILogger<TenantWhiteLabelSettingsHelper> logger)
+    ILogger<TenantWhiteLabelSettingsHelper> logger,
+    IWhiteLabelLogoConverter logoConverter)
 {
     private const string ModuleName = "whitelabel";
 
@@ -690,7 +689,7 @@ public class TenantWhiteLabelSettingsHelper(
                 tenantWhiteLabelSettings.SetExt(currentLogoType, extLight, false);
                 if (currentLogoType == WhiteLabelLogoType.LoginPage)
                 {
-                    var (notificationData, extNotification) = GetNotificationLogoData(lightData, extLight, tenantWhiteLabelSettings);
+                    var (notificationData, extNotification) = logoConverter.GetNotificationLogoData(lightData, extLight, tenantWhiteLabelSettings);
 
                     if (notificationData != null)
                     {
@@ -757,55 +756,6 @@ public class TenantWhiteLabelSettingsHelper(
         }
 
         return (null, null);
-    }
-
-    private (byte[], string) GetNotificationLogoData(byte[] logoData, string extLogo, TenantWhiteLabelSettings tenantWhiteLabelSettings)
-    {
-        var extNotification = tenantWhiteLabelSettings.GetExt(WhiteLabelLogoType.Notification, false);
-
-        return extLogo switch
-        {
-            "png" => (logoData, extNotification),
-            "svg" => (GetLogoDataFromSvg(), extNotification),
-            "bmp" or "jpg" or "jpeg" or "ico" => (GetLogoDataFromJpg(), extNotification),
-            _ => ((byte[], string))(null, extNotification)
-        };
-
-        byte[] GetLogoDataFromSvg()
-        {
-            var size = GetSize(WhiteLabelLogoType.Notification);
-
-            using var svg = new SKSvg();
-
-            using (var stream = new MemoryStream(logoData))
-            {
-                svg.Load(stream);
-            }
-
-            using (var bitMap = new SKBitmap((int)size.Width, (int)size.Height))
-            using (var canvas = new SKCanvas(bitMap))
-            {
-                var canvasMin = Math.Min(size.Width, size.Height);
-                var svgMax = Math.Max(svg.Picture.CullRect.Width, svg.Picture.CullRect.Height);
-                var scale = canvasMin / svgMax;
-                var matrix = SKMatrix.CreateScale(scale, scale);
-
-                canvas.DrawPicture(svg.Picture, matrix);
-
-                using (var image = SKImage.FromBitmap(bitMap))
-                using (var pngData = image.Encode())
-                {
-                    return pngData.ToArray();
-                }
-            }
-        }
-
-        byte[] GetLogoDataFromJpg()
-        {
-            using var image = SKImage.FromEncodedData(logoData);
-            using var pngData = image.Encode();
-            return pngData.ToArray();
-        }
     }
 
     public async Task SetLogoFromStream(TenantWhiteLabelSettings tenantWhiteLabelSettings, WhiteLabelLogoType type, string fileExt, Stream fileStream, bool dark, IDataStore storage = null)
