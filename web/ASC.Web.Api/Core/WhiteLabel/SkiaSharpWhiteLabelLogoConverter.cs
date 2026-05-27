@@ -35,7 +35,7 @@ using SKSvg = Svg.Skia.SKSvg;
 
 namespace ASC.Web.Api.Core.WhiteLabel;
 
-[Scope(typeof(IWhiteLabelLogoConverter), typeof(SkiaSharpWhiteLabelLogoConverter))]
+[Scope(typeof(IWhiteLabelLogoConverter))]
 public class SkiaSharpWhiteLabelLogoConverter : IWhiteLabelLogoConverter
 {
     /// <inheritdoc/>
