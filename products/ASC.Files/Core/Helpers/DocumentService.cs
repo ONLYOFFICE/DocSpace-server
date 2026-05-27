@@ -1073,9 +1073,11 @@ public static class DocumentServiceHttpClientExtension
 
         services.AddHttpClient(GetHttpClientName(sslVerification: false))
                 .SetHandlerLifetime(TimeSpan.FromMinutes(5))
-                .ConfigurePrimaryHttpMessageHandler(_ => new HttpClientHandler
+                .ConfigurePrimaryHttpMessageHandler(_ =>
                 {
-                    ServerCertificateCustomValidationCallback = (_, _, _, _) => true
+                    var handler = new SocketsHttpHandler();
+                    handler.SslOptions.RemoteCertificateValidationCallback = (_, _, _, _) => true;
+                    return handler;
                 })
                 .AddResilienceHandler(ResiliencePipelineName, builder =>
                 {
@@ -1084,9 +1086,11 @@ public static class DocumentServiceHttpClientExtension
                 });
 
         services.AddHttpClient(CustomSslVerificationClient)
-                .ConfigurePrimaryHttpMessageHandler(_ => new HttpClientHandler
+                .ConfigurePrimaryHttpMessageHandler(_ =>
                 {
-                    ServerCertificateCustomValidationCallback = (_, _, _, _) => true
+                    var handler = new SocketsHttpHandler();
+                    handler.SslOptions.RemoteCertificateValidationCallback = (_, _, _, _) => true;
+                    return handler;
                 });
 
         services.AddResiliencePipeline<string, LicenseValidationResult>(LicenseResiliencePipelineName, pipelineBuilder =>
