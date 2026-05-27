@@ -66,11 +66,14 @@ public class SkiaSharpWhiteLabelLogoConverter : IWhiteLabelLogoConverter
             using (var canvas = new SKCanvas(bitMap))
             {
                 var canvasMin = Math.Min(size.Width, size.Height);
-                var svgMax = Math.Max(svg.Picture.CullRect.Width, svg.Picture.CullRect.Height);
-                var scale = canvasMin / svgMax;
-                var matrix = SKMatrix.CreateScale(scale, scale);
+                if (svg.Picture != null)
+                {
+                    var svgMax = Math.Max(svg.Picture.CullRect.Width, svg.Picture.CullRect.Height);
+                    var scale = canvasMin / svgMax;
+                    var matrix = SKMatrix.CreateScale(scale, scale);
 
-                canvas.DrawPicture(svg.Picture, matrix);
+                    canvas.DrawPicture(svg.Picture, matrix);
+                }
 
                 using (var image = SKImage.FromBitmap(bitMap))
                 using (var pngData = image.Encode())
