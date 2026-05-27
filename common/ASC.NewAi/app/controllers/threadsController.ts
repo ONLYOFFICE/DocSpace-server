@@ -136,7 +136,7 @@ export const threadsController = {
   readMessages: asyncHandler(async (req, res) => {
     const threadId = asString(req.query["threadId"]);
     if (!threadId) {
-      res.status(400).json({ error: "threadId required" });
+      res.json([]);
       return;
     }
     const limit = parseInt10(req.query["limit"]);
