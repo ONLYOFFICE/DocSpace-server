@@ -330,7 +330,7 @@ public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
         };
     }
 
-    public void SetIsDefault(WhiteLabelLogoType type, bool value)
+    internal void SetIsDefault(WhiteLabelLogoType type, bool value)
     {
         switch (type)
         {
@@ -406,7 +406,7 @@ public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
         };
     }
 
-    public void SetExt(WhiteLabelLogoType type, string fileExt, bool dark)
+    internal void SetExt(WhiteLabelLogoType type, string fileExt, bool dark)
     {
         switch (type)
         {
@@ -640,7 +640,7 @@ public class TenantWhiteLabelSettingsHelper(
 
     #region Set logo
 
-    public async Task SetLogoAsync(TenantWhiteLabelSettings tenantWhiteLabelSettings, WhiteLabelLogoType type, string logoFileExt, byte[] data, bool dark, IDataStore storage = null)
+    private async Task SetLogoAsync(TenantWhiteLabelSettings tenantWhiteLabelSettings, WhiteLabelLogoType type, string logoFileExt, byte[] data, bool dark, IDataStore storage = null)
     {
         var store = storage ?? await storageFactory.GetStorageAsync(tenantManager.GetCurrentTenantId(), ModuleName);
 
@@ -666,6 +666,97 @@ public class TenantWhiteLabelSettingsHelper(
 
         memory.Seek(0, SeekOrigin.Begin);
         await store.SaveAsync(logoFileName, memory);
+    }
+
+    public async Task SetLogo(TenantWhiteLabelSettings tenantWhiteLabelSettings, IWhiteLabelLogoConverter logoConverter,
+        Dictionary<int, KeyValuePair<string, string>> logo, IDataStore storage = null)
+    {
+        foreach (var currentLogo in logo)
+        {
+            var currentLogoType = (WhiteLabelLogoType)currentLogo.Key;
+
+            var (lightData, extLight) = await GetLogoData(currentLogo.Value.Key);
+
+            var (darkData, extDark) = await GetLogoData(currentLogo.Value.Value);
+
+            if (lightData == null && darkData == null)
+            {
+                return;
+            }
+
+            if (lightData != null)
+            {
+                await SetLogoAsync(tenantWhiteLabelSettings, currentLogoType, extLight, lightData, false, storage);
+                tenantWhiteLabelSettings.SetExt(currentLogoType, extLight, false);
+                if (currentLogoType == WhiteLabelLogoType.LoginPage)
+                {
+                    var (notificationData, extNotification) = logoConverter.GetNotificationLogoData(lightData, extLight, tenantWhiteLabelSettings);
+
+                    if (notificationData != null)
+                    {
+                        await SetLogoAsync(tenantWhiteLabelSettings, WhiteLabelLogoType.Notification, extNotification, notificationData, false, storage);
+                    }
+                }
+            }
+
+            if (darkData != null && CanBeDark(currentLogoType))
+            {
+                await SetLogoAsync(tenantWhiteLabelSettings, currentLogoType, extDark, darkData, true, storage);
+                tenantWhiteLabelSettings.SetExt(currentLogoType, extDark, true);
+            }
+
+            tenantWhiteLabelSettings.SetIsDefault(currentLogoType, false);
+        }
+    }
+
+    private async Task<(byte[], string)> GetLogoData(string logo)
+    {
+        var supportedFormats = new[]
+        {
+            new {
+                    mime = "image/jpeg",
+                    ext = "jpg"
+                },
+            new {
+                    mime = "image/png",
+                    ext = "png"
+                },
+            new {
+                    mime = "image/svg+xml",
+                    ext = "svg"
+                }
+        };
+
+        if (!string.IsNullOrEmpty(logo))
+        {
+            byte[] data;
+            var format = supportedFormats.FirstOrDefault(r => logo.StartsWith($"data:{r.mime};base64,"));
+            string ext;
+            if (format == null)
+            {
+                var fileName = Path.GetFileName(logo);
+                ext = fileName.Split('.').Last();
+                data = await userPhotoManager.GetTempPhotoData(fileName);
+                try
+                {
+                    await userPhotoManager.RemoveTempPhotoAsync(fileName);
+                }
+                catch (Exception ex)
+                {
+                    logger.ErrorSetLogo(ex);
+                }
+            }
+            else
+            {
+                ext = format.ext;
+                var xB64 = logo[$"data:{format.mime};base64,".Length..]; // Get the Base64 string
+                data = Convert.FromBase64String(xB64); // Convert the Base64 string to binary data
+            }
+
+            return (data, ext);
+        }
+
+        return (null, null);
     }
 
     public async Task SetLogoFromStream(TenantWhiteLabelSettings tenantWhiteLabelSettings, WhiteLabelLogoType type, string fileExt, Stream fileStream, bool dark, IDataStore storage = null)
@@ -881,7 +972,7 @@ public class TenantWhiteLabelSettingsHelper(
 
     #endregion
 
-    public static bool CanBeDark(WhiteLabelLogoType type)
+    private static bool CanBeDark(WhiteLabelLogoType type)
     {
         return type switch
         {
