@@ -45,7 +45,8 @@ public class ChatTools(
     AiSettingsStore aiSettingsStore,
     AiGateway aiGateway,
     AiAccessibility aiAccessibility,
-    TenantManager tenantManager)
+    TenantManager tenantManager,
+    AuthContext authContext)
 {
     public async Task<(ToolHolder, string? error)> GetAsync(Folder<int> agent,
         UserChatSettings chatSettings,
@@ -58,17 +59,19 @@ public class ChatTools(
         var tenantQuota = await tenantManager.GetCurrentTenantQuotaAsync();
         if (tenantQuota.AutomationApi)
         {
+            var userId = authContext.CurrentAccount.ID;
+
             holder.AddTool(
                 SystemToolType.GeneratePresentation,
-                ToWrapper(agent.Id, generatePresentationTool.Init(resultStorageId))
+                ToWrapper(agent.Id, generatePresentationTool.Init(resultStorageId, userId))
             );
             holder.AddTool(
                 SystemToolType.GenerateDocx,
-                ToWrapper(agent.Id, generateDocxTool.Init(resultStorageId))
+                ToWrapper(agent.Id, generateDocxTool.Init(resultStorageId, userId))
             );
             holder.AddTool(
                 SystemToolType.GenerateForm,
-                ToWrapper(agent.Id, generateFormTool.Init(resultStorageId))
+                ToWrapper(agent.Id, generateFormTool.Init(resultStorageId, userId))
             );
         }
 
@@ -142,6 +145,21 @@ public class ChatTools(
                 Name = tool.Name,
                 RoomId = roomId,
                 AutoInvoke = true
+            }
+        };
+    }
+
+    private static ToolWrapper ToWrapper(int roomId, EditorToolRegistration registration)
+    {
+        return new ToolWrapper
+        {
+            Tool = registration.Tool,
+            Context = new ToolContext
+            {
+                Name = registration.Tool.Name,
+                RoomId = roomId,
+                AutoInvoke = true,
+                OnToolCallReceived = registration.OnToolCall
             }
         };
     }
