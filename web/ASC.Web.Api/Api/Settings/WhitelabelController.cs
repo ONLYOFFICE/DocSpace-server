@@ -1,34 +1,34 @@
 ﻿// Copyright (C) Ascensio System SIA, 2009-2026
-//
+// 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-//
+// 
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-//
+// 
 // No trademark rights are granted under this License.
-//
+// 
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-//
+// 
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-//
+// 
 // SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Web.Api.Controllers.Settings;
@@ -49,10 +49,7 @@ public class WhitelabelController(
     TenantExtra tenantExtra,
     StorageFactory storageFactory,
     AdditionalWhiteLabelSettingsMapper additionalWhiteLabelSettingsMapper,
-    CompanyWhiteLabelSettingsDtoMapper companyWhiteLabelSettingsDtoMapper,
-    IWhiteLabelLogoConverter logoConverter,
-    UserPhotoManager userPhotoManager,
-    ILogger<WhitelabelController> logger)
+    CompanyWhiteLabelSettingsDtoMapper companyWhiteLabelSettingsDtoMapper)
     : BaseSettingsController(fusionCache, webItemManager)
 {
     #region Logos
@@ -119,7 +116,7 @@ public class WhitelabelController(
                 logoDict.Add(key, new KeyValuePair<string, string>(l.Value.Light, l.Value.Dark));
             }
 
-            await SetLogo(settings, logoDict, storage);
+            await tenantWhiteLabelSettingsHelper.SetLogo(settings, logoDict, storage);
         }
 
         await settingsManager.SaveAsync(settings, tenantId);
@@ -381,96 +378,6 @@ public class WhitelabelController(
         await tenantWhiteLabelSettingsHelper.RestoreDefaultLogos(settings, tenantLogoManager, tenantId, storage);
 
         messageService.Send(MessageAction.WhiteLabelSettingsLogosUpdated);
-    }
-
-    private async Task SetLogo(TenantWhiteLabelSettings tenantWhiteLabelSettings, Dictionary<int, KeyValuePair<string, string>> logo, IDataStore storage = null)
-    {
-        foreach (var currentLogo in logo)
-        {
-            var currentLogoType = (WhiteLabelLogoType)currentLogo.Key;
-
-            var (lightData, extLight) = await GetLogoData(currentLogo.Value.Key);
-
-            var (darkData, extDark) = await GetLogoData(currentLogo.Value.Value);
-
-            if (lightData == null && darkData == null)
-            {
-                return;
-            }
-
-            if (lightData != null)
-            {
-                await tenantWhiteLabelSettingsHelper.SetLogoAsync(tenantWhiteLabelSettings, currentLogoType, extLight, lightData, false, storage);
-                tenantWhiteLabelSettings.SetExt(currentLogoType, extLight, false);
-                if (currentLogoType == WhiteLabelLogoType.LoginPage)
-                {
-                    var (notificationData, extNotification) = logoConverter.GetNotificationLogoData(lightData, extLight, tenantWhiteLabelSettings);
-
-                    if (notificationData != null)
-                    {
-                        await tenantWhiteLabelSettingsHelper.SetLogoAsync(tenantWhiteLabelSettings, WhiteLabelLogoType.Notification, extNotification, notificationData, false, storage);
-                    }
-                }
-            }
-
-            if (darkData != null && TenantWhiteLabelSettingsHelper.CanBeDark(currentLogoType))
-            {
-                await tenantWhiteLabelSettingsHelper.SetLogoAsync(tenantWhiteLabelSettings, currentLogoType, extDark, darkData, true, storage);
-                tenantWhiteLabelSettings.SetExt(currentLogoType, extDark, true);
-            }
-
-            tenantWhiteLabelSettings.SetIsDefault(currentLogoType, false);
-        }
-    }
-
-    private async Task<(byte[], string)> GetLogoData(string logo)
-    {
-        var supportedFormats = new[]
-        {
-            new {
-                    mime = "image/jpeg",
-                    ext = "jpg"
-                },
-            new {
-                    mime = "image/png",
-                    ext = "png"
-                },
-            new {
-                    mime = "image/svg+xml",
-                    ext = "svg"
-                }
-        };
-
-        if (!string.IsNullOrEmpty(logo))
-        {
-            byte[] data;
-            var format = supportedFormats.FirstOrDefault(r => logo.StartsWith($"data:{r.mime};base64,"));
-            string ext;
-            if (format == null)
-            {
-                var fileName = Path.GetFileName(logo);
-                ext = fileName.Split('.').Last();
-                data = await userPhotoManager.GetTempPhotoData(fileName);
-                try
-                {
-                    await userPhotoManager.RemoveTempPhotoAsync(fileName);
-                }
-                catch (Exception ex)
-                {
-                    logger.ErrorSetLogo(ex);
-                }
-            }
-            else
-            {
-                ext = format.ext;
-                var xB64 = logo[$"data:{format.mime};base64,".Length..]; // Get the Base64 string
-                data = Convert.FromBase64String(xB64); // Convert the Base64 string to binary data
-            }
-
-            return (data, ext);
-        }
-
-        return (null, null);
     }
 
     #endregion
@@ -887,10 +794,4 @@ public class WhitelabelController(
             await tenantLogoManager.DemandWhiteLabelPermissionAsync();
         }
     }
-}
-
-internal static partial class TenantWhiteLabelSettingsHelperLogger
-{
-    [LoggerMessage(LogLevel.Error, "TenantWhiteLabelSettingsHelper SetLogo")]
-    public static partial void ErrorSetLogo(this ILogger<WhitelabelController> logger, Exception exception);
 }
