@@ -99,7 +99,8 @@ public class NotifySenderService(
 
                 if (tasks.Count >= _notifyServiceCfg.Process.MaxThreads)
                 {
-                    await Task.WhenAny(tasks.ToArray()).ContinueWith(_ => tasks.RemoveAll(a => a.IsCompleted), stoppingToken);
+                    await Task.WhenAny(tasks.ToArray());
+                    tasks.RemoveAll(a => a.IsCompleted);
                 }
 
                 tasks.Add(SendOneAsync(notifyMessage, stoppingToken));
