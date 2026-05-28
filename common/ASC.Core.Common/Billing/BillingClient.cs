@@ -130,12 +130,14 @@ public class BillingClient
         {
             parameters.Add(Tuple.Create("Quantity", quantity));
         }
-        if (!string.IsNullOrEmpty(backUrl))
-        {
-            parameters.Add(Tuple.Create("BackRef", successUrl));
-        }
         if (!string.IsNullOrEmpty(successUrl))
         {
+            // BackRef - redirect url after payment
+            parameters.Add(Tuple.Create("BackRef", successUrl));
+        }
+        if (!string.IsNullOrEmpty(backUrl))
+        {
+            // ShopUrl - redirect url when canceling a purchase (back to the shop)
             parameters.Add(Tuple.Create("ShopUrl", backUrl));
         }
 
