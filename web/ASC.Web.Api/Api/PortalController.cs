@@ -84,7 +84,8 @@ public class PortalController(
     IEventBus eventBus,
     CspSettingsHelper cspSettingsHelper,
     IdentityClient client,
-    InvitationLinkDtoHelper invitationLinkDtoHelper)
+    InvitationLinkDtoHelper invitationLinkDtoHelper,
+    CountPaidUserChecker countPaidUserChecker)
     : ControllerBase
 {
     /// <remarks>
@@ -223,6 +224,11 @@ public class PortalController(
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
+        if (inDto.EmployeeType is EmployeeType.RoomAdmin or EmployeeType.DocSpaceAdmin)
+        {
+            await countPaidUserChecker.CheckAppend();
+        }
+
         await using (await distributedLockProvider.TryAcquireFairLockAsync($"invitationlink_{tenant.Id}"))
         {
             var existedInvitationLink = await userManager.GetInvitationLinkAsync(inDto.EmployeeType);
@@ -269,6 +275,11 @@ public class PortalController(
             !await permissionContext.CheckPermissionsAsync(new UserSecurityProvider(Guid.Empty, inDto.EmployeeType), Constants.Action_AddRemoveUser))
         {
             throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+
+        if (inDto.EmployeeType is EmployeeType.RoomAdmin or EmployeeType.DocSpaceAdmin)
+        {
+            await countPaidUserChecker.CheckAppend();
         }
 
         var invitationLink = await userManager.GetInvitationLinkAsync(inDto.EmployeeType);
