@@ -99,7 +99,7 @@ public class NotifySenderService(
 
                 if (tasks.Count >= _notifyServiceCfg.Process.MaxThreads)
                 {
-                    await Task.WhenAny(tasks.ToArray());
+                    await Task.WhenAny(tasks);
                     tasks.RemoveAll(a => a.IsCompleted);
                 }
 
