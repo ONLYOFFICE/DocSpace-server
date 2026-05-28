@@ -107,11 +107,6 @@ public class PaymentController(
             throw new ArgumentException("Invalid quantity");
         }
 
-        if (!Uri.TryCreate(inDto.BackUrl, UriKind.Absolute, out var parsedUri))
-        {
-            throw new ArgumentException("Invalid URI format");
-        }
-
         var tenant = tenantManager.GetCurrentTenant();
         var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
         if (customerInfo != null)
