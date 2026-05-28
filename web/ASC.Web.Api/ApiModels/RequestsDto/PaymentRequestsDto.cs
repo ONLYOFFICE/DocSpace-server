@@ -79,6 +79,8 @@ public class PaymentAccountRequestDto
     /// The URL where the user will be redirected after payment processing.
     /// </summary>
     /// <example>https://example.com</example>
+    [Url]
+    [StringLength(255)]
     [FromQuery(Name = "backUrl")]
     public string BackUrl { get; set; }
 }
@@ -148,14 +150,20 @@ public class CheckoutSetupUrlRequestsDto
     /// The URL where the user will be redirected after setup cancellation.
     /// </summary>
     /// <example>https://example.com/payment/back</example>
+    [Url]
+    [Required]
     [FromQuery]
+    [StringLength(255)]
     public string BackUrl { get; set; }
 
     /// <summary>
     /// The URL where the user will be redirected after successful payment.
     /// </summary>
     /// <example>https://example.com/payment/success</example>
+    [Url]
+    [Required]
     [FromQuery]
+    [StringLength(255)]
     public string SuccessUrl { get; set; }
 }
 
