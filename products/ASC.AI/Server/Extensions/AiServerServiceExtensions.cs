@@ -45,8 +45,8 @@ public static class AiServerServiceExtensions
         services.AddBaseDbContextPool<FilesDbContext>();
         services.RegisterQuotaFeature();
 
-        services.AddSingleton<IToolPermissionRequester, RedisToolPermissionRequester>();
-        services.AddSingleton<IToolPermissionProvider, RedisToolPermissionProvider>();
+        services.AddSingleton<IToolCallReceiver, RedisToolCallReceiver>();
+        services.AddSingleton<IToolCallPublisher, RedisToolCallPublisher>();
 
         services.AddTransient<McpContentTypeHandler>();
         services.AddHttpClient(McpContentTypeHandler.HttpClientName)
