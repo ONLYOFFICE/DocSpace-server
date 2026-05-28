@@ -34,6 +34,7 @@
 using OpenTelemetry;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
 #pragma warning disable CA2000
@@ -68,13 +69,12 @@ public static class OpenTelemetryExtension
             var fileExporterEndpoint = builder.Configuration["OTEL_FILE_EXPORTER_ENDPOINT"];
             var fileEndpoint = !string.IsNullOrWhiteSpace(fileExporterEndpoint) ? new Uri(fileExporterEndpoint) : null;
 
-            builder.Logging.AddOpenTelemetry(logging =>
-            {
-                logging.IncludeFormattedMessage = true;
-                logging.IncludeScopes = true;
-            });
+            var serviceName = telemetrySettings?.ServiceName
+                ?? Environment.GetEnvironmentVariable("OTEL_SERVICE_NAME")
+                ?? builder.Environment.ApplicationName;
 
             builder.Services.AddOpenTelemetry()
+                .ConfigureResource(resource => resource.AddService(serviceName))
                 .WithMetrics(metrics =>
                 {
                     metrics.AddAspNetCoreInstrumentation()
@@ -114,7 +114,9 @@ public static class OpenTelemetryExtension
                     tracing
                         .AddHttpClientInstrumentation()
                         .AddAspNetCoreInstrumentation()
-                        .AddFusionCacheInstrumentation();
+                        .AddFusionCacheInstrumentation()
+                        .AddEntityFrameworkCoreInstrumentation()
+                        .AddRedisInstrumentation();
 
                     if (useOtlpExporter)
                     {
