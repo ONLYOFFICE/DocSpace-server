@@ -215,18 +215,14 @@ public class WarmupBaseDbContextStartupTask(IServiceProvider provider, ILogger<W
                 continue;
             }
 
-            var queries = t.GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public)
-                .Where(r => !r.IsSpecialName);
+            var queries = t
+                .GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public)
+                .Where(r => !r.IsSpecialName && r.IsDefined(typeof(PreCompileQuery), false));
 
             foreach (var q in queries)
             {
                 try
                 {
-                    if (q.GetCustomAttribute<PreCompileQuery>() == null)
-                    {
-                        continue;
-                    }
-
                     var args = q.GetParameters()
                         .Select(p => GetDefaultValue(p.ParameterType))
                         .ToArray();
