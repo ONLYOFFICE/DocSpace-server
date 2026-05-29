@@ -589,6 +589,7 @@ public class StudioNotifyService(
         try
         {
             INotifyAction notifyAction;
+            DateTime auditPasswordChangeEventDate = default;
 
             if (tenantExtra.Enterprise)
             {
@@ -609,8 +610,22 @@ public class StudioNotifyService(
             }
             else
             {
+                if (u.ActivationStatus == EmployeeActivationStatus.Activated)
+                {
+                    auditPasswordChangeEventDate = DateTime.UtcNow;
+                    auditPasswordChangeEventDate = new DateTime(
+                        auditPasswordChangeEventDate.Year,
+                        auditPasswordChangeEventDate.Month,
+                        auditPasswordChangeEventDate.Day,
+                        auditPasswordChangeEventDate.Hour,
+                        auditPasswordChangeEventDate.Minute,
+                        auditPasswordChangeEventDate.Second,
+                        0,
+                        DateTimeKind.Utc);
+                }
+
                 var saasAdminActivationV1NotifyAction = serviceProvider.GetService<SaasAdminActivationV1NotifyAction>();
-                await saasAdminActivationV1NotifyAction.Init(u);
+                await saasAdminActivationV1NotifyAction.Init(u, auditPasswordChangeEventDate);
                 notifyAction = saasAdminActivationV1NotifyAction;
             }
 
@@ -619,8 +634,15 @@ public class StudioNotifyService(
                 await settingsManager.SaveAsync(new FirstEmailConfirmSettings { IsFirst = true });
             }
 
+            var recipient = await studioNotifyHelper.RecipientFromEmailAsync(u.Email, false);
+            await studioNotifyServiceHelper.SendNoticeToAsync(notifyAction, recipient, [EMailSenderName]);
 
-            await studioNotifyServiceHelper.SendNoticeToAsync(notifyAction, await studioNotifyHelper.RecipientFromEmailAsync(u.Email, false), [EMailSenderName]);
+            if (auditPasswordChangeEventDate != default)
+            {
+                var displayUserName = u.DisplayUserName(false, displayUserSettingsHelper);
+                messageService.Send(MessageAction.UserSentPasswordChangeInstructions, MessageTarget.Create(u.Id),
+                    auditPasswordChangeEventDate, displayUserName);
+            }
         }
         catch (Exception error)
         {
