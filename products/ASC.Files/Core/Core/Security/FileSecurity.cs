@@ -2639,7 +2639,8 @@ public class FileSecurity(
         Guid subjectOwnerId,
         QuotaFilter quotaFilter,
         StorageFilter storageFilter,
-        int? groupId = null)
+        int? groupId = null,
+        RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None)
     {
         var securityDao = daoFactory.GetSecurityDao<string>();
 
@@ -2697,11 +2698,11 @@ public class FileSecurity(
         if (isAdmin && searchArea != SearchArea.Templates)
         {
             return await GetAllVirtualRoomsAsync(filterTypes, subjectId, searchText, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject, provider,
-                subjectFilter, subjectOwnerId, subjectEntries, quotaFilter, storageFilter, internalRoomsRecords, thirdPartyRoomsRecords, groupId);
+                subjectFilter, subjectOwnerId, subjectEntries, quotaFilter, storageFilter, internalRoomsRecords, thirdPartyRoomsRecords, groupId, privacyFilter);
         }
 
         return await GetVirtualRoomsForMeAsync(filterTypes, subjectId, searchText, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject, provider,
-            subjectFilter, subjectOwnerId, subjectEntries, storageFilter, internalRoomsRecords, thirdPartyRoomsRecords, groupId);
+            subjectFilter, subjectOwnerId, subjectEntries, storageFilter, internalRoomsRecords, thirdPartyRoomsRecords, groupId, privacyFilter);
     }
 
     private async Task<List<FileEntry>> GetAllVirtualRoomsAsync(
@@ -2722,7 +2723,8 @@ public class FileSecurity(
         StorageFilter storageFilter,
         Dictionary<int, FileShareRecord<int>> internalRecords,
         Dictionary<string, FileShareRecord<string>> thirdPartyRecords,
-        int? groupId)
+        int? groupId,
+        RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None)
     {
         var folderDao = daoFactory.GetFolderDao<int>();
         var folderThirdPartyDao = daoFactory.GetFolderDao<string>();
@@ -2741,11 +2743,11 @@ public class FileSecurity(
 
         var roomsEntries = storageFilter == StorageFilter.ThirdParty ?
             [] :
-            await folderDao.GetRoomsAsync(rootFoldersIds, filterTypes, tagNames, subjectId, search, withSubfolders, withoutTags, excludeSubject, provider, subjectFilter, subjectOwnerId, subjectEntries, quotaFilter, groupId)
+            await folderDao.GetRoomsAsync(rootFoldersIds, filterTypes, tagNames, subjectId, search, withSubfolders, withoutTags, excludeSubject, provider, subjectFilter, subjectOwnerId, subjectEntries, quotaFilter, groupId, privacyFilter)
                 .Where(r => withSubfolders || r.IsRoom)
                 .ToListAsync();
 
-        var thirdPartyRoomsEntries = storageFilter == StorageFilter.Internal ?
+        var thirdPartyRoomsEntries = storageFilter == StorageFilter.Internal || privacyFilter == RoomPrivacyFilter.Private ?
             [] :
             await folderThirdPartyDao.GetProviderBasedRoomsAsync(searchArea, filterTypes, tagNames, subjectId, search, withoutTags, excludeSubject, provider, subjectFilter, subjectOwnerId, subjectEntries, groupId)
                 .Where(r => withSubfolders || r.IsRoom)
@@ -2826,7 +2828,8 @@ public class FileSecurity(
         StorageFilter storageFilter,
         Dictionary<int, FileShareRecord<int>> internalRecords,
         Dictionary<string, FileShareRecord<string>> thirdPartyRecords,
-        int? groupId = null)
+        int? groupId = null,
+        RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None)
     {
         var folderDao = daoFactory.GetFolderDao<int>();
         var folderThirdPartyDao = daoFactory.GetFolderDao<string>();
@@ -2845,12 +2848,12 @@ public class FileSecurity(
 
         var rooms = storageFilter == StorageFilter.ThirdParty
             ? []
-            : await folderDao.GetRoomsAsync(internalRecords.Keys, filterTypes, tagNames, subjectId, search, withSubfolders, withoutTags, excludeSubject, provider, subjectFilter, subjectOwnerId, subjectEntries, rootFoldersIds, groupId)
+            : await folderDao.GetRoomsAsync(internalRecords.Keys, filterTypes, tagNames, subjectId, search, withSubfolders, withoutTags, excludeSubject, provider, subjectFilter, subjectOwnerId, subjectEntries, rootFoldersIds, groupId, privacyFilter)
                 .Where(r => withSubfolders || r.IsRoom)
                 .Where(r => Filter(r, internalRecords))
                 .ToListAsync();
 
-        var thirdPartyRooms = storageFilter == StorageFilter.Internal
+        var thirdPartyRooms = storageFilter == StorageFilter.Internal || privacyFilter == RoomPrivacyFilter.Private
             ? []
             : await folderThirdPartyDao.GetProviderBasedRoomsAsync(searchArea, thirdPartyRecords.Keys, filterTypes, tagNames, subjectId, search, withoutTags, excludeSubject, provider, subjectFilter, subjectOwnerId, subjectEntries, groupId)
                 .Where(r => withSubfolders || r.IsRoom)

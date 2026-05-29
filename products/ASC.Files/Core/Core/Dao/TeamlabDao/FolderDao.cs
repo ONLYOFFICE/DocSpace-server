@@ -172,7 +172,8 @@ internal class FolderDao(
         Guid subjectOwnerId,
         IEnumerable<string> subjectEntriesIds,
         QuotaFilter quotaFilter = QuotaFilter.All,
-        int? groupId = null)
+        int? groupId = null,
+        RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None)
     {
         if (CheckInvalidFilters(filterTypes) || (provider != ProviderFilter.None && provider != ProviderFilter.Storage))
         {
@@ -188,8 +189,8 @@ internal class FolderDao(
         var q = GetFolderQuery(filesDbContext, r => parentsIds.Contains(r.ParentId));
 
         q = !withSubfolders ?
-            BuildRoomsQuery(filesDbContext, q, filter, tags, subjectId, searchByTags, withoutTags, searchByTypes, false, excludeSubject, subjectFilter, subjectOwnerId, subjectEntriesIds, quotaFilter, groupId) :
-            BuildRoomsWithSubfoldersQuery(filesDbContext, parentsIds, filter, tags, searchByTags, searchByTypes, withoutTags, excludeSubject, subjectId, subjectFilter, subjectOwnerId, subjectEntriesIds);
+            BuildRoomsQuery(filesDbContext, q, filter, tags, subjectId, searchByTags, withoutTags, searchByTypes, false, excludeSubject, subjectFilter, subjectOwnerId, subjectEntriesIds, quotaFilter, groupId, privacyFilter) :
+            BuildRoomsWithSubfoldersQuery(filesDbContext, parentsIds, filter, tags, searchByTags, searchByTypes, withoutTags, excludeSubject, subjectId, subjectFilter, subjectOwnerId, subjectEntriesIds, privacyFilter);
 
         if (!string.IsNullOrEmpty(searchText))
         {
@@ -217,7 +218,8 @@ internal class FolderDao(
         Guid subjectOwnerId,
         IEnumerable<string> subjectEntriesIds,
         IEnumerable<int> parentsIds = null,
-        int? groupId = null)
+        int? groupId = null,
+        RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None)
     {
         if (CheckInvalidFilters(filterTypes) || provider != ProviderFilter.None)
         {
@@ -233,8 +235,8 @@ internal class FolderDao(
         var q = GetFolderQuery(filesDbContext, f => roomsIds.Contains(f.Id) || (f.CreateBy == _authContext.CurrentAccount.ID && parentsIds != null && parentsIds.Contains(f.ParentId)));
 
         q = !withSubfolders ?
-            BuildRoomsQuery(filesDbContext, q, filter, tags, subjectId, searchByTags, withoutTags, searchByTypes, false, excludeSubject, subjectFilter, subjectOwnerId, subjectEntriesIds, groupId: groupId) :
-            BuildRoomsWithSubfoldersQuery(filesDbContext, roomsIds, filter, tags, searchByTags, searchByTypes, withoutTags, excludeSubject, subjectId, subjectFilter, subjectOwnerId, subjectEntriesIds);
+            BuildRoomsQuery(filesDbContext, q, filter, tags, subjectId, searchByTags, withoutTags, searchByTypes, false, excludeSubject, subjectFilter, subjectOwnerId, subjectEntriesIds, groupId: groupId, privacyFilter: privacyFilter) :
+            BuildRoomsWithSubfoldersQuery(filesDbContext, roomsIds, filter, tags, searchByTags, searchByTypes, withoutTags, excludeSubject, subjectId, subjectFilter, subjectOwnerId, subjectEntriesIds, privacyFilter);
 
         if (!string.IsNullOrEmpty(searchText))
         {
@@ -2024,7 +2026,7 @@ internal class FolderDao(
     }
 
     private IQueryable<DbFolder> BuildRoomsQuery(FilesDbContext filesDbContext, IQueryable<DbFolder> query, IEnumerable<FolderType> folderTypes, IEnumerable<string> tags, Guid subjectId, bool searchByTags, bool withoutTags,
-        bool searchByFilter, bool withSubfolders, bool excludeSubject, SubjectFilter? subjectFilter, Guid subjectOwnerId, IEnumerable<string> subjectEntriesIds, QuotaFilter quotaFilter = QuotaFilter.All, int? groupId = null)
+        bool searchByFilter, bool withSubfolders, bool excludeSubject, SubjectFilter? subjectFilter, Guid subjectOwnerId, IEnumerable<string> subjectEntriesIds, QuotaFilter quotaFilter = QuotaFilter.All, int? groupId = null, RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None)
     {
         if (subjectFilter != null)
         {
@@ -2067,6 +2069,13 @@ internal class FolderDao(
                 : query.Where(f => f.Settings.Quota != TenantEntityQuotaSettings.DefaultQuotaValue);
         }
 
+        if (privacyFilter != RoomPrivacyFilter.None)
+        {
+            query = privacyFilter == RoomPrivacyFilter.Private
+                ? query.Where(f => f.Settings.Private)
+                : query.Where(f => !f.Settings.Private);
+        }
+
         if (withoutTags)
         {
             query = query.Where(f => !filesDbContext.TagLink.Join(filesDbContext.Tag, l => l.TagId, t => t.Id, (link, tag) => new { link.EntryId, tag })
@@ -2095,11 +2104,11 @@ internal class FolderDao(
     }
 
     private IQueryable<DbFolder> BuildRoomsWithSubfoldersQuery(FilesDbContext filesDbContext, IEnumerable<int> roomsIds, IEnumerable<FolderType> folderTypes, IEnumerable<string> tags, bool searchByTags, bool searchByFilter, bool withoutTags,
-        bool withoutMe, Guid subjectId, SubjectFilter? subjectFilter, Guid subjectOwnerId, IEnumerable<string> subjectEntriesIds)
+        bool withoutMe, Guid subjectId, SubjectFilter? subjectFilter, Guid subjectOwnerId, IEnumerable<string> subjectEntriesIds, RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None)
     {
         var q1 = GetFolderQuery(filesDbContext, f => roomsIds.Contains(f.Id));
 
-        q1 = BuildRoomsQuery(filesDbContext, q1, folderTypes, tags, subjectId, searchByTags, withoutTags, searchByFilter, true, withoutMe, subjectFilter, subjectOwnerId, subjectEntriesIds);
+        q1 = BuildRoomsQuery(filesDbContext, q1, folderTypes, tags, subjectId, searchByTags, withoutTags, searchByFilter, true, withoutMe, subjectFilter, subjectOwnerId, subjectEntriesIds, privacyFilter: privacyFilter);
 
         if (searchByTags)
         {

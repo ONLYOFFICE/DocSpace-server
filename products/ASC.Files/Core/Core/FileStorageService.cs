@@ -263,7 +263,8 @@ public class FileStorageService //: IFileStorageService
         FormsItemDto formsItemDto = null,
         Location? location = null,
         int? groupId = null,
-        T parentFolderId = default)
+        T parentFolderId = default,
+        RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None)
     {
         var subjectId = string.IsNullOrEmpty(subject) ? Guid.Empty : new Guid(subject);
         var subjectOwnerIdGuid = string.IsNullOrEmpty(subjectOwnerId) ? Guid.Empty : new Guid(subjectOwnerId);
@@ -413,7 +414,8 @@ public class FileStorageService //: IFileStorageService
                 formsItemDto,
                 location,
                 groupId,
-                parentFolderId);
+                parentFolderId,
+                privacyFilter);
         }
         catch (Exception e)
         {

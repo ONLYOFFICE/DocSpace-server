@@ -702,6 +702,11 @@ public abstract class VirtualRoomsController<T>(
     [HttpDelete("{id}/tags")]
     public async Task<FolderDto<T>> DeleteRoomTags(BatchTagsRequestDto<T> inDto)
     {
+        foreach (var batchTagsName in inDto.BatchTags.Names)
+        {
+            ArgumentNullException.ThrowIfNull(batchTagsName, nameof(inDto.BatchTags.Names));
+        }
+
         var room = await customTagsService.DeleteRoomTagsAsync(inDto.Id, inDto.BatchTags.Names);
         return await _folderDtoHelper.GetAsync(room);
     }
@@ -952,7 +957,8 @@ public class VirtualRoomsCommonController(
             inDto.SubjectOwnerId,
             quotaFilter: inDto.QuotaFilter ?? QuotaFilter.All,
             storageFilter: inDto.StorageFilter ?? StorageFilter.None,
-            groupId: inDto.GroupId ?? null);
+            groupId: inDto.GroupId ?? null,
+            privacyFilter: inDto.PrivacyFilter ?? RoomPrivacyFilter.None);
 
         var dto = await folderContentDtoHelper.GetAsync(parentId, content, startIndex);
 

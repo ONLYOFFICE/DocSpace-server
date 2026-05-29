@@ -86,7 +86,7 @@ public class ClientQueryRepositoryDynamoDomainAdapter implements ClientQueryRepo
    * @return an {@link Optional} containing the found client if it exists, or empty otherwise
    */
   public Optional<Client> findById(ClientId clientId) {
-    return Optional.of(dynamoClientRepository.findById(clientId.getValue().toString()))
+    return Optional.ofNullable(dynamoClientRepository.findById(clientId.getValue().toString()))
         .map(clientDataAccessMapper::toDomain);
   }
 
