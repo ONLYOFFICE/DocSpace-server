@@ -1,34 +1,34 @@
 ﻿// Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 using ValidationResult = System.ComponentModel.DataAnnotations.ValidationResult;
@@ -239,18 +239,62 @@ public class WarmupBaseDbContextStartupTask(IServiceProvider provider, ILogger<W
 
                     await using (context as IAsyncDisposable)
                     {
-                        if (q.Invoke(context, args) is Task task)
+                        var dbContext = (DbContext)context;
+                        var strategy = dbContext.Database.CreateExecutionStrategy();
+                        await strategy.ExecuteAsync(async () =>
                         {
-                            await task.ConfigureAwait(false);
-                        }
+                            await using var tx = await dbContext.Database.BeginTransactionAsync(cancellationToken);
+                            try
+                            {
+                                await ExecuteQueryAsync(q.Invoke(context, args), cancellationToken);
+                            }
+                            finally
+                            {
+                                await tx.RollbackAsync(cancellationToken);
+                            }
+                        });
                     }
                 }
                 catch (Exception e)
                 {
-                    logger.LogDebug(e, q.Name);
+                    logger.LogWarning(e, q.Name);
                 }
             }
         }
+    }
+
+    private static readonly MethodInfo _drainMethod =
+        typeof(WarmupBaseDbContextStartupTask).GetMethod(nameof(DrainAsync), BindingFlags.Static | BindingFlags.NonPublic);
+
+    private static async Task ExecuteQueryAsync(object result, CancellationToken cancellationToken)
+    {
+        switch (result)
+        {
+            case null:
+                return;
+            case Task task:
+                await task.ConfigureAwait(false);
+                return;
+        }
+
+        var asyncEnumerable = result.GetType().GetInterfaces().FirstOrDefault(i =>
+            i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IAsyncEnumerable<>));
+        if (asyncEnumerable != null)
+        {
+            var drain = _drainMethod.MakeGenericMethod(asyncEnumerable.GetGenericArguments()[0]);
+            var t = drain.Invoke(null, [result, cancellationToken]);
+            if (t is Task task)
+            {
+                await task;
+            }
+        }
+    }
+
+    // Enumerating the first element forces the compiled streaming query to translate to SQL and execute.
+    private static async Task DrainAsync<T>(IAsyncEnumerable<T> source, CancellationToken cancellationToken)
+    {
+        await using var enumerator = source.GetAsyncEnumerator(cancellationToken);
+        await enumerator.MoveNextAsync().ConfigureAwait(false);
     }
 
     private static object GetDefaultValue(Type type)

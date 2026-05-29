@@ -59,7 +59,7 @@ public partial class FilesDbContext
         return TagQueries.TmpShareFolderTagsAsync(this, tenantId, subject, folderType);
     }
 
-    [PreCompileQuery]
+    //[PreCompileQuery]
     public IAsyncEnumerable<TagLinkData> TmpShareSBoxTagsAsync(int tenantId, Guid subject, IEnumerable<string> selectorsIds)
     {
         return TagQueries.TmpShareSBoxTagsAsync(this, tenantId, subject, selectorsIds);
