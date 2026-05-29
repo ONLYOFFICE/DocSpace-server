@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     /// <inheritdoc />
-    public partial class MigrationContext_Upgrade83 : Migration
+    public partial class MigrationContext_Upgrade85 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -80,6 +80,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .Annotation("MySql:CharSet", "utf8"),
                     reasoning = table.Column<bool>(type: "tinyint(1)", nullable: true),
                     capabilities = table.Column<int>(type: "int", nullable: true),
+                    use_responses_api = table.Column<bool>(type: "tinyint(1)", nullable: true),
+                    can_use_tool = table.Column<bool>(type: "tinyint(1)", nullable: true),
                     created_at = table.Column<DateTime>(type: "datetime", nullable: false)
                 },
                 constraints: table =>
