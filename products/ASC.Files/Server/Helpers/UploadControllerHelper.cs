@@ -44,6 +44,7 @@ public class UploadControllerHelper(
     TenantManager tenantManager,
     IDaoFactory daoFactory,
     FileChecker fileChecker,
+    FilesMessageService filesMessageService,
     WebhookManager webhookManager,
     IEventBus eventBus,
     AuthContext authContext)
@@ -54,6 +55,7 @@ public class UploadControllerHelper(
         fileDtoHelper,
         fileStorageService,
         fileChecker,
+        filesMessageService,
         webhookManager,
         daoFactory,
         eventBus,
@@ -88,10 +90,7 @@ public class UploadControllerHelper(
             await _filesSettingsHelper.SetStoreOriginalFiles(uploadModel.StoreOriginalFileFlag.Value);
         }
 
-        if (uploadModel.File == null)
-        {
-            throw new InvalidOperationException("No input files");
-        }
+        ArgumentNullException.ThrowIfNull(uploadModel.File);
 
         var fileName = uploadModel.File.FileName;
 

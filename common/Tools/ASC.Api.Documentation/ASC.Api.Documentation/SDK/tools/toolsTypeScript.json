@@ -16,6 +16,7 @@
     "modelPackage": "models",
     "apiPackage": "api", 
     "axiosVersion": "1.13.5",
-    "useSingleRequestParameter": true
+    "useSingleRequestParameter": true,
+    "supportsES6": true
   }
 }

@@ -43,6 +43,7 @@ global using System.Globalization;
 global using System.Linq.Expressions;
 global using System.Net;
 global using System.Net.Http.Headers;
+global using System.Net.Sockets;
 global using System.Net.Http.Json;
 global using System.Reflection;
 global using System.Runtime.Serialization;

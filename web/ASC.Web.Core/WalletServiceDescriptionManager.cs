@@ -42,7 +42,7 @@ public class WalletServiceDescriptionManager
         { "search", "num_results" }
     };
 
-    public static (string, string, int) GetServiceDescriptionAndUom(Operation operation, string filterServiceName, Dictionary<string, string> metadata, string logoText)
+    public static (string, string, int) GetServiceDescriptionAndUom(Operation operation, string filterServiceName, Dictionary<string, string> metadata)
     {
         if (operation == null)
         {
@@ -99,7 +99,7 @@ public class WalletServiceDescriptionManager
             }
         }
 
-        var description = (Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceDesc_{serviceName}") ?? "").Replace("{LogoText}", logoText);
+        var description = (Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceDesc_{serviceName}") ?? "");
         var uom = Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceUOM_{serviceName}");
 
         return (description, uom, quantity);

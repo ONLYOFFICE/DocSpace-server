@@ -49,10 +49,8 @@ public class WebhooksController(
     MessageService messageService,
     SettingsManager settingsManager,
     PasswordSettingsManager passwordSettingsManager,
-    IHttpClientFactory clientFactory,
-    IConfiguration configuration,
-    ILogger<WebhooksController> logger,
-    WebhooksConfigDtoHelper webhooksConfigDtoHelper)
+    WebhooksConfigDtoHelper webhooksConfigDtoHelper,
+    IUrlValidator urlValidator)
     : BaseSettingsController(fusionCache, webItemManager)
 {
     /// <remarks>
@@ -421,45 +419,32 @@ public class WebhooksController(
             passwordSettingsManager.CheckPassword(secret, passwordSettings);
         }
 
-        var restrictions = configuration.GetSection("webhooks:blacklist").Get<List<string>>() ?? [];
-
-        if (!Uri.TryCreate(uri, UriKind.Absolute, out var parsedUri))
+        // Validate URL using centralized UrlValidator (SSRF protection)
+        var validationResult = await urlValidator.ValidateAsync(uri, new UrlValidationOptions
         {
-            throw new ArgumentException("Invalid URI format");
+            RequireHttps = ssl
+        });
+
+        if (!validationResult.IsValid)
+        {
+            throw new ArgumentException(validationResult.ErrorMessage);
         }
 
-        if (IPAddress.TryParse(parsedUri.Host, out _) &&
-            restrictions.Any(r => IPAddressRange.MatchIPs(parsedUri.Host, r)))
+        var handler = new SocketsHttpHandler
         {
-            throw new ArgumentException();
+            AllowAutoRedirect = false,
+            ConnectCallback = UrlValidator.PinnedConnectCallback
+        };
+
+        if (Uri.UriSchemeHttps.Equals(validationResult.ParsedUri.Scheme, StringComparison.OrdinalIgnoreCase) && !ssl)
+        {
+            handler.SslOptions.RemoteCertificateValidationCallback = (_, _, _, _) => true;
         }
 
-        IPAddress[] addresses;
-        try
-        {
-            addresses = await Dns.GetHostAddressesAsync(parsedUri.Host);
-        }
-        catch (Exception e)
-        {
-            var errorMsg = $"DNS resolution failed for {parsedUri.Host}";
-            logger.WarningWithException(errorMsg, e);
-            throw new ArgumentException(errorMsg);
-        }
-
-        if (addresses.Any(a => restrictions.Any(r => IPAddressRange.MatchIPs(a.ToString(), r))))
-        {
-            throw new ArgumentException();
-        }
-
-        var httpClientName = "customHttpClient";
-
-        if (Uri.UriSchemeHttps.Equals(parsedUri.Scheme, StringComparison.OrdinalIgnoreCase) && !ssl)
-        {
-            httpClientName = "customHttpClientSslIgnore";
-        }
-
-        using var httpClient = clientFactory.CreateClient(httpClientName);
-        using var request = new HttpRequestMessage(HttpMethod.Head, uri);
+        using var httpClient = new HttpClient(handler, disposeHandler: true);
+        httpClient.Timeout = TimeSpan.FromSeconds(10);
+        using var request = new HttpRequestMessage(HttpMethod.Head, validationResult.ParsedUri);
+        request.Options.Set(UrlValidator.PinnedIpKey, validationResult.ResolvedAddresses[0]);
         using var response = await httpClient.SendAsync(request);
 
         if (response is not { IsSuccessStatusCode: true })
