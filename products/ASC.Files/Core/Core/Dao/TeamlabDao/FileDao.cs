@@ -275,7 +275,7 @@ internal class FileDao(
     }
 
     public async IAsyncEnumerable<File<int>> GetFilesAsync(int parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension,
-        bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, int roomId = 0, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, FormsItemDto formsItemDto = null, bool applyFormStepFilter = false)
+        bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, int roomId = 0, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, FormsItemDto formsItemDto = null, bool applyFormStepFilter = false, bool applyFfrStartedFormsFilter = false)
     {
         if (filterType == FilterType.FoldersOnly || count == 0)
         {
@@ -293,6 +293,10 @@ internal class FileDao(
         if (applyFormStepFilter)
         {
             q = ApplyAdditionalFileFilters(q, filesDbContext, parentId, parentType, AdditionalFilterOption.FormsWithFillingRole);
+        }
+        if (applyFfrStartedFormsFilter)
+        {
+            q = ApplyAdditionalFileFilters(q, filesDbContext, parentId, parentType, AdditionalFilterOption.FfrStartedForms);
         }
 
         q = q.Skip(offset);
@@ -681,7 +685,6 @@ internal class FileDao(
                                             var u = a.Where(ace => ace is not { Access: FileShare.FillForms }).Select(ace => ace.Id).ToList();
 
                                             await socketManager.CreateFolderAsync(formFolder, u);
-                                            await filesMessageService.SendAsync(MessageAction.FolderCreated, formFolder, formFolder.Title);
                                         }
                                     }
 
@@ -2337,6 +2340,7 @@ internal class FileDao(
         var tenantId = _tenantManager.GetCurrentTenantId();
         var currentUserId = securityContext.CurrentAccount.ID;
         var guestUserId = ASC.Core.Configuration.Constants.Guest.ID;
+        var pdfCategories = new[] { (int)FilterType.PdfForm, (int)FilterType.Pdf };
 
         switch (additionalFilterOption)
         {
@@ -2385,14 +2389,22 @@ internal class FileDao(
                 break;
 
             case AdditionalFilterOption.FormsWithFillingRole:
-                var pdfCategories = new[] { (int)FilterType.PdfForm, (int)FilterType.Pdf };
-
                 q = q.Where(file =>
                     pdfCategories.Contains(file.Category) &&
                     filesDbContext.FilesFormRoleMapping.Any(m =>
                         m.TenantId == tenantId &&
                         m.FormId == file.Id &&
                         m.UserId == currentUserId)
+                );
+                break;
+
+            case AdditionalFilterOption.FfrStartedForms:
+                q = q.Where(file =>
+                    pdfCategories.Contains(file.Category) &&
+                    filesDbContext.FilesProperties.Any(p =>
+                        p.EntryId == file.Id.ToString() &&
+                        p.TenantId == tenantId &&
+                        p.StartFilling == true)
                 );
                 break;
         }

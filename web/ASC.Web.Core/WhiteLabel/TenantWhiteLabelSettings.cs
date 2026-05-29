@@ -576,8 +576,7 @@ public class TenantWhiteLabelSettingsHelper(
     UserManager userManager,
     SettingsManager settingsManager,
     IConfiguration configuration,
-    ILogger<TenantWhiteLabelSettingsHelper> logger,
-    IWhiteLabelLogoConverter logoConverter)
+    ILogger<TenantWhiteLabelSettingsHelper> logger)
 {
     private const string ModuleName = "whitelabel";
 
@@ -669,7 +668,8 @@ public class TenantWhiteLabelSettingsHelper(
         await store.SaveAsync(logoFileName, memory);
     }
 
-    public async Task SetLogo(TenantWhiteLabelSettings tenantWhiteLabelSettings, Dictionary<int, KeyValuePair<string, string>> logo, IDataStore storage = null)
+    public async Task SetLogo(TenantWhiteLabelSettings tenantWhiteLabelSettings, IWhiteLabelLogoConverter logoConverter,
+        Dictionary<int, KeyValuePair<string, string>> logo, IDataStore storage = null)
     {
         foreach (var currentLogo in logo)
         {
