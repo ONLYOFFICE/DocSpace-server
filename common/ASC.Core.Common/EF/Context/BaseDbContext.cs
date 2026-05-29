@@ -222,38 +222,14 @@ public class WarmupBaseDbContextStartupTask(IServiceProvider provider, ILogger<W
             {
                 try
                 {
-                    var @params = q.GetParameters();
-                    var paramsAttr = q.GetCustomAttribute<PreCompileQuery>();
-
-                    if (paramsAttr == null || paramsAttr.Data.Length != @params.Length)
+                    if (q.GetCustomAttribute<PreCompileQuery>() == null)
                     {
                         continue;
                     }
 
-                    var paramsToInvoke = new List<object>(@params.Length);
-
-                    for (var i = 0; i < @params.Length; i++)
-                    {
-                        var p = paramsAttr.Data[i];
-                        if (@params[i].ParameterType == typeof(Guid))
-                        {
-                            if (Guid.TryParse(p.ToString(), out var g))
-                            {
-                                paramsToInvoke.Add(g);
-                            }
-                        }
-                        else if (@params[i].ParameterType == typeof(DateTime))
-                        {
-                            if (DateTime.TryParse(p.ToString(), CultureInfo.InvariantCulture, out var d))
-                            {
-                                paramsToInvoke.Add(d);
-                            }
-                        }
-                        else
-                        {
-                            paramsToInvoke.Add(p);
-                        }
-                    }
+                    var args = q.GetParameters()
+                        .Select(p => GetDefaultValue(p.ParameterType))
+                        .ToArray();
 
                     var context = createDbContextMethod.Invoke(dbContextFactory, null);
                     if (context == null)
@@ -263,8 +239,7 @@ public class WarmupBaseDbContextStartupTask(IServiceProvider provider, ILogger<W
 
                     await using (context as IAsyncDisposable)
                     {
-                        var res = q.Invoke(context, paramsToInvoke.ToArray());
-                        if (res is Task task)
+                        if (q.Invoke(context, args) is Task task)
                         {
                             await task.ConfigureAwait(false);
                         }
@@ -277,14 +252,46 @@ public class WarmupBaseDbContextStartupTask(IServiceProvider provider, ILogger<W
             }
         }
     }
+
+    private static object GetDefaultValue(Type type)
+    {
+        var t = Nullable.GetUnderlyingType(type) ?? type;
+
+        if (t == typeof(string))
+        {
+            return null;
+        }
+        if (t == typeof(int))
+        {
+            return int.MaxValue;
+        }
+        if (t == typeof(long))
+        {
+            return long.MaxValue;
+        }
+        if (t == typeof(Guid))
+        {
+            return Guid.Empty;
+        }
+        if (t == typeof(DateTime))
+        {
+            return DateTime.MinValue;
+        }
+        if (t.IsEnum)
+        {
+            return Enum.GetValues(t).GetValue(0);
+        }
+
+        var enumerable = t.GetInterfaces().FirstOrDefault(i =>
+            i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEnumerable<>));
+        if (enumerable != null)
+        {
+            return Array.CreateInstance(enumerable.GetGenericArguments()[0], 0);
+        }
+
+        return t.IsValueType ? Activator.CreateInstance(t) : null;
+    }
 }
 
 [AttributeUsage(AttributeTargets.Method)]
-public class PreCompileQuery(object[] data) : Attribute
-{
-    public object[] Data { get; } = data;
-
-    public const int DefaultInt = int.MaxValue;
-    public const string DefaultGuid = "00000000-0000-0000-0000-000000000000";
-    public const string DefaultDateTime = "01/01/0001 00:00:00";
-}
+public class PreCompileQuery : Attribute;

@@ -1,204 +1,204 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Files.Core.EF;
 
 public partial class FilesDbContext
 {
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, null])]
-    public IAsyncEnumerable<TagLinkData> NewTagsForFilesAsync(int tenantId, Guid subject, List<string> where)
+    [PreCompileQuery]
+    public IAsyncEnumerable<TagLinkData> NewTagsForFilesAsync(int tenantId, Guid subject, IEnumerable<string> where)
     {
         return TagQueries.NewTagsForFilesAsync(this, tenantId, subject, where);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, null])]
-    public IAsyncEnumerable<TagLinkData> NewTagsForFoldersAsync(int tenantId, Guid subject, List<string> monitorFolderIdsStrings)
+    [PreCompileQuery]
+    public IAsyncEnumerable<TagLinkData> NewTagsForFoldersAsync(int tenantId, Guid subject, IEnumerable<string> monitorFolderIdsStrings)
     {
         return TagQueries.NewTagsForFoldersAsync(this, tenantId, subject, monitorFolderIdsStrings);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, FolderType.CustomRoom])]
+    [PreCompileQuery]
     public IAsyncEnumerable<TagLinkData> TmpShareFileTagsAsync(int tenantId, Guid subject, FolderType folderType)
     {
         return TagQueries.TmpShareFileTagsAsync(this, tenantId, subject, folderType);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, FolderType.CustomRoom])]
+    [PreCompileQuery]
     public IAsyncEnumerable<TagLinkData> TmpShareFolderTagsAsync(int tenantId, Guid subject, FolderType folderType)
     {
         return TagQueries.TmpShareFolderTagsAsync(this, tenantId, subject, folderType);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, null])]
-    public IAsyncEnumerable<TagLinkData> TmpShareSBoxTagsAsync(int tenantId, Guid subject, List<string> selectorsIds)
+    [PreCompileQuery]
+    public IAsyncEnumerable<TagLinkData> TmpShareSBoxTagsAsync(int tenantId, Guid subject, IEnumerable<string> selectorsIds)
     {
         return TagQueries.TmpShareSBoxTagsAsync(this, tenantId, subject, selectorsIds);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public IAsyncEnumerable<TagLinkData> ProjectsAsync(int tenantId, Guid subject)
     {
         return TagQueries.ProjectsAsync(this, tenantId, subject);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, null])]
-    public IAsyncEnumerable<TagLinkData> NewTagsForSBoxAsync(int tenantId, Guid subject, List<string> thirdpartyFolderIds)
+    [PreCompileQuery]
+    public IAsyncEnumerable<TagLinkData> NewTagsForSBoxAsync(int tenantId, Guid subject, IEnumerable<string> thirdpartyFolderIds)
     {
         return TagQueries.NewTagsForSBoxAsync(this, tenantId, subject, thirdpartyFolderIds);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public IAsyncEnumerable<TagLinkData> NewTagsThirdpartyRoomsAsync(int tenantId, Guid subject)
     {
         return TagQueries.NewTagsThirdpartyRoomsAsync(this, tenantId, subject);
     }
 
-    [PreCompileQuery([null, false])]
-    public IAsyncEnumerable<int> FolderAsync(List<int> monitorFolderIdsInt, bool deepSearch)
+    [PreCompileQuery]
+    public IAsyncEnumerable<int> FolderAsync(IEnumerable<int> monitorFolderIdsInt, bool deepSearch)
     {
         return TagQueries.FolderAsync(this, monitorFolderIdsInt, deepSearch);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, FolderType.CustomRoom, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public IAsyncEnumerable<int> ThirdpartyAccountAsync(int tenantId, FolderType folderType, Guid subject)
     {
         return TagQueries.ThirdpartyAccountAsync(this, tenantId, folderType, subject);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null, null, null])]
+    [PreCompileQuery]
     public IAsyncEnumerable<TagLinkData> TagsAsync(int tenantId, IEnumerable<TagType> tagType, IEnumerable<string> filesId, IEnumerable<string> foldersId)
     {
         return TagQueries.TagsAsync(this, tenantId, tagType, filesId, foldersId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, TagType.Custom, null, null, null])]
+    [PreCompileQuery]
     public IAsyncEnumerable<TagLinkData> GetTagsByEntryTypeAsync(int tenantId, TagType? tagType, FileEntryType entryType, string mappedId, Guid? owner, string name)
     {
         return TagQueries.GetTagsByEntryTypeAsync(this, tenantId, tagType, entryType, mappedId, owner, name);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, TagType.Custom])]
+    [PreCompileQuery]
     public IAsyncEnumerable<TagLinkData> TagsByOwnerAsync(int tenantId, Guid owner, string entryId, params IEnumerable<TagType> tagType)
     {
         return TagQueries.TagsByOwnerAsync(this, tenantId, owner, entryId, tagType);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null, TagType.Custom])]
+    [PreCompileQuery]
     public IAsyncEnumerable<TagLinkData> TagsInfoAsync(int tenantId, IEnumerable<string> names, TagType type)
     {
         return TagQueries.TagsInfoAsync(this, tenantId, names, type);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultDateTime])]
+    [PreCompileQuery]
     public Task<int> MustBeDeletedFilesAsync(int tenantId, DateTime date)
     {
         return TagQueries.MustBeDeletedFilesAsync(this, tenantId, date);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public Task<bool> AnyTagLinkByIdsAsync(int tenantId, IEnumerable<int> tagsIds)
     {
         return TagQueries.AnyTagLinkByIdsAsync(this, tenantId, tagsIds);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, null, TagType.Custom])]
+    [PreCompileQuery]
     public Task<int> FirstTagIdAsync(int tenantId, Guid owner, string name, TagType type)
     {
         return TagQueries.FirstTagIdAsync(this, tenantId, owner, name, type);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task<bool> AnyTagLinkByIdAsync(int tenantId, int id)
     {
         return TagQueries.AnyTagLinkByIdAsync(this, tenantId, id);
     }
 
-    [PreCompileQuery([])]
+    [PreCompileQuery]
     public Task<int> DeleteTagAsync()
     {
         return TagQueries.DeleteTagAsync(this);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultGuid, null, TagType.Custom, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task<int> TagIdAsync(Guid owner, string name, TagType type, int tenantId)
     {
         return TagQueries.TagIdAsync(this, owner, name, type, tenantId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, FileEntryType.File, null, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultDateTime, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task<int> UpdateTagLinkAsync(int tenantId, int tagId, FileEntryType tagEntryType, string mappedId, Guid createdBy, DateTime createOn, int count)
     {
         return TagQueries.UpdateTagLinkAsync(this, tenantId, tagId, tagEntryType, mappedId, createdBy, createOn, count);
     }
 
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null, null, FileEntryType.File])]
+    [PreCompileQuery]
     public Task<int> DeleteTagLinksAsync(int tenantId, IEnumerable<int> tagsIds, string entryId, FileEntryType type)
     {
         return TagQueries.DeleteTagLinksAsync(this, tenantId, tagsIds, entryId, type);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null, FileEntryType.File, TagType.Custom])]
+    [PreCompileQuery]
     public Task<int> DeleteTagLinksByEntryIdAsync(int tenantId, string mappedId, FileEntryType entryType, TagType tagType)
     {
         return TagQueries.DeleteTagLinksByEntryIdAsync(this, tenantId, mappedId, entryType, tagType);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task<int> DeleteTagLinksByTagIdAsync(int tenantId, int id)
     {
         return TagQueries.DeleteTagLinksByTagIdAsync(this, tenantId, id);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task<int> DeleteTagByIdAsync(int tenantId, int id)
     {
         return TagQueries.DeleteTagByIdAsync(this, tenantId, id);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null, null, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public IAsyncEnumerable<TagLinkData> TagLinkDataAsync(int tenantId, IEnumerable<string> entryIds, IEnumerable<int> entryTypes, Guid subject)
     {
         return TagQueries.TagLinkDataAsync(this, tenantId, entryIds, entryTypes, subject);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public Task<int> DeleteTagsByIdsAsync(int tenantId, IEnumerable<int> tagsIds)
     {
         return TagQueries.DeleteTagsByIdsAsync(this, tenantId, tagsIds);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null, FileEntryType.File, null, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultDateTime])]
+    [PreCompileQuery]
     public Task<int> IncrementNewTagsAsync(int tenantId, IEnumerable<int> tagsIds, FileEntryType tagEntryType, string mappedId, Guid createdBy, DateTime createOn)
     {
         return TagQueries.IncrementNewTagsAsync(this, tenantId, tagsIds, tagEntryType, mappedId, createdBy, createOn);
@@ -207,9 +207,9 @@ public partial class FilesDbContext
 
 static file class TagQueries
 {
-    public static readonly Func<FilesDbContext, int, Guid, List<string>, IAsyncEnumerable<TagLinkData>> NewTagsForFilesAsync =
+    public static readonly Func<FilesDbContext, int, Guid, IEnumerable<string>, IAsyncEnumerable<TagLinkData>> NewTagsForFilesAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, Guid subject, List<string> where) =>
+            (FilesDbContext ctx, int tenantId, Guid subject, IEnumerable<string> where) =>
                 ctx.Tag
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => subject == Guid.Empty || r.Owner == subject)
@@ -226,9 +226,9 @@ static file class TagQueries
                     .Select(r => r.tagLink)
                     .Distinct());
 
-    public static readonly Func<FilesDbContext, int, Guid, List<string>, IAsyncEnumerable<TagLinkData>> NewTagsForFoldersAsync =
+    public static readonly Func<FilesDbContext, int, Guid, IEnumerable<string>, IAsyncEnumerable<TagLinkData>> NewTagsForFoldersAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, Guid subject, List<string> monitorFolderIdsStrings) =>
+            (FilesDbContext ctx, int tenantId, Guid subject, IEnumerable<string> monitorFolderIdsStrings) =>
                 ctx.Tag
 
                     .Where(r => r.TenantId == tenantId)
@@ -307,9 +307,9 @@ static file class TagQueries
                     .Select(r => r.tagLink)
                     .Distinct());
 
-    public static readonly Func<FilesDbContext, int, Guid, List<string>, IAsyncEnumerable<TagLinkData>> TmpShareSBoxTagsAsync =
+    public static readonly Func<FilesDbContext, int, Guid, IEnumerable<string>, IAsyncEnumerable<TagLinkData>> TmpShareSBoxTagsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, Guid subject, List<string> selectorsIds) =>
+            (FilesDbContext ctx, int tenantId, Guid subject, IEnumerable<string> selectorsIds) =>
                 ctx.Tag
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => subject == Guid.Empty || r.Owner == subject)
@@ -345,9 +345,9 @@ static file class TagQueries
                     .Select(r => r.tagLink)
                     .Distinct());
 
-    public static readonly Func<FilesDbContext, int, Guid, List<string>, IAsyncEnumerable<TagLinkData>> NewTagsForSBoxAsync =
+    public static readonly Func<FilesDbContext, int, Guid, IEnumerable<string>, IAsyncEnumerable<TagLinkData>> NewTagsForSBoxAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, Guid subject, List<string> thirdpartyFolderIds) =>
+            (FilesDbContext ctx, int tenantId, Guid subject, IEnumerable<string> thirdpartyFolderIds) =>
                 ctx.Tag
 
                     .Where(r => r.TenantId == tenantId)
@@ -386,9 +386,9 @@ static file class TagQueries
                                 r.account.FolderType == FolderType.VirtualRooms)
                     .Select(r => r.tagLinkData.tagLink).Distinct());
 
-    public static readonly Func<FilesDbContext, List<int>, bool, IAsyncEnumerable<int>> FolderAsync =
+    public static readonly Func<FilesDbContext, IEnumerable<int>, bool, IAsyncEnumerable<int>> FolderAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, List<int> monitorFolderIdsInt, bool deepSearch) =>
+            (FilesDbContext ctx, IEnumerable<int> monitorFolderIdsInt, bool deepSearch) =>
                 ctx.Tree
 
                     .Where(r => monitorFolderIdsInt.Contains(r.ParentId))

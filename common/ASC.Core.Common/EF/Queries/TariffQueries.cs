@@ -35,19 +35,19 @@ namespace ASC.Core.Common.EF;
 
 public partial class CoreDbContext
 {
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task<DbTariff> TariffAsync(int? tenantId, int? id)
     {
         return Queries.TariffAsync(this, tenantId, id);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public IAsyncEnumerable<Billing.Quota> QuotasAsync(int tenantId, int id)
     {
         return Queries.QuotasAsync(this, tenantId, id);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task<int> DeleteTariffs(int tenantId)
     {
         return Queries.DeleteTariffs(this, tenantId);
