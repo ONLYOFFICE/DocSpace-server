@@ -35,109 +35,109 @@ namespace ASC.Files.Core.EF;
 
 public partial class FilesDbContext
 {
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public IAsyncEnumerable<DbFolder> FoldersAsync(int tenantId, IEnumerable<int> folderId)
     {
         return AbstractQueries.FoldersAsync(this, tenantId, folderId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, int.MaxValue])]
+    [PreCompileQuery]
     public Task<int> FilesCountAsync(int tenantId, int folderId)
     {
         return AbstractQueries.FilesCountAsync(this, tenantId, folderId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public Task<string> IdAsync(int tenantId, string hashId)
     {
         return AbstractQueries.IdAsync(this, tenantId, hashId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, FileEntryType.File])]
+    [PreCompileQuery]
     public Task<bool> IsIndexingAsync(int tenantId, int parentFolderId, FileEntryType entryType)
     {
         return AbstractQueries.IsIndexingAsync(this, tenantId, parentFolderId, entryType);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, FileEntryType.File])]
+    [PreCompileQuery]
     public Task<DbFileOrder> GetFileOrderAsync(int tenantId, int entryId, FileEntryType entryType)
     {
         return AbstractQueries.GetFileOrderAsync(this, tenantId, entryId, entryType);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, FileEntryType.File])]
+    [PreCompileQuery]
     public Task ClearFileOrderAsync(int tenantId, int parentFolderId, FileEntryType entryType)
     {
         return AbstractQueries.ClearFileOrderAsync(this, tenantId, parentFolderId, entryType);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task<int> GetLastFileOrderAsync(int tenantId, int parentFolderId)
     {
         return AbstractQueries.GetLastFileOrderAsync(this, tenantId, parentFolderId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task IncreaseFileOrderAsync(int tenantId, int parentFolderId, int newOrder, int currentOrder)
     {
         return AbstractQueries.IncreaseFileOrderAsync(this, tenantId, parentFolderId, newOrder, currentOrder);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task DecreaseFileOrderAsync(int tenantId, int parentFolderId, int newOrder, int currentOrder)
     {
         return AbstractQueries.DecreaseFileOrderAsync(this, tenantId, parentFolderId, newOrder, currentOrder);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task ChangeFilesCountAsync(int tenantId, int folderId, int counter)
     {
         return AbstractQueries.ChangeFilesCountAsync(this, tenantId, folderId, counter);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task ChangeFoldersCountAsync(int tenantId, int folderId, int counter)
     {
         return AbstractQueries.ChangeFoldersCountAsync(this, tenantId, folderId, counter);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, FileEntryType.File])]
+    [PreCompileQuery]
     public Task<int> DeleteAuditReferencesAsync(int entryId, FileEntryType entryType)
     {
         return AbstractQueries.DeleteAuditReferencesAsync(this, entryId, entryType);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, FileEntryType.File])]
+    [PreCompileQuery]
     public Task<int> DeleteLinksAsync(int tenantId, int entryId, FileEntryType entryType)
     {
         return AbstractQueries.DeleteLinksAsync(this, tenantId, entryId, entryType);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, FileEntryType.File])]
+    [PreCompileQuery]
     public IAsyncEnumerable<int> GetAuditEventsIdsAsync(int entryId, FileEntryType entryType)
     {
         return AbstractQueries.GetAuditEventsIdsAsync(this, entryId, entryType);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, FileEntryType.File])]
+    [PreCompileQuery]
     public Task<int> MarkAuditReferencesAsCorruptedAsync(IEnumerable<int> eventsIds)
     {
         return AbstractQueries.MarkAuditReferencesAsCorruptedAsync(this, eventsIds);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task DeleteChatsAsync(int folderId)
     {
         return AbstractQueries.DeleteChatsAsync(this, folderId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task DeleteFileKeysAsync(int entryId, int tenantId)
     {
         return AbstractQueries.DeleteFileKeysAsync(this, entryId, tenantId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public Task DeleteFileKeysAsync(int tenantId, int fileId, IEnumerable<Guid> userIds)
     {
         return AbstractQueries.DeleteFileKeysByUsersAsync(this, tenantId, fileId, userIds);

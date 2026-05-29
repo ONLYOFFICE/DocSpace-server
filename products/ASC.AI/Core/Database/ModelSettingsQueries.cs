@@ -35,25 +35,25 @@ namespace ASC.AI.Core.Database;
 
 public partial class AiDbContext
 {
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public IAsyncEnumerable<DbAiModelSettings> GetModelSettingsAsync(int tenantId, int providerId)
     {
         return Queries.GetModelSettingsAsync(this, tenantId, providerId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public Task<DbAiModelSettings?> GetModelSettingAsync(int tenantId, int providerId, string modelId)
     {
         return Queries.GetModelSettingAsync(this, tenantId, providerId, modelId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public IAsyncEnumerable<DbAiModelSettings> GetModelSettingsByIdsAsync(int tenantId, int providerId, IEnumerable<string> modelIds)
     {
         return Queries.GetModelSettingsByIdsAsync(this, tenantId, providerId, modelIds);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public Task DeleteModelSettingsAsync(int tenantId, int providerId, string modelId)
     {
         return Queries.DeleteModelSettingsAsync(this, tenantId, providerId, modelId);
