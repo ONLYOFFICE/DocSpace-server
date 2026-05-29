@@ -589,7 +589,7 @@ public class StudioNotifyService(
         try
         {
             INotifyAction notifyAction;
-            DateTime auditPasswordChangeEventDate = default;
+            DateTime? auditPasswordChangeEventDate = null;
 
             if (tenantExtra.Enterprise)
             {
@@ -612,14 +612,14 @@ public class StudioNotifyService(
             {
                 if (u.ActivationStatus == EmployeeActivationStatus.Activated)
                 {
-                    auditPasswordChangeEventDate = DateTime.UtcNow;
+                    var now = DateTime.UtcNow;
                     auditPasswordChangeEventDate = new DateTime(
-                        auditPasswordChangeEventDate.Year,
-                        auditPasswordChangeEventDate.Month,
-                        auditPasswordChangeEventDate.Day,
-                        auditPasswordChangeEventDate.Hour,
-                        auditPasswordChangeEventDate.Minute,
-                        auditPasswordChangeEventDate.Second,
+                        now.Year,
+                        now.Month,
+                        now.Day,
+                        now.Hour,
+                        now.Minute,
+                        now.Second,
                         0,
                         DateTimeKind.Utc);
                 }
@@ -637,7 +637,7 @@ public class StudioNotifyService(
             var recipient = await studioNotifyHelper.RecipientFromEmailAsync(u.Email, false);
             await studioNotifyServiceHelper.SendNoticeToAsync(notifyAction, recipient, [EMailSenderName]);
 
-            if (auditPasswordChangeEventDate != default)
+            if (auditPasswordChangeEventDate.HasValue)
             {
                 var displayUserName = u.DisplayUserName(false, displayUserSettingsHelper);
                 messageService.Send(MessageAction.UserSentPasswordChangeInstructions, MessageTarget.Create(u.Id),

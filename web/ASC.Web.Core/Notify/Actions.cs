@@ -1515,7 +1515,7 @@ public sealed class SaasAdminActivationV1NotifyAction(StudioNotifyHelper studioN
         ];
     }
 
-    public async Task Init(UserInfo u, DateTime auditPasswordChangeEventDate)
+    public async Task Init(UserInfo u, DateTime? auditPasswordChangeEventDate)
     {
         var culture = GetCulture(u);
 
@@ -1528,9 +1528,9 @@ public sealed class SaasAdminActivationV1NotifyAction(StudioNotifyHelper studioN
             var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonConfirm", culture);
             orangeButton = TagValues.OrangeButton(orangeButtonText, await urlShortener.GetShortenLinkAsync(confirmationUrl));
         }
-        else
+        else if (auditPasswordChangeEventDate.HasValue)
         {
-            var hash = auditPasswordChangeEventDate.ToString("s", CultureInfo.InvariantCulture);
+            var hash = auditPasswordChangeEventDate.Value.ToString("s", CultureInfo.InvariantCulture);
 
             var confirmationUrl = commonLinkUtility.GetConfirmationEmailUrl(u.Email, ConfirmType.PasswordChange, hash, u.Id);
             var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonChangePassword", culture);
