@@ -1002,7 +1002,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Name = "aitools",
                             Price = 1m,
                             ServiceName = "ai-tools",
-                            Visible = true,
+                            Visible = false,
                             Wallet = true
                         });
                 });

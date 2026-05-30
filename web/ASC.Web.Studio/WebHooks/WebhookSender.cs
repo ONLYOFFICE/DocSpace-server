@@ -32,6 +32,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 using ASC.Core;
+using ASC.Core.Common.Security;
 using ASC.MessagingSystem.Core;
 using ASC.MessagingSystem.EF.Model;
 using ASC.Webhooks.Core.EF.Model;
@@ -44,7 +45,8 @@ public class WebhookSender(
     IServiceScopeFactory scopeFactory,
     IHttpClientFactory clientFactory,
     ResiliencePipelineProvider<string> resiliencePipelineProvider,
-    Settings settings)
+    Settings settings,
+    IUrlValidator urlValidator)
 {
     private readonly JsonSerializerOptions _jsonSerializerOptions = new()
     {
@@ -74,14 +76,19 @@ public class WebhookSender(
             await tenantManager.SetCurrentTenantAsync(webhookRequest.TenantId);
 
             var entry = await dbWorker.ReadJournal(webhookRequest.TenantId, webhookRequest.WebhookLogId);
-
-            if (entry == null || !Uri.TryCreate(entry.Config.Uri, UriKind.Absolute, out var configUri))
+            if (entry == null)
             {
                 return;
             }
 
-            if (!await CheckWebhookBlacklisted(configUri, entry, dbWorker, messageService))
+            // Validate URL using centralized UrlValidator (SSRF protection)
+            var validationResult = await urlValidator.ValidateAsync(entry.Config.Uri, new UrlValidationOptions
             {
+                RequireHttps = entry.Config.SSL
+            });
+            if (!validationResult.IsValid)
+            {
+                await DisableWebhook(validationResult, entry, dbWorker, messageService);
                 return;
             }
 
@@ -122,7 +129,8 @@ public class WebhookSender(
 
                 var response = await pipeline.ExecuteAsync(async context =>
                 {
-                    var request = new HttpRequestMessage(HttpMethod.Post, configUri);
+                    var request = new HttpRequestMessage(HttpMethod.Post, validationResult.ParsedUri);
+                    request.Options.Set(UrlValidator.PinnedIpKey, validationResult.ResolvedAddresses[0]);
 
                     var retryCount = context.Properties.GetValue(RetryCountPropKey, 0);
 
@@ -220,51 +228,24 @@ public class WebhookSender(
         }
     }
 
-    private async Task<bool> CheckWebhookBlacklisted(Uri configUri, DbWebhooksLog entry, DbWorker dbWorker, MessageService messageService)
+    private static async Task DisableWebhook(UrlValidationResult validationResult, DbWebhooksLog entry, DbWorker dbWorker,
+        MessageService messageService)
     {
-        if (IPAddress.TryParse(configUri.Host, out var ip) && IsBlacklisted([ip]))
+        if (validationResult.Blacklisted)
         {
             await dbWorker.RemoveWebhookConfigAsync(entry.ConfigId);
-            messageService.SendHeadersMessage(MessageAction.WebhookDeleted, MessageTarget.Create(entry.ConfigId), null, $"{entry.Config.Name} (blacklist)");
-            return false;
+            messageService.SendHeadersMessage(MessageAction.WebhookDeleted,
+                MessageTarget.Create(entry.ConfigId), null,
+                $"{entry.Config.Name} (blacklist)");
         }
-
-        var addresses = await GetHostAddressesAsync(configUri);
-        if (addresses is not { Length: > 0})
+        else
         {
             entry.Config.Enabled = false;
             await dbWorker.UpdateWebhookConfig(entry.Config, true);
-            messageService.SendHeadersMessage(MessageAction.WebhookUpdated, MessageTarget.Create(entry.ConfigId), null, $"{entry.Config.Name} (DNS resolution failed for {configUri.Host})");
-            return false;
+            messageService.SendHeadersMessage(MessageAction.WebhookUpdated,
+                MessageTarget.Create(entry.ConfigId), null,
+                $"{entry.Config.Name} ({validationResult.ErrorMessage})");
         }
-
-        if (IsBlacklisted(addresses))
-        {
-            await dbWorker.RemoveWebhookConfigAsync(entry.ConfigId);
-            messageService.SendHeadersMessage(MessageAction.WebhookDeleted, MessageTarget.Create(entry.ConfigId), null, $"{entry.Config.Name} (blacklist)");
-            return false;
-        }
-
-        return true;
-    }
-
-    private async Task<IPAddress[]> GetHostAddressesAsync(Uri uri)
-    {
-        IPAddress[] addresses = null;
-        try
-        {
-            addresses = await Dns.GetHostAddressesAsync(uri.Host);
-        }
-        catch (Exception e)
-        {
-            logger.ErrorWithException($"DNS resolution failed for {uri.Host}", e);
-        }
-        return addresses;
-    }
-
-    private bool IsBlacklisted(IPAddress[] addresses)
-    {
-        return addresses.Any(a => settings.Blacklist.Any(r => IPAddressRange.MatchIPs(a.ToString(), r)));
     }
 
     private static string GetSecretHash(string secretKey, string body)
@@ -290,17 +271,23 @@ public static class WebhookSenderExtension
 
         services.AddHttpClient(WebhookSender.WebhookHttpClient)
             .SetHandlerLifetime(lifeTime)
-            .ConfigurePrimaryHttpMessageHandler(_ => new HttpClientHandler
+            .ConfigurePrimaryHttpMessageHandler(_ => new SocketsHttpHandler
             {
-                AllowAutoRedirect = false
+                AllowAutoRedirect = false,
+                ConnectCallback = UrlValidator.PinnedConnectCallback
             });
 
         services.AddHttpClient(WebhookSender.WebhookHttpClientSslIgnore)
             .SetHandlerLifetime(lifeTime)
-            .ConfigurePrimaryHttpMessageHandler(_ => new HttpClientHandler
+            .ConfigurePrimaryHttpMessageHandler(_ =>
             {
-                AllowAutoRedirect = false,
-                ServerCertificateCustomValidationCallback = (_, _, _, _) => true
+                var handler = new SocketsHttpHandler
+                {
+                    AllowAutoRedirect = false,
+                    ConnectCallback = UrlValidator.PinnedConnectCallback
+                };
+                handler.SslOptions.RemoteCertificateValidationCallback = (_, _, _, _) => true;
+                return handler;
             });
 
         services.AddResiliencePipeline<string, HttpResponseMessage>(WebhookSender.WebhookResiliencePipeline, pipelineBuilder =>

@@ -1426,6 +1426,83 @@
         ]
       }
     },
+    "/api/2.0/ai/chats/tool-files/{callId}/decision": {
+      "post": {
+        "tags": [
+          "AI / Chat"
+        ],
+        "summary": "Resolve a pending editor file-generation tool",
+        "description": "Submits the user's approval or denial for a pending editor generation tool call (docx, form, presentation).\r\nOn approval the file is created from the original tool arguments and information about it is returned,\r\nwhile the suspended chat tool is resumed with the same result so the AI session can continue.",
+        "operationId": "resolveEditorTool",
+        "parameters": [
+          {
+            "name": "callId",
+            "in": "path",
+            "description": "The unique identifier of the pending tool call awaiting the user's decision.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "call_abc123"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "The decision parameters.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditorToolDecisionRequestBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Information about the created file, or empty if the request was declined or has expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneratedFileWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": []
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": []
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": []
+          }
+        ]
+      }
+    },
     "/api/2.0/ai/rooms/{roomId}/chats/config": {
       "put": {
         "tags": [
@@ -6557,6 +6634,9 @@
               }
             }
           },
+          "403": {
+            "description": "You don't have enough permission to perform the operation"
+          },
           "404": {
             "description": "Not Found"
           },
@@ -6646,6 +6726,9 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "You don't have enough permission to perform the operation"
           },
           "404": {
             "description": "Not Found"
@@ -9342,6 +9425,9 @@
               }
             }
           },
+          "403": {
+            "description": "You don't have enough permission to perform the operation"
+          },
           "404": {
             "description": "Not Found"
           },
@@ -9431,6 +9517,9 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "You don't have enough permission to perform the operation"
           },
           "404": {
             "description": "Not Found"
@@ -17419,6 +17508,9 @@
               }
             }
           },
+          "403": {
+            "description": "You don't have enough permission to perform the operation"
+          },
           "404": {
             "description": "Not Found"
           },
@@ -23042,7 +23134,7 @@
           "People / Password"
         ],
         "summary": "Remind a user password",
-        "description": "Reminds a password to the user using the email address specified in the request.",
+        "description": "Sends a password recovery email to the specified user address.\r\nFor unauthenticated requests, CAPTCHA validation is required when CAPTCHA is enabled in the configuration.",
         "operationId": "sendUserPassword",
         "requestBody": {
           "content": {
@@ -28766,6 +28858,9 @@
           "403": {
             "description": "No permissions to perform this action"
           },
+          "404": {
+            "description": "No migration is in progress"
+          },
           "401": {
             "description": "Unauthorized"
           }
@@ -29162,7 +29257,10 @@
             "in": "query",
             "description": "The URL where the user will be redirected after payment processing.",
             "schema": {
+              "maxLength": 255,
+              "minLength": 0,
               "type": "string",
+              "format": "uri",
               "example": "https://example.com"
             }
           }
@@ -29713,10 +29811,27 @@
           {
             "name": "BackUrl",
             "in": "query",
-            "description": "The URL where the user will be redirected after completing the setup.",
+            "description": "The URL where the user will be redirected after setup cancellation.",
+            "required": true,
             "schema": {
+              "maxLength": 255,
+              "minLength": 0,
               "type": "string",
-              "example": "https://example.com/setup/complete"
+              "format": "uri",
+              "example": "https://example.com/payment/back"
+            }
+          },
+          {
+            "name": "SuccessUrl",
+            "in": "query",
+            "description": "The URL where the user will be redirected after successful payment.",
+            "required": true,
+            "schema": {
+              "maxLength": 255,
+              "minLength": 0,
+              "type": "string",
+              "format": "uri",
+              "example": "https://example.com/payment/success"
             }
           }
         ],
@@ -30682,7 +30797,7 @@
             "description": "No permissions to perform this action"
           },
           "404": {
-            "description": "Customer could not be found"
+            "description": "Customer or AiTools quota could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -31094,6 +31209,9 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "No permissions to perform this action"
           },
           "401": {
             "description": "Unauthorized"
@@ -42571,6 +42689,18 @@
         ],
         "description": "[0 - Created, 1 - Running, 2 - Completed, 3 - Canceled, 4 - Failted]"
       },
+      "EditorToolDecisionRequestBody": {
+        "type": "object",
+        "properties": {
+          "allow": {
+            "type": "boolean",
+            "description": "Whether the user approved creating the file.",
+            "example": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Parameters for an editor file-generation tool decision."
+      },
       "EmailInvitationDto": {
         "type": "object",
         "properties": {
@@ -43791,6 +43921,75 @@
           "DefaultTemplates"
         ]
       },
+      "GeneratedFileDto": {
+        "required": [
+          "extension",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "The unique identifier of the created file.",
+            "format": "int32",
+            "example": 42
+          },
+          "title": {
+            "type": "string",
+            "description": "The file title, including extension.",
+            "nullable": true,
+            "example": "Report.docx"
+          },
+          "extension": {
+            "type": "string",
+            "description": "The file extension.",
+            "nullable": true,
+            "example": ".docx"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Information about a file created by an AI editor generation tool."
+      },
+      "GeneratedFileWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/GeneratedFileDto"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
       "Icon": {
         "required": [
           "icon16",
@@ -43889,33 +44088,44 @@
         "description": "The logo cover information."
       },
       "LogoRequest": {
+        "required": [
+          "tmpFile"
+        ],
         "type": "object",
         "properties": {
           "tmpFile": {
+            "minLength": 1,
             "type": "string",
             "description": "The path to the temporary image file.",
-            "nullable": true,
             "example": "/tmp/logo.png"
           },
           "x": {
+            "maximum": 1280,
+            "minimum": 0,
             "type": "integer",
             "description": "The X coordinate of the rectangle starting point.",
             "format": "int32",
             "example": 0
           },
           "y": {
+            "maximum": 1280,
+            "minimum": 0,
             "type": "integer",
             "description": "The Y coordinate of the rectangle starting point.",
             "format": "int32",
             "example": 0
           },
           "width": {
+            "maximum": 1280,
+            "minimum": 1,
             "type": "integer",
             "description": "The rectangle width.",
             "format": "int32",
             "example": 100
           },
           "height": {
+            "maximum": 1280,
+            "minimum": 1,
             "type": "integer",
             "description": "The rectangle height.",
             "format": "int32",
@@ -64729,7 +64939,8 @@
       },
       "PaymentUrlRequestDto": {
         "required": [
-          "backUrl"
+          "backUrl",
+          "successUrl"
         ],
         "type": "object",
         "properties": {
@@ -64737,9 +64948,17 @@
             "maxLength": 255,
             "minLength": 0,
             "type": "string",
-            "description": "The URL where the user will be redirected after payment processing.",
+            "description": "The URL where the user will be redirected after payment cancellation.",
             "format": "uri",
-            "example": "https://example.com"
+            "example": "https://example.com/payment/back"
+          },
+          "successUrl": {
+            "maxLength": 255,
+            "minLength": 0,
+            "type": "string",
+            "description": "The URL where the user will be redirected after successful payment.",
+            "format": "uri",
+            "example": "https://example.com/payment/success"
           },
           "quantity": {
             "type": "object",

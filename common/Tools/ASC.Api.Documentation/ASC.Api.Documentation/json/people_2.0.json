@@ -2084,7 +2084,7 @@
           "People / Password"
         ],
         "summary": "Remind a user password",
-        "description": "Reminds a password to the user using the email address specified in the request.",
+        "description": "Sends a password recovery email to the specified user address.\r\nFor unauthenticated requests, CAPTCHA validation is required when CAPTCHA is enabled in the configuration.",
         "operationId": "sendUserPassword",
         "requestBody": {
           "content": {

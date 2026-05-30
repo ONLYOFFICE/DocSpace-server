@@ -44,6 +44,7 @@ public class UploadControllerHelper(
     TenantManager tenantManager,
     IDaoFactory daoFactory,
     FileChecker fileChecker,
+    FilesMessageService filesMessageService,
     WebhookManager webhookManager,
     IEventBus eventBus,
     AuthContext authContext)
@@ -54,6 +55,7 @@ public class UploadControllerHelper(
         fileDtoHelper,
         fileStorageService,
         fileChecker,
+        filesMessageService,
         webhookManager,
         daoFactory,
         eventBus,

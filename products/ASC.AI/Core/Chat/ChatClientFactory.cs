@@ -42,7 +42,7 @@ namespace ASC.AI.Core.Chat;
 [Scope]
 public class ChatClientFactory(
     IHttpClientFactory httpClientFactory,
-    IToolPermissionRequester toolPermissionRequester,
+    IToolCallReceiver toolCallReceiver,
     AiConfiguration aiConfiguration)
 {
     public IChatClient Create(
@@ -62,7 +62,10 @@ public class ChatClientFactory(
                 {
                     var openAiClient = CreateOpenAiClient(options);
                     var chatClient = openAiClient.GetResponsesClient(options.ModelId);
-                    builder = chatClient.AsIChatClient().AsBuilder();
+                    // CA2000: OpenAiResponsesClient wraps a chat client, ownership transferred
+#pragma warning disable CA2000
+                    builder = new OpenAiResponsesClient(chatClient.AsIChatClient()).AsBuilder();
+#pragma warning restore CA2000
                     break;
                 }
             case ProviderType.Anthropic:
@@ -123,7 +126,8 @@ public class ChatClientFactory(
                     var chatClient = openAiClient.GetChatClient(options.ModelId);
                     // CA2000: OpenRouterChatClient wraps a chat client, ownership transferred
 #pragma warning disable CA2000
-                    builder = new OpenRouterChatClient(chatClient.AsIChatClient(), options.Metadata).AsBuilder();
+                    var completionClient = new OpenAiChatCompletionClient(chatClient.AsIChatClient());
+                    builder = new OpenRouterChatClient(completionClient, options.Metadata).AsBuilder();
                     builder.ConfigureOptions(x =>
                     {
                         x.AdditionalProperties ??= new AdditionalPropertiesDictionary();
@@ -136,15 +140,17 @@ public class ChatClientFactory(
                 {
                     var openAiClient = CreateOpenAiClient(options);
                     var chatClient = openAiClient.GetChatClient(options.ModelId);
-
-                    builder = chatClient.AsIChatClient().AsBuilder();
+                    // CA2000: OpenAiChatCompletionClient wraps a chat client, ownership transferred
+#pragma warning disable CA2000
+                    builder = new OpenAiChatCompletionClient(chatClient.AsIChatClient()).AsBuilder();
+#pragma warning restore CA2000
                     break;
                 }
         }
 
         builder.ConfigureOptions(x => x.ModelId = options.ModelId);
 
-        if (options.ReasoningEffort is { } reasoningEffort and not ChatReasoningEffort.None)
+        if (options.ReasoningEffort is { } reasoningEffort)
         {
             builder.ConfigureOptions(x =>
             {
@@ -186,7 +192,7 @@ public class ChatClientFactory(
                 var funcClient = new ManagedFunctionInvokingChatClient(
                     innerClient,
                     toolHolder,
-                    toolPermissionRequester,
+                    toolCallReceiver,
                     userId);
 
                 funcClient.MaximumIterationsPerRequest = 32;

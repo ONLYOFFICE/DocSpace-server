@@ -46,6 +46,7 @@ public class ChatController(
     ApiContext apiContext,
     MessageExporter exporter,
     McpService mcpService,
+    EditorToolService editorToolService,
     MessageDtoConverter dtoConverter) : ControllerBase
 {
     private static readonly JsonSerializerOptions _streamSerializerOptions = new(JsonSerializerDefaults.Web)
@@ -279,6 +280,24 @@ public class ChatController(
     public async Task ProvidePermissionAsync(ToolDecisionRequestDto inDto)
     {
         await mcpService.ProvideMcpToolPermissionAsync(inDto.CallId, inDto.Body.Decision);
+    }
+
+    /// <summary>
+    /// Resolve a pending editor file-generation tool
+    /// </summary>
+    /// <remarks>
+    /// Submits the user's approval or denial for a pending editor generation tool call (docx, form, presentation).
+    /// On approval the file is created from the original tool arguments and information about it is returned,
+    /// while the suspended chat tool is resumed with the same result so the AI session can continue.
+    /// </remarks>
+    /// <path>api/2.0/ai/chats/tool-files/{callId}/decision</path>
+    [Tags("AI / Chat")]
+    [SwaggerResponse(200, "Information about the created file, or empty if the request was declined or has expired", typeof(GeneratedFileDto))]
+    [HttpPost("chats/tool-files/{callId}/decision")]
+    public async Task<GeneratedFileDto?> ResolveEditorToolAsync(EditorToolDecisionRequestDto inDto)
+    {
+        var result = await editorToolService.ResolveAsync(inDto.CallId, inDto.Body.Allow);
+        return result?.MapToDto();
     }
 
     /// <summary>

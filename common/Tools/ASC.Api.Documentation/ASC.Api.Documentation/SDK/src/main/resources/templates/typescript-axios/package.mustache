@@ -31,7 +31,14 @@
   "sideEffects": false,
 {{/supportsES6}}
   "scripts": {
-    "build": "tsc{{#supportsES6}} && tsc -p tsconfig.esm.json{{/supportsES6}}",
+  {{#supportsES6}}
+    "build": "npm run build:cjs && npm run build:esm",
+    "build:cjs": "tsc",
+    "build:esm": "tsc --project tsconfig.esm.json",
+  {{/supportsES6}}
+  {{^supportsES6}}
+    "build": "tsc",
+  {{/supportsES6}}
     "prepare": "npm run build"
   },
   "dependencies": {

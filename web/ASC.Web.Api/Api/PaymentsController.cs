@@ -68,7 +68,6 @@ public class PaymentController(
     ApiDateTimeHelper apiDateTimeHelper,
     EmployeeDtoHelper employeeWrapperHelper,
     DisplayUserSettingsHelper displayUserSettingsHelper,
-    TenantLogoManager tenantLogoManager,
     IEventBus eventBus,
     CommonLinkUtility commonLinkUtility,
     DocumentBuilderTaskManager<CustomerOperationsReportTask, int, CustomerOperationsReportTaskData> documentBuilderTaskManager,
@@ -108,11 +107,6 @@ public class PaymentController(
             throw new ArgumentException("Invalid quantity");
         }
 
-        if (!Uri.TryCreate(inDto.BackUrl, UriKind.Absolute, out var parsedUri))
-        {
-            throw new ArgumentException("Invalid URI format");
-        }
-
         var tenant = tenantManager.GetCurrentTenant();
         var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
         if (customerInfo != null)
@@ -146,7 +140,8 @@ public class PaymentController(
             CultureInfo.CurrentCulture.TwoLetterISOLanguageName,
             (await userManager.GetUsersAsync(securityContext.CurrentAccount.ID)).Email,
             inDto.Quantity,
-            inDto.BackUrl);
+            inDto.BackUrl,
+            inDto.SuccessUrl);
     }
 
     /// <remarks>
@@ -691,6 +686,7 @@ public class PaymentController(
             user.Email,
             [],
             inDto.BackUrl,
+            inDto.SuccessUrl,
             true);
     }
 
@@ -915,9 +911,8 @@ public class PaymentController(
         }
 
         var participantDisplayNames = await report.GetParticipantDisplayNamesAsync(displayUserSettingsHelper, true);
-        var logoText = await tenantLogoManager.GetLogoTextAsync();
 
-        return new ReportDto(report, apiDateTimeHelper, participantDisplayNames, filter.ServiceName, logoText);
+        return new ReportDto(report, apiDateTimeHelper, participantDisplayNames, filter.ServiceName);
     }
 
     /// <remarks>
@@ -1249,7 +1244,7 @@ public class PaymentController(
     [SwaggerResponse(200, "The AI credit operation result", typeof(ServicePayment))]
     [SwaggerResponse(400, "Unsupported currency or insufficient balance")]
     [SwaggerResponse(403, "No permissions to perform this action")]
-    [SwaggerResponse(404, "Customer could not be found")]
+    [SwaggerResponse(404, "Customer or AiTools quota could not be found")]
     [HttpPost("creditaibalance")]
     [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
     public async Task<ServicePayment> CreditAiBalance(CreditAiBalanceRequestDto inDto)
@@ -1298,7 +1293,8 @@ public class PaymentController(
             throw new ArgumentException("Insufficient balance");
         }
 
-        var quotaList = await tenantManager.GetTenantQuotasAsync(true, true);
+        // The method must throw an exception if the AiTools quota is hidden or not found in the database!
+        var quotaList = await tenantManager.GetTenantQuotasAsync(false, true);
         var aiToolsQuota = quotaList.FirstOrDefault(x => x.TenantId == (int)TenantWalletService.AITools);
         if (aiToolsQuota == null)
         {
@@ -1336,10 +1332,7 @@ public class PaymentController(
     [HttpGet("ai-prices")]
     public async Task<AiPricesDto> GetAiPrices()
     {
-        if (!tariffService.IsConfigured())
-        {
-            throw new InvalidOperationException("Tariff service is not configured");
-        }
+        DemandAiGatewayConfiguration();
 
         await DemandAdminAsync();
 
@@ -1417,10 +1410,7 @@ public class PaymentController(
     [HttpGet("ai-model/restrictions")]
     public async Task<RestrictedModelsResponse> GetRestrictedAiModels()
     {
-        if (!tariffService.IsConfigured())
-        {
-            throw new InvalidOperationException("Tariff service is not configured");
-        }
+        DemandAiGatewayConfiguration();
 
         await DemandAdminAsync();
 
@@ -1443,12 +1433,9 @@ public class PaymentController(
     [HttpPut("ai-model/restrictions")]
     public async Task<RestrictedModelsResponse> SetRestrictedAiModels(SetRestrictedAiModelsRequestDto inDto)
     {
-        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        DemandAiGatewayConfiguration();
 
-        if (!tariffService.IsConfigured())
-        {
-            throw new InvalidOperationException("Tariff service is not configured");
-        }
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var tenant = tenantManager.GetCurrentTenant();
 
@@ -1498,6 +1485,14 @@ public class PaymentController(
         }
     }
 
+    private void DemandAiGatewayConfiguration()
+    {
+        if (!tariffService.IsConfigured() || !aiGateway.Configured)
+        {
+            throw new InvalidOperationException("Tariff service or AI gateway is not configured");
+        }
+    }
+
     private async Task CheckCache(string baseKey)
     {
         var key = HttpContext.Connection.RemoteIpAddress + baseKey;
@@ -1511,9 +1506,18 @@ public class PaymentController(
         await fusionCache.SetAsync(key, count + 1, TimeSpan.FromMinutes(_expirationMinutes));
     }
 
+    /// <summary>
+    /// Validates the service name and returns the corresponding tenant wallet service
+    /// </summary>
+    /// <remarks>
+    /// Checks if the provided service name matches any tenant quota service name and verifies that the corresponding tenant ID is a valid TenantWalletService enum value.
+    /// </remarks>
+    /// <param name="serviceName">The service name to validate</param>
+    /// <return>The corresponding TenantWalletService enum value</return>
+    /// <exception cref="ItemNotFoundException">Thrown when the quota with the corresponding service name is hidden or not found in the database.</exception>
     private async Task<TenantWalletService> CheckWalletServiceName(string serviceName)
     {
-        var quotaList = await tenantManager.GetTenantQuotasAsync(true, true);
+        var quotaList = await tenantManager.GetTenantQuotasAsync(false, true);
 
         var selectedQuota = quotaList.FirstOrDefault(x =>
             x.ServiceName.Equals(serviceName, StringComparison.InvariantCultureIgnoreCase));

@@ -84,7 +84,8 @@ public class PortalController(
     IEventBus eventBus,
     CspSettingsHelper cspSettingsHelper,
     IdentityClient client,
-    InvitationLinkDtoHelper invitationLinkDtoHelper)
+    InvitationLinkDtoHelper invitationLinkDtoHelper,
+    CountPaidUserChecker countPaidUserChecker)
     : ControllerBase
 {
     /// <remarks>
@@ -223,6 +224,11 @@ public class PortalController(
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
+        if (inDto.EmployeeType is EmployeeType.RoomAdmin or EmployeeType.DocSpaceAdmin)
+        {
+            await countPaidUserChecker.CheckAppend();
+        }
+
         await using (await distributedLockProvider.TryAcquireFairLockAsync($"invitationlink_{tenant.Id}"))
         {
             var existedInvitationLink = await userManager.GetInvitationLinkAsync(inDto.EmployeeType);
@@ -269,6 +275,11 @@ public class PortalController(
             !await permissionContext.CheckPermissionsAsync(new UserSecurityProvider(Guid.Empty, inDto.EmployeeType), Constants.Action_AddRemoveUser))
         {
             throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+
+        if (inDto.EmployeeType is EmployeeType.RoomAdmin or EmployeeType.DocSpaceAdmin)
+        {
+            await countPaidUserChecker.CheckAppend();
         }
 
         var invitationLink = await userManager.GetInvitationLinkAsync(inDto.EmployeeType);
@@ -513,10 +524,7 @@ public class PortalController(
     [HttpGet("quota")]
     public async Task<TenantQuota> GetPortalQuota()
     {
-        if (await userManager.IsGuestAsync(securityContext.CurrentAccount.ID))
-        {
-            throw new SecurityException();
-        }
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var tenant = tenantManager.GetCurrentTenant();
         var result = await tenantManager.GetTenantQuotaAsync(tenant.Id);
@@ -538,9 +546,12 @@ public class PortalController(
     /// <path>api/2.0/portal/quota/right</path>
     [Tags("Portal / Quota")]
     [SwaggerResponse(200, "Recommended portal quota", typeof(TenantQuota))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("quota/right")]
     public async Task<TenantQuota> GetRightQuota()
     {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
         var usedSpace = await GetPortalUsedSpace();
         var needUsersCount = await GetPortalUsersCount();
 

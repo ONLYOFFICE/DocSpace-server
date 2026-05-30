@@ -1,24 +1,24 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
@@ -51,10 +51,11 @@ public class PhotoController(
     SettingsManager settingsManager,
     FileSizeComment fileSizeComment,
     SetupInfo setupInfo,
-    IHttpClientFactory httpClientFactory,
     IHttpContextAccessor httpContextAccessor,
-    UserWebhookManager webhookManager)
-    : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
+    UserWebhookManager webhookManager,
+    IUrlValidator urlValidator,
+    IHttpClientFactory httpClientFactory)
+    : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpContextAccessor, urlValidator, setupInfo, httpClientFactory)
 {
     /// <remarks>
     /// Creates the user photo thumbnails by coordinates of the original image specified in the request.
@@ -190,9 +191,15 @@ public class PhotoController(
 
         await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(user.Id), Constants.Action_EditUser);
 
+        if (string.IsNullOrEmpty(inDto.UpdatePhoto.Files))
+        {
+            throw new ArgumentException(PeopleResource.ErrorEmptyUploadFileSelected);
+        }
+
         if (inDto.UpdatePhoto.Files != await _userPhotoManager.GetPhotoAbsoluteWebPath(user.Id))
         {
-            await UpdatePhotoUrlAsync(inDto.UpdatePhoto.Files, user);
+            var photoValidation = await ValidatePhotoUrlAsync(inDto.UpdatePhoto.Files);
+            await DownloadAndSavePhotoAsync(photoValidation, user);
         }
 
         await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
@@ -236,7 +243,7 @@ public class PhotoController(
 
                 var userPhoto = inDto.File;
 
-                if (userPhoto.Length > setupInfo.MaxImageUploadSize)
+                if (userPhoto.Length > _setupInfo.MaxImageUploadSize)
                 {
                     result.Success = false;
                     result.Message = fileSizeComment.FileImageSizeExceptionString;
@@ -255,7 +262,7 @@ public class PhotoController(
 
                 if (autosave)
                 {
-                    if (data.Length > setupInfo.MaxImageUploadSize)
+                    if (data.Length > _setupInfo.MaxImageUploadSize)
                     {
                         throw new ImageSizeLimitException();
                     }
@@ -280,7 +287,7 @@ public class PhotoController(
                 }
                 else
                 {
-                    result.Data = await _userPhotoManager.SaveTempPhoto(data, setupInfo.MaxImageUploadSize, UserPhotoManager.OriginalFotoSize.Width, UserPhotoManager.OriginalFotoSize.Height);
+                    result.Data = await _userPhotoManager.SaveTempPhoto(data, _setupInfo.MaxImageUploadSize, UserPhotoManager.OriginalFotoSize.Width, UserPhotoManager.OriginalFotoSize.Height);
                 }
 
                 result.Success = true;

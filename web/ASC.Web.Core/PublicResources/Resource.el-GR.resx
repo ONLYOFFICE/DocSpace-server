@@ -139,7 +139,7 @@
     <value>Ποσότητα</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>{LogoText} AI</value>
+    <value>Λειτουργίες AI</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Αντίγραφο ασφαλείας</value>
@@ -1153,10 +1153,10 @@
     <value>Ο αριθμός των εκπροσώπων AI δεν πρέπει να υπερβαίνει τα {0}</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>{LogoText} AI</value>
+    <value>Λειτουργίες AI</value>
   </data>
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Ενεργοποιήστε τις λειτουργίες AI στο DocSpace σας για να αυξήσετε την παραγωγικότητα.</value>
+    <value>Ενεργοποιήστε τις λειτουργίες AI για να αυξήσετε την παραγωγικότητα.</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Παρακολούθηση συνδέσεων και ενεργειών</value>
@@ -1165,7 +1165,10 @@
     <value>Αντίγραφο ασφαλείας</value>
   </data>
   <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
-    <value>Ενεργοποιήστε τα αντίγραφα ασφαλείας για το DocSpace σας. Το κόστος θα χρεώνεται αυτόματα.</value>
+    <value>Ενεργοποιήστε τα αντίγραφα ασφαλείας. Το κόστος θα χρεώνεται αυτόματα.</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_additional" xml:space="preserve">
+    <value>Επιπλέον αντίγραφο ασφαλείας</value>
   </data>
   <data name="TariffsFeature_customization" xml:space="preserve">
     <value>Επωνυμία και προσαρμογή</value>
