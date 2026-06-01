@@ -279,7 +279,8 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
 
     public ConnectionStringManager AddMailPit()
     {
-        MailResource = builder.AddMailPit("mailpit");
+        MailResource = builder.AddMailPit("mailpit")
+            .WithArgs("--smtp-disable-rdns");
 
         return this;
     }
