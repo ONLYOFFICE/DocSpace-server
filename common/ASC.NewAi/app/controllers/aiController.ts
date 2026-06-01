@@ -38,6 +38,10 @@ import logger from "../log.js";
 import { storage } from "../storage/index.js";
 import { asyncHandler, streamNdjson } from "./_helpers.js";
 import { isObject } from "../narrow.js";
+import {
+  HttpToolsAdapter,
+  safeGetToolsPrompt,
+} from "../tools/httpToolsAdapter.js";
 
 // Client-side code passes `actionArgs.signal: AbortSignal` so it can
 // cancel an in-flight stream. Going through JSON the signal collapses
@@ -72,7 +76,35 @@ function withRequestSignal<T>(res: Response, body: T): T {
   };
 }
 
-const engine = new AIEngine({ storage });
+// Fold the DocSpace tools system-prompt fragment into the action's prompt
+// override. The fragment ships alongside the tool list from
+// `tools/list`; the engine's own `getTools` reuses the cached fetch, so
+// this adds no extra round-trip. An existing client override is kept and
+// the fragment appended to its text; otherwise an `append` override is set.
+async function withToolsPrompt<T>(body: T): Promise<T> {
+  if (!isObject(body)) {
+    return body;
+  }
+  const entityId =
+    typeof body["entityId"] === "string" ? body["entityId"] : undefined;
+  const fragment = await safeGetToolsPrompt(toolsAdapter, entityId);
+  if (!fragment) {
+    return body;
+  }
+  const actionArgs = isObject(body["actionArgs"]) ? body["actionArgs"] : {};
+  const existing = actionArgs["prompt"];
+  const prompt =
+    isObject(existing) && typeof existing["text"] === "string"
+      ? { ...existing, text: `${existing["text"] as string}\n\n${fragment}` }
+      : { mode: "append", text: fragment };
+  return {
+    ...body,
+    actionArgs: { ...actionArgs, prompt },
+  };
+}
+
+const toolsAdapter = new HttpToolsAdapter();
+const engine = new AIEngine({ storage, toolsAdapter });
 
 function isAsyncIterable(value: unknown): value is AsyncIterable<unknown> {
   if (typeof value !== "object" || value === null) {
@@ -164,7 +196,7 @@ export const aiController = {
   }),
 
   sendWithStream: asyncHandler<SendStreamInput>(async (req, res) => {
-    const body = withRequestSignal(res, req.body);
+    const body = await withToolsPrompt(withRequestSignal(res, req.body));
     await streamNdjson(
       res,
       logStreamErrors("ai/send-with-stream", engine.sendWithStream(body)),
@@ -172,7 +204,7 @@ export const aiController = {
   }),
 
   regenerateStream: asyncHandler<RegenerateStreamInput>(async (req, res) => {
-    const body = withRequestSignal(res, req.body);
+    const body = await withToolsPrompt(withRequestSignal(res, req.body));
     await streamNdjson(
       res,
       logStreamErrors("ai/regenerate-stream", engine.regenerateStream(body)),
