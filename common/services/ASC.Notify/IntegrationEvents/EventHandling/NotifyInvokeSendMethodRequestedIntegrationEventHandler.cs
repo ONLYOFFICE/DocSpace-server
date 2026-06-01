@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -34,11 +34,11 @@
 namespace ASC.Notify.IntegrationEvents.EventHandling;
 
 [Scope]
-public class NotifyInvokeSendMethodRequestedIntegrationEventHandler(ILoggerProvider options,
+public class NotifyInvokeSendMethodRequestedIntegrationEventHandler(ILoggerFactory loggerFactory,
         IServiceScopeFactory serviceScopeFactory)
     : IIntegrationEventHandler<NotifyInvokeSendMethodRequestedIntegrationEvent>
 {
-    private readonly ILogger _logger = options.CreateLogger("ASC.NotifyService");
+    private readonly ILogger _logger = loggerFactory.CreateLogger("ASC.NotifyService");
 
     private async Task InvokeSendMethodAsync(NotifyInvoke notifyInvoke)
     {

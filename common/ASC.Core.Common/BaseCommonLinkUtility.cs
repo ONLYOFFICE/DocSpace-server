@@ -59,7 +59,7 @@ public class BaseCommonLinkUtility
         CoreBaseSettings coreBaseSettings,
         CoreSettings coreSettings,
         TenantManager tenantManager,
-        ILoggerProvider options)
+        ILoggerFactory loggerFactory)
     {
 
         try
@@ -90,7 +90,7 @@ public class BaseCommonLinkUtility
         }
         catch (Exception error)
         {
-            options.CreateLogger("ASC.Web").ErrorWithException(error);
+            loggerFactory.CreateLogger("ASC.Web").ErrorWithException(error);
         }
 
         _coreBaseSettings = coreBaseSettings;

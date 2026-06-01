@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -36,7 +36,7 @@ namespace ASC.Web.Api.Controllers.Settings;
 [DefaultRoute("tips")]
 [ApiExplorerSettings(IgnoreApi = true)]
 public class TipsController(
-    ILoggerProvider option,
+    ILoggerFactory loggerFactory,
     AuthContext authContext,
     StudioNotifyHelper studioNotifyHelper,
     SettingsManager settingsManager,
@@ -48,7 +48,7 @@ public class TipsController(
     IServiceProvider serviceProvider)
     : BaseSettingsController(fusionCache, webItemManager)
 {
-    private readonly ILogger _log = option.CreateLogger("ASC.Api");
+    private readonly ILogger _log = loggerFactory.CreateLogger("ASC.Api");
 
     /// <remarks>
     /// Updates the user interface tip settings with the parameters specified in the request.

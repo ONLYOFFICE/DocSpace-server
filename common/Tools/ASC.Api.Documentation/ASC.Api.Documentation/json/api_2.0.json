@@ -680,6 +680,9 @@
           "403": {
             "description": "No permissions to perform this action"
           },
+          "404": {
+            "description": "No migration is in progress"
+          },
           "401": {
             "description": "Unauthorized"
           }
@@ -1076,7 +1079,10 @@
             "in": "query",
             "description": "The URL where the user will be redirected after payment processing.",
             "schema": {
+              "maxLength": 255,
+              "minLength": 0,
               "type": "string",
+              "format": "uri",
               "example": "https://example.com"
             }
           }
@@ -1627,10 +1633,27 @@
           {
             "name": "BackUrl",
             "in": "query",
-            "description": "The URL where the user will be redirected after completing the setup.",
+            "description": "The URL where the user will be redirected after setup cancellation.",
+            "required": true,
             "schema": {
+              "maxLength": 255,
+              "minLength": 0,
               "type": "string",
-              "example": "https://example.com/setup/complete"
+              "format": "uri",
+              "example": "https://example.com/payment/back"
+            }
+          },
+          {
+            "name": "SuccessUrl",
+            "in": "query",
+            "description": "The URL where the user will be redirected after successful payment.",
+            "required": true,
+            "schema": {
+              "maxLength": 255,
+              "minLength": 0,
+              "type": "string",
+              "format": "uri",
+              "example": "https://example.com/payment/success"
             }
           }
         ],
@@ -2596,7 +2619,7 @@
             "description": "No permissions to perform this action"
           },
           "404": {
-            "description": "Customer could not be found"
+            "description": "Customer or AiTools quota could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -20546,7 +20569,8 @@
       },
       "PaymentUrlRequestDto": {
         "required": [
-          "backUrl"
+          "backUrl",
+          "successUrl"
         ],
         "type": "object",
         "properties": {
@@ -20554,9 +20578,17 @@
             "maxLength": 255,
             "minLength": 0,
             "type": "string",
-            "description": "The URL where the user will be redirected after payment processing.",
+            "description": "The URL where the user will be redirected after payment cancellation.",
             "format": "uri",
-            "example": "https://example.com"
+            "example": "https://example.com/payment/back"
+          },
+          "successUrl": {
+            "maxLength": 255,
+            "minLength": 0,
+            "type": "string",
+            "description": "The URL where the user will be redirected after successful payment.",
+            "format": "uri",
+            "example": "https://example.com/payment/success"
           },
           "quantity": {
             "type": "object",

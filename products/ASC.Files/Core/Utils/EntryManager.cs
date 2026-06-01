@@ -2222,11 +2222,6 @@ public class EntryManager(IDaoFactory daoFactory,
                         await fileDao.SaveProperties(originalFormId, origProperties);
                     }
 
-                    if (originalForm != null)
-                    {
-                        await formFillingReportCreator.MigrateFormVersionAsync(rId, origFormId, origProperties.FormFilling.OriginalFormVersion);
-                    }
-
                     await formFillingReportCreator.UpdateFormFillingReport(
                        origFormId,
                        origProperties.FormFilling.OriginalFormVersion,

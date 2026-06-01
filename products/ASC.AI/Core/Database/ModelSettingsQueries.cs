@@ -48,9 +48,9 @@ public partial class AiDbContext
     }
 
     [PreCompileQuery]
-    public IAsyncEnumerable<DbAiModelSettings> GetModelSettingsByIdsAsync(int tenantId, int providerId, IEnumerable<string> modelIds)
+    public IAsyncEnumerable<DbAiModelSettings> GetModelSettingsForUpdateAsync(int tenantId, int providerId, IEnumerable<string> modelIds)
     {
-        return Queries.GetModelSettingsByIdsAsync(this, tenantId, providerId, modelIds);
+        return Queries.GetModelSettingsForUpdateAsync(this, tenantId, providerId, modelIds);
     }
 
     [PreCompileQuery]
@@ -74,7 +74,7 @@ static file class Queries
                 ctx.ModelSettings
                     .FirstOrDefault(x => x.TenantId == tenantId && x.ProviderId == providerId && x.ModelId == modelId));
 
-    public static readonly Func<AiDbContext, int, int, IEnumerable<string>, IAsyncEnumerable<DbAiModelSettings>> GetModelSettingsByIdsAsync =
+    public static readonly Func<AiDbContext, int, int, IEnumerable<string>, IAsyncEnumerable<DbAiModelSettings>> GetModelSettingsForUpdateAsync =
         EF.CompileAsyncQuery(
             (AiDbContext ctx, int tenantId, int providerId, IEnumerable<string> modelIds) =>
                 ctx.ModelSettings
