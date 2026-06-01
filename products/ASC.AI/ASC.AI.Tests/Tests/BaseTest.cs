@@ -29,14 +29,14 @@ namespace ASC.AI.Tests.Tests;
 [Collection("Test Collection")]
 public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
 {
-    protected const string ProfilesPath = "/api/2.0/ai/integration/profiles";
-    protected const string ProfilesBatchPath = "/api/2.0/ai/integration/profiles/batch";
-    protected const string AssignmentsPath = "/api/2.0/ai/integration/assignments";
-    protected const string ThreadsPath = "/api/2.0/ai/integration/threads";
-    protected const string MessagesPath = "/api/2.0/ai/integration/messages";
-    protected const string McpServersPath = "/api/2.0/ai/integration/mcp-servers";
-    protected const string PreferencesPath = "/api/2.0/ai/integration/preferences";
-    protected const string ToolPrefsPath = "/api/2.0/ai/integration/tool-prefs";
+    protected const string ProfilesPath = "/internal/ai/integration/profiles";
+    protected const string ProfilesBatchPath = "/internal/ai/integration/profiles/batch";
+    protected const string AssignmentsPath = "/internal/ai/integration/assignments";
+    protected const string ThreadsPath = "/internal/ai/integration/threads";
+    protected const string MessagesPath = "/internal/ai/integration/messages";
+    protected const string McpServersPath = "/internal/ai/integration/mcp-servers";
+    protected const string PreferencesPath = "/internal/ai/integration/preferences";
+    protected const string ToolPrefsPath = "/internal/ai/integration/tool-prefs";
 
     protected const string SystemToolsServerType = "00000000-0000-0000-0000-000000000001";
 
