@@ -37,6 +37,7 @@ export interface AppConfig {
   environment: string;
   logName?: string;
   proxy?: { url?: string };
+  aiService?: { url?: string };
 }
 
 export interface AwsCloudWatchConfig {

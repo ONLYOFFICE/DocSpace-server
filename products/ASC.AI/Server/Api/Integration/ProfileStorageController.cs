@@ -29,7 +29,7 @@ using ASC.AI.Models.ResponseDto.Integration;
 namespace ASC.AI.Api.Integration;
 
 [Scope]
-[DefaultRoute]
+[InternalRoute]
 [ApiController]
 [AiFeature]
 [ControllerName("ai")]

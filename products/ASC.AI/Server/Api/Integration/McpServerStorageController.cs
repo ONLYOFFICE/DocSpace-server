@@ -30,7 +30,7 @@ using McpServerMapper = ASC.AI.Models.ResponseDto.Integration.McpServerMapper;
 namespace ASC.AI.Api.Integration;
 
 [Scope]
-[DefaultRoute]
+[InternalRoute]
 [ApiController]
 [AiFeature]
 [ControllerName("ai")]

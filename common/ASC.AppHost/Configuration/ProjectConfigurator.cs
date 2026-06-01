@@ -292,6 +292,7 @@ public class ProjectConfigurator(
                 .WithEnvironment("log:dir", "/logs")
                 .WithEnvironment("log:name", "newAi")
                 .WithEnvironment("API_HOST", new UriBuilder(Uri.UriSchemeHttp, Constants.OpenRestyContainer, Constants.RestyPort).ToString())
+                .WithEnvironment("AI_SERVICE_URL", new UriBuilder(Uri.UriSchemeHttp, GetProjectName<ASC_AI>(), Constants.AiPort).ToString())
                 .WithEnvironment("app:appsettings", "/buildtools/config")
                 .WithHttpEndpoint(port, port, isProxied: false)
                 .WithHttpHealthCheck("/health")

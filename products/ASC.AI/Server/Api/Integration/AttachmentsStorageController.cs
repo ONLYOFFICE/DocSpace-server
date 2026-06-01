@@ -30,7 +30,7 @@ using AttachmentMapper = ASC.AI.Models.ResponseDto.Integration.AttachmentMapper;
 namespace ASC.AI.Api.Integration;
 
 [Scope]
-[DefaultRoute]
+[InternalRoute]
 [ApiController]
 [AiFeature]
 [ControllerName("ai")]

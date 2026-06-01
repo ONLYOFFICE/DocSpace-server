@@ -30,7 +30,7 @@ using PreferencesMapper = ASC.AI.Models.ResponseDto.Integration.PreferencesMappe
 namespace ASC.AI.Api.Integration;
 
 [Scope]
-[DefaultRoute]
+[InternalRoute]
 [ApiController]
 [AiFeature]
 [ControllerName("ai")]

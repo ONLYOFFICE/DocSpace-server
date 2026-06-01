@@ -7,6 +7,9 @@
     "logName": "web.newai.%DATE%.log",
     "proxy": {
       "url": "http://localhost:8092"
+    },
+    "aiService": {
+      "url": "http://localhost:5157"
     }
   },
   "logger": {

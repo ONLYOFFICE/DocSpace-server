@@ -57,8 +57,22 @@ function resolveProxyUrl(): string {
   return "http://localhost:8092";
 }
 
-const BASE_URL = resolveProxyUrl();
-const API_PREFIX = "/api/2.0/ai";
+function resolveAiServiceUrl(): string {
+  const fromEnv = process.env["AI_SERVICE_URL"];
+  if (fromEnv) {
+    return fromEnv.replace(/\/+$/, "");
+  }
+  const app: AppConfig | undefined = nconf.get("app");
+  const fromConfig = app?.aiService?.url;
+  if (fromConfig) {
+    return fromConfig.replace(/\/+$/, "");
+  }
+  return "http://localhost:5157";
+}
+
+const PROXY_BASE_URL = resolveProxyUrl();
+const AI_BASE_URL = resolveAiServiceUrl();
+const API_PREFIX = "/internal/ai";
 
 export type QueryValue = string | number | boolean | null | undefined;
 
@@ -81,7 +95,7 @@ export async function aiServiceRequest(
   options: RequestOptions = {},
 ): Promise<unknown> {
   const { body, query, signal } = options;
-  let url = `${BASE_URL}${API_PREFIX}${path}`;
+  let url = `${AI_BASE_URL}${API_PREFIX}${path}`;
   if (query && Object.keys(query).length > 0) {
     const params = new URLSearchParams();
     for (const [k, v] of Object.entries(query)) {
@@ -134,4 +148,4 @@ export const aiService = {
     aiServiceRequest("DELETE", path, opts),
 };
 
-export const proxyBaseUrl = BASE_URL;
+export const proxyBaseUrl = PROXY_BASE_URL;

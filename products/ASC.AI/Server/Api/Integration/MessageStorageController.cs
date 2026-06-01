@@ -30,7 +30,7 @@ using MessageMapper = ASC.AI.Models.ResponseDto.Integration.MessageMapper;
 namespace ASC.AI.Api.Integration;
 
 [Scope]
-[DefaultRoute]
+[InternalRoute]
 [ApiController]
 [AiFeature]
 [ControllerName("ai")]

@@ -30,7 +30,7 @@ using WebSearchConfigMapper = ASC.AI.Models.ResponseDto.Integration.WebSearchCon
 namespace ASC.AI.Api.Integration;
 
 [Scope]
-[DefaultRoute]
+[InternalRoute]
 [ApiController]
 [AiFeature]
 [ControllerName("ai")]
