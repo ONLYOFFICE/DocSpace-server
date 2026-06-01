@@ -29,10 +29,13 @@ namespace ASC.AI.Integration.McpServers;
 [Scope]
 public class McpServersStorage(
     IDbContextFactory<AiIntegrationContext> dbContextFactory,
-    IDistributedLockProvider distributedLockProvider)
+    IDistributedLockProvider distributedLockProvider,
+    InstanceCrypto crypto)
 {
     public async Task<bool> CreateAsync(int tenantId, string name, string config, int? entryId = null)
     {
+        var encryptedConfig = await EncryptConfigAsync(config);
+
         await using (await distributedLockProvider.TryAcquireFairLockAsync(GetLockKey(tenantId, entryId)))
         {
             await using var dbContext = await dbContextFactory.CreateDbContextAsync();
@@ -56,7 +59,7 @@ public class McpServersStorage(
                     Id = Guid.CreateVersion7(),
                     TenantId = tenantId,
                     Name = name,
-                    Config = config,
+                    Config = encryptedConfig,
                     EntryId = entryId,
                     CreatedAt = DateTime.UtcNow
                 });
@@ -76,7 +79,7 @@ public class McpServersStorage(
             ? await context.GetMcpServerByEntryAsync(tenantId, name, entryId.Value)
             : await context.GetMcpServerAsync(tenantId, name);
 
-        return entity == null ? null : ToDomain(entity);
+        return entity == null ? null : await ToDomainAsync(entity);
     }
 
     public async Task<IReadOnlyList<McpServer>> ReadAllAsync(int tenantId, int? entryId = null)
@@ -87,18 +90,26 @@ public class McpServersStorage(
             ? context.GetAllMcpServersByEntryAsync(tenantId, entryId.Value)
             : context.GetAllMcpServersAsync(tenantId);
 
-        return await servers.Select(ToDomain).ToListAsync();
+        var result = new List<McpServer>();
+        await foreach (var entity in servers)
+        {
+            result.Add(await ToDomainAsync(entity));
+        }
+
+        return result;
     }
 
     public async Task<bool> UpdateAsync(int tenantId, string name, string config, int? entryId = null)
     {
+        var encryptedConfig = await EncryptConfigAsync(config);
+
         await using (await distributedLockProvider.TryAcquireFairLockAsync(GetLockKey(tenantId, entryId)))
         {
             await using var context = await dbContextFactory.CreateDbContextAsync();
 
             var affected = entryId.HasValue
-                ? await context.UpdateMcpServerConfigByEntryAsync(tenantId, name, entryId.Value, config)
-                : await context.UpdateMcpServerConfigAsync(tenantId, name, config);
+                ? await context.UpdateMcpServerConfigByEntryAsync(tenantId, name, entryId.Value, encryptedConfig)
+                : await context.UpdateMcpServerConfigAsync(tenantId, name, encryptedConfig);
 
             return affected > 0;
         }
@@ -111,6 +122,12 @@ public class McpServersStorage(
             return;
         }
 
+        var encryptedServers = new Dictionary<string, string>(servers.Count);
+        foreach (var (name, config) in servers)
+        {
+            encryptedServers[name] = await EncryptConfigAsync(config);
+        }
+
         await using (await distributedLockProvider.TryAcquireFairLockAsync(GetLockKey(tenantId, entryId)))
         {
             await using var dbContext = await dbContextFactory.CreateDbContextAsync();
@@ -121,12 +138,12 @@ public class McpServersStorage(
                 await using var context = await dbContextFactory.CreateDbContextAsync();
 
                 var existingByName = await (entryId.HasValue
-                        ? context.GetMcpServersByNamesAndEntryAsync(tenantId, entryId.Value, servers.Keys)
-                        : context.GetMcpServersByNamesAsync(tenantId, servers.Keys))
+                        ? context.GetMcpServersByNamesAndEntryAsync(tenantId, entryId.Value, encryptedServers.Keys)
+                        : context.GetMcpServersByNamesAsync(tenantId, encryptedServers.Keys))
                     .ToDictionaryAsync(x => x.Name, x => x.Id);
 
                 var now = DateTime.UtcNow;
-                foreach (var (name, config) in servers)
+                foreach (var (name, config) in encryptedServers)
                 {
                     if (existingByName.TryGetValue(name, out var existingId))
                     {
@@ -186,11 +203,33 @@ public class McpServersStorage(
         });
     }
 
-    private static McpServer ToDomain(DbMcpServer entity) => new()
+    private async Task<McpServer> ToDomainAsync(DbMcpServer entity) => new()
     {
         Name = entity.Name,
-        Config = entity.Config
+        Config = await DecryptConfigAsync(entity.Config)
     };
+
+    private async Task<string> EncryptConfigAsync(string config)
+    {
+        return string.IsNullOrEmpty(config) ? config : await crypto.EncryptAsync(config);
+    }
+
+    private async Task<string> DecryptConfigAsync(string config)
+    {
+        if (string.IsNullOrEmpty(config))
+        {
+            return config;
+        }
+
+        try
+        {
+            return await crypto.DecryptAsync(config);
+        }
+        catch (CryptographicException)
+        {
+            return string.Empty;
+        }
+    }
 
     private static string GetLockKey(int tenantId, int? entryId)
     {

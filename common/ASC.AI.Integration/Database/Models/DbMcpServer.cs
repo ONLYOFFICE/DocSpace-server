@@ -90,7 +90,9 @@ public static class DbMcpServerExtension
 
             entity.Property(e => e.Config)
                 .HasColumnName("config")
-                .HasColumnType("json");
+                .HasColumnType("text")
+                .HasCharSet("utf8")
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.EntryId)
                 .HasColumnName("entry_id")
@@ -129,7 +131,7 @@ public static class DbMcpServerExtension
 
             entity.Property(e => e.Config)
                 .HasColumnName("config")
-                .HasColumnType("jsonb");
+                .HasColumnType("text");
 
             entity.Property(e => e.EntryId)
                 .HasColumnName("entry_id")

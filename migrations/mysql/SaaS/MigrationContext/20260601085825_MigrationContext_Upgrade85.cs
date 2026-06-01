@@ -20,7 +20,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     tenant_id = table.Column<int>(type: "int", nullable: false),
                     name = table.Column<string>(type: "varchar(128)", maxLength: 128, nullable: false, collation: "utf8_general_ci")
                         .Annotation("MySql:CharSet", "utf8"),
-                    config = table.Column<string>(type: "json", nullable: false)
+                    config = table.Column<string>(type: "text", nullable: false, collation: "utf8_general_ci")
                         .Annotation("MySql:CharSet", "utf8"),
                     entry_id = table.Column<int>(type: "int", nullable: true),
                     created_at = table.Column<DateTime>(type: "datetime", nullable: false)

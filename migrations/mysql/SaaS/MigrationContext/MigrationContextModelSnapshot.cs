@@ -270,8 +270,10 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.Property<string>("Config")
                         .IsRequired()
-                        .HasColumnType("json")
-                        .HasColumnName("config");
+                        .HasColumnType("text")
+                        .HasColumnName("config")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime")

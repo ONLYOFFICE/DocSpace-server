@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     [DbContext(typeof(MigrationContext))]
-    [Migration("20260529104636_MigrationContext_Upgrade85")]
+    [Migration("20260601085825_MigrationContext_Upgrade85")]
     partial class MigrationContext_Upgrade85
     {
         /// <inheritdoc />
@@ -273,8 +273,10 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.Property<string>("Config")
                         .IsRequired()
-                        .HasColumnType("json")
-                        .HasColumnName("config");
+                        .HasColumnType("text")
+                        .HasColumnName("config")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime")
