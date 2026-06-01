@@ -27,10 +27,11 @@
 import { ToolsEngine } from "@onlyoffice/ai-chat/core";
 import type { McpServerConfig } from "@onlyoffice/ai-chat/core";
 import { storage } from "../storage/index.js";
+import { systemToolsSource } from "../tools/systemTools.js";
 import { asyncHandler, unpackPositional } from "./_helpers.js";
 import { asString } from "../narrow.js";
 
-const engine = new ToolsEngine({ storage });
+const engine = new ToolsEngine({ storage, systemToolsSource });
 
 export const toolsController = {
   addCustomServer: asyncHandler(async (req, res) => {
@@ -80,6 +81,12 @@ export const toolsController = {
     const entityId = asString(req.query["entityId"]);
     const servers = await engine.listCustomServers(entityId);
     res.json(servers);
+  }),
+
+  listSystemTools: asyncHandler(async (req, res) => {
+    const entityId = asString(req.query["entityId"]);
+    const tools = await engine.listSystemTools(entityId);
+    res.json(tools);
   }),
 
   replaceAllCustomServers: asyncHandler(async (req, res) => {

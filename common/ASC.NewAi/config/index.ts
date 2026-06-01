@@ -28,7 +28,7 @@ import nconf from "nconf";
 import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
-import type { AppConfig, RootConfig } from "../app/types.js";
+import type { AppConfig, McpServerSetting, RootConfig } from "../app/types.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -55,6 +55,42 @@ export function getAppConfig(): AppConfig {
 export function getRootConfig(): RootConfig {
     const root: RootConfig = nconf.get();
     return root;
+}
+
+// Per-entry endpoint override injected by the Aspire AppHost as
+// `AI__MCP__<i>__ENDPOINT` (e.g. `http://onlyoffice-docspace-mcp:8000/mcp`),
+// overriding the stale appsettings value. The `__` form is deliberate: a
+// `:`-keyed var (the .NET convention) gets nested by nconf and would turn
+// the `ai.mcp` array into an object. Read straight from the environment.
+function mcpEndpointOverride(index: number): string | undefined {
+    return process.env[`AI__MCP__${index}__ENDPOINT`];
+}
+
+// Host-preconfigured MCP servers from the shared `appsettings.json`
+// (`ai.mcp`), with the Aspire endpoint override applied per entry.
+// Malformed entries (missing id / name / endpoint) are dropped so a bad
+// config can't crash startup.
+export function getMcpServers(): McpServerSetting[] {
+    const ai: RootConfig["ai"] = nconf.get("ai");
+    const mcp = ai?.mcp;
+    if (!Array.isArray(mcp)) {
+        if (mcp != null) {
+            console.warn("ai.mcp is not an array — ignoring (a ':'-keyed env var may have nested over it; use AI__MCP__<i>__ENDPOINT)");
+        }
+        return [];
+    }
+    const servers: McpServerSetting[] = [];
+    mcp.forEach((s, index) => {
+        if (typeof s?.id !== "string" || typeof s?.name !== "string" || s.name.length === 0) {
+            return;
+        }
+        const endpoint = mcpEndpointOverride(index) ?? s.endpoint;
+        if (typeof endpoint !== "string" || endpoint.length === 0) {
+            return;
+        }
+        servers.push({ id: s.id, name: s.name, endpoint });
+    });
+    return servers;
 }
 
 function getAndSaveAppsettings(): void {

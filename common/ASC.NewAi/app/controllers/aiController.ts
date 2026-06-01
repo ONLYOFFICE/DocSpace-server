@@ -25,7 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 import type { Response } from "express";
-import { AIEngine } from "@onlyoffice/ai-chat/core";
+import { AIEngine, composeToolsAdapters } from "@onlyoffice/ai-chat/core";
 import type {
   SendInput,
   SendCustomInput,
@@ -42,6 +42,7 @@ import {
   HttpToolsAdapter,
   safeGetToolsPrompt,
 } from "../tools/httpToolsAdapter.js";
+import { systemToolsSource } from "../tools/systemTools.js";
 
 // Client-side code passes `actionArgs.signal: AbortSignal` so it can
 // cancel an in-flight stream. Going through JSON the signal collapses
@@ -104,7 +105,13 @@ async function withToolsPrompt<T>(body: T): Promise<T> {
 }
 
 const toolsAdapter = new HttpToolsAdapter();
-const engine = new AIEngine({ storage, toolsAdapter });
+const engine = new AIEngine({
+  storage,
+  // System (host-configured MCP) tools run server-side and pause for UI
+  // approval; the DocSpace integration tools run silently. Compose both.
+  toolsAdapter: composeToolsAdapters(systemToolsSource, toolsAdapter),
+  systemServerTypes: () => systemToolsSource.getServerTypes(),
+});
 
 function isAsyncIterable(value: unknown): value is AsyncIterable<unknown> {
   if (typeof value !== "object" || value === null) {

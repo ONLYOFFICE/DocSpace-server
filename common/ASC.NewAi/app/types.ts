@@ -40,6 +40,14 @@ export interface AppConfig {
   aiService?: { url?: string };
 }
 
+// A host-preconfigured MCP server from `appsettings.json` (`ai.mcp`).
+// Wired into the engine as a server-side "system tools" source.
+export interface McpServerSetting {
+  id: string;
+  name: string;
+  endpoint: string;
+}
+
 export interface AwsCloudWatchConfig {
   accessKeyId?: string;
   secretAccessKey?: string;
@@ -54,6 +62,8 @@ export interface RootConfig {
   logConsole?: boolean;
   logPath?: string;
   logLevel?: string;
+  // Merged from the shared DocSpace `appsettings.json` `ai` section.
+  ai?: { mcp?: McpServerSetting[] };
 }
 
 export interface ThreadDto {
