@@ -41,7 +41,7 @@ public class GoogleCloudStorage(TempStream tempStream,
         PathUtils pathUtils,
         EmailValidationKeyProvider emailValidationKeyProvider,
         IHttpContextAccessor httpContextAccessor,
-        ILoggerProvider factory,
+        ILoggerFactory loggerFactory,
         ILogger<GoogleCloudStorage> options,
         IHttpClientFactory clientFactory,
         TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
@@ -50,7 +50,7 @@ public class GoogleCloudStorage(TempStream tempStream,
         IQuotaService quotaService,
         UserManager userManager,
         CustomQuota customQuota)
-    : BaseStorage(tempStream, tenantManager, pathUtils, emailValidationKeyProvider, httpContextAccessor, factory, options, clientFactory, tenantQuotaFeatureStatHelper, quotaSocketManager, settingsManager, quotaService, userManager, customQuota)
+    : BaseStorage(tempStream, tenantManager, pathUtils, emailValidationKeyProvider, httpContextAccessor, loggerFactory, options, clientFactory, tenantQuotaFeatureStatHelper, quotaSocketManager, settingsManager, quotaService, userManager, customQuota)
 {
     public override bool IsSupportChunking => true;
 
@@ -151,7 +151,7 @@ public class GoogleCloudStorage(TempStream tempStream,
 
     public Uri GetUriShared(string domain, string path)
     {
-        return new Uri(SecureHelper.IsSecure(_httpContextAccessor.HttpContext, _options) ? _bucketSSlRoot : _bucketRoot, MakePath(domain, path));
+        return new Uri(SecureHelper.IsSecure(_httpContextAccessor.HttpContext, _loggerFactory) ? _bucketSSlRoot : _bucketRoot, MakePath(domain, path));
     }
     public override Task<Stream> GetReadStreamAsync(string domain, string path)
     {

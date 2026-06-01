@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -60,7 +60,7 @@ public class DeletePersonalFolderProgressItem : DistributedTaskProgress
     {
         await using var scope = _serviceScopeFactory.CreateAsyncScope();
         var fileStorageService = scope.ServiceProvider.GetService<FileStorageService>();
-        var options = scope.ServiceProvider.GetService<ILoggerProvider>();
+        var loggerFactory = scope.ServiceProvider.GetService<ILoggerFactory>();
         var daoFactory = scope.ServiceProvider.GetService<IDaoFactory>();
         var tenantManager = scope.ServiceProvider.GetService<TenantManager>();
         var userManager = scope.ServiceProvider.GetService<UserManager>();
@@ -68,7 +68,7 @@ public class DeletePersonalFolderProgressItem : DistributedTaskProgress
         await tenantManager.SetCurrentTenantAsync(_tenantId);
 
         var folderDao = daoFactory.GetFolderDao<int>();
-        var logger = options.CreateLogger("ASC.Web");
+        var logger = loggerFactory.CreateLogger("ASC.Web");
 
         try
         {

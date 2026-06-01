@@ -47,7 +47,7 @@ public class WebPathSettings
         }
     }
 
-    public string GetRelativePath(HttpContext httpContext, ILoggerProvider options, string absolutePath)
+    public string GetRelativePath(HttpContext httpContext, ILoggerFactory loggerFactory, string absolutePath)
     {
         if (!Uri.IsWellFormedUriString(absolutePath, UriKind.Absolute))
         {
@@ -60,12 +60,12 @@ public class WebPathSettings
             return absolutePath;
         }
 
-        return SecureHelper.IsSecure(httpContext, options) && !string.IsNullOrEmpty(appender.AppendSecure) ?
+        return SecureHelper.IsSecure(httpContext, loggerFactory) && !string.IsNullOrEmpty(appender.AppendSecure) ?
             absolutePath.Remove(0, appender.AppendSecure.Length) :
             absolutePath.Remove(0, appender.Append.Length);
     }
 
-    public string GetPath(HttpContext httpContext, ILoggerProvider options, string relativePath)
+    public string GetPath(HttpContext httpContext, ILoggerFactory loggerFactory, string relativePath)
     {
         if (!string.IsNullOrEmpty(relativePath) && relativePath.StartsWith('~'))
         {
@@ -116,7 +116,7 @@ public class WebPathSettings
             else
             {
                 //TODO HostingEnvironment.IsHosted
-                if (SecureHelper.IsSecure(httpContext, options) && !string.IsNullOrEmpty(appender.AppendSecure))
+                if (SecureHelper.IsSecure(httpContext, loggerFactory) && !string.IsNullOrEmpty(appender.AppendSecure))
                 {
                     result = $"{appender.AppendSecure.TrimEnd('/')}/{relativePath.TrimStart('/')}";
                 }
@@ -140,7 +140,7 @@ public class WebPath(
     StorageSettingsHelper storageSettingsHelper,
     IHttpContextAccessor httpContextAccessor,
     CoreBaseSettings coreBaseSettings,
-    ILoggerProvider options)
+    ILoggerFactory loggerFactory)
 {
     public async Task<string> GetPathAsync(string relativePath)
     {
@@ -166,6 +166,6 @@ public class WebPath(
             }
         }
 
-        return webPathSettings.GetPath(httpContextAccessor?.HttpContext, options, relativePath);
+        return webPathSettings.GetPath(httpContextAccessor?.HttpContext, loggerFactory, relativePath);
     }
 }

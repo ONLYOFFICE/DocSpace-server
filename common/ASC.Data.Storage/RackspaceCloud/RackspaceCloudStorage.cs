@@ -42,7 +42,7 @@ public class RackspaceCloudStorage(TempPath tempPath,
         PathUtils pathUtils,
         EmailValidationKeyProvider emailValidationKeyProvider,
         IHttpContextAccessor httpContextAccessor,
-        ILoggerProvider options,
+        ILoggerFactory loggerFactory,
         ILogger<RackspaceCloudStorage> logger,
         IHttpClientFactory httpClient,
         TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
@@ -51,7 +51,7 @@ public class RackspaceCloudStorage(TempPath tempPath,
         IQuotaService quotaService,
         UserManager userManager,
         CustomQuota customQuota)
-    : BaseStorage(tempStream, tenantManager, pathUtils, emailValidationKeyProvider, httpContextAccessor, options, logger, httpClient, tenantQuotaFeatureStatHelper, quotaSocketManager, settingsManager, quotaService, userManager, customQuota)
+    : BaseStorage(tempStream, tenantManager, pathUtils, emailValidationKeyProvider, httpContextAccessor, loggerFactory, logger, httpClient, tenantQuotaFeatureStatHelper, quotaSocketManager, settingsManager, quotaService, userManager, customQuota)
 {
     public override bool IsSupportChunking => true;
     public TempPath TempPath { get; } = tempPath;
@@ -782,7 +782,7 @@ public class RackspaceCloudStorage(TempPath tempPath,
 
     private Uri GetUriShared(string domain, string path)
     {
-        return new Uri(string.Format("{0}{1}", SecureHelper.IsSecure(_httpContextAccessor?.HttpContext, _options) ? _cnameSSL : _cname, MakePath(domain, path)));
+        return new Uri(string.Format("{0}{1}", SecureHelper.IsSecure(_httpContextAccessor?.HttpContext, _loggerFactory) ? _cnameSSL : _cname, MakePath(domain, path)));
     }
 
     private ACL GetDomainACL(string domain)
