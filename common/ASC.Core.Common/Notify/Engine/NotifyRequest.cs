@@ -35,7 +35,7 @@ using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Notify.Engine;
 
-public class NotifyRequest(ILoggerProvider options, INotifySource notifySource, INotifyAction action, string objectID, IRecipient recipient)
+public class NotifyRequest(ILoggerFactory loggerFactory, INotifySource notifySource, INotifyAction action, string objectID, IRecipient recipient)
 {
     private readonly INotifySource _notifySource = notifySource ?? throw new ArgumentNullException(nameof(notifySource));
     public INotifyAction NotifyAction { get; internal set; } = action ?? throw new ArgumentNullException(nameof(action));
@@ -52,7 +52,7 @@ public class NotifyRequest(ILoggerProvider options, INotifySource notifySource, 
     internal List<string> _requaredTags = [];
     internal List<ISendInterceptor> _interceptors = [];
     internal bool _isNeedCheckSubscriptions = true;
-    private readonly ILogger _log = options.CreateLogger("ASC.Notify");
+    private readonly ILogger _log = loggerFactory.CreateLogger("ASC.Notify");
 
     internal async Task<bool> Intercept(InterceptorPlace place, IServiceScope serviceScope)
     {
@@ -100,7 +100,7 @@ public class NotifyRequest(ILoggerProvider options, INotifySource notifySource, 
     {
         ArgumentNullException.ThrowIfNull(recipient);
 
-        var newRequest = new NotifyRequest(options, _notifySource, NotifyAction, ObjectID, recipient)
+        var newRequest = new NotifyRequest(loggerFactory, _notifySource, NotifyAction, ObjectID, recipient)
         {
             _tenantId = _tenantId,
             _senderNames = _senderNames,

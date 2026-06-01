@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -35,7 +35,7 @@ namespace ASC.Web.Api.Controllers.Settings;
 
 [DefaultRoute("license")]
 public class LicenseController(
-    ILoggerProvider option,
+    ILoggerFactory loggerFactory,
     MessageService messageService,
     SecurityContext securityContext,
     UserManager userManager,
@@ -53,7 +53,7 @@ public class LicenseController(
     DocumentServiceLicense documentServiceLicense)
     : BaseSettingsController(fusionCache, webItemManager)
 {
-    private readonly ILogger _log = option.CreateLogger("ASC.Api");
+    private readonly ILogger _log = loggerFactory.CreateLogger("ASC.Api");
 
     /// <remarks>
     /// Refreshes the portal license.

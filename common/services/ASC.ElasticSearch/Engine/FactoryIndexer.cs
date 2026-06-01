@@ -61,7 +61,7 @@ public interface IFactoryIndexer
     Task DeleteAsync(int tenantId, bool immediately = true);
 }
 
-public abstract class FactoryIndexer<T>(ILoggerProvider options,
+public abstract class FactoryIndexer<T>(ILoggerFactory loggerFactory,
         TenantManager tenantManager,
         SearchSettingsHelper searchSettingsHelper,
         FactoryIndexer factoryIndexer,
@@ -71,7 +71,7 @@ public abstract class FactoryIndexer<T>(ILoggerProvider options,
     : IFactoryIndexer
     where T : class, ISearchItem
 {
-    protected ILogger Logger { get; } = options.CreateLogger("ASC.Indexer");
+    protected ILogger Logger { get; } = loggerFactory.CreateLogger("ASC.Indexer");
     public string IndexName => _indexer.IndexName;
     public virtual string SettingsTitle => string.Empty;
 
@@ -599,7 +599,7 @@ public class FactoryIndexer
         IServiceProvider serviceProvider,
         FactoryIndexerHelper factoryIndexerHelper,
         Client client,
-        ILoggerProvider options,
+        ILoggerFactory loggerFactory,
         CoreBaseSettings coreBaseSettings,
         ICache cache)
     {
@@ -611,7 +611,7 @@ public class FactoryIndexer
 
         try
         {
-            Log = options.CreateLogger("ASC.Indexer");
+            Log = loggerFactory.CreateLogger("ASC.Indexer");
         }
         catch (Exception e)
         {

@@ -91,10 +91,10 @@ public class WebItemManager
         }
     }
 
-    public WebItemManager(IServiceProvider serviceProvider, IConfiguration configuration, ILoggerProvider options)
+    public WebItemManager(IServiceProvider serviceProvider, IConfiguration configuration, ILoggerFactory loggerFactory)
     {
         _serviceProvider = serviceProvider;
-        _log = options.CreateLogger("ASC.Web");
+        _log = loggerFactory.CreateLogger("ASC.Web");
         _disableItem = (configuration["web:disabled-items"] ?? "").Split(",").ToList();
         _lazyItems = new Lazy<ConcurrentDictionary<Guid, IWebItem>>(LoadItems, LazyThreadSafetyMode.ExecutionAndPublication);
     }

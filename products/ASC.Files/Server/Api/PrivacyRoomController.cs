@@ -84,10 +84,10 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
         SettingsManager settingsManager,
         EncryptionKeyPairDtoHelper encryptionKeyPairHelper,
         MessageService messageService,
-        ILoggerProvider option)
+        ILoggerFactory loggerFactory)
     : ControllerBase
 {
-    private readonly ILogger _logger = option.CreateLogger("ASC.Api.Documents");
+    private readonly ILogger _logger = loggerFactory.CreateLogger("ASC.Api.Documents");
 
     /// <remarks>
     /// Returns a key pair for the current user.
