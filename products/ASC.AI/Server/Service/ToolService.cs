@@ -46,7 +46,11 @@ public class ToolService(IServiceProvider serviceProvider)
                 prompt.Append(bundle.Prompt);
             }
 
-            descriptors.AddRange(bundle.Tools.Select(tool => new ToolDescriptor(tool.Name, tool.Function.JsonSchema)));
+            descriptors.AddRange(bundle.Tools.Select(tool =>
+                new ToolDescriptor(
+                    tool.Name,
+                    tool.Function.Description,
+                    tool.Function.JsonSchema)));
         }
 
         return new ToolListResponse(prompt.ToString(), descriptors);
