@@ -232,7 +232,7 @@ public class SocketManager(
 
         var folderDao = daoFactory.GetFolderDao<T>();
         var room = await folderDao.GetFirstParentTypeFromFileEntryAsync(form);
-        if (room is { FolderType: FolderType.VirtualDataRoom })
+        if (room is { FolderType: FolderType.VirtualDataRoom or FolderType.FillingFormsRoom })
         {
             var aces = await fileSharing.GetSharedInfoAsync(room);
             users = aces.Where(ace => ace.Access != FileShare.FillForms)
