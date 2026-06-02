@@ -123,6 +123,11 @@ public abstract class FileEntry : ICloneable
     public bool SharedForUser { get; set; }
 
     /// <summary>
+    /// Specifies if the file entry is shared via a public (non-internal) external link.
+    /// </summary>
+    public bool SharedExternal { get; set; }
+
+    /// <summary>
     /// Indicates whether the parent entity is shared.
     /// </summary>
     public bool ParentShared { get; set; }

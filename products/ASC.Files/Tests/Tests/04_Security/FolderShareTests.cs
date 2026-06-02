@@ -1,34 +1,34 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Files.Tests.Tests._04_Security;
@@ -47,18 +47,18 @@ public class FolderShareTests(
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
         var folder = await CreateFolderInMy("folder", Initializer.Owner);
-        
+
         // Act
         var linkParams = new FolderLinkRequest(access: fileShare);
         await _foldersApi.CreateFolderPrimaryExternalLinkAsync(folder.Id, linkParams, TestContext.Current.CancellationToken);
         var result = (await _foldersApi.GetFolderPrimaryExternalLinkAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        
+
         // Assert
         result.Should().NotBeNull();
         //result.ShareLink.Should().NotBeNullOrEmpty();
         result.Access.Should().Be(fileShare);
     }
-    
+
     // [Fact]
     // public async Task PrimaryExternalLink_ShortLink_ReturnsOk()
     // {
@@ -67,7 +67,7 @@ public class FolderShareTests(
     //     var room = (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("room title", roomType: RoomType.CustomRoom), TestContext.Current.CancellationToken)).Response;
     //     var folder = await CreateFolder("folder",  room.Id);
     //     var linkParams = new FolderLinkRequest(access: FileShare.Read);
-    //     
+    //
     //     // Act
     //     var externalLink =  (await _foldersApi.CreateFolderPrimaryExternalLinkAsync(folder.Id, linkParams, TestContext.Current.CancellationToken)).Response;
     //     var sharedTo = DeserializeSharedToLink(externalLink);
@@ -75,7 +75,7 @@ public class FolderShareTests(
     //     var result = await apiFactory.HttpClient.GetAsync(sharedTo.ShareLink, TestContext.Current.CancellationToken);
     //     result.StatusCode.Should().Be(HttpStatusCode.OK);
     // }
-    
+
     [Fact]
     public async Task CreatePrimaryExternalLink_ByDefault_ReturnsLinkData()
     {
@@ -83,7 +83,7 @@ public class FolderShareTests(
         await _filesClient.Authenticate(Initializer.Owner);
         var folder = await CreateFolderInMy("folder", Initializer.Owner);
         var file = await CreateFile("file", folder.Id);
-        
+
         // Act
         var result = (await _foldersApi.GetFolderPrimaryExternalLinkAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         var sharedTo = result.SharedLink;
@@ -107,36 +107,36 @@ public class FolderShareTests(
         folderInfo.Current.Should().NotBeNull();
         folderInfo.Current.Title.Should().Be(folder.Title);
         folderInfo.Current.Shared.Should().BeTrue();
-        
+
         fileInfo.Should().NotBeNull();
         fileInfo.Title.Should().Be(file.Title);
         fileInfo.ParentShared.Should().BeTrue();
     }
-    
+
     [Theory]
     [MemberData(nameof(InvalidFileShare))]
     public async Task CreatePrimaryExternalLink_InvalidFileShare_ReturnsError(FileShare fileShare)
     {
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
-        
+
         //Assert
         var folder = await CreateFolderInMy("folder", Initializer.Owner);
         var linkParams = new FolderLinkRequest(access: fileShare);
-        
+
         // Act
 
-        await Assert.ThrowsAsync<ApiException>(async () => 
+        await Assert.ThrowsAsync<ApiException>(async () =>
             await _foldersApi.CreateFolderPrimaryExternalLinkAsync(folder.Id, linkParams, TestContext.Current.CancellationToken));
     }
-    
+
     [Fact]
     public async Task UpdatePrimaryExternalLink_ValidData_ReturnsLinkData()
     {
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
         var folder = await CreateFolderInMy("folder", Initializer.Owner);
-        
+
         // Act
         var result = (await _foldersApi.GetFolderPrimaryExternalLinkAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         var sharedTo = result.SharedLink;
@@ -156,7 +156,7 @@ public class FolderShareTests(
         updatedSharedTo.Password.Should().Be(data.Password);
         updatedSharedTo.DenyDownload.Should().Be(data.DenyDownload);
     }
-    
+
     [Fact]
     public async Task ExternalLinkDenyDownload_InternalUser_ReturnsOk()
     {
@@ -164,20 +164,20 @@ public class FolderShareTests(
         await _filesClient.Authenticate(Initializer.Owner);
         var folder = await CreateFolderInMy("folder", Initializer.Owner);
         var file = await CreateFile("file_to_share.docx", folder.Id);
-        
+
         // Act
         var externalLink =  (await _foldersApi.GetFolderPrimaryExternalLinkAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         var sharedTo = externalLink.SharedLink;
-        
+
         var data = new FolderLinkRequest(sharedTo.Id, FileShare.Editing, denyDownload: true);
         await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, data, TestContext.Current.CancellationToken);
-        
+
         file = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         file.Should().NotBeNull();
         file.FolderId.Should().Be(folder.Id);
         file.Security.Download.Should().BeTrue();
     }
-    
+
     [Fact]
     public async Task ExternalLinkDenyDownload_ExternalUser_ReturnsError()
     {
@@ -185,7 +185,7 @@ public class FolderShareTests(
         await _filesClient.Authenticate(Initializer.Owner);
         var folder = await CreateFolderInMy("folder", Initializer.Owner);
         var file = await CreateFile("file_to_share.docx", folder.Id);
-        
+
         // Act
         var externalLink =  (await _foldersApi.GetFolderPrimaryExternalLinkAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         var sharedTo = externalLink.SharedLink;
@@ -193,16 +193,16 @@ public class FolderShareTests(
         var data = new FolderLinkRequest(sharedTo.Id, FileShare.Editing, denyDownload: true);
         var updatedExternalLink = (await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, data, TestContext.Current.CancellationToken)).Response;
         var updatedSharedTo = updatedExternalLink.SharedLink;
-        
+
         await _filesClient.Authenticate(null);
         _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, updatedSharedTo.RequestToken);
         file = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
-        
+
         file.Should().NotBeNull();
         file.Security.Download.Should().BeFalse();
     }
-    
+
     [Fact]
     public async Task CreatePrimaryExternalLink_FolderWithFileInMyByOwner_ReturnsError()
     {
@@ -210,28 +210,28 @@ public class FolderShareTests(
         await _filesClient.Authenticate(Initializer.Owner);
         var folder = await CreateFolderInMy("folder", Initializer.Owner);
         var file = await CreateFile("file", folder.Id);
-        
+
         // Act
         var result = (await _foldersApi.GetFolderPrimaryExternalLinkAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         var sharedTo = result.SharedLink;
 
         var data = new FolderLinkRequest(sharedTo.Id, password: "11111111");
         await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, data, TestContext.Current.CancellationToken);
-        
+
         await _filesClient.Authenticate(null);
         _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, sharedTo.RequestToken);
         await Assert.ThrowsAsync<ApiException>(async () => await _filesApi.GetFileInfoAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken));
         await Assert.ThrowsAsync<ApiException>(async () => await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken));
         _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
     }
-    
+
     [Fact]
     public async Task ExternalLinkWithPassword_ExternalUserRequirePassword_ReturnsRequiredPassword()
     {
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
         var folder = await CreateFolderInMy("folder", Initializer.Owner);
-        
+
         // Act
         var externalLink = (await _foldersApi.GetFolderPrimaryExternalLinkAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         var sharedTo = externalLink.SharedLink;
@@ -239,7 +239,7 @@ public class FolderShareTests(
         var data = new FolderLinkRequest(sharedTo.Id, FileShare.Editing, password: "11111111");
         var updatedExternalLink = (await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, data, TestContext.Current.CancellationToken)).Response;
         var updatedSharedTo = updatedExternalLink.SharedLink;
-        
+
         await _filesClient.Authenticate(null);
         _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, updatedSharedTo.RequestToken);
         var externalShareData = (await _sharingApi.GetExternalShareDataAsync(updatedSharedTo.RequestToken, cancellationToken: TestContext.Current.CancellationToken)).Response;
@@ -247,14 +247,14 @@ public class FolderShareTests(
 
         externalShareData.Status.Should().Be(Status.RequiredPassword);
     }
-    
+
     [Fact]
     public async Task ExternalLinkWithPassword_CheckPassword_ReturnsOk()
     {
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
         var folder = await CreateFolderInMy("folder", Initializer.Owner);
-        
+
         // Act
         var externalLink = (await _foldersApi.GetFolderPrimaryExternalLinkAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         var sharedTo = externalLink.SharedLink;
@@ -263,7 +263,7 @@ public class FolderShareTests(
         var data = new FolderLinkRequest(sharedTo.Id, FileShare.Editing, password: password);
         var updatedExternalLink = (await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, data, TestContext.Current.CancellationToken)).Response;
         var updatedSharedTo = updatedExternalLink.SharedLink;
-        
+
         await _filesClient.Authenticate(null);
         _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, updatedSharedTo.RequestToken);
         var externalShareDataWrongPassword = (await _sharingApi.ApplyExternalSharePasswordAsync(updatedSharedTo.RequestToken, new ExternalShareRequestParam { Password = password + "1" }, cancellationToken: TestContext.Current.CancellationToken)).Response;
@@ -273,42 +273,42 @@ public class FolderShareTests(
         externalShareDataWrongPassword.Status.Should().Be(Status.InvalidPassword);
         externalShareData.Status.Should().Be(Status.Ok);
     }
-    
+
     [Fact]
     public async Task SetFolderLinkAsync_NoneAccess_ReturnsOk()
     {
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
-        
+
         var folder = await CreateFolderInMy("folder", Initializer.Owner);
         var file = await CreateFile("file", folder.Id);
-        
+
         var linkParams = new FolderLinkRequest(access: FileShare.Read);
         var externalLink = (await _foldersApi.CreateFolderPrimaryExternalLinkAsync(folder.Id, linkParams, TestContext.Current.CancellationToken)).Response;
         var sharedTo = externalLink.SharedLink;
-        
+
         // Act
         var data = new FolderLinkRequest(sharedTo.Id, FileShare.None);
         var updatedExternalLink = (await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, data, TestContext.Current.CancellationToken)).Response;
         var folderInfo = (await _foldersApi.GetFolderInfoAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         var fileInfo = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        
+
         // Assert
         updatedExternalLink.Should().BeNull();
         folderInfo.Shared.Should().BeFalse();
         fileInfo.Shared.Should().BeFalse();
-        
+
         var allLinks = (await _foldersApi.GetFolderLinksAsync(folderInfo.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        allLinks.Should().BeEmpty(); 
+        allLinks.Should().BeEmpty();
     }
-    
+
     [Fact]
     public async Task CheckEditAccess_VDR_ReturnsFalse()
     {
         await _filesClient.Authenticate(Initializer.Owner);
         var room = await CreateVDRRoom("room title");
         var folder = await CreateFolder("folder title", room.Id);
-        
+
         // Get the primary external link
         var primaryLink = (await _foldersApi.GetFolderPrimaryExternalLinkAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         var sharedToLink = primaryLink.SharedLink;
@@ -320,14 +320,14 @@ public class FolderShareTests(
         var updatedSharedToLink = updatedLink.SharedLink;
         updatedSharedToLink.Internal.Should().BeTrue();
     }
-    
+
     [Fact]
     public async Task CheckEditAccess_PublicRoom_ReturnsFalse()
     {
         await _filesClient.Authenticate(Initializer.Owner);
         var room = await CreatePublicRoom("room title");
         var folder = await CreateFolder("folder title", room.Id);
-        
+
         // Get the primary external link
         var primaryLink = (await _foldersApi.GetFolderPrimaryExternalLinkAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         var sharedToLink = primaryLink.SharedLink;
@@ -339,7 +339,7 @@ public class FolderShareTests(
         var updatedSharedToLink = updatedLink.SharedLink;
         updatedSharedToLink.Internal.Should().BeFalse();
     }
-    
+
     [Theory]
     [InlineData(RoomType.CustomRoom)]
     [InlineData(RoomType.EditingRoom)]
@@ -349,18 +349,18 @@ public class FolderShareTests(
         await _filesClient.Authenticate(Initializer.Owner);
         var room = (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("room title", roomType: roomType), TestContext.Current.CancellationToken)).Response;
         var folder = await CreateFolder("folder title", room.Id);
-        
+
         // Get the primary external link
         var primaryLink = (await _foldersApi.GetFolderPrimaryExternalLinkAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         var sharedToLink = primaryLink.SharedLink;
-        
+
         sharedToLink.Internal.Should().BeFalse();
         primaryLink.CanEditInternal.Should().BeTrue();
-        
+
         var updatedLink = (await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, new FolderLinkRequest(sharedToLink.Id, @internal: true), TestContext.Current.CancellationToken)).Response;
         updatedLink.Should().BeNull();
     }
-    
+
     [Theory]
     [InlineData(RoomType.FillingFormsRoom)]
     public async Task CheckEditAccess_InValidRoomType_ReturnsTrue(RoomType roomType)
@@ -369,11 +369,11 @@ public class FolderShareTests(
         await _filesClient.Authenticate(Initializer.Owner);
         var room = (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("room title", roomType: roomType), TestContext.Current.CancellationToken)).Response;
         var folder = await CreateFolder("folder title", room.Id);
-        
+
         // Get the primary external link
         await Assert.ThrowsAsync<ApiException>(async () => await _foldersApi.GetFolderPrimaryExternalLinkAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken));
     }
-    
+
     [Fact]
     public async Task GetFolderSecurityInfo_SharedFolder_ReturnsSecurityInformation()
     {
@@ -400,7 +400,7 @@ public class FolderShareTests(
         var result = (await _sharingApi.SetFolderSecurityInfoAsync(folder.Id, securityRequest, TestContext.Current.CancellationToken)).Response;
         result.Should().NotBeNull();
         result.Should().AllSatisfy(r => r.SubjectType.Should().BeOneOf(SubjectType.Group, SubjectType.User));
-        
+
         // Act
         var securityInfos = (await _sharingApi.GetFolderSecurityInfoAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
@@ -417,7 +417,7 @@ public class FolderShareTests(
         var user2Security = securityInfos.FirstOrDefault(s => s.SharedToUser.Id == user2.Id);
         user2Security.Should().NotBeNull();
         user2Security!.Access.Should().Be(FileShare.Editing);
-        
+
         // Verify that the file is accessible by group members with correct permissions
         await _filesClient.Authenticate(user1);
         var folderAsUser1 = (await _foldersApi.GetFolderInfoAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
@@ -425,24 +425,24 @@ public class FolderShareTests(
         folderAsUser1.Access.Should().Be(FileShare.Read);
         folderAsUser1.Security.Read.Should().BeTrue();
         folderAsUser1.Security.Edit.Should().BeFalse();
-        
+
         var sharedFolderIdAsUser1 = await GetShareFolderIdAsync( user1);
         var sharedFolderAsUser1 = (await _foldersApi.GetFolderByFolderIdAsync(sharedFolderIdAsUser1, cancellationToken: TestContext.Current.CancellationToken)).Response;
         sharedFolderAsUser1.Should().NotBeNull();
         sharedFolderAsUser1.Folders.Should().Contain(r => r.Title == folder.Title && r.Access == FileShare.Read);
-        
+
         await _filesClient.Authenticate(user2);
         var folderAsUser2 = (await _foldersApi.GetFolderInfoAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         folderAsUser2.Should().NotBeNull();
         folderAsUser2.Access.Should().Be(FileShare.Editing);
         folderAsUser2.Security.Read.Should().BeTrue();
-        
+
         var sharedFolderIdAsUser2 = await GetShareFolderIdAsync( user2);
         var sharedFolderAsUser2 = (await _foldersApi.GetFolderByFolderIdAsync(sharedFolderIdAsUser2, cancellationToken: TestContext.Current.CancellationToken)).Response;
         sharedFolderAsUser2.Should().NotBeNull();
         sharedFolderAsUser2.Folders.Should().Contain(r => r.Title == folder.Title && r.Access == FileShare.Editing);
     }
-    
+
     [Fact]
     public async Task GetFolderSecurityInfo_SharedFolderGroup_ReturnsSecurityInformation()
     {
@@ -455,7 +455,7 @@ public class FolderShareTests(
 
         // Create a group
         var group = (await _groupApi.AddGroupAsync(new GroupRequestDto([user1.Id, user2.Id], Initializer.Owner.Id, "TestFolderGroup"), TestContext.Current.CancellationToken)).Response;
-        
+
         // Share the folder with the group
         var shareInfo = new List<FileShareParams>
         {
@@ -471,7 +471,7 @@ public class FolderShareTests(
         var result = (await _sharingApi.SetFolderSecurityInfoAsync(folder.Id, securityRequest, TestContext.Current.CancellationToken)).Response;
         result.Should().NotBeNull();
         result.Should().AllSatisfy(r => r.SubjectType.Should().BeOneOf(SubjectType.Group, SubjectType.User));
-        
+
         // Act
         var securityInfos = (await _sharingApi.GetFolderSecurityInfoAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
@@ -483,7 +483,7 @@ public class FolderShareTests(
         var user1Security = securityInfos.FirstOrDefault(s => s.SharedToGroup?.Id == group.Id);
         user1Security.Should().NotBeNull();
         user1Security!.Access.Should().Be(FileShare.Editing);
-        
+
         // Verify that the file is accessible by group members with correct permissions
         await _filesClient.Authenticate(user1);
         var folderAsUser1 = (await _foldersApi.GetFolderInfoAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
@@ -491,41 +491,41 @@ public class FolderShareTests(
         folderAsUser1.Access.Should().Be(FileShare.Editing);
         folderAsUser1.Security.Read.Should().BeTrue();
         folderAsUser1.Security.Edit.Should().BeFalse();
-        
+
         var sharedFolderIdAsUser1 = await GetShareFolderIdAsync( user1);
         var sharedFolderAsUser1 = (await _foldersApi.GetFolderByFolderIdAsync(sharedFolderIdAsUser1, cancellationToken: TestContext.Current.CancellationToken)).Response;
         sharedFolderAsUser1.Should().NotBeNull();
         sharedFolderAsUser1.Folders.Should().Contain(r => r.Title == folder.Title && r.Access == FileShare.Editing);
-        
+
         await _filesClient.Authenticate(user2);
         var folderAsUser2 = (await _foldersApi.GetFolderInfoAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         folderAsUser2.Should().NotBeNull();
         folderAsUser2.Access.Should().Be(FileShare.Editing);
         folderAsUser2.Security.Read.Should().BeTrue();
-        
+
         var sharedFolderIdAsUser2 = await GetShareFolderIdAsync( user2);
         var sharedFolderAsUser2 = (await _foldersApi.GetFolderByFolderIdAsync(sharedFolderIdAsUser2, cancellationToken: TestContext.Current.CancellationToken)).Response;
         sharedFolderAsUser2.Should().NotBeNull();
         sharedFolderAsUser2.Folders.Should().Contain(r => r.Title == folder.Title && r.Access == FileShare.Editing);
     }
-    
+
     [Fact]
     public async Task GetFolderSecurityInfo_SharedFolderWithGroup_ReturnsGroupSecurityInformation()
     {
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
         await _peopleClient.Authenticate(Initializer.Owner);
-        
+
         var folder = await CreateFolderInMy("folder_security_info_group", Initializer.Owner);
         var fileInFolder = await CreateFile("file_in_folder", folder.Id);
-        
+
         // Add users to the group
         var user1 = await Initializer.InviteContact(EmployeeType.User);
         var user2 = await Initializer.InviteContact(EmployeeType.User);
-        
+
         // Create a group
         var group = (await _groupApi.AddGroupAsync(new GroupRequestDto([user1.Id, user2.Id], Initializer.Owner.Id, "TestFolderGroup"), TestContext.Current.CancellationToken)).Response;
-        
+
         // Share the folder with the group
         var shareInfo = new List<FileShareParams>
         {
@@ -566,13 +566,13 @@ public class FolderShareTests(
         var sharedFolderAsUser1 = (await _foldersApi.GetFolderByFolderIdAsync(sharedFolderIdAsUser1, cancellationToken: TestContext.Current.CancellationToken)).Response;
         sharedFolderAsUser1.Should().NotBeNull();
         sharedFolderAsUser1.Folders.Should().Contain(r => r.Title == folder.Title && r.Access == FileShare.Editing);
-        
+
         await _filesClient.Authenticate(user2);
         var fileAsUser2 = (await _filesApi.GetFileInfoAsync(fileInFolder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         fileAsUser2.Should().NotBeNull();
         fileAsUser2.Access.Should().Be(FileShare.Editing);
         fileAsUser2.Security.Edit.Should().BeTrue();
-        
+
         var sharedFolderIdAsUser2 = await GetShareFolderIdAsync( user2);
         var sharedFolderAsUser2 = (await _foldersApi.GetFolderByFolderIdAsync(sharedFolderIdAsUser2, cancellationToken: TestContext.Current.CancellationToken)).Response;
         sharedFolderAsUser2.Should().NotBeNull();
@@ -721,10 +721,10 @@ public class FolderShareTests(
         {
             Share = removeShareInfo
         };
-        await Assert.ThrowsAsync<ApiException>(async() => 
+        await Assert.ThrowsAsync<ApiException>(async() =>
             await _sharingApi.SetFileSecurityInfoAsync(file.Id, removeSecurityRequest, TestContext.Current.CancellationToken));
     }
-    
+
     [Fact]
     [Trait("Category", "Bug")]
     [Trait("Bug", "77613")]
@@ -735,31 +735,31 @@ public class FolderShareTests(
 
         var folder = await CreateFolderInMy("folder_new_item_1", Initializer.Owner);
         var result = (await _foldersApi.GetFolderPrimaryExternalLinkAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        
+
         await _filesClient.Authenticate(user);
-        
+
         var firstResult = await _sharingApi.GetExternalShareDataAsync(result.SharedLink.RequestToken, cancellationToken: TestContext.Current.CancellationToken);
         firstResult.Should().NotBeNull();
         firstResult.Status.Should().Be(0);
-        
+
         var shareFolder = await GetShareFolderIdAsync(user);
         var sharedFolderAsUser1 = (await _foldersApi.GetFolderByFolderIdAsync(shareFolder, cancellationToken: TestContext.Current.CancellationToken)).Response;
         sharedFolderAsUser1.Should().NotBeNull();
         sharedFolderAsUser1.Folders.Should().Contain(r => r.Title == folder.Title && r.Access == FileShare.Read);
-        
+
         await _sharingApi.RemoveSecurityInfoAsync(new BaseBatchRequestDto { FolderIds = [new(folder.Id)] }, cancellationToken: TestContext.Current.CancellationToken);
         sharedFolderAsUser1 = (await _foldersApi.GetFolderByFolderIdAsync(shareFolder, cancellationToken: TestContext.Current.CancellationToken)).Response;
         sharedFolderAsUser1.Folders.Should().BeEmpty();
-        
+
         await _sharingApi.GetExternalShareDataAsync(result.SharedLink.RequestToken, cancellationToken: TestContext.Current.CancellationToken);
         firstResult.Should().NotBeNull();
         firstResult.Status.Should().Be(0);
-        
+
         sharedFolderAsUser1 = (await _foldersApi.GetFolderByFolderIdAsync(shareFolder, cancellationToken: TestContext.Current.CancellationToken)).Response;
         sharedFolderAsUser1.Should().NotBeNull();
         sharedFolderAsUser1.Folders.Should().Contain(r => r.Title == folder.Title && r.Access == FileShare.Read);
     }
-    
+
     [Fact]
     [Trait("Category", "Bug")]
     [Trait("Bug", "78968")]
@@ -768,25 +768,25 @@ public class FolderShareTests(
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
         var user1 = await Initializer.InviteContact(EmployeeType.User);
-        
+
         var folder = await CreateFolderInMy("folder", Initializer.Owner);
         var subFolder = await CreateFolder("subfolder", folder.Id);
         var subSubFolder = await CreateFolder("subsubfolder", subFolder.Id);
-        
+
         var securityRequest = new SecurityInfoSimpleRequestDto
         {
             Share = [new() { ShareTo = user1.Id, Access = FileShare.Read }]
         };
-        
-        await _sharingApi.SetFolderSecurityInfoAsync(folder.Id, securityRequest, TestContext.Current.CancellationToken);   
-        
+
+        await _sharingApi.SetFolderSecurityInfoAsync(folder.Id, securityRequest, TestContext.Current.CancellationToken);
+
         securityRequest = new SecurityInfoSimpleRequestDto
         {
             Share = [new() { ShareTo = user1.Id, Access = FileShare.ReadWrite }]
         };
-        
+
         await _sharingApi.SetFolderSecurityInfoAsync(subFolder.Id, securityRequest, TestContext.Current.CancellationToken);
-        
+
         //Act
         await _filesClient.Authenticate(user1);
         var folderUser = (await _foldersApi.GetFolderInfoAsync(subSubFolder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
@@ -794,5 +794,73 @@ public class FolderShareTests(
         // Assert
         folderUser.Should().NotBeNull();
         folderUser.Access.Should().Be(FileShare.ReadWrite);
+    }
+
+    [Fact]
+    public async Task SharedProperties_FolderWithPublicExternalLink_ReturnsSharedTrue()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var folder = await CreateFolderInMy("folder_shared_props", Initializer.Owner);
+
+        // Act - getting the primary external link creates a public (non-internal) link
+        var link = (await _foldersApi.GetFolderPrimaryExternalLinkAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var folderInfo = (await _foldersApi.GetFolderInfoAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        link.SharedLink.Internal.Should().BeFalse();
+        folderInfo.Should().NotBeNull();
+        folderInfo.Shared.Should().BeTrue();         // shared via external link
+        folderInfo.SharedForUser.Should().BeFalse(); // not shared with users/groups
+
+        folderInfo.SharedExternal.Should().BeTrue(); // public (non-internal) external link present
+    }
+
+    [Fact]
+    public async Task SharedProperties_FolderSharedWithUser_ReturnsSharedForUserTrue()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var folder = await CreateFolderInMy("folder_shared_with_user", Initializer.Owner);
+        var user = await Initializer.InviteContact(EmployeeType.User);
+
+        var securityRequest = new SecurityInfoSimpleRequestDto
+        {
+            Share = [new() { ShareTo = user.Id, Access = FileShare.Read }]
+        };
+        await _sharingApi.SetFolderSecurityInfoAsync(folder.Id, securityRequest, TestContext.Current.CancellationToken);
+
+        // Act
+        var folderInfo = (await _foldersApi.GetFolderInfoAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        folderInfo.Should().NotBeNull();
+        folderInfo.SharedForUser.Should().BeTrue(); // shared with a user
+        folderInfo.Shared.Should().BeFalse();        // no external link
+
+        folderInfo.SharedExternal.Should().BeFalse(); // no public external link
+    }
+
+    [Fact]
+    public async Task SharedProperties_FolderWithInternalExternalLink_ReturnsSharedExternalFalse()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var folder = await CreateFolderInMy("folder_internal_link", Initializer.Owner);
+
+        // Act - create the primary external link and switch it to internal
+        var link = (await _foldersApi.GetFolderPrimaryExternalLinkAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var data = new FolderLinkRequest(link.SharedLink.Id, FileShare.Read, @internal: true);
+        var updatedLink = (await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, data, TestContext.Current.CancellationToken)).Response;
+
+        var folderInfo = (await _foldersApi.GetFolderInfoAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        updatedLink.SharedLink.Internal.Should().BeTrue();
+        folderInfo.Should().NotBeNull();
+        folderInfo.Shared.Should().BeTrue();         // still shared via an external link
+        folderInfo.SharedForUser.Should().BeFalse(); // not shared with users/groups
+
+        folderInfo.SharedExternal.Should().BeFalse(); // link is internal, not a public external link
     }
 }

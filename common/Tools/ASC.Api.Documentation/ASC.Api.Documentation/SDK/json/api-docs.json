@@ -13241,6 +13241,69 @@
         ]
       }
     },
+    "/api/2.0/files/settings/externalsharingsettings": {
+      "put": {
+        "tags": [
+          "Files / Settings"
+        ],
+        "summary": "Change the Access Control external sharing settings",
+        "description": "Changes the Access Control external sharing settings.",
+        "operationId": "changeExternalSharingSettings",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExternalSharingSettingsRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "External sharing settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExternalSharingSettingsWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": []
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": []
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": []
+          }
+        ]
+      }
+    },
     "/api/2.0/files/settings/externalsocialmedia": {
       "put": {
         "tags": [
@@ -42903,6 +42966,11 @@
             "description": "Specifies if the file entry is shared for user or not.",
             "example": false
           },
+          "sharedExternal": {
+            "type": "boolean",
+            "description": "Specifies if the file entry is shared via a public (non-internal) external link.",
+            "example": false
+          },
           "parentShared": {
             "type": "boolean",
             "description": "Indicates whether the parent entity is shared.",
@@ -50191,6 +50259,110 @@
           }
         }
       },
+      "ExternalSharingSettingsDto": {
+        "type": "object",
+        "properties": {
+          "externalShare": {
+            "type": "boolean",
+            "description": "Specifies whether external (public) link creation is allowed.",
+            "example": true
+          },
+          "defaultShareLinkInternal": {
+            "type": "boolean",
+            "description": "Specifies the default sharing link type: true = DocSpace users only, false = Anyone with the link.",
+            "example": false
+          },
+          "externalShareApplyToDocuments": {
+            "type": "boolean",
+            "description": "When external sharing is restricted, specifies whether the restriction applies to the My Documents section.",
+            "example": true
+          },
+          "externalShareApplyToRooms": {
+            "type": "boolean",
+            "description": "When external sharing is restricted, specifies whether the restriction applies to the Rooms section.",
+            "example": true
+          },
+          "blockExistingLinksOnRestrict": {
+            "type": "boolean",
+            "description": "When external sharing is restricted, specifies whether existing public links are blocked immediately.",
+            "example": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "The Access Control external sharing settings."
+      },
+      "ExternalSharingSettingsRequestDto": {
+        "type": "object",
+        "properties": {
+          "externalShare": {
+            "type": "boolean",
+            "description": "Specifies whether external (public) link creation is allowed.",
+            "example": true
+          },
+          "defaultShareLinkInternal": {
+            "type": "boolean",
+            "description": "Specifies the default sharing link type: true = DocSpace users only, false = Anyone with the link.\r\nRelevant only when ExternalShare is true.",
+            "example": false
+          },
+          "externalShareApplyToDocuments": {
+            "type": "boolean",
+            "description": "When external sharing is restricted, specifies whether to apply the restriction to the My Documents section.\r\nRelevant only when ExternalShare is false.",
+            "example": true
+          },
+          "externalShareApplyToRooms": {
+            "type": "boolean",
+            "description": "When external sharing is restricted, specifies whether to apply the restriction to the Rooms section.\r\nRelevant only when ExternalShare is false.",
+            "example": true
+          },
+          "blockExistingLinksOnRestrict": {
+            "type": "boolean",
+            "description": "When external sharing is restricted, specifies whether to block existing public links immediately.\r\nRelevant only when ExternalShare is false.",
+            "example": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "The Access Control external sharing settings request parameters."
+      },
+      "ExternalSharingSettingsWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/ExternalSharingSettingsDto"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
       "FeedbackConfig": {
         "type": "object",
         "properties": {
@@ -52119,6 +52291,26 @@
           "organizeRoomsGrouping": {
             "type": "boolean",
             "description": "Specifies whether the grouping of rooms is enabled or not.",
+            "example": true
+          },
+          "defaultShareLinkInternal": {
+            "type": "boolean",
+            "description": "Specifies the default sharing link type: true = DocSpace users only (internal), false = Anyone with the link.",
+            "example": false
+          },
+          "externalShareApplyToDocuments": {
+            "type": "boolean",
+            "description": "When external sharing is restricted, specifies whether the restriction applies to the My Documents section.",
+            "example": true
+          },
+          "externalShareApplyToRooms": {
+            "type": "boolean",
+            "description": "When external sharing is restricted, specifies whether the restriction applies to the Rooms section.",
+            "example": true
+          },
+          "blockExistingLinksOnRestrict": {
+            "type": "boolean",
+            "description": "When external sharing is restricted, specifies whether existing public links are blocked immediately.",
             "example": true
           },
           "extsFilesVectorized": {
