@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -43,7 +43,8 @@ public abstract class PeopleControllerBase(
     UserPhotoManager userPhotoManager,
     IHttpContextAccessor httpContextAccessor,
     IUrlValidator urlValidator,
-    SetupInfo setupInfo)
+    SetupInfo setupInfo,
+    IHttpClientFactory httpClientFactory)
     : ApiControllerBase
 {
     protected readonly UserManager _userManager = userManager;
@@ -53,6 +54,7 @@ public abstract class PeopleControllerBase(
     protected readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
     protected readonly IUrlValidator _urlValidator = urlValidator;
     protected readonly SetupInfo _setupInfo = setupInfo;
+    protected readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
 
     protected async Task<UserInfo> GetUserInfoAsync(string userNameOrId)
     {
@@ -144,14 +146,7 @@ public abstract class PeopleControllerBase(
 
         await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(user.Id), Constants.Action_EditUser);
 
-        var handler = new SocketsHttpHandler
-        {
-            AllowAutoRedirect = false,
-            ConnectCallback = UrlValidator.PinnedConnectCallback
-        };
-
-        using var httpClient = new HttpClient(handler, disposeHandler: true);
-        httpClient.Timeout = TimeSpan.FromSeconds(10);
+        var httpClient = _httpClientFactory.CreateClient(UrlValidator.PinnedHttpClient);
         using var request = new HttpRequestMessage(HttpMethod.Get, photoValidation.ParsedUri);
         request.Options.Set(UrlValidator.PinnedIpKey, photoValidation.ResolvedAddresses[0]);
         using var response = await httpClient.SendAsync(request);

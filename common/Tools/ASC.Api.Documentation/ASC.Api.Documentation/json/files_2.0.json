@@ -1997,6 +1997,9 @@
               }
             }
           },
+          "403": {
+            "description": "You don't have enough permission to perform the operation"
+          },
           "404": {
             "description": "Not Found"
           },
@@ -2086,6 +2089,9 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "You don't have enough permission to perform the operation"
           },
           "404": {
             "description": "Not Found"
@@ -4928,6 +4934,9 @@
               }
             }
           },
+          "403": {
+            "description": "You don't have enough permission to perform the operation"
+          },
           "404": {
             "description": "Not Found"
           },
@@ -5017,6 +5026,9 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "You don't have enough permission to perform the operation"
           },
           "404": {
             "description": "Not Found"
@@ -13626,6 +13638,9 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "You don't have enough permission to perform the operation"
           },
           "404": {
             "description": "Not Found"
@@ -24839,33 +24854,44 @@
         "description": "The logo cover information."
       },
       "LogoRequest": {
+        "required": [
+          "tmpFile"
+        ],
         "type": "object",
         "properties": {
           "tmpFile": {
+            "minLength": 1,
             "type": "string",
             "description": "The path to the temporary image file.",
-            "nullable": true,
             "example": "/tmp/logo.png"
           },
           "x": {
+            "maximum": 1280,
+            "minimum": 0,
             "type": "integer",
             "description": "The X coordinate of the rectangle starting point.",
             "format": "int32",
             "example": 0
           },
           "y": {
+            "maximum": 1280,
+            "minimum": 0,
             "type": "integer",
             "description": "The Y coordinate of the rectangle starting point.",
             "format": "int32",
             "example": 0
           },
           "width": {
+            "maximum": 1280,
+            "minimum": 1,
             "type": "integer",
             "description": "The rectangle width.",
             "format": "int32",
             "example": 100
           },
           "height": {
+            "maximum": 1280,
+            "minimum": 1,
             "type": "integer",
             "description": "The rectangle height.",
             "format": "int32",

@@ -533,7 +533,7 @@ public partial class BackupPortalTask(
         var files = GetFilesToProcess(tenantId).Distinct();
 
         await using var backupRecordContext = await dbContextFactory.CreateDbContextAsync();
-        var exclude = await Queries.BackupRecordsAsync(backupRecordContext, tenantId).ToListAsync();
+        var exclude = await Queries.BackupRecordsIncludingDumpAsync(backupRecordContext, tenantId).ToListAsync();
 
         files = files.Where(f => !exclude.Exists(e => f.Path.Replace('\\', '/').Contains($"/file_{e.StoragePath}/")));
         files = files.Where(f => !f.Path.Contains("/thumb."));
@@ -759,6 +759,12 @@ static file class Queries
     public static readonly Func<BackupsContext, int, IAsyncEnumerable<BackupRecord>> BackupRecordsAsync = Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
         (BackupsContext ctx, int tenantId) =>
             ctx.Backups.Where(b => b.TenantId == tenantId
+                                   && b.StorageType == 0
+                                   && b.StoragePath != null));
+
+    public static readonly Func<BackupsContext, int, IAsyncEnumerable<BackupRecord>> BackupRecordsIncludingDumpAsync = Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+        (BackupsContext ctx, int tenantId) =>
+            ctx.Backups.Where(b => (b.TenantId == tenantId || b.TenantId == -1)
                                    && b.StorageType == 0
                                    && b.StoragePath != null));
 

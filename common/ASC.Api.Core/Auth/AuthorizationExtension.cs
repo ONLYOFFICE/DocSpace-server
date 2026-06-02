@@ -51,7 +51,7 @@ public static class AuthorizationExtension
         { "GET api/[^/]+/keys/@self?", [ "*" ] }
     };
 
-    private static string GetAuthorizePolicy(string routePattern, string httpMethod)
+    internal static string GetAuthorizePolicy(string routePattern, string httpMethod)
     {
         string[] globalScopes;
 

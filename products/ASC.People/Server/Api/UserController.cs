@@ -95,8 +95,9 @@ public class UserController(
     SetupInfo setupInfo,
     IdentityClient client,
     GroupFullDtoHelper groupFullDtoHelper,
-    IUrlValidator urlValidator)
-    : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpContextAccessor, urlValidator, setupInfo)
+    IUrlValidator urlValidator,
+    IHttpClientFactory httpClientFactory)
+    : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpContextAccessor, urlValidator, setupInfo, httpClientFactory)
 {
     /// <remarks>
     /// Returns the user claims.

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+// (c) Copyright Ascensio System SIA 2010-2022
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -128,7 +128,7 @@ namespace ASC.Webhooks.Tests
             var SuccessedWebhookRequest = new WebhookRequest { Id = successWebhookPayloadId };
             var FailedWebhookRequest = new WebhookRequest { Id = failedWebhookPayloadId };
 
-            var sender = new WebhookSender(serviceProvider.GetService<ILoggerProvider>(), serviceProvider.GetRequiredService<IServiceScopeFactory>(), _httpClientFactory);
+            var sender = new WebhookSender(serviceProvider.GetService<ILoggerFactory>(), serviceProvider.GetRequiredService<IServiceScopeFactory>(), _httpClientFactory);
             await sender.Send(SuccessedWebhookRequest, token);
             await sender.Send(FailedWebhookRequest, token);
 

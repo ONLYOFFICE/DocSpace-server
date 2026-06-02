@@ -1,37 +1,35 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
-
-using SKSvg = Svg.Skia.SKSvg;
 
 namespace ASC.Web.Core.WhiteLabel;
 
@@ -202,6 +200,7 @@ public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
             WhiteLabelLogoType.PdfEditorEmbed => LogoPdfEditorEmbedSize,
             WhiteLabelLogoType.DiagramEditor => LogoDiagramEditorSize,
             WhiteLabelLogoType.DiagramEditorEmbed => LogoDiagramEditorEmbedSize,
+            WhiteLabelLogoType.Notification => LogoNotificationSize,
             _ => new MagickGeometry()
         };
     }
@@ -383,7 +382,7 @@ public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
         }
     }
 
-    internal string GetExt(WhiteLabelLogoType type, bool dark)
+    public string GetExt(WhiteLabelLogoType type, bool dark)
     {
         return type switch
         {
@@ -669,7 +668,8 @@ public class TenantWhiteLabelSettingsHelper(
         await store.SaveAsync(logoFileName, memory);
     }
 
-    public async Task SetLogo(TenantWhiteLabelSettings tenantWhiteLabelSettings, Dictionary<int, KeyValuePair<string, string>> logo, IDataStore storage = null)
+    public async Task SetLogo(TenantWhiteLabelSettings tenantWhiteLabelSettings, IWhiteLabelLogoConverter logoConverter,
+        Dictionary<int, KeyValuePair<string, string>> logo, IDataStore storage = null)
     {
         foreach (var currentLogo in logo)
         {
@@ -690,7 +690,7 @@ public class TenantWhiteLabelSettingsHelper(
                 tenantWhiteLabelSettings.SetExt(currentLogoType, extLight, false);
                 if (currentLogoType == WhiteLabelLogoType.LoginPage)
                 {
-                    var (notificationData, extNotification) = GetNotificationLogoData(lightData, extLight, tenantWhiteLabelSettings);
+                    var (notificationData, extNotification) = logoConverter.GetNotificationLogoData(lightData, extLight, tenantWhiteLabelSettings);
 
                     if (notificationData != null)
                     {
@@ -757,55 +757,6 @@ public class TenantWhiteLabelSettingsHelper(
         }
 
         return (null, null);
-    }
-
-    private (byte[], string) GetNotificationLogoData(byte[] logoData, string extLogo, TenantWhiteLabelSettings tenantWhiteLabelSettings)
-    {
-        var extNotification = tenantWhiteLabelSettings.GetExt(WhiteLabelLogoType.Notification, false);
-
-        return extLogo switch
-        {
-            "png" => (logoData, extNotification),
-            "svg" => (GetLogoDataFromSvg(), extNotification),
-            "bmp" or "jpg" or "jpeg" or "ico" => (GetLogoDataFromJpg(), extNotification),
-            _ => ((byte[], string))(null, extNotification)
-        };
-
-        byte[] GetLogoDataFromSvg()
-        {
-            var size = GetSize(WhiteLabelLogoType.Notification);
-
-            using var svg = new SKSvg();
-
-            using (var stream = new MemoryStream(logoData))
-            {
-                svg.Load(stream);
-            }
-
-            using (var bitMap = new SKBitmap((int)size.Width, (int)size.Height))
-            using (var canvas = new SKCanvas(bitMap))
-            {
-                var canvasMin = Math.Min(size.Width, size.Height);
-                var svgMax = Math.Max(svg.Picture.CullRect.Width, svg.Picture.CullRect.Height);
-                var scale = canvasMin / svgMax;
-                var matrix = SKMatrix.CreateScale(scale, scale);
-
-                canvas.DrawPicture(svg.Picture, matrix);
-
-                using (var image = SKImage.FromBitmap(bitMap))
-                using (var pngData = image.Encode())
-                {
-                    return pngData.ToArray();
-                }
-            }
-        }
-
-        byte[] GetLogoDataFromJpg()
-        {
-            using var image = SKImage.FromEncodedData(logoData);
-            using var pngData = image.Encode();
-            return pngData.ToArray();
-        }
     }
 
     public async Task SetLogoFromStream(TenantWhiteLabelSettings tenantWhiteLabelSettings, WhiteLabelLogoType type, string fileExt, Stream fileStream, bool dark, IDataStore storage = null)
@@ -1000,30 +951,6 @@ public class TenantWhiteLabelSettingsHelper(
         }
 
         return $"{type.ToStringLowerFast()}.{fileExt}";
-    }
-
-    private static IMagickGeometry GetSize(WhiteLabelLogoType type)
-    {
-        return type switch
-        {
-            WhiteLabelLogoType.LightSmall => TenantWhiteLabelSettings.LogoLightSmallSize,
-            WhiteLabelLogoType.LoginPage => TenantWhiteLabelSettings.LogoLoginPageSize,
-            WhiteLabelLogoType.Favicon => TenantWhiteLabelSettings.LogoFaviconSize,
-            WhiteLabelLogoType.DocsEditor => TenantWhiteLabelSettings.LogoDocsEditorSize,
-            WhiteLabelLogoType.DocsEditorEmbed => TenantWhiteLabelSettings.LogoDocsEditorEmbedSize,
-            WhiteLabelLogoType.LeftMenu => TenantWhiteLabelSettings.LogoLeftMenuSize,
-            WhiteLabelLogoType.AboutPage => TenantWhiteLabelSettings.LogoAboutPageSize,
-            WhiteLabelLogoType.Notification => TenantWhiteLabelSettings.LogoNotificationSize,
-            WhiteLabelLogoType.SpreadsheetEditor => TenantWhiteLabelSettings.LogoSpreadsheetEditorSize,
-            WhiteLabelLogoType.SpreadsheetEditorEmbed => TenantWhiteLabelSettings.LogoSpreadsheetEditorEmbedSize,
-            WhiteLabelLogoType.PresentationEditor => TenantWhiteLabelSettings.LogoPresentationEditorSize,
-            WhiteLabelLogoType.PresentationEditorEmbed => TenantWhiteLabelSettings.LogoPresentationEditorEmbedSize,
-            WhiteLabelLogoType.PdfEditor => TenantWhiteLabelSettings.LogoPdfEditorSize,
-            WhiteLabelLogoType.PdfEditorEmbed => TenantWhiteLabelSettings.LogoPdfEditorEmbedSize,
-            WhiteLabelLogoType.DiagramEditor => TenantWhiteLabelSettings.LogoDiagramEditorSize,
-            WhiteLabelLogoType.DiagramEditorEmbed => TenantWhiteLabelSettings.LogoDiagramEditorEmbedSize,
-            _ => new MagickGeometry(0, 0)
-        };
     }
 
     #region Delete from Store

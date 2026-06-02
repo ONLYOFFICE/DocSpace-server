@@ -217,15 +217,18 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
 
     public ConnectionStringManager AddEditors()
     {
+        var forTesting = builder.Configuration["APP_EDITOR_TEST"] == "true";
         var image = builder.Configuration["APP_EDITION"] switch
         {
-            "enterprise" => "onlyoffice/documentserver-ee",
-            "developer" => "onlyoffice/documentserver-de",
-            _ => "onlyoffice/documentserver"
+            "enterprise" => forTesting ? "onlyoffice/4testing-documentserver-ee" : "onlyoffice/documentserver-ee",
+            "developer" => forTesting ? "onlyoffice/4testing-documentserver-de" : "onlyoffice/documentserver-de",
+            _ => forTesting ? "onlyoffice/4testing-documentserver" : "onlyoffice/documentserver"
         };
 
+        var tag = builder.Configuration["APP_EDITOR_VERSION"] ?? "latest";
+
         EditorResource = builder
-            .AddContainer(Constants.EditorsContainer, image, "latest")
+            .AddContainer(Constants.EditorsContainer, image, tag)
             //TODO:get from config or set for the rest projects
             .WithEnvironment("JWT_ENABLED", "true")
             .WithEnvironment("JWT_SECRET", "secret")
@@ -276,7 +279,8 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
 
     public ConnectionStringManager AddMailPit()
     {
-        MailResource = builder.AddMailPit("mailpit");
+        MailResource = builder.AddMailPit("mailpit")
+            .WithArgs("--smtp-disable-rdns");
 
         return this;
     }

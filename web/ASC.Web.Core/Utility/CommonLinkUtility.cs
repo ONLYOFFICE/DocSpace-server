@@ -72,9 +72,9 @@ public class CommonLinkUtility(
         UserManager userManager,
         InstanceCrypto instanceCrypto,
         EmailValidationKeyProvider emailValidationKeyProvider,
-        ILoggerProvider options,
+        ILoggerFactory loggerFactory,
         ExternalResourceSettingsHelper externalResourceSettingsHelper)
-    : BaseCommonLinkUtility(httpContextAccessor, coreBaseSettings, coreSettings, tenantManager, options)
+    : BaseCommonLinkUtility(httpContextAccessor, coreBaseSettings, coreSettings, tenantManager, loggerFactory)
 {
     public const string ParamName_UserUserID = "uid";
     public const string AbsoluteAccountsPath = "/accounts/";

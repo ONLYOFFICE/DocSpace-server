@@ -72,10 +72,10 @@ public class EmailSenderSink(INotifySender sender) : Sink
 
 [Scope]
 public class EmailSenderSinkMessageCreator(TenantManager tenantManager, CoreConfiguration coreConfiguration,
-        ILoggerProvider options)
+        ILoggerFactory loggerFactory)
     : SinkMessageCreator
 {
-    private readonly ILogger _logger = options.CreateLogger("ASC.Notify");
+    private readonly ILogger _logger = loggerFactory.CreateLogger("ASC.Notify");
 
     public override async Task<NotifyMessage> CreateNotifyMessage(INoticeMessage message, string senderName)
     {

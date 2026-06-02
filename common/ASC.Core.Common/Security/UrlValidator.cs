@@ -100,6 +100,12 @@ public class UrlValidator(
 
     private readonly string[] _blacklist = configuration.GetSection("webhooks:blacklist").Get<string[]>() ?? _defaultBlacklist;
 
+    /// <summary>Named <see cref="HttpClient"/> with SSRF-safe <see cref="PinnedConnectCallback"/> and full TLS verification.</summary>
+    public const string PinnedHttpClient = "pinnedHttpClient";
+
+    /// <summary>Named <see cref="HttpClient"/> with SSRF-safe <see cref="PinnedConnectCallback"/> and TLS certificate validation disabled.</summary>
+    public const string PinnedHttpClientSslIgnore = "pinnedHttpClientSslIgnore";
+
     /// <summary>
     /// Key used to attach the pre-validated <see cref="IPAddress"/> to an <see cref="HttpRequestMessage"/>.
     /// Set via <c>request.Options.Set(UrlValidator.PinnedIpKey, ip)</c> before calling <c>SendAsync</c>.

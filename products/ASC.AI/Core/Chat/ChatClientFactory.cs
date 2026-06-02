@@ -42,7 +42,7 @@ namespace ASC.AI.Core.Chat;
 [Scope]
 public class ChatClientFactory(
     IHttpClientFactory httpClientFactory,
-    IToolPermissionRequester toolPermissionRequester,
+    IToolCallReceiver toolCallReceiver,
     AiConfiguration aiConfiguration)
 {
     public IChatClient Create(
@@ -192,7 +192,7 @@ public class ChatClientFactory(
                 var funcClient = new ManagedFunctionInvokingChatClient(
                     innerClient,
                     toolHolder,
-                    toolPermissionRequester,
+                    toolCallReceiver,
                     userId);
 
                 funcClient.MaximumIterationsPerRequest = 32;
