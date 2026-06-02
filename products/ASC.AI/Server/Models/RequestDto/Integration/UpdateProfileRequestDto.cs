@@ -41,8 +41,13 @@ public class UpdateProfileBody
 {
     public required string Name { get; init; }
     public required string ProviderType { get; init; }
+
+    [MaxLength(AiIntegrationLimits.MaxBaseUrlLength)]
     public required string BaseUrl { get; init; }
+
+    [MaxLength(AiIntegrationLimits.MaxKeyLength)]
     public string? Key { get; init; }
+
     public required string ModelId { get; init; }
     public bool? Reasoning { get; init; }
     public Capabilities? Capabilities { get; init; }

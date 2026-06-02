@@ -26,8 +26,21 @@
 
 namespace ASC.AI.Models.RequestDto.Integration;
 
-public class ReplaceMcpServersRequestDto
+public class ReplaceMcpServersRequestDto : IValidatableObject
 {
     public required IReadOnlyDictionary<string, string> Servers { get; init; }
     public string? EntityId { get; init; }
+
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        foreach (var (name, config) in Servers)
+        {
+            if (config is { Length: > AiIntegrationLimits.MaxConfigLength })
+            {
+                yield return new ValidationResult(
+                    $"Config for MCP server '{name}' exceeds the maximum length of {AiIntegrationLimits.MaxConfigLength} characters.",
+                    [nameof(Servers)]);
+            }
+        }
+    }
 }

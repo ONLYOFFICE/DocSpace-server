@@ -37,6 +37,8 @@ public class UpdateMcpServerRequestDto
 
 public class UpdateMcpServerBody
 {
+    [MaxLength(AiIntegrationLimits.MaxConfigLength)]
     public required string Config { get; init; }
+
     public string? EntityId { get; init; }
 }
