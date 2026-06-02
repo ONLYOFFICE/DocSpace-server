@@ -283,7 +283,8 @@ public class FolderDtoHelper(
         string order = null,
         IFolder contextFolder = null,
         AiStatus aiStatus = null,
-        AiModelSettingsResult modelSettingsResult = null)
+        AiModelSettingsResult modelSettingsResult = null,
+        HashSet<string> roomsWithPublicLinks = null)
     {
         var result = await GetFolderWrapperAsync(folder);
         result.ParentId = folder.ParentId;
@@ -322,7 +323,7 @@ public class FolderDtoHelper(
 
             result.Mute = await roomsNotificationSettingsHelper.CheckMuteForRoomAsync(result.Id.ToString());
 
-            result.SharedExternal = await _fileSecurity
+            result.SharedExternal = roomsWithPublicLinks?.Contains(folder.Id.ToString()) ?? await _fileSecurity
                 .GetPureSharesAsync(folder, ShareFilterType.ExternalLink, null, null)
                 .AnyAsync(r => r.Options?.Internal == false);
 

@@ -42,6 +42,7 @@ public interface ISecurityDao<T>
     Task RemoveSecuritiesAsync(Guid subject, Guid ownerId, SubjectType subjectType);
     IAsyncEnumerable<FileShareRecord<T>> GetPureShareRecordsAsync(IEnumerable<FileEntry<T>> entries);
     IAsyncEnumerable<FileShareRecord<T>> GetPureShareRecordsAsync(FileEntry<T> entry);
+    IAsyncEnumerable<FileShareRecord<T>> GetPureExternalLinkRecordsAsync(IEnumerable<FileEntry<T>> entries);
     Task DeleteShareRecordsAsync(IEnumerable<FileShareRecord<T>> records);
     Task<int> GetPureSharesCountAsync(FileEntry<T> entry, ShareFilterType filterType, EmployeeActivationStatus? status, string text);
     IAsyncEnumerable<FileShareRecord<T>> GetPureSharesAsync(FileEntry<T> entry, ShareFilterType filterType, EmployeeActivationStatus? status, string text, int offset = 0, int count = -1);

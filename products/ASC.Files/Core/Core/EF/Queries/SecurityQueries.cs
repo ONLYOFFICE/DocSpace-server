@@ -71,6 +71,12 @@ public partial class FilesDbContext
         return SecurityQueries.PureShareRecordsDbAsync(this, tenantId, files, folders);
     }
 
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    public IAsyncEnumerable<DbFilesSecurity> ExternalLinkRecordsDbAsync(int tenantId, IEnumerable<string> folders)
+    {
+        return SecurityQueries.ExternalLinkRecordsDbAsync(this, tenantId, folders);
+    }
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
     public Task<int> RemoveBySubjectAsync(int tenantId, Guid subject)
     {
@@ -165,6 +171,16 @@ static file class SecurityQueries
                 ctx.Security.Where(r =>
                     (r.TenantId == tenantId && files.Contains(r.EntryId) && r.EntryType == FileEntryType.File)
                     || (r.TenantId == tenantId && folders.Contains(r.EntryId) && r.EntryType == FileEntryType.Folder)));
+
+    public static readonly
+        Func<FilesDbContext, int, IEnumerable<string>, IAsyncEnumerable<DbFilesSecurity>> ExternalLinkRecordsDbAsync =
+            Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, IEnumerable<string> folders) =>
+                ctx.Security.Where(r =>
+                    r.TenantId == tenantId
+                    && folders.Contains(r.EntryId)
+                    && r.EntryType == FileEntryType.Folder
+                    && (r.SubjectType == SubjectType.ExternalLink || r.SubjectType == SubjectType.PrimaryExternalLink)));
 
     public static readonly Func<FilesDbContext, int, Guid, Task<int>> RemoveBySubjectAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

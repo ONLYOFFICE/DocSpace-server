@@ -228,6 +228,40 @@ internal abstract class SecurityBaseDao<T>(
         return InternalGetPureShareRecordsAsync(entry);
     }
 
+    public IAsyncEnumerable<FileShareRecord<T>> GetPureExternalLinkRecordsAsync(IEnumerable<FileEntry<T>> entries)
+    {
+        if (entries == null)
+        {
+            return AsyncEnumerable.Empty<FileShareRecord<T>>();
+        }
+
+        return InternalGetPureExternalLinkRecordsAsync(entries);
+    }
+
+    private async IAsyncEnumerable<FileShareRecord<T>> InternalGetPureExternalLinkRecordsAsync(IEnumerable<FileEntry<T>> entries)
+    {
+        var files = new List<string>();
+        var folders = new List<string>();
+
+        foreach (var entry in entries)
+        {
+            await SelectFilesAndFoldersForShareAsync(entry, files, folders, null);
+        }
+
+        if (folders.Count == 0)
+        {
+            yield break;
+        }
+
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        await foreach (var e in filesDbContext.ExternalLinkRecordsDbAsync(tenantId, folders))
+        {
+            yield return await ToFileShareRecordAsync(e);
+        }
+    }
+
     public async IAsyncEnumerable<GroupMemberSecurityRecord> GetGroupMembersWithSecurityAsync(FileEntry<T> entry, Guid groupId, string text, int offset, int count)
     {
         if (entry == null)
