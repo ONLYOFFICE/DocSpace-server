@@ -26,6 +26,7 @@
 
 import type { Request, Response, NextFunction, RequestHandler } from "express";
 import logger from "../log.js";
+import { AiServiceHttpError } from "../storage/httpClient.js";
 
 export type TypedRequest<ReqBody = unknown, ReqQuery = Record<string, unknown>> = Request<
   Record<string, string>,
@@ -40,11 +41,23 @@ type AsyncHandler<ReqBody, ReqQuery> = (
   next: NextFunction,
 ) => Promise<void> | void;
 
-function errorMessage(err: unknown): string {
-  if (err instanceof Error) {
-    return err.message;
+// What is safe to return to the client. Full detail (stack, upstream URL,
+// upstream body) is logged server-side only — never echoed back. An
+// `AiServiceHttpError` carries the internal `AI_SERVICE_URL` and the
+// upstream response body in its `message`, so we forward only its status
+// and `statusText`. Errors that opt in via `expose` (e.g. request
+// validation) get their message through under a 4xx status; everything
+// else collapses to a generic 500.
+function clientError(err: unknown): { status: number; message: string } {
+  if (err instanceof AiServiceHttpError) {
+    return { status: err.status, message: err.statusText || "Upstream error" };
   }
-  return String(err);
+  const status = (err as { status?: unknown })?.status;
+  const expose = (err as { expose?: unknown })?.expose === true;
+  if (expose && typeof status === "number" && status >= 400 && status < 500) {
+    return { status, message: err instanceof Error ? err.message : "Bad request" };
+  }
+  return { status: 500, message: "Internal server error" };
 }
 
 /**
@@ -125,7 +138,8 @@ export function asyncHandler<ReqBody = unknown, ReqQuery = Record<string, unknow
     } catch (err) {
       logger.error(`${req.method} ${req.originalUrl} failed: ${errorDetails(err)}`);
       if (!res.headersSent) {
-        res.status(500).json({ error: errorMessage(err) });
+        const { status, message } = clientError(err);
+        res.status(status).json({ error: message });
       } else {
         res.end();
       }
@@ -148,7 +162,9 @@ export async function streamNdjson(
     }
   } catch (err) {
     logger.error(`stream aborted: ${errorDetails(err)}`);
-    res.write(`${JSON.stringify({ type: "error", message: errorMessage(err) })}\n`);
+    // Generic message only — detail is in the server log. The full error can
+    // carry the internal AI service URL / upstream body.
+    res.write(`${JSON.stringify({ type: "error", message: "stream error" })}\n`);
   } finally {
     res.end();
   }

@@ -32,6 +32,7 @@ import type {
 } from "@onlyoffice/ai-chat/core";
 import { getMcpServers } from "../../config/index.js";
 import { getForwardedHeaders } from "../requestContext.js";
+import { withTimeout } from "../storage/httpClient.js";
 import logger from "../log.js";
 
 // docspace-mcp resolves the target portal from the `Referer` header — it
@@ -136,9 +137,15 @@ const forwardingFetch: FetchLike = async (url, init) => {
       .sort()
       .join(",")}])`,
   );
+  // Bound the connect/header phase so an unreachable or hung MCP server
+  // can't pin the request forever; the timer is cleared once the response
+  // is in hand, leaving streamed bodies to flow under the MCP client's own
+  // signal.
+  const { signal, cancel } = withTimeout(init?.signal ?? undefined);
   try {
     const res = await fetch(url, {
       ...init,
+      signal,
       headers: {
         ...forwarded,
         ...(referer ? { referer } : {}),
@@ -146,6 +153,7 @@ const forwardingFetch: FetchLike = async (url, init) => {
         ...provided,
       },
     });
+    cancel();
     if (res.ok) {
       logger.info(`MCP fetch <- ${res.status} ${res.statusText} for ${url}`);
     } else {
@@ -162,6 +170,7 @@ const forwardingFetch: FetchLike = async (url, init) => {
     }
     return res;
   } catch (err) {
+    cancel();
     logger.error(
       `MCP fetch failed for ${url}: ${
         err instanceof Error ? err.message : String(err)

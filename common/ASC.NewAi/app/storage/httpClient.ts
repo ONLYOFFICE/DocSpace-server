@@ -26,8 +26,46 @@
 
 import nconf from "../../config/index.js";
 import { getForwardedHeaders } from "../requestContext.js";
-import { isObject } from "../narrow.js";
+import { isObject, parseInt10 } from "../narrow.js";
 import type { AppConfig } from "../types.js";
+
+// Hard ceiling for a single upstream round-trip so a hung AI service / MCP
+// server can't pin a Node socket (and the caller's request) indefinitely.
+// Generous by default because tool calls proxied through the .NET service
+// can be slow; override with `NEW_AI_UPSTREAM_TIMEOUT_MS`. Note this guards
+// request/response calls only — long-lived chat *streams* are bounded by
+// the client-driven abort signal, not by this timeout.
+const UPSTREAM_TIMEOUT_MS = parseInt10(process.env["NEW_AI_UPSTREAM_TIMEOUT_MS"], 60_000) ?? 60_000;
+
+/**
+ * Build an {@link AbortSignal} that fires on a timeout, on an upstream
+ * `external` signal (e.g. client disconnect), or both. Returns a `cancel`
+ * that clears the timer and detaches the listener — always call it (in a
+ * `finally`) once the request settles so the timer can't leak.
+ */
+export function withTimeout(
+  external: AbortSignal | undefined,
+  ms: number = UPSTREAM_TIMEOUT_MS,
+): { signal: AbortSignal; cancel: () => void } {
+  const controller = new AbortController();
+  const timer = setTimeout(
+    () => controller.abort(new Error(`upstream timeout after ${ms}ms`)),
+    ms,
+  );
+  const onAbort = (): void => controller.abort((external as { reason?: unknown })?.reason);
+  if (external) {
+    if (external.aborted) {
+      onAbort();
+    } else {
+      external.addEventListener("abort", onAbort, { once: true });
+    }
+  }
+  const cancel = (): void => {
+    clearTimeout(timer);
+    external?.removeEventListener("abort", onAbort);
+  };
+  return { signal: controller.signal, cancel };
+}
 
 export class AiServiceHttpError extends Error {
   public readonly status: number;
@@ -111,28 +149,31 @@ export async function aiServiceRequest(
 
   const headers: Record<string, string> = { ...getForwardedHeaders() };
   const init: RequestInit = { method, headers };
-  if (signal) {
-    init.signal = signal;
-  }
   if (body !== undefined) {
     headers["Content-Type"] = "application/json";
     init.body = JSON.stringify(body);
   }
 
-  const res = await fetch(url, init);
-  if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new AiServiceHttpError(res.status, res.statusText, text, url);
+  const { signal: reqSignal, cancel } = withTimeout(signal);
+  init.signal = reqSignal;
+  try {
+    const res = await fetch(url, init);
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      throw new AiServiceHttpError(res.status, res.statusText, text, url);
+    }
+    if (res.status === 204) {
+      return null;
+    }
+    const contentType = res.headers.get("content-type") ?? "";
+    if (contentType.includes("application/json")) {
+      const json: unknown = await res.json();
+      return unwrapDocSpaceEnvelope(json);
+    }
+    return res.text();
+  } finally {
+    cancel();
   }
-  if (res.status === 204) {
-    return null;
-  }
-  const contentType = res.headers.get("content-type") ?? "";
-  if (contentType.includes("application/json")) {
-    const json: unknown = await res.json();
-    return unwrapDocSpaceEnvelope(json);
-  }
-  return res.text();
 }
 
 export const aiService = {

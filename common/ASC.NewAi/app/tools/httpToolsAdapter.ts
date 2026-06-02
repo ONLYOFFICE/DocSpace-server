@@ -37,17 +37,10 @@ const CALL_PATH = "/integration/tools/call";
 // DocSpace tools are a single logical source, so they share one serverType.
 const SERVER_TYPE = "docspace";
 
-// The engine calls `getTools` and the controller pre-fetches the system
-// prompt (see `getPrompt`) within the same stream. Cache the single
-// `tools/list` round-trip per scope for a short window so both reuse it.
-const CACHE_TTL_MS = 10_000;
-
 type ToolsList = {
   tools: TMCPItem[];
   prompt: string;
 };
-
-type CacheEntry = ToolsList & { expires: number };
 
 // `ToolContext` on the C# side — `{ agentId, formId }`. `entityId` is the
 // opaque widget scope token; for room-bound chat it carries the room id.
@@ -100,10 +93,6 @@ function parseList(raw: unknown): ToolsList {
   return { tools, prompt };
 }
 
-function cacheKey(entityId: string | undefined): string {
-  return entityId ?? "";
-}
-
 /**
  * {@link ToolsAdapter} backed by the DocSpace AI integration endpoints
  * (`integration/tools/list` / `integration/tools/call`). Tools served by
@@ -111,8 +100,6 @@ function cacheKey(entityId: string | undefined): string {
  * so no approval round-trip surfaces to the UI.
  */
 export class HttpToolsAdapter implements ToolsAdapter {
-  private readonly cache = new Map<string, CacheEntry>();
-
   async getTools(
     entityId?: string,
     _config?: { attachmentId: string[] },
@@ -147,8 +134,7 @@ export class HttpToolsAdapter implements ToolsAdapter {
 
   /**
    * System-prompt fragment that accompanies the tool list. Consumed by
-   * the controller to append to the chat's system prompt. Shares the
-   * cached `tools/list` fetch with {@link getTools}.
+   * the controller to append to the chat's system prompt.
    */
   async getPrompt(entityId?: string): Promise<string> {
     const { prompt } = await this.list(entityId);
@@ -156,15 +142,8 @@ export class HttpToolsAdapter implements ToolsAdapter {
   }
 
   private async list(entityId: string | undefined): Promise<ToolsList> {
-    const key = cacheKey(entityId);
-    const cached = this.cache.get(key);
-    if (cached && cached.expires > Date.now()) {
-      return cached;
-    }
     const raw = await aiService.post(LIST_PATH, toContext(entityId));
-    const parsed = parseList(raw);
-    this.cache.set(key, { ...parsed, expires: Date.now() + CACHE_TTL_MS });
-    return parsed;
+    return parseList(raw);
   }
 }
 

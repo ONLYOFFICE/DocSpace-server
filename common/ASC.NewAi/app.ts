@@ -45,6 +45,17 @@ logger.info("Storage initialized");
 
 const app = express();
 
+// CORS is off by default: the chat UI reaches this service same-origin via
+// the DocSpace nginx (`/api/2.0/new-ai`), so no cross-origin request is
+// expected. A blanket `cors()` would emit `Access-Control-Allow-Origin: *`
+// on an authenticated, user-scoped API — undesirable. Set
+// `NEW_AI_CORS_ORIGINS` (comma-separated) only if a real cross-origin
+// caller exists; an explicit allowlist is then honored with credentials.
+const corsOrigins = (process.env["NEW_AI_CORS_ORIGINS"] ?? "")
+  .split(",")
+  .map((o) => o.trim())
+  .filter(Boolean);
+
 app
   .use(morgan("combined", { stream: logStream }))
   .use(cookieParser())
@@ -53,9 +64,14 @@ app
   // `DELETE profiles/delete` arrives with body `"uuid"`, which strict-mode
   // would reject. Handlers normalize via `unpackPositional` afterwards.
   .use(bodyParser.json({ strict: false }))
-  .use(bodyParser.urlencoded({ extended: false }))
-  .use(cors())
-  .use(requestContextMiddleware);
+  .use(bodyParser.urlencoded({ extended: false }));
+
+if (corsOrigins.length > 0) {
+  app.use(cors({ origin: corsOrigins, credentials: true }));
+  logger.info(`CORS enabled for origins: ${corsOrigins.join(", ")}`);
+}
+
+app.use(requestContextMiddleware);
 
 registerRoutes(app);
 

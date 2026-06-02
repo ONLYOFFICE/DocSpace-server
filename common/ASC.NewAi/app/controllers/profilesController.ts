@@ -29,6 +29,7 @@ import type { Profile, CreateProfileInput, ProviderType } from "@onlyoffice/ai-c
 import { storage } from "../storage/index.js";
 import { asyncHandler, unpackPositional } from "./_helpers.js";
 import { asString } from "../narrow.js";
+import { assertSafeBaseUrl } from "../security.js";
 
 const engine = new ProfilesEngine({ storage });
 
@@ -40,11 +41,13 @@ interface ListProviderModelsBody {
 
 export const profilesController = {
   create: asyncHandler<CreateProfileInput>(async (req, res) => {
+    assertSafeBaseUrl(req.body?.baseUrl);
     const result = await engine.create(req.body);
     res.json(result);
   }),
 
   update: asyncHandler<Profile>(async (req, res) => {
+    assertSafeBaseUrl(req.body?.baseUrl);
     const result = await engine.update(req.body);
     res.json(result);
   }),
@@ -66,6 +69,7 @@ export const profilesController = {
       res.status(400).json({ error: "providerType and baseUrl required" });
       return;
     }
+    assertSafeBaseUrl(baseUrl);
     const models = await engine.listProviderModels({
       providerType,
       baseUrl,
