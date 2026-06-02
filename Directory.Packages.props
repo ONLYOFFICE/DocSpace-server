@@ -135,6 +135,7 @@
     <PackageVersion Include="NLog" Version="5.5.0" />
     <PackageVersion Include="NLog.DiagnosticSource" Version="5.2.3" />
     <PackageVersion Include="NLog.Targets.ElasticSearch" Version="7.7.0" />
+    <PackageVersion Include="NLog.Targets.OpenTelemetryProtocol" Version="1.2.3" />
     <PackageVersion Include="NLog.Targets.Syslog" Version="7.0.0" />
     <PackageVersion Include="NLog.Web.AspNetCore" Version="5.5.0" />
     <PackageVersion Include="Novell.Directory.Ldap.NETStandard" Version="3.6.0" />
