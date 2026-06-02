@@ -3973,6 +3973,11 @@ public class FileStorageService //: IFileStorageService
 
         entry.NotFoundIfNull();
 
+        if (!requiredAuth && await externalShare.IsCreationRestrictedAsync(entry))
+        {
+            requiredAuth = true;
+        }
+
         //hack for the form-filling room. return a link to a file with the room key.
         if (share is FileShare.FillForms && entry is File<T>)
         {
@@ -4345,6 +4350,11 @@ public class FileStorageService //: IFileStorageService
         FileEntry<T> entry = entryType == FileEntryType.File
             ? await daoFactory.GetFileDao<T>().GetFileAsync(entryId)
             : await daoFactory.GetFolderDao<T>().GetFolderAsync(entryId);
+
+        if (!requiredAuth && entry != null && await externalShare.IsCreationRestrictedAsync(entry))
+        {
+            requiredAuth = true;
+        }
 
         //hack for the form-filling room. return a link to a file with the room key.
         if (entry is File<T> { IsForm: true })
