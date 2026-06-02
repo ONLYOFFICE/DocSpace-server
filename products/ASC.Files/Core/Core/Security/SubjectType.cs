@@ -82,3 +82,19 @@ public enum SubjectType
     [Description("Primary external link")]
     PrimaryExternalLink = 4
 }
+
+/// <summary>
+/// The projected share information of an entry used to derive the Shared, SharedForUser and SharedExternal flags.
+/// </summary>
+public class UserShareInfo
+{
+    /// <summary>
+    /// The subject type of the share record.
+    /// </summary>
+    public SubjectType SubjectType { get; set; }
+
+    /// <summary>
+    /// The internal flag of the share link options. Null when the share record has no options.
+    /// </summary>
+    public bool? Internal { get; set; }
+}
