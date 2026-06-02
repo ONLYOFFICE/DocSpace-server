@@ -113,6 +113,8 @@ static file class AssignmentQueriesContainer
             (AiIntegrationContext ctx, int tenantId, ActionType actionType, int entryId) =>
                 ctx.Assignments.FirstOrDefault(x => x.TenantId == tenantId && x.ActionType == actionType && x.EntryId == entryId));
 
+    // Returns every assignment in the scope, including the global Default slot
+    // (ActionType.Default == 0). Default is a valid persisted value, so it is included by design.
     public static readonly Func<AiIntegrationContext, int, IAsyncEnumerable<DbAssignment>> GetAllAssignmentsAsync =
         EF.CompileAsyncQuery(
             (AiIntegrationContext ctx, int tenantId) =>

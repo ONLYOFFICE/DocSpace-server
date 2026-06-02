@@ -26,9 +26,21 @@
 
 namespace ASC.AI.Integration.Assignments;
 
+/// <summary>
+/// Identifies the AI action a profile can be assigned to. Each member is a distinct
+/// assignment slot within a tenant/entry scope (see <see cref="AssignmentsStorage"/>).
+/// </summary>
 [EnumExtensions]
 public enum ActionType
 {
+    /// <summary>
+    /// The global fallback slot used during profile resolution when no profile is bound
+    /// to the requested action. This is a valid, persisted assignment value — <b>not</b> a
+    /// sentinel or "unset" marker. Note that, as the first member, its underlying value is
+    /// <c>0</c> (i.e. <c>default(ActionType)</c>), so reads such as
+    /// <see cref="Database.AiIntegrationContext.GetAllAssignmentsAsync"/> intentionally
+    /// include it; do not add a filter or constraint that excludes it.
+    /// </summary>
     Default,
     Chat,
     Code,
