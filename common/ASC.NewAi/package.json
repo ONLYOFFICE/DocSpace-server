@@ -6,7 +6,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "tsx watch app.ts",
+    "start": "node server.js",
+    "dev": "tsx watch app.ts",
     "serve": "tsx app.ts",
     "typecheck": "tsc --noEmit"
   },
@@ -24,6 +25,7 @@
     "morgan": "1.10.0",
     "nconf": "^0.10.0",
     "openai": "^5.22.0",
+    "tsx": "^4.19.0",
     "winston": "^3.8.2",
     "winston-cloudwatch": "^6.1.1",
     "winston-daily-rotate-file": "^4.5.5"
@@ -36,7 +38,6 @@
     "@types/morgan": "^1.9.9",
     "@types/nconf": "^0.10.6",
     "@types/node": "^20.12.0",
-    "tsx": "^4.19.0",
     "typescript": "^5.6.0"
   },
   "engines": {

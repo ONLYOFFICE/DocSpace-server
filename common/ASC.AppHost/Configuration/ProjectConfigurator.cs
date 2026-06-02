@@ -305,7 +305,7 @@ public class ProjectConfigurator(
         }
         else
         {
-            builder.AddJavaScriptApp(name, path, "start")
+            builder.AddJavaScriptApp(name, path, "dev")
                 .WithYarn()
                 .WithEnvironment("NODE_ENV", "development")
                 // `__` form, not `:` — NewAi's nconf would otherwise nest a
