@@ -419,7 +419,7 @@ public partial class FileMapper(IServiceProvider serviceProvider, TenantDateTime
         {
             result.Shared = dbFileQuery.UserShared.Any(r => r.SubjectType is SubjectType.ExternalLink or SubjectType.PrimaryExternalLink);
             result.SharedForUser = dbFileQuery.UserShared.Any(r => r.SubjectType is SubjectType.Group or SubjectType.User);
-            result.SharedExternal = dbFileQuery.UserShared.Any(r => (r.SubjectType is SubjectType.ExternalLink or SubjectType.PrimaryExternalLink) && r.Internal == false);
+            result.SharedExternal = dbFileQuery.UserShared.Any(r => (r.SubjectType is SubjectType.ExternalLink or SubjectType.PrimaryExternalLink) && r.Internal is false);
         }
 
         return result;
