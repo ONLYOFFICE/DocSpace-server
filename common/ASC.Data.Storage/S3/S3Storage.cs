@@ -39,7 +39,7 @@ public class S3Storage(TempStream tempStream,
         PathUtils pathUtils,
         EmailValidationKeyProvider emailValidationKeyProvider,
         IHttpContextAccessor httpContextAccessor,
-        ILoggerProvider factory,
+        ILoggerFactory loggerFactory,
         ILogger<S3Storage> options,
         IHttpClientFactory clientFactory,
         TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
@@ -50,7 +50,7 @@ public class S3Storage(TempStream tempStream,
         IQuotaService quotaService,
         UserManager userManager,
         CustomQuota customQuota)
-    : BaseStorage(tempStream, tenantManager, pathUtils, emailValidationKeyProvider, httpContextAccessor, factory, options, clientFactory, tenantQuotaFeatureStatHelper, quotaSocketManager, settingsManager, quotaService, userManager, customQuota), IDisposable
+    : BaseStorage(tempStream, tenantManager, pathUtils, emailValidationKeyProvider, httpContextAccessor, loggerFactory, options, clientFactory, tenantQuotaFeatureStatHelper, quotaSocketManager, settingsManager, quotaService, userManager, customQuota), IDisposable
 {
     public override bool IsSupportCdnUri => true;
     public static long ChunkSize => 1000 * 1024 * 1024;
@@ -85,12 +85,12 @@ public class S3Storage(TempStream tempStream,
 
     public Uri GetUriInternal(string path)
     {
-        return new Uri(SecureHelper.IsSecure(_httpContextAccessor?.HttpContext, _options) ? _bucketSSlRoot : _bucketRoot, path ?? "");
+        return new Uri(SecureHelper.IsSecure(_httpContextAccessor?.HttpContext, _loggerFactory) ? _bucketSSlRoot : _bucketRoot, path ?? "");
     }
 
     public Uri GetUriShared(string domain, string path)
     {
-        return new Uri(SecureHelper.IsSecure(_httpContextAccessor?.HttpContext, _options) ? _bucketSSlRoot : _bucketRoot, MakePath(domain, path));
+        return new Uri(SecureHelper.IsSecure(_httpContextAccessor?.HttpContext, _loggerFactory) ? _bucketSSlRoot : _bucketRoot, MakePath(domain, path));
     }
 
     public override Task<Uri> GetInternalUriAsync(string domain, string path, TimeSpan expire, IEnumerable<string> headers)
@@ -109,7 +109,7 @@ public class S3Storage(TempStream tempStream,
             BucketName = _bucket,
             Expires = DateTime.UtcNow.Add(expire),
             Key = MakePath(domain, path),
-            Protocol = SecureHelper.IsSecure(_httpContextAccessor?.HttpContext, _options) ? Protocol.HTTPS : Protocol.HTTP,
+            Protocol = SecureHelper.IsSecure(_httpContextAccessor?.HttpContext, _loggerFactory) ? Protocol.HTTPS : Protocol.HTTP,
             Verb = HttpVerb.GET
         };
 
@@ -169,7 +169,7 @@ public class S3Storage(TempStream tempStream,
             return GetInternalUriAsync(domain, path, expire, headers);
         }
 
-        var proto = SecureHelper.IsSecure(_httpContextAccessor?.HttpContext, _options) ? "https" : "http";
+        var proto = SecureHelper.IsSecure(_httpContextAccessor?.HttpContext, _loggerFactory) ? "https" : "http";
 
         var baseUrl = $"{proto}://{CdnDistributionDomain}/{MakePath(domain, path)}";
 

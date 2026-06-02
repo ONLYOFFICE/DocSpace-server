@@ -48,7 +48,7 @@ public class FileStorageService //: IFileStorageService
     FilesLinkUtility filesLinkUtility,
     BaseCommonLinkUtility baseCommonLinkUtility,
     DisplayUserSettingsHelper displayUserSettingsHelper,
-    ILoggerProvider optionMonitor,
+    ILoggerFactory loggerFactory,
     PathProvider pathProvider,
     FileSecurity fileSecurity,
     SocketManager socketManager,
@@ -114,7 +114,7 @@ public class FileStorageService //: IFileStorageService
     ExportToXLSX exportToXLSX,
     ExternalDbSyncService externalDbSyncService)
 {
-    private readonly ILogger _logger = optionMonitor.CreateLogger("ASC.Files");
+    private readonly ILogger _logger = loggerFactory.CreateLogger("ASC.Files");
 
     private static readonly FrozenDictionary<SubjectType, FrozenDictionary<EventType, MessageAction>> _roomMessageActions =
         new Dictionary<SubjectType, FrozenDictionary<EventType, MessageAction>>
@@ -5557,6 +5557,7 @@ public class FileStorageService //: IFileStorageService
 
         var isNewFile = await entryManager.EnsureFormFillingOutputAsync(form, room, resultsFile, resultFolder, properties, folderDao, fileDao);
 
+        await formFillingReportCreator.MigrateFormVersionAsync(room.Id, form.Id, form.Version);
         var task = await exportToXLSX.UpdateXlsxReport(room.Id, form.Id, form.Version, isNewFile);
 
         return (task, form, isNewFile);
@@ -5632,6 +5633,7 @@ public class FileStorageService //: IFileStorageService
 
         var isNewFile = await entryManager.EnsureFormFillingOutputAsync(form, room, resultsFile, resultFolder, properties, folderDao, fileDao);
 
+        await formFillingReportCreator.MigrateFormVersionAsync(room.Id, form.Id, form.Version);
         var task = await exportToXLSX.UpdateXlsxReport(room.Id, form.Id, form.Version, isNewFile);
 
         return (task, form, isNewFile);

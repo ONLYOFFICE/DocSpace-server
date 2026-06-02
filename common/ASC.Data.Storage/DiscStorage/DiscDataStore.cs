@@ -40,7 +40,7 @@ public class DiscDataStore(
     PathUtils pathUtils,
     EmailValidationKeyProvider emailValidationKeyProvider,
     IHttpContextAccessor httpContextAccessor,
-    ILoggerProvider options,
+    ILoggerFactory loggerFactory,
     ILogger<DiscDataStore> logger,
     EncryptionSettingsHelper encryptionSettingsHelper,
     EncryptionFactory encryptionFactory,
@@ -51,7 +51,7 @@ public class DiscDataStore(
     IQuotaService quotaService,
     UserManager userManager,
     CustomQuota customQuota)
-    : BaseStorage(tempStream, tenantManager, pathUtils, emailValidationKeyProvider, httpContextAccessor, options, logger, clientFactory, tenantQuotaFeatureStatHelper, quotaSocketManager, settingsManager, quotaService, userManager, customQuota)
+    : BaseStorage(tempStream, tenantManager, pathUtils, emailValidationKeyProvider, httpContextAccessor, loggerFactory, logger, clientFactory, tenantQuotaFeatureStatHelper, quotaSocketManager, settingsManager, quotaService, userManager, customQuota)
 {
     public override bool IsSupportInternalUri => false;
     public override bool IsSupportedPreSignedUri => false;

@@ -83,9 +83,9 @@ public class UpdateUserTypeProgressItem : DistributedTaskProgress
     {
         await using var scope = _serviceScopeFactory.CreateAsyncScope();
         var scopeClass = scope.ServiceProvider.GetService<ChangeUserTypeProgressItemScope>();
-        var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, displayUserSettingsHelper, options, webItemSecurityCache, distributedLockProvider, socketManager, webhookManager, userFormatter, daoFactory, groupFullDtoHelper, fileSecurity) = scopeClass;
+        var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, displayUserSettingsHelper, loggerFactory, webItemSecurityCache, distributedLockProvider, socketManager, webhookManager, userFormatter, daoFactory, groupFullDtoHelper, fileSecurity) = scopeClass;
         var settingsManager = scope.ServiceProvider.GetService<SettingsManager>();
-        var logger = options.CreateLogger("ASC.Web");
+        var logger = loggerFactory.CreateLogger("ASC.Web");
         await tenantManager.SetCurrentTenantAsync(_tenantId);
         _userInfo = await userManager.GetUsersAsync(User);
 
@@ -290,7 +290,7 @@ public record ChangeUserTypeProgressItemScope(
     SecurityContext SecurityContext,
     UserManager UserManager,
     DisplayUserSettingsHelper DisplayUserSettingsHelper,
-    ILoggerProvider Options,
+    ILoggerFactory LoggerFactory,
     WebItemSecurityCache WebItemSecurityCache,
     IDistributedLockProvider DistributedLockProvider,
     UserSocketManager SocketManager,

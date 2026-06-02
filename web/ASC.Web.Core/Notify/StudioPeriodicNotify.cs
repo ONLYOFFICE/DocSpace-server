@@ -39,7 +39,7 @@ namespace ASC.Web.Studio.Core.Notify;
 
 [Scope]
 public class StudioPeriodicNotify(
-    ILoggerProvider log,
+    ILoggerFactory loggerFactory,
     WorkContext workContext,
     TenantManager tenantManager,
     TenantLogoManager tenantLogoManager,
@@ -60,7 +60,7 @@ public class StudioPeriodicNotify(
     IdentityClient identityClient,
     SecurityContext securityContext)
 {
-    private readonly ILogger _log = log.CreateLogger("ASC.Notify");
+    private readonly ILogger _log = loggerFactory.CreateLogger("ASC.Notify");
 
     private const string CacheKey = "notification_date_for_unused_portals";
 
