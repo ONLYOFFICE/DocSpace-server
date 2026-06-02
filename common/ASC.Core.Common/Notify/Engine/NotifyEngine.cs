@@ -41,9 +41,9 @@ public interface INotifyEngineAction
 
 [Singleton]
 public class NotifyEngine(Context context,
-    ILoggerProvider options)
+    ILoggerFactory loggerFactory)
 {
-    private readonly ILogger _logger = options.CreateLogger("ASC.Notify");
+    private readonly ILogger _logger = loggerFactory.CreateLogger("ASC.Notify");
     private readonly Context _context = context ?? throw new ArgumentNullException(nameof(context));
     internal readonly List<SendMethodWrapper> SendMethods = [];
     private readonly Dictionary<Type, IPatternStyler> _stylers = new();

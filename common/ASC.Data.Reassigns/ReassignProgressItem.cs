@@ -92,8 +92,8 @@ public class ReassignProgressItem : DistributedTaskProgress
     {
         await using var scope = _serviceScopeFactory.CreateAsyncScope();
         var scopeClass = scope.ServiceProvider.GetService<ReassignProgressItemScope>();
-        var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, userPhotoManager, displayUserSettingsHelper, options, socketManager, webhookManager, client, groupFullDtoHelper) = scopeClass;
-        var logger = options.CreateLogger("ASC.Web");
+        var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, userPhotoManager, displayUserSettingsHelper, loggerFactory, socketManager, webhookManager, client, groupFullDtoHelper) = scopeClass;
+        var logger = loggerFactory.CreateLogger("ASC.Web");
         await tenantManager.SetCurrentTenantAsync(_tenantId);
 
         try
@@ -264,7 +264,7 @@ public record ReassignProgressItemScope(
     UserManager UserManager,
     UserPhotoManager UserPhotoManager,
     DisplayUserSettingsHelper DisplayUserSettingsHelper,
-    ILoggerProvider Options,
+    ILoggerFactory LoggerFactory,
     UserSocketManager SocketManager,
     UserWebhookManager WebhookManager,
     IdentityClient Client,

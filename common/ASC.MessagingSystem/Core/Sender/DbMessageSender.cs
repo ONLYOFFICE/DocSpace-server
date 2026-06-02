@@ -40,12 +40,12 @@ public class DbMessageSender : IMessageSender
     private readonly MessagesRepository _messagesRepository;
     private readonly bool _messagingEnabled;
 
-    public DbMessageSender(IConfiguration configuration, MessagesRepository messagesRepository, ILoggerProvider options)
+    public DbMessageSender(IConfiguration configuration, MessagesRepository messagesRepository, ILoggerFactory loggerFactory)
     {
         var setting = configuration["messaging:enabled"];
         _messagingEnabled = !string.IsNullOrEmpty(setting) && setting == "true";
         _messagesRepository = messagesRepository;
-        _logger = options.CreateLogger("ASC.Messaging");
+        _logger = loggerFactory.CreateLogger("ASC.Messaging");
     }
 
     public async Task<int> SendAsync(EventMessage message)

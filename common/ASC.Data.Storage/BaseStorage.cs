@@ -38,7 +38,7 @@ public abstract class BaseStorage(TempStream tempStream,
         PathUtils pathUtils,
         EmailValidationKeyProvider emailValidationKeyProvider,
         IHttpContextAccessor httpContextAccessor,
-        ILoggerProvider options,
+        ILoggerFactory loggerFactory,
         ILogger logger,
         IHttpClientFactory clientFactory,
         TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
@@ -66,7 +66,7 @@ public abstract class BaseStorage(TempStream tempStream,
     protected readonly TempStream _tempStream = tempStream;
     protected readonly PathUtils _pathUtils = pathUtils;
     protected readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
-    protected readonly ILoggerProvider _options = options;
+    protected readonly ILoggerFactory _loggerFactory = loggerFactory;
     protected readonly IHttpClientFactory _clientFactory = clientFactory;
 
     public TimeSpan GetExpire(string domain)

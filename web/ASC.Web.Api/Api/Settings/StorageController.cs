@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -39,7 +39,7 @@ using ASC.Data.Storage.Encryption.IntegrationEvents.Events;
 namespace ASC.Web.Api.Controllers.Settings;
 
 public class StorageController(
-    ILoggerProvider option,
+    ILoggerFactory loggerFactory,
         ServiceClient serviceClient,
         MessageService messageService,
         SecurityContext securityContext,
@@ -63,7 +63,7 @@ public class StorageController(
         TenantExtra tenantExtra)
     : BaseSettingsController(fusionCache, webItemManager)
 {
-    private readonly ILogger _log = option.CreateLogger("ASC.Api");
+    private readonly ILogger _log = loggerFactory.CreateLogger("ASC.Api");
 
     /// <remarks>
     /// Returns a list of all the portal storages.

@@ -1,24 +1,24 @@
 ﻿// Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
@@ -43,7 +43,8 @@ public class ExternalShare(
     BaseCommonLinkUtility commonLinkUtility,
     FilesLinkUtility filesLinkUtility,
     FileUtility fileUtility,
-    CoreSettings coreSettings)
+    CoreSettings coreSettings,
+    FilesSettingsHelper filesSettingsHelper)
 {
     private ExternalSessionSnapshot _snapshot;
     private string _dbKey;
@@ -110,6 +111,14 @@ public class ExternalShare(
         if (record.Options.Internal && !isAuthenticated)
         {
             return Status.ExternalAccessDenied;
+        }
+
+        if (!record.Options.Internal && !isAuthenticated && entry != null)
+        {
+            if (await IsGloballyRestrictedAsync(entry))
+            {
+                return Status.ExternalAccessDenied;
+            }
         }
 
         if (entry is { RootFolderType: FolderType.Archive or FolderType.TRASH })
@@ -340,6 +349,61 @@ public class ExternalShare(
     private async Task<string> GetDbKeyAsync()
     {
         return _dbKey ??= await coreSettings.GetDocDbKeyAsync();
+    }
+
+    /// <summary>
+    /// Returns <c>true</c> when an existing public link should be blocked because the admin
+    /// has both disabled external sharing for the entry's section and enabled the
+    /// "block existing links" option. Used only for access-validation paths.
+    /// </summary>
+    public async Task<bool> IsGloballyRestrictedAsync(FileEntry entry)
+    {
+        var settings = await filesSettingsHelper.GetTenantFilesSettingsAsync();
+        return IsGlobalRestrictionApplies(entry, settings);
+    }
+
+    /// <summary>
+    /// Returns <c>true</c> when creating a new public link should be prevented because the
+    /// admin has disabled external sharing for the entry's section.
+    /// Unlike <see cref="IsGloballyRestrictedAsync"/>, this does <b>not</b> consult
+    /// <c>BlockExistingLinksOnRestrict</c> — that flag controls only existing-link access,
+    /// not whether new links may be created as public.
+    /// </summary>
+    public async Task<bool> IsCreationRestrictedAsync(FileEntry entry)
+    {
+        var settings = await filesSettingsHelper.GetTenantFilesSettingsAsync();
+
+        if (!settings.DisableShareLinkSetting)
+        {
+            return false;
+        }
+
+        return entry.RootFolderType switch
+        {
+            FolderType.USER => settings.ExternalShareApplyToDocumentsSetting,
+            FolderType.VirtualRooms => settings.ExternalShareApplyToRoomsSetting,
+            _ => false
+        };
+    }
+
+    private static bool IsGlobalRestrictionApplies(FileEntry entry, FilesSettings settings)
+    {
+        if (!settings.DisableShareLinkSetting)
+        {
+            return false;
+        }
+
+        if (!settings.BlockExistingLinksOnRestrictSetting)
+        {
+            return false;
+        }
+
+        return entry.RootFolderType switch
+        {
+            FolderType.USER => settings.ExternalShareApplyToDocumentsSetting,
+            FolderType.VirtualRooms => settings.ExternalShareApplyToRoomsSetting,
+            _ => false
+        };
     }
 }
 

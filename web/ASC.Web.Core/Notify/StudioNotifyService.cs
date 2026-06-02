@@ -53,11 +53,11 @@ public class StudioNotifyService(
     SettingsManager settingsManager,
     MessageService messageService,
     IUrlShortener urlShortener,
-    ILoggerProvider option)
+    ILoggerFactory loggerFactory)
 {
     public static string EMailSenderName => Constants.NotifyEMailSenderSysName;
 
-    private readonly ILogger _log = option.CreateLogger("ASC.Notify");
+    private readonly ILogger _log = loggerFactory.CreateLogger("ASC.Notify");
 
     public async Task SendMsgToAdminFromNotAuthUserAsync(string email, string message, string culture)
     {

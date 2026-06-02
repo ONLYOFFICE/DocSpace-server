@@ -2520,6 +2520,21 @@ public class FileSecurity(
         return daoFactory.GetSecurityDao<T>().GetPureSharesAsync(entry, filterType, status, text, offset, count);
     }
 
+    public async Task<HashSet<string>> GetRoomsWithPublicLinksAsync<T>(IEnumerable<Folder<T>> rooms)
+    {
+        var result = new HashSet<string>();
+
+        await foreach (var record in daoFactory.GetSecurityDao<T>().GetPureExternalLinkRecordsAsync(rooms))
+        {
+            if (record.Options?.Internal == false)
+            {
+                result.Add(record.EntryId.ToString());
+            }
+        }
+
+        return result;
+    }
+
     public Task<int> GetPureSharesCountAsync<T>(FileEntry<T> entry, ShareFilterType filterType, EmployeeActivationStatus? status, string text)
     {
         return daoFactory.GetSecurityDao<T>().GetPureSharesCountAsync(entry, filterType, status, text);

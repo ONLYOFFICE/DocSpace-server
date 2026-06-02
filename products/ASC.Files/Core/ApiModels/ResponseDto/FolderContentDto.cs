@@ -126,9 +126,16 @@ public class FolderContentDtoHelper(
         }
 
         List<FileShareRecord<string>> currentUsersRecords = null;
+        HashSet<string> roomsWithPublicLinks = null;
         if (folderItems.FolderInfo is { FolderType: FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates or FolderType.DefaultTemplates })
         {
             currentUsersRecords = await fileSecurity.GetUserRecordsAsync().ToListAsync();
+
+            var intRooms = folderItems.Entries.OfType<Folder<int>>().Where(f => f.IsRoom).ToList();
+            var stringRooms = folderItems.Entries.OfType<Folder<string>>().Where(f => f.IsRoom).ToList();
+
+            roomsWithPublicLinks = await fileSecurity.GetRoomsWithPublicLinksAsync(intRooms);
+            roomsWithPublicLinks.UnionWith(await fileSecurity.GetRoomsWithPublicLinksAsync(stringRooms));
         }
 
         var aiStatusTask = accessibility.GetStatusAsync();
@@ -245,7 +252,7 @@ public class FolderContentDtoHelper(
                     {
                         currentUsersRecords = await fileSecurity.GetUserRecordsAsync().ToListAsync();
                     }
-                    return await folderWrapperHelper.GetAsync(fol1, currentUsersRecords, entriesOrder, contextFolder, aiStatus, modelSettingsResult);
+                    return await folderWrapperHelper.GetAsync(fol1, currentUsersRecords, entriesOrder, contextFolder, aiStatus, modelSettingsResult, roomsWithPublicLinks);
                 case Folder<string> fol2:
                     if (currentUsersRecords == null &&
                         fol2.IsRoom &&
@@ -253,7 +260,7 @@ public class FolderContentDtoHelper(
                     {
                         currentUsersRecords = await fileSecurity.GetUserRecordsAsync().ToListAsync();
                     }
-                    return await folderWrapperHelper.GetAsync(fol2, currentUsersRecords, entriesOrder, contextFolder, aiStatus, modelSettingsResult);
+                    return await folderWrapperHelper.GetAsync(fol2, currentUsersRecords, entriesOrder, contextFolder, aiStatus, modelSettingsResult, roomsWithPublicLinks);
             }
 
             return null;

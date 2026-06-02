@@ -42,11 +42,11 @@ public class GlobalNotify
     private readonly ICacheNotify<AscCacheItem> _notify;
     private readonly ICacheNotify<ClearMyFolderItem> _notifyMyFolder;
 
-    public GlobalNotify(ICacheNotify<AscCacheItem> notify, ICacheNotify<ClearMyFolderItem> notifyMyFolder, ILoggerProvider options, CoreBaseSettings coreBaseSettings)
+    public GlobalNotify(ICacheNotify<AscCacheItem> notify, ICacheNotify<ClearMyFolderItem> notifyMyFolder, ILoggerFactory loggerFactory, CoreBaseSettings coreBaseSettings)
     {
         _notify = notify;
         _notifyMyFolder = notifyMyFolder;
-        Logger = options.CreateLogger("ASC.Files");
+        Logger = loggerFactory.CreateLogger("ASC.Files");
         if (coreBaseSettings.Standalone)
         {
             ClearCache();

@@ -37,7 +37,7 @@ namespace ASC.Notify.Model;
 
 [Transient]
 internal class NotifyClientImpl(
-        ILoggerProvider loggerFactory,
+        ILoggerFactory loggerFactory,
         NotifyEngine notifyEngine,
         IServiceProvider serviceProvider,
         ChannelWriter<NotifyRequest> channelWriter)

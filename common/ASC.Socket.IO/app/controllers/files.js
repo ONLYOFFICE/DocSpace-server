@@ -259,6 +259,11 @@ module.exports = (files) => {
     res.end();
   });
 
+  router.post("/change-external-sharing-settings", (req, res) => {
+    files.changeExternalSharingSettings(req.body);
+    res.end();
+  });
+
   router.post("/external-db-settings", (req, res) => {
     files.externalDbSettings(req.body);
     res.end();

@@ -33,14 +33,14 @@
 
 namespace ASC.ElasticSearch;
 
-public class ElasticSearchIndexService(ILoggerProvider options,
+public class ElasticSearchIndexService(ILoggerFactory loggerFactory,
         ICacheNotify<AscCacheItem> notify,
         ICacheNotify<IndexAction> indexNotify,
         IServiceScopeFactory serviceScopeFactory,
         Settings settings)
     : BackgroundService
 {
-    private readonly ILogger _logger = options.CreateLogger("ASC.Indexer");
+    private readonly ILogger _logger = loggerFactory.CreateLogger("ASC.Indexer");
     private readonly TimeSpan _period = TimeSpan.FromMinutes(settings.Period.Value);
     private bool _isStarted;
 
