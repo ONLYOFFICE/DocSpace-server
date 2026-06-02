@@ -117,11 +117,6 @@ public class McpServersStorage(
 
     public async Task ReplaceAllAsync(int tenantId, IReadOnlyDictionary<string, string> servers, int? entryId = null)
     {
-        if (servers.Count == 0)
-        {
-            return;
-        }
-
         var encryptedServers = new Dictionary<string, string>(servers.Count);
         foreach (var (name, config) in servers)
         {
@@ -136,44 +131,30 @@ public class McpServersStorage(
             await strategy.ExecuteAsync(async () =>
             {
                 await using var context = await dbContextFactory.CreateDbContextAsync();
+                await using var transaction = await context.Database.BeginTransactionAsync();
 
-                var existingByName = await (entryId.HasValue
-                        ? context.GetMcpServersByNamesAndEntryAsync(tenantId, entryId.Value, encryptedServers.Keys)
-                        : context.GetMcpServersByNamesAsync(tenantId, encryptedServers.Keys))
-                    .ToDictionaryAsync(x => x.Name, x => x.Id);
-
-                var now = DateTime.UtcNow;
-                foreach (var (name, config) in encryptedServers)
+                if (entryId.HasValue)
                 {
-                    if (existingByName.TryGetValue(name, out var existingId))
-                    {
-                        var entity = new DbMcpServer
-                        {
-                            Id = existingId,
-                            TenantId = tenantId,
-                            Name = name,
-                            Config = config,
-                            EntryId = entryId,
-                            CreatedAt = default
-                        };
-                        context.McpServers.Attach(entity);
-                        context.Entry(entity).Property(x => x.Config).IsModified = true;
-                    }
-                    else
-                    {
-                        context.McpServers.Add(new DbMcpServer
-                        {
-                            Id = Guid.CreateVersion7(),
-                            TenantId = tenantId,
-                            Name = name,
-                            Config = config,
-                            EntryId = entryId,
-                            CreatedAt = now
-                        });
-                    }
+                    await context.DeleteAllMcpServersByEntryAsync(tenantId, entryId.Value);
+                }
+                else
+                {
+                    await context.DeleteAllMcpServersAsync(tenantId);
                 }
 
+                var now = DateTime.UtcNow;
+                context.McpServers.AddRange(encryptedServers.Select(x => new DbMcpServer
+                {
+                    Id = Guid.CreateVersion7(),
+                    TenantId = tenantId,
+                    Name = x.Key,
+                    Config = x.Value,
+                    EntryId = entryId,
+                    CreatedAt = now
+                }));
+
                 await context.SaveChangesAsync();
+                await transaction.CommitAsync();
             });
         }
     }
