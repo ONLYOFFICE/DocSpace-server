@@ -795,4 +795,75 @@ public class FolderShareTests(
         folderUser.Should().NotBeNull();
         folderUser.Access.Should().Be(FileShare.ReadWrite);
     }
+
+    [Fact]
+    public async Task SharedProperties_FolderWithPublicExternalLink_ReturnsSharedTrue()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var folder = await CreateFolderInMy("folder_shared_props", Initializer.Owner);
+
+        // Act - getting the primary external link creates a public (non-internal) link
+        var link = (await _foldersApi.GetFolderPrimaryExternalLinkAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var folderInfo = (await _foldersApi.GetFolderInfoAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        link.SharedLink.Internal.Should().BeFalse();
+        folderInfo.Should().NotBeNull();
+        folderInfo.Shared.Should().BeTrue();         // shared via external link
+        folderInfo.SharedForUser.Should().BeFalse(); // not shared with users/groups
+
+        // TODO: enable once SharedExternal is exposed in the generated SDK
+        // folderInfo.SharedExternal.Should().BeTrue(); // public (non-internal) external link present
+    }
+
+    [Fact]
+    public async Task SharedProperties_FolderSharedWithUser_ReturnsSharedForUserTrue()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var folder = await CreateFolderInMy("folder_shared_with_user", Initializer.Owner);
+        var user = await Initializer.InviteContact(EmployeeType.User);
+
+        var securityRequest = new SecurityInfoSimpleRequestDto
+        {
+            Share = [new() { ShareTo = user.Id, Access = FileShare.Read }]
+        };
+        await _sharingApi.SetFolderSecurityInfoAsync(folder.Id, securityRequest, TestContext.Current.CancellationToken);
+
+        // Act
+        var folderInfo = (await _foldersApi.GetFolderInfoAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        folderInfo.Should().NotBeNull();
+        folderInfo.SharedForUser.Should().BeTrue(); // shared with a user
+        folderInfo.Shared.Should().BeFalse();        // no external link
+
+        // TODO: enable once SharedExternal is exposed in the generated SDK
+        // folderInfo.SharedExternal.Should().BeFalse(); // no public external link
+    }
+
+    [Fact]
+    public async Task SharedProperties_FolderWithInternalExternalLink_ReturnsSharedExternalFalse()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var folder = await CreateFolderInMy("folder_internal_link", Initializer.Owner);
+
+        // Act - create the primary external link and switch it to internal
+        var link = (await _foldersApi.GetFolderPrimaryExternalLinkAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var data = new FolderLinkRequest(link.SharedLink.Id, FileShare.Read, @internal: true);
+        var updatedLink = (await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, data, TestContext.Current.CancellationToken)).Response;
+
+        var folderInfo = (await _foldersApi.GetFolderInfoAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        updatedLink.SharedLink.Internal.Should().BeTrue();
+        folderInfo.Should().NotBeNull();
+        folderInfo.Shared.Should().BeTrue();         // still shared via an external link
+        folderInfo.SharedForUser.Should().BeFalse(); // not shared with users/groups
+
+        // TODO: enable once SharedExternal is exposed in the generated SDK
+        // folderInfo.SharedExternal.Should().BeFalse(); // link is internal, not a public external link
+    }
 }
