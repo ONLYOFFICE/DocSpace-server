@@ -145,10 +145,6 @@ public abstract class BaseStartup
             options.DefaultApiVersion = new ApiVersion(2, 0);
         });
 
-        services.Configure<RateLimiterSettings>(
-            _configuration.GetSection("core:hosting:rateLimiterOptions")
-        );
-
         services.Configure<ForwardedHeadersOptions>(options =>
         {
             options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
@@ -190,6 +186,7 @@ public abstract class BaseStartup
 
         var rateLimiterSettings = new RateLimiterSettings();
         _configuration.GetSection("core:hosting:rateLimiterOptions").Bind(rateLimiterSettings);
+        services.AddSingleton(Options.Create(rateLimiterSettings));
 
         services.AddRateLimiter(options =>
         {

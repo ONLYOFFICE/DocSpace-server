@@ -91,7 +91,7 @@ public class RateLimitOperationFilter(IOptions<RateLimiterSettings> rateLimiterO
         },
         new OpenApiHeader
         {
-            Description = $"Seconds to wait before retrying ({limitValue} req /{timeValue} min limit per user/IP).",
+            Description = $"Seconds to wait before retrying ({limitValue} req / {timeValue} min limit per user/IP).",
             Schema = new OpenApiSchema { Type = JsonSchemaType.Integer, Example = 30 }
         }
     );
