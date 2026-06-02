@@ -28,25 +28,25 @@ namespace ASC.AI.Integration.Database;
 
 public partial class AiIntegrationContext
 {
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<DbPromptFolder?> GetPromptFolderAsync(int tenantId, Guid createdBy, Guid id)
     {
         return PromptFolderQueriesContainer.GetPromptFolderAsync(this, tenantId, createdBy, id);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public IAsyncEnumerable<DbPromptFolder> GetAllPromptFoldersAsync(int tenantId, Guid createdBy)
     {
         return PromptFolderQueriesContainer.GetAllPromptFoldersAsync(this, tenantId, createdBy);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultGuid, null, PreCompileQuery.DefaultDateTime])]
+    [PreCompileQuery]
     public Task<int> UpdatePromptFolderNameAsync(int tenantId, Guid createdBy, Guid id, string name, DateTime updatedAt)
     {
         return PromptFolderQueriesContainer.UpdatePromptFolderNameAsync(this, tenantId, createdBy, id, name, updatedAt);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<int> DeletePromptFolderAsync(int tenantId, Guid createdBy, Guid id)
     {
         return PromptFolderQueriesContainer.DeletePromptFolderAsync(this, tenantId, createdBy, id);

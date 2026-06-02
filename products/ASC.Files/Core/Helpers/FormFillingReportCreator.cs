@@ -51,6 +51,8 @@ public class FormFillingReportCreator(
     {
         await GetSubmitFormsData(formsDataFile, originalFormId, originalFormVersion, roomId, resultFormNumber, formsDataUrl);
 
+        await MigrateFormVersionAsync(roomId, originalFormId, originalFormVersion);
+
         if (sendFormToExternalDB && externalDatabaseClient.IsEnabled())
         {
             var fileId = formsDataFile.Id is int id ? id : 0;

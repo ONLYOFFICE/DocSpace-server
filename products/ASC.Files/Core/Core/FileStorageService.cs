@@ -48,7 +48,7 @@ public class FileStorageService //: IFileStorageService
     FilesLinkUtility filesLinkUtility,
     BaseCommonLinkUtility baseCommonLinkUtility,
     DisplayUserSettingsHelper displayUserSettingsHelper,
-    ILoggerProvider optionMonitor,
+    ILoggerFactory loggerFactory,
     PathProvider pathProvider,
     FileSecurity fileSecurity,
     SocketManager socketManager,
@@ -114,7 +114,7 @@ public class FileStorageService //: IFileStorageService
     ExternalDbSyncService externalDbSyncService,
     EncryptionLoginProvider encryptionLoginProvider)
 {
-    private readonly ILogger _logger = optionMonitor.CreateLogger("ASC.Files");
+    private readonly ILogger _logger = loggerFactory.CreateLogger("ASC.Files");
 
     private static readonly FrozenDictionary<SubjectType, FrozenDictionary<EventType, MessageAction>> _roomMessageActions =
         new Dictionary<SubjectType, FrozenDictionary<EventType, MessageAction>>
@@ -1831,7 +1831,7 @@ public class FileStorageService //: IFileStorageService
 
         var room = await folderDao.GetParentFoldersAsync(folder.Id).FirstOrDefaultAsync(f => f.IsRoom);
 
-        if (file.IsForm && room?.FolderType == FolderType.VirtualDataRoom)
+        if (file.IsForm && (room?.FolderType == FolderType.VirtualDataRoom || room?.FolderType == FolderType.FillingFormsRoom))
         {
             var users = (await fileSharing.GetSharedInfoAsync(room))
                 .Where(ace => ace is not { Access: FileShare.FillForms } && ace.Id != authContext.CurrentAccount.ID)
@@ -5329,6 +5329,23 @@ public class FileStorageService //: IFileStorageService
 
                     var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
                     await filesMessageService.SendAsync(MessageAction.FormStartedToFill, form, MessageInitiator.DocsService, currentUser?.DisplayUserName(false, displayUserSettingsHelper), form.Title);
+
+                    var aces = await fileSharing.GetSharedInfoAsync(room);
+                    var formFillers = aces.Where(ace => ace.Access == FileShare.FillForms).Select(ace => ace.Id).ToList();
+
+                    if (formFillers.Count != 0)
+                    {
+                        var folderDao = daoFactory.GetFolderDao<T>();
+                        if (!form.ParentId.Equals(room.Id))
+                        {
+                            var parentFolders = await folderDao.GetParentFoldersAsync(form.ParentId).Where(f => !f.IsRoom).ToListAsync();
+                            foreach (var folder in parentFolders)
+                            {
+                                await socketManager.CreateFolderAsync(folder, formFillers);
+                            }
+                        }
+                        await socketManager.CreateFileAsync(form, formFillers);
+                    }
                 }
 
                 break;
@@ -5559,6 +5576,7 @@ public class FileStorageService //: IFileStorageService
 
         var isNewFile = await entryManager.EnsureFormFillingOutputAsync(form, room, resultsFile, resultFolder, properties, folderDao, fileDao);
 
+        await formFillingReportCreator.MigrateFormVersionAsync(room.Id, form.Id, form.Version);
         var task = await exportToXLSX.UpdateXlsxReport(room.Id, form.Id, form.Version, isNewFile);
 
         return (task, form, isNewFile);
@@ -5634,6 +5652,7 @@ public class FileStorageService //: IFileStorageService
 
         var isNewFile = await entryManager.EnsureFormFillingOutputAsync(form, room, resultsFile, resultFolder, properties, folderDao, fileDao);
 
+        await formFillingReportCreator.MigrateFormVersionAsync(room.Id, form.Id, form.Version);
         var task = await exportToXLSX.UpdateXlsxReport(room.Id, form.Id, form.Version, isNewFile);
 
         return (task, form, isNewFile);

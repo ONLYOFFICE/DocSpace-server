@@ -28,70 +28,64 @@ namespace ASC.AI.Integration.Database;
 
 public partial class AiIntegrationContext
 {
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public Task<DbMcpServer?> GetMcpServerAsync(int tenantId, string name)
     {
         return McpServerQueriesContainer.GetMcpServerAsync(this, tenantId, name);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task<DbMcpServer?> GetMcpServerByEntryAsync(int tenantId, string name, int entryId)
     {
         return McpServerQueriesContainer.GetMcpServerByEntryAsync(this, tenantId, name, entryId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public IAsyncEnumerable<DbMcpServer> GetAllMcpServersAsync(int tenantId)
     {
         return McpServerQueriesContainer.GetAllMcpServersAsync(this, tenantId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public IAsyncEnumerable<DbMcpServer> GetAllMcpServersByEntryAsync(int tenantId, int entryId)
     {
         return McpServerQueriesContainer.GetAllMcpServersByEntryAsync(this, tenantId, entryId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
-    public IAsyncEnumerable<DbMcpServer> GetMcpServersByNamesAsync(int tenantId, IEnumerable<string> names)
-    {
-        return McpServerQueriesContainer.GetMcpServersByNamesAsync(this, tenantId, names);
-    }
-
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, null])]
-    public IAsyncEnumerable<DbMcpServer> GetMcpServersByNamesAndEntryAsync(int tenantId, int entryId, IEnumerable<string> names)
-    {
-        return McpServerQueriesContainer.GetMcpServersByNamesAndEntryAsync(this, tenantId, entryId, names);
-    }
-
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null, null])]
+    [PreCompileQuery]
     public Task<int> UpdateMcpServerConfigAsync(int tenantId, string name, string config)
     {
         return McpServerQueriesContainer.UpdateMcpServerConfigAsync(this, tenantId, name, config);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null, PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public Task<int> UpdateMcpServerConfigByEntryAsync(int tenantId, string name, int entryId, string config)
     {
         return McpServerQueriesContainer.UpdateMcpServerConfigByEntryAsync(this, tenantId, name, entryId, config);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public Task<int> DeleteMcpServerAsync(int tenantId, string name)
     {
         return McpServerQueriesContainer.DeleteMcpServerAsync(this, tenantId, name);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task<int> DeleteMcpServerByEntryAsync(int tenantId, string name, int entryId)
     {
         return McpServerQueriesContainer.DeleteMcpServerByEntryAsync(this, tenantId, name, entryId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task<int> DeleteAllMcpServersAsync(int tenantId)
     {
         return McpServerQueriesContainer.DeleteAllMcpServersAsync(this, tenantId);
+    }
+
+    [PreCompileQuery]
+    public Task<int> DeleteAllMcpServersByEntryAsync(int tenantId, int entryId)
+    {
+        return McpServerQueriesContainer.DeleteAllMcpServersByEntryAsync(this, tenantId, entryId);
     }
 }
 
@@ -122,18 +116,6 @@ static file class McpServerQueriesContainer
                     .Where(x => x.TenantId == tenantId && x.EntryId == entryId)
                     .OrderBy(x => x.Name)
                     .AsQueryable());
-
-    public static readonly Func<AiIntegrationContext, int, IEnumerable<string>, IAsyncEnumerable<DbMcpServer>> GetMcpServersByNamesAsync =
-        EF.CompileAsyncQuery(
-            (AiIntegrationContext ctx, int tenantId, IEnumerable<string> names) =>
-                ctx.McpServers
-                    .Where(x => x.TenantId == tenantId && x.EntryId == null && names.Contains(x.Name)));
-
-    public static readonly Func<AiIntegrationContext, int, int, IEnumerable<string>, IAsyncEnumerable<DbMcpServer>> GetMcpServersByNamesAndEntryAsync =
-        EF.CompileAsyncQuery(
-            (AiIntegrationContext ctx, int tenantId, int entryId, IEnumerable<string> names) =>
-                ctx.McpServers
-                    .Where(x => x.TenantId == tenantId && x.EntryId == entryId && names.Contains(x.Name)));
 
     public static readonly Func<AiIntegrationContext, int, string, string, Task<int>> UpdateMcpServerConfigAsync =
         EF.CompileAsyncQuery(
@@ -167,6 +149,13 @@ static file class McpServerQueriesContainer
         EF.CompileAsyncQuery(
             (AiIntegrationContext ctx, int tenantId) =>
                 ctx.McpServers
-                    .Where(x => x.TenantId == tenantId)
+                    .Where(x => x.TenantId == tenantId && x.EntryId == null)
+                    .ExecuteDelete());
+
+    public static readonly Func<AiIntegrationContext, int, int, Task<int>> DeleteAllMcpServersByEntryAsync =
+        EF.CompileAsyncQuery(
+            (AiIntegrationContext ctx, int tenantId, int entryId) =>
+                ctx.McpServers
+                    .Where(x => x.TenantId == tenantId && x.EntryId == entryId)
                     .ExecuteDelete());
 }

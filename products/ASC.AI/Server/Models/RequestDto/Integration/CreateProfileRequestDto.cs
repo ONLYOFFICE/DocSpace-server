@@ -24,16 +24,19 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.AI.Integration.Profiles;
-
 namespace ASC.AI.Models.RequestDto.Integration;
 
 public class CreateProfileRequestDto
 {
     public required string Name { get; init; }
     public required string ProviderType { get; init; }
+
+    [MaxLength(AiIntegrationLimits.MaxBaseUrlLength)]
     public required string BaseUrl { get; init; }
+
+    [MaxLength(AiIntegrationLimits.MaxKeyLength)]
     public string? Key { get; init; }
+
     public required string ModelId { get; init; }
     public bool? Reasoning { get; init; }
     public Capabilities? Capabilities { get; init; }

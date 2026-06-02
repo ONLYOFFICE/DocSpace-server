@@ -43,13 +43,13 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
     CoreSettings coreSettings,
     IConfiguration configuration,
     WorkContext workContext,
-    ILoggerProvider optionsMonitor,
+    ILoggerFactory loggerFactory,
     AuditEventsRepository auditEventsRepository,
     WebItemManager webItemManager,
     DisplayUserSettingsHelper displayUserSettingsHelper,
     IServiceProvider serviceProvider)
 {
-    private readonly ILogger _log = optionsMonitor.CreateLogger("ASC.Notify");
+    private readonly ILogger _log = loggerFactory.CreateLogger("ASC.Notify");
 
     public static readonly List<MessageAction?> DailyActions =
     [

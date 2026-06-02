@@ -53,8 +53,9 @@ public class PhotoController(
     SetupInfo setupInfo,
     IHttpContextAccessor httpContextAccessor,
     UserWebhookManager webhookManager,
-    IUrlValidator urlValidator)
-    : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpContextAccessor, urlValidator, setupInfo)
+    IUrlValidator urlValidator,
+    IHttpClientFactory httpClientFactory)
+    : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpContextAccessor, urlValidator, setupInfo, httpClientFactory)
 {
     /// <remarks>
     /// Creates the user photo thumbnails by coordinates of the original image specified in the request.

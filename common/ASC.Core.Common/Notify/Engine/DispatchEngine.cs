@@ -41,10 +41,10 @@ public class DispatchEngine
     private readonly Context _context;
     private readonly bool _logOnly;
 
-    public DispatchEngine(Context context, IConfiguration configuration, ILoggerProvider options)
+    public DispatchEngine(Context context, IConfiguration configuration, ILoggerFactory loggerFactory)
     {
-        _logger = options.CreateLogger("ASC.Notify");
-        _messagesLogger = options.CreateLogger("ASC.Notify.Messages");
+        _logger = loggerFactory.CreateLogger("ASC.Notify");
+        _messagesLogger = loggerFactory.CreateLogger("ASC.Notify.Messages");
         _context = context ?? throw new ArgumentNullException(nameof(context));
         _logOnly = "log".Equals(configuration["core:notify:postman"], StringComparison.InvariantCultureIgnoreCase);
         _logger.LogOnly(_logOnly);

@@ -28,55 +28,55 @@ namespace ASC.AI.Integration.Database;
 
 public partial class AiIntegrationContext
 {
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public IAsyncEnumerable<DbToolPreference> GetAllToolPrefsAsync(int tenantId, Guid createdBy)
     {
         return ToolPrefsQueriesContainer.GetAllToolPrefsAsync(this, tenantId, createdBy);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public IAsyncEnumerable<DbToolPreference> GetAllToolPrefsByEntryAsync(int tenantId, Guid createdBy, int entryId)
     {
         return ToolPrefsQueriesContainer.GetAllToolPrefsByEntryAsync(this, tenantId, createdBy, entryId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, null])]
+    [PreCompileQuery]
     public IAsyncEnumerable<DbToolPreference> GetToolPrefsByServerTypesAsync(int tenantId, Guid createdBy, IEnumerable<string> serverTypes)
     {
         return ToolPrefsQueriesContainer.GetToolPrefsByServerTypesAsync(this, tenantId, createdBy, serverTypes);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public IAsyncEnumerable<DbToolPreference> GetToolPrefsByServerTypesAndEntryAsync(int tenantId, Guid createdBy, int entryId, IEnumerable<string> serverTypes)
     {
         return ToolPrefsQueriesContainer.GetToolPrefsByServerTypesAndEntryAsync(this, tenantId, createdBy, entryId, serverTypes);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public Task<int> DeleteToolPrefsByServerTypeAsync(int tenantId, string serverType)
     {
         return ToolPrefsQueriesContainer.DeleteToolPrefsByServerTypeAsync(this, tenantId, serverType);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task<int> DeleteToolPrefsByServerTypeAndEntryAsync(int tenantId, string serverType, int entryId)
     {
         return ToolPrefsQueriesContainer.DeleteToolPrefsByServerTypeAndEntryAsync(this, tenantId, serverType, entryId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<int> ClearToolPrefsDisabledAsync(int tenantId, Guid createdBy)
     {
         return ToolPrefsQueriesContainer.ClearToolPrefsDisabledAsync(this, tenantId, createdBy);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<int> ClearToolPrefsAllowAlwaysAsync(int tenantId, Guid createdBy)
     {
         return ToolPrefsQueriesContainer.ClearToolPrefsAllowAlwaysAsync(this, tenantId, createdBy);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<int> DeleteEmptyToolPrefsAsync(int tenantId, Guid createdBy)
     {
         return ToolPrefsQueriesContainer.DeleteEmptyToolPrefsAsync(this, tenantId, createdBy);

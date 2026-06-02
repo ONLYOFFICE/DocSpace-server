@@ -99,8 +99,8 @@ public class RemoveProgressItem : DistributedTaskProgress
     {
         await using var scope = _serviceScopeFactory.CreateAsyncScope();
         var scopeClass = scope.ServiceProvider.GetService<RemoveProgressItemScope>();
-        var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, userPhotoManager, webItemManagerSecurity, userFormatter, options, client) = scopeClass;
-        var logger = options.CreateLogger("ASC.Web");
+        var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, userPhotoManager, webItemManagerSecurity, userFormatter, loggerFactory, client) = scopeClass;
+        var logger = loggerFactory.CreateLogger("ASC.Web");
         await tenantManager.SetCurrentTenantAsync(_tenantId);
         var userName = userFormatter.GetUserName(User);
 
@@ -285,7 +285,7 @@ public record RemoveProgressItemScope(
     UserPhotoManager UserPhotoManager,
     WebItemManagerSecurity WebItemManagerSecurity,
     UserFormatter UserFormatter,
-    ILoggerProvider Options,
+    ILoggerFactory LoggerFactory,
     IdentityClient Client);
 
 internal class UsageSpaceWrapper

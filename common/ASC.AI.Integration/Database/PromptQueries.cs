@@ -28,31 +28,31 @@ namespace ASC.AI.Integration.Database;
 
 public partial class AiIntegrationContext
 {
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<DbPrompt?> GetPromptAsync(int tenantId, Guid createdBy, Guid id)
     {
         return PromptQueriesContainer.GetPromptAsync(this, tenantId, createdBy, id);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public IAsyncEnumerable<DbPrompt> GetAllPromptsAsync(int tenantId, Guid createdBy)
     {
         return PromptQueriesContainer.GetAllPromptsAsync(this, tenantId, createdBy);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, null])]
+    [PreCompileQuery]
     public IAsyncEnumerable<DbPrompt> GetPromptsByFolderAsync(int tenantId, Guid createdBy, Guid? folderId)
     {
         return PromptQueriesContainer.GetPromptsByFolderAsync(this, tenantId, createdBy, folderId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultGuid, null, null, null, PreCompileQuery.DefaultDateTime])]
+    [PreCompileQuery]
     public Task<int> UpdatePromptAsync(int tenantId, Guid createdBy, Guid id, string name, string text, Guid? folderId, DateTime updatedAt)
     {
         return PromptQueriesContainer.UpdatePromptAsync(this, tenantId, createdBy, id, name, text, folderId, updatedAt);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<int> DeletePromptAsync(int tenantId, Guid createdBy, Guid id)
     {
         return PromptQueriesContainer.DeletePromptAsync(this, tenantId, createdBy, id);

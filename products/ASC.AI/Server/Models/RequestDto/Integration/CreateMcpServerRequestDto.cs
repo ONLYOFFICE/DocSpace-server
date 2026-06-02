@@ -29,6 +29,9 @@ namespace ASC.AI.Models.RequestDto.Integration;
 public class CreateMcpServerRequestDto
 {
     public required string Name { get; init; }
+
+    [MaxLength(AiIntegrationLimits.MaxConfigLength)]
     public required string Config { get; init; }
+
     public string? EntityId { get; init; }
 }

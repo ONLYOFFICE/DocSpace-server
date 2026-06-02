@@ -39,7 +39,7 @@ namespace ASC.Files.Thirdparty.GoogleDrive;
 [Transient(typeof(IThirdPartyStorage<DriveFile, DriveFile, DriveFile>))]
 internal class GoogleDriveStorage(
         FileUtility fileUtility,
-        ILoggerProvider monitor,
+        ILoggerFactory loggerFactory,
         TempStream tempStream,
         OAuth20TokenHelper oAuth20TokenHelper,
         IHttpClientFactory clientFactory)
@@ -66,7 +66,7 @@ internal class GoogleDriveStorage(
     }
 
     private const long MaxChunkedUploadFileSize = 2L * 1024L * 1024L * 1024L;
-    private readonly ILogger _logger = monitor.CreateLogger("ASC.Files");
+    private readonly ILogger _logger = loggerFactory.CreateLogger("ASC.Files");
     private DriveService _driveService;
     private OAuth20Token _token;
 

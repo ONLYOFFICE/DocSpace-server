@@ -28,25 +28,25 @@ namespace ASC.AI.Integration.Database;
 
 public partial class AiIntegrationContext
 {
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<DbPreference?> GetPreferencesAsync(int tenantId, Guid userId)
     {
         return PreferencesQueriesContainer.GetPreferencesAsync(this, tenantId, userId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task<DbPreference?> GetPreferencesByEntryAsync(int tenantId, Guid userId, int entryId)
     {
         return PreferencesQueriesContainer.GetPreferencesByEntryAsync(this, tenantId, userId, entryId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<int> DeletePreferencesAsync(int tenantId, Guid userId)
     {
         return PreferencesQueriesContainer.DeletePreferencesAsync(this, tenantId, userId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task<int> DeletePreferencesByEntryAsync(int tenantId, Guid userId, int entryId)
     {
         return PreferencesQueriesContainer.DeletePreferencesByEntryAsync(this, tenantId, userId, entryId);

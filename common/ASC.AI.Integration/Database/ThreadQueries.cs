@@ -28,49 +28,49 @@ namespace ASC.AI.Integration.Database;
 
 public partial class AiIntegrationContext
 {
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<DbThread?> GetThreadAsync(int tenantId, Guid id)
     {
         return ThreadQueriesContainer.GetThreadAsync(this, tenantId, id);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public IAsyncEnumerable<DbThread> GetAllThreadsAsync(int tenantId, Guid createdBy)
     {
         return ThreadQueriesContainer.GetAllThreadsAsync(this, tenantId, createdBy);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public IAsyncEnumerable<DbThread> GetAllThreadsByEntryAsync(int tenantId, Guid createdBy, int entryId)
     {
         return ThreadQueriesContainer.GetAllThreadsByEntryAsync(this, tenantId, createdBy, entryId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, null])]
+    [PreCompileQuery]
     public Task<int> UpdateThreadTitleAsync(int tenantId, Guid id, string title)
     {
         return ThreadQueriesContainer.UpdateThreadTitleAsync(this, tenantId, id, title);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultDateTime])]
+    [PreCompileQuery]
     public Task<int> TouchThreadAsync(int tenantId, Guid id, DateTime lastEditDate)
     {
         return ThreadQueriesContainer.TouchThreadAsync(this, tenantId, id, lastEditDate);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultDateTime, null])]
+    [PreCompileQuery]
     public Task<int> TouchThreadWithProfileAsync(int tenantId, Guid id, DateTime lastEditDate, Guid? profileId)
     {
         return ThreadQueriesContainer.TouchThreadWithProfileAsync(this, tenantId, id, lastEditDate, profileId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<int> DeleteThreadAsync(int tenantId, Guid id)
     {
         return ThreadQueriesContainer.DeleteThreadAsync(this, tenantId, id);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<int> ClearThreadsProfileAsync(int tenantId, Guid profileId)
     {
         return ThreadQueriesContainer.ClearThreadsProfileAsync(this, tenantId, profileId);

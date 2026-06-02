@@ -28,32 +28,32 @@ namespace ASC.AI.Integration.Database;
 
 public partial class AiIntegrationContext
 {
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<DbProfile?> GetProfileAsync(int tenantId, Guid id)
     {
-        return Queries.GetProfileAsync(this, tenantId, id);
+        return ProfileQueriesContainer.GetProfileAsync(this, tenantId, id);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public IAsyncEnumerable<DbProfile> GetAllProfilesAsync(int tenantId)
     {
-        return Queries.GetAllProfilesAsync(this, tenantId);
+        return ProfileQueriesContainer.GetAllProfilesAsync(this, tenantId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<DbProfile?> GetProfileForUpdateAsync(int tenantId, Guid id)
     {
-        return Queries.GetProfileForUpdateAsync(this, tenantId, id);
+        return ProfileQueriesContainer.GetProfileForUpdateAsync(this, tenantId, id);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<int> DeleteProfileAsync(int tenantId, Guid id)
     {
-        return Queries.DeleteProfileAsync(this, tenantId, id);
+        return ProfileQueriesContainer.DeleteProfileAsync(this, tenantId, id);
     }
 }
 
-static file class Queries
+static file class ProfileQueriesContainer
 {
     public static readonly Func<AiIntegrationContext, int, Guid, Task<DbProfile?>> GetProfileAsync =
         EF.CompileAsyncQuery(

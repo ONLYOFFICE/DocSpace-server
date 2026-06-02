@@ -114,7 +114,7 @@ public class McpServerReplaceTests(AspireAppFixture fixture) : BaseTest(fixture)
     }
 
     [Fact]
-    public async Task ReplaceAll_EmptyDict_NoOp()
+    public async Task ReplaceAll_EmptyDict_ClearsAll()
     {
         await CreateMcpServerAsync("server-1");
 
@@ -124,7 +124,32 @@ public class McpServerReplaceTests(AspireAppFixture fixture) : BaseTest(fixture)
             TestContext.Current.CancellationToken);
         response.EnsureSuccessStatusCode();
 
-        (await ReadAllMcpServersAsync()).Should().ContainSingle(s => s.Name == "server-1");
+        (await ReadAllMcpServersAsync()).Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task ReplaceAll_RemovesServersAbsentFromNewSet()
+    {
+        var keptConfig = BuildMcpConfig("https://example.com/kept");
+
+        await CreateMcpServerAsync("server-1");
+        await CreateMcpServerAsync("server-2");
+
+        using var response = await Ai.PutAsync(
+            McpServersPath,
+            new
+            {
+                servers = new Dictionary<string, string>
+                {
+                    ["server-1"] = keptConfig
+                }
+            },
+            TestContext.Current.CancellationToken);
+        response.EnsureSuccessStatusCode();
+
+        var all = await ReadAllMcpServersAsync();
+        all.Should().ContainSingle().Which.Name.Should().Be("server-1");
+        JsonEquals(all.Single().Config, keptConfig).Should().BeTrue();
     }
 
     [Fact]

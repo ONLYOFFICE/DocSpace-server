@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -35,13 +35,13 @@ namespace ASC.AI.Core.Database;
 
 public partial class AiDbContext
 {
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public Task<int> UpdateRoomSettingsAsync(int tenantId, IEnumerable<int> providersIds)
     {
         return Queries.UpdateRoomSettingsAsync(this, tenantId, providersIds);
     }
     
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt,  PreCompileQuery.DefaultGuid, null])]
+    [PreCompileQuery]
     public IAsyncEnumerable<DbMcpServerSettings> GetToolsSettings(int tenantId, int roomId, Guid userId, IEnumerable<Guid> serversIds)
     {
         return Queries.GetToolsSettings(this, tenantId, roomId, userId, serversIds);
