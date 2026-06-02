@@ -1291,4 +1291,75 @@ public class FileShareTests(
         var response = await _sharingApi.GetFileSecurityInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken);
         response.Response.Should().NotContain(r => r.SharedToUser.Id == guest.Id);
     }
+
+    [Fact]
+    public async Task SharedProperties_FileWithPublicExternalLink_ReturnsSharedTrue()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var file = await CreateFileInMy("file_shared_props.docx", Initializer.Owner);
+
+        // Act - getting the primary external link creates a public (non-internal) link
+        var link = (await _filesApi.GetFilePrimaryExternalLinkAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var fileInfo = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        link.SharedLink.Internal.Should().BeFalse();
+        fileInfo.Should().NotBeNull();
+        fileInfo.Shared.Should().BeTrue();         // shared via external link
+        fileInfo.SharedForUser.Should().BeFalse(); // not shared with users/groups
+
+        // TODO: enable once SharedExternal is exposed in the generated SDK
+        // fileInfo.SharedExternal.Should().BeTrue(); // public (non-internal) external link present
+    }
+
+    [Fact]
+    public async Task SharedProperties_FileSharedWithUser_ReturnsSharedForUserTrue()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var file = await CreateFileInMy("file_shared_with_user.docx", Initializer.Owner);
+        var user = await Initializer.InviteContact(EmployeeType.User);
+
+        var securityRequest = new SecurityInfoSimpleRequestDto
+        {
+            Share = [new() { ShareTo = user.Id, Access = FileShare.Read }]
+        };
+        await _sharingApi.SetFileSecurityInfoAsync(file.Id, securityRequest, TestContext.Current.CancellationToken);
+
+        // Act
+        var fileInfo = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        fileInfo.Should().NotBeNull();
+        fileInfo.SharedForUser.Should().BeTrue(); // shared with a user
+        fileInfo.Shared.Should().BeFalse();        // no external link
+
+        // TODO: enable once SharedExternal is exposed in the generated SDK
+        // fileInfo.SharedExternal.Should().BeFalse(); // no public external link
+    }
+
+    [Fact]
+    public async Task SharedProperties_FileWithInternalExternalLink_ReturnsSharedExternalFalse()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var file = await CreateFileInMy("file_internal_link.docx", Initializer.Owner);
+
+        // Act - create the primary external link and switch it to internal
+        var initialLink = (await _filesApi.CreateFilePrimaryExternalLinkAsync(file.Id, new FileLinkRequest(access: FileShare.Read, primary: true), TestContext.Current.CancellationToken)).Response;
+        var updateLinkParams = new FileLinkRequest(linkId: initialLink.SharedLink.Id, access: FileShare.Read, @internal: true);
+        var updatedLink = (await _filesApi.SetFileExternalLinkAsync(file.Id, updateLinkParams, TestContext.Current.CancellationToken)).Response;
+
+        var fileInfo = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        updatedLink.SharedLink.Internal.Should().BeTrue();
+        fileInfo.Should().NotBeNull();
+        fileInfo.Shared.Should().BeTrue();         // still shared via an external link
+        fileInfo.SharedForUser.Should().BeFalse(); // not shared with users/groups
+
+        // TODO: enable once SharedExternal is exposed in the generated SDK
+        // fileInfo.SharedExternal.Should().BeFalse(); // link is internal, not a public external link
+    }
 }

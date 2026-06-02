@@ -105,12 +105,6 @@ public class FolderDto<T> : FileEntryDto<T>
     public bool Private { get; set; }
 
     /// <summary>
-    /// Specifies if the room has a public (non-internal) external link.
-    /// </summary>
-    /// <example>false</example>
-    public bool? SharedExternal { get; set; }
-
-    /// <summary>
     /// Specifies if the folder is indexed or not.
     /// </summary>
     /// <example>true</example>
@@ -283,8 +277,7 @@ public class FolderDtoHelper(
         string order = null,
         IFolder contextFolder = null,
         AiStatus aiStatus = null,
-        AiModelSettingsResult modelSettingsResult = null,
-        HashSet<string> roomsWithPublicLinks = null)
+        AiModelSettingsResult modelSettingsResult = null)
     {
         var result = await GetFolderWrapperAsync(folder);
         result.ParentId = folder.ParentId;
@@ -322,10 +315,6 @@ public class FolderDtoHelper(
             }
 
             result.Mute = await roomsNotificationSettingsHelper.CheckMuteForRoomAsync(result.Id.ToString());
-
-            result.SharedExternal = roomsWithPublicLinks?.Contains(folder.Id.ToString()) ?? await _fileSecurity
-                .GetPureSharesAsync(folder, ShareFilterType.ExternalLink, null, null)
-                .AnyAsync(r => r.Options?.Internal == false);
 
             if (folder.CreateBy == authContext.CurrentAccount.ID)
             {
