@@ -28,37 +28,37 @@ namespace ASC.AI.Integration.Database;
 
 public partial class AiIntegrationContext
 {
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<DbMessage?> GetMessageAsync(int tenantId, Guid id)
     {
         return MessageQueriesContainer.GetMessageAsync(this, tenantId, id);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<DbMessage?> GetMessageWithThreadAsync(int tenantId, Guid id)
     {
         return MessageQueriesContainer.GetMessageWithThreadAsync(this, tenantId, id);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, 0, int.MaxValue])]
+    [PreCompileQuery]
     public IAsyncEnumerable<DbMessage> GetMessagesByThreadAsync(int tenantId, Guid threadId, int skip, int take)
     {
         return MessageQueriesContainer.GetMessagesByThreadAsync(this, tenantId, threadId, skip, take);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, null, PreCompileQuery.DefaultDateTime])]
+    [PreCompileQuery]
     public Task<int> UpdateMessageContentsAsync(int tenantId, Guid id, string contents, DateTime timestamp)
     {
         return MessageQueriesContainer.UpdateMessageContentsAsync(this, tenantId, id, contents, timestamp);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<int> DeleteMessageAsync(int tenantId, Guid id)
     {
         return MessageQueriesContainer.DeleteMessageAsync(this, tenantId, id);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<int> DeleteMessagesByThreadAsync(int tenantId, Guid threadId)
     {
         return MessageQueriesContainer.DeleteMessagesByThreadAsync(this, tenantId, threadId);

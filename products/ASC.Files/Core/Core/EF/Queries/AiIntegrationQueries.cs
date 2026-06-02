@@ -28,31 +28,31 @@ namespace ASC.Files.Core.EF;
 
 public partial class FilesDbContext
 {
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task DeleteThreadsAsync(int tenantId, int folderId)
     {
         return AiIntegrationQueries.DeleteThreadsAsync(this, tenantId, folderId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task DeleteAssignmentsAsync(int tenantId, int folderId)
     {
         return AiIntegrationQueries.DeleteAssignmentsAsync(this, tenantId, folderId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task DeleteMcpServersAsync(int tenantId, int folderId)
     {
         return AiIntegrationQueries.DeleteMcpServersAsync(this, tenantId, folderId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task DeleteMcpServerToolPrefsAsync(int tenantId, int folderId)
     {
         return AiIntegrationQueries.DeleteMcpServerToolPrefsAsync(this, tenantId, folderId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task DeleteAttachmentsAsync(int tenantId, int folderId)
     {
         return AiIntegrationQueries.DeleteAttachmentsAsync(this, tenantId, folderId);

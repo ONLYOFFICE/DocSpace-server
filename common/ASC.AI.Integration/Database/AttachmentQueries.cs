@@ -28,31 +28,31 @@ namespace ASC.AI.Integration.Database;
 
 public partial class AiIntegrationContext
 {
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<DbAttachment?> GetAttachmentAsync(int tenantId, Guid id)
     {
         return AttachmentQueriesContainer.GetAttachmentAsync(this, tenantId, id);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public IAsyncEnumerable<DbAttachment> GetAttachmentsByIdsAsync(int tenantId, IEnumerable<Guid> ids)
     {
         return AttachmentQueriesContainer.GetAttachmentsByIdsAsync(this, tenantId, ids);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<int> UpdateAttachmentBindingsByIdsAsync(int tenantId, IEnumerable<Guid> ids, Guid messageId)
     {
         return AttachmentQueriesContainer.UpdateAttachmentBindingsByIdsAsync(this, tenantId, ids, messageId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<int> DeleteAttachmentAsync(int tenantId, Guid id)
     {
         return AttachmentQueriesContainer.DeleteAttachmentAsync(this, tenantId, id);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public Task<int> DeleteAttachmentsByIdsAsync(int tenantId, IEnumerable<Guid> ids)
     {
         return AttachmentQueriesContainer.DeleteAttachmentsByIdsAsync(this, tenantId, ids);

@@ -28,73 +28,73 @@ namespace ASC.AI.Integration.Database;
 
 public partial class AiIntegrationContext
 {
-    [PreCompileQuery([PreCompileQuery.DefaultInt, ActionType.Default])]
+    [PreCompileQuery]
     public Task<DbAssignment?> GetAssignmentAsync(int tenantId, ActionType actionType)
     {
         return AssignmentQueriesContainer.GetAssignmentAsync(this, tenantId, actionType);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, ActionType.Default, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task<DbAssignment?> GetAssignmentByEntryAsync(int tenantId, ActionType actionType, int entryId)
     {
         return AssignmentQueriesContainer.GetAssignmentByEntryAsync(this, tenantId, actionType, entryId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public IAsyncEnumerable<DbAssignment> GetAllAssignmentsAsync(int tenantId)
     {
         return AssignmentQueriesContainer.GetAllAssignmentsAsync(this, tenantId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public IAsyncEnumerable<DbAssignment> GetAllAssignmentsByEntryAsync(int tenantId, int entryId)
     {
         return AssignmentQueriesContainer.GetAllAssignmentsByEntryAsync(this, tenantId, entryId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public IAsyncEnumerable<DbAssignment> GetAssignmentsByTypesAsync(int tenantId, IEnumerable<ActionType> actionTypes)
     {
         return AssignmentQueriesContainer.GetAssignmentsByTypesAsync(this, tenantId, actionTypes);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public IAsyncEnumerable<DbAssignment> GetAssignmentsByTypesAndEntryAsync(int tenantId, int entryId, IEnumerable<ActionType> actionTypes)
     {
         return AssignmentQueriesContainer.GetAssignmentsByTypesAndEntryAsync(this, tenantId, entryId, actionTypes);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, ActionType.Default, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<int> UpdateAssignmentProfileAsync(int tenantId, ActionType actionType, Guid profileId)
     {
         return AssignmentQueriesContainer.UpdateAssignmentProfileAsync(this, tenantId, actionType, profileId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, ActionType.Default, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<int> UpdateAssignmentProfileByEntryAsync(int tenantId, ActionType actionType, int entryId, Guid profileId)
     {
         return AssignmentQueriesContainer.UpdateAssignmentProfileByEntryAsync(this, tenantId, actionType, entryId, profileId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, ActionType.Default])]
+    [PreCompileQuery]
     public Task<int> DeleteAssignmentAsync(int tenantId, ActionType actionType)
     {
         return AssignmentQueriesContainer.DeleteAssignmentAsync(this, tenantId, actionType);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, ActionType.Default, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task<int> DeleteAssignmentByEntryAsync(int tenantId, ActionType actionType, int entryId)
     {
         return AssignmentQueriesContainer.DeleteAssignmentByEntryAsync(this, tenantId, actionType, entryId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public Task<int> DeleteAssignmentsByTypesAsync(int tenantId, IEnumerable<ActionType> actionTypes)
     {
         return AssignmentQueriesContainer.DeleteAssignmentsByTypesAsync(this, tenantId, actionTypes);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public Task<int> DeleteAssignmentsByTypesAndEntryAsync(int tenantId, int entryId, IEnumerable<ActionType> actionTypes)
     {
         return AssignmentQueriesContainer.DeleteAssignmentsByTypesAndEntryAsync(this, tenantId, entryId, actionTypes);

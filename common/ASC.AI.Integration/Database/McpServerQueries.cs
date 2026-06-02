@@ -28,61 +28,61 @@ namespace ASC.AI.Integration.Database;
 
 public partial class AiIntegrationContext
 {
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public Task<DbMcpServer?> GetMcpServerAsync(int tenantId, string name)
     {
         return McpServerQueriesContainer.GetMcpServerAsync(this, tenantId, name);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task<DbMcpServer?> GetMcpServerByEntryAsync(int tenantId, string name, int entryId)
     {
         return McpServerQueriesContainer.GetMcpServerByEntryAsync(this, tenantId, name, entryId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public IAsyncEnumerable<DbMcpServer> GetAllMcpServersAsync(int tenantId)
     {
         return McpServerQueriesContainer.GetAllMcpServersAsync(this, tenantId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public IAsyncEnumerable<DbMcpServer> GetAllMcpServersByEntryAsync(int tenantId, int entryId)
     {
         return McpServerQueriesContainer.GetAllMcpServersByEntryAsync(this, tenantId, entryId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null, null])]
+    [PreCompileQuery]
     public Task<int> UpdateMcpServerConfigAsync(int tenantId, string name, string config)
     {
         return McpServerQueriesContainer.UpdateMcpServerConfigAsync(this, tenantId, name, config);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null, PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public Task<int> UpdateMcpServerConfigByEntryAsync(int tenantId, string name, int entryId, string config)
     {
         return McpServerQueriesContainer.UpdateMcpServerConfigByEntryAsync(this, tenantId, name, entryId, config);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public Task<int> DeleteMcpServerAsync(int tenantId, string name)
     {
         return McpServerQueriesContainer.DeleteMcpServerAsync(this, tenantId, name);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task<int> DeleteMcpServerByEntryAsync(int tenantId, string name, int entryId)
     {
         return McpServerQueriesContainer.DeleteMcpServerByEntryAsync(this, tenantId, name, entryId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task<int> DeleteAllMcpServersAsync(int tenantId)
     {
         return McpServerQueriesContainer.DeleteAllMcpServersAsync(this, tenantId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task<int> DeleteAllMcpServersByEntryAsync(int tenantId, int entryId)
     {
         return McpServerQueriesContainer.DeleteAllMcpServersByEntryAsync(this, tenantId, entryId);

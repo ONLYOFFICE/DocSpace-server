@@ -28,25 +28,25 @@ namespace ASC.AI.Integration.Database;
 
 public partial class AiIntegrationContext
 {
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<DbProfile?> GetProfileAsync(int tenantId, Guid id)
     {
         return ProfileQueriesContainer.GetProfileAsync(this, tenantId, id);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public IAsyncEnumerable<DbProfile> GetAllProfilesAsync(int tenantId)
     {
         return ProfileQueriesContainer.GetAllProfilesAsync(this, tenantId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<DbProfile?> GetProfileForUpdateAsync(int tenantId, Guid id)
     {
         return ProfileQueriesContainer.GetProfileForUpdateAsync(this, tenantId, id);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<int> DeleteProfileAsync(int tenantId, Guid id)
     {
         return ProfileQueriesContainer.DeleteProfileAsync(this, tenantId, id);
