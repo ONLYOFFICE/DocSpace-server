@@ -309,6 +309,11 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
 
                             await socketManager.DeleteFolder(folder, action: async () => await FolderDao.DeleteFolderAsync(folder.Id));
 
+                            if (isRoom && folder.RootFolderType == FolderType.VirtualRooms)
+                            {
+                                await FolderDao.ChangeTreeFolderSizeAsync(folder.ParentId, -folder.Counter);
+                            }
+
                             if (isNeedSendActions)
                             {
                                 if (isRoom)
@@ -394,6 +399,11 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
 
                                 await socketManager.DeleteFolder(folder, action: async () => await FolderDao.DeleteFolderAsync(folder.Id));
 
+                                if (isRoom && folder.RootFolderType == FolderType.VirtualRooms)
+                                {
+                                    await FolderDao.ChangeTreeFolderSizeAsync(folder.ParentId, -folder.Counter);
+                                }
+
                                 if (isNeedSendActions)
                                 {
                                     if (isRoom)
@@ -433,6 +443,12 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
                                 {
                                     await filesMessageService.SendAsync(MessageAction.FolderMovedToTrash, folder, _headers, folder.Title);
                                     await webhookManager.PublishAsync(webhookTrigger, webhookConfigs, folder);
+
+                                    if (isRoom && folder.RootFolderType is FolderType.VirtualRooms or FolderType.Archive)
+                                    {
+                                        var (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountRoomFeature, int>();
+                                        _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
+                                    }
                                 }
                             }
 

@@ -108,22 +108,30 @@ public class InviteContactsCommand : AsyncCommand<InviteContactsCommand.Settings
         var result = new List<User>();
 
         List<Task<User>> tasks = [];
-        var j = 0;
+
 
         var employeeTypes = new List<EmployeeType> { EmployeeType.RoomAdmin, EmployeeType.DocSpaceAdmin, EmployeeType.User};
 
         foreach (var empl in employeeTypes)
         {
+            var shortLink = (await usersApi.GetInvitationLinkAsync(empl, token)).Response;
+            using var client = factory.CreateClient();
+
+            var fullLink = await client.GetAsync(shortLink, token);
+            var confirmHeader = fullLink.RequestMessage?.RequestUri?.Query.Substring(1);
+            if (confirmHeader == null)
+            {
+                throw new HttpRequestException($"Unable to get confirmation link for {empl}");
+            }
+
             foreach (var _ in Enumerable.Range(1, settings.UsersPerType))
             {
-                tasks.Add(InviteContact(member, empl));
-                j++;
+                tasks.Add(InviteContact(member, empl, confirmHeader));
 
-                if (j == 100)
+                if (tasks.Count >= 10)
                 {
-                    result.AddRange(await Task.WhenAll(tasks));
-                    tasks.Clear();
-                    j = 0;
+                    await Task.WhenAny(tasks);
+                    tasks.RemoveAll(a => a.IsCompleted);
                 }
             }
         }
@@ -131,46 +139,35 @@ public class InviteContactsCommand : AsyncCommand<InviteContactsCommand.Settings
         await Task.WhenAll(tasks);
         return result;
 
-        async Task<User> InviteContact(Faker<MemberRequestDto> fakerMember, EmployeeType employeeType)
+        async Task<User> InviteContact(Faker<MemberRequestDto> fakerMember, EmployeeType employeeType, string confirmHeader)
         {
-            using var profilesApi = new ProfilesApi(configuration);
-            var shortLink = (await usersApi.GetInvitationLinkAsync(employeeType, token)).Response;
-            using var client = factory.CreateClient();
-
-            var fullLink = await client.GetAsync(shortLink, token);
-            var confirmHeader = fullLink.RequestMessage?.RequestUri?.Query.Substring(1);
-            if (confirmHeader == null)
-            {
-                throw new HttpRequestException($"Unable to get confirmation link for {employeeType}");
-            }
-
-            profilesApi.Configuration.DefaultHeaders.Add("confirm", confirmHeader);
-
-            var parsedQuery = HttpUtility.ParseQueryString(confirmHeader);
-            if(!Enum.TryParse(parsedQuery["emplType"], out EmployeeType parsedEmployeeType))
-            {
-                parsedEmployeeType = EmployeeType.Guest;
-            }
-
-            MemberRequestDto fakeMember;
-            lock (fakerMember)
-            {
-                fakeMember = fakerMember.Generate();
-            }
-
             try
             {
+                using var profilesApi = new ProfilesApi(configuration);
+                profilesApi.Configuration.DefaultHeaders.Add("confirm", confirmHeader);
+
+                var parsedQuery = HttpUtility.ParseQueryString(confirmHeader);
+                if (!Enum.TryParse(parsedQuery["emplType"], out EmployeeType parsedEmployeeType))
+                {
+                    parsedEmployeeType = EmployeeType.Guest;
+                }
+
+                MemberRequestDto fakeMember;
+                lock (fakerMember)
+                {
+                    fakeMember = fakerMember.Generate();
+                }
+
+
                 var createMemberResponse = await profilesApi.AddMemberWithHttpInfoAsync(new MemberRequestDto
                 {
                     FromInviteLink = true,
                     CultureName = "en-US",
                     Spam = false,
-
                     Email = fakeMember.Email,
                     Password = fakeMember.Password,
                     FirstName = fakeMember.FirstName,
                     LastName = fakeMember.LastName,
-
                     Type = parsedEmployeeType,
                     Key = parsedQuery["key"] ?? "",
                 }, token);
@@ -181,16 +178,17 @@ public class InviteContactsCommand : AsyncCommand<InviteContactsCommand.Settings
                 {
                     throw new HttpRequestException($"Unable to invite user {employeeType}");
                 }
+
                 progressTask.Increment(100.0 / (employeeTypes.Count * settings.UsersPerType));
-                return new User(fakeMember.Email, fakeMember.Password)
-                {
-                    Id = createMemberResponse.Data.Response.Id
-                };
+
+                return new User(fakeMember.Email, fakeMember.Password) { Id = createMemberResponse.Data.Response.Id };
             }
-            catch (ApiException e)
+            catch (Exception e)
             {
                 AnsiConsole.WriteException(e);
             }
+
+            progressTask.Increment(100.0 / (employeeTypes.Count * settings.UsersPerType));
 
             return new User("", "");
         }
