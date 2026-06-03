@@ -846,7 +846,8 @@ public class FileStorageService //: IFileStorageService
                     await SetExternalLinkAsync(folder, Guid.NewGuid(), FileShare.Read, FilesCommonResource.DefaultExternalLinkTitle, primary: true);
                     break;
                 case FolderType.FillingFormsRoom:
-                    await SetExternalLinkAsync(folder, Guid.NewGuid(), FileShare.FillForms, FilesCommonResource.FillOutExternalLinkTitle, primary: true);
+                    var fillFormLinkInternal = await filesSettingsHelper.GetDefaultShareLinkInternal();
+                    await SetExternalLinkAsync(folder, Guid.NewGuid(), FileShare.FillForms, FilesCommonResource.FillOutExternalLinkTitle, primary: true, requiredAuth: fillFormLinkInternal);
                     break;
             }
         }
@@ -5808,7 +5809,8 @@ public class FileStorageService //: IFileStorageService
                 _ => throw new InvalidOperationException()
             };
 
-            result = await SetAceLinkAsync(entry, SubjectType.PrimaryExternalLink, linkId, defaultAccess, new FileShareOptions { Title = defaultTitle });
+            var defaultInternal = folder.FolderType == FolderType.FillingFormsRoom && await filesSettingsHelper.GetDefaultShareLinkInternal();
+            result = await SetAceLinkAsync(entry, SubjectType.PrimaryExternalLink, linkId, defaultAccess, new FileShareOptions { Title = defaultTitle, Internal = defaultInternal });
 
             await filesMessageService.SendAsync(MessageAction.RoomExternalLinkRevoked, entry, linkId.ToString(), ace.FileShareOptions?.Title,
                 result.Ace.FileShareOptions?.Title);
