@@ -170,7 +170,7 @@ public class ManagedFunctionInvokingChatClient(
                     message = $"{message} Exception: {result.Exception.Message}";
                 }
 
-                functionResult = ToFunctionTextResult(message);
+                functionResult = new ToolResponse<object> { Error = message };
             }
 
             if (functionResult is TextContent text)

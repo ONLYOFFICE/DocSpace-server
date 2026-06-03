@@ -35,6 +35,9 @@ namespace ASC.AI.Core.Tools;
 
 public class ToolResponse<T>
 {
+    [JsonPropertyName("data")]
     public T? Data { get; init; }
+
+    [JsonPropertyName("error")]
     public string? Error { get; init; }
 }
