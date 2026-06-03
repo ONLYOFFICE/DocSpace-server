@@ -1194,4 +1194,16 @@
   <data name="WhiteLabelSettingsLogoTextUpdated" xml:space="preserve">
     <value>Το όνομα επωνυμίας ενημερώθηκε</value>
   </data>
+  <data name="DocumentsExternalShareSettingsUpdated" xml:space="preserve">
+    <value>Οι ρυθμίσεις πρόσβασης για εξωτερικούς συνδέσμους ενημερώθηκαν</value>
+  </data>
+  <data name="UserLogoutActiveConnection" xml:space="preserve">
+    <value>Η ενεργή σύνδεση αποσυνδέθηκε: {0}</value>
+  </data>
+  <data name="UserLogoutActiveConnections" xml:space="preserve">
+    <value>Οι ενεργές συνδέσεις αποσυνδέθηκαν: {0}</value>
+  </data>
+  <data name="UserLogoutActiveConnectionsForUser" xml:space="preserve">
+    <value>Οι ενεργές συνδέσεις για τον χρήστη αποσυνδέθηκαν: {0}</value>
+  </data>
 </root>

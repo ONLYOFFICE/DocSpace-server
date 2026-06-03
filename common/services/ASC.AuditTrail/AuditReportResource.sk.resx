@@ -1194,4 +1194,16 @@
   <data name="ScheduledBackupDeleted" xml:space="preserve">
     <value>Plánované zálohovanie odstránené</value>
   </data>
+  <data name="DocumentsExternalShareSettingsUpdated" xml:space="preserve">
+    <value>Nastavenia prístupu pre externé odkazy boli aktualizované</value>
+  </data>
+  <data name="UserLogoutActiveConnection" xml:space="preserve">
+    <value>Aktívne pripojenie bolo odhlásené: {0}</value>
+  </data>
+  <data name="UserLogoutActiveConnections" xml:space="preserve">
+    <value>Aktívne pripojenia boli odhlásené: {0}</value>
+  </data>
+  <data name="UserLogoutActiveConnectionsForUser" xml:space="preserve">
+    <value>Aktívne pripojenia používateľa boli odhlásené: {0}</value>
+  </data>
 </root>

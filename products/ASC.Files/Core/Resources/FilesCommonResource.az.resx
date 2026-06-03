@@ -589,4 +589,10 @@ docx, xlsx, pptx ilə ən yüksək uyğunluq.</value>
   <data name="ErrorMessage_AiServicesDisabled" xml:space="preserve">
     <value>Cari portal üçün AI xidmətləri deaktivdir</value>
   </data>
+  <data name="ErrorMessage_ExternalDbNotIndexed" xml:space="preserve">
+    <value>Verilənlər bazası cədvəli ilk forma göndərildikdən sonra yaradılacaq. Hələ strukturunu yaratmaq üçün məlumat yoxdur.</value>
+  </data>
+  <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
+    <value>Forma məlumatlarının xarici verilənlər bazası ilə sinxronizasiyası uğursuz oldu.</value>
+  </data>
 </root>

@@ -1194,4 +1194,16 @@
   <data name="ScheduledBackupStarted" xml:space="preserve">
     <value>예약된 백업이 시작되었습니다</value>
   </data>
+  <data name="DocumentsExternalShareSettingsUpdated" xml:space="preserve">
+    <value>외부 링크에 대한 액세스 설정이 업데이트되었습니다</value>
+  </data>
+  <data name="UserLogoutActiveConnection" xml:space="preserve">
+    <value>활성 연결이 로그아웃되었습니다: {0}</value>
+  </data>
+  <data name="UserLogoutActiveConnections" xml:space="preserve">
+    <value>활성 연결들이 로그아웃되었습니다: {0}</value>
+  </data>
+  <data name="UserLogoutActiveConnectionsForUser" xml:space="preserve">
+    <value>사용자의 활성 연결들이 로그아웃되었습니다: {0}</value>
+  </data>
 </root>

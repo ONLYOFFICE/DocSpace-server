@@ -589,4 +589,10 @@ docx、xlsx、pptxとの100％の互換性が保証されています。</value>
   <data name="ResultStorageFolder" xml:space="preserve">
     <value>結果ストレージ</value>
   </data>
+  <data name="ErrorMessage_ExternalDbNotIndexed" xml:space="preserve">
+    <value>データベーステーブルは最初のフォーム送信後に作成されます。その構造を生成するためのデータがまだありません。</value>
+  </data>
+  <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
+    <value>フォームデータを外部データベースに同期できませんでした。</value>
+  </data>
 </root>

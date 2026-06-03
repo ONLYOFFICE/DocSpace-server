@@ -589,4 +589,10 @@
   <data name="ErrorMessage_AiServicesDisabled" xml:space="preserve">
     <value>ԱԲ ծառայությունները անջատված են ընթացիկ պորտալի համար</value>
   </data>
+  <data name="ErrorMessage_ExternalDbNotIndexed" xml:space="preserve">
+    <value>Տվյալների բազայի աղյուսակը կստեղծվի ձևի առաջին ներկայացումից հետո: Դեռ տվյալներ չկան դրա կառուցվածքը ստեղծելու համար:</value>
+  </data>
+  <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
+    <value>Ձևի տվյալները արտաքին տվյալների բազայի հետ համաժամացնել չհաջողվեց:</value>
+  </data>
 </root>

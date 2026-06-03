@@ -589,4 +589,10 @@ Najwyższy poziom kompatybilności z docx, xlsx, pptx.</value>
   <data name="ErrorMessage_AiServicesDisabled" xml:space="preserve">
     <value>Usługi AI są wyłączone dla bieżącego portalu</value>
   </data>
+  <data name="ErrorMessage_ExternalDbNotIndexed" xml:space="preserve">
+    <value>Tabela bazy danych zostanie utworzona po pierwszym przesłaniu formularza. Nie ma jeszcze danych do wygenerowania jej struktury.</value>
+  </data>
+  <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
+    <value>Nie udało się zsynchronizować danych formularza z zewnętrzną bazą danych.</value>
+  </data>
 </root>

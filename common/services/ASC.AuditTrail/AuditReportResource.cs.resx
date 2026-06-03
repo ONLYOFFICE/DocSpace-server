@@ -1194,4 +1194,16 @@
   <data name="WhiteLabelSettingsLogoTextUpdated" xml:space="preserve">
     <value>Název značky aktualizován</value>
   </data>
+  <data name="DocumentsExternalShareSettingsUpdated" xml:space="preserve">
+    <value>Nastavení přístupu pro externí odkazy bylo aktualizováno</value>
+  </data>
+  <data name="UserLogoutActiveConnection" xml:space="preserve">
+    <value>Aktivní připojení bylo odhlášeno: {0}</value>
+  </data>
+  <data name="UserLogoutActiveConnections" xml:space="preserve">
+    <value>Aktivní připojení byla odhlášena: {0}</value>
+  </data>
+  <data name="UserLogoutActiveConnectionsForUser" xml:space="preserve">
+    <value>Aktivní připojení pro uživatele byla odhlášena: {0}</value>
+  </data>
 </root>

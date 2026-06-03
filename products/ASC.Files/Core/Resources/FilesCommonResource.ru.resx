@@ -589,4 +589,10 @@
   <data name="ErrorMessage_AiServicesDisabled" xml:space="preserve">
     <value>ИИ-сервисы отключены для текущего портала</value>
   </data>
+  <data name="ErrorMessage_ExternalDbNotIndexed" xml:space="preserve">
+    <value>Таблица базы данных будет создана после первой отправки формы. Пока нет данных для создания ее структуры.</value>
+  </data>
+  <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
+    <value>Не удалось синхронизировать данные формы с внешней базой данных.</value>
+  </data>
 </root>

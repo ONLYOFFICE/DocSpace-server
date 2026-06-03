@@ -19,7 +19,7 @@ namespace ASC.Files.Core.Resources {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "18.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class FilesCommonResource {
@@ -484,7 +484,7 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
-        ///  Looks up a localized string similar to The database table will be created after the first form submission. There is no data yet to generate its structure..
+        ///   Looks up a localized string similar to The database table will be created after the first form submission. There is no data yet to generate its structure..
         /// </summary>
         public static string ErrorMessage_ExternalDbNotIndexed {
             get {
@@ -500,7 +500,7 @@ namespace ASC.Files.Core.Resources {
                 return ResourceManager.GetString("ErrorMessage_ExternalDbSyncFailed", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to The required file was not found.
         /// </summary>
