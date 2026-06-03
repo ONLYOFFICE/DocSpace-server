@@ -589,4 +589,10 @@ Massima compatibilità con docx, xlsx, pptx.</value>
   <data name="ResultStorageFolder" xml:space="preserve">
     <value>Archiviazione dei risultati</value>
   </data>
+  <data name="ErrorMessage_ExternalDbNotIndexed" xml:space="preserve">
+    <value>La tabella del database verrà creata dopo il primo invio del modulo. Non ci sono ancora dati per generarne la struttura.</value>
+  </data>
+  <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
+    <value>Sincronizzazione dei dati del modulo con il database esterno non riuscita.</value>
+  </data>
 </root>
