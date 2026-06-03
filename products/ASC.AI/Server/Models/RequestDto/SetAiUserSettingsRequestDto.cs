@@ -39,19 +39,6 @@ namespace ASC.AI.Models.RequestDto;
 public class SetAiUserSettingsRequestDto
 {
     /// <summary>
-    /// The per-user AI recommended model visibility parameters.
-    /// </summary>
-    /// <example>{"chatRecommendedModelVisible": true}</example>
-    [FromBody]
-    public required SetAiUserSettingsRequestBody Body { get; init; }
-}
-
-/// <summary>
-/// Parameters for updating per-user AI recommended model visibility settings.
-/// </summary>
-public class SetAiUserSettingsRequestBody
-{
-    /// <summary>
     /// Indicates whether the recommended model banner is visible in the AI chat.
     /// </summary>
     /// <example>true</example>

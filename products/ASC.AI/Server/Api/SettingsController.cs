@@ -165,9 +165,9 @@ public class SettingsController(AiSettingsService aiSettingsService) : Controlle
     [Tags("AI / Settings")]
     [SwaggerResponse(200, "Updated per-user AI settings", typeof(AiUserSettingsDto))]
     [HttpPut("config/user")]
-    public async Task<AiUserSettingsDto> SetAiUserSettingsAsync(SetAiUserSettingsRequestDto inDto)
+    public async Task<AiUserSettingsDto> SetAiUserSettingsAsync([FromBody] SetAiUserSettingsRequestDto inDto)
     {
-        var settings = await aiSettingsService.SetAiUserSettingsAsync(inDto.Body.ChatRecommendedModelVisible);
+        var settings = await aiSettingsService.SetAiUserSettingsAsync(inDto.ChatRecommendedModelVisible);
         return settings.MapToDto();
     }
 }
