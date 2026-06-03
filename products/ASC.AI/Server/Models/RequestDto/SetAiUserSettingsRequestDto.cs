@@ -41,7 +41,7 @@ public class SetAiUserSettingsRequestDto
     /// <summary>
     /// The per-user AI recommended model visibility parameters.
     /// </summary>
-    /// <example>{"chatRecomendedModelVisible": true}</example>
+    /// <example>{"chatRecommendedModelVisible": true}</example>
     [FromBody]
     public required SetAiUserSettingsRequestBody Body { get; init; }
 }
@@ -55,5 +55,5 @@ public class SetAiUserSettingsRequestBody
     /// Indicates whether the recommended model banner is visible in the AI chat.
     /// </summary>
     /// <example>true</example>
-    public bool ChatRecomendedModelVisible { get; init; }
+    public bool ChatRecommendedModelVisible { get; init; }
 }

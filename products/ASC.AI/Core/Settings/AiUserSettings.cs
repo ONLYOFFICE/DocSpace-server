@@ -40,9 +40,9 @@ public class AiUserSettings : ISettings<AiUserSettings>
     /// <summary>
     /// Indicates whether the recommended model banner is visible in the AI chat.
     /// </summary>
-    public bool ChatRecomendedModelVisible { get; init; }
+    public bool ChatRecommendedModelVisible { get; init; }
 
     public DateTime LastModified { get; set; }
 
-    public AiUserSettings GetDefault() => new() { ChatRecomendedModelVisible = true };
+    public AiUserSettings GetDefault() => new() { ChatRecommendedModelVisible = true };
 }

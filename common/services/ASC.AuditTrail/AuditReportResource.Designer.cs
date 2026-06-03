@@ -3184,6 +3184,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to User AI settings updated.
+        /// </summary>
+        public static string UserUpdatedAiSettings {
+            get {
+                return ResourceManager.GetString("UserUpdatedAiSettings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Users [{0}]. Avatar Thumbnails Updated.
         /// </summary>
         public static string UserUpdatedAvatarThumbnails {

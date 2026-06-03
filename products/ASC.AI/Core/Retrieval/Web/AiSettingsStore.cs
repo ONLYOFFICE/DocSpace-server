@@ -181,9 +181,9 @@ public class AiSettingsStore(
         return aiConfiguration.GetModelAliases();
     }
 
-    public string? GetRecomendedModelForForms()
+    public string? GetRecommendedModelForForms()
     {
-        return aiConfiguration.RecomendedModelForForms;
+        return aiConfiguration.RecommendedModelForForms;
     }
 
     private async Task<T> NormalizeSystemTypeAsync<T>(T type, T noneType, T systemType, bool isConfigured)

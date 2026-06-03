@@ -42,7 +42,7 @@ public class AiUserSettingsDto
     /// Indicates whether the recommended model banner is visible in the AI chat for the current user.
     /// </summary>
     /// <example>true</example>
-    public bool ChatRecomendedModelVisible { get; init; }
+    public bool ChatRecommendedModelVisible { get; init; }
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,

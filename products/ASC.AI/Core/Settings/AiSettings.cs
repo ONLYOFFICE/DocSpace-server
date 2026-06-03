@@ -45,8 +45,7 @@ public class AiSettings
     public required IReadOnlyDictionary<string, string> ModelAliases { get; init; }
     public Guid? PortalMcpServerId { get; init; }
     public bool SystemAiEnabled { get; init; }
-    public bool ChatRecomendedModelVisible { get; init; }
-    public string? RecomendedModelForForms { get; init; }
+    public string? RecommendedModelForForms { get; init; }
     public string KnowledgeSearchToolName => KnowledgeSearchTool.Name;
     public string WebSearchToolName => WebSearchTool.Name;
     public string WebCrawlingToolName => WebCrawlingTool.Name;

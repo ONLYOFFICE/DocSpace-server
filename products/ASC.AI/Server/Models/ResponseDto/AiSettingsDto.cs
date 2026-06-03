@@ -135,16 +135,10 @@ public class AiSettingsDto
     public bool SystemAiEnabled { get; init; }
 
     /// <summary>
-    /// Indicates whether the recommended model banner is visible in the AI chat for the current user.
-    /// </summary>
-    /// <example>true</example>
-    public bool ChatRecomendedModelVisible { get; init; }
-
-    /// <summary>
     /// The identifier of the model recommended for form generation.
     /// </summary>
     /// <example>gpt-5.4</example>
-    public string? RecomendedModelForForms { get; init; }
+    public string? RecommendedModelForForms { get; init; }
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,

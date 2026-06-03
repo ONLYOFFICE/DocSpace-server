@@ -40,7 +40,7 @@ namespace ASC.Core.Common.AI;
 public class AiConfiguration
 {
     public int MaxImageSize { get; private set; }
-    public string? RecomendedModelForForms { get; private set; }
+    public string? RecommendedModelForForms { get; private set; }
     public static readonly FrozenSet<string> SupportedImageFormats =
         ((HashSet<string>)[".jpeg", ".jpg", ".gif", ".webp", ".png"])
         .ToFrozenSet(StringComparer.OrdinalIgnoreCase);
@@ -59,7 +59,7 @@ public class AiConfiguration
         var effort = section.GetSection("effort").Get<Dictionary<string, EffortSettingsData>>() ?? [];
 
         MaxImageSize = maxImgSize > 0 ? maxImgSize : 0;
-        RecomendedModelForForms = section["recomendedModelForForms"];
+        RecommendedModelForForms = section["recommendedModelForForms"];
         _effortSettings = effort.ToFrozenDictionary(e =>
             e.Key, e => e.Value, StringComparer.OrdinalIgnoreCase);
 

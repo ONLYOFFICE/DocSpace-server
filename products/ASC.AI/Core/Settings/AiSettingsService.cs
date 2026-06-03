@@ -192,7 +192,6 @@ public class AiSettingsService(
 
         var needResetProvidersTask = providerService.NeedResetProvidersAsync();
         var aiStatusTask = accessibility.GetStatusAsync();
-        var userSettingsTask = settingsManager.LoadForCurrentUserAsync<AiUserSettings>();
 
         var docSpaceMcpServer = systemMcpConfig.Servers.Values.FirstOrDefault(
             x => x.Type == ServerType.DocSpace);
@@ -203,8 +202,7 @@ public class AiSettingsService(
             vectorizationSettingsTask,
             vectorizationEnabledTask,
             needResetProvidersTask,
-            aiStatusTask,
-            userSettingsTask
+            aiStatusTask
             );
 
         var webSearchNeedReset = (await webSearchSettingsTask).NeedReset;
@@ -216,8 +214,6 @@ public class AiSettingsService(
         var aiStatus = await aiStatusTask;
         var needResetProviders = await needResetProvidersTask;
         var aiReady = (aiStatus.GatewayEnabled || !needResetProviders) && aiStatus.Enabled;
-
-        var userSettings = await userSettingsTask;
 
         return new AiSettings
         {
@@ -231,19 +227,25 @@ public class AiSettingsService(
             ModelAliases = aiSettingsStore.GetModelAliases(),
             PortalMcpServerId = docSpaceMcpServer?.Id,
             SystemAiEnabled = aiStatus.GatewayEnabled,
-            ChatRecomendedModelVisible = userSettings.ChatRecomendedModelVisible,
-            RecomendedModelForForms = aiSettingsStore.GetRecomendedModelForForms(),
+            RecommendedModelForForms = aiSettingsStore.GetRecommendedModelForForms(),
         };
     }
 
-    public async Task<AiUserSettings> SetAiUserSettingsAsync(bool chatRecomendedModelVisible)
+    public async Task<AiUserSettings> GetAiUserSettingsAsync()
+    {
+        return await settingsManager.LoadForCurrentUserAsync<AiUserSettings>();
+    }
+
+    public async Task<AiUserSettings> SetAiUserSettingsAsync(bool chatRecommendedModelVisible)
     {
         var settings = new AiUserSettings
         {
-            ChatRecomendedModelVisible = chatRecomendedModelVisible,
+            ChatRecommendedModelVisible = chatRecommendedModelVisible,
         };
 
         await settingsManager.SaveForCurrentUserAsync(settings);
+
+        messageService.Send(MessageAction.UserUpdatedAiSettings);
 
         return settings;
     }

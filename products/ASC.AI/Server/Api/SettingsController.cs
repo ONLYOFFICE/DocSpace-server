@@ -139,6 +139,22 @@ public class SettingsController(AiSettingsService aiSettingsService) : Controlle
     }
 
     /// <summary>
+    /// Get per-user AI settings
+    /// </summary>
+    /// <remarks>
+    /// Retrieves the current user's AI settings, including the recommended model banner visibility preference.
+    /// </remarks>
+    /// <path>api/2.0/ai/config/user</path>
+    [Tags("AI / Settings")]
+    [SwaggerResponse(200, "Current per-user AI settings", typeof(AiUserSettingsDto))]
+    [HttpGet("config/user")]
+    public async Task<AiUserSettingsDto> GetAiUserSettingsAsync()
+    {
+        var settings = await aiSettingsService.GetAiUserSettingsAsync();
+        return settings.MapToDto();
+    }
+
+    /// <summary>
     /// Update per-user AI settings
     /// </summary>
     /// <remarks>
@@ -151,7 +167,7 @@ public class SettingsController(AiSettingsService aiSettingsService) : Controlle
     [HttpPut("config/user")]
     public async Task<AiUserSettingsDto> SetAiUserSettingsAsync(SetAiUserSettingsRequestDto inDto)
     {
-        var settings = await aiSettingsService.SetAiUserSettingsAsync(inDto.Body.ChatRecomendedModelVisible);
+        var settings = await aiSettingsService.SetAiUserSettingsAsync(inDto.Body.ChatRecommendedModelVisible);
         return settings.MapToDto();
     }
 }
