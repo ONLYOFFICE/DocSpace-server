@@ -34,9 +34,11 @@
 namespace ASC.Common.Logging;
 
 [Singleton]
-public class EFLoggerFactory(ILoggerProvider loggerProvider) : ILoggerFactory
+public class EFLoggerFactory(ILoggerFactory loggerFactory) : ILoggerFactory
 {
-    private readonly ILogger _logger = new EFLogger(loggerProvider.CreateLogger("ASC.SQL"));
+    // Create the "ASC.SQL" logger from the application ILoggerFactory so EF command logs fan out to every
+    // registered provider (NLog -> sql file/AWS, and OpenTelemetry -> OTLP/structured logging).
+    private readonly ILogger _logger = new EFLogger(loggerFactory.CreateLogger("ASC.SQL"));
 
     public void AddProvider(ILoggerProvider provider)
     {

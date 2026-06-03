@@ -708,6 +708,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Access settings for external links updated.
+        /// </summary>
+        public static string DocumentsExternalShareSettingsUpdated {
+            get {
+                return ResourceManager.GetString("DocumentsExternalShareSettingsUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Forcesave settings Updated.
         /// </summary>
         public static string DocumentsForcesave {
@@ -3172,7 +3181,34 @@ namespace ASC.AuditTrail {
                 return ResourceManager.GetString("UserUpdatedPassword", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to Active Connections Logged Out: {0}.
+        /// </summary>
+        public static string UserLogoutActiveConnections {
+            get {
+                return ResourceManager.GetString("UserLogoutActiveConnections", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Active Connection Logged Out: {0}.
+        /// </summary>
+        public static string UserLogoutActiveConnection {
+            get {
+                return ResourceManager.GetString("UserLogoutActiveConnection", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Active Connections Logged Out for User: {0}.
+        /// </summary>
+        public static string UserLogoutActiveConnectionsForUser {
+            get {
+                return ResourceManager.GetString("UserLogoutActiveConnectionsForUser", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Webhook created: {0}.
         /// </summary>
