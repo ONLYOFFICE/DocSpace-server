@@ -33,96 +33,96 @@ namespace ASC.Files.Tests.Tests._07_Settings;
 [Trait("Feature", "ExternalSharing")]
 public class ExternalSharingSettingsTests(AspireAppFixture fixture) : BaseTest(fixture)
 {
-    // private async Task SetExternalSharingAsync(
-    //     bool externalShare,
-    //     bool defaultLinkInternal = false,
-    //     bool applyToDocuments = true,
-    //     bool applyToRooms = true,
-    //     bool blockExisting = true)
-    // {
-    //     await _filesClient.Authenticate(Initializer.Owner);
-    //     await _filesSettingsApi.ChangeExternalSharingSettingsAsync(
-    //         new ExternalSharingSettingsRequestDto(
-    //             externalShare: externalShare,
-    //             defaultShareLinkInternal: defaultLinkInternal,
-    //             externalShareApplyToDocuments: applyToDocuments,
-    //             externalShareApplyToRooms: applyToRooms,
-    //             blockExistingLinksOnRestrict: blockExisting),
-    //         TestContext.Current.CancellationToken);
-    // }
-    //
-    // [Fact]
-    // public async Task ChangeExternalSharingSettings_AllSettings_PersistedAndReflectedInGet()
-    // {
-    //     // Arrange
-    //     await _filesClient.Authenticate(Initializer.Owner);
-    //
-    //     var request = new ExternalSharingSettingsRequestDto(
-    //         externalShare: false,
-    //         defaultShareLinkInternal: true,
-    //         externalShareApplyToDocuments: false,
-    //         externalShareApplyToRooms: true,
-    //         blockExistingLinksOnRestrict: false);
-    //
-    //     // Act
-    //     var putResult = (await _filesSettingsApi.ChangeExternalSharingSettingsAsync(
-    //         request, TestContext.Current.CancellationToken)).Response;
-    //
-    //     var getResult = (await _filesSettingsApi.GetFilesSettingsAsync(
-    //         TestContext.Current.CancellationToken)).Response;
-    //
-    //     // Reset external sharing changes
-    //     await SetExternalSharingAsync(externalShare: true);
-    //
-    //     // Assert — PUT response echoes the request values
-    //     putResult.ExternalShare.Should().Be(request.ExternalShare);
-    //     putResult.DefaultShareLinkInternal.Should().Be(request.DefaultShareLinkInternal);
-    //     putResult.ExternalShareApplyToDocuments.Should().Be(request.ExternalShareApplyToDocuments);
-    //     putResult.ExternalShareApplyToRooms.Should().Be(request.ExternalShareApplyToRooms);
-    //     putResult.BlockExistingLinksOnRestrict.Should().Be(request.BlockExistingLinksOnRestrict);
-    //
-    //     // Assert — GET settings reflect the persisted values
-    //     getResult.ExternalShare.Should().Be(request.ExternalShare);
-    //     getResult.DefaultShareLinkInternal.Should().Be(request.DefaultShareLinkInternal);
-    //     getResult.ExternalShareApplyToDocuments.Should().Be(request.ExternalShareApplyToDocuments);
-    //     getResult.ExternalShareApplyToRooms.Should().Be(request.ExternalShareApplyToRooms);
-    //     getResult.BlockExistingLinksOnRestrict.Should().Be(request.BlockExistingLinksOnRestrict);
-    // }
-    //
-    // [Fact]
-    // public async Task ChangeExternalSharingSettings_AsNonAdmin_ReturnsForbidden()
-    // {
-    //     // Arrange
-    //     var nonAdmin = await Initializer.InviteContact(EmployeeType.User);
-    //     await _filesClient.Authenticate(nonAdmin);
-    //
-    //     // Act & Assert
-    //     var exception = await Assert.ThrowsAsync<ApiException>(
-    //         async () => await _filesSettingsApi.ChangeExternalSharingSettingsAsync(
-    //             new ExternalSharingSettingsRequestDto(externalShare: false),
-    //             TestContext.Current.CancellationToken));
-    //
-    //     // Reset external sharing changes
-    //     await SetExternalSharingAsync(externalShare: true);
-    //
-    //     exception.ErrorCode.Should().Be(403);
-    // }
-    //
-    // [Fact]
-    // public async Task ChangeExternalSharingSettings_DisableExternalShare_AlsoDisablesSocialMedia()
-    // {
-    //     // Arrange & Act
-    //     await SetExternalSharingAsync(externalShare: false);
-    //
-    //     await _filesClient.Authenticate(Initializer.Owner);
-    //     var settings = (await _filesSettingsApi.GetFilesSettingsAsync(
-    //         TestContext.Current.CancellationToken)).Response;
-    //
-    //     // Reset external sharing changes
-    //     await SetExternalSharingAsync(externalShare: true);
-    //
-    //     // Assert
-    //     settings.ExternalShare.Should().BeFalse();
-    //     settings.ExternalShareSocialMedia.Should().BeFalse();
-    // }
+    private async Task SetExternalSharingAsync(
+        bool externalShare,
+        bool defaultLinkInternal = false,
+        bool applyToDocuments = true,
+        bool applyToRooms = true,
+        bool blockExisting = true)
+    {
+        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesSettingsApi.ChangeExternalSharingSettingsAsync(
+            new ExternalSharingSettingsRequestDto(
+                externalShare: externalShare,
+                defaultShareLinkInternal: defaultLinkInternal,
+                externalShareApplyToDocuments: applyToDocuments,
+                externalShareApplyToRooms: applyToRooms,
+                blockExistingLinksOnRestrict: blockExisting),
+            TestContext.Current.CancellationToken);
+    }
+
+    [Fact]
+    public async Task ChangeExternalSharingSettings_AllSettings_PersistedAndReflectedInGet()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+
+        var request = new ExternalSharingSettingsRequestDto(
+            externalShare: false,
+            defaultShareLinkInternal: true,
+            externalShareApplyToDocuments: false,
+            externalShareApplyToRooms: true,
+            blockExistingLinksOnRestrict: false);
+
+        // Act
+        var putResult = (await _filesSettingsApi.ChangeExternalSharingSettingsAsync(
+            request, TestContext.Current.CancellationToken)).Response;
+
+        var getResult = (await _filesSettingsApi.GetFilesSettingsAsync(
+            TestContext.Current.CancellationToken)).Response;
+
+        // Reset external sharing changes
+        await SetExternalSharingAsync(externalShare: true);
+
+        // Assert — PUT response echoes the request values
+        putResult.ExternalShare.Should().Be(request.ExternalShare);
+        putResult.DefaultShareLinkInternal.Should().Be(request.DefaultShareLinkInternal);
+        putResult.ExternalShareApplyToDocuments.Should().Be(request.ExternalShareApplyToDocuments);
+        putResult.ExternalShareApplyToRooms.Should().Be(request.ExternalShareApplyToRooms);
+        putResult.BlockExistingLinksOnRestrict.Should().Be(request.BlockExistingLinksOnRestrict);
+
+        // Assert — GET settings reflect the persisted values
+        getResult.ExternalShare.Should().Be(request.ExternalShare);
+        getResult.DefaultShareLinkInternal.Should().Be(request.DefaultShareLinkInternal);
+        getResult.ExternalShareApplyToDocuments.Should().Be(request.ExternalShareApplyToDocuments);
+        getResult.ExternalShareApplyToRooms.Should().Be(request.ExternalShareApplyToRooms);
+        getResult.BlockExistingLinksOnRestrict.Should().Be(request.BlockExistingLinksOnRestrict);
+    }
+
+    [Fact]
+    public async Task ChangeExternalSharingSettings_AsNonAdmin_ReturnsForbidden()
+    {
+        // Arrange
+        var nonAdmin = await Initializer.InviteContact(EmployeeType.User);
+        await _filesClient.Authenticate(nonAdmin);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _filesSettingsApi.ChangeExternalSharingSettingsAsync(
+                new ExternalSharingSettingsRequestDto(externalShare: false),
+                TestContext.Current.CancellationToken));
+
+        // Reset external sharing changes
+        await SetExternalSharingAsync(externalShare: true);
+
+        exception.ErrorCode.Should().Be(403);
+    }
+
+    [Fact]
+    public async Task ChangeExternalSharingSettings_DisableExternalShare_AlsoDisablesSocialMedia()
+    {
+        // Arrange & Act
+        await SetExternalSharingAsync(externalShare: false);
+
+        await _filesClient.Authenticate(Initializer.Owner);
+        var settings = (await _filesSettingsApi.GetFilesSettingsAsync(
+            TestContext.Current.CancellationToken)).Response;
+
+        // Reset external sharing changes
+        await SetExternalSharingAsync(externalShare: true);
+
+        // Assert
+        settings.ExternalShare.Should().BeFalse();
+        settings.ExternalShareSocialMedia.Should().BeFalse();
+    }
 }
