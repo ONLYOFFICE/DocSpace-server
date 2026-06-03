@@ -4351,8 +4351,15 @@ public class FileStorageService //: IFileStorageService
             ? await daoFactory.GetFileDao<T>().GetFileAsync(entryId)
             : await daoFactory.GetFolderDao<T>().GetFolderAsync(entryId);
 
-        if (!requiredAuth && entry != null && await externalShare.IsCreationRestrictedAsync(entry))
+        if (!requiredAuth && share != FileShare.None && entry != null && await externalShare.IsCreationRestrictedAsync(entry))
         {
+            await DetermineParentRoomType(entry);
+
+            if (entry is Folder<T> { FolderType: FolderType.PublicRoom } || entry.ParentRoomType == FolderType.PublicRoom)
+            {
+                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+            }
+
             requiredAuth = true;
         }
 
