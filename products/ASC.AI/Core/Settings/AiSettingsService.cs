@@ -43,7 +43,8 @@ public class AiSettingsService(
     VectorizationGlobalSettings vectorizationGlobalSettings,
     SystemMcpConfig systemMcpConfig,
     ModelClientFactory modelClientFactory,
-    MessageService messageService)
+    MessageService messageService,
+    SettingsManager settingsManager)
 {
     public async Task<WebSearchSettings> SetWebSearchSettingsAsync(bool enabled, EngineType type, string? key)
     {
@@ -191,6 +192,7 @@ public class AiSettingsService(
 
         var needResetProvidersTask = providerService.NeedResetProvidersAsync();
         var aiStatusTask = accessibility.GetStatusAsync();
+        var userSettingsTask = settingsManager.LoadForCurrentUserAsync<AiUserSettings>();
 
         var docSpaceMcpServer = systemMcpConfig.Servers.Values.FirstOrDefault(
             x => x.Type == ServerType.DocSpace);
@@ -201,7 +203,8 @@ public class AiSettingsService(
             vectorizationSettingsTask,
             vectorizationEnabledTask,
             needResetProvidersTask,
-            aiStatusTask
+            aiStatusTask,
+            userSettingsTask
             );
 
         var webSearchNeedReset = (await webSearchSettingsTask).NeedReset;
@@ -213,6 +216,8 @@ public class AiSettingsService(
         var aiStatus = await aiStatusTask;
         var needResetProviders = await needResetProvidersTask;
         var aiReady = (aiStatus.GatewayEnabled || !needResetProviders) && aiStatus.Enabled;
+
+        var userSettings = await userSettingsTask;
 
         return new AiSettings
         {
@@ -226,9 +231,23 @@ public class AiSettingsService(
             ModelAliases = aiSettingsStore.GetModelAliases(),
             PortalMcpServerId = docSpaceMcpServer?.Id,
             SystemAiEnabled = aiStatus.GatewayEnabled,
+            ChatRecomendedModelVisible = userSettings.ChatRecomendedModelVisible,
+            RecomendedModelForForms = aiSettingsStore.GetRecomendedModelForForms(),
         };
     }
-    
+
+    public async Task<AiUserSettings> SetAiUserSettingsAsync(bool chatRecomendedModelVisible)
+    {
+        var settings = new AiUserSettings
+        {
+            ChatRecomendedModelVisible = chatRecomendedModelVisible,
+        };
+
+        await settingsManager.SaveForCurrentUserAsync(settings);
+
+        return settings;
+    }
+
     private async Task ThrowIfNotAccess()
     {
         if (!await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))

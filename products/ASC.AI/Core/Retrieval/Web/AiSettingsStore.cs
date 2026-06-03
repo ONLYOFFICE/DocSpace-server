@@ -181,6 +181,11 @@ public class AiSettingsStore(
         return aiConfiguration.GetModelAliases();
     }
 
+    public string? GetRecomendedModelForForms()
+    {
+        return aiConfiguration.RecomendedModelForForms;
+    }
+
     private async Task<T> NormalizeSystemTypeAsync<T>(T type, T noneType, T systemType, bool isConfigured)
         where T : struct, Enum
     {
