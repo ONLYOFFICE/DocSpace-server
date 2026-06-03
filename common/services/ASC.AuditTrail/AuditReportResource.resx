@@ -1134,6 +1134,15 @@
   <data name="UserUpdatedPassword" xml:space="preserve">
     <value>Password Updated</value>
   </data>
+  <data name="UserLogoutActiveConnections" xml:space="preserve">
+    <value>Active Connections Logged Out: {0}</value>
+  </data>
+  <data name="UserLogoutActiveConnection" xml:space="preserve">
+    <value>Active Connection Logged Out: {0}</value>
+  </data>
+  <data name="UserLogoutActiveConnectionsForUser" xml:space="preserve">
+    <value>Active Connections Logged Out for User: {0}</value>
+  </data>
   <data name="WebhookCreated" xml:space="preserve">
     <value>Webhook created: {0}</value>
   </data>
@@ -1187,5 +1196,8 @@
   </data>
   <data name="AIAccessDisabled" xml:space="preserve">
     <value>AI services have been disabled</value>
+  </data>
+  <data name="DocumentsExternalShareSettingsUpdated" xml:space="preserve">
+    <value>Access settings for external links updated</value>
   </data>
 </root>

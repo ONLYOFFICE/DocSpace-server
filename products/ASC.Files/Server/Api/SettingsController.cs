@@ -166,6 +166,19 @@ public class SettingsController(
     }
 
     /// <remarks>
+    /// Changes the Access Control external sharing settings.
+    /// </remarks>
+    /// <summary>Change the Access Control external sharing settings</summary>
+    /// <path>api/2.0/files/settings/externalsharingsettings</path>
+    [Tags("Files / Settings")]
+    [SwaggerResponse(200, "External sharing settings", typeof(ExternalSharingSettingsDto))]
+    [HttpPut("settings/externalsharingsettings")]
+    public async Task<ExternalSharingSettingsDto> ChangeExternalSharingSettings(ExternalSharingSettingsRequestDto inDto)
+    {
+        return await filesSettingsHelper.ChangeExternalSharingSettingsAsync(inDto);
+    }
+
+    /// <remarks>
     /// Changes the ability to share a file externally on social networks.
     /// </remarks>
     /// <summary>Change the external sharing ability on social networks</summary>

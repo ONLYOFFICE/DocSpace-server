@@ -372,8 +372,9 @@ public partial class FolderMapper(IServiceProvider serviceProvider, TenantDateTi
 
         if (dbFolderQuery.UserShared != null)
         {
-            result.Shared = dbFolderQuery.UserShared.Any(r => r is SubjectType.ExternalLink or SubjectType.PrimaryExternalLink);
-            result.SharedForUser = dbFolderQuery.UserShared.Any(r => r is SubjectType.Group or SubjectType.User);
+            result.Shared = dbFolderQuery.UserShared.Any(r => r.SubjectType is SubjectType.ExternalLink or SubjectType.PrimaryExternalLink);
+            result.SharedForUser = dbFolderQuery.UserShared.Any(r => r.SubjectType is SubjectType.Group or SubjectType.User);
+            result.SharedExternal = dbFolderQuery.UserShared.Any(r => (r.SubjectType is SubjectType.ExternalLink or SubjectType.PrimaryExternalLink) && r.Internal is false);
         }
 
         return result;

@@ -398,7 +398,7 @@ static file class FileQueries
                         UserShared = ctx.Security.Where(x =>
                                 x.TenantId == tenantId &&
                                 x.InternalEntryId == r.Id && x.EntryType == FileEntryType.File)
-                            .Select(s => s.SubjectType).ToList(),
+                            .Select(s => new UserShareInfo { SubjectType = s.SubjectType, Internal = s.Options.Internal }).ToList(),
                         ParentShared = ctx.Security.Any(x =>
                             x.TenantId == tenantId &&
                             (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
@@ -451,7 +451,7 @@ static file class FileQueries
                         UserShared = ctx.Security.Where(x =>
                                 x.TenantId == tenantId &&
                                 x.InternalEntryId == r.Id && x.EntryType == FileEntryType.File)
-                            .Select(s => s.SubjectType).ToList(),
+                            .Select(s => new UserShareInfo { SubjectType = s.SubjectType, Internal = s.Options.Internal }).ToList(),
                         ParentShared = ctx.Security.Any(x =>
                             x.TenantId == tenantId &&
                             (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&

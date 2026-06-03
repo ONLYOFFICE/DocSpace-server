@@ -119,6 +119,10 @@ public class FilesSpaceUsageStatManager(IDbContextFactory<FilesDbContext> dbCont
     {
         await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
 
+        await filesDbContext.Folders
+            .Where(f => f.TenantId == TenantId)
+            .ExecuteUpdateAsync(s => s.SetProperty(f => f.Counter, 0));
+
         var queryGroup = filesDbContext.Folders
                     .Join(filesDbContext.Tree, r => r.Id, a => a.ParentId, (folder, tree) => new { folder, tree })
                     .Join(filesDbContext.Files, r => r.tree.FolderId, b => b.ParentId, (temp, file) => new { temp.folder, file })

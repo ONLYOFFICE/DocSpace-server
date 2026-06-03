@@ -612,6 +612,24 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:change-ai-config");
   }
 
+  function changeExternalSharingSettings({
+    room,
+    externalShare,
+    defaultShareLinkInternal,
+    externalShareApplyToDocuments,
+    externalShareApplyToRooms,
+    blockExistingLinksOnRestrict,
+  } = {}) {
+    logger.info(`change external sharing settings in room ${room}`);
+    filesIO.to(room).emit("s:change-external-sharing-settings", {
+      externalShare,
+      defaultShareLinkInternal,
+      externalShareApplyToDocuments,
+      externalShareApplyToRooms,
+      blockExistingLinksOnRestrict,
+    });
+  }
+
   function externalDbSettings({ tenantId, externalDbEnabled } = {}) {
     var room = `${tenantId}-external-db-settings`;
     logger.info(`external db settings changed in room ${room}, enabled: ${externalDbEnabled}`);
@@ -665,6 +683,7 @@ module.exports = (io) => {
     changeAccessRightsForFolder,
     quotaExceeded,
     changeAiConfig,
+    changeExternalSharingSettings,
     externalDbSettings
   };
 };
