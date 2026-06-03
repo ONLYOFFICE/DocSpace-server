@@ -5150,6 +5150,11 @@
             "description": "Specifies if the file entry is shared for user or not.",
             "example": false
           },
+          "sharedExternal": {
+            "type": "boolean",
+            "description": "Specifies if the file entry is shared via a public (non-internal) external link.",
+            "example": false
+          },
           "parentShared": {
             "type": "boolean",
             "description": "Indicates whether the parent entity is shared.",

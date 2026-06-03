@@ -3973,6 +3973,11 @@ public class FileStorageService //: IFileStorageService
 
         entry.NotFoundIfNull();
 
+        if (!requiredAuth && await externalShare.IsCreationRestrictedAsync(entry))
+        {
+            requiredAuth = true;
+        }
+
         //hack for the form-filling room. return a link to a file with the room key.
         if (share is FileShare.FillForms && entry is File<T>)
         {
@@ -4346,6 +4351,18 @@ public class FileStorageService //: IFileStorageService
             ? await daoFactory.GetFileDao<T>().GetFileAsync(entryId)
             : await daoFactory.GetFolderDao<T>().GetFolderAsync(entryId);
 
+        if (!requiredAuth && share != FileShare.None && entry != null && await externalShare.IsCreationRestrictedAsync(entry))
+        {
+            await DetermineParentRoomType(entry);
+
+            if (entry is Folder<T> { FolderType: FolderType.PublicRoom } || entry.ParentRoomType == FolderType.PublicRoom)
+            {
+                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+            }
+
+            requiredAuth = true;
+        }
+
         //hack for the form-filling room. return a link to a file with the room key.
         if (entry is File<T> { IsForm: true })
         {
@@ -4540,15 +4557,26 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorrMessage_PinRoom);
         }
 
+        var userId = authContext.CurrentAccount.ID;
+
         var tagDao = daoFactory.GetTagDao<T>();
-        var tag = Tag.Pin(authContext.CurrentAccount.ID, room);
+        var tag = Tag.Pin(userId, room);
 
         if (pin)
         {
-            await using (await distributedLockProvider.TryAcquireFairLockAsync($"pin_{authContext.CurrentAccount.ID}"))
+            await using (await distributedLockProvider.TryAcquireFairLockAsync($"pin_{userId}"))
             {
-                var count = await tagDao.GetTagsAsync(authContext.CurrentAccount.ID, default, TagType.Pin).CountAsync();
-                if (count >= fileUtilityConfiguration.MaxPinnedRooms)
+                var tags = await tagDao.GetTagsAsync(userId, default, TagType.Pin).ToListAsync();
+
+                var internalIds = tags.Select(x => x.EntryId).OfType<int>();
+                var internalFolders = await daoFactory.GetFolderDao<int>().GetFoldersAsync(internalIds).ToListAsync();
+
+                var agentTagsCount = internalFolders.Count(x => x.IsAgent);
+                var roomTagsCount = tags.Count - agentTagsCount;
+
+                var tagsCount = room.IsAgent ? agentTagsCount : roomTagsCount;
+
+                if (tagsCount >= fileUtilityConfiguration.MaxPinnedRooms)
                 {
                     throw new InvalidOperationException(FilesCommonResource.ErrorrMessage_PinRoom);
                 }
@@ -4558,7 +4586,7 @@ public class FileStorageService //: IFileStorageService
         }
         else
         {
-            var tags = await tagDao.GetTagsAsync(authContext.CurrentAccount.ID, [TagType.Pin], [room]).ToListAsync();
+            var tags = await tagDao.GetTagsAsync(userId, [TagType.Pin], [room]).ToListAsync();
             await tagDao.RemoveTagsAsync(room, tags.Select(r=> r.Id));
         }
 

@@ -105,6 +105,15 @@ public class ExternalLinkHelper(
             return result;
         }
 
+        if (status == Status.Ok && !isAuth && !record.Options.Internal)
+        {
+            if (await externalShare.IsGloballyRestrictedAsync(entry))
+            {
+                result.Status = Status.ExternalAccessDenied;
+                return result;
+            }
+        }
+
         if (status == Status.RequiredPassword)
         {
             if (isAuth)
@@ -292,4 +301,5 @@ public class ExternalLinkHelper(
         var record = await fileSecurity.GetCurrentShareAsync(entry, userId, isDocSpaceAdmin);
         return record != null && record.Share != FileShare.Restrict && !record.IsLink;
     }
+
 }

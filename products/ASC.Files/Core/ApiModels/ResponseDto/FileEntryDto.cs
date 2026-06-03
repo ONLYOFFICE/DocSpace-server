@@ -88,6 +88,12 @@ public abstract class FileEntryBaseDto
     public bool SharedForUser { get; set; }
 
     /// <summary>
+    /// Specifies if the file entry is shared via a public (non-internal) external link.
+    /// </summary>
+    /// <example>false</example>
+    public bool SharedExternal { get; set; }
+
+    /// <summary>
     /// Indicates whether the parent entity is shared.
     /// </summary>
     /// <example>false</example>
@@ -188,6 +194,7 @@ public abstract class FileEntryBaseDto
         Access = entry.Access;
         Shared = entry.Shared;
         SharedForUser = entry.SharedForUser;
+        SharedExternal = entry.SharedExternal;
         ParentShared = entry.ParentShared;
         RootFolderType = entry.RootFolderType;
         ParentRoomType = entry.ParentRoomType;
@@ -435,6 +442,7 @@ public class FileEntryDtoHelper(
             SharedBy = securityContext.IsAuthenticated && sharedBy.HasValue ? await employeeWrapperHelper.GetAsync(sharedBy.Value) : null,
             OwnedBy = securityContext.IsAuthenticated && ownedBy.HasValue ? await employeeWrapperHelper.GetAsync(ownedBy.Value) : null,
             SharedForUser = entry.SharedForUser,
+            SharedExternal = entry.SharedExternal,
             ParentShared = entry.ParentShared,
             ShortWebUrl = shortWebUrl,
             Created = _apiDateTimeHelper.Get(entry.CreateOn),

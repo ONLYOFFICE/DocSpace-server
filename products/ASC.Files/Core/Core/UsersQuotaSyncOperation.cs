@@ -110,8 +110,6 @@ public class UsersQuotaSyncJob : DistributedTaskProgress
 
             var settingsManager = scope.ServiceProvider.GetRequiredService<SettingsManager>();
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager>();
-            var authentication = scope.ServiceProvider.GetRequiredService<AuthManager>();
-            var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
             var filesSpaceUsageStatManager = scope.ServiceProvider.GetRequiredService<FilesSpaceUsageStatManager>();
 
             await filesSpaceUsageStatManager.RecalculateQuota(tenant.Id);
@@ -132,9 +130,6 @@ public class UsersQuotaSyncJob : DistributedTaskProgress
 
                 Percentage += 1.0 * 100 / users.Length;
                 await PublishChanges();
-
-                var account = await authentication.GetAccountByIDAsync(TenantId, user.Id);
-                await securityContext.AuthenticateMeAsync(account);
 
                 await filesSpaceUsageStatManager.RecalculateUserQuota(TenantId, user.Id);
             }
