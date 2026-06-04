@@ -3974,8 +3974,6 @@ public class FileStorageService //: IFileStorageService
 
         entry.NotFoundIfNull();
 
-        requiredAuth = await ResolveRequiredAuthAsync(entry, requiredAuth);
-
         //hack for the form-filling room. return a link to a file with the room key.
         if (share is FileShare.FillForms && entry is File<T>)
         {
@@ -3996,6 +3994,8 @@ public class FileStorageService //: IFileStorageService
         var link = await fileSharing.GetPureSharesAsync(entry, ShareFilterType.PrimaryExternalLink, null, null, 0, 1).FirstOrDefaultAsync();
         if (link == null)
         {
+            requiredAuth = await ResolveRequiredAuthAsync(entry, requiredAuth);
+
             share = entry switch
             {
                 File<T> { IsForm: true, RootFolderType: FolderType.USER } when share != FileShare.Editing && share != FileShare.FillForms => FileShare.Editing,
