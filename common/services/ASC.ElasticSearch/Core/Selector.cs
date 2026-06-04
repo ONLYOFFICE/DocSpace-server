@@ -464,10 +464,41 @@ public class Selector<T>(IServiceProvider serviceProvider)
 
         foreach (var field in fields)
         {
-            qcWildCard = qcWildCard || Wrap(field, (a, w) => w.Wildcard(r => r.Field(a).Value(value)));
+            // For the document content field a leading-wildcard ("*term*") forces a full term-dictionary
+            // scan, which is extremely slow on large content indexes. Drop the leading asterisk so the
+            // query becomes a prefix match ("term*") that can use the inverted index.
+            // Short fields (title/comment/changes) keep the substring behaviour.
+            var fieldValue = IsDocumentContentField(field) ? value.TrimStart('*') : value;
+
+            qcWildCard = qcWildCard || Wrap(field, (a, w) => w.Wildcard(r => r.Field(a).Value(fieldValue)));
         }
 
         return qcWildCard;
+    }
+
+    private static bool IsDocumentContentField(Field field)
+    {
+        if (!string.IsNullOrEmpty(field.Name))
+        {
+            return field.Name.EndsWith("content", StringComparison.OrdinalIgnoreCase);
+        }
+
+        var expression = field.Expression;
+
+        // The field can be passed either as a lambda (x => x.Document.Attachment.Content)
+        // or, when it comes from a "new object[] { ... }" array, as the raw element expression
+        // wrapped in a Convert (boxing to object). Unwrap both forms down to the member access.
+        if (expression is LambdaExpression lambda)
+        {
+            expression = lambda.Body;
+        }
+
+        if (expression is UnaryExpression unary)
+        {
+            expression = unary.Operand;
+        }
+
+        return expression is MemberExpression { Member.Name: "Content" };
     }
 
     private QueryContainer MultiPhrase(Fields fields, string value)
