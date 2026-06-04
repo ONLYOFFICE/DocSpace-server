@@ -52,6 +52,7 @@ import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
+import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -275,5 +276,11 @@ public class OpenAPISchemaConfiguration {
                                                             .example(
                                                                 "6c7cf17b-1bd3-47d5-94c6-be2d3570e168"))))))));
     return new OpenAPI().paths(paths);
+  }
+
+  /** Removes the auto-generated servers section from the OpenAPI spec d */
+  @Bean
+  public OpenApiCustomizer removeServersCustomizer() {
+    return openApi -> openApi.setServers(null);
   }
 }

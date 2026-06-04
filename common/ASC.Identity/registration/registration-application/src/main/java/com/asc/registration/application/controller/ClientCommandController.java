@@ -96,7 +96,10 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(
-    value = "${spring.application.web.api}/clients",
+    value = {
+      "${spring.application.web.api}/oauth2/clients",
+      "${spring.application.web.api}/clients"
+    },
     produces = {MediaType.APPLICATION_JSON_VALUE})
 @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
 public class ClientCommandController {
