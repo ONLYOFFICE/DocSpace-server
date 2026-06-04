@@ -590,7 +590,7 @@ public class EntryManager(IDaoFactory daoFactory,
                 var applyFormStepFilter = room is { FolderType: FolderType.VirtualDataRoom } && parent.ShareRecord is { Share: FileShare.FillForms };
 
                 var applyFfrStartedFormsFilter = room is { FolderType: FolderType.FillingFormsRoom }
-                    && parent.FolderType == FolderType.DEFAULT
+                    && parent.FolderType is FolderType.DEFAULT or FolderType.FillingFormsRoom
                     && parent.ShareRecord is { Share: FileShare.FillForms };
 
                 var filesAdditionalFilter = applyFfrStartedFormsFilter
