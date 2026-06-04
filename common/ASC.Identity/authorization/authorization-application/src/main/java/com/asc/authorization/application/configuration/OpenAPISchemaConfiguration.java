@@ -278,7 +278,7 @@ public class OpenAPISchemaConfiguration {
     return new OpenAPI().paths(paths);
   }
 
-  /** Removes the auto-generated servers section from the OpenAPI spec d */
+  /** Removes the auto-generated servers section from the OpenAPI spec */
   @Bean
   public OpenApiCustomizer removeServersCustomizer() {
     return openApi -> openApi.setServers(null);
