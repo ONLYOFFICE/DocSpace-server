@@ -1324,6 +1324,16 @@ public class EntryManager(IDaoFactory daoFactory,
             return false;
         }
 
+        var draftProperties = await fileDao.GetProperties(linkedFile.Id);
+        if (draftProperties?.FormFilling != null
+            && draftProperties.FormFilling.OriginalFormVersion != 0
+            && draftProperties.FormFilling.OriginalFormVersion != sourceFile.Version)
+        {
+            await linkDao.DeleteLinkAsync(sourceId);
+
+            return false;
+        }
+
         return true;
 
     }
@@ -2112,6 +2122,13 @@ public class EntryManager(IDaoFactory daoFactory,
         var properties = await daoFactory.GetFileDao<T>().GetProperties(file.Id);
         var originalFormId = properties.FormFilling.OriginalFormId;
         var originalForm = await fileDao.GetFileAsync(originalFormId);
+
+        if (originalForm != null
+            && properties.FormFilling.OriginalFormVersion != 0
+            && properties.FormFilling.OriginalFormVersion != originalForm.Version)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FillFormDraftObsolete);
+        }
 
         await using (await distributedLockProvider.TryAcquireFairLockAsync($"fillform_{room.Id}_{originalFormId}"))
         {

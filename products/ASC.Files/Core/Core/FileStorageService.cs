@@ -5308,6 +5308,13 @@ public class FileStorageService //: IFileStorageService
                 }
                 if (room.FolderType == FolderType.FillingFormsRoom)
                 {
+                    if (properties.FormFilling.OriginalFormVersion != 0
+                        && properties.FormFilling.OriginalFormVersion != form.Version)
+                    {
+                        await daoFactory.GetLinkDao<T>().DeleteAllLinkAsync(formId);
+                        properties.FormFilling.IsVersionChanged = true;
+                    }
+
                     properties.FormFilling.StartFilling = true;
                     properties.FormFilling.StartedByUserId = authContext.CurrentAccount.ID;
 
