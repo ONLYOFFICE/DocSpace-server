@@ -1,34 +1,34 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 using Microsoft.Extensions.Hosting;
@@ -92,7 +92,7 @@ public class ProjectConfigurator(
             case "enterprise":
             case "developer":
                 project.WithEnvironment("license:file:path", Path.Combine(basePath, "Data", "license.lic"))
-                       .WithEnvironment("DOTNET_ENVIRONMENT", builder.Configuration["APP_EDITION"]);
+                    .WithEnvironment("DOTNET_ENVIRONMENT", builder.Configuration["APP_EDITION"]);
                 break;
             default:
                 project.WithEnvironment("DOTNET_ENVIRONMENT", builder.Environment.EnvironmentName);
@@ -133,7 +133,7 @@ public class ProjectConfigurator(
             .WithEnvironment("web:hub:internal", new UriBuilder(Uri.UriSchemeHttp, Constants.SocketIoContainer, Constants.SocketIoPort).ToString())
             .WithEnvironment("core:hosting:singletonMode", true.ToString())
             .WithEnvironment("pathToConf", "/buildtools/config/")
-            .WithEnvironment("ai:mcp:0:endpoint",new UriBuilder(Uri.UriSchemeHttp, Constants.DocSpaceMcpContainer, Constants.DocSpaceMcpPort).ToString() + "mcp")
+            .WithEnvironment("ai:mcp:0:endpoint", new UriBuilder(Uri.UriSchemeHttp, Constants.DocSpaceMcpContainer, Constants.DocSpaceMcpPort).ToString() + "mcp")
             .WithArgs($"{dllPath}{name.Replace('_', '.')}.dll")
             .WithEntrypoint("dotnet");
 
@@ -142,7 +142,7 @@ public class ProjectConfigurator(
             case "enterprise":
             case "developer":
                 resourceBuilder.WithEnvironment("license:file:path", "/data/license.lic")
-                               .WithEnvironment("DOTNET_ENVIRONMENT", builder.Configuration["APP_EDITION"]);
+                    .WithEnvironment("DOTNET_ENVIRONMENT", builder.Configuration["APP_EDITION"]);
                 break;
             default:
                 resourceBuilder.WithEnvironment("DOTNET_ENVIRONMENT", builder.Environment.EnvironmentName);
@@ -172,12 +172,7 @@ public class ProjectConfigurator(
         connectionManager.AddBaseConfig(resourceBuilder, isDocker);
         connectionManager.AddWaitFor(resourceBuilder);
 
-        var otlEnvs = new Dictionary<string, string>
-        {
-            {"OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EXCEPTION_LOG_ATTRIBUTES", "true" },
-            {"OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EVENT_LOG_ATTRIBUTES", "true"},
-            {"OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY", "in_memory"}
-        };
+        var otlEnvs = new Dictionary<string, string> { { "OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EXCEPTION_LOG_ATTRIBUTES", "true" }, { "OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EVENT_LOG_ATTRIBUTES", "true" }, { "OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY", "in_memory" } };
 
         if (resourceBuilder.ApplicationBuilder.ExecutionContext.IsRunMode && resourceBuilder.ApplicationBuilder.Environment.IsDevelopment())
         {
@@ -256,7 +251,7 @@ public class ProjectConfigurator(
                 .WithImageTag("dev")
                 .WithEnvironment("log:dir", "/logs")
                 .WithEnvironment("log:name", "ssoAuth")
-                .WithEnvironment("API_HOST",  new UriBuilder(Uri.UriSchemeHttp, Constants.OpenRestyContainer, Constants.RestyPort).ToString())
+                .WithEnvironment("API_HOST", new UriBuilder(Uri.UriSchemeHttp, Constants.OpenRestyContainer, Constants.RestyPort).ToString())
                 .WithEnvironment("app:appsettings", "/buildtools/config")
                 .WithHttpEndpoint(port, port, isProxied: false)
                 .WithHttpHealthCheck("/health")
@@ -321,6 +316,7 @@ public class ProjectConfigurator(
             .WithEnvironment("log:name", "identity.registration")
             .WithEnvironment("SERVER_PORT", Constants.IdentityRegistrationPort.ToString())
             .WithEnvironment("SPRING_PROFILES_ACTIVE", "dev,server")
+            .WithEnvironment("SPRING_APPLICATION_SIGNATURE_SECRET", builder.Configuration["core:machinekey"])
             .WithEnvironment("SPRING_APPLICATION_NAME", "ASC.Identity.Registration")
             .WithEnvironment("GRPC_CLIENT_AUTHORIZATION_ADDRESS", new UriBuilder("static", Constants.IdentityAuthorizationContainer, 9999).ToString())
             .WithHttpEndpoint(Constants.IdentityRegistrationPort, Constants.IdentityRegistrationPort, isProxied: false)
@@ -336,6 +332,7 @@ public class ProjectConfigurator(
             .WithEnvironment("log:name", "identity.authorization")
             .WithEnvironment("SERVER_PORT", Constants.IdentityAuthorizationPort.ToString())
             .WithEnvironment("SPRING_PROFILES_ACTIVE", "dev,server")
+            .WithEnvironment("SPRING_APPLICATION_SIGNATURE_SECRET", builder.Configuration["core:machinekey"])
             .WithEnvironment("SPRING_APPLICATION_NAME", "ASC.Identity.Authorization")
             .WithEnvironment("GRPC_CLIENT_AUTHORIZATION_ADDRESS", new UriBuilder("static", Constants.IdentityRegistrationContainer, 8888).ToString())
             .WithHttpEndpoint(Constants.IdentityAuthorizationPort, Constants.IdentityAuthorizationPort, isProxied: false)
