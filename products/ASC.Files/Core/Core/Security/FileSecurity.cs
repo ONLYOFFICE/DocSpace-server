@@ -74,6 +74,8 @@ public class FileSecurity(
 
     public static readonly HashSet<FileShare> PaidShares = [FileShare.RoomManager];
     private static HashSet<FileShare> DefaultFileAccess => [FileShare.Editing, FileShare.FillForms, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.None];
+    private static bool IsFillFormsRoom(FolderType? roomType) =>
+        roomType is FolderType.FillingFormsRoom or FolderType.VirtualDataRoom or FolderType.USER;
     private static readonly FrozenDictionary<SubjectType, HashSet<FileShare>> _defaultFileShareDictionary = new Dictionary<SubjectType, HashSet<FileShare>>
     {
         { SubjectType.ExternalLink, DefaultFileAccess },
@@ -1590,6 +1592,12 @@ public class FileSecurity(
                     }
 
                     var fileFolder = parentFolders.FirstOrDefault(r => r.IsRoom);
+
+                    if (action == FilesSecurityActions.FillForms && !IsFillFormsRoom(fileFolder?.FolderType))
+                    {
+                        return false;
+                    }
+
                     if (fileFolder is { FolderType: FolderType.VirtualDataRoom } && !userId.Equals(ASC.Core.Configuration.Constants.Guest.ID))
                     {
                         var (currentStep, myRoles) = await cacheFileDao.GetUserFormRoles(file.Id, userId);
@@ -3320,7 +3328,7 @@ public class FileSecurity(
                 switch (s)
                 {
                     case FileShare.Editing when (file.IsForm && parentRoomType != FolderType.FillingFormsRoom || !file.IsForm) && canEdit:
-                    case FileShare.FillForms when file.IsForm:
+                    case FileShare.FillForms when file.IsForm && IsFillFormsRoom(parentRoomType):
                     case FileShare.CustomFilter when !file.IsForm && canCustomFiltering:
                     case FileShare.Comment when !file.IsForm && canComment:
                     case FileShare.Review when !file.IsForm && canReview:
@@ -3357,6 +3365,8 @@ public class FileSecurity(
             }
         }
 
+        var fillFormsAllowed = IsFillFormsRoom(parentRoomType);
+
         foreach (var subjectType in Enum.GetValues<SubjectType>())
         {
             if (!parentRoomType.HasValue ||
@@ -3368,7 +3378,7 @@ public class FileSecurity(
 
             List<FileShare> sharesToAdd = [];
 
-            foreach (var s in shares.Where(r => parentRoomType == FolderType.FillingFormsRoom || r != FileShare.FillForms))
+            foreach (var s in shares.Where(r => fillFormsAllowed || r != FileShare.FillForms))
             {
                 if (s is FileShare.None)
                 {
