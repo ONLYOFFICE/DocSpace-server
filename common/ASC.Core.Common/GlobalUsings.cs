@@ -169,6 +169,8 @@ global using Polly.Retry;
 
 global using ProtoBuf;
 
+global using Refit;
+
 global using Riok.Mapperly.Abstractions;
 
 global using Telegram.Bot;

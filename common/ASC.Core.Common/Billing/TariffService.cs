@@ -1202,8 +1202,12 @@ public class TariffService(
             try
             {
                 var portalId = await coreSettings.GetKeyAsync(tenantId);
-                balance = await accountingClient.GetCustomerBalanceAsync(portalId, true);
+                balance = await accountingClient.GetCustomerBalanceAsync(portalId);
                 await hybridCache.SetAsync(cacheKey, balance, TimeSpan.FromMinutes(10));
+            }
+            catch (AccountingCustomerNotFoundException exception)
+            {
+                logger.DebugAccountingTenant(tenantId.ToString(), exception.Message);
             }
             catch (Exception error)
             {
@@ -1243,8 +1247,12 @@ public class TariffService(
             try
             {
                 var portalId = await coreSettings.GetKeyAsync(tenantId);
-                balance = await accountingClient.GetCustomerAiBalanceAsync(portalId, true);
+                balance = await accountingClient.GetCustomerAiBalanceAsync(portalId);
                 await hybridCache.SetAsync(cacheKey, balance, TimeSpan.FromMinutes(10));
+            }
+            catch (AccountingCustomerNotFoundException exception)
+            {
+                logger.DebugAccountingTenant(tenantId.ToString(), exception.Message);
             }
             catch (Exception error)
             {
@@ -1308,11 +1316,16 @@ public class TariffService(
 
             return await accountingClient.GetCustomerOperationsAsync(portalId, filter, isAiService);
         }
+        catch (AccountingCustomerNotFoundException exception)
+        {
+            logger.DebugAccountingTenant(tenantId.ToString(), exception.Message);
+        }
         catch (Exception error)
         {
             LogError(error, tenantId.ToString());
-            return null;
         }
+
+        return null;
     }
 
     public async Task<List<Currency>> GetAllAccountingCurrenciesAsync()

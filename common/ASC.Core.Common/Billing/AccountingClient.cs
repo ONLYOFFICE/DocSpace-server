@@ -31,8 +31,6 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using System.Collections.Specialized;
-
 using ASC.Web.Core.Users;
 
 namespace ASC.Core.Billing;
@@ -45,21 +43,11 @@ public class AccountingClient
     private readonly AccountingConfiguration _configuration;
     private readonly ICache _cache;
     private readonly IHttpClientFactory _httpClientFactory;
+    private readonly RefitSettings _refitSettings;
 
     internal const string HttpClientName = "accountingHttpClient";
     internal const string ResiliencePipelineName = "accountingResiliencePipeline";
     internal const string BalanceResiliencePipelineName = "balanceResiliencePipeline";
-
-    private readonly JsonSerializerOptions _deserializationOptions = new()
-    {
-        PropertyNameCaseInsensitive = true
-    };
-
-    private readonly JsonSerializerOptions _serializationOptions = new()
-    {
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-    };
 
     public AccountingClient(IConfiguration configuration, ICache cache, IHttpClientFactory httpClientFactory)
     {
@@ -78,85 +66,96 @@ public class AccountingClient
         {
             Configured = true;
         }
+
+        _refitSettings = new RefitSettings
+        {
+            ContentSerializer = new SystemTextJsonContentSerializer(new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            }),
+            ExceptionFactory = CreateExceptionAsync
+        };
+    }
+
+    // Because AccountingClient is a [Singleton], it must not capture a Refit typed-client (it would freeze a single
+    // HttpClient for the whole app lifetime - a captive dependency that defeats IHttpClientFactory handler rotation).
+    // Instead, build the Refit client per call so the underlying HttpClient (and its handler chain) is taken fresh from
+    // the factory, preserving handler rotation. The settings instance is reused.
+    private IAccountingApi CreateApi()
+    {
+        return RestService.For<IAccountingApi>(_httpClientFactory.CreateClient(HttpClientName), _refitSettings);
     }
 
 
-    public async Task<Balance> GetCustomerBalanceAsync(string portalId, bool addPolicy = false)
+    public async Task<Balance> GetCustomerBalanceAsync(string portalId)
     {
-        return await RequestAsync<Balance>(HttpMethod.Get, $"/customer/{portalId}/balance", addPolicy: addPolicy);
+        EnsureConfigured();
+
+        return await CreateApi().GetCustomerBalanceAsync(portalId);
     }
 
-    public async Task<Balance> GetCustomerAiBalanceAsync(string portalId, bool addPolicy = false)
+    public async Task<Balance> GetCustomerAiBalanceAsync(string portalId)
     {
-        return await RequestAsync<Balance>(HttpMethod.Get, $"/customer/{portalId}/balance/ai", addPolicy: addPolicy);
+        EnsureConfigured();
+
+        return await CreateApi().GetCustomerAiBalanceAsync(portalId);
     }
 
     public async Task<Session> OpenCustomerSessionAsync(string portalId, string serviceName, string externalRef,
         int quantity, int duration)
     {
-        var data = new SessionOpenOperation(portalId, serviceName, externalRef, quantity, duration);
+        EnsureConfigured();
 
-        var jsonBody = JsonSerializer.Serialize(data, _serializationOptions);
-
-        return await RequestAsync<Session>(HttpMethod.Post, "/session/open", jsonBody: jsonBody);
+        return await CreateApi().OpenCustomerSessionAsync(new SessionOpenOperation(portalId, serviceName, externalRef, quantity, duration));
     }
 
     public async Task CloseCustomerSessionAsync(int sessionId)
     {
-        var queryParams = new NameValueCollection
-        {
-            { "sessionId", sessionId.ToString() }
-        };
+        EnsureConfigured();
 
-        _ = await RequestAsync<string>(HttpMethod.Put, $"/session/close", queryParams);
+        await CreateApi().CloseCustomerSessionAsync(sessionId);
     }
 
     public async Task<Session> ExtendCustomerSessionAsync(int sessionId, int duration)
     {
-        var queryParams = new NameValueCollection
-        {
-            { "sessionId", sessionId.ToString() },
-            { "duration", duration.ToString() }
-        };
+        EnsureConfigured();
 
-        return await RequestAsync<Session>(HttpMethod.Put, $"/session/extend", queryParams);
+        return await CreateApi().ExtendCustomerSessionAsync(sessionId, duration);
     }
 
     public async Task CompleteCustomerSessionAsync(string portalId, string serviceName, int sessionId, int quantity,
         string customerParticipantName, Dictionary<string, string> metadata = null)
     {
-        var data = new SessionCompleteOperation(portalId, serviceName, sessionId, quantity, customerParticipantName,
-            metadata);
+        EnsureConfigured();
 
-        var jsonBody = JsonSerializer.Serialize(data, _serializationOptions);
-
-        _ = await RequestAsync<string>(HttpMethod.Post, "/operation/sessionComplete", jsonBody: jsonBody);
+        await CreateApi().CompleteCustomerSessionAsync(new SessionCompleteOperation(portalId, serviceName, sessionId, quantity,
+            customerParticipantName, metadata));
     }
 
     public async Task<ServicePayment> MakeAiCreditAsync(string portalId, decimal amount, string currency,
         string customerParticipantName, Dictionary<string, string> metadata = null)
     {
-        var data = new AiCreditOperation(portalId, (double)amount, currency, customerParticipantName, metadata);
+        EnsureConfigured();
 
-        var jsonBody = JsonSerializer.Serialize(data, _serializationOptions);
-
-        return await RequestAsync<ServicePayment>(HttpMethod.Post, "/operation/AiCredit", jsonBody: jsonBody);
+        return await CreateApi().MakeAiCreditAsync(new AiCreditOperation(portalId, (double)amount, currency, customerParticipantName, metadata));
     }
 
     public async Task<Report> GetCustomerOperationsAsync(string portalId, OperationFilter filter, bool isAiService)
     {
-        var queryParams = FilterToNameValueCollection(filter);
+        EnsureConfigured();
 
-        var path = isAiService
-            ? $"/customer/{portalId}/operations/ai"
-            : $"/customer/{portalId}/operations";
+        var queryParams = FilterToQueryParams(filter);
 
-        return await RequestAsync<Report>(HttpMethod.Get, path, queryParams);
+        return isAiService
+            ? await CreateApi().GetCustomerAiOperationsAsync(portalId, queryParams)
+            : await CreateApi().GetCustomerOperationsAsync(portalId, queryParams);
     }
 
-    private static NameValueCollection FilterToNameValueCollection(OperationFilter filter)
+    private static Dictionary<string, string> FilterToQueryParams(OperationFilter filter)
     {
-        var queryParams = new NameValueCollection();
+        var queryParams = new Dictionary<string, string>();
 
         if (filter.UtcStartDate != null)
         {
@@ -227,7 +226,9 @@ public class AccountingClient
         var result = _cache.Get<List<Currency>>(key);
         if (result == null)
         {
-            result = await RequestAsync<List<Currency>>(HttpMethod.Get, "/currency/all");
+            EnsureConfigured();
+
+            result = await CreateApi().GetAllCurrenciesAsync();
             _cache.Insert(key, result, DateTime.Now.AddDays(1));
         }
         return result;
@@ -240,7 +241,9 @@ public class AccountingClient
 
     public async Task<ServiceInfo> GetServiceInfoAsync(string serviceName)
     {
-        return await RequestAsync<ServiceInfo>(HttpMethod.Get, $"/service/{serviceName}/name");
+        EnsureConfigured();
+
+        return await CreateApi().GetServiceInfoAsync(serviceName);
     }
 
     public async Task<Dictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync(string partnerId, List<string> serviceNames)
@@ -278,102 +281,36 @@ public class AccountingClient
         return result;
     }
 
-    private async Task<T> RequestAsync<T>(HttpMethod httpMethod, string path, NameValueCollection queryParams = null, string jsonBody = null, bool addPolicy = false)
+    private void EnsureConfigured()
     {
         if (!Configured)
         {
             throw new AccountingNotConfiguredException();
         }
-
-        var uriBuilder = new UriBuilder(_configuration.Url + path);
-
-        if (queryParams != null)
-        {
-            var query = HttpUtility.ParseQueryString(string.Empty);
-
-            foreach (string key in queryParams)
-            {
-                foreach (var value in queryParams.GetValues(key) ?? [])
-                {
-                    query.Add(key, value);
-                }
-            }
-
-            uriBuilder.Query = query.ToString();
-        }
-
-        using var request = new HttpRequestMessage(httpMethod, uriBuilder.Uri);
-
-        if (!string.IsNullOrEmpty(_configuration.Key))
-        {
-            request.Headers.Add("Authorization", CreateAuthToken(_configuration.Key, _configuration.Secret));
-        }
-
-        var httpClient = _httpClientFactory.CreateClient(addPolicy ? HttpClientName : "");
-        httpClient.Timeout = TimeSpan.FromMilliseconds(60000);
-
-        if (!string.IsNullOrEmpty(jsonBody))
-        {
-            request.Content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
-        }
-
-        try
-        {
-            using var response = await httpClient.SendAsync(request);
-
-            var responseString = await response.Content.ReadAsStringAsync();
-
-            if (!response.IsSuccessStatusCode)
-            {
-                if (response.StatusCode == HttpStatusCode.PaymentRequired)
-                {
-                    throw new AccountingPaymentRequiredException();
-                }
-
-                if (response.StatusCode == HttpStatusCode.BadRequest &&
-                    responseString.Contains("not found", StringComparison.OrdinalIgnoreCase))
-                {
-                    throw new AccountingCustomerNotFoundException();
-                }
-
-                throw new Exception($"Accounting request failed with status code {response.StatusCode} {responseString}");
-            }
-
-            if (typeof(T) == typeof(string))
-            {
-                return (T)(object)responseString;
-            }
-
-            if (string.IsNullOrEmpty(responseString))
-            {
-                throw new Exception("Accounting responseString is null or empty");
-            }
-
-            var result = JsonSerializer.Deserialize<T>(responseString, _deserializationOptions);
-
-            return result;
-        }
-        catch (AccountingPaymentRequiredException)
-        {
-            throw;
-        }
-        catch (AccountingCustomerNotFoundException)
-        {
-            throw;
-        }
-        catch (Exception ex)
-        {
-            throw new AccountingException(ex.Message, ex);
-        }
     }
 
-    private static string CreateAuthToken(string pkey, string machinekey)
+    // Maps non-success responses to the domain exceptions the callers expect (payment required / customer not found),
+    // and wraps any other failure into AccountingException with the status code and response body.
+    private static async Task<Exception> CreateExceptionAsync(HttpResponseMessage response)
     {
-        using var hasher = new HMACSHA1(Encoding.UTF8.GetBytes(machinekey));
-        var now = DateTime.UtcNow.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture);
-        var hash = WebEncoders.Base64UrlEncode(hasher.ComputeHash(Encoding.UTF8.GetBytes(string.Join("\n", now, pkey))));
+        if (response.IsSuccessStatusCode)
+        {
+            return null;
+        }
 
-        return $"ASC {pkey}:{now}:{hash}";
+        if (response.StatusCode == HttpStatusCode.PaymentRequired)
+        {
+            return new AccountingPaymentRequiredException();
+        }
+
+        var content = await response.Content.ReadAsStringAsync();
+        if (response.StatusCode == HttpStatusCode.BadRequest &&
+            content.Contains("not found", StringComparison.OrdinalIgnoreCase))
+        {
+            return new AccountingCustomerNotFoundException();
+        }
+
+        return new AccountingException($"Accounting request failed with status code {response.StatusCode} {content}");
     }
 }
 
@@ -905,14 +842,14 @@ public class ServicePayment
     public DateTime? EndDate { get; init; }
 }
 
-file record SessionOpenOperation(
+public record SessionOpenOperation(
     string CustomerName,
     string ServiceName,
     string ExternalRef,
     int Quantity,
     int Duration);
 
-file record SessionCompleteOperation(
+public record SessionCompleteOperation(
     string CustomerName,
     string ServiceName,
     int SessionId,
@@ -920,7 +857,7 @@ file record SessionCompleteOperation(
     string CustomerParticipantName,
     Dictionary<string, string> Metadata);
 
-file record AiCreditOperation(
+public record AiCreditOperation(
     string CustomerName,
     double Sum,
     string Currency,
@@ -931,7 +868,24 @@ public static class AccountingHttpClientExtension
 {
     public static void AddAccountingHttpClient(this IServiceCollection services)
     {
-        services.AddHttpClient(AccountingClient.HttpClientName)
+        services.AddTransient<AccountingAuthHandler>();
+
+        services.AddHttpClient(AccountingClient.HttpClientName, (sp, client) =>
+            {
+                var url = (sp.GetRequiredService<IConfiguration>().GetSection("core:accounting").Get<AccountingConfiguration>()?.Url ?? "")
+                    .Trim()
+                    .TrimEnd('/');
+
+                if (!string.IsNullOrEmpty(url))
+                {
+                    // No trailing slash: Refit appends its leading-slash method paths to the base path, so a configured
+                    // sub-path (e.g. https://host/api) is preserved -> https://host/api/customer/... with a single slash.
+                    client.BaseAddress = new Uri(url);
+                }
+
+                client.Timeout = TimeSpan.FromMilliseconds(60000);
+            })
+            .AddHttpMessageHandler<AccountingAuthHandler>()
             .SetHandlerLifetime(TimeSpan.FromMinutes(5))
             .AddResilienceHandler(AccountingClient.ResiliencePipelineName, builder =>
             {
@@ -940,10 +894,29 @@ public static class AccountingHttpClientExtension
                     MaxRetryAttempts = 2,
                     Delay = TimeSpan.FromSeconds(1),
                     BackoffType = DelayBackoffType.Exponential,
-                    ShouldHandle = new PredicateBuilder<HttpResponseMessage>()
-                        .Handle<HttpRequestException>()
-                        .Handle<TaskCanceledException>()
-                        .HandleResult(response => !response.IsSuccessStatusCode)
+                    ShouldHandle = async args =>
+                    {
+                        // Retry only idempotent GET requests on a non-success response. POST/PUT are never retried to
+                        // avoid duplicating accounting operations (payments, sessions); transient errors that require
+                        // stronger retries (e.g. balance refresh after a deposit) are handled by the balance pipeline.
+                        var response = args.Outcome.Result;
+                        if (response is null || response.IsSuccessStatusCode || response.RequestMessage?.Method != HttpMethod.Get)
+                        {
+                            return false;
+                        }
+
+                        // "Customer not found" is a definitive result, not a transient error - retrying won't change it.
+                        if (response.StatusCode == HttpStatusCode.BadRequest)
+                        {
+                            var content = await response.Content.ReadAsStringAsync();
+                            if (content.Contains("not found", StringComparison.OrdinalIgnoreCase))
+                            {
+                                return false;
+                            }
+                        }
+
+                        return true;
+                    }
                 });
             });
 
