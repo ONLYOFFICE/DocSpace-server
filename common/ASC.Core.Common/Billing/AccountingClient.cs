@@ -38,7 +38,7 @@ namespace ASC.Core.Billing;
 [Singleton]
 public class AccountingClient
 {
-    public readonly bool Configured;
+    public bool Configured { get; }
 
     private readonly AccountingConfiguration _configuration;
     private readonly ICache _cache;
