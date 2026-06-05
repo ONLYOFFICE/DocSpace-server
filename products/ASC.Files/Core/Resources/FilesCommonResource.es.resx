@@ -589,4 +589,10 @@
   <data name="ErrorMessage_AiServicesDisabled" xml:space="preserve">
     <value>Los servicios de IA están desactivados para el portal actual</value>
   </data>
+  <data name="ErrorMessage_ExternalDbNotIndexed" xml:space="preserve">
+    <value>La tabla de la base de datos se creará tras el primer envío del formulario. Aún no hay datos para generar su estructura.</value>
+  </data>
+  <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
+    <value>Error al sincronizar los datos del formulario con la base de datos externa.</value>
+  </data>
 </root>

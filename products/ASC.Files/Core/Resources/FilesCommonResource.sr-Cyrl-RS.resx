@@ -589,4 +589,10 @@
   <data name="ErrorMessage_AiServicesDisabled" xml:space="preserve">
     <value>ВИ услуге су онемогућене за тренутни портал</value>
   </data>
+  <data name="ErrorMessage_ExternalDbNotIndexed" xml:space="preserve">
+    <value>Табела базе података биће креирана након прве подношења обрасца. Још нема података за генерисање њене структуре.</value>
+  </data>
+  <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
+    <value>Није успела синхронизација података обрасца са спољном базом података.</value>
+  </data>
 </root>

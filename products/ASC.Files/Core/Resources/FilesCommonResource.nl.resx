@@ -589,4 +589,10 @@ Het beste geschikt voor docx, xlsx, pptx.</value>
   <data name="ErrorMessage_AiServicesDisabled" xml:space="preserve">
     <value>AI-services zijn uitgeschakeld voor het huidige portaal</value>
   </data>
+  <data name="ErrorMessage_ExternalDbNotIndexed" xml:space="preserve">
+    <value>De databasetabel wordt aangemaakt na de eerste formulierinzending. Er zijn nog geen gegevens om de structuur te genereren.</value>
+  </data>
+  <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
+    <value>Synchronisatie van formuliergegevens met externe database mislukt.</value>
+  </data>
 </root>

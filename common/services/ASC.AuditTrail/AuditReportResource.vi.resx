@@ -1188,4 +1188,16 @@
   <data name="ScheduledBackupDeleted" xml:space="preserve">
     <value>Sao lưu theo lịch đã bị xóa</value>
   </data>
+  <data name="DocumentsExternalShareSettingsUpdated" xml:space="preserve">
+    <value>Cài đặt quyền truy cập cho các liên kết bên ngoài đã được cập nhật</value>
+  </data>
+  <data name="UserLogoutActiveConnection" xml:space="preserve">
+    <value>Kết nối đang hoạt động đã đăng xuất: {0}</value>
+  </data>
+  <data name="UserLogoutActiveConnections" xml:space="preserve">
+    <value>Các kết nối đang hoạt động đã đăng xuất: {0}</value>
+  </data>
+  <data name="UserLogoutActiveConnectionsForUser" xml:space="preserve">
+    <value>Các kết nối đang hoạt động của người dùng đã đăng xuất: {0}</value>
+  </data>
 </root>

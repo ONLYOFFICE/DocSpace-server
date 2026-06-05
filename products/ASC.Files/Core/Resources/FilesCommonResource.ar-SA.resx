@@ -589,4 +589,10 @@
   <data name="ErrorMessage_AiServicesDisabled" xml:space="preserve">
     <value>خدمات الذكاء الاصطناعي معطلة للبوابة الحالية</value>
   </data>
+  <data name="ErrorMessage_ExternalDbNotIndexed" xml:space="preserve">
+    <value>سيتم إنشاء جدول قاعدة البيانات بعد أول إرسال للنموذج. لا توجد بيانات بعد لإنشاء هيكله.</value>
+  </data>
+  <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
+    <value>فشل مزامنة بيانات النموذج مع قاعدة البيانات الخارجية.</value>
+  </data>
 </root>

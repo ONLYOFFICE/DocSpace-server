@@ -589,4 +589,10 @@
   <data name="ErrorMessage_AiServicesDisabled" xml:space="preserve">
     <value>AI услугите са деактивирани за текущия портал</value>
   </data>
+  <data name="ErrorMessage_ExternalDbNotIndexed" xml:space="preserve">
+    <value>Таблицата в базата данни ще бъде създадена след първото подаване на формуляр. Все още няма данни за генериране на нейната структура.</value>
+  </data>
+  <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
+    <value>Неуспешна синхронизация на данните от формуляра с външната база данни.</value>
+  </data>
 </root>

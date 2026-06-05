@@ -1143,4 +1143,67 @@
   <data name="AIDefaultProviderSet" xml:space="preserve">
     <value>已设置默认 AI 提供商：名称：{0}，默认模型：{1}</value>
   </data>
+  <data name="BackupCancelled" xml:space="preserve">
+    <value>备份已取消</value>
+  </data>
+  <data name="DocumentsDefaultTemplatesSettingsUpdated" xml:space="preserve">
+    <value>默认模板设置已更新：{0}</value>
+  </data>
+  <data name="DocumentsExternalShareSettingsUpdated" xml:space="preserve">
+    <value>外部链接的访问设置已更新</value>
+  </data>
+  <data name="UserLogoutActiveConnection" xml:space="preserve">
+    <value>活动连接已退出登录：{0}</value>
+  </data>
+  <data name="UserLogoutActiveConnections" xml:space="preserve">
+    <value>活动连接已退出登录：{0}</value>
+  </data>
+  <data name="UserLogoutActiveConnectionsForUser" xml:space="preserve">
+    <value>用户的活动连接已退出登录：{0}</value>
+  </data>
+  <data name="FileNotSavedDueToRoomQuota" xml:space="preserve">
+    <value>房间 [{0}]。文件未保存：{1} – 已超出房间存储配额。</value>
+  </data>
+  <data name="FileNotSavedDueToUserQuota" xml:space="preserve">
+    <value>用户 [{0}]。文件未保存：{1} – 已超出用户存储配额。</value>
+  </data>
+  <data name="FileSavedButRoomQuotaExceeded" xml:space="preserve">
+    <value>房间 [{0}]。文件已更新：{1}，已超出房间存储配额。</value>
+  </data>
+  <data name="FileSavedButUserQuotaExceeded" xml:space="preserve">
+    <value>用户 [{0}]。文件已更新：{1}，已超出用户存储配额。</value>
+  </data>
+  <data name="InvitationSettingsUpdated" xml:space="preserve">
+    <value>邀请设置已更新</value>
+  </data>
+  <data name="IPRestrictionsSettingsUpdated" xml:space="preserve">
+    <value>IP 安全设置已更新</value>
+  </data>
+  <data name="LoginSettingsUpdated" xml:space="preserve">
+    <value>暴力破解保护设置已更新</value>
+  </data>
+  <data name="RestoreCancelled" xml:space="preserve">
+    <value>恢复已取消</value>
+  </data>
+  <data name="RestoreStarted" xml:space="preserve">
+    <value>恢复已开始</value>
+  </data>
+  <data name="ScheduledBackupDeleted" xml:space="preserve">
+    <value>计划备份已删除</value>
+  </data>
+  <data name="WhiteLabelAdditionalSettingsUpdated" xml:space="preserve">
+    <value>附加品牌设置已更新</value>
+  </data>
+  <data name="WhiteLabelCompanySettingsUpdated" xml:space="preserve">
+    <value>公司信息设置已更新</value>
+  </data>
+  <data name="WhiteLabelMailSettingsUpdated" xml:space="preserve">
+    <value>邮件设置已更新</value>
+  </data>
+  <data name="WhiteLabelSettingsLogosUpdated" xml:space="preserve">
+    <value>Logo设置已更新</value>
+  </data>
+  <data name="WhiteLabelSettingsLogoTextUpdated" xml:space="preserve">
+    <value>品牌名称已更新</value>
+  </data>
 </root>

@@ -589,4 +589,10 @@ Visaugstākā saderība ar docx, xlsx, pptx.</value>
   <data name="ErrorMessage_AiServicesDisabled" xml:space="preserve">
     <value>MI pakalpojumi ir atspējoti pašreizējam portālam</value>
   </data>
+  <data name="ErrorMessage_ExternalDbNotIndexed" xml:space="preserve">
+    <value>Datubāzes tabula tiks izveidota pēc pirmās veidlapas iesniegšanas. Vēl nav datu tās struktūras ģenerēšanai.</value>
+  </data>
+  <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
+    <value>Neizdevās sinhronizēt veidlapas datus ar ārējo datubāzi.</value>
+  </data>
 </root>
