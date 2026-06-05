@@ -916,6 +916,107 @@ public class PaymentController(
     }
 
     /// <remarks>
+    /// Returns the customer spending aggregated per calendar month from the accounting service.
+    /// </remarks>
+    /// <summary>
+    /// Get the customer monthly usage
+    /// </summary>
+    /// <path>api/2.0/portal/payment/customer/usage/monthly</path>
+    /// <collection>list</collection>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The customer monthly usage", typeof(IEnumerable<CustomerMonthlyUsageDto>))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [HttpGet("customer/usage/monthly")]
+    public async Task<List<CustomerMonthlyUsageDto>> GetCustomerMonthlyUsage([FromQuery] CustomerMonthlyUsageRequestDto inDto)
+    {
+        if (!tariffService.IsConfigured())
+        {
+            throw new InvalidOperationException("Tariff service is not configured");
+        }
+
+        await DemandAdminAsync();
+
+        var tenant = tenantManager.GetCurrentTenant();
+
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+        if (customerInfo == null)
+        {
+            return null;
+        }
+
+        var utcStartDate = tenantUtil.DateTimeToUtc(inDto.StartDate ?? tenant.CreationDateTime);
+        var utcEndDate = tenantUtil.DateTimeToUtc(inDto.EndDate ?? DateTime.UtcNow);
+
+        var usage = await tariffService.GetCustomerMonthlyUsageAsync(tenant.Id, utcStartDate, utcEndDate);
+        if (usage == null)
+        {
+            return null;
+        }
+
+        return usage.Select(u => new CustomerMonthlyUsageDto(u)).ToList();
+    }
+
+    /// <remarks>
+    /// Returns the customer usage statistics aggregated per service from the accounting service.
+    /// </remarks>
+    /// <summary>
+    /// Get the customer service usage
+    /// </summary>
+    /// <path>api/2.0/portal/payment/customer/usage</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The customer service usage", typeof(CustomerServiceUsageReportDto))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(404, "Service could not be found")]
+    [HttpGet("customer/usage")]
+    public async Task<CustomerServiceUsageReportDto> GetCustomerServiceUsage([FromQuery] CustomerServiceUsageRequestDto inDto)
+    {
+        if (!tariffService.IsConfigured())
+        {
+            throw new InvalidOperationException("Tariff service is not configured");
+        }
+
+        await DemandAdminAsync();
+
+        var tenant = tenantManager.GetCurrentTenant();
+
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+        if (customerInfo == null)
+        {
+            return null;
+        }
+
+        if (!string.IsNullOrEmpty(inDto.ServiceName))
+        {
+            await CheckWalletServiceName(inDto.ServiceName);
+        }
+
+        var utcStartDate = tenantUtil.DateTimeToUtc(inDto.StartDate ?? tenant.CreationDateTime);
+        var utcEndDate = tenantUtil.DateTimeToUtc(inDto.EndDate ?? DateTime.UtcNow);
+
+        var filter = new UsageFilter
+        {
+            ServiceName = inDto.ServiceName,
+            ParticipantName = inDto.ParticipantName,
+            Status = inDto.Status,
+            UtcStartDate = utcStartDate,
+            UtcEndDate = utcEndDate,
+            Metadata = inDto.Metadata,
+            Offset = inDto.Offset,
+            Limit = inDto.Limit,
+            OrderBy = inDto.OrderBy,
+            OrderType = inDto.OrderType
+        };
+
+        var report = await tariffService.GetCustomerServiceUsageAsync(tenant.Id, filter);
+        if (report == null)
+        {
+            return null;
+        }
+
+        return new CustomerServiceUsageReportDto(report);
+    }
+
+    /// <remarks>
     /// Starts generating a customer operations report as an "xlsx" file and saves it in Documents.
     /// </remarks>
     /// <summary>

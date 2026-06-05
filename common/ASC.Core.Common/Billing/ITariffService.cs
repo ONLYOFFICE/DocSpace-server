@@ -59,6 +59,8 @@ public interface ITariffService
     Task<bool> CompleteCustomerSessionAsync(int tenantId, string serviceName, int sessionId, int quantity, string customerParticipantName, Dictionary<string, string> metadata = null);
     Task<ServicePayment> MakeAiCreditAsync(int tenantId, decimal amount, string currency, string customerParticipantName, Dictionary<string, string> metadata = null);
     Task<Report> GetCustomerOperationsAsync(int tenantId, OperationFilter filter);
+    Task<List<CustomerMonthlyUsage>> GetCustomerMonthlyUsageAsync(int tenantId, DateTime? utcStartDate, DateTime? utcEndDate);
+    Task<UsageReport> GetCustomerServiceUsageAsync(int tenantId, UsageFilter filter);
     Task<List<Currency>> GetAllAccountingCurrenciesAsync();
     List<string> GetSupportedAccountingCurrencies();
 

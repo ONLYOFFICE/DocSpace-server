@@ -1315,6 +1315,36 @@ public class TariffService(
         }
     }
 
+    public async Task<List<CustomerMonthlyUsage>> GetCustomerMonthlyUsageAsync(int tenantId, DateTime? utcStartDate, DateTime? utcEndDate)
+    {
+        try
+        {
+            var portalId = await coreSettings.GetKeyAsync(tenantId);
+
+            return await accountingClient.GetCustomerMonthlyUsageAsync(portalId, utcStartDate, utcEndDate);
+        }
+        catch (Exception error)
+        {
+            LogError(error, tenantId.ToString());
+            return null;
+        }
+    }
+
+    public async Task<UsageReport> GetCustomerServiceUsageAsync(int tenantId, UsageFilter filter)
+    {
+        try
+        {
+            var portalId = await coreSettings.GetKeyAsync(tenantId);
+
+            return await accountingClient.GetCustomerServiceUsageAsync(portalId, filter);
+        }
+        catch (Exception error)
+        {
+            LogError(error, tenantId.ToString());
+            return null;
+        }
+    }
+
     public async Task<List<Currency>> GetAllAccountingCurrenciesAsync()
     {
         return await accountingClient.GetAllCurrenciesAsync();

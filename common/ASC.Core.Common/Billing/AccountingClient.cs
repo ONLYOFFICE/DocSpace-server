@@ -154,6 +154,90 @@ public class AccountingClient
         return await RequestAsync<Report>(HttpMethod.Get, path, queryParams);
     }
 
+    public async Task<List<CustomerMonthlyUsage>> GetCustomerMonthlyUsageAsync(string portalId, DateTime? utcStartDate, DateTime? utcEndDate)
+    {
+        var queryParams = new NameValueCollection();
+
+        if (utcStartDate != null)
+        {
+            queryParams.Add("startDate", utcStartDate.Value.ToString("o"));
+        }
+
+        if (utcEndDate != null)
+        {
+            queryParams.Add("endDate", utcEndDate.Value.ToString("o"));
+        }
+
+        return await RequestAsync<List<CustomerMonthlyUsage>>(HttpMethod.Get, $"/customer/{portalId}/usage/monthly", queryParams);
+    }
+
+    public async Task<UsageReport> GetCustomerServiceUsageAsync(string portalId, UsageFilter filter)
+    {
+        var queryParams = UsageFilterToNameValueCollection(filter);
+
+        return await RequestAsync<UsageReport>(HttpMethod.Get, $"/customer/{portalId}/usage", queryParams);
+    }
+
+    private static NameValueCollection UsageFilterToNameValueCollection(UsageFilter filter)
+    {
+        var queryParams = new NameValueCollection();
+
+        if (!string.IsNullOrEmpty(filter.ServiceName))
+        {
+            queryParams.Add("serviceName", filter.ServiceName);
+        }
+
+        if (!string.IsNullOrEmpty(filter.ParticipantName))
+        {
+            queryParams.Add("participantName", filter.ParticipantName.Trim());
+        }
+
+        if (filter.Status.HasValue)
+        {
+            queryParams.Add("status", filter.Status.Value.ToString());
+        }
+
+        if (filter.UtcStartDate != null)
+        {
+            queryParams.Add("startDate", filter.UtcStartDate.Value.ToString("o"));
+        }
+
+        if (filter.UtcEndDate != null)
+        {
+            queryParams.Add("endDate", filter.UtcEndDate.Value.ToString("o"));
+        }
+
+        if (filter.Metadata != null)
+        {
+            foreach (var (key, value) in filter.Metadata)
+            {
+                queryParams.Add($"metadata[{key}]", value);
+            }
+        }
+
+        if (filter.Offset.HasValue)
+        {
+            queryParams.Add("offset", filter.Offset.Value.ToString());
+        }
+
+        if (filter.Limit.HasValue)
+        {
+            queryParams.Add("limit", filter.Limit.Value.ToString());
+        }
+
+        if (!string.IsNullOrEmpty(filter.OrderBy))
+        {
+            queryParams.Add("orderBy", filter.OrderBy.Trim());
+        }
+
+        if (filter.OrderType.HasValue && filter.OrderType is not OperationOrderType.Descending)
+        {
+            queryParams.Add("orderType", filter.OrderType.Value.ToString());
+        }
+
+        return queryParams;
+    }
+
     private static NameValueCollection FilterToNameValueCollection(OperationFilter filter)
     {
         var queryParams = new NameValueCollection();
@@ -521,6 +605,53 @@ public class OperationFilter
 }
 
 /// <summary>
+/// The filter for customer service usage statistics.
+/// </summary>
+public class UsageFilter
+{
+    /// <summary>
+    /// The service name.
+    /// </summary>
+    public string ServiceName { get; init; }
+    /// <summary>
+    /// Unique name of customer participant to filter by.
+    /// </summary>
+    public string ParticipantName { get; init; }
+    /// <summary>
+    /// The operation status to filter by.
+    /// </summary>
+    public OperationStatus? Status { get; init; }
+    /// <summary>
+    /// The start date of the period to filter usage from (inclusive).
+    /// </summary>
+    public DateTime? UtcStartDate { get; init; }
+    /// <summary>
+    /// The end date of the period to filter usage until (inclusive).
+    /// </summary>
+    public DateTime? UtcEndDate { get; init; }
+    /// <summary>
+    /// Metadata key-value pairs to filter by.
+    /// </summary>
+    public Dictionary<string, string> Metadata { get; init; }
+    /// <summary>
+    /// The number of items to skip before starting to return results. Used for pagination.
+    /// </summary>
+    public int? Offset { get; set; }
+    /// <summary>
+    /// The maximum number of items to return in the response.
+    /// </summary>
+    public int? Limit { get; set; }
+    /// <summary>
+    /// The field to order by.
+    /// </summary>
+    public string OrderBy { get; init; }
+    /// <summary>
+    /// Order direction: ASC or DESC.
+    /// </summary>
+    public OperationOrderType? OrderType { get; init; }
+}
+
+/// <summary>
 /// The customer information.
 /// </summary>
 public class CustomerInfo
@@ -747,6 +878,109 @@ public class Report
 
         return participantDisplayNames;
     }
+}
+
+/// <summary>
+/// Aggregated customer spending for a single calendar month.
+/// </summary>
+public class CustomerMonthlyUsage
+{
+    /// <summary>
+    /// Calendar year (e.g. 2025).
+    /// </summary>
+    public int Year { get; set; }
+
+    /// <summary>
+    /// Calendar month (1-12).
+    /// </summary>
+    public int Month { get; set; }
+
+    /// <summary>
+    /// Currency code of the amounts (e.g. USD, EUR).
+    /// </summary>
+    public string Currency { get; set; }
+
+    /// <summary>
+    /// Total amount charged across all services in this month.
+    /// </summary>
+    public decimal TotalAmount { get; set; }
+
+    /// <summary>
+    /// Number of individual purchase operations in this month.
+    /// </summary>
+    public int OperationCount { get; set; }
+}
+
+/// <summary>
+/// Aggregated customer usage statistics for a service over a period.
+/// </summary>
+public class CustomerServiceUsage
+{
+    /// <summary>
+    /// Name of the service.
+    /// </summary>
+    public string Service { get; set; }
+
+    /// <summary>
+    /// Unit of measurement for the service (e.g. requests, GB, hours).
+    /// </summary>
+    public string ServiceUnit { get; set; }
+
+    /// <summary>
+    /// Currency code of the amounts (e.g. USD, EUR).
+    /// </summary>
+    public string Currency { get; set; }
+
+    /// <summary>
+    /// Total number of units consumed.
+    /// </summary>
+    public int TotalQuantity { get; set; }
+
+    /// <summary>
+    /// Total amount charged for the service.
+    /// </summary>
+    public decimal TotalAmount { get; set; }
+
+    /// <summary>
+    /// Number of individual purchase operations.
+    /// </summary>
+    public int OperationCount { get; set; }
+}
+
+/// <summary>
+/// Represents a paged report of customer service usage statistics.
+/// </summary>
+public class UsageReport
+{
+    /// <summary>
+    /// Collection of service usage statistics.
+    /// </summary>
+    public List<CustomerServiceUsage> Collection { get; set; }
+
+    /// <summary>
+    /// Offset of the report data.
+    /// </summary>
+    public int Offset { get; set; }
+
+    /// <summary>
+    /// Limit of the report data.
+    /// </summary>
+    public int Limit { get; set; }
+
+    /// <summary>
+    /// Total quantity of records in the report.
+    /// </summary>
+    public long TotalQuantity { get; set; }
+
+    /// <summary>
+    /// Total number of pages in the report.
+    /// </summary>
+    public int TotalPage { get; set; }
+
+    /// <summary>
+    /// Current page number of the report.
+    /// </summary>
+    public int CurrentPage { get; set; }
 }
 
 /// <summary>

@@ -127,3 +127,105 @@ public class CustomerOperationsReportRequestDto
     /// <example>Descending</example>
     public OperationOrderType? OrderType  { get; init; }
 }
+
+/// <summary>
+/// The request parameters for receiving customer monthly usage statistics.
+/// </summary>
+/// <example>
+/// {
+///   "startDate": "2025-01-01T00:00:00Z",
+///   "endDate": "2025-12-31T23:59:59Z"
+/// }
+/// </example>
+public class CustomerMonthlyUsageRequestDto
+{
+    /// <summary>
+    /// Start of the period (inclusive).
+    /// </summary>
+    /// <example>2025-01-01T00:00:00Z</example>
+    [FromQuery(Name = "startDate")]
+    public DateTime? StartDate { get; set; }
+
+    /// <summary>
+    /// End of the period (inclusive).
+    /// </summary>
+    /// <example>2025-12-31T23:59:59Z</example>
+    [FromQuery(Name = "endDate")]
+    public DateTime? EndDate { get; set; }
+}
+
+/// <summary>
+/// The request parameters for receiving customer service usage statistics.
+/// </summary>
+/// <example>
+/// {
+///   "serviceName": "backup",
+///   "startDate": "2025-01-01T00:00:00Z",
+///   "endDate": "2025-12-31T23:59:59Z",
+///   "offset": 0,
+///   "limit": 25
+/// }
+/// </example>
+public class CustomerServiceUsageRequestDto
+{
+    /// <summary>
+    /// The service name.
+    /// </summary>
+    /// <example>backup</example>
+    public string ServiceName { get; set; }
+
+    /// <summary>
+    /// The participant name.
+    /// </summary>
+    /// <example>My Own Corporation</example>
+    public string ParticipantName { get; set; }
+
+    /// <summary>
+    /// The operation status to filter by.
+    /// </summary>
+    /// <example>Completed</example>
+    public OperationStatus? Status { get; init; }
+
+    /// <summary>
+    /// Start of the period (inclusive).
+    /// </summary>
+    /// <example>2025-01-01T00:00:00Z</example>
+    public DateTime? StartDate { get; set; }
+
+    /// <summary>
+    /// End of the period (inclusive).
+    /// </summary>
+    /// <example>2025-12-31T23:59:59Z</example>
+    public DateTime? EndDate { get; set; }
+
+    /// <summary>
+    /// Metadata key-value pairs to filter by.
+    /// </summary>
+    public Dictionary<string, string> Metadata { get; set; }
+
+    /// <summary>
+    /// The number of items to skip for pagination. The default value is 0.
+    /// </summary>
+    /// <example>0</example>
+    [FromQuery(Name = "offset")]
+    public int? Offset { get; set; }
+
+    /// <summary>
+    /// The maximum number of items to return for pagination. The default value is 25.
+    /// </summary>
+    /// <example>25</example>
+    [FromQuery(Name = "limit")]
+    public int? Limit { get; set; }
+
+    /// <summary>
+    /// The field to order by.
+    /// </summary>
+    /// <example>ServiceName</example>
+    public string OrderBy { get; init; }
+
+    /// <summary>
+    /// Order direction: Ascending or Descending.
+    /// </summary>
+    /// <example>Descending</example>
+    public OperationOrderType? OrderType { get; init; }
+}
