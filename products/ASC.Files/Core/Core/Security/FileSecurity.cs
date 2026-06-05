@@ -74,8 +74,6 @@ public class FileSecurity(
 
     public static readonly HashSet<FileShare> PaidShares = [FileShare.RoomManager];
     private static HashSet<FileShare> DefaultFileAccess => [FileShare.Editing, FileShare.FillForms, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.None];
-    private static bool IsFillFormsRoom(FolderType? roomType) =>
-        roomType is FolderType.FillingFormsRoom or FolderType.VirtualDataRoom or FolderType.USER;
     private static readonly FrozenDictionary<SubjectType, HashSet<FileShare>> _defaultFileShareDictionary = new Dictionary<SubjectType, HashSet<FileShare>>
     {
         { SubjectType.ExternalLink, DefaultFileAccess },
@@ -1593,7 +1591,7 @@ public class FileSecurity(
 
                     var fileFolder = parentFolders.FirstOrDefault(r => r.IsRoom);
 
-                    if (action == FilesSecurityActions.FillForms && !IsFillFormsRoom(fileFolder?.FolderType))
+                    if (action == FilesSecurityActions.FillForms && !DocSpaceHelper.IsFillFormsRoom(fileFolder?.FolderType))
                     {
                         return false;
                     }
@@ -3328,7 +3326,7 @@ public class FileSecurity(
                 switch (s)
                 {
                     case FileShare.Editing when (file.IsForm && parentRoomType != FolderType.FillingFormsRoom || !file.IsForm) && canEdit:
-                    case FileShare.FillForms when file.IsForm && IsFillFormsRoom(parentRoomType):
+                    case FileShare.FillForms when file.IsForm && DocSpaceHelper.IsFillFormsRoom(parentRoomType):
                     case FileShare.CustomFilter when !file.IsForm && canCustomFiltering:
                     case FileShare.Comment when !file.IsForm && canComment:
                     case FileShare.Review when !file.IsForm && canReview:
@@ -3365,7 +3363,7 @@ public class FileSecurity(
             }
         }
 
-        var fillFormsAllowed = IsFillFormsRoom(parentRoomType);
+        var fillFormsAllowed = DocSpaceHelper.IsFillFormsRoom(parentRoomType);
 
         foreach (var subjectType in Enum.GetValues<SubjectType>())
         {
