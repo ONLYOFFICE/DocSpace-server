@@ -294,13 +294,18 @@ public class AccountingClient
         }
 
         var content = await response.Content.ReadAsStringAsync();
-        if (response.StatusCode == HttpStatusCode.BadRequest &&
-            content.Contains("not found", StringComparison.OrdinalIgnoreCase))
+        if (IsCustomerNotFound(response.StatusCode, content))
         {
             return new AccountingCustomerNotFoundException();
         }
 
         return new AccountingException($"Accounting request failed with status code {response.StatusCode} {content}");
+    }
+
+    internal static bool IsCustomerNotFound(HttpStatusCode status, string content)
+    {
+        return status == HttpStatusCode.BadRequest &&
+               content.Contains("not found", StringComparison.OrdinalIgnoreCase);
     }
 }
 
@@ -895,10 +900,7 @@ public static class AccountingHttpClientExtension
                         if (response.StatusCode == HttpStatusCode.BadRequest)
                         {
                             var content = await response.Content.ReadAsStringAsync();
-                            if (content.Contains("not found", StringComparison.OrdinalIgnoreCase))
-                            {
-                                return false;
-                            }
+                            return !AccountingClient.IsCustomerNotFound(response.StatusCode, content);
                         }
 
                         return true;
