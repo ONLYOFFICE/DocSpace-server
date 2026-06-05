@@ -561,6 +561,7 @@ public abstract class BaseStartup
 
         services.AddBillingHttpClient();
         services.AddAccountingHttpClient();
+        services.AddDocsCloudHttpClient();
 
         services.ConfigureNotificationServices();
 
