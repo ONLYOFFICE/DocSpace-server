@@ -129,7 +129,7 @@ public class AccountingClient
     {
         EnsureConfigured();
 
-        return await CreateApi().MakeAiCreditAsync(new AiCreditOperation(portalId, (double)amount, currency, customerParticipantName, metadata));
+        return await CreateApi().MakeAiCreditAsync(new AiCreditOperation(portalId, amount, currency, customerParticipantName, metadata));
     }
 
     public async Task<Report> GetCustomerOperationsAsync(string portalId, OperationFilter filter, bool isAiService)
@@ -854,7 +854,7 @@ public record SessionCompleteOperation(
 
 public record AiCreditOperation(
     string CustomerName,
-    double Sum,
+    decimal Sum,
     string Currency,
     string CustomerParticipantName,
     Dictionary<string, string> Metadata);

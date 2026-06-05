@@ -171,6 +171,18 @@ public class AccountingClientTests
     }
 
     [Fact]
+    public async Task MakeAiCredit_SendsAmountAsExactDecimal()
+    {
+        var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK, "{}"));
+
+        // A value that cannot be represented exactly in IEEE-754 double - must survive intact (no decimal->double cast).
+        await client.MakeAiCreditAsync("portal-1", 1234567890.123456789m, "USD", "participant");
+
+        handler.LastRequestBody.Should().NotBeNull();
+        handler.LastRequestBody.Should().Contain("\"sum\":1234567890.123456789");
+    }
+
+    [Fact]
     public async Task PaymentRequiredResponse_ThrowsAccountingPaymentRequiredException()
     {
         var (client, _) = CreateClient(_ => Json(HttpStatusCode.PaymentRequired, ""));
@@ -342,8 +354,9 @@ public class AccountingClientTests
         public Uri? LastUri { get; private set; }
         public HttpMethod? LastMethod { get; private set; }
         public string? LastAuthorization { get; private set; }
+        public string? LastRequestBody { get; private set; }
 
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             CallCount++;
             LastUri = request.RequestUri;
@@ -351,13 +364,14 @@ public class AccountingClientTests
             LastAuthorization = request.Headers.Contains("Authorization")
                 ? request.Headers.GetValues("Authorization").First()
                 : null;
+            LastRequestBody = request.Content is null ? null : await request.Content.ReadAsStringAsync(cancellationToken);
 
             var response = responder(request);
 
             // Mimic the real primary handler so the resilience pipeline can inspect the request method.
             response.RequestMessage = request;
 
-            return Task.FromResult(response);
+            return response;
         }
     }
 }
