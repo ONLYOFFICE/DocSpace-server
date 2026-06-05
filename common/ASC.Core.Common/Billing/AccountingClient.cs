@@ -427,10 +427,12 @@ public class OperationFilter
     /// <summary>
     /// The number of items to skip before starting to return results. Used for pagination.
     /// </summary>
+    /// <remarks>Mutable (set) because it is reassigned per page while paginating, e.g. in CustomerOperationsReportTask.</remarks>
     public int? Offset { get; set; }
     /// <summary>
     /// The maximum number of items to return in the response.
     /// </summary>
+    /// <remarks>Mutable (set) because it is reassigned per page while paginating, e.g. in CustomerOperationsReportTask.</remarks>
     public int? Limit { get; set; }
     /// <summary>
     /// The operation type to filter by.
@@ -630,32 +632,32 @@ public class Report
     /// <summary>
     /// Collection of operations.
     /// </summary>
-    public List<Operation> Collection { get; set; }
+    public List<Operation> Collection { get; init; }
 
     /// <summary>
     /// Offset of the report data.
     /// </summary>
-    public int Offset { get; set; }
+    public int Offset { get; init; }
 
     /// <summary>
     /// Limit of the report data.
     /// </summary>
-    public int Limit { get; set; }
+    public int Limit { get; init; }
 
     /// <summary>
     /// Total quantity of operations in the report.
     /// </summary>
-    public int TotalQuantity { get; set; }
+    public int TotalQuantity { get; init; }
 
     /// <summary>
     /// Total number of pages in the report.
     /// </summary>
-    public int TotalPage { get; set; }
+    public int TotalPage { get; init; }
 
     /// <summary>
     /// Current page number of the report.
     /// </summary>
-    public int CurrentPage { get; set; }
+    public int CurrentPage { get; init; }
 
     public async Task<Dictionary<string, string>> GetParticipantDisplayNamesAsync(DisplayUserSettingsHelper displayUserSettingsHelper, bool withHtmlEncode)
     {
