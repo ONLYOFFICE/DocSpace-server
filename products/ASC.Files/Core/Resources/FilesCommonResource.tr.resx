@@ -589,4 +589,10 @@ docx, xlsx, pptx ile en yüksek uyumluluk.</value>
   <data name="ErrorMessage_AiServicesDisabled" xml:space="preserve">
     <value>Mevcut portal için AI hizmetleri devre dışı</value>
   </data>
+  <data name="ErrorMessage_ExternalDbNotIndexed" xml:space="preserve">
+    <value>Veritabanı tablosu, ilk form gönderiminden sonra oluşturulacaktır. Henüz yapısını oluşturmak için veri yok.</value>
+  </data>
+  <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
+    <value>Form verileri harici veritabanıyla senkronize edilemedi.</value>
+  </data>
 </root>

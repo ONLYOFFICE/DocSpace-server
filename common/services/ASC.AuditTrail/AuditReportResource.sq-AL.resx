@@ -1191,4 +1191,16 @@
   <data name="WhiteLabelSettingsLogoTextUpdated" xml:space="preserve">
     <value>Emri i markës u përditësua</value>
   </data>
+  <data name="DocumentsExternalShareSettingsUpdated" xml:space="preserve">
+    <value>Cilësimet e aksesit për lidhjet e jashtme u përditësuan</value>
+  </data>
+  <data name="UserLogoutActiveConnection" xml:space="preserve">
+    <value>Lidhja aktive u çkyç: {0}</value>
+  </data>
+  <data name="UserLogoutActiveConnections" xml:space="preserve">
+    <value>Lidhjet aktive u çkyçën: {0}</value>
+  </data>
+  <data name="UserLogoutActiveConnectionsForUser" xml:space="preserve">
+    <value>Lidhjet aktive të përdoruesit u çkyçën: {0}</value>
+  </data>
 </root>

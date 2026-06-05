@@ -589,4 +589,10 @@ Compatibilité maximale avec docx, xlsx, pptx.</value>
   <data name="ErrorMessage_AiServicesDisabled" xml:space="preserve">
     <value>Les services IA sont désactivés pour le portail actuel</value>
   </data>
+  <data name="ErrorMessage_ExternalDbNotIndexed" xml:space="preserve">
+    <value>La table de base de données sera créée après la première soumission du formulaire. Il n'y a pas encore de données pour générer sa structure.</value>
+  </data>
+  <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
+    <value>Échec de la synchronisation des données du formulaire avec la base de données externe.</value>
+  </data>
 </root>

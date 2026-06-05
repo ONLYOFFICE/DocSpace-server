@@ -589,4 +589,10 @@ Je garantována 100% kompatibilita s MS Office formáty.</value>
   <data name="ErrorMessage_AiServicesDisabled" xml:space="preserve">
     <value>Služby AI jsou pro aktuální portál deaktivovány</value>
   </data>
+  <data name="ErrorMessage_ExternalDbNotIndexed" xml:space="preserve">
+    <value>Databázová tabulka bude vytvořena po prvním odeslání formuláře. Zatím neexistují žádná data pro vygenerování její struktury.</value>
+  </data>
+  <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
+    <value>Synchronizace dat formuláře s externí databází se nezdařila.</value>
+  </data>
 </root>

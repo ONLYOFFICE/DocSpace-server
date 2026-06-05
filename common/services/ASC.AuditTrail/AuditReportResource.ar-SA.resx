@@ -1188,4 +1188,16 @@
   <data name="WhiteLabelSettingsLogoTextUpdated" xml:space="preserve">
     <value>تم تحديث اسم العلامة التجارية</value>
   </data>
+  <data name="DocumentsExternalShareSettingsUpdated" xml:space="preserve">
+    <value>تم تحديث إعدادات الوصول للروابط الخارجية</value>
+  </data>
+  <data name="UserLogoutActiveConnection" xml:space="preserve">
+    <value>تم تسجيل خروج الاتصال النشط: {0}</value>
+  </data>
+  <data name="UserLogoutActiveConnections" xml:space="preserve">
+    <value>تم تسجيل خروج الاتصالات النشطة: {0}</value>
+  </data>
+  <data name="UserLogoutActiveConnectionsForUser" xml:space="preserve">
+    <value>تم تسجيل خروج الاتصالات النشطة للمستخدم: {0}</value>
+  </data>
 </root>

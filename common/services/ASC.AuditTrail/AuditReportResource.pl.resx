@@ -1188,4 +1188,16 @@
   <data name="WhiteLabelSettingsLogoTextUpdated" xml:space="preserve">
     <value>Nazwa marki zaktualizowana</value>
   </data>
+  <data name="DocumentsExternalShareSettingsUpdated" xml:space="preserve">
+    <value>Ustawienia dostępu do linków zewnętrznych zostały zaktualizowane</value>
+  </data>
+  <data name="UserLogoutActiveConnection" xml:space="preserve">
+    <value>Aktywne połączenie zostało wylogowane: {0}</value>
+  </data>
+  <data name="UserLogoutActiveConnections" xml:space="preserve">
+    <value>Aktywne połączenia zostały wylogowane: {0}</value>
+  </data>
+  <data name="UserLogoutActiveConnectionsForUser" xml:space="preserve">
+    <value>Aktywne połączenia użytkownika zostały wylogowane: {0}</value>
+  </data>
 </root>

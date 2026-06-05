@@ -1188,4 +1188,16 @@
   <data name="WhiteLabelSettingsLogoTextUpdated" xml:space="preserve">
     <value>Brend adı yeniləndi</value>
   </data>
+  <data name="DocumentsExternalShareSettingsUpdated" xml:space="preserve">
+    <value>Xarici bağlantılar üçün giriş parametrləri yeniləndi</value>
+  </data>
+  <data name="UserLogoutActiveConnection" xml:space="preserve">
+    <value>Aktiv bağlantıdan çıxış edildi: {0}</value>
+  </data>
+  <data name="UserLogoutActiveConnections" xml:space="preserve">
+    <value>Aktiv bağlantılardan çıxış edildi: {0}</value>
+  </data>
+  <data name="UserLogoutActiveConnectionsForUser" xml:space="preserve">
+    <value>İstifadəçi üçün aktiv bağlantılardan çıxış edildi: {0}</value>
+  </data>
 </root>

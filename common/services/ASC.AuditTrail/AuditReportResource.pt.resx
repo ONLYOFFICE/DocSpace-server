@@ -1188,4 +1188,16 @@
   <data name="ScheduledBackupDeleted" xml:space="preserve">
     <value>Backup programado eliminado</value>
   </data>
+  <data name="DocumentsExternalShareSettingsUpdated" xml:space="preserve">
+    <value>Definições de acesso para ligações externas atualizadas</value>
+  </data>
+  <data name="UserLogoutActiveConnection" xml:space="preserve">
+    <value>Ligação ativa terminada: {0}</value>
+  </data>
+  <data name="UserLogoutActiveConnections" xml:space="preserve">
+    <value>Ligações ativas terminadas: {0}</value>
+  </data>
+  <data name="UserLogoutActiveConnectionsForUser" xml:space="preserve">
+    <value>Ligações ativas terminadas para o utilizador: {0}</value>
+  </data>
 </root>

@@ -570,6 +570,7 @@ public class EditorConfigurationConverter<T>(CustomizationConfigConverter<T> con
         }
 
         var fileType = configuration.GetFileType(file);
+        var recent = await source.GetRecent(fileType, file.Id).ToListAsync();
         var result = new EditorConfigurationDto
         {
             CallbackUrl = await source.GetCallbackUrl(file),
@@ -582,7 +583,7 @@ public class EditorConfigurationConverter<T>(CustomizationConfigConverter<T> con
             Mode = source.Mode,
             ModeWrite = source.ModeWrite,
             Plugins = source.Plugins,
-            Recent = await source.GetRecent(fileType, file.Id).ToListAsync(),
+            Recent = recent.Count == 0 ? null : recent,
             Templates = [], // await source.GetTemplates(fileType, configuration.Document.Title),
             User = authContext.IsAuthenticated ? await source.GetUserAsync() : null
         };
