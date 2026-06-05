@@ -252,13 +252,15 @@ public class AccountingClientTests
 
         var services = new ServiceCollection();
         services.AddSingleton<IConfiguration>(configuration);
+        services.AddSingleton<AccountingConfiguration>(); // normally self-registered via DIHelper.Scan ([Singleton])
         services.AddAccountingHttpClient();
 
         var provider = services.BuildServiceProvider();
         var factory = provider.GetRequiredService<IHttpClientFactory>();
+        var accountingConfiguration = provider.GetRequiredService<AccountingConfiguration>();
         var cache = new AscCache(new MemoryCache(new MemoryCacheOptions()));
 
-        var client = new AccountingClient(configuration, cache, factory);
+        var client = new AccountingClient(accountingConfiguration, cache, factory);
 
         client.Configured.Should().BeFalse();
 
@@ -283,6 +285,7 @@ public class AccountingClientTests
 
         var services = new ServiceCollection();
         services.AddSingleton<IConfiguration>(configuration);
+        services.AddSingleton<AccountingConfiguration>(); // normally self-registered via DIHelper.Scan ([Singleton])
         services.AddAccountingHttpClient();
 
         // Replace the real network handler with our capturing one for every named client (including "accountingHttpClient").
@@ -290,9 +293,10 @@ public class AccountingClientTests
 
         var provider = services.BuildServiceProvider();
         var factory = provider.GetRequiredService<IHttpClientFactory>();
+        var accountingConfiguration = provider.GetRequiredService<AccountingConfiguration>();
         var cache = new AscCache(new MemoryCache(new MemoryCacheOptions()));
 
-        return (new AccountingClient(configuration, cache, factory), handler);
+        return (new AccountingClient(accountingConfiguration, cache, factory), handler);
     }
 
     private static HttpResponseMessage Json(HttpStatusCode status, string json)

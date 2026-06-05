@@ -37,23 +37,13 @@ namespace ASC.Core.Billing;
 /// Adds the per-request ASC HMAC-SHA1 authorization header to every accounting request.
 /// The token embeds the current UTC timestamp, so it must be generated per call rather than as a static header.
 /// </summary>
-internal class AccountingAuthHandler : DelegatingHandler
+internal class AccountingAuthHandler(AccountingConfiguration configuration) : DelegatingHandler
 {
-    private readonly string _key;
-    private readonly string _secret;
-
-    public AccountingAuthHandler(IConfiguration configuration)
-    {
-        var config = configuration.GetSection("core:accounting").Get<AccountingConfiguration>() ?? new AccountingConfiguration();
-        _key = config.Key;
-        _secret = config.Secret;
-    }
-
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        if (!string.IsNullOrEmpty(_key))
+        if (!string.IsNullOrEmpty(configuration.Key))
         {
-            request.Headers.Add("Authorization", CreateAuthToken(_key, _secret));
+            request.Headers.Add("Authorization", CreateAuthToken(configuration.Key, configuration.Secret));
         }
 
         return await base.SendAsync(request, cancellationToken);

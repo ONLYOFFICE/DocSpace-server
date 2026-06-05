@@ -49,23 +49,13 @@ public class AccountingClient
     internal const string ResiliencePipelineName = "accountingResiliencePipeline";
     internal const string BalanceResiliencePipelineName = "balanceResiliencePipeline";
 
-    public AccountingClient(IConfiguration configuration, ICache cache, IHttpClientFactory httpClientFactory)
+    public AccountingClient(AccountingConfiguration configuration, ICache cache, IHttpClientFactory httpClientFactory)
     {
-        _configuration = configuration.GetSection("core:accounting").Get<AccountingConfiguration>() ??
-                         new AccountingConfiguration();
+        _configuration = configuration;
         _cache = cache;
         _httpClientFactory = httpClientFactory;
 
-        _configuration.Url = (_configuration.Url ?? "").Trim().TrimEnd('/');
-
-        _configuration.Currencies = _configuration.Currencies == null || _configuration.Currencies.Count == 0
-            ? ["USD"]
-            : _configuration.Currencies;
-
-        if (!string.IsNullOrEmpty(_configuration.Url))
-        {
-            Configured = true;
-        }
+        Configured = !string.IsNullOrEmpty(_configuration.Url);
 
         _refitSettings = new RefitSettings
         {
@@ -872,14 +862,10 @@ public static class AccountingHttpClientExtension
 
         services.AddHttpClient(AccountingClient.HttpClientName, (sp, client) =>
             {
-                var url = (sp.GetRequiredService<IConfiguration>().GetSection("core:accounting").Get<AccountingConfiguration>()?.Url ?? "")
-                    .Trim()
-                    .TrimEnd('/');
+                var url = sp.GetRequiredService<AccountingConfiguration>().Url;
 
                 if (!string.IsNullOrEmpty(url))
                 {
-                    // No trailing slash: Refit appends its leading-slash method paths to the base path, so a configured
-                    // sub-path (e.g. https://host/api) is preserved -> https://host/api/customer/... with a single slash.
                     client.BaseAddress = new Uri(url);
                 }
 
