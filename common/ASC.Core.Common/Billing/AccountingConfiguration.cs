@@ -47,10 +47,10 @@ public class AccountingConfiguration
 
         // Normalize once here so every consumer (AccountingClient, the named HttpClient base address and the auth
         // handler) reuses this singleton instead of re-reading and re-normalizing the section.
-        Url = (section.GetValue<string>("Url") ?? "").Trim().TrimEnd('/');
-        Key = section.GetValue<string>("Key");
-        Secret = section.GetValue<string>("Secret");
-        Currencies = section.GetSection("Currencies").Get<List<string>>() is { Count: > 0 } currencies
+        Url = (section.GetValue<string>("url") ?? "").Trim().TrimEnd('/');
+        Key = section.GetValue<string>("key");
+        Secret = section.GetValue<string>("secret");
+        Currencies = section.GetSection("currencies").Get<List<string>>() is { Count: > 0 } currencies
             ? currencies
             : ["USD"];
     }
