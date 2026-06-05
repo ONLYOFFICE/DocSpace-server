@@ -589,4 +589,10 @@ Paras yhteensopivuus docx:n, xlsx:n, pptx:n kanssa.</value>
   <data name="ErrorMessage_AiServicesDisabled" xml:space="preserve">
     <value>Tekoälypalvelut on poistettu käytöstä nykyisessä portaalissa</value>
   </data>
+  <data name="ErrorMessage_ExternalDbNotIndexed" xml:space="preserve">
+    <value>Tietokantataulukko luodaan ensimmäisen lomakkeen lähetyksen jälkeen. Tietoja ei ole vielä sen rakenteen luomiseksi.</value>
+  </data>
+  <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
+    <value>Lomakkeen tietojen synkronointi ulkoiseen tietokantaan epäonnistui.</value>
+  </data>
 </root>

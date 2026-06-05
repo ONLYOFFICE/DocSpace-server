@@ -31,6 +31,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
+using Microsoft.Extensions.Configuration;
+
 #pragma warning disable ASPIREINTERACTION001
 
 var builder = DistributedApplication.CreateBuilder(args);
@@ -43,6 +45,10 @@ var storybook = string.Compare(builder.Configuration["STORYBOOK"], "true", Strin
 var launchProfile = builder.Configuration["DOTNET_LAUNCH_PROFILE"];
 var otelFileLogging = string.Compare(builder.Configuration["OTEL_FILE_LOGGING"], "true", StringComparison.OrdinalIgnoreCase) == 0;
 var connectionManager = new ConnectionStringManager(builder, basePath).AddEditors();
+
+var baseConfigurationBuilder = new ConfigurationManager().AddJsonFile(Path.Combine(basePath, "buildtools", "config", "appsettings.json"), true, true);
+var baseConfig = baseConfigurationBuilder.Build();
+builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?> { { "core:machinekey", baseConfig["core:machinekey"] } });
 
 if (otelFileLogging)
 {
