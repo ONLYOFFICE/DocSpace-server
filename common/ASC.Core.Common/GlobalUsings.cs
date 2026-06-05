@@ -135,6 +135,7 @@ global using ASC.Notify.Sinks;
 global using ASC.Security.Cryptography;
 global using ASC.Web.Core.WhiteLabel;
 global using ASC.Web.Core.Files;
+global using ASC.Web.Core.Users;
 global using ASC.Web.Studio.Utility;
 
 global using Autofac;

@@ -31,8 +31,6 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using ASC.Web.Core.Users;
-
 namespace ASC.Core.Billing;
 
 [Singleton]
