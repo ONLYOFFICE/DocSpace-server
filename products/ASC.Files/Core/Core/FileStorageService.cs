@@ -4343,9 +4343,16 @@ public class FileStorageService //: IFileStorageService
             ? await daoFactory.GetFileDao<T>().GetFileAsync(entryId)
             : await daoFactory.GetFolderDao<T>().GetFolderAsync(entryId);
 
-        if (share != FileShare.None && entry != null)
+        if (entry != null)
         {
-            requiredAuth = await ResolveRequiredAuthAsync(entry, requiredAuth, linkId == Guid.Empty);
+            if (share is FileShare.None)
+            {
+                await CheckPrimaryLinkRevokeAsync(entry, linkId);
+            }
+            else
+            {
+                requiredAuth = await ResolveRequiredAuthAsync(entry, requiredAuth, linkId == Guid.Empty);
+            }
         }
 
         //hack for the form-filling room. return a link to a file with the room key.
@@ -5989,6 +5996,41 @@ public class FileStorageService //: IFileStorageService
         }
 
         return false;
+    }
+
+    /// <summary>
+    /// Throws <see cref="SecurityException"/> when an attempt is made to revoke the primary external link
+    /// of a <see cref="FolderType.PublicRoom"/> or <see cref="FolderType.FillingFormsRoom"/> while external
+    /// link creation is restricted by the admin. These room types must always have a primary link, so revoking
+    /// it under the restriction would automatically trigger a new public link creation, bypassing the policy.
+    /// </summary>
+    private async Task CheckPrimaryLinkRevokeAsync<T>(FileEntry<T> entry, Guid linkId)
+    {
+        if (!await externalShare.IsCreationRestrictedAsync(entry))
+        {
+            return;
+        }
+
+        var existingLink = await fileSharing.GetPureSharesAsync(entry, [linkId]).FirstOrDefaultAsync();
+        if (existingLink?.SubjectType is not SubjectType.PrimaryExternalLink)
+        {
+            return;
+        }
+
+        await DetermineParentRoomType(entry);
+
+        if (entry is Folder<T> { FolderType: FolderType.PublicRoom } || entry.ParentRoomType is FolderType.PublicRoom)
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
+        if (entry is Folder<T> { FolderType: FolderType.FillingFormsRoom } || entry.ParentRoomType is FolderType.FillingFormsRoom)
+        {
+            if (!existingLink.FileShareOptions.Internal)
+            {
+                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+            }
+        }
     }
 }
 
