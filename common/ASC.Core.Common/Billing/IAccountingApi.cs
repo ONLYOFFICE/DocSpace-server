@@ -38,7 +38,7 @@ namespace ASC.Core.Billing;
 /// All paths are relative — the base address, authentication and resilience are configured in
 /// <see cref="AccountingHttpClientExtension.AddAccountingHttpClient"/>. The public wrapper is <see cref="AccountingClient"/>.
 /// </summary>
-public interface IAccountingApi
+internal interface IAccountingApi
 {
     [Get("/customer/{portalId}/balance")]
     Task<Balance> GetCustomerBalanceAsync(string portalId);
