@@ -3974,8 +3974,6 @@ public class FileStorageService //: IFileStorageService
 
         entry.NotFoundIfNull();
 
-        requiredAuth = await ResolveRequiredAuthAsync(entry, requiredAuth);
-
         //hack for the form-filling room. return a link to a file with the room key.
         if (share is FileShare.FillForms && entry is File<T>)
         {
@@ -3996,6 +3994,8 @@ public class FileStorageService //: IFileStorageService
         var link = await fileSharing.GetPureSharesAsync(entry, ShareFilterType.PrimaryExternalLink, null, null, 0, 1).FirstOrDefaultAsync();
         if (link == null)
         {
+            requiredAuth = await ResolveRequiredAuthAsync(entry, requiredAuth);
+
             await DetermineParentRoomType(entry);
 
             share = entry switch
@@ -4025,12 +4025,6 @@ public class FileStorageService //: IFileStorageService
                 denyDownload: denyDownload,
                 requiredAuth: requiredAuth,
                 password: password);
-        }
-
-        if (link.FileShareOptions.IsExpired && entry.RootFolderType == FolderType.USER)
-        {
-            return await SetExternalLinkAsync(entry, link.Id, link.Access, FilesCommonResource.DefaultExternalLinkTitle,
-                DateTime.UtcNow.Add(filesLinkUtility.DefaultLinkLifeTime), requiredAuth: link.FileShareOptions.Internal, primary: true);
         }
 
         return link;
@@ -5317,6 +5311,13 @@ public class FileStorageService //: IFileStorageService
                 }
                 if (room.FolderType == FolderType.FillingFormsRoom)
                 {
+                    if (properties.FormFilling.OriginalFormVersion != 0
+                        && properties.FormFilling.OriginalFormVersion != form.Version)
+                    {
+                        await daoFactory.GetLinkDao<T>().DeleteAllLinkAsync(formId);
+                        properties.FormFilling.IsVersionChanged = true;
+                    }
+
                     properties.FormFilling.StartFilling = true;
                     properties.FormFilling.StartedByUserId = authContext.CurrentAccount.ID;
 

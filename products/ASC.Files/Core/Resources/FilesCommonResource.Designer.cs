@@ -1123,6 +1123,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The form has been changed. This draft is outdated and cannot be submitted..
+        /// </summary>
+        public static string ErrorMessage_FillFormDraftObsolete {
+            get {
+                return ResourceManager.GetString("ErrorMessage_FillFormDraftObsolete", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to The file is no longer a draft to fill in the form..
         /// </summary>
         public static string MessageFillFormDraftDiscard {
