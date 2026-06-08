@@ -35,7 +35,7 @@ import type { AppConfig } from "../types.js";
 // can be slow; override with `NEW_AI_UPSTREAM_TIMEOUT_MS`. Note this guards
 // request/response calls only — long-lived chat *streams* are bounded by
 // the client-driven abort signal, not by this timeout.
-const UPSTREAM_TIMEOUT_MS = parseInt10(process.env["NEW_AI_UPSTREAM_TIMEOUT_MS"], 60_000) ?? 60_000;
+const UPSTREAM_TIMEOUT_MS = parseInt10(process.env["NEW_AI_UPSTREAM_TIMEOUT_MS"], 180_000) ?? 180_000;
 
 /**
  * Build an {@link AbortSignal} that fires on a timeout, on an upstream
