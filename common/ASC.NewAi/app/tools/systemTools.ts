@@ -213,16 +213,14 @@ const source = new SystemToolsSource({
 // `composeToolsAdapters`) and `ToolsEngine` (listing for permission cards).
 export const systemToolsSource: ToolsAdapter & {
   getServerTypes(): string[];
-  refresh(): void;
 } = {
   async getTools(entityId, config) {
     const serverNames = source.getServerTypes();
     logger.info(
       `systemTools.getTools(entityId=${entityId ?? "-"}, attachments=${
         config?.attachmentId.length ?? 0
-      }) configured servers=[${serverNames.join(", ") || "<none>"}] — refreshing cache`,
+      }) configured servers=[${serverNames.join(", ") || "<none>"}] — enumerating`,
     );
-    source.refresh();
     const started = Date.now();
     let grouped: Awaited<ReturnType<typeof source.getTools>>;
     try {
@@ -267,9 +265,5 @@ export const systemToolsSource: ToolsAdapter & {
 
   getServerTypes() {
     return source.getServerTypes();
-  },
-
-  refresh() {
-    source.refresh();
   },
 };
