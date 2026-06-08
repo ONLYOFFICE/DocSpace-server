@@ -184,9 +184,9 @@ public abstract class BaseStartup
 
         var connectionMultiplexer = await services.GetRedisConnectionMultiplexerAsync(_configuration, GetType().Namespace);
 
-        var rateLimiterSettings = new RateLimiterSettings();
-        _configuration.GetSection("core:hosting:rateLimiterOptions").Bind(rateLimiterSettings);
-        services.AddSingleton(Options.Create(rateLimiterSettings));
+        var rateLimiterSettingsSection = _configuration.GetSection("core:hosting:rateLimiterOptions");
+        var rateLimiterSettings = rateLimiterSettingsSection.Get<RateLimiterSettings>();
+        builder.Services.Configure<RateLimiterSettings>(rateLimiterSettingsSection);
 
         services.AddRateLimiter(options =>
         {

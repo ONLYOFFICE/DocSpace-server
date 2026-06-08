@@ -1,34 +1,34 @@
 ﻿// Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 using System.Text.Json.Nodes;
@@ -53,6 +53,7 @@ public class ErrorResponseFilter(IOptions<RateLimiterSettings> rateLimiterOption
 
     public void Apply(OpenApiDocument swaggerDoc, DocumentFilterContext context)
     {
+        swaggerDoc.Components ??= new OpenApiComponents();
         swaggerDoc.Components.Headers ??= new Dictionary<string, IOpenApiHeader>();
         swaggerDoc.Components.Headers["X-RateLimit-Limit"] = new OpenApiHeader
         {
@@ -78,35 +79,24 @@ public class ErrorResponseFilter(IOptions<RateLimiterSettings> rateLimiterOption
             Schema = new OpenApiSchema { Type = JsonSchemaType.Integer, Example = 30 },
         };
 
-        foreach (var path in swaggerDoc.Paths.Values)
+        foreach (var operation in swaggerDoc.Paths.Values.Where(path => path.Operations != null).SelectMany(path => path.Operations.Values))
         {
-            foreach (var operation in path.Operations.Values)
+            if (operation.Responses == null)
             {
-                if (operation.Responses.TryGetValue("200", out var okResponse) && okResponse is OpenApiResponse concreteOkResponse)
-                {
-                    concreteOkResponse.Headers ??= new Dictionary<string, IOpenApiHeader>();
-                    concreteOkResponse.Headers.TryAdd("X-RateLimit-Limit", new OpenApiHeaderReference("X-RateLimit-Limit", swaggerDoc));
-                    concreteOkResponse.Headers.TryAdd("X-RateLimit-Remaining", new OpenApiHeaderReference("X-RateLimit-Remaining", swaggerDoc));
-                    concreteOkResponse.Headers.TryAdd("X-RateLimit-Reset", new OpenApiHeaderReference("X-RateLimit-Reset", swaggerDoc));
-                }
-
-                operation.Responses.TryAdd("429", new OpenApiResponse
-                {
-                    Description = "Too Many Requests.",
-                    Headers = new Dictionary<string, IOpenApiHeader>
-                    {
-                        ["Retry-After"] = new OpenApiHeaderReference("Retry-After", swaggerDoc)
-                    }
-                });
-                operation.Responses.TryAdd("502", new OpenApiResponse
-                {
-                    Description = "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
-                });
-                operation.Responses.TryAdd("503", new OpenApiResponse
-                {
-                    Description = "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
-                });
+                continue;
             }
+
+            if (operation.Responses.TryGetValue("200", out var okResponse) && okResponse is OpenApiResponse concreteOkResponse)
+            {
+                concreteOkResponse.Headers ??= new Dictionary<string, IOpenApiHeader>();
+                concreteOkResponse.Headers.TryAdd("X-RateLimit-Limit", new OpenApiHeaderReference("X-RateLimit-Limit", swaggerDoc));
+                concreteOkResponse.Headers.TryAdd("X-RateLimit-Remaining", new OpenApiHeaderReference("X-RateLimit-Remaining", swaggerDoc));
+                concreteOkResponse.Headers.TryAdd("X-RateLimit-Reset", new OpenApiHeaderReference("X-RateLimit-Reset", swaggerDoc));
+            }
+
+            operation.Responses.TryAdd("429", new OpenApiResponse { Description = "Too Many Requests.", Headers = new Dictionary<string, IOpenApiHeader> { ["Retry-After"] = new OpenApiHeaderReference("Retry-After", swaggerDoc) } });
+            operation.Responses.TryAdd("502", new OpenApiResponse { Description = "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON." });
+            operation.Responses.TryAdd("503", new OpenApiResponse { Description = "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON." });
         }
     }
 }

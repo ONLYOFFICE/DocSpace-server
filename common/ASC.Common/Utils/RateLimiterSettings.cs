@@ -35,16 +35,16 @@ namespace ASC.Common.Utils;
 
 public class RateLimiterSettings
 {
-    public int SlidingWindowLimit { get; set; } = 1500;
-    public int ConcurrentGetLimit { get; set; } = 50;
-    public int DefaultConcurrencyWriteRequests { get; set; } = 15;
-    public int DailyWriteLimit { get; set; } = 10000;
+    public int SlidingWindowLimit { get; init; } = 1500;
+    public int ConcurrentGetLimit { get; init; } = 50;
+    public int DefaultConcurrencyWriteRequests { get; init; } = 15;
+    public int DailyWriteLimit { get; init; } = 10000;
 
-    public int SensitiveApiLimit { get; set; } = 5;
-    public int SensitiveApiWindowMinutes { get; set; } = 15;
+    public int SensitiveApiLimit { get; init; } = 5;
+    public int SensitiveApiWindowMinutes { get; init; } = 15;
 
-    public int PaymentsApiLimit { get; set; } = 10;
-    public int PaymentsApiWindowMinutes { get; set; } = 1;
+    public int PaymentsApiLimit { get; init; } = 10;
+    public int PaymentsApiWindowMinutes { get; init; } = 1;
 
-    public int? MaxEmailInvitationsPerDay { get; set; }
+    public int? MaxEmailInvitationsPerDay { get; init; }
 }
