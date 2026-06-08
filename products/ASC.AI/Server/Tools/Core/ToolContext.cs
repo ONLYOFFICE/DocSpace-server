@@ -28,6 +28,12 @@ namespace ASC.AI.Tools.Core;
 
 public class ToolContext
 {
-    public int AgentId { get; init; }
+    public JsonElement? FolderId { get; init; }
     public int FormId { get; init; }
+}
+
+public class ResolvedToolContext
+{
+    public IFolder? Folder { get; init; }
+    public FileEntry? Form { get; init; }
 }

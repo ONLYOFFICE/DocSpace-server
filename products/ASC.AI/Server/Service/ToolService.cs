@@ -27,16 +27,21 @@
 namespace ASC.AI.Service;
 
 [Scope]
-public class ToolService(IServiceProvider serviceProvider)
+public class ToolService(
+    IServiceProvider serviceProvider,
+    IDaoFactory daoFactory,
+    FileSecurity fileSecurity)
 {
     public async Task<ToolListResponse> GetToolsAsync(ToolContext context)
     {
         var prompt = new StringBuilder();
         var descriptors = new List<ToolDescriptor>();
 
+        var resolvedContext = await ResolveContext(context);
+
         foreach (var factory in serviceProvider.GetServices<IAiToolFactory>())
         {
-            var bundle = await factory.BuildAsync(context);
+            var bundle = await factory.BuildAsync(resolvedContext);
             if (!string.IsNullOrEmpty(bundle.Prompt))
             {
                 if (prompt.Length > 0)
@@ -60,6 +65,8 @@ public class ToolService(IServiceProvider serviceProvider)
         IReadOnlyList<ToolCall> calls,
         ToolContext context)
     {
+        var resolvedContext = await ResolveContext(context);
+
         var factories = serviceProvider.GetServices<IAiToolFactory>().ToArray();
         var targetNames = calls.Select(c => c.Name).ToHashSet(StringComparer.Ordinal);
         var functions = new Dictionary<string, AIFunction>(StringComparer.Ordinal);
@@ -69,7 +76,7 @@ public class ToolService(IServiceProvider serviceProvider)
                      name => factories.FirstOrDefault(
                          f => f.Owns(name))).OfType<IAiToolFactory>().Where(visited.Add))
         {
-            var bundle = await factory.BuildAsync(context);
+            var bundle = await factory.BuildAsync(resolvedContext);
             foreach (var tool in bundle.Tools)
             {
                 if (targetNames.Contains(tool.Name))
@@ -101,5 +108,54 @@ public class ToolService(IServiceProvider serviceProvider)
         {
             return new ToolCallResult(call.Id, call.Name, Result: null, Error: e.Message);
         }
+    }
+
+    private async Task<ResolvedToolContext> ResolveContext(ToolContext context)
+    {
+        var folderTask = ResolveFolderAsync(context.FolderId);
+        var formTask = ResolveFormAsync(context.FormId);
+
+        await Task.WhenAll(folderTask, formTask);
+
+        return new ResolvedToolContext
+        {
+            Folder = await folderTask,
+            Form = await formTask
+        };
+    }
+
+    private async Task<IFolder?> ResolveFolderAsync(JsonElement? folderId)
+    {
+        switch (folderId)
+        {
+            case { ValueKind: JsonValueKind.Number } value:
+                var folder = await daoFactory.GetFolderDao<int>().GetFolderAsync(value.GetInt32());
+                return folder is null
+                    ? null
+                    : await fileSecurity.SetSecurity(new[] { folder }.ToAsyncEnumerable()).FirstAsync() as IFolder;
+
+            case { ValueKind: JsonValueKind.String } value :
+                var stringFolder = await daoFactory.GetFolderDao<string>().GetFolderAsync(value.GetString()!);
+                return stringFolder is null
+                    ? null
+                    : await fileSecurity.SetSecurity(new[] { stringFolder }.ToAsyncEnumerable()).FirstAsync() as IFolder;
+
+            default:
+                return null;
+        }
+    }
+
+    private async Task<File<int>?> ResolveFormAsync(int formId)
+    {
+        if (formId <= 0)
+        {
+            return null;
+        }
+
+        var form = await daoFactory.GetFileDao<int>().GetFileAsync(formId);
+
+        return form is null
+            ? null
+            : await fileSecurity.SetSecurity(new[] { form }.ToAsyncEnumerable()).FirstAsync() as File<int>;
     }
 }
