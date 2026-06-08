@@ -80,6 +80,7 @@ public class PortalController(
     ExternalResourceSettingsHelper externalResourceSettingsHelper,
     QuotaHelper quotaHelper,
     QuotaSocketManager quotaSocketManager,
+    RegionHelper regionHelper,
     ApiDateTimeHelper apiDateTimeHelper,
     IEventBus eventBus,
     CspSettingsHelper cspSettingsHelper,
@@ -531,21 +532,51 @@ public class PortalController(
         var tenant = tenantManager.GetCurrentTenant();
         var source = await tariffService.GetTariffAsync(tenant.Id, refresh: inDto.Refresh);
 
-        var quotaDefinitions = (await tenantManager.GetTenantQuotasAsync(all: true, wallet: false))
-            .Concat(await tenantManager.GetTenantQuotasAsync(all: true, wallet: true))
-            .GroupBy(q => q.TenantId)
-            .ToDictionary(g => g.Key, g => g.First());
+        var defaultRegion = regionHelper.GetDefaultRegionInfo();
 
         var result = new List<UpcomingPaymentDto>();
 
         foreach (var quota in source.Quotas)
         {
-            if (!quotaDefinitions.TryGetValue(quota.Id, out var definition))
+            var definition = await tenantManager.GetTenantQuotaAsync(quota.Id);
+            if (definition == null || definition.TenantId != quota.Id)
             {
                 continue;
             }
 
             var quantity = quota.NextQuantity ?? quota.Quantity;
+
+            // The cached quota service skips price/currency resolution, so resolve it here for the
+            // current region the same way TenantQuotaMapper.Resolve does (falling back to the default region).
+            var productPaymentId = definition.GetPaymentId();
+            var priceInfo = string.IsNullOrEmpty(productPaymentId)
+                ? null
+                : await tenantManager.GetProductPriceInfoAsync(productPaymentId, quota.Wallet);
+
+            decimal unitPrice;
+            string currency;
+
+            if (priceInfo != null)
+            {
+                var currentRegion = await regionHelper.GetCurrentRegionInfoAsync(
+                    new Dictionary<string, Dictionary<string, decimal>> { { productPaymentId, priceInfo } });
+
+                if (priceInfo.TryGetValue(currentRegion.ISOCurrencySymbol, out var resolved))
+                {
+                    unitPrice = resolved;
+                    currency = currentRegion.ISOCurrencySymbol;
+                }
+                else
+                {
+                    unitPrice = definition.Price;
+                    currency = defaultRegion.ISOCurrencySymbol;
+                }
+            }
+            else
+            {
+                unitPrice = definition.Price;
+                currency = defaultRegion.ISOCurrencySymbol;
+            }
 
             result.Add(new UpcomingPaymentDto
             {
@@ -554,8 +585,8 @@ public class PortalController(
                 Quantity = quantity,
                 Wallet = quota.Wallet,
                 DueDate = apiDateTimeHelper.Get(quota.DueDate ?? source.DueDate),
-                Amount = definition.Price * quantity,
-                Currency = definition.PriceISOCurrencySymbol
+                Amount = unitPrice * quantity,
+                Currency = currency
             });
         }
 
