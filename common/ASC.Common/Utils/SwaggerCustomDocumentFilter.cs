@@ -47,37 +47,13 @@ public class HideRouteDocumentFilter(string routeToHide) : IDocumentFilter
     }
 }
 
-public class ErrorResponseFilter(IOptions<RateLimiterSettings> rateLimiterOptions) : IDocumentFilter
+public class ErrorResponseFilter : IDocumentFilter
 {
-    private readonly RateLimiterSettings _settings = rateLimiterOptions.Value;
-
     public void Apply(OpenApiDocument swaggerDoc, DocumentFilterContext context)
     {
         swaggerDoc.Components ??= new OpenApiComponents();
         swaggerDoc.Components.Headers ??= new Dictionary<string, IOpenApiHeader>();
-        swaggerDoc.Components.Headers["X-RateLimit-Limit"] = new OpenApiHeader
-        {
-            Description = $"Sliding window rate limit: {_settings.SlidingWindowLimit} requests per minute per user/IP.",
-            Schema = new OpenApiSchema { Type = JsonSchemaType.Integer, Example = _settings.SlidingWindowLimit },
-        };
-        swaggerDoc.Components.Headers["X-RateLimit-Remaining"] = new OpenApiHeader
-        {
-            Description = $"Number of requests remaining in the current sliding window ({_settings.SlidingWindowLimit} req/min). " +
-                          $"Concurrent limits also apply: {_settings.ConcurrentGetLimit} parallel GET requests, " +
-                          $"{_settings.DefaultConcurrencyWriteRequests} parallel POST/PUT requests.",
-            Schema = new OpenApiSchema { Type = JsonSchemaType.Integer, Example = 1 },
-        };
-        swaggerDoc.Components.Headers["X-RateLimit-Reset"] = new OpenApiHeader
-        {
-            Description = "Unix timestamp (seconds) when the current sliding window rate limit resets.",
-            Schema = new OpenApiSchema { Type = JsonSchemaType.Integer, Example = 1750000000 },
-        };
-        swaggerDoc.Components.Headers["Retry-After"] = new OpenApiHeader
-        {
-            Description = $"Seconds to wait before retrying. " +
-                          $"Up to 60s for the sliding window ({_settings.SlidingWindowLimit} req/min), up to 86400s for the daily POST/PUT limit ({_settings.DailyWriteLimit}/day).",
-            Schema = new OpenApiSchema { Type = JsonSchemaType.Integer, Example = 30 },
-        };
+
 
         foreach (var operation in swaggerDoc.Paths.Values.Where(path => path.Operations != null).SelectMany(path => path.Operations.Values))
         {
@@ -86,15 +62,6 @@ public class ErrorResponseFilter(IOptions<RateLimiterSettings> rateLimiterOption
                 continue;
             }
 
-            if (operation.Responses.TryGetValue("200", out var okResponse) && okResponse is OpenApiResponse concreteOkResponse)
-            {
-                concreteOkResponse.Headers ??= new Dictionary<string, IOpenApiHeader>();
-                concreteOkResponse.Headers.TryAdd("X-RateLimit-Limit", new OpenApiHeaderReference("X-RateLimit-Limit", swaggerDoc));
-                concreteOkResponse.Headers.TryAdd("X-RateLimit-Remaining", new OpenApiHeaderReference("X-RateLimit-Remaining", swaggerDoc));
-                concreteOkResponse.Headers.TryAdd("X-RateLimit-Reset", new OpenApiHeaderReference("X-RateLimit-Reset", swaggerDoc));
-            }
-
-            operation.Responses.TryAdd("429", new OpenApiResponse { Description = "Too Many Requests.", Headers = new Dictionary<string, IOpenApiHeader> { ["Retry-After"] = new OpenApiHeaderReference("Retry-After", swaggerDoc) } });
             operation.Responses.TryAdd("502", new OpenApiResponse { Description = "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON." });
             operation.Responses.TryAdd("503", new OpenApiResponse { Description = "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON." });
         }

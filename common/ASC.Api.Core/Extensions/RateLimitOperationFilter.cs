@@ -33,9 +33,12 @@
 
 namespace ASC.Api.Core.Extensions;
 
-public class RateLimitOperationFilter(IOptions<RateLimiterSettings> rateLimiterOptions) : IOperationFilter
+public class RateLimitOperationFilter(
+    IOptions<RateLimiterSettings> rateLimiterOptions,
+    IOptions<RateLimiterOptions> limiterOptions) : IOperationFilter
 {
     private readonly RateLimiterSettings _settings = rateLimiterOptions.Value;
+    private readonly bool _hasGlobalLimiter = limiterOptions.Value.GlobalLimiter is not null;
 
     public void Apply(OpenApiOperation operation, OperationFilterContext context)
     {
@@ -43,18 +46,22 @@ public class RateLimitOperationFilter(IOptions<RateLimiterSettings> rateLimiterO
             .OfType<EnableRateLimitingAttribute>()
             .FirstOrDefault();
 
-        if (rateLimitAttr is null)
-        {
-            return;
-        }
+        (OpenApiHeader Limit, OpenApiHeader Remaining, OpenApiHeader Reset, OpenApiHeader RetryAfter) headers = default;
 
-        var headers = rateLimitAttr.PolicyName switch
+
+        if (rateLimitAttr is not null)
         {
-            RateLimiterPolicy.SensitiveApi       => BuildHeaders(_settings.SensitiveApiLimit, _settings.SensitiveApiWindowMinutes),
-            RateLimiterPolicy.PaymentsApi        => BuildHeaders(_settings.PaymentsApiLimit, _settings.PaymentsApiWindowMinutes),
-            RateLimiterPolicy.EmailInvitationApi => BuildEmailInvitationHeaders(_settings.MaxEmailInvitationsPerDay),
-            _ => default
-        };
+            headers = rateLimitAttr.PolicyName switch
+            {
+                RateLimiterPolicy.SensitiveApi => BuildHeaders(_settings.SensitiveApiLimit, _settings.SensitiveApiWindowMinutes),
+                RateLimiterPolicy.PaymentsApi => BuildHeaders(_settings.PaymentsApiLimit, _settings.PaymentsApiWindowMinutes),
+                RateLimiterPolicy.EmailInvitationApi => BuildEmailInvitationHeaders(_settings.MaxEmailInvitationsPerDay),
+                _ => default
+            };
+        } else if (_hasGlobalLimiter)
+        {
+            headers = BuildGlobalHeaders(_settings);
+        }
 
         if (headers == default)
         {
@@ -83,6 +90,34 @@ public class RateLimitOperationFilter(IOptions<RateLimiterSettings> rateLimiterO
             }
         };
     }
+
+    private static (OpenApiHeader Limit, OpenApiHeader Remaining, OpenApiHeader Reset, OpenApiHeader RetryAfter) BuildGlobalHeaders(RateLimiterSettings settings) =>
+    (
+        new OpenApiHeader
+        {
+            Description =  $"Sliding window rate limit: {settings.SlidingWindowLimit} requests per minute per user/IP.",
+            Schema = new OpenApiSchema { Type = JsonSchemaType.Integer, Example = settings.SlidingWindowLimit }
+        },
+        new OpenApiHeader
+        {
+            Description =
+                $"Number of requests remaining in the current sliding window ({settings.SlidingWindowLimit} req/min). " +
+                $"Concurrent limits also apply: {settings.ConcurrentGetLimit} parallel GET requests, " +
+                $"{settings.DefaultConcurrencyWriteRequests} parallel POST/PUT requests.",
+            Schema = new OpenApiSchema { Type = JsonSchemaType.Integer, Example = 1 }
+        },
+        new OpenApiHeader
+        {
+            Description = "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+            Schema = new OpenApiSchema { Type = JsonSchemaType.Integer, Example = 1750000000 }
+        },
+        new OpenApiHeader
+        {
+            Description =  $"Seconds to wait before retrying. " +
+                           $"Up to 60s for the sliding window ({settings.SlidingWindowLimit} req/min), up to 86400s for the daily POST/PUT limit ({settings.DailyWriteLimit}/day).",
+            Schema = new OpenApiSchema { Type = JsonSchemaType.Integer, Example = 30 }
+        }
+    );
 
     private static (OpenApiHeader Limit, OpenApiHeader Remaining, OpenApiHeader Reset, OpenApiHeader RetryAfter) BuildHeaders(int limitValue, int timeValue) =>
     (
