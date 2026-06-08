@@ -35,7 +35,9 @@ const CALL_PATH = "/integration/tools/call";
 
 // Group key for the disabled / allow-always filters in `storage.toolPrefs`.
 // DocSpace tools are a single logical source, so they share one serverType.
-const SERVER_TYPE = "docspace";
+// Distinct from the MCP server name ("docspace") so Object.assign in
+// composeToolsAdapters does not overwrite the 23 MCP tools with these 3.
+const SERVER_TYPE = "docspace-integration";
 
 type ToolsList = {
   tools: TMCPItem[];
@@ -185,12 +187,26 @@ export class HttpToolsAdapter implements ToolsAdapter {
     // assistant reply starts; a stalled list here delays the whole chat,
     // so time it and report the tool count.
     const started = Date.now();
-    const raw = await aiService.post(LIST_PATH, toContext(entityId));
-    const parsed = parseList(raw);
+    const context = toContext(entityId);
     logger.info(
-      `docspaceTools.list entityId=${entityId ?? "-"} -> ${
-        parsed.tools.length
-      } tool(s) in ${Date.now() - started}ms`,
+      `docspaceTools.list entityId=${entityId ?? "-"} -> ${LIST_PATH} context=${JSON.stringify(context)}`,
+    );
+    let raw: unknown;
+    try {
+      raw = await aiService.post(LIST_PATH, context);
+    } catch (err) {
+      logger.error(
+        `docspaceTools.list entityId=${entityId ?? "-"} request failed after ${Date.now() - started}ms: ${err instanceof Error ? err.message : String(err)}`,
+      );
+      throw err;
+    }
+    logger.info(
+      `docspaceTools.list raw response: ${JSON.stringify(raw).slice(0, 1000)}`,
+    );
+    const parsed = parseList(raw);
+    const names = parsed.tools.map((t) => t.name).join(", ") || "<none>";
+    logger.info(
+      `docspaceTools.list entityId=${entityId ?? "-"} -> ${parsed.tools.length} tool(s) in ${Date.now() - started}ms: [${names}]`,
     );
     return parsed;
   }

@@ -216,16 +216,32 @@ export const systemToolsSource: ToolsAdapter & {
   refresh(): void;
 } = {
   async getTools(entityId, config) {
-    const grouped = await source.getTools();
-    const summary =
-      Object.entries(grouped)
-        .map(([type, items]) => `${type}=${items.length}`)
-        .join(", ") || "<none>";
+    const serverNames = source.getServerTypes();
     logger.info(
       `systemTools.getTools(entityId=${entityId ?? "-"}, attachments=${
         config?.attachmentId.length ?? 0
-      }) -> ${summary}`,
+      }) configured servers=[${serverNames.join(", ") || "<none>"}] — refreshing cache`,
     );
+    source.refresh();
+    const started = Date.now();
+    let grouped: Awaited<ReturnType<typeof source.getTools>>;
+    try {
+      grouped = await source.getTools();
+    } catch (err) {
+      logger.error(
+        `systemTools.getTools failed after ${Date.now() - started}ms: ${err instanceof Error ? err.message : String(err)}`,
+      );
+      return {};
+    }
+    for (const [type, items] of Object.entries(grouped)) {
+      const names = items.map((t) => t.name).join(", ") || "<none>";
+      logger.info(
+        `systemTools.getTools server=${type} -> ${items.length} tool(s) in ${Date.now() - started}ms: [${names}]`,
+      );
+    }
+    if (Object.keys(grouped).length === 0) {
+      logger.warn(`systemTools.getTools(entityId=${entityId ?? "-"}) -> no tools from any server`);
+    }
     return grouped;
   },
 
