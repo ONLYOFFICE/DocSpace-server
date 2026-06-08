@@ -30,7 +30,6 @@ namespace ASC.AI.Tools;
 public class FormDataToolsFactory(
     ExternalDatabaseClient externalDatabaseClient,
     IDaoFactory daoFactory,
-    FileSecurity fileSecurity,
     FormFillingReportCreator formFillingReportCreator,
     ILogger<FormDataToolsFactory> logger) : IAiToolFactory
 {
@@ -193,14 +192,14 @@ public class FormDataToolsFactory(
         return _toolNames.Contains(toolName);
     }
 
-    public async Task<ToolBundle> BuildAsync(ToolContext context)
+    public async Task<ToolBundle> BuildAsync(ResolvedToolContext context)
     {
-        if (context.FormId <= 0 || !externalDatabaseClient.IsEnabled())
+        if (context.Form is not File<int> form || !externalDatabaseClient.IsEnabled())
         {
             return ToolBundle.Empty;
         }
 
-        var init = await TryInitAsync(context.FormId);
+        var init = await TryInitAsync(form);
         if (init is null)
         {
             return ToolBundle.Empty;
@@ -230,33 +229,28 @@ public class FormDataToolsFactory(
         return new ToolBundle(prompt, tools);
     }
 
-    private async Task<InitData?> TryInitAsync(int fileId)
+    private async Task<InitData?> TryInitAsync(File<int> file)
     {
         try
         {
             var fileDao = daoFactory.GetFileDao<int>();
-            var file = await fileDao.GetFileAsync(fileId);
-            if (file == null || !await fileSecurity.CanEditAsync(file))
-            {
-                return null;
-            }
 
-            var properties = await fileDao.GetProperties(fileId);
+            var properties = await fileDao.GetProperties(file.Id);
             var formFilling = properties?.FormFilling;
 
-            if (formFilling?.StartFilling != true || formFilling.OriginalFormId != fileId)
+            if (formFilling?.StartFilling != true || formFilling.OriginalFormId != file.Id)
             {
                 return null;
             }
 
-            var tableName = FormFillingReportCreator.GetTableName(fileId, file.Version);
+            var tableName = FormFillingReportCreator.GetTableName(file.Id, file.Version);
             if (!await externalDatabaseClient.TableExistsAsync(tableName))
             {
                 return null;
             }
 
             var rowCount = await externalDatabaseClient.CountAsync(tableName);
-            var columns = (await formFillingReportCreator.GetColumnDefinitionsAsync(fileId, file.Version)).ToList();
+            var columns = (await formFillingReportCreator.GetColumnDefinitionsAsync(file.Id, file.Version)).ToList();
             var allowedColumns = columns.Select(c => c.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
 
             var pkColumn = columns.FirstOrDefault(c => c.IsPrimaryKey)
@@ -267,7 +261,7 @@ public class FormDataToolsFactory(
         }
         catch (Exception e)
         {
-            logger.WarnFormDataToolsFailed(e, fileId);
+            logger.WarnFormDataToolsFailed(e, file.Id);
             return null;
         }
     }

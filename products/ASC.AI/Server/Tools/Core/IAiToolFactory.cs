@@ -30,5 +30,5 @@ public interface IAiToolFactory
 {
     bool Owns(string toolName);
 
-    Task<ToolBundle> BuildAsync(ToolContext context);
+    Task<ToolBundle> BuildAsync(ResolvedToolContext context);
 }

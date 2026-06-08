@@ -105,20 +105,16 @@ public class KnowledgeSearchToolFactory(
         return toolName == Name;
     }
 
-    public async Task<ToolBundle> BuildAsync(ToolContext context)
+    public async Task<ToolBundle> BuildAsync(ResolvedToolContext context)
     {
-        if (context.AgentId <= 0 || !await aiAccessibility.IsVectorizationEnabledAsync())
+        if (context.Folder is not Folder<int> { IsAgent: true } agent ||
+            !await aiAccessibility.IsVectorizationEnabledAsync() ||
+            !await fileSecurity.CanUseChatAsync(agent))
         {
             return ToolBundle.Empty;
         }
 
         var folderDao = daoFactory.GetFolderDao<int>();
-
-        var agent = await folderDao.GetFolderAsync(context.AgentId);
-        if (agent is null || !await fileSecurity.CanUseChatAsync(agent))
-        {
-            return ToolBundle.Empty;
-        }
 
         var knowledge = await folderDao.GetFoldersAsync(agent.Id, FolderType.Knowledge).FirstAsync();
         if (knowledge is null || knowledge.FilesCount == 0)
