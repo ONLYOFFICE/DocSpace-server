@@ -126,7 +126,7 @@ public class TariffDto
 ///   "state": "Active"
 /// }
 /// </example>
-public class TariffQuotaDto(Quota quota, ApiDateTimeHelper apiDateTimeHelper)
+public class TariffQuotaDto(Quota quota, DateTime tariffDueDate, ApiDateTimeHelper apiDateTimeHelper)
 {
     /// <summary>
     /// The quota ID.
@@ -147,10 +147,10 @@ public class TariffQuotaDto(Quota quota, ApiDateTimeHelper apiDateTimeHelper)
     public bool Wallet { get; set; } = quota.Wallet;
 
     /// <summary>
-    /// The quota due date in the portal time zone.
+    /// The quota due date in the portal time zone. Falls back to the tariff due date when the quota has none.
     /// </summary>
     /// <example>2024-01-15T10:30:00Z</example>
-    public ApiDateTime DueDate { get; set; } = apiDateTimeHelper.Get(quota.DueDate);
+    public ApiDateTime DueDate { get; set; } = apiDateTimeHelper.Get(quota.DueDate ?? tariffDueDate);
 
     /// <summary>
     /// The quota next quantity.
@@ -163,4 +163,63 @@ public class TariffQuotaDto(Quota quota, ApiDateTimeHelper apiDateTimeHelper)
     /// </summary>
     /// <example>Active</example>
     public QuotaState? State { get; set; } = quota.State;
+}
+
+/// <summary>
+/// The upcoming payment parameters.
+/// </summary>
+/// <example>
+/// {
+///   "id": -11,
+///   "name": "storage",
+///   "quantity": 100,
+///   "wallet": true,
+///   "dueDate": "2026-07-08T11:39:43.0000000+03:00",
+///   "amount": 14,
+///   "currency": "USD"
+/// }
+/// </example>
+public class UpcomingPaymentDto
+{
+    /// <summary>
+    /// The quota ID.
+    /// </summary>
+    /// <example>-11</example>
+    public int Id { get; set; }
+
+    /// <summary>
+    /// The quota name.
+    /// </summary>
+    /// <example>storage</example>
+    public string Name { get; set; }
+
+    /// <summary>
+    /// The quantity that will be charged (the next quantity if set, otherwise the current quantity).
+    /// </summary>
+    /// <example>100</example>
+    public int Quantity { get; set; }
+
+    /// <summary>
+    /// The quota applies to the wallet or not.
+    /// </summary>
+    /// <example>true</example>
+    public bool Wallet { get; set; }
+
+    /// <summary>
+    /// The due date of the upcoming payment in the portal time zone.
+    /// </summary>
+    /// <example>2026-07-08T11:39:43.0000000+03:00</example>
+    public ApiDateTime DueDate { get; set; }
+
+    /// <summary>
+    /// The amount that will be charged (unit price multiplied by the quantity).
+    /// </summary>
+    /// <example>14</example>
+    public decimal Amount { get; set; }
+
+    /// <summary>
+    /// The three-character ISO 4217 currency symbol of the amount.
+    /// </summary>
+    /// <example>USD</example>
+    public string Currency { get; set; }
 }

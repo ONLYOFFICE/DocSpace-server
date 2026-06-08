@@ -505,7 +505,58 @@ public class PortalController(
             result.CustomerId = source.CustomerId;
             result.LicenseDate = apiDateTimeHelper.Get(source.LicenseDate);
             result.Quotas = source.Quotas.Concat(source.OverdueQuotas ?? [])
-                .Select(q => new TariffQuotaDto(q, apiDateTimeHelper)).ToList();
+                .Select(q => new TariffQuotaDto(q, source.DueDate, apiDateTimeHelper)).ToList();
+        }
+
+        return result;
+    }
+
+    /// <remarks>
+    /// Returns the list of upcoming payments based on the active quotas of the current portal tariff.
+    /// </remarks>
+    /// <summary>
+    /// Get upcoming payments
+    /// </summary>
+    /// <path>api/2.0/portal/tariff/upcoming</path>
+    /// <collection>list</collection>
+    [Tags("Portal / Quota")]
+    [SwaggerResponse(200, "List of upcoming payments", typeof(IEnumerable<UpcomingPaymentDto>))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [AllowNotPayment]
+    [HttpGet("tariff/upcoming")]
+    public async Task<List<UpcomingPaymentDto>> GetUpcomingPayments(CurrentPortalTariffRequestDto inDto)
+    {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        var tenant = tenantManager.GetCurrentTenant();
+        var source = await tariffService.GetTariffAsync(tenant.Id, refresh: inDto.Refresh);
+
+        var quotaDefinitions = (await tenantManager.GetTenantQuotasAsync(all: true, wallet: false))
+            .Concat(await tenantManager.GetTenantQuotasAsync(all: true, wallet: true))
+            .GroupBy(q => q.TenantId)
+            .ToDictionary(g => g.Key, g => g.First());
+
+        var result = new List<UpcomingPaymentDto>();
+
+        foreach (var quota in source.Quotas)
+        {
+            if (!quotaDefinitions.TryGetValue(quota.Id, out var definition))
+            {
+                continue;
+            }
+
+            var quantity = quota.NextQuantity ?? quota.Quantity;
+
+            result.Add(new UpcomingPaymentDto
+            {
+                Id = quota.Id,
+                Name = definition.Name,
+                Quantity = quantity,
+                Wallet = quota.Wallet,
+                DueDate = apiDateTimeHelper.Get(quota.DueDate ?? source.DueDate),
+                Amount = definition.Price * quantity,
+                Currency = definition.PriceISOCurrencySymbol
+            });
         }
 
         return result;
