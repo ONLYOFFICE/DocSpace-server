@@ -3746,6 +3746,121 @@
         ]
       }
     },
+    "/api/2.0/ai/config/user": {
+      "get": {
+        "tags": [
+          "AI / Settings"
+        ],
+        "summary": "Get per-user AI settings",
+        "description": "Retrieves the current user's AI settings, including the recommended model banner visibility preference.",
+        "operationId": "getAiUserSettings",
+        "responses": {
+          "200": {
+            "description": "Current per-user AI settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiUserSettingsWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "AI / Settings"
+        ],
+        "summary": "Update per-user AI settings",
+        "description": "Updates the current user's AI recommended model banner visibility preferences.\r\nEach user's settings are stored independently.",
+        "operationId": "setAiUserSettings",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetAiUserSettingsRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated per-user AI settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiUserSettingsWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
     "/api/2.0/ai/vectorization/tasks": {
       "post": {
         "tags": [
@@ -4178,6 +4293,12 @@
             "type": "boolean",
             "description": "Indicates whether the system-level AI provider is enabled.",
             "example": true
+          },
+          "recommendedModelForForms": {
+            "type": "string",
+            "description": "The identifier of the model recommended for form generation.",
+            "nullable": true,
+            "example": "gpt-5.4"
           }
         },
         "additionalProperties": false,
@@ -4188,6 +4309,58 @@
         "properties": {
           "response": {
             "$ref": "#/components/schemas/AiSettingsDto"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
+      "AiUserSettingsDto": {
+        "type": "object",
+        "properties": {
+          "chatRecommendedModelVisible": {
+            "type": "boolean",
+            "description": "Indicates whether the recommended model banner is visible in the AI chat for the current user.",
+            "example": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "The per-user AI settings."
+      },
+      "AiUserSettingsWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/AiUserSettingsDto"
           },
           "count": {
             "type": "integer",
@@ -7683,6 +7856,18 @@
           }
         ],
         "x-enum-type": "integer"
+      },
+      "SetAiUserSettingsRequestDto": {
+        "type": "object",
+        "properties": {
+          "chatRecommendedModelVisible": {
+            "type": "boolean",
+            "description": "Indicates whether the recommended model banner is visible in the AI chat.",
+            "example": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Request to update per-user AI recommended model visibility settings."
       },
       "SetDefaultProviderRequestDto": {
         "required": [
