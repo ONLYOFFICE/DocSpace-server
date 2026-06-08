@@ -27,7 +27,7 @@
 namespace ASC.Site.Core.Classes
 {
     [Scope]
-    public class MultiRegionPrivider(
+    public class MultiRegionProvider(
         MachinePseudoKeys machinePseudoKeys,
         IDbContextFactory<EuRegionDbContext> euRegionDbContextFactory,
         IDbContextFactory<UsRegionDbContext> usRegionDbContextFactory)
@@ -115,7 +115,7 @@ namespace ASC.Site.Core.Classes
             return userDbContext.Tenants
                 .Where(t => t.Status == TenantStatus.Active)
                 .Join(userDbContext.Users, t => t.Id, u => u.TenantId, (tenant, user) => new
-                { 
+                {
                     tenant,
                     user
                 })
@@ -185,40 +185,67 @@ namespace ASC.Site.Core.Classes
                 .ToListAsync();
         }
 
-        private static Task<List<TenantUser>> GetTenantsBySocialAsync(HostedRegionDbContext userDbContext, LoginProfile loginProfile)
+        private static async Task<List<TenantUser>> GetTenantsBySocialAsync(HostedRegionDbContext userDbContext, LoginProfile loginProfile)
         {
             var region = userDbContext is EuRegionDbContext ? TenantRegion.Eu : TenantRegion.Us;
             var email = loginProfile.EMail?.ToLowerInvariant();
             var findByEmail = !string.IsNullOrWhiteSpace(email);
 
-            return userDbContext.Users
-                 .Join(userDbContext.Tenants, u => u.TenantId, t => t.Id, (user, tenant) => new
-                 {
-                     user,
-                     tenant
-                 })
-                 .GroupJoin(userDbContext.AccountLinks, r => r.user.Id.ToString(), a => a.Id, (r, accounts) => new
-                 {
-                     r.tenant,
-                     r.user,
-                     account = accounts.FirstOrDefault()
-                 })
-                 .Where(r => r.tenant.Status == TenantStatus.Active)
-                 .Where(r => !r.user.Removed && r.user.Status == EmployeeStatus.Active)
-                 .Where(r => (r.account != null && r.account.UId == loginProfile.HashId) ||
-                             (findByEmail && r.user.Email == email && r.user.ActivationStatus == EmployeeActivationStatus.Activated))
-                 .Select(r => new TenantUser
-                 {
-                     UserId = r.user.Id,
-                     UserEmail = r.user.Email,
-                     UserFirstName = r.user.FirstName,
-                     UserLastName = r.user.LastName,
-                     TenantId = r.tenant.Id,
-                     TenantAlias = r.tenant.Alias,
-                     TenantMappedDomain = r.tenant.MappedDomain,
-                     TenantRegion = region
-                 })
-                 .ToListAsync();
+            // Path A: indexed seek on account_links.uid to get the ids of users linked to this social profile.
+            var linkedGuids = (await userDbContext.AccountLinks
+                    .Where(a => a.UId == loginProfile.HashId)
+                    .Select(a => a.Id)
+                    .ToListAsync())
+                .Select(id => Guid.TryParse(id, out var g) ? g : (Guid?)null)
+                .Where(g => g.HasValue)
+                .Select(g => g.Value)
+                .ToList();
+
+            var bySocial = linkedGuids.Count == 0
+                ? []
+                : await userDbContext.Users
+                    .Where(u => !u.Removed && u.Status == EmployeeStatus.Active && linkedGuids.Contains(u.Id))
+                    .Join(userDbContext.Tenants, u => u.TenantId, t => t.Id, (user, tenant) => new { user, tenant })
+                    .Where(r => r.tenant.Status == TenantStatus.Active)
+                    .Select(r => new TenantUser
+                    {
+                        UserId = r.user.Id,
+                        UserEmail = r.user.Email,
+                        UserFirstName = r.user.FirstName,
+                        UserLastName = r.user.LastName,
+                        TenantId = r.tenant.Id,
+                        TenantAlias = r.tenant.Alias,
+                        TenantMappedDomain = r.tenant.MappedDomain,
+                        TenantRegion = region
+                    })
+                    .ToListAsync();
+
+            // Path B: indexed seek on core_user.email for activated accounts matching the profile email.
+            var byEmail = !findByEmail
+                ? []
+                : await userDbContext.Users
+                    .Where(u => !u.Removed && u.Status == EmployeeStatus.Active && u.Email == email && u.ActivationStatus == EmployeeActivationStatus.Activated)
+                    .Join(userDbContext.Tenants, u => u.TenantId, t => t.Id, (user, tenant) => new { user, tenant })
+                    .Where(r => r.tenant.Status == TenantStatus.Active)
+                    .Select(r => new TenantUser
+                    {
+                        UserId = r.user.Id,
+                        UserEmail = r.user.Email,
+                        UserFirstName = r.user.FirstName,
+                        UserLastName = r.user.LastName,
+                        TenantId = r.tenant.Id,
+                        TenantAlias = r.tenant.Alias,
+                        TenantMappedDomain = r.tenant.MappedDomain,
+                        TenantRegion = region
+                    })
+                    .ToListAsync();
+
+            // Preserve the original OR semantics: a user may match by social link or by email; show each once.
+            return bySocial
+                .Concat(byEmail)
+                .GroupBy(t => t.UserId)
+                .Select(g => g.First())
+                .ToList();
         }
 
         private static async Task<DateTime> GetUserPasswordStampAsync(HostedRegionDbContext userDbContext, int tenantId, Guid userId)
