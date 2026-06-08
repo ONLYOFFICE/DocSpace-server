@@ -1194,4 +1194,16 @@
   <data name="ScheduledBackupDeleted" xml:space="preserve">
     <value>Plānotā rezerves kopēšana dzēsta</value>
   </data>
+  <data name="DocumentsExternalShareSettingsUpdated" xml:space="preserve">
+    <value>Piekļuves iestatījumi ārējām saitēm atjaunināti</value>
+  </data>
+  <data name="UserLogoutActiveConnection" xml:space="preserve">
+    <value>Aktīvais savienojums atteicās: {0}</value>
+  </data>
+  <data name="UserLogoutActiveConnections" xml:space="preserve">
+    <value>Aktīvie savienojumi atteicās: {0}</value>
+  </data>
+  <data name="UserLogoutActiveConnectionsForUser" xml:space="preserve">
+    <value>Lietotāja aktīvie savienojumi atteicās: {0}</value>
+  </data>
 </root>

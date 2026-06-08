@@ -1194,4 +1194,16 @@
   <data name="ScheduledBackupDeleted" xml:space="preserve">
     <value>Ajoitettu varmuuskopio poistettu</value>
   </data>
+  <data name="DocumentsExternalShareSettingsUpdated" xml:space="preserve">
+    <value>Ulkoisten linkkien käyttöoikeusasetukset päivitetty</value>
+  </data>
+  <data name="UserLogoutActiveConnection" xml:space="preserve">
+    <value>Aktiivinen yhteys kirjattu ulos: {0}</value>
+  </data>
+  <data name="UserLogoutActiveConnections" xml:space="preserve">
+    <value>Aktiiviset yhteydet kirjattu ulos: {0}</value>
+  </data>
+  <data name="UserLogoutActiveConnectionsForUser" xml:space="preserve">
+    <value>Käyttäjän aktiiviset yhteydet kirjattu ulos: {0}</value>
+  </data>
 </root>

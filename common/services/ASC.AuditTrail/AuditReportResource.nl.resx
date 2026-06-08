@@ -1194,4 +1194,16 @@
   <data name="WhiteLabelSettingsLogoTextUpdated" xml:space="preserve">
     <value>Merknaam bijgewerkt</value>
   </data>
+  <data name="DocumentsExternalShareSettingsUpdated" xml:space="preserve">
+    <value>Toegangsinstellingen voor externe links bijgewerkt</value>
+  </data>
+  <data name="UserLogoutActiveConnection" xml:space="preserve">
+    <value>Actieve verbinding uitgelogd: {0}</value>
+  </data>
+  <data name="UserLogoutActiveConnections" xml:space="preserve">
+    <value>Actieve verbindingen uitgelogd: {0}</value>
+  </data>
+  <data name="UserLogoutActiveConnectionsForUser" xml:space="preserve">
+    <value>Actieve verbindingen voor gebruiker uitgelogd: {0}</value>
+  </data>
 </root>

@@ -589,4 +589,10 @@ Najviša kompatibilnost sa docx, xlsx, pptx.</value>
   <data name="ErrorMessage_AiServicesDisabled" xml:space="preserve">
     <value>AI usluge su onemogućene za trenutni portal</value>
   </data>
+  <data name="ErrorMessage_ExternalDbNotIndexed" xml:space="preserve">
+    <value>Tabela baze podataka biće kreirana nakon prvog podnošenja obrasca. Još nema podataka za generisanje njene strukture.</value>
+  </data>
+  <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
+    <value>Nije uspela sinhronizacija podataka obrasca sa spoljnom bazom podataka.</value>
+  </data>
 </root>

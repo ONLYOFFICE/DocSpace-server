@@ -589,4 +589,10 @@ Khả năng tương thích cao nhất với docx, xlsx, pptx.</value>
   <data name="ErrorMessage_AiServicesDisabled" xml:space="preserve">
     <value>Dịch vụ AI bị vô hiệu hóa cho cổng thông tin hiện tại</value>
   </data>
+  <data name="ErrorMessage_ExternalDbNotIndexed" xml:space="preserve">
+    <value>Bảng cơ sở dữ liệu sẽ được tạo sau lần gửi biểu mẫu đầu tiên. Chưa có dữ liệu để tạo cấu trúc của nó.</value>
+  </data>
+  <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
+    <value>Không thể đồng bộ hóa dữ liệu biểu mẫu với cơ sở dữ liệu bên ngoài.</value>
+  </data>
 </root>

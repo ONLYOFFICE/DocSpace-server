@@ -1194,4 +1194,16 @@
   <data name="ScheduledBackupDeleted" xml:space="preserve">
     <value>Načrtovano varnostno kopiranje izbrisano</value>
   </data>
+  <data name="DocumentsExternalShareSettingsUpdated" xml:space="preserve">
+    <value>Nastavitve dostopa za zunanje povezave so bile posodobljene</value>
+  </data>
+  <data name="UserLogoutActiveConnection" xml:space="preserve">
+    <value>Aktivna povezava je bila odjavljena: {0}</value>
+  </data>
+  <data name="UserLogoutActiveConnections" xml:space="preserve">
+    <value>Aktivne povezave so bile odjavljene: {0}</value>
+  </data>
+  <data name="UserLogoutActiveConnectionsForUser" xml:space="preserve">
+    <value>Aktivne povezave uporabnika so bile odjavljene: {0}</value>
+  </data>
 </root>

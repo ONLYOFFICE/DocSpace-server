@@ -64,7 +64,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RestController
 @RequestMapping(
-    value = "${spring.application.web.api}/scopes",
+    value = {"${spring.application.web.api}/oauth2/scopes", "${spring.application.web.api}/scopes"},
     produces = {MediaType.APPLICATION_JSON_VALUE})
 @RequiredArgsConstructor
 public class ScopeQueryController {

@@ -1194,4 +1194,16 @@
   <data name="WhiteLabelSettingsLogoTextUpdated" xml:space="preserve">
     <value>ブランド名が更新されました</value>
   </data>
+  <data name="DocumentsExternalShareSettingsUpdated" xml:space="preserve">
+    <value>外部リンクのアクセス設定が更新されました</value>
+  </data>
+  <data name="UserLogoutActiveConnection" xml:space="preserve">
+    <value>アクティブな接続がログアウトされました: {0}</value>
+  </data>
+  <data name="UserLogoutActiveConnections" xml:space="preserve">
+    <value>アクティブな接続がログアウトされました: {0}</value>
+  </data>
+  <data name="UserLogoutActiveConnectionsForUser" xml:space="preserve">
+    <value>ユーザーのアクティブな接続がログアウトされました: {0}</value>
+  </data>
 </root>

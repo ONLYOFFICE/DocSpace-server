@@ -32,176 +32,176 @@ namespace ASC.Files.Tests.Tests._04_Security;
 [Trait("Feature", "ExternalSharing")]
 public class ExternalShareAccessTests(AspireAppFixture fixture) : BaseTest(fixture)
 {
-    // private async Task SetExternalSharingAsync(
-    //     bool externalShare,
-    //     bool defaultLinkInternal = false,
-    //     bool applyToDocuments = true,
-    //     bool applyToRooms = true,
-    //     bool blockExisting = true)
-    // {
-    //     await _filesClient.Authenticate(Initializer.Owner);
-    //     await _filesSettingsApi.ChangeExternalSharingSettingsAsync(
-    //         new ExternalSharingSettingsRequestDto(
-    //             externalShare: externalShare,
-    //             defaultShareLinkInternal: defaultLinkInternal,
-    //             externalShareApplyToDocuments: applyToDocuments,
-    //             externalShareApplyToRooms: applyToRooms,
-    //             blockExistingLinksOnRestrict: blockExisting),
-    //         TestContext.Current.CancellationToken);
-    // }
-    //
-    // [Fact]
-    // public async Task CreateFileLink_WhenRestrictedForDocuments_IsInternal()
-    // {
-    //     // Arrange — restrict external sharing for My Documents
-    //     await SetExternalSharingAsync(externalShare: false, applyToDocuments: true, applyToRooms: false);
-    //
-    //     await _filesClient.Authenticate(Initializer.Owner);
-    //     var file = await CreateFileInMy("file.docx", Initializer.Owner);
-    //
-    //     // Act — explicitly request a public (non-internal) link
-    //     var linkParams = new FileLinkRequest(access: FileShare.Read, @internal: false);
-    //     await _filesApi.CreateFilePrimaryExternalLinkAsync(file.Id, linkParams, TestContext.Current.CancellationToken);
-    //     var result = (await _filesApi.GetFilePrimaryExternalLinkAsync(
-    //         file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-    //
-    //     // Reset external sharing changes
-    //     await SetExternalSharingAsync(externalShare: true);
-    //
-    //     // Assert — server enforcement overrides the requested flag
-    //     result.SharedLink.Internal.Should().BeTrue();
-    // }
-    //
-    // [Fact]
-    // public async Task CreateRoomLink_WhenRestrictedForRooms_IsInternal()
-    // {
-    //     // Arrange — restrict external sharing for Rooms only
-    //     await SetExternalSharingAsync(externalShare: false, applyToDocuments: false, applyToRooms: true);
-    //
-    //     await _filesClient.Authenticate(Initializer.Owner);
-    //     var room = await CreateCustomRoom("restricted-room");
-    //
-    //     // Act — retrieve (or auto-create) the primary external link
-    //     var result = (await _roomsApi.GetRoomsPrimaryExternalLinkAsync(
-    //         room.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-    //
-    //     // Reset external sharing changes
-    //     await SetExternalSharingAsync(externalShare: true);
-    //
-    //     // Assert — enforcement applies to the room link
-    //     result.SharedLink.Internal.Should().BeTrue();
-    // }
-    //
-    // [Fact]
-    // public async Task CreateFileLink_WhenRestrictedForRoomsOnly_IsPublic()
-    // {
-    //     // Arrange — restrict only Rooms, leave My Documents unrestricted
-    //     await SetExternalSharingAsync(externalShare: false, applyToDocuments: false, applyToRooms: true);
-    //
-    //     await _filesClient.Authenticate(Initializer.Owner);
-    //     var file = await CreateFileInMy("file.docx", Initializer.Owner);
-    //
-    //     // Act — request a public link for a file in My Documents
-    //     var linkParams = new FileLinkRequest(access: FileShare.Read, @internal: false);
-    //     await _filesApi.CreateFilePrimaryExternalLinkAsync(file.Id, linkParams, TestContext.Current.CancellationToken);
-    //     var result = (await _filesApi.GetFilePrimaryExternalLinkAsync(
-    //         file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-    //
-    //     // Reset external sharing changes
-    //     await SetExternalSharingAsync(externalShare: true);
-    //
-    //     // Assert — no enforcement for My Documents when only Rooms are restricted
-    //     result.SharedLink.Internal.Should().BeFalse();
-    // }
-    //
-    // [Fact]
-    // public async Task AccessExistingFileLink_WhenBlockEnabled_AsAnonymous_ReturnsExternalAccessDenied()
-    // {
-    //     // Arrange — create a public link while sharing is still allowed
-    //     await _filesClient.Authenticate(Initializer.Owner);
-    //     var (token, _) = await CreateFileAndShare(FileShare.Read, varInternal: false);
-    //
-    //     // Apply restriction and block existing links
-    //     await SetExternalSharingAsync(externalShare: false, applyToDocuments: true, blockExisting: true);
-    //
-    //     // Act — anonymous access attempt
-    //     await _filesClient.Authenticate(null);
-    //     var result = (await _sharingApi.GetExternalShareDataAsync(
-    //         token, cancellationToken: TestContext.Current.CancellationToken)).Response;
-    //
-    //     // Reset external sharing changes
-    //     await SetExternalSharingAsync(externalShare: true);
-    //
-    //     // Assert
-    //     result.Status.Should().Be(Status.ExternalAccessDenied);
-    // }
-    //
-    // [Fact]
-    // public async Task AccessExistingRoomLink_WhenBlockEnabled_AsAnonymous_ReturnsExternalAccessDenied()
-    // {
-    //     // Arrange — create a public room link while sharing is allowed
-    //     await _filesClient.Authenticate(Initializer.Owner);
-    //     var room = await CreateCustomRoom("public-room");
-    //     var link = (await _roomsApi.GetRoomsPrimaryExternalLinkAsync(
-    //         room.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-    //     var token = link.SharedLink.RequestToken;
-    //
-    //     // Apply restriction and block existing links for Rooms
-    //     await SetExternalSharingAsync(externalShare: false, applyToDocuments: false, applyToRooms: true, blockExisting: true);
-    //
-    //     // Act — anonymous access attempt
-    //     await _filesClient.Authenticate(null);
-    //     var result = (await _sharingApi.GetExternalShareDataAsync(
-    //         token, cancellationToken: TestContext.Current.CancellationToken)).Response;
-    //
-    //     // Reset external sharing changes
-    //     await SetExternalSharingAsync(externalShare: true);
-    //
-    //     // Assert
-    //     result.Status.Should().Be(Status.ExternalAccessDenied);
-    // }
-    //
-    // [Fact]
-    // public async Task AccessExistingFileLink_WhenBlockDisabled_AsAnonymous_ReturnsOk()
-    // {
-    //     // Arrange — create a public link while sharing is allowed
-    //     await _filesClient.Authenticate(Initializer.Owner);
-    //     var (token, _) = await CreateFileAndShare(FileShare.Read, varInternal: false);
-    //
-    //     // Apply restriction but allow existing links to continue working
-    //     await SetExternalSharingAsync(externalShare: false, applyToDocuments: true, blockExisting: false);
-    //
-    //     // Act — anonymous access
-    //     await _filesClient.Authenticate(null);
-    //     var result = (await _sharingApi.GetExternalShareDataAsync(
-    //         token, cancellationToken: TestContext.Current.CancellationToken)).Response;
-    //
-    //     // Reset external sharing changes
-    //     await SetExternalSharingAsync(externalShare: true);
-    //
-    //     // Assert — existing link still works when block is disabled
-    //     result.Status.Should().Be(Status.Ok);
-    // }
-    //
-    // [Fact]
-    // public async Task AccessExistingFileLink_WhenBlockEnabled_AsAuthenticatedUser_ReturnsOk()
-    // {
-    //     // Arrange — create a public link while sharing is allowed
-    //     await _filesClient.Authenticate(Initializer.Owner);
-    //     var (token, _) = await CreateFileAndShare(FileShare.Read, varInternal: false);
-    //
-    //     // Apply restriction and block existing links
-    //     await SetExternalSharingAsync(externalShare: false, applyToDocuments: true, blockExisting: true);
-    //
-    //     // Act — authenticated user accesses the link
-    //     await _filesClient.Authenticate(Initializer.Owner);
-    //     var result = (await _sharingApi.GetExternalShareDataAsync(
-    //         token, cancellationToken: TestContext.Current.CancellationToken)).Response;
-    //
-    //     // Reset external sharing changes
-    //     await SetExternalSharingAsync(externalShare: true);
-    //
-    //     // Assert — authenticated users bypass the global block
-    //     result.Status.Should().Be(Status.Ok);
-    // }
+    private async Task SetExternalSharingAsync(
+        bool externalShare,
+        bool defaultLinkInternal = false,
+        bool applyToDocuments = true,
+        bool applyToRooms = true,
+        bool blockExisting = true)
+    {
+        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesSettingsApi.ChangeExternalSharingSettingsAsync(
+            new ExternalSharingSettingsRequestDto(
+                externalShare: externalShare,
+                defaultShareLinkInternal: defaultLinkInternal,
+                externalShareApplyToDocuments: applyToDocuments,
+                externalShareApplyToRooms: applyToRooms,
+                blockExistingLinksOnRestrict: blockExisting),
+            TestContext.Current.CancellationToken);
+    }
+
+    [Fact]
+    public async Task CreateFileLink_WhenRestrictedForDocuments_IsInternal()
+    {
+        // Arrange — restrict external sharing for My Documents
+        await SetExternalSharingAsync(externalShare: false, applyToDocuments: true, applyToRooms: false);
+
+        await _filesClient.Authenticate(Initializer.Owner);
+        var file = await CreateFileInMy("file.docx", Initializer.Owner);
+
+        // Act — explicitly request a public (non-internal) link
+        var linkParams = new FileLinkRequest(access: FileShare.Read, @internal: false);
+        await _filesApi.CreateFilePrimaryExternalLinkAsync(file.Id, linkParams, TestContext.Current.CancellationToken);
+        var result = (await _filesApi.GetFilePrimaryExternalLinkAsync(
+            file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        // Reset external sharing changes
+        await SetExternalSharingAsync(externalShare: true);
+
+        // Assert — server enforcement overrides the requested flag
+        result.SharedLink.Internal.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task CreateRoomLink_WhenRestrictedForRooms_IsInternal()
+    {
+        // Arrange — restrict external sharing for Rooms only
+        await SetExternalSharingAsync(externalShare: false, applyToDocuments: false, applyToRooms: true);
+
+        await _filesClient.Authenticate(Initializer.Owner);
+        var room = await CreateCustomRoom("restricted-room");
+
+        // Act — retrieve (or auto-create) the primary external link
+        var result = (await _roomsApi.GetRoomsPrimaryExternalLinkAsync(
+            room.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        // Reset external sharing changes
+        await SetExternalSharingAsync(externalShare: true);
+
+        // Assert — enforcement applies to the room link
+        result.SharedLink.Internal.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task CreateFileLink_WhenRestrictedForRoomsOnly_IsPublic()
+    {
+        // Arrange — restrict only Rooms, leave My Documents unrestricted
+        await SetExternalSharingAsync(externalShare: false, applyToDocuments: false, applyToRooms: true);
+
+        await _filesClient.Authenticate(Initializer.Owner);
+        var file = await CreateFileInMy("file.docx", Initializer.Owner);
+
+        // Act — request a public link for a file in My Documents
+        var linkParams = new FileLinkRequest(access: FileShare.Read, @internal: false);
+        await _filesApi.CreateFilePrimaryExternalLinkAsync(file.Id, linkParams, TestContext.Current.CancellationToken);
+        var result = (await _filesApi.GetFilePrimaryExternalLinkAsync(
+            file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        // Reset external sharing changes
+        await SetExternalSharingAsync(externalShare: true);
+
+        // Assert — no enforcement for My Documents when only Rooms are restricted
+        result.SharedLink.Internal.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task AccessExistingFileLink_WhenBlockEnabled_AsAnonymous_ReturnsExternalAccessDenied()
+    {
+        // Arrange — create a public link while sharing is still allowed
+        await _filesClient.Authenticate(Initializer.Owner);
+        var (token, _) = await CreateFileAndShare(FileShare.Read, varInternal: false);
+
+        // Apply restriction and block existing links
+        await SetExternalSharingAsync(externalShare: false, applyToDocuments: true, blockExisting: true);
+
+        // Act — anonymous access attempt
+        await _filesClient.Authenticate(null);
+        var result = (await _sharingApi.GetExternalShareDataAsync(
+            token, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        // Reset external sharing changes
+        await SetExternalSharingAsync(externalShare: true);
+
+        // Assert
+        result.Status.Should().Be(Status.ExternalAccessDenied);
+    }
+
+    [Fact]
+    public async Task AccessExistingRoomLink_WhenBlockEnabled_AsAnonymous_ReturnsExternalAccessDenied()
+    {
+        // Arrange — create a public room link while sharing is allowed
+        await _filesClient.Authenticate(Initializer.Owner);
+        var room = await CreateCustomRoom("public-room");
+        var link = (await _roomsApi.GetRoomsPrimaryExternalLinkAsync(
+            room.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var token = link.SharedLink.RequestToken;
+
+        // Apply restriction and block existing links for Rooms
+        await SetExternalSharingAsync(externalShare: false, applyToDocuments: false, applyToRooms: true, blockExisting: true);
+
+        // Act — anonymous access attempt
+        await _filesClient.Authenticate(null);
+        var result = (await _sharingApi.GetExternalShareDataAsync(
+            token, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        // Reset external sharing changes
+        await SetExternalSharingAsync(externalShare: true);
+
+        // Assert
+        result.Status.Should().Be(Status.ExternalAccessDenied);
+    }
+
+    [Fact]
+    public async Task AccessExistingFileLink_WhenBlockDisabled_AsAnonymous_ReturnsOk()
+    {
+        // Arrange — create a public link while sharing is allowed
+        await _filesClient.Authenticate(Initializer.Owner);
+        var (token, _) = await CreateFileAndShare(FileShare.Read, varInternal: false);
+
+        // Apply restriction but allow existing links to continue working
+        await SetExternalSharingAsync(externalShare: false, applyToDocuments: true, blockExisting: false);
+
+        // Act — anonymous access
+        await _filesClient.Authenticate(null);
+        var result = (await _sharingApi.GetExternalShareDataAsync(
+            token, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        // Reset external sharing changes
+        await SetExternalSharingAsync(externalShare: true);
+
+        // Assert — existing link still works when block is disabled
+        result.Status.Should().Be(Status.Ok);
+    }
+
+    [Fact]
+    public async Task AccessExistingFileLink_WhenBlockEnabled_AsAuthenticatedUser_ReturnsOk()
+    {
+        // Arrange — create a public link while sharing is allowed
+        await _filesClient.Authenticate(Initializer.Owner);
+        var (token, _) = await CreateFileAndShare(FileShare.Read, varInternal: false);
+
+        // Apply restriction and block existing links
+        await SetExternalSharingAsync(externalShare: false, applyToDocuments: true, blockExisting: true);
+
+        // Act — authenticated user accesses the link
+        await _filesClient.Authenticate(Initializer.Owner);
+        var result = (await _sharingApi.GetExternalShareDataAsync(
+            token, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        // Reset external sharing changes
+        await SetExternalSharingAsync(externalShare: true);
+
+        // Assert — authenticated users bypass the global block
+        result.Status.Should().Be(Status.Ok);
+    }
 }

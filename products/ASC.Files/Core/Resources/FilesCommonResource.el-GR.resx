@@ -589,4 +589,10 @@
   <data name="ErrorMessage_AiServicesDisabled" xml:space="preserve">
     <value>Οι υπηρεσίες AI είναι απενεργοποιημένες για την τρέχουσα πύλη</value>
   </data>
+  <data name="ErrorMessage_ExternalDbNotIndexed" xml:space="preserve">
+    <value>Ο πίνακας βάσης δεδομένων θα δημιουργηθεί μετά την πρώτη υποβολή φόρμας. Δεν υπάρχουν ακόμα δεδομένα για τη δημιουργία της δομής του.</value>
+  </data>
+  <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
+    <value>Αποτυχία συγχρονισμού δεδομένων φόρμας με εξωτερική βάση δεδομένων.</value>
+  </data>
 </root>

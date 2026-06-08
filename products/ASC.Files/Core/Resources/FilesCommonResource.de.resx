@@ -589,4 +589,10 @@ Sicherheit durch garantierte 100%ige Kompatibilität mit docx, xslx und pptx For
   <data name="ErrorMessage_AiServicesDisabled" xml:space="preserve">
     <value>KI-Dienste sind für das aktuelle Portal deaktiviert</value>
   </data>
+  <data name="ErrorMessage_ExternalDbNotIndexed" xml:space="preserve">
+    <value>Die Datenbanktabelle wird nach der ersten Formularübermittlung erstellt. Es sind noch keine Daten vorhanden, um ihre Struktur zu generieren.</value>
+  </data>
+  <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
+    <value>Synchronisierung der Formulardaten mit der externen Datenbank fehlgeschlagen.</value>
+  </data>
 </root>

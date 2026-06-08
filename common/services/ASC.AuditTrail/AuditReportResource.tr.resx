@@ -1194,4 +1194,16 @@
   <data name="ScheduledBackupDeleted" xml:space="preserve">
     <value>Zamanlanmış yedekleme silindi</value>
   </data>
+  <data name="DocumentsExternalShareSettingsUpdated" xml:space="preserve">
+    <value>Dış bağlantılar için erişim ayarları güncellendi</value>
+  </data>
+  <data name="UserLogoutActiveConnection" xml:space="preserve">
+    <value>Aktif bağlantı oturumu kapatıldı: {0}</value>
+  </data>
+  <data name="UserLogoutActiveConnections" xml:space="preserve">
+    <value>Aktif bağlantıların oturumu kapatıldı: {0}</value>
+  </data>
+  <data name="UserLogoutActiveConnectionsForUser" xml:space="preserve">
+    <value>Kullanıcının aktif bağlantılarının oturumu kapatıldı: {0}</value>
+  </data>
 </root>

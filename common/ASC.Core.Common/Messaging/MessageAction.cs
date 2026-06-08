@@ -1000,6 +1000,9 @@ public enum MessageAction
     [Description("AI access disabled")]
     AIAccessDisabled = 6098,
 
+    [Description("User AI settings updated")]
+    UserUpdatedAiSettings = 6099,
+
     #endregion
 
     #region others
