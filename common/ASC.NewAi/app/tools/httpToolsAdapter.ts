@@ -117,19 +117,58 @@ export class HttpToolsAdapter implements ToolsAdapter {
       ...toContext(entityId),
       calls: [{ id: randomUUID(), name: toolName, arguments: args }],
     };
-    const raw = await aiService.post(CALL_PATH, body);
+    // Verbose lifecycle logging: DocSpace integration tools run silently
+    // in-engine, so without this a tool that stalls the C# round-trip
+    // (up to the 60s upstream timeout) is invisible — the UI just shows a
+    // hanging tool card. Log start, elapsed, and the result classification
+    // (no-result / failed / ok) so the stall point is pinpointable.
+    const started = Date.now();
+    logger.info(
+      `docspaceTools.callTool name=${toolName} args=[${Object.keys(args).join(
+        ",",
+      )}] entityId=${entityId ?? "-"} -> ${CALL_PATH}`,
+    );
+    let raw: unknown;
+    try {
+      raw = await aiService.post(CALL_PATH, body);
+    } catch (err) {
+      logger.error(
+        `docspaceTools.callTool name=${toolName} threw after ${
+          Date.now() - started
+        }ms: ${err instanceof Error ? err.message : String(err)}`,
+      );
+      throw err;
+    }
     const results = Array.isArray(raw) ? raw : [];
     const result = results.find((r) => isObject(r)) ?? results[0];
     if (!isObject(result)) {
+      logger.warn(
+        `docspaceTools.callTool name=${toolName} no-result after ${
+          Date.now() - started
+        }ms`,
+      );
       return `Tool "${toolName}" returned no result`;
     }
     const error = getString(result, "error") ?? getString(result, "Error");
     if (error) {
       // Contract: stringify failures into the result so the model can
       // react instead of aborting the stream.
+      logger.warn(
+        `docspaceTools.callTool name=${toolName} failed after ${
+          Date.now() - started
+        }ms: ${error}`,
+      );
       return `Tool "${toolName}" failed: ${error}`;
     }
-    return "result" in result ? result["result"] : result["Result"];
+    const value = "result" in result ? result["result"] : result["Result"];
+    logger.info(
+      `docspaceTools.callTool name=${toolName} ok in ${
+        Date.now() - started
+      }ms (resultLength=${
+        typeof value === "string" ? value.length : "n/a"
+      })`,
+    );
+    return value;
   }
 
   /**
@@ -142,8 +181,18 @@ export class HttpToolsAdapter implements ToolsAdapter {
   }
 
   private async list(entityId: string | undefined): Promise<ToolsList> {
+    // Runs on every stream (tool list + prompt fragment) before the
+    // assistant reply starts; a stalled list here delays the whole chat,
+    // so time it and report the tool count.
+    const started = Date.now();
     const raw = await aiService.post(LIST_PATH, toContext(entityId));
-    return parseList(raw);
+    const parsed = parseList(raw);
+    logger.info(
+      `docspaceTools.list entityId=${entityId ?? "-"} -> ${
+        parsed.tools.length
+      } tool(s) in ${Date.now() - started}ms`,
+    );
+    return parsed;
   }
 }
 

@@ -140,19 +140,69 @@ function describeChatError(error: unknown): string {
   return parts.length > 0 ? parts.join(", ") : JSON.stringify(error);
 }
 
+// Describe a `tool-call-pending` event for the server log: the tool name
+// lives in the tool-call content part at `event.idx`, alongside the
+// approval flags. A hanging tool surfaces here (we see which tool was
+// requested) but never reaches `message-end` — the absence of a
+// "stream completed" line for the same route is the tell.
+function describeToolCallPending(event: Record<string, unknown>): string {
+  const idx = typeof event["idx"] === "number" ? event["idx"] : -1;
+  const message = isObject(event["message"]) ? event["message"] : null;
+  const content =
+    message && Array.isArray(message["content"]) ? message["content"] : [];
+  const part = idx >= 0 && isObject(content[idx]) ? content[idx] : null;
+  const toolName =
+    part && typeof part["toolName"] === "string" ? part["toolName"] : "?";
+  const toolCallId =
+    part && typeof part["toolCallId"] === "string" ? part["toolCallId"] : "?";
+  return `tool=${toolName} callId=${toolCallId} idx=${idx} serverExecuted=${
+    event["serverExecuted"] === true
+  } autoAllow=${event["autoAllow"] === true}`;
+}
+
+// Scan an event's streamed message for tool-call content parts and record
+// each tool's name against whether its `result` is populated yet. Adapter
+// tools (web search, image generation, DocSpace) execute inside the engine
+// and never surface a `tool-call-pending` to this tap — the only trace they
+// leave here is the tool-call part inside the assistant message, gaining a
+// `result` once the engine ran it. So `executed=true` in the completion
+// summary is the positive proof a tool actually fired and returned.
+function trackToolCalls(
+  event: unknown,
+  seen: Map<string, boolean>,
+): void {
+  if (!isObject(event)) {
+    return;
+  }
+  const message = isObject(event["message"]) ? event["message"] : null;
+  const content = message && Array.isArray(message["content"]) ? message["content"] : [];
+  for (const part of content) {
+    if (!isObject(part) || part["type"] !== "tool-call") {
+      continue;
+    }
+    const name = typeof part["toolName"] === "string" ? part["toolName"] : "?";
+    const hasResult = part["result"] !== undefined && part["result"] !== null;
+    // Latch to true: a later delta without the result must not flip it back.
+    seen.set(name, (seen.get(name) ?? false) || hasResult);
+  }
+}
+
 // Sniff stream events to surface provider failures in server logs. The
 // engine emits `message-incomplete` with `status.reason === "error"` and a
 // `ChatErrorPayload` instead of throwing, so without this tap the cause of
 // a broken stream is invisible from the server side — it only shows up in
-// the browser DevTools network tab.
+// the browser DevTools network tab. Also traces tool-call lifecycle so a
+// tool that hangs (pending surfaced, stream never completes) is visible.
 async function* logStreamErrors<T>(
   route: string,
   iter: AsyncIterable<T>,
 ): AsyncIterable<T> {
   let eventCount = 0;
+  const toolCalls = new Map<string, boolean>();
   try {
     for await (const event of iter) {
       eventCount += 1;
+      trackToolCalls(event, toolCalls);
       if (isObject(event) && event["type"] === "message-incomplete") {
         const message = isObject(event["message"]) ? event["message"] : null;
         const status = message && isObject(message["status"]) ? message["status"] : null;
@@ -165,9 +215,22 @@ async function* logStreamErrors<T>(
             `${route}: message-incomplete reason=${String(status["reason"])}`,
           );
         }
+      } else if (isObject(event) && event["type"] === "tool-call-pending") {
+        logger.info(
+          `${route}: tool-call-pending — ${describeToolCallPending(event)}`,
+        );
       }
       yield event;
     }
+    const toolSummary =
+      toolCalls.size > 0
+        ? [...toolCalls]
+            .map(([name, executed]) => `${name}(executed=${executed})`)
+            .join(", ")
+        : "<none>";
+    logger.info(
+      `${route}: stream completed after ${eventCount} event(s); toolCalls=${toolSummary}`,
+    );
   } catch (err) {
     logger.error(
       `${route}: stream threw after ${eventCount} event(s): ${
