@@ -31,6 +31,8 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
+using ASC.Files.Core.Core.Thirdparty.Nextcloud;
+
 using DriveFile = Google.Apis.Drive.v3.Data.File;
 
 namespace ASC.Files.Thirdparty;
@@ -40,6 +42,7 @@ namespace ASC.Files.Thirdparty;
 [Scope(typeof(IDaoSelector<DriveFile, DriveFile, DriveFile>), GenericArguments = [typeof(DriveFile), typeof(DriveFile), typeof(DriveFile)])]
 [Scope(typeof(IDaoSelector<Item, Item, Item>), GenericArguments = [typeof(Item), typeof(Item), typeof(Item)])]
 [Scope(typeof(IDaoSelector<WebDavEntry, WebDavEntry, WebDavEntry>), GenericArguments = [typeof(WebDavEntry), typeof(WebDavEntry), typeof(WebDavEntry)])]
+[Scope(typeof(IDaoSelector<NextcloudDavEntry, NextcloudDavEntry, NextcloudDavEntry>), GenericArguments = [typeof(NextcloudDavEntry), typeof(NextcloudDavEntry), typeof(NextcloudDavEntry)])]
 internal class RegexDaoSelectorBase<TFile, TFolder, TItem>(IServiceProvider serviceProvider, IDaoFactory daoFactory)
     : IDaoSelector<TFile, TFolder, TItem>
     where TFile : class, TItem

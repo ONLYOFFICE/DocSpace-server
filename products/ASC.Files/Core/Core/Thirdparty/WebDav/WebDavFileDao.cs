@@ -36,7 +36,8 @@ using File = System.IO.File;
 namespace ASC.Files.Core.Core.Thirdparty.WebDav;
 
 [Scope(typeof(ThirdPartyFileDao<WebDavEntry, WebDavEntry, WebDavEntry>))]
-internal class WebDavFileDao(UserManager userManager,
+internal class WebDavFileDao(
+    UserManager userManager,
     IDbContextFactory<FilesDbContext> dbContextFactory,
     RegexDaoSelectorBase<WebDavEntry, WebDavEntry, WebDavEntry> daoSelector,
     CrossDao crossDao,
@@ -45,8 +46,23 @@ internal class WebDavFileDao(UserManager userManager,
     TempPath tempPath,
     SetupInfo setupInfo,
     TenantManager tenantManager,
-    Global global) :
-    ThirdPartyFileDao<WebDavEntry, WebDavEntry, WebDavEntry>(userManager, dbContextFactory, daoSelector, crossDao, fileDao, dao, tenantManager, global)
+    Global global)
+    : AbstractWebDavFileDao<WebDavEntry>(userManager, dbContextFactory, daoSelector, crossDao, fileDao, dao, tempPath, setupInfo, tenantManager, global)
+{ }
+
+internal abstract class AbstractWebDavFileDao<TEntry>(
+    UserManager userManager,
+    IDbContextFactory<FilesDbContext> dbContextFactory,
+    RegexDaoSelectorBase<TEntry, TEntry, TEntry> daoSelector,
+    CrossDao crossDao,
+    IFileDao<int> fileDao,
+    IDaoBase<TEntry, TEntry, TEntry> dao,
+    TempPath tempPath,
+    SetupInfo setupInfo,
+    TenantManager tenantManager,
+    Global global)
+    : ThirdPartyFileDao<TEntry, TEntry, TEntry>(userManager, dbContextFactory, daoSelector, crossDao, fileDao, dao, tenantManager, global)
+    where TEntry : WebDavEntry
 {
     protected override string UploadSessionKey => "WebDavSession";
 

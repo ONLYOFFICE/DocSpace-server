@@ -31,6 +31,8 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
+using ASC.Files.Core.Core.Thirdparty.Nextcloud;
+
 namespace ASC.Files.Thirdparty;
 
 [EnumExtensions]
@@ -45,7 +47,8 @@ public enum ProviderTypes
     kDrive,
     Yandex,
     NextCloud,
-    OwnCloud
+    OwnCloud,
+    Nextcloud2
 }
 
 [Scope(typeof(IProviderDao))]
@@ -57,6 +60,7 @@ internal class ProviderAccountDao(
     AuthContext authContext,
     IDbContextFactory<FilesDbContext> dbContextFactory,
     OAuth20TokenHelper oAuth20TokenHelper,
+    ConsumerFactory consumerFactory,
     ILogger<ProviderAccountDao> logger)
     : IProviderDao
 {
@@ -188,7 +192,10 @@ internal class ProviderAccountDao(
         {
             ProviderTypesExtensions.TryParse(forUpdate.Provider, true, out var key);
             var updatedAuthData = GetEncodedAccessToken(data.AuthData, key);
-            updatedAuthData.Url = forUpdate.Url;
+            if (key != ProviderTypes.Nextcloud2)
+            {
+                updatedAuthData.Url = forUpdate.Url;
+            }
 
             if (!await CheckProviderInfoAsync(await ToProviderInfoAsync(0, key, forUpdate.Title, updatedAuthData, authContext.CurrentAccount.ID, forUpdate.FolderType,
                     tenantUtil.DateTimeToUtc(tenantUtil.DateTimeNow()))))
@@ -620,6 +627,26 @@ internal class ProviderAccountDao(
             return od;
         }
 
+        if (key == ProviderTypes.Nextcloud2) {
+            var nc = serviceProvider.GetService<NextcloudDavProviderInfo>();
+            nc.ProviderId = id;
+            nc.CustomerTitle = providerTitle;
+            nc.Owner = owner == Guid.Empty ? authContext.CurrentAccount.ID : owner;
+            nc.ProviderKey = key.ToStringFast();
+            nc.RootFolderType = rootFolderType;
+            nc.CreateOn = createOn;
+            nc.ModifiedOn = modifiedOn;
+            nc.AuthData = authData;
+            nc.FolderType = folderType;
+            nc.FolderId = folderId;
+            nc.Private = privateRoom;
+            nc.HasLogo = hasLogo;
+            nc.Color = color;
+            nc.Cover = cover;
+
+            return nc;
+        }
+
         if (string.IsNullOrEmpty(input.Provider))
         {
             throw new ArgumentNullException("providerKey");
@@ -704,6 +731,20 @@ internal class ProviderAccountDao(
                 }
 
                 return new AuthData(token: token.ToJson());
+
+            case ProviderTypes.Nextcloud2:
+                code = authData.RawToken;
+                token = oAuth20TokenHelper.GetAccessToken<NextcloudLoginProvider>(code);
+                if (token == null)
+                {
+                    throw new UnauthorizedAccessException(string.Format(FilesCommonResource.ErrorMessage_SecurityException_Auth, provider));
+                }
+
+                var nextcloudLoginProvider = consumerFactory.Get<NextcloudLoginProvider>();
+                var profile = nextcloudLoginProvider.RequestProfile(token.AccessToken);
+
+                return new AuthData(token: token.ToJson(), url: new Uri(nextcloudLoginProvider.BaseUrl, $"/remote.php/dav/files/{profile.Id}").ToString());
+
             case ProviderTypes.SharePoint:
             case ProviderTypes.WebDav:
             case ProviderTypes.NextCloud:

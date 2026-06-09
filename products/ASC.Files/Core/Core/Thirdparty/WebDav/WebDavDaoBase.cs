@@ -33,6 +33,7 @@
 
 namespace ASC.Files.Core.Core.Thirdparty.WebDav;
 
+
 [Scope(typeof(IDaoBase<WebDavEntry, WebDavEntry, WebDavEntry>))]
 internal class WebDavDaoBase(
     IDaoFactory daoFactory,
@@ -43,36 +44,58 @@ internal class WebDavDaoBase(
     IDbContextFactory<FilesDbContext> dbContextFactory,
     FileUtility fileUtility,
     RegexDaoSelectorBase<WebDavEntry, WebDavEntry, WebDavEntry> regexDaoSelectorBase)
-    : ThirdPartyProviderDao<WebDavEntry, WebDavEntry, WebDavEntry>(daoFactory, serviceProvider, userManager, tenantManager, tenantUtil, dbContextFactory, fileUtility, regexDaoSelectorBase),
+    : AbstractWebDavDaoBase<WebDavEntry>(daoFactory, serviceProvider, userManager, tenantManager, tenantUtil, dbContextFactory, fileUtility, regexDaoSelectorBase),
         IDaoBase<WebDavEntry, WebDavEntry, WebDavEntry>
 {
+    protected override WebDavEntry CreateErrorEntry(string error, string id) => new ErrorWebDavEntry(error, id);
 
-    private WebDavProviderInfo _providerInfo;
+    private sealed class ErrorWebDavEntry(string errorMessage, string id) : WebDavEntry, IErrorItem
+    {
+        public string Error { get; } = errorMessage;
+        public string ErrorId { get; } = id;
+    }
+}
 
-    public void Init(string pathPrefix, IProviderInfo<WebDavEntry, WebDavEntry, WebDavEntry> providerInfo)
+internal abstract class AbstractWebDavDaoBase<TEntry>(
+    IDaoFactory daoFactory,
+    IServiceProvider serviceProvider,
+    UserManager userManager,
+    TenantManager tenantManager,
+    TenantUtil tenantUtil,
+    IDbContextFactory<FilesDbContext> dbContextFactory,
+    FileUtility fileUtility,
+    RegexDaoSelectorBase<TEntry, TEntry, TEntry> regexDaoSelectorBase)
+    : ThirdPartyProviderDao<TEntry, TEntry, TEntry>(daoFactory, serviceProvider, userManager, tenantManager, tenantUtil, dbContextFactory, fileUtility, regexDaoSelectorBase),
+        IDaoBase<TEntry, TEntry, TEntry>
+    where TEntry : WebDavEntry
+{
+
+    private AbstractProviderInfo<TEntry, TEntry, TEntry> _providerInfo;
+
+    public void Init(string pathPrefix, IProviderInfo<TEntry, TEntry, TEntry> providerInfo)
     {
         PathPrefix = pathPrefix;
         ProviderInfo = providerInfo;
-        _providerInfo = providerInfo as WebDavProviderInfo;
+        _providerInfo = providerInfo as AbstractProviderInfo<TEntry, TEntry, TEntry>;
     }
 
-    public string GetName(WebDavEntry item)
+    public string GetName(TEntry item)
     {
         return item.DisplayName;
     }
 
-    public string GetId(WebDavEntry item)
+    public string GetId(TEntry item)
     {
         return item.Id;
     }
 
-    public bool IsFile(WebDavEntry item)
+    public bool IsFile(TEntry item)
     {
         return !item.IsCollection;
     }
 
 
-    public bool IsRoot(WebDavEntry folder)
+    public bool IsRoot(TEntry folder)
     {
         return IsRoot(folder.Id);
     }
@@ -101,7 +124,7 @@ internal class WebDavDaoBase(
         }
     }
 
-    public string GetParentFolderId(WebDavEntry item)
+    public string GetParentFolderId(TEntry item)
     {
         if (item == null || IsRoot(item))
         {
@@ -118,7 +141,7 @@ internal class WebDavDaoBase(
         return index == -1 ? null : id[..index];
     }
 
-    public string MakeId(WebDavEntry item)
+    public string MakeId(TEntry item)
     {
         return MakeId(GetId(item));
     }
@@ -135,7 +158,7 @@ internal class WebDavDaoBase(
             : $"{PathPrefix}-{path}";
     }
 
-    public string MakeFolderTitle(WebDavEntry folder)
+    public string MakeFolderTitle(TEntry folder)
     {
         if (folder == null || IsRoot(folder))
         {
@@ -145,21 +168,25 @@ internal class WebDavDaoBase(
         return Global.ReplaceInvalidCharsAndTruncate(GetName(folder));
     }
 
-    public string MakeFileTitle(WebDavEntry file)
+    public string MakeFileTitle(TEntry file)
     {
         var name = GetName(file);
 
         return string.IsNullOrEmpty(name) ? ProviderInfo.ProviderKey : Global.ReplaceInvalidCharsAndTruncate(name);
     }
 
-    public Folder<string> ToFolder(WebDavEntry webDavFolder)
+    protected abstract TEntry CreateErrorEntry(string error, string id);
+
+    public Folder<string> ToFolder(TEntry webDavFolder)
     {
-        switch (webDavFolder)
+        if (webDavFolder == null)
         {
-            case null:
-                return null;
-            case ErrorWebDavEntry errorEntry:
-                return ToErrorFolder(errorEntry);
+            return null;
+        }
+
+        if (webDavFolder is IErrorItem)
+        {
+            return ToErrorFolder(webDavFolder);
         }
 
         var isRoot = IsRoot(webDavFolder);
@@ -175,21 +202,23 @@ internal class WebDavDaoBase(
         folder.SettingsHasLogo = ProviderInfo.HasLogo;
         folder.SettingsColor = ProviderInfo.Color;
         folder.SettingsCover = ProviderInfo.Cover;
-        
+
         ProcessFolderAsRoom(folder);
         SetDateTime(webDavFolder, folder);
 
         return folder;
     }
 
-    public File<string> ToFile(WebDavEntry webDavFile)
+    public File<string> ToFile(TEntry webDavFile)
     {
-        switch (webDavFile)
+        if (webDavFile == null)
         {
-            case null:
-                return null;
-            case ErrorWebDavEntry errorEntry:
-                return ToErrorFile(errorEntry);
+            return null;
+        }
+
+        if (webDavFile is IErrorItem)
+        {
+            return ToErrorFile(webDavFile);
         }
 
         var file = GetFile();
@@ -200,12 +229,13 @@ internal class WebDavDaoBase(
         file.Title = MakeFileTitle(webDavFile);
         file.ThumbnailStatus = Thumbnail.Created;
         file.Encrypted = ProviderInfo.Private;
+        file.Category = (int)FilterType.PdfForm;
         SetDateTime(webDavFile, file);
 
         return file;
     }
 
-    private void SetDateTime(WebDavEntry webDavEntry, FileEntry fileEntry)
+    private void SetDateTime(TEntry webDavEntry, FileEntry fileEntry)
     {
         if (webDavEntry.CreationDate != DateTime.MinValue)
         {
@@ -222,12 +252,12 @@ internal class WebDavDaoBase(
         return ToFolder(await GetFolderAsync(string.Empty));
     }
 
-    public async Task<WebDavEntry> CreateFolderAsync(string title, string folderId)
+    public async Task<TEntry> CreateFolderAsync(string title, string folderId)
     {
         return await _providerInfo.CreateFolderAsync(title, MakeThirdId(folderId), GetId);
     }
 
-    public async Task<WebDavEntry> GetFolderAsync(string folderId)
+    public async Task<TEntry> GetFolderAsync(string folderId)
     {
         var id = MakeThirdId(folderId);
 
@@ -237,11 +267,11 @@ internal class WebDavDaoBase(
         }
         catch (Exception e)
         {
-            return new ErrorWebDavEntry(e.Message, folderId);
+            return CreateErrorEntry(e.Message, folderId);
         }
     }
 
-    public async Task<WebDavEntry> GetFileAsync(string fileId)
+    public async Task<TEntry> GetFileAsync(string fileId)
     {
         var id = MakeThirdId(fileId);
 
@@ -251,7 +281,7 @@ internal class WebDavDaoBase(
         }
         catch (Exception e)
         {
-            return new ErrorWebDavEntry(e.Message, fileId);
+            return CreateErrorEntry(e.Message, fileId);
         }
     }
 
@@ -262,14 +292,14 @@ internal class WebDavDaoBase(
         return items.Select(MakeId);
     }
 
-    public async Task<List<WebDavEntry>> GetItemsAsync(string parentId, bool? folder = null)
+    public async Task<List<TEntry>> GetItemsAsync(string parentId, bool? folder = null)
     {
         var id = MakeThirdId(parentId);
-        var items = await _providerInfo.GetItemsAsync(id, GetId, IsFile);
+        var items = (await _providerInfo.GetItemsAsync(id, GetId, IsFile)).Cast<TEntry>();
 
         if (!folder.HasValue)
         {
-            return items;
+            return items.ToList();
         }
 
         return folder.Value
@@ -277,35 +307,29 @@ internal class WebDavDaoBase(
             : items.Where(x => !x.IsCollection).ToList();
     }
 
-    private File<string> ToErrorFile(ErrorWebDavEntry errorEntry)
+    private File<string> ToErrorFile(TEntry errorEntry)
     {
-        if (errorEntry == null)
+        if (errorEntry is not IErrorItem errorItem)
         {
             return null;
         }
 
-        var file = GetErrorFile(new ErrorEntry(errorEntry.Error, errorEntry.ErrorId));
+        var file = GetErrorFile(new ErrorEntry(errorItem.Error, errorItem.ErrorId));
         file.Title = MakeFileTitle(errorEntry);
 
         return file;
     }
 
-    private Folder<string> ToErrorFolder(ErrorWebDavEntry errorEntry)
+    private Folder<string> ToErrorFolder(TEntry errorEntry)
     {
-        if (errorEntry == null)
+        if (errorEntry is not IErrorItem errorItem)
         {
             return null;
         }
 
-        var folder = GetErrorFolder(new ErrorEntry(errorEntry.Error, errorEntry.ErrorId));
+        var folder = GetErrorFolder(new ErrorEntry(errorItem.Error, errorItem.ErrorId));
         folder.Title = MakeFolderTitle(errorEntry);
 
         return folder;
-    }
-
-    private class ErrorWebDavEntry(string errorMessage, string id) : WebDavEntry, IErrorItem
-    {
-        public string Error { get; } = errorMessage;
-        public string ErrorId { get; } = id;
     }
 }

@@ -82,6 +82,8 @@ public class ThirdPartyController(OAuth20TokenHelper oAuth20TokenHelper) : Contr
             LoginProvider.Wordpress => oAuth20TokenHelper.RequestCode<WordpressLoginProvider>(
                 additionalStateArgs: additionals),
             LoginProvider.Github => oAuth20TokenHelper.RequestCode<GithubLoginProvider>(additionalStateArgs: additionals),
+            LoginProvider.Nextcloud => oAuth20TokenHelper.RequestCode<NextcloudLoginProvider>(
+                additionalStateArgs: additionals),
             _ => null
         };
     }

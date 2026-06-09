@@ -35,12 +35,36 @@ namespace ASC.Files.Core.Core.Thirdparty;
 
 internal abstract class AbstractProviderInfo<TFile, TFolder, TItem, TProvider>(DisposableWrapper wrapper,
         ProviderInfoHelper providerInfoHelper)
-    : IProviderInfo<TFile, TFolder, TItem>
+    : AbstractProviderInfo<TFile, TFolder, TItem>(wrapper, providerInfoHelper)
     where TFile : class, TItem
     where TFolder : class, TItem
     where TItem : class
     where TProvider : Consumer, IOAuthProvider, new()
 {
+    public override Task<IThirdPartyStorage<TFile, TFolder, TItem>> StorageAsync
+    {
+        get
+        {
+            if (!_wrapper.TryGetStorage<IThirdPartyStorage<TFile, TFolder, TItem>>(ProviderId, out var storage) || !storage.IsOpened)
+            {
+                return _wrapper.CreateStorageAsync<IThirdPartyStorage<TFile, TFolder, TItem>, TProvider>(AuthData, ProviderId);
+            }
+
+            return Task.FromResult(storage);
+        }
+    }
+}
+
+internal abstract class AbstractProviderInfo<TFile, TFolder, TItem>(
+    DisposableWrapper wrapper,
+    ProviderInfoHelper providerInfoHelper)
+    : IProviderInfo<TFile, TFolder, TItem>
+    where TFile : class, TItem
+    where TFolder : class, TItem
+    where TItem : class
+{
+    protected DisposableWrapper _wrapper = wrapper;
+
     public abstract Selector Selector { get; }
     public abstract ProviderFilter ProviderFilter { get; }
     public virtual bool MutableEntityId => false;
@@ -62,20 +86,9 @@ internal abstract class AbstractProviderInfo<TFile, TFolder, TItem, TProvider>(D
     public AuthData AuthData { get; set; }
     public string Color { get; set; }
     public string Cover { get; set; }
-    private bool StorageOpened => wrapper.TryGetStorage(ProviderId, out var storage) && storage.IsOpened;
+    private bool StorageOpened => _wrapper.TryGetStorage(ProviderId, out var storage) && storage.IsOpened;
 
-    public Task<IThirdPartyStorage<TFile, TFolder, TItem>> StorageAsync
-    {
-        get
-        {
-            if (!wrapper.TryGetStorage<IThirdPartyStorage<TFile, TFolder, TItem>>(ProviderId, out var storage) || !storage.IsOpened)
-            {
-                return wrapper.CreateStorageAsync<IThirdPartyStorage<TFile, TFolder, TItem>, TProvider>(AuthData, ProviderId);
-            }
-
-            return Task.FromResult(storage);
-        }
-    }
+    public abstract Task<IThirdPartyStorage<TFile, TFolder, TItem>> StorageAsync { get; }
 
     public async Task<bool> CheckAccessAsync()
     {
@@ -94,7 +107,7 @@ internal abstract class AbstractProviderInfo<TFile, TFolder, TItem, TProvider>(D
 
     public Task InvalidateStorageAsync()
     {
-        wrapper?.Dispose();
+        _wrapper?.Dispose();
 
         return CacheResetAsync();
     }

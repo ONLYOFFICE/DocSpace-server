@@ -54,6 +54,9 @@ public class ThirdpartyConfiguration(ThirdpartyConfigurationData configuration, 
 
     private GoogleLoginProvider GoogleLoginProvider => field ??= consumerFactory.Get<GoogleLoginProvider>();
 
+    private NextcloudLoginProvider _nextcloudLoginProvider;
+    private NextcloudLoginProvider NextcloudLoginProvider => _nextcloudLoginProvider ??= consumerFactory.Get<NextcloudLoginProvider>();
+
     private HashSet<string> ThirdPartyProviders => configuration.ThirdPartyProviders;
 
     public bool SupportInclusion(IDaoFactory daoFactory)
@@ -96,6 +99,7 @@ public class ThirdpartyConfiguration(ThirdpartyConfigurationData configuration, 
     private static string SharePointKey => "sharepoint";
     private static string WebDavKey => "webdav";
     private static string NextcloudKey => "nextcloud";
+    private static string Nextcloud2Key => "nextcloud2";
     private static string OwncloudKey => "owncloud";
     private static string KDriveKey => "kdrive";
     private static string YandexKey => "yandex";
@@ -154,6 +158,8 @@ public class ThirdpartyConfiguration(ThirdpartyConfigurationData configuration, 
         if (ThirdPartyProviders.Contains(NextcloudKey))
         {
             providers.Add(new ProviderDto("Nextcloud", webDavKey, true, RequiredConnectionUrl: true));
+            providers.Add(new ProviderDto("Nextcloud2", ProviderTypes.Nextcloud2.ToStringFast(), NextcloudLoginProvider.IsEnabled, true, NextcloudLoginProvider.RedirectUri,
+                ClientId: NextcloudLoginProvider.ClientID));
         }
 
         if (ThirdPartyProviders.Contains(OwncloudKey))
@@ -187,6 +193,8 @@ public class ThirdpartyConfiguration(ThirdpartyConfigurationData configuration, 
         {
             result.Add(["OneDrive", OneDriveLoginProvider.ClientID, OneDriveLoginProvider.RedirectUri]);
         }
+
+        result.Add(["Nextcloud2", NextcloudLoginProvider.ClientID, NextcloudLoginProvider.RedirectUri]);
 
         if (SupportSharePointInclusion)
         {

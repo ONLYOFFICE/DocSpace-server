@@ -76,7 +76,7 @@ public class NextcloudLoginProvider : BaseLoginProvider<NextcloudLoginProvider>,
             : RequestProfile(accessToken);
     }
 
-    private LoginProfile RequestProfile(string accessToken)
+    public LoginProfile RequestProfile(string accessToken)
     {
         try
         {
@@ -87,7 +87,6 @@ public class NextcloudLoginProvider : BaseLoginProvider<NextcloudLoginProvider>,
             });
 
             var response = JsonSerializer.Deserialize<NextcloudApiResponse<NextcloudUser>>(responseJson, _jsonSerializerOptions);
-
             return ProfileFromNextcloud(response.Ocs.Data);
         }
         catch (Exception ex)
@@ -111,7 +110,7 @@ public class NextcloudLoginProvider : BaseLoginProvider<NextcloudLoginProvider>,
             Provider = ProviderConstants.Nextcloud,
             EMail = nextcloudUser.Email,
             DisplayName = nextcloudUser.DisplayName
-        };;
+        };
     }
 
     private class NextcloudApiResponse<T>

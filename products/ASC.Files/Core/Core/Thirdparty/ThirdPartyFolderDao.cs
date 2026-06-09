@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -31,6 +31,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
+using ASC.Files.Core.Core.Thirdparty.Nextcloud;
+
 using DriveFile = Google.Apis.Drive.v3.Data.File;
 
 namespace ASC.Files.Core.Core.Thirdparty;
@@ -40,6 +42,7 @@ namespace ASC.Files.Core.Core.Thirdparty;
 [Scope(GenericArguments = [typeof(DriveFile), typeof(DriveFile), typeof(DriveFile)])]
 [Scope(GenericArguments = [typeof(Item), typeof(Item), typeof(Item)])]
 [Scope(GenericArguments = [typeof(WebDavEntry), typeof(WebDavEntry), typeof(WebDavEntry)])]
+[Scope(GenericArguments = [typeof(NextcloudDavEntry), typeof(NextcloudDavEntry), typeof(NextcloudDavEntry)])]
 internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
     IDaoSelector<TFile, TFolder, TItem> daoSelector,
     IDaoBase<TFile, TFolder, TItem> dao,

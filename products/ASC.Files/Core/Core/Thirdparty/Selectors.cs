@@ -43,9 +43,10 @@ public static class Selectors
     public static readonly Selector Box = new() { Name = "Box", Id = "box" };
     public static readonly Selector Dropbox = new() { Name = "Dropbox", Id = "dropbox" };
     public static readonly Selector OneDrive = new() { Name = "OneDrive", Id = "onedrive" };
+    public static readonly Selector Nextcloud = new() { Name = "Nextcloud", Id = "nextcloud" };
 
-    public static readonly List<Selector> All = [WebDav, SharePoint, GoogleDrive, Box, Dropbox, OneDrive];
-    public static readonly List<Selector> StoredCache = [GoogleDrive, Box, Dropbox, OneDrive, WebDav];
+    public static readonly List<Selector> All = [WebDav, SharePoint, GoogleDrive, Box, Dropbox, OneDrive, Nextcloud];
+    public static readonly List<Selector> StoredCache = [GoogleDrive, Box, Dropbox, OneDrive, WebDav, Nextcloud];
 }
 
 public class Selector

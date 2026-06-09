@@ -31,6 +31,8 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
+using ASC.Files.Core.Core.Thirdparty.Nextcloud;
+
 using DriveFile = Google.Apis.Drive.v3.Data.File;
 using File = Microsoft.SharePoint.Client.File;
 using Folder = Microsoft.SharePoint.Client.Folder;
@@ -76,6 +78,11 @@ internal class SelectorFactory(IServiceProvider serviceProvider)
         if (selector == Selectors.OneDrive.Id)
         {
             return serviceProvider.GetService<IDaoSelector<Item, Item, Item>>();
+        }
+
+        if (selector == Selectors.Nextcloud.Id)
+        {
+            return serviceProvider.GetService<IDaoSelector<NextcloudDavEntry, NextcloudDavEntry, NextcloudDavEntry>>();
         }
 
         throw new ItemNotFoundException($"Selector '{selector}' not found");

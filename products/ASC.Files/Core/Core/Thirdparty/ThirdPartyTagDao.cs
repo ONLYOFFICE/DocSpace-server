@@ -31,6 +31,8 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
+using ASC.Files.Core.Core.Thirdparty.Nextcloud;
+
 using DriveFile = Google.Apis.Drive.v3.Data.File;
 
 namespace ASC.Files.Core.Core.Thirdparty;
@@ -40,6 +42,7 @@ namespace ASC.Files.Core.Core.Thirdparty;
 [Scope(GenericArguments = [typeof(DriveFile), typeof(DriveFile), typeof(DriveFile)])]
 [Scope(GenericArguments = [typeof(Item), typeof(Item), typeof(Item)])]
 [Scope(GenericArguments = [typeof(WebDavEntry), typeof(WebDavEntry), typeof(WebDavEntry)])]
+[Scope(GenericArguments = [typeof(NextcloudDavEntry), typeof(NextcloudDavEntry), typeof(NextcloudDavEntry)])]
 internal class ThirdPartyTagDao<TFile, TFolder, TItem>(
     IDaoFactory daoFactory,
     IDbContextFactory<FilesDbContext> dbContextFactory,
