@@ -273,6 +273,47 @@ public class ProjectConfigurator(
         return this;
     }
 
+    public ProjectConfigurator AddNewAi()
+    {
+        var name = "onlyoffice-newAi";
+        var path = Path.Combine("..", "ASC.NewAi");
+        var port = Constants.NewAiPort;
+
+        if (isDocker)
+        {
+            var resourceBuilder = builder
+                .AddDockerfile(name, path)
+                .WithImageTag("dev")
+                .WithEnvironment("log:dir", "/logs")
+                .WithEnvironment("log:name", "newAi")
+                .WithEnvironment("API_HOST", new UriBuilder(Uri.UriSchemeHttp, Constants.OpenRestyContainer, Constants.RestyPort).ToString())
+                .WithEnvironment("AI_SERVICE_URL", new UriBuilder(Uri.UriSchemeHttp, GetProjectName<ASC_AI>(), Constants.AiPort).ToString())
+                .WithEnvironment("app:appsettings", "/buildtools/config")
+                // `__` form, not `:` — NewAi's nconf would otherwise nest a
+                // `:`-keyed var and turn the `ai.mcp` array into an object.
+                .WithEnvironment("AI__MCP__0__ENDPOINT", new UriBuilder(Uri.UriSchemeHttp, Constants.DocSpaceMcpContainer, Constants.DocSpaceMcpPort).ToString() + "mcp")
+                .WithHttpEndpoint(port, port, isProxied: false)
+                .WithHttpHealthCheck("/health")
+                .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
+
+            AddBaseBind(resourceBuilder);
+        }
+        else
+        {
+            builder.AddJavaScriptApp(name, path, "dev")
+                .WithYarn()
+                .WithEnvironment("NODE_ENV", "development")
+                // `__` form, not `:` — NewAi's nconf would otherwise nest a
+                // `:`-keyed var and turn the `ai.mcp` array into an object.
+                .WithEnvironment("AI__MCP__0__ENDPOINT", new UriBuilder(Uri.UriSchemeHttp, "localhost", Constants.DocSpaceMcpPort) + "mcp")
+                .WithHttpEndpoint(targetPort: port)
+                .WithHttpHealthCheck("/health")
+                .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
+        }
+
+        return this;
+    }
+
     public ProjectConfigurator AddWebDav()
     {
         var name = "onlyoffice-webDav";

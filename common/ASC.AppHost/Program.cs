@@ -69,7 +69,8 @@ switch (launchProfile)
             .AddProject<ASC_Files>(Constants.FilesPort)
             .AddProject<ASC_Files_Worker>(Constants.FilesWorkerPort)
             .AddProject<ASC_People>(Constants.PeoplePort)
-            .AddProject<ASC_Web_Api>(Constants.WebApiPort);
+            .AddProject<ASC_Web_Api>(Constants.WebApiPort)
+            .AddProject<ASC_AI>(Constants.AiPort);
 
         break;
     case "preview":
@@ -103,7 +104,8 @@ switch (launchProfile)
             .AddProject<ASC_AI_Worker>(Constants.AiWorkerPort)
             .AddProject<ASC_TelegramService>(Constants.TelegramPort)
             .AddSocketIO()
-            .AddSsoAuth();
+            .AddSsoAuth()
+            .AddNewAi();
 
         break;
     default:
@@ -139,6 +141,7 @@ switch (launchProfile)
             .AddProject<ASC_TelegramService>(Constants.TelegramPort)
             .AddSocketIO()
             .AddSsoAuth()
+            .AddNewAi()
             .AddWebDav()
             .AddIdentity();
 
