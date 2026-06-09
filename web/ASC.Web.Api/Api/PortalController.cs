@@ -539,7 +539,7 @@ public class PortalController(
         foreach (var quota in source.Quotas)
         {
             var definition = await tenantManager.GetTenantQuotaAsync(quota.Id);
-            if (definition == null || definition.TenantId != quota.Id)
+            if (definition == null || definition.TenantId != quota.Id || definition.Price <= 0)
             {
                 continue;
             }
@@ -582,6 +582,8 @@ public class PortalController(
             {
                 Id = quota.Id,
                 Name = definition.Name,
+                Title = Resource.ResourceManager.GetString($"TariffsUpcoming_{definition.Name}"),
+                UnitOfMeasure = Resource.ResourceManager.GetString($"TariffsUpcomingUOM_{definition.Name}"),
                 Quantity = quantity,
                 Wallet = quota.Wallet,
                 DueDate = apiDateTimeHelper.Get(quota.DueDate ?? source.DueDate),

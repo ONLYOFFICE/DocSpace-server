@@ -194,6 +194,18 @@ public class UpcomingPaymentDto
     public string Name { get; set; }
 
     /// <summary>
+    /// The quota title.
+    /// </summary>
+    /// <example>Business plan</example>
+    public string Title { get; set; }
+
+    /// <summary>
+    /// The quota unit of measure.
+    /// </summary>
+    /// <example>admins</example>
+    public string UnitOfMeasure { get; set; }
+
+    /// <summary>
     /// The quantity that will be charged (the next quantity if set, otherwise the current quantity).
     /// </summary>
     /// <example>100</example>
