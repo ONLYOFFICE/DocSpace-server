@@ -90,7 +90,7 @@ public class FormRoleDto
 [Scope]
 public class FormRoleDtoHelper(TenantUtil tenantUtil, EmployeeFullDtoHelper employeeFullDtoHelper, UserManager userManager)
 {
-    public async Task<FormRoleDto> Get<T>(EntryProperties<T> properties, FormRole role)
+    public async Task<FormRoleDto> Get<T>(EntryProperties<T> properties, FormRole<T> role)
     {
         if (role == null)
         {

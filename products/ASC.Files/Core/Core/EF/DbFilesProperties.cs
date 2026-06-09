@@ -35,7 +35,7 @@ namespace ASC.Files.Core.EF;
 public class DbFilesProperties : BaseEntity
 {
     public int TenantId { get; set; }
-    [MaxLength(32)]
+    [MaxLength(64)]
     public string EntryId { get; set; }
     public string Data { get; set; }
 

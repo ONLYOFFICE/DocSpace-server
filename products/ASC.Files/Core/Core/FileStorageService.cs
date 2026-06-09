@@ -5180,7 +5180,7 @@ public class FileStorageService //: IFileStorageService
         return [.. users];
     }
 
-    public async Task SaveFormRoleMapping<T>(T formId, IEnumerable<FormRole> roles)
+    public async Task SaveFormRoleMapping<T>(T formId, IEnumerable<FormRole<T>> roles)
     {
         var fileDao = daoFactory.GetFileDao<T>();
         var folderDao = daoFactory.GetFolderDao<T>();

@@ -1576,7 +1576,7 @@ internal class FileDao(
         return match.Success && match.Groups.TryGetValue(FileIdGroupName, out var group) && int.TryParse(group.Value, out fileId);
     }
 
-    public async Task SaveFormRoleMapping(int formId, IEnumerable<FormRole> formRoles)
+    public async Task SaveFormRoleMapping(int formId, IEnumerable<FormRole<int>> formRoles)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
 
@@ -1584,7 +1584,7 @@ internal class FileDao(
 
         if (formRoles == null || !formRoles.Any())
         {
-            await filesDbContext.DeleteFormRoleMappingsAsync(tenantId, formId);
+            await filesDbContext.DeleteFormRoleMappingsAsync(tenantId, formId.ToString());
             return;
         }
         var sequence = 0;
@@ -1609,7 +1609,7 @@ internal class FileDao(
         await filesDbContext.SaveChangesAsync();
     }
 
-    public virtual async Task<(int, List<FormRole>)> GetUserFormRoles(int formId, Guid userId)
+    public virtual async Task<(int, List<FormRole<int>>)> GetUserFormRoles(int formId, Guid userId)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
 
@@ -1618,7 +1618,7 @@ internal class FileDao(
         var roles = await GetFormUserRoles(formId, userId).ToListAsync();
         return (currentStep, roles);
     }
-    public virtual async IAsyncEnumerable<FormRole> GetFormUserRoles(int formId, Guid userId)
+    public virtual async IAsyncEnumerable<FormRole<int>> GetFormUserRoles(int formId, Guid userId)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
 
@@ -1630,7 +1630,7 @@ internal class FileDao(
         }
     }
 
-    public async IAsyncEnumerable<FormRole> GetUserFormRolesInRoom(int roomId, Guid userId)
+    public async IAsyncEnumerable<FormRole<int>> GetUserFormRolesInRoom(int roomId, Guid userId)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
 
@@ -1641,7 +1641,7 @@ internal class FileDao(
             yield return r;
         }
     }
-    public virtual async IAsyncEnumerable<FormRole> GetFormRoles(int formId)
+    public virtual async IAsyncEnumerable<FormRole<int>> GetFormRoles(int formId)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
 
@@ -1652,7 +1652,7 @@ internal class FileDao(
             yield return r;
         }
     }
-    public async Task<FormRole> ChangeUserFormRoleAsync(int formId, FormRole formRole)
+    public async Task<FormRole<int>> ChangeUserFormRoleAsync(int formId, FormRole<int> formRole)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
 
@@ -3073,8 +3073,8 @@ internal class CacheFileDao(ILogger<FileDao> logger,
         displayUserSettingsHelper), ICacheFileDao<int>
 {
 
-    private readonly ConcurrentDictionary<int, IEnumerable<FormRole>> _cache = new();
-    public override async IAsyncEnumerable<FormRole> GetFormRoles(int formId)
+    private readonly ConcurrentDictionary<int, IEnumerable<FormRole<int>>> _cache = new();
+    public override async IAsyncEnumerable<FormRole<int>> GetFormRoles(int formId)
     {
         if (!_cache.TryGetValue(formId, out var result))
         {
@@ -3087,8 +3087,8 @@ internal class CacheFileDao(ILogger<FileDao> logger,
             yield return folder;
         }
     }
-    private readonly ConcurrentDictionary<(int, Guid), (int, List<FormRole>)> _cacheUserRoles = new();
-    public override async Task<(int, List<FormRole>)> GetUserFormRoles(int formId, Guid userId)
+    private readonly ConcurrentDictionary<(int, Guid), (int, List<FormRole<int>>)> _cacheUserRoles = new();
+    public override async Task<(int, List<FormRole<int>>)> GetUserFormRoles(int formId, Guid userId)
     {
         if (!_cacheUserRoles.TryGetValue((formId, userId), out var result))
         {
@@ -3099,8 +3099,8 @@ internal class CacheFileDao(ILogger<FileDao> logger,
         return result;
     }
 
-    private readonly ConcurrentDictionary<(int, Guid), IEnumerable<FormRole>> _cacheFormUserRoles = new();
-    public override async IAsyncEnumerable<FormRole> GetFormUserRoles(int formId, Guid userId)
+    private readonly ConcurrentDictionary<(int, Guid), IEnumerable<FormRole<int>>> _cacheFormUserRoles = new();
+    public override async IAsyncEnumerable<FormRole<int>> GetFormUserRoles(int formId, Guid userId)
     {
         if (!_cacheFormUserRoles.TryGetValue((formId, userId), out var result))
         {

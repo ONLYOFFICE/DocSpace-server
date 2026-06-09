@@ -79,14 +79,20 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
             }
         }
 
-        if (folder.FolderType is not (FolderType.CustomRoom or FolderType.PublicRoom))
-        {
-            return folder;
-        }
-
         var tenantId = tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
         folder.Shared = await Queries.SharedAsync(filesDbContext, tenantId, folder.Id, FileEntryType.Folder, SubjectType.PrimaryExternalLink);
+
+        var settings = await Queries.GetThirdpartyRoomSettingsAsync(filesDbContext, tenantId, folder.Id);
+        if (settings != null)
+        {
+            folder.SettingsIndexing = settings.Indexing;
+            folder.SettingsDenyDownload = settings.DenyDownload;
+            folder.SettingsWatermark = settings.Watermark.Map();
+            folder.SettingsLifetime = settings.Lifetime.Map();
+            folder.SettingsSendFormToExternalDB = settings.SendFormToExternalDB;
+            folder.SettingsSaveFormAsXLSX = settings.SaveFormAsXLSX;
+        }
 
         return folder;
     }
@@ -178,7 +184,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         return folders;
     }
 
-    public IAsyncEnumerable<Folder<string>> GetFoldersAsync(IEnumerable<string> folderIds, IEnumerable<string> excludeParentIds  = null, FilterType filterType = FilterType.None, bool subjectGroup = false,
+    public IAsyncEnumerable<Folder<string>> GetFoldersAsync(IEnumerable<string> folderIds, IEnumerable<string> excludeParentIds = null, FilterType filterType = FilterType.None, bool subjectGroup = false,
         Guid? subjectID = null, string searchText = "", bool searchSubfolders = false, bool checkShare = true, bool excludeSubject = false)
     {
         if (dao.CheckInvalidFilter(filterType))
@@ -206,6 +212,8 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
     public async IAsyncEnumerable<Folder<string>> GetParentFoldersAsync(string folderId)
     {
         var path = new List<Folder<string>>();
+        var filesDbContext = dbContextFactory.CreateDbContext();
+        var tenantId = tenantManager.GetCurrentTenantId();
 
         while (folderId != null)
         {
@@ -217,7 +225,18 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
             }
             else
             {
-                path.Add(dao.ToFolder(folder));
+                var mapped = dao.ToFolder(folder);
+                var settings = await Queries.GetThirdpartyRoomSettingsAsync(filesDbContext, tenantId, mapped.Id);
+                if (settings != null)
+                {
+                    mapped.SettingsIndexing = settings.Indexing;
+                    mapped.SettingsDenyDownload = settings.DenyDownload;
+                    mapped.SettingsWatermark = settings.Watermark.Map();
+                    mapped.SettingsLifetime = settings.Lifetime.Map();
+                    mapped.SettingsSendFormToExternalDB = settings.SendFormToExternalDB;
+                    mapped.SettingsSaveFormAsXLSX = settings.SaveFormAsXLSX;
+                }
+                path.Add(mapped);
                 folderId = dao.GetParentFolderId(folder);
             }
         }
@@ -241,7 +260,16 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
 
         if (folder.Id != null)
         {
-            return await RenameFolderAsync(folder, folder.Title);
+            var id = await RenameFolderAsync(folder, folder.Title);
+
+            if (folder.FolderType.IsRoom())
+            {
+                var tenantId = tenantManager.GetCurrentTenantId();
+                await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
+                await SaveRoomSettingsFromFolderAsync(filesDbContext, tenantId, folder);
+            }
+
+            return id;
         }
 
         if (folder.ParentId == null)
@@ -259,7 +287,17 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
             await _providerInfo.CacheResetAsync(parentFolderId);
         }
 
-        return dao.MakeId(thirdFolder);
+        var newId = dao.MakeId(thirdFolder);
+        folder.Id = newId;
+
+        if (folder.FolderType.IsRoom())
+        {
+            var tenantId = tenantManager.GetCurrentTenantId();
+            await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
+            await SaveRoomSettingsFromFolderAsync(filesDbContext, tenantId, folder);
+        }
+
+        return newId;
     }
 
     public async Task DeleteFolderAsync(string folderId)
@@ -278,6 +316,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
             await Queries.DeleteTagLinksAsync(context, tenantId, id);
             await Queries.DeleteDbFilesTag(context);
             await Queries.DeleteSecuritiesAsync(context, tenantId, id);
+            await Queries.DeleteThirdpartyRoomSettingsAsync(context, tenantId, id);
             await Queries.DeleteThirdpartyIdMappingsAsync(context, tenantId, id);
 
             await tx.CommitAsync();
@@ -428,7 +467,13 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
 
     public async Task<string> UpdateFolderAsync(Folder<string> folder, string newTitle, long newQuota, bool indexing, bool denyDownload, RoomDataLifetime lifeTime, WatermarkSettings watermark, string color, string cover, ChatSettings chatSettings = null, bool? sendFormToExternalDB = null, bool? saveFormAsXLSX = null)
     {
-        return await RenameFolderAsync(folder, newTitle);
+        var newId = await RenameFolderAsync(folder, newTitle);
+
+        var tenantId = tenantManager.GetCurrentTenantId();
+        await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
+        await UpsertThirdpartyRoomSettingsAsync(filesDbContext, tenantId, folder.Id, indexing, denyDownload, lifeTime, watermark, sendFormToExternalDB, saveFormAsXLSX);
+
+        return newId;
     }
 
     public Task<string> ChangeFolderTypeAsync(Folder<string> folder, FolderType folderType)
@@ -524,6 +569,60 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
     public Task<string> GetBackupExtensionAsync(string folderId)
     {
         return Task.FromResult("tar.gz");
+    }
+
+    private static async Task SaveRoomSettingsFromFolderAsync(FilesDbContext ctx, int tenantId, Folder<string> folder)
+    {
+        var existing = await Queries.GetThirdpartyRoomSettingsAsync(ctx, tenantId, folder.Id);
+        if (existing == null)
+        {
+            existing = new DbThirdpartyRoomSettings { TenantId = tenantId, HashId = folder.Id };
+            ctx.ThirdpartyRoomSettings.Add(existing);
+        }
+        else
+        {
+            ctx.ThirdpartyRoomSettings.Update(existing);
+        }
+
+        existing.Indexing = folder.SettingsIndexing;
+        existing.DenyDownload = folder.SettingsDenyDownload;
+        existing.Watermark = folder.SettingsWatermark.Map();
+        existing.Lifetime = folder.SettingsLifetime.Map();
+        existing.SendFormToExternalDB = folder.SettingsSendFormToExternalDB;
+        existing.SaveFormAsXLSX = folder.SettingsSaveFormAsXLSX;
+
+        await ctx.SaveChangesAsync();
+    }
+
+    private static async Task UpsertThirdpartyRoomSettingsAsync(FilesDbContext ctx, int tenantId, string folderId,
+        bool indexing, bool denyDownload, RoomDataLifetime lifeTime, WatermarkSettings watermark,
+        bool? sendFormToExternalDB, bool? saveFormAsXLSX)
+    {
+        var existing = await Queries.GetThirdpartyRoomSettingsAsync(ctx, tenantId, folderId);
+        if (existing == null)
+        {
+            existing = new DbThirdpartyRoomSettings { TenantId = tenantId, HashId = folderId };
+            ctx.ThirdpartyRoomSettings.Add(existing);
+        }
+        else
+        {
+            ctx.ThirdpartyRoomSettings.Update(existing);
+        }
+
+        existing.Indexing = indexing;
+        existing.DenyDownload = denyDownload;
+        existing.Watermark = watermark.Map();
+        existing.Lifetime = lifeTime.Map();
+        if (sendFormToExternalDB.HasValue)
+        {
+            existing.SendFormToExternalDB = sendFormToExternalDB.Value;
+        }
+        if (saveFormAsXLSX.HasValue)
+        {
+            existing.SaveFormAsXLSX = saveFormAsXLSX.Value;
+        }
+
+        await ctx.SaveChangesAsync();
     }
 
     public Task ReassignFoldersAsync(Guid oldOwnerId, Guid newOwnerId, IEnumerable<string> exceptFolderIds)
@@ -720,9 +819,23 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         return Task.CompletedTask;
     }
 
-    public Task<string> SetWatermarkSettings(WatermarkSettings watermarkSettings, Folder<string> folder)
+    public async Task<string> SetWatermarkSettings(WatermarkSettings watermarkSettings, Folder<string> folder)
     {
-        throw new NotImplementedException();
+        ArgumentNullException.ThrowIfNull(folder);
+
+        var tenantId = tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
+        var roomSettings = await Queries.GetThirdpartyRoomSettingsAsync(filesDbContext, tenantId, folder.Id);
+
+        if (roomSettings != null)
+        {
+            roomSettings.Watermark = watermarkSettings.Map();
+            filesDbContext.Update(roomSettings);
+            await filesDbContext.SaveChangesAsync();
+        }
+
+        return folder.Id;
     }
     public Task<string> ChangeTreeFolderSizeAsync(string folderId, long size)
     {
@@ -734,9 +847,16 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         throw new NotImplementedException();
     }
 
-    public Task<WatermarkSettings> GetWatermarkSettings(Folder<string> room)
+    public async Task<WatermarkSettings> GetWatermarkSettings(Folder<string> room)
     {
-        throw new NotImplementedException();
+        ArgumentNullException.ThrowIfNull(room.Id);
+
+        var tenantId = tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
+        var roomSettings = await Queries.GetThirdpartyRoomSettingsAsync(filesDbContext, tenantId, room.Id);
+
+        return roomSettings.Watermark.Map();
     }
 
     public async Task<bool> IsExistAsync(string title, string folderId)
@@ -751,14 +871,42 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         return await global.GetAvailableTitleAsync(requestTitle, parentFolderId, IsExistAsync, FileEntryType.Folder);
     }
 
-    public Task<Folder<string>> DeleteWatermarkSettings(Folder<string> room)
+    public async Task<Folder<string>> DeleteWatermarkSettings(Folder<string> room)
     {
-        throw new NotImplementedException();
+        ArgumentNullException.ThrowIfNull(room.Id);
+
+        var tenantId = tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
+        var roomSettings = await Queries.GetThirdpartyRoomSettingsAsync(filesDbContext, tenantId, room.Id);
+
+        if (roomSettings != null)
+        {
+            roomSettings.Watermark = null;
+            filesDbContext.Update(roomSettings);
+            await filesDbContext.SaveChangesAsync();
+        }
+
+        return room;
     }
 
-    public Task<Folder<string>> DeleteLifetimeSettings(Folder<string> room)
+    public async Task<Folder<string>> DeleteLifetimeSettings(Folder<string> room)
     {
-        throw new NotImplementedException();
+        ArgumentNullException.ThrowIfNull(room.Id);
+
+        var tenantId = tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
+        var roomSettings = await Queries.GetThirdpartyRoomSettingsAsync(filesDbContext, tenantId, room.Id);
+
+        if (roomSettings != null)
+        {
+            roomSettings.Lifetime = null;
+            filesDbContext.Update(roomSettings);
+            await filesDbContext.SaveChangesAsync();
+        }
+
+        return room;
     }
 
     public IAsyncEnumerable<Folder<string>> GetFoldersByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool excludeSubject, Location? location, int trashId, string parentId, OrderBy orderBy, int offset, int count)
@@ -898,4 +1046,23 @@ static file class Queries
                         .Join(ctx.ThirdpartyIdMapping, s => s.EntryId, m => m.HashId,
                             (s, m) => new { s, m.Id })
                         .Any(r => r.Id == entryId));
+
+    public static readonly Func<FilesDbContext, int, string, Task<DbThirdpartyRoomSettings>>
+        GetThirdpartyRoomSettingsAsync =
+            Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+                (FilesDbContext ctx, int tenantId, string hashId) =>
+                    ctx.ThirdpartyRoomSettings
+                        .FirstOrDefault(r => r.TenantId == tenantId && r.HashId == hashId));
+
+    public static readonly Func<FilesDbContext, int, string, Task<int>>
+        DeleteThirdpartyRoomSettingsAsync =
+            Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+                (FilesDbContext ctx, int tenantId, string idStart) =>
+                    ctx.ThirdpartyRoomSettings
+                        .Where(r => r.TenantId == tenantId)
+                        .Where(r => ctx.ThirdpartyIdMapping
+                            .Where(t => t.TenantId == tenantId)
+                            .Where(t => t.Id.StartsWith(idStart))
+                            .Select(t => t.HashId).Any(h => h == r.HashId))
+                        .ExecuteDelete());
 }

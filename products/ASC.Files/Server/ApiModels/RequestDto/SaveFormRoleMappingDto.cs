@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -48,5 +48,5 @@ public class SaveFormRoleMappingDto<T>
     /// The collection of roles.
     /// </summary>
     /// <example>[{"roleName": "Approver", "userId": "00000000-0000-0000-0000-000000000000"}]</example>
-    public required IEnumerable<FormRole> Roles { get; set; }
+    public required IEnumerable<FormRole<T>> Roles { get; set; }
 }

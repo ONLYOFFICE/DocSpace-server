@@ -36,13 +36,13 @@ namespace ASC.Files.Core.Core.Entries;
 /// <summary>
 /// The form role.
 /// </summary>
-public class FormRole
+public class FormRole<T>
 {
     /// <summary>
     /// The room ID.
     /// </summary>
     /// <example>1</example>
-    public int RoomId { get; set; }
+    public T RoomId { get; set; }
 
     /// <summary>
     /// The role name.
@@ -90,5 +90,6 @@ public class FormRole
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
 public static partial class FormRoleMapper
 {
-    public static partial FormRole Map(this DbFilesFormRoleMapping source);
+    public static partial FormRole<int> Map(this DbFilesFormRoleMapping source);
+    public static partial FormRole<string> Map(this DbThirdpartyFilesFormRoleMapping source);
 }

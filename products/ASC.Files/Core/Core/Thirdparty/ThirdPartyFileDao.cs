@@ -829,25 +829,25 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         return Task.FromResult(nativeSession.BytesTransferred);
     }
 
-    public Task SaveFormRoleMapping(string formId, IEnumerable<FormRole> formRoles)
+    public Task SaveFormRoleMapping(string formId, IEnumerable<FormRole<string>> formRoles)
     {
         return Task.CompletedTask;
     }
-    public IAsyncEnumerable<FormRole> GetFormRoles(string formId)
+    public IAsyncEnumerable<FormRole<string>> GetFormRoles(string formId)
     {
-        return AsyncEnumerable.Empty<FormRole>();
+        return AsyncEnumerable.Empty<FormRole<string>>();
     }
-    public Task<(int, List<FormRole>)> GetUserFormRoles(string formId, Guid userId)
+    public Task<(int, List<FormRole<string>>)> GetUserFormRoles(string formId, Guid userId)
     {
-        return Task.FromResult((-1, new List<FormRole>()));
+        return Task.FromResult((-1, new List<FormRole<string>>()));
     }
-    public IAsyncEnumerable<FormRole> GetUserFormRolesInRoom(string roomId, Guid userId)
+    public IAsyncEnumerable<FormRole<string>> GetUserFormRolesInRoom(string roomId, Guid userId)
     {
-        return AsyncEnumerable.Empty<FormRole>();
+        return AsyncEnumerable.Empty<FormRole<string>>();
     }
-    public Task<FormRole> ChangeUserFormRoleAsync(string formId, FormRole formRole)
+    public Task<FormRole<string>> ChangeUserFormRoleAsync(string formId, FormRole<string> formRole)
     {
-        return Task.FromResult<FormRole>(null);
+        return Task.FromResult<FormRole<string>>(null);
     }
     public Task DeleteFormRolesAsync(string formId)
     {

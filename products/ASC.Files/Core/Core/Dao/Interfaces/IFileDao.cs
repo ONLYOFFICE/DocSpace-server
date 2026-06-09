@@ -308,14 +308,14 @@ public interface IFileDao<T>
     /// <param name="formId"></param>
     /// <param name="formRoles"></param>
     /// <returns></returns>
-    Task SaveFormRoleMapping(T formId, IEnumerable<FormRole> formRoles);
+    Task SaveFormRoleMapping(T formId, IEnumerable<FormRole<T>> formRoles);
 
     /// <summary>
     /// Get form role mappings
     /// </summary>
     /// <param name="formId"></param>
     /// <returns></returns>
-    IAsyncEnumerable<FormRole> GetFormRoles(T formId);
+    IAsyncEnumerable<FormRole<T>> GetFormRoles(T formId);
 
     /// <summary>
     /// Get form role mappings
@@ -323,7 +323,7 @@ public interface IFileDao<T>
     /// <param name="formId"></param>
     /// <param name="userId"></param>
     /// <returns></returns>
-    Task<(int, List<FormRole>)> GetUserFormRoles(T formId, Guid userId);
+    Task<(int, List<FormRole<T>>)> GetUserFormRoles(T formId, Guid userId);
 
     /// <summary>
     /// Get user form roles in room
@@ -331,14 +331,14 @@ public interface IFileDao<T>
     /// <param name="roomId"></param>
     /// <param name="userId"></param>
     /// <returns></returns>
-    IAsyncEnumerable<FormRole> GetUserFormRolesInRoom(T roomId, Guid userId);
+    IAsyncEnumerable<FormRole<T>> GetUserFormRolesInRoom(T roomId, Guid userId);
     /// <summary>
     /// Updates user role
     /// </summary>
     /// <param name="formId"></param>
     /// <param name="formRole"></param>
     /// <returns></returns>
-    Task<FormRole> ChangeUserFormRoleAsync(T formId, FormRole formRole);
+    Task<FormRole<T>> ChangeUserFormRoleAsync(T formId, FormRole<T> formRole);
 
     /// <summary>
     /// Deletes roles for form

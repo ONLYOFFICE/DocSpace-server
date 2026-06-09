@@ -106,17 +106,17 @@ internal abstract class ThirdPartyProviderDao
         return Task.FromResult<Stream>(null);
     }
 
-    public Task<EntryProperties<string>> GetProperties(string fileId)
+    public virtual Task<EntryProperties<string>> GetProperties(string fileId)
     {
         return Task.FromResult<EntryProperties<string>>(null);
     }
 
-    public Task<Dictionary<string, EntryProperties<string>>> GetPropertiesAsync(IEnumerable<string> filesIds)
+    public virtual Task<Dictionary<string, EntryProperties<string>>> GetPropertiesAsync(IEnumerable<string> filesIds)
     {
         return Task.FromResult<Dictionary<string, EntryProperties<string>>>(null);
     }
 
-    public Task SaveProperties(string fileId, EntryProperties<string> entryProperties)
+    public virtual Task SaveProperties(string fileId, EntryProperties<string> entryProperties)
     {
         return Task.CompletedTask;
     }

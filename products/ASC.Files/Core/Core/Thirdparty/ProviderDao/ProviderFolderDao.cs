@@ -219,7 +219,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         }
     }
 
-    public IAsyncEnumerable<Folder<string>> GetFoldersAsync(IEnumerable<string> folderIds, IEnumerable<string> excludeParentIds  = null, FilterType filterType = FilterType.None, bool subjectGroup = false, Guid? subjectID = null, string searchText = "", bool searchSubfolders = false, bool checkShare = true, bool excludeSubject = false)
+    public IAsyncEnumerable<Folder<string>> GetFoldersAsync(IEnumerable<string> folderIds, IEnumerable<string> excludeParentIds = null, FilterType filterType = FilterType.None, bool subjectGroup = false, Guid? subjectID = null, string searchText = "", bool searchSubfolders = false, bool checkShare = true, bool excludeSubject = false)
     {
         var result = AsyncEnumerable.Empty<Folder<string>>();
 
@@ -424,6 +424,37 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
             Color = color,
             Cover = cover
         });
+
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
+
+        var existing = await filesDbContext.ThirdpartyRoomSettings
+            .FirstOrDefaultAsync(r => r.TenantId == tenantId && r.HashId == folder.Id);
+        if (existing == null)
+        {
+            existing = new DbThirdpartyRoomSettings { TenantId = tenantId, HashId = newId };
+            filesDbContext.ThirdpartyRoomSettings.Add(existing);
+        }
+        else
+        {
+            filesDbContext.ThirdpartyRoomSettings.Update(existing);
+        }
+
+        existing.HashId = newId;
+        existing.Indexing = indexing;
+        existing.DenyDownload = denyDownload;
+        existing.Watermark = watermark.Map();
+        existing.Lifetime = lifeTime.Map();
+        if (sendFormToExternalDB.HasValue)
+        {
+            existing.SendFormToExternalDB = sendFormToExternalDB.Value;
+        }
+        if (saveFormAsXLSX.HasValue)
+        {
+            existing.SaveFormAsXLSX = saveFormAsXLSX.Value;
+        }
+
+        await filesDbContext.SaveChangesAsync();
 
         return newId;
     }

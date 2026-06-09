@@ -256,14 +256,7 @@ public class EntryStatusManager(IDaoFactory daoFactory, AuthContext authContext,
                 continue;
             }
 
-            if (!file.ProviderEntry)
-            {
-                pdfs.Add(file);
-            }
-            else
-            {
-                file.FormInfo = FormInfo<T>.Empty;
-            }
+            pdfs.Add(file);
         }
 
         if (pdfs.Count == 0)
@@ -2406,7 +2399,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
     }
 
-    private int GetCurrentFillingStep(List<FormRole> roles)
+    private int GetCurrentFillingStep<T>(List<FormRole<T>> roles)
     {
         if (roles?.Count == 0)
         {
@@ -2418,12 +2411,12 @@ public class EntryManager(IDaoFactory daoFactory,
             .Min(r => (int?)r.Sequence)
             ?? 0;
     }
-    private FormRole GetCurrentUserRole(List<FormRole> roles, Guid userId)
+    private FormRole<T> GetCurrentUserRole<T>(List<FormRole<T>> roles, Guid userId)
     {
         return roles?.FirstOrDefault(r => r.UserId == userId && !r.Submitted);
     }
 
-    private (int, List<Guid>) GetNextRoleUserIds(List<FormRole> formRoles, FormRole currentRole, Guid userId)
+    private (int, List<Guid>) GetNextRoleUserIds<T>(List<FormRole<T>> formRoles, FormRole<T> currentRole, Guid userId)
     {
         if (formRoles == null || formRoles.Count == 0)
         {

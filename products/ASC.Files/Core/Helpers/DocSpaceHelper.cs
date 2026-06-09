@@ -157,7 +157,7 @@ public static class DocSpaceHelper
 
     public static async Task<bool> IsWatermarkEnabled<T>(FileEntry<T> file, IFolderDao<T> folderDao)
     {
-        if (file.ProviderEntry || file.RootFolderType is not (FolderType.VirtualRooms or FolderType.Archive))
+        if (file.RootFolderType is not (FolderType.VirtualRooms or FolderType.Archive))
         {
             return false;
         }

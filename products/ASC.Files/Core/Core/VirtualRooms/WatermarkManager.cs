@@ -172,7 +172,6 @@ public class WatermarkManager(
     public async Task<WatermarkSettings> GetWatermarkAsync<T>(Folder<T> room)
     {
         if (room is not { IsRoom: true } ||
-            room.ProviderEntry ||
             room.RootFolderType == FolderType.Archive ||
             !await fileSecurity.CanEditRoomAsync(room))
         {
