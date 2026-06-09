@@ -49,7 +49,6 @@ public class ConnectionsController(
     DisplayUserSettingsHelper displayUserSettingsHelper,
     CommonLinkUtility commonLinkUtility,
     ILogger<ConnectionsController> logger,
-    WebItemSecurity webItemSecurity,
     MessageService messageService,
     CookiesManager cookiesManager,
     CookieStorage cookieStorage,
