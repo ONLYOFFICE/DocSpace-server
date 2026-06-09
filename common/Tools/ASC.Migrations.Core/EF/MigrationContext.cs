@@ -101,6 +101,7 @@ public class MigrationContext : DbContext
     public DbSet<DbFilesSecurity> Security { get; set; }
     public DbSet<DbFilesThirdpartyIdMapping> ThirdpartyIdMapping { get; set; }
     public DbSet<DbFilesFormRoleMapping> FilesFormRoleMapping { get; set; }
+    public DbSet<DbThirdpartyFilesFormRoleMapping> FilesThirdpartyFormRoleMapping { get; set; }
     public DbSet<DbFilesThirdpartyAccount> ThirdpartyAccount { get; set; }
     public DbSet<DbFilesTagLink> TagLink { get; set; }
     public DbSet<DbFilesTag> Tag { get; set; }
@@ -109,6 +110,7 @@ public class MigrationContext : DbContext
     public DbSet<DbFilesProperties> FilesProperties { get; set; }
     public DbSet<DbFileOrder> FileOrder { get; set; }
     public DbSet<DbRoomSettings> RoomSettings { get; set; }
+    public DbSet<DbThirdpartyRoomSettings> ThirdpartyRoomSettings { get; set; }
     public DbSet<ShortLink> ShortLink { get; set; }
     public DbSet<DbFilesAuditReference> FilesAuditReferences { get; set; }
     public DbSet<DbFilesGroup> FilesGroup { get; set; }
@@ -200,6 +202,7 @@ public class MigrationContext : DbContext
                 .AddDbFilesSecurity()
                 .AddDbFilesThirdpartyIdMapping()
                 .AddDbFilesFormRoleMapping()
+                .AddDbThirdpartyFilesFormRoleMapping()
                 .AddDbFilesTagLink()
                 .AddDbFilesTag()
                 .AddDbFilesGroup()
@@ -220,6 +223,7 @@ public class MigrationContext : DbContext
                 .AddShortLinks()
                 .AddDbFileOrder()
                 .AddDbRoomSettings()
+                .AddDbThirdpartyRoomSettings()
                 .AddFilesAuditReference()
                 .AddIdentity()
                 .AddIdentityCert()

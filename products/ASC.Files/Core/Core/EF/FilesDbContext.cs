@@ -53,11 +53,13 @@ public partial class FilesDbContext(DbContextOptions<FilesDbContext> dbContextOp
     public DbSet<User> Users { get; set; }
     public DbSet<DbFileOrder> FileOrder { get; set; }
     public DbSet<DbRoomSettings> RoomSettings { get; set; }
+    public DbSet<DbThirdpartyRoomSettings> ThirdpartyRoomSettings { get; set; }
     public DbSet<DbGroup> Groups { get; set; }
     public DbSet<UserGroup> UserGroup { get; set; }
     public DbSet<DbFilesAuditReference> FilesAuditReference { get; set; }
     public DbSet<DbUserRelation> UserRelations { get; set; }
     public DbSet<DbFilesFormRoleMapping> FilesFormRoleMapping { get; set; }
+    public DbSet<DbThirdpartyFilesFormRoleMapping> ThirdpartyFilesFormRoleMapping { get; set; }
     public DbSet<DbFilesGroup> RoomGroup { get; set; }
     public DbSet<DbFilesRoomGroup> RoomGroupRef { get; set; }
     public DbSet<DbChat> Chats { get; set; }
@@ -87,6 +89,7 @@ public partial class FilesDbContext(DbContextOptions<FilesDbContext> dbContextOp
             .AddDbFilesSecurity()
             .AddDbFilesThirdpartyIdMapping()
             .AddDbFilesFormRoleMapping()
+            .AddDbThirdpartyFilesFormRoleMapping()
             .AddDbFilesTagLink()
             .AddDbFilesTag()
             .AddDbFilesGroup()
@@ -98,6 +101,7 @@ public partial class FilesDbContext(DbContextOptions<FilesDbContext> dbContextOp
             .AddDbFileOrder()
             .AddUser()
             .AddDbRoomSettings()
+            .AddDbThirdpartyRoomSettings()
             .AddDbGroup()
             .AddUserGroup()
             .AddFilesAuditReference()
