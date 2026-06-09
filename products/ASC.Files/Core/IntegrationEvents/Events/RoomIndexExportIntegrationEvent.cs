@@ -41,17 +41,18 @@ public record RoomIndexExportIntegrationEvent : IntegrationEvent
 
     }
 
-    public RoomIndexExportIntegrationEvent(Guid createBy, int tenantId, int roomId, string baseUri, bool terminate = false, IDictionary<string, string> headers = null)
+    public RoomIndexExportIntegrationEvent(Guid createBy, int tenantId, string roomId, string baseUri, bool isThirdpartyRoom = false, bool terminate = false, IDictionary<string, string> headers = null)
     : base(createBy, tenantId)
     {
         RoomId = roomId;
+        IsThirdpartyRoom = isThirdpartyRoom;
         Terminate = terminate;
         BaseUri = baseUri;
         Headers = headers;
     }
 
     [ProtoMember(1)]
-    public int RoomId { get; set; }
+    public string RoomId { get; set; }
 
     [ProtoMember(2)]
     public string BaseUri { get; set; }
@@ -61,4 +62,7 @@ public record RoomIndexExportIntegrationEvent : IntegrationEvent
 
     [ProtoMember(4)]
     public IDictionary<string, string> Headers { get; set; }
+
+    [ProtoMember(5)]
+    public bool IsThirdpartyRoom { get; set; }
 }

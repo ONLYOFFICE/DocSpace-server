@@ -39,7 +39,8 @@ public class RoomIndexExportIntegrationEventHandler(
     CommonLinkUtility commonLinkUtility,
     TenantManager tenantManager,
     SecurityContext securityContext,
-    DocumentBuilderTaskManager<RoomIndexExportTask, int, RoomIndexExportTaskData> documentBuilderTaskManager,
+    DocumentBuilderTaskManager<RoomIndexExportTask<int>, int, RoomIndexExportTaskData<int>> documentBuilderTaskManagerInt,
+    DocumentBuilderTaskManager<RoomIndexExportTask<string>, int, RoomIndexExportTaskData<string>> documentBuilderTaskManagerString,
     IServiceProvider serviceProvider)
     : IIntegrationEventHandler<RoomIndexExportIntegrationEvent>
 {
@@ -56,7 +57,8 @@ public class RoomIndexExportIntegrationEventHandler(
             {
                 if (@event.Terminate)
                 {
-                    await documentBuilderTaskManager.TerminateTask(@event.TenantId, @event.CreateBy);
+                    await documentBuilderTaskManagerInt.TerminateTask(@event.TenantId, @event.CreateBy);
+                    await documentBuilderTaskManagerString.TerminateTask(@event.TenantId, @event.CreateBy);
                     return;
                 }
 
@@ -69,11 +71,18 @@ public class RoomIndexExportIntegrationEventHandler(
 
                 await securityContext.AuthenticateMeWithoutCookieAsync(@event.TenantId, @event.CreateBy);
 
-                var task = serviceProvider.GetService<RoomIndexExportTask>();
-
-                task.Init(@event.BaseUri, @event.TenantId, @event.CreateBy, new RoomIndexExportTaskData(@event.RoomId, @event.Headers));
-
-                await documentBuilderTaskManager.StartTask(task);
+                if (@event.IsThirdpartyRoom)
+                {
+                    var task = serviceProvider.GetService<RoomIndexExportTask<string>>();
+                    task.Init(@event.BaseUri, @event.TenantId, @event.CreateBy, new RoomIndexExportTaskData<string>(@event.RoomId, @event.Headers));
+                    await documentBuilderTaskManagerString.StartTask(task);
+                }
+                else
+                {
+                    var task = serviceProvider.GetService<RoomIndexExportTask<int>>();
+                    task.Init(@event.BaseUri, @event.TenantId, @event.CreateBy, new RoomIndexExportTaskData<int>(int.Parse(@event.RoomId), @event.Headers));
+                    await documentBuilderTaskManagerInt.StartTask(task);
+                }
             }
             catch (Exception ex)
             {

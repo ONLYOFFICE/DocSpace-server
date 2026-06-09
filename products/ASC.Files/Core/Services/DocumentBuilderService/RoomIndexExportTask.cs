@@ -33,8 +33,9 @@
 
 namespace ASC.Files.Core.Services.DocumentBuilderService;
 
-[Transient]
-public class RoomIndexExportTask : DocumentBuilderTask<int, RoomIndexExportTaskData>
+[Transient(GenericArguments = [typeof(int)])]
+[Transient(GenericArguments = [typeof(string)])]
+public class RoomIndexExportTask<T> : DocumentBuilderTask<int, RoomIndexExportTaskData<T>>
 {
     private const string ScriptName = "RoomIndexExport.docbuilder";
 
@@ -46,6 +47,7 @@ public class RoomIndexExportTask : DocumentBuilderTask<int, RoomIndexExportTaskD
     public RoomIndexExportTask(IServiceScopeFactory serviceProvider) : base(serviceProvider)
     {
     }
+
 
     protected override async Task<DocumentBuilderInputData> GetDocumentBuilderInputDataAsync(IServiceProvider serviceProvider)
     {
@@ -88,7 +90,7 @@ public class RoomIndexExportTask : DocumentBuilderTask<int, RoomIndexExportTaskD
             ? _data.Headers.ToDictionary(x => x.Key, x => new StringValues(x.Value))
             : [];
 
-        var room = await daoFactory.GetFolderDao<int>().GetFolderAsync(_data.RoomId);
+        var room = await daoFactory.GetFolderDao<T>().GetFolderAsync(_data.RoomId);
 
         await filesMessageService.SendAsync(MessageAction.RoomIndexExportSaved, room, headers: headers);
 
@@ -309,4 +311,4 @@ public class RoomIndexExportTask : DocumentBuilderTask<int, RoomIndexExportTaskD
     private record FolderIndex(int ChildFoldersCount, string Order);
 }
 
-public record RoomIndexExportTaskData(int RoomId, IDictionary<string, string> Headers);
+public record RoomIndexExportTaskData<T>(T RoomId, IDictionary<string, string> Headers);

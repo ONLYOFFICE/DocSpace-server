@@ -55,7 +55,8 @@ public class VirtualRoomsInternalController(
     IEventBus eventBus,
     RoomTemplatesWorker roomTemplatesWorker,
     UserManager userManager,
-    IDaoFactory daoFactory)
+    IDaoFactory daoFactory,
+    IServiceProvider serviceProvider)
     : VirtualRoomsController<int>(globalFolderHelper,
         fileOperationDtoHelper,
         customTagsService,
@@ -73,7 +74,10 @@ public class VirtualRoomsInternalController(
         apiDateTimeHelper,
         userManager,
         authContext,
-        daoFactory)
+        tenantManager,
+        eventBus,
+        daoFactory,
+        serviceProvider)
 {
     private readonly AuthContext _authContext = authContext;
 
@@ -255,7 +259,10 @@ public class VirtualRoomsThirdPartyController(
     ApiDateTimeHelper apiDateTimeHelper,
     UserManager userManager,
     AuthContext authContext,
-    IDaoFactory daoFactory)
+    TenantManager tenantManager,
+    IEventBus eventBus,
+    IDaoFactory daoFactory,
+    IServiceProvider serviceProvider)
     : VirtualRoomsController<string>(globalFolderHelper,
         fileOperationDtoHelper,
         customTagsService,
@@ -273,7 +280,10 @@ public class VirtualRoomsThirdPartyController(
         apiDateTimeHelper,
         userManager,
         authContext,
-        daoFactory)
+        tenantManager,
+        eventBus,
+        daoFactory,
+        serviceProvider)
 {
     /// <remarks>
     /// Creates a room in the "Rooms" section stored in a third-party storage.
@@ -310,7 +320,10 @@ public abstract class VirtualRoomsController<T>(
     ApiDateTimeHelper apiDateTimeHelper,
     UserManager userManager,
     AuthContext authContext,
-    IDaoFactory daoFactory)
+    TenantManager tenantManager,
+    IEventBus eventBus,
+    IDaoFactory daoFactory,
+    IServiceProvider serviceProvider)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     protected readonly FileStorageService _fileStorageService = fileStorageService;
@@ -880,6 +893,104 @@ public abstract class VirtualRoomsController<T>(
 
         return result;
     }
+
+    /// <remarks>
+    /// Starts the index export of a room with the ID specified in the request.
+    /// </remarks>
+    /// <summary>Start the room index export</summary>
+    /// <path>api/2.0/files/rooms/{id}/indexexport</path>
+    /// <exception cref="NotSupportedException"></exception>
+    [Tags("Rooms")]
+    [SwaggerResponse(200, "Ok", typeof(DocumentBuilderTaskDto))]
+    [SwaggerResponse(501, "Folder indexing is turned off")]
+    [HttpPost("{id}/indexexport")]
+    public async Task<DocumentBuilderTaskDto> StartRoomIndexExport(RoomIdRequestDto<T> inDto)
+    {
+        var room = await _fileStorageService.GetFolderAsync(inDto.Id).NotFoundIfNull("Folder not found");
+
+        if (room.RootId is int roomRootId && roomRootId == await globalFolderHelper.FolderRoomTemplatesAsync)
+        {
+            throw new ItemNotFoundException();
+        }
+
+        var fileSecurity = serviceProvider.GetService<FileSecurity>();
+
+        if (!await fileSecurity.CanIndexExportAsync(room))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
+        if (!room.SettingsIndexing)
+        {
+            throw new InvalidOperationException("Folder indexing is turned off");
+        }
+
+        var tenantId = tenantManager.GetCurrentTenantId();
+        var userId = authContext.CurrentAccount.ID;
+
+        var task = serviceProvider.GetService<RoomIndexExportTask<T>>();
+
+        var commonLinkUtility = serviceProvider.GetService<CommonLinkUtility>();
+
+        var baseUri = commonLinkUtility.ServerRootPath;
+
+        task.Init(baseUri, tenantId, userId, null);
+
+        var documentBuilderTaskManager = serviceProvider.GetService<DocumentBuilderTaskManager<RoomIndexExportTask<T>, int, RoomIndexExportTaskData<T>>>();
+        var taskProgress = await documentBuilderTaskManager.StartTask(task, false);
+
+        var headers = MessageSettings.GetHttpHeaders(Request);
+        var evt = new RoomIndexExportIntegrationEvent(userId, tenantId, inDto.Id.ToString(), baseUri, typeof(T) == typeof(string), headers: headers != null
+            ? headers.ToDictionary(x => x.Key, x => x.Value.ToString())
+            : []);
+
+        await eventBus.PublishAsync(evt);
+
+        return DocumentBuilderTaskDto.Get(taskProgress);
+    }
+
+    /// <remarks>
+    /// Returns the room index export.
+    /// </remarks>
+    /// <summary>Get the room index export</summary>
+    /// <path>api/2.0/files/rooms/indexexport</path>
+    [Tags("Rooms")]
+    [SwaggerResponse(200, "Ok", typeof(DocumentBuilderTaskDto))]
+    [HttpGet("indexexport")]
+    public async Task<DocumentBuilderTaskDto> GetRoomIndexExport()
+    {
+        var tenantId = tenantManager.GetCurrentTenantId();
+        var userId = authContext.CurrentAccount.ID;
+
+        var intManager = serviceProvider.GetService<DocumentBuilderTaskManager<RoomIndexExportTask<int>, int, RoomIndexExportTaskData<int>>>();
+        var intTask = await intManager.GetTask(tenantId, userId);
+        if (intTask != null)
+        {
+            return DocumentBuilderTaskDto.Get(intTask);
+        }
+
+        var stringManager = serviceProvider.GetService<DocumentBuilderTaskManager<RoomIndexExportTask<string>, int, RoomIndexExportTaskData<string>>>();
+        var stringTask = await stringManager.GetTask(tenantId, userId);
+        return DocumentBuilderTaskDto.Get(stringTask);
+    }
+
+    /// <remarks>
+    /// Terminates the room index export.
+    /// </remarks>
+    /// <summary>Terminate the room index export</summary>
+    /// <path>api/2.0/files/rooms/indexexport</path>
+    [Tags("Rooms")]
+    [SwaggerResponse(200, "Ok")]
+    [HttpDelete("indexexport")]
+    public async Task TerminateRoomIndexExport()
+    {
+        var tenantId = tenantManager.GetCurrentTenantId();
+        var userId = authContext.CurrentAccount.ID;
+
+        var evt = new RoomIndexExportIntegrationEvent(userId, tenantId, null, null, terminate: true);
+
+        await eventBus.PublishAsync(evt);
+    }
 }
 
 public class VirtualRoomsCommonController(
@@ -891,9 +1002,7 @@ public class VirtualRoomsCommonController(
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
     AuthContext authContext,
-    DocumentBuilderTaskManager<RoomIndexExportTask, int, RoomIndexExportTaskData> documentBuilderTaskManager,
     TenantManager tenantManager,
-    IEventBus eventBus,
     UserManager userManager,
     IServiceProvider serviceProvider,
     ApiDateTimeHelper apiDateTimeHelper,
@@ -1080,96 +1189,6 @@ public class VirtualRoomsCommonController(
         }
 
         return result;
-    }
-
-    /// <remarks>
-    /// Starts the index export of a room with the ID specified in the request.
-    /// </remarks>
-    /// <summary>Start the room index export</summary>
-    /// <path>api/2.0/files/rooms/{id}/indexexport</path>
-    /// <exception cref="NotSupportedException"></exception>
-    [Tags("Rooms")]
-    [SwaggerResponse(200, "Ok", typeof(DocumentBuilderTaskDto))]
-    [SwaggerResponse(501, "Folder indexing is turned off")]
-    [HttpPost("rooms/{id:int}/indexexport")]
-    public async Task<DocumentBuilderTaskDto> StartRoomIndexExport(RoomIdRequestDto<int> inDto)
-    {
-        var room = await fileStorageService.GetFolderAsync(inDto.Id).NotFoundIfNull("Folder not found");
-
-        if (room.RootId == await globalFolderHelper.FolderRoomTemplatesAsync)
-        {
-            throw new ItemNotFoundException();
-        }
-
-        var fileSecurity = serviceProvider.GetService<FileSecurity>();
-
-        if (!await fileSecurity.CanIndexExportAsync(room))
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
-        }
-
-        if (!room.SettingsIndexing)
-        {
-            throw new InvalidOperationException("Folder indexing is turned off");
-        }
-
-        var tenantId = tenantManager.GetCurrentTenantId();
-        var userId = authContext.CurrentAccount.ID;
-
-        var task = serviceProvider.GetService<RoomIndexExportTask>();
-
-        var commonLinkUtility = serviceProvider.GetService<CommonLinkUtility>();
-
-        var baseUri = commonLinkUtility.ServerRootPath;
-
-        task.Init(baseUri, tenantId, userId, null);
-
-        var taskProgress = await documentBuilderTaskManager.StartTask(task, false);
-
-        var headers = MessageSettings.GetHttpHeaders(Request);
-        var evt = new RoomIndexExportIntegrationEvent(userId, tenantId, inDto.Id, baseUri, headers: headers != null
-            ? headers.ToDictionary(x => x.Key, x => x.Value.ToString())
-            : []);
-
-        await eventBus.PublishAsync(evt);
-
-        return DocumentBuilderTaskDto.Get(taskProgress);
-    }
-
-    /// <remarks>
-    /// Returns the room index export.
-    /// </remarks>
-    /// <summary>Get the room index export</summary>
-    /// <path>api/2.0/files/rooms/indexexport</path>
-    [Tags("Rooms")]
-    [SwaggerResponse(200, "Ok", typeof(DocumentBuilderTaskDto))]
-    [HttpGet("rooms/indexexport")]
-    public async Task<DocumentBuilderTaskDto> GetRoomIndexExport()
-    {
-        var tenantId = tenantManager.GetCurrentTenantId();
-        var userId = authContext.CurrentAccount.ID;
-
-        var task = await documentBuilderTaskManager.GetTask(tenantId, userId);
-
-        return DocumentBuilderTaskDto.Get(task);
-    }
-
-    /// <remarks>
-    /// Terminates the room index export.
-    /// </remarks>
-    /// <summary>Terminate the room index export</summary>
-    /// <path>api/2.0/files/rooms/indexexport</path>
-    [Tags("Rooms")]
-    [SwaggerResponse(200, "Ok")]
-    [HttpDelete("rooms/indexexport")]
-    public async Task TerminateRoomIndexExport()
-    {
-        var tenantId = tenantManager.GetCurrentTenantId();
-        var userId = authContext.CurrentAccount.ID;
-
-        var evt = new RoomIndexExportIntegrationEvent(userId, tenantId, 0, null, true);
-
-        await eventBus.PublishAsync(evt);
     }
 
     /// <remarks>

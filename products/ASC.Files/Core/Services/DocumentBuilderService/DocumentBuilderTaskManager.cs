@@ -35,7 +35,8 @@ namespace ASC.Files.Core.Services.DocumentBuilderService;
 
 [Singleton(GenericArguments = [typeof(CustomerOperationsReportTask), typeof(int), typeof(CustomerOperationsReportTaskData)])]
 [Singleton(GenericArguments = [typeof(FormFillingReportTask), typeof(int), typeof(FormFillingReportTaskData)])]
-[Singleton(GenericArguments = [typeof(RoomIndexExportTask), typeof(int), typeof(RoomIndexExportTaskData)])]
+[Singleton(GenericArguments = [typeof(RoomIndexExportTask<int>), typeof(int), typeof(RoomIndexExportTaskData<int>)])]
+[Singleton(GenericArguments = [typeof(RoomIndexExportTask<string>), typeof(int), typeof(RoomIndexExportTaskData<string>)])]
 public class DocumentBuilderTaskManager<T, TId, TData> where T : DocumentBuilderTask<TId, TData>
 {
     private static readonly SemaphoreSlim _semaphore = new(1);
