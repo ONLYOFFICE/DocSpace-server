@@ -25,6 +25,10 @@ import org.openapitools.codegen.languages.CSharpClientCodegen;
 import org.openapitools.codegen.*;
 import static org.openapitools.codegen.utils.StringUtils.camelize;
 import org.openapitools.codegen.utils.ModelUtils;
+import org.openapitools.codegen.templating.mustache.ReplaceAllLambda;
+
+import com.google.common.collect.ImmutableMap;
+import com.samskivert.mustache.Mustache;
 
 import java.io.File;
 import java.util.stream.Collectors;
@@ -236,6 +240,22 @@ public class MyCSharpClientCodegen extends CSharpClientCodegen {
                                     }
                                 }
                             }
+                
+                            if (Boolean.TRUE.equals(param.isDeepObject) && param.items != null && param.items.vars != null) {
+                                for (CodegenProperty itemVar : param.items.vars) {
+                                    boolean isValue = (itemVar.isNumeric
+                                            || itemVar.isBoolean
+                                            || itemVar.isDate
+                                            || itemVar.isDateTime
+                                            || itemVar.isUuid
+                                            || itemVar.isEnum)
+                                            && !itemVar.isNullable;
+
+                                    if (isValue) {
+                                        itemVar.vendorExtensions.put("x-is-value", true);
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -253,6 +273,12 @@ public class MyCSharpClientCodegen extends CSharpClientCodegen {
             return "@" + name;
         }
         return name;
+    }
+
+    @Override
+    protected ImmutableMap.Builder<String, Mustache.Lambda> addMustacheLambdas() {
+        return super.addMustacheLambdas()
+            .put("unescape_param", new ReplaceAllLambda("^@", ""));
     }
 
 
