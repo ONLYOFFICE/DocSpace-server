@@ -33,62 +33,23 @@
 
 namespace ASC.Core.Billing;
 
-[Singleton]
-public class AccountingClient
+[Scope]
+public class AccountingClient(IOptions<AccountingConfiguration> configuration, ICache cache, IAccountingApi accountingApi)
 {
-    public bool Configured { get; }
-
-    private readonly AccountingConfiguration _configuration;
-    private readonly ICache _cache;
-    private readonly IHttpClientFactory _httpClientFactory;
-    private readonly RefitSettings _refitSettings;
-
-    internal const string HttpClientName = "accountingHttpClient";
-    internal const string ResiliencePipelineName = "accountingResiliencePipeline";
-    internal const string BalanceResiliencePipelineName = "balanceResiliencePipeline";
-
-    public AccountingClient(AccountingConfiguration configuration, ICache cache, IHttpClientFactory httpClientFactory)
-    {
-        _configuration = configuration;
-        _cache = cache;
-        _httpClientFactory = httpClientFactory;
-
-        Configured = !string.IsNullOrEmpty(_configuration.Url);
-
-        _refitSettings = new RefitSettings
-        {
-            ContentSerializer = new SystemTextJsonContentSerializer(new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true,
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-            }),
-            ExceptionFactory = CreateExceptionAsync
-        };
-    }
-
-    // Because AccountingClient is a [Singleton], it must not capture a Refit typed-client (it would freeze a single
-    // HttpClient for the whole app lifetime - a captive dependency that defeats IHttpClientFactory handler rotation).
-    // Instead, build the Refit client per call so the underlying HttpClient (and its handler chain) is taken fresh from
-    // the factory, preserving handler rotation. The settings instance is reused.
-    private IAccountingApi CreateApi()
-    {
-        return RestService.For<IAccountingApi>(_httpClientFactory.CreateClient(HttpClientName), _refitSettings);
-    }
-
+    public bool Configured { get => !string.IsNullOrEmpty(configuration.Value.Url); }
 
     public async Task<Balance> GetCustomerBalanceAsync(string portalId)
     {
         EnsureConfigured();
 
-        return await CreateApi().GetCustomerBalanceAsync(portalId);
+        return await accountingApi.GetCustomerBalanceAsync(portalId);
     }
 
     public async Task<Balance> GetCustomerAiBalanceAsync(string portalId)
     {
         EnsureConfigured();
 
-        return await CreateApi().GetCustomerAiBalanceAsync(portalId);
+        return await accountingApi.GetCustomerAiBalanceAsync(portalId);
     }
 
     public async Task<Session> OpenCustomerSessionAsync(string portalId, string serviceName, string externalRef,
@@ -96,21 +57,21 @@ public class AccountingClient
     {
         EnsureConfigured();
 
-        return await CreateApi().OpenCustomerSessionAsync(new SessionOpenOperation(portalId, serviceName, externalRef, quantity, duration));
+        return await accountingApi.OpenCustomerSessionAsync(new SessionOpenOperation(portalId, serviceName, externalRef, quantity, duration));
     }
 
     public async Task CloseCustomerSessionAsync(int sessionId)
     {
         EnsureConfigured();
 
-        await CreateApi().CloseCustomerSessionAsync(sessionId);
+        await accountingApi.CloseCustomerSessionAsync(sessionId);
     }
 
     public async Task<Session> ExtendCustomerSessionAsync(int sessionId, int duration)
     {
         EnsureConfigured();
 
-        return await CreateApi().ExtendCustomerSessionAsync(sessionId, duration);
+        return await accountingApi.ExtendCustomerSessionAsync(sessionId, duration);
     }
 
     public async Task CompleteCustomerSessionAsync(string portalId, string serviceName, int sessionId, int quantity,
@@ -118,7 +79,7 @@ public class AccountingClient
     {
         EnsureConfigured();
 
-        await CreateApi().CompleteCustomerSessionAsync(new SessionCompleteOperation(portalId, serviceName, sessionId, quantity,
+        await accountingApi.CompleteCustomerSessionAsync(new SessionCompleteOperation(portalId, serviceName, sessionId, quantity,
             customerParticipantName, metadata));
     }
 
@@ -127,7 +88,7 @@ public class AccountingClient
     {
         EnsureConfigured();
 
-        return await CreateApi().MakeAiCreditAsync(new AiCreditOperation(portalId, amount, currency, customerParticipantName, metadata));
+        return await accountingApi.MakeAiCreditAsync(new AiCreditOperation(portalId, amount, currency, customerParticipantName, metadata));
     }
 
     public async Task<Report> GetCustomerOperationsAsync(string portalId, OperationFilter filter, bool isAiService)
@@ -137,8 +98,8 @@ public class AccountingClient
         var queryParams = FilterToQueryParams(filter);
 
         return isAiService
-            ? await CreateApi().GetCustomerAiOperationsAsync(portalId, queryParams)
-            : await CreateApi().GetCustomerOperationsAsync(portalId, queryParams);
+            ? await accountingApi.GetCustomerAiOperationsAsync(portalId, queryParams)
+            : await accountingApi.GetCustomerOperationsAsync(portalId, queryParams);
     }
 
     private static Dictionary<string, string> FilterToQueryParams(OperationFilter filter)
@@ -211,33 +172,33 @@ public class AccountingClient
     public async Task<List<Currency>> GetAllCurrenciesAsync()
     {
         var key = "accounting-currencies";
-        var result = _cache.Get<List<Currency>>(key);
+        var result = cache.Get<List<Currency>>(key);
         if (result == null)
         {
             EnsureConfigured();
 
-            result = await CreateApi().GetAllCurrenciesAsync();
-            _cache.Insert(key, result, DateTime.Now.AddDays(1));
+            result = await accountingApi.GetAllCurrenciesAsync();
+            cache.Insert(key, result, DateTime.Now.AddDays(1));
         }
         return result;
     }
 
     public List<string> GetSupportedCurrencies()
     {
-        return _configuration.Currencies;
+        return configuration.Value.Currencies;
     }
 
     public async Task<ServiceInfo> GetServiceInfoAsync(string serviceName)
     {
         EnsureConfigured();
 
-        return await CreateApi().GetServiceInfoAsync(serviceName);
+        return await accountingApi.GetServiceInfoAsync(serviceName);
     }
 
     public async Task<Dictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync(string partnerId, List<string> serviceNames)
     {
         var key = $"accounting-prices-{partnerId}-{string.Join(",", serviceNames)}";
-        var result = _cache.Get<Dictionary<string, Dictionary<string, decimal>>>(key);
+        var result = cache.Get<Dictionary<string, Dictionary<string, decimal>>>(key);
 
         if (result != null)
         {
@@ -264,7 +225,7 @@ public class AccountingClient
             });
         }
 
-        _cache.Insert(key, result, DateTime.Now.AddDays(1));
+        cache.Insert(key, result, DateTime.Now.AddDays(1));
 
         return result;
     }
@@ -275,35 +236,6 @@ public class AccountingClient
         {
             throw new AccountingNotConfiguredException();
         }
-    }
-
-    // Maps non-success responses to the domain exceptions the callers expect (payment required / customer not found),
-    // and wraps any other failure into AccountingException with the status code and response body.
-    private static async Task<Exception> CreateExceptionAsync(HttpResponseMessage response)
-    {
-        if (response.IsSuccessStatusCode)
-        {
-            return null;
-        }
-
-        if (response.StatusCode == HttpStatusCode.PaymentRequired)
-        {
-            return new AccountingPaymentRequiredException();
-        }
-
-        var content = await response.Content.ReadAsStringAsync();
-        if (IsCustomerNotFound(response.StatusCode, content))
-        {
-            return new AccountingCustomerNotFoundException();
-        }
-
-        return new AccountingException($"Accounting request failed with status code {response.StatusCode} {content}");
-    }
-
-    internal static bool IsCustomerNotFound(HttpStatusCode status, string content)
-    {
-        return status == HttpStatusCode.BadRequest &&
-               content.Contains("not found", StringComparison.OrdinalIgnoreCase);
     }
 }
 
@@ -861,13 +793,31 @@ public record AiCreditOperation(
 
 public static class AccountingHttpClientExtension
 {
-    public static void AddAccountingHttpClient(this IServiceCollection services)
+    private const string ResiliencePipelineName = "accountingResiliencePipeline";
+    internal const string BalanceResiliencePipelineName = "balanceResiliencePipeline";
+
+    public static void AddAccountingHttpClient(this IServiceCollection services, IConfiguration configuration)
     {
+        var accountingSettingsSection = configuration.GetSection("core:accounting");
+        var accountingSettings = accountingSettingsSection.Get<AccountingConfiguration>();
+        services.Configure<AccountingConfiguration>(accountingSettingsSection);
+
         services.AddTransient<AccountingAuthHandler>();
 
-        services.AddHttpClient(AccountingClient.HttpClientName, (sp, client) =>
+        services
+            .AddRefitClient<IAccountingApi>(new RefitSettings
             {
-                var url = sp.GetRequiredService<AccountingConfiguration>().Url;
+                ContentSerializer = new SystemTextJsonContentSerializer(new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true,
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+                }),
+                ExceptionFactory = CreateExceptionAsync
+            })
+            .ConfigureHttpClient((sp, client) =>
+            {
+                var url = accountingSettings?.Url;
 
                 if (!string.IsNullOrEmpty(url))
                 {
@@ -878,7 +828,7 @@ public static class AccountingHttpClientExtension
             })
             .AddHttpMessageHandler<AccountingAuthHandler>()
             .SetHandlerLifetime(TimeSpan.FromMinutes(5))
-            .AddResilienceHandler(AccountingClient.ResiliencePipelineName, builder =>
+            .AddResilienceHandler(ResiliencePipelineName, builder =>
             {
                 builder.AddRetry(new RetryStrategyOptions<HttpResponseMessage>
                 {
@@ -900,7 +850,7 @@ public static class AccountingHttpClientExtension
                         if (response.StatusCode == HttpStatusCode.BadRequest)
                         {
                             var content = await response.Content.ReadAsStringAsync();
-                            return !AccountingClient.IsCustomerNotFound(response.StatusCode, content);
+                            return !IsCustomerNotFound(response.StatusCode, content);
                         }
 
                         return true;
@@ -908,7 +858,7 @@ public static class AccountingHttpClientExtension
                 });
             });
 
-        services.AddResiliencePipeline<string, bool>(AccountingClient.BalanceResiliencePipelineName, pipelineBuilder =>
+        services.AddResiliencePipeline<string, bool>(BalanceResiliencePipelineName, pipelineBuilder =>
         {
             pipelineBuilder.AddRetry(new RetryStrategyOptions<bool>
             {
@@ -918,6 +868,35 @@ public static class AccountingHttpClientExtension
                 ShouldHandle = new PredicateBuilder<bool>().HandleResult(result => !result)
             });
         });
+    }
+
+    // Maps non-success responses to the domain exceptions the callers expect (payment required / customer not found),
+    // and wraps any other failure into AccountingException with the status code and response body.
+    private static async Task<Exception> CreateExceptionAsync(HttpResponseMessage response)
+    {
+        if (response.IsSuccessStatusCode)
+        {
+            return null;
+        }
+
+        if (response.StatusCode == HttpStatusCode.PaymentRequired)
+        {
+            return new AccountingPaymentRequiredException();
+        }
+
+        var content = await response.Content.ReadAsStringAsync();
+        if (IsCustomerNotFound(response.StatusCode, content))
+        {
+            return new AccountingCustomerNotFoundException();
+        }
+
+        return new AccountingException($"Accounting request failed with status code {response.StatusCode} {content}");
+    }
+
+    private static bool IsCustomerNotFound(HttpStatusCode status, string content)
+    {
+        return status == HttpStatusCode.BadRequest &&
+               content.Contains("not found", StringComparison.OrdinalIgnoreCase);
     }
 }
 
