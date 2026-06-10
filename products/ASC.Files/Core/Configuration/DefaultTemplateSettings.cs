@@ -61,7 +61,8 @@ public class DefaultTemplateSettingsHelper(IServiceProvider serviceProvider,
     IFileDao<string> fileThirdPartyDao,
     IFolderDao<int> folderDao,
     FilesMessageService fileMessageService,
-    FileChecker fileChecker)
+    FileChecker fileChecker,
+    FileSecurity fileSecurity)
 {
     public async Task<DefaultTemplateSettings> GetSettingsAsync()
     {
@@ -96,7 +97,12 @@ public class DefaultTemplateSettingsHelper(IServiceProvider serviceProvider,
 
         if (fileId != null)
         {
-            var template = await CheckAndCopyFile();
+            var template = fileId.Value.ValueKind switch
+            {
+                JsonValueKind.String => await CheckAndCopyFile(fileThirdPartyDao, fileId.Value.GetString(), extension),
+                JsonValueKind.Number => await CheckAndCopyFile(fileDao, fileId.Value.GetInt32(), extension),
+                _ => throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound)
+            };
             setting.SelectedFile = template.Id;
         }
         else
@@ -114,33 +120,6 @@ public class DefaultTemplateSettingsHelper(IServiceProvider serviceProvider,
         fileMessageService.Send(MessageAction.DocumentsDefaultTemplatesSettingsUpdated, setting.FileExtension, fileId?.ToString());
 
         return settings;
-
-        async Task<File<int>> CheckAndCopyFile()
-        {
-            FileEntry file = fileId.Value.ValueKind switch
-            {
-                JsonValueKind.String => await fileThirdPartyDao.GetFileAsync(fileId.Value.GetString()),
-                JsonValueKind.Number => await fileDao.GetFileAsync(fileId.Value.GetInt32()),
-                _ => throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound)
-            };
-
-            if (file == null)
-            {
-                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
-            }
-
-            if (Path.GetExtension(file.Title) != extension)
-            {
-                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_NotSupportedFormat);
-            }
-
-            return fileId.Value.ValueKind switch
-            {
-                JsonValueKind.String => await fileThirdPartyDao.CopyFileAsync(fileId.Value.GetString(), await folderDao.GetFolderIDDefaultTemplatesAsync(true)),
-                JsonValueKind.Number => await fileDao.CopyFileAsync(fileId.Value.GetInt32(), await folderDao.GetFolderIDDefaultTemplatesAsync(true)),
-                _ => throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound)
-            };
-        }
     }
 
     public async Task<DefaultTemplateSettings> SetTemplateAsync(string extension, string title, Stream stream)
@@ -222,5 +201,23 @@ public class DefaultTemplateSettingsHelper(IServiceProvider serviceProvider,
             .ToListAsync();
 
         return extensions;
+    }
+
+    private async Task<File<int>> CheckAndCopyFile<T>(IFileDao<T> dao, T fileId, string extension)
+    {
+        FileEntry<T> file = await dao.GetFileAsync(fileId)
+            ?? throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
+
+        if (!await fileSecurity.CanCopyAsync(file))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
+        if (Path.GetExtension(file.Title) != extension)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_NotSupportedFormat);
+        }
+
+        return await dao.CopyFileAsync(fileId, await folderDao.GetFolderIDDefaultTemplatesAsync(true));
     }
 }
