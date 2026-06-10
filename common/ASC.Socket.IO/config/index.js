@@ -72,7 +72,7 @@ function getAndSaveAppsettings(){
         redis.socket = {
             host: redis.Hosts[0].Host,
             port: redis.Hosts[0].Port,
-            tls: redis.Ssl
+            tls: redis.Ssl || false
         };
 
         nconf.set("Redis", redis);
