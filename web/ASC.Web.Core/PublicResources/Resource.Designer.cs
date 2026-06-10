@@ -3795,7 +3795,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to admins.
+        ///   Looks up a localized string similar to Admins.
         /// </summary>
         public static string TariffsUpcomingUOM_admin {
             get {
@@ -3804,7 +3804,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to admins.
+        ///   Looks up a localized string similar to Admins.
         /// </summary>
         public static string TariffsUpcomingUOM_adminyear {
             get {

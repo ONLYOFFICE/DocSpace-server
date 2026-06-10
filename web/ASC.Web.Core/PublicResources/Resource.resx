@@ -1393,10 +1393,10 @@
     <value>Additional disk storage</value>
   </data>
   <data name="TariffsUpcomingUOM_admin" xml:space="preserve">
-    <value>admins</value>
+    <value>Admins</value>
   </data>
   <data name="TariffsUpcomingUOM_adminyear" xml:space="preserve">
-    <value>admins</value>
+    <value>Admins</value>
   </data>
   <data name="TariffsUpcomingUOM_storage" xml:space="preserve">
     <value>GB</value>
