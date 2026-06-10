@@ -187,7 +187,7 @@ public class QuotaHelper(
                         })
                     .OrderBy(r => r.Order))
         {
-            var featureName = $"{feature.Name}{(quota.Wallet ? "_wallet" : "")}";
+            var featureName = $"{feature.Name}{(quota.Wallet && quota.Additional ? "_wallet" : "")}";
 
             var result = new TenantQuotaFeatureDto
             {

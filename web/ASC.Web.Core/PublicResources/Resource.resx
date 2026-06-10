@@ -1401,4 +1401,10 @@
   <data name="TariffsUpcomingUOM_storage" xml:space="preserve">
     <value>GB</value>
   </data>
+  <data name="AccountingCustomerOperationServiceUOM_admin" xml:space="preserve">
+    <value>Admins</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_admin" xml:space="preserve">
+    <value>Business plan</value>
+  </data>
 </root>

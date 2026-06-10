@@ -132,6 +132,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to  plan.
+        /// </summary>
+        public static string AccountingCustomerOperationServiceDesc_admin {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationServiceDesc_admin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to AI features.
         /// </summary>
         public static string AccountingCustomerOperationServiceDesc_ai_tools {
@@ -209,6 +218,15 @@ namespace ASC.Web.Core.PublicResources {
         public static string AccountingCustomerOperationServiceUnit {
             get {
                 return ResourceManager.GetString("AccountingCustomerOperationServiceUnit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Admins.
+        /// </summary>
+        public static string AccountingCustomerOperationServiceUOM_admin {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationServiceUOM_admin", resourceCulture);
             }
         }
         

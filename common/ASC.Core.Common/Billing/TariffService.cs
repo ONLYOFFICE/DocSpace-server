@@ -139,6 +139,11 @@ public class TariffService(
                                 {
                                     nextQuantity = existingQuota.NextQuantity;
                                 }
+                                if (existingQuota is { Additional: false })
+                                {
+                                    var paymentEndDate = 9999 <= currentPayment.EndDate.Year ? DateTime.MaxValue : currentPayment.EndDate;
+                                    asynctariff.DueDate = DateTime.Compare(asynctariff.DueDate, paymentEndDate) < 0 ? asynctariff.DueDate : paymentEndDate;
+                                }
                             }
                             else
                             {
@@ -147,18 +152,18 @@ public class TariffService(
                             }
 
                             asynctariff.Quotas = asynctariff.Quotas.Where(r => r.Id != quota.TenantId).ToList();
-                            asynctariff.Quotas.Add(new Quota(quota.TenantId, currentPayment.Quantity, quota.Wallet, quotaDueDate, nextQuantity));
+                            asynctariff.Quotas.Add(new Quota(quota.TenantId, currentPayment.Quantity, quota.Additional, quota.Wallet, quotaDueDate, nextQuantity));
                             email = currentPayment.PaymentEmail;
                         }
 
-                        // need sort by wallet
-                        asynctariff.Quotas = asynctariff.Quotas.OrderBy(q => q.Wallet).ToList();
+                        // need sort by additional
+                        asynctariff.Quotas = asynctariff.Quotas.OrderBy(q => q.Additional).ToList();
 
-                        if (asynctariff.Quotas.All(q => q.Wallet))
+                        if (asynctariff.Quotas.All(q => q.Additional))
                         {
                             if (tariff.Id != 0 && tariff.State >= TariffState.Paid && !await IsFreeTariffAsync(tariff))
                             {
-                                throw new BillingNotFoundException($"Payment {tariff.Id} not found. Only wallet payments available");
+                                throw new BillingNotFoundException($"Payment {tariff.Id} not found. Only additional payments available");
                             }
 
                             await AddInitialQuotaAsync(asynctariff, tenantId);
@@ -691,7 +696,7 @@ public class TariffService(
             }
         }
 
-        if (tariff.Quotas.All(q => q.Wallet))
+        if (tariff.Quotas.All(q => q.Additional))
         {
             await AddInitialQuotaAsync(tariff, tenant.Value);
         }

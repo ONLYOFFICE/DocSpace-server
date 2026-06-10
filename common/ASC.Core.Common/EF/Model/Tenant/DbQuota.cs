@@ -56,6 +56,8 @@ public class DbQuota : BaseEntity
 
     public bool Visible { get; set; }
     public bool Wallet { get; set; }
+    public bool Additional { get; set; }
+
     public override object[] GetKeys()
     {
         return [TenantId];
@@ -113,7 +115,8 @@ public static class DbQuotaExtension
                     Features = "total_size:1073741824",
                     Price = 0,
                     ProductId = "1004",
-                    Visible = false
+                    Visible = false,
+                    Additional = true
                 },
                 new DbQuota
                 {
@@ -123,7 +126,8 @@ public static class DbQuotaExtension
                     Features = "manager:1",
                     Price = 0,
                     ProductId = "1005",
-                    Visible = false
+                    Visible = false,
+                    Additional = true
                 },
                 new DbQuota
                 {
@@ -159,21 +163,21 @@ public static class DbQuotaExtension
                 {
                     TenantId = -9,
                     Name = "admin",
-                    Description = "since 01.04.2024",
+                    Description = "since 01.04.2024, until 08.06.2026",
                     Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,free_backup:2:fixed,automationapi",
                     Price = 20,
                     ProductId = "1006",
-                    Visible = true
+                    Visible = false
                 },
                 new DbQuota
                 {
                     TenantId = -10,
                     Name = "adminyear",
-                    Description = "since 10.02.2025",
+                    Description = "since 10.02.2025, until 08.06.2026",
                     Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,year,free_backup:2:fixed,automationapi",
                     Price = 220,
                     ProductId = "1009",
-                    Visible = true
+                    Visible = false
                 },
                 new DbQuota
                 {
@@ -185,7 +189,8 @@ public static class DbQuotaExtension
                     ProductId = "1011",
                     ServiceName = "disk-storage",
                     Visible = true,
-                    Wallet = true
+                    Wallet = true,
+                    Additional = true
                 },
                 new DbQuota
                 {
@@ -197,7 +202,8 @@ public static class DbQuotaExtension
                     ProductId = null,
                     ServiceName = "backup",
                     Visible = true,
-                    Wallet = true
+                    Wallet = true,
+                    Additional = true
                 },
                 new DbQuota
                 {
@@ -208,6 +214,20 @@ public static class DbQuotaExtension
                     Price = 1,
                     ProductId = null,
                     ServiceName = "ai-tools",
+                    ServiceGroup = null,
+                    Visible = true,
+                    Wallet = true,
+                    Additional = true
+                },
+                new DbQuota
+                {
+                    TenantId = -14,
+                    Name = "admin",
+                    Description = "since 08.06.2026",
+                    Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,free_backup:2:fixed,automationapi",
+                    Price = 20,
+                    ProductId = "1013",
+                    ServiceName = "admin",
                     ServiceGroup = null,
                     Visible = true,
                     Wallet = true
