@@ -33,21 +33,17 @@
 
 namespace ASC.Core.Billing;
 
-[Singleton]
 public class DocsCloudConfiguration
 {
-    public string Url { get; }
-    public string Key { get; }
-    public string Secret { get; }
-
-    public DocsCloudConfiguration(IConfiguration configuration)
+    public string Url
     {
-        var section = configuration.GetSection("core:docscloud");
-
-        // Normalize once here so every consumer (DocsCloudClient, the named HttpClient base address and the auth
-        // handler) reuses this singleton instead of re-reading and re-normalizing the section.
-        Url = (section.GetValue<string>("url") ?? "").Trim().TrimEnd('/');
-        Key = section.GetValue<string>("key");
-        Secret = section.GetValue<string>("secret");
+        get;
+        init
+        {
+            field = (value ?? "").Trim().TrimEnd('/');
+        }
     }
+
+    public string Key { get; init; }
+    public string Secret { get; init; }
 }

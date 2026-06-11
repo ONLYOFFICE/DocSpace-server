@@ -37,13 +37,13 @@ namespace ASC.Core.Billing;
 /// Adds the per-request ASC HMAC-SHA1 authorization header to every DocsCloud request.
 /// The token embeds the current UTC timestamp, so it must be generated per call rather than as a static header.
 /// </summary>
-internal class DocsCloudAuthHandler(DocsCloudConfiguration configuration) : DelegatingHandler
+internal class DocsCloudAuthHandler(IOptions<DocsCloudConfiguration> configuration) : DelegatingHandler
 {
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        if (!string.IsNullOrEmpty(configuration.Secret))
+        if (!string.IsNullOrEmpty(configuration.Value.Secret))
         {
-            request.Headers.Add("Authorization", CreateAuthToken(configuration.Key, configuration.Secret));
+            request.Headers.Add("Authorization", CreateAuthToken(configuration.Value.Key, configuration.Value.Secret));
         }
 
         return await base.SendAsync(request, cancellationToken);

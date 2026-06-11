@@ -38,7 +38,7 @@ namespace ASC.Core.Billing;
 /// All paths are relative — the base address, authentication and resilience are configured in
 /// <see cref="DocsCloudHttpClientExtension.AddDocsCloudHttpClient"/>. The public wrapper is <see cref="DocsCloudClient"/>.
 /// </summary>
-internal interface IDocsCloudApi
+public interface IDocsCloudApi
 {
     [Get("/api/healthcheck")]
     Task HealthCheckAsync();

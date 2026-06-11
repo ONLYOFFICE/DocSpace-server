@@ -102,8 +102,8 @@ public class BaseWorkerStartup(IConfiguration configuration)
         services.AddTransient<DistributedTaskProgress>();
 
         services.AddBillingHttpClient();
-        services.AddAccountingHttpClient(configuration);
-        services.AddDocsCloudHttpClient();
+        services.AddAccountingHttpClient(Configuration);
+        services.AddDocsCloudHttpClient(Configuration);
     }
 
     public virtual void Configure(IApplicationBuilder app)

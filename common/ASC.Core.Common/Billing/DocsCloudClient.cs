@@ -33,45 +33,10 @@
 
 namespace ASC.Core.Billing;
 
-[Singleton]
-public class DocsCloudClient
+[Scope]
+public class DocsCloudClient(IOptions<DocsCloudConfiguration> configuration, IDocsCloudApi docsCloudApi)
 {
-    public bool Configured { get; }
-
-    private readonly DocsCloudConfiguration _configuration;
-    private readonly IHttpClientFactory _httpClientFactory;
-    private readonly RefitSettings _refitSettings;
-
-    internal const string HttpClientName = "docsCloudHttpClient";
-    internal const string ResiliencePipelineName = "docsCloudResiliencePipeline";
-
-    public DocsCloudClient(DocsCloudConfiguration configuration, IHttpClientFactory httpClientFactory)
-    {
-        _configuration = configuration;
-        _httpClientFactory = httpClientFactory;
-
-        Configured = !string.IsNullOrEmpty(_configuration.Url);
-
-        _refitSettings = new RefitSettings
-        {
-            ContentSerializer = new SystemTextJsonContentSerializer(new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true,
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-            }),
-            ExceptionFactory = CreateExceptionAsync
-        };
-    }
-
-    // Because DocsCloudClient is a [Singleton], it must not capture a Refit typed-client (it would freeze a single
-    // HttpClient for the whole app lifetime - a captive dependency that defeats IHttpClientFactory handler rotation).
-    // Instead, build the Refit client per call so the underlying HttpClient (and its handler chain) is taken fresh from
-    // the factory, preserving handler rotation. The settings instance is reused.
-    private IDocsCloudApi CreateApi()
-    {
-        return RestService.For<IDocsCloudApi>(_httpClientFactory.CreateClient(HttpClientName), _refitSettings);
-    }
+    public bool Configured { get => !string.IsNullOrEmpty(configuration.Value.Url); }
 
     /// <summary>
     /// Pings the DocsCloud server health endpoint. Requires no authorization, so it intentionally skips the
@@ -79,49 +44,49 @@ public class DocsCloudClient
     /// </summary>
     public async Task CheckHealthAsync()
     {
-        await CreateApi().HealthCheckAsync();
+        await docsCloudApi.HealthCheckAsync();
     }
 
     public async Task<DocsCloudTenant> GetTenantAsync(string portalId)
     {
         EnsureConfigured();
 
-        return await CreateApi().GetTenantAsync(portalId);
+        return await docsCloudApi.GetTenantAsync(portalId);
     }
 
     public async Task<string> GetTenantInfoAsync(string portalId)
     {
         EnsureConfigured();
 
-        return await CreateApi().GetTenantInfoAsync(portalId);
+        return await docsCloudApi.GetTenantInfoAsync(portalId);
     }
 
     public async Task<DocsCloudConfigDto> GetTenantConfigAsync(string portalId)
     {
         EnsureConfigured();
 
-        return await CreateApi().GetTenantConfigAsync(portalId);
+        return await docsCloudApi.GetTenantConfigAsync(portalId);
     }
 
     public async Task<DocsCloudConfigDto> UpdateTenantConfigAsync(string portalId, DocsCloudConfigDto config)
     {
         EnsureConfigured();
 
-        return await CreateApi().UpdateTenantConfigAsync(portalId, config);
+        return await docsCloudApi.UpdateTenantConfigAsync(portalId, config);
     }
 
     public async Task<Stream> GetTenantQuotaAsync(string portalId)
     {
         EnsureConfigured();
 
-        return await CreateApi().GetTenantQuotaAsync(portalId);
+        return await docsCloudApi.GetTenantQuotaAsync(portalId);
     }
 
     public async Task<DocsCloudUsage> GetTenantUsageAsync(string portalId)
     {
         EnsureConfigured();
 
-        return await CreateApi().GetTenantUsageAsync(portalId);
+        return await docsCloudApi.GetTenantUsageAsync(portalId);
     }
 
     private void EnsureConfigured()
@@ -130,30 +95,6 @@ public class DocsCloudClient
         {
             throw new DocsCloudNotConfiguredException();
         }
-    }
-
-    // Maps non-success responses to the domain exceptions the callers expect (resource not found / authorization
-    // failed), and wraps any other failure into DocsCloudException with the status code and response body.
-    private static async Task<Exception> CreateExceptionAsync(HttpResponseMessage response)
-    {
-        if (response.IsSuccessStatusCode)
-        {
-            return null;
-        }
-
-        if (response.StatusCode == HttpStatusCode.NotFound)
-        {
-            return new DocsCloudNotFoundException();
-        }
-
-        if (response.StatusCode == HttpStatusCode.Forbidden)
-        {
-            return new DocsCloudForbiddenException();
-        }
-
-        var content = await response.Content.ReadAsStringAsync();
-
-        return new DocsCloudException($"DocsCloud request failed with status code {response.StatusCode} {content}");
     }
 }
 
@@ -353,13 +294,30 @@ public class DocsCloudUsage
 
 public static class DocsCloudHttpClientExtension
 {
-    public static void AddDocsCloudHttpClient(this IServiceCollection services)
+    private const string ResiliencePipelineName = "docsCloudResiliencePipeline";
+
+    public static void AddDocsCloudHttpClient(this IServiceCollection services, IConfiguration configuration)
     {
+        var docsCloudSettingsSection = configuration.GetSection("core:docscloud");
+        var docsCloudSettings = docsCloudSettingsSection.Get<DocsCloudConfiguration>();
+        services.Configure<DocsCloudConfiguration>(docsCloudSettingsSection);
+
         services.AddTransient<DocsCloudAuthHandler>();
 
-        services.AddHttpClient(DocsCloudClient.HttpClientName, (sp, client) =>
+        services
+            .AddRefitClient<IDocsCloudApi>(new RefitSettings
             {
-                var url = sp.GetRequiredService<DocsCloudConfiguration>().Url;
+                ContentSerializer = new SystemTextJsonContentSerializer(new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true,
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+                }),
+                ExceptionFactory = CreateExceptionAsync
+            })
+            .ConfigureHttpClient((sp, client) =>
+            {
+                var url = docsCloudSettings?.Url;
 
                 if (!string.IsNullOrEmpty(url))
                 {
@@ -370,7 +328,7 @@ public static class DocsCloudHttpClientExtension
             })
             .AddHttpMessageHandler<DocsCloudAuthHandler>()
             .SetHandlerLifetime(TimeSpan.FromMinutes(5))
-            .AddResilienceHandler(DocsCloudClient.ResiliencePipelineName, builder =>
+            .AddResilienceHandler(ResiliencePipelineName, builder =>
             {
                 builder.AddRetry(new RetryStrategyOptions<HttpResponseMessage>
                 {
@@ -394,6 +352,30 @@ public static class DocsCloudHttpClientExtension
                     }
                 });
             });
+    }
+
+    // Maps non-success responses to the domain exceptions the callers expect (resource not found / authorization
+    // failed), and wraps any other failure into DocsCloudException with the status code and response body.
+    private static async Task<Exception> CreateExceptionAsync(HttpResponseMessage response)
+    {
+        if (response.IsSuccessStatusCode)
+        {
+            return null;
+        }
+
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            return new DocsCloudNotFoundException();
+        }
+
+        if (response.StatusCode == HttpStatusCode.Forbidden)
+        {
+            return new DocsCloudForbiddenException();
+        }
+
+        var content = await response.Content.ReadAsStringAsync();
+
+        return new DocsCloudException($"DocsCloud request failed with status code {response.StatusCode} {content}");
     }
 }
 
