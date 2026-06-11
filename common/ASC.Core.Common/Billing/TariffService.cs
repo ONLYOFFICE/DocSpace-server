@@ -1153,7 +1153,7 @@ public class TariffService(
             return result;
         }
 
-        var pipeline = resiliencePipelineProvider.GetPipeline<bool>(AccountingClient.BalanceResiliencePipelineName);
+        var pipeline = resiliencePipelineProvider.GetPipeline<bool>(AccountingHttpClientExtension.BalanceResiliencePipelineName);
 
         var updated = await pipeline.ExecuteAsync(async _ =>
         {

@@ -1188,4 +1188,16 @@
   <data name="ScheduledBackupDeleted" xml:space="preserve">
     <value>Заплановане резервне копіювання видалено</value>
   </data>
+  <data name="DocumentsExternalShareSettingsUpdated" xml:space="preserve">
+    <value>Налаштування доступу для зовнішніх посилань оновлено</value>
+  </data>
+  <data name="UserLogoutActiveConnection" xml:space="preserve">
+    <value>Активний сеанс завершено: {0}</value>
+  </data>
+  <data name="UserLogoutActiveConnections" xml:space="preserve">
+    <value>Активні сеанси завершено: {0}</value>
+  </data>
+  <data name="UserLogoutActiveConnectionsForUser" xml:space="preserve">
+    <value>Активні сеанси завершено для користувача: {0}</value>
+  </data>
 </root>

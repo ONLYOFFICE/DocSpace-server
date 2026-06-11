@@ -33,25 +33,28 @@
 
 namespace ASC.Core.Billing;
 
-[Singleton]
 public class AccountingConfiguration
 {
-    public string Url { get; }
-    public string Key { get; }
-    public string Secret { get; }
-    public List<string> Currencies { get; }
-
-    public AccountingConfiguration(IConfiguration configuration)
+    private static readonly List<string> _defaultCurrencies = ["USD"];
+    public string Url
     {
-        var section = configuration.GetSection("core:accounting");
-
-        // Normalize once here so every consumer (AccountingClient, the named HttpClient base address and the auth
-        // handler) reuses this singleton instead of re-reading and re-normalizing the section.
-        Url = (section.GetValue<string>("Url") ?? "").Trim().TrimEnd('/');
-        Key = section.GetValue<string>("Key");
-        Secret = section.GetValue<string>("Secret");
-        Currencies = section.GetSection("Currencies").Get<List<string>>() is { Count: > 0 } currencies
-            ? currencies
-            : ["USD"];
+        get;
+        init
+        {
+            field = (value ?? "").Trim().TrimEnd('/');
+        }
     }
+
+    public string Key { get; init; }
+    public string Secret { get;  init; }
+
+    public List<string> Currencies
+    {
+        get;
+        init
+        {
+            field = value?.Count > 0 ? value : _defaultCurrencies;
+        }
+    } = _defaultCurrencies;
+
 }

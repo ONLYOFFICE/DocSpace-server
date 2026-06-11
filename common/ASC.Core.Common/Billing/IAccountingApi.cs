@@ -38,7 +38,7 @@ namespace ASC.Core.Billing;
 /// All paths are relative — the base address, authentication and resilience are configured in
 /// <see cref="AccountingHttpClientExtension.AddAccountingHttpClient"/>. The public wrapper is <see cref="AccountingClient"/>.
 /// </summary>
-internal interface IAccountingApi
+public interface IAccountingApi
 {
     [Get("/customer/{portalId}/balance")]
     Task<Balance> GetCustomerBalanceAsync(string portalId);
@@ -62,10 +62,10 @@ internal interface IAccountingApi
     Task<ServicePayment> MakeAiCreditAsync([Body] AiCreditOperation data);
 
     [Get("/customer/{portalId}/operations")]
-    Task<Report> GetCustomerOperationsAsync(string portalId, [Query] IDictionary<string, string> filter);
+    Task<Report> GetCustomerOperationsAsync(string portalId, [Query] OperationFilter filter);
 
     [Get("/customer/{portalId}/operations/ai")]
-    Task<Report> GetCustomerAiOperationsAsync(string portalId, [Query] IDictionary<string, string> filter);
+    Task<Report> GetCustomerAiOperationsAsync(string portalId, [Query] OperationFilter filter);
 
     [Get("/currency/all")]
     Task<List<Currency>> GetAllCurrenciesAsync();

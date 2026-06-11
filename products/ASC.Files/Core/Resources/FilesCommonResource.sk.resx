@@ -589,4 +589,10 @@
   <data name="ErrorMessage_AiServicesDisabled" xml:space="preserve">
     <value>Služby AI sú pre aktuálny portál deaktivované</value>
   </data>
+  <data name="ErrorMessage_ExternalDbNotIndexed" xml:space="preserve">
+    <value>Databázová tabuľka bude vytvorená po prvom odoslaní formulára. Zatiaľ nie sú k dispozícii žiadne údaje na vygenerovanie jej štruktúry.</value>
+  </data>
+  <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
+    <value>Synchronizácia údajov formulára s externou databázou zlyhala.</value>
+  </data>
 </root>

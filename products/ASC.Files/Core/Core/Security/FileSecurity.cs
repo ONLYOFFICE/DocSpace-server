@@ -320,7 +320,8 @@ public class FileSecurity(
                     FilesSecurityActions.Embed,
                     FilesSecurityActions.ChangeOwner,
                     FilesSecurityActions.IndexExport,
-                    FilesSecurityActions.UseChat
+                    FilesSecurityActions.UseChat,
+                    FilesSecurityActions.CanUseAi
                 }
             }
     }.ToFrozenDictionary();
@@ -611,6 +612,11 @@ public class FileSecurity(
     public async Task<bool> CanUseChatAsync<T>(FileEntry<T> entry)
     {
         return await CanAsync(entry, authContext.CurrentAccount.ID, FilesSecurityActions.UseChat);
+    }
+
+    public async Task<bool> CanUseAiAsync<T>(FileEntry<T> entry)
+    {
+        return await CanAsync(entry, authContext.CurrentAccount.ID, FilesSecurityActions.CanUseAi);
     }
 
     public async Task<int> UpdateShareByFolderTypesAsync(Guid subject, IEnumerable<FolderType> folderTypes, FileShare share)
@@ -1158,6 +1164,13 @@ public class FileSecurity(
             return false;
         }
 
+        if (action is FilesSecurityActions.CanUseAi &&
+            !(folder is { FolderType: FolderType.USER } && folder.CreateBy == userId) &&
+            !isRoom)
+        {
+            return false;
+        }
+
         if (action is FilesSecurityActions.AskAi)
         {
             if (file == null)
@@ -1388,7 +1401,12 @@ public class FileSecurity(
                 {
                     if (folder.FolderType == FolderType.USER)
                     {
-                        return folder.CreateBy == userId && action is FilesSecurityActions.Create or FilesSecurityActions.CopyTo or FilesSecurityActions.MoveTo or FilesSecurityActions.FillForms;
+                        return folder.CreateBy == userId &&
+                               action is FilesSecurityActions.Create or
+                                   FilesSecurityActions.CopyTo or
+                                   FilesSecurityActions.MoveTo or
+                                   FilesSecurityActions.FillForms or
+                                   FilesSecurityActions.CanUseAi;
                     }
 
                     if (folder.FolderType == FolderType.Archive && action == FilesSecurityActions.MoveTo)
@@ -2437,6 +2455,20 @@ public class FileSecurity(
                         return false;
                     default:
                         if (e.Access is FileShare.RoomManager or FileShare.ContentCreator)
+                        {
+                            return true;
+                        }
+
+                        break;
+                }
+                break;
+            case FilesSecurityActions.CanUseAi:
+                switch (e.RootFolderType)
+                {
+                    case FolderType.USER:
+                        return false;
+                    default:
+                        if (e.Access is FileShare.RoomManager)
                         {
                             return true;
                         }
@@ -3787,6 +3819,9 @@ public class FileSecurity(
         UpdateXlsx,
 
         [Description("Analyze responses")]
-        AnalyzeResponses
+        AnalyzeResponses,
+
+        [Description("Use AI")]
+        CanUseAi
     }
 }

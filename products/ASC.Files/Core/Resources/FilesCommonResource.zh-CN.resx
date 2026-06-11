@@ -589,4 +589,10 @@
   <data name="ResultStorageFolder" xml:space="preserve">
     <value>结果存储</value>
   </data>
+  <data name="ErrorMessage_ExternalDbNotIndexed" xml:space="preserve">
+    <value>数据库表将在首次提交表单后创建。目前还没有数据来生成其结构。</value>
+  </data>
+  <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
+    <value>无法将表单数据同步到外部数据库。</value>
+  </data>
 </root>

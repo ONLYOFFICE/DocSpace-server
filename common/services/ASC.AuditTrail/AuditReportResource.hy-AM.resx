@@ -1188,4 +1188,16 @@
   <data name="WhiteLabelSettingsLogoTextUpdated" xml:space="preserve">
     <value>Բրենդի անվանումը թարմացվել է</value>
   </data>
+  <data name="DocumentsExternalShareSettingsUpdated" xml:space="preserve">
+    <value>Արտաքին հղումների մուտքի կարգավորումները թարմացվել են</value>
+  </data>
+  <data name="UserLogoutActiveConnection" xml:space="preserve">
+    <value>Ակտիվ կապը դուրս է գրանցվել. {0}</value>
+  </data>
+  <data name="UserLogoutActiveConnections" xml:space="preserve">
+    <value>Ակտիվ կապերը դուրս են գրանցվել. {0}</value>
+  </data>
+  <data name="UserLogoutActiveConnectionsForUser" xml:space="preserve">
+    <value>Օգտատիրոջ ակտիվ կապերը դուրս են գրանցվել. {0}</value>
+  </data>
 </root>

@@ -263,16 +263,14 @@ public class AccountingClientTests
             .Build();
 
         var services = new ServiceCollection();
+        services.AddMemoryCache();
         services.AddSingleton<IConfiguration>(configuration);
-        services.AddSingleton<AccountingConfiguration>(); // normally self-registered via DIHelper.Scan ([Singleton])
-        services.AddAccountingHttpClient();
+        services.AddSingleton(typeof(ICache), typeof(AscCache));
+        services.AddScoped<AccountingClient>();
+        services.AddAccountingHttpClient(configuration);
 
         var provider = services.BuildServiceProvider();
-        var factory = provider.GetRequiredService<IHttpClientFactory>();
-        var accountingConfiguration = provider.GetRequiredService<AccountingConfiguration>();
-        var cache = new AscCache(new MemoryCache(new MemoryCacheOptions()));
-
-        var client = new AccountingClient(accountingConfiguration, cache, factory);
+        var client = provider.GetRequiredService<AccountingClient>();
 
         client.Configured.Should().BeFalse();
 
@@ -296,19 +294,18 @@ public class AccountingClientTests
         var handler = new CapturingHandler(responder);
 
         var services = new ServiceCollection();
+        services.AddMemoryCache();
         services.AddSingleton<IConfiguration>(configuration);
-        services.AddSingleton<AccountingConfiguration>(); // normally self-registered via DIHelper.Scan ([Singleton])
-        services.AddAccountingHttpClient();
+        services.AddSingleton(typeof(ICache), typeof(AscCache));
+        services.AddScoped<AccountingClient>();
+
+        services.AddAccountingHttpClient(configuration);
 
         // Replace the real network handler with our capturing one for every named client (including "accountingHttpClient").
         services.ConfigureHttpClientDefaults(b => b.ConfigurePrimaryHttpMessageHandler(() => handler));
 
         var provider = services.BuildServiceProvider();
-        var factory = provider.GetRequiredService<IHttpClientFactory>();
-        var accountingConfiguration = provider.GetRequiredService<AccountingConfiguration>();
-        var cache = new AscCache(new MemoryCache(new MemoryCacheOptions()));
-
-        return (new AccountingClient(accountingConfiguration, cache, factory), handler);
+        return (provider.GetRequiredService<AccountingClient>(), handler);
     }
 
     private static HttpResponseMessage Json(HttpStatusCode status, string json)

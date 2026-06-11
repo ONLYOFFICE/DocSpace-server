@@ -1,0 +1,171 @@
+// Copyright (C) Ascensio System SIA, 2009-2026
+// 
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
+// 
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
+// 
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
+// 
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
+// 
+// No trademark rights are granted under this License.
+// 
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
+
+import express from "express";
+import type { Application, RequestHandler, Router } from "express";
+import {
+  DEFAULT_AI_ROUTES,
+  DEFAULT_ASSIGNMENTS_ROUTES,
+  DEFAULT_ATTACHMENTS_ROUTES,
+  DEFAULT_PREFERENCES_ROUTES,
+  DEFAULT_PROFILES_ROUTES,
+  DEFAULT_PROMPTS_ROUTES,
+  DEFAULT_THREADS_ROUTES,
+  DEFAULT_TOOLS_ROUTES,
+  DEFAULT_WEB_SEARCH_ROUTES,
+} from "@onlyoffice/ai-chat/core";
+import type { RouteSpec } from "@onlyoffice/ai-chat/core";
+import logger from "./log.js";
+import { aiController } from "./controllers/aiController.js";
+import { assignmentsController } from "./controllers/assignmentsController.js";
+import { attachmentsController } from "./controllers/attachmentsController.js";
+import { preferencesController } from "./controllers/preferencesController.js";
+import { profilesController } from "./controllers/profilesController.js";
+import { promptsController } from "./controllers/promptsController.js";
+import { threadsController } from "./controllers/threadsController.js";
+import { toolsController } from "./controllers/toolsController.js";
+import { webSearchController } from "./controllers/webSearchController.js";
+
+export const API_PREFIX = "/api/2.0/new-ai";
+
+type RouteMap = Readonly<Record<string, RouteSpec>>;
+type ControllerMap = Readonly<Record<string, RequestHandler>>;
+
+interface EngineBinding {
+  name: string;
+  routes: RouteMap;
+  controller: ControllerMap;
+}
+
+const ENGINE_BINDINGS: ReadonlyArray<EngineBinding> = [
+  { name: "ai", routes: DEFAULT_AI_ROUTES, controller: aiController },
+  { name: "assignments", routes: DEFAULT_ASSIGNMENTS_ROUTES, controller: assignmentsController },
+  { name: "attachments", routes: DEFAULT_ATTACHMENTS_ROUTES, controller: attachmentsController },
+  { name: "preferences", routes: DEFAULT_PREFERENCES_ROUTES, controller: preferencesController },
+  { name: "profiles", routes: DEFAULT_PROFILES_ROUTES, controller: profilesController },
+  { name: "prompts", routes: DEFAULT_PROMPTS_ROUTES, controller: promptsController },
+  { name: "threads", routes: DEFAULT_THREADS_ROUTES, controller: threadsController },
+  { name: "tools", routes: DEFAULT_TOOLS_ROUTES, controller: toolsController },
+  { name: "webSearch", routes: DEFAULT_WEB_SEARCH_ROUTES, controller: webSearchController },
+];
+
+function bindEngine(router: Router, binding: EngineBinding): void {
+  const { name, routes, controller } = binding;
+  for (const [methodName, route] of Object.entries(routes)) {
+    const handler = controller[methodName];
+    if (typeof handler !== "function") {
+      throw new Error(`Missing handler ${name}.${methodName} for ${route.method} ${route.path}`);
+    }
+    const verb = route.method.toLowerCase();
+    switch (verb) {
+      case "get":
+        router.get(`/${route.path}`, handler);
+        break;
+      case "post":
+        router.post(`/${route.path}`, handler);
+        break;
+      case "put":
+        router.put(`/${route.path}`, handler);
+        break;
+      case "patch":
+        router.patch(`/${route.path}`, handler);
+        break;
+      case "delete":
+        router.delete(`/${route.path}`, handler);
+        break;
+      default:
+        throw new Error(`Unsupported HTTP method ${route.method} for ${name}.${methodName}`);
+    }
+  }
+}
+
+export default function registerRoutes(app: Application): void {
+  app.get("/isLife", (_req, res) => {
+    res.sendStatus(200);
+  });
+  app.get("/health", (_req, res) => {
+    res.status(200).json({ status: "Healthy" });
+  });
+
+  const router = express.Router();
+
+  router.get("/isLife", (_req, res) => {
+    res.sendStatus(200);
+  });
+  router.get("/health", (_req, res) => {
+    res.status(200).json({ status: "Healthy" });
+  });
+
+  // Auth gate: this service does no auth of its own and blindly forwards the
+  // caller's credentials downstream, so an unauthenticated request would
+  // reach the engine / .NET integration with no DocSpace session. Reject
+  // anything without the `asc_auth_key` session cookie (the credential the
+  // browser sends and which `httpClient` / MCP forwarding rely on) up front
+  // with 401, before any engine work. Health endpoints above stay open.
+  router.use((req, res, next) => {
+    const cookies = (req as { cookies?: Record<string, unknown> }).cookies;
+    const authKey = cookies?.["asc_auth_key"];
+    if (typeof authKey !== "string" || authKey.trim().length === 0) {
+      logger.warn(`Unauthenticated request rejected: ${req.method} ${req.originalUrl}`);
+      res.status(401).json({ error: "Unauthorized" });
+      return;
+    }
+    next();
+  });
+
+  // GET responses are user/entity-scoped and must never be cached by the
+  // browser or any intermediate proxy — switching account or `entityId`
+  // would otherwise serve a stale snapshot from the previous scope.
+  router.use((req, res, next) => {
+    if (req.method === "GET") {
+      res.setHeader("Cache-Control", "no-store");
+    }
+    next();
+  });
+
+  let total = 0;
+  for (const binding of ENGINE_BINDINGS) {
+    bindEngine(router, binding);
+    total += Object.keys(binding.routes).length;
+  }
+  logger.info(
+    `Registered ${total} engine routes across ${ENGINE_BINDINGS.length} engines under ${API_PREFIX}`,
+  );
+
+  app.use(API_PREFIX, router);
+
+  app.use((req, res) => {
+    logger.warn(`Route not found: ${req.method} ${req.originalUrl}`);
+    res.sendStatus(404);
+  });
+}

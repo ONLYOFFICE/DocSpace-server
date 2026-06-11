@@ -837,7 +837,8 @@ public class FileStorageService //: IFileStorageService
                     await SetExternalLinkAsync(folder, Guid.NewGuid(), FileShare.Read, FilesCommonResource.DefaultExternalLinkTitle, primary: true);
                     break;
                 case FolderType.FillingFormsRoom:
-                    await SetExternalLinkAsync(folder, Guid.NewGuid(), FileShare.FillForms, FilesCommonResource.FillOutExternalLinkTitle, primary: true);
+                    var fillFormLinkInternal = await filesSettingsHelper.GetDefaultShareLinkInternal();
+                    await SetExternalLinkAsync(folder, Guid.NewGuid(), FileShare.FillForms, FilesCommonResource.FillOutExternalLinkTitle, primary: true, requiredAuth: fillFormLinkInternal);
                     break;
             }
         }
@@ -3964,11 +3965,6 @@ public class FileStorageService //: IFileStorageService
 
         entry.NotFoundIfNull();
 
-        if (!requiredAuth && await externalShare.IsCreationRestrictedAsync(entry))
-        {
-            requiredAuth = true;
-        }
-
         //hack for the form-filling room. return a link to a file with the room key.
         if (share is FileShare.FillForms && entry is File<T>)
         {
@@ -3989,6 +3985,8 @@ public class FileStorageService //: IFileStorageService
         var link = await fileSharing.GetPureSharesAsync(entry, ShareFilterType.PrimaryExternalLink, null, null, 0, 1).FirstOrDefaultAsync();
         if (link == null)
         {
+            requiredAuth = await ResolveRequiredAuthAsync(entry, requiredAuth);
+
             share = entry switch
             {
                 File<T> { IsForm: true, RootFolderType: FolderType.USER } when share != FileShare.Editing && share != FileShare.FillForms => FileShare.Editing,
@@ -4015,12 +4013,6 @@ public class FileStorageService //: IFileStorageService
                 denyDownload: denyDownload,
                 requiredAuth: requiredAuth,
                 password: password);
-        }
-
-        if (link.FileShareOptions.IsExpired && entry.RootFolderType == FolderType.USER)
-        {
-            return await SetExternalLinkAsync(entry, link.Id, link.Access, FilesCommonResource.DefaultExternalLinkTitle,
-                DateTime.UtcNow.Add(filesLinkUtility.DefaultLinkLifeTime), requiredAuth: link.FileShareOptions.Internal, primary: true);
         }
 
         return link;
@@ -4342,16 +4334,16 @@ public class FileStorageService //: IFileStorageService
             ? await daoFactory.GetFileDao<T>().GetFileAsync(entryId)
             : await daoFactory.GetFolderDao<T>().GetFolderAsync(entryId);
 
-        if (!requiredAuth && share != FileShare.None && entry != null && await externalShare.IsCreationRestrictedAsync(entry))
+        if (entry != null)
         {
-            await DetermineParentRoomType(entry);
-
-            if (entry is Folder<T> { FolderType: FolderType.PublicRoom } || entry.ParentRoomType == FolderType.PublicRoom)
+            if (share is FileShare.None)
             {
-                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+                await CheckPrimaryLinkRevokeAsync(entry, linkId);
             }
-
-            requiredAuth = true;
+            else
+            {
+                requiredAuth = await ResolveRequiredAuthAsync(entry, requiredAuth, linkId == Guid.Empty);
+            }
         }
 
         //hack for the form-filling room. return a link to a file with the room key.
@@ -5352,6 +5344,13 @@ public class FileStorageService //: IFileStorageService
                 }
                 if (room.FolderType == FolderType.FillingFormsRoom)
                 {
+                    if (properties.FormFilling.OriginalFormVersion != 0
+                        && properties.FormFilling.OriginalFormVersion != form.Version)
+                    {
+                        await daoFactory.GetLinkDao<T>().DeleteAllLinkAsync(formId);
+                        properties.FormFilling.IsVersionChanged = true;
+                    }
+
                     properties.FormFilling.StartFilling = true;
                     properties.FormFilling.StartedByUserId = authContext.CurrentAccount.ID;
 
@@ -5837,7 +5836,8 @@ public class FileStorageService //: IFileStorageService
                 _ => throw new InvalidOperationException()
             };
 
-            result = await SetAceLinkAsync(entry, SubjectType.PrimaryExternalLink, linkId, defaultAccess, new FileShareOptions { Title = defaultTitle });
+            var defaultInternal = folder.FolderType == FolderType.FillingFormsRoom && await filesSettingsHelper.GetDefaultShareLinkInternal();
+            result = await SetAceLinkAsync(entry, SubjectType.PrimaryExternalLink, linkId, defaultAccess, new FileShareOptions { Title = defaultTitle, Internal = defaultInternal });
 
             await filesMessageService.SendAsync(MessageAction.RoomExternalLinkRevoked, entry, linkId.ToString(), ace.FileShareOptions?.Title,
                 result.Ace.FileShareOptions?.Title);
@@ -5957,6 +5957,84 @@ public class FileStorageService //: IFileStorageService
             {
                 entry.ParentRoomType = room.FolderType;
                 entry.ParentRoomCreatedBy = room.CreateBy;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Resolves the effective <c>requiredAuth</c> value for an external link by applying
+    /// the admin's global sharing restriction and the default sharing link type setting.
+    /// </summary>
+    /// <param name="entry">The file entry the link belongs to.</param>
+    /// <param name="requiredAuth">The current value; when already <c>true</c>, it is returned unchanged.</param>
+    /// <param name="applyDefault">
+    /// When <c>true</c> and the entry is not a <see cref="FolderType.PublicRoom"/>,
+    /// falls back to <see cref="FilesSettingsHelper.GetDefaultShareLinkInternal"/> if no restriction applies.
+    /// Pass <c>false</c> for update operations where the caller sets the value explicitly.
+    /// </param>
+    private async Task<bool> ResolveRequiredAuthAsync<T>(FileEntry<T> entry, bool requiredAuth, bool applyDefault = true)
+    {
+        if (requiredAuth)
+        {
+            return true;
+        }
+
+        if (await externalShare.IsCreationRestrictedAsync(entry))
+        {
+            await DetermineParentRoomType(entry);
+
+            if (entry is Folder<T> { FolderType: FolderType.PublicRoom } || entry.ParentRoomType == FolderType.PublicRoom)
+            {
+                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+            }
+
+            return true;
+        }
+
+        if (applyDefault)
+        {
+            await DetermineParentRoomType(entry);
+
+            if (entry is not Folder<T> { FolderType: FolderType.PublicRoom } && entry.ParentRoomType != FolderType.PublicRoom)
+            {
+                return await filesSettingsHelper.GetDefaultShareLinkInternal();
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Throws <see cref="SecurityException"/> when an attempt is made to revoke the primary external link
+    /// of a <see cref="FolderType.PublicRoom"/> or <see cref="FolderType.FillingFormsRoom"/> while external
+    /// link creation is restricted by the admin. These room types must always have a primary link, so revoking
+    /// it under the restriction would automatically trigger a new public link creation, bypassing the policy.
+    /// </summary>
+    private async Task CheckPrimaryLinkRevokeAsync<T>(FileEntry<T> entry, Guid linkId)
+    {
+        if (!await externalShare.IsCreationRestrictedAsync(entry))
+        {
+            return;
+        }
+
+        var existingLink = await fileSharing.GetPureSharesAsync(entry, [linkId]).FirstOrDefaultAsync();
+        if (existingLink?.SubjectType is not SubjectType.PrimaryExternalLink)
+        {
+            return;
+        }
+
+        await DetermineParentRoomType(entry);
+
+        if (entry is Folder<T> { FolderType: FolderType.PublicRoom } || entry.ParentRoomType is FolderType.PublicRoom)
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
+        if (entry is Folder<T> { FolderType: FolderType.FillingFormsRoom } || entry.ParentRoomType is FolderType.FillingFormsRoom)
+        {
+            if (!existingLink.FileShareOptions.Internal)
+            {
+                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
             }
         }
     }

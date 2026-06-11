@@ -560,7 +560,7 @@ public abstract class BaseStartup
                 .AddJwtBearerAuthentication();
 
         services.AddBillingHttpClient();
-        services.AddAccountingHttpClient();
+        services.AddAccountingHttpClient(_configuration);
         services.AddDocsCloudHttpClient();
 
         services.ConfigureNotificationServices();
