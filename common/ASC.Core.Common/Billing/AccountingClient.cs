@@ -31,222 +31,105 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using System.Collections.Specialized;
-
-using ASC.Web.Core.Users;
-
 namespace ASC.Core.Billing;
 
-[Singleton]
-public class AccountingClient
+[Scope]
+public class AccountingClient(IOptions<AccountingConfiguration> configuration, ICache cache, IAccountingApi accountingApi)
 {
-    public readonly bool Configured;
+    public bool Configured { get => !string.IsNullOrEmpty(configuration.Value.Url); }
 
-    private readonly AccountingConfiguration _configuration;
-    private readonly ICache _cache;
-    private readonly IHttpClientFactory _httpClientFactory;
-
-    internal const string HttpClientName = "accountingHttpClient";
-    internal const string ResiliencePipelineName = "accountingResiliencePipeline";
-    internal const string BalanceResiliencePipelineName = "balanceResiliencePipeline";
-
-    private readonly JsonSerializerOptions _deserializationOptions = new()
+    public async Task<Balance> GetCustomerBalanceAsync(string portalId)
     {
-        PropertyNameCaseInsensitive = true
-    };
+        EnsureConfigured();
 
-    private readonly JsonSerializerOptions _serializationOptions = new()
-    {
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-    };
-
-    public AccountingClient(IConfiguration configuration, ICache cache, IHttpClientFactory httpClientFactory)
-    {
-        _configuration = configuration.GetSection("core:accounting").Get<AccountingConfiguration>() ??
-                         new AccountingConfiguration();
-        _cache = cache;
-        _httpClientFactory = httpClientFactory;
-
-        _configuration.Url = (_configuration.Url ?? "").Trim().TrimEnd('/');
-
-        _configuration.Currencies = _configuration.Currencies == null || _configuration.Currencies.Count == 0
-            ? ["USD"]
-            : _configuration.Currencies;
-
-        if (!string.IsNullOrEmpty(_configuration.Url))
-        {
-            Configured = true;
-        }
+        return await accountingApi.GetCustomerBalanceAsync(portalId);
     }
 
-
-    public async Task<Balance> GetCustomerBalanceAsync(string portalId, bool addPolicy = false)
+    public async Task<Balance> GetCustomerAiBalanceAsync(string portalId)
     {
-        return await RequestAsync<Balance>(HttpMethod.Get, $"/customer/{portalId}/balance", addPolicy: addPolicy);
-    }
+        EnsureConfigured();
 
-    public async Task<Balance> GetCustomerAiBalanceAsync(string portalId, bool addPolicy = false)
-    {
-        return await RequestAsync<Balance>(HttpMethod.Get, $"/customer/{portalId}/balance/ai", addPolicy: addPolicy);
+        return await accountingApi.GetCustomerAiBalanceAsync(portalId);
     }
 
     public async Task<Session> OpenCustomerSessionAsync(string portalId, string serviceName, string externalRef,
         int quantity, int duration)
     {
-        var data = new SessionOpenOperation(portalId, serviceName, externalRef, quantity, duration);
+        EnsureConfigured();
 
-        var jsonBody = JsonSerializer.Serialize(data, _serializationOptions);
-
-        return await RequestAsync<Session>(HttpMethod.Post, "/session/open", jsonBody: jsonBody);
+        return await accountingApi.OpenCustomerSessionAsync(new SessionOpenOperation(portalId, serviceName, externalRef, quantity, duration));
     }
 
     public async Task CloseCustomerSessionAsync(int sessionId)
     {
-        var queryParams = new NameValueCollection
-        {
-            { "sessionId", sessionId.ToString() }
-        };
+        EnsureConfigured();
 
-        _ = await RequestAsync<string>(HttpMethod.Put, $"/session/close", queryParams);
+        await accountingApi.CloseCustomerSessionAsync(sessionId);
     }
 
     public async Task<Session> ExtendCustomerSessionAsync(int sessionId, int duration)
     {
-        var queryParams = new NameValueCollection
-        {
-            { "sessionId", sessionId.ToString() },
-            { "duration", duration.ToString() }
-        };
+        EnsureConfigured();
 
-        return await RequestAsync<Session>(HttpMethod.Put, $"/session/extend", queryParams);
+        return await accountingApi.ExtendCustomerSessionAsync(sessionId, duration);
     }
 
     public async Task CompleteCustomerSessionAsync(string portalId, string serviceName, int sessionId, int quantity,
         string customerParticipantName, Dictionary<string, string> metadata = null)
     {
-        var data = new SessionCompleteOperation(portalId, serviceName, sessionId, quantity, customerParticipantName,
-            metadata);
+        EnsureConfigured();
 
-        var jsonBody = JsonSerializer.Serialize(data, _serializationOptions);
-
-        _ = await RequestAsync<string>(HttpMethod.Post, "/operation/sessionComplete", jsonBody: jsonBody);
+        await accountingApi.CompleteCustomerSessionAsync(new SessionCompleteOperation(portalId, serviceName, sessionId, quantity,
+            customerParticipantName, metadata));
     }
 
     public async Task<ServicePayment> MakeAiCreditAsync(string portalId, decimal amount, string currency,
         string customerParticipantName, Dictionary<string, string> metadata = null)
     {
-        var data = new AiCreditOperation(portalId, (double)amount, currency, customerParticipantName, metadata);
+        EnsureConfigured();
 
-        var jsonBody = JsonSerializer.Serialize(data, _serializationOptions);
-
-        return await RequestAsync<ServicePayment>(HttpMethod.Post, "/operation/AiCredit", jsonBody: jsonBody);
+        return await accountingApi.MakeAiCreditAsync(new AiCreditOperation(portalId, amount, currency, customerParticipantName, metadata));
     }
 
     public async Task<Report> GetCustomerOperationsAsync(string portalId, OperationFilter filter, bool isAiService)
     {
-        var queryParams = FilterToNameValueCollection(filter);
+        EnsureConfigured();
 
-        var path = isAiService
-            ? $"/customer/{portalId}/operations/ai"
-            : $"/customer/{portalId}/operations";
-
-        return await RequestAsync<Report>(HttpMethod.Get, path, queryParams);
-    }
-
-    private static NameValueCollection FilterToNameValueCollection(OperationFilter filter)
-    {
-        var queryParams = new NameValueCollection();
-
-        if (filter.UtcStartDate != null)
-        {
-            queryParams.Add("startDate", filter.UtcStartDate.Value.ToString("o"));
-        }
-
-        if (filter.UtcEndDate != null)
-        {
-            queryParams.Add("endDate", filter.UtcEndDate.Value.ToString("o"));
-        }
-
-        if (!string.IsNullOrEmpty(filter.ParticipantName))
-        {
-            queryParams.Add("participantName", filter.ParticipantName.Trim());
-        }
-
-        if (filter.Credit.HasValue)
-        {
-            queryParams.Add("credit", filter.Credit.Value.ToString().ToLowerInvariant());
-        }
-
-        if (filter.Debit.HasValue)
-        {
-            queryParams.Add("debit", filter.Debit.Value.ToString().ToLowerInvariant());
-        }
-
-        if (filter.Offset.HasValue)
-        {
-            queryParams.Add("offset", filter.Offset.Value.ToString());
-        }
-
-        if (filter.Limit.HasValue)
-        {
-            queryParams.Add("limit", filter.Limit.Value.ToString());
-        }
-
-        if (filter.Type.HasValue)
-        {
-            queryParams.Add("types", filter.Type.Value.ToString());
-        }
-
-        if (filter.Status.HasValue)
-        {
-            queryParams.Add("status", filter.Status.Value.ToString());
-        }
-
-        if (!string.IsNullOrEmpty(filter.OrderBy))
-        {
-            queryParams.Add("orderBy", filter.OrderBy.Trim());
-        }
-
-        if (filter.OrderType.HasValue && filter.OrderType is not OperationOrderType.Descending)
-        {
-            queryParams.Add("orderType", filter.OrderType.Value.ToString());
-        }
-
-        if (!string.IsNullOrEmpty(filter.ServiceName))
-        {
-            queryParams.Add("serviceName", filter.ServiceName);
-        }
-
-        return queryParams;
+        return isAiService
+            ? await accountingApi.GetCustomerAiOperationsAsync(portalId, filter)
+            : await accountingApi.GetCustomerOperationsAsync(portalId, filter);
     }
 
     public async Task<List<Currency>> GetAllCurrenciesAsync()
     {
         var key = "accounting-currencies";
-        var result = _cache.Get<List<Currency>>(key);
+        var result = cache.Get<List<Currency>>(key);
         if (result == null)
         {
-            result = await RequestAsync<List<Currency>>(HttpMethod.Get, "/currency/all");
-            _cache.Insert(key, result, DateTime.Now.AddDays(1));
+            EnsureConfigured();
+
+            result = await accountingApi.GetAllCurrenciesAsync();
+            cache.Insert(key, result, DateTime.Now.AddDays(1));
         }
         return result;
     }
 
     public List<string> GetSupportedCurrencies()
     {
-        return _configuration.Currencies;
+        return configuration.Value.Currencies;
     }
 
     public async Task<ServiceInfo> GetServiceInfoAsync(string serviceName)
     {
-        return await RequestAsync<ServiceInfo>(HttpMethod.Get, $"/service/{serviceName}/name");
+        EnsureConfigured();
+
+        return await accountingApi.GetServiceInfoAsync(serviceName);
     }
 
     public async Task<Dictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync(string partnerId, List<string> serviceNames)
     {
         var key = $"accounting-prices-{partnerId}-{string.Join(",", serviceNames)}";
-        var result = _cache.Get<Dictionary<string, Dictionary<string, decimal>>>(key);
+        var result = cache.Get<Dictionary<string, Dictionary<string, decimal>>>(key);
 
         if (result != null)
         {
@@ -273,107 +156,17 @@ public class AccountingClient
             });
         }
 
-        _cache.Insert(key, result, DateTime.Now.AddDays(1));
+        cache.Insert(key, result, DateTime.Now.AddDays(1));
 
         return result;
     }
 
-    private async Task<T> RequestAsync<T>(HttpMethod httpMethod, string path, NameValueCollection queryParams = null, string jsonBody = null, bool addPolicy = false)
+    private void EnsureConfigured()
     {
         if (!Configured)
         {
             throw new AccountingNotConfiguredException();
         }
-
-        var uriBuilder = new UriBuilder(_configuration.Url + path);
-
-        if (queryParams != null)
-        {
-            var query = HttpUtility.ParseQueryString(string.Empty);
-
-            foreach (string key in queryParams)
-            {
-                foreach (var value in queryParams.GetValues(key) ?? [])
-                {
-                    query.Add(key, value);
-                }
-            }
-
-            uriBuilder.Query = query.ToString();
-        }
-
-        using var request = new HttpRequestMessage(httpMethod, uriBuilder.Uri);
-
-        if (!string.IsNullOrEmpty(_configuration.Key))
-        {
-            request.Headers.Add("Authorization", CreateAuthToken(_configuration.Key, _configuration.Secret));
-        }
-
-        var httpClient = _httpClientFactory.CreateClient(addPolicy ? HttpClientName : "");
-        httpClient.Timeout = TimeSpan.FromMilliseconds(60000);
-
-        if (!string.IsNullOrEmpty(jsonBody))
-        {
-            request.Content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
-        }
-
-        try
-        {
-            using var response = await httpClient.SendAsync(request);
-
-            var responseString = await response.Content.ReadAsStringAsync();
-
-            if (!response.IsSuccessStatusCode)
-            {
-                if (response.StatusCode == HttpStatusCode.PaymentRequired)
-                {
-                    throw new AccountingPaymentRequiredException();
-                }
-
-                if (response.StatusCode == HttpStatusCode.BadRequest &&
-                    responseString.Contains("not found", StringComparison.OrdinalIgnoreCase))
-                {
-                    throw new AccountingCustomerNotFoundException();
-                }
-
-                throw new Exception($"Accounting request failed with status code {response.StatusCode} {responseString}");
-            }
-
-            if (typeof(T) == typeof(string))
-            {
-                return (T)(object)responseString;
-            }
-
-            if (string.IsNullOrEmpty(responseString))
-            {
-                throw new Exception("Accounting responseString is null or empty");
-            }
-
-            var result = JsonSerializer.Deserialize<T>(responseString, _deserializationOptions);
-
-            return result;
-        }
-        catch (AccountingPaymentRequiredException)
-        {
-            throw;
-        }
-        catch (AccountingCustomerNotFoundException)
-        {
-            throw;
-        }
-        catch (Exception ex)
-        {
-            throw new AccountingException(ex.Message, ex);
-        }
-    }
-
-    private static string CreateAuthToken(string pkey, string machinekey)
-    {
-        using var hasher = new HMACSHA1(Encoding.UTF8.GetBytes(machinekey));
-        var now = DateTime.UtcNow.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture);
-        var hash = WebEncoders.Base64UrlEncode(hasher.ComputeHash(Encoding.UTF8.GetBytes(string.Join("\n", now, pkey))));
-
-        return $"ASC {pkey}:{now}:{hash}";
     }
 }
 
@@ -477,15 +270,23 @@ public class OperationFilter
     /// <summary>
     /// The start date of the period to filter operations from (inclusive).
     /// </summary>
+    [AliasAs("startDate")]
+    [Query(Format = "o")]
     public DateTime? UtcStartDate { get; init; }
     /// <summary>
     /// The end date of the period to filter operations until (inclusive).
     /// </summary>
+    [AliasAs("endDate")]
+    [Query(Format = "o")]
     public DateTime? UtcEndDate { get; init; }
     /// <summary>
     /// Unique name of customer participant to filter by.
     /// </summary>
-    public string ParticipantName { get; init; }
+    public string ParticipantName
+    {
+        get;
+        init => field = value?.Trim();
+    }
     /// <summary>
     /// Whether to include credit operations.
     /// </summary>
@@ -497,14 +298,17 @@ public class OperationFilter
     /// <summary>
     /// The number of items to skip before starting to return results. Used for pagination.
     /// </summary>
+    /// <remarks>Mutable (set) because it is reassigned per page while paginating, e.g. in CustomerOperationsReportTask.</remarks>
     public int? Offset { get; set; }
     /// <summary>
     /// The maximum number of items to return in the response.
     /// </summary>
+    /// <remarks>Mutable (set) because it is reassigned per page while paginating, e.g. in CustomerOperationsReportTask.</remarks>
     public int? Limit { get; set; }
     /// <summary>
     /// The operation type to filter by.
     /// </summary>
+    [AliasAs("types")]
     public OperationType? Type { get; init; }
     /// <summary>
     /// The operation status to filter by.
@@ -513,11 +317,23 @@ public class OperationFilter
     /// <summary>
     /// The field to order by.
     /// </summary>
-    public string OrderBy { get; init; }
+    public string OrderBy
+    {
+        get;
+        init => field = value?.Trim();
+    }
     /// <summary>
     /// Order direction: ASC or DESC.
     /// </summary>
-    public OperationOrderType? OrderType  { get; init; }
+    /// <remarks>
+    /// Descending is the server-side default, so it is normalized to <c>null</c> here:
+    /// an explicit Descending and an unspecified value produce the same request (no orderType param).
+    /// </remarks>
+    public OperationOrderType? OrderType
+    {
+        get;
+        init => field = value is OperationOrderType.Descending ? null : value;
+    }
 }
 
 /// <summary>
@@ -700,32 +516,32 @@ public class Report
     /// <summary>
     /// Collection of operations.
     /// </summary>
-    public List<Operation> Collection { get; set; }
+    public List<Operation> Collection { get; init; }
 
     /// <summary>
     /// Offset of the report data.
     /// </summary>
-    public int Offset { get; set; }
+    public int Offset { get; init; }
 
     /// <summary>
     /// Limit of the report data.
     /// </summary>
-    public int Limit { get; set; }
+    public int Limit { get; init; }
 
     /// <summary>
     /// Total quantity of operations in the report.
     /// </summary>
-    public int TotalQuantity { get; set; }
+    public int TotalQuantity { get; init; }
 
     /// <summary>
     /// Total number of pages in the report.
     /// </summary>
-    public int TotalPage { get; set; }
+    public int TotalPage { get; init; }
 
     /// <summary>
     /// Current page number of the report.
     /// </summary>
-    public int CurrentPage { get; set; }
+    public int CurrentPage { get; init; }
 
     public async Task<Dictionary<string, string>> GetParticipantDisplayNamesAsync(DisplayUserSettingsHelper displayUserSettingsHelper, bool withHtmlEncode)
     {
@@ -905,14 +721,14 @@ public class ServicePayment
     public DateTime? EndDate { get; init; }
 }
 
-file record SessionOpenOperation(
+public record SessionOpenOperation(
     string CustomerName,
     string ServiceName,
     string ExternalRef,
     int Quantity,
     int Duration);
 
-file record SessionCompleteOperation(
+public record SessionCompleteOperation(
     string CustomerName,
     string ServiceName,
     int SessionId,
@@ -920,34 +736,83 @@ file record SessionCompleteOperation(
     string CustomerParticipantName,
     Dictionary<string, string> Metadata);
 
-file record AiCreditOperation(
+public record AiCreditOperation(
     string CustomerName,
-    double Sum,
+    decimal Sum,
     string Currency,
     string CustomerParticipantName,
     Dictionary<string, string> Metadata);
 
 public static class AccountingHttpClientExtension
 {
-    public static void AddAccountingHttpClient(this IServiceCollection services)
+    private const string ResiliencePipelineName = "accountingResiliencePipeline";
+    internal const string BalanceResiliencePipelineName = "balanceResiliencePipeline";
+
+    public static void AddAccountingHttpClient(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddHttpClient(AccountingClient.HttpClientName)
+        var accountingSettingsSection = configuration.GetSection("core:accounting");
+        var accountingSettings = accountingSettingsSection.Get<AccountingConfiguration>();
+        services.Configure<AccountingConfiguration>(accountingSettingsSection);
+
+        services.AddTransient<AccountingAuthHandler>();
+
+        services
+            .AddRefitClient<IAccountingApi>(new RefitSettings
+            {
+                ContentSerializer = new SystemTextJsonContentSerializer(new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true,
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+                }),
+                UrlParameterFormatter = new AccountingUrlParameterFormatter(),
+                UrlParameterKeyFormatter = new CamelCaseUrlParameterKeyFormatter(),
+                ExceptionFactory = CreateExceptionAsync
+            })
+            .ConfigureHttpClient((sp, client) =>
+            {
+                var url = accountingSettings?.Url;
+
+                if (!string.IsNullOrEmpty(url))
+                {
+                    client.BaseAddress = new Uri(url);
+                }
+
+                client.Timeout = TimeSpan.FromMilliseconds(60000);
+            })
+            .AddHttpMessageHandler<AccountingAuthHandler>()
             .SetHandlerLifetime(TimeSpan.FromMinutes(5))
-            .AddResilienceHandler(AccountingClient.ResiliencePipelineName, builder =>
+            .AddResilienceHandler(ResiliencePipelineName, builder =>
             {
                 builder.AddRetry(new RetryStrategyOptions<HttpResponseMessage>
                 {
                     MaxRetryAttempts = 2,
                     Delay = TimeSpan.FromSeconds(1),
                     BackoffType = DelayBackoffType.Exponential,
-                    ShouldHandle = new PredicateBuilder<HttpResponseMessage>()
-                        .Handle<HttpRequestException>()
-                        .Handle<TaskCanceledException>()
-                        .HandleResult(response => !response.IsSuccessStatusCode)
+                    ShouldHandle = async args =>
+                    {
+                        // Retry only idempotent GET requests on a non-success response. POST/PUT are never retried to
+                        // avoid duplicating accounting operations (payments, sessions); transient errors that require
+                        // stronger retries (e.g. balance refresh after a deposit) are handled by the balance pipeline.
+                        var response = args.Outcome.Result;
+                        if (response is null || response.IsSuccessStatusCode || response.RequestMessage?.Method != HttpMethod.Get)
+                        {
+                            return false;
+                        }
+
+                        // "Customer not found" is a definitive result, not a transient error - retrying won't change it.
+                        if (response.StatusCode == HttpStatusCode.BadRequest)
+                        {
+                            var content = await response.Content.ReadAsStringAsync();
+                            return !IsCustomerNotFound(response.StatusCode, content);
+                        }
+
+                        return true;
+                    }
                 });
             });
 
-        services.AddResiliencePipeline<string, bool>(AccountingClient.BalanceResiliencePipelineName, pipelineBuilder =>
+        services.AddResiliencePipeline<string, bool>(BalanceResiliencePipelineName, pipelineBuilder =>
         {
             pipelineBuilder.AddRetry(new RetryStrategyOptions<bool>
             {
@@ -957,6 +822,50 @@ public static class AccountingHttpClientExtension
                 ShouldHandle = new PredicateBuilder<bool>().HandleResult(result => !result)
             });
         });
+    }
+
+    // Maps non-success responses to the domain exceptions the callers expect (payment required / customer not found),
+    // and wraps any other failure into AccountingException with the status code and response body.
+    private static async Task<Exception> CreateExceptionAsync(HttpResponseMessage response)
+    {
+        if (response.IsSuccessStatusCode)
+        {
+            return null;
+        }
+
+        if (response.StatusCode == HttpStatusCode.PaymentRequired)
+        {
+            return new AccountingPaymentRequiredException();
+        }
+
+        var content = await response.Content.ReadAsStringAsync();
+        if (IsCustomerNotFound(response.StatusCode, content))
+        {
+            return new AccountingCustomerNotFoundException();
+        }
+
+        return new AccountingException($"Accounting request failed with status code {response.StatusCode} {content}");
+    }
+
+    private static bool IsCustomerNotFound(HttpStatusCode status, string content)
+    {
+        return status == HttpStatusCode.BadRequest &&
+               content.Contains("not found", StringComparison.OrdinalIgnoreCase);
+    }
+
+    // The accounting service expects lowercase boolean query values ("true"/"false"); Refit's default formatter
+    // renders them as "True"/"False". Everything else falls through to the default behaviour.
+    private sealed class AccountingUrlParameterFormatter : DefaultUrlParameterFormatter
+    {
+        public override string Format(object parameterValue, ICustomAttributeProvider attributeProvider, Type type)
+        {
+            if (parameterValue is bool boolValue)
+            {
+                return boolValue ? "true" : "false";
+            }
+
+            return base.Format(parameterValue, attributeProvider, type);
+        }
     }
 }
 
