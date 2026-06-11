@@ -260,7 +260,8 @@ public class CustomerMonthlyUsageDto
 /// </summary>
 /// <example>
 /// {
-///   "service": "backup",
+///   "service": "disk-storage",
+///   "title": "Additional disk storage",
 ///   "serviceUnit": "GB",
 ///   "currency": "USD",
 ///   "totalQuantity": 100,
@@ -273,8 +274,14 @@ public class CustomerServiceUsageDto
     /// <summary>
     /// The name of the service.
     /// </summary>
-    /// <example>backup</example>
+    /// <example>disk-storage</example>
     public string Service { get; set; }
+
+    /// <summary>
+    /// The title of the service.
+    /// </summary>
+    /// <example>Additional disk storage</example>
+    public string Title { get; set; }
 
     /// <summary>
     /// The unit of measurement for the service.
@@ -297,19 +304,20 @@ public class CustomerServiceUsageDto
     /// <summary>
     /// The total amount charged for the service.
     /// </summary>
-    /// <example>49.99</example>
+    /// <example>14</example>
     public decimal TotalAmount { get; set; }
 
     /// <summary>
     /// The number of individual purchase operations.
     /// </summary>
-    /// <example>2</example>
+    /// <example>1</example>
     public int OperationCount { get; set; }
 
     public CustomerServiceUsageDto(CustomerServiceUsage usage)
     {
         Service = usage.Service;
-        ServiceUnit = usage.ServiceUnit;
+        Title = Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceDesc_{usage.Service}");
+        ServiceUnit = Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceUOM_{usage.Service}");
         Currency = usage.Currency;
         TotalQuantity = usage.TotalQuantity;
         TotalAmount = usage.TotalAmount;

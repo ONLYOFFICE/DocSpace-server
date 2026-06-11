@@ -578,12 +578,14 @@ public class PortalController(
                 currency = defaultRegion.ISOCurrencySymbol;
             }
 
+            var serviceName = definition.ServiceName ?? definition.Name;
+
             result.Add(new UpcomingPaymentDto
             {
                 Id = quota.Id,
                 Name = definition.Name,
-                Title = Resource.ResourceManager.GetString($"TariffsUpcoming_{definition.Name}"),
-                UnitOfMeasure = Resource.ResourceManager.GetString($"TariffsUpcomingUOM_{definition.Name}"),
+                Title = Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceDesc_{serviceName}"),
+                UnitOfMeasure = Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceUOM_{serviceName}"),
                 Quantity = quantity,
                 Wallet = quota.Wallet,
                 DueDate = apiDateTimeHelper.Get(quota.DueDate ?? source.DueDate),

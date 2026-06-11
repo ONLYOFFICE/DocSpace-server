@@ -1383,22 +1383,16 @@
   <data name="AccountingCustomerOperationAgent" xml:space="preserve">
     <value>Agent</value>
   </data>
-  <data name="TariffsUpcoming_admin" xml:space="preserve">
+  <data name="AccountingCustomerOperationServiceDesc_admin" xml:space="preserve">
     <value>Business plan</value>
   </data>
-  <data name="TariffsUpcoming_adminyear" xml:space="preserve">
+  <data name="AccountingCustomerOperationServiceUOM_admin" xml:space="preserve">
+    <value>Admins</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_adminyear" xml:space="preserve">
+    <value>Admins</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_adminyear" xml:space="preserve">
     <value>Business plan</value>
-  </data>
-  <data name="TariffsUpcoming_storage" xml:space="preserve">
-    <value>Additional disk storage</value>
-  </data>
-  <data name="TariffsUpcomingUOM_admin" xml:space="preserve">
-    <value>Admins</value>
-  </data>
-  <data name="TariffsUpcomingUOM_adminyear" xml:space="preserve">
-    <value>Admins</value>
-  </data>
-  <data name="TariffsUpcomingUOM_storage" xml:space="preserve">
-    <value>GB</value>
   </data>
 </root>
