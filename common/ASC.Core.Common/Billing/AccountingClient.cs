@@ -95,78 +95,9 @@ public class AccountingClient(IOptions<AccountingConfiguration> configuration, I
     {
         EnsureConfigured();
 
-        var queryParams = FilterToQueryParams(filter);
-
         return isAiService
-            ? await accountingApi.GetCustomerAiOperationsAsync(portalId, queryParams)
-            : await accountingApi.GetCustomerOperationsAsync(portalId, queryParams);
-    }
-
-    private static Dictionary<string, string> FilterToQueryParams(OperationFilter filter)
-    {
-        var queryParams = new Dictionary<string, string>();
-
-        if (filter.UtcStartDate != null)
-        {
-            queryParams.Add("startDate", filter.UtcStartDate.Value.ToString("o"));
-        }
-
-        if (filter.UtcEndDate != null)
-        {
-            queryParams.Add("endDate", filter.UtcEndDate.Value.ToString("o"));
-        }
-
-        if (!string.IsNullOrEmpty(filter.ParticipantName))
-        {
-            queryParams.Add("participantName", filter.ParticipantName.Trim());
-        }
-
-        if (filter.Credit.HasValue)
-        {
-            queryParams.Add("credit", filter.Credit.Value.ToString().ToLowerInvariant());
-        }
-
-        if (filter.Debit.HasValue)
-        {
-            queryParams.Add("debit", filter.Debit.Value.ToString().ToLowerInvariant());
-        }
-
-        if (filter.Offset.HasValue)
-        {
-            queryParams.Add("offset", filter.Offset.Value.ToString());
-        }
-
-        if (filter.Limit.HasValue)
-        {
-            queryParams.Add("limit", filter.Limit.Value.ToString());
-        }
-
-        if (filter.Type.HasValue)
-        {
-            queryParams.Add("types", filter.Type.Value.ToString());
-        }
-
-        if (filter.Status.HasValue)
-        {
-            queryParams.Add("status", filter.Status.Value.ToString());
-        }
-
-        if (!string.IsNullOrEmpty(filter.OrderBy))
-        {
-            queryParams.Add("orderBy", filter.OrderBy.Trim());
-        }
-
-        if (filter.OrderType.HasValue && filter.OrderType is not OperationOrderType.Descending)
-        {
-            queryParams.Add("orderType", filter.OrderType.Value.ToString());
-        }
-
-        if (!string.IsNullOrEmpty(filter.ServiceName))
-        {
-            queryParams.Add("serviceName", filter.ServiceName);
-        }
-
-        return queryParams;
+            ? await accountingApi.GetCustomerAiOperationsAsync(portalId, filter)
+            : await accountingApi.GetCustomerOperationsAsync(portalId, filter);
     }
 
     public async Task<List<Currency>> GetAllCurrenciesAsync()
@@ -339,15 +270,23 @@ public class OperationFilter
     /// <summary>
     /// The start date of the period to filter operations from (inclusive).
     /// </summary>
+    [AliasAs("startDate")]
+    [Query(Format = "o")]
     public DateTime? UtcStartDate { get; init; }
     /// <summary>
     /// The end date of the period to filter operations until (inclusive).
     /// </summary>
+    [AliasAs("endDate")]
+    [Query(Format = "o")]
     public DateTime? UtcEndDate { get; init; }
     /// <summary>
     /// Unique name of customer participant to filter by.
     /// </summary>
-    public string ParticipantName { get; init; }
+    public string ParticipantName
+    {
+        get;
+        init => field = value?.Trim();
+    }
     /// <summary>
     /// Whether to include credit operations.
     /// </summary>
@@ -369,6 +308,7 @@ public class OperationFilter
     /// <summary>
     /// The operation type to filter by.
     /// </summary>
+    [AliasAs("types")]
     public OperationType? Type { get; init; }
     /// <summary>
     /// The operation status to filter by.
@@ -377,11 +317,23 @@ public class OperationFilter
     /// <summary>
     /// The field to order by.
     /// </summary>
-    public string OrderBy { get; init; }
+    public string OrderBy
+    {
+        get;
+        init => field = value?.Trim();
+    }
     /// <summary>
     /// Order direction: ASC or DESC.
     /// </summary>
-    public OperationOrderType? OrderType  { get; init; }
+    /// <remarks>
+    /// Descending is the server-side default, so it is normalized to <c>null</c> here:
+    /// an explicit Descending and an unspecified value produce the same request (no orderType param).
+    /// </remarks>
+    public OperationOrderType? OrderType
+    {
+        get;
+        init => field = value is OperationOrderType.Descending ? null : value;
+    }
 }
 
 /// <summary>
@@ -813,6 +765,8 @@ public static class AccountingHttpClientExtension
                     PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
                     DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
                 }),
+                UrlParameterFormatter = new AccountingUrlParameterFormatter(),
+                UrlParameterKeyFormatter = new CamelCaseUrlParameterKeyFormatter(),
                 ExceptionFactory = CreateExceptionAsync
             })
             .ConfigureHttpClient((sp, client) =>
@@ -897,6 +851,21 @@ public static class AccountingHttpClientExtension
     {
         return status == HttpStatusCode.BadRequest &&
                content.Contains("not found", StringComparison.OrdinalIgnoreCase);
+    }
+
+    // The accounting service expects lowercase boolean query values ("true"/"false"); Refit's default formatter
+    // renders them as "True"/"False". Everything else falls through to the default behaviour.
+    private sealed class AccountingUrlParameterFormatter : DefaultUrlParameterFormatter
+    {
+        public override string Format(object parameterValue, ICustomAttributeProvider attributeProvider, Type type)
+        {
+            if (parameterValue is bool boolValue)
+            {
+                return boolValue ? "true" : "false";
+            }
+
+            return base.Format(parameterValue, attributeProvider, type);
+        }
     }
 }
 
