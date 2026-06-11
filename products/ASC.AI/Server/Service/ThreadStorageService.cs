@@ -52,14 +52,7 @@ public class ThreadStorageService(
 
     public async Task<Thread> CreateAsync(string title, Guid? profileId = null, string? entityId = null)
     {
-        await AssertUserHasAccessAsync(_allowedTypes);
-
-        int? entryId = entityId == null ? null : int.Parse(entityId);
-
-        if (entryId.HasValue)
-        {
-            await AssertEntryAccessAsync(entryId.Value);
-        }
+        var entryId = await AssertUserHasAccessAsync(_allowedTypes, entityId);
 
         var tenantId = tenantManager.GetCurrentTenantId();
 
@@ -90,9 +83,7 @@ public class ThreadStorageService(
 
     public async Task<IEnumerable<Thread>> ReadAllAsync(string? entityId = null)
     {
-        await AssertUserHasAccessAsync(_allowedTypes);
-
-        int? entryId = entityId == null ? null : int.Parse(entityId);
+        var entryId = await AssertUserHasAccessAsync(_allowedTypes, entityId);
 
         return await storage.ReadAllAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, entryId);
     }

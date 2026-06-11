@@ -43,23 +43,26 @@ public class ProfileStorageService(
     IDaoFactory daoFactory,
     FileSecurity fileSecurity) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity)
 {
+    private static readonly IEnumerable<EmployeeType> _writeTypes = [EmployeeType.DocSpaceAdmin];
+    private static readonly IEnumerable<EmployeeType> _readTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin];
+
     public async Task<Profile> CreateAsync(ProfileData profile)
     {
-        await AssertUserHasAccessAsync([EmployeeType.DocSpaceAdmin]);
+        await AssertUserHasAccessAsync(_writeTypes);
 
         return await storage.CreateAsync(tenantManager.GetCurrentTenantId(), profile);
     }
 
     public async Task<IReadOnlyList<Profile>> CreateManyAsync(IReadOnlyList<ProfileData> profiles)
     {
-        await AssertUserHasAccessAsync([EmployeeType.DocSpaceAdmin]);
+        await AssertUserHasAccessAsync(_writeTypes);
 
         return await storage.CreateManyAsync(tenantManager.GetCurrentTenantId(), profiles);
     }
 
     public async Task<Profile> ReadByIdAsync(Guid id)
     {
-        await AssertUserHasAccessAsync([EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin]);
+        await AssertUserHasAccessAsync(_readTypes);
 
         var profile = await storage.ReadByIdAsync(tenantManager.GetCurrentTenantId(), id);
 
@@ -68,21 +71,21 @@ public class ProfileStorageService(
 
     public async Task<List<Profile>> ReadAllAsync()
     {
-        await AssertUserHasAccessAsync([EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin]);
+        await AssertUserHasAccessAsync(_readTypes);
 
         return await storage.ReadAllAsync(tenantManager.GetCurrentTenantId());
     }
 
     public async Task<Profile> UpdateAsync(Profile profile)
     {
-        await AssertUserHasAccessAsync([EmployeeType.DocSpaceAdmin]);
+        await AssertUserHasAccessAsync(_writeTypes);
 
         return await storage.UpdateAsync(tenantManager.GetCurrentTenantId(), profile);
     }
 
     public async Task DeleteAsync(Guid id)
     {
-        await AssertUserHasAccessAsync([EmployeeType.DocSpaceAdmin]);
+        await AssertUserHasAccessAsync(_writeTypes);
 
         var tenantId = tenantManager.GetCurrentTenantId();
 

@@ -47,14 +47,7 @@ public class AssignmentsStorageService(
 
     public async Task CreateAsync(ActionType actionType, Guid profileId, string? entityId = null)
     {
-        await AssertUserHasAccessAsync(_writeTypes);
-
-        int? entryId = entityId == null ? null : int.Parse(entityId);
-
-        if (entryId.HasValue)
-        {
-            await AssertEntryAccessAsync(entryId.Value);
-        }
+        var entryId = await AssertUserHasAccessAsync(_writeTypes, entityId);
 
         if (!await storage.CreateAsync(tenantManager.GetCurrentTenantId(), actionType, profileId, entryId))
         {
@@ -64,42 +57,21 @@ public class AssignmentsStorageService(
 
     public async Task<Guid?> ReadByTypeAsync(ActionType actionType, string? entityId = null)
     {
-        await AssertUserHasAccessAsync(_readTypes);
-
-        int? entryId = entityId == null ? null : int.Parse(entityId);
-
-        if (entryId.HasValue)
-        {
-            await AssertEntryAccessAsync(entryId.Value);
-        }
+        var entryId = await AssertUserHasAccessAsync(_readTypes, entityId);
 
         return await storage.ReadByTypeAsync(tenantManager.GetCurrentTenantId(), actionType, entryId);
     }
 
     public async Task<Dictionary<ActionType, Guid>> ReadAllAsync(string? entityId = null)
     {
-        await AssertUserHasAccessAsync(_readTypes);
-
-        int? entryId = entityId == null ? null : int.Parse(entityId);
-
-        if (entryId.HasValue)
-        {
-            await AssertEntryAccessAsync(entryId.Value);
-        }
+        var entryId = await AssertUserHasAccessAsync(_readTypes, entityId);
 
         return await storage.ReadAllAsync(tenantManager.GetCurrentTenantId(), entryId);
     }
 
     public async Task UpdateAsync(ActionType actionType, Guid profileId, string? entityId = null)
     {
-        await AssertUserHasAccessAsync(_writeTypes);
-
-        int? entryId = entityId == null ? null : int.Parse(entityId);
-
-        if (entryId.HasValue)
-        {
-            await AssertEntryAccessAsync(entryId.Value);
-        }
+        var entryId = await AssertUserHasAccessAsync(_writeTypes, entityId);
 
         if (!await storage.UpdateAsync(tenantManager.GetCurrentTenantId(), actionType, profileId, entryId))
         {
@@ -109,14 +81,7 @@ public class AssignmentsStorageService(
 
     public async Task UpsertManyAsync(IReadOnlyDictionary<ActionType, Guid> assignments, string? entityId = null)
     {
-        await AssertUserHasAccessAsync(_writeTypes);
-
-        int? entryId = entityId == null ? null : int.Parse(entityId);
-
-        if (entryId.HasValue)
-        {
-            await AssertEntryAccessAsync(entryId.Value);
-        }
+        var entryId = await AssertUserHasAccessAsync(_writeTypes, entityId);
 
         await storage.UpsertManyAsync(tenantManager.GetCurrentTenantId(), assignments, entryId);
     }

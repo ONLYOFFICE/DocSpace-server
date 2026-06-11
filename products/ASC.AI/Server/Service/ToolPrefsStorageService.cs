@@ -46,32 +46,18 @@ public class ToolPrefsStorageService(
 
     public async Task<IReadOnlyDictionary<string, ToolPreference>> ReadAsync(string? entityId = null)
     {
-        await AssertUserHasAccessAsync(_allowedTypes);
-
-        int? entryId = entityId == null ? null : int.Parse(entityId);
-
-        if (entryId.HasValue)
-        {
-            await AssertEntryAccessAsync(entryId.Value);
-        }
+        var entryId = await AssertUserHasAccessAsync(_allowedTypes, entityId);
 
         return await storage.ReadAllAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, entryId);
     }
 
     public async Task UpsertDisabledAsync(IReadOnlyDictionary<string, HashSet<string>> disabled, string? entityId = null)
     {
-        await AssertUserHasAccessAsync(_allowedTypes);
+        var entryId = await AssertUserHasAccessAsync(_allowedTypes, entityId);
 
         if (disabled.Count == 0)
         {
             return;
-        }
-
-        int? entryId = entityId == null ? null : int.Parse(entityId);
-
-        if (entryId.HasValue)
-        {
-            await AssertEntryAccessAsync(entryId.Value);
         }
 
         var items = disabled.ToDictionary(kv => kv.Key, kv => new ToolPreference { Disabled = kv.Value });
@@ -80,18 +66,11 @@ public class ToolPrefsStorageService(
 
     public async Task UpsertAllowAlwaysAsync(IReadOnlyDictionary<string, HashSet<string>> allowAlways, string? entityId = null)
     {
-        await AssertUserHasAccessAsync(_allowedTypes);
+        var entryId = await AssertUserHasAccessAsync(_allowedTypes, entityId);
 
         if (allowAlways.Count == 0)
         {
             return;
-        }
-
-        int? entryId = entityId == null ? null : int.Parse(entityId);
-
-        if (entryId.HasValue)
-        {
-            await AssertEntryAccessAsync(entryId.Value);
         }
 
         var items = allowAlways.ToDictionary(kv => kv.Key, kv => new ToolPreference { AllowAlways = kv.Value });
