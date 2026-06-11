@@ -3453,7 +3453,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Enable AI features to boost productivity..
+        ///   Looks up a localized string similar to Get access to a wide range of AI models through OpenRouter integration. Pay only for what you use, billed from your Wallet..
         /// </summary>
         public static string TariffsFeature_aitools_wallet_price_count {
             get {
@@ -3480,20 +3480,20 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Enable backups. Costs will be billed automatically..
-        /// </summary>
-        public static string TariffsFeature_backup_wallet_price_count {
-            get {
-                return ResourceManager.GetString("TariffsFeature_backup_wallet_price_count", resourceCulture);
-            }
-        }
-
-        /// <summary>
         ///   Looks up a localized string similar to Additional backup.
         /// </summary>
         public static string TariffsFeature_backup_wallet_additional {
             get {
                 return ResourceManager.GetString("TariffsFeature_backup_wallet_additional", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enable backups. Costs will be billed automatically..
+        /// </summary>
+        public static string TariffsFeature_backup_wallet_price_count {
+            get {
+                return ResourceManager.GetString("TariffsFeature_backup_wallet_price_count", resourceCulture);
             }
         }
         

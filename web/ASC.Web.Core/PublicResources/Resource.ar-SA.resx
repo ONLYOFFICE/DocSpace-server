@@ -1155,9 +1155,6 @@
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
     <value>ميزات الذكاء الاصطناعي</value>
   </data>
-  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>قوموا بتمكين ميزات الذكاء الاصطناعي لتعزيز الإنتاجية.</value>
-  </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>تتبع عمليات تسجيل الدخول والإجراءات</value>
   </data>
