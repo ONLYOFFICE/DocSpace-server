@@ -178,7 +178,7 @@ public class QuotaHelper(
                                 return false;
                             }
 
-                            if (quota.Wallet && !quota.Features.Contains(r.Name))
+                            if (quota.Additional && !quota.Features.Contains(r.Name))
                             {
                                 return false;
                             }
