@@ -115,8 +115,12 @@ public static class OpenTelemetryExtension
                         .AddHttpClientInstrumentation()
                         .AddAspNetCoreInstrumentation()
                         .AddFusionCacheInstrumentation()
-                        .AddEntityFrameworkCoreInstrumentation()
-                        .AddRedisInstrumentation();
+                        .AddEntityFrameworkCoreInstrumentation();
+
+                    if (ServiceCollectionExtension.IsRedisEnabled(builder.Configuration))
+                    {
+                        tracing.AddRedisInstrumentation();
+                    }
 
                     if (useOtlpExporter)
                     {
