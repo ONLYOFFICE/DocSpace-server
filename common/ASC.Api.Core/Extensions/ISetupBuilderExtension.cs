@@ -39,17 +39,14 @@ public static class ISetupBuilderExtension
 {
     public static ISetupBuilder LoadConfiguration(this ISetupBuilder loggingBuilder, IConfiguration configuration, IHostEnvironment hostEnvironment)
     {
-        // Ensure OTEL_SERVICE_NAME is set before nlog.config loads, so the OTLP target picks it up.
-        // AppHost sets it explicitly; standalone runs (no Aspire) fall back to appsettings or the app name.
-        if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("OTEL_SERVICE_NAME")))
-        {
-            var serviceName = configuration["openTelemetry:ServiceName"] ?? hostEnvironment.ApplicationName;
-            Environment.SetEnvironmentVariable("OTEL_SERVICE_NAME", serviceName);
-        }
-
         var conf = new XmlLoggingConfiguration(CrossPlatform.PathCombine(configuration["pathToConf"], "nlog.config"));
 
-        conf.Variables["serviceName"] = Environment.GetEnvironmentVariable("OTEL_SERVICE_NAME");
+        // Resolve service name for the NLog OTLP target. AppHost sets OTEL_SERVICE_NAME in container env;
+        // standalone runs fall back to appsettings or the host application name. We never mutate the
+        // process environment — passing through conf.Variables keeps the resolution local to this NLog setup.
+        conf.Variables["serviceName"] = Environment.GetEnvironmentVariable("OTEL_SERVICE_NAME")
+                                        ?? configuration["openTelemetry:ServiceName"]
+                                        ?? hostEnvironment.ApplicationName;
 
         var settings = configuration.GetSection("log").Get<NLogSettings>();
 
