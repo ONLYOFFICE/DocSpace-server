@@ -320,13 +320,30 @@ public class TenantManager(
 
     public async Task<List<TenantQuota>> GetTenantQuotasAsync(bool all, bool wallet)
     {
-        //TODO: remove this hack
         return (await quotaService.GetTenantQuotasAsync())
-            .Where(q => q.TenantId < 0
-                        && (all || q.Visible)
-                        && (wallet ? (q.Wallet && q.Additional) : (!q.Wallet || (q.Wallet && !q.Additional))))
+            .Where(q => IsTenantQuotaVisible(q, all, wallet))
             .OrderByDescending(q => q.TenantId)
             .ToList();
+
+        static bool IsTenantQuotaVisible(TenantQuota q, bool all, bool wallet)
+        {
+            if (q.TenantId >= 0)
+            {
+                return false;
+            }
+
+            if (!all && !q.Visible)
+            {
+                return false;
+            }
+
+            if (wallet)
+            {
+                return q.Wallet && q.Additional;
+            }
+
+            return !q.Wallet || (q.Wallet && !q.Additional);
+        }
     }
 
     public async Task<TenantQuota> GetCurrentTenantQuotaAsync(bool refresh = false)
