@@ -589,4 +589,10 @@ Përputhshmëria më e lartë me docx, xlsx, pptx.</value>
   <data name="ErrorMessage_AiServicesDisabled" xml:space="preserve">
     <value>Shërbimet AI janë të çaktivizuara për portalin aktual</value>
   </data>
+  <data name="ErrorMessage_ExternalDbNotIndexed" xml:space="preserve">
+    <value>Tabela e bazës së të dhënave do të krijohet pas dorëzimit të parë të formularit. Ende nuk ka të dhëna për të gjeneruar strukturën e saj.</value>
+  </data>
+  <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
+    <value>Dështoi sinkronizimi i të dhënave të formularit me bazën e të dhënave të jashtme.</value>
+  </data>
 </root>

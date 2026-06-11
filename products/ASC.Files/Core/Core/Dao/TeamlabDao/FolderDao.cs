@@ -922,6 +922,11 @@ internal class FolderDao(
 
             await filesDbContext.DeleteAuditReferencesAsync(folderId, FileEntryType.Folder);
             await filesDbContext.DeleteChatsAsync(folderId);
+            await filesDbContext.DeleteAttachmentsAsync(tenantId, folderId);
+            await filesDbContext.DeleteThreadsAsync(tenantId, folderId);
+            await filesDbContext.DeleteAssignmentsAsync(tenantId, folderId);
+            await filesDbContext.DeleteMcpServerToolPrefsAsync(tenantId, folderId);
+            await filesDbContext.DeleteMcpServersAsync(tenantId, folderId);
             await filesDbContext.DeleteRoomGroupRefByFolderIdsAsync(tenantId, subfolders);
 
             await context.SaveChangesAsync();

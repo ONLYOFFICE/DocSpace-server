@@ -522,7 +522,7 @@ public class FilesSettingsHelper(
 
         var settings = await settingsManager.LoadAsync<FilesSettings>();
         settings.DisableShareLinkSetting = !inDto.ExternalShare;
-        settings.DefaultShareLinkInternalSetting = inDto.DefaultShareLinkInternal;
+        settings.DefaultShareLinkInternalSetting = !inDto.ExternalShare || inDto.DefaultShareLinkInternal;
         settings.ExternalShareApplyToDocumentsSetting = inDto.ExternalShareApplyToDocuments;
         settings.ExternalShareApplyToRoomsSetting = inDto.ExternalShareApplyToRooms;
         settings.BlockExistingLinksOnRestrictSetting = inDto.BlockExistingLinksOnRestrict;

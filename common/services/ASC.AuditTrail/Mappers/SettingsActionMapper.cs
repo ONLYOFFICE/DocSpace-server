@@ -115,7 +115,8 @@ internal class ProductsActionMapper : ILocationActionMapper
                     MessageAction.WhiteLabelSettingsLogoTextUpdated,MessageAction.WhiteLabelSettingsLogosUpdated,MessageAction.WhiteLabelCompanySettingsUpdated,MessageAction.WhiteLabelAdditionalSettingsUpdated,MessageAction.WhiteLabelMailSettingsUpdated,
                     MessageAction.InvitationSettingsUpdated,MessageAction.IPRestrictionsSettingsUpdated,MessageAction.LoginSettingsUpdated,
                     MessageAction.AIAccessEnabled,
-                    MessageAction.AIAccessDisabled
+                    MessageAction.AIAccessDisabled,
+                    MessageAction.UserUpdatedAiSettings
                 ]
             },
             {

@@ -299,7 +299,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             .WithNpm()
             .WithEnvironment("MACHINEKEY", coreMachineKey)
             .WithEnvironment("PKEY", "PKEY")
-            .WithEnvironment("LOCAL_PORTAL_DOMAIN", $"localhost:{Constants.AppHostPort.ToString()}")
+            .WithEnvironment("LOCAL_PORTAL_DOMAIN", $"127.0.0.1:{Constants.AppHostPort.ToString()}")
             .WithEnvironment("DOCSPACE_OWNER_EMAIL", docspaceOwnerEmail)
             .WithExplicitStart();
 
@@ -420,7 +420,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             .WithNpm()
             .WithEnvironment("MACHINEKEY", coreMachineKey)
             .WithEnvironment("PKEY", "PKEY")
-            .WithEnvironment("LOCAL_PORTAL_DOMAIN", $"localhost:{Constants.AppHostPort.ToString()}")
+            .WithEnvironment("LOCAL_PORTAL_DOMAIN", $"127.0.0.1:{Constants.AppHostPort.ToString()}")
             .WithEnvironment("DOCSPACE_OWNER_EMAIL", docspaceOwnerEmail)
             .WithArgs("--", "--ui", "--ui-host", "0.0.0.0", "--ui-port", Constants.E2ETestsUiPort.ToString())
             .WithExplicitStart();
