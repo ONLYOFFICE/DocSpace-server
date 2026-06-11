@@ -32,14 +32,22 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 global using System.Collections.Concurrent;
+global using System.Globalization;
 global using System.Net;
+global using System.Security.Cryptography;
+global using System.Text;
 
+global using ASC.Common.Caching;
+global using ASC.Core.Billing;
 global using ASC.Core.Common.Security;
 global using ASC.Notify.Cron;
 
 global using FluentAssertions;
 
+global using Microsoft.AspNetCore.WebUtilities;
+global using Microsoft.Extensions.Caching.Memory;
 global using Microsoft.Extensions.Configuration;
+global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Logging.Abstractions;
 
 global using Polly;

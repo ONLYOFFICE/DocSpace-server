@@ -163,6 +163,8 @@
     <PackageVersion Include="Rackspace" Version="1.0.0" />
     <PackageVersion Include="RedisRateLimiting" Version="1.2.1" />
     <PackageVersion Include="RedisRateLimiting.AspNetCore" Version="1.2.1" />
+    <PackageVersion Include="Refit" Version="11.0.1" />
+    <PackageVersion Include="Refit.HttpClientFactory" Version="11.0.1" />
     <PackageVersion Include="Respawn" Version="7.0.0" />
     <PackageVersion Include="ResXResourceReader.NetStandard" Version="1.1.0" />
     <PackageVersion Include="Riok.Mapperly" Version="4.3.1" />
