@@ -58,8 +58,8 @@ interface CreateAgentBody {
 export const agentsController = {
   // POST agents — creates an AI agent. Creation is delegated to the .NET
   // endpoint `POST api/2.0/ai/agents` (AgentsController.CreateAgent). The
-  // caller's body is forwarded as-is except that `chatSettings` is always
-  // `{ prompt }`. The profile is then bound to the created agent via an
+  // caller's body is forwarded as-is except that `profileId` and `prompt`
+  // are stripped. The profile is then bound to the created agent via an
   // assignment (profileId + the agent's entry id); a binding failure is an
   // error for the caller even though the agent room already exists.
   createAgent: asyncHandler<CreateAgentBody>(async (req, res) => {
@@ -79,9 +79,14 @@ export const agentsController = {
     }
 
     const { profileId: _profileId, prompt: _prompt, ...rest } = body;
+    // `chatSettings` is NOT forwarded for now: FileStorageService rejects
+    // chatSettings without a valid providerId/modelId (ArgumentException
+    // "ProviderId"), and the agent's model comes from the assigned profile
+    // instead. Restore `chatSettings: { prompt }` in the payload below once
+    // the .NET side accepts a prompt-only chatSettings.
+    void prompt;
     const agent = await docSpaceApi.post("/ai/agents", {
       ...rest,
-      chatSettings: { prompt },
     });
 
     const agentId = isObject(agent) ? getNumber(agent, "id") : undefined;
