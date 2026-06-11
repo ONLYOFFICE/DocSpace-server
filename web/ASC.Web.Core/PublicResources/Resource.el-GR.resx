@@ -1155,9 +1155,6 @@
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
     <value>Λειτουργίες AI</value>
   </data>
-  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Ενεργοποιήστε τις λειτουργίες AI για να αυξήσετε την παραγωγικότητα.</value>
-  </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Παρακολούθηση συνδέσεων και ενεργειών</value>
   </data>

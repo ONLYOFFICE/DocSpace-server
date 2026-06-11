@@ -1155,9 +1155,6 @@
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
     <value>KI-Funktionen</value>
   </data>
-  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Aktivieren Sie KI-Funktionen, um die Produktivität zu steigern.</value>
-  </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Verfolgen von Anmeldungen und Aktionen</value>
   </data>

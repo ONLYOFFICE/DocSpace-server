@@ -1155,9 +1155,6 @@
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
     <value>AI-functies</value>
   </data>
-  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Activeer AI-functies om de productiviteit te verhogen.</value>
-  </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Inloggegevens en acties bijhouden</value>
   </data>

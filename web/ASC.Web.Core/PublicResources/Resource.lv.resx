@@ -1155,9 +1155,6 @@
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
     <value>MI funkcijas</value>
   </data>
-  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Iespējojiet MI funkcijas, lai palielinātu produktivitāti.</value>
-  </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Izsekošana pieteikšanās un darbības</value>
   </data>

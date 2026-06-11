@@ -1155,9 +1155,6 @@
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
     <value>Funksionalitetet AI</value>
   </data>
-  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Aktivizoni funksionalitetet AI për të rritur produktivitetin.</value>
-  </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Gjurmimi i hyrjeve dhe veprimeve</value>
   </data>

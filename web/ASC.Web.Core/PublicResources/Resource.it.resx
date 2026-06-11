@@ -1155,9 +1155,6 @@
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
     <value>Funzionalità IA</value>
   </data>
-  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Attiva le funzioni IA per aumentare la produttività.</value>
-  </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Tracciamento accessi e azioni</value>
   </data>

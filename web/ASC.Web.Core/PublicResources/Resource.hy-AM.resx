@@ -1155,9 +1155,6 @@
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
     <value>ԱԲ գործառույթներ</value>
   </data>
-  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Միացրեք ԱԲ գործառույթները արտադրողականությունը բարձրացնելու համար։</value>
-  </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Մուտքերի և գործողությունների հետևում</value>
   </data>
