@@ -211,6 +211,45 @@ public static class DbQuotaExtension
                     ServiceGroup = null,
                     Visible = true,
                     Wallet = true
+                },
+                // new DbQuota
+                // {
+                //     TenantId = -14,
+                //     Name = "admin",
+                //     Description = "since 08.06.2026",
+                //     Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,free_backup:2:fixed,automationapi",
+                //     Price = 20,
+                //     ProductId = "1013",
+                //     ServiceName = "admin",
+                //     ServiceGroup = null,
+                //     Visible = true,
+                //     Wallet = true
+                // },
+                new DbQuota
+                {
+                    TenantId = -15,
+                    Name = "docscloud",
+                    Description = null,
+                    Features = "docscloud:1",
+                    Price = 8,
+                    ProductId = "1014",
+                    ServiceName = "docscloud",
+                    ServiceGroup = null,
+                    Visible = true,
+                    Wallet = true
+                },
+                new DbQuota
+                {
+                    TenantId = -16,
+                    Name = "docsclouddevpack",
+                    Description = null,
+                    Features = "docscloud:1,docsclouddevpack",
+                    Price = 12,
+                    ProductId = "1015",
+                    ServiceName = "docscloud-devpack",
+                    ServiceGroup = null,
+                    Visible = false,
+                    Wallet = true
                 }
                 );
         return modelBuilder;

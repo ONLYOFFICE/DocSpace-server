@@ -1383,4 +1383,10 @@
   <data name="AccountingCustomerOperationAgent" xml:space="preserve">
     <value>Agent</value>
   </data>
+  <data name="TariffsFeature_docscloud_wallet" xml:space="preserve">
+    <value>Docs Connect</value>
+  </data>
+  <data name="TariffsFeature_docscloud_wallet_price_count" xml:space="preserve">
+    <value>Embed ONLYOFFICE Docs editors into your app with cloud-hosted tenants and your own API keys.</value>
+  </data>
 </root>
