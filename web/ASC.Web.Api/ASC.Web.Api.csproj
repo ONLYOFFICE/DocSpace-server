@@ -50,7 +50,7 @@
       <EmbeddedResource Include="img\statistic.svg" />
       <EmbeddedResource Include="img\websearch_wallet.svg" />
       <EmbeddedResource Include="img\anthropic.svg" />
-      <EmbeddedResource Include="img\crawling.svg" />
+      <EmbeddedResource Include="img\fetch.svg" />
       <EmbeddedResource Include="img\deepseek.svg" />
       <EmbeddedResource Include="img\default.svg" />
       <EmbeddedResource Include="img\embedding.svg" />
