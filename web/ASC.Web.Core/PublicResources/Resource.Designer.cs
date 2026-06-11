@@ -132,11 +132,20 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to  plan.
+        ///   Looks up a localized string similar to Business plan.
         /// </summary>
         public static string AccountingCustomerOperationServiceDesc_admin {
             get {
                 return ResourceManager.GetString("AccountingCustomerOperationServiceDesc_admin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Business plan.
+        /// </summary>
+        public static string AccountingCustomerOperationServiceDesc_adminyear {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationServiceDesc_adminyear", resourceCulture);
             }
         }
         
@@ -168,7 +177,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Disk space.
+        ///   Looks up a localized string similar to Additional disk storage.
         /// </summary>
         public static string AccountingCustomerOperationServiceDesc_disk_storage {
             get {
@@ -227,6 +236,15 @@ namespace ASC.Web.Core.PublicResources {
         public static string AccountingCustomerOperationServiceUOM_admin {
             get {
                 return ResourceManager.GetString("AccountingCustomerOperationServiceUOM_admin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Admins.
+        /// </summary>
+        public static string AccountingCustomerOperationServiceUOM_adminyear {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationServiceUOM_adminyear", resourceCulture);
             }
         }
         
@@ -3782,60 +3800,6 @@ namespace ASC.Web.Core.PublicResources {
         public static string TariffsFeature_usersQuotaExceeds_exception {
             get {
                 return ResourceManager.GetString("TariffsFeature_usersQuotaExceeds_exception", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Business plan.
-        /// </summary>
-        public static string TariffsUpcoming_admin {
-            get {
-                return ResourceManager.GetString("TariffsUpcoming_admin", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Business plan.
-        /// </summary>
-        public static string TariffsUpcoming_adminyear {
-            get {
-                return ResourceManager.GetString("TariffsUpcoming_adminyear", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Additional disk storage.
-        /// </summary>
-        public static string TariffsUpcoming_storage {
-            get {
-                return ResourceManager.GetString("TariffsUpcoming_storage", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Admins.
-        /// </summary>
-        public static string TariffsUpcomingUOM_admin {
-            get {
-                return ResourceManager.GetString("TariffsUpcomingUOM_admin", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Admins.
-        /// </summary>
-        public static string TariffsUpcomingUOM_adminyear {
-            get {
-                return ResourceManager.GetString("TariffsUpcomingUOM_adminyear", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to GB.
-        /// </summary>
-        public static string TariffsUpcomingUOM_storage {
-            get {
-                return ResourceManager.GetString("TariffsUpcomingUOM_storage", resourceCulture);
             }
         }
         
