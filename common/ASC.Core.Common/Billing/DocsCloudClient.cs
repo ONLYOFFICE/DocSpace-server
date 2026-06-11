@@ -118,6 +118,7 @@ public class DocsCloudTenant
     /// <summary>
     /// The tenant secret.
     /// </summary>
+    /// <example>abc123</example>
     public string Secret { get; init; }
 
     /// <summary>
