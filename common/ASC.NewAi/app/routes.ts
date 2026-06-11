@@ -46,6 +46,7 @@ import {
 } from "@onlyoffice/ai-chat/core";
 import type { RouteSpec } from "@onlyoffice/ai-chat/core";
 import logger from "./log.js";
+import { agentsController } from "./controllers/agentsController.js";
 import { aiController } from "./controllers/aiController.js";
 import { assignmentsController } from "./controllers/assignmentsController.js";
 import { attachmentsController } from "./controllers/attachmentsController.js";
@@ -152,6 +153,10 @@ export default function registerRoutes(app: Application): void {
     }
     next();
   });
+
+  // Custom routes not backed by an @onlyoffice/ai-chat engine. Agent
+  // creation is delegated to the .NET AI service (see agentsController).
+  router.post("/agents", agentsController.createAgent);
 
   let total = 0;
   for (const binding of ENGINE_BINDINGS) {
