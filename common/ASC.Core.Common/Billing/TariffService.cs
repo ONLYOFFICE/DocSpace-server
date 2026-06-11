@@ -685,7 +685,7 @@ public class TariffService(
 
         foreach (var q in quotas)
         {
-            if (q.State is QuotaState.Overdue)
+            if (q is { Additional: true, State: QuotaState.Overdue })
             {
                 tariff.OverdueQuotas ??= [];
                 tariff.OverdueQuotas.Add(q);

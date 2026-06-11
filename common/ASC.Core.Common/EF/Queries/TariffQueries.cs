@@ -71,7 +71,7 @@ static file class Queries
                 ctx.TariffRows
                     .Join(ctx.Quotas, tr => tr.Quota, q => q.TenantId, (tariffRow, quota) => new { tariffRow, quota })
                     .Where(r => r.tariffRow.TariffId == id && r.tariffRow.TenantId == tenantId)
-                    .OrderBy(r => r.quota.Wallet)
+                    .OrderBy(r => r.quota.Additional)
                     .Select(r => new Billing.Quota(r.tariffRow.Quota, r.tariffRow.Quantity, r.quota.Additional, r.quota.Wallet, r.tariffRow.DueDate, r.tariffRow.NextQuantity)));
 
     public static readonly Func<CoreDbContext, int, Task<int>> DeleteTariffs =
