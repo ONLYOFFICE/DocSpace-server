@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -33,28 +33,28 @@
 
 namespace ASC.Core.Billing;
 
-public class AccountingConfiguration
+/// <summary>
+/// Adds the per-request ASC HMAC-SHA1 authorization header to every accounting request.
+/// The token embeds the current UTC timestamp, so it must be generated per call rather than as a static header.
+/// </summary>
+internal class AccountingAuthHandler(IOptions<AccountingConfiguration> configuration) : DelegatingHandler
 {
-    private static readonly List<string> _defaultCurrencies = ["USD"];
-    public string Url
+    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        get;
-        init
+        if (!string.IsNullOrEmpty(configuration.Value.Key))
         {
-            field = (value ?? "").Trim().TrimEnd('/');
+            request.Headers.Add("Authorization", CreateAuthToken(configuration.Value.Key, configuration.Value.Secret));
         }
+
+        return await base.SendAsync(request, cancellationToken);
     }
 
-    public string Key { get; init; }
-    public string Secret { get;  init; }
-
-    public List<string> Currencies
+    private static string CreateAuthToken(string pkey, string machinekey)
     {
-        get;
-        init
-        {
-            field = value?.Count > 0 ? value : _defaultCurrencies;
-        }
-    } = _defaultCurrencies;
+        using var hasher = new HMACSHA1(Encoding.UTF8.GetBytes(machinekey));
+        var now = DateTime.UtcNow.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture);
+        var hash = WebEncoders.Base64UrlEncode(hasher.ComputeHash(Encoding.UTF8.GetBytes(string.Join("\n", now, pkey))));
 
+        return $"ASC {pkey}:{now}:{hash}";
+    }
 }
