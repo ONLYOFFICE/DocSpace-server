@@ -144,9 +144,6 @@
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Αντίγραφο ασφαλείας</value>
   </data>
-  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
-    <value>Χώρος αποθήκευσης στον δίσκο</value>
-  </data>
   <data name="AccountingCustomerOperationServiceDesc_embedding" xml:space="preserve">
     <value>Διανυσματικοποίηση</value>
   </data>

@@ -148,7 +148,7 @@
     <value>Chat</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
-    <value>Disk space</value>
+    <value>Additional disk storage</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_embedding" xml:space="preserve">
     <value>Vectorization</value>

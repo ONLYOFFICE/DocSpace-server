@@ -159,7 +159,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Disk space.
+        ///   Looks up a localized string similar to Additional disk storage.
         /// </summary>
         public static string AccountingCustomerOperationServiceDesc_disk_storage {
             get {
