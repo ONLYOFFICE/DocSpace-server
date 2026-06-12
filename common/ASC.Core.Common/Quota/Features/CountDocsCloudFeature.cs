@@ -33,4 +33,4 @@
 
 namespace ASC.Core.Common.Quota.Features;
 
-public class CountDocsCloudFeature(TenantQuota tenantQuota) : TenantQuotaFeatureCount(tenantQuota, "docscloud", true);
+public class CountDocsCloudFeature(TenantQuota tenantQuota) : TenantQuotaFeatureCount(tenantQuota, "docscloud", 0, true);
