@@ -283,9 +283,11 @@ public class PaymentController(
             throw new BillingException("Tariff is not paid");
         }
 
+        var minValue = quota.TenantId == (int)TenantWalletService.Storage ? 100 : 1; // min value 100Gb
+
         if (inDto.ProductQuantityType is ProductQuantityType.Set)
         {
-            if (productQty.HasValue && productQty.Value != 0 && productQty.Value < 100) // min value 100Gb
+            if (productQty.HasValue && productQty.Value != 0 && productQty.Value < minValue)
             {
                 throw new ArgumentException("Invalid quantity");
             }
@@ -309,7 +311,7 @@ public class PaymentController(
         }
 
         var hasActiveWalletQuota = tariff.Quotas.Any(q => q.Id == quota.TenantId && q.State == QuotaState.Active);
-        if (!hasActiveWalletQuota && productQty < 100) // min value 100Gb
+        if (!hasActiveWalletQuota && productQty < minValue)
         {
             throw new ArgumentException("Invalid quantity");
         }
