@@ -40,24 +40,24 @@ namespace ASC.Core.Billing;
 /// </summary>
 public interface IDocsCloudApi
 {
-    [Get("/api/healthcheck")]
+    [Get("/healthcheck")]
     Task HealthCheckAsync();
 
-    [Get("/api/tenant")]
+    [Get("/tenant")]
     Task<DocsCloudTenant> GetTenantAsync([Query] string portalId);
 
-    [Get("/api/tenant/info")]
+    [Get("/tenant/info")]
     Task<string> GetTenantInfoAsync([Query] string portalId);
 
-    [Get("/api/tenant/config")]
+    [Get("/tenant/config")]
     Task<DocsCloudConfigDto> GetTenantConfigAsync([Query] string portalId);
 
-    [Post("/api/tenant/config")]
+    [Post("/tenant/config")]
     Task<DocsCloudConfigDto> UpdateTenantConfigAsync([Query] string portalId, [Body] DocsCloudConfigDto config);
 
-    [Get("/api/tenant/quota")]
+    [Get("/tenant/quota")]
     Task<Stream> GetTenantQuotaAsync([Query] string portalId);
 
-    [Get("/api/tenant/usage")]
+    [Get("/tenant/usage")]
     Task<DocsCloudUsage> GetTenantUsageAsync([Query] string portalId);
 }
