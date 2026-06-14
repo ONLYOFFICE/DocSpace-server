@@ -1459,11 +1459,7 @@ public class PaymentController(
             Image = icons[m.OwnedBy.ToLower()],
             Alias = m.Alias,
             Provider = m.Provider,
-            Price = new AiChatPriceDto
-            {
-                Prompt = m.Price.Prompt * 1_000_000,
-                Completion = m.Price.Completion * 1_000_000
-            },
+            Price = new AiChatPriceDto { Prompt = m.Price.Prompt, Completion = m.Price.Completion },
             Link = m.Link
         }).ToList();
 
@@ -1475,17 +1471,15 @@ public class PaymentController(
             Alias = e.Alias,
             Provider = e.Provider,
             Image = embeddingImage,
-            Price = new AiEmbeddingPriceDto { Prompt = e.Price.Prompt * 1_000_000 },
+            Price = new AiEmbeddingPriceDto { Prompt = e.Price.Prompt },
             Link = e.Link
         }).ToList();
-
-        var searchImage = await walletStaticProvider.GetImageAsync("search");
 
         var search = aiPrices.WebSearch.Select(s => new AiEntryPricingDto<decimal>
         {
             Id = s.Id,
-            Alias = s.Alias,
-            Image = searchImage,
+            Alias = Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceDesc_{s.Id}"),
+            Image = icons[s.Id],
             Provider = s.Provider,
             Price = s.Price,
             Link = s.Link

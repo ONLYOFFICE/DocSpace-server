@@ -167,7 +167,6 @@ public record AiPricesResponse
         new()
         {
             Id = "search",
-            Alias = "Web Search",
             Provider = "Exa",
             Price = 0.007M,
             Link = "https://exa.ai/pricing"
@@ -175,7 +174,6 @@ public record AiPricesResponse
         new()
         {
             Id = "fetch",
-            Alias = "Web crawling",
             Provider = "Exa",
             Price = 0.001M,
             Link = "https://exa.ai/pricing"
@@ -218,7 +216,6 @@ public record AiEmbeddingPrice
 public record AiWebSearchPricing
 {
     public string Id { get; init; }
-    public string Alias { get; init; }
     public string Provider { get; init; }
     public decimal Price { get; init; }
     public string Link { get; init; }
