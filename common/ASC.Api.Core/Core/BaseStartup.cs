@@ -184,6 +184,10 @@ public abstract class BaseStartup
 
         var connectionMultiplexer = await services.GetRedisConnectionMultiplexerAsync(_configuration, GetType().Namespace);
 
+        var rateLimiterSettingsSection = _configuration.GetSection("core:hosting:rateLimiterOptions");
+        var rateLimiterSettings = rateLimiterSettingsSection.Get<RateLimiterSettings>();
+        builder.Services.Configure<RateLimiterSettings>(rateLimiterSettingsSection);
+
         services.AddRateLimiter(options =>
         {
             bool EnableNoLimiter(IPAddress address)
@@ -236,7 +240,7 @@ public abstract class BaseStartup
 
                     userId ??= remoteIpAddress.ToInvariantString();
 
-                    var permitLimit = 1500;
+                    var permitLimit = rateLimiterSettings.SlidingWindowLimit;
 
                     var partitionKey = $"sw_{userId}";
 
@@ -259,17 +263,12 @@ public abstract class BaseStartup
 
                     if (string.Compare(httpContext?.Request.Method, "GET", StringComparison.OrdinalIgnoreCase) == 0)
                     {
-                        permitLimit = 50;
+                        permitLimit = rateLimiterSettings.ConcurrentGetLimit;
                         partitionKey = $"cr_read_{userId}";
                     }
                     else
                     {
-                        permitLimit = _configuration.GetSection("core:hosting:rateLimiterOptions:defaultConcurrencyWriteRequests").Get<int>();
-
-                        if (permitLimit == 0)
-                        {
-                            permitLimit = 15;
-                        }
+                        permitLimit = rateLimiterSettings.DefaultConcurrencyWriteRequests;
 
                         partitionKey = $"cr_write_{userId}";
                     }
@@ -291,7 +290,7 @@ public abstract class BaseStartup
                         userId ??= remoteIpAddress.ToInvariantString();
 
                         var partitionKey = $"fw_post_put_{userId}";
-                        var permitLimit = 10000;
+                        var permitLimit = rateLimiterSettings.DailyWriteLimit;
 
                         if (!(string.Compare(httpContext?.Request.Method, "POST", StringComparison.OrdinalIgnoreCase) == 0 ||
                               string.Compare(httpContext?.Request.Method, "PUT", StringComparison.OrdinalIgnoreCase) == 0))
@@ -308,7 +307,7 @@ public abstract class BaseStartup
                 var userId = httpContext?.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value ??
                              httpContext?.Connection.RemoteIpAddress.ToInvariantString();
 
-                var permitLimit = 5;
+                var permitLimit = rateLimiterSettings.SensitiveApiLimit;
                 var path = httpContext?.Request.Path.ToString();
                 var partitionKey = $"{RateLimiterPolicy.SensitiveApi}_{userId}|{path}";
                 var remoteIpAddress = httpContext?.Connection.RemoteIpAddress;
@@ -318,12 +317,13 @@ public abstract class BaseStartup
                     return RateLimitPartition.GetNoLimiter("no_limiter");
                 }
 
-                return RedisRateLimitPartition.GetSlidingWindowRateLimiter(partitionKey, _ => new RedisSlidingWindowRateLimiterOptions { PermitLimit = permitLimit, Window = TimeSpan.FromMinutes(15), ConnectionMultiplexerFactory = () => connectionMultiplexer });
+                return RedisRateLimitPartition.GetSlidingWindowRateLimiter(partitionKey, _ => new RedisSlidingWindowRateLimiterOptions { PermitLimit = permitLimit, Window = TimeSpan.FromMinutes(rateLimiterSettings.SensitiveApiWindowMinutes), ConnectionMultiplexerFactory = () => connectionMultiplexer });
             });
 
             options.AddPolicy(RateLimiterPolicy.EmailInvitationApi, httpContext =>
             {
-                if (!int.TryParse(_configuration["core:hosting:rateLimiterOptions:maxEmailInvitationsPerDay"], out var invitationLimitPerDay))
+                var invitationLimitPerDay = rateLimiterSettings.MaxEmailInvitationsPerDay;
+                if (invitationLimitPerDay is null)
                 {
                     return RateLimitPartition.GetNoLimiter("no_limiter");
                 }
@@ -384,7 +384,7 @@ public abstract class BaseStartup
 
                 var partitionKey = $"{RateLimiterPolicy.EmailInvitationApi}_{tenant.Id}";
 
-                RedisFixedWindowRateLimiterOptions OptionFactory() => new() { PermitLimit = invitationLimitPerDay, Window = TimeSpan.FromDays(1), ConnectionMultiplexerFactory = () => connectionMultiplexer };
+                RedisFixedWindowRateLimiterOptions OptionFactory() => new() { PermitLimit = invitationLimitPerDay.Value, Window = TimeSpan.FromDays(1), ConnectionMultiplexerFactory = () => connectionMultiplexer };
 
                 RateLimiter LimitterFactory(string key) => new LooppedRedisFixedWindowRateLimiter<string>(key, OptionFactory(), invitationsCount);
 
@@ -396,7 +396,7 @@ public abstract class BaseStartup
                 var userId = httpContext?.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value ??
                              httpContext?.Connection.RemoteIpAddress.ToInvariantString();
 
-                var permitLimit = 10;
+                var permitLimit = rateLimiterSettings.PaymentsApiLimit;
                 var path = httpContext?.Request.Path.ToString();
                 var partitionKey = $"{RateLimiterPolicy.PaymentsApi}_{userId}|{path}";
                 var remoteIpAddress = httpContext?.Connection.RemoteIpAddress;
@@ -406,7 +406,7 @@ public abstract class BaseStartup
                     return RateLimitPartition.GetNoLimiter("no_limiter");
                 }
 
-                return RedisRateLimitPartition.GetSlidingWindowRateLimiter(partitionKey, _ => new RedisSlidingWindowRateLimiterOptions { PermitLimit = permitLimit, Window = TimeSpan.FromMinutes(1), ConnectionMultiplexerFactory = () => connectionMultiplexer });
+                return RedisRateLimitPartition.GetSlidingWindowRateLimiter(partitionKey, _ => new RedisSlidingWindowRateLimiterOptions { PermitLimit = permitLimit, Window = TimeSpan.FromMinutes(rateLimiterSettings.PaymentsApiWindowMinutes), ConnectionMultiplexerFactory = () => connectionMultiplexer });
             });
 
             options.OnRejected = (context, ct) => RateLimitMetadata.OnRejected(context.HttpContext, context.Lease, ct);

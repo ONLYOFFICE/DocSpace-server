@@ -713,7 +713,11 @@ public class UserController(
         var userName = user.DisplayUserName(false, displayUserSettingsHelper);
         var groups = await _userManager.GetUserGroupsAsync(user.Id);
 
-        await client.DeleteClientsAsync(user.Id);
+        if (!isGuest)
+        {
+            await client.DeleteClientsAsync(user.Id);
+        }
+
         await _userPhotoManager.RemovePhotoAsync(user.Id);
         await _userManager.DeleteUserAsync(user.Id);
         await fileSecurity.RemoveSubjectAsync(user.Id, true);
@@ -1365,7 +1369,11 @@ public class UserController(
 
             var isGuest = userType == EmployeeType.Guest;
 
-            await client.DeleteClientsAsync(user.Id);
+            if (!isGuest)
+            {
+                await client.DeleteClientsAsync(user.Id);
+            }
+
             await _userPhotoManager.RemovePhotoAsync(user.Id);
             await _userManager.DeleteUserAsync(user.Id);
             await fileSecurity.RemoveSubjectAsync(user.Id, true);

@@ -52,6 +52,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.RedisSerializer;
@@ -103,7 +104,11 @@ public class ClientCacheConfiguration {
       config.setUsername(properties.getUsername());
     if (properties.getPassword() != null && !properties.getPassword().isEmpty())
       config.setPassword(properties.getPassword());
-    var factory = new LettuceConnectionFactory(config);
+
+    var clientConfigBuilder = LettuceClientConfiguration.builder();
+    if (properties.isSsl()) clientConfigBuilder.useSsl();
+
+    var factory = new LettuceConnectionFactory(config, clientConfigBuilder.build());
     factory.afterPropertiesSet();
 
     log.info("clientCacheRedisConnectionFactory created successfully");

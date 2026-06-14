@@ -45,6 +45,8 @@ spring:
       password: ${REDIS_PASSWORD:}
       database: ${REDIS_DATABASE:0}
       timeout: ${REDIS_TIMEOUT:2000}
+      ssl:
+        enabled: ${REDIS_SSL:false}
       lettuce:
         pool:
           max-active: ${REDIS_POOL_MAX_ACTIVE:8}
