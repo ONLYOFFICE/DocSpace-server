@@ -49,6 +49,7 @@ public static class AiWorkerServiceExtensions
         services.RegisterQueue<ChatDeletionTask>(10);
         services.RegisterQueue<MessageExportTask>();
         services.RegisterQueue<ChatExportTask>();
+        services.RegisterQueue<TextToDocxTask>(10);
         services.RegisterQueue<AsyncTaskData<int>>();
         services.RegisterQueue<AsyncTaskData<string>>();
 
@@ -67,6 +68,8 @@ public static class AiWorkerServiceExtensions
                 MessageExportIntegrationEventHandler>(),
             eventBus.SubscribeAsync<ChatExportIntegrationEvent,
                 ChatExportIntegrationEventHandler>(),
+            eventBus.SubscribeAsync<TextToDocxIntegrationEvent,
+                TextToDocxIntegrationHandler>(),
             eventBus.SubscribeAsync<ChatDeletionIntegrationEvent,
                 ChatDeletionIntegrationEventHandler>());
     }
