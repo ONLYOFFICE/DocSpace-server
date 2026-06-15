@@ -163,23 +163,8 @@ public record AiPricesResponse
 {
     public required IEnumerable<AiChatModelPricing> Chat { get; init; }
     public required IEnumerable<AiEmbeddingModelPricing> Embedding { get; init; }
-    public IEnumerable<AiWebSearchPricing> WebSearch { get; init; } = [
-        new()
-        {
-            Id = "search",
-            Provider = "Exa",
-            Price = 0.007M,
-            Link = "https://exa.ai/pricing"
-        },
-        new()
-        {
-            Id = "fetch",
-            Provider = "Exa",
-            Price = 0.001M,
-            Link = "https://exa.ai/pricing"
-        }
-    ];
-    public required CurrencyInfo Currency { get; init; } = new() { Code = "USD", Symbol = "$" };
+    public required IEnumerable<AiWebSearchPricing> Search { get; init; }
+    public required CurrencyInfo Currency { get; init; }
 }
 
 public record AiChatModelPricing

@@ -1441,7 +1441,7 @@ public class PaymentController(
         var icons = new Dictionary<string, string>();
 
         var providers = aiPrices.Chat.Select(m => m.OwnedBy.ToLower()).Distinct();
-        var searchTypes = aiPrices.WebSearch.Select(s => s.Id).Distinct();
+        var searchTypes = aiPrices.Search.Select(s => s.Id).Distinct();
 
         foreach (var provider in providers)
         {
@@ -1475,7 +1475,7 @@ public class PaymentController(
             Link = e.Link
         }).ToList();
 
-        var search = aiPrices.WebSearch.Select(s => new AiEntryPricingDto<decimal>
+        var search = aiPrices.Search.Select(s => new AiEntryPricingDto<decimal>
         {
             Id = s.Id,
             Alias = Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceDesc_{s.Id}"),
