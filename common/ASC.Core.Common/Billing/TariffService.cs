@@ -1210,6 +1210,11 @@ public class TariffService(
                 balance = await accountingClient.GetCustomerBalanceAsync(portalId, true);
                 await hybridCache.SetAsync(cacheKey, balance, TimeSpan.FromMinutes(10));
             }
+            catch (AccountingCustomerNotFoundException exception)
+            {
+                logger.InfoAccountingTenant(tenantId.ToString(), exception.Message);
+                await hybridCache.SetAsync(cacheKey, new Balance(), TimeSpan.FromMinutes(10));
+            }
             catch (Exception error)
             {
                 LogError(error, tenantId.ToString());
@@ -1250,6 +1255,11 @@ public class TariffService(
                 var portalId = await coreSettings.GetKeyAsync(tenantId);
                 balance = await accountingClient.GetCustomerAiBalanceAsync(portalId, true);
                 await hybridCache.SetAsync(cacheKey, balance, TimeSpan.FromMinutes(10));
+            }
+            catch (AccountingCustomerNotFoundException exception)
+            {
+                logger.InfoAccountingTenant(tenantId.ToString(), exception.Message);
+                await hybridCache.SetAsync(cacheKey, new Balance(), TimeSpan.FromMinutes(10));
             }
             catch (Exception error)
             {
@@ -1313,11 +1323,16 @@ public class TariffService(
 
             return await accountingClient.GetCustomerOperationsAsync(portalId, filter, isAiService);
         }
+        catch (AccountingCustomerNotFoundException exception)
+        {
+            logger.InfoAccountingTenant(tenantId.ToString(), exception.Message);
+        }
         catch (Exception error)
         {
             LogError(error, tenantId.ToString());
-            return null;
         }
+
+        return null;
     }
 
     public async Task<List<CustomerMonthlyUsage>> GetCustomerMonthlyUsageAsync(int tenantId, DateTime? utcStartDate, DateTime? utcEndDate)

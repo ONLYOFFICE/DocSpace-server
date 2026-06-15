@@ -1440,25 +1440,29 @@ public class PaymentController(
         await DemandAdminAsync();
 
         var aiPrices = await aiGateway.GetPricesAsync();
+        var icons = new Dictionary<string, string>();
 
         var providers = aiPrices.Chat.Select(m => m.OwnedBy.ToLower()).Distinct();
-        var icons = new Dictionary<string, string>();
+        var searchTypes = aiPrices.WebSearch.Select(s => s.Id).Distinct();
+
         foreach (var provider in providers)
         {
             icons[provider] = await walletStaticProvider.GetImageAsync(provider);
         }
 
-        var chat = aiPrices.Chat.Select(model => new AiEntryPricingDto<AiChatPriceDto>
+        foreach (var searchType in searchTypes)
         {
-            Id = model.Id,
-            Image = icons[model.OwnedBy.ToLower()],
-            Alias = model.Alias,
-            Provider = model.Provider,
-            Price = new AiChatPriceDto
-            {
-                Prompt = model.Price.Prompt * 1_000_000,
-                Completion = model.Price.Completion * 1_000_000
-            }
+            icons[searchType] = await walletStaticProvider.GetImageAsync(searchType);
+        }
+
+        var chat = aiPrices.Chat.Select(m => new AiEntryPricingDto<AiChatPriceDto>
+        {
+            Id = m.Id,
+            Image = icons[m.OwnedBy.ToLower()],
+            Alias = m.Alias,
+            Provider = m.Provider,
+            Price = new AiChatPriceDto { Prompt = m.Price.Prompt, Completion = m.Price.Completion },
+            Link = m.Link
         }).ToList();
 
         var embeddingImage = await walletStaticProvider.GetImageAsync("embedding");
@@ -1469,31 +1473,25 @@ public class PaymentController(
             Alias = e.Alias,
             Provider = e.Provider,
             Image = embeddingImage,
-            Price = new AiEmbeddingPriceDto { Prompt = e.Price.Prompt * 1_000_000 }
+            Price = new AiEmbeddingPriceDto { Prompt = e.Price.Prompt },
+            Link = e.Link
+        }).ToList();
+
+        var search = aiPrices.WebSearch.Select(s => new AiEntryPricingDto<decimal>
+        {
+            Id = s.Id,
+            Alias = Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceDesc_{s.Id}"),
+            Image = icons[s.Id],
+            Provider = s.Provider,
+            Price = s.Price,
+            Link = s.Link
         }).ToList();
 
         return new AiPricesDto
         {
             Chat = chat,
             Embedding = embedding,
-            WebSearch = [
-                new AiEntryPricingDto<decimal>
-                {
-                    Id = "search",
-                    Alias = "Web Search",
-                    Image = await walletStaticProvider.GetImageAsync("search"),
-                    Provider = aiPrices.WebSearch.Provider,
-                    Price = aiPrices.WebSearch.Search
-                },
-                new AiEntryPricingDto<decimal>
-                {
-                    Id = "fetch",
-                    Alias = "Web crawling",
-                    Image = await walletStaticProvider.GetImageAsync("crawling"),
-                    Provider = aiPrices.WebSearch.Provider,
-                    Price = aiPrices.WebSearch.Contents
-                }
-            ],
+            WebSearch = search,
             Currency = aiPrices.Currency
         };
     }

@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -31,14 +31,20 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.AI.Core.Provider;
+namespace ASC.Common.Utils;
 
-public class ModelData
+public class RateLimiterSettings
 {
-    public required AiProvider Provider { get; init; }
-    public required string ModelId { get; init; }
-    public string? Alias { get; init; }
-    public AiModelCapabilities? Capabilities { get; init; }
-    public AiChatPrice? Price { get; set; }
-    public CurrencyInfo? Currency { get; set; }
+    public int SlidingWindowLimit { get; init; } = 1500;
+    public int ConcurrentGetLimit { get; init; } = 50;
+    public int DefaultConcurrencyWriteRequests { get; init; } = 15;
+    public int DailyWriteLimit { get; init; } = 10000;
+
+    public int SensitiveApiLimit { get; init; } = 5;
+    public int SensitiveApiWindowMinutes { get; init; } = 15;
+
+    public int PaymentsApiLimit { get; init; } = 10;
+    public int PaymentsApiWindowMinutes { get; init; } = 1;
+
+    public int? MaxEmailInvitationsPerDay { get; init; }
 }
