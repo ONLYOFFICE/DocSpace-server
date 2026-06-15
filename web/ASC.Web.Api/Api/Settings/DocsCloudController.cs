@@ -36,13 +36,76 @@ namespace ASC.Web.Api.Controllers.Settings;
 [DefaultRoute("docscloud")]
 public class DocsCloudController(
     PermissionContext permissionContext,
+    SecurityContext securityContext,
     TenantManager tenantManager,
     CoreSettings coreSettings,
     DocsCloudClient docsCloudClient,
+    ITariffService tariffService,
+    IQuotaService quotaService,
+    MessageService messageService,
     WebItemManager webItemManager,
     IFusionCache fusionCache)
     : BaseSettingsController(fusionCache, webItemManager)
 {
+    /// <remarks>
+    /// Starts the DocsCloud trial.
+    /// </remarks>
+    /// <summary>
+    /// Start the DocsCloud trial
+    /// </summary>
+    /// <path>api/2.0/settings/docscloud/trial</path>
+    [Tags("Settings / DocsCloud")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
+    [SwaggerResponse(400, "Quota is already set")]
+    [SwaggerResponse(402, "Tariff is not paid")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(404, "Quota could not be found")]
+    [HttpPost("trial")]
+    public async Task<bool> UpdateWalletPayment()
+    {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        if (!tariffService.IsConfigured())
+        {
+            throw new InvalidOperationException("Tariff service is not configured");
+        }
+
+        var tenant = tenantManager.GetCurrentTenant();
+
+        var quota = (await quotaService.GetTenantQuotasAsync())
+            .FirstOrDefault(q => q.Name == "docscloudtrial");
+
+        if (quota == null)
+        {
+            throw new ItemNotFoundException("Quota could not be found");
+        }
+
+        var tariff = await tariffService.GetTariffAsync(tenant.Id);
+
+        if (tariff.State > TariffState.Paid)
+        {
+            throw new BillingException("Tariff is not paid");
+        }
+
+        if (tariff.Quotas.Any(q => q.Id == quota.TenantId))
+        {
+            throw new ArgumentException("Quota is already set");
+        }
+
+        var quantity = new Dictionary<string, int> { { quota.Name, 1 } };
+        var defaultCurrency = tariffService.GetSupportedAccountingCurrencies().First();
+        var participant = securityContext.CurrentAccount.ID.ToString();
+
+        var result = await tariffService.PaymentChangeAsync(tenant.Id, quantity, ProductQuantityType.Add, defaultCurrency, false, participant);
+
+        if (result)
+        {
+            messageService.Send(MessageAction.CustomerSubscriptionUpdated, $"{quota.Name}");
+        }
+
+        return result;
+    }
+
     /// <remarks>
     /// Checks whether the DocsCloud server is reachable.
     /// </remarks>

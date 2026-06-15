@@ -250,6 +250,19 @@ public static class DbQuotaExtension
                     ServiceGroup = null,
                     Visible = false,
                     Wallet = true
+                },
+                new DbQuota
+                {
+                    TenantId = -17,
+                    Name = "docscloudtrial",
+                    Description = null,
+                    Features = "docscloud:1000,docsclouddevpack,docscloudtrial",
+                    Price = 0,
+                    ProductId = "1016",
+                    ServiceName = null,
+                    ServiceGroup = null,
+                    Visible = false,
+                    Wallet = false
                 }
                 );
         return modelBuilder;

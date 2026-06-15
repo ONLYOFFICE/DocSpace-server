@@ -490,7 +490,7 @@ public class TenantQuota
         set => _countDocsCloud.Value = value;
     }
 
-    private readonly WalletFeatureFlag _docsCloudDevPack;
+    private readonly TenantQuotaFeatureFlag _docsCloudDevPack;
 
     /// <summary>
     /// Specifies if the DocsCloudDevPack enabled or not.
@@ -500,6 +500,18 @@ public class TenantQuota
     {
         get => _docsCloudDevPack.Value;
         set => _docsCloudDevPack.Value = value;
+    }
+
+    private readonly TenantQuotaFeatureFlag _docsCloudTrial;
+
+    /// <summary>
+    /// Specifies if the DocsCloudTrial enabled or not.
+    /// </summary>
+    /// <example>true</example>
+    public bool DocsCloudTrial
+    {
+        get => _docsCloudTrial.Value;
+        set => _docsCloudTrial.Value = value;
     }
 
     public TenantQuota()
@@ -536,7 +548,8 @@ public class TenantQuota
         _countAIAgentFeature = new CountAIAgentFeature(this) { Order = 11 };
         _aiTools = new WalletFeatureFlag(this, "aitools") { EmployeeType = EmployeeType.DocSpaceAdmin };
         _countDocsCloud = new CountDocsCloudFeature(this) { Order = 13 };
-        _docsCloudDevPack = new WalletFeatureFlag(this, "docsclouddevpack") { EmployeeType = EmployeeType.DocSpaceAdmin };
+        _docsCloudDevPack = new TenantQuotaFeatureFlag(this, "docsclouddevpack") { EmployeeType = EmployeeType.DocSpaceAdmin };
+        _docsCloudTrial = new TenantQuotaFeatureFlag(this, "docscloudtrial") { EmployeeType = EmployeeType.DocSpaceAdmin };
 
         TenantQuotaFeatures = new List<TenantQuotaFeature>
         {
@@ -570,7 +583,8 @@ public class TenantQuota
             _countAIAgentFeature,
             _aiTools,
             _countDocsCloud,
-            _docsCloudDevPack
+            _docsCloudDevPack,
+            _docsCloudTrial
         };
     }
 
