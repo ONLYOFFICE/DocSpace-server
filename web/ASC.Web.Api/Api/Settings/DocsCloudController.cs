@@ -137,14 +137,14 @@ public class DocsCloudController(
     }
 
     /// <remarks>
-    /// Returns the DocsCloud server information/statistics of the current portal.
+    /// Returns the DocsCloud license and server information with usage statistics of the current portal.
     /// </remarks>
     /// <summary>Get the DocsCloud tenant information</summary>
     /// <path>api/2.0/settings/docscloud/tenant/info</path>
     [Tags("Settings / DocsCloud")]
-    [SwaggerResponse(200, "DocsCloud server information (raw JSON returned by the DocsCloud server)", typeof(string))]
+    [SwaggerResponse(200, "DocsCloud tenant information", typeof(DocsCloudTenantInfo))]
     [HttpGet("tenant/info")]
-    public async Task<string> GetTenantInfo()
+    public async Task<DocsCloudTenantInfo> GetTenantInfo()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -182,18 +182,33 @@ public class DocsCloudController(
     }
 
     /// <remarks>
-    /// Returns the DocsCloud user quota of the current portal as a CSV file.
+    /// Returns the DocsCloud user quota (active users) of the current portal.
     /// </remarks>
     /// <summary>Get the DocsCloud tenant quota</summary>
     /// <path>api/2.0/settings/docscloud/tenant/quota</path>
     [Tags("Settings / DocsCloud")]
-    [SwaggerResponse(200, "DocsCloud user quota CSV file", typeof(FileResult))]
+    [SwaggerResponse(200, "DocsCloud user quota", typeof(DocsCloudQuota))]
     [HttpGet("tenant/quota")]
-    public async Task<FileResult> GetTenantQuota()
+    public async Task<DocsCloudQuota> GetTenantQuota()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var stream = await docsCloudClient.GetTenantQuotaAsync(await GetPortalIdAsync());
+        return await docsCloudClient.GetTenantQuotaAsync(await GetPortalIdAsync());
+    }
+
+    /// <remarks>
+    /// Downloads the DocsCloud user quota of the current portal as a CSV file.
+    /// </remarks>
+    /// <summary>Download the DocsCloud tenant quota</summary>
+    /// <path>api/2.0/settings/docscloud/tenant/quota/download</path>
+    [Tags("Settings / DocsCloud")]
+    [SwaggerResponse(200, "DocsCloud user quota CSV file", typeof(FileResult))]
+    [HttpGet("tenant/quota/download")]
+    public async Task<FileResult> DownloadTenantQuota()
+    {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        var stream = await docsCloudClient.DownloadTenantQuotaAsync(await GetPortalIdAsync());
 
         return File(stream, "text/csv", "quota.csv");
     }

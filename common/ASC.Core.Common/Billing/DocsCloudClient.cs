@@ -54,7 +54,7 @@ public class DocsCloudClient(IOptions<DocsCloudConfiguration> configuration, IDo
         return await docsCloudApi.GetTenantAsync(portalId);
     }
 
-    public async Task<string> GetTenantInfoAsync(string portalId)
+    public async Task<DocsCloudTenantInfo> GetTenantInfoAsync(string portalId)
     {
         EnsureConfigured();
 
@@ -75,11 +75,18 @@ public class DocsCloudClient(IOptions<DocsCloudConfiguration> configuration, IDo
         return await docsCloudApi.UpdateTenantConfigAsync(portalId, config);
     }
 
-    public async Task<Stream> GetTenantQuotaAsync(string portalId)
+    public async Task<DocsCloudQuota> GetTenantQuotaAsync(string portalId)
     {
         EnsureConfigured();
 
         return await docsCloudApi.GetTenantQuotaAsync(portalId);
+    }
+
+    public async Task<Stream> DownloadTenantQuotaAsync(string portalId)
+    {
+        EnsureConfigured();
+
+        return await docsCloudApi.DownloadTenantQuotaAsync(portalId);
     }
 
     public async Task<DocsCloudUsage> GetTenantUsageAsync(string portalId)
@@ -114,12 +121,6 @@ public class DocsCloudTenant
     /// </summary>
     /// <example>my-portal</example>
     public string Alias { get; init; }
-
-    /// <summary>
-    /// The tenant secret.
-    /// </summary>
-    /// <example>abc123</example>
-    public string Secret { get; init; }
 
     /// <summary>
     /// The tenant name.
@@ -162,6 +163,12 @@ public class DocsCloudTenant
     /// </summary>
     /// <example>false</example>
     public bool IsActive { get; init; }
+
+    /// <summary>
+    /// The tenant address.
+    /// </summary>
+    /// <example>https://my-portal.onlyoffice.com</example>
+    public string Address { get; init; }
 
     /// <summary>
     /// The tenant payment information.
@@ -291,6 +298,194 @@ public class DocsCloudUsage
     /// </summary>
     /// <example>10</example>
     public int ActiveCount { get; init; }
+}
+
+/// <summary>
+/// Represents the license and server information of a DocsCloud tenant, with usage statistics for the current period.
+/// </summary>
+public class DocsCloudTenantInfo
+{
+    /// <summary>
+    /// The license information.
+    /// </summary>
+    public DocsCloudLicenseInfo License { get; init; }
+
+    /// <summary>
+    /// The DocsCloud server information.
+    /// </summary>
+    public DocsCloudServerInfo Server { get; init; }
+
+    /// <summary>
+    /// The user limits of the license.
+    /// </summary>
+    public DocsCloudUsersLimit UsersLimit { get; init; }
+
+    /// <summary>
+    /// The usage statistics for the current period.
+    /// </summary>
+    public DocsCloudStats Stats { get; init; }
+}
+
+/// <summary>
+/// Represents the license information of a DocsCloud tenant.
+/// </summary>
+public class DocsCloudLicenseInfo
+{
+    /// <summary>
+    /// The date and time until which the license is valid.
+    /// </summary>
+    /// <example>2024-01-15T10:30:00Z</example>
+    public DateTime Valid { get; init; }
+
+    /// <summary>
+    /// Whether the license is a trial.
+    /// </summary>
+    /// <example>false</example>
+    public bool Trial { get; init; }
+
+    /// <summary>
+    /// The license build date.
+    /// </summary>
+    /// <example>2024-01-15T10:30:00Z</example>
+    public DateTime BuildDate { get; init; }
+}
+
+/// <summary>
+/// Represents the DocsCloud server information.
+/// </summary>
+public class DocsCloudServerInfo
+{
+    /// <summary>
+    /// The server version.
+    /// </summary>
+    /// <example>8.0.0</example>
+    public string Version { get; init; }
+
+    /// <summary>
+    /// The server package type ("Open Source", "Enterprise Edition" or "Developer Edition").
+    /// </summary>
+    /// <example>Enterprise Edition</example>
+    public string PackageType { get; init; }
+
+    /// <summary>
+    /// The server build date.
+    /// </summary>
+    /// <example>2024-01-15T10:30:00Z</example>
+    public DateTime Date { get; init; }
+}
+
+/// <summary>
+/// Represents the user limits of a DocsCloud license.
+/// </summary>
+public class DocsCloudUsersLimit
+{
+    /// <summary>
+    /// The maximum number of users who can edit documents.
+    /// </summary>
+    /// <example>100</example>
+    public int Edit { get; init; }
+
+    /// <summary>
+    /// The maximum number of users who can view documents.
+    /// </summary>
+    /// <example>100</example>
+    public int View { get; init; }
+}
+
+/// <summary>
+/// Represents the usage statistics of a DocsCloud tenant for the current period.
+/// </summary>
+public class DocsCloudStats
+{
+    /// <summary>
+    /// The length of the statistics period in days.
+    /// </summary>
+    /// <example>30</example>
+    public int PeriodDay { get; init; }
+
+    /// <summary>
+    /// The statistics for editor users.
+    /// </summary>
+    public DocsCloudUserStats Editor { get; init; }
+
+    /// <summary>
+    /// The statistics for viewer users.
+    /// </summary>
+    public DocsCloudUserStats Viewer { get; init; }
+}
+
+/// <summary>
+/// Represents the usage statistics of a single DocsCloud user category (editor or viewer).
+/// </summary>
+public class DocsCloudUserStats
+{
+    /// <summary>
+    /// The number of active users.
+    /// </summary>
+    /// <example>10</example>
+    public int Active { get; init; }
+
+    /// <summary>
+    /// The number of internal users.
+    /// </summary>
+    /// <example>8</example>
+    public int Internal { get; init; }
+
+    /// <summary>
+    /// The number of external users.
+    /// </summary>
+    /// <example>2</example>
+    public int External { get; init; }
+
+    /// <summary>
+    /// The number of remaining users before the limit is reached.
+    /// </summary>
+    /// <example>90</example>
+    public int Remaining { get; init; }
+
+    /// <summary>
+    /// Whether the number of remaining users is critically low.
+    /// </summary>
+    /// <example>false</example>
+    public bool CriticalRemaining { get; init; }
+}
+
+/// <summary>
+/// Represents the current user quota of a DocsCloud tenant.
+/// </summary>
+public class DocsCloudQuota
+{
+    /// <summary>
+    /// The editor users.
+    /// </summary>
+    /// <example>[{"userid": "00000000-0000-0000-0000-000000000000", "expire": "2024-01-15T10:30:00Z"}]</example>
+    public List<DocsCloudQuotaUser> Users { get; init; }
+
+    /// <summary>
+    /// The viewer users.
+    /// </summary>
+    /// <example>[{"userid": "00000000-0000-0000-0000-000000000000", "expire": "2024-01-15T10:30:00Z"}]</example>
+    [JsonPropertyName("users_view")]
+    public List<DocsCloudQuotaUser> UsersView { get; init; }
+}
+
+/// <summary>
+/// Represents a single user entry of a DocsCloud quota.
+/// </summary>
+public class DocsCloudQuotaUser
+{
+    /// <summary>
+    /// The user ID.
+    /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
+    [JsonPropertyName("userid")]
+    public string UserId { get; init; }
+
+    /// <summary>
+    /// The expiration date of the user.
+    /// </summary>
+    /// <example>2024-01-15T10:30:00Z</example>
+    public string Expire { get; init; }
 }
 
 public static class DocsCloudHttpClientExtension
