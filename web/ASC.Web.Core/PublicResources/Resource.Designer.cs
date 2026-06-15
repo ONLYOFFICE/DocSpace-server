@@ -168,6 +168,24 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Docs Connect.
+        /// </summary>
+        public static string AccountingCustomerOperationServiceDesc_docscloud {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationServiceDesc_docscloud", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Docs Connect Dev Pack.
+        /// </summary>
+        public static string AccountingCustomerOperationServiceDesc_docscloud_devpack {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationServiceDesc_docscloud-devpack", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Vectorization.
         /// </summary>
         public static string AccountingCustomerOperationServiceDesc_embedding {
@@ -245,6 +263,24 @@ namespace ASC.Web.Core.PublicResources {
         public static string AccountingCustomerOperationServiceUOM_disk_storage {
             get {
                 return ResourceManager.GetString("AccountingCustomerOperationServiceUOM_disk-storage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Users.
+        /// </summary>
+        public static string AccountingCustomerOperationServiceUOM_docscloud {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationServiceUOM_docscloud", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Users.
+        /// </summary>
+        public static string AccountingCustomerOperationServiceUOM_docscloud_devpack {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationServiceUOM_docscloud-devpack", resourceCulture);
             }
         }
         

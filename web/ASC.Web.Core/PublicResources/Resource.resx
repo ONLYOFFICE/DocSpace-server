@@ -1389,4 +1389,16 @@
   <data name="TariffsFeature_docscloud_wallet_price_count" xml:space="preserve">
     <value>Embed ONLYOFFICE Docs editors into your app with cloud-hosted tenants and your own API keys.</value>
   </data>
+  <data name="AccountingCustomerOperationServiceDesc_docscloud" xml:space="preserve">
+    <value>Docs Connect</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_docscloud-devpack" xml:space="preserve">
+    <value>Docs Connect Dev Pack</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_docscloud" xml:space="preserve">
+    <value>Users</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_docscloud-devpack" xml:space="preserve">
+    <value>Users</value>
+  </data>
 </root>
