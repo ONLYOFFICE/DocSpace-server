@@ -992,12 +992,7 @@ public class FileStorageService //: IFileStorageService
 
             if (chatSettings != null)
             {
-                if (chatSettings.ProviderId <= 0 && !(chatSettings.ProviderId == -1 && await gateway.IsEnabledAsync()))
-                {
-                    throw new ArgumentException(nameof(chatSettings.ProviderId));
-                }
-
-                ArgumentException.ThrowIfNullOrEmpty(chatSettings.ModelId);
+                await ValidateChatSettingsAsync(chatSettings);
 
                 newFolder.SettingsChatProviderId = chatSettings.ProviderId;
                 newFolder.SettingsChatParameters = chatSettings.Map();
@@ -1094,6 +1089,29 @@ public class FileStorageService //: IFileStorageService
         {
             throw GenerateException(e);
         }
+    }
+
+    // Validates the chat settings for an AI room. A prompt-only payload (no
+    // provider and no model) is allowed: the model is resolved from the
+    // agent's assigned AI profile, so only the prompt is stored on the room.
+    // Once a provider or a model is supplied, both are required as before.
+    private async Task ValidateChatSettingsAsync(ChatSettings chatSettings)
+    {
+        var hasProvider = chatSettings.ProviderId > 0
+            || (chatSettings.ProviderId == -1 && await gateway.IsEnabledAsync());
+        var hasModel = !string.IsNullOrEmpty(chatSettings.ModelId);
+
+        if (!hasProvider && !hasModel)
+        {
+            return;
+        }
+
+        if (!hasProvider)
+        {
+            throw new ArgumentException(nameof(chatSettings.ProviderId));
+        }
+
+        ArgumentException.ThrowIfNullOrEmpty(chatSettings.ModelId);
     }
 
     public async Task<Folder<T>> FolderQuotaChangeAsync<T>(T folderId, long quota)
@@ -1237,14 +1255,7 @@ public class FileStorageService //: IFileStorageService
 
             if (chatSettingsChanged)
             {
-                var chatSettings = updateData.ChatSettings;
-
-                if (chatSettings.ProviderId <= 0 && !(chatSettings.ProviderId == -1 && await gateway.IsEnabledAsync()))
-                {
-                    throw new ArgumentException(nameof(updateData.ChatSettings.ProviderId));
-                }
-
-                ArgumentException.ThrowIfNullOrEmpty(updateData.ChatSettings.ModelId);
+                await ValidateChatSettingsAsync(updateData.ChatSettings);
             }
 
             if (watermarkChanged)

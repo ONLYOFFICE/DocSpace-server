@@ -125,6 +125,12 @@ export interface RequestOptions {
   body?: unknown;
   query?: Record<string, QueryValue>;
   signal?: AbortSignal;
+  // When true, return the upstream JSON exactly as received, keeping the
+  // DocSpace `{ response, status, statusCode, count, total }` envelope.
+  // Used for routes consumed by the DocSpace client (which reads
+  // `response.data.response`); engine-backed storage calls leave this off
+  // and get the unwrapped payload.
+  raw?: boolean;
 }
 
 function unwrapDocSpaceEnvelope(json: unknown): unknown {
@@ -140,7 +146,7 @@ async function jsonRequest(
   path: string,
   options: RequestOptions = {},
 ): Promise<unknown> {
-  const { body, query, signal } = options;
+  const { body, query, signal, raw } = options;
   let url = `${baseUrl}${path}`;
   if (query && Object.keys(query).length > 0) {
     const params = new URLSearchParams();
@@ -176,7 +182,7 @@ async function jsonRequest(
     const contentType = res.headers.get("content-type") ?? "";
     if (contentType.includes("application/json")) {
       const json: unknown = await res.json();
-      return unwrapDocSpaceEnvelope(json);
+      return raw ? json : unwrapDocSpaceEnvelope(json);
     }
     return res.text();
   } finally {
@@ -209,6 +215,10 @@ export const docSpaceApi = {
     docSpaceApiRequest("GET", path, opts),
   post: (path: string, body: unknown, opts?: RequestOptions): Promise<unknown> =>
     docSpaceApiRequest("POST", path, { ...opts, body }),
+  put: (path: string, body: unknown, opts?: RequestOptions): Promise<unknown> =>
+    docSpaceApiRequest("PUT", path, { ...opts, body }),
+  delete: (path: string, body?: unknown, opts?: RequestOptions): Promise<unknown> =>
+    docSpaceApiRequest("DELETE", path, { ...opts, body }),
 };
 
 export const aiService = {

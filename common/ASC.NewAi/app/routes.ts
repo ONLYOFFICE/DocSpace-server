@@ -155,8 +155,18 @@ export default function registerRoutes(app: Application): void {
   });
 
   // Custom routes not backed by an @onlyoffice/ai-chat engine. Agent
-  // creation is delegated to the .NET AI service (see agentsController).
+  // operations are delegated to the .NET AI service (see agentsController).
+  // Literal sub-paths (`news`, `agentquota`, `resetquota`) are registered
+  // before the parameterized `/agents/:id` so Express does not capture them
+  // as an id.
+  router.get("/agents", agentsController.getAgents);
+  router.get("/agents/news", agentsController.getAgentsNews);
+  router.get("/agents/:id", agentsController.getAgentInfo);
   router.post("/agents", agentsController.createAgent);
+  router.put("/agents/agentquota", agentsController.updateAgentsQuota);
+  router.put("/agents/resetquota", agentsController.resetAgentsQuota);
+  router.put("/agents/:id", agentsController.updateAgent);
+  router.delete("/agents/:id", agentsController.deleteAgent);
 
   let total = 0;
   for (const binding of ENGINE_BINDINGS) {
