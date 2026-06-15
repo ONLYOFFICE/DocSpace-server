@@ -69,9 +69,13 @@ public static class OpenTelemetryExtension
             var fileExporterEndpoint = builder.Configuration["OTEL_FILE_EXPORTER_ENDPOINT"];
             var fileEndpoint = !string.IsNullOrWhiteSpace(fileExporterEndpoint) ? new Uri(fileExporterEndpoint) : null;
 
-            var serviceName = telemetrySettings?.ServiceName
-                ?? Environment.GetEnvironmentVariable("OTEL_SERVICE_NAME")
-                ?? builder.Environment.ApplicationName;
+            var serviceName = new[]
+            {
+                telemetrySettings?.ServiceName,
+                Environment.GetEnvironmentVariable("OTEL_SERVICE_NAME"),
+                builder.Environment.ApplicationName,
+                Assembly.GetEntryAssembly()?.GetName().Name
+            }.FirstOrDefault(static s => !string.IsNullOrWhiteSpace(s));
 
             builder.Services.AddOpenTelemetry()
                 .ConfigureResource(resource => resource.AddService(serviceName))

@@ -44,9 +44,13 @@ public static class ISetupBuilderExtension
         // Resolve service name for the NLog OTLP target. AppHost sets OTEL_SERVICE_NAME in container env;
         // standalone runs fall back to appsettings or the host application name. We never mutate the
         // process environment — passing through conf.Variables keeps the resolution local to this NLog setup.
-        conf.Variables["serviceName"] = Environment.GetEnvironmentVariable("OTEL_SERVICE_NAME")
-                                        ?? configuration["openTelemetry:ServiceName"]
-                                        ?? hostEnvironment.ApplicationName;
+        conf.Variables["serviceName"] = new[]
+        {
+            Environment.GetEnvironmentVariable("OTEL_SERVICE_NAME"),
+            configuration["openTelemetry:ServiceName"],
+            hostEnvironment.ApplicationName,
+            Assembly.GetEntryAssembly()?.GetName().Name
+        }.FirstOrDefault(static s => !string.IsNullOrWhiteSpace(s));
 
         var settings = configuration.GetSection("log").Get<NLogSettings>();
 
