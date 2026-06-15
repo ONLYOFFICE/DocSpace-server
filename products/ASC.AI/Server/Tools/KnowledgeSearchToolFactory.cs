@@ -116,7 +116,7 @@ public class KnowledgeSearchToolFactory(
     {
         if (context.Folder is not Folder<int> { IsAgent: true } agent ||
             !await aiAccessibility.IsVectorizationEnabledAsync() ||
-            !await fileSecurity.CanUseChatAsync(agent))
+            !await fileSecurity.CanUseAiAsync(agent))
         {
             return ToolBundle.Empty;
         }
