@@ -178,7 +178,11 @@ public class DocsCloudController(
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        return await docsCloudClient.UpdateTenantConfigAsync(await GetPortalIdAsync(), inDto);
+        var result = await docsCloudClient.UpdateTenantConfigAsync(await GetPortalIdAsync(), inDto);
+
+        messageService.Send(MessageAction.DocsCloudConfigUpdated);
+
+        return result;
     }
 
     /// <remarks>

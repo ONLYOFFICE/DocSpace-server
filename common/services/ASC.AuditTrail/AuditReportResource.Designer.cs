@@ -691,6 +691,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Docs Connect config updated.
+        /// </summary>
+        public static string DocsCloudConfigUpdated {
+            get {
+                return ResourceManager.GetString("DocsCloudConfigUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Default template settings updated: {0}.
         /// </summary>
         public static string DocumentsDefaultTemplatesSettingsUpdated {

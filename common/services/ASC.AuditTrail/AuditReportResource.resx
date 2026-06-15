@@ -1203,4 +1203,7 @@
   <data name="UserUpdatedAiSettings" xml:space="preserve">
     <value>User AI settings updated</value>
   </data>
+  <data name="DocsCloudConfigUpdated" xml:space="preserve">
+    <value>Docs Connect config updated</value>
+  </data>
 </root>

@@ -116,7 +116,8 @@ internal class ProductsActionMapper : ILocationActionMapper
                     MessageAction.InvitationSettingsUpdated,MessageAction.IPRestrictionsSettingsUpdated,MessageAction.LoginSettingsUpdated,
                     MessageAction.AIAccessEnabled,
                     MessageAction.AIAccessDisabled,
-                    MessageAction.UserUpdatedAiSettings
+                    MessageAction.UserUpdatedAiSettings,
+                    MessageAction.DocsCloudConfigUpdated
                 ]
             },
             {
