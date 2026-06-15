@@ -283,7 +283,24 @@ public class PaymentController(
             throw new BillingException("Tariff is not paid");
         }
 
-        var minValue = quota.TenantId == (int)TenantWalletService.Storage ? 100 : 1; // min value 100Gb
+        if (quota.TenantId == (int)TenantWalletService.DocsCloud &&
+            tariff.Quotas.Any(q => q.Id == (int)TenantWalletService.DocsCloudDevPack))
+        {
+            throw new ArgumentException("Quota is already set");
+        }
+
+        if (quota.TenantId == (int)TenantWalletService.DocsCloudDevPack &&
+            tariff.Quotas.Any(q => q.Id == (int)TenantWalletService.DocsCloud))
+        {
+            throw new ArgumentException("Quota is already set");
+        }
+
+        var minValue = quota.TenantId switch
+        {
+            (int)TenantWalletService.Storage => 100,
+            (int)TenantWalletService.DocsCloudDevPack => 10,
+            _ => 1
+        };
 
         if (inDto.ProductQuantityType is ProductQuantityType.Set)
         {
