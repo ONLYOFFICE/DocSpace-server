@@ -53,12 +53,15 @@ public class TextToDocxTaskPublisher(
     FileSecurity fileSecurity,
     IEventBus eventBus)
 {
-    public async Task PublishAsync(string title, string content, int folderId, string? thirdpartyFolderId = null)
+    public async Task PublishAsync<T>(string title, string content, T folderId)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
         var userId = authContext.CurrentAccount.ID;
 
-        var folder = TextToDocxFolder.Create(daoFactory, folderId, thirdpartyFolderId);
+        var intFolderId = folderId is int id ? id : 0;
+        var thirdpartyFolderId = folderId as string;
+
+        var folder = TextToDocxFolder.Create(daoFactory, intFolderId, thirdpartyFolderId);
 
         await folder.GetFolder();
         await folder.CheckSecurity(fileSecurity);
@@ -67,7 +70,7 @@ public class TextToDocxTaskPublisher(
         {
             Title = title,
             Content = content,
-            FolderId = folderId,
+            FolderId = intFolderId,
             ThirdpartyFolderId = thirdpartyFolderId,
             BaseUri = commonLinkUtility.ServerRootPath
         };

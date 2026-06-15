@@ -37,6 +37,5 @@ public class PublishTextToDocxRequestDto
 {
     public required string Title { get; init; }
     public required string Content { get; init; }
-    public int FolderId { get; init; }
-    public string? ThirdpartyFolderId { get; init; }
+    public required JsonElement FolderId { get; init; }
 }

@@ -44,7 +44,14 @@ public class TextToDocxController(TextToDocxTaskPublisher textToDocxTaskPublishe
     [HttpPost("integration/text-to-docx/start")]
     public async Task<IActionResult> PublishAsync(PublishTextToDocxRequestDto inDto)
     {
-        await textToDocxTaskPublisher.PublishAsync(inDto.Title, inDto.Content, inDto.FolderId, inDto.ThirdpartyFolderId);
+        if (inDto.FolderId.ValueKind == JsonValueKind.Number)
+        {
+            await textToDocxTaskPublisher.PublishAsync(inDto.Title, inDto.Content, inDto.FolderId.GetInt32());
+        }
+        else
+        {
+            await textToDocxTaskPublisher.PublishAsync(inDto.Title, inDto.Content, inDto.FolderId.GetString());
+        }
 
         return NoContent();
     }
