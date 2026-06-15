@@ -143,15 +143,18 @@ public class AccountingClient
         return await RequestAsync<ServicePayment>(HttpMethod.Post, "/operation/AiCredit", jsonBody: jsonBody);
     }
 
-    public async Task<Report> GetCustomerOperationsAsync(string portalId, OperationFilter filter, bool isAiService)
+    public async Task<Report> GetCustomerAiOperationsAsync(string portalId, OperationFilter filter)
     {
         var queryParams = FilterToNameValueCollection(filter);
 
-        var path = isAiService
-            ? $"/customer/{portalId}/operations/ai"
-            : $"/customer/{portalId}/operations";
+        return await RequestAsync<Report>(HttpMethod.Get, $"/customer/{portalId}/operations/ai", queryParams);
+    }
 
-        return await RequestAsync<Report>(HttpMethod.Get, path, queryParams);
+    public async Task<Report> GetCustomerOperationsAsync(string portalId, OperationFilter filter)
+    {
+        var queryParams = FilterToNameValueCollection(filter);
+
+        return await RequestAsync<Report>(HttpMethod.Get, $"/customer/{portalId}/operations", queryParams);
     }
 
     public async Task<List<CustomerMonthlyUsage>> GetCustomerMonthlyUsageAsync(string portalId, DateTime? utcStartDate, DateTime? utcEndDate)

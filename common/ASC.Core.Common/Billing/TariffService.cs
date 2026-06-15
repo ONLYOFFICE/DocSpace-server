@@ -1309,14 +1309,16 @@ public class TariffService(
         {
             var portalId = await coreSettings.GetKeyAsync(tenantId);
 
-            var isAiService = false;
-            if (!string.IsNullOrEmpty(filter.ServiceName))
-            {
-                var aiQuota = await quotaService.GetTenantQuotaAsync((int)TenantWalletService.AITools);
-                isAiService = aiQuota != null && aiQuota.ServiceName == filter.ServiceName;
-            }
+            // if (!string.IsNullOrEmpty(filter.ServiceName))
+            // {
+            //     var aiQuota = await quotaService.GetTenantQuotaAsync((int)TenantWalletService.AITools);
+            //     if (aiQuota != null && aiQuota.ServiceName == filter.ServiceName)
+            //     {
+            //         return await accountingClient.GetCustomerAiOperationsAsync(portalId, filter);
+            //     }
+            // }
 
-            return await accountingClient.GetCustomerOperationsAsync(portalId, filter, isAiService);
+            return await accountingClient.GetCustomerOperationsAsync(portalId, filter);
         }
         catch (AccountingCustomerNotFoundException exception)
         {
