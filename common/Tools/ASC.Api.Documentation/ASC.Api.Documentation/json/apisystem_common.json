@@ -1911,10 +1911,7 @@
             "type": "string",
             "description": "The serialized third party profile.",
             "nullable": true,
-            "example": {
-              "id": "12345",
-              "provider": "google"
-            }
+            "example": "{\"id\":\"12345\",\"provider\":\"google\"}"
           }
         },
         "additionalProperties": false,

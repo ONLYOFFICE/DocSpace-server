@@ -6817,7 +6817,6 @@
       },
       "CreateAgentRequestDto": {
         "required": [
-          "chatSettings",
           "title"
         ],
         "type": "object",
@@ -7465,7 +7464,7 @@
             "type": "string",
             "description": "The order of the file entry.",
             "nullable": true,
-            "example": 1
+            "example": "1"
           },
           "isFavorite": {
             "type": "boolean",
@@ -7705,6 +7704,9 @@
                   },
                   "AnalyzeResponses": {
                     "type": "boolean"
+                  },
+                  "CanUseAi": {
+                    "type": "boolean"
                   }
                 },
                 "additionalProperties": false,
@@ -7851,7 +7853,7 @@
             "type": "string",
             "description": "The file operation processing status.",
             "nullable": true,
-            "example": 1
+            "example": "1"
           },
           "finished": {
             "type": "boolean",
