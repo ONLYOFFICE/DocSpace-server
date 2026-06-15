@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -284,7 +284,7 @@ internal abstract class ThirdPartyProviderDao
     }
 
     public IAsyncEnumerable<File<string>> GetFilesByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
-        string searchText, string[] extension, bool searchInContent, bool excludeSubject, Location? location, int trashId, string parentId, OrderBy orderBy, int offset, int count)
+        string searchText, string[] extension, bool searchInContent, bool excludeSubject, Location? location, int trashId, string parentId, IEnumerable<FolderType> folderType, OrderBy orderBy, int offset, int count)
     {
         return AsyncEnumerable.Empty<File<string>>();
     }

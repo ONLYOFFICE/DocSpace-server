@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -2121,6 +2121,7 @@ internal class FileDao(
         Location? location,
         int trashId,
         int parentId,
+        IEnumerable<FolderType> folderType,
         OrderBy orderBy,
         int offset,
         int count)
@@ -2132,7 +2133,7 @@ internal class FileDao(
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        var q = GetFilesByTagQuery(filesDbContext, tagOwner, tagType, location, trashId, parentId);
+        var q = GetFilesByTagQuery(filesDbContext, tagOwner, tagType, location, trashId, parentId, folderType);
 
         q = await GetFilesQueryWithFilters(q, filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject);
 
@@ -2830,7 +2831,7 @@ internal class FileDao(
         return q;
     }
 
-    private IQueryable<FileByTagQuery> GetFilesByTagQuery(FilesDbContext filesDbContext, Guid tagOwner, IEnumerable<TagType> tagType, Location? location, int? trashId, int? parentId)
+    private IQueryable<FileByTagQuery> GetFilesByTagQuery(FilesDbContext filesDbContext, Guid tagOwner, IEnumerable<TagType> tagType, Location? location, int? trashId, int? parentId, IEnumerable<FolderType> folderType)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
 
@@ -2852,6 +2853,12 @@ internal class FileDao(
         if (parentId != 0)
         {
             initQuery = initQuery.Where(r => filesDbContext.Tree.Any(a => a.FolderId == r.f.ParentId && a.ParentId == parentId));
+        }
+
+        if (folderType != null && folderType.Any())
+        {
+            initQuery = initQuery.Where(r => filesDbContext.Tree.Any(a => a.FolderId == r.f.ParentId &&
+                filesDbContext.Folders.Any(f => f.Id == a.ParentId && f.TenantId == tenantId && folderType.Contains(f.FolderType))));
         }
 
         var query = initQuery.Select(x => new FileByTagQuery

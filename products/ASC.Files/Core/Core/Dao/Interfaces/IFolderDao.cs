@@ -467,7 +467,7 @@ public interface IFolderDao<T>
     Task<Folder<T>> DeleteLifetimeSettings(Folder<T> room);
 
     IAsyncEnumerable<Folder<T>> GetFoldersByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
-        string searchText, bool excludeSubject, Location? location, int trashId, T parentId, OrderBy orderBy, int offset, int count);
+        string searchText, bool excludeSubject, Location? location, int trashId, T parentId, IEnumerable<FolderType> folderType, OrderBy orderBy, int offset, int count);
 
     Task<int> GetSharedFoldersCountAsync(T parentId);
 

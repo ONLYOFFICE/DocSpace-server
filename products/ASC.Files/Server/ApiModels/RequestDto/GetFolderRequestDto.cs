@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -79,6 +79,13 @@ public class GetFolderRequestDto<T>
     /// <example>1</example>
     [FromQuery(Name = "parentId")]
     public T ParentId { get; set; }
+
+    /// <summary>
+    /// The parent folder types used to filter the folder contents by folder type.
+    /// </summary>
+    /// <example>[2]</example>
+    [FromQuery(Name = "folderType")]
+    public IEnumerable<FolderType> FolderType { get; set; }
 
     /// <summary>
     /// Specifies whether to exclude search by user or group ID.

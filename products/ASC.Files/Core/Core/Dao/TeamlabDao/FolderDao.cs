@@ -711,7 +711,7 @@ internal class FolderDao(
         return room;
     }
 
-    public async IAsyncEnumerable<Folder<int>> GetFoldersByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool excludeSubject, Location? location, int trashId, int parentId, OrderBy orderBy, int offset, int count)
+    public async IAsyncEnumerable<Folder<int>> GetFoldersByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool excludeSubject, Location? location, int trashId, int parentId, IEnumerable<FolderType> folderType, OrderBy orderBy, int offset, int count)
     {
         if (CheckInvalidFilter(filterType))
         {
@@ -720,7 +720,7 @@ internal class FolderDao(
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        var q = GetFoldersByTagQuery(filesDbContext, tagOwner, tagType, location, trashId, parentId);
+        var q = GetFoldersByTagQuery(filesDbContext, tagOwner, tagType, location, trashId, parentId, folderType);
 
         q = await GetFoldersQueryWithFilters(q, subjectGroup, subjectId, searchText, excludeSubject);
 
@@ -759,7 +759,7 @@ internal class FolderDao(
         }
     }
 
-    private IQueryable<FolderByTagQuery> GetFoldersByTagQuery(FilesDbContext filesDbContext, Guid tagOwner, IEnumerable<TagType> tagType, Location? location, int? trashId, int? parentId)
+    private IQueryable<FolderByTagQuery> GetFoldersByTagQuery(FilesDbContext filesDbContext, Guid tagOwner, IEnumerable<TagType> tagType, Location? location, int? trashId, int? parentId, IEnumerable<FolderType> folderType)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
 
@@ -776,6 +776,12 @@ internal class FolderDao(
         if (parentId != 0)
         {
             initQuery = initQuery.Where(r => filesDbContext.Tree.Any(a => a.FolderId == r.f.ParentId && a.ParentId == parentId));
+        }
+
+        if (folderType != null && folderType.Any())
+        {
+            initQuery = initQuery.Where(r => filesDbContext.Tree.Any(a => a.FolderId == r.f.ParentId &&
+                filesDbContext.Folders.Any(f => f.Id == a.ParentId && f.TenantId == tenantId && folderType.Contains(f.FolderType))));
         }
 
         var query = initQuery.Select(x => new FolderByTagQuery

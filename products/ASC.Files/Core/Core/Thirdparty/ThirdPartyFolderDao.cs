@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -761,7 +761,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         throw new NotImplementedException();
     }
 
-    public IAsyncEnumerable<Folder<string>> GetFoldersByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool excludeSubject, Location? location, int trashId, string parentId, OrderBy orderBy, int offset, int count)
+    public IAsyncEnumerable<Folder<string>> GetFoldersByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool excludeSubject, Location? location, int trashId, string parentId, IEnumerable<FolderType> folderType, OrderBy orderBy, int offset, int count)
     {
         throw new NotImplementedException();
     }

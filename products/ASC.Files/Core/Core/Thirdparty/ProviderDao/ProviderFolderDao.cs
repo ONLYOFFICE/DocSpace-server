@@ -807,7 +807,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         return folderDao.DeleteLifetimeSettings(room);
     }
 
-    public IAsyncEnumerable<Folder<string>> GetFoldersByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool excludeSubject, Location? location, int trashId, string parentId, OrderBy orderBy, int offset, int count)
+    public IAsyncEnumerable<Folder<string>> GetFoldersByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool excludeSubject, Location? location, int trashId, string parentId, IEnumerable<FolderType> folderType, OrderBy orderBy, int offset, int count)
     {
         throw new NotImplementedException();
     }

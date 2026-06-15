@@ -446,7 +446,7 @@ public interface IFileDao<T>
     Task InitCustomOrder(Dictionary<T, int> fileIds, T parentFolderId);
 
     IAsyncEnumerable<File<T>> GetFilesByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
-        string searchText, string[] extension, bool searchInContent, bool excludeSubject, Location? location, int trashId, T parentId, OrderBy orderBy, int offset, int count);
+        string searchText, string[] extension, bool searchInContent, bool excludeSubject, Location? location, int trashId, T parentId, IEnumerable<FolderType> folderType, OrderBy orderBy, int offset, int count);
 
     Task<int> GetSharedFilesCountAsync(T parentId);
 
