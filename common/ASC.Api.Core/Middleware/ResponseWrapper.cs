@@ -70,6 +70,7 @@ public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IE
                 break;
             case SecurityException:
             case AuthorizingException:
+            case UnauthorizedAccessException:
                 status = HttpStatusCode.Forbidden;
                 message = "Access denied";
                 break;

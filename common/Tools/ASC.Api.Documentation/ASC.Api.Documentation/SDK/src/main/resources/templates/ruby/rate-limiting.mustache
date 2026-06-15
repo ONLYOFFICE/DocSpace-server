@@ -1,0 +1,11 @@
+## Rate Limiting
+
+All API responses may include the following rate limiting headers:
+
+| Header | Description |
+|--------|-------------|
+{{#apiInfo}}{{#apis}}{{#-first}}{{#operations}}{{#operation}}{{#-first}}| `{{vendorExtensions.x-rateLimitLimit.name}}` | {{vendorExtensions.x-rateLimitLimit.description}} |
+| `{{vendorExtensions.x-rateLimitRemaining.name}}` | {{vendorExtensions.x-rateLimitRemaining.description}} |
+| `{{vendorExtensions.x-rateLimitReset.name}}` | {{vendorExtensions.x-rateLimitReset.description}} |
+| `{{vendorExtensions.x-retryAfter.name}}` | {{vendorExtensions.x-retryAfter.description}} |
+{{/-first}}{{/operation}}{{/operations}}{{/-first}}{{/apis}}{{/apiInfo}}

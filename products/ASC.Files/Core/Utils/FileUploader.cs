@@ -346,7 +346,7 @@ public class FileUploader(
                     var currentRoom = await folderDao.GetFolderAsync(roomId);
                     if (currentRoom.FolderType == FolderType.FillingFormsRoom && !isForm)//
                     {
-                        throw new Exception(FilesCommonResource.ErrorMessage_UploadToFormRoom);
+                        throw new InvalidOperationException(FilesCommonResource.ErrorMessage_UploadToFormRoom);
                     }
                 }
 
