@@ -1395,10 +1395,4 @@
   <data name="AccountingCustomerOperationServiceDesc_adminyear" xml:space="preserve">
     <value>Business plan</value>
   </data>
-  <data name="AccountingCustomerOperationServiceUOM_admin" xml:space="preserve">
-    <value>Admins</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_admin" xml:space="preserve">
-    <value>Business plan</value>
-  </data>
 </root>
