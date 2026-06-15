@@ -84,6 +84,12 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -162,6 +168,12 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -240,6 +252,12 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -555,6 +573,12 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -633,6 +657,12 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -708,6 +738,12 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         }
       }
@@ -1001,6 +1037,12 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -1076,6 +1118,12 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         }
       }
@@ -1111,6 +1159,12 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -1175,6 +1229,12 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -1272,6 +1332,12 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -1350,6 +1416,12 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -1428,6 +1500,12 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [

@@ -27,6 +27,7 @@ import static org.openapitools.codegen.utils.StringUtils.camelize;
 import org.openapitools.codegen.*;
 import org.openapitools.codegen.utils.ModelUtils;
 import io.swagger.v3.oas.models.servers.*;
+import io.swagger.v3.oas.models.headers.*;
 import io.swagger.v3.oas.models.media.Schema;
 
 public class MyTypeScriptAxiosClientCodegen extends TypeScriptAxiosClientCodegen {
@@ -142,8 +143,35 @@ public class MyTypeScriptAxiosClientCodegen extends TypeScriptAxiosClientCodegen
         operationMap.put("x-classname", tagParts.classPart + apiNameSuffix);
         boolean shouldSupportFields = false;
         boolean supportUseAt = false;
+        Map<String, Map<String, Object>> rateLimitHeaders = new LinkedHashMap<>();
+        if (openAPI.getComponents() != null && openAPI.getComponents().getHeaders() != null) {
+            Map<String, Header> componentHeaders = openAPI.getComponents().getHeaders();
+            String[][] rateLimitHeaderDefs = {
+                {"X-RateLimit-Limit",     "x-rateLimitLimit"},
+                {"X-RateLimit-Remaining", "x-rateLimitRemaining"},
+                {"X-RateLimit-Reset",     "x-rateLimitReset"},
+                {"Retry-After",           "x-retryAfter"}
+            };
+            for (String[] def : rateLimitHeaderDefs) {
+                String name = def[0];
+                String vendorKey = def[1];
+                Header header = componentHeaders.get(name);
+                if (header != null) {
+                    Map<String, Object> headerData = new LinkedHashMap<>();
+                    headerData.put("name", name);
+                    headerData.put("description", header.getDescription());
+                    if (header.getSchema() != null && header.getSchema().getExample() != null) {
+                        headerData.put("example", header.getSchema().getExample());
+                    }
+                    rateLimitHeaders.put(vendorKey, headerData);
+                }
+            }
+        }
         if (operations != null) {
             for (CodegenOperation op : operations) {
+                for (Map.Entry<String, Map<String, Object>> entry : rateLimitHeaders.entrySet()) {
+                    op.vendorExtensions.put(entry.getKey(), entry.getValue());
+                }
                 if (op.operationId != null) {
                     String dashedId = toDashCase(op.operationId);
                     String seealsoUrl = "https://api.onlyoffice.com/docspace/api-backend/usage-api/" + dashedId + "/";

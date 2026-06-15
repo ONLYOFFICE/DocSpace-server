@@ -1208,6 +1208,7 @@ public class TariffService(
             catch (AccountingCustomerNotFoundException exception)
             {
                 logger.DebugAccountingTenant(tenantId.ToString(), exception.Message);
+                await hybridCache.SetAsync(cacheKey, new Balance(), TimeSpan.FromMinutes(10));
             }
             catch (Exception error)
             {
@@ -1253,6 +1254,7 @@ public class TariffService(
             catch (AccountingCustomerNotFoundException exception)
             {
                 logger.DebugAccountingTenant(tenantId.ToString(), exception.Message);
+                await hybridCache.SetAsync(cacheKey, new Balance(), TimeSpan.FromMinutes(10));
             }
             catch (Exception error)
             {
