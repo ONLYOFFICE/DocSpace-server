@@ -48,6 +48,7 @@ import { isObject } from "../narrow.js";
 import {
   HttpToolsAdapter,
   safeGetToolsPrompt,
+  DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE,
 } from "../tools/httpToolsAdapter.js";
 import { systemToolsSource } from "../tools/systemTools.js";
 
@@ -115,9 +116,15 @@ const toolsAdapter = new HttpToolsAdapter();
 const engine = new AIEngine({
   storage,
   // System (host-configured MCP) tools run server-side and pause for UI
-  // approval; the DocSpace integration tools run silently. Compose both.
+  // approval; most DocSpace integration tools run silently. Compose both.
   toolsAdapter: composeToolsAdapters(systemToolsSource, toolsAdapter),
-  systemServerTypes: () => systemToolsSource.getServerTypes(),
+  // Approval-required server types: the MCP servers plus the DocSpace
+  // integration tools explicitly grouped under the approval serverType
+  // (e.g. document/presentation/form generation).
+  systemServerTypes: () => [
+    ...systemToolsSource.getServerTypes(),
+    DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE,
+  ],
 });
 
 function isAsyncIterable(value: unknown): value is AsyncIterable<unknown> {

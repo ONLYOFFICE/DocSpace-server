@@ -46,6 +46,20 @@ const CALL_PATH = "/integration/tools/call";
 // composeToolsAdapters does not overwrite the 23 MCP tools with these 3.
 const SERVER_TYPE = "docspace-integration";
 
+// Tools that must surface a UI approval dialog before running. The engine
+// gates approval per serverType (a serverType listed in `systemServerTypes`
+// requires approval), so these tools are emitted under a dedicated
+// serverType (`DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE`) which the engine
+// is configured to treat as approval-required; everything else stays under
+// `SERVER_TYPE` and runs in-engine without a round-trip.
+export const DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE = "docspace-integration-approval";
+
+const APPROVAL_TOOL_NAMES = new Set<string>([
+  "docspace_generate_docx",
+  "docspace_generate_presentation",
+  "docspace_generate_form",
+]);
+
 type ToolsList = {
   tools: TMCPItem[];
   prompt: string;
@@ -104,9 +118,11 @@ function parseList(raw: unknown): ToolsList {
 
 /**
  * {@link ToolsAdapter} backed by the DocSpace AI integration endpoints
- * (`integration/tools/list` / `integration/tools/call`). Tools served by
- * this adapter are executed in-engine and the chat resumes automatically,
- * so no approval round-trip surfaces to the UI.
+ * (`integration/tools/list` / `integration/tools/call`). Most tools served
+ * by this adapter are executed in-engine and the chat resumes automatically
+ * with no approval round-trip; the tools in `APPROVAL_TOOL_NAMES` are
+ * emitted under a separate serverType so the engine surfaces an approval
+ * dialog before running them.
  */
 export class HttpToolsAdapter implements ToolsAdapter {
   async getTools(
@@ -114,7 +130,24 @@ export class HttpToolsAdapter implements ToolsAdapter {
     _config?: { attachmentId: string[] },
   ): Promise<Record<string, TMCPItem[]>> {
     const { tools } = await this.list(entityId);
-    return tools.length > 0 ? { [SERVER_TYPE]: tools } : {};
+    if (tools.length === 0) {
+      return {};
+    }
+    // Split into the silent group and the approval-required group so the
+    // engine shows an approval dialog only for `APPROVAL_TOOL_NAMES`.
+    const silent: TMCPItem[] = [];
+    const approval: TMCPItem[] = [];
+    for (const tool of tools) {
+      (APPROVAL_TOOL_NAMES.has(tool.name) ? approval : silent).push(tool);
+    }
+    const grouped: Record<string, TMCPItem[]> = {};
+    if (silent.length > 0) {
+      grouped[SERVER_TYPE] = silent;
+    }
+    if (approval.length > 0) {
+      grouped[DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE] = approval;
+    }
+    return grouped;
   }
 
   async callTool(
