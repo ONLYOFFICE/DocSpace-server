@@ -16,7 +16,7 @@
     "@aws-sdk/client-cloudwatch-logs": "^3.199.0",
     "@google/genai": "^1.30.0",
     "@mistralai/mistralai": "^1.11.0",
-    "@onlyoffice/ai-chat": "file:./onlyoffice-ai-chat-0.4.74.tgz",
+    "@onlyoffice/ai-chat": "file:./onlyoffice-ai-chat-0.4.123.tgz",
     "body-parser": "1.19.0",
     "cookie-parser": "1.4.5",
     "cors": "^2.8.5",
