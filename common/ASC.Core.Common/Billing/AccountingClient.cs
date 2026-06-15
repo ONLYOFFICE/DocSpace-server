@@ -41,6 +41,7 @@ namespace ASC.Core.Billing;
 public class AccountingClient
 {
     public readonly bool Configured;
+    public readonly bool SubAccountsEnabled;
 
     private readonly AccountingConfiguration _configuration;
     private readonly ICache _cache;
@@ -78,6 +79,8 @@ public class AccountingClient
         {
             Configured = true;
         }
+
+        SubAccountsEnabled = _configuration.SubAccounts;
     }
 
 

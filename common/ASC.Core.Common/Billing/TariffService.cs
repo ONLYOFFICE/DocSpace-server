@@ -1227,6 +1227,11 @@ public class TariffService(
             return null;
         }
 
+        if (!accountingClient.SubAccountsEnabled)
+        {
+            throw new InvalidOperationException("Accounting client does not support sub-accounts");
+        }
+
         var cacheKey = GetAccountingAiBalanceCacheKey(tenantId);
 
         var balance = refresh ? null : await GetFromCache<Balance>(cacheKey);
@@ -1296,6 +1301,11 @@ public class TariffService(
 
     public async Task<ServicePayment> MakeAiCreditAsync(int tenantId, decimal amount, string currency, string customerParticipantName, Dictionary<string, string> metadata = null)
     {
+        if (!accountingClient.SubAccountsEnabled)
+        {
+            throw new InvalidOperationException("Accounting client does not support sub-accounts");
+        }
+
         var portalId = await coreSettings.GetKeyAsync(tenantId);
         var result = await accountingClient.MakeAiCreditAsync(portalId, amount, currency, customerParticipantName, metadata);
         await hybridCache.RemoveAsync(GetAccountingAiBalanceCacheKey(tenantId));
@@ -1309,14 +1319,14 @@ public class TariffService(
         {
             var portalId = await coreSettings.GetKeyAsync(tenantId);
 
-            // if (!string.IsNullOrEmpty(filter.ServiceName))
-            // {
-            //     var aiQuota = await quotaService.GetTenantQuotaAsync((int)TenantWalletService.AITools);
-            //     if (aiQuota != null && aiQuota.ServiceName == filter.ServiceName)
-            //     {
-            //         return await accountingClient.GetCustomerAiOperationsAsync(portalId, filter);
-            //     }
-            // }
+            if (accountingClient.SubAccountsEnabled && !string.IsNullOrEmpty(filter.ServiceName))
+            {
+                var aiQuota = await quotaService.GetTenantQuotaAsync((int)TenantWalletService.AITools);
+                if (aiQuota != null && aiQuota.ServiceName == filter.ServiceName)
+                {
+                    return await accountingClient.GetCustomerAiOperationsAsync(portalId, filter);
+                }
+            }
 
             return await accountingClient.GetCustomerOperationsAsync(portalId, filter);
         }
