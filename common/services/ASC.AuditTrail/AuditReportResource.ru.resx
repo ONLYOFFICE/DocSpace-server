@@ -747,9 +747,6 @@
   <data name="PrivacyRoomDisable" xml:space="preserve">
     <value>Приватная комната отключена</value>
   </data>
-  <data name="PrivacyRoomEnable" xml:space="preserve">
-    <value>Приватная комната включена</value>
-  </data>
   <data name="ProductAccessOpened" xml:space="preserve">
     <value>Продукты [{0}]. Открыт доступ</value>
   </data>
@@ -1193,5 +1190,17 @@
   </data>
   <data name="AIAccessEnabled" xml:space="preserve">
     <value>ИИ-сервисы были включены</value>
+  </data>
+  <data name="DocumentsExternalShareSettingsUpdated" xml:space="preserve">
+    <value>Обновлены настройки доступа для внешних ссылок</value>
+  </data>
+  <data name="UserLogoutActiveConnection" xml:space="preserve">
+    <value>Активная сессия завершена: {0}</value>
+  </data>
+  <data name="UserLogoutActiveConnections" xml:space="preserve">
+    <value>Активные сессии завершены: {0}</value>
+  </data>
+  <data name="UserLogoutActiveConnectionsForUser" xml:space="preserve">
+    <value>Активные сессии завершены для пользователя: {0}</value>
   </data>
 </root>

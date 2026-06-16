@@ -1,34 +1,34 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
-// 
+// Copyright (C) Ascensio System SIA, 2009-2026
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 using System.Diagnostics;
@@ -87,20 +87,42 @@ public abstract class BaseStartup
 
         services.AddHttpClient();
         services.AddHttpClient("customHttpClient", _ => { })
-            .ConfigurePrimaryHttpMessageHandler(_ => new HttpClientHandler
+            .ConfigurePrimaryHttpMessageHandler(_ => new SocketsHttpHandler
             {
                 AllowAutoRedirect = false
             });
         services.AddHttpClient("customHttpClientSslIgnore", _ => { })
-            .ConfigurePrimaryHttpMessageHandler(_ => new HttpClientHandler
+            .ConfigurePrimaryHttpMessageHandler(_ =>
             {
-                AllowAutoRedirect = false,
-                ServerCertificateCustomValidationCallback = (_, _, _, _) => true
+                var handler = new SocketsHttpHandler { AllowAutoRedirect = false };
+                handler.SslOptions.RemoteCertificateValidationCallback = (_, _, _, _) => true;
+                return handler;
             });
         services.AddHttpClient("customHttpClientNoCookie", _ => { })
-            .ConfigurePrimaryHttpMessageHandler(_ => new HttpClientHandler
+            .ConfigurePrimaryHttpMessageHandler(_ => new SocketsHttpHandler
             {
-                UseCookies = false,
+                UseCookies = false
+            });
+        services.AddHttpClient(UrlValidator.PinnedHttpClient)
+            .SetHandlerLifetime(TimeSpan.FromMinutes(5))
+            .ConfigureHttpClient(c => c.Timeout = TimeSpan.FromSeconds(10))
+            .ConfigurePrimaryHttpMessageHandler(_ => new SocketsHttpHandler
+            {
+                AllowAutoRedirect = false,
+                ConnectCallback = UrlValidator.PinnedConnectCallback
+            });
+        services.AddHttpClient(UrlValidator.PinnedHttpClientSslIgnore)
+            .SetHandlerLifetime(TimeSpan.FromMinutes(5))
+            .ConfigureHttpClient(c => c.Timeout = TimeSpan.FromSeconds(10))
+            .ConfigurePrimaryHttpMessageHandler(_ =>
+            {
+                var handler = new SocketsHttpHandler
+                {
+                    AllowAutoRedirect = false,
+                    ConnectCallback = UrlValidator.PinnedConnectCallback
+                };
+                handler.SslOptions.RemoteCertificateValidationCallback = (_, _, _, _) => true;
+                return handler;
             });
 
 
@@ -162,6 +184,10 @@ public abstract class BaseStartup
 
         var connectionMultiplexer = await services.GetRedisConnectionMultiplexerAsync(_configuration, GetType().Namespace);
 
+        var rateLimiterSettingsSection = _configuration.GetSection("core:hosting:rateLimiterOptions");
+        var rateLimiterSettings = rateLimiterSettingsSection.Get<RateLimiterSettings>();
+        builder.Services.Configure<RateLimiterSettings>(rateLimiterSettingsSection);
+
         services.AddRateLimiter(options =>
         {
             bool EnableNoLimiter(IPAddress address)
@@ -214,7 +240,7 @@ public abstract class BaseStartup
 
                     userId ??= remoteIpAddress.ToInvariantString();
 
-                    var permitLimit = 1500;
+                    var permitLimit = rateLimiterSettings.SlidingWindowLimit;
 
                     var partitionKey = $"sw_{userId}";
 
@@ -237,17 +263,12 @@ public abstract class BaseStartup
 
                     if (string.Compare(httpContext?.Request.Method, "GET", StringComparison.OrdinalIgnoreCase) == 0)
                     {
-                        permitLimit = 50;
+                        permitLimit = rateLimiterSettings.ConcurrentGetLimit;
                         partitionKey = $"cr_read_{userId}";
                     }
                     else
                     {
-                        permitLimit = _configuration.GetSection("core:hosting:rateLimiterOptions:defaultConcurrencyWriteRequests").Get<int>();
-
-                        if (permitLimit == 0)
-                        {
-                            permitLimit = 15;
-                        }
+                        permitLimit = rateLimiterSettings.DefaultConcurrencyWriteRequests;
 
                         partitionKey = $"cr_write_{userId}";
                     }
@@ -269,7 +290,7 @@ public abstract class BaseStartup
                         userId ??= remoteIpAddress.ToInvariantString();
 
                         var partitionKey = $"fw_post_put_{userId}";
-                        var permitLimit = 10000;
+                        var permitLimit = rateLimiterSettings.DailyWriteLimit;
 
                         if (!(string.Compare(httpContext?.Request.Method, "POST", StringComparison.OrdinalIgnoreCase) == 0 ||
                               string.Compare(httpContext?.Request.Method, "PUT", StringComparison.OrdinalIgnoreCase) == 0))
@@ -286,7 +307,7 @@ public abstract class BaseStartup
                 var userId = httpContext?.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value ??
                              httpContext?.Connection.RemoteIpAddress.ToInvariantString();
 
-                var permitLimit = 5;
+                var permitLimit = rateLimiterSettings.SensitiveApiLimit;
                 var path = httpContext?.Request.Path.ToString();
                 var partitionKey = $"{RateLimiterPolicy.SensitiveApi}_{userId}|{path}";
                 var remoteIpAddress = httpContext?.Connection.RemoteIpAddress;
@@ -296,12 +317,13 @@ public abstract class BaseStartup
                     return RateLimitPartition.GetNoLimiter("no_limiter");
                 }
 
-                return RedisRateLimitPartition.GetSlidingWindowRateLimiter(partitionKey, _ => new RedisSlidingWindowRateLimiterOptions { PermitLimit = permitLimit, Window = TimeSpan.FromMinutes(15), ConnectionMultiplexerFactory = () => connectionMultiplexer });
+                return RedisRateLimitPartition.GetSlidingWindowRateLimiter(partitionKey, _ => new RedisSlidingWindowRateLimiterOptions { PermitLimit = permitLimit, Window = TimeSpan.FromMinutes(rateLimiterSettings.SensitiveApiWindowMinutes), ConnectionMultiplexerFactory = () => connectionMultiplexer });
             });
 
             options.AddPolicy(RateLimiterPolicy.EmailInvitationApi, httpContext =>
             {
-                if (!int.TryParse(_configuration["core:hosting:rateLimiterOptions:maxEmailInvitationsPerDay"], out var invitationLimitPerDay))
+                var invitationLimitPerDay = rateLimiterSettings.MaxEmailInvitationsPerDay;
+                if (invitationLimitPerDay is null)
                 {
                     return RateLimitPartition.GetNoLimiter("no_limiter");
                 }
@@ -362,7 +384,7 @@ public abstract class BaseStartup
 
                 var partitionKey = $"{RateLimiterPolicy.EmailInvitationApi}_{tenant.Id}";
 
-                RedisFixedWindowRateLimiterOptions OptionFactory() => new() { PermitLimit = invitationLimitPerDay, Window = TimeSpan.FromDays(1), ConnectionMultiplexerFactory = () => connectionMultiplexer };
+                RedisFixedWindowRateLimiterOptions OptionFactory() => new() { PermitLimit = invitationLimitPerDay.Value, Window = TimeSpan.FromDays(1), ConnectionMultiplexerFactory = () => connectionMultiplexer };
 
                 RateLimiter LimitterFactory(string key) => new LooppedRedisFixedWindowRateLimiter<string>(key, OptionFactory(), invitationsCount);
 
@@ -374,7 +396,7 @@ public abstract class BaseStartup
                 var userId = httpContext?.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value ??
                              httpContext?.Connection.RemoteIpAddress.ToInvariantString();
 
-                var permitLimit = 10;
+                var permitLimit = rateLimiterSettings.PaymentsApiLimit;
                 var path = httpContext?.Request.Path.ToString();
                 var partitionKey = $"{RateLimiterPolicy.PaymentsApi}_{userId}|{path}";
                 var remoteIpAddress = httpContext?.Connection.RemoteIpAddress;
@@ -384,7 +406,7 @@ public abstract class BaseStartup
                     return RateLimitPartition.GetNoLimiter("no_limiter");
                 }
 
-                return RedisRateLimitPartition.GetSlidingWindowRateLimiter(partitionKey, _ => new RedisSlidingWindowRateLimiterOptions { PermitLimit = permitLimit, Window = TimeSpan.FromMinutes(1), ConnectionMultiplexerFactory = () => connectionMultiplexer });
+                return RedisRateLimitPartition.GetSlidingWindowRateLimiter(partitionKey, _ => new RedisSlidingWindowRateLimiterOptions { PermitLimit = permitLimit, Window = TimeSpan.FromMinutes(rateLimiterSettings.PaymentsApiWindowMinutes), ConnectionMultiplexerFactory = () => connectionMultiplexer });
             });
 
             options.OnRejected = (context, ct) => RateLimitMetadata.OnRejected(context.HttpContext, context.Lease, ct);
@@ -472,6 +494,7 @@ public abstract class BaseStartup
             config.Filters.Add(new TypeFilterAttribute(typeof(AiFeatureFilter)));
             config.Filters.Add(new TypeFilterAttribute(typeof(IpSecurityFilter)));
             config.Filters.Add(new TypeFilterAttribute(typeof(ProductSecurityFilter)));
+            config.Filters.Add(new TypeFilterAttribute(typeof(ApiKeyScopesFilter)));
             config.Filters.Add(new CustomResponseFilterAttribute());
         });
 
@@ -537,7 +560,7 @@ public abstract class BaseStartup
                 .AddJwtBearerAuthentication();
 
         services.AddBillingHttpClient();
-        services.AddAccountingHttpClient();
+        services.AddAccountingHttpClient(_configuration);
 
         services.ConfigureNotificationServices();
 
@@ -645,7 +668,7 @@ public abstract class BaseStartup
 
     private async Task DefaultHealthChecksResponseWriter(HttpContext httpContext, HealthReport healthReport)
     {
-        var logger = httpContext.RequestServices.GetRequiredService<ILoggerProvider>().CreateLogger("ASC.Api.HealthChecks");
+        var logger = httpContext.RequestServices.GetRequiredService<ILoggerFactory>().CreateLogger("ASC.Api.HealthChecks");
 
         if (healthReport.Status != HealthStatus.Healthy)
         {

@@ -168,7 +168,7 @@ function writeCell(position, data) {
     }
 
     if (data.url) {
-        oWorksheet.SetHyperlink(position, data.url, "", data.value);
+        oWorksheet.SetHyperlink(position, data.url, "", data.value, data.value);
     } else {
         if (data.value != null) {
             sRange.SetValue(data.value);

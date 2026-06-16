@@ -1,34 +1,34 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Files.Core.Security;
@@ -320,7 +320,8 @@ public class FileSecurity(
                     FilesSecurityActions.Embed,
                     FilesSecurityActions.ChangeOwner,
                     FilesSecurityActions.IndexExport,
-                    FilesSecurityActions.UseChat
+                    FilesSecurityActions.UseChat,
+                    FilesSecurityActions.CanUseAi
                 }
             }
     }.ToFrozenDictionary();
@@ -611,6 +612,11 @@ public class FileSecurity(
     public async Task<bool> CanUseChatAsync<T>(FileEntry<T> entry)
     {
         return await CanAsync(entry, authContext.CurrentAccount.ID, FilesSecurityActions.UseChat);
+    }
+
+    public async Task<bool> CanUseAiAsync<T>(FileEntry<T> entry)
+    {
+        return await CanAsync(entry, authContext.CurrentAccount.ID, FilesSecurityActions.CanUseAi);
     }
 
     public async Task<int> UpdateShareByFolderTypesAsync(Guid subject, IEnumerable<FolderType> folderTypes, FileShare share)
@@ -1158,6 +1164,13 @@ public class FileSecurity(
             return false;
         }
 
+        if (action is FilesSecurityActions.CanUseAi &&
+            !(folder is { FolderType: FolderType.USER } && folder.CreateBy == userId) &&
+            !isRoom)
+        {
+            return false;
+        }
+
         if (action is FilesSecurityActions.AskAi)
         {
             if (file == null)
@@ -1388,7 +1401,12 @@ public class FileSecurity(
                 {
                     if (folder.FolderType == FolderType.USER)
                     {
-                        return folder.CreateBy == userId && action is FilesSecurityActions.Create or FilesSecurityActions.CopyTo or FilesSecurityActions.MoveTo or FilesSecurityActions.FillForms;
+                        return folder.CreateBy == userId &&
+                               action is FilesSecurityActions.Create or
+                                   FilesSecurityActions.CopyTo or
+                                   FilesSecurityActions.MoveTo or
+                                   FilesSecurityActions.FillForms or
+                                   FilesSecurityActions.CanUseAi;
                     }
 
                     if (folder.FolderType == FolderType.Archive && action == FilesSecurityActions.MoveTo)
@@ -1590,6 +1608,12 @@ public class FileSecurity(
                     }
 
                     var fileFolder = parentFolders.FirstOrDefault(r => r.IsRoom);
+
+                    if (action == FilesSecurityActions.FillForms && !DocSpaceHelper.IsFillFormsRoom(fileFolder?.FolderType))
+                    {
+                        return false;
+                    }
+
                     if (fileFolder is { FolderType: FolderType.VirtualDataRoom } && !userId.Equals(ASC.Core.Configuration.Constants.Guest.ID))
                     {
                         var (currentStep, myRoles) = await cacheFileDao.GetUserFormRoles(file.Id, userId);
@@ -1738,6 +1762,36 @@ public class FileSecurity(
                         case FilesSecurityActions.EditExpiration when fileFolder?.FolderType is FolderType.FillingFormsRoom:
                             return false;
                     }
+                }
+
+                if (file != null && room is {SettingsPrivate: true} &&
+                    action is
+                        FilesSecurityActions.Convert or
+                        FilesSecurityActions.AskAi or
+                        FilesSecurityActions.Embed or
+                        FilesSecurityActions.EditAccess or
+                        FilesSecurityActions.Copy
+                    )
+                {
+                    return false;
+                }
+
+                if (folder is {SettingsPrivate: true} &&
+                    action is
+                        FilesSecurityActions.Convert or
+                        FilesSecurityActions.AskAi or
+                        FilesSecurityActions.Embed
+                    )
+                {
+                    return false;
+                }
+
+                if (room is {SettingsPrivate: true} && folder is {IsRoom: false} &&
+                    action is FilesSecurityActions.EditAccess or
+                        FilesSecurityActions.Copy or
+                        FilesSecurityActions.CopyTo)
+                {
+                    return false;
                 }
 
                 if (await HasFullAccessAsync(e, userId, isGuest, isRoom, isUser))
@@ -2414,6 +2468,20 @@ public class FileSecurity(
                         break;
                 }
                 break;
+            case FilesSecurityActions.CanUseAi:
+                switch (e.RootFolderType)
+                {
+                    case FolderType.USER:
+                        return false;
+                    default:
+                        if (e.Access is FileShare.RoomManager)
+                        {
+                            return true;
+                        }
+
+                        break;
+                }
+                break;
         }
 
         if (e.Access != FileShare.Restrict &&
@@ -2577,7 +2645,8 @@ public class FileSecurity(
         Guid subjectOwnerId,
         QuotaFilter quotaFilter,
         StorageFilter storageFilter,
-        int? groupId = null)
+        int? groupId = null,
+        RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None)
     {
         var securityDao = daoFactory.GetSecurityDao<string>();
 
@@ -2635,11 +2704,11 @@ public class FileSecurity(
         if (isAdmin && searchArea != SearchArea.Templates)
         {
             return await GetAllVirtualRoomsAsync(filterTypes, subjectId, searchText, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject, provider,
-                subjectFilter, subjectOwnerId, subjectEntries, quotaFilter, storageFilter, internalRoomsRecords, thirdPartyRoomsRecords, groupId);
+                subjectFilter, subjectOwnerId, subjectEntries, quotaFilter, storageFilter, internalRoomsRecords, thirdPartyRoomsRecords, groupId, privacyFilter);
         }
 
         return await GetVirtualRoomsForMeAsync(filterTypes, subjectId, searchText, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject, provider,
-            subjectFilter, subjectOwnerId, subjectEntries, storageFilter, internalRoomsRecords, thirdPartyRoomsRecords, groupId);
+            subjectFilter, subjectOwnerId, subjectEntries, storageFilter, internalRoomsRecords, thirdPartyRoomsRecords, groupId, privacyFilter);
     }
 
     private async Task<List<FileEntry>> GetAllVirtualRoomsAsync(
@@ -2660,7 +2729,8 @@ public class FileSecurity(
         StorageFilter storageFilter,
         Dictionary<int, FileShareRecord<int>> internalRecords,
         Dictionary<string, FileShareRecord<string>> thirdPartyRecords,
-        int? groupId)
+        int? groupId,
+        RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None)
     {
         var folderDao = daoFactory.GetFolderDao<int>();
         var folderThirdPartyDao = daoFactory.GetFolderDao<string>();
@@ -2679,11 +2749,11 @@ public class FileSecurity(
 
         var roomsEntries = storageFilter == StorageFilter.ThirdParty ?
             [] :
-            await folderDao.GetRoomsAsync(rootFoldersIds, filterTypes, tagNames, subjectId, search, withSubfolders, withoutTags, excludeSubject, provider, subjectFilter, subjectOwnerId, subjectEntries, quotaFilter, groupId)
+            await folderDao.GetRoomsAsync(rootFoldersIds, filterTypes, tagNames, subjectId, search, withSubfolders, withoutTags, excludeSubject, provider, subjectFilter, subjectOwnerId, subjectEntries, quotaFilter, groupId, privacyFilter)
                 .Where(r => withSubfolders || r.IsRoom)
                 .ToListAsync();
 
-        var thirdPartyRoomsEntries = storageFilter == StorageFilter.Internal ?
+        var thirdPartyRoomsEntries = storageFilter == StorageFilter.Internal || privacyFilter == RoomPrivacyFilter.Private ?
             [] :
             await folderThirdPartyDao.GetProviderBasedRoomsAsync(searchArea, filterTypes, tagNames, subjectId, search, withoutTags, excludeSubject, provider, subjectFilter, subjectOwnerId, subjectEntries, groupId)
                 .Where(r => withSubfolders || r.IsRoom)
@@ -2764,7 +2834,8 @@ public class FileSecurity(
         StorageFilter storageFilter,
         Dictionary<int, FileShareRecord<int>> internalRecords,
         Dictionary<string, FileShareRecord<string>> thirdPartyRecords,
-        int? groupId = null)
+        int? groupId = null,
+        RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None)
     {
         var folderDao = daoFactory.GetFolderDao<int>();
         var folderThirdPartyDao = daoFactory.GetFolderDao<string>();
@@ -2783,12 +2854,12 @@ public class FileSecurity(
 
         var rooms = storageFilter == StorageFilter.ThirdParty
             ? []
-            : await folderDao.GetRoomsAsync(internalRecords.Keys, filterTypes, tagNames, subjectId, search, withSubfolders, withoutTags, excludeSubject, provider, subjectFilter, subjectOwnerId, subjectEntries, rootFoldersIds, groupId)
+            : await folderDao.GetRoomsAsync(internalRecords.Keys, filterTypes, tagNames, subjectId, search, withSubfolders, withoutTags, excludeSubject, provider, subjectFilter, subjectOwnerId, subjectEntries, rootFoldersIds, groupId, privacyFilter)
                 .Where(r => withSubfolders || r.IsRoom)
                 .Where(r => Filter(r, internalRecords))
                 .ToListAsync();
 
-        var thirdPartyRooms = storageFilter == StorageFilter.Internal
+        var thirdPartyRooms = storageFilter == StorageFilter.Internal || privacyFilter == RoomPrivacyFilter.Private
             ? []
             : await folderThirdPartyDao.GetProviderBasedRoomsAsync(searchArea, thirdPartyRecords.Keys, filterTypes, tagNames, subjectId, search, withoutTags, excludeSubject, provider, subjectFilter, subjectOwnerId, subjectEntries, groupId)
                 .Where(r => withSubfolders || r.IsRoom)
@@ -3320,7 +3391,7 @@ public class FileSecurity(
                 switch (s)
                 {
                     case FileShare.Editing when (file.IsForm && parentRoomType != FolderType.FillingFormsRoom || !file.IsForm) && canEdit:
-                    case FileShare.FillForms when file.IsForm:
+                    case FileShare.FillForms when file.IsForm && DocSpaceHelper.IsFillFormsRoom(parentRoomType):
                     case FileShare.CustomFilter when !file.IsForm && canCustomFiltering:
                     case FileShare.Comment when !file.IsForm && canComment:
                     case FileShare.Review when !file.IsForm && canReview:
@@ -3357,6 +3428,13 @@ public class FileSecurity(
             }
         }
 
+        if (folder is { SettingsPrivate: true })
+        {
+            return result;
+        }
+
+        var fillFormsAllowed = DocSpaceHelper.IsFillFormsRoom(parentRoomType);
+
         foreach (var subjectType in Enum.GetValues<SubjectType>())
         {
             if (!parentRoomType.HasValue ||
@@ -3368,7 +3446,7 @@ public class FileSecurity(
 
             List<FileShare> sharesToAdd = [];
 
-            foreach (var s in shares.Where(r => parentRoomType == FolderType.FillingFormsRoom || r != FileShare.FillForms))
+            foreach (var s in shares.Where(r => fillFormsAllowed || r != FileShare.FillForms))
             {
                 if (s is FileShare.None)
                 {
@@ -3425,6 +3503,11 @@ public class FileSecurity(
                 }
             }
             linkSettings = _linkCountRoomFileSettingsAccesses;
+        }
+
+        if (room is { SettingsPrivate: true })
+        {
+            return 0;
         }
 
         if (parentRoomType.HasValue && linkSettings.TryGetValue(parentRoomType.Value, out var access) && access.TryGetValue(subjectType, out var i))
@@ -3744,6 +3827,9 @@ public class FileSecurity(
         UpdateXlsx,
 
         [Description("Analyze responses")]
-        AnalyzeResponses
+        AnalyzeResponses,
+
+        [Description("Use AI")]
+        CanUseAi
     }
 }

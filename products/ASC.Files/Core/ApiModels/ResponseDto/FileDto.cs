@@ -549,14 +549,9 @@ public class FileDtoHelper(
                         result.Security[FileSecurity.FilesSecurityActions.Edit] = false;
                         result.Security[FileSecurity.FilesSecurityActions.StopFilling] = false;
                     }
-                    else
-                    {
-                        result.Security[FileSecurity.FilesSecurityActions.FillForms] = true;
-                    }
                 }
                 else
                 {
-                    result.Security[FileSecurity.FilesSecurityActions.StartFilling] = true;
                     result.Security[FileSecurity.FilesSecurityActions.FillForms] = false;
                     result.Security[FileSecurity.FilesSecurityActions.StopFilling] = false;
                 }

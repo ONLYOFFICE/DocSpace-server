@@ -589,4 +589,10 @@ docx, xlsx, pptx와 최고의 호환성이 보장됩니다.</value>
   <data name="ErrorMessage_AiServicesDisabled" xml:space="preserve">
     <value>현재 포털에서 AI 서비스가 비활성화되어 있습니다</value>
   </data>
+  <data name="ErrorMessage_ExternalDbNotIndexed" xml:space="preserve">
+    <value>데이터베이스 테이블은 첫 번째 양식 제출 후 생성됩니다. 아직 구조를 생성할 데이터가 없습니다.</value>
+  </data>
+  <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
+    <value>양식 데이터를 외부 데이터베이스에 동기화하지 못했습니다.</value>
+  </data>
 </root>

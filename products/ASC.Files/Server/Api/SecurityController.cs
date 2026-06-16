@@ -188,12 +188,11 @@ public abstract class SecurityController<T>(
     /// <summary>Get file encryption keys</summary>
     /// <path>api/2.0/files/file/{fileId}/publickeys</path>
     /// <collection>list</collection>
-    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
-    [SwaggerResponse(200, "List of encryption key pairs: encrypted private key, public key, user ID", typeof(List<EncryptionKeyPairDto>))]
+    [SwaggerResponse(200, "List of encryption key pairs: encrypted private key, public key, user ID", typeof(List<EncryptionKeyDto>))]
     [SwaggerResponse(403, "You do not have enough permissions to edit the file")]
     [HttpGet("file/{fileId}/publickeys")]
-    public async Task<List<EncryptionKeyPairDto>> GetEncryptionAccess(FileIdRequestDto<T> inDto)
+    public async Task<List<EncryptionKeyDto>> GetEncryptionAccess(FileIdRequestDto<T> inDto)
     {
         return await fileStorageService.GetEncryptionAccessAsync(inDto.FileId);
     }

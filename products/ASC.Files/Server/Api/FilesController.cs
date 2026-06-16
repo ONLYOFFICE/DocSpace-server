@@ -1,34 +1,34 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Files.Api;
@@ -54,7 +54,8 @@ public class FilesControllerInternal(
     UserManager userManager,
     AuthContext authContext,
     GlobalStore globalStore,
-    BaseCommonLinkUtility baseCommonLinkUtility)
+    BaseCommonLinkUtility baseCommonLinkUtility,
+    EncryptionKeyPairDtoHelper encryptionKeyPairDtoHelper)
     : FilesController<int>(
         filesControllerHelper,
         fileStorageService,
@@ -74,7 +75,8 @@ public class FilesControllerInternal(
         userManager,
         authContext,
         globalStore,
-        baseCommonLinkUtility)
+        baseCommonLinkUtility,
+        encryptionKeyPairDtoHelper)
 {
     /// <remarks>
     /// Returns the list of actions performed on the file with the specified identifier.
@@ -114,7 +116,8 @@ public class FilesControllerThirdparty(
     UserManager userManager,
     AuthContext authContext,
     GlobalStore globalStore,
-    BaseCommonLinkUtility baseCommonLinkUtility)
+    BaseCommonLinkUtility baseCommonLinkUtility,
+    EncryptionKeyPairDtoHelper encryptionKeyPairDtoHelper)
     : FilesController<string>(
         filesControllerHelper,
         fileStorageService,
@@ -134,7 +137,8 @@ public class FilesControllerThirdparty(
         userManager,
         authContext,
         globalStore,
-        baseCommonLinkUtility);
+        baseCommonLinkUtility,
+        encryptionKeyPairDtoHelper);
 
 public abstract class FilesController<T>(
     FilesControllerHelper filesControllerHelper,
@@ -155,7 +159,8 @@ public abstract class FilesController<T>(
     UserManager userManager,
     AuthContext authContext,
     GlobalStore globalStore,
-    BaseCommonLinkUtility baseCommonLinkUtility)
+    BaseCommonLinkUtility baseCommonLinkUtility,
+    EncryptionKeyPairDtoHelper encryptionKeyPairDtoHelper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <remarks>
@@ -346,7 +351,7 @@ public abstract class FilesController<T>(
         if (file == null)
         {
             throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
-        }
+    }
 
         if (!await fileSecurity.CanReadHistoryAsync(file))
         {
@@ -571,6 +576,7 @@ public abstract class FilesController<T>(
     /// <path>api/2.0/files/file/{id}/link</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "File security information", typeof(FileShareDto))]
+    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [SwaggerResponse(404, "Not Found")]
     [HttpPost("file/{id}/link")]
     public async Task<FileShareDto> CreateFilePrimaryExternalLink(FileLinkRequestDto<T> inDto)
@@ -596,6 +602,7 @@ public abstract class FilesController<T>(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "File security information", typeof(FileShareDto))]
+    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [SwaggerResponse(404, "Not Found")]
     [AllowAnonymous]
     [HttpGet("file/{id}/link")]
@@ -763,6 +770,60 @@ public abstract class FilesController<T>(
     public Task<FormSubmissionsDto> GetFormSubmissions(FileIdRequestDto<int> inDto)
     {
         return fileStorageService.GetSubmissionsByFormId(inDto.FileId);
+    }
+
+    /// <summary>
+    /// Get file encryption information
+    /// </summary>
+    /// <remarks>
+    /// Returns the encryption information for a file with the specified identifier, including user encryption keys and file-specific encryption keys.
+    /// </remarks>
+    /// <path>api/2.0/files/file/{fileId}/access</path>
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "File encryption information", typeof(FileEncryptionInfoDto))]
+    [SwaggerResponse(400, "Invalid operation")]
+    [SwaggerResponse(403, "You don't have enough permission to read the file")]
+    [SwaggerResponse(404, "File not found")]
+    [HttpGet("{fileId}/access")]
+    public async Task<FileEncryptionInfoDto> GetEncryptionInfoAsync(T fileId)
+    {
+        var fileDao = daoFactory.GetFileDao<T>();
+        var file = await fileDao.GetFileAsync(fileId);
+
+        if (file == null)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+        if (!await fileSecurity.CanReadAsync(file))
+        {
+            throw new InvalidOperationException( FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
+        var userKeys = await encryptionKeyPairDtoHelper.GetKeyPairAsync();
+        var fileKeys = await fileDao.GetFileKeys(fileId, authContext.CurrentAccount.ID);
+
+        return new FileEncryptionInfoDto
+        {
+            UserKeys = userKeys,
+            FileKeys = fileKeys
+        };
+    }
+
+    /// <summary>
+    /// Set file encryption information
+    /// </summary>
+    /// <remarks>
+    /// Sets or updates the encryption keys for a file with the specified identifier. This allows updating the file's encryption configuration.
+    /// </remarks>
+    /// <path>api/2.0/files/file/{fileId}/access</path>
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "Encryption information successfully updated")]
+    [SwaggerResponse(403, "You don't have enough permission to edit the file")]
+    [SwaggerResponse(404, "File not found")]
+    [HttpPut("{fileId}/access")]
+    public async Task SetEncryptionInfoAsync(AccessRequestDto<T> inDto)
+    {
+        await fileStorageService.SetEncryptionInfoAsync(inDto.FileId, inDto.Keys.Project());
     }
 }
 

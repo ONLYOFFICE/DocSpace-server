@@ -35,25 +35,25 @@ namespace ASC.AI.Core.Database;
 
 public partial class AiDbContext
 {
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public IAsyncEnumerable<DbAiModelSettings> GetModelSettingsAsync(int tenantId, int providerId)
     {
         return Queries.GetModelSettingsAsync(this, tenantId, providerId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public Task<DbAiModelSettings?> GetModelSettingAsync(int tenantId, int providerId, string modelId)
     {
         return Queries.GetModelSettingAsync(this, tenantId, providerId, modelId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, null])]
-    public IAsyncEnumerable<DbAiModelSettings> GetModelSettingsByIdsAsync(int tenantId, int providerId, IEnumerable<string> modelIds)
+    [PreCompileQuery]
+    public IAsyncEnumerable<DbAiModelSettings> GetModelSettingsForUpdateAsync(int tenantId, int providerId, IEnumerable<string> modelIds)
     {
-        return Queries.GetModelSettingsByIdsAsync(this, tenantId, providerId, modelIds);
+        return Queries.GetModelSettingsForUpdateAsync(this, tenantId, providerId, modelIds);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public Task DeleteModelSettingsAsync(int tenantId, int providerId, string modelId)
     {
         return Queries.DeleteModelSettingsAsync(this, tenantId, providerId, modelId);
@@ -74,7 +74,7 @@ static file class Queries
                 ctx.ModelSettings
                     .FirstOrDefault(x => x.TenantId == tenantId && x.ProviderId == providerId && x.ModelId == modelId));
 
-    public static readonly Func<AiDbContext, int, int, IEnumerable<string>, IAsyncEnumerable<DbAiModelSettings>> GetModelSettingsByIdsAsync =
+    public static readonly Func<AiDbContext, int, int, IEnumerable<string>, IAsyncEnumerable<DbAiModelSettings>> GetModelSettingsForUpdateAsync =
         EF.CompileAsyncQuery(
             (AiDbContext ctx, int tenantId, int providerId, IEnumerable<string> modelIds) =>
                 ctx.ModelSettings

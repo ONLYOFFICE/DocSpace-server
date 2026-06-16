@@ -426,6 +426,11 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:change-web-plugin", { webPluginName, enabled });
   }
 
+  function changeAppEnabled({ room, id, enabled } = {}) {
+    logger.info(`changed app enabled in room ${room}, id ${id}, enabled ${enabled}`);
+    filesIO.to(room).emit("s:change-app-enabled", { id, enabled });
+  }
+
   function topUpWallet({ room, auto } = {}) {
     logger.info(`wallet topped up ${room}, auto ${auto}`);
     filesIO.to(room).emit("s:top-up-wallet", { auto });
@@ -607,6 +612,24 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:change-ai-config");
   }
 
+  function changeExternalSharingSettings({
+    room,
+    externalShare,
+    defaultShareLinkInternal,
+    externalShareApplyToDocuments,
+    externalShareApplyToRooms,
+    blockExistingLinksOnRestrict,
+  } = {}) {
+    logger.info(`change external sharing settings in room ${room}`);
+    filesIO.to(room).emit("s:change-external-sharing-settings", {
+      externalShare,
+      defaultShareLinkInternal,
+      externalShareApplyToDocuments,
+      externalShareApplyToRooms,
+      blockExistingLinksOnRestrict,
+    });
+  }
+
   function externalDbSettings({ tenantId, externalDbEnabled } = {}) {
     var room = `${tenantId}-external-db-settings`;
     logger.info(`external db settings changed in room ${room}, enabled: ${externalDbEnabled}`);
@@ -630,6 +653,7 @@ module.exports = (io) => {
     markAsNewFolders,
     changeInvitationLimitValue,
     changeWebPlugin,
+    changeAppEnabled,
     topUpWallet,
     updateHistory,
     logoutSession,
@@ -659,6 +683,7 @@ module.exports = (io) => {
     changeAccessRightsForFolder,
     quotaExceeded,
     changeAiConfig,
+    changeExternalSharingSettings,
     externalDbSettings
   };
 };

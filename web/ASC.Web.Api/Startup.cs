@@ -57,6 +57,8 @@ public class Startup : BaseStartup
     {
         base.Configure(app, env);
 
+        TimeZoneConverter.InitializeEnglishDisplayNames();
+
         app.UseWebApiMiddleware();
     }
 }

@@ -709,6 +709,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Access settings for external links updated.
+        /// </summary>
+        public static string DocumentsExternalShareSettingsUpdated {
+            get {
+                return ResourceManager.GetString("DocumentsExternalShareSettingsUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Forcesave settings Updated.
         /// </summary>
         public static string DocumentsForcesave {
@@ -2014,24 +2023,6 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Private Room is disabled.
-        /// </summary>
-        public static string PrivacyRoomDisable {
-            get {
-                return ResourceManager.GetString("PrivacyRoomDisable", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Private Room is enabled.
-        /// </summary>
-        public static string PrivacyRoomEnable {
-            get {
-                return ResourceManager.GetString("PrivacyRoomEnable", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Products [{0}]. Access Opened.
         /// </summary>
         public static string ProductAccessOpened {
@@ -3040,6 +3031,33 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Active Connection Logged Out: {0}.
+        /// </summary>
+        public static string UserLogoutActiveConnection {
+            get {
+                return ResourceManager.GetString("UserLogoutActiveConnection", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Active Connections Logged Out: {0}.
+        /// </summary>
+        public static string UserLogoutActiveConnections {
+            get {
+                return ResourceManager.GetString("UserLogoutActiveConnections", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Active Connections Logged Out for User: {0}.
+        /// </summary>
+        public static string UserLogoutActiveConnectionsForUser {
+            get {
+                return ResourceManager.GetString("UserLogoutActiveConnectionsForUser", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Users Deleted: {0}.
         /// </summary>
         public static string UsersDeleted {
@@ -3144,6 +3162,15 @@ namespace ASC.AuditTrail {
         public static string UserUpdated {
             get {
                 return ResourceManager.GetString("UserUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User AI settings updated.
+        /// </summary>
+        public static string UserUpdatedAiSettings {
+            get {
+                return ResourceManager.GetString("UserUpdatedAiSettings", resourceCulture);
             }
         }
         

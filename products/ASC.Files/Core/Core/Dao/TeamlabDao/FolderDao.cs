@@ -1,34 +1,34 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Files.Core.Data;
@@ -172,7 +172,8 @@ internal class FolderDao(
         Guid subjectOwnerId,
         IEnumerable<string> subjectEntriesIds,
         QuotaFilter quotaFilter = QuotaFilter.All,
-        int? groupId = null)
+        int? groupId = null,
+        RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None)
     {
         if (CheckInvalidFilters(filterTypes) || (provider != ProviderFilter.None && provider != ProviderFilter.Storage))
         {
@@ -188,8 +189,8 @@ internal class FolderDao(
         var q = GetFolderQuery(filesDbContext, r => parentsIds.Contains(r.ParentId));
 
         q = !withSubfolders ?
-            BuildRoomsQuery(filesDbContext, q, filter, tags, subjectId, searchByTags, withoutTags, searchByTypes, false, excludeSubject, subjectFilter, subjectOwnerId, subjectEntriesIds, quotaFilter, groupId) :
-            BuildRoomsWithSubfoldersQuery(filesDbContext, parentsIds, filter, tags, searchByTags, searchByTypes, withoutTags, excludeSubject, subjectId, subjectFilter, subjectOwnerId, subjectEntriesIds);
+            BuildRoomsQuery(filesDbContext, q, filter, tags, subjectId, searchByTags, withoutTags, searchByTypes, false, excludeSubject, subjectFilter, subjectOwnerId, subjectEntriesIds, quotaFilter, groupId, privacyFilter) :
+            BuildRoomsWithSubfoldersQuery(filesDbContext, parentsIds, filter, tags, searchByTags, searchByTypes, withoutTags, excludeSubject, subjectId, subjectFilter, subjectOwnerId, subjectEntriesIds, privacyFilter);
 
         if (!string.IsNullOrEmpty(searchText))
         {
@@ -217,7 +218,8 @@ internal class FolderDao(
         Guid subjectOwnerId,
         IEnumerable<string> subjectEntriesIds,
         IEnumerable<int> parentsIds = null,
-        int? groupId = null)
+        int? groupId = null,
+        RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None)
     {
         if (CheckInvalidFilters(filterTypes) || provider != ProviderFilter.None)
         {
@@ -233,8 +235,8 @@ internal class FolderDao(
         var q = GetFolderQuery(filesDbContext, f => roomsIds.Contains(f.Id) || (f.CreateBy == _authContext.CurrentAccount.ID && parentsIds != null && parentsIds.Contains(f.ParentId)));
 
         q = !withSubfolders ?
-            BuildRoomsQuery(filesDbContext, q, filter, tags, subjectId, searchByTags, withoutTags, searchByTypes, false, excludeSubject, subjectFilter, subjectOwnerId, subjectEntriesIds, groupId: groupId) :
-            BuildRoomsWithSubfoldersQuery(filesDbContext, roomsIds, filter, tags, searchByTags, searchByTypes, withoutTags, excludeSubject, subjectId, subjectFilter, subjectOwnerId, subjectEntriesIds);
+            BuildRoomsQuery(filesDbContext, q, filter, tags, subjectId, searchByTags, withoutTags, searchByTypes, false, excludeSubject, subjectFilter, subjectOwnerId, subjectEntriesIds, groupId: groupId, privacyFilter: privacyFilter) :
+            BuildRoomsWithSubfoldersQuery(filesDbContext, roomsIds, filter, tags, searchByTags, searchByTypes, withoutTags, excludeSubject, subjectId, subjectFilter, subjectOwnerId, subjectEntriesIds, privacyFilter);
 
         if (!string.IsNullOrEmpty(searchText))
         {
@@ -709,7 +711,7 @@ internal class FolderDao(
         return room;
     }
 
-    public async IAsyncEnumerable<Folder<int>> GetFoldersByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool excludeSubject, Location? location, int trashId, OrderBy orderBy, int offset, int count)
+    public async IAsyncEnumerable<Folder<int>> GetFoldersByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool excludeSubject, Location? location, int trashId, int parentId, OrderBy orderBy, int offset, int count)
     {
         if (CheckInvalidFilter(filterType))
         {
@@ -718,7 +720,7 @@ internal class FolderDao(
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        var q = GetFoldersByTagQuery(filesDbContext, tagOwner, tagType, location, trashId);
+        var q = GetFoldersByTagQuery(filesDbContext, tagOwner, tagType, location, trashId, parentId);
 
         q = await GetFoldersQueryWithFilters(q, subjectGroup, subjectId, searchText, excludeSubject);
 
@@ -757,23 +759,7 @@ internal class FolderDao(
         }
     }
 
-    public async Task<int> GetFoldersByTagCountAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool excludeSubject, Location? location, int trashId)
-    {
-        if (CheckInvalidFilter(filterType))
-        {
-            return 0;
-        }
-
-        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-
-        var q = GetFoldersByTagQuery(filesDbContext, tagOwner, tagType, location, trashId);
-
-        q = await GetFoldersQueryWithFilters(q, subjectGroup, subjectId, searchText, excludeSubject);
-
-        return await q.CountAsync();
-    }
-
-    private IQueryable<FolderByTagQuery> GetFoldersByTagQuery(FilesDbContext filesDbContext, Guid tagOwner, IEnumerable<TagType> tagType, Location? location, int? trashId)
+    private IQueryable<FolderByTagQuery> GetFoldersByTagQuery(FilesDbContext filesDbContext, Guid tagOwner, IEnumerable<TagType> tagType, Location? location, int? trashId, int? parentId)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
 
@@ -785,6 +771,11 @@ internal class FolderDao(
         if (trashId != 0)
         {
             initQuery = initQuery.Where(r => !filesDbContext.Tree.Any(a => a.FolderId == r.f.ParentId && a.ParentId == trashId));
+        }
+
+        if (parentId != 0)
+        {
+            initQuery = initQuery.Where(r => filesDbContext.Tree.Any(a => a.FolderId == r.f.ParentId && a.ParentId == parentId));
         }
 
         var query = initQuery.Select(x => new FolderByTagQuery
@@ -931,6 +922,11 @@ internal class FolderDao(
 
             await filesDbContext.DeleteAuditReferencesAsync(folderId, FileEntryType.Folder);
             await filesDbContext.DeleteChatsAsync(folderId);
+            await filesDbContext.DeleteAttachmentsAsync(tenantId, folderId);
+            await filesDbContext.DeleteThreadsAsync(tenantId, folderId);
+            await filesDbContext.DeleteAssignmentsAsync(tenantId, folderId);
+            await filesDbContext.DeleteMcpServerToolPrefsAsync(tenantId, folderId);
+            await filesDbContext.DeleteMcpServersAsync(tenantId, folderId);
             await filesDbContext.DeleteRoomGroupRefByFolderIdsAsync(tenantId, subfolders);
 
             await context.SaveChangesAsync();
@@ -1883,7 +1879,7 @@ internal class FolderDao(
                 UserShared = filesDbContext.Security.Where(x =>
                         x.TenantId == tenantId &&
                         x.InternalEntryId == r.Id && x.EntryType == FileEntryType.Folder)
-                    .Select(s => s.SubjectType).ToList(),
+                    .Select(s => new UserShareInfo { SubjectType = s.SubjectType, Internal = s.Options.Internal }).ToList(),
                 ParentShared = filesDbContext.Security.Any(x =>
                     x.TenantId == tenantId &&
                     (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
@@ -2030,7 +2026,7 @@ internal class FolderDao(
     }
 
     private IQueryable<DbFolder> BuildRoomsQuery(FilesDbContext filesDbContext, IQueryable<DbFolder> query, IEnumerable<FolderType> folderTypes, IEnumerable<string> tags, Guid subjectId, bool searchByTags, bool withoutTags,
-        bool searchByFilter, bool withSubfolders, bool excludeSubject, SubjectFilter? subjectFilter, Guid subjectOwnerId, IEnumerable<string> subjectEntriesIds, QuotaFilter quotaFilter = QuotaFilter.All, int? groupId = null)
+        bool searchByFilter, bool withSubfolders, bool excludeSubject, SubjectFilter? subjectFilter, Guid subjectOwnerId, IEnumerable<string> subjectEntriesIds, QuotaFilter quotaFilter = QuotaFilter.All, int? groupId = null, RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None)
     {
         if (subjectFilter != null)
         {
@@ -2073,6 +2069,13 @@ internal class FolderDao(
                 : query.Where(f => f.Settings.Quota != TenantEntityQuotaSettings.DefaultQuotaValue);
         }
 
+        if (privacyFilter != RoomPrivacyFilter.None)
+        {
+            query = privacyFilter == RoomPrivacyFilter.Private
+                ? query.Where(f => f.Settings.Private)
+                : query.Where(f => !f.Settings.Private);
+        }
+
         if (withoutTags)
         {
             query = query.Where(f => !filesDbContext.TagLink.Join(filesDbContext.Tag, l => l.TagId, t => t.Id, (link, tag) => new { link.EntryId, tag })
@@ -2101,11 +2104,11 @@ internal class FolderDao(
     }
 
     private IQueryable<DbFolder> BuildRoomsWithSubfoldersQuery(FilesDbContext filesDbContext, IEnumerable<int> roomsIds, IEnumerable<FolderType> folderTypes, IEnumerable<string> tags, bool searchByTags, bool searchByFilter, bool withoutTags,
-        bool withoutMe, Guid subjectId, SubjectFilter? subjectFilter, Guid subjectOwnerId, IEnumerable<string> subjectEntriesIds)
+        bool withoutMe, Guid subjectId, SubjectFilter? subjectFilter, Guid subjectOwnerId, IEnumerable<string> subjectEntriesIds, RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None)
     {
         var q1 = GetFolderQuery(filesDbContext, f => roomsIds.Contains(f.Id));
 
-        q1 = BuildRoomsQuery(filesDbContext, q1, folderTypes, tags, subjectId, searchByTags, withoutTags, searchByFilter, true, withoutMe, subjectFilter, subjectOwnerId, subjectEntriesIds);
+        q1 = BuildRoomsQuery(filesDbContext, q1, folderTypes, tags, subjectId, searchByTags, withoutTags, searchByFilter, true, withoutMe, subjectFilter, subjectOwnerId, subjectEntriesIds, privacyFilter: privacyFilter);
 
         if (searchByTags)
         {
@@ -2220,14 +2223,14 @@ internal class FolderDao(
                 l.EntryId,
                 l.EntryType
             }), f => f.Id.ToString(), t => t.EntryId, (folder, tag) => new { folder, tag })
-                .Where(r => r.tag.Type == TagType.Origin && r.tag.EntryType == FileEntryType.Folder && filesDbContext.Folders.Where(f =>
-                        f.TenantId == tenantId && f.Id == filesDbContext.Tree.Where(t => t.FolderId == Convert.ToInt32(r.tag.Name))
-                            .OrderByDescending(t => t.Level)
-                            .Select(t => t.ParentId)
-                            .Skip(1)
-                            .FirstOrDefault())
-                    .Select(f => f.Id)
-                    .FirstOrDefault() == roomId)
+                .Where(r => r.tag.Type == TagType.Origin && r.tag.EntryType == FileEntryType.Folder &&
+                            filesDbContext.Folders
+                                .Any(f => f.TenantId == tenantId && f.Id ==
+                                    filesDbContext.Tree
+                                        .Where(t => t.FolderId == Convert.ToInt32(r.tag.Name) && t.ParentId == roomId)
+                                        .OrderByDescending(t => t.Level)
+                                        .Select(t => t.ParentId)
+                                        .FirstOrDefault()))
                 .Select(r => r.folder);
         }
 
@@ -2346,7 +2349,7 @@ public class DbFolderQuery
     public DbFolder Folder { get; init; }
     public DbFolder Root { get; set; }
     public DbRoomSettings Settings { get; set; }
-    public List<SubjectType> UserShared { get; set; }
+    public List<UserShareInfo> UserShared { get; set; }
     public bool ParentShared { get; set; }
     public int Order { get; set; }
 

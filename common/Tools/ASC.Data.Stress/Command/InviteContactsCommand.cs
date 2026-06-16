@@ -1,34 +1,34 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 using DocSpace.API.SDK.Api.Portal;
@@ -50,49 +50,49 @@ public class InviteContactsCommand : AsyncCommand<InviteContactsCommand.Settings
 
         [CommandOption("--password")]
         public required string Password { get; set; }
-        
+
         public static readonly Settings Default = new()
         {
             Email = "test@onlyoffice.com",
             Password = "11111111"
         };
     }
-    
+
     public override ValidationResult Validate(CommandContext context, Settings settings)
-    {               
+    {
         if (string.IsNullOrEmpty(settings.Email))
         {
             settings.Email = AnsiConsole.Ask("Enter user [green]email[/]:", Settings.Default.Email);
-        }  
-        
+        }
+
         if (string.IsNullOrEmpty(settings.Password))
         {
             settings.Password = AnsiConsole.Ask("Enter user [green]password[/]:", Settings.Default.Password);
         }
-        
-        
+
+
         return ValidationResult.Success();
     }
-    
+
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings, CancellationToken cancellationToken)
     {
         var services = new ServiceCollection();
         services.AddHttpClient();
         var serviceProvider = services.BuildServiceProvider();
         var factory = serviceProvider.GetRequiredService<IHttpClientFactory>();
-        
+
         var configuration = await ApiHelper.GetConfigurationAsync(settings.Email, settings.Password);
         using var usersApi = new UsersApi(configuration);
-        
+
         var token = CancellationToken.None;
         await AnsiConsole.Progress()
             .StartAsync(async ctx =>
-            {                
+            {
                 var ctxTask = ctx.AddTask($"[green]Invite contacts[/]");
                 var contacts = await InviteContactsInBatches(ctxTask, factory, usersApi, configuration, settings, token);
                 AnsiConsole.MarkupLine($"[green]Created {contacts.Count} users[/]");
             });
-        
+
         return 0;
     }
 
@@ -108,64 +108,66 @@ public class InviteContactsCommand : AsyncCommand<InviteContactsCommand.Settings
         var result = new List<User>();
 
         List<Task<User>> tasks = [];
-        var j = 0;
+
 
         var employeeTypes = new List<EmployeeType> { EmployeeType.RoomAdmin, EmployeeType.DocSpaceAdmin, EmployeeType.User};
-        
+
         foreach (var empl in employeeTypes)
         {
-            foreach (var _ in Enumerable.Range(1, settings.UsersPerType))
-            {
-                tasks.Add(InviteContact(member, empl));
-                j++;
-
-                if (j == 100)
-                {
-                    result.AddRange(await Task.WhenAll(tasks));
-                    tasks.Clear();
-                    j = 0;
-                }
-            }
-        }
-
-        return result;
-
-        async Task<User> InviteContact(Faker<MemberRequestDto> fakerMember, EmployeeType employeeType)
-        {
-            using var profilesApi = new ProfilesApi(configuration);
-            var shortLink = (await usersApi.GetInvitationLinkAsync(employeeType, token)).Response;
+            var shortLink = (await usersApi.GetInvitationLinkAsync(empl, token)).Response;
             using var client = factory.CreateClient();
 
             var fullLink = await client.GetAsync(shortLink, token);
             var confirmHeader = fullLink.RequestMessage?.RequestUri?.Query.Substring(1);
             if (confirmHeader == null)
             {
-                throw new HttpRequestException($"Unable to get confirmation link for {employeeType}");
+                throw new HttpRequestException($"Unable to get confirmation link for {empl}");
             }
 
-            profilesApi.Configuration.DefaultHeaders.Add("confirm", confirmHeader);
-
-            var parsedQuery = HttpUtility.ParseQueryString(confirmHeader);
-            if(!Enum.TryParse(parsedQuery["emplType"], out EmployeeType parsedEmployeeType))
+            foreach (var _ in Enumerable.Range(1, settings.UsersPerType))
             {
-                parsedEmployeeType = EmployeeType.Guest;
+                tasks.Add(InviteContact(member, empl, confirmHeader));
+
+                if (tasks.Count >= 10)
+                {
+                    await Task.WhenAny(tasks);
+                    tasks.RemoveAll(a => a.IsCompleted);
+                }
             }
+        }
 
-            var fakeMember = fakerMember.Generate();
+        await Task.WhenAll(tasks);
+        return result;
 
+        async Task<User> InviteContact(Faker<MemberRequestDto> fakerMember, EmployeeType employeeType, string confirmHeader)
+        {
             try
             {
+                using var profilesApi = new ProfilesApi(configuration);
+                profilesApi.Configuration.DefaultHeaders.Add("confirm", confirmHeader);
+
+                var parsedQuery = HttpUtility.ParseQueryString(confirmHeader);
+                if (!Enum.TryParse(parsedQuery["emplType"], out EmployeeType parsedEmployeeType))
+                {
+                    parsedEmployeeType = EmployeeType.Guest;
+                }
+
+                MemberRequestDto fakeMember;
+                lock (fakerMember)
+                {
+                    fakeMember = fakerMember.Generate();
+                }
+
+
                 var createMemberResponse = await profilesApi.AddMemberWithHttpInfoAsync(new MemberRequestDto
                 {
                     FromInviteLink = true,
                     CultureName = "en-US",
                     Spam = false,
-
                     Email = fakeMember.Email,
                     Password = fakeMember.Password,
                     FirstName = fakeMember.FirstName,
                     LastName = fakeMember.LastName,
-
                     Type = parsedEmployeeType,
                     Key = parsedQuery["key"] ?? "",
                 }, token);
@@ -176,16 +178,17 @@ public class InviteContactsCommand : AsyncCommand<InviteContactsCommand.Settings
                 {
                     throw new HttpRequestException($"Unable to invite user {employeeType}");
                 }
+
                 progressTask.Increment(100.0 / (employeeTypes.Count * settings.UsersPerType));
-                return new User(fakeMember.Email, fakeMember.Password)
-                {
-                    Id = createMemberResponse.Data.Response.Id
-                };
+
+                return new User(fakeMember.Email, fakeMember.Password) { Id = createMemberResponse.Data.Response.Id };
             }
-            catch (ApiException e)
+            catch (Exception e)
             {
                 AnsiConsole.WriteException(e);
             }
+
+            progressTask.Increment(100.0 / (employeeTypes.Count * settings.UsersPerType));
 
             return new User("", "");
         }

@@ -35,61 +35,61 @@ namespace ASC.MessagingSystem.EF.Context;
 
 public partial class MessagesContext
 {
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, new int[0], PreCompileQuery.DefaultDateTime])]
+    [PreCompileQuery]
     public IAsyncEnumerable<DbLoginEvent> LoginEventsAsync(int tenantId, Guid userId, IEnumerable<int> loginActions, DateTime date)
     {
         return Queries.LoginEventsAsync(this, tenantId, userId, loginActions, date);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task<int> DeleteLoginEventsAsync(int tenantId, int loginEventId)
     {
         return Queries.DeleteLoginEventsAsync(this, tenantId, loginEventId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public IAsyncEnumerable<DbLoginEvent> LoginEventsByUserIdAsync(int tenantId, Guid userId)
     {
         return Queries.LoginEventsByUserIdAsync(this, tenantId, userId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public IAsyncEnumerable<DbLoginEvent> LoginEventsByTenantIdAsync(int tenantId)
     {
         return Queries.LoginEventsByTenantIdAsync(this, tenantId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task<DbLoginEvent> LoginEventsByIdAsync(int tenantId, int id)
     {
         return Queries.LoginEventsByIdAsync(this, tenantId, id);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public IAsyncEnumerable<DbLoginEvent> LoginEventsExceptThisAsync(int tenantId, Guid userId, int loginEventId)
     {
         return Queries.LoginEventsExceptThisAsync(this, tenantId, userId, loginEventId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, (byte)0, 0, 0, null, null])]
+    [PreCompileQuery]
     public IAsyncEnumerable<Tuple<DbAuditEvent, DbFilesAuditReference>> GetAuditEventsByReferences(int tenantId, int entryId, byte entryType, int offset, int count, DateTime? fromDate, DateTime? toDate)
     {
         return Queries.GetAuditEventsByReferences(this, tenantId, entryId, entryType, offset, count, fromDate, toDate);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, (byte)0, 0, 0, null, null, null, null, null, null])]
+    [PreCompileQuery]
     public IAsyncEnumerable<Tuple<DbAuditEvent, DbFilesAuditReference>> GetFilteredAuditEventsByReferences(int tenantId, int entryId, byte entryType, int offset, int count, IEnumerable<int> filterFolderIds, IEnumerable<int> filterFilesIds, IEnumerable<int> filterFolderActions, IEnumerable<int> filterFileActions, DateTime? fromDate, DateTime? toDate)
     {
         return Queries.GetFilteredAuditEventsByReferences(this, tenantId, entryId, entryType, offset, count, filterFolderIds, filterFilesIds, filterFolderActions, filterFileActions, fromDate, toDate);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, (byte)0, null, null])]
+    [PreCompileQuery]
     public Task<int> GetAuditEventsByReferencesTotalCount(int tenantId, int entryId, byte entryType, DateTime? fromDate, DateTime? toDate)
     {
         return Queries.GetAuditEventsByReferencesTotalCount(this, tenantId, entryId, entryType, fromDate, toDate);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, (byte)0, null, null, null, null, null, null])]
+    [PreCompileQuery]
     public Task<int> GetFilteredAuditEventsByReferencesTotalCount(int tenantId, int entryId, byte entryType, IEnumerable<int> filterFolderIds, IEnumerable<int> filterFilesIds, IEnumerable<int> filterFolderActions, IEnumerable<int> filterFileActions, DateTime? fromDate, DateTime? toDate)
     {
         return Queries.GetFilteredAuditEventsByReferencesTotalCount(this, tenantId, entryId, entryType, filterFolderIds, filterFilesIds, filterFolderActions, filterFileActions, fromDate, toDate);

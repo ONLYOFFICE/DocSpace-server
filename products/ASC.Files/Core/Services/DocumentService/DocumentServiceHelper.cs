@@ -239,7 +239,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         {
             var folderDao = daoFactory.GetFolderDao<T>();
             var room = await DocSpaceHelper.GetParentRoom(file, folderDao);
-            locatedInPrivateRoom = DocSpaceHelper.LocatedInPrivateRoomAsync(room);
+            locatedInPrivateRoom = DocSpaceHelper.LocatedInPrivateRoom(room);
             options = GetOptions(room);
         }
 
@@ -576,6 +576,11 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
         if (securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))
         {
+            if (properties?.FormFilling?.StartFilling != true)
+            {
+                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
+            }
+
             result.CanFill = true;
             result.IsSubmitOnly = true;
             result.FillingSessionId = FileConstant.AnonFillingSession + Guid.NewGuid();
@@ -599,6 +604,11 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
         if (properties?.FormFilling?.StartFilling != true)
         {
+            if (!await fileSecurity.CanStartFillingAsync(file, securityContext.CurrentAccount.ID))
+            {
+                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
+            }
+
             result.CanEdit = true;
             result.CanStartFilling = true;
             return result;

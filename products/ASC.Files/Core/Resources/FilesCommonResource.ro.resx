@@ -589,4 +589,10 @@ Compatibilitate garantată 100% cu formatele MS Office.</value>
   <data name="ErrorMessage_AiServicesDisabled" xml:space="preserve">
     <value>Serviciile IA sunt dezactivate pentru portalul curent</value>
   </data>
+  <data name="ErrorMessage_ExternalDbNotIndexed" xml:space="preserve">
+    <value>Tabelul bazei de date va fi creat după prima trimitere a formularului. Nu există încă date pentru a-i genera structura.</value>
+  </data>
+  <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
+    <value>Sincronizarea datelor formularului cu baza de date externă a eșuat.</value>
+  </data>
 </root>

@@ -1,34 +1,34 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Core.Billing;
@@ -485,7 +485,7 @@ public class TariffService(
         return payments;
     }
 
-    public async Task<Uri> GetShoppingUriAsync(int tenant, string affiliateId, string partnerId, string currency = null, string language = null, string customerEmail = null, Dictionary<string, int> quantity = null, string backUrl = null, bool checkoutSetup = false)
+    public async Task<Uri> GetShoppingUriAsync(int tenant, string affiliateId, string partnerId, string currency = null, string language = null, string customerEmail = null, Dictionary<string, int> quantity = null, string backUrl = null, string successUrl = null, bool checkoutSetup = false)
     {
         List<TenantQuota> newQuotas = [];
 
@@ -546,7 +546,8 @@ public class TariffService(
                             !string.IsNullOrEmpty(language) ? "__Language__" : null,
                             !string.IsNullOrEmpty(customerEmail) ? "__CustomerEmail__" : null,
                             hasQuantity ? "__Quantity__" : null,
-                            !string.IsNullOrEmpty(backUrl) ? "__BackUrl__" : null
+                            !string.IsNullOrEmpty(backUrl) ? "__BackUrl__" : null,
+                            !string.IsNullOrEmpty(successUrl) ? "__SuccessUrl__" : null
                             );
                 }
                 catch (Exception error)
@@ -570,7 +571,9 @@ public class TariffService(
                                .Replace("__Language__", HttpUtility.UrlEncode((language ?? "").ToLower()))
                                .Replace("__CustomerEmail__", HttpUtility.UrlEncode(customerEmail ?? ""))
                                .Replace("__Quantity__", hasQuantity ? string.Join(',', quantity.Values) : "")
-                               .Replace("__BackUrl__", HttpUtility.UrlEncode(backUrl ?? "")));
+                               .Replace("__BackUrl__", HttpUtility.UrlEncode(backUrl ?? ""))
+                               .Replace("__SuccessUrl__", HttpUtility.UrlEncode(successUrl ?? "")))
+            ;
         return result;
     }
 
@@ -1150,7 +1153,7 @@ public class TariffService(
             return result;
         }
 
-        var pipeline = resiliencePipelineProvider.GetPipeline<bool>(AccountingClient.BalanceResiliencePipelineName);
+        var pipeline = resiliencePipelineProvider.GetPipeline<bool>(AccountingHttpClientExtension.BalanceResiliencePipelineName);
 
         var updated = await pipeline.ExecuteAsync(async _ =>
         {
@@ -1199,8 +1202,13 @@ public class TariffService(
             try
             {
                 var portalId = await coreSettings.GetKeyAsync(tenantId);
-                balance = await accountingClient.GetCustomerBalanceAsync(portalId, true);
+                balance = await accountingClient.GetCustomerBalanceAsync(portalId);
                 await hybridCache.SetAsync(cacheKey, balance, TimeSpan.FromMinutes(10));
+            }
+            catch (AccountingCustomerNotFoundException exception)
+            {
+                logger.DebugAccountingTenant(tenantId.ToString(), exception.Message);
+                await hybridCache.SetAsync(cacheKey, new Balance(), TimeSpan.FromMinutes(10));
             }
             catch (Exception error)
             {
@@ -1240,8 +1248,13 @@ public class TariffService(
             try
             {
                 var portalId = await coreSettings.GetKeyAsync(tenantId);
-                balance = await accountingClient.GetCustomerAiBalanceAsync(portalId, true);
+                balance = await accountingClient.GetCustomerAiBalanceAsync(portalId);
                 await hybridCache.SetAsync(cacheKey, balance, TimeSpan.FromMinutes(10));
+            }
+            catch (AccountingCustomerNotFoundException exception)
+            {
+                logger.DebugAccountingTenant(tenantId.ToString(), exception.Message);
+                await hybridCache.SetAsync(cacheKey, new Balance(), TimeSpan.FromMinutes(10));
             }
             catch (Exception error)
             {
@@ -1305,11 +1318,16 @@ public class TariffService(
 
             return await accountingClient.GetCustomerOperationsAsync(portalId, filter, isAiService);
         }
+        catch (AccountingCustomerNotFoundException exception)
+        {
+            logger.DebugAccountingTenant(tenantId.ToString(), exception.Message);
+        }
         catch (Exception error)
         {
             LogError(error, tenantId.ToString());
-            return null;
         }
+
+        return null;
     }
 
     public async Task<List<Currency>> GetAllAccountingCurrenciesAsync()

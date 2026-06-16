@@ -201,14 +201,14 @@ public class BaseIndexerFormMetadata(Client client,
 
 [Scope(typeof(IFactoryIndexer))]
 public class FactoryIndexerFormMetadata(
-    ILoggerProvider options,
+    ILoggerFactory loggerFactory,
     TenantManager tenantManager,
     SearchSettingsHelper searchSettingsHelper,
     FactoryIndexer factoryIndexer,
     BaseIndexerFormMetadata baseIndexer,
     IServiceProvider serviceProvider,
     ICache cache)
-    : FactoryIndexer<DbFormsMetadataSearch>(options, tenantManager, searchSettingsHelper, factoryIndexer, baseIndexer, serviceProvider, cache)
+    : FactoryIndexer<DbFormsMetadataSearch>(loggerFactory, tenantManager, searchSettingsHelper, factoryIndexer, baseIndexer, serviceProvider, cache)
 {
     public override async Task IndexAllAsync()
     {
@@ -261,14 +261,14 @@ public class BaseIndexerForm(Client client,
 
 [Scope(typeof(IFactoryIndexer))]
 public class FactoryIndexerForm(
-    ILoggerProvider options,
+    ILoggerFactory loggerFactory,
     TenantManager tenantManager,
     SearchSettingsHelper searchSettingsHelper,
     FactoryIndexer factoryIndexer,
     BaseIndexerForm baseIndexer,
     IServiceProvider serviceProvider,
     ICache cache)
-    : FactoryIndexer<DbFormsItemDataSearch>(options, tenantManager, searchSettingsHelper, factoryIndexer, baseIndexer, serviceProvider, cache)
+    : FactoryIndexer<DbFormsItemDataSearch>(loggerFactory, tenantManager, searchSettingsHelper, factoryIndexer, baseIndexer, serviceProvider, cache)
 {
     public override async Task IndexAllAsync()
     {

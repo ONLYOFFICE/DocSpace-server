@@ -59,6 +59,29 @@
         "responses": {
           "200": {
             "description": "Create a user api key",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Rate limit: 5 requests per 15 minutes per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 5
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests remaining in the current 15-minute window.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current 15-minute window resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -69,6 +92,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying (5 req / 15 min limit per user/IP).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -111,6 +152,29 @@
         "responses": {
           "200": {
             "description": "List of api keys for user",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -121,6 +185,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -165,6 +247,29 @@
         "responses": {
           "200": {
             "description": "List of all available permissions for key",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -175,6 +280,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -219,6 +342,29 @@
         "responses": {
           "200": {
             "description": "List of api keys for user",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -229,6 +375,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -297,6 +461,29 @@
         "responses": {
           "200": {
             "description": "Update optional params for user api keys",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -307,6 +494,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -362,6 +567,29 @@
         "responses": {
           "200": {
             "description": "Delete a user api key",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -372,6 +600,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -486,6 +732,29 @@
         "responses": {
           "200": {
             "description": "List of groups",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -496,6 +765,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -547,6 +834,29 @@
         "responses": {
           "200": {
             "description": "Newly created group with the detailed information",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -557,6 +867,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -623,6 +951,29 @@
         "responses": {
           "200": {
             "description": "Group with the detailed information",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -636,6 +987,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -702,6 +1071,29 @@
         "responses": {
           "200": {
             "description": "Updated group with the detailed information",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -715,6 +1107,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -770,6 +1180,29 @@
         "responses": {
           "200": {
             "description": "No content",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -783,6 +1216,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -840,6 +1291,29 @@
         "responses": {
           "200": {
             "description": "List of groups",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -850,6 +1324,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -918,6 +1410,29 @@
         "responses": {
           "200": {
             "description": "Group with the detailed information",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -931,6 +1446,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -999,6 +1532,29 @@
         "responses": {
           "200": {
             "description": "Group with the detailed information",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -1009,6 +1565,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -1075,6 +1649,29 @@
         "responses": {
           "200": {
             "description": "Group with the detailed information",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -1088,6 +1685,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -1154,6 +1769,29 @@
         "responses": {
           "200": {
             "description": "Group with the detailed information",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -1167,6 +1805,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -1235,6 +1891,29 @@
         "responses": {
           "200": {
             "description": "Group with the detailed information",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -1248,6 +1927,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -1345,6 +2042,29 @@
         "responses": {
           "200": {
             "description": "Ok",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -1358,6 +2078,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -1455,6 +2193,29 @@
         "responses": {
           "200": {
             "description": "Ok",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -1468,6 +2229,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -1565,6 +2344,29 @@
         "responses": {
           "200": {
             "description": "Ok",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -1578,6 +2380,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -1646,6 +2466,29 @@
         "responses": {
           "200": {
             "description": "Detailed user information",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Rate limit: 5 requests per 15 minutes per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 5
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests remaining in the current 15-minute window.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current 15-minute window resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -1665,6 +2508,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying (5 req / 15 min limit per user/IP).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -1718,6 +2579,29 @@
         "responses": {
           "200": {
             "description": "Message text",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Rate limit: 5 requests per 15 minutes per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 5
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests remaining in the current 15-minute window.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current 15-minute window resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -1737,6 +2621,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying (5 req / 15 min limit per user/IP).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -1811,6 +2713,29 @@
         "responses": {
           "200": {
             "description": "Detailed profile information",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -1830,6 +2755,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -1882,13 +2825,54 @@
         },
         "responses": {
           "200": {
-            "description": "Request parameters for deleting guests"
+            "description": "Request parameters for deleting guests",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            }
           },
           "403": {
             "description": "No permissions to perform this action"
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -1942,6 +2926,29 @@
         "responses": {
           "200": {
             "description": "Detailed profile information",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -1958,6 +2965,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -2026,6 +3051,29 @@
         "responses": {
           "200": {
             "description": "Detailed user information",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Rate limit: 5 requests per 15 minutes per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 5
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests remaining in the current 15-minute window.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current 15-minute window resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -2045,6 +3093,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying (5 req / 15 min limit per user/IP).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -2084,7 +3150,7 @@
           "People / Password"
         ],
         "summary": "Remind a user password",
-        "description": "Reminds a password to the user using the email address specified in the request.",
+        "description": "Sends a password recovery email to the specified user address.\r\nFor unauthenticated requests, CAPTCHA validation is required when CAPTCHA is enabled in the configuration.",
         "operationId": "sendUserPassword",
         "requestBody": {
           "content": {
@@ -2098,6 +3164,29 @@
         "responses": {
           "200": {
             "description": "Email with the password",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Rate limit: 5 requests per 15 minutes per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 5
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests remaining in the current 15-minute window.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current 15-minute window resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -2108,6 +3197,24 @@
           },
           "403": {
             "description": "No permissions to perform this action"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying (5 req / 15 min limit per user/IP).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         }
       }
@@ -2146,6 +3253,29 @@
         "responses": {
           "200": {
             "description": "Thumbnail parameters",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -2162,6 +3292,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -2218,6 +3366,29 @@
         "responses": {
           "200": {
             "description": "Thumbnail parameters: original photo, retina, maximum size photo, big, medium, small",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -2234,6 +3405,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -2288,6 +3477,29 @@
         "responses": {
           "200": {
             "description": "Thumbnail parameters: original photo, retina, maximum size photo, big, medium, small",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -2304,6 +3516,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -2369,6 +3599,29 @@
         "responses": {
           "200": {
             "description": "Updated thumbnail parameters: original photo, retina, maximum size photo, big, medium, small",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -2385,6 +3638,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -2472,6 +3743,29 @@
         "responses": {
           "200": {
             "description": "Result of file uploading",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -2494,6 +3788,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -2538,6 +3850,29 @@
         "responses": {
           "200": {
             "description": "Claims",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -2548,6 +3883,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -2601,6 +3954,29 @@
         "responses": {
           "200": {
             "description": "Newly added user with the detailed information",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -2614,6 +3990,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -2725,6 +4119,29 @@
         "responses": {
           "200": {
             "description": "List of users with the detailed information",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -2735,6 +4152,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -2807,6 +4242,12 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -2858,6 +4299,29 @@
         "responses": {
           "200": {
             "description": "List of users with the detailed information",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Rate limit: 5 requests per 15 minutes per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 5
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests remaining in the current 15-minute window.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current 15-minute window resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -2871,6 +4335,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying (5 req / 15 min limit per user/IP).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -2927,6 +4409,29 @@
         "responses": {
           "200": {
             "description": "Deleted user detailed information",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -2943,6 +4448,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -2997,6 +4520,29 @@
         "responses": {
           "200": {
             "description": "Detailed profile information",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -3013,6 +4559,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -3078,6 +4642,29 @@
         "responses": {
           "200": {
             "description": "Updated user with the detailed information",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -3097,6 +4684,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -3141,6 +4746,29 @@
         "responses": {
           "200": {
             "description": "Detailed information about my profile",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -3157,6 +4785,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -3199,6 +4845,29 @@
         "responses": {
           "200": {
             "description": "Detailed information about my profile",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -3209,6 +4878,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -3248,7 +4935,7 @@
           "People / Profiles"
         ],
         "summary": "Check if a user exists by email",
-        "description": "Returns a boolean indicating whether a user with the specified email exists on the portal.",
+        "description": "Returns data indicating whether a user with the specified email exists on the portal.",
         "operationId": "checkUserExistsByEmail",
         "parameters": [
           {
@@ -3284,11 +4971,34 @@
         ],
         "responses": {
           "200": {
-            "description": "Boolean result",
+            "description": "User existence result",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/BooleanWrapper"
+                  "$ref": "#/components/schemas/UserExistsResponseWrapper"
                 }
               }
             }
@@ -3298,6 +5008,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -3351,6 +5079,29 @@
         "responses": {
           "200": {
             "description": "List of users with the detailed information",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -3370,6 +5121,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -3436,6 +5205,29 @@
         "responses": {
           "200": {
             "description": "Detailed user information",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -3455,6 +5247,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -3508,6 +5318,29 @@
         "responses": {
           "200": {
             "description": "List of users with the detailed information",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -3524,6 +5357,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -3577,6 +5428,29 @@
         "responses": {
           "200": {
             "description": "User detailed information",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -3596,6 +5470,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -3774,6 +5666,29 @@
         "responses": {
           "200": {
             "description": "Ok",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -3787,6 +5702,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -3965,6 +5898,29 @@
         "responses": {
           "200": {
             "description": "Ok",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -3978,6 +5934,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -4156,6 +6130,29 @@
         "responses": {
           "200": {
             "description": "Ok",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -4169,6 +6166,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -4252,6 +6267,29 @@
         "responses": {
           "200": {
             "description": "List of users with the detailed information",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -4265,6 +6303,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -4537,6 +6593,29 @@
         "responses": {
           "200": {
             "description": "List of users with the detailed information",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -4550,6 +6629,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -4605,6 +6702,29 @@
         "responses": {
           "200": {
             "description": "List of users",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -4615,6 +6735,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -4689,6 +6827,29 @@
         "responses": {
           "200": {
             "description": "List of users with the detailed information",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -4702,6 +6863,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -4974,6 +7153,29 @@
         "responses": {
           "200": {
             "description": "List of users",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -4987,6 +7189,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -5165,6 +7385,29 @@
         "responses": {
           "200": {
             "description": "Ok",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -5178,6 +7421,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -5356,6 +7617,29 @@
         "responses": {
           "200": {
             "description": "Ok",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -5369,6 +7653,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -5547,6 +7849,29 @@
         "responses": {
           "200": {
             "description": "Ok",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -5560,6 +7885,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -5604,6 +7947,29 @@
         "responses": {
           "200": {
             "description": "Theme",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -5614,6 +7980,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -5665,6 +8049,29 @@
         "responses": {
           "200": {
             "description": "Theme",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -5675,6 +8082,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -5757,6 +8182,29 @@
         "responses": {
           "200": {
             "description": "List of third-party accounts",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -5764,6 +8212,24 @@
                 }
               }
             }
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         }
       }
@@ -5787,13 +8253,54 @@
         },
         "responses": {
           "200": {
-            "description": "Ok"
+            "description": "Ok",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            }
           },
           "405": {
             "description": "Error not allowed option"
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -5847,6 +8354,29 @@
         "responses": {
           "200": {
             "description": "Ok",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -5860,6 +8390,24 @@
           },
           "403": {
             "description": "The invitation link is invalid or its validity has expired"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         }
       }
@@ -5885,10 +8433,51 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            }
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -5946,6 +8535,29 @@
         "responses": {
           "200": {
             "description": "Reassignment progress",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -5956,6 +8568,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -6009,6 +8639,29 @@
         "responses": {
           "200": {
             "description": "Reassignment progress",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -6022,6 +8675,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -6075,6 +8746,29 @@
         "responses": {
           "200": {
             "description": "Reassignment progress",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -6085,6 +8779,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -6150,6 +8862,29 @@
         "responses": {
           "200": {
             "description": "Boolean value: true if neccessary reassign",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -6160,6 +8895,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -6217,6 +8970,29 @@
         "responses": {
           "200": {
             "description": "Deletion progress",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -6227,6 +9003,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -6271,6 +9065,29 @@
         "responses": {
           "200": {
             "description": "Information message",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Rate limit: 5 requests per 15 minutes per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 5
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests remaining in the current 15-minute window.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current 15-minute window resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -6284,6 +9101,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying (5 req / 15 min limit per user/IP).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -6337,6 +9172,29 @@
         "responses": {
           "200": {
             "description": "Deletion progress",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -6356,6 +9214,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -6408,10 +9284,51 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            }
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -6456,6 +9373,29 @@
         "responses": {
           "200": {
             "description": "delete personal progress",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -6469,6 +9409,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -6513,6 +9471,29 @@
         "responses": {
           "200": {
             "description": "Deletion progress",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -6523,6 +9504,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -6646,6 +9645,29 @@
         "responses": {
           "200": {
             "description": "List of users with the detailed information",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -6656,6 +9678,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -6721,6 +9761,29 @@
         "responses": {
           "200": {
             "description": "List of users with the detailed information",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -6737,6 +9800,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -6804,6 +9885,29 @@
         "responses": {
           "200": {
             "description": "List of users with the detailed information",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -6814,6 +9918,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -6881,6 +10003,29 @@
         "responses": {
           "200": {
             "description": "List of users with the detailed information",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -6894,6 +10039,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -6947,6 +10110,29 @@
         "responses": {
           "200": {
             "description": "Update type progress",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -6963,6 +10149,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -7020,6 +10224,29 @@
         "responses": {
           "200": {
             "description": "Update type progress",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -7030,6 +10257,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -7083,6 +10328,29 @@
         "responses": {
           "200": {
             "description": "Update type progress",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -7093,6 +10361,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -7150,6 +10436,29 @@
         "responses": {
           "200": {
             "description": "User share link",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -7166,6 +10475,24 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
         "security": [
@@ -8775,10 +12102,7 @@
             "type": "string",
             "description": "The third-party profile in the serialized format.",
             "nullable": true,
-            "example": {
-              "provider": "Google",
-              "id": "123456"
-            }
+            "example": "{\"provider\":\"Google\",\"id\":\"123456\"}"
           }
         },
         "additionalProperties": false,
@@ -9270,10 +12594,7 @@
             "type": "string",
             "description": "The third-party profile in the serialized format",
             "nullable": true,
-            "example": {
-              "provider": "Google",
-              "id": "123456"
-            }
+            "example": "{\"provider\":\"Google\",\"id\":\"123456\"}"
           }
         },
         "additionalProperties": false,
@@ -9875,6 +13196,64 @@
         },
         "additionalProperties": false,
         "description": "The request parameters for updating a photo."
+      },
+      "UserExistsResponseDto": {
+        "required": [
+          "exists"
+        ],
+        "type": "object",
+        "properties": {
+          "exists": {
+            "type": "boolean",
+            "description": "Specifies whether the user exists or not.",
+            "example": true
+          },
+          "status": {
+            "$ref": "#/components/schemas/EmployeeStatus"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The user existence check response parameters."
+      },
+      "UserExistsResponseWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/UserExistsResponseDto"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
       },
       "UserInvitationRequestDto": {
         "allOf": [

@@ -217,15 +217,18 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
 
     public ConnectionStringManager AddEditors()
     {
+        var forTesting = builder.Configuration["APP_EDITOR_TEST"] == "true";
         var image = builder.Configuration["APP_EDITION"] switch
         {
-            "enterprise" => "onlyoffice/documentserver-ee",
-            "developer" => "onlyoffice/documentserver-de",
-            _ => "onlyoffice/documentserver"
+            "enterprise" => forTesting ? "onlyoffice/4testing-documentserver-ee" : "onlyoffice/documentserver-ee",
+            "developer" => forTesting ? "onlyoffice/4testing-documentserver-de" : "onlyoffice/documentserver-de",
+            _ => forTesting ? "onlyoffice/4testing-documentserver" : "onlyoffice/documentserver"
         };
 
+        var tag = builder.Configuration["APP_EDITOR_VERSION"] ?? "latest";
+
         EditorResource = builder
-            .AddContainer(Constants.EditorsContainer, image, "latest")
+            .AddContainer(Constants.EditorsContainer, image, tag)
             //TODO:get from config or set for the rest projects
             .WithEnvironment("JWT_ENABLED", "true")
             .WithEnvironment("JWT_SECRET", "secret")
@@ -276,7 +279,8 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
 
     public ConnectionStringManager AddMailPit()
     {
-        MailResource = builder.AddMailPit("mailpit");
+        MailResource = builder.AddMailPit("mailpit")
+            .WithArgs("--smtp-disable-rdns");
 
         return this;
     }
@@ -295,7 +299,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             .WithNpm()
             .WithEnvironment("MACHINEKEY", coreMachineKey)
             .WithEnvironment("PKEY", "PKEY")
-            .WithEnvironment("LOCAL_PORTAL_DOMAIN", $"localhost:{Constants.AppHostPort.ToString()}")
+            .WithEnvironment("LOCAL_PORTAL_DOMAIN", $"127.0.0.1:{Constants.AppHostPort.ToString()}")
             .WithEnvironment("DOCSPACE_OWNER_EMAIL", docspaceOwnerEmail)
             .WithExplicitStart();
 
@@ -416,7 +420,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             .WithNpm()
             .WithEnvironment("MACHINEKEY", coreMachineKey)
             .WithEnvironment("PKEY", "PKEY")
-            .WithEnvironment("LOCAL_PORTAL_DOMAIN", $"localhost:{Constants.AppHostPort.ToString()}")
+            .WithEnvironment("LOCAL_PORTAL_DOMAIN", $"127.0.0.1:{Constants.AppHostPort.ToString()}")
             .WithEnvironment("DOCSPACE_OWNER_EMAIL", docspaceOwnerEmail)
             .WithArgs("--", "--ui", "--ui-host", "0.0.0.0", "--ui-port", Constants.E2ETestsUiPort.ToString())
             .WithExplicitStart();
@@ -441,9 +445,9 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         bool includeMigrate = true,
         bool includeRabbitMq = true,
         bool includeRedis = true,
-        bool includeEditors = true,
+        bool includeEditors = false,
         bool includeOpensearch = true,
-        bool includeMailPit = true
+        bool includeMailPit = false
         )  where T : IResourceWithWaitSupport
     {
         if (includeMigrate && MigrateResource != null)
@@ -580,7 +584,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             resourceBuilder.WithEnvironment("REDIS_PASSWORD", () => Redis?.Password ?? string.Empty);
         }
 
-        AddWaitFor(resourceBuilder, includeEditors: false);
+        AddWaitFor(resourceBuilder);
     }
 
     public static string? SubstituteLocalhost(string? host) => host?.Replace(KnownHostNames.Localhost, KnownHostNames.DockerDesktopHostBridge);

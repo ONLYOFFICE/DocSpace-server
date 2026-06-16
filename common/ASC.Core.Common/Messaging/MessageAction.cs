@@ -1,34 +1,34 @@
 ﻿// Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.MessagingSystem.Core;
@@ -614,19 +614,19 @@ public enum MessageAction
 
     [Description("Form stopped")]
     FormStopped = 5153,
-    
+
     [Description("AI agent created")]
     AgentCreated = 5154,
 
     [Description("AI agent renamed")]
     AgentRenamed = 5155,
-    
+
     [Description("AI agent deleted")]
     AgentDeleted = 5156,
-    
+
     [Description("MCP server added to AI agent")]
     AddedServerToAgent = 5157,
-    
+
     [Description("MCP server deleted from AI agent")]
     DeletedServerFromAgent = 5158,
 
@@ -635,7 +635,7 @@ public enum MessageAction
 
     [Description("Documents default templates settings updated")]
     DocumentsDefaultTemplatesSettingsUpdated = 5160,
-    
+
     [Description("File saved, user quota exceeded")]
     FileSavedButUserQuotaExceeded = 5201,
 
@@ -877,12 +877,6 @@ public enum MessageAction
     [Description("Start storage encryption")]
     StartStorageEncryption = 5050,
 
-    [Description("Privacy room enable")]
-    PrivacyRoomEnable = 5051,
-
-    [Description("Privacy room disable")]
-    PrivacyRoomDisable = 5052,
-
     [Description("Start storage decryption")]
     StartStorageDecryption = 5053,
 
@@ -933,28 +927,28 @@ public enum MessageAction
 
     [Description("MCP server created")]
     ServerCreated = 6076,
-    
+
     [Description("MCP server updated")]
     ServerUpdated = 6077,
-    
+
     [Description("MCP server enabled")]
     ServerEnabled = 6078,
-    
+
     [Description("MCP server disabled")]
     ServerDisabled = 6079,
-    
+
     [Description("MCP server deleted")]
     ServerDeleted = 6080,
-    
+
     [Description("WebSearch settings configured")]
     SetWebSearchSettings = 6081,
-    
+
     [Description("WebSearch settings reset")]
     ResetWebSearchSettings = 6082,
-    
+
     [Description("Vectorization settings configured")]
     SetVectorizationSettings = 6083,
-    
+
     [Description("Vectorization settings reset")]
     ResetVectorizationSettings = 6084,
 
@@ -990,7 +984,7 @@ public enum MessageAction
 
     [Description("Login settings updated")]
     LoginSettingsUpdated = 6095,
-    
+
     [Description("AI default provider set")]
     AIDefaultProviderSet = 6096,
 
@@ -999,6 +993,9 @@ public enum MessageAction
 
     [Description("AI access disabled")]
     AIAccessDisabled = 6098,
+
+    [Description("User AI settings updated")]
+    UserUpdatedAiSettings = 6099,
 
     #endregion
 

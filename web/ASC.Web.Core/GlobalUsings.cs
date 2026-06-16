@@ -133,8 +133,6 @@ global using MimeKit.Utils;
 
 global using ProtoBuf;
 
-global using SkiaSharp;
-
 global using Twilio.Clients;
 global using Twilio.Rest.Api.V2010.Account;
 global using Twilio.Types;

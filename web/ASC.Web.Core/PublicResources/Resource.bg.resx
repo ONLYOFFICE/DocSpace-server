@@ -139,7 +139,7 @@
     <value>Количество</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>{LogoText} AI</value>
+    <value>AI функции</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Резервно копие</value>
@@ -1153,10 +1153,10 @@
     <value>Броят на AI агентите не трябва да надвишава {0}</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>{LogoText} AI</value>
+    <value>AI функции</value>
   </data>
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Активирайте AI функциите във вашия DocSpace, за да повишите производителността.</value>
+    <value>Активирайте AI функциите, за да повишите производителността.</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Проследяване на влизания и действия</value>
@@ -1165,7 +1165,10 @@
     <value>Резервно копие</value>
   </data>
   <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
-    <value>Активирайте архивирането на вашия DocSpace. Разходите ще бъдат таксувани автоматично.</value>
+    <value>Активирайте архивирането. Разходите ще бъдат таксувани автоматично.</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_additional" xml:space="preserve">
+    <value>Допълнително архивиране</value>
   </data>
   <data name="TariffsFeature_customization" xml:space="preserve">
     <value>Брандинг и персонализиране</value>

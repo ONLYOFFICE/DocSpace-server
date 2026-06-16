@@ -1,24 +1,24 @@
 ﻿// Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
@@ -166,7 +166,7 @@ public class EditorConfigurationDto
     /// <summary>
     /// The encryption keys of the editor configuration.
     /// </summary>
-    public EncryptionKeysConfig EncryptionKeys { get; set; }
+    public EncryptionKeyDto EncryptionKeys { get; set; }
 
     /// <summary>
     /// The language of the editor configuration.
@@ -570,6 +570,7 @@ public class EditorConfigurationConverter<T>(CustomizationConfigConverter<T> con
         }
 
         var fileType = configuration.GetFileType(file);
+        var recent = await source.GetRecent(fileType, file.Id).ToListAsync();
         var result = new EditorConfigurationDto
         {
             CallbackUrl = await source.GetCallbackUrl(file),
@@ -582,7 +583,7 @@ public class EditorConfigurationConverter<T>(CustomizationConfigConverter<T> con
             Mode = source.Mode,
             ModeWrite = source.ModeWrite,
             Plugins = source.Plugins,
-            Recent = await source.GetRecent(fileType, file.Id).ToListAsync(),
+            Recent = recent.Count == 0 ? null : recent,
             Templates = [], // await source.GetTemplates(fileType, configuration.Document.Title),
             User = authContext.IsAuthenticated ? await source.GetUserAsync() : null
         };

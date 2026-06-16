@@ -32,11 +32,11 @@
     <PackageVersion Include="Asp.Versioning.Http" Version="8.1.1" />
     <PackageVersion Include="Asp.Versioning.Mvc" Version="8.1.1" />
     <PackageVersion Include="Asp.Versioning.Mvc.ApiExplorer" Version="8.1.1" />
-    <PackageVersion Include="Aspire.Hosting.AppHost" Version="13.3.1" />
-    <PackageVersion Include="Aspire.Hosting.JavaScript" Version="13.3.1" />
-    <PackageVersion Include="Aspire.Hosting.MySql" Version="13.3.1" />
-    <PackageVersion Include="Aspire.Hosting.RabbitMQ" Version="13.3.1" />
-    <PackageVersion Include="Aspire.Hosting.Redis" Version="13.3.1" />
+    <PackageVersion Include="Aspire.Hosting.AppHost" Version="13.4.2" />
+    <PackageVersion Include="Aspire.Hosting.JavaScript" Version="13.4.2" />
+    <PackageVersion Include="Aspire.Hosting.MySql" Version="13.4.2" />
+    <PackageVersion Include="Aspire.Hosting.RabbitMQ" Version="13.4.2" />
+    <PackageVersion Include="Aspire.Hosting.Redis" Version="13.4.2" />
     <PackageVersion Include="AspNetCore.HealthChecks.Kafka" Version="9.0.0" />
     <PackageVersion Include="AspNetCore.HealthChecks.MySql" Version="9.0.0" />
     <PackageVersion Include="AspNetCore.HealthChecks.NpgSql" Version="9.0.0" />
@@ -57,9 +57,9 @@
     <PackageVersion Include="Bogus" Version="35.6.5" />
     <PackageVersion Include="Box.V2.Core" Version="5.8.0" />
     <PackageVersion Include="CommandLineParser" Version="2.9.1" />
-    <PackageVersion Include="CommunityToolkit.Aspire.Hosting.MailPit" Version="13.1.1" />
-    <PackageVersion Include="CommunityToolkit.Aspire.Hosting.McpInspector" Version="13.1.1" />
-    <PackageVersion Include="CommunityToolkit.Aspire.Hosting.MySql.Extensions" Version="13.1.1" />
+    <PackageVersion Include="CommunityToolkit.Aspire.Hosting.MailPit" Version="13.4.0" />
+    <PackageVersion Include="CommunityToolkit.Aspire.Hosting.McpInspector" Version="13.4.0" />
+    <PackageVersion Include="CommunityToolkit.Aspire.Hosting.MySql.Extensions" Version="13.4.0" />
     <PackageVersion Include="Confluent.Kafka" Version="2.13.0" />
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />
     <PackageVersion Include="CsvHelper" Version="33.1.0" />
@@ -102,9 +102,9 @@
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.10" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.10" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.10" />
-    <PackageVersion Include="Microsoft.Extensions.AI" Version="10.3.0" />
-    <PackageVersion Include="Microsoft.Extensions.AI.Abstractions" Version="10.3.0" />
-    <PackageVersion Include="Microsoft.Extensions.AI.OpenAI" Version="10.3.0" />
+    <PackageVersion Include="Microsoft.Extensions.AI" Version="10.6.0" />
+    <PackageVersion Include="Microsoft.Extensions.AI.Abstractions" Version="10.6.0" />
+    <PackageVersion Include="Microsoft.Extensions.AI.OpenAI" Version="10.6.0" />
     <PackageVersion Include="Microsoft.Extensions.ApiDescription.Server" Version="10.0.8" />
     <PackageVersion Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.8" />
     <PackageVersion Include="Microsoft.Extensions.Configuration" Version="10.0.8" />
@@ -117,19 +117,19 @@
     <PackageVersion Include="Microsoft.Extensions.Hosting.WindowsServices" Version="10.0.8" />
     <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.8" />
     <PackageVersion Include="Microsoft.Extensions.Http.Polly" Version="10.0.8" />
-    <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="10.3.0" />
+    <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="10.6.0" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.8" />
     <PackageVersion Include="Microsoft.Extensions.Options" Version="10.0.8" />
-    <PackageVersion Include="Microsoft.Extensions.Resilience" Version="10.3.0" />
+    <PackageVersion Include="Microsoft.Extensions.Resilience" Version="10.6.0" />
     <PackageVersion Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="8.15.0" />
     <PackageVersion Include="Microsoft.ML.Tokenizers.Data.Cl100kBase" Version="2.0.0" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
     <PackageVersion Include="Microsoft.OneDriveSDK" Version="2.1.0" />
     <PackageVersion Include="Microsoft.ML.Tokenizers" Version="2.0.0" />
-    <PackageVersion Include="Microsoft.SemanticKernel.Core" Version="1.72.0" />
+    <PackageVersion Include="Microsoft.SemanticKernel.Core" Version="1.77.0" />
     <PackageVersion Include="Microsoft.SharePoint.Client" Version="14.0.4762.1000" />
     <PackageVersion Include="Microsoft.Windows.Compatibility" Version="10.0.8" />
-    <PackageVersion Include="ModelContextProtocol" Version="1.0.0" />
+    <PackageVersion Include="ModelContextProtocol" Version="1.4.0" />
     <PackageVersion Include="Moq" Version="4.18.4" />
     <PackageVersion Include="Mscc.GenerativeAI.Microsoft" Version="3.1.0" />
     <PackageVersion Include="MSTest.TestFramework" Version="3.6.3" />
@@ -138,6 +138,7 @@
     <PackageVersion Include="NLog" Version="5.5.0" />
     <PackageVersion Include="NLog.DiagnosticSource" Version="5.2.3" />
     <PackageVersion Include="NLog.Targets.ElasticSearch" Version="7.7.0" />
+    <PackageVersion Include="NLog.Targets.OpenTelemetryProtocol" Version="1.2.3" />
     <PackageVersion Include="NLog.Targets.Syslog" Version="7.0.0" />
     <PackageVersion Include="NLog.Web.AspNetCore" Version="5.5.0" />
     <PackageVersion Include="Novell.Directory.Ldap.NETStandard" Version="3.6.0" />
@@ -165,25 +166,27 @@
     <PackageVersion Include="Rackspace" Version="1.0.0" />
     <PackageVersion Include="RedisRateLimiting" Version="1.2.1" />
     <PackageVersion Include="RedisRateLimiting.AspNetCore" Version="1.2.1" />
+    <PackageVersion Include="Refit" Version="11.0.1" />
+    <PackageVersion Include="Refit.HttpClientFactory" Version="11.0.1" />
     <PackageVersion Include="Respawn" Version="7.0.0" />
     <PackageVersion Include="ResXResourceReader.NetStandard" Version="1.1.0" />
     <PackageVersion Include="Riok.Mapperly" Version="4.3.1" />
-    <PackageVersion Include="Scalar.AspNetCore" Version="2.13.1" />
-    <PackageVersion Include="Scalar.AspNetCore.Swashbuckle" Version="2.13.1" />
+    <PackageVersion Include="Scalar.AspNetCore" Version="2.14.14" />
+    <PackageVersion Include="Scalar.AspNetCore.Swashbuckle" Version="2.14.14" />
     <PackageVersion Include="SharpZipLib" Version="2.4.3" />
-    <PackageVersion Include="SkiaSharp" Version="3.119.2" />
-    <PackageVersion Include="SkiaSharp.NativeAssets.Linux" Version="3.119.2" />
-    <PackageVersion Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="3.119.2" />
+    <PackageVersion Include="SkiaSharp" Version="3.119.4" />
+    <PackageVersion Include="SkiaSharp.NativeAssets.Linux" Version="3.119.4" />
+    <PackageVersion Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="3.119.4" />
     <PackageVersion Include="Spectre.Console" Version="0.54.0" />
     <PackageVersion Include="Spectre.Console.Cli" Version="0.53.1" />
-    <PackageVersion Include="StackExchange.Redis" Version="2.11.3" />
+    <PackageVersion Include="StackExchange.Redis" Version="2.13.17" />
     <PackageVersion Include="StackExchange.Redis.Extensions.AspNetCore" Version="11.0.0" />
     <PackageVersion Include="StackExchange.Redis.Extensions.Core" Version="11.0.0" />
     <PackageVersion Include="StackExchange.Redis.Extensions.Newtonsoft" Version="11.0.0" />
     <PackageVersion Include="Svg.Skia" Version="3.4.1" />
-    <PackageVersion Include="Swashbuckle.AspNetCore" Version="10.1.4" />
-    <PackageVersion Include="Swashbuckle.AspNetCore.Annotations" Version="10.1.4" />
-    <PackageVersion Include="Swashbuckle.AspNetCore.SwaggerGen" Version="10.1.4" />
+    <PackageVersion Include="Swashbuckle.AspNetCore" Version="10.2.1" />
+    <PackageVersion Include="Swashbuckle.AspNetCore.Annotations" Version="10.2.1" />
+    <PackageVersion Include="Swashbuckle.AspNetCore.SwaggerGen" Version="10.2.1" />
     <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="8.15.0" />
     <PackageVersion Include="Aspire.Hosting.PostgreSQL" Version="13.2.0" />
     <PackageVersion Include="Aspire.Hosting.Testing" Version="13.2.0" />

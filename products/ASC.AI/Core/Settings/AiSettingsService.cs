@@ -43,7 +43,8 @@ public class AiSettingsService(
     VectorizationGlobalSettings vectorizationGlobalSettings,
     SystemMcpConfig systemMcpConfig,
     ModelClientFactory modelClientFactory,
-    MessageService messageService)
+    MessageService messageService,
+    SettingsManager settingsManager)
 {
     public async Task<WebSearchSettings> SetWebSearchSettingsAsync(bool enabled, EngineType type, string? key)
     {
@@ -226,9 +227,29 @@ public class AiSettingsService(
             ModelAliases = aiSettingsStore.GetModelAliases(),
             PortalMcpServerId = docSpaceMcpServer?.Id,
             SystemAiEnabled = aiStatus.GatewayEnabled,
+            RecommendedModelForForms = aiSettingsStore.GetRecommendedModelForForms(),
         };
     }
-    
+
+    public async Task<AiUserSettings> GetAiUserSettingsAsync()
+    {
+        return await settingsManager.LoadForCurrentUserAsync<AiUserSettings>();
+    }
+
+    public async Task<AiUserSettings> SetAiUserSettingsAsync(bool chatRecommendedModelVisible)
+    {
+        var settings = new AiUserSettings
+        {
+            ChatRecommendedModelVisible = chatRecommendedModelVisible,
+        };
+
+        await settingsManager.SaveForCurrentUserAsync(settings);
+
+        messageService.Send(MessageAction.UserUpdatedAiSettings);
+
+        return settings;
+    }
+
     private async Task ThrowIfNotAccess()
     {
         if (!await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))

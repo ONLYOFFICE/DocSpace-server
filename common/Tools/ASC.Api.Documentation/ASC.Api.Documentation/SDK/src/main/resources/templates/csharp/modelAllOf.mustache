@@ -127,7 +127,7 @@
         /// Initializes a new instance of the <see cref="{{classname}}" /> class.
         /// </summary>
         {{#vendorExtensions.x-localVars}}
-        /// <param name="{{#lambda.camelcase_sanitize_param}}{{name}}{{/lambda.camelcase_sanitize_param}}">{{description}}{{^description}}{{#lambda.camelcase_sanitize_param}}{{name}}{{/lambda.camelcase_sanitize_param}}{{/description}}{{#required}} (required){{/required}}{{#defaultValue}} (default to {{.}}){{/defaultValue}}.</param>
+        /// <param name="{{#lambda.unescape_param}}{{#lambda.camelcase_sanitize_param}}{{name}}{{/lambda.camelcase_sanitize_param}}{{/lambda.unescape_param}}">{{description}}{{^description}}{{#lambda.camelcase_sanitize_param}}{{name}}{{/lambda.camelcase_sanitize_param}}{{/description}}{{#required}} (required){{/required}}{{#defaultValue}} (default to {{.}}){{/defaultValue}}.</param>
         {{/vendorExtensions.x-localVars}}
     {{#hasOnlyReadOnly}}
         [JsonConstructor]

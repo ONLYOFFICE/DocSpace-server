@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -45,7 +45,7 @@ public class BaseIndexerFolder(
     : BaseIndexer<DbFolder>(client, log, dbContextManager, tenantManager, baseIndexerHelper, settings, serviceProvider);
 
 [Scope(typeof(IFactoryIndexer))]
-public class FactoryIndexerFolder(ILoggerProvider options,
+public class FactoryIndexerFolder(ILoggerFactory loggerFactory,
         TenantManager tenantManager,
         SearchSettingsHelper searchSettingsHelper,
         FactoryIndexer factoryIndexer,
@@ -54,7 +54,7 @@ public class FactoryIndexerFolder(ILoggerProvider options,
         IDbContextFactory<FilesDbContext> dbContextFactory,
         ICache cache,
         Settings settings)
-    : FactoryIndexer<DbFolder>(options, tenantManager, searchSettingsHelper, factoryIndexer, baseIndexer, serviceProvider, cache)
+    : FactoryIndexer<DbFolder>(loggerFactory, tenantManager, searchSettingsHelper, factoryIndexer, baseIndexer, serviceProvider, cache)
 {
     public override async Task IndexAllAsync()
     {

@@ -90,9 +90,19 @@ import lombok.*;
 @AllArgsConstructor
 @Schema(description = "Request to update an existing tenant client")
 public class UpdateClientRequest implements Serializable {
-  /** The name of the client. This field must not be blank. */
+  /**
+   * The name of the client. The client name length is expected to be between 3 and 256 characters.
+   */
   @NotBlank(message = "client name must not be empty")
-  @Schema(description = "The name of the client", example = "Updated Client")
+  @Size(
+      min = 3,
+      max = 256,
+      message = "client name length is expected to be between 3 and 256 characters")
+  @Schema(
+      description = "The name of the client",
+      example = "Updated Client",
+      minLength = 3,
+      maxLength = 256)
   private String name;
 
   /** The description of the client. */
