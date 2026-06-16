@@ -465,7 +465,6 @@ public class DocsCloudQuota
     /// The viewer users.
     /// </summary>
     /// <example>[{"userid": "00000000-0000-0000-0000-000000000000", "expire": "2024-01-15T10:30:00Z"}]</example>
-    [JsonPropertyName("users_view")]
     public List<DocsCloudQuotaUser> UsersView { get; init; }
 }
 
@@ -478,7 +477,6 @@ public class DocsCloudQuotaUser
     /// The user ID.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
-    [JsonPropertyName("userid")]
     public string UserId { get; init; }
 
     /// <summary>
