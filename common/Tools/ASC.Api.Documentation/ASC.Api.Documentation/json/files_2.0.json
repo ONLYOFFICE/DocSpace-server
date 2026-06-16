@@ -5701,8 +5701,6 @@
             "name": "extension",
             "in": "query",
             "description": "Specifies whether to search for a specific file extension in the \"Recent\" folder.",
-            "style": "deepObject",
-            "explode": true,
             "schema": {
               "type": "array",
               "items": {
@@ -7052,8 +7050,6 @@
             "name": "folderType",
             "in": "query",
             "description": "The parent folder types used to filter the folder contents by folder type.",
-            "style": "deepObject",
-            "explode": true,
             "schema": {
               "type": "array",
               "items": {
@@ -19190,8 +19186,6 @@
             "name": "type",
             "in": "query",
             "description": "The filter by room type.",
-            "style": "deepObject",
-            "explode": true,
             "schema": {
               "type": "array",
               "items": {

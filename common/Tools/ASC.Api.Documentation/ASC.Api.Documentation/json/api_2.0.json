@@ -17777,8 +17777,6 @@
             "name": "ids",
             "in": "query",
             "description": "The list of module identifiers for which to retrieve the security settings.",
-            "style": "deepObject",
-            "explode": true,
             "schema": {
               "type": "array",
               "items": {
