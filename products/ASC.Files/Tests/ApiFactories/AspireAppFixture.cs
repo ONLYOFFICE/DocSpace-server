@@ -68,6 +68,10 @@ public class AspireAppFixture : IAsyncLifetime
     public GroupApi GroupApi { get; private set; } = null!;
     public PhotosApi PhotosApi { get; private set; } = null!;
 
+    // Editors service
+    public HttpClient EditorsHttpClient { get; private set; } = null!;
+    private const string EditorsJwtSecret = "secret";
+
     // WebApi service
     public HttpClient WebApiHttpClient { get; private set; } = null!;
     public DocSpace.API.SDK.Api.Settings.QuotaApi WebApiSettingsQuotaApi { get; private set; } = null!;
@@ -100,12 +104,14 @@ public class AspireAppFixture : IAsyncLifetime
         const string onlyofficeFiles = "onlyoffice-files";
         const string onlyofficePeople = "onlyoffice-people";
         const string onlyofficeWebApi = "onlyoffice-web-api";
+        const string onlyofficeEditors = "onlyoffice-editors";
 
         var waitForFiles = resourceNotifications.WaitForResourceHealthyAsync(onlyofficeFiles);
         var waitForPeople = resourceNotifications.WaitForResourceHealthyAsync(onlyofficePeople);
         var waitForApi = resourceNotifications.WaitForResourceHealthyAsync(onlyofficeWebApi);
+        var waitForEditors = resourceNotifications.WaitForResourceHealthyAsync(onlyofficeEditors);
 
-        await Task.WhenAll(waitForFiles, waitForPeople, waitForApi);
+        await Task.WhenAll(waitForFiles, waitForPeople, waitForApi, waitForEditors);
 
         // Get connection strings from Aspire resources
         var dbConnectionString = await _app.GetConnectionStringAsync("docspace");
@@ -120,6 +126,7 @@ public class AspireAppFixture : IAsyncLifetime
         FilesHttpClient = CreateHttpClientNoCookies(onlyofficeFiles);
         PeopleHttpClient = CreateHttpClientNoCookies(onlyofficePeople);
         WebApiHttpClient = CreateHttpClientNoCookies(onlyofficeWebApi);
+        EditorsHttpClient = CreateHttpClientNoCookies(onlyofficeEditors);
 
         // Initialize Files API clients
         var filesConfig = new Configuration { BasePath = FilesHttpClient.BaseAddress!.ToString().TrimEnd('/') };
@@ -221,6 +228,258 @@ public class AspireAppFixture : IAsyncLifetime
     private static string MakeCopyTableName(string tableName)
     {
         return $"{tableName}_copy";
+    }
+
+    public async Task SimulateDocServiceSubmitFormAsync(
+        string callbackUrl,
+        string docKey,
+        Guid fillerUserId,
+        byte[] filledPdfBytes,
+        CancellationToken cancellationToken = default)
+    {
+        // Without formsdataurl the server throws inside SubmitFillingRoomFormAsync's try-catch, silently skipping link deletion.
+        var emptyFormsData = Encoding.UTF8.GetBytes("{}");
+        await ServeBytesOverHttpAsync(
+            emptyFormsData, "formsdata.json", "application/json", "host.docker.internal",
+            async formsDataUri =>
+            {
+                await ServeBytesOverHttpAsync(
+                    filledPdfBytes, "filled_form.pdf", "application/pdf", "host.docker.internal",
+                    async downloadUri =>
+                    {
+                        var submitKey = Convert.ToBase64String(
+                            Encoding.UTF8.GetBytes($"submit_{Guid.NewGuid()}_{docKey}")).TrimEnd('=');
+                        var payload = $$"""{"status":6,"forceSaveType":3,"key":"{{submitKey}}","users":["{{fillerUserId}}"],"url":"{{downloadUri}}","filetype":"pdf","formsdataurl":"{{formsDataUri}}"}""";
+
+                        // DocSpace validates the JWT token field when DocServiceSignatureSecret is configured
+                        var token = CreateJwtHs256(payload, EditorsJwtSecret);
+                        var trackerJson = $$"""{"status":6,"forceSaveType":3,"key":"{{submitKey}}","users":["{{fillerUserId}}"],"url":"{{downloadUri}}","filetype":"pdf","formsdataurl":"{{formsDataUri}}","token":"{{token}}"}""";
+
+                        var callbackPath = new Uri(callbackUrl).PathAndQuery;
+                        using var content = new StringContent(trackerJson, Encoding.UTF8, "application/json");
+                        using var response = await FilesHttpClient.PostAsync(callbackPath, content, cancellationToken);
+                        var body = await response.Content.ReadAsStringAsync(cancellationToken);
+                        if (!response.IsSuccessStatusCode)
+                        {
+                            throw new InvalidOperationException($"DS callback failed: {response.StatusCode} - {body}");
+                        }
+                        return body;
+                    },
+                    cancellationToken);
+                return formsDataUri;
+            },
+            cancellationToken);
+    }
+
+    public async Task SimulateDocServiceSessionCloseAsync(
+        string callbackUrl,
+        string docKey,
+        Guid fillerUserId,
+        CancellationToken cancellationToken = default)
+    {
+        var payload = $$"""{"status":4,"key":"{{docKey}}","users":["{{fillerUserId}}"]}""";
+        var token = CreateJwtHs256(payload, EditorsJwtSecret);
+        var json = $$"""{"status":4,"key":"{{docKey}}","users":["{{fillerUserId}}"],"token":"{{token}}"}""";
+        var callbackPath = new Uri(callbackUrl).PathAndQuery;
+        using var content = new StringContent(json, Encoding.UTF8, "application/json");
+        using var response = await FilesHttpClient.PostAsync(callbackPath, content, cancellationToken);
+        var body = await response.Content.ReadAsStringAsync(cancellationToken);
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new InvalidOperationException($"DS session close callback failed: {response.StatusCode} - {body}");
+        }
+    }
+
+    public Task<byte[]> RunDocBuilderAsync(string scriptResourceName, string outputFileName, CancellationToken cancellationToken = default) =>
+        RunDocBuilderAsync(scriptResourceName, outputFileName, argumentJson: null, cancellationToken);
+
+    public async Task<byte[]> RunDocBuilderAsync(string scriptResourceName, string outputFileName, string? argumentJson, CancellationToken cancellationToken = default)
+    {
+        var assembly = typeof(AspireAppFixture).Assembly;
+
+        await using var scriptStream = assembly.GetManifestResourceStream($"ASC.Files.Tests.Data.{scriptResourceName}")
+            ?? throw new FileNotFoundException($"Embedded docbuilder script '{scriptResourceName}' not found.", scriptResourceName);
+
+        using var scriptBuffer = new MemoryStream();
+        await scriptStream.CopyToAsync(scriptBuffer, cancellationToken);
+        var scriptBytes = scriptBuffer.ToArray();
+
+        return await ServeBytesOverHttpAsync(
+            scriptBytes,
+            scriptResourceName,
+            "text/plain; charset=utf-8",
+            "host.docker.internal",
+            scriptUrl => CallDocBuilderAsync(scriptUrl, outputFileName, argumentJson, cancellationToken),
+            cancellationToken);
+    }
+
+    private async Task<byte[]> CallDocBuilderAsync(string scriptUrl, string outputFileName, string? argumentJson, CancellationToken cancellationToken)
+    {
+        var argumentFragment = string.IsNullOrEmpty(argumentJson) ? string.Empty : $",\"argument\":{argumentJson}";
+        var payloadJson = $"{{\"async\":false,\"url\":\"{scriptUrl}\"{argumentFragment}}}";
+        var tokenJson = $"{{\"payload\":{payloadJson}}}";
+        var jwt = CreateJwtHs256(tokenJson, EditorsJwtSecret);
+        var signedBody = $"{{\"async\":false,\"url\":\"{scriptUrl}\"{argumentFragment},\"token\":\"{jwt}\"}}";
+
+        const int maxAttempts = 5;
+        HttpResponseMessage? response = null;
+        string? lastErrorBody = null;
+        HttpStatusCode lastStatus = 0;
+
+        try
+        {
+            for (var attempt = 1; attempt <= maxAttempts; attempt++)
+            {
+                response?.Dispose();
+
+                using var requestContent = new StringContent(signedBody, Encoding.UTF8, "application/json");
+                using var request = new HttpRequestMessage(HttpMethod.Post, "docbuilder") { Content = requestContent };
+                request.Headers.TryAddWithoutValidation("AuthorizationJwt", $"Bearer {jwt}");
+
+                response = await EditorsHttpClient.SendAsync(request, cancellationToken);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    break;
+                }
+
+                lastStatus = response.StatusCode;
+                lastErrorBody = await response.Content.ReadAsStringAsync(cancellationToken);
+
+                if ((int)response.StatusCode is not (502 or 503 or 504))
+                {
+                    break;
+                }
+
+                await Task.Delay(TimeSpan.FromSeconds(attempt), cancellationToken);
+            }
+
+            if (response is null || !response.IsSuccessStatusCode)
+            {
+                throw new InvalidOperationException($"docbuilder request failed after retries. Status: {lastStatus}. Body: {lastErrorBody}");
+            }
+
+            await using var bodyStream = await response.Content.ReadAsStreamAsync(cancellationToken);
+            using var doc = await JsonDocument.ParseAsync(bodyStream, cancellationToken: cancellationToken);
+
+            if (!doc.RootElement.TryGetProperty("urls", out var urls)
+                || !urls.TryGetProperty(outputFileName, out var outputUrlElement)
+                || outputUrlElement.GetString() is not { } outputUrl)
+            {
+                throw new InvalidOperationException($"docbuilder response did not contain url for '{outputFileName}'.");
+            }
+
+            var outputPath = new Uri(outputUrl).PathAndQuery;
+            return await EditorsHttpClient.GetByteArrayAsync(outputPath, cancellationToken);
+        }
+        finally
+        {
+            response?.Dispose();
+        }
+    }
+
+    public async Task<TResult> ServeBytesOverHttpAsync<TResult>(
+        byte[] bytes,
+        string fileName,
+        string contentType,
+        string hostnameForUrl,
+        Func<string, Task<TResult>> action,
+        CancellationToken cancellationToken = default)
+    {
+        using var listener = new TcpListener(IPAddress.Any, 0);
+        listener.Start();
+        var port = ((IPEndPoint)listener.LocalEndpoint).Port;
+
+        using var serveCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        var serveTask = ServeBytesLoopAsync(listener, bytes, contentType, serveCts.Token);
+
+        try
+        {
+            var url = $"http://{hostnameForUrl}:{port}/{fileName}";
+            return await action(url);
+        }
+        finally
+        {
+            await serveCts.CancelAsync();
+            listener.Stop();
+            try { await serveTask; } catch { /* listener stopped */ }
+        }
+    }
+
+    private static async Task ServeBytesLoopAsync(TcpListener listener, byte[] bytes, string contentType, CancellationToken cancellationToken)
+    {
+        while (!cancellationToken.IsCancellationRequested)
+        {
+            TcpClient client;
+            try
+            {
+                client = await listener.AcceptTcpClientAsync(cancellationToken);
+            }
+            catch (OperationCanceledException) { return; }
+            catch (ObjectDisposedException) { return; }
+            catch (SocketException) { return; }
+
+            _ = HandleBytesRequestAsync(client, bytes, contentType, cancellationToken);
+        }
+    }
+
+    private static async Task HandleBytesRequestAsync(TcpClient client, byte[] bytes, string contentType, CancellationToken cancellationToken)
+    {
+        try
+        {
+            using (client)
+            await using (var stream = client.GetStream())
+            {
+                var requestBuffer = new byte[4096];
+                var totalRead = 0;
+                while (totalRead < requestBuffer.Length)
+                {
+                    var read = await stream.ReadAsync(requestBuffer.AsMemory(totalRead), cancellationToken);
+                    if (read == 0)
+                    {
+                        break;
+                    }
+
+                    totalRead += read;
+                    var headerEnd = Encoding.ASCII.GetString(requestBuffer, 0, totalRead).IndexOf("\r\n\r\n", StringComparison.Ordinal);
+                    if (headerEnd >= 0)
+                    {
+                        break;
+                    }
+                }
+
+                var method = ExtractHttpMethod(requestBuffer, totalRead);
+                var headers = $"HTTP/1.1 200 OK\r\nContent-Type: {contentType}\r\nContent-Length: {bytes.Length}\r\nConnection: close\r\n\r\n";
+                var headerBytes = Encoding.ASCII.GetBytes(headers);
+                await stream.WriteAsync(headerBytes, cancellationToken);
+
+                if (!string.Equals(method, "HEAD", StringComparison.OrdinalIgnoreCase))
+                {
+                    await stream.WriteAsync(bytes, cancellationToken);
+                }
+
+                await stream.FlushAsync(cancellationToken);
+            }
+        }
+        catch { }
+    }
+
+    private static string ExtractHttpMethod(byte[] buffer, int length)
+    {
+        var spaceIndex = Array.IndexOf(buffer, (byte)' ', 0, length);
+        return spaceIndex > 0 ? Encoding.ASCII.GetString(buffer, 0, spaceIndex) : string.Empty;
+    }
+
+    private static string CreateJwtHs256(string payloadJson, string secret)
+    {
+        static string Base64Url(byte[] data) =>
+            Convert.ToBase64String(data).TrimEnd('=').Replace('+', '-').Replace('/', '_');
+
+        var header = Base64Url(Encoding.UTF8.GetBytes("{\"alg\":\"HS256\",\"typ\":\"JWT\"}"));
+        var payload = Base64Url(Encoding.UTF8.GetBytes(payloadJson));
+        using var hmac = new System.Security.Cryptography.HMACSHA256(Encoding.UTF8.GetBytes(secret));
+        var signature = Base64Url(hmac.ComputeHash(Encoding.UTF8.GetBytes($"{header}.{payload}")));
+        return $"{header}.{payload}.{signature}";
     }
 
     public async ValueTask DisposeAsync()

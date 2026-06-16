@@ -1,0 +1,152 @@
+// =====================================================================
+//  Leave Application Form  —  ONLYOFFICE Document Builder script
+// =====================================================================
+//  Run with:
+//      docbuilder leave_application_form.docbuilder
+//  Output:
+//      leave_application_form.pdf  (PDF form, can be filled in any
+//      ONLYOFFICE editor / DocSpace)
+// =====================================================================
+
+builder.CreateFile("docx");
+const oDocument = Api.GetDocument();
+
+// ----- colours -----
+const BRAND   = [31, 58, 95];      // #1F3A5F
+const MUTED   = [136, 136, 136];   // #888888
+
+// ---------------------------------------------------------------------
+// helpers
+// ---------------------------------------------------------------------
+function addParagraph(opts) {
+    opts = opts || {};
+    const p = Api.CreateParagraph();
+    if (opts.jc)             p.SetJc(opts.jc);
+    if (opts.spacingBefore)  p.SetSpacingBefore(opts.spacingBefore);
+    if (opts.spacingAfter)   p.SetSpacingAfter(opts.spacingAfter);
+    oDocument.Push(p);
+    return p;
+}
+
+function addText(paragraph, text, opts) {
+    opts = opts || {};
+    const r = paragraph.AddText(text);
+    if (opts.bold)     r.SetBold(true);
+    if (opts.italic)   r.SetItalic(true);
+    if (opts.size)     r.SetFontSize(opts.size);          // half-points
+    if (opts.color)    r.SetColor(opts.color[0], opts.color[1], opts.color[2]);
+    return r;
+}
+
+function addLabel(text) {
+    const p = addParagraph({ spacingBefore: 200, spacingAfter: 60 });
+    addText(p, text, { bold: true, size: 22, color: BRAND });
+    return p;
+}
+
+function addFormField(form) {
+    const p = addParagraph({ spacingAfter: 120 });
+    p.AddElement(form);
+    // give the field some visible width by appending spaces inside it
+    form.SetPlaceholderText(form.GetPlaceholderText ? form.GetPlaceholderText() : "");
+    return p;
+}
+
+// ---------------------------------------------------------------------
+// header
+// ---------------------------------------------------------------------
+// remove the default empty first paragraph, we'll add our own
+const firstP = oDocument.GetElement(0);
+
+addText(firstP, "LEAVE APPLICATION FORM",
+        { bold: true, size: 36, color: BRAND });
+firstP.SetJc("center");
+firstP.SetSpacingAfter(120);
+
+const subtitle = addParagraph({ jc: "center", spacingAfter: 240 });
+addText(subtitle,
+        "Please fill in all fields below and submit to your manager.",
+        { italic: true, size: 22, color: MUTED });
+
+// ---------------------------------------------------------------------
+// fields
+// ---------------------------------------------------------------------
+
+// 1. First Name
+addLabel("First Name");
+addFormField(Api.CreateTextForm({
+    "key":           "first_name",
+    "tip":           "Enter your first name",
+    "required":      true,
+    "placeholder":   "First name",
+    "comb":          false,
+    "multiLine":     false,
+    "autoFit":       true
+}));
+
+// 2. Last Name
+addLabel("Last Name");
+addFormField(Api.CreateTextForm({
+    "key":           "last_name",
+    "tip":           "Enter your last name",
+    "required":      true,
+    "placeholder":   "Last name",
+    "comb":          false,
+    "multiLine":     false,
+    "autoFit":       true
+}));
+
+// 3. Start Date  —  proper date form, not a plain text field
+addLabel("Start Date");
+addFormField(Api.CreateDateForm({
+    "key":           "start_date",
+    "tip":           "Pick the first day of your leave",
+    "required":      true,
+    "placeholder":   "DD/MM/YYYY",
+    "format":        "dd/mm/yyyy",
+    "lang":          "en-US"
+}));
+
+// 4. End Date
+addLabel("End Date");
+addFormField(Api.CreateDateForm({
+    "key":           "end_date",
+    "tip":           "Pick the last day of your leave",
+    "required":      true,
+    "placeholder":   "DD/MM/YYYY",
+    "format":        "dd/mm/yyyy",
+    "lang":          "en-US"
+}));
+
+// 5. Vacation Destination  —  multiline text field
+addLabel("Vacation Destination");
+addFormField(Api.CreateTextForm({
+    "key":           "vacation_destination",
+    "tip":           "Where do you plan to spend your vacation?",
+    "required":      true,
+    "placeholder":   "City, country, optional details",
+    "comb":          false,
+    "multiLine":     true,
+    "autoFit":       true
+}));
+
+// ---------------------------------------------------------------------
+// signature line
+// ---------------------------------------------------------------------
+addParagraph({ spacingBefore: 480 });   // some empty space
+
+const sig = addParagraph();
+addText(sig, "Employee Signature: ____________________________     ",
+        { size: 22 });
+addText(sig, "Date: __________________", { size: 22 });
+
+// footer note
+const footer = addParagraph({ jc: "center", spacingBefore: 480 });
+addText(footer, "Leave Application Form  •  Generated for internal use",
+        { italic: true, size: 16, color: MUTED });
+
+// ---------------------------------------------------------------------
+// save as a PDF form
+// ---------------------------------------------------------------------
+builder.SaveFile("form", "leave_application_form.pdf");
+builder.CloseFile();
