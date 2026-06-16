@@ -100,6 +100,11 @@ public class AiGateway(
         return await SendAsync<RestrictedModelsResponse>(HttpMethod.Put, "/chat/models/restrictions", content);
     }
 
+    public async Task<ModelsResponse> GetModelsAsync()
+    {
+        return await SendAsync<ModelsResponse>(HttpMethod.Get, "/chat/models");
+    }
+
     private async Task<string> GenerateKeyAsync()
     {
         var customerInfo = await tariffService.GetCustomerInfoAsync(tenantManager.GetCurrentTenantId());
@@ -211,4 +216,19 @@ public class SetRestrictedModelsRequest
 public record RestrictedModelsResponse
 {
     public required List<string> Models { get; init; }
+}
+
+public record Model
+{
+    public required string Id { get; init; }
+    public required Guid RevisionId { get; init; }
+    public required List<string> InputModalities { get; init; }
+    public required List<string> OutputModalities { get; init; }
+    public List<string> Capabilities { get; init; }
+}
+
+
+public record ModelsResponse
+{
+    public required List<Model> Data { get; init; }
 }
