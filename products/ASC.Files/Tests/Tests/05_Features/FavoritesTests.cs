@@ -217,6 +217,125 @@ public class FavoritesTests(
         favorites.Files.Should().NotContain(f => f.Title == publicRoomFile.Title);
     }
 
+    [Fact]
+    public async Task AddToFavorites_FolderFromMyDocuments_AppearsInFavorites()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var folder = await CreateFolderInMy("favorite_my_folder", Initializer.Owner);
+
+        // Act
+        await AddFoldersToFavorites(folder.Id);
+
+        // Assert
+        var favorites = await GetFavoritesAsync(Initializer.Owner);
+        favorites.Folders.Should().ContainSingle(f => f.Title == folder.Title);
+    }
+
+    [Fact]
+    public async Task AddToFavorites_FolderFromSubFolderInMyDocuments_AppearsInFavorites()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var subFolder = await CreateFolderInMy("favorite_parent_folder", Initializer.Owner);
+        var folder = await CreateFolder("favorite_nested_folder", subFolder.Id);
+
+        // Act
+        await AddFoldersToFavorites(folder.Id);
+
+        // Assert - a folder nested in a sub-folder of "My documents" is still part of the "My documents" favorites
+        var favorites = await GetFavoritesAsync(Initializer.Owner, [FolderType.USER]);
+        favorites.Folders.Should().ContainSingle(f => f.Title == folder.Title);
+    }
+
+    [Fact]
+    public async Task AddToFavorites_FolderFromRoom_AppearsInFavorites()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var room = await CreateCustomRoom("favorite_custom_room");
+        var folder = await CreateFolder("favorite_room_folder", room.Id);
+
+        // Act
+        await AddFoldersToFavorites(folder.Id);
+
+        // Assert
+        var favorites = await GetFavoritesAsync(Initializer.Owner);
+        favorites.Folders.Should().ContainSingle(f => f.Title == folder.Title);
+    }
+
+    [Fact]
+    public async Task GetFavorites_FilterByMyDocuments_ReturnsOnlyMyDocumentsFolders()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+
+        var myFolder = await CreateFolderInMy("favorite_my_folder", Initializer.Owner);
+
+        var customRoom = await CreateCustomRoom("favorite_custom_room");
+        var customRoomFolder = await CreateFolder("favorite_custom_folder", customRoom.Id);
+
+        await AddFoldersToFavorites(myFolder.Id, customRoomFolder.Id);
+
+        // Act
+        var favorites = await GetFavoritesAsync(Initializer.Owner, [FolderType.USER]);
+
+        // Assert
+        favorites.Folders.Should().Contain(f => f.Title == myFolder.Title);
+        favorites.Folders.Should().NotContain(f => f.Title == customRoomFolder.Title);
+    }
+
+    [Fact]
+    public async Task GetFavorites_FilterByRooms_ReturnsOnlyRoomFolders()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+
+        var myFolder = await CreateFolderInMy("favorite_my_folder", Initializer.Owner);
+
+        var customRoom = await CreateCustomRoom("favorite_custom_room");
+        var customRoomFolder = await CreateFolder("favorite_custom_folder", customRoom.Id);
+
+        var publicRoom = await CreatePublicRoom("favorite_public_room");
+        var publicRoomFolder = await CreateFolder("favorite_public_folder", publicRoom.Id);
+
+        await AddFoldersToFavorites(myFolder.Id, customRoomFolder.Id, publicRoomFolder.Id);
+
+        // Act - VirtualRooms is the common ancestor of every room, so it selects all room folders
+        var favorites = await GetFavoritesAsync(Initializer.Owner, [FolderType.VirtualRooms]);
+
+        // Assert
+        favorites.Folders.Should().Contain(f => f.Title == customRoomFolder.Title);
+        favorites.Folders.Should().Contain(f => f.Title == publicRoomFolder.Title);
+        favorites.Folders.Should().NotContain(f => f.Title == myFolder.Title);
+    }
+
+    [Fact]
+    public async Task GetFavorites_FilterByFolderType_AppliesToBothFilesAndFolders()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+
+        var myFile = await CreateFileInMy("favorite_my.docx", Initializer.Owner);
+        var myFolder = await CreateFolderInMy("favorite_my_folder", Initializer.Owner);
+
+        var customRoom = await CreateCustomRoom("favorite_custom_room");
+        var customRoomFile = await CreateFile("favorite_custom.docx", customRoom.Id);
+        var customRoomFolder = await CreateFolder("favorite_custom_folder", customRoom.Id);
+
+        await AddToFavorites(myFile.Id, customRoomFile.Id);
+        await AddFoldersToFavorites(myFolder.Id, customRoomFolder.Id);
+
+        // Act
+        var favorites = await GetFavoritesAsync(Initializer.Owner, [FolderType.USER]);
+
+        // Assert - the parent folder type filter narrows both files and folders to "My documents"
+        favorites.Files.Should().Contain(f => f.Title == myFile.Title);
+        favorites.Files.Should().NotContain(f => f.Title == customRoomFile.Title);
+        favorites.Folders.Should().Contain(f => f.Title == myFolder.Title);
+        favorites.Folders.Should().NotContain(f => f.Title == customRoomFolder.Title);
+    }
+
     public static TheoryData<RoomType, FolderType> RoomTypeFilterCases =>
         new()
         {
@@ -236,6 +355,13 @@ public class FavoritesTests(
     private async Task AddToFavorites(params int[] fileIds)
     {
         var request = new BaseBatchRequestDto { FileIds = fileIds.Select(id => new BaseBatchRequestDtoAllOfFileIds(id)).ToList() };
+
+        await _filesOperationsApi.AddFavoritesAsync(request, cancellationToken: TestContext.Current.CancellationToken);
+    }
+
+    private async Task AddFoldersToFavorites(params int[] folderIds)
+    {
+        var request = new BaseBatchRequestDto { FolderIds = folderIds.Select(id => new BaseBatchRequestDtoAllOfFolderIds(id)).ToList() };
 
         await _filesOperationsApi.AddFavoritesAsync(request, cancellationToken: TestContext.Current.CancellationToken);
     }
