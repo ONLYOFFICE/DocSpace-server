@@ -3961,7 +3961,7 @@ public class FileStorageService //: IFileStorageService
         string title = null,
         DateTime expirationDate = default,
         bool denyDownload = false,
-        bool requiredAuth = false,
+        bool? requiredAuth = null,
         string password = null,
         bool allowUnlimitedDate = false)
     {
@@ -3994,7 +3994,7 @@ public class FileStorageService //: IFileStorageService
         var link = await fileSharing.GetPureSharesAsync(entry, ShareFilterType.PrimaryExternalLink, null, null, 0, 1).FirstOrDefaultAsync();
         if (link == null)
         {
-            requiredAuth = await ResolveRequiredAuthAsync(entry, requiredAuth);
+            var requiredAuthResolved = await ResolveRequiredAuthAsync(entry, requiredAuth ?? false,  applyDefault: !requiredAuth.HasValue);
 
             await DetermineParentRoomType(entry);
 
@@ -4023,7 +4023,7 @@ public class FileStorageService //: IFileStorageService
                         ? DateTime.UtcNow.Add(filesLinkUtility.DefaultLinkLifeTime)
                         : default,
                 denyDownload: denyDownload,
-                requiredAuth: requiredAuth,
+                requiredAuth: requiredAuthResolved,
                 password: password);
         }
 
