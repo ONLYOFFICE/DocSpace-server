@@ -1671,9 +1671,7 @@ public class FileSecurity(
 
                         if (action == FilesSecurityActions.UpdateXlsx)
                         {
-                            var isOwnOrStartedByUser = shareRecord is { Share: FileShare.ContentCreator } &&
-                                (file.CreateBy.Equals(userId) || formFilling?.StartedByUserId == userId);
-                            return userHasFullAccess || shareRecord is { Share: FileShare.RoomManager } || isOwnOrStartedByUser;
+                            return userHasFullAccess || shareRecord is { Share: FileShare.RoomManager or FileShare.ContentCreator };
                         }
 
                         if (action == FilesSecurityActions.StartFilling)
