@@ -7049,6 +7049,22 @@
             }
           },
           {
+            "name": "folderType",
+            "in": "query",
+            "description": "The parent folder types used to filter the folder contents by folder type.",
+            "style": "deepObject",
+            "explode": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/FolderType"
+              },
+              "example": [
+                2
+              ]
+            }
+          },
+          {
             "name": "excludeSubject",
             "in": "query",
             "description": "Specifies whether to exclude search by user or group ID.",
