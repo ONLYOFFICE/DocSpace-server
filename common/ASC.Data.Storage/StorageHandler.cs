@@ -251,21 +251,24 @@ public static class StorageHandlerExtensions
         var handler = new StorageHandler(string.Empty, module, domain, !publicRoute);
         var url = virtPath + "{*pathInfo}";
 
-        if (!builder.DataSources
-                .SelectMany(r => r.Endpoints)
-                .OfType<RouteEndpoint>()
-                .Any(e => string.Equals(e.RoutePattern.RawText, url, StringComparison.OrdinalIgnoreCase)))
+        if (NotRegistered(builder, url))
         {
             builder.MapGet(url, handler.InvokeAsync);
 
             var newUrl = url.Replace("{0}", "{t1}/{t2}/{t3}");
 
-            if (newUrl != url)
+            if (newUrl != url && NotRegistered(builder, newUrl))
             {
                 builder.MapGet(newUrl, handler.InvokeAsync);
             }
         }
 
         return builder;
+
+        static bool NotRegistered(IEndpointRouteBuilder builder, string pattern) =>
+            !builder.DataSources
+                .SelectMany(r => r.Endpoints)
+                .OfType<RouteEndpoint>()
+                .Any(e => string.Equals(e.RoutePattern.RawText, pattern, StringComparison.OrdinalIgnoreCase));
     }
 }
