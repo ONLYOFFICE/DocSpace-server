@@ -166,7 +166,8 @@ public static class DbQuotaExtension
                     Description = "since 01.04.2024",
                     Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,free_backup:2:fixed,automationapi",
                     Price = 20,
-                    ProductId = "1006"
+                    ProductId = "1006",
+                    Visible = true
                 },
                 new DbQuota
                 {
@@ -175,7 +176,8 @@ public static class DbQuotaExtension
                     Description = "since 10.02.2025",
                     Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,year,free_backup:2:fixed,automationapi",
                     Price = 220,
-                    ProductId = "1009"
+                    ProductId = "1009",
+                    Visible = true
                 },
                 new DbQuota
                 {
