@@ -42,7 +42,8 @@ public class ProfileStorageService(
     IDistributedLockProvider distributedLockProvider,
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
-    AiGateway aiGateway) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity)
+    AiGateway aiGateway,
+    BaseCommonLinkUtility linkUtility) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity)
 {
     private static readonly IEnumerable<EmployeeType> _writeTypes = [EmployeeType.DocSpaceAdmin];
     private static readonly IEnumerable<EmployeeType> _readTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin];
@@ -134,7 +135,7 @@ public class ProfileStorageService(
                 Id = m.RevisionId,
                 Name = m.Alias,
                 ProviderType = "openaicompatible",
-                BaseUrl = "http://localhost:8092/api/2.0/ai/gateway",
+                BaseUrl = linkUtility.GetFullAbsolutePath("api/2.0/ai/gateway"),
                 ModelId = m.Id,
                 Reasoning = HasCapability(m, "reasoning"),
                 CanUseTool = HasCapability(m, ToolsCapability),

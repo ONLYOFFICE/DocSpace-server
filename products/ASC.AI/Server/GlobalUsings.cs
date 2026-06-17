@@ -67,6 +67,7 @@ global using ASC.Common;
 global using ASC.Common.Log;
 global using ASC.Common.Threading.DistributedLock.Abstractions;
 global using ASC.Common.Web;
+global using ASC.Core.Common;
 global using ASC.Core.Common.EF;
 global using ASC.Core.Common.EF.Model.Ai;
 global using ASC.Core.Common.Settings;
