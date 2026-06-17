@@ -69,7 +69,7 @@ public class ReportDto
     /// The total quantity of operations in the report.
     /// </summary>
     /// <example>1</example>
-    public int TotalQuantity { get; set; }
+    public long TotalQuantity { get; set; }
     /// <summary>
     /// The total number of pages in the report.
     /// </summary>

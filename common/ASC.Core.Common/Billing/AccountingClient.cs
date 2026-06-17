@@ -278,27 +278,69 @@ public enum OperationStatus
     Canceled
 }
 
+public class DateRangeFilter
+{
+    /// <summary>
+    /// The start date of the period to filter from (inclusive).
+    /// </summary>
+    [AliasAs("startDate")]
+    [Query(Format = "o")]
+    public DateTime? UtcStartDate { get; init; }
+
+    /// <summary>
+    /// The end date of the period to filter until (inclusive).
+    /// </summary>
+    [AliasAs("endDate")]
+    [Query(Format = "o")]
+    public DateTime? UtcEndDate { get; init; }
+}
+
+public class PagedFilter : DateRangeFilter
+{
+    /// <summary>
+    /// The number of items to skip before starting to return results. Used for pagination.
+    /// </summary>
+    /// <remarks>Mutable (set) because it is reassigned per page while paginating, e.g. in CustomerOperationsReportTask.</remarks>
+    public int? Offset { get; set; }
+
+    /// <summary>
+    /// The maximum number of items to return in the response.
+    /// </summary>
+    /// <remarks>Mutable (set) because it is reassigned per page while paginating, e.g. in CustomerOperationsReportTask.</remarks>
+    public int? Limit { get; set; }
+
+    /// <summary>
+    /// The field to order by.
+    /// </summary>
+    public string OrderBy
+    {
+        get;
+        init => field = value?.Trim();
+    }
+
+    /// <summary>
+    /// Order direction: ASC or DESC.
+    /// </summary>
+    /// <remarks>
+    /// Descending is the server-side default, so it is normalized to <c>null</c> here:
+    /// an explicit Descending and an unspecified value produce the same request (no orderType param).
+    /// </remarks>
+    public OperationOrderType? OrderType
+    {
+        get;
+        init => field = value is OperationOrderType.Descending ? null : value;
+    }
+}
+
 /// <summary>
 /// Represents an object for filtering the list of customer operations.
 /// </summary>
-public class OperationFilter
+public class OperationFilter : PagedFilter
 {
     /// <summary>
     /// The service name.
     /// </summary>
     public string ServiceName { get; init; }
-    /// <summary>
-    /// The start date of the period to filter operations from (inclusive).
-    /// </summary>
-    [AliasAs("startDate")]
-    [Query(Format = "o")]
-    public DateTime? UtcStartDate { get; init; }
-    /// <summary>
-    /// The end date of the period to filter operations until (inclusive).
-    /// </summary>
-    [AliasAs("endDate")]
-    [Query(Format = "o")]
-    public DateTime? UtcEndDate { get; init; }
     /// <summary>
     /// Unique name of customer participant to filter by.
     /// </summary>
@@ -316,16 +358,6 @@ public class OperationFilter
     /// </summary>
     public bool? Debit { get; init; }
     /// <summary>
-    /// The number of items to skip before starting to return results. Used for pagination.
-    /// </summary>
-    /// <remarks>Mutable (set) because it is reassigned per page while paginating, e.g. in CustomerOperationsReportTask.</remarks>
-    public int? Offset { get; set; }
-    /// <summary>
-    /// The maximum number of items to return in the response.
-    /// </summary>
-    /// <remarks>Mutable (set) because it is reassigned per page while paginating, e.g. in CustomerOperationsReportTask.</remarks>
-    public int? Limit { get; set; }
-    /// <summary>
     /// The operation type to filter by.
     /// </summary>
     [AliasAs("types")]
@@ -334,51 +366,19 @@ public class OperationFilter
     /// The operation status to filter by.
     /// </summary>
     public OperationStatus? Status { get; init; }
-    /// <summary>
-    /// The field to order by.
-    /// </summary>
-    public string OrderBy
-    {
-        get;
-        init => field = value?.Trim();
-    }
-    /// <summary>
-    /// Order direction: ASC or DESC.
-    /// </summary>
-    /// <remarks>
-    /// Descending is the server-side default, so it is normalized to <c>null</c> here:
-    /// an explicit Descending and an unspecified value produce the same request (no orderType param).
-    /// </remarks>
-    public OperationOrderType? OrderType
-    {
-        get;
-        init => field = value is OperationOrderType.Descending ? null : value;
-    }
 }
 
 /// <summary>
 /// Represents an object for filtering the list of monthly usage statistics.
 /// </summary>
-public class MonthlyUsageFilter
+public class MonthlyUsageFilter : DateRangeFilter
 {
-    /// <summary>
-    /// The start date of the period to filter usage from (inclusive).
-    /// </summary>
-    [AliasAs("startDate")]
-    [Query(Format = "o")]
-    public DateTime? UtcStartDate { get; init; }
-    /// <summary>
-    /// The end date of the period to filter usage until (inclusive).
-    /// </summary>
-    [AliasAs("endDate")]
-    [Query(Format = "o")]
-    public DateTime? UtcEndDate { get; init; }
 }
 
 /// <summary>
 /// The filter for customer service usage statistics.
 /// </summary>
-public class UsageFilter
+public class UsageFilter : PagedFilter
 {
     /// <summary>
     /// The service name.
@@ -397,45 +397,9 @@ public class UsageFilter
     /// </summary>
     public OperationStatus? Status { get; init; }
     /// <summary>
-    /// The start date of the period to filter usage from (inclusive).
-    /// </summary>
-    [AliasAs("startDate")]
-    [Query(Format = "o")]
-    public DateTime? UtcStartDate { get; init; }
-    /// <summary>
-    /// The end date of the period to filter usage until (inclusive).
-    /// </summary>
-    [AliasAs("endDate")]
-    [Query(Format = "o")]
-    public DateTime? UtcEndDate { get; init; }
-    /// <summary>
     /// Metadata key-value pairs to filter by.
     /// </summary>
     public Dictionary<string, string> Metadata { get; init; }
-    /// <summary>
-    /// The number of items to skip before starting to return results. Used for pagination.
-    /// </summary>
-    public int? Offset { get; init; }
-    /// <summary>
-    /// The maximum number of items to return in the response.
-    /// </summary>
-    public int? Limit { get; init; }
-    /// <summary>
-    /// The field to order by.
-    /// </summary>
-    public string OrderBy
-    {
-        get;
-        init => field = value?.Trim();
-    }
-    /// <summary>
-    /// Order direction: ASC or DESC.
-    /// </summary>
-    public OperationOrderType? OrderType
-    {
-        get;
-        init => field = value is OperationOrderType.Descending ? null : value;
-    }
 }
 
 /// <summary>
@@ -511,46 +475,50 @@ public class Balance
     }
 }
 
+public class CurrencyCode
+{
+    /// <summary>
+    /// The three-character ISO 4217 currency symbol.
+    /// </summary>
+    /// <example>"USD"</example>
+    public string Currency { get; init; }
+}
+
+public class CurrencyAmount : CurrencyCode
+{
+    /// <summary>
+    /// The amount in the specified currency.
+    /// </summary>
+    /// <example>1500.75</example>
+    public decimal Amount { get; init; }
+}
+
+public class CurrencyTotalAmount : CurrencyCode
+{
+    /// <summary>
+    /// The total amount in the specified currency.
+    /// </summary>
+    /// <example>1500.75</example>
+    public decimal TotalAmount { get; init; }
+}
+
 /// <summary>
 /// Represents information about the transaction applied to an account.
 /// </summary>
-public class TransactionInfo
+public class TransactionInfo : CurrencyAmount
 {
     /// <summary>
     /// The date and time when the credit transaction occurred.
     /// </summary>
     /// <example>2024-01-15T10:30:00Z</example>
     public DateTime Date { get; init; }
-
-    /// <summary>
-    /// The three-character ISO 4217 currency symbol of the transaction.
-    /// </summary>
-    /// <example>"USD"</example>
-    public string Currency { get; init; }
-
-    /// <summary>
-    /// Amount of the transaction.
-    /// </summary>
-    /// <example>1500.75</example>
-    public decimal Amount { get; init; }
 }
 
 /// <summary>
 /// Represents a sub-account with a specific currency and balance.
 /// </summary>
-public class SubAccount
+public class SubAccount : CurrencyAmount
 {
-    /// <summary>
-    /// The three-character ISO 4217 currency symbol of the sub-account.
-    /// </summary>
-    /// <example>"USD"</example>
-    public string Currency { get; init; }
-
-    /// <summary>
-    /// The balance of the sub-account in the specified currency.
-    /// </summary>
-    /// <example>1500.75</example>
-    public decimal Amount { get; init; }
 }
 
 /// <summary>
@@ -610,15 +578,12 @@ public class ServiceInfo
     public int AccountNumber { get; init; }
 }
 
-/// <summary>
-/// Represents a report containing a collection of operations.
-/// </summary>
-public class Report
+public class BaseReport<T>
 {
     /// <summary>
-    /// Collection of operations.
+    /// Collection of report items.
     /// </summary>
-    public List<Operation> Collection { get; init; }
+    public List<T> Collection { get; init; }
 
     /// <summary>
     /// Offset of the report data.
@@ -631,11 +596,6 @@ public class Report
     public int Limit { get; init; }
 
     /// <summary>
-    /// Total quantity of operations in the report.
-    /// </summary>
-    public int TotalQuantity { get; init; }
-
-    /// <summary>
     /// Total number of pages in the report.
     /// </summary>
     public int TotalPage { get; init; }
@@ -645,6 +605,17 @@ public class Report
     /// </summary>
     public int CurrentPage { get; init; }
 
+    /// <summary>
+    /// Total quantity of records in the report.
+    /// </summary>
+    public long TotalQuantity { get; init; }
+}
+
+/// <summary>
+/// Represents a report containing a collection of operations.
+/// </summary>
+public class Report : BaseReport<Operation>
+{
     public async Task<Dictionary<string, string>> GetParticipantDisplayNamesAsync(DisplayUserSettingsHelper displayUserSettingsHelper, bool withHtmlEncode)
     {
         var participantDisplayNames = new Dictionary<string, string>();
@@ -670,104 +641,55 @@ public class Report
 /// <summary>
 /// Aggregated customer spending for a single calendar month.
 /// </summary>
-public class CustomerMonthlyUsage
+public class CustomerMonthlyUsage : CurrencyTotalAmount
 {
     /// <summary>
     /// Calendar year (e.g. 2025).
     /// </summary>
-    public int Year { get; set; }
+    public int Year { get; init; }
 
     /// <summary>
     /// Calendar month (1-12).
     /// </summary>
-    public int Month { get; set; }
-
-    /// <summary>
-    /// Currency code of the amounts (e.g. USD, EUR).
-    /// </summary>
-    public string Currency { get; set; }
-
-    /// <summary>
-    /// Total amount charged across all services in this month.
-    /// </summary>
-    public decimal TotalAmount { get; set; }
+    public int Month { get; init; }
 
     /// <summary>
     /// Number of individual purchase operations in this month.
     /// </summary>
-    public int OperationCount { get; set; }
+    public int OperationCount { get; init; }
 }
 
 /// <summary>
 /// Aggregated customer usage statistics for a service over a period.
 /// </summary>
-public class CustomerServiceUsage
+public class CustomerServiceUsage : CurrencyTotalAmount
 {
     /// <summary>
     /// Name of the service.
     /// </summary>
-    public string Service { get; set; }
+    public string Service { get; init; }
 
     /// <summary>
     /// Unit of measurement for the service (e.g. requests, GB, hours).
     /// </summary>
-    public string ServiceUnit { get; set; }
-
-    /// <summary>
-    /// Currency code of the amounts (e.g. USD, EUR).
-    /// </summary>
-    public string Currency { get; set; }
+    public string ServiceUnit { get; init; }
 
     /// <summary>
     /// Total number of units consumed.
     /// </summary>
-    public int TotalQuantity { get; set; }
-
-    /// <summary>
-    /// Total amount charged for the service.
-    /// </summary>
-    public decimal TotalAmount { get; set; }
+    public int TotalQuantity { get; init; }
 
     /// <summary>
     /// Number of individual purchase operations.
     /// </summary>
-    public int OperationCount { get; set; }
+    public int OperationCount { get; init; }
 }
 
 /// <summary>
 /// Represents a paged report of customer service usage statistics.
 /// </summary>
-public class UsageReport
+public class UsageReport : BaseReport<CustomerServiceUsage>
 {
-    /// <summary>
-    /// Collection of service usage statistics.
-    /// </summary>
-    public List<CustomerServiceUsage> Collection { get; set; }
-
-    /// <summary>
-    /// Offset of the report data.
-    /// </summary>
-    public int Offset { get; set; }
-
-    /// <summary>
-    /// Limit of the report data.
-    /// </summary>
-    public int Limit { get; set; }
-
-    /// <summary>
-    /// Total quantity of records in the report.
-    /// </summary>
-    public long TotalQuantity { get; set; }
-
-    /// <summary>
-    /// Total number of pages in the report.
-    /// </summary>
-    public int TotalPage { get; set; }
-
-    /// <summary>
-    /// Current page number of the report.
-    /// </summary>
-    public int CurrentPage { get; set; }
 }
 
 /// <summary>
