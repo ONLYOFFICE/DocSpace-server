@@ -989,11 +989,6 @@ public class FileStorageService //: IFileStorageService
                 newFolder.SettingsQuota = quota.Value;
             }
 
-            if (saveFormAsXLSX.HasValue)
-            {
-                newFolder.SettingsSaveFormAsXLSX = saveFormAsXLSX.Value;
-            }
-
             if (sendFormToExternalDB.HasValue)
             {
                 newFolder.SettingsSendFormToExternalDB = sendFormToExternalDB.Value;
@@ -1018,7 +1013,7 @@ public class FileStorageService //: IFileStorageService
 
             if (folderType == FolderType.FillingFormsRoom)
             {
-                newFolder.SettingsSaveFormAsXLSX = true;
+                newFolder.SettingsSaveFormAsXLSX = saveFormAsXLSX ?? true;
             }
 
             T folderId;
@@ -1873,7 +1868,7 @@ public class FileStorageService //: IFileStorageService
 
         if (room is { FolderType: FolderType.PublicRoom })
         {
-            await SetExternalLinkAsync(file, Guid.NewGuid(), file.IsForm ? FileShare.FillForms : FileShare.Read, title ?? FilesCommonResource.DefaultExternalLinkTitle, primary: true);
+            await SetExternalLinkAsync(file, Guid.NewGuid(), file.IsForm ? FileShare.Editing : FileShare.Read, title ?? FilesCommonResource.DefaultExternalLinkTitle, primary: true);
         }
 
         return file;
@@ -3961,7 +3956,7 @@ public class FileStorageService //: IFileStorageService
         string title = null,
         DateTime expirationDate = default,
         bool denyDownload = false,
-        bool requiredAuth = false,
+        bool? requiredAuth = null,
         string password = null,
         bool allowUnlimitedDate = false)
     {
@@ -3994,12 +3989,15 @@ public class FileStorageService //: IFileStorageService
         var link = await fileSharing.GetPureSharesAsync(entry, ShareFilterType.PrimaryExternalLink, null, null, 0, 1).FirstOrDefaultAsync();
         if (link == null)
         {
-            requiredAuth = await ResolveRequiredAuthAsync(entry, requiredAuth);
+            var requiredAuthResolved = await ResolveRequiredAuthAsync(entry, requiredAuth ?? false,  applyDefault: !requiredAuth.HasValue);
+
+            await DetermineParentRoomType(entry);
 
             share = entry switch
             {
+                File<T> { IsForm: true, RootFolderType: FolderType.VirtualRooms, ParentRoomType: FolderType.FillingFormsRoom or FolderType.VirtualDataRoom } => FileShare.FillForms,
                 File<T> { IsForm: true, RootFolderType: FolderType.USER } when share != FileShare.Editing && share != FileShare.FillForms => FileShare.Editing,
-                File<T> { IsForm: true, RootFolderType: FolderType.VirtualRooms } when share != FileShare.FillForms => FileShare.FillForms,
+                File<T> { IsForm: true, RootFolderType: not FolderType.USER } => FileShare.Editing,
                 _ => share
             };
 
@@ -4020,7 +4018,7 @@ public class FileStorageService //: IFileStorageService
                         ? DateTime.UtcNow.Add(filesLinkUtility.DefaultLinkLifeTime)
                         : default,
                 denyDownload: denyDownload,
-                requiredAuth: requiredAuth,
+                requiredAuth: requiredAuthResolved,
                 password: password);
         }
 

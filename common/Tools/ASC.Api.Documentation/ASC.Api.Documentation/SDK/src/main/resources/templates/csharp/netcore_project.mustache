@@ -16,13 +16,18 @@
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\{{packageName}}.xml</DocumentationFile>
     <PackageLicenseExpression>{{licenseName}}</PackageLicenseExpression>
     <RepositoryUrl>{{repositoryUrl}}</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>{{#releaseNote}}
+    <RepositoryType>git</RepositoryType>
+    <PackageReadmeFile>README_nuget.md</PackageReadmeFile>{{#releaseNote}}
     <PackageReleaseNotes>{{.}}</PackageReleaseNotes>{{/releaseNote}}{{#packageTags}}
     <PackageTags>{{{.}}}</PackageTags>{{/packageTags}}{{#nrt}}
     <Nullable>{{#useGenericHost}}enable{{/useGenericHost}}{{^useGenericHost}}annotations{{/useGenericHost}}</Nullable>{{/nrt}}
     <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\docs\README_nuget.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
 
   <ItemGroup>
     {{#useCompareNetObjects}}

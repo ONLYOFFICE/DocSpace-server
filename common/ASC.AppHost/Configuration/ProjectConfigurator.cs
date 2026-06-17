@@ -348,7 +348,7 @@ public class ProjectConfigurator(
             .WithEnvironment("SPRING_PROFILES_ACTIVE", "dev,server")
             .WithEnvironment("SPRING_APPLICATION_SIGNATURE_SECRET", builder.Configuration["core:machinekey"])
             .WithEnvironment("SPRING_APPLICATION_NAME", "ASC.Identity.Authorization")
-            .WithEnvironment("GRPC_CLIENT_AUTHORIZATION_ADDRESS", new UriBuilder("static", Constants.IdentityRegistrationContainer, 8888).ToString())
+            .WithEnvironment("GRPC_CLIENT_REGISTRATION_ADDRESS", new UriBuilder("static", Constants.IdentityRegistrationContainer, 8888).ToString())
             .WithHttpEndpoint(Constants.IdentityAuthorizationPort, Constants.IdentityAuthorizationPort, isProxied: false)
             .WithBuildArg("MODULE", "authorization/authorization-container")
             .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
