@@ -32,7 +32,7 @@
 
 import { ActionType } from "@onlyoffice/ai-chat/core";
 import { storage } from "../storage/index.js";
-import { docSpaceApi } from "../storage/httpClient.js";
+import { docSpaceApi, AiServiceHttpError } from "../storage/httpClient.js";
 import type { QueryValue } from "../storage/httpClient.js";
 import { asyncHandler } from "./_helpers.js";
 import { isObject, getString, getNumber, getObject } from "../narrow.js";
@@ -49,6 +49,23 @@ const UUID_PATTERN = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{
 
 function badRequest(message: string): never {
   throw Object.assign(new Error(message), { status: 400, expose: true });
+}
+
+// Translate a failure from binding the profile (assignment write on the
+// .NET side) into a meaningful client error. The common case is a foreign
+// key violation on `profile_id`: the supplied profile does not exist, which
+// is a bad request, not a 500. Anything else is rethrown unchanged.
+function rethrowAssignmentError(err: unknown, profileId: string): never {
+  if (
+    err instanceof AiServiceHttpError &&
+    /foreign key|profile_id|ai_integration_profiles/i.test(err.body)
+  ) {
+    throw Object.assign(new Error(`AI profile "${profileId}" does not exist`), {
+      status: 400,
+      expose: true,
+    });
+  }
+  throw err;
 }
 
 // Agent ids are int folder ids on the .NET side (`RoomIdRequestDto<int>`).
@@ -120,7 +137,11 @@ export const agentsController = {
       throw new Error("agent created, but the AI service returned no agent id");
     }
 
-    await storage.assignments.create(AGENT_ACTION_TYPE, profileId, String(agentId));
+    try {
+      await storage.assignments.create(AGENT_ACTION_TYPE, profileId, String(agentId));
+    } catch (err) {
+      rethrowAssignmentError(err, profileId);
+    }
 
     res.json(envelope);
   }),
@@ -191,10 +212,14 @@ export const agentsController = {
       const existing = await storage.assignments
         .readByType(AGENT_ACTION_TYPE, id)
         .catch(() => null);
-      if (existing) {
-        await storage.assignments.update(AGENT_ACTION_TYPE, profileId, id);
-      } else {
-        await storage.assignments.create(AGENT_ACTION_TYPE, profileId, id);
+      try {
+        if (existing) {
+          await storage.assignments.update(AGENT_ACTION_TYPE, profileId, id);
+        } else {
+          await storage.assignments.create(AGENT_ACTION_TYPE, profileId, id);
+        }
+      } catch (err) {
+        rethrowAssignmentError(err, profileId);
       }
     }
 
