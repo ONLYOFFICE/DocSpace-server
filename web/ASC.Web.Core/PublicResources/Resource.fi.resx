@@ -1377,4 +1377,22 @@
   <data name="UserAuthenticationFailed" xml:space="preserve">
     <value>Käyttäjän todennus epäonnistui</value>
   </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Lisälevytila</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_admin" xml:space="preserve">
+    <value>Yritys-tilaus</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_adminyear" xml:space="preserve">
+    <value>Yritys-tilaus</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_admin" xml:space="preserve">
+    <value>Ylläpitäjät</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_adminyear" xml:space="preserve">
+    <value>Ylläpitäjät</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Saat käyttöösi laajan valikoiman tekoälymalleja OpenRouter-integraation kautta. Maksat vain käyttösi mukaan, ja summa veloitetaan Lompakostasi.</value>
+  </data>
 </root>

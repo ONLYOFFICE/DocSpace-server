@@ -1377,4 +1377,22 @@
   <data name="UserAuthenticationFailed" xml:space="preserve">
     <value>Autenticazione utente non riuscita</value>
   </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Archiviazione disco aggiuntiva</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_admin" xml:space="preserve">
+    <value>Piano Business</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_adminyear" xml:space="preserve">
+    <value>Piano Business</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_admin" xml:space="preserve">
+    <value>Amministratori</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_adminyear" xml:space="preserve">
+    <value>Amministratori</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Accedi a un'ampia gamma di modelli IA tramite l'integrazione con OpenRouter. Paghi solo per ciò che utilizzi, con addebito sul tuo Portafoglio.</value>
+  </data>
 </root>

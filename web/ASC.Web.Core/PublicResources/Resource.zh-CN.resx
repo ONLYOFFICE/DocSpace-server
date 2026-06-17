@@ -1377,4 +1377,22 @@
   <data name="AccountingCustomerOperationServiceUOM_embedding" xml:space="preserve">
     <value>令牌</value>
   </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>额外磁盘存储空间</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_admin" xml:space="preserve">
+    <value>专业版套餐</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_adminyear" xml:space="preserve">
+    <value>专业版套餐</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_admin" xml:space="preserve">
+    <value>管理员</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_adminyear" xml:space="preserve">
+    <value>管理员</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>通过 OpenRouter 集成访问广泛的 AI 模型。仅按实际使用量付费，费用从您的钱包中扣除。</value>
+  </data>
 </root>

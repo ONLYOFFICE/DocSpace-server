@@ -1377,4 +1377,22 @@
   <data name="UserAuthenticationFailed" xml:space="preserve">
     <value>فشل مصادقة المستخدم</value>
   </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>مساحة تخزين إضافية على القرص</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_admin" xml:space="preserve">
+    <value>الخطة التجارية</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_adminyear" xml:space="preserve">
+    <value>الخطة التجارية</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_admin" xml:space="preserve">
+    <value>المسؤولون</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_adminyear" xml:space="preserve">
+    <value>المسؤولون</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>احصل على إمكانية الوصول إلى مجموعة واسعة من نماذج الذكاء الاصطناعي عبر تكامل OpenRouter. ادفع فقط مقابل ما تستخدمه، ويُحتسب من محفظتك.</value>
+  </data>
 </root>
