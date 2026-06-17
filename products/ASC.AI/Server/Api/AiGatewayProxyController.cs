@@ -47,6 +47,15 @@ public class AiGatewayProxyController(
     UserManager userManager,
     AuthContext authContext) : ControllerBase
 {
+    private static readonly HashSet<string> _allowedPaths = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "models",
+        "chat/completions",
+        "images/generations",
+        "search",
+        "contents"
+    };
+
     [HttpGet("gateway/{*path}")]
     [HttpPost("gateway/{*path}")]
     [HttpPut("gateway/{*path}")]
@@ -57,6 +66,11 @@ public class AiGatewayProxyController(
         if (userType is EmployeeType.User or EmployeeType.Guest)
         {
             throw new SecurityException();
+        }
+
+        if (!IsPathAllowed(path))
+        {
+            return NotFound();
         }
 
         var cancellationToken = Request.HttpContext.RequestAborted;
@@ -101,5 +115,22 @@ public class AiGatewayProxyController(
         await Response.CompleteAsync();
 
         return new EmptyResult();
+    }
+
+    private static bool IsPathAllowed(string path)
+    {
+        if (string.IsNullOrEmpty(path))
+        {
+            return false;
+        }
+
+        var normalized = path.Trim().Trim('/');
+
+        if (normalized.Contains("..") || normalized.Contains('%'))
+        {
+            return false;
+        }
+
+        return _allowedPaths.Contains(normalized);
     }
 }
