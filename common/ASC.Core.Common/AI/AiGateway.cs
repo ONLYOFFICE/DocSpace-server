@@ -102,7 +102,7 @@ public class AiGateway(
 
     public async Task<ModelsResponse> GetModelsAsync()
     {
-        return await SendAsync<ModelsResponse>(HttpMethod.Get, "/chat/models");
+        return await SendAsync<ModelsResponse>(HttpMethod.Get, "/models");
     }
 
     private async Task<string> GenerateKeyAsync()
@@ -221,14 +221,22 @@ public record RestrictedModelsResponse
 public record Model
 {
     public required string Id { get; init; }
+    public required string Type { get; init; }
+    public required string Alias { get; init; }
+    public IEnumerable<string> Capabilities { get; init; }
+
+    [JsonPropertyName("revision_id")]
     public required Guid RevisionId { get; init; }
-    public required List<string> InputModalities { get; init; }
-    public required List<string> OutputModalities { get; init; }
-    public List<string> Capabilities { get; init; }
+
+    [JsonPropertyName("input_modalities")]
+    public required IEnumerable<string> InputModalities { get; init; }
+
+    [JsonPropertyName("output_modalities")]
+    public required IEnumerable<string> OutputModalities { get; init; }
 }
 
 
 public record ModelsResponse
 {
-    public required List<Model> Data { get; init; }
+    public required IEnumerable<Model> Data { get; init; }
 }
