@@ -150,12 +150,12 @@ internal abstract class BaseTagDao<T>(
 
         q = q.OrderByDescending(r => r.Id);
 
+        q = q.Skip(from);
+
         if (count != 0)
         {
             q = q.Take(count);
         }
-
-        q = q.Skip(from);
 
         await foreach (var tag in q.AsAsyncEnumerable())
         {
