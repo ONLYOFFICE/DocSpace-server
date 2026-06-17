@@ -265,7 +265,7 @@ public class FileStorageService //: IFileStorageService
         int? groupId = null,
         T parentFolderId = default,
         RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None,
-        IEnumerable<FolderType> folderType = null)
+        List<FolderType> folderType = null)
     {
         var subjectId = string.IsNullOrEmpty(subject) ? Guid.Empty : new Guid(subject);
         var subjectOwnerIdGuid = string.IsNullOrEmpty(subjectOwnerId) ? Guid.Empty : new Guid(subjectOwnerId);

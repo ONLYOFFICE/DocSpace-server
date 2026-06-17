@@ -365,7 +365,7 @@ public class EntryManager(IDaoFactory daoFactory,
         int? groupId = null,
         T parentFolderId = default,
         RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None,
-        IEnumerable<FolderType> folderType = null)
+        List<FolderType> folderType = null)
     {
         int total;
         var withShared = true;
