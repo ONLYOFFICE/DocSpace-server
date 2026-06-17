@@ -575,8 +575,12 @@ public class EntryManager(IDaoFactory daoFactory,
                     filesFilterType = FilterType.FoldersOnly;
                 }
 
+                // The folderType filter is resolved against Origin tags, which only exist on items moved to Trash.
+                // Applying it to any other parent would silently empty the results, so it is ignored outside Trash.
+                var trashFolderType = parent.FolderType == FolderType.TRASH ? folderType : null;
+
                 var foldersTask = folderDao.GetFoldersAsync(parent.Id, orderBy, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders,
-                    excludeSubject, from, count, roomId, containingMyFiles, parent.FolderType, folderType: folderType);
+                    excludeSubject, from, count, roomId, containingMyFiles, parent.FolderType, folderType: trashFolderType);
 
                 var folders = await foldersTask.ToListAsync();
 
@@ -600,18 +604,18 @@ public class EntryManager(IDaoFactory daoFactory,
                 allFilesCountTask = fileDao.GetFilesCountAsync(parent.Id, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders, excludeSubject, roomId, formsItemDto,
                     applyFfrStartedFormsFilter ? FolderType.DEFAULT : containingMyFiles && withSubfolders ? parent.FolderType : FolderType.DEFAULT,
                     filesAdditionalFilter,
-                    applyFormStepFilter: applyFormStepFilter, folderType: folderType);
+                    applyFormStepFilter: applyFormStepFilter, folderType: trashFolderType);
 
                 allFoldersCountTask = folderDao.GetFoldersCountAsync(parent.Id, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders, excludeSubject, roomId,
                     containingMyFiles ? parent.FolderType : FolderType.DEFAULT,
-                    containingMyFiles ? AdditionalFilterOption.MyFilesAndFolders : AdditionalFilterOption.All, folderType: folderType);
+                    containingMyFiles ? AdditionalFilterOption.MyFilesAndFolders : AdditionalFilterOption.All, folderType: trashFolderType);
 
                 var filesCount = count - folders.Count;
                 var filesOffset = Math.Max(folders.Count > 0 ? 0 : from - await allFoldersCountTask, 0);
 
                 var filesTask = fileDao.GetFilesAsync(parent.Id, orderBy, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders,
                     excludeSubject, filesOffset, filesCount, roomId, withShared, containingMyFiles && withSubfolders, parent.FolderType, formsItemDto,
-                    applyFormStepFilter: applyFormStepFilter, applyFfrStartedFormsFilter: applyFfrStartedFormsFilter, folderType: folderType);
+                    applyFormStepFilter: applyFormStepFilter, applyFfrStartedFormsFilter: applyFfrStartedFormsFilter, folderType: trashFolderType);
 
                 var files = await filesTask.ToListAsync();
 
