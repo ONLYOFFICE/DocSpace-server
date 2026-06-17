@@ -106,6 +106,12 @@ public partial class AiIntegrationContext
     {
         return AssignmentQueriesContainer.DeleteAssignmentsByTypesAndEntryAsync(this, tenantId, entryId, actionTypes);
     }
+
+    [PreCompileQuery]
+    public Task<int> DeleteAssignmentsByProfileAsync(int tenantId, Guid profileId)
+    {
+        return AssignmentQueriesContainer.DeleteAssignmentsByProfileAsync(this, tenantId, profileId);
+    }
 }
 
 static file class AssignmentQueriesContainer
@@ -190,5 +196,12 @@ static file class AssignmentQueriesContainer
             (AiIntegrationContext ctx, int tenantId, int entryId, IEnumerable<ActionType> actionTypes) =>
                 ctx.Assignments
                     .Where(x => x.TenantId == tenantId && x.EntryId == entryId && actionTypes.Contains(x.ActionType))
+                    .ExecuteDelete());
+
+    public static readonly Func<AiIntegrationContext, int, Guid, Task<int>> DeleteAssignmentsByProfileAsync =
+        EF.CompileAsyncQuery(
+            (AiIntegrationContext ctx, int tenantId, Guid profileId) =>
+                ctx.Assignments
+                    .Where(x => x.TenantId == tenantId && x.ProfileId == profileId)
                     .ExecuteDelete());
 }

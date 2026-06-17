@@ -43,7 +43,7 @@ public class ThreadStorageService(
     AuthContext authContext,
     TenantManager tenantManager,
     ThreadsStorage storage,
-    ProfileStorage profileStorage,
+    ProfileStorageService profileStorageService,
     IDistributedLockProvider distributedLockProvider,
     IDaoFactory daoFactory,
     FileSecurity fileSecurity) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity)
@@ -65,7 +65,7 @@ public class ThreadStorageService(
 
         await using (await distributedLockProvider.TryAcquireFairLockAsync(ProfileStorage.GetLockKey(tenantId, id)))
         {
-            await AssertProfileExistsAsync(tenantId, id);
+            _ = await profileStorageService.ReadByIdAsync(id);
             return await storage.CreateAsync(tenantId, CurrentUserId, title, id, entryId);
         }
     }
@@ -121,7 +121,7 @@ public class ThreadStorageService(
 
         await using (await distributedLockProvider.TryAcquireFairLockAsync(ProfileStorage.GetLockKey(tenantId, parsedProfileId)))
         {
-            await AssertProfileExistsAsync(tenantId, parsedProfileId);
+            _ = await profileStorageService.ReadByIdAsync(parsedProfileId);
             await storage.TouchAsync(tenantId, id, lastEditDateUtc, parsedProfileId);
         }
     }
@@ -150,11 +150,5 @@ public class ThreadStorageService(
         {
             throw new SecurityException();
         }
-    }
-
-    private async Task AssertProfileExistsAsync(int tenantId, Guid profileId)
-    {
-        _ = await profileStorage.ReadByIdAsync(tenantId, profileId)
-            ?? throw new ItemNotFoundException($"Profile with id '{profileId}' was not found");
     }
 }
