@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -31,33 +31,24 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using ASC.AI.Extensions;
-using ASC.AI.Integration.Extensions;
+namespace ASC.ElasticSearch.Engine.Pipelines;
 
-namespace ASC.AI;
-
-public class Startup : BaseStartup
+internal static class AttachmentPipeline
 {
-    public Startup(IConfiguration configuration) : base(configuration)
+    public const string Name = "attachments";
+
+    extension(OpenSearchClient client)
     {
-        if (configuration.GetSection("RabbitMQ").GetChildren().Any() &&
-            string.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
+        public void AddAttachmentPipeline()
         {
-            configuration["RabbitMQ:ClientProvidedName"] = Program.AppName;
+            client.Ingest.PutPipeline(Name, p =>
+                p.Processors(pp =>
+                    pp.Attachment<Attachment>(a =>
+                            a.Field("document.data")
+                                .TargetField("document.attachment")
+                                .IndexedCharacters(-1))
+                        .Remove<Document>(x =>
+                            x.Field("document.data"))));
         }
-    }
-
-    public override async Task ConfigureServices(WebApplicationBuilder builder)
-    {
-        var services = builder.Services;
-
-        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-
-        services.AddMemoryCache();
-
-        await base.ConfigureServices(builder);
-
-        services.AddAiServerServices(_configuration);
-        services.AddAiIntegrationServices();
     }
 }

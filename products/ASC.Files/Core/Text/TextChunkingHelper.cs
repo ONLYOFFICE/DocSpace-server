@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -31,33 +31,30 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using ASC.AI.Extensions;
-using ASC.AI.Integration.Extensions;
+#pragma warning disable SKEXP0050
 
-namespace ASC.AI;
+using Microsoft.SemanticKernel.Text;
 
-public class Startup : BaseStartup
+namespace ASC.Files.Core.Text;
+
+internal static class TextChunkingHelper
 {
-    public Startup(IConfiguration configuration) : base(configuration)
+    public static IEnumerable<string> Split(string text, ChunkerSettings settings)
     {
-        if (configuration.GetSection("RabbitMQ").GetChildren().Any() &&
-            string.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
+        var overlapInTokens = (int)Math.Floor(settings.ChunkOverlap * settings.MaxTokensPerChunk);
+
+        TextChunker.TokenCounter tokenCounter = input => settings.TokenCounter(input);
+
+        var lines = TextChunker.SplitPlainTextLines(text, settings.MaxTokensPerChunk, tokenCounter);
+        var chunks = TextChunker.SplitPlainTextParagraphs(
+            lines,
+            settings.MaxTokensPerChunk,
+            overlapInTokens,
+            tokenCounter: tokenCounter);
+
+        foreach (var chunk in chunks)
         {
-            configuration["RabbitMQ:ClientProvidedName"] = Program.AppName;
+            yield return chunk;
         }
-    }
-
-    public override async Task ConfigureServices(WebApplicationBuilder builder)
-    {
-        var services = builder.Services;
-
-        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-
-        services.AddMemoryCache();
-
-        await base.ConfigureServices(builder);
-
-        services.AddAiServerServices(_configuration);
-        services.AddAiIntegrationServices();
     }
 }

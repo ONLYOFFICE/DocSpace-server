@@ -107,6 +107,9 @@ public class ProjectConfigurator(
         {
             project.WithEnvironment("OTEL_FILE_EXPORTER_ENDPOINT", connectionManager.GetOtelCollectorEndpoint(isDocker: false));
         }
+
+        ApplyServiceName(project);
+        ApplyCustomOtlpEndpoint(project);
     }
 
     private void AddProjectDocker<TProject>(int projectPort) where TProject : IProjectMetadata, new()
@@ -191,6 +194,8 @@ public class ProjectConfigurator(
         }
 
         resourceBuilder.WithOtlpExporter();
+        ApplyServiceName(resourceBuilder);
+        ApplyCustomOtlpEndpoint(resourceBuilder);
     }
 
     public ProjectConfigurator AddSocketIO()
@@ -218,6 +223,7 @@ public class ProjectConfigurator(
 
             AddBaseBind(resourceBuilder);
             connectionManager.AddWaitFor(resourceBuilder);
+            ApplyServiceName(resourceBuilder);
         }
         else
         {
@@ -233,6 +239,7 @@ public class ProjectConfigurator(
                 .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
 
             connectionManager.AddWaitFor(resourceBuilder);
+            ApplyServiceName(resourceBuilder);
         }
 
         return this;
@@ -258,16 +265,19 @@ public class ProjectConfigurator(
                 .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
 
             AddBaseBind(resourceBuilder);
+            ApplyServiceName(resourceBuilder);
         }
         else
         {
-            builder.AddJavaScriptApp(name, path, "start")
+            var resourceBuilder = builder.AddJavaScriptApp(name, path, "start")
                 .WithYarn()
                 .WithEnvironment("NODE_ENV", "development")
                 .WithEnvironment("API_HOST", $"http://localhost:{Constants.AppHostPort.ToString()}")
                 .WithHttpEndpoint(targetPort: port)
                 .WithHttpHealthCheck("/health")
                 .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
+
+            ApplyServiceName(resourceBuilder);
         }
 
         return this;
@@ -332,15 +342,18 @@ public class ProjectConfigurator(
                 .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
 
             AddBaseBind(resourceBuilder);
+            ApplyServiceName(resourceBuilder);
         }
         else
         {
-            builder.AddJavaScriptApp(name, path, "start")
+            var resourceBuilder = builder.AddJavaScriptApp(name, path, "start")
                 .WithYarn()
                 .WithEnvironment("NODE_ENV", "development")
                 .WithHttpEndpoint(targetPort: port)
                 .WithHttpHealthCheck("/health")
                 .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
+
+            ApplyServiceName(resourceBuilder);
         }
 
         return this;
@@ -365,6 +378,7 @@ public class ProjectConfigurator(
             .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
 
         connectionManager.AddIdentityEnv(registrationBuilder);
+        ApplyServiceName(registrationBuilder);
 
         var authorizationBuilder = builder
             .AddDockerfile(Constants.IdentityAuthorizationContainer, path)
@@ -375,12 +389,13 @@ public class ProjectConfigurator(
             .WithEnvironment("SPRING_PROFILES_ACTIVE", "dev,server")
             .WithEnvironment("SPRING_APPLICATION_SIGNATURE_SECRET", builder.Configuration["core:machinekey"])
             .WithEnvironment("SPRING_APPLICATION_NAME", "ASC.Identity.Authorization")
-            .WithEnvironment("GRPC_CLIENT_AUTHORIZATION_ADDRESS", new UriBuilder("static", Constants.IdentityRegistrationContainer, 8888).ToString())
+            .WithEnvironment("GRPC_CLIENT_REGISTRATION_ADDRESS", new UriBuilder("static", Constants.IdentityRegistrationContainer, 8888).ToString())
             .WithHttpEndpoint(Constants.IdentityAuthorizationPort, Constants.IdentityAuthorizationPort, isProxied: false)
             .WithBuildArg("MODULE", "authorization/authorization-container")
             .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
 
         connectionManager.AddIdentityEnv(authorizationBuilder);
+        ApplyServiceName(authorizationBuilder);
 
         return this;
     }
@@ -392,6 +407,27 @@ public class ProjectConfigurator(
             .WithBindMount(Path.Combine(basePath, "Data"), "/data")
             .WithBindMount(Path.Combine(basePath, "Logs"), "/logs")
             .WithEnvironment("log:dir", "/logs");
+    }
+
+    private void ApplyCustomOtlpEndpoint<T>(IResourceBuilder<T> resourceBuilder) where T : IResourceWithEnvironment
+    {
+        var otlpEndpoint = builder.Configuration["OtlpEndpoint"];
+
+        if (string.IsNullOrWhiteSpace(otlpEndpoint))
+        {
+            return;
+        }
+
+        var otlpProtocol = builder.Configuration["OtlpProtocol"];
+
+        resourceBuilder
+            .WithEnvironment("OTEL_EXPORTER_OTLP_ENDPOINT", otlpEndpoint)
+            .WithEnvironment("OTEL_EXPORTER_OTLP_PROTOCOL", string.IsNullOrWhiteSpace(otlpProtocol) ? "grpc" : otlpProtocol);
+    }
+
+    private static void ApplyServiceName<T>(IResourceBuilder<T> resourceBuilder) where T : IResourceWithEnvironment
+    {
+        resourceBuilder.WithEnvironment("OTEL_SERVICE_NAME", resourceBuilder.Resource.Name);
     }
 
     private void ConfigureForwardedHeadersNetworks<T>(IResourceBuilder<T> project) where T : IResourceWithEnvironment

@@ -500,7 +500,8 @@ public static class ServiceCollectionExtension
 
             services
                 .AddSingleton(redisConfiguration)
-                .AddSingleton(redisConnection);
+                .AddSingleton(redisConnection)
+                .AddSingleton<IConnectionMultiplexer>(sp => sp.GetRequiredService<RedisPersistentConnection>().GetConnection());
 
             return redisConnection.GetConnection();
 
