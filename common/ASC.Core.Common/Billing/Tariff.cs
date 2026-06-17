@@ -140,7 +140,16 @@ public class Tariff
             && t.DueDate == DueDate
             && t.Quotas.Count == Quotas.Count
             && t.Quotas.TrueForAll(Quotas.Contains)
-            && t.CustomerId == CustomerId;
+            && t.CustomerId == CustomerId
+            && OverdueQuotasEqual(t.OverdueQuotas, OverdueQuotas);
+    }
+
+    private static bool OverdueQuotasEqual(List<Quota> left, List<Quota> right)
+    {
+        left ??= [];
+        right ??= [];
+
+        return left.Count == right.Count && left.TrueForAll(right.Contains);
     }
 }
 

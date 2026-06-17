@@ -87,7 +87,7 @@ public class DocsCloudController(
             throw new BillingException("Tariff is not paid");
         }
 
-        if (tariff.Quotas.Any(q => q.Id == quota.TenantId))
+        if (tariff.Quotas.Concat(tariff.OverdueQuotas ?? []).Any(q => q.Id == quota.TenantId))
         {
             throw new ArgumentException("Quota is already set");
         }
