@@ -33,9 +33,34 @@
 
 import { aiService, AiServiceHttpError } from "./httpClient.js";
 import { isObject, getString, getNumber, getBoolean } from "../narrow.js";
+import {
+  getForwardedHeaders,
+  shouldForwardHeadersToProvider,
+} from "../requestContext.js";
 import type { ProfilesStorage, Profile } from "@onlyoffice/ai-chat/core";
 
 const PATH = "/integration/profiles";
+
+// When the current request opted in (chat-stream handlers) and the profile
+// is an OpenAI-compatible provider, merge the forwarded client headers into
+// the profile's own headers so they reach the upstream provider with each
+// request. The profile's configured headers win over the forwarded ones, so
+// an explicit gateway token / Authorization is never clobbered.
+function withForwardedProviderHeaders(
+  profile: Profile | undefined,
+): Profile | undefined {
+  if (
+    !profile ||
+    profile.providerType !== "openaicompatible" ||
+    !shouldForwardHeadersToProvider()
+  ) {
+    return profile;
+  }
+  return {
+    ...profile,
+    headers: { ...getForwardedHeaders(), ...(profile.headers ?? {}) },
+  };
+}
 
 function dtoToProfile(raw: unknown): Profile | undefined {
   if (!isObject(raw)) {
@@ -142,7 +167,7 @@ export class HttpProfilesStorage implements ProfilesStorage {
   async readById(id: string): Promise<Profile | undefined> {
     try {
       const raw = await aiService.get(`${PATH}/${encodeURIComponent(id)}`);
-      return dtoToProfile(raw);
+      return withForwardedProviderHeaders(dtoToProfile(raw));
     } catch (err) {
       if (err instanceof AiServiceHttpError && err.status === 404) {
         return undefined;

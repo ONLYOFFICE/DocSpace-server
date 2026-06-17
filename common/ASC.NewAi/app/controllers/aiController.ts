@@ -42,6 +42,7 @@ import type {
   DenyToolCallInput,
 } from "@onlyoffice/ai-chat/core";
 import logger from "../log.js";
+import { markForwardHeadersToProvider } from "../requestContext.js";
 import { storage } from "../storage/index.js";
 import { asyncHandler, streamNdjson, streamOpenAiSse } from "./_helpers.js";
 import { isObject } from "../narrow.js";
@@ -319,6 +320,7 @@ export const aiController = {
   }),
 
   sendWithStream: asyncHandler<SendStreamInput>(async (req, res) => {
+    markForwardHeadersToProvider();
     const body = withContextPrompt(await withToolsPrompt(withRequestSignal(res, req.body)));
     await streamNdjson(
       res,
@@ -330,6 +332,7 @@ export const aiController = {
   // engine emits OpenAI `chat.completion.chunk` objects (and a native
   // OpenAI error envelope on provider failure), which we frame as SSE.
   sendWithStreamOpenAI: asyncHandler<SendStreamInput>(async (req, res) => {
+    markForwardHeadersToProvider();
     const body = withContextPrompt(await withToolsPrompt(withRequestSignal(res, req.body)));
     await streamOpenAiSse(
       res,
