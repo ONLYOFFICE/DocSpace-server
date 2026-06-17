@@ -577,8 +577,9 @@ public class AiProviderService(
 
             throw new ArgumentException(ErrorMessages.InvalidUrl);
         }
-        catch (Exception)
+        catch (Exception e)
         {
+            var test = e;
             throw new ArgumentException(ErrorMessages.InvalidKey);
         }
     }

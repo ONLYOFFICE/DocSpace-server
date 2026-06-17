@@ -38,18 +38,37 @@ public class InternalModelClient(HttpClient client, string url, string apiKey) :
     protected override async Task<IEnumerable<ModelInfo>> GetModelsDataAsync(HttpResponseMessage response)
     {
         var content = await response.Content.ReadFromJsonAsync<Response>();
-        return content == null ? [] : content.Data.Where(x => x.Type == "chat");
+        if (content?.Data is null)
+        {
+            return [];
+        }
+
+        return content.Data
+            .Where(m => m.Type == "chat")
+            .Select(m => new InternalModel
+            {
+                Id = m.Id,
+                Created = m.Created,
+                Price = m.Price
+            });
     }
 
     private class Response
     {
-        public required List<InternalModel> Data { get; init; }
+        public required List<Model> Data { get; init; }
+    }
+
+    private class Model
+    {
+        public required string Id { get; init; }
+        public int Created { get; init; }
+        public required string Type { get; init; }
+        public required Price Price { get; init; }
     }
 }
 
 public class InternalModel : ModelInfo
 {
-    public required string Type { get; init; }
     public required Price Price { get; init; }
 }
 
