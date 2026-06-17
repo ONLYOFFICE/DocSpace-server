@@ -49,11 +49,17 @@ public abstract class IntegrationServiceBase(
             throw new SecurityException();
         }
 
-        int? entryId = entityId == null ? null : int.Parse(entityId);
-        if (!entryId.HasValue)
+        if (entityId == null)
         {
             return null;
         }
+
+        if (!int.TryParse(entityId, out var parsed))
+        {
+            throw new ArgumentException($"entityId must be a numeric folder id, got '{entityId}'");
+        }
+
+        int? entryId = parsed;
 
         var folder = await daoFactory.GetFolderDao<int>().GetFolderAsync(entryId.Value)
                      ?? throw new ItemNotFoundException();
