@@ -1305,4 +1305,7 @@
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
     <value>Отримайте доступ до широкого набору моделей ШІ завдяки інтеграції з OpenRouter. Платіть лише за те, що використовуєте — кошти списуються з вашого Гаманця.</value>
   </data>
+  <data name="Tariffs_adminwallet" xml:space="preserve">
+    <value>Business</value>
+  </data>
 </root>

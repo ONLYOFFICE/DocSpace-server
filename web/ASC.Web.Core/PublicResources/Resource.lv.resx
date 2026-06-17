@@ -1395,4 +1395,7 @@
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
     <value>Iegūstiet piekļuvi plašam AI modeļu klāstam, izmantojot OpenRouter integrāciju. Maksājiet tikai par to, ko izmantojat; summa tiek norakstīta no jūsu Maka.</value>
   </data>
+  <data name="Tariffs_adminwallet" xml:space="preserve">
+    <value>Business</value>
+  </data>
 </root>

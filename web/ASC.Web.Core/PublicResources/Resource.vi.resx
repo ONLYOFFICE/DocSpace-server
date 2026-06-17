@@ -1395,4 +1395,7 @@
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
     <value>Truy cập nhiều mô hình AI thông qua tích hợp OpenRouter. Chỉ trả tiền cho những gì bạn sử dụng, được tính từ Ví của bạn.</value>
   </data>
+  <data name="Tariffs_adminwallet" xml:space="preserve">
+    <value>Business</value>
+  </data>
 </root>

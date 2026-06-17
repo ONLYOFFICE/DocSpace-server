@@ -1395,4 +1395,7 @@
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
     <value>Saat käyttöösi laajan valikoiman tekoälymalleja OpenRouter-integraation kautta. Maksat vain käyttösi mukaan, ja summa veloitetaan Lompakostasi.</value>
   </data>
+  <data name="Tariffs_adminwallet" xml:space="preserve">
+    <value>Yritys</value>
+  </data>
 </root>

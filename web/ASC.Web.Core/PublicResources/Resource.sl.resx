@@ -1395,4 +1395,7 @@
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
     <value>Pridobite dostop do širokega nabora modelov AI prek integracije OpenRouter. Plačate le tisto, kar porabite, znesek pa se odšteje z vaše Denarnice.</value>
   </data>
+  <data name="Tariffs_adminwallet" xml:space="preserve">
+    <value>Business</value>
+  </data>
 </root>

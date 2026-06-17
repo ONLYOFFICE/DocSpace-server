@@ -1395,4 +1395,7 @@
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
     <value>Krijg toegang tot een breed scala aan AI-modellen via de OpenRouter-integratie. Betaal alleen voor wat u gebruikt, afgeschreven van uw Portemonnee.</value>
   </data>
+  <data name="Tariffs_adminwallet" xml:space="preserve">
+    <value>Business</value>
+  </data>
 </root>
