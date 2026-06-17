@@ -54,6 +54,7 @@ public class AiProviderService(
         ProviderType type,
         List<AiModelSettings>? modelSettings = null)
     {
+        ThrowIfGatewayConfigured();
         await ThrowIfNotAccessAsync();
 
         var settings = aiConfig.Get(type);
@@ -114,6 +115,7 @@ public class AiProviderService(
         string? key,
         List<AiModelSettings>? deltaSettings = null)
     {
+        ThrowIfGatewayConfigured();
         await ThrowIfNotAccessAsync();
 
         var provider = await GetProviderAsync(id);
@@ -209,6 +211,7 @@ public class AiProviderService(
 
     public async Task<IEnumerable<ProviderSettingsData>> GetAvailableProvidersAsync()
     {
+        ThrowIfGatewayConfigured();
         await ThrowIfNotAccessAsync();
 
         return aiConfig.GetAvailableProviders()
@@ -219,6 +222,7 @@ public class AiProviderService(
 
     public async Task DeleteProvidersAsync(HashSet<int> ids)
     {
+        ThrowIfGatewayConfigured();
         await ThrowIfNotAccessAsync();
 
         await providerDao.DeleteProviders(tenantManager.GetCurrentTenantId(), ids);
@@ -236,26 +240,6 @@ public class AiProviderService(
 
         var client = modelClientFactory.Create(provider.Type, provider.Url, provider.Key);
         var models = await ExecuteProviderRequestAsync(provider.Type, client.ListModelsAsync);
-
-        Dictionary<string, AiChatPrice>? priceMap = null;
-        CurrencyInfo? currency = null;
-        if (provider.Type == ProviderType.PortalAi)
-        {
-            try
-            {
-                var prices = await aiGateway.GetPricesAsync();
-                currency = prices.Currency;
-                priceMap = prices.Chat.ToDictionary(p => p.Id, p => new AiChatPrice
-                {
-                    Prompt = p.Price.Prompt * 1_000_000,
-                    Completion = p.Price.Completion * 1_000_000
-                });
-            }
-            catch(Exception e)
-            {
-                logger.ErrorWithException(e);
-            }
-        }
 
         var dbSettings = await providerDao.GetModelSettingsAsync(tenantId, provider.Id, provider.Type);
 
@@ -277,15 +261,28 @@ public class AiProviderService(
                 continue;
             }
 
-            result.Add(new ModelData
+            var model = new ModelData
             {
                 Provider = provider,
                 ModelId = m.Id,
                 Alias = resolved.Alias,
-                Capabilities = resolved.Capabilities,
-                Price = priceMap?.GetValueOrDefault(m.Id),
-                Currency = priceMap != null ? currency : null
-            });
+                Capabilities = resolved.Capabilities
+            };
+
+            if (provider.Type == ProviderType.PortalAi && m is InternalModel internalModel)
+            {
+                model.Price = new AiChatPrice
+                {
+                    Prompt = internalModel.Price.Prompt, Completion = internalModel.Price.Completion
+                };
+                model.Currency = new CurrencyInfo
+                {
+                    Code = internalModel.Price.Currency.Code,
+                    Symbol = internalModel.Price.Currency.Symbol
+                };
+            }
+
+            result.Add(model);
         }
 
         return result;
@@ -412,6 +409,7 @@ public class AiProviderService(
 
     public async Task<IEnumerable<ModelSettings>> GetPreviewModelsAsync(ProviderType type, string? url, string key)
     {
+        ThrowIfGatewayConfigured();
         await ThrowIfNotAccessAsync();
 
         if (type == ProviderType.PortalAi)
@@ -582,6 +580,14 @@ public class AiProviderService(
         catch (Exception)
         {
             throw new ArgumentException(ErrorMessages.InvalidKey);
+        }
+    }
+
+    private void ThrowIfGatewayConfigured()
+    {
+        if (aiGateway.Configured)
+        {
+            throw new SecurityException(ErrorMessages.ManageProviders);
         }
     }
 }

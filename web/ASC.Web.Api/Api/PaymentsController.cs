@@ -327,6 +327,11 @@ public class PaymentController(
             throw new ArgumentException("Invalid quantity");
         }
 
+        if (quota.TenantId == (int)TenantWalletService.Admin)
+        {
+            minValue = (await userManager.GetUsersByGroupAsync(ASC.Core.Users.Constants.GroupRoomAdmin.ID)).Length;
+        }
+
         var hasActiveWalletQuota = tariff.Quotas.Any(q => q.Id == quota.TenantId && q.State == QuotaState.Active);
         if (!hasActiveWalletQuota && productQty < minValue)
         {
@@ -935,6 +940,102 @@ public class PaymentController(
     }
 
     /// <remarks>
+    /// Returns the customer spending aggregated per calendar month from the accounting service.
+    /// </remarks>
+    /// <summary>
+    /// Get the customer monthly usage
+    /// </summary>
+    /// <path>api/2.0/portal/payment/customer/usage/monthly</path>
+    /// <collection>list</collection>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The customer monthly usage", typeof(IEnumerable<CustomerMonthlyUsageDto>))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [HttpGet("customer/usage/monthly")]
+    public async Task<List<CustomerMonthlyUsageDto>> GetCustomerMonthlyUsage([FromQuery] CustomerMonthlyUsageRequestDto inDto)
+    {
+        if (!tariffService.IsConfigured())
+        {
+            throw new InvalidOperationException("Tariff service is not configured");
+        }
+
+        await DemandAdminAsync();
+
+        var tenant = tenantManager.GetCurrentTenant();
+
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+        if (customerInfo == null)
+        {
+            return null;
+        }
+
+        var filter = new MonthlyUsageFilter
+        {
+            UtcStartDate = tenantUtil.DateTimeToUtc(inDto.StartDate ?? tenant.CreationDateTime),
+            UtcEndDate = tenantUtil.DateTimeToUtc(inDto.EndDate ?? DateTime.UtcNow)
+        };
+
+        var usage = await tariffService.GetCustomerMonthlyUsageAsync(tenant.Id, filter);
+
+        return usage?.Select(u => new CustomerMonthlyUsageDto(u)).ToList();
+    }
+
+    /// <remarks>
+    /// Returns the customer usage statistics aggregated per service from the accounting service.
+    /// </remarks>
+    /// <summary>
+    /// Get the customer service usage
+    /// </summary>
+    /// <path>api/2.0/portal/payment/customer/usage</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The customer service usage", typeof(CustomerServiceUsageReportDto))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(404, "Service could not be found")]
+    [HttpGet("customer/usage")]
+    public async Task<CustomerServiceUsageReportDto> GetCustomerServiceUsage([FromQuery] CustomerServiceUsageRequestDto inDto)
+    {
+        if (!tariffService.IsConfigured())
+        {
+            throw new InvalidOperationException("Tariff service is not configured");
+        }
+
+        await DemandAdminAsync();
+
+        var tenant = tenantManager.GetCurrentTenant();
+
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+        if (customerInfo == null)
+        {
+            return null;
+        }
+
+        if (!string.IsNullOrEmpty(inDto.ServiceName))
+        {
+            await CheckWalletServiceName(inDto.ServiceName);
+        }
+
+        var utcStartDate = tenantUtil.DateTimeToUtc(inDto.StartDate ?? tenant.CreationDateTime);
+        var utcEndDate = tenantUtil.DateTimeToUtc(inDto.EndDate ?? DateTime.UtcNow);
+
+        var filter = new UsageFilter
+        {
+            ServiceName = inDto.ServiceName,
+            ParticipantName = inDto.ParticipantName,
+            Status = inDto.Status,
+            UtcStartDate = utcStartDate,
+            UtcEndDate = utcEndDate,
+            Metadata = inDto.Metadata,
+            Offset = inDto.Offset,
+            Limit = inDto.Limit,
+            OrderBy = inDto.OrderBy,
+            OrderType = inDto.OrderType
+        };
+
+        var report = await tariffService.GetCustomerServiceUsageAsync(tenant.Id, filter);
+
+        return report == null ? null : new CustomerServiceUsageReportDto(report);
+    }
+
+    /// <remarks>
     /// Starts generating a customer operations report as an "xlsx" file and saves it in Documents.
     /// </remarks>
     /// <summary>
@@ -1356,25 +1457,29 @@ public class PaymentController(
         await DemandAdminAsync();
 
         var aiPrices = await aiGateway.GetPricesAsync();
+        var icons = new Dictionary<string, string>();
 
         var providers = aiPrices.Chat.Select(m => m.OwnedBy.ToLower()).Distinct();
-        var icons = new Dictionary<string, string>();
+        var searchTypes = aiPrices.Search.Select(s => s.Id).Distinct();
+
         foreach (var provider in providers)
         {
             icons[provider] = await walletStaticProvider.GetImageAsync(provider);
         }
 
-        var chat = aiPrices.Chat.Select(model => new AiEntryPricingDto<AiChatPriceDto>
+        foreach (var searchType in searchTypes)
         {
-            Id = model.Id,
-            Image = icons[model.OwnedBy.ToLower()],
-            Alias = model.Alias,
-            Provider = model.Provider,
-            Price = new AiChatPriceDto
-            {
-                Prompt = model.Price.Prompt * 1_000_000,
-                Completion = model.Price.Completion * 1_000_000
-            }
+            icons[searchType] = await walletStaticProvider.GetImageAsync(searchType);
+        }
+
+        var chat = aiPrices.Chat.Select(m => new AiEntryPricingDto<AiChatPriceDto>
+        {
+            Id = m.Id,
+            Image = icons[m.OwnedBy.ToLower()],
+            Alias = m.Alias,
+            Provider = m.Provider,
+            Price = new AiChatPriceDto { Prompt = m.Price.Prompt, Completion = m.Price.Completion },
+            Link = m.Link
         }).ToList();
 
         var embeddingImage = await walletStaticProvider.GetImageAsync("embedding");
@@ -1385,31 +1490,25 @@ public class PaymentController(
             Alias = e.Alias,
             Provider = e.Provider,
             Image = embeddingImage,
-            Price = new AiEmbeddingPriceDto { Prompt = e.Price.Prompt * 1_000_000 }
+            Price = new AiEmbeddingPriceDto { Prompt = e.Price.Prompt },
+            Link = e.Link
+        }).ToList();
+
+        var search = aiPrices.Search.Select(s => new AiEntryPricingDto<decimal>
+        {
+            Id = s.Id,
+            Alias = Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceDesc_{s.Id}"),
+            Image = icons[s.Id],
+            Provider = s.Provider,
+            Price = s.Price,
+            Link = s.Link
         }).ToList();
 
         return new AiPricesDto
         {
             Chat = chat,
             Embedding = embedding,
-            WebSearch = [
-                new AiEntryPricingDto<decimal>
-                {
-                    Id = "search",
-                    Alias = "Web Search",
-                    Image = await walletStaticProvider.GetImageAsync("search"),
-                    Provider = aiPrices.WebSearch.Provider,
-                    Price = aiPrices.WebSearch.Search
-                },
-                new AiEntryPricingDto<decimal>
-                {
-                    Id = "fetch",
-                    Alias = "Web crawling",
-                    Image = await walletStaticProvider.GetImageAsync("crawling"),
-                    Provider = aiPrices.WebSearch.Provider,
-                    Price = aiPrices.WebSearch.Contents
-                }
-            ],
+            WebSearch = search,
             Currency = aiPrices.Currency
         };
     }

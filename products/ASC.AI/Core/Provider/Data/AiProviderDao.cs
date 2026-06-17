@@ -111,9 +111,14 @@ public class AiProviderDao(
 
     public async Task<AiProvider?> GetProviderAsync(int tenantId, int id, bool forceSystemProvider = false)
     {
-        if (gateway.Configured && id == AiGateway.ProviderId)
+        if (gateway.Configured)
         {
-            return await CreateGatewayProviderAsync(includeCredentials: true, force: forceSystemProvider);
+            if (id == AiGateway.ProviderId)
+            {
+                return await CreateGatewayProviderAsync(includeCredentials: true, force: forceSystemProvider);
+            }
+
+            return null;
         }
 
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
@@ -137,12 +142,17 @@ public class AiProviderDao(
     {
         var defaultProviderId = (await GetDefaultProviderAsync(tenantId))?.ProviderId;
 
-        if (gateway.Configured && offset == 0)
+        if (gateway.Configured)
         {
+            if (offset > 0)
+            {
+                yield break;
+            }
+
             var gatewayProvider = await CreateGatewayProviderAsync();
-            gatewayProvider.IsDefault = defaultProviderId == gatewayProvider.Id;
+            gatewayProvider.IsDefault = true;
             yield return gatewayProvider;
-            limit--;
+            yield break;
         }
 
         if (limit <= 0)
@@ -186,13 +196,13 @@ public class AiProviderDao(
 
     public async Task<int> GetProvidersTotalCountAsync(int tenantId)
     {
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-        var count = await dbContext.GetProvidersTotalCountAsync(tenantId);
-
         if (gateway.Configured)
         {
-            count++;
+            return 1;
         }
+
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        var count = await dbContext.GetProvidersTotalCountAsync(tenantId);
 
         return count;
     }
@@ -284,6 +294,11 @@ public class AiProviderDao(
 
         var queryResult = await dbContext.GetDefaultProviderAsync(tenantId);
         if (queryResult == null)
+        {
+            return null;
+        }
+
+        if (gateway.Configured && queryResult.ProviderId != AiGateway.ProviderId)
         {
             return null;
         }

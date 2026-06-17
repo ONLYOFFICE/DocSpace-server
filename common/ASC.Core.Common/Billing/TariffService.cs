@@ -139,6 +139,11 @@ public class TariffService(
                                 {
                                     nextQuantity = existingQuota.NextQuantity;
                                 }
+                                if (existingQuota is { Additional: false })
+                                {
+                                    var paymentEndDate = 9999 <= currentPayment.EndDate.Year ? DateTime.MaxValue : currentPayment.EndDate;
+                                    asynctariff.DueDate = DateTime.Compare(asynctariff.DueDate, paymentEndDate) < 0 ? asynctariff.DueDate : paymentEndDate;
+                                }
                             }
                             else if (quota.DocsCloudTrial)
                             {
@@ -153,18 +158,18 @@ public class TariffService(
                             }
 
                             asynctariff.Quotas = asynctariff.Quotas.Where(r => r.Id != quota.TenantId).ToList();
-                            asynctariff.Quotas.Add(new Quota(quota.TenantId, currentPayment.Quantity, quota.Wallet, quotaDueDate, nextQuantity));
+                            asynctariff.Quotas.Add(new Quota(quota.TenantId, currentPayment.Quantity, quota.Additional, quota.Wallet, quotaDueDate, nextQuantity));
                             email = currentPayment.PaymentEmail;
                         }
 
-                        // need sort by wallet
-                        asynctariff.Quotas = asynctariff.Quotas.OrderBy(q => q.Wallet).ToList();
+                        // need sort by additional
+                        asynctariff.Quotas = asynctariff.Quotas.OrderBy(q => q.Additional).ToList();
 
-                        if (asynctariff.Quotas.All(q => q.Wallet))
+                        if (asynctariff.Quotas.All(q => q.Additional))
                         {
                             if (tariff.Id != 0 && tariff.State >= TariffState.Paid && !await IsFreeTariffAsync(tariff))
                             {
-                                throw new BillingNotFoundException($"Payment {tariff.Id} not found. Only wallet payments available");
+                                throw new BillingNotFoundException($"Payment {tariff.Id} not found. Only additional payments available");
                             }
 
                             await AddInitialQuotaAsync(asynctariff, tenantId);
@@ -696,7 +701,7 @@ public class TariffService(
 
         foreach (var q in quotas)
         {
-            if (q.State is QuotaState.Overdue)
+            if (q is { Additional: true, State: QuotaState.Overdue })
             {
                 tariff.OverdueQuotas ??= [];
                 tariff.OverdueQuotas.Add(q);
@@ -707,7 +712,7 @@ public class TariffService(
             }
         }
 
-        if (tariff.Quotas.All(q => q.Wallet))
+        if (tariff.Quotas.All(q => q.Additional))
         {
             await AddInitialQuotaAsync(tariff, tenant.Value);
         }
@@ -1261,6 +1266,11 @@ public class TariffService(
             return null;
         }
 
+        if (!accountingClient.SubAccountsEnabled)
+        {
+            throw new InvalidOperationException("Accounting client does not support sub-accounts");
+        }
+
         var cacheKey = GetAccountingAiBalanceCacheKey(tenantId);
 
         var balance = refresh ? null : await GetFromCache<Balance>(cacheKey);
@@ -1330,6 +1340,11 @@ public class TariffService(
 
     public async Task<ServicePayment> MakeAiCreditAsync(int tenantId, decimal amount, string currency, string customerParticipantName, Dictionary<string, string> metadata = null)
     {
+        if (!accountingClient.SubAccountsEnabled)
+        {
+            throw new InvalidOperationException("Accounting client does not support sub-accounts");
+        }
+
         var portalId = await coreSettings.GetKeyAsync(tenantId);
         var result = await accountingClient.MakeAiCreditAsync(portalId, amount, currency, customerParticipantName, metadata);
         await hybridCache.RemoveAsync(GetAccountingAiBalanceCacheKey(tenantId));
@@ -1343,14 +1358,16 @@ public class TariffService(
         {
             var portalId = await coreSettings.GetKeyAsync(tenantId);
 
-            var isAiService = false;
-            if (!string.IsNullOrEmpty(filter.ServiceName))
+            if (accountingClient.SubAccountsEnabled && !string.IsNullOrEmpty(filter.ServiceName))
             {
                 var aiQuota = await quotaService.GetTenantQuotaAsync((int)TenantWalletService.AITools);
-                isAiService = aiQuota != null && aiQuota.ServiceName == filter.ServiceName;
+                if (aiQuota != null && aiQuota.ServiceName == filter.ServiceName)
+                {
+                    return await accountingClient.GetCustomerAiOperationsAsync(portalId, filter);
+                }
             }
 
-            return await accountingClient.GetCustomerOperationsAsync(portalId, filter, isAiService);
+            return await accountingClient.GetCustomerOperationsAsync(portalId, filter);
         }
         catch (AccountingCustomerNotFoundException exception)
         {
@@ -1362,6 +1379,36 @@ public class TariffService(
         }
 
         return null;
+    }
+
+    public async Task<List<CustomerMonthlyUsage>> GetCustomerMonthlyUsageAsync(int tenantId, MonthlyUsageFilter filter)
+    {
+        try
+        {
+            var portalId = await coreSettings.GetKeyAsync(tenantId);
+
+            return await accountingClient.GetCustomerMonthlyUsageAsync(portalId, filter);
+        }
+        catch (Exception error)
+        {
+            LogError(error, tenantId.ToString());
+            return null;
+        }
+    }
+
+    public async Task<UsageReport> GetCustomerServiceUsageAsync(int tenantId, UsageFilter filter)
+    {
+        try
+        {
+            var portalId = await coreSettings.GetKeyAsync(tenantId);
+
+            return await accountingClient.GetCustomerServiceUsageAsync(portalId, filter);
+        }
+        catch (Exception error)
+        {
+            LogError(error, tenantId.ToString());
+            return null;
+        }
     }
 
     public async Task<List<Currency>> GetAllAccountingCurrenciesAsync()

@@ -110,6 +110,12 @@ public class TenantQuota
     public bool Wallet { get; set; }
 
     /// <summary>
+    /// Specifies if the tenant quota is primary or additional.
+    /// </summary>
+    /// <example>false</example>
+    public bool Additional { get; set; }
+
+    /// <summary>
     /// The quota due date.
     /// </summary>
     /// <example>2021-01-01T00:00:00</example>
@@ -605,6 +611,7 @@ public class TenantQuota
         MaxFileSize = quota.MaxFileSize;
         Features = quota.Features;
         Wallet = quota.Wallet;
+        Additional = quota.Additional;
         DueDate = quota.DueDate;
     }
 

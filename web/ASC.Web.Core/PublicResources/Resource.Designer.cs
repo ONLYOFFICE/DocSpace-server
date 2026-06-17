@@ -132,6 +132,24 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Business plan.
+        /// </summary>
+        public static string AccountingCustomerOperationServiceDesc_admin {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationServiceDesc_admin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Business plan.
+        /// </summary>
+        public static string AccountingCustomerOperationServiceDesc_adminyear {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationServiceDesc_adminyear", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to AI features.
         /// </summary>
         public static string AccountingCustomerOperationServiceDesc_ai_tools {
@@ -159,7 +177,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Disk space.
+        ///   Looks up a localized string similar to Additional disk storage.
         /// </summary>
         public static string AccountingCustomerOperationServiceDesc_disk_storage {
             get {
@@ -227,6 +245,24 @@ namespace ASC.Web.Core.PublicResources {
         public static string AccountingCustomerOperationServiceUnit {
             get {
                 return ResourceManager.GetString("AccountingCustomerOperationServiceUnit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Admins.
+        /// </summary>
+        public static string AccountingCustomerOperationServiceUOM_admin {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationServiceUOM_admin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Admins.
+        /// </summary>
+        public static string AccountingCustomerOperationServiceUOM_adminyear {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationServiceUOM_adminyear", resourceCulture);
             }
         }
         
@@ -3446,6 +3482,15 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Business.
         /// </summary>
+        public static string Tariffs_adminwallet {
+            get {
+                return ResourceManager.GetString("Tariffs_adminwallet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Business.
+        /// </summary>
         public static string Tariffs_adminyear {
             get {
                 return ResourceManager.GetString("Tariffs_adminyear", resourceCulture);
@@ -3489,7 +3534,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Enable AI features to boost productivity..
+        ///   Looks up a localized string similar to Get access to a wide range of AI models through OpenRouter integration. Pay only for what you use, billed from your Wallet..
         /// </summary>
         public static string TariffsFeature_aitools_wallet_price_count {
             get {

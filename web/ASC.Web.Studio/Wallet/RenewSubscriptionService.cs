@@ -1,34 +1,34 @@
 ﻿// Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 using System.Globalization;
@@ -128,8 +128,9 @@ public class RenewSubscriptionService(
 
             var tariffService = scope.ServiceProvider.GetRequiredService<ITariffService>();
             var currentTariff = await tariffService.GetTariffAsync(data.TenantId, refresh: false);
+            var walletQuota = _walletQuotas[data.Quota];
 
-            if (currentTariff.State > TariffState.Paid)
+            if (currentTariff.State > TariffState.Paid && walletQuota.Additional)
             {
                 return;
             }
@@ -154,36 +155,45 @@ public class RenewSubscriptionService(
                 await securityContext.AuthenticateMeWithoutCookieAsync(data.TenantId, owner.Id);
             }
 
-            var walletQuota = _walletQuotas[data.Quota];
-
-            var walletQuotaFeatureName = walletQuota.Features.Split(':').FirstOrDefault(); // wallet quota must contains only one feature
+            var walletQuotaFeatureName = walletQuota.Additional
+                ? walletQuota.Features.Split(':').FirstOrDefault()
+                : "manager"; // wallet quota must contains only one feature
 
             var nextQuantity = data.NextQuantity ?? data.Quantity;
 
             var currentQuota = await tenantManager.GetCurrentTenantQuotaAsync(refresh: true);
 
-            foreach (var feature in currentQuota.TenantQuotaFeatures)
+            var feature = currentQuota.TenantQuotaFeatures.FirstOrDefault(f => f.Name == walletQuotaFeatureName);
+
+            if (feature != null)
             {
-                if (feature.Name == walletQuotaFeatureName)
+                if (feature is MaxTotalSizeFeature size)
                 {
-                    if (feature is MaxTotalSizeFeature size)
+                    var tenantQuotaSize = size.Value; // size by tariff (quota size * quantity)
+
+                    var maxTotalSizeStatistic = scope.ServiceProvider.GetRequiredService<MaxTotalSizeStatistic>();
+
+                    var usedSize = await maxTotalSizeStatistic.GetValueAsync();
+
+                    var walletQuotaSize = walletQuota.GetFeature<long>(feature.Name).Value; // wallet quota size by database
+
+                    if (walletQuotaSize > 0 && usedSize > tenantQuotaSize + walletQuotaSize * nextQuantity)
                     {
-                        var tenantQuotaSize = size.Value; // size by tariff (quota size * quantity)
-
-                        var maxTotalSizeStatistic = scope.ServiceProvider.GetRequiredService<MaxTotalSizeStatistic>();
-
-                        var usedSize = await maxTotalSizeStatistic.GetValueAsync();
-
-                        var walletQuotaSize = walletQuota.GetFeature<long>(feature.Name).Value; // wallet quota size by database
-
-                        if (walletQuotaSize > 0 && usedSize > tenantQuotaSize + walletQuotaSize * nextQuantity)
-                        {
-                            var oversize = usedSize - tenantQuotaSize;
-                            nextQuantity = (int)((oversize + walletQuotaSize - 1) / walletQuotaSize); // round up
-                        }
+                        var oversize = usedSize - tenantQuotaSize;
+                        nextQuantity = (int)((oversize + walletQuotaSize - 1) / walletQuotaSize); // round up
                     }
+                }
 
-                    break; //TODO: add nextQuantity calculations for another wallet quotas (for example admins count)
+                if (feature is CountPaidUserFeature && !walletQuota.Additional)
+                {
+                    var usedCount = (await userManager.GetUsersByGroupAsync(ASC.Core.Users.Constants.GroupRoomAdmin.ID)).Length;
+
+                    var walletQuotaCount = walletQuota.GetFeature<long>(feature.Name).Value; // wallet quota count by database
+
+                    if (walletQuotaCount > 0 && usedCount > walletQuotaCount * nextQuantity)
+                    {
+                        nextQuantity = usedCount; // round up
+                    }
                 }
             }
 

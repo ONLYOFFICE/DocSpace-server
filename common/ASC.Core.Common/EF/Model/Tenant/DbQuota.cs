@@ -56,6 +56,8 @@ public class DbQuota : BaseEntity
 
     public bool Visible { get; set; }
     public bool Wallet { get; set; }
+    public bool Additional { get; set; }
+
     public override object[] GetKeys()
     {
         return [TenantId];
@@ -113,7 +115,8 @@ public static class DbQuotaExtension
                     Features = "total_size:1073741824",
                     Price = 0,
                     ProductId = "1004",
-                    Visible = false
+                    Visible = false,
+                    Additional = true
                 },
                 new DbQuota
                 {
@@ -123,7 +126,8 @@ public static class DbQuotaExtension
                     Features = "manager:1",
                     Price = 0,
                     ProductId = "1005",
-                    Visible = false
+                    Visible = false,
+                    Additional = true
                 },
                 new DbQuota
                 {
@@ -185,7 +189,8 @@ public static class DbQuotaExtension
                     ProductId = "1011",
                     ServiceName = "disk-storage",
                     Visible = true,
-                    Wallet = true
+                    Wallet = true,
+                    Additional = true
                 },
                 new DbQuota
                 {
@@ -197,7 +202,8 @@ public static class DbQuotaExtension
                     ProductId = null,
                     ServiceName = "backup",
                     Visible = true,
-                    Wallet = true
+                    Wallet = true,
+                    Additional = true
                 },
                 new DbQuota
                 {
@@ -210,21 +216,23 @@ public static class DbQuotaExtension
                     ServiceName = "ai-tools",
                     ServiceGroup = null,
                     Visible = true,
-                    Wallet = true
+                    Wallet = true,
+                    Additional = true
                 },
-                // new DbQuota
-                // {
-                //     TenantId = -14,
-                //     Name = "admin",
-                //     Description = "since 08.06.2026",
-                //     Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,free_backup:2:fixed,automationapi",
-                //     Price = 20,
-                //     ProductId = "1013",
-                //     ServiceName = "admin",
-                //     ServiceGroup = null,
-                //     Visible = true,
-                //     Wallet = true
-                // },
+                new DbQuota
+                {
+                    TenantId = -14,
+                    Name = "adminwallet",
+                    Description = null,
+                    Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,free_backup:2:fixed,automationapi",
+                    Price = 20,
+                    ProductId = "1013",
+                    ServiceName = "admin",
+                    ServiceGroup = null,
+                    Visible = true,
+                    Wallet = true,
+                    Additional = true
+                },
                 new DbQuota
                 {
                     TenantId = -15,
@@ -236,7 +244,8 @@ public static class DbQuotaExtension
                     ServiceName = "docscloud",
                     ServiceGroup = null,
                     Visible = true,
-                    Wallet = true
+                    Wallet = true,
+                    Additional = true
                 },
                 new DbQuota
                 {
@@ -249,7 +258,8 @@ public static class DbQuotaExtension
                     ServiceName = "docscloud-devpack",
                     ServiceGroup = null,
                     Visible = false,
-                    Wallet = true
+                    Wallet = true,
+                    Additional = true
                 },
                 new DbQuota
                 {
@@ -262,7 +272,8 @@ public static class DbQuotaExtension
                     ServiceName = null,
                     ServiceGroup = null,
                     Visible = false,
-                    Wallet = false
+                    Wallet = false,
+                    Additional = true
                 }
                 );
         return modelBuilder;

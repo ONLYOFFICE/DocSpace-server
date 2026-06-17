@@ -567,6 +567,13 @@ public class BackupService(
         return await backupRepository.GetBackupsCountAsync(tenantId, paid, from, to);
     }
 
+    public async Task<(int Free, int Paid)> GetBackupsCountAsync(int tenantId, DateTime from, DateTime to)
+    {
+        await DemandPermissionsBackupAsync();
+
+        return await backupRepository.GetBackupsCountAsync(tenantId, from, to);
+    }
+
     public async Task<bool> IsBackupServiceEnabledAsync(int tenantId)
     {
         var settings = await settingsManager.LoadAsync<TenantWalletServiceSettings>(tenantId);

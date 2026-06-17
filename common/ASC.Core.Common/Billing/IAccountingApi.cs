@@ -61,11 +61,17 @@ public interface IAccountingApi
     [Post("/operation/AiCredit")]
     Task<ServicePayment> MakeAiCreditAsync([Body] AiCreditOperation data);
 
+    [Get("/customer/{portalId}/operations/ai")]
+    Task<Report> GetCustomerAiOperationsAsync(string portalId, [Query] OperationFilter filter);
+
     [Get("/customer/{portalId}/operations")]
     Task<Report> GetCustomerOperationsAsync(string portalId, [Query] OperationFilter filter);
 
-    [Get("/customer/{portalId}/operations/ai")]
-    Task<Report> GetCustomerAiOperationsAsync(string portalId, [Query] OperationFilter filter);
+    [Get("/customer/{portalId}/usage/monthly")]
+    Task<List<CustomerMonthlyUsage>> GetCustomerMonthlyUsageAsync(string portalId, [Query] MonthlyUsageFilter filter);
+
+    [Get("/customer/{portalId}/usage")]
+    Task<UsageReport> GetCustomerServiceUsageAsync(string portalId, UsageFilter filter);
 
     [Get("/currency/all")]
     Task<List<Currency>> GetAllCurrenciesAsync();

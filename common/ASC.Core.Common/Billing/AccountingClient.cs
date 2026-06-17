@@ -37,6 +37,7 @@ namespace ASC.Core.Billing;
 public class AccountingClient(IOptions<AccountingConfiguration> configuration, ICache cache, IAccountingApi accountingApi)
 {
     public bool Configured { get => !string.IsNullOrEmpty(configuration.Value.Url); }
+    public bool SubAccountsEnabled { get => configuration.Value.SubAccounts; }
 
     public async Task<Balance> GetCustomerBalanceAsync(string portalId)
     {
@@ -91,13 +92,32 @@ public class AccountingClient(IOptions<AccountingConfiguration> configuration, I
         return await accountingApi.MakeAiCreditAsync(new AiCreditOperation(portalId, amount, currency, customerParticipantName, metadata));
     }
 
-    public async Task<Report> GetCustomerOperationsAsync(string portalId, OperationFilter filter, bool isAiService)
+    public async Task<Report> GetCustomerAiOperationsAsync(string portalId, OperationFilter filter)
     {
         EnsureConfigured();
 
-        return isAiService
-            ? await accountingApi.GetCustomerAiOperationsAsync(portalId, filter)
-            : await accountingApi.GetCustomerOperationsAsync(portalId, filter);
+        return await accountingApi.GetCustomerAiOperationsAsync(portalId, filter);
+    }
+
+    public async Task<Report> GetCustomerOperationsAsync(string portalId, OperationFilter filter)
+    {
+        EnsureConfigured();
+
+        return await accountingApi.GetCustomerOperationsAsync(portalId, filter);
+    }
+
+    public async Task<List<CustomerMonthlyUsage>> GetCustomerMonthlyUsageAsync(string portalId, MonthlyUsageFilter filter)
+    {
+        EnsureConfigured();
+
+        return await accountingApi.GetCustomerMonthlyUsageAsync(portalId, filter);
+    }
+
+    public async Task<UsageReport> GetCustomerServiceUsageAsync(string portalId, UsageFilter filter)
+    {
+        EnsureConfigured();
+
+        return await accountingApi.GetCustomerServiceUsageAsync(portalId, filter);
     }
 
     public async Task<List<Currency>> GetAllCurrenciesAsync()
@@ -337,6 +357,88 @@ public class OperationFilter
 }
 
 /// <summary>
+/// Represents an object for filtering the list of monthly usage statistics.
+/// </summary>
+public class MonthlyUsageFilter
+{
+    /// <summary>
+    /// The start date of the period to filter usage from (inclusive).
+    /// </summary>
+    [AliasAs("startDate")]
+    [Query(Format = "o")]
+    public DateTime? UtcStartDate { get; init; }
+    /// <summary>
+    /// The end date of the period to filter usage until (inclusive).
+    /// </summary>
+    [AliasAs("endDate")]
+    [Query(Format = "o")]
+    public DateTime? UtcEndDate { get; init; }
+}
+
+/// <summary>
+/// The filter for customer service usage statistics.
+/// </summary>
+public class UsageFilter
+{
+    /// <summary>
+    /// The service name.
+    /// </summary>
+    public string ServiceName { get; init; }
+    /// <summary>
+    /// Unique name of customer participant to filter by.
+    /// </summary>
+    public string ParticipantName
+    {
+        get;
+        init => field = value?.Trim();
+    }
+    /// <summary>
+    /// The operation status to filter by.
+    /// </summary>
+    public OperationStatus? Status { get; init; }
+    /// <summary>
+    /// The start date of the period to filter usage from (inclusive).
+    /// </summary>
+    [AliasAs("startDate")]
+    [Query(Format = "o")]
+    public DateTime? UtcStartDate { get; init; }
+    /// <summary>
+    /// The end date of the period to filter usage until (inclusive).
+    /// </summary>
+    [AliasAs("endDate")]
+    [Query(Format = "o")]
+    public DateTime? UtcEndDate { get; init; }
+    /// <summary>
+    /// Metadata key-value pairs to filter by.
+    /// </summary>
+    public Dictionary<string, string> Metadata { get; init; }
+    /// <summary>
+    /// The number of items to skip before starting to return results. Used for pagination.
+    /// </summary>
+    public int? Offset { get; init; }
+    /// <summary>
+    /// The maximum number of items to return in the response.
+    /// </summary>
+    public int? Limit { get; init; }
+    /// <summary>
+    /// The field to order by.
+    /// </summary>
+    public string OrderBy
+    {
+        get;
+        init => field = value?.Trim();
+    }
+    /// <summary>
+    /// Order direction: ASC or DESC.
+    /// </summary>
+    public OperationOrderType? OrderType
+    {
+        get;
+        init => field = value is OperationOrderType.Descending ? null : value;
+    }
+}
+
+/// <summary>
 /// The customer information.
 /// </summary>
 public class CustomerInfo
@@ -563,6 +665,109 @@ public class Report
 
         return participantDisplayNames;
     }
+}
+
+/// <summary>
+/// Aggregated customer spending for a single calendar month.
+/// </summary>
+public class CustomerMonthlyUsage
+{
+    /// <summary>
+    /// Calendar year (e.g. 2025).
+    /// </summary>
+    public int Year { get; set; }
+
+    /// <summary>
+    /// Calendar month (1-12).
+    /// </summary>
+    public int Month { get; set; }
+
+    /// <summary>
+    /// Currency code of the amounts (e.g. USD, EUR).
+    /// </summary>
+    public string Currency { get; set; }
+
+    /// <summary>
+    /// Total amount charged across all services in this month.
+    /// </summary>
+    public decimal TotalAmount { get; set; }
+
+    /// <summary>
+    /// Number of individual purchase operations in this month.
+    /// </summary>
+    public int OperationCount { get; set; }
+}
+
+/// <summary>
+/// Aggregated customer usage statistics for a service over a period.
+/// </summary>
+public class CustomerServiceUsage
+{
+    /// <summary>
+    /// Name of the service.
+    /// </summary>
+    public string Service { get; set; }
+
+    /// <summary>
+    /// Unit of measurement for the service (e.g. requests, GB, hours).
+    /// </summary>
+    public string ServiceUnit { get; set; }
+
+    /// <summary>
+    /// Currency code of the amounts (e.g. USD, EUR).
+    /// </summary>
+    public string Currency { get; set; }
+
+    /// <summary>
+    /// Total number of units consumed.
+    /// </summary>
+    public int TotalQuantity { get; set; }
+
+    /// <summary>
+    /// Total amount charged for the service.
+    /// </summary>
+    public decimal TotalAmount { get; set; }
+
+    /// <summary>
+    /// Number of individual purchase operations.
+    /// </summary>
+    public int OperationCount { get; set; }
+}
+
+/// <summary>
+/// Represents a paged report of customer service usage statistics.
+/// </summary>
+public class UsageReport
+{
+    /// <summary>
+    /// Collection of service usage statistics.
+    /// </summary>
+    public List<CustomerServiceUsage> Collection { get; set; }
+
+    /// <summary>
+    /// Offset of the report data.
+    /// </summary>
+    public int Offset { get; set; }
+
+    /// <summary>
+    /// Limit of the report data.
+    /// </summary>
+    public int Limit { get; set; }
+
+    /// <summary>
+    /// Total quantity of records in the report.
+    /// </summary>
+    public long TotalQuantity { get; set; }
+
+    /// <summary>
+    /// Total number of pages in the report.
+    /// </summary>
+    public int TotalPage { get; set; }
+
+    /// <summary>
+    /// Current page number of the report.
+    /// </summary>
+    public int CurrentPage { get; set; }
 }
 
 /// <summary>
