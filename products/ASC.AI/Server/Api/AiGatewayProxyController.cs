@@ -58,8 +58,6 @@ public class AiGatewayProxyController(
 
     [HttpGet("gateway/{*path}")]
     [HttpPost("gateway/{*path}")]
-    [HttpPut("gateway/{*path}")]
-    [HttpDelete("gateway/{*path}")]
     public async Task<IActionResult> ProxyRequest([FromRoute] string path)
     {
         var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
