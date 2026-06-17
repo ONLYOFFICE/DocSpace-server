@@ -1606,12 +1606,14 @@
           "error": {
             "type": "string",
             "description": "The backup error message.",
-            "nullable": true
+            "nullable": true,
+            "example": null
           },
           "warning": {
             "type": "string",
             "description": "The backup warning message.",
-            "nullable": true
+            "nullable": true,
+            "example": null
           },
           "link": {
             "type": "string",

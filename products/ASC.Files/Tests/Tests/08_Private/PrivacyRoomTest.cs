@@ -33,10 +33,7 @@
 
 extern alias ASCWebApi;
 extern alias ASCPeople;
-using System.Net.Http.Json;
 using System.Reflection;
-
-using ASC.Files.Tests.ApiFactories;
 
 namespace ASC.Files.Tests.Tests._08_Privacy;
 
@@ -221,7 +218,7 @@ public class PrivacyRoomTest(AspireAppFixture fixture) : BaseTest(fixture)
             ]
         }, TestContext.Current.CancellationToken);
 
-        security.Response.Members.Should().Contain(r=> r.SharedToUser.Id == roomAdmin1.Id && r.Access == FileShare.ContentCreator);
+        security.Response.Members.Should().Contain(r => r.SharedToUser.Id == roomAdmin1.Id && r.Access == FileShare.ContentCreator);
     }
 
     [Fact]

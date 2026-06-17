@@ -100,13 +100,16 @@ public class VectorizationTask : DistributedTaskProgress
 
             var vectorStore = scope.ServiceProvider.GetRequiredService<VectorStore>();
             var generatorFactory = scope.ServiceProvider.GetRequiredService<EmbeddingGeneratorFactory>();
-            var fileProcessor = scope.ServiceProvider.GetRequiredService<FileTextProcessor>();
+            var textProcessor = scope.ServiceProvider.GetRequiredService<TextProcessor>();
+            var tokenizerFactory = scope.ServiceProvider.GetRequiredService<TokenizerFactory>();
             var vectorizationSettings = scope.ServiceProvider.GetRequiredService<VectorizationGlobalSettings>();
 
-            var splitterSettings = new SplitterSettings
+            var tokenCounter = tokenizerFactory.GetTokenCounter(vectorizationSettings.Model.Id);
+            var chunkerSettings = new ChunkerSettings
             {
-                MaxTokensPerChunk = (int)(vectorizationSettings.ChunkSize * 0.75),
-                ChunkOverlap = vectorizationSettings.ChunkOverlap
+                MaxTokensPerChunk = vectorizationSettings.ChunkSize,
+                ChunkOverlap = vectorizationSettings.ChunkOverlap,
+                TokenCounter = tokenCounter
             };
 
             collection = vectorStore.GetCollection<Chunk>(
@@ -138,9 +141,17 @@ public class VectorizationTask : DistributedTaskProgress
             await collection.EnsureCollectionExistsAsync(CancellationToken);
             var embeddingGenerator = await generatorFactory.CreateAsync(agent);
 
-            var textChunks = await fileProcessor.GetTextChunksAsync(file, splitterSettings);
+            await using var stream = await fileDao.GetFileStreamAsync(file);
 
-            foreach (var batch in textChunks.Chunk(vectorizationSettings.ChunksBatchSize))
+            var fileExtension = FileUtility.GetFileExtension(file.Title);
+            var textChunks = textProcessor.ProcessAsync(
+                stream, 
+                file.ContentLength, 
+                fileExtension, 
+                chunkerSettings,
+                CancellationToken);
+
+            await foreach (var batch in textChunks.Chunk(vectorizationSettings.ChunksBatchSize))
             {
                 var embeddings = await embeddingGenerator.GenerateAsync(batch, cancellationToken: CancellationToken);
                 var chunks = batch.Select((text, index) =>

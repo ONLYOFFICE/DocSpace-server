@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -31,33 +31,11 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using ASC.AI.Extensions;
-using ASC.AI.Integration.Extensions;
+namespace ASC.Files.Core.Text;
 
-namespace ASC.AI;
-
-public class Startup : BaseStartup
+public class ChunkerSettings
 {
-    public Startup(IConfiguration configuration) : base(configuration)
-    {
-        if (configuration.GetSection("RabbitMQ").GetChildren().Any() &&
-            string.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
-        {
-            configuration["RabbitMQ:ClientProvidedName"] = Program.AppName;
-        }
-    }
-
-    public override async Task ConfigureServices(WebApplicationBuilder builder)
-    {
-        var services = builder.Services;
-
-        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-
-        services.AddMemoryCache();
-
-        await base.ConfigureServices(builder);
-
-        services.AddAiServerServices(_configuration);
-        services.AddAiIntegrationServices();
-    }
+    public required int MaxTokensPerChunk { get; init; }
+    public required float ChunkOverlap { get; init; }
+    public required Func<string, int> TokenCounter { get; init; }
 }

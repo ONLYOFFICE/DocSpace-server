@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -31,33 +31,26 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using ASC.AI.Extensions;
-using ASC.AI.Integration.Extensions;
+namespace ASC.Files.Core.Text;
 
-namespace ASC.AI;
-
-public class Startup : BaseStartup
+[Singleton]
+public class TextProcessor(IServiceProvider serviceProvider)
 {
-    public Startup(IConfiguration configuration) : base(configuration)
+    public IAsyncEnumerable<string> ProcessAsync(
+        Stream content,
+        long contentLength,
+        string fileExtension,
+        ChunkerSettings settings,
+        CancellationToken cancellationToken = default)
     {
-        if (configuration.GetSection("RabbitMQ").GetChildren().Any() &&
-            string.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
+        IDocumentProcessingStrategy strategy = fileExtension.ToLowerInvariant() switch
         {
-            configuration["RabbitMQ:ClientProvidedName"] = Program.AppName;
-        }
-    }
+            ".csv" => serviceProvider.GetRequiredService<CsvDocumentProcessingStrategy>(),
+            ".json" => serviceProvider.GetRequiredService<JsonDocumentProcessingStrategy>(),
+            ".md" => serviceProvider.GetRequiredService<MarkdownDocumentProcessingStrategy>(),
+            _ => serviceProvider.GetRequiredService<GenericDocumentProcessingStrategy>()
+        };
 
-    public override async Task ConfigureServices(WebApplicationBuilder builder)
-    {
-        var services = builder.Services;
-
-        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-
-        services.AddMemoryCache();
-
-        await base.ConfigureServices(builder);
-
-        services.AddAiServerServices(_configuration);
-        services.AddAiIntegrationServices();
+        return strategy.ProcessAsync(content, contentLength, fileExtension, settings, cancellationToken);
     }
 }

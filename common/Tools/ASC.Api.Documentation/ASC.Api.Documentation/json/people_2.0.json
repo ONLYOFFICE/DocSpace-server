@@ -12102,10 +12102,7 @@
             "type": "string",
             "description": "The third-party profile in the serialized format.",
             "nullable": true,
-            "example": {
-              "provider": "Google",
-              "id": "123456"
-            }
+            "example": "{\"provider\":\"Google\",\"id\":\"123456\"}"
           }
         },
         "additionalProperties": false,
@@ -12597,10 +12594,7 @@
             "type": "string",
             "description": "The third-party profile in the serialized format",
             "nullable": true,
-            "example": {
-              "provider": "Google",
-              "id": "123456"
-            }
+            "example": "{\"provider\":\"Google\",\"id\":\"123456\"}"
           }
         },
         "additionalProperties": false,

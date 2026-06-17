@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -31,33 +31,30 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using ASC.AI.Extensions;
-using ASC.AI.Integration.Extensions;
+using System.Runtime.CompilerServices;
 
-namespace ASC.AI;
+namespace ASC.Files.Core.Text;
 
-public class Startup : BaseStartup
+[Singleton]
+public class GenericDocumentProcessingStrategy(DocumentTextExtractor documentTextExtractor) : IDocumentProcessingStrategy
 {
-    public Startup(IConfiguration configuration) : base(configuration)
+    public async IAsyncEnumerable<string> ProcessAsync(
+        Stream content,
+        long contentLength,
+        string fileExtension,
+        ChunkerSettings settings,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        if (configuration.GetSection("RabbitMQ").GetChildren().Any() &&
-            string.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
+        var text = await documentTextExtractor.ExtractAsync(content, contentLength, fileExtension);
+
+        if (string.IsNullOrEmpty(text))
         {
-            configuration["RabbitMQ:ClientProvidedName"] = Program.AppName;
+            yield break;
         }
-    }
 
-    public override async Task ConfigureServices(WebApplicationBuilder builder)
-    {
-        var services = builder.Services;
-
-        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-
-        services.AddMemoryCache();
-
-        await base.ConfigureServices(builder);
-
-        services.AddAiServerServices(_configuration);
-        services.AddAiIntegrationServices();
+        foreach (var chunk in TextChunkingHelper.Split(text, settings))
+        {
+            yield return chunk;
+        }
     }
 }

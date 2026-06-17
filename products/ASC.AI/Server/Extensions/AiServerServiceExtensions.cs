@@ -39,14 +39,22 @@ namespace ASC.AI.Extensions;
 
 public static class AiServerServiceExtensions
 {
-    public static IServiceCollection AddAiServerServices(this IServiceCollection services)
+    public static IServiceCollection AddAiServerServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddBaseDbContextPool<AiDbContext>();
         services.AddBaseDbContextPool<FilesDbContext>();
         services.RegisterQuotaFeature();
 
-        services.AddSingleton<IToolCallReceiver, RedisToolCallReceiver>();
-        services.AddSingleton<IToolCallPublisher, RedisToolCallPublisher>();
+        if (ServiceCollectionExtension.IsRedisEnabled(configuration))
+        {
+            services.AddSingleton<IToolCallReceiver, RedisToolCallReceiver>();
+            services.AddSingleton<IToolCallPublisher, RedisToolCallPublisher>();
+        }
+        else
+        {
+            services.AddSingleton<IToolCallReceiver, InMemoryToolCallReceiver>();
+            services.AddSingleton<IToolCallPublisher, InMemoryToolCallPublisher>();
+        }
 
         services.AddTransient<McpContentTypeHandler>();
         services.AddHttpClient(McpContentTypeHandler.HttpClientName)
