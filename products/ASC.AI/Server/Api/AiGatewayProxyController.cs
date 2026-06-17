@@ -31,8 +31,6 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using System.Net.Http.Headers;
-
 namespace ASC.AI.Api;
 
 [Scope]
