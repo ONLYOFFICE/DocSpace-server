@@ -310,6 +310,11 @@ public class PaymentController(
             throw new ArgumentException("Invalid quantity");
         }
 
+        if (quota.TenantId == (int)TenantWalletService.Admin)
+        {
+            minValue = (await userManager.GetUsersByGroupAsync(ASC.Core.Users.Constants.GroupRoomAdmin.ID)).Length;
+        }
+
         var hasActiveWalletQuota = tariff.Quotas.Any(q => q.Id == quota.TenantId && q.State == QuotaState.Active);
         if (!hasActiveWalletQuota && productQty < minValue)
         {
