@@ -115,7 +115,6 @@ public class Startup : BaseStartup
         // --- Endpoints ---
         app.UseEndpoints(endpoints =>
         {
-            endpoints.InitializeHttpHandlers("files_template");
             endpoints.InitializeHttpHandlers();
         });
     }
