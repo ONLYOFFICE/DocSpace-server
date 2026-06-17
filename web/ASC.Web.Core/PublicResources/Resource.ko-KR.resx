@@ -1377,4 +1377,22 @@
   <data name="UserAuthenticationFailed" xml:space="preserve">
     <value>사용자 인증에 실패했습니다</value>
   </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>추가 디스크 저장 공간</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_admin" xml:space="preserve">
+    <value>비즈니스 요금제</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_adminyear" xml:space="preserve">
+    <value>비즈니스 요금제</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_admin" xml:space="preserve">
+    <value>관리자</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_adminyear" xml:space="preserve">
+    <value>관리자</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>OpenRouter 통합을 통해 다양한 AI 모델에 액세스하세요. 사용한 만큼만 지불하며, 요금은 지갑에서 청구됩니다.</value>
+  </data>
 </root>

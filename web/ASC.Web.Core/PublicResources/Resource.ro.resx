@@ -1377,4 +1377,22 @@
   <data name="UserAuthenticationFailed" xml:space="preserve">
     <value>Autentificarea utilizatorului a eșuat</value>
   </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Spațiu de stocare suplimentar</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_admin" xml:space="preserve">
+    <value>Plan Business</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_adminyear" xml:space="preserve">
+    <value>Plan Business</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_admin" xml:space="preserve">
+    <value>Administratori</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_adminyear" xml:space="preserve">
+    <value>Administratori</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Obțineți acces la o gamă largă de modele AI prin integrarea OpenRouter. Plătiți doar pentru ceea ce utilizați, suma fiind dedusă din Portofelul dvs.</value>
+  </data>
 </root>

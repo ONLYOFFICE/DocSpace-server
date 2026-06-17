@@ -1377,4 +1377,22 @@
   <data name="UserAuthenticationFailed" xml:space="preserve">
     <value>Օգտատիրոջ նույնականացումը ձախողվել է</value>
   </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Լրացուցիչ սկավառակի պահեստ</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_admin" xml:space="preserve">
+    <value>Բիզնես պլան</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_adminyear" xml:space="preserve">
+    <value>Բիզնես պլան</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_admin" xml:space="preserve">
+    <value>Ադմինիստրատորներ</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_adminyear" xml:space="preserve">
+    <value>Ադմինիստրատորներ</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>OpenRouter ինտեգրման միջոցով ստացեք հասանելիություն ԱԲ մոդելների լայն շրջանակին։ Վճարեք միայն օգտագործածի համար՝ ձեր Դրամապանակից։</value>
+  </data>
 </root>

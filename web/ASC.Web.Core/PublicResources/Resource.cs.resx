@@ -1377,4 +1377,22 @@
   <data name="ConsumersNextcloudInstruction" xml:space="preserve">
     <value>Povolte aplikaci přihlásit se k portálu pomocí účtu Nextcloud.</value>
   </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Další úložiště na disku</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_admin" xml:space="preserve">
+    <value>Plán Business</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_adminyear" xml:space="preserve">
+    <value>Plán Business</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_admin" xml:space="preserve">
+    <value>Správci</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_adminyear" xml:space="preserve">
+    <value>Správci</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Získejte přístup k široké škále modelů AI prostřednictvím integrace OpenRouter. Plaťte jen za to, co využijete; částka se účtuje z vaší Peněženky.</value>
+  </data>
 </root>

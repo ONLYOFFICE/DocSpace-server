@@ -1377,4 +1377,22 @@
   <data name="TelegramOnSuccessfulLink" xml:space="preserve">
     <value>DocSpaceからの通知を受け取るためにTelegramへの接続が完了しました。</value>
   </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>追加ディスクストレージ</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_admin" xml:space="preserve">
+    <value>BUSINESSプラン</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_adminyear" xml:space="preserve">
+    <value>BUSINESSプラン</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_admin" xml:space="preserve">
+    <value>管理者</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_adminyear" xml:space="preserve">
+    <value>管理者</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>OpenRouter連携を通じて、幅広いAIモデルにアクセスできます。使用した分だけお支払いいただき、料金はウォレットから請求されます。</value>
+  </data>
 </root>
