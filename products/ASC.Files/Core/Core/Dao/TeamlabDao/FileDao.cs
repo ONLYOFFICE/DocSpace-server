@@ -2762,20 +2762,12 @@ internal class FileDao(
         {
             q = q.Join(filesDbContext.TagLink.Join(filesDbContext.Tag, l => l.TagId, t => t.Id, (l, t) => new
                 {
-                    t.TenantId,
-                    t.Type,
-                    t.Name,
-                    l.EntryId,
-                    l.EntryType
+                    t.TenantId, t.Type, t.Name, l.EntryId, l.EntryType
                 }), f => f.Id.ToString(), t => t.EntryId, (file, tag) => new { file, tag })
                 .Where(r => r.tag.Type == TagType.Origin && r.tag.EntryType == FileEntryType.File &&
-                            filesDbContext.Folders.Any(f =>
-                                f.TenantId == tenantId &&
-                                f.Id == filesDbContext.Tree
-                                    .Where(t => t.FolderId == Convert.ToInt32(r.tag.Name) && t.ParentId == f.Id && folderType.Contains(f.FolderType))
-                                    .OrderByDescending(t => t.Level)
-                                    .Select(t => t.ParentId)
-                                    .FirstOrDefault()))
+                            filesDbContext.Tree.Any(t => t.FolderId == Convert.ToInt32(r.tag.Name) &&
+                                                         filesDbContext.Folders.Any(f =>
+                                                             f.Id == t.ParentId && f.TenantId == tenantId && folderType.Contains(f.FolderType))))
                 .Select(r => r.file);
         }
 
