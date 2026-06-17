@@ -140,7 +140,8 @@ public class ProfileStorageService(
                 Reasoning = HasCapability(m, "reasoning"),
                 CanUseTool = HasCapability(m, ToolsCapability),
                 Capabilities = MapCapabilities(m),
-                UseResponsesApi = false
+                UseResponsesApi = false,
+                Key = "onlyoffice"
             });
     }
 
