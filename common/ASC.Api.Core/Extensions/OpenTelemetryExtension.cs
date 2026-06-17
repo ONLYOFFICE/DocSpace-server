@@ -77,8 +77,7 @@ public static class OpenTelemetryExtension
                 Assembly.GetEntryAssembly()?.GetName().Name
             }.FirstOrDefault(static s => !string.IsNullOrWhiteSpace(s));
 
-            builder.Services.AddOpenTelemetry()
-                .ConfigureResource(resource => resource.AddService(serviceName))
+            var otlbuilder = builder.Services.AddOpenTelemetry()
                 .WithMetrics(metrics =>
                 {
                     metrics.AddAspNetCoreInstrumentation()
@@ -140,6 +139,15 @@ public static class OpenTelemetryExtension
                         });
                     }
                 });
+
+            if (!string.IsNullOrWhiteSpace(serviceName))
+            {
+                // Do not auto-generate service.instance.id: under Aspire it would override the
+                // instance id injected via OTEL_RESOURCE_ATTRIBUTES, so the dashboard could no longer
+                // correlate telemetry to the orchestrated resource and showed a duplicate "phantom"
+                // instance per service. Letting the env-provided instance id stand keeps one entry.
+                otlbuilder.ConfigureResource(resource => resource.AddService(serviceName, autoGenerateServiceInstanceId: false));
+            }
 
             return builder;
         }
