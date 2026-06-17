@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -34,6 +34,7 @@
 global using ASC.Api.Core;
 global using ASC.Api.Core.Core;
 global using ASC.Api.Core.Convention;
+global using ASC.Api.Core.Extensions;
 global using ASC.Api.Utils;
 
 global using ASC.AI.Core.Chat;
@@ -67,6 +68,7 @@ global using ASC.Common;
 global using ASC.Common.Log;
 global using ASC.Common.Threading.DistributedLock.Abstractions;
 global using ASC.Common.Web;
+global using ASC.Core.Common;
 global using ASC.Core.Common.EF;
 global using ASC.Core.Common.EF.Model.Ai;
 global using ASC.Core.Common.Settings;
@@ -102,6 +104,7 @@ global using Microsoft.Extensions.AI;
 
 global using System.ComponentModel;
 global using System.ComponentModel.DataAnnotations;
+global using System.Net.Http.Headers;
 global using System.Text;
 global using System.Text.Json;
 global using System.Text.Json.Serialization;

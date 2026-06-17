@@ -102,7 +102,7 @@ public class BaseWorkerStartup(IConfiguration configuration)
         services.AddTransient<DistributedTaskProgress>();
 
         services.AddBillingHttpClient();
-        services.AddAccountingHttpClient(configuration);
+        services.AddAccountingHttpClient(Configuration);
     }
 
     public virtual void Configure(IApplicationBuilder app)

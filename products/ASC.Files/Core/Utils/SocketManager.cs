@@ -79,6 +79,10 @@ public class SocketManager(
 
     public async Task CreateFolderAsync<T>(Folder<T> folder, IEnumerable<Guid> users = null)
     {
+        if (users == null)
+        {
+            users = await GetRecipientListForFolder(folder);
+        }
         await MakeRequest("create-folder", folder, true, users);
     }
 
@@ -237,6 +241,22 @@ public class SocketManager(
             var aces = await fileSharing.GetSharedInfoAsync(room);
             users = aces.Where(ace => ace.Access != FileShare.FillForms)
             .Select(ace => ace.Id).ToList();
+        }
+
+        return users;
+    }
+
+    private async Task<IEnumerable<Guid>> GetRecipientListForFolder<T>(Folder<T> folder)
+    {
+        List<Guid> users = null;
+
+        var folderDao = daoFactory.GetFolderDao<T>();
+        var room = await folderDao.GetFirstParentTypeFromFileEntryAsync(folder);
+        if (room is { FolderType: FolderType.VirtualDataRoom or FolderType.FillingFormsRoom })
+        {
+            var aces = await fileSharing.GetSharedInfoAsync(room);
+            users = aces.Where(ace => ace.Access != FileShare.FillForms)
+                .Select(ace => ace.Id).ToList();
         }
 
         return users;

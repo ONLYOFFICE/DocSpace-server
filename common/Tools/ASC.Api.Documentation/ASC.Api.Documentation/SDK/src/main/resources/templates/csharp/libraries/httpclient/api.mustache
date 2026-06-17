@@ -29,7 +29,7 @@ namespace {{packageName}}.{{apiPackage}}.{{x-folder}}
         /// </remarks>
         {{/notes}}
         /// <exception cref="{{packageName}}.Client.ApiException">Thrown when fails to make API call</exception>
-        {{#allParams}}/// <param name="{{paramName}}">{{{description}}}{{^required}} (optional{{#defaultValue}}, default to {{.}}{{/defaultValue}}){{/required}}{{#isDeprecated}} (deprecated){{/isDeprecated}}</param>
+        {{#allParams}}/// <param name="{{#lambda.unescape_param}}{{paramName}}{{/lambda.unescape_param}}">{{{description}}}{{^required}} (optional{{#defaultValue}}, default to {{.}}{{/defaultValue}}){{/required}}{{#isDeprecated}} (deprecated){{/isDeprecated}}</param>
         {{/allParams}}/// <seealso href="{{vendorExtensions.x-seealsoUrl}}">REST API Reference for {{operationId}} Operation</seealso>
         /// <returns>{{returnType}}</returns>
         {{#isDeprecated}}
@@ -44,7 +44,7 @@ namespace {{packageName}}.{{apiPackage}}.{{x-folder}}
         /// {{{notes}}}
         /// </remarks>
         /// <exception cref="{{packageName}}.Client.ApiException">Thrown when fails to make API call</exception>
-        {{#allParams}}/// <param name="{{paramName}}">{{{description}}}{{^required}} (optional{{#defaultValue}}, default to {{.}}{{/defaultValue}}){{/required}}{{#isDeprecated}} (deprecated){{/isDeprecated}}</param>
+        {{#allParams}}/// <param name="{{#lambda.unescape_param}}{{paramName}}{{/lambda.unescape_param}}">{{{description}}}{{^required}} (optional{{#defaultValue}}, default to {{.}}{{/defaultValue}}){{/required}}{{#isDeprecated}} (deprecated){{/isDeprecated}}</param>
         {{/allParams}}/// <seealso href="{{vendorExtensions.x-seealsoUrl}}">REST API Reference for {{operationId}} Operation</seealso>
         /// <returns>ApiResponse of {{returnType}}{{^returnType}}Object(void){{/returnType}}</returns>
         {{#isDeprecated}}
@@ -71,7 +71,7 @@ namespace {{packageName}}.{{apiPackage}}.{{x-folder}}
         /// </remarks>
         /// <exception cref="{{packageName}}.Client.ApiException">Thrown when fails to make API call</exception>
         {{#allParams}}
-        /// <param name="{{paramName}}">{{{description}}}{{^required}} (optional{{#defaultValue}}, default to {{.}}{{/defaultValue}}){{/required}}{{#isDeprecated}} (deprecated){{/isDeprecated}}</param>
+        /// <param name="{{#lambda.unescape_param}}{{paramName}}{{/lambda.unescape_param}}">{{{description}}}{{^required}} (optional{{#defaultValue}}, default to {{.}}{{/defaultValue}}){{/required}}{{#isDeprecated}} (deprecated){{/isDeprecated}}</param>
         {{/allParams}}
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <seealso href="{{vendorExtensions.x-seealsoUrl}}">REST API Reference for {{operationId}} Operation</seealso>
@@ -89,7 +89,7 @@ namespace {{packageName}}.{{apiPackage}}.{{x-folder}}
         /// </remarks>
         /// <exception cref="{{packageName}}.Client.ApiException">Thrown when fails to make API call</exception>
         {{#allParams}}
-        /// <param name="{{paramName}}">{{{description}}}{{^required}} (optional{{#defaultValue}}, default to {{.}}{{/defaultValue}}){{/required}}{{#isDeprecated}} (deprecated){{/isDeprecated}}</param>
+        /// <param name="{{#lambda.unescape_param}}{{paramName}}{{/lambda.unescape_param}}">{{{description}}}{{^required}} (optional{{#defaultValue}}, default to {{.}}{{/defaultValue}}){{/required}}{{#isDeprecated}} (deprecated){{/isDeprecated}}</param>
         {{/allParams}}
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <seealso href="{{vendorExtensions.x-seealsoUrl}}">REST API Reference for {{operationId}} Operation</seealso>
@@ -345,6 +345,10 @@ namespace {{packageName}}.{{apiPackage}}.{{x-folder}}
 
         {{#x-supportsUseAt}}private bool _useAtRecent ;
 
+        /// <summary>
+        /// Enables the "@" address prefix so the request targets the current user's recent items.
+        /// </summary>
+        /// <returns></returns>
         public {{x-classname}} WithFields()
         {
             _useAtRecent = true;
@@ -362,7 +366,7 @@ namespace {{packageName}}.{{apiPackage}}.{{x-folder}}
         /// </remarks>
         {{/notes}}
         /// <exception cref="{{packageName}}.Client.ApiException">Thrown when fails to make API call</exception>
-        {{#allParams}}/// <param name="{{paramName}}">{{{description}}}{{^required}} (optional{{#defaultValue}}, default to {{.}}{{/defaultValue}}){{/required}}{{#isDeprecated}} (deprecated){{/isDeprecated}}</param>
+        {{#allParams}}/// <param name="{{#lambda.unescape_param}}{{paramName}}{{/lambda.unescape_param}}">{{{description}}}{{^required}} (optional{{#defaultValue}}, default to {{.}}{{/defaultValue}}){{/required}}{{#isDeprecated}} (deprecated){{/isDeprecated}}</param>
         {{/allParams}}/// <seealso href="{{vendorExtensions.x-seealsoUrl}}">REST API Reference for {{operationId}} Operation</seealso>
         /// <returns>{{returnType}}</returns>
         {{#isDeprecated}}
@@ -383,7 +387,7 @@ namespace {{packageName}}.{{apiPackage}}.{{x-folder}}
         /// </remarks>
         {{/notes}}
         /// <exception cref="{{packageName}}.Client.ApiException">Thrown when fails to make API call</exception>
-        {{#allParams}}/// <param name="{{paramName}}">{{{description}}}{{^required}} (optional{{#defaultValue}}, default to {{.}}{{/defaultValue}}){{/required}}{{#isDeprecated}} (deprecated){{/isDeprecated}}</param>
+        {{#allParams}}/// <param name="{{#lambda.unescape_param}}{{paramName}}{{/lambda.unescape_param}}">{{{description}}}{{^required}} (optional{{#defaultValue}}, default to {{.}}{{/defaultValue}}){{/required}}{{#isDeprecated}} (deprecated){{/isDeprecated}}</param>
         {{/allParams}}/// <seealso href="{{vendorExtensions.x-seealsoUrl}}">REST API Reference for {{operationId}} Operation</seealso>
         /// <returns>ApiResponse of {{returnType}}{{^returnType}}Object(void){{/returnType}}</returns>
         {{#isDeprecated}}
@@ -444,10 +448,15 @@ namespace {{packageName}}.{{apiPackage}}.{{x-folder}}
             {
                 {{#isDeepObject}}
                     {{#items.vars}}
+                    {{#vendorExtensions.x-is-value}}
+                localVarRequestOptions.QueryParameters.Add(ClientUtils.ParameterToMultiMap("{{collectionFormat}}", "{{baseName}}", {{paramName}}.{{name}}));
+                    {{/vendorExtensions.x-is-value}}
+                    {{^vendorExtensions.x-is-value}}
                 if ({{paramName}}.{{name}} != null)
                 {
                     localVarRequestOptions.QueryParameters.Add(ClientUtils.ParameterToMultiMap("{{collectionFormat}}", "{{baseName}}", {{paramName}}.{{name}}));
                 }
+                    {{/vendorExtensions.x-is-value}}
                     {{/items.vars}}
                 {{^items}}
                 localVarRequestOptions.QueryParameters.Add(ClientUtils.ParameterToMultiMap("deepObject", "{{baseName}}", {{paramName}}));
@@ -602,7 +611,7 @@ namespace {{packageName}}.{{apiPackage}}.{{x-folder}}
         {{/notes}}
         /// <exception cref="{{packageName}}.Client.ApiException">Thrown when fails to make API call</exception>
         {{#allParams}}
-        /// <param name="{{paramName}}">{{{description}}}{{^required}} (optional{{#defaultValue}}, default to {{.}}{{/defaultValue}}){{/required}}{{#isDeprecated}} (deprecated){{/isDeprecated}}</param>
+        /// <param name="{{#lambda.unescape_param}}{{paramName}}{{/lambda.unescape_param}}">{{{description}}}{{^required}} (optional{{#defaultValue}}, default to {{.}}{{/defaultValue}}){{/required}}{{#isDeprecated}} (deprecated){{/isDeprecated}}</param>
         {{/allParams}}
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <seealso href="{{vendorExtensions.x-seealsoUrl}}">REST API Reference for {{operationId}} Operation</seealso>
@@ -626,7 +635,7 @@ namespace {{packageName}}.{{apiPackage}}.{{x-folder}}
         {{/notes}}
         /// <exception cref="{{packageName}}.Client.ApiException">Thrown when fails to make API call</exception>
         {{#allParams}}
-        /// <param name="{{paramName}}">{{{description}}}{{^required}} (optional{{#defaultValue}}, default to {{.}}{{/defaultValue}}){{/required}}{{#isDeprecated}} (deprecated){{/isDeprecated}}</param>
+        /// <param name="{{#lambda.unescape_param}}{{paramName}}{{/lambda.unescape_param}}">{{{description}}}{{^required}} (optional{{#defaultValue}}, default to {{.}}{{/defaultValue}}){{/required}}{{#isDeprecated}} (deprecated){{/isDeprecated}}</param>
         {{/allParams}}
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <seealso href="{{vendorExtensions.x-seealsoUrl}}">REST API Reference for {{operationId}} Operation</seealso>

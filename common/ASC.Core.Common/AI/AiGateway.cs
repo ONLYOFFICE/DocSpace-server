@@ -55,10 +55,15 @@ public class AiGateway(
     ITariffService tariffService,
     UserManager userManager,
     AuthContext authContext,
-    SettingsManager settingsManager)
+    SettingsManager settingsManager,
+    IFusionCache fusionCache)
 {
     public const int ProviderId = -1;
     public const string ProviderTitle = "ONLYOFFICE AI";
+
+    private const string ModelsCacheKey = "ai:gateway:models";
+    private static readonly TimeSpan _modelsCacheDuration = TimeSpan.FromSeconds(60);
+
     public string Url => aiGatewayConfiguration.Settings?.Url;
 
     public bool Configured => aiGatewayConfiguration.Configured;
@@ -98,6 +103,16 @@ public class AiGateway(
     {
         var content = JsonContent.Create(new SetRestrictedModelsRequest { Models = models });
         return await SendAsync<RestrictedModelsResponse>(HttpMethod.Put, "/chat/models/restrictions", content);
+    }
+
+    public async Task<ModelsResponse> GetModelsAsync()
+    {
+        // The model list is gateway-wide (not tenant-specific) and changes rarely, so cache it
+        // with a short TTL to avoid hitting the gateway once per ReadAllAsync/ReadByIdAsync call.
+        return await fusionCache.GetOrSetAsync<ModelsResponse>(
+            ModelsCacheKey,
+            async (_, _) => await SendAsync<ModelsResponse>(HttpMethod.Get, "/models"),
+            opt => opt.SetDuration(_modelsCacheDuration).SetFailSafe(true));
     }
 
     private async Task<string> GenerateKeyAsync()
@@ -211,4 +226,27 @@ public class SetRestrictedModelsRequest
 public record RestrictedModelsResponse
 {
     public required List<string> Models { get; init; }
+}
+
+public record Model
+{
+    public required string Id { get; init; }
+    public required string Type { get; init; }
+    public required string Alias { get; init; }
+    public IEnumerable<string> Capabilities { get; init; }
+
+    [JsonPropertyName("revision_id")]
+    public required Guid RevisionId { get; init; }
+
+    [JsonPropertyName("input_modalities")]
+    public required IEnumerable<string> InputModalities { get; init; }
+
+    [JsonPropertyName("output_modalities")]
+    public required IEnumerable<string> OutputModalities { get; init; }
+}
+
+
+public record ModelsResponse
+{
+    public required IEnumerable<Model> Data { get; init; }
 }

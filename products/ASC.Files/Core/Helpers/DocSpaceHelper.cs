@@ -70,6 +70,9 @@ public static class DocSpaceHelper
         FolderType.ReadyFormFolder
     ];
 
+    public static bool IsFillFormsRoom(FolderType? roomType) =>
+        roomType is FolderType.FillingFormsRoom or FolderType.VirtualDataRoom or FolderType.USER;
+
     public static bool IsFormsFillingSystemFolder(FolderType folderType)
     {
         return FormsFillingSystemFolders.Contains(folderType);

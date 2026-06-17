@@ -213,10 +213,8 @@ public class AttachmentsStorageService(
         }
 
         await using var stream = await fileDao.GetFileStreamAsync(file);
-        var buffer = new byte[(int)file.ContentLength];
-        await stream.ReadExactlyAsync(buffer);
 
-        var content = await textExtractor.ExtractAsync(buffer);
+        var content = await textExtractor.ExtractAsync(stream, file.ContentLength);
         if (string.IsNullOrEmpty(content))
         {
             throw new ArgumentException($"Failed to extract content from file '{file.Title}'");
@@ -232,7 +230,7 @@ public class AttachmentsStorageService(
         };
     }
 
-    private async Task<AttachmentResult> ToResultAsync<T>(IFileDao<T> fileDao, Attachment attachment, File<T> file)
+    private static async Task<AttachmentResult> ToResultAsync<T>(IFileDao<T> fileDao, Attachment attachment, File<T> file)
     {
         var dataUrl = attachment.Kind == AttachmentKind.Image
             ? await fileDao.GetPreSignedUriAsync(file, _downloadUrlExpiration)

@@ -63,6 +63,12 @@ public class TextToDocxTaskPublisher(
 
         var folder = TextToDocxFolder.Create(daoFactory, intFolderId, thirdpartyFolderId);
 
+        // Early-rejection optimisation only: fail fast on the HTTP request thread so the
+        // caller gets an immediate error for an invalid/forbidden folder instead of an
+        // asynchronous failure on the event bus. This is NOT the authoritative gate —
+        // TextToDocxTask.DoJob re-resolves the folder and re-runs CheckSecurity under the
+        // task's authenticated identity at execution time, which catches folder deletion or
+        // permission changes that happen between publish and execute.
         await folder.GetFolder();
         await folder.CheckSecurity(fileSecurity);
 

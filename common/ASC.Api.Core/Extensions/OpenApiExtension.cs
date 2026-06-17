@@ -104,6 +104,7 @@ public static class OpenApiExtension
             c.AddScalarFilters();
             c.SchemaFilter<SwaggerSchemaCustomFilter>();
             c.DocumentFilter<LowercaseDocumentFilter>();
+            c.DocumentFilter<ErrorResponseFilter>();
             c.SchemaFilter<DerivedSchemaFilter>();
             c.DocumentFilter<HideRouteDocumentFilter>("/api/2.0/capabilities.json");
             c.DocumentFilter<HideRouteDocumentFilter>("/api/2.0/files/@recent");
@@ -111,6 +112,7 @@ public static class OpenApiExtension
             c.OperationFilter<SwaggerCustomOperationFilter>();
             c.OperationFilter<ContentTypeOperationFilter>();
             c.OperationFilter<AllowAnonymousFilter>();
+            c.OperationFilter<RateLimitOperationFilter>();
             c.DocumentFilter<SwaggerSuccessApiResponseFilter>();
             c.EnableAnnotations();
             c.SchemaFilter<CustomInheritanceSchemaFilter>();
@@ -434,7 +436,10 @@ public static class OpenApiExtension
                 return;
             }
 
-            var openApiSchema = schema as OpenApiSchema;
+            if (schema is not OpenApiSchema openApiSchema)
+            {
+                return;
+            }
 
             var baseTypeSchema = context.SchemaGenerator.GenerateSchema(baseType, context.SchemaRepository);
 
@@ -454,7 +459,7 @@ public static class OpenApiExtension
                 Required = new HashSet<string>()
             };
 
-            foreach (var prop in originalProperties)
+            foreach (var prop in originalProperties ?? Enumerable.Empty<KeyValuePair<string, IOpenApiSchema>>())
             {
                 if (!baseProperties.Contains(prop.Key.ToLowerInvariant()))
                 {

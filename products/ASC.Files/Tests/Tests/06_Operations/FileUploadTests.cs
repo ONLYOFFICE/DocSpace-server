@@ -32,7 +32,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 using System.Reflection;
-using System.Security.Cryptography;
 
 namespace ASC.Files.Tests.Tests._06_Operations;
 

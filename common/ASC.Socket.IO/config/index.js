@@ -71,7 +71,8 @@ function getAndSaveAppsettings(){
         redis.password = redis.Password;
         redis.socket = {
             host: redis.Hosts[0].Host,
-            port: redis.Hosts[0].Port
+            port: redis.Hosts[0].Port,
+            tls: redis.Ssl || false
         };
 
         nconf.set("Redis", redis);
