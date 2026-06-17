@@ -989,11 +989,6 @@ public class FileStorageService //: IFileStorageService
                 newFolder.SettingsQuota = quota.Value;
             }
 
-            if (saveFormAsXLSX.HasValue)
-            {
-                newFolder.SettingsSaveFormAsXLSX = saveFormAsXLSX.Value;
-            }
-
             if (sendFormToExternalDB.HasValue)
             {
                 newFolder.SettingsSendFormToExternalDB = sendFormToExternalDB.Value;
@@ -1018,7 +1013,7 @@ public class FileStorageService //: IFileStorageService
 
             if (folderType == FolderType.FillingFormsRoom)
             {
-                newFolder.SettingsSaveFormAsXLSX = true;
+                newFolder.SettingsSaveFormAsXLSX = saveFormAsXLSX ?? true;
             }
 
             T folderId;
