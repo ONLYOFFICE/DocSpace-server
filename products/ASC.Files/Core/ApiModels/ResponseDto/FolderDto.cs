@@ -495,7 +495,7 @@ public class FolderDtoHelper(
                 {
                     result.OriginalFormId = originalFormId;
                     var originalForm = await fileDao.GetFileAsync(originalFormId);
-                    canUpdateXlsx = originalForm != null && await _fileSecurity.CanEditAsync(originalForm);
+                    canUpdateXlsx = originalForm != null && await _fileSecurity.CanUpdateXlsxAsync(originalForm);
                 }
             }
 

@@ -70,20 +70,13 @@ public class Startup : BaseStartup
         // === BaseStartup: core DI, auth, rate limiting, health checks, etc. ===
         await base.ConfigureServices(builder);
 
-        // === Monolith-specific: Tool permission fallback (Redis or In-memory) ===
-        if (!ServiceCollectionExtension.IsRedisEnabled(_configuration))
-        {
-            services.AddSingleton<IToolCallReceiver, InMemoryToolCallReceiver>();
-            services.AddSingleton<IToolCallPublisher, InMemoryToolCallPublisher>();
-        }
-
         // === Service registrations (shared with standalone services) ===
         services.AddWebApiServices(_configuration);
         services.AddWebStudioServices(_configuration);
         services.AddFilesServerServices(_configuration);
         services.AddFilesWorkerServices(_configuration);
         services.AddPeopleServices();
-        services.AddAiServerServices();
+        services.AddAiServerServices(_configuration);
         services.AddAiWorkerServices(_configuration);
         services.AddBackupServices();
         services.AddBackupWorkerServices(_configuration);
@@ -122,7 +115,6 @@ public class Startup : BaseStartup
         // --- Endpoints ---
         app.UseEndpoints(endpoints =>
         {
-            endpoints.InitializeHttpHandlers("files_template");
             endpoints.InitializeHttpHandlers();
         });
     }

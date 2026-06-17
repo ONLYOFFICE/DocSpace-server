@@ -242,7 +242,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
     public ConnectionStringManager AddOpensearch(bool withDashboard = true, bool fixedPort = true, bool withDataVolume = true)
     {
         OpensearchResource = builder
-            .AddContainer(Constants.OpensearchContainer, "opensearchproject/opensearch", "2")
+            .AddContainer(Constants.OpensearchContainer, "opensearchproject/opensearch", "3.5.0")
             .WithEnvironment("DISABLE_INSTALL_DEMO_CONFIG", "true")
             .WithEnvironment("plugins.security.disabled", "true")
             .WithEnvironment("discovery.type", "single-node")

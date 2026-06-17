@@ -57,7 +57,7 @@ public class Startup : BaseStartup
 
         await base.ConfigureServices(builder);
 
-        services.AddAiServerServices();
+        services.AddAiServerServices(_configuration);
         services.AddAiIntegrationServices();
     }
 }
