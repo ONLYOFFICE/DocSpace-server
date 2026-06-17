@@ -43,7 +43,7 @@ import type {
 } from "@onlyoffice/ai-chat/core";
 import logger from "../log.js";
 import { storage } from "../storage/index.js";
-import { asyncHandler, streamNdjson } from "./_helpers.js";
+import { asyncHandler, streamNdjson, streamOpenAiSse } from "./_helpers.js";
 import { isObject } from "../narrow.js";
 import {
   HttpToolsAdapter,
@@ -284,6 +284,17 @@ export const aiController = {
     await streamNdjson(
       res,
       logStreamErrors("ai/send-with-stream", engine.sendWithStream(body)),
+    );
+  }),
+
+  // OpenAI-compatible streaming chat: same input as sendWithStream, but the
+  // engine emits OpenAI `chat.completion.chunk` objects (and a native
+  // OpenAI error envelope on provider failure), which we frame as SSE.
+  sendWithStreamOpenAI: asyncHandler<SendStreamInput>(async (req, res) => {
+    const body = await withToolsPrompt(withRequestSignal(res, req.body));
+    await streamOpenAiSse(
+      res,
+      logStreamErrors("ai/send-with-stream-openai", engine.sendWithStreamOpenAI(body)),
     );
   }),
 

@@ -176,3 +176,37 @@ export async function streamNdjson(
     res.end();
   }
 }
+
+// Streams OpenAI-format chunks as Server-Sent Events: each chunk is written
+// as a `data:` frame and a normal completion is terminated with the OpenAI
+// sentinel `data: [DONE]`. The engine's `sendWithStreamOpenAI` already emits
+// a native OpenAI error envelope (`{ error: {...} }`) as an in-stream chunk
+// on provider failure; this wrapper only adds a generic error frame (and no
+// `[DONE]`, matching OpenAI) if the generator itself throws.
+export async function streamOpenAiSse(
+  res: Response,
+  generator: AsyncIterable<unknown>,
+): Promise<void> {
+  res.setHeader("Content-Type", "text/event-stream; charset=utf-8");
+  res.setHeader("Cache-Control", "no-cache, no-transform");
+  res.setHeader("Connection", "keep-alive");
+  res.setHeader("X-Accel-Buffering", "no");
+  res.flushHeaders?.();
+
+  try {
+    for await (const chunk of generator) {
+      res.write(`data: ${JSON.stringify(chunk)}\n\n`);
+    }
+    res.write("data: [DONE]\n\n");
+  } catch (err) {
+    logger.error(`openai stream aborted: ${errorDetails(err)}`);
+    // Generic message only — detail stays in the server log.
+    res.write(
+      `data: ${JSON.stringify({
+        error: { message: "stream error", type: "server_error" },
+      })}\n\n`,
+    );
+  } finally {
+    res.end();
+  }
+}
