@@ -33,7 +33,6 @@
 
 namespace ASC.Files.Tests.Tests._04_Security;
 
-[Collection("Test Collection")]
 [Trait("Category", "Security")]
 [Trait("Feature", "Rooms")]
 public class RoomShareTests(
@@ -50,7 +49,7 @@ public class RoomShareTests(
     public async Task CreatePrimaryExternalLink_ValidRoomType_ReturnsLinkData(RoomType roomType)
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var customRoom = (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("room title", roomType: roomType), TestContext.Current.CancellationToken)).Response;
 
         // Act
@@ -76,7 +75,7 @@ public class RoomShareTests(
     public async Task CreatePrimaryExternalLink_FillingForm_ReturnsLinkData()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var customRoom = (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("filling form room title", roomType: RoomType.FillingFormsRoom), TestContext.Current.CancellationToken)).Response;
 
         // Act
@@ -103,7 +102,7 @@ public class RoomShareTests(
     public async Task CreatePrimaryExternalLink_RestrictedRoomType_ReturnsError(RoomType roomType)
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var customRoom = (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("room", roomType: roomType), TestContext.Current.CancellationToken)).Response;
 
         // Act
@@ -118,7 +117,7 @@ public class RoomShareTests(
     public async Task CreateExternalLink_RestrictedRoomType_ReturnsError(RoomType roomType, FileShare fileShare)
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var customRoom = (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("room", roomType: roomType), TestContext.Current.CancellationToken)).Response;
 
         var additionalLink = new RoomLinkRequest(
@@ -138,7 +137,7 @@ public class RoomShareTests(
     public async Task CreateMultipleLinks_InRoom_ReturnsAllLinks(RoomType roomType)
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var customRoom =  (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("room with multiple links", roomType: roomType), TestContext.Current.CancellationToken)).Response;
 
         // Act - Get a primary external link
@@ -179,7 +178,7 @@ public class RoomShareTests(
     public async Task CreateMaximumFiveLinks_InRoom_ReturnsError()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var customRoom =  (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("room with multiple links", roomType: RoomType.CustomRoom), TestContext.Current.CancellationToken)).Response;
 
         // Act - Get a primary external link
@@ -207,7 +206,7 @@ public class RoomShareTests(
     public async Task CreateMultipleLinks_InFormFillingRoom_ReturnsError(FileShare fileShare)
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var customRoom =  (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("room with multiple links", roomType: RoomType.FillingFormsRoom), TestContext.Current.CancellationToken)).Response;
 
         // Act - Get a primary external link
@@ -228,7 +227,7 @@ public class RoomShareTests(
     public async Task UpdateMultipleLinks_InRoom_ReturnsUpdatedLinks()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var customRoom = await CreateCustomRoom("room with links to update");
 
         // Create two additional links
@@ -300,7 +299,7 @@ public class RoomShareTests(
     public async Task UpdatePrimaryExternalLink_ValidFileShare_ReturnsLinkData(FileShare fileShare)
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var customRoom = await CreateCustomRoom("custom room");
 
         // Act
@@ -326,7 +325,7 @@ public class RoomShareTests(
     public async Task ExternalLinkDenyDownload_InternalUser_ReturnsOk()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var customRoom = await CreateCustomRoom("custom room");
         var file = await CreateFile("file_to_share.docx", customRoom.Id);
 
@@ -346,7 +345,7 @@ public class RoomShareTests(
     public async Task ExternalLinkDenyDownload_ExternalUser_ReturnsError()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var customRoom = await CreateCustomRoom("custom room");
         var file = await CreateFile("file_to_share.docx", customRoom.Id);
 
@@ -371,7 +370,7 @@ public class RoomShareTests(
     public async Task ExternalLinkWithPassword_ExternalUser_ReturnsError()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var customRoom = await CreateCustomRoom("custom room");
         var file = await CreateFile("file_to_share.docx", customRoom.Id);
 
@@ -395,7 +394,7 @@ public class RoomShareTests(
     public async Task ExternalLinkWithPassword_ExternalUserRequirePassword_ReturnsError()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var customRoom = await CreateCustomRoom("custom room");
 
         // Act
@@ -418,7 +417,7 @@ public class RoomShareTests(
     public async Task ExternalLinkWithPassword_CheckInvalidPassword_ReturnsOk()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var customRoom = await CreateCustomRoom("custom room");
 
         // Act
@@ -444,7 +443,7 @@ public class RoomShareTests(
     public async Task ExternalLinkWithPassword_ExternalUserWithPassword_ReturnsFileData()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var customRoom = await CreateCustomRoom("custom room");
         var file = await CreateFile("file_to_share.docx", customRoom.Id);
 
@@ -476,7 +475,7 @@ public class RoomShareTests(
     public async Task SetRoomLinkAsync_PublicRoomWithNoneAccess_ReturnsNewLink()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var publicRoom = (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("Public Room Test", roomType: RoomType.PublicRoom), TestContext.Current.CancellationToken)).Response;
 
         // Get the primary external link
@@ -509,7 +508,7 @@ public class RoomShareTests(
     public async Task SetRoomLinkAsync_PublicRoomWithExpiration_ReturnsOldLink()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var publicRoom = await CreatePublicRoom("Public Room Test");
 
         // Get the primary external link
@@ -535,7 +534,7 @@ public class RoomShareTests(
     public async Task SetRoomLinkAsync_CustomRoomWithNoneAccess_ReturnsNull()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var customRoom = await CreateCustomRoom("Public Room Test");
 
         // Get the primary external link
@@ -561,7 +560,7 @@ public class RoomShareTests(
     public async Task AccessRoomWithMultipleLinks_DifferentPermissions_ReturnsCorrectAccess()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var customRoom = await CreateCustomRoom("room with multiple access links");
         var file = await CreateFile("file_in_room.docx", customRoom.Id);
 
@@ -606,9 +605,9 @@ public class RoomShareTests(
     public async Task RoomShare_MultipleExternalLinks_CheckLastAccessRights()
     {
         // Arrange: owner creates a virtual data room and a file inside it
-        await _filesClient.Authenticate(Initializer.Owner);
-        var owner = Initializer.Owner;
-        var user2 = await Initializer.InviteContact(EmployeeType.User);
+        await _filesClient.Authenticate(Owner);
+        var owner = Owner;
+        var user2 = await InviteContact(EmployeeType.User);
 
         var customRoom = await CreateCustomRoom("room_last_link_rights");
         var file = await CreateFile("file_in_room_last_link_rights.docx", customRoom.Id);
@@ -676,9 +675,9 @@ public class RoomShareTests(
     public async Task RoomShare_PersonalRights_PreservedAfterVisitingRoomExternalLinks()
     {
         // Arrange: owner creates a room and a file inside it, invites user2 and grants personal Read rights
-        await _filesClient.Authenticate(Initializer.Owner);
-        var owner = Initializer.Owner;
-        var user2 = await Initializer.InviteContact(EmployeeType.User);
+        await _filesClient.Authenticate(Owner);
+        var owner = Owner;
+        var user2 = await InviteContact(EmployeeType.User);
 
         var room = await CreateCustomRoom("room_personal_rights");
         var file = await CreateFile("file_in_room_personal_rights.docx", room.Id);
@@ -774,8 +773,8 @@ public class RoomShareTests(
     public async Task RoomShare_PersonalRights_PreservedAfterVisitingFileExternalLinks()
     {
         // Arrange: owner creates a room and a file inside it, invites user2 and grants personal Read rights
-        await _filesClient.Authenticate(Initializer.Owner);
-        var user2 = await Initializer.InviteContact(EmployeeType.User);
+        await _filesClient.Authenticate(Owner);
+        var user2 = await InviteContact(EmployeeType.User);
 
         var room = await CreateCustomRoom("room_personal_rights");
         var file = await CreateFile("file_in_room_personal_rights.docx", room.Id);
@@ -839,7 +838,7 @@ public class RoomShareTests(
     public async Task CheckEditAccess_InvalidRoomType_ReturnsFalse(RoomType roomType)
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var room = (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("room title", roomType: roomType), TestContext.Current.CancellationToken)).Response;
 
         // Get the primary external link
@@ -853,7 +852,7 @@ public class RoomShareTests(
     public async Task CheckEditAccess_ValidRoomType_ReturnsTrue(RoomType roomType)
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var room = (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("room title", roomType: roomType), TestContext.Current.CancellationToken)).Response;
 
         // Get the primary external link
@@ -871,12 +870,12 @@ public class RoomShareTests(
     [Trait("Bug", "77820")]
     public async Task RoomRemovedFromList_DeletingRoomLink_StatusOk(RoomType roomType)
     {
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var room = (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("room title", roomType: roomType), TestContext.Current.CancellationToken)).Response;
 
         var primaryLink = (await _roomsApi.GetRoomsPrimaryExternalLinkAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
-        var user = await Initializer.InviteContact(EmployeeType.User);
+        var user = await InviteContact(EmployeeType.User);
         await _filesClient.Authenticate(user);
         await _sharingApi.GetExternalShareDataAsync(primaryLink.SharedLink.RequestToken, cancellationToken: TestContext.Current.CancellationToken);
         await _sharingApi.RemoveSecurityInfoAsync(new BaseBatchRequestDto { FolderIds = [new(room.Id)] }, cancellationToken: TestContext.Current.CancellationToken);
@@ -891,9 +890,9 @@ public class RoomShareTests(
     [Trait("Bug", "79361")]
     public async Task RoomInvite_GuestWhoDoesNotBelongToMe_ReturnEmpty()
     {
-        await _filesClient.Authenticate(Initializer.Owner);
-        var roomAdmin = await Initializer.InviteContact(EmployeeType.RoomAdmin);
-        var guest = await Initializer.InviteContact(EmployeeType.Guest);
+        await _filesClient.Authenticate(Owner);
+        var roomAdmin = await InviteContact(EmployeeType.RoomAdmin);
+        var guest = await InviteContact(EmployeeType.Guest);
 
         await _filesClient.Authenticate(roomAdmin);
         var room = await CreateCustomRoom("room_guest_does_not_belong_to_me");
@@ -907,7 +906,7 @@ public class RoomShareTests(
         var response = await _roomsApi.GetRoomSecurityInfoAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken);
         response.Response.Should().NotContain(r=> r.SharedToUser.Id == guest.Id);
 
-        var myguest = await Initializer.InviteContact(EmployeeType.Guest, roomAdmin);
+        var myguest = await InviteContact(EmployeeType.Guest, roomAdmin);
 
         await _filesClient.Authenticate(roomAdmin);
         securityRequest = new RoomInvitationRequest
@@ -926,17 +925,17 @@ public class RoomShareTests(
     [Trait("Bug", "79366")]
     public async Task GuestWhoDoesNotBelongToMe_GetPhoto_ReturnEmpty()
     {
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
-        var guest = await Initializer.InviteContact(EmployeeType.Guest);
-        var roomAdmin = await Initializer.InviteContact(EmployeeType.RoomAdmin);
+        var guest = await InviteContact(EmployeeType.Guest);
+        var roomAdmin = await InviteContact(EmployeeType.RoomAdmin);
 
         await _peopleClient.Authenticate(roomAdmin);
 
         var exception = await Assert.ThrowsAsync<ApiException>(async () =>  await _photosApi.GetMemberPhotoAsync(guest.Id.ToString(), cancellationToken: TestContext.Current.CancellationToken));
         exception.ErrorCode.Should().Be(403);
 
-        var roomAdminGuest = await Initializer.InviteContact(EmployeeType.Guest, roomAdmin);
+        var roomAdminGuest = await InviteContact(EmployeeType.Guest, roomAdmin);
         var photo = (await _photosApi.GetMemberPhotoAsync(roomAdminGuest.Id.ToString(), cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         photo.Should().NotBeNull();
@@ -949,7 +948,7 @@ public class RoomShareTests(
     public async Task CreateInviteLinkInRoom_UseLinkByOwner_ReturnsOnlyOwner(RoomType roomType)
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var customRoom =  (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("room with multiple links", roomType: roomType), TestContext.Current.CancellationToken)).Response;
 
         // Act - Get a primary external link
@@ -963,10 +962,10 @@ public class RoomShareTests(
         var response = (await _roomsApi.SetRoomLinkAsync(customRoom.Id, additionalLink1, TestContext.Current.CancellationToken)).Response;
         var shortLink = response.SharedLink.ShareLink;
 
-        await _webApiClient.Authenticate(Initializer.Owner);
+        await _webApiClient.Authenticate(Owner);
         var fullLink = await _webApiClient.GetAsync(new Uri(shortLink).PathAndQuery, TestContext.Current.CancellationToken);
         var key = HttpUtility.ParseQueryString(fullLink.RequestMessage?.RequestUri?.Query!)["key"];
-        await _authenticationApi.CheckConfirmAsync(new EmailValidationKeyModel(key!, uiD: Initializer.Owner.Id, type: ConfirmType.LinkInvite), TestContext.Current.CancellationToken);
+        await _authenticationApi.CheckConfirmAsync(new EmailValidationKeyModel(key!, uiD: Owner.Id, type: ConfirmType.LinkInvite), TestContext.Current.CancellationToken);
 
         var info = (await _roomsApi.GetRoomSecurityInfoAsync(customRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
@@ -981,9 +980,9 @@ public class RoomShareTests(
     public async Task UpdateInvitationLinkAccess_AfterUserVisitedReadLink_UserRightsStayRead(RoomType roomType)
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        var owner = Initializer.Owner;
-        var user = await Initializer.InviteContact(EmployeeType.User);
+        await _filesClient.Authenticate(Owner);
+        var owner = Owner;
+        var user = await InviteContact(EmployeeType.User);
 
         var room = (await _roomsApi.CreateRoomAsync(
             new CreateRoomRequestDto("room with invitation link", roomType: roomType),
@@ -1043,14 +1042,14 @@ public class RoomShareTests(
     public async Task VdrRoom_UserWithFillForms_SeesOnlyFolderBeforeFormRole_ThenSeesFolderAndFormAfterFormRole()
     {
         // Arrange: owner creates a VDR room, a folder and a form inside it
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var room = await CreateVDRRoom("vdr_room_entity_count");
 
         var folder = await CreateFolder("test_folder", room.Id);
         var form = await CreateFile("test_form.pdf", room.Id);
 
         // Invite user to the room with FillForms rights
-        var user = await Initializer.InviteContact(EmployeeType.User);
+        var user = await InviteContact(EmployeeType.User);
         await _roomsApi.SetRoomSecurityAsync(room.Id, new RoomInvitationRequest
         {
             Invitations = [new RoomInvitation { Id = user.Id, Access = FileShare.FillForms }]
@@ -1067,7 +1066,7 @@ public class RoomShareTests(
         roomContentBeforeRole.Total.Should().Be(1);
 
         // Act 2: owner grants user a role on the form
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var roles = new List<FormRole>
         {
             new()
@@ -1103,14 +1102,14 @@ public class RoomShareTests(
     public async Task RoomManager_InvitesGuest_OwnerRemovesGuest_GuestStaysRemoved()
     {
         // Arrange: Room admin creates a custom room
-        await _filesClient.Authenticate(Initializer.Owner);
-        var roomAdmin = await Initializer.InviteContact(EmployeeType.RoomAdmin);
+        await _filesClient.Authenticate(Owner);
+        var roomAdmin = await InviteContact(EmployeeType.RoomAdmin);
 
         await _filesClient.Authenticate(roomAdmin);
         var room = await CreateCustomRoom("room_manager_guest_removal");
 
         // Room admin invites second user as Room manager
-        var roomManager = await Initializer.InviteContact(EmployeeType.RoomAdmin);
+        var roomManager = await InviteContact(EmployeeType.RoomAdmin);
         await _roomsApi.SetRoomSecurityAsync(room.Id, new RoomInvitationRequest
         {
             Invitations = [new RoomInvitation { Id = roomManager.Id, Access = FileShare.RoomManager }]
@@ -1118,7 +1117,7 @@ public class RoomShareTests(
 
         // Room manager invites a guest
         await _filesClient.Authenticate(roomManager);
-        var guest = await Initializer.InviteContact(EmployeeType.Guest, roomManager);
+        var guest = await InviteContact(EmployeeType.Guest, roomManager);
         await _roomsApi.SetRoomSecurityAsync(room.Id, new RoomInvitationRequest
         {
             Invitations = [new RoomInvitation { Id = guest.Id, Access = FileShare.Read }]

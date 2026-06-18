@@ -33,7 +33,6 @@
 
 namespace ASC.Files.Tests.Tests._05_Features;
 
-[Collection("Test Collection")]
 [Trait("Category", "Features")]
 [Trait("Feature", "Recent")]
 public class RecentTests(
@@ -44,14 +43,14 @@ public class RecentTests(
     public async Task AddToRecent_FileFromMyDocuments_AppearsInRecent()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        var file = await CreateFileInMy("recent_my.docx", Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
+        var file = await CreateFileInMy("recent_my.docx", Owner);
 
         // Act
         await _filesApi.AddFileToRecentAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
-        var recent = await GetRecentAsync(Initializer.Owner);
+        var recent = await GetRecentAsync(Owner);
         recent.Files.Should().ContainSingle(f => f.Title == file.Title);
     }
 
@@ -59,15 +58,15 @@ public class RecentTests(
     public async Task AddToRecent_FileFromSubFolderInMyDocuments_AppearsInRecent()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        var subFolder = await CreateFolderInMy("recent_subfolder", Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
+        var subFolder = await CreateFolderInMy("recent_subfolder", Owner);
         var file = await CreateFile("recent_in_subfolder.docx", subFolder.Id);
 
         // Act
         await _filesApi.AddFileToRecentAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert - a file nested in a sub-folder of "My documents" is still part of the "My documents" recent
-        var recent = await GetRecentAsync(Initializer.Owner, [FolderType.USER]);
+        var recent = await GetRecentAsync(Owner, [FolderType.USER]);
         recent.Files.Should().ContainSingle(f => f.Title == file.Title);
     }
 
@@ -75,7 +74,7 @@ public class RecentTests(
     public async Task AddToRecent_FileFromRoom_AppearsInRecent()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var room = await CreateCustomRoom("recent_custom_room");
         var file = await CreateFile("recent_in_room.docx", room.Id);
 
@@ -83,7 +82,7 @@ public class RecentTests(
         await _filesApi.AddFileToRecentAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
-        var recent = await GetRecentAsync(Initializer.Owner);
+        var recent = await GetRecentAsync(Owner);
         recent.Files.Should().ContainSingle(f => f.Title == file.Title);
     }
 
@@ -91,9 +90,9 @@ public class RecentTests(
     public async Task GetRecent_WithoutFolderTypeFilter_ReturnsFilesFromMyDocumentsAndRooms()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
-        var myFile = await CreateFileInMy("recent_my.docx", Initializer.Owner);
+        var myFile = await CreateFileInMy("recent_my.docx", Owner);
 
         var customRoom = await CreateCustomRoom("recent_custom_room");
         var customRoomFile = await CreateFile("recent_custom.docx", customRoom.Id);
@@ -107,7 +106,7 @@ public class RecentTests(
         await AddToRecent(myFile.Id, customRoomFile.Id, publicRoomFile.Id, vdrRoomFile.Id);
 
         // Act
-        var recent = await GetRecentAsync(Initializer.Owner);
+        var recent = await GetRecentAsync(Owner);
 
         // Assert - without the filter every recent file is returned regardless of its parent folder type
         recent.Files.Should().Contain(f => f.Title == myFile.Title);
@@ -120,9 +119,9 @@ public class RecentTests(
     public async Task GetRecent_FilterByMyDocuments_ReturnsOnlyMyDocumentsFiles()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
-        var myFile = await CreateFileInMy("recent_my.docx", Initializer.Owner);
+        var myFile = await CreateFileInMy("recent_my.docx", Owner);
 
         var customRoom = await CreateCustomRoom("recent_custom_room");
         var customRoomFile = await CreateFile("recent_custom.docx", customRoom.Id);
@@ -130,7 +129,7 @@ public class RecentTests(
         await AddToRecent(myFile.Id, customRoomFile.Id);
 
         // Act
-        var recent = await GetRecentAsync(Initializer.Owner, [FolderType.USER]);
+        var recent = await GetRecentAsync(Owner, [FolderType.USER]);
 
         // Assert
         recent.Files.Should().Contain(f => f.Title == myFile.Title);
@@ -141,9 +140,9 @@ public class RecentTests(
     public async Task GetRecent_FilterByRooms_ReturnsOnlyRoomFiles()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
-        var myFile = await CreateFileInMy("recent_my.docx", Initializer.Owner);
+        var myFile = await CreateFileInMy("recent_my.docx", Owner);
 
         var customRoom = await CreateCustomRoom("recent_custom_room");
         var customRoomFile = await CreateFile("recent_custom.docx", customRoom.Id);
@@ -154,7 +153,7 @@ public class RecentTests(
         await AddToRecent(myFile.Id, customRoomFile.Id, publicRoomFile.Id);
 
         // Act - VirtualRooms is the common ancestor of every room, so it selects all room files
-        var recent = await GetRecentAsync(Initializer.Owner, [FolderType.VirtualRooms]);
+        var recent = await GetRecentAsync(Owner, [FolderType.VirtualRooms]);
 
         // Assert
         recent.Files.Should().Contain(f => f.Title == customRoomFile.Title);
@@ -167,9 +166,9 @@ public class RecentTests(
     public async Task GetRecent_FilterBySpecificRoomType_ReturnsOnlyThatRoomFiles(RoomType roomType, FolderType folderTypeFilter)
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
-        var myFile = await CreateFileInMy("recent_my.docx", Initializer.Owner);
+        var myFile = await CreateFileInMy("recent_my.docx", Owner);
 
         var targetRoom = await CreateRoom(roomType, "recent_target_room");
         var targetRoomFile = await CreateFile("recent_target.docx", targetRoom.Id);
@@ -180,7 +179,7 @@ public class RecentTests(
         await AddToRecent(myFile.Id, targetRoomFile.Id, otherRoomFile.Id);
 
         // Act
-        var recent = await GetRecentAsync(Initializer.Owner, [folderTypeFilter]);
+        var recent = await GetRecentAsync(Owner, [folderTypeFilter]);
 
         // Assert
         recent.Files.Should().Contain(f => f.Title == targetRoomFile.Title);
@@ -196,9 +195,9 @@ public class RecentTests(
     public async Task GetRecent_FilterByMultipleFolderTypes_ReturnsFilesFromAllRequestedTypes()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
-        var myFile = await CreateFileInMy("recent_my.docx", Initializer.Owner);
+        var myFile = await CreateFileInMy("recent_my.docx", Owner);
 
         var customRoom = await CreateCustomRoom("recent_custom_room");
         var customRoomFile = await CreateFile("recent_custom.docx", customRoom.Id);
@@ -209,7 +208,7 @@ public class RecentTests(
         await AddToRecent(myFile.Id, customRoomFile.Id, publicRoomFile.Id);
 
         // Act
-        var recent = await GetRecentAsync(Initializer.Owner, [FolderType.USER, FolderType.CustomRoom]);
+        var recent = await GetRecentAsync(Owner, [FolderType.USER, FolderType.CustomRoom]);
 
         // Assert
         recent.Files.Should().Contain(f => f.Title == myFile.Title);

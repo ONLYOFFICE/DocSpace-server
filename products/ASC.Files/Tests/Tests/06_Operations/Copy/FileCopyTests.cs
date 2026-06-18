@@ -33,7 +33,6 @@
 
 namespace ASC.Files.Tests.Tests._06_Operations.Copy;
 
-[Collection("Test Collection")]
 [Trait("Category", "Operations")]
 [Trait("Feature", "Files")]
 public class FileCopyTests(
@@ -44,13 +43,13 @@ public class FileCopyTests(
     public async Task CopyFile_BetweenUserFolders_ReturnsValidFile()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
         // Create a source file
-        var sourceFile = await CreateFileInMy("source_document.docx", Initializer.Owner);
+        var sourceFile = await CreateFileInMy("source_document.docx", Owner);
 
         // Create a target folder
-        var targetFolder = await CreateFolderInMy("target_folder", Initializer.Owner);
+        var targetFolder = await CreateFolderInMy("target_folder", Owner);
 
         // Act
         var copyParams = new CopyAsJsonElement(
@@ -72,10 +71,10 @@ public class FileCopyTests(
     public async Task DuplicateFile_InsideUserFolder_ReturnsValidFileWithIndex()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
         // Create a source file
-        var sourceFile = await CreateFileInMy("source_document.docx", Initializer.Owner);
+        var sourceFile = await CreateFileInMy("source_document.docx", Owner);
 
         // Act
         var results = (await _filesOperationsApi.DuplicateBatchItemsAsync(new DuplicateRequestDto
@@ -103,14 +102,14 @@ public class FileCopyTests(
     public async Task CopyFile_WithRename_ReturnsRenamedFile()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
         // Create a source file
-        var sourceFile = await CreateFileInMy("rename_source.docx", Initializer.Owner);
+        var sourceFile = await CreateFileInMy("rename_source.docx", Owner);
         var newFileName = "renamed_copy.docx";
 
         // Get root folders to find a target folder
-        var targetFolderId = await GetUserFolderIdAsync( Initializer.Owner);
+        var targetFolderId = await GetUserFolderIdAsync( Owner);
 
         // Act
         var copyParams = new CopyAsJsonElement(
@@ -128,8 +127,8 @@ public class FileCopyTests(
     public async Task CopyFile_FileNotFound_ReturnsError()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        var targetFolderId = await GetUserFolderIdAsync(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
+        var targetFolderId = await GetUserFolderIdAsync(Owner);
         var resultFileId = 999999999;
 
         // Act
@@ -155,10 +154,10 @@ public class FileCopyTests(
     public async Task CopyFile_NoPermissions_ReturnError()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        var sourceFile = await CreateFileInMy("source_document.docx", Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
+        var sourceFile = await CreateFileInMy("source_document.docx", Owner);
 
-        var user = await Initializer.InviteContact(EmployeeType.User);
+        var user = await InviteContact(EmployeeType.User);
         await _filesClient.Authenticate(user);
         var targetFolder = await CreateFolderInMy("folder_no_permissions", user);
 
@@ -185,11 +184,11 @@ public class FileCopyTests(
     public async Task CopyFile_AnotherUsersFile_ReturnError()
     {
         // Arrange
-        var fileOwner = await Initializer.InviteContact(EmployeeType.User);
+        var fileOwner = await InviteContact(EmployeeType.User);
         await _filesClient.Authenticate(fileOwner);
         var sourceFile = await CreateFile("source_file.docx", FolderType.USER, fileOwner);
 
-        var folderOwner = await Initializer.InviteContact(EmployeeType.User);
+        var folderOwner = await InviteContact(EmployeeType.User);
         await _filesClient.Authenticate(folderOwner);
         var targetFolder = await CreateFolder("folder_no_permissions", FolderType.USER, folderOwner);
 
@@ -216,9 +215,9 @@ public class FileCopyTests(
     public async Task CopyFiles_ToFormFillingRoom_ReturnsError()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        var firstSourceFile = await CreateFile("first_document.docx", FolderType.USER, Initializer.Owner);
-        var secondSourceFile = await CreateFile("second_document.docx", FolderType.USER, Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
+        var firstSourceFile = await CreateFile("first_document.docx", FolderType.USER, Owner);
+        var secondSourceFile = await CreateFile("second_document.docx", FolderType.USER, Owner);
         var targertRoom = await CreateFillingFormsRoom("target_room");
 
         // Act
@@ -244,10 +243,10 @@ public class FileCopyTests(
     public async Task CopyFile_ToAnotherUsersFolder_ReturnsError()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        var targetFolder = await CreateFolderInMy("target_folder", Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
+        var targetFolder = await CreateFolderInMy("target_folder", Owner);
 
-        var user = await Initializer.InviteContact(EmployeeType.User);
+        var user = await InviteContact(EmployeeType.User);
         await _filesClient.Authenticate(user);
         var sourceFile = await CreateFileInMy("source_file.docx", user);
 
@@ -274,9 +273,9 @@ public class FileCopyTests(
     public async Task CopyFile_SecurityException_ReturnsErrror()
     {
         // Assert
-        var targetFolder = await CreateFolderInMy("target_folder", Initializer.Owner);
-        var sourceFile = await CreateFileInMy("source_file.docx", Initializer.Owner);
-        var user = await Initializer.InviteContact(EmployeeType.User);
+        var targetFolder = await CreateFolderInMy("target_folder", Owner);
+        var sourceFile = await CreateFileInMy("source_file.docx", Owner);
+        var user = await InviteContact(EmployeeType.User);
         await _filesClient.Authenticate(user);
 
         // Act
@@ -302,8 +301,8 @@ public class FileCopyTests(
     public async Task CopyFile_FormToFillingFormsRoom_ReturnsError()
     {
         // Assert
-        await _filesClient.Authenticate(Initializer.Owner);
-        var sourceFile = await CreateFileInMy("source_file.docx", Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
+        var sourceFile = await CreateFileInMy("source_file.docx", Owner);
         sourceFile.IsForm = true;
 
         var parentFolder = await CreateFillingFormsRoom("parent_folder");
@@ -333,12 +332,12 @@ public class FileCopyTests(
     public async Task CopyFile_LockedFile_ReturnsError()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var createdRoom = await CreateVirtualRoom("room_to_lock");
         var sourceFile = await CreateFile("file_to_lock.docx", createdRoom.Id);
         var lockedFile = (await _filesApi.LockFileAsync(sourceFile.Id, new LockFileParameters(true), TestContext.Current.CancellationToken)).Response;
 
-        var user = await Initializer.InviteContact(EmployeeType.User);
+        var user = await InviteContact(EmployeeType.User);
         await _filesClient.Authenticate(user);
         var targetFolderId = await GetUserFolderIdAsync(user);
 
@@ -365,12 +364,12 @@ public class FileCopyTests(
     public async Task CopyFile_EditingFile_ReturnsError()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var createdRoom = await CreateVirtualRoom("room");
         var sourceFile = await CreateFile("file_to_edit.docx", createdRoom.Id);
         await _filesApi.StartEditFileAsync(sourceFile.Id, new StartEdit(true), TestContext.Current.CancellationToken);
 
-        var user = await Initializer.InviteContact(EmployeeType.User);
+        var user = await InviteContact(EmployeeType.User);
         await _filesClient.Authenticate(user);
         var targetFolderId = await GetUserFolderIdAsync(user);
 
@@ -397,7 +396,7 @@ public class FileCopyTests(
     public async Task CopyFile_NotSupportedFormat_ReturnsError()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
         var roomRequest = new CreateRoomRequestDto("ai_room", indexing: true, roomType: RoomType.AiRoom);
 
@@ -445,7 +444,7 @@ public class FileCopyTests(
 
         var extension = unsupportedExtension!.StartsWith('.') ? unsupportedExtension : $".{unsupportedExtension}";
 
-        var myFolder = await GetUserFolderIdAsync(Initializer.Owner);
+        var myFolder = await GetUserFolderIdAsync(Owner);
         var fileName = $"new{extension}";
 
         await using var stream = new MemoryStream([1, 2, 3, 4]);

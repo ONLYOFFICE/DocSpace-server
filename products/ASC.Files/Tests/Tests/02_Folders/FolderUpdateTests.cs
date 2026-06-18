@@ -33,7 +33,6 @@
 
 namespace ASC.Files.Tests.Tests._02_Folders;
 
-[Collection("Test Collection")]
 [Trait("Category", "CRUD")]
 [Trait("Feature", "Folders")]
 public class FolderUpdateTests(
@@ -44,10 +43,10 @@ public class FolderUpdateTests(
     public async Task RenameFolder_ChangesFolderName_ReturnsUpdatedFolder()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         
         // Create a folder to rename
-        var folder = await CreateFolder("folder_to_rename", FolderType.USER, Initializer.Owner);
+        var folder = await CreateFolder("folder_to_rename", FolderType.USER, Owner);
         var newFolderName = "renamed_folder";
         
         // Act
@@ -64,9 +63,9 @@ public class FolderUpdateTests(
     public async Task RenameFolder_NameLongerThan165Chars_Returns400()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         
-        var createdFolder = await CreateFolder("folder_to_rename", FolderType.USER, Initializer.Owner);
+        var createdFolder = await CreateFolder("folder_to_rename", FolderType.USER, Owner);
         var longFolderName = new string('a', 166);
         var updateParams = new CreateFolder(longFolderName);
         
@@ -84,10 +83,10 @@ public class FolderUpdateTests(
     public async Task DeleteFolder_RemovesFolderAndContents_ReturnsSuccess()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         
         // Create folder with file inside
-        var folder = await CreateFolder("folder_to_delete", FolderType.USER, Initializer.Owner);
+        var folder = await CreateFolder("folder_to_delete", FolderType.USER, Owner);
         await CreateFile("test_file.docx", folder.Id);
         
         // Act
@@ -111,10 +110,10 @@ public class FolderUpdateTests(
     public async Task GetFolderContent_ReturnsFilesAndFolders()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         
         // Create parent folder
-        var parentFolder = await CreateFolder("parent_folder", FolderType.USER, Initializer.Owner);
+        var parentFolder = await CreateFolder("parent_folder", FolderType.USER, Owner);
         
         // Create subfolders and files
         await CreateFolder("subfolder1", parentFolder.Id);

@@ -33,7 +33,6 @@
 
 namespace ASC.Files.Tests.Tests._01_Files;
 
-[Collection("Test Collection")]
 [Trait("Category", "CRUD")]
 [Trait("Feature", "Files")]
 public class FileDeleteTests(
@@ -43,7 +42,7 @@ public class FileDeleteTests(
     [Fact]
     public async Task DeleteFile_FolderMy_Owner_ReturnsOk()
     {
-        var createdFile = await CreateFileInMy("test.docx", Initializer.Owner);
+        var createdFile = await CreateFileInMy("test.docx", Owner);
 
         var results = (await _filesApi.DeleteFileAsync(createdFile.Id, new Delete { Immediately = true }, true, TestContext.Current.CancellationToken)).Response;
         var operationId = results.FirstOrDefault()?.Id;
@@ -65,7 +64,7 @@ public class FileDeleteTests(
     public async Task DeleteFile_NonExistingFile_ReturnsError()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var nonExistingFileId = 99999; // Non-existing file ID
 
         // Act & Assert
@@ -83,11 +82,11 @@ public class FileDeleteTests(
     public async Task DeleteFile_NoPermissions_ReturnsError()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
-        var file = await CreateFile("file_no_permissions.docx", FolderType.USER, Initializer.Owner);
+        var file = await CreateFile("file_no_permissions.docx", FolderType.USER, Owner);
 
-        var user = await Initializer.InviteContact(EmployeeType.User);
+        var user = await InviteContact(EmployeeType.User);
         await _filesClient.Authenticate(user);
 
         // Act & Assert
@@ -105,12 +104,12 @@ public class FileDeleteTests(
     public async Task DeleteFile_FileLockedInRoom_ReturnsError()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var createdRoom = await CreateVirtualRoom("room_to_lock");
         var sourceFile = await CreateFile("file_to_lock.docx", createdRoom.Id);
         var lockedFile = (await _filesApi.LockFileAsync(sourceFile.Id, new LockFileParameters(true), TestContext.Current.CancellationToken)).Response;
 
-        var user = await Initializer.InviteContact(EmployeeType.User);
+        var user = await InviteContact(EmployeeType.User);
         await _filesClient.Authenticate(user);
         var targetFolderId = await GetUserFolderIdAsync(user);
 
@@ -129,12 +128,12 @@ public class FileDeleteTests(
     public async Task DeleteFile_FileLocked_ReturnsError()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
-        var file = await CreateFile("locked_file.docx", FolderType.USER, Initializer.Owner);
+        var file = await CreateFile("locked_file.docx", FolderType.USER, Owner);
         await _filesApi.LockFileAsync(file.Id, new LockFileParameters(true), TestContext.Current.CancellationToken);
 
-        var user = await Initializer.InviteContact(EmployeeType.User);
+        var user = await InviteContact(EmployeeType.User);
         await _filesClient.Authenticate(user);
 
         // Act & Assert
@@ -152,10 +151,10 @@ public class FileDeleteTests(
     public async Task DeleteFile_SharedFileLocked_ReturnsError()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
-        var file = await CreateFileInMy("file_security_info.docx", Initializer.Owner);
-        var user1 = await Initializer.InviteContact(EmployeeType.User);
+        var file = await CreateFileInMy("file_security_info.docx", Owner);
+        var user1 = await InviteContact(EmployeeType.User);
 
         var shareInfo = new List<FileShareParams>
         {
@@ -181,9 +180,9 @@ public class FileDeleteTests(
     public async Task DeleteFile_EditingFile_ReturnsError()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
-        var file = await CreateFile("editing_file.docx", FolderType.USER, Initializer.Owner);
+        var file = await CreateFile("editing_file.docx", FolderType.USER, Owner);
         await _filesApi.StartEditFileAsync(file.Id, new StartEdit(true), TestContext.Current.CancellationToken);
 
         // Act & Assert
@@ -200,8 +199,8 @@ public class FileDeleteTests(
     [Fact]
     public async Task MoveFileToTrash_FolderMy_Owner_ReturnsOk()
     {
-        await _filesClient.Authenticate(Initializer.Owner);
-        var myId = await GetUserFolderIdAsync(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
+        var myId = await GetUserFolderIdAsync(Owner);
         await MoveFileToTrash(myId);
     }
 
@@ -216,9 +215,9 @@ public class FileDeleteTests(
     public async Task MoveFilesToTrash_WithoutFolderTypeFilter_ReturnsFilesFromMyDocumentsAndRooms()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
-        var myFile = await CreateFileInMy("trash_my.docx", Initializer.Owner);
+        var myFile = await CreateFileInMy("trash_my.docx", Owner);
 
         var customRoom = await CreateCustomRoom("trash_custom_room");
         var customRoomFile = await CreateFile("trash_custom.docx", customRoom.Id);
@@ -245,9 +244,9 @@ public class FileDeleteTests(
     public async Task MoveFilesToTrash_FilterByMyDocuments_ReturnsOnlyMyDocumentsFiles()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
-        var myFile = await CreateFileInMy("trash_my.docx", Initializer.Owner);
+        var myFile = await CreateFileInMy("trash_my.docx", Owner);
 
         var customRoom = await CreateCustomRoom("trash_custom_room");
         var customRoomFile = await CreateFile("trash_custom.docx", customRoom.Id);
@@ -266,9 +265,9 @@ public class FileDeleteTests(
     public async Task MoveFilesToTrash_FilterByRooms_ReturnsOnlyRoomFiles()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
-        var myFile = await CreateFileInMy("trash_my.docx", Initializer.Owner);
+        var myFile = await CreateFileInMy("trash_my.docx", Owner);
 
         var customRoom = await CreateCustomRoom("trash_custom_room");
         var customRoomFile = await CreateFile("trash_custom.docx", customRoom.Id);
@@ -292,9 +291,9 @@ public class FileDeleteTests(
     public async Task MoveFilesToTrash_FilterBySpecificRoomType_ReturnsOnlyThatRoomFiles(RoomType roomType, FolderType folderTypeFilter)
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
-        var myFile = await CreateFileInMy("trash_my.docx", Initializer.Owner);
+        var myFile = await CreateFileInMy("trash_my.docx", Owner);
 
         var targetRoom = await CreateRoom(roomType, "trash_target_room");
         var targetRoomFile = await CreateFile("trash_target.docx", targetRoom.Id);
@@ -321,9 +320,9 @@ public class FileDeleteTests(
     public async Task MoveFilesToTrash_FilterByMultipleFolderTypes_ReturnsFilesFromAllRequestedTypes()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
-        var myFile = await CreateFileInMy("trash_my.docx", Initializer.Owner);
+        var myFile = await CreateFileInMy("trash_my.docx", Owner);
 
         var customRoom = await CreateCustomRoom("trash_custom_room");
         var customRoomFile = await CreateFile("trash_custom.docx", customRoom.Id);
@@ -353,7 +352,7 @@ public class FileDeleteTests(
 
     private async Task<FolderContentDtoInteger> GetTrashAsync(List<FolderType>? folderType = null)
     {
-        var trashId = await GetTrashFolderIdAsync(Initializer.Owner);
+        var trashId = await GetTrashFolderIdAsync(Owner);
 
         return (await _foldersApi.GetFolderByFolderIdAsync(trashId, folderType: folderType, cancellationToken: TestContext.Current.CancellationToken)).Response;
     }
@@ -378,7 +377,7 @@ public class FileDeleteTests(
 
     private async Task MoveFileToTrash(int roomId)
     {
-        var trashId = await GetTrashFolderIdAsync(Initializer.Owner);
+        var trashId = await GetTrashFolderIdAsync(Owner);
 
         var fileInMy = await CreateFile(Guid.NewGuid() + ".docx", roomId);
         var fileInMyNotForDelete = await CreateFile(Guid.NewGuid() + ".docx", roomId);

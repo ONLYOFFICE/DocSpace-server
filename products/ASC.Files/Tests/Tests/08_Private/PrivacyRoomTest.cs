@@ -37,7 +37,6 @@ using System.Reflection;
 
 namespace ASC.Files.Tests.Tests._08_Privacy;
 
-[Collection("Test Collection")]
 [Trait("Category", "CRUD")]
 [Trait("Feature", "PrivacyRoom")]
 public class PrivacyRoomTest(AspireAppFixture fixture) : BaseTest(fixture)
@@ -45,7 +44,7 @@ public class PrivacyRoomTest(AspireAppFixture fixture) : BaseTest(fixture)
     [Fact]
     public async Task CRUD_UserPrivateKey()
     {
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
         var (publicKey, privateKey, _, keys) = await ExportPublicAndPrivateKeys();
 
@@ -68,9 +67,9 @@ public class PrivacyRoomTest(AspireAppFixture fixture) : BaseTest(fixture)
     [Fact]
     public async Task CreateRoom_Private_WithUserKeys_ThrowsException()
     {
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
-        var docspaceAdmin = await Initializer.InviteContact(EmployeeType.DocSpaceAdmin);
+        var docspaceAdmin = await InviteContact(EmployeeType.DocSpaceAdmin);
 
         await _filesClient.Authenticate(docspaceAdmin);
 
@@ -86,7 +85,7 @@ public class PrivacyRoomTest(AspireAppFixture fixture) : BaseTest(fixture)
     [Fact]
     public async Task SetFileAccess_PrivateRoom_WithUserKeys_ReturnsOk()
     {
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
         var settings = (await _filesSettingsApi.GetFilesSettingsAsync(TestContext.Current.CancellationToken)).Response;
         var (userPublicKey, _, userPassword, userKeys) = await ExportPublicAndPrivateKeys();
@@ -133,10 +132,10 @@ public class PrivacyRoomTest(AspireAppFixture fixture) : BaseTest(fixture)
         List<AccessRequestKeyDto> keys = [new(roomKeys[0].UserId, roomKeys[0].Id, filePrivateKeyEnc)];
 
 
-        var roomAdmin1 = await Initializer.InviteContact(EmployeeType.RoomAdmin);
+        var roomAdmin1 = await InviteContact(EmployeeType.RoomAdmin);
         await _filesClient.Authenticate(roomAdmin1);
         await ExportPublicAndPrivateKeys();
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         await _roomsApi.SetRoomSecurityAsync(createdRoom.Id, new RoomInvitationRequest
         {
             Invitations =
@@ -145,7 +144,7 @@ public class PrivacyRoomTest(AspireAppFixture fixture) : BaseTest(fixture)
             ]
         }, TestContext.Current.CancellationToken);
 
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         await _filesApi.SetEncryptionInfoAsync(fileId, keys, cancellationToken: TestContext.Current.CancellationToken);
 
         var result = (await _filesApi.GetEncryptionInfoAsync(fileId, cancellationToken: TestContext.Current.CancellationToken)).Response;
@@ -178,9 +177,9 @@ public class PrivacyRoomTest(AspireAppFixture fixture) : BaseTest(fixture)
     [Fact]
     public async Task Invite_PrivateRoom_WithUserKeys_ThrowsException()
     {
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
-        var docspaceAdmin = await Initializer.InviteContact(EmployeeType.DocSpaceAdmin);
+        var docspaceAdmin = await InviteContact(EmployeeType.DocSpaceAdmin);
         await _filesClient.Authenticate(docspaceAdmin);
 
         await ExportPublicAndPrivateKeys();
@@ -193,7 +192,7 @@ public class PrivacyRoomTest(AspireAppFixture fixture) : BaseTest(fixture)
 
         var createdRoom = (await _roomsApi.CreateRoomAsync(createRequest, TestContext.Current.CancellationToken)).Response;
 
-        var roomAdmin1 = await Initializer.InviteContact(EmployeeType.RoomAdmin);
+        var roomAdmin1 = await InviteContact(EmployeeType.RoomAdmin);
 
         await Assert.ThrowsAsync<ApiException>(async () =>
             await _roomsApi.SetRoomSecurityAsync(createdRoom.Id, new RoomInvitationRequest
@@ -225,7 +224,7 @@ public class PrivacyRoomTest(AspireAppFixture fixture) : BaseTest(fixture)
     public async Task CopyFolder_FromPrivateRoom_ReturnsError()
     {
         // Arrange
-        var docspaceAdmin = await Initializer.InviteContact(EmployeeType.DocSpaceAdmin);
+        var docspaceAdmin = await InviteContact(EmployeeType.DocSpaceAdmin);
         await _filesClient.Authenticate(docspaceAdmin);
 
         await ExportPublicAndPrivateKeys();

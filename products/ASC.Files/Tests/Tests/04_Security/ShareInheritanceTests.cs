@@ -33,21 +33,18 @@
 
 namespace ASC.Files.Tests.Tests._04_Security;
 
-[Collection("Test Collection")]
 [Trait("Category", "Security")]
 [Trait("Feature", "Inheritance")]
 public class ShareInheritanceTests(
     AspireAppFixture fixture)
     : BaseTest(fixture)
 {
-    private readonly HttpClient _webApiClient = fixture.WebApiHttpClient;
-
     [Theory]
     [MemberData(nameof(ValidRoomTypesForShare))]
     public async Task RoomWithLink_FolderWithoutLink_FileWithoutLink_InheritsRoomPermissions(RoomType roomType)
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var room = (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("room title", roomType: roomType), TestContext.Current.CancellationToken)).Response;
         var folder = await CreateFolder("folder without link", room.Id);
         var file = await CreateFile("file without link.docx", folder.Id);
@@ -77,7 +74,7 @@ public class ShareInheritanceTests(
     public async Task RoomWithLink_FolderWithLink_FileWithoutLink_InheritsFolderPermissions()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var room = await CreateCustomRoom("room with link");
         var folder = await CreateFolder("folder with link", room.Id);
         var file = await CreateFile("file without link.docx", folder.Id);
@@ -126,7 +123,7 @@ public class ShareInheritanceTests(
     public async Task RoomWithLink_FolderWithLink_FileWithLink_UsesOwnPermissions()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var room = await CreateCustomRoom("room with link");
         var folder = await CreateFolder("folder with link", room.Id);
         var file = await CreateFile("file with link.docx", folder.Id);
@@ -196,8 +193,8 @@ public class ShareInheritanceTests(
     public async Task FolderWithLink_FileWithoutLink_InheritsFolderPermissions()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        var folder = await CreateFolderInMy("folder with link", Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
+        var folder = await CreateFolderInMy("folder with link", Owner);
         var file = await CreateFile("file without link.docx", folder.Id);
 
         // Create folder link with read-only access
@@ -224,8 +221,8 @@ public class ShareInheritanceTests(
     public async Task FolderWithLink_FileWithLink_UsesOwnPermissions()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        var folder = await CreateFolderInMy("folder with link", Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
+        var folder = await CreateFolderInMy("folder with link", Owner);
         var file = await CreateFile("file with link.docx", folder.Id);
 
         // Create folder link with read-only access
@@ -270,7 +267,7 @@ public class ShareInheritanceTests(
     public async Task RoomWithDenyDownload_InheritsToFolderAndFile()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var room = await CreateCustomRoom("room with deny download");
         var folder = await CreateFolder("folder without link", room.Id);
         var file = await CreateFile("file without link.docx", folder.Id);
@@ -301,8 +298,8 @@ public class ShareInheritanceTests(
     public async Task FolderWithDenyDownload_InheritsToFile()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        var folder = await CreateFolderInMy("folder with deny download", Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
+        var folder = await CreateFolderInMy("folder with deny download", Owner);
         var file = await CreateFile("file without link.docx", folder.Id);
 
         // Create folder link with editing access and deny download
@@ -330,7 +327,7 @@ public class ShareInheritanceTests(
     public async Task FileWithDenyDownload_OverridesFolderAndRoomSettings()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var room = await CreateCustomRoom("room without deny download");
         var folder = await CreateFolder("folder without deny download", room.Id);
         var file = await CreateFile("file with deny download.docx", folder.Id);
@@ -368,7 +365,7 @@ public class ShareInheritanceTests(
     public async Task RoomWithPassword_DoesNotInheritToFolderOrFile()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var room = await CreateCustomRoom("room with password");
         var folder = await CreateFolder("folder in room", room.Id);
         var file = await CreateFile("file in room.docx", folder.Id);
@@ -421,7 +418,7 @@ public class ShareInheritanceTests(
     public async Task FileWithPassword_RequiresPasswordRegardlessOfParent()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var room = await CreateCustomRoom("room without password");
         var folder = await CreateFolder("folder in room", room.Id);
         var file = await CreateFile("file with password.docx", folder.Id);
@@ -474,7 +471,7 @@ public class ShareInheritanceTests(
     public async Task MultipleLinkLevels_UsesCorrectAccessBasedOnEntryPoint()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var room = await CreateCustomRoom("multi-link room");
         var folder = await CreateFolder("multi-link folder", room.Id);
         var file = await CreateFile("multi-link file.docx", folder.Id);
@@ -553,7 +550,7 @@ public class ShareInheritanceTests(
     public async Task ExpiredRoomLink_FallsBackToFolderLink()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var room = await CreateCustomRoom("room with expired link");
         var folder = await CreateFolder("folder with valid link", room.Id);
         var file = await CreateFile("file.docx", folder.Id);
@@ -601,8 +598,8 @@ public class ShareInheritanceTests(
     public async Task ExpiredFolderLink_FallsBackToFileLink()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        var folder = await CreateFolderInMy("folder with expired link", Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
+        var folder = await CreateFolderInMy("folder with expired link", Owner);
         var file = await CreateFile("file with valid link.docx", folder.Id);
 
         // Create folder link that expires in 1 second
@@ -646,7 +643,7 @@ public class ShareInheritanceTests(
     public async Task SetFileLinkAsync_FileWithNoneAccessPublicRoom_ReturnsNewLink()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var publicRoom = await CreatePublicRoom("Public Room Test");
         var file = await CreateFile("File in Public Room", publicRoom.Id);
 
@@ -679,7 +676,7 @@ public class ShareInheritanceTests(
     public async Task SetFileInRoomLinkAsync_PublicRoomWithFileExpiration_ReturnsNoExpiration()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var publicRoom = (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("Public Room Test", roomType: RoomType.PublicRoom), TestContext.Current.CancellationToken)).Response;
         var file = await CreateFile("File in Public Room", publicRoom.Id);
 
@@ -705,7 +702,7 @@ public class ShareInheritanceTests(
     public async Task SetFileInRoomLinkAsync_PublicRoomWithFileInternal_ReturnsExternal()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var publicRoom = (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("Public Room Test", roomType: RoomType.PublicRoom), TestContext.Current.CancellationToken)).Response;
         var file = await CreateFile("File in Public Room", publicRoom.Id);
 
@@ -731,7 +728,7 @@ public class ShareInheritanceTests(
     public async Task SetFolderLinkAsync_FolderWithNoneAccessPublicRoom_ReturnsNewLink()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var publicRoom = await CreatePublicRoom("Public Room Test");
         var folder = await CreateFolder("Folder in Public Room", publicRoom.Id);
 
@@ -764,7 +761,7 @@ public class ShareInheritanceTests(
     public async Task CreateFolderFileLink_VDRRoom_ReturnsNewLink()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var vdrRoom = await CreateVDRRoom("VDR Room Test");
         var folder = await CreateFolder("Folder in VDR Room", vdrRoom.Id);
 
@@ -781,7 +778,7 @@ public class ShareInheritanceTests(
     public async Task ChangeInternalSettingLink_FileFolder_VDRRoom_ReturnsError()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var vdrRoom = await CreateVDRRoom("VDR Room Test");
         var folder = await CreateFolder("Folder in VDR Room", vdrRoom.Id);
         var file = await CreateFile("File in VDR Room", vdrRoom.Id);
@@ -815,7 +812,7 @@ public class ShareInheritanceTests(
     public async Task CheckExternalRightsFile_FillingFormRoom_ReturnFormFilling()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var fillingForm = await CreateFillingFormsRoom("VDR Room Test");
         var file = await CreateFile("File in VDR Room.pdf", fillingForm.Id);
 
@@ -832,8 +829,8 @@ public class ShareInheritanceTests(
     public async Task CheckExternalRightsFile_Documents_ReturnFormFilling()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        var file = await CreateFileInMy("File in My.pdf", Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
+        var file = await CreateFileInMy("File in My.pdf", Owner);
 
         // Get the primary external link
         await _filesApi.GetFilePrimaryExternalLinkAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken);
@@ -849,10 +846,10 @@ public class ShareInheritanceTests(
     [Trait("Bug", "78776")]
     public async Task SharedFolder_NewItemsCount_IncreasesAfterSharingFoldersAndAddingFiles()
     {
-        await _filesClient.Authenticate(Initializer.Owner);
-        var user1 = Initializer.Owner;
-        var user2 = await Initializer.InviteContact(EmployeeType.DocSpaceAdmin);
-        var user3 = await Initializer.InviteContact(EmployeeType.User);
+        await _filesClient.Authenticate(Owner);
+        var user1 = Owner;
+        var user2 = await InviteContact(EmployeeType.DocSpaceAdmin);
+        var user3 = await InviteContact(EmployeeType.User);
 
         var folder1 = await CreateFolderInMy("folder_1", user1);
 
@@ -888,10 +885,10 @@ public class ShareInheritanceTests(
     [Trait("Bug", "78848")]
     public async Task SharedFolder_ShareSubfolder_SubFileUsesParentsRights()
     {
-        await _filesClient.Authenticate(Initializer.Owner);
-        var user = await Initializer.InviteContact(EmployeeType.DocSpaceAdmin);
+        await _filesClient.Authenticate(Owner);
+        var user = await InviteContact(EmployeeType.DocSpaceAdmin);
 
-        var folder1 = await CreateFolderInMy("folder_1", Initializer.Owner);
+        var folder1 = await CreateFolderInMy("folder_1", Owner);
         var folder2 = await CreateFolder("folder_2", folder1.Id);
         var file = await CreateFile("file.docx", folder2.Id);
 

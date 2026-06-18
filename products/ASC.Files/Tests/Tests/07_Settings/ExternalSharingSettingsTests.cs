@@ -28,7 +28,6 @@ using EmployeeType = DocSpace.API.SDK.Model.EmployeeType;
 
 namespace ASC.Files.Tests.Tests._07_Settings;
 
-[Collection("Test Collection")]
 [Trait("Category", "Settings")]
 [Trait("Feature", "ExternalSharing")]
 public class ExternalSharingSettingsTests(AspireAppFixture fixture) : BaseTest(fixture)
@@ -40,7 +39,7 @@ public class ExternalSharingSettingsTests(AspireAppFixture fixture) : BaseTest(f
         bool applyToRooms = true,
         bool blockExisting = true)
     {
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         await _filesSettingsApi.ChangeExternalSharingSettingsAsync(
             new ExternalSharingSettingsRequestDto(
                 externalShare: externalShare,
@@ -55,7 +54,7 @@ public class ExternalSharingSettingsTests(AspireAppFixture fixture) : BaseTest(f
     public async Task ChangeExternalSharingSettings_AllSettings_PersistedAndReflectedInGet()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
         var request = new ExternalSharingSettingsRequestDto(
             externalShare: false,
@@ -93,7 +92,7 @@ public class ExternalSharingSettingsTests(AspireAppFixture fixture) : BaseTest(f
     public async Task ChangeExternalSharingSettings_AsNonAdmin_ReturnsForbidden()
     {
         // Arrange
-        var nonAdmin = await Initializer.InviteContact(EmployeeType.User);
+        var nonAdmin = await InviteContact(EmployeeType.User);
         await _filesClient.Authenticate(nonAdmin);
 
         // Act & Assert
@@ -114,7 +113,7 @@ public class ExternalSharingSettingsTests(AspireAppFixture fixture) : BaseTest(f
         // Arrange & Act
         await SetExternalSharingAsync(externalShare: false);
 
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var settings = (await _filesSettingsApi.GetFilesSettingsAsync(
             TestContext.Current.CancellationToken)).Response;
 

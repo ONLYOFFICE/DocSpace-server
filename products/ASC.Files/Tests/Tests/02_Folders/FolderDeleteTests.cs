@@ -33,7 +33,6 @@
 
 namespace ASC.Files.Tests.Tests._02_Folders;
 
-[Collection("Test Collection")]
 [Trait("Category", "CRUD")]
 [Trait("Feature", "Folders")]
 public class FolderDeleteTests(
@@ -44,7 +43,7 @@ public class FolderDeleteTests(
     public async Task DeleteFolder_NonExistingFolder_ReturnsError()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var nonExistingFolderId = 99999; // Non-existing folder ID
 
         // Act & Assert
@@ -61,11 +60,11 @@ public class FolderDeleteTests(
     public async Task DeleteFolder_NoPermissions_ReturnsError()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
-        var folder = await CreateFolder("folder_no_permissions", FolderType.USER, Initializer.Owner);
+        var folder = await CreateFolder("folder_no_permissions", FolderType.USER, Owner);
 
-        var user = await Initializer.InviteContact(EmployeeType.User);
+        var user = await InviteContact(EmployeeType.User);
         await _filesClient.Authenticate(user);
 
         // Act & Assert
@@ -82,9 +81,9 @@ public class FolderDeleteTests(
     public async Task MoveFoldersToTrash_WithoutFolderTypeFilter_ReturnsFoldersFromMyDocumentsAndRooms()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
-        var myFolder = await CreateFolderInMy("trash_my_folder", Initializer.Owner);
+        var myFolder = await CreateFolderInMy("trash_my_folder", Owner);
 
         var customRoom = await CreateCustomRoom("trash_custom_room");
         var customRoomFolder = await CreateFolder("trash_custom_folder", customRoom.Id);
@@ -111,9 +110,9 @@ public class FolderDeleteTests(
     public async Task MoveFoldersToTrash_FilterByMyDocuments_ReturnsOnlyMyDocumentsFolders()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
-        var myFolder = await CreateFolderInMy("trash_my_folder", Initializer.Owner);
+        var myFolder = await CreateFolderInMy("trash_my_folder", Owner);
 
         var customRoom = await CreateCustomRoom("trash_custom_room");
         var customRoomFolder = await CreateFolder("trash_custom_folder", customRoom.Id);
@@ -132,9 +131,9 @@ public class FolderDeleteTests(
     public async Task MoveFoldersToTrash_FilterByRooms_ReturnsOnlyRoomFolders()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
-        var myFolder = await CreateFolderInMy("trash_my_folder", Initializer.Owner);
+        var myFolder = await CreateFolderInMy("trash_my_folder", Owner);
 
         var customRoom = await CreateCustomRoom("trash_custom_room");
         var customRoomFolder = await CreateFolder("trash_custom_folder", customRoom.Id);
@@ -158,9 +157,9 @@ public class FolderDeleteTests(
     public async Task MoveFoldersToTrash_FilterBySpecificRoomType_ReturnsOnlyThatRoomFolders(RoomType roomType, FolderType folderTypeFilter)
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
-        var myFolder = await CreateFolderInMy("trash_my_folder", Initializer.Owner);
+        var myFolder = await CreateFolderInMy("trash_my_folder", Owner);
 
         var targetRoom = await CreateRoom(roomType, "trash_target_room");
         var targetRoomFolder = await CreateFolder("trash_target_folder", targetRoom.Id);
@@ -187,9 +186,9 @@ public class FolderDeleteTests(
     public async Task MoveFoldersToTrash_FilterByMultipleFolderTypes_ReturnsFoldersFromAllRequestedTypes()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
-        var myFolder = await CreateFolderInMy("trash_my_folder", Initializer.Owner);
+        var myFolder = await CreateFolderInMy("trash_my_folder", Owner);
 
         var customRoom = await CreateCustomRoom("trash_custom_room");
         var customRoomFolder = await CreateFolder("trash_custom_folder", customRoom.Id);
@@ -219,7 +218,7 @@ public class FolderDeleteTests(
 
     private async Task<FolderContentDtoInteger> GetTrashAsync(List<FolderType>? folderType = null)
     {
-        var trashId = await GetTrashFolderIdAsync(Initializer.Owner);
+        var trashId = await GetTrashFolderIdAsync(Owner);
 
         return (await _foldersApi.GetFolderByFolderIdAsync(trashId, folderType: folderType, cancellationToken: TestContext.Current.CancellationToken)).Response;
     }

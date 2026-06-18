@@ -33,7 +33,6 @@
 
 namespace ASC.Files.Tests.Tests._02_Folders;
 
-[Collection("Test Collection")]
 [Trait("Category", "CRUD")]
 [Trait("Feature", "Folders")]
 public class FolderCreateTests(
@@ -58,7 +57,7 @@ public class FolderCreateTests(
     public async Task CreateFolder_InMyDocuments_Owner_ReturnsOk()
     {
         var folderName = "Test folder";
-        var createdFolder = await CreateFolder(folderName, FolderType.USER, Initializer.Owner);
+        var createdFolder = await CreateFolder(folderName, FolderType.USER, Owner);
         
         createdFolder.Should().NotBeNull();
         createdFolder.Title.Should().Be(folderName);
@@ -68,7 +67,7 @@ public class FolderCreateTests(
     public async Task CreateFolder_InMyDocuments_RoomAdmin_ReturnsOk()
     {
         var folderName = "Test folder";
-        var roomAdmin = await Initializer.InviteContact(EmployeeType.RoomAdmin);
+        var roomAdmin = await InviteContact(EmployeeType.RoomAdmin);
         
         var createdFolder = await CreateFolder(folderName, FolderType.USER, roomAdmin);
         
@@ -80,7 +79,7 @@ public class FolderCreateTests(
     public async Task CreateFolder_InMyDocuments_User_ReturnsOk()
     {
         var folderName = "Test folder";
-        var user = await Initializer.InviteContact(EmployeeType.User);
+        var user = await InviteContact(EmployeeType.User);
         
         var createdFolder = await CreateFolder(folderName, FolderType.USER, user);
 
@@ -92,7 +91,7 @@ public class FolderCreateTests(
     [MemberData(nameof(FolderNames))]
     public async Task CreateVariousFolder_InMyDocuments_Owner_ReturnsOk(string folderName)
     {
-        var createdFolder = await CreateFolder(folderName, FolderType.USER, Initializer.Owner);
+        var createdFolder = await CreateFolder(folderName, FolderType.USER, Owner);
         
         createdFolder.Should().NotBeNull();
         createdFolder.Title.Should().Be(folderName);
@@ -101,7 +100,7 @@ public class FolderCreateTests(
     [Fact]
     public async Task CreateFolder_ParentFolderDoesNotExist_ReturnsFail()
     {
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         
         // Arrange
         var folderRequest = new CreateFolder("Test Folder");
@@ -118,7 +117,7 @@ public class FolderCreateTests(
     [MemberData(nameof(SystemFolderTypesData))]
     public async Task CreateFolder_InSystemFolder_Owner_ReturnsOk(FolderType folderType)
     {
-        var exception = await Assert.ThrowsAsync<ApiException>(async () => await CreateFolder("Test System Folder", folderType, Initializer.Owner));
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await CreateFolder("Test System Folder", folderType, Owner));
 
         exception.ErrorCode.Should().Be(403);
     }
@@ -126,7 +125,7 @@ public class FolderCreateTests(
     [Fact]
     public async Task CreateFolder_NameLongerThan165Chars_Returns400()
     {
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         
         // Arrange
         var longFolderName = new string('a', 166); // 166 characters
@@ -135,7 +134,7 @@ public class FolderCreateTests(
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _foldersApi.CreateFolderAsync(
-                await GetUserFolderIdAsync( Initializer.Owner), 
+                await GetUserFolderIdAsync( Owner), 
                 folderRequest, 
                 cancellationToken: TestContext.Current.CancellationToken));
         
@@ -145,11 +144,11 @@ public class FolderCreateTests(
     [Fact]
     public async Task CreateFolder_WithSameNameInSameParent_ReturnsFolderExistsError()
     {
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         
         // Arrange
         var folderName = "Duplicate Folder";
-        var parentFolderId = await GetUserFolderIdAsync( Initializer.Owner);
+        var parentFolderId = await GetUserFolderIdAsync( Owner);
         
         // Create first folder
         var firstFolder = await CreateFolder(folderName, parentFolderId);
@@ -167,14 +166,14 @@ public class FolderCreateTests(
     [Fact]
     public async Task CreateNestedFolders_ReturnsOk()
     {
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         
         // Arrange
         var parentFolderName = "Parent Folder";
         var childFolderName = "Child Folder";
         
         // Create parent folder
-        var parentFolder = await CreateFolder(parentFolderName, FolderType.USER, Initializer.Owner);
+        var parentFolder = await CreateFolder(parentFolderName, FolderType.USER, Owner);
         parentFolder.Should().NotBeNull();
         
         // Create child folder inside parent folder

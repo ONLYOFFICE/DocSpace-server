@@ -33,7 +33,6 @@
 
 namespace ASC.Files.Tests.Tests._05_Features;
 
-[Collection("Test Collection")]
 [Trait("Category", "Features")]
 [Trait("Feature", "Forms")]
 public class FormFilesTests(
@@ -44,10 +43,10 @@ public class FormFilesTests(
     public async Task IsFormPDF_RegularPdf_ReturnsFalse()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
         // Create a regular PDF file (not a form)
-        var regularPdfFile = await CreateFileInMy("regular.pdf", Initializer.Owner);
+        var regularPdfFile = await CreateFileInMy("regular.pdf", Owner);
 
         // Act
         var isFormResult = (await _filesApi.IsFormPDFAsync(regularPdfFile.Id, TestContext.Current.CancellationToken)).Response;
@@ -61,11 +60,11 @@ public class FormFilesTests(
     public async Task GetFormRoles_ValidForm_ReturnsRoles()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
         // Note: Creating a proper form file for testing might require specific setup
         // For this test, we'll use a regular file but handle the expected response appropriately
-        var file = await CreateFileInMy("test_form.pdf", Initializer.Owner);
+        var file = await CreateFileInMy("test_form.pdf", Owner);
 
         // Act & Assert
         try
@@ -87,11 +86,11 @@ public class FormFilesTests(
     public async Task CheckFillFormDraft_ValidDraft_ReturnsSessionId()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
         // Note: Creating a proper form draft for testing might require specific setup
         // For this test, we'll use a regular file but handle the expected response appropriately
-        var file = await CreateFileInMy("form_draft.pdf", Initializer.Owner);
+        var file = await CreateFileInMy("form_draft.pdf", Owner);
 
         // Act & Assert
         try
@@ -114,11 +113,11 @@ public class FormFilesTests(
     public async Task ManageFormFilling_ValidAction_ExecutesSuccessfully()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
         // Create a test form file
         // Note: Creating a proper form file for testing might require specific setup
-        var file = await CreateFileInMy("manage_form.pdf", Initializer.Owner);
+        var file = await CreateFileInMy("manage_form.pdf", Owner);
 
         // Act & Assert
         try
@@ -143,10 +142,10 @@ public class FormFilesTests(
     // public async Task SaveAsPdf_ValidFile_ReturnsNewPdfFile()
     // {
     //     // Arrange
-    //     await _filesClient.Authenticate(Initializer.Owner);
+    //     await _filesClient.Authenticate(Owner);
     //     
-    //     var sourceFile = await CreateFile("file_to_convert.docx", FolderType.USER, Initializer.Owner);
-    //     var destFolderId = await GetUserFolderIdAsync( Initializer.Owner);
+    //     var sourceFile = await CreateFile("file_to_convert.docx", FolderType.USER, Owner);
+    //     var destFolderId = await GetUserFolderIdAsync( Owner);
     //     var newFileName = "converted_file.pdf";
     //     
     //     // Act
@@ -169,17 +168,17 @@ public class FormFilesTests(
     // public async Task SaveFormRoleMapping_ValidRoles_SavesSuccessfully()
     // {
     //     // Arrange
-    //     await _filesClient.Authenticate(Initializer.Owner);
+    //     await _filesClient.Authenticate(Owner);
     //     
     //     // Create a test form file
-    //     var file = await CreateFile("role_mapping.pdf", FolderType.USER, Initializer.Owner);
+    //     var file = await CreateFile("role_mapping.pdf", FolderType.USER, Owner);
     //     
     //     // Create sample roles for mapping
     //     var roles = new List<FormRole>
     //     {
     //         new() 
     //         { 
-    //             UserId = Initializer.Owner.Id, 
+    //             UserId = Owner.Id, 
     //             RoleName = "Approver", 
     //             Sequence = 1 
     //         }

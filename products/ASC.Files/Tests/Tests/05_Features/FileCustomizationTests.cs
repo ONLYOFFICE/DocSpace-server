@@ -33,7 +33,6 @@
 
 namespace ASC.Files.Tests.Tests._05_Features;
 
-[Collection("Test Collection")]
 [Trait("Category", "Features")]
 public class FileCustomizationTests(
     AspireAppFixture fixture)
@@ -43,9 +42,9 @@ public class FileCustomizationTests(
     public async Task SetCustomFilterTag_InMy_ReturnsError()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         
-        var file = await CreateFileInMy("file_for_custom_filter.xlsx",  Initializer.Owner);
+        var file = await CreateFileInMy("file_for_custom_filter.xlsx",  Owner);
         
         // Act
         var customFilterParams = new CustomFilterParameters(enabled: true);
@@ -61,7 +60,7 @@ public class FileCustomizationTests(
     public async Task SetCustomFilterTag_EnableCustomFilter_ReturnsUpdatedFile()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         
         var createdRoom = await CreateVirtualRoom("room_for_custom_filter"); 
         var file = await CreateFile("file_for_custom_filter.xlsx", createdRoom.Id);
@@ -81,7 +80,7 @@ public class FileCustomizationTests(
     public async Task SetCustomFilterTag_DisableCustomFilter_ReturnsUpdatedFile()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         
         var createdRoom = await CreateVirtualRoom("room_for_custom_filter"); 
         var file = await CreateFile("file_for_custom_filter_disable.xlsx", createdRoom.Id);
@@ -104,9 +103,9 @@ public class FileCustomizationTests(
     // public async Task CreateThumbnails_ValidFile_ReturnsSuccess()
     // {
     //     // Arrange
-    //     await _filesClient.Authenticate(Initializer.Owner);
+    //     await _filesClient.Authenticate(Owner);
     //     
-    //     var file = await CreateFile("file_for_thumbnail.docx", FolderType.USER, Initializer.Owner);
+    //     var file = await CreateFile("file_for_thumbnail.docx", FolderType.USER, Owner);
     //     
     //     // Act
     //     var thumbnailRequest = new BaseBatchRequestDto(fileIds: [new(file.Id)]);

@@ -38,7 +38,6 @@ using SecurityInfoSimpleRequestDto = DocSpace.API.SDK.Model.SecurityInfoSimpleRe
 
 namespace ASC.Files.Tests.Tests._04_Security;
 
-[Collection("Test Collection")]
 [Trait("Category", "Security")]
 [Trait("Feature", "Sharing")]
 public class FileShareTests(
@@ -50,9 +49,9 @@ public class FileShareTests(
     public async Task CreatePrimaryExternalLink_ValidFileShare_ReturnsLinkData(FileShare fileShare)
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
-        var file = await CreateFileInMy("file_to_share.docx", Initializer.Owner);
+        var file = await CreateFileInMy("file_to_share.docx", Owner);
 
         // Act
         var linkParams = new FileLinkRequest(access: fileShare);
@@ -74,9 +73,9 @@ public class FileShareTests(
     public async Task CreatePrimaryExternalLink_ByDefault_ReturnsLinkData()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
-        var file = await CreateFileInMy("file_to_share.docx", Initializer.Owner);
+        var file = await CreateFileInMy("file_to_share.docx", Owner);
 
         // Act
         var result = (await _filesApi.GetFilePrimaryExternalLinkAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
@@ -97,9 +96,9 @@ public class FileShareTests(
     public async Task CreatePrimaryExternalLink_InvalidFileShare_ReturnsError(FileShare fileShare)
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
-        var file = await CreateFileInMy("file_to_share.docx", Initializer.Owner);
+        var file = await CreateFileInMy("file_to_share.docx", Owner);
 
         // Act
         var linkParams = new FileLinkRequest(access: fileShare);
@@ -112,9 +111,9 @@ public class FileShareTests(
     public async Task GetLinks_WithMultipleLinks_ReturnsAllLinks()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
-        var file = await CreateFileInMy("file_with_multiple_links.docx", Initializer.Owner);
+        var file = await CreateFileInMy("file_with_multiple_links.docx", Owner);
 
         // Create a primary external link
         var primaryLinkParams = new FileLinkRequest(access: FileShare.Read);
@@ -140,8 +139,8 @@ public class FileShareTests(
     public async Task CreateMultipleLinks_ForFile_ReturnsAllLinks()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        var file = await CreateFileInMy("file_with_multiple_links.docx", Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
+        var file = await CreateFileInMy("file_with_multiple_links.docx", Owner);
 
         // Create primary link
         var primaryLinkParams = new FileLinkRequest(
@@ -188,9 +187,9 @@ public class FileShareTests(
     public async Task SetExternalLink_UpdateExistingLink_ReturnsUpdatedLink()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
-        var file = await CreateFileInMy("file_update_link.docx", Initializer.Owner);
+        var file = await CreateFileInMy("file_update_link.docx", Owner);
 
         // Create initial external link
         var initialLinkParams = new FileLinkRequest(
@@ -229,8 +228,8 @@ public class FileShareTests(
     public async Task UpdateMultipleLinks_ForFile_ReturnsUpdatedLinks()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        var file = await CreateFileInMy("file_with_links_to_update.docx", Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
+        var file = await CreateFileInMy("file_with_links_to_update.docx", Owner);
 
         // Create multiple links
         var link1Request = new FileLinkRequest(
@@ -318,7 +317,7 @@ public class FileShareTests(
         var (share, fileId) = await CreateFileAndShare(fileShare);
 
         // Assert
-        var user = await Initializer.InviteContact(EmployeeType.User);
+        var user = await InviteContact(EmployeeType.User);
         var openEditResult = await TryOpenEditAsync(share, fileId, user);
 
         // Assert
@@ -370,8 +369,8 @@ public class FileShareTests(
     public async Task AccessFileWithMultipleLinks_DifferentPermissions_ReturnsCorrectAccess()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        var file = await CreateFileInMy("file_with_multiple_access_links.docx", Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
+        var file = await CreateFileInMy("file_with_multiple_access_links.docx", Owner);
 
         // Create multiple links with different permissions
         var readOnlyLink = new FileLinkRequest(
@@ -437,8 +436,8 @@ public class FileShareTests(
     public async Task FileWithMultipleLinks_PasswordProtectedAndUnrestricted_WorksCorrectly()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        var file = await CreateFileInMy("file_with_mixed_links.docx", Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
+        var file = await CreateFileInMy("file_with_mixed_links.docx", Owner);
 
         // Create one link with password and one without
         var unrestrictedLink = new FileLinkRequest(
@@ -500,11 +499,11 @@ public class FileShareTests(
     public async Task GetFileSecurityInfo_SharedFile_ReturnsSecurityInformation()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
-        var file = await CreateFileInMy("file_security_info.docx", Initializer.Owner);
-        var user1 = await Initializer.InviteContact(EmployeeType.User);
-        var user2 = await Initializer.InviteContact(EmployeeType.User);
+        var file = await CreateFileInMy("file_security_info.docx", Owner);
+        var user1 = await InviteContact(EmployeeType.User);
+        var user2 = await InviteContact(EmployeeType.User);
 
         // Share the file with different access levels
         var shareInfo = new List<FileShareParams>
@@ -570,17 +569,17 @@ public class FileShareTests(
     public async Task GetFileSecurityInfo_SharedFileWithGroup_ReturnsGroupSecurityInformation()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        await _peopleClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
+        await _peopleClient.Authenticate(Owner);
 
-        var file = await CreateFileInMy("file_security_info_group.docx", Initializer.Owner);
+        var file = await CreateFileInMy("file_security_info_group.docx", Owner);
 
         // Add users to the group
-        var user1 = await Initializer.InviteContact(EmployeeType.User);
-        var user2 = await Initializer.InviteContact(EmployeeType.User);
+        var user1 = await InviteContact(EmployeeType.User);
+        var user2 = await InviteContact(EmployeeType.User);
 
         // Create a group
-        var group = (await _groupApi.AddGroupAsync(new GroupRequestDto([user1.Id, user2.Id], Initializer.Owner.Id, "TestGroup"), TestContext.Current.CancellationToken)).Response;
+        var group = (await _groupApi.AddGroupAsync(new GroupRequestDto([user1.Id, user2.Id], Owner.Id, "TestGroup"), TestContext.Current.CancellationToken)).Response;
 
         // Share the file with the group
         var shareInfo = new List<FileShareParams>
@@ -640,9 +639,9 @@ public class FileShareTests(
     public async Task MixingAccessRights_ExternalLinkRead_SecurityEdit_ChecksEditAccessViaLink()
     {
         // Step 1: Authenticate as user1
-        await _filesClient.Authenticate(Initializer.Owner);
-        var user1 = Initializer.Owner;
-        var user2 = await Initializer.InviteContact(EmployeeType.User);
+        await _filesClient.Authenticate(Owner);
+        var user1 = Owner;
+        var user2 = await InviteContact(EmployeeType.User);
 
         // Step 2: Create file in "My Documents"
         var file = await CreateFileInMy("file_mixed_access.docx", user1);
@@ -684,14 +683,14 @@ public class FileShareTests(
     public async Task MixingAccessRights_ExternalLinkEditing_GroupSecurityComment_UserSecurityRead_ChecksAccess()
     {
         // Authenticate as Owner and create file in "My Documents"
-        await _filesClient.Authenticate(Initializer.Owner);
-        var user1 = Initializer.Owner;
-        var user2 = await Initializer.InviteContact(EmployeeType.User);
+        await _filesClient.Authenticate(Owner);
+        var user1 = Owner;
+        var user2 = await InviteContact(EmployeeType.User);
 
         var file = await CreateFileInMy("file_mixed_access_rights.docx", user1);
 
         // Create a group
-        var group = (await _groupApi.AddGroupAsync(new GroupRequestDto([user2.Id], Initializer.Owner.Id, "Group1"), TestContext.Current.CancellationToken)).Response;
+        var group = (await _groupApi.AddGroupAsync(new GroupRequestDto([user2.Id], Owner.Id, "Group1"), TestContext.Current.CancellationToken)).Response;
 
         // Set external link with editing rights
         var editingLinkRequest = new FileLinkRequest(access: FileShare.Editing);
@@ -773,9 +772,9 @@ public class FileShareTests(
     public async Task SharedFolder_NewItemsCount_IncreasesAfterSharingFiles()
     {
         // Step 1: Authenticate as user1
-        await _filesClient.Authenticate(Initializer.Owner);
-        var user1 = Initializer.Owner;
-        var user2 = await Initializer.InviteContact(EmployeeType.User);
+        await _filesClient.Authenticate(Owner);
+        var user1 = Owner;
+        var user2 = await InviteContact(EmployeeType.User);
 
         // Step 2: Create file1 and file2 in "My Documents"
         var file1 = await CreateFileInMy("file_new_item_1.docx", user1);
@@ -835,9 +834,9 @@ public class FileShareTests(
     public async Task SharedFolder_ExternalLinkRead_ChecksReadAccessInSharedFolder()
     {
         // Authenticate as Owner and create file in "My Documents"
-        await _filesClient.Authenticate(Initializer.Owner);
-        var owner = Initializer.Owner;
-        var user2 = await Initializer.InviteContact(EmployeeType.User);
+        await _filesClient.Authenticate(Owner);
+        var owner = Owner;
+        var user2 = await InviteContact(EmployeeType.User);
 
         var file = await CreateFileInMy("file_external_read.docx", owner);
         var fileShare = FileShare.Read;
@@ -878,9 +877,9 @@ public class FileShareTests(
     public async Task SharedFolder_MultipleExternalLinks_ChecksAccessViaLastLink()
     {
         // Authenticate as Owner and create file in "My Documents"
-        await _filesClient.Authenticate(Initializer.Owner);
-        var owner = Initializer.Owner;
-        var user2 = await Initializer.InviteContact(EmployeeType.User);
+        await _filesClient.Authenticate(Owner);
+        var owner = Owner;
+        var user2 = await InviteContact(EmployeeType.User);
 
         var accessTypes = new[] { FileShare.Read, FileShare.Comment, FileShare.Editing };
 
@@ -936,8 +935,8 @@ public class FileShareTests(
     public async Task FileAccessViaLink_DeletingUnusedLink_FileRemainsInSharedWithMe()
     {
         // Step 1: Authenticate as Owner and create file in "My Documents"
-        await _filesClient.Authenticate(Initializer.Owner);
-        var file = await CreateFileInMy("file_multiple_links.docx", Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
+        var file = await CreateFileInMy("file_multiple_links.docx", Owner);
 
         // Step 2: Create two external read links for the file
         var firstLinkRequest = new FileLinkRequest(access: FileShare.Read);
@@ -949,7 +948,7 @@ public class FileShareTests(
         var secondLinkId = secondLinkResponse.SharedLink.Id;
 
         // Step 3: Invite a User and authenticate as that user
-        var user = await Initializer.InviteContact(EmployeeType.User);
+        var user = await InviteContact(EmployeeType.User);
         await _filesClient.Authenticate(user);
 
         // Step 4: Access the file using the first link
@@ -962,7 +961,7 @@ public class FileShareTests(
         fileAccessedViaLink.Access.Should().Be(FileShare.Read);
 
         // Step 5: Authenticate back as Owner and delete the second link
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         await _filesApi.SetFileExternalLinkAsync(file.Id, new FileLinkRequest()
         {
             Access = FileShare.None,
@@ -992,10 +991,10 @@ public class FileShareTests(
     public async Task SetFileSecurityInfo_InSharedFolder_OverridesParentFolderPermissions()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
-        var folder = await CreateFolderInMy("folder", Initializer.Owner);
-        var user1 = await Initializer.InviteContact(EmployeeType.User);
+        var folder = await CreateFolderInMy("folder", Owner);
+        var user1 = await InviteContact(EmployeeType.User);
 
         var securityRequest = new SecurityInfoSimpleRequestDto
         {
@@ -1007,7 +1006,7 @@ public class FileShareTests(
         var file = await CreateFile("fileName.docx", folder.Id);
 
         // Act
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         securityRequest = new SecurityInfoSimpleRequestDto
         {
             Share = [new() { ShareTo = user1.Id, Access = FileShare.Read }]
@@ -1027,10 +1026,10 @@ public class FileShareTests(
     public async Task FolderWithShare_FileWithLink_UsesOwnPermissions()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        var user1 = await Initializer.InviteContact(EmployeeType.User);
+        await _filesClient.Authenticate(Owner);
+        var user1 = await InviteContact(EmployeeType.User);
 
-        var folder = await CreateFolderInMy("folder with link", Initializer.Owner);
+        var folder = await CreateFolderInMy("folder with link", Owner);
         var file = await CreateFile("file with link.docx", folder.Id);
 
         var securityRequest = new SecurityInfoSimpleRequestDto
@@ -1065,10 +1064,10 @@ public class FileShareTests(
     public async Task FolderWithShare_FolderWithLink_UsesOwnPermissions()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        var user1 = await Initializer.InviteContact(EmployeeType.User);
+        await _filesClient.Authenticate(Owner);
+        var user1 = await InviteContact(EmployeeType.User);
 
-        var folder = await CreateFolderInMy("folder with link", Initializer.Owner);
+        var folder = await CreateFolderInMy("folder with link", Owner);
         var subFolder = await CreateFolder("folder with link", folder.Id);
 
         var securityRequest = new SecurityInfoSimpleRequestDto
@@ -1103,10 +1102,10 @@ public class FileShareTests(
     public async Task FolderWithShare_FileWithShare_UsesOwnPermissions()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        var user1 = await Initializer.InviteContact(EmployeeType.User);
+        await _filesClient.Authenticate(Owner);
+        var user1 = await InviteContact(EmployeeType.User);
 
-        var folder = await CreateFolderInMy("folder with link", Initializer.Owner);
+        var folder = await CreateFolderInMy("folder with link", Owner);
         var file = await CreateFile("file with link.docx", folder.Id);
 
         var securityRequest = new SecurityInfoSimpleRequestDto
@@ -1139,10 +1138,10 @@ public class FileShareTests(
     public async Task FolderWithShare_SubFolderWithShare_FileUsesParentPermissions()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        var user1 = await Initializer.InviteContact(EmployeeType.User);
+        await _filesClient.Authenticate(Owner);
+        var user1 = await InviteContact(EmployeeType.User);
 
-        var folder = await CreateFolderInMy("folder", Initializer.Owner);
+        var folder = await CreateFolderInMy("folder", Owner);
         var subFolder = await CreateFolder("subfolder", folder.Id);
         var file = await CreateFile("file.docx", subFolder.Id);
 
@@ -1176,10 +1175,10 @@ public class FileShareTests(
     public async Task EveryoneShare_FileWithLink_AnonymousAccess_FileUsesParentPermissions()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        var user1 = await Initializer.InviteContact(EmployeeType.User);
+        await _filesClient.Authenticate(Owner);
+        var user1 = await InviteContact(EmployeeType.User);
 
-        var file = await CreateFileInMy("file.docx", Initializer.Owner);
+        var file = await CreateFileInMy("file.docx", Owner);
 
         var securityRequest = new SecurityInfoSimpleRequestDto
         {
@@ -1211,9 +1210,9 @@ public class FileShareTests(
     [Trait("Bug", "79420")]
     public async Task FileShare_GuestWhoDoesNotBelongToMe_ReturnEmpty()
     {
-        await _filesClient.Authenticate(Initializer.Owner);
-        var roomAdmin = await Initializer.InviteContact(EmployeeType.RoomAdmin);
-        var guest = await Initializer.InviteContact(EmployeeType.Guest);
+        await _filesClient.Authenticate(Owner);
+        var roomAdmin = await InviteContact(EmployeeType.RoomAdmin);
+        var guest = await InviteContact(EmployeeType.Guest);
 
         await _filesClient.Authenticate(roomAdmin);
         var file = await CreateFileInMy("file.docx", roomAdmin);
@@ -1227,7 +1226,7 @@ public class FileShareTests(
         var response = await _sharingApi.GetFileSecurityInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken);
         response.Response.Should().NotContain(r=> r.SharedToUser.Id == guest.Id);
 
-        var myguest = await Initializer.InviteContact(EmployeeType.Guest, roomAdmin);
+        var myguest = await InviteContact(EmployeeType.Guest, roomAdmin);
 
         await _filesClient.Authenticate(roomAdmin);
         securityRequest = new SecurityInfoSimpleRequestDto
@@ -1248,9 +1247,9 @@ public class FileShareTests(
     public async Task FileShare_UserSharesFileFromMy_WithNonGuestTypes_Success(EmployeeType targetType)
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        var user = await Initializer.InviteContact(EmployeeType.User);
-        var target = await Initializer.InviteContact(targetType);
+        await _filesClient.Authenticate(Owner);
+        var user = await InviteContact(EmployeeType.User);
+        var target = await InviteContact(targetType);
 
         await _filesClient.Authenticate(user);
         var file = await CreateFileInMy("file.docx", user);
@@ -1272,9 +1271,9 @@ public class FileShareTests(
     public async Task FileShare_UserSharesFileFromMy_WithGuestNotBelongingToUser_ReturnEmpty()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        var user = await Initializer.InviteContact(EmployeeType.User);
-        var guest = await Initializer.InviteContact(EmployeeType.Guest);
+        await _filesClient.Authenticate(Owner);
+        var user = await InviteContact(EmployeeType.User);
+        var guest = await InviteContact(EmployeeType.Guest);
 
         await _filesClient.Authenticate(user);
         var file = await CreateFileInMy("file.docx", user);
@@ -1296,8 +1295,8 @@ public class FileShareTests(
     public async Task SharedProperties_FileWithPublicExternalLink_ReturnsSharedTrue()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        var file = await CreateFileInMy("file_shared_props.docx", Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
+        var file = await CreateFileInMy("file_shared_props.docx", Owner);
 
         // Act - getting the primary external link creates a public (non-internal) link
         var link = (await _filesApi.GetFilePrimaryExternalLinkAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
@@ -1316,9 +1315,9 @@ public class FileShareTests(
     public async Task SharedProperties_FileSharedWithUser_ReturnsSharedForUserTrue()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        var file = await CreateFileInMy("file_shared_with_user.docx", Initializer.Owner);
-        var user = await Initializer.InviteContact(EmployeeType.User);
+        await _filesClient.Authenticate(Owner);
+        var file = await CreateFileInMy("file_shared_with_user.docx", Owner);
+        var user = await InviteContact(EmployeeType.User);
 
         var securityRequest = new SecurityInfoSimpleRequestDto
         {
@@ -1341,8 +1340,8 @@ public class FileShareTests(
     public async Task SharedProperties_FileWithInternalExternalLink_ReturnsSharedExternalFalse()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        var file = await CreateFileInMy("file_internal_link.docx", Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
+        var file = await CreateFileInMy("file_internal_link.docx", Owner);
 
         // Act - create the primary external link and switch it to internal
         var initialLink = (await _filesApi.CreateFilePrimaryExternalLinkAsync(file.Id, new FileLinkRequest(access: FileShare.Read, primary: true), TestContext.Current.CancellationToken)).Response;

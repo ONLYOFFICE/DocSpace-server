@@ -33,7 +33,6 @@
 
 namespace ASC.Files.Tests.Tests._06_Operations.Move;
 
-[Collection("Test Collection")]
 [Trait("Category", "Operations")]
 [Trait("Feature", "Files")]
 public class FileMoveTests(
@@ -44,13 +43,13 @@ public class FileMoveTests(
     public async Task MoveFile_ToAnotherFolder_ReturnsSuccess()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
         // Create a source file
-        var sourceFile = await CreateFileInMy("file_to_move.docx", Initializer.Owner);
+        var sourceFile = await CreateFileInMy("file_to_move.docx", Owner);
 
         // Create a target folder
-        var targetFolder = await CreateFolder("target_folder", FolderType.USER, Initializer.Owner);
+        var targetFolder = await CreateFolder("target_folder", FolderType.USER, Owner);
 
         // Act
         var moveParams = new BatchRequestDto
@@ -83,10 +82,10 @@ public class FileMoveTests(
     public async Task MoveFile_NoPermission_ReturnsError()
     {
         // Assert
-        await _filesClient.Authenticate(Initializer.Owner);
-        var sourceFile = await CreateFileInMy("source_file.docx", Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
+        var sourceFile = await CreateFileInMy("source_file.docx", Owner);
 
-        var user = await Initializer.InviteContact(EmployeeType.User);
+        var user = await InviteContact(EmployeeType.User);
         await _filesClient.Authenticate(user);
         var targetFolder = await CreateFolderInMy("target_folder", user);
 
@@ -113,8 +112,8 @@ public class FileMoveTests(
     public async Task MoveFile_FormToFillingFormsRoom_ReturnsError()
     {
         // Assert
-        await _filesClient.Authenticate(Initializer.Owner);
-        var sourseFile = await CreateFileInMy("source_file.docx", Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
+        var sourseFile = await CreateFileInMy("source_file.docx", Owner);
         sourseFile.IsForm = true;
 
         var parentFolder = await CreateFillingFormsRoom("parent_folder");

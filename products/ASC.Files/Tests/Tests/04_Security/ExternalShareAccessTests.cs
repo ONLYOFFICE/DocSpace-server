@@ -27,7 +27,6 @@
 
 namespace ASC.Files.Tests.Tests._04_Security;
 
-[Collection("Test Collection")]
 [Trait("Category", "Security")]
 [Trait("Feature", "ExternalSharing")]
 public class ExternalShareAccessTests(AspireAppFixture fixture) : BaseTest(fixture)
@@ -39,7 +38,7 @@ public class ExternalShareAccessTests(AspireAppFixture fixture) : BaseTest(fixtu
         bool applyToRooms = true,
         bool blockExisting = true)
     {
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         await _filesSettingsApi.ChangeExternalSharingSettingsAsync(
             new ExternalSharingSettingsRequestDto(
                 externalShare: externalShare,
@@ -56,8 +55,8 @@ public class ExternalShareAccessTests(AspireAppFixture fixture) : BaseTest(fixtu
         // Arrange — restrict external sharing for My Documents
         await SetExternalSharingAsync(externalShare: false, applyToDocuments: true, applyToRooms: false);
 
-        await _filesClient.Authenticate(Initializer.Owner);
-        var file = await CreateFileInMy("file.docx", Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
+        var file = await CreateFileInMy("file.docx", Owner);
 
         // Act — explicitly request a public (non-internal) link
         var linkParams = new FileLinkRequest(access: FileShare.Read, @internal: false);
@@ -78,7 +77,7 @@ public class ExternalShareAccessTests(AspireAppFixture fixture) : BaseTest(fixtu
         // Arrange — restrict external sharing for Rooms only
         await SetExternalSharingAsync(externalShare: false, applyToDocuments: false, applyToRooms: true);
 
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var room = await CreateCustomRoom("restricted-room");
 
         // Act — retrieve (or auto-create) the primary external link
@@ -98,8 +97,8 @@ public class ExternalShareAccessTests(AspireAppFixture fixture) : BaseTest(fixtu
         // Arrange — restrict only Rooms, leave My Documents unrestricted
         await SetExternalSharingAsync(externalShare: false, applyToDocuments: false, applyToRooms: true);
 
-        await _filesClient.Authenticate(Initializer.Owner);
-        var file = await CreateFileInMy("file.docx", Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
+        var file = await CreateFileInMy("file.docx", Owner);
 
         // Act — request a public link for a file in My Documents
         var linkParams = new FileLinkRequest(access: FileShare.Read, @internal: false);
@@ -118,7 +117,7 @@ public class ExternalShareAccessTests(AspireAppFixture fixture) : BaseTest(fixtu
     public async Task AccessExistingFileLink_WhenBlockEnabled_AsAnonymous_ReturnsExternalAccessDenied()
     {
         // Arrange — create a public link while sharing is still allowed
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var (token, _) = await CreateFileAndShare(FileShare.Read, varInternal: false);
 
         // Apply restriction and block existing links
@@ -140,7 +139,7 @@ public class ExternalShareAccessTests(AspireAppFixture fixture) : BaseTest(fixtu
     public async Task AccessExistingRoomLink_WhenBlockEnabled_AsAnonymous_ReturnsExternalAccessDenied()
     {
         // Arrange — create a public room link while sharing is allowed
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var room = await CreateCustomRoom("public-room");
         var link = (await _roomsApi.GetRoomsPrimaryExternalLinkAsync(
             room.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
@@ -165,7 +164,7 @@ public class ExternalShareAccessTests(AspireAppFixture fixture) : BaseTest(fixtu
     public async Task AccessExistingFileLink_WhenBlockDisabled_AsAnonymous_ReturnsOk()
     {
         // Arrange — create a public link while sharing is allowed
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var (token, _) = await CreateFileAndShare(FileShare.Read, varInternal: false);
 
         // Apply restriction but allow existing links to continue working
@@ -187,14 +186,14 @@ public class ExternalShareAccessTests(AspireAppFixture fixture) : BaseTest(fixtu
     public async Task AccessExistingFileLink_WhenBlockEnabled_AsAuthenticatedUser_ReturnsOk()
     {
         // Arrange — create a public link while sharing is allowed
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var (token, _) = await CreateFileAndShare(FileShare.Read, varInternal: false);
 
         // Apply restriction and block existing links
         await SetExternalSharingAsync(externalShare: false, applyToDocuments: true, blockExisting: true);
 
         // Act — authenticated user accesses the link
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var result = (await _sharingApi.GetExternalShareDataAsync(
             token, cancellationToken: TestContext.Current.CancellationToken)).Response;
 

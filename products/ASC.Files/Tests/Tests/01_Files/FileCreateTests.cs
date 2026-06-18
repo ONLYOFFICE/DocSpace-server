@@ -33,7 +33,6 @@
 
 namespace ASC.Files.Tests.Tests._01_Files;
 
-[Collection("Test Collection")]
 [Trait("Category", "CRUD")]
 [Trait("Feature", "Files")]
 public class FileCreateTests(
@@ -69,7 +68,7 @@ public class FileCreateTests(
     [MemberData(nameof(Data))]
     public async Task CreateFile_FolderMy_Owner_ReturnsOk(string fileName)
     {
-        var createdFile = await CreateFileInMy(fileName, Initializer.Owner);
+        var createdFile = await CreateFileInMy(fileName, Owner);
 
         createdFile.Should().NotBeNull();
         createdFile.Title.Should().Be(fileName);
@@ -84,7 +83,7 @@ public class FileCreateTests(
     [MemberData(nameof(DataWithEmployeeType))]
     public async Task CreateFile_FolderMy_Admin_ReturnsOk(string fileName, EmployeeType employeeType)
     {
-        var roomAdmin = await Initializer.InviteContact(employeeType);
+        var roomAdmin = await InviteContact(employeeType);
 
         var createdFile = await CreateFileInMy(fileName, roomAdmin);
 
@@ -100,7 +99,7 @@ public class FileCreateTests(
     [Fact]
     public async Task CreateFile_FolderDoesNotExist_ReturnsFileInMy()
     {
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
         //Arrange
         var file = new CreateFileJsonElement("test.docx");
@@ -114,7 +113,7 @@ public class FileCreateTests(
     [MemberData(nameof(FolderTypesData))]
     public async Task CreateFile_SystemFolder_Owner_ReturnsOk(FolderType folderType)
     {
-        var exception = await Assert.ThrowsAsync<ApiException>(async () =>  await CreateFile("test.docx", folderType, Initializer.Owner));
+        var exception = await Assert.ThrowsAsync<ApiException>(async () =>  await CreateFile("test.docx", folderType, Owner));
 
         exception.ErrorCode.Should().Be(403);
     }
@@ -122,7 +121,7 @@ public class FileCreateTests(
     [Fact]
     public async Task CreateFile_NameLongerThan165Chars_Returns400()
     {
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
         // Arrange
         var longFileName = new string('a', 166) + ".docx"; // 166 characters + 5 for extension = 171 characters
@@ -131,7 +130,7 @@ public class FileCreateTests(
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _filesApi.CreateFileAsync(
-                await GetUserFolderIdAsync( Initializer.Owner),
+                await GetUserFolderIdAsync( Owner),
                 file,
                 cancellationToken: TestContext.Current.CancellationToken));
 
@@ -142,9 +141,9 @@ public class FileCreateTests(
     public async Task CreateTextFile_ValidContent_ReturnsNewTextFile()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
-        var userFolderId = await GetUserFolderIdAsync(Initializer.Owner);
+        var userFolderId = await GetUserFolderIdAsync(Owner);
         var fileName = "new_text_file";
         var content = "This is the content of my text file.";
 
@@ -170,9 +169,9 @@ public class FileCreateTests(
     public async Task CreateHtmlFile_ValidContent_ReturnsNewHtmlFile()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
-        var userFolderId = await GetUserFolderIdAsync(Initializer.Owner);
+        var userFolderId = await GetUserFolderIdAsync(Owner);
         var fileName = "new_html_file";
         var content = "<html><body><h1>Test HTML</h1><p>This is a test HTML file.</p></body></html>";
 

@@ -408,6 +408,20 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         return this;
     }
 
+    public ConnectionStringManager AllowPortalRegistration()
+    {
+        var docspaceOwnerEmail = builder.Configuration["OWNER_EMAIL"] ?? "test@example.com";
+
+        _parameters ??= new Dictionary<string, string>();
+        _parameters["auth:allowskip:registerportal"] = true.ToString();
+
+        // Treat the test owner address as an autotest email so that ApiSystem skips
+        // registration rate-limiting and recaptcha when every test creates its own portal.
+        _parameters["web:autotest:secret-email"] = docspaceOwnerEmail;
+
+        return this;
+    }
+
     public ConnectionStringManager AddE2ETest()
     {
         var docspaceOwnerEmail = builder.Configuration["OWNER_EMAIL"] ?? "test@example.com";

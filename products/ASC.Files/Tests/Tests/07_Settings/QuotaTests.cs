@@ -38,7 +38,6 @@ using QuotaSettingsRequestsDto = DocSpace.API.SDK.Model.QuotaSettingsRequestsDto
 
 namespace ASC.Files.Tests.Tests._07_Settings;
 
-[Collection("Test Collection")]
 [Trait("Category", "Settings")]
 [Trait("Feature", "Quota")]
 public class QuotaTests(
@@ -49,8 +48,8 @@ public class QuotaTests(
     public async Task ResetRoomQuota_ValidRoomIds_ResetsQuotaSuccessfully()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        await _webApiClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
+        await _webApiClient.Authenticate(Owner);
        
         var defaultQuotaLimit = 1073741824; // 1 GB
         await _settingsQuotaApi.SaveRoomQuotaSettingsAsync(new QuotaSettingsRequestsDto(true,  new QuotaSettingsRequestsDtoDefaultQuota(defaultQuotaLimit)), TestContext.Current.CancellationToken);
@@ -91,8 +90,8 @@ public class QuotaTests(
     public async Task ResetRoomQuota_MultipleRooms_ResetsQuotaForAll()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        await _webApiClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
+        await _webApiClient.Authenticate(Owner);
         
         var defaultQuotaLimit = 1073741824; // 1 GB
         await _settingsQuotaApi.SaveRoomQuotaSettingsAsync(new QuotaSettingsRequestsDto(true,  new QuotaSettingsRequestsDtoDefaultQuota(defaultQuotaLimit)), TestContext.Current.CancellationToken);
@@ -138,8 +137,8 @@ public class QuotaTests(
     public async Task UpdateRoomsQuota_ValidRoomAndQuota_UpdatesQuotaSuccessfully()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        await _webApiClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
+        await _webApiClient.Authenticate(Owner);
         
         var defaultQuotaLimit = 1073741824; // 1 GB
         await _settingsQuotaApi.SaveRoomQuotaSettingsAsync(new QuotaSettingsRequestsDto(true,  new QuotaSettingsRequestsDtoDefaultQuota(defaultQuotaLimit)), TestContext.Current.CancellationToken);
@@ -172,8 +171,8 @@ public class QuotaTests(
     public async Task UpdateRoomsQuota_MultipleRoomsWithDifferentQuotas_UpdatesSuccessfully()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        await _webApiClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
+        await _webApiClient.Authenticate(Owner);
         
         var defaultQuotaLimit = 1073741824; // 1 GB
         await _settingsQuotaApi.SaveRoomQuotaSettingsAsync(new QuotaSettingsRequestsDto(true,  new QuotaSettingsRequestsDtoDefaultQuota(defaultQuotaLimit)), TestContext.Current.CancellationToken);
@@ -211,8 +210,8 @@ public class QuotaTests(
     public async Task UpdateRoomsQuota_ZeroQuota_ShouldResetQuota()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        await _webApiClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
+        await _webApiClient.Authenticate(Owner);
         
         var defaultQuotaLimit = 1073741824; // 1 GB
         await _settingsQuotaApi.SaveRoomQuotaSettingsAsync(new QuotaSettingsRequestsDto(true,  new QuotaSettingsRequestsDtoDefaultQuota(defaultQuotaLimit)), TestContext.Current.CancellationToken);
@@ -242,8 +241,8 @@ public class QuotaTests(
     public async Task QuotaLifecycle_SetAndResetQuota_ManagesQuotaCorrectly()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        await _webApiClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
+        await _webApiClient.Authenticate(Owner);
         
         var defaultQuotaLimit = 1073741824; // 1 GB
         await _settingsQuotaApi.SaveRoomQuotaSettingsAsync(new QuotaSettingsRequestsDto(true,  new QuotaSettingsRequestsDtoDefaultQuota(defaultQuotaLimit)), TestContext.Current.CancellationToken);
@@ -279,8 +278,8 @@ public class QuotaTests(
     public async Task CreateFile_InRoomWithDefaultBigQuota_SuccessfullyUploads()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        await _webApiClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
+        await _webApiClient.Authenticate(Owner);
         
         var defaultQuotaLimit = 1073741824; // 1 GB
         await _settingsQuotaApi.SaveRoomQuotaSettingsAsync(new QuotaSettingsRequestsDto(true,  new QuotaSettingsRequestsDtoDefaultQuota(defaultQuotaLimit)), TestContext.Current.CancellationToken);
@@ -308,8 +307,8 @@ public class QuotaTests(
     public async Task CreateFile_InRoomWithSmallerQuota_SuccessfullyUploads()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        await _webApiClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
+        await _webApiClient.Authenticate(Owner);
         
         var defaultQuotaLimit = 1073741824; // 1 GB
         await _settingsQuotaApi.SaveRoomQuotaSettingsAsync(new QuotaSettingsRequestsDto(true,  new QuotaSettingsRequestsDtoDefaultQuota(defaultQuotaLimit)), TestContext.Current.CancellationToken);
@@ -340,8 +339,8 @@ public class QuotaTests(
     public async Task CreateFile_InRoomWithSmallerQuotaThenFileSize_ReturnsFail()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        await _webApiClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
+        await _webApiClient.Authenticate(Owner);
         
         var defaultQuotaLimit = 1073741824; // 1 GB
         await _settingsQuotaApi.SaveRoomQuotaSettingsAsync(new QuotaSettingsRequestsDto(true,  new QuotaSettingsRequestsDtoDefaultQuota(defaultQuotaLimit)), TestContext.Current.CancellationToken);
@@ -362,8 +361,8 @@ public class QuotaTests(
     public async Task CreateFile_RoomQuotaExceededButLessThan2x_AllowedOnce()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        await _webApiClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
+        await _webApiClient.Authenticate(Owner);
 
         const int defaultQuotaLimit = 4 * 1024; // 4 KB
         await _settingsQuotaApi.SaveRoomQuotaSettingsAsync(new QuotaSettingsRequestsDto(true, new QuotaSettingsRequestsDtoDefaultQuota(defaultQuotaLimit)), TestContext.Current.CancellationToken);
@@ -392,8 +391,8 @@ public class QuotaTests(
     public async Task CreateFile_RoomQuotaExceededMoreThan2x_ReturnsFail()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        await _webApiClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
+        await _webApiClient.Authenticate(Owner);
 
         const int defaultQuotaLimit = 3 * 1024; // 3 KB
         await _settingsQuotaApi.SaveRoomQuotaSettingsAsync(new QuotaSettingsRequestsDto(true, new QuotaSettingsRequestsDtoDefaultQuota(defaultQuotaLimit)), TestContext.Current.CancellationToken);
@@ -412,8 +411,8 @@ public class QuotaTests(
     public async Task CreateFile_RoomQuotaExceededSecondTime_ReturnsFail()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        await _webApiClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
+        await _webApiClient.Authenticate(Owner);
 
         const int defaultQuotaLimit = 4 * 1024; // 4 KB
         await _settingsQuotaApi.SaveRoomQuotaSettingsAsync(new QuotaSettingsRequestsDto(true, new QuotaSettingsRequestsDtoDefaultQuota(defaultQuotaLimit)), TestContext.Current.CancellationToken);
@@ -444,8 +443,8 @@ public class QuotaTests(
     public async Task UploadFile_ToRoomWithQuotaExceededLessThan2x_Allowed()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        await _webApiClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
+        await _webApiClient.Authenticate(Owner);
 
         const int defaultQuotaLimit = 4 * 1024; // 4 KB
         await _settingsQuotaApi.SaveRoomQuotaSettingsAsync(new QuotaSettingsRequestsDto(true, new QuotaSettingsRequestsDtoDefaultQuota(defaultQuotaLimit)), TestContext.Current.CancellationToken);
@@ -518,8 +517,8 @@ public class QuotaTests(
     public async Task UploadFile_ToRoomWithQuotaExceededMoreThan2x_ReturnsFail()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        await _webApiClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
+        await _webApiClient.Authenticate(Owner);
 
         const int defaultQuotaLimit = 3 * 1024; // 3 KB
         await _settingsQuotaApi.SaveRoomQuotaSettingsAsync(new QuotaSettingsRequestsDto(true, new QuotaSettingsRequestsDtoDefaultQuota(defaultQuotaLimit)), TestContext.Current.CancellationToken);

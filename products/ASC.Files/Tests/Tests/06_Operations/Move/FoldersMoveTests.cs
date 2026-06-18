@@ -33,7 +33,6 @@
 
 namespace ASC.Files.Tests.Tests._06_Operations.Move;
 
-[Collection("Test Collection")]
 [Trait("Category", "Operations")]
 [Trait("Feature", "Folders")]
 public class FoldersMoveTests(
@@ -44,9 +43,9 @@ public class FoldersMoveTests(
     public async Task MoveFolder_ArchiveRoom_ReturnsError()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var sourceFolder = await CreateFillingFormsRoom("source_room_folder");
-        var targetFolder = await CreateFolderInMy("target_archive_folder", Initializer.Owner);
+        var targetFolder = await CreateFolderInMy("target_archive_folder", Owner);
         targetFolder.RootFolderType = FolderType.Archive;
 
         // Act
@@ -72,9 +71,9 @@ public class FoldersMoveTests(
     public async Task MoveFolder_UnarchiveRoom_ReturnsError()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var sourceFolder = await CreateFillingFormsRoom("source_room_folder");
-        var targetFolder = await CreateFolderInMy("target_unarchive_folder", Initializer.Owner);
+        var targetFolder = await CreateFolderInMy("target_unarchive_folder", Owner);
 
         // Act
         var moveParams = new BatchRequestDto
@@ -99,10 +98,10 @@ public class FoldersMoveTests(
     public async Task MoveFolder_NoPermissions_ReturnsError()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        var sourceFolder = await CreateFolderInMy("source_folder", Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
+        var sourceFolder = await CreateFolderInMy("source_folder", Owner);
 
-        var user = await Initializer.InviteContact(EmployeeType.User);
+        var user = await InviteContact(EmployeeType.User);
         await _filesClient.Authenticate(user);
         var targetFolder = await CreateFolderInMy("target_folder", user);
 
@@ -129,14 +128,14 @@ public class FoldersMoveTests(
     public async Task CopyFolder_BetweenUserFolders_ReturnsValidFolder()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
         // Create a source folder with a test file inside
-        var sourceFolder = await CreateFolder("source_folder", FolderType.USER, Initializer.Owner);
+        var sourceFolder = await CreateFolder("source_folder", FolderType.USER, Owner);
         await CreateFile("test_file.docx", sourceFolder.Id);
 
         // Create a target folder
-        var targetFolderId = await GetUserFolderIdAsync( Initializer.Owner);
+        var targetFolderId = await GetUserFolderIdAsync( Owner);
 
         // Act
         var copyParams = new BatchRequestDto
@@ -177,13 +176,13 @@ public class FoldersMoveTests(
     public async Task MoveFolder_ToAnotherFolder_ReturnsSuccess()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
         // Create a source folder
-        var sourceFolder = await CreateFolder("folder_to_move", FolderType.USER, Initializer.Owner);
+        var sourceFolder = await CreateFolder("folder_to_move", FolderType.USER, Owner);
 
         // Create a target folder
-        var targetFolder = await CreateFolder("target_folder", FolderType.USER, Initializer.Owner);
+        var targetFolder = await CreateFolder("target_folder", FolderType.USER, Owner);
 
         // Act
         var moveParams = new BatchRequestDto
@@ -217,10 +216,10 @@ public class FoldersMoveTests(
     public async Task DuplicateFolder_InsideUserFolder_ReturnsValidFolderWithIndex()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
         // Create a source file
-        var sourceFolder = await CreateFolderInMy("folder", Initializer.Owner);
+        var sourceFolder = await CreateFolderInMy("folder", Owner);
 
         // Act
         var results = (await _filesOperationsApi.DuplicateBatchItemsAsync(new DuplicateRequestDto
