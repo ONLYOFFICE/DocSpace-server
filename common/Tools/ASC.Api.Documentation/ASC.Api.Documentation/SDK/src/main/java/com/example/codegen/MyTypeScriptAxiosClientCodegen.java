@@ -62,6 +62,16 @@ public class MyTypeScriptAxiosClientCodegen extends TypeScriptAxiosClientCodegen
     @Override
     public void processOpts() {
         super.processOpts();
+
+        Boolean example = (Boolean) additionalProperties.get("example");
+
+        if(Boolean.TRUE.equals(example))
+        {
+            supportingFiles.add(new SupportingFile(
+                "example.mustache", "samples", "example.ts"
+            ));
+        }
+
         this.outputFolder = "../../../../../sdk/docspace-api-sdk-typescript";
 
         if (openAPI.getServers() != null && !openAPI.getServers().isEmpty()) {
