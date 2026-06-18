@@ -32,11 +32,11 @@
     <PackageVersion Include="Asp.Versioning.Http" Version="8.1.1" />
     <PackageVersion Include="Asp.Versioning.Mvc" Version="8.1.1" />
     <PackageVersion Include="Asp.Versioning.Mvc.ApiExplorer" Version="8.1.1" />
-    <PackageVersion Include="Aspire.Hosting.AppHost" Version="13.4.2" />
-    <PackageVersion Include="Aspire.Hosting.JavaScript" Version="13.4.2" />
-    <PackageVersion Include="Aspire.Hosting.MySql" Version="13.4.2" />
-    <PackageVersion Include="Aspire.Hosting.RabbitMQ" Version="13.4.2" />
-    <PackageVersion Include="Aspire.Hosting.Redis" Version="13.4.2" />
+    <PackageVersion Include="Aspire.Hosting.AppHost" Version="13.4.5" />
+    <PackageVersion Include="Aspire.Hosting.JavaScript" Version="13.4.5" />
+    <PackageVersion Include="Aspire.Hosting.MySql" Version="13.4.5" />
+    <PackageVersion Include="Aspire.Hosting.RabbitMQ" Version="13.4.5" />
+    <PackageVersion Include="Aspire.Hosting.Redis" Version="13.4.5" />
     <PackageVersion Include="AspNetCore.HealthChecks.Kafka" Version="9.0.0" />
     <PackageVersion Include="AspNetCore.HealthChecks.MySql" Version="9.0.0" />
     <PackageVersion Include="AspNetCore.HealthChecks.NpgSql" Version="9.0.0" />
@@ -191,7 +191,7 @@
     <PackageVersion Include="Swashbuckle.AspNetCore.SwaggerGen" Version="10.2.1" />
     <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="8.15.0" />
     <PackageVersion Include="Aspire.Hosting.PostgreSQL" Version="13.2.0" />
-    <PackageVersion Include="Aspire.Hosting.Testing" Version="13.2.0" />
+    <PackageVersion Include="Aspire.Hosting.Testing" Version="13.4.5" />
     <PackageVersion Include="Telegram.Bot" Version="22.7.6" />
     <PackageVersion Include="TweetinviAPI" Version="5.0.4" />
     <PackageVersion Include="Twilio" Version="7.13.5" />
