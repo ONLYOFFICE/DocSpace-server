@@ -264,7 +264,8 @@ public class FileStorageService //: IFileStorageService
         Location? location = null,
         int? groupId = null,
         T parentFolderId = default,
-        RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None)
+        RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None,
+        List<FolderType> folderType = null)
     {
         var subjectId = string.IsNullOrEmpty(subject) ? Guid.Empty : new Guid(subject);
         var subjectOwnerIdGuid = string.IsNullOrEmpty(subjectOwnerId) ? Guid.Empty : new Guid(subjectOwnerId);
@@ -415,7 +416,8 @@ public class FileStorageService //: IFileStorageService
                 location,
                 groupId,
                 parentFolderId,
-                privacyFilter);
+                privacyFilter,
+                folderType);
         }
         catch (Exception e)
         {
