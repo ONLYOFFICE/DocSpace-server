@@ -115,7 +115,7 @@ public class AiProviderDao(
         {
             if (id == AiGateway.ProviderId)
             {
-                return await CreateGatewayProviderAsync(includeCredentials: true, force: forceSystemProvider);
+                return await CreateGatewayProviderAsync(includeCredentials: true, allowEmptyKey: forceSystemProvider);
             }
 
             return null;
@@ -402,14 +402,14 @@ public class AiProviderDao(
         await context.SaveChangesAsync();
     }
 
-    private async Task<AiProvider> CreateGatewayProviderAsync(bool includeCredentials = false, bool force = false)
+    private async Task<AiProvider> CreateGatewayProviderAsync(bool includeCredentials = false, bool allowEmptyKey = false)
     {
         return new AiProvider
         {
             Id = AiGateway.ProviderId,
             Title = AiGateway.ProviderTitle,
             Url = includeCredentials ? gateway.Url : string.Empty,
-            Key = includeCredentials ? await gateway.GetKeyAsync(force) : string.Empty,
+            Key = includeCredentials ? await gateway.GetKeyAsync(allowEmpty: allowEmptyKey) : string.Empty,
             Type = ProviderType.PortalAi
         };
     }

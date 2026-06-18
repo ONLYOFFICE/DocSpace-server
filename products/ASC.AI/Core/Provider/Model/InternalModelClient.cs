@@ -33,10 +33,23 @@
 
 namespace ASC.AI.Core.Provider.Model;
 
-public class InternalModelClient(HttpClient client, string url, string apiKey) : OpenAiModelClientBase(client, url, apiKey)
+public class InternalModelClient(HttpClient client, string url, string apiKey) : IModelClient
 {
-    protected override async Task<IEnumerable<ModelInfo>> GetModelsDataAsync(HttpResponseMessage response)
+    private string ModelsEndpoint => string.IsNullOrEmpty(apiKey) ? "models" : "customer/models";
+
+    public async Task PingAsync()
     {
+        using var response = await SendRequestAsync(
+            $"{url.TrimEnd('/')}/{ModelsEndpoint}",
+            HttpCompletionOption.ResponseHeadersRead);
+    }
+
+    public async Task<IEnumerable<ModelInfo>> ListModelsAsync()
+    {
+        using var response = await SendRequestAsync(
+            $"{url.TrimEnd('/')}/{ModelsEndpoint}",
+            HttpCompletionOption.ResponseContentRead);
+
         var content = await response.Content.ReadFromJsonAsync<Response>();
         if (content?.Data is null)
         {
@@ -51,6 +64,18 @@ public class InternalModelClient(HttpClient client, string url, string apiKey) :
                 Created = m.Created,
                 Price = m.Price
             });
+    }
+
+    private async Task<HttpResponseMessage> SendRequestAsync(string endpoint, HttpCompletionOption completionOption)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Get, endpoint);
+
+        if (!string.IsNullOrEmpty(apiKey))
+        {
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
+        }
+
+        return (await client.SendAsync(request, completionOption)).EnsureSuccessStatusCode();
     }
 
     private class Response
