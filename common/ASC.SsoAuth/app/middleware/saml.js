@@ -68,7 +68,13 @@ module.exports = (app, config) => {
       return res.redirect(urlResolver.getPortal404Url(req));
     }
 
-    if (req.url === config.routes.generatecert) {
+    const noConfigRoutes = [
+      config.routes.generatecert,
+      config.routes.validatecerts,
+      config.routes.uploadmetadata,
+      config.routes.loadmetadata,
+    ];
+    if (noConfigRoutes.includes(req.url)) {
       return next();
     }
 
