@@ -73,7 +73,9 @@ switch (launchProfile)
         break;
     case "preview":
         connectionManager
-            .AddMySql();
+            .AddMySql()
+            .AddMcpServer()
+            .AddOpensearch(withDashboard: false);
 
         configurator
             .AddProject<ASC_Monolith>(Constants.MonolithPort)
