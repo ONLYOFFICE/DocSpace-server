@@ -1516,7 +1516,10 @@ public class PaymentController(
     [HttpGet("ai-model/restrictions")]
     public async Task<RestrictedModelsResponse> GetRestrictedAiModels()
     {
-        DemandAiGatewayConfiguration();
+        if (!tariffService.IsConfigured() || !await aiGateway.IsEnabledAsync())
+        {
+            return new RestrictedModelsResponse { Models = [] };
+        }
 
         await DemandAdminAsync();
 

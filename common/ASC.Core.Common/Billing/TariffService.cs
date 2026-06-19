@@ -1208,7 +1208,6 @@ public class TariffService(
             {
                 var portalId = await coreSettings.GetKeyAsync(tenantId);
                 balance = await accountingClient.GetCustomerBalanceAsync(portalId, true);
-                await hybridCache.SetAsync(cacheKey, balance, TimeSpan.FromMinutes(10));
             }
             catch (AccountingCustomerNotFoundException exception)
             {
@@ -1259,7 +1258,6 @@ public class TariffService(
             {
                 var portalId = await coreSettings.GetKeyAsync(tenantId);
                 balance = await accountingClient.GetCustomerAiBalanceAsync(portalId, true);
-                await hybridCache.SetAsync(cacheKey, balance, TimeSpan.FromMinutes(10));
             }
             catch (AccountingCustomerNotFoundException exception)
             {
