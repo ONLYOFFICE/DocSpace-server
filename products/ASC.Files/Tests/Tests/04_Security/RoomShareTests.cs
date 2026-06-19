@@ -929,13 +929,13 @@ public class RoomShareTests(
 
         var guest = await InviteGuest();
         var roomAdmin = await InviteContact(EmployeeType.RoomAdmin);
+        var roomAdminGuest = await InviteGuest( roomAdmin);
 
         await _peopleClient.Authenticate(roomAdmin);
 
         var exception = await Assert.ThrowsAsync<ApiException>(async () =>  await _photosApi.GetMemberPhotoAsync(guest.Id.ToString(), cancellationToken: TestContext.Current.CancellationToken));
         exception.ErrorCode.Should().Be(403);
 
-        var roomAdminGuest = await InviteGuest( roomAdmin);
         var photo = (await _photosApi.GetMemberPhotoAsync(roomAdminGuest.Id.ToString(), cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         photo.Should().NotBeNull();

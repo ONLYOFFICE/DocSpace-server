@@ -239,26 +239,16 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         return this;
     }
 
-    public ConnectionStringManager AddOpensearch(bool withDashboard = true, bool fixedPort = true, bool withDataVolume = true)
+    public ConnectionStringManager AddOpensearch(bool withDashboard = true, bool withDataVolume = true)
     {
         OpensearchResource = builder
             .AddContainer(Constants.OpensearchContainer, "opensearchproject/opensearch", "3.5.0")
+            .WithHttpEndpoint(port: Constants.OpensearchPort, targetPort: Constants.OpensearchPort, name: "http", isProxied: false)
             .WithEnvironment("DISABLE_INSTALL_DEMO_CONFIG", "true")
             .WithEnvironment("plugins.security.disabled", "true")
             .WithEnvironment("discovery.type", "single-node")
             .WithEntrypoint("/bin/bash")
             .WithArgs("-c", "opensearch-plugin install ingest-attachment --batch && /usr/share/opensearch/opensearch-docker-entrypoint.sh");
-
-        if (fixedPort)
-        {
-            OpensearchResource = OpensearchResource
-                .WithHttpEndpoint(port: Constants.OpensearchPort, targetPort: Constants.OpensearchPort, name: "http");
-        }
-        else
-        {
-            OpensearchResource = OpensearchResource
-                .WithHttpEndpoint(targetPort: Constants.OpensearchPort, name: "http");
-        }
 
         if (withDataVolume)
         {

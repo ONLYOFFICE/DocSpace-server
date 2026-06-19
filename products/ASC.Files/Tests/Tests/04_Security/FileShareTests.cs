@@ -1226,7 +1226,7 @@ public class FileShareTests(
         var response = await _sharingApi.GetFileSecurityInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken);
         response.Response.Should().NotContain(r=> r.SharedToUser.Id == guest.Id);
 
-        var myguest = await InviteContact(EmployeeType.Guest, roomAdmin);
+        var myguest = await InviteGuest( roomAdmin);
 
         await _filesClient.Authenticate(roomAdmin);
         securityRequest = new SecurityInfoSimpleRequestDto

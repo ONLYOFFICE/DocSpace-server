@@ -168,6 +168,7 @@ public class BaseTest(
     protected async Task<User> InviteGuest(User? user = null)
     {
         user ??= Owner;
+        await _filesClient.Authenticate(user);
         await _peopleClient.Authenticate(user);
 
         // Create a public room
@@ -190,7 +191,8 @@ public class BaseTest(
         };
 
         await _roomsApi.SetRoomSecurityAsync(room.Id, roomInvitation, cancellationToken: TestContext.Current.CancellationToken);
-        var guestId = (await _profilesApi.GetProfileByEmailAsync(guestEmail, cancellationToken: TestContext.Current.CancellationToken)).Response.Id;
+        var result = (await _roomsApi.GetRoomSecurityInfoAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var guestId = result.First(r => r.SharedToUser.Email == guestEmail).SharedToUser.Id;
 
         return new User(guestEmail, "")
         {
