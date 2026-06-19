@@ -145,16 +145,20 @@ public class TariffService(
                                     asynctariff.DueDate = DateTime.Compare(asynctariff.DueDate, paymentEndDate) < 0 ? asynctariff.DueDate : paymentEndDate;
                                 }
                             }
-                            else if (quota.DocsCloudTrial)
-                            {
-                                // track the trial expiration per-quota so it becomes Overdue after the trial ends,
-                                // instead of being folded into the tariff-level DueDate (which would expire the whole tariff)
-                                quotaDueDate = currentPayment.EndDate;
-                            }
                             else
                             {
                                 var paymentEndDate = 9999 <= currentPayment.EndDate.Year ? DateTime.MaxValue : currentPayment.EndDate;
-                                asynctariff.DueDate = DateTime.Compare(asynctariff.DueDate, paymentEndDate) < 0 ? asynctariff.DueDate : paymentEndDate;
+
+                                // track the DocsCloudTrial expiration per-quota so it becomes Overdue after the trial ends,
+                                // instead of being folded into the tariff-level DueDate (which would expire the whole tariff)
+                                if (quota.Additional)
+                                {
+                                    quotaDueDate = paymentEndDate;
+                                }
+                                else
+                                {
+                                    asynctariff.DueDate = DateTime.Compare(asynctariff.DueDate, paymentEndDate) < 0 ? asynctariff.DueDate : paymentEndDate;
+                                }
                             }
 
                             asynctariff.Quotas = asynctariff.Quotas.Where(r => r.Id != quota.TenantId).ToList();
