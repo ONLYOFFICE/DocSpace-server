@@ -38,7 +38,7 @@ public class DocSpaceTransportBuilder(
     CommonLinkUtility commonLinkUtility,
     IHttpContextAccessor httpContextAccessor,
     IHttpClientFactory httpClientFactory,
-    IConfiguration configuration) : ITransportBuilder
+    string? internalHost) : ITransportBuilder
 {
     public ValueTask<HttpClientTransport> BuildAsync(McpServerConnection connection)
     {
@@ -71,7 +71,6 @@ public class DocSpaceTransportBuilder(
     {
         var referer = commonLinkUtility.GetFullAbsolutePath(string.Empty);
 
-        var internalHost = configuration["ai:mcpInternalHost"];
         if (!string.IsNullOrEmpty(internalHost) && Uri.TryCreate(referer, UriKind.Absolute, out var uri))
         {
             referer = new UriBuilder(uri) { Host = internalHost }.Uri.ToString();

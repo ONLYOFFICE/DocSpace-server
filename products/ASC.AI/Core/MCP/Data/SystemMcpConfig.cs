@@ -41,7 +41,9 @@ public class SystemMcpConfig
     public readonly IReadOnlyDictionary<Guid, SystemMcpServer> Servers = new Dictionary<Guid, SystemMcpServer>().AsReadOnly();
 
     public readonly ImmutableHashSet<string> ReservedServerNames;
-    
+
+    public readonly string? InternalHost;
+
     private readonly FrozenDictionary<string, StaticServerInfo> _staticInfos =
         new Dictionary<string, StaticServerInfo>
         {
@@ -79,7 +81,9 @@ public class SystemMcpConfig
         reservedServerNames.Add("docspace");
         
         ReservedServerNames = reservedServerNames.ToImmutableHashSet();
-        
+
+        InternalHost = configuration["ai:mcpInternalHost"];
+
         var settings = configuration.GetSection("ai:mcp").Get<List<McpConfig>>();
         if (settings == null)
         {
