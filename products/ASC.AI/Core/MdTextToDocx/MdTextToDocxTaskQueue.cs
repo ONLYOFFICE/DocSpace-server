@@ -31,21 +31,21 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.AI.Core.TextToDocx;
+namespace ASC.AI.Core.MdTextToDocx;
 
 [Singleton]
-public class TextToDocxTaskQueue(IDistributedTaskQueueFactory queueFactory)
+public class MdTextToDocxTaskQueue(IDistributedTaskQueueFactory queueFactory)
 {
-    private readonly DistributedTaskQueue<TextToDocxTask> _queue = queueFactory.CreateQueue<TextToDocxTask>();
+    private readonly DistributedTaskQueue<MdTextToDocxTask> _queue = queueFactory.CreateQueue<MdTextToDocxTask>();
 
-    public Task PushAsync(TextToDocxTask task)
+    public Task PushAsync(MdTextToDocxTask task)
     {
         return _queue.EnqueueTask(task);
     }
 }
 
 [Scope]
-public class TextToDocxTaskPublisher(
+public class MdToDocxTaskPublisher(
     CommonLinkUtility commonLinkUtility,
     TenantManager tenantManager,
     AuthContext authContext,
@@ -61,18 +61,15 @@ public class TextToDocxTaskPublisher(
         var intFolderId = folderId is int id ? id : 0;
         var thirdpartyFolderId = folderId as string;
 
-        var folder = TextToDocxFolder.Create(daoFactory, intFolderId, thirdpartyFolderId);
-
-        // Early-rejection optimisation only: fail fast on the HTTP request thread so the
+        // Early-rejection optimization only: fail fast on the HTTP request thread, so the
         // caller gets an immediate error for an invalid/forbidden folder instead of an
         // asynchronous failure on the event bus. This is NOT the authoritative gate —
         // TextToDocxTask.DoJob re-resolves the folder and re-runs CheckSecurity under the
         // task's authenticated identity at execution time, which catches folder deletion or
-        // permission changes that happen between publish and execute.
-        await folder.GetFolder();
-        await folder.CheckSecurity(fileSecurity);
+        // permission changes that happen between publication and execute.
+        _ = await Target.InitializeAsync(daoFactory, fileSecurity, intFolderId, thirdpartyFolderId);
 
-        var data = new TextToDocxTaskData
+        var data = new MdTextToDocxTaskData
         {
             Title = title,
             Content = content,
@@ -81,7 +78,7 @@ public class TextToDocxTaskPublisher(
             BaseUri = commonLinkUtility.ServerRootPath
         };
 
-        await eventBus.PublishAsync(new TextToDocxIntegrationEvent(userId, tenantId)
+        await eventBus.PublishAsync(new MdTextToDocxIntegrationEvent(userId, tenantId)
         {
             Data = data
         });

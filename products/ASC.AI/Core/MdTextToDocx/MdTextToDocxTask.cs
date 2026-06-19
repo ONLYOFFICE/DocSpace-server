@@ -31,17 +31,12 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using System.Globalization;
-
-using ASC.Web.Files.Classes;
-using ASC.Web.Files.Services.DocumentService;
-
 using SecurityContext = ASC.Core.SecurityContext;
 
-namespace ASC.AI.Core.TextToDocx;
+namespace ASC.AI.Core.MdTextToDocx;
 
 [ProtoContract]
-public class TextToDocxTaskData
+public class MdTextToDocxTaskData
 {
     [ProtoMember(1)]
     public required string Title { get; set; }
@@ -60,13 +55,13 @@ public class TextToDocxTaskData
 }
 
 [Transient]
-public class TextToDocxTask(IServiceScopeFactory serviceScopeFactory) : DistributedTask
+public class MdTextToDocxTask(IServiceScopeFactory serviceScopeFactory) : DistributedTask
 {
-    private TextToDocxTaskData _data = null!;
+    private MdTextToDocxTaskData _data = null!;
     private Guid _userId;
     private int _tenantId;
 
-    public void Init(int tenantId, Guid userId, TextToDocxTaskData data)
+    public void Init(int tenantId, Guid userId, MdTextToDocxTaskData data)
     {
         _tenantId = tenantId;
         _userId = userId;
@@ -76,7 +71,7 @@ public class TextToDocxTask(IServiceScopeFactory serviceScopeFactory) : Distribu
     protected override async Task DoJob()
     {
         await using var scope = serviceScopeFactory.CreateAsyncScope();
-        var logger = scope.ServiceProvider.GetRequiredService<ILogger<TextToDocxTask>>();
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<MdTextToDocxTask>>();
 
         try
         {
@@ -94,15 +89,14 @@ public class TextToDocxTask(IServiceScopeFactory serviceScopeFactory) : Distribu
             }
 
             var daoFactory = scope.ServiceProvider.GetRequiredService<IDaoFactory>();
-            var folder = TextToDocxFolder.Create(daoFactory, _data.FolderId, _data.ThirdpartyFolderId);
+            var fileSecurity = scope.ServiceProvider.GetRequiredService<FileSecurity>();
 
             // Authoritative security gate: runs at execution time under the task's authenticated
             // identity (see AuthenticateMeWithoutCookieAsync above). The matching check in
             // TextToDocxTaskPublisher.PublishAsync is only an early-rejection optimisation; this
             // re-resolution and re-check is what actually protects against acting on a folder that
             // was deleted or whose permissions changed after the event was published.
-            await folder.GetFolder();
-            await folder.CheckSecurity(scope.ServiceProvider.GetRequiredService<FileSecurity>());
+            var target = await Target.InitializeAsync(daoFactory, fileSecurity, _data.FolderId, _data.ThirdpartyFolderId);
 
             var pathProvider = scope.ServiceProvider.GetRequiredService<PathProvider>();
 
@@ -127,7 +121,7 @@ public class TextToDocxTask(IServiceScopeFactory serviceScopeFactory) : Distribu
 
             var fileConverter = scope.ServiceProvider.GetRequiredService<FileConverter>();
 
-            await folder.SaveFile(fileConverter, outFileUri, outFileType, _data.Title, false);
+            await target.SaveFile(fileConverter, outFileUri, outFileType, _data.Title, false);
 
             if (Status <= DistributedTaskStatus.Running)
             {

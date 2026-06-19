@@ -31,34 +31,39 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.AI.Core.TextToDocx;
+namespace ASC.AI.Core.MdTextToDocx;
 
-internal abstract class TextToDocxFolder
+internal abstract class Target
 {
-    public static TextToDocxFolder Create(IDaoFactory daoFactory, int folderId, string? thirdpartyFolderId)
+    public static async Task<Target> InitializeAsync(IDaoFactory daoFactory, FileSecurity fileSecurity, int folderId, string? thirdpartyFolderId)
     {
+        Target target;
+
         if (!string.IsNullOrEmpty(thirdpartyFolderId))
         {
             var folderDao = daoFactory.GetFolderDao<string>();
-            return new TextToDocxFolder<string>(folderDao, thirdpartyFolderId);
+            target = new Target<string>(folderDao, thirdpartyFolderId);
         }
         else
         {
             var folderDao = daoFactory.GetFolderDao<int>();
-            return new TextToDocxFolder<int>(folderDao, folderId);
+            target = new Target<int>(folderDao, folderId);
         }
+
+        await target.ResolveAsync(fileSecurity);
+
+        return target;
     }
 
-    public abstract Task GetFolder();
-    public abstract Task CheckSecurity(FileSecurity fileSecurity);
+    protected abstract Task ResolveAsync(FileSecurity fileSecurity);
     public abstract Task SaveFile(FileConverter fileConverter, string fileUri, string fileType, string title, bool updateIfExists);
 }
 
-internal class TextToDocxFolder<TFolder>(IFolderDao<TFolder> folderDao, TFolder folderId) : TextToDocxFolder
+internal class Target<TFolder>(IFolderDao<TFolder> folderDao, TFolder folderId) : Target
 {
     private Folder<TFolder>? _folder;
 
-    public override async Task GetFolder()
+    protected override async Task ResolveAsync(FileSecurity fileSecurity)
     {
         _folder = await folderDao.GetFolderAsync(folderId);
 
@@ -74,10 +79,7 @@ internal class TextToDocxFolder<TFolder>(IFolderDao<TFolder> folderDao, TFolder 
 
             _folder = folder;
         }
-    }
 
-    public override async Task CheckSecurity(FileSecurity fileSecurity)
-    {
         if (!await fileSecurity.CanCreateAsync(_folder))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);

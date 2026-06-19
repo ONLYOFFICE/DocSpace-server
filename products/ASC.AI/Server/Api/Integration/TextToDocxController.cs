@@ -31,6 +31,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
+using ASC.AI.Core.MdTextToDocx;
+
 namespace ASC.AI.Api.Integration;
 
 [Scope]
@@ -39,18 +41,18 @@ namespace ASC.AI.Api.Integration;
 [AiFeature]
 [ControllerName("ai")]
 [ApiExplorerSettings(IgnoreApi = true)]
-public class TextToDocxController(TextToDocxTaskPublisher textToDocxTaskPublisher) : ControllerBase
+public class TextToDocxController(MdToDocxTaskPublisher mdToDocxTaskPublisher) : ControllerBase
 {
     [HttpPost("integration/text-to-docx/start")]
     public async Task<IActionResult> PublishAsync(PublishTextToDocxRequestDto inDto)
     {
         if (inDto.FolderId.ValueKind == JsonValueKind.Number)
         {
-            await textToDocxTaskPublisher.PublishAsync(inDto.Title, inDto.Content, inDto.FolderId.GetInt32());
+            await mdToDocxTaskPublisher.PublishAsync(inDto.Title, inDto.Content, inDto.FolderId.GetInt32());
         }
         else
         {
-            await textToDocxTaskPublisher.PublishAsync(inDto.Title, inDto.Content, inDto.FolderId.GetString());
+            await mdToDocxTaskPublisher.PublishAsync(inDto.Title, inDto.Content, inDto.FolderId.GetString());
         }
 
         return NoContent();

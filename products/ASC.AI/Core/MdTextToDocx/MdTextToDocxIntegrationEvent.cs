@@ -31,15 +31,15 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.AI.Core.TextToDocx;
+namespace ASC.AI.Core.MdTextToDocx;
 
 [ProtoContract]
-public record TextToDocxIntegrationEvent : IntegrationEvent
+public record MdTextToDocxIntegrationEvent : IntegrationEvent
 {
-    private TextToDocxIntegrationEvent() : base() { }
+    private MdTextToDocxIntegrationEvent() : base() { }
 
-    public TextToDocxIntegrationEvent(Guid createBy, int tenantId) : base(createBy, tenantId) { }
+    public MdTextToDocxIntegrationEvent(Guid createBy, int tenantId) : base(createBy, tenantId) { }
 
     [ProtoMember(1)]
-    public required TextToDocxTaskData Data { get; set; }
+    public required MdTextToDocxTaskData Data { get; set; }
 }

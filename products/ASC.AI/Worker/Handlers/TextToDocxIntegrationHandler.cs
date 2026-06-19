@@ -31,6 +31,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
+using ASC.AI.Core.MdTextToDocx;
+
 namespace ASC.AI.Worker.Handlers;
 
 [Scope]
@@ -39,11 +41,11 @@ public class TextToDocxIntegrationHandler(
     TenantManager tenantManager,
     AuthManager authManager,
     SecurityContext securityContext,
-    TextToDocxTaskQueue queue,
+    MdTextToDocxTaskQueue queue,
     ILogger<TextToDocxIntegrationHandler> logger)
-    : IIntegrationEventHandler<TextToDocxIntegrationEvent>
+    : IIntegrationEventHandler<MdTextToDocxIntegrationEvent>
 {
-    public async Task Handle(TextToDocxIntegrationEvent @event)
+    public async Task Handle(MdTextToDocxIntegrationEvent @event)
     {
         CustomSynchronizationContext.CreateContext();
         using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
@@ -52,7 +54,7 @@ public class TextToDocxIntegrationHandler(
             _ = await tenantManager.SetCurrentTenantAsync(@event.TenantId);
             await securityContext.AuthenticateMeWithoutCookieAsync(await authManager.GetAccountByIDAsync(@event.TenantId, @event.CreateBy));
 
-            var task = serviceProvider.GetRequiredService<TextToDocxTask>();
+            var task = serviceProvider.GetRequiredService<MdTextToDocxTask>();
             task.Init(@event.TenantId, @event.CreateBy, @event.Data);
 
             await queue.PushAsync(task);

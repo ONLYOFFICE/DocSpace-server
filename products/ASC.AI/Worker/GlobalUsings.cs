@@ -36,7 +36,6 @@ global using ASC.AI.Core.Chat.Data;
 global using ASC.AI.Core.Chat.Deletion;
 global using ASC.Api.Core.Extensions;
 global using ASC.AI.Core.Export;
-global using ASC.AI.Core.TextToDocx;
 global using ASC.AI.Worker;
 global using ASC.AI.Worker.BackgroundServices;
 global using ASC.AI.Worker.Extensions;
