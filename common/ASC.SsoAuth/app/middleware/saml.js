@@ -49,7 +49,16 @@ module.exports = (app, config) => {
     let lastError;
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
-        return await fetch(url, options);
+        const response = await fetch(url, options);
+        if (response.status !== 200) {
+          return { response, text: null };
+        }
+        const headersObj = {};
+        response.headers.forEach((value, name) => { headersObj[name] = value; });
+        logger.info(`SSO config response: status=${response.status}, headers=${JSON.stringify(headersObj)}`);
+        const text = await response.text();
+        logger.info(`SSO config body size=${text.length}`);
+        return { response, text };
       } catch (error) {
         lastError = error;
         if (attempt < maxRetries) {
@@ -94,13 +103,14 @@ module.exports = (app, config) => {
       return next();
     }
 
+
     try
     {
         const baseUrl = urlResolver.getBaseUrl(req).originUrl;
         var urls = urlResolver.getPortalSsoConfigUrl(req);
 
         let headers = { Origin: urls.originUrl }
-        const response = await fetchWithRetry(urls.url, { headers });
+        const { response, text } = await fetchWithRetry(urls.url, { headers });
 
         if (!response || response.status === 404) {
             if (response) {
@@ -110,10 +120,6 @@ module.exports = (app, config) => {
         } else if (response.status !== 200) {
             throw new Error(`Invalid response status ${response.status}`);
         }
-        logger.info(
-            `SSO config response: status=${response.status}, content-length=${response.headers.get("content-length")}, transfer-encoding=${response.headers.get("transfer-encoding")}`
-        );
-        const text = await response.text();
         if (!text) {
             throw new Error("Empty config response");
         }

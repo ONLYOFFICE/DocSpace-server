@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -140,10 +140,14 @@ public class SsoHandlerService
 
             if (context.Request.Query["config"] == "saml")
             {
-                context.Response.StatusCode = 200;
                 var signedSettings = _signature.Create(settings);
-                var ssoConfig = JsonSerializer.Serialize(signedSettings);
-                await context.Response.WriteAsync(ssoConfig.Replace("\"", ""));
+                var ssoConfig = JsonSerializer.Serialize(signedSettings).Replace("\"", "");
+                var bytes = Encoding.UTF8.GetBytes(ssoConfig);
+
+                context.Response.StatusCode = 200;
+                context.Response.ContentType = "text/plain; charset=utf-8";
+                context.Response.ContentLength = bytes.Length;
+                await context.Response.Body.WriteAsync(bytes);
                 return;
             }
 
@@ -255,11 +259,6 @@ public class SsoHandlerService
         {
             _log.ErrorWithException(e);
             RedirectToLogin(context, (int)MessageKey.Error);
-        }
-        finally
-        {
-            await context.Response.CompleteAsync();
-            //context.ApplicationInstance.CompleteRequest();
         }
     }
     private void RedirectToLogin(HttpContext context, int messageKey)
