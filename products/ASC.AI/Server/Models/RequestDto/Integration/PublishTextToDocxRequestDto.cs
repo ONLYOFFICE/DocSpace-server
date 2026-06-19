@@ -31,10 +31,11 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.AI.Integration.ToolPrefs;
+namespace ASC.AI.Models.RequestDto.Integration;
 
-public enum ToolPrefField
+public class PublishTextToDocxRequestDto
 {
-    Disabled,
-    AllowAlways
+    public required string Title { get; init; }
+    public required string Content { get; init; }
+    public required JsonElement FolderId { get; init; }
 }

@@ -31,49 +31,33 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Files.Core.Utils;
+using ASC.AI.Core.MdTextToDocx;
 
-public class AiStatus
-{
-    public bool Enabled { get; init; }
-    public bool GatewayEnabled { get; init; }
-}
+namespace ASC.AI.Worker.Handlers;
 
 [Scope]
-public class AiAccessibility(
+public class TextToDocxIntegrationHandler(
+    IServiceProvider serviceProvider,
     TenantManager tenantManager,
-    AiGateway aiGateway,
-    SettingsManager settingsManager)
+    AuthManager authManager,
+    SecurityContext securityContext,
+    MdTextToDocxTaskQueue queue,
+    ILogger<TextToDocxIntegrationHandler> logger)
+    : IIntegrationEventHandler<MdTextToDocxIntegrationEvent>
 {
-    public async Task<AiStatus> GetStatusAsync()
+    public async Task Handle(MdTextToDocxIntegrationEvent @event)
     {
-        var tenantId = tenantManager.GetCurrentTenantId();
-
-        var aiAccessSettings = await settingsManager.LoadAsync<TenantAiAccessSettings>(tenantId);
-        if (!aiAccessSettings.Enabled)
+        CustomSynchronizationContext.CreateContext();
+        using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
         {
-            return new AiStatus { Enabled = false, GatewayEnabled = false };
+            logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
+            _ = await tenantManager.SetCurrentTenantAsync(@event.TenantId);
+            await securityContext.AuthenticateMeWithoutCookieAsync(await authManager.GetAccountByIDAsync(@event.TenantId, @event.CreateBy));
+
+            var task = serviceProvider.GetRequiredService<MdTextToDocxTask>();
+            task.Init(@event.TenantId, @event.CreateBy, @event.Data);
+
+            await queue.PushAsync(task);
         }
-
-        if (await aiGateway.IsEnabledAsync())
-        {
-            return new AiStatus { Enabled = true, GatewayEnabled = true };
-        }
-
-        return new AiStatus { Enabled = false, GatewayEnabled = false };
-    }
-
-    public async Task<bool> IsVectorizationEnabledAsync()
-    {
-        var status = await GetStatusAsync();
-        if (status.GatewayEnabled)
-        {
-            return true;
-        }
-
-        var tenantId = tenantManager.GetCurrentTenantId();
-        var settings = await settingsManager.LoadAsync<EncryptedVectorizationSettings>(tenantId);
-
-        return settings.ProviderType != EmbeddingProviderType.None && settings.IsConfigured;
     }
 }

@@ -125,6 +125,12 @@ export interface RequestOptions {
   body?: unknown;
   query?: Record<string, QueryValue>;
   signal?: AbortSignal;
+  // When true, return the upstream JSON exactly as received, keeping the
+  // DocSpace `{ response, status, statusCode, count, total }` envelope.
+  // Used for routes consumed by the DocSpace client (which reads
+  // `response.data.response`); engine-backed storage calls leave this off
+  // and get the unwrapped payload.
+  raw?: boolean;
 }
 
 function unwrapDocSpaceEnvelope(json: unknown): unknown {
@@ -134,13 +140,14 @@ function unwrapDocSpaceEnvelope(json: unknown): unknown {
   return json;
 }
 
-export async function aiServiceRequest(
+async function jsonRequest(
+  baseUrl: string,
   method: string,
   path: string,
   options: RequestOptions = {},
 ): Promise<unknown> {
-  const { body, query, signal } = options;
-  let url = `${AI_BASE_URL}${API_PREFIX}${path}`;
+  const { body, query, signal, raw } = options;
+  let url = `${baseUrl}${path}`;
   if (query && Object.keys(query).length > 0) {
     const params = new URLSearchParams();
     for (const [k, v] of Object.entries(query)) {
@@ -175,13 +182,44 @@ export async function aiServiceRequest(
     const contentType = res.headers.get("content-type") ?? "";
     if (contentType.includes("application/json")) {
       const json: unknown = await res.json();
-      return unwrapDocSpaceEnvelope(json);
+      return raw ? json : unwrapDocSpaceEnvelope(json);
     }
     return res.text();
   } finally {
     cancel();
   }
 }
+
+export async function aiServiceRequest(
+  method: string,
+  path: string,
+  options: RequestOptions = {},
+): Promise<unknown> {
+  return jsonRequest(`${AI_BASE_URL}${API_PREFIX}`, method, path, options);
+}
+
+// Calls the public DocSpace API (`api/2.0/...`) through the proxy, acting
+// on behalf of the current user: `getForwardedHeaders` carries the caller's
+// `asc_auth_key` cookie, so authorization and tenant resolution happen on
+// the .NET side exactly as for a direct browser request.
+export async function docSpaceApiRequest(
+  method: string,
+  path: string,
+  options: RequestOptions = {},
+): Promise<unknown> {
+  return jsonRequest(`${PROXY_BASE_URL}/api/2.0`, method, path, options);
+}
+
+export const docSpaceApi = {
+  get: (path: string, opts?: RequestOptions): Promise<unknown> =>
+    docSpaceApiRequest("GET", path, opts),
+  post: (path: string, body: unknown, opts?: RequestOptions): Promise<unknown> =>
+    docSpaceApiRequest("POST", path, { ...opts, body }),
+  put: (path: string, body: unknown, opts?: RequestOptions): Promise<unknown> =>
+    docSpaceApiRequest("PUT", path, { ...opts, body }),
+  delete: (path: string, body?: unknown, opts?: RequestOptions): Promise<unknown> =>
+    docSpaceApiRequest("DELETE", path, { ...opts, body }),
+};
 
 export const aiService = {
   get: (path: string, opts?: RequestOptions): Promise<unknown> =>

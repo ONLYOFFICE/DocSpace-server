@@ -4,6 +4,7 @@ using ASC.Migrations.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     [DbContext(typeof(MigrationContext))]
-    partial class MigrationContextModelSnapshot : ModelSnapshot
+    [Migration("20260617154811_MigrationContext_Upgrade86")]
+    partial class MigrationContext_Upgrade86
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -5287,8 +5290,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Property<bool>("SaveFormAsXLSX")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("tinyint(1)")
-                        .HasDefaultValue(true)
-                        .HasColumnName("save_form_as_xlsx");
+                        .HasColumnName("save_form_as_xlsx")
+                        .HasDefaultValueSql("1");
 
                     b.Property<bool>("SendFormToExternalDB")
                         .ValueGeneratedOnAdd()

@@ -989,14 +989,6 @@ public class FileStorageService //: IFileStorageService
 
             if (chatSettings != null)
             {
-                if (chatSettings.ProviderId <= 0 && !(chatSettings.ProviderId == -1 && await gateway.IsEnabledAsync()))
-                {
-                    throw new ArgumentException(nameof(chatSettings.ProviderId));
-                }
-
-                ArgumentException.ThrowIfNullOrEmpty(chatSettings.ModelId);
-
-                newFolder.SettingsChatProviderId = chatSettings.ProviderId;
                 newFolder.SettingsChatParameters = chatSettings.Map();
             }
 
@@ -1231,18 +1223,6 @@ public class FileStorageService //: IFileStorageService
             var oldTitle = folder.Title;
             WatermarkSettings watermark = null;
             RoomDataLifetime lifetime = null;
-
-            if (chatSettingsChanged)
-            {
-                var chatSettings = updateData.ChatSettings;
-
-                if (chatSettings.ProviderId <= 0 && !(chatSettings.ProviderId == -1 && await gateway.IsEnabledAsync()))
-                {
-                    throw new ArgumentException(nameof(updateData.ChatSettings.ProviderId));
-                }
-
-                ArgumentException.ThrowIfNullOrEmpty(updateData.ChatSettings.ModelId);
-            }
 
             if (watermarkChanged)
             {
