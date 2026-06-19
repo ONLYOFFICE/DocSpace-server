@@ -40,6 +40,7 @@ module.exports = function (app, config) {
   const urlResolver = require("./utils/resolver")();
   const coder = require("./utils/coder");
   const urn = require("samlify/build/src/urn");
+  const fetch = require("node-fetch");
   const fileManager = require('./fileManager');
   const forge = require('node-forge');
   const path = require('path');
