@@ -68,7 +68,11 @@ module.exports = (app, config) => {
       return res.redirect(urlResolver.getPortal404Url(req));
     }
 
-    try 
+    if (req.url === config.routes.generatecert) {
+      return next();
+    }
+
+    try
     {
         const baseUrl = urlResolver.getBaseUrl(req).originUrl;
         var urls = urlResolver.getPortalSsoConfigUrl(req);
