@@ -43,13 +43,14 @@ public class ClientTransportFactory(
     IHttpClientFactory clientFactory,
     IHttpMessageHandlerFactory messageHandlerFactory,
     OAuth20TokenHelper tokenHelper,
-    SystemMcpConfig systemMcpConfig)
+    SystemMcpConfig systemMcpConfig,
+    ILogger<DocSpaceTransportBuilder> docSpaceTransportLogger)
 {
     public async Task<HttpClientTransport> CreateAsync(McpServerConnection connection)
     {
         if (connection.ServerType is ServerType.DocSpace)
         {
-            var docspaceBuilder = new DocSpaceTransportBuilder(cookiesManager, commonLinkUtility, httpContextAccessor, clientFactory, systemMcpConfig.InternalHost);
+            var docspaceBuilder = new DocSpaceTransportBuilder(cookiesManager, commonLinkUtility, httpContextAccessor, clientFactory, docSpaceTransportLogger, systemMcpConfig.InternalHost);
             return await docspaceBuilder.BuildAsync(connection);
         }
 

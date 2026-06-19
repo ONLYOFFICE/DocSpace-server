@@ -38,6 +38,7 @@ public class DocSpaceTransportBuilder(
     CommonLinkUtility commonLinkUtility,
     IHttpContextAccessor httpContextAccessor,
     IHttpClientFactory httpClientFactory,
+    ILogger<DocSpaceTransportBuilder> logger,
     string? internalHost) : ITransportBuilder
 {
     public ValueTask<HttpClientTransport> BuildAsync(McpServerConnection connection)
@@ -71,11 +72,24 @@ public class DocSpaceTransportBuilder(
     {
         var referer = commonLinkUtility.GetFullAbsolutePath(string.Empty);
 
-        if (!string.IsNullOrEmpty(internalHost) && Uri.TryCreate(referer, UriKind.Absolute, out var uri))
+        if (!string.IsNullOrEmpty(internalHost))
         {
-            referer = new UriBuilder(uri) { Host = internalHost }.Uri.ToString();
+            if (Uri.TryCreate(referer, UriKind.Absolute, out var uri))
+            {
+                referer = new UriBuilder(uri) { Host = internalHost }.Uri.ToString();
+            }
+            else
+            {
+                logger.WarningMcpRefererNotAbsolute(referer);
+            }
         }
 
         return referer.TrimEnd('/') + "/";
     }
+}
+
+public static partial class DocSpaceTransportBuilderLogger
+{
+    [LoggerMessage(LogLevel.Warning, "Cannot rewrite MCP Referer host: '{referer}' is not an absolute URI, the MCP server may be unreachable")]
+    public static partial void WarningMcpRefererNotAbsolute(this ILogger<DocSpaceTransportBuilder> logger, string referer);
 }
