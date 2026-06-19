@@ -45,6 +45,22 @@ module.exports = (app, config) => {
     ? config["core"].machinekey
     : config.get("app").machinekey;
 
+  const fetchWithRetry = async (url, options, maxRetries = 2) => {
+    let lastError;
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        return await fetch(url, options);
+      } catch (error) {
+        lastError = error;
+        if (attempt < maxRetries) {
+          logger.warn(`SSO config fetch attempt ${attempt + 1} failed: ${error.message}, retrying...`);
+          await new Promise(resolve => setTimeout(resolve, 300));
+        }
+      }
+    }
+    throw lastError;
+  };
+
   const fetchConfig = async (req, res, next) => {
     const foundRoutes =
       req.url && req.url.length > 0
@@ -84,7 +100,7 @@ module.exports = (app, config) => {
         var urls = urlResolver.getPortalSsoConfigUrl(req);
 
         let headers = { Origin: urls.originUrl }
-        const response = await fetch(urls.url, { headers });
+        const response = await fetchWithRetry(urls.url, { headers });
 
         if (!response || response.status === 404) {
             if (response) {
@@ -94,7 +110,9 @@ module.exports = (app, config) => {
         } else if (response.status !== 200) {
             throw new Error(`Invalid response status ${response.status}`);
         }
-
+        logger.info(
+            `SSO config response: status=${response.status}, content-length=${response.headers.get("content-length")}, transfer-encoding=${response.headers.get("transfer-encoding")}`
+        );
         const text = await response.text();
         if (!text) {
             throw new Error("Empty config response");
