@@ -63,7 +63,7 @@ switch (launchProfile)
             .AddMySql(withDataVolume: false)
             .AddRabbitMq()
             .AddRedis()
-            .AddOpensearch(withDashboard: false, fixedPort: false, withDataVolume: false)
+            .AddOpensearch(withDashboard: false)
             .AllowPortalRegistration();
 
         configurator
@@ -72,7 +72,8 @@ switch (launchProfile)
             .AddProject<ASC_People>(Constants.PeoplePort)
             .AddProject<ASC_Web_Api>(Constants.WebApiPort)
             .AddProject<ASC_ApiSystem>(Constants.ApiSystemPort)
-            .AddProject<ASC_AI>(Constants.AiPort);
+            .AddProject<ASC_AI>(Constants.AiPort)
+            .AddSocketIO();
 
         break;
     case "preview":

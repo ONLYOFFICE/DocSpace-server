@@ -1212,7 +1212,7 @@ public class FileShareTests(
     {
         await _filesClient.Authenticate(Owner);
         var roomAdmin = await InviteContact(EmployeeType.RoomAdmin);
-        var guest = await InviteContact(EmployeeType.Guest);
+        var guest = await InviteGuest();
 
         await _filesClient.Authenticate(roomAdmin);
         var file = await CreateFileInMy("file.docx", roomAdmin);
@@ -1273,7 +1273,7 @@ public class FileShareTests(
         // Arrange
         await _filesClient.Authenticate(Owner);
         var user = await InviteContact(EmployeeType.User);
-        var guest = await InviteContact(EmployeeType.Guest);
+        var guest = await InviteGuest();
 
         await _filesClient.Authenticate(user);
         var file = await CreateFileInMy("file.docx", user);

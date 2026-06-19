@@ -1,34 +1,34 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Files.Tests.Tests._03_Rooms;
@@ -469,27 +469,20 @@ public class RoomsApiTests(
     {
         // Arrange
         await _filesClient.Authenticate(Owner);
+        await _webApiClient.Authenticate(Owner);
+        await _peopleClient.Authenticate(Owner);
 
         // Create a guest user
-        var guest = await InviteContact(EmployeeType.Guest);
-
-        // Disable "Allow inviting guests" setting
-        var invitationSettings = new TenantUserInvitationSettingsRequestDto
-        {
-            AllowInvitingMembers = true,
-            AllowInvitingGuests = false
-        };
-
-        await _commonSettingsApi.UpdateInvitationSettingsAsync(invitationSettings, TestContext.Current.CancellationToken);
+        var guestEmail = Initializer.FakerMember.Generate().Email;
 
         // Create a public room
-        var room = await CreatePublicRoom("Test Room For Existing Guest");
+        var room1 = await CreatePublicRoom("Test Room For Existing Guest");
 
         // Act - Add existing guest to the room
         var invitation = new RoomInvitation
         {
-            Id = guest.Id,
-            Access = FileShare.ContentCreator
+            Access = FileShare.ContentCreator,
+            Email = guestEmail,
         };
 
         var roomInvitation = new RoomInvitationRequest
@@ -500,19 +493,29 @@ public class RoomsApiTests(
             Culture = "en-US"
         };
 
-        await _roomsApi.SetRoomSecurityAsync(room.Id, roomInvitation,
-            cancellationToken: TestContext.Current.CancellationToken);
+        await _roomsApi.SetRoomSecurityAsync(room1.Id, roomInvitation, cancellationToken: TestContext.Current.CancellationToken);
+
+        var guestId = (await _profilesApi.GetProfileByEmailAsync(guestEmail, cancellationToken: TestContext.Current.CancellationToken)).Response.Id;
+
+        // Disable "Allow inviting guests" setting
+        var invitationSettings = new TenantUserInvitationSettingsRequestDto
+        {
+            AllowInvitingMembers = true,
+            AllowInvitingGuests = false
+        };
+
+        await _commonSettingsApi.UpdateInvitationSettingsAsync(invitationSettings, TestContext.Current.CancellationToken);
+
+        var room2 = await CreatePublicRoom("Test Room2 For Existing Guest");
+        roomInvitation.Invitations = [new RoomInvitation() { Access = FileShare.ContentCreator, Id = guestId }];
+
+        await _roomsApi.SetRoomSecurityAsync(room2.Id, roomInvitation, cancellationToken: TestContext.Current.CancellationToken);
 
         // Verify guest was added to the room
-        var roomSecurity = await _roomsApi.GetRoomSecurityInfoAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken);
-        var guestAccess = roomSecurity.Response.FirstOrDefault(x => x.SharedToUser.Id == guest.Id);
+        var roomSecurity = await _roomsApi.GetRoomSecurityInfoAsync(room2.Id, cancellationToken: TestContext.Current.CancellationToken);
+        var guestAccess = roomSecurity.Response.FirstOrDefault(x => x.SharedToUser.Id == guestId);
         guestAccess.Should().NotBeNull("guest should be added to the room");
         guestAccess!.Access.Should().Be(FileShare.ContentCreator);
-
-        // Cleanup - Re-enable "Allow inviting guests" setting
-        invitationSettings.AllowInvitingGuests = true;
-        await _commonSettingsApi.UpdateInvitationSettingsAsync(invitationSettings,
-            cancellationToken: TestContext.Current.CancellationToken);
     }
 
     [Fact]
@@ -530,8 +533,8 @@ public class RoomsApiTests(
             AllowInvitingGuests = false
         };
 
-        await _commonSettingsApi.UpdateInvitationSettingsAsync(invitationSettings,
-            cancellationToken: TestContext.Current.CancellationToken);
+        await _webApiClient.Authenticate(Owner);
+        await _commonSettingsApi.UpdateInvitationSettingsAsync(invitationSettings, cancellationToken: TestContext.Current.CancellationToken);
 
         // Create a public room
         var room = await CreatePublicRoom("Test Room For Existing Guest");

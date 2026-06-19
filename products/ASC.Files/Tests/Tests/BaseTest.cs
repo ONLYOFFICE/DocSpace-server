@@ -66,6 +66,7 @@ public class BaseTest(
     protected GroupApi _groupApi = null!;
     protected UserStatusApi _userStatusApi = null!;
     protected PhotosApi _photosApi = null!;
+    protected ProfilesApi _profilesApi = null!;
 
     protected CommonSettingsApi _commonSettingsApi = null!;
     protected DocSpace.API.SDK.Api.Settings.QuotaApi _settingsQuotaApi = null!;
@@ -118,6 +119,7 @@ public class BaseTest(
         _groupApi = _clients.GroupApi;
         _userStatusApi = _clients.UserStatusApi;
         _photosApi = _clients.PhotosApi;
+        _profilesApi = _clients.ProfilesApi;
 
         _commonSettingsApi = _clients.CommonSettingsApi;
         _settingsQuotaApi = _clients.SettingsQuotaApi;
@@ -161,6 +163,39 @@ public class BaseTest(
         }
 
         return new User(fakeMember.Email, fakeMember.Password) { Id = createMemberResponse.Data.Response.Id };
+    }
+
+    protected async Task<User> InviteGuest(User? user = null)
+    {
+        user ??= Owner;
+        await _peopleClient.Authenticate(user);
+
+        // Create a public room
+        var guestEmail = Initializer.FakerMember.Generate().Email;
+        var room = await CreatePublicRoom("Test Room For Existing Guest");
+
+        // Act - Add existing guest to the room
+        var invitation = new RoomInvitation
+        {
+            Access = FileShare.ContentCreator,
+            Email = guestEmail,
+        };
+
+        var roomInvitation = new RoomInvitationRequest
+        {
+            Invitations = [invitation],
+            Notify = false,
+            Message = "",
+            Culture = "en-US"
+        };
+
+        await _roomsApi.SetRoomSecurityAsync(room.Id, roomInvitation, cancellationToken: TestContext.Current.CancellationToken);
+        var guestId = (await _profilesApi.GetProfileByEmailAsync(guestEmail, cancellationToken: TestContext.Current.CancellationToken)).Response.Id;
+
+        return new User(guestEmail, "")
+        {
+            Id = guestId
+        };
     }
 
     protected async Task<FileDtoInteger> GetFile(int fileId)
