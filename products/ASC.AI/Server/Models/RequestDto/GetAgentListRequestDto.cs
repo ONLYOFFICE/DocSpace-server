@@ -74,14 +74,6 @@ namespace ASC.AI.Models.RequestDto
         public bool? ExcludeSubject { get; set; }
 
         /// <summary>
-        /// The filter by user (Owner - 0, Member - 1).
-        /// </summary>
-        /// <example>0</example>
-        [FromQuery(Name = "subjectFilter")]
-        [Obsolete("Use SubjectOwnerId instead")]
-        public SubjectFilter? SubjectFilter { get; set; }
-
-        /// <summary>
         /// The filter by quota (All - 0, Default - 1, Custom - 2).
         /// </summary>
         /// <example>0</example>

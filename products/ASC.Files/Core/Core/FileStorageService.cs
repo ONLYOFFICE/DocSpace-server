@@ -255,7 +255,6 @@ public class FileStorageService //: IFileStorageService
         IEnumerable<string> tagNames = null,
         bool excludeSubject = false,
         ProviderFilter provider = ProviderFilter.None,
-        SubjectFilter? subjectFilter = null,
         string subjectOwnerId = null,
         ApplyFilterOption applyFilterOption = ApplyFilterOption.All,
         QuotaFilter quotaFilter = QuotaFilter.All,
@@ -269,10 +268,6 @@ public class FileStorageService //: IFileStorageService
     {
         var subjectId = string.IsNullOrEmpty(subject) ? Guid.Empty : new Guid(subject);
         var subjectOwnerIdGuid = string.IsNullOrEmpty(subjectOwnerId) ? Guid.Empty : new Guid(subjectOwnerId);
-        if (subjectFilter != null)
-        {
-            subjectOwnerIdGuid = Guid.Empty;
-        }
 
         var folderDao = daoFactory.GetCacheFolderDao<T>();
 
@@ -407,7 +402,6 @@ public class FileStorageService //: IFileStorageService
                 tagNames,
                 excludeSubject,
                 provider,
-                subjectFilter,
                 subjectOwnerIdGuid,
                 applyFilterOption,
                 quotaFilter,
