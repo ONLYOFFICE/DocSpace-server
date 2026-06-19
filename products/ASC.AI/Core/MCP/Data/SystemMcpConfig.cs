@@ -78,8 +78,6 @@ public class SystemMcpConfig
             reservedServerNames.Add(item.Key);
         }
 
-        reservedServerNames.Add("docspace");
-        
         ReservedServerNames = reservedServerNames.ToImmutableHashSet();
 
         InternalHost = configuration["ai:mcpInternalHost"];
