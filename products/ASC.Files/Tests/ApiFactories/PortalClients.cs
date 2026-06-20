@@ -77,16 +77,17 @@ public sealed class PortalClients : IDisposable
     public UsersApi PortalUsersApi { get; }
     public DocSpace.API.SDK.Api.Settings.QuotaApi SettingsQuotaApi { get; }
 
-    public PortalClients(Uri filesBaseAddress, Uri peopleBaseAddress, Uri webApiBaseAddress, string portalName, User owner)
+    public PortalClients(Uri filesBaseAddress, Uri peopleBaseAddress, Uri webApiBaseAddress, string portalName, User owner, Func<Uri, string?, HttpClient> createClient)
     {
         PortalName = portalName;
         Owner = owner;
 
         var origin = $"http://{portalName}";
 
-        FilesHttpClient = AspireAppFixture.CreateRawClient(filesBaseAddress, origin);
-        PeopleHttpClient = AspireAppFixture.CreateRawClient(peopleBaseAddress, origin);
-        WebApiHttpClient = AspireAppFixture.CreateRawClient(webApiBaseAddress, origin);
+        // The clients are per-test (own Origin/Auth headers) but share the fixture's connection pool.
+        FilesHttpClient = createClient(filesBaseAddress, origin);
+        PeopleHttpClient = createClient(peopleBaseAddress, origin);
+        WebApiHttpClient = createClient(webApiBaseAddress, origin);
 
         var filesConfig = new Configuration { BasePath = filesBaseAddress.ToString().TrimEnd('/') };
         FoldersApi = new FoldersApi(FilesHttpClient, filesConfig);

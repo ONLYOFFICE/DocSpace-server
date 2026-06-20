@@ -51,9 +51,15 @@ public class AspireAppFixture : IAsyncLifetime
     private DistributedApplication _app = null!;
     private HttpClient _apiSystemClient = null!;
 
-    public Uri FilesBaseAddress { get; private set; } = null!;
-    public Uri PeopleBaseAddress { get; private set; } = null!;
-    public Uri WebApiBaseAddress { get; private set; } = null!;
+    // A single connection pool shared by every per-test HttpClient. The clients stay per-test (so
+    // their Origin/Authorization default headers never collide across parallel tests), but they all
+    // reuse this one handler, which avoids creating ~1000+ short-lived connection pools over a run
+    // and the socket churn / TIME_WAIT exhaustion that comes with it.
+    private readonly SocketsHttpHandler _sharedHandler = new() { UseCookies = false };
+
+    private Uri FilesBaseAddress { get; set; } = null!;
+    private Uri PeopleBaseAddress { get; set; } = null!;
+    private Uri WebApiBaseAddress { get; set; } = null!;
 
     public async ValueTask InitializeAsync()
     {
@@ -119,7 +125,7 @@ public class AspireAppFixture : IAsyncLifetime
             PasswordHash = Initializer.GetClientPassword(Initializer.OwnerPassword)
         };
 
-        return new PortalClients(FilesBaseAddress, PeopleBaseAddress, WebApiBaseAddress, portalName, owner);
+        return new PortalClients(FilesBaseAddress, PeopleBaseAddress, WebApiBaseAddress, portalName, owner, CreateRawClient);
     }
 
     /// <summary>
@@ -160,11 +166,11 @@ public class AspireAppFixture : IAsyncLifetime
         return baseClient.BaseAddress!;
     }
 
-    internal static HttpClient CreateRawClient(Uri baseAddress, string? origin)
+    private HttpClient CreateRawClient(Uri baseAddress, string? origin)
     {
-        // Cookies disabled to avoid stale auth cookies leaking between requests.
-        var handler = new HttpClientHandler { UseCookies = false };
-        var client = new HttpClient(handler) { BaseAddress = baseAddress };
+        // disposeHandler: false — the shared connection pool outlives individual clients and is
+        // disposed once with the fixture. Disposing a per-test client must NOT tear down the pool.
+        var client = new HttpClient(_sharedHandler, disposeHandler: false) { BaseAddress = baseAddress };
 
         if (!string.IsNullOrEmpty(origin))
         {
@@ -179,5 +185,6 @@ public class AspireAppFixture : IAsyncLifetime
         _apiSystemClient.Dispose();
         await _app.StopAsync();
         await _app.DisposeAsync();
+        _sharedHandler.Dispose();
     }
 }
