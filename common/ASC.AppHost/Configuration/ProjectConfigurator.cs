@@ -79,7 +79,8 @@ public class ProjectConfigurator(
         var isStandalone = string.Compare(builder.Configuration["APP_HOSTING_STANDALONE"], "true", StringComparison.OrdinalIgnoreCase) == 0;
 
         project.WithEnvironment("core:base-domain", isStandalone ? "localhost" : "")
-            .WithEnvironment("ai:mcp:0:endpoint", new UriBuilder(Uri.UriSchemeHttp, "localhost", Constants.DocSpaceMcpPort) + "mcp");
+            .WithEnvironment("ai:mcp:0:endpoint", new UriBuilder(Uri.UriSchemeHttp, "localhost", Constants.DocSpaceMcpPort, "mcp").Uri.ToString())
+            .WithEnvironment("ai:mcpInternalHost", Constants.HostDockerInternal);
 
         ConfigureForwardedHeadersNetworks(project);
 
@@ -107,6 +108,9 @@ public class ProjectConfigurator(
         {
             project.WithEnvironment("OTEL_FILE_EXPORTER_ENDPOINT", connectionManager.GetOtelCollectorEndpoint(isDocker: false));
         }
+
+        ApplyServiceName(project);
+        ApplyCustomOtlpEndpoint(project);
     }
 
     private void AddProjectDocker<TProject>(int projectPort) where TProject : IProjectMetadata, new()
@@ -133,7 +137,8 @@ public class ProjectConfigurator(
             .WithEnvironment("web:hub:internal", new UriBuilder(Uri.UriSchemeHttp, Constants.SocketIoContainer, Constants.SocketIoPort).ToString())
             .WithEnvironment("core:hosting:singletonMode", true.ToString())
             .WithEnvironment("pathToConf", "/buildtools/config/")
-            .WithEnvironment("ai:mcp:0:endpoint", new UriBuilder(Uri.UriSchemeHttp, Constants.DocSpaceMcpContainer, Constants.DocSpaceMcpPort).ToString() + "mcp")
+            .WithEnvironment("ai:mcp:0:endpoint", new UriBuilder(Uri.UriSchemeHttp, Constants.DocSpaceMcpContainer, Constants.DocSpaceMcpPort, "mcp").Uri.ToString())
+            .WithEnvironment("ai:mcpInternalHost", Constants.OpenRestyContainer)
             .WithArgs($"{dllPath}{name.Replace('_', '.')}.dll")
             .WithEntrypoint("dotnet");
 
@@ -191,6 +196,8 @@ public class ProjectConfigurator(
         }
 
         resourceBuilder.WithOtlpExporter();
+        ApplyServiceName(resourceBuilder);
+        ApplyCustomOtlpEndpoint(resourceBuilder);
     }
 
     public ProjectConfigurator AddSocketIO()
@@ -218,6 +225,7 @@ public class ProjectConfigurator(
 
             AddBaseBind(resourceBuilder);
             connectionManager.AddWaitFor(resourceBuilder);
+            ApplyServiceName(resourceBuilder);
         }
         else
         {
@@ -233,6 +241,7 @@ public class ProjectConfigurator(
                 .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
 
             connectionManager.AddWaitFor(resourceBuilder);
+            ApplyServiceName(resourceBuilder);
         }
 
         return this;
@@ -258,16 +267,19 @@ public class ProjectConfigurator(
                 .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
 
             AddBaseBind(resourceBuilder);
+            ApplyServiceName(resourceBuilder);
         }
         else
         {
-            builder.AddJavaScriptApp(name, path, "start")
+            var resourceBuilder = builder.AddJavaScriptApp(name, path, "start")
                 .WithYarn()
                 .WithEnvironment("NODE_ENV", "development")
                 .WithEnvironment("API_HOST", $"http://localhost:{Constants.AppHostPort.ToString()}")
                 .WithHttpEndpoint(targetPort: port)
                 .WithHttpHealthCheck("/health")
                 .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
+
+            ApplyServiceName(resourceBuilder);
         }
 
         return this;
@@ -291,15 +303,18 @@ public class ProjectConfigurator(
                 .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
 
             AddBaseBind(resourceBuilder);
+            ApplyServiceName(resourceBuilder);
         }
         else
         {
-            builder.AddJavaScriptApp(name, path, "start")
+            var resourceBuilder = builder.AddJavaScriptApp(name, path, "start")
                 .WithYarn()
                 .WithEnvironment("NODE_ENV", "development")
                 .WithHttpEndpoint(targetPort: port)
                 .WithHttpHealthCheck("/health")
                 .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
+
+            ApplyServiceName(resourceBuilder);
         }
 
         return this;
@@ -324,6 +339,7 @@ public class ProjectConfigurator(
             .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
 
         connectionManager.AddIdentityEnv(registrationBuilder);
+        ApplyServiceName(registrationBuilder);
 
         var authorizationBuilder = builder
             .AddDockerfile(Constants.IdentityAuthorizationContainer, path)
@@ -340,6 +356,7 @@ public class ProjectConfigurator(
             .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
 
         connectionManager.AddIdentityEnv(authorizationBuilder);
+        ApplyServiceName(authorizationBuilder);
 
         return this;
     }
@@ -351,6 +368,27 @@ public class ProjectConfigurator(
             .WithBindMount(Path.Combine(basePath, "Data"), "/data")
             .WithBindMount(Path.Combine(basePath, "Logs"), "/logs")
             .WithEnvironment("log:dir", "/logs");
+    }
+
+    private void ApplyCustomOtlpEndpoint<T>(IResourceBuilder<T> resourceBuilder) where T : IResourceWithEnvironment
+    {
+        var otlpEndpoint = builder.Configuration["OtlpEndpoint"];
+
+        if (string.IsNullOrWhiteSpace(otlpEndpoint))
+        {
+            return;
+        }
+
+        var otlpProtocol = builder.Configuration["OtlpProtocol"];
+
+        resourceBuilder
+            .WithEnvironment("OTEL_EXPORTER_OTLP_ENDPOINT", otlpEndpoint)
+            .WithEnvironment("OTEL_EXPORTER_OTLP_PROTOCOL", string.IsNullOrWhiteSpace(otlpProtocol) ? "grpc" : otlpProtocol);
+    }
+
+    private static void ApplyServiceName<T>(IResourceBuilder<T> resourceBuilder) where T : IResourceWithEnvironment
+    {
+        resourceBuilder.WithEnvironment("OTEL_SERVICE_NAME", resourceBuilder.Resource.Name);
     }
 
     private void ConfigureForwardedHeadersNetworks<T>(IResourceBuilder<T> project) where T : IResourceWithEnvironment
