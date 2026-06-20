@@ -75,6 +75,7 @@ public static class Constants
     public const string OpenRestyContainer = "onlyoffice-openresty";
     public const string EditorsContainer = "onlyoffice-editors";
     public const string OpensearchContainer = "opensearch";
+    public const string OpensearchVersion = "3.5.0";
     public const string SocketIoContainer = "onlyoffice-socketIO";
     public const string DocSpaceMcpContainer = "onlyoffice-docspace-mcp";
     public const string OtelCollectorContainer = "onlyoffice-otel-collector";
