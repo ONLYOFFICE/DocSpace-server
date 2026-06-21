@@ -142,12 +142,9 @@ public class SsoHandlerService
             {
                 var signedSettings = _signature.Create(settings);
                 var ssoConfig = JsonSerializer.Serialize(signedSettings).Replace("\"", "");
-                var bytes = Encoding.UTF8.GetBytes(ssoConfig);
 
                 context.Response.StatusCode = 200;
-                context.Response.ContentType = "text/plain; charset=utf-8";
-                context.Response.ContentLength = bytes.Length;
-                await context.Response.Body.WriteAsync(bytes);
+                await context.Response.WriteAsync(ssoConfig);
                 return;
             }
 
@@ -259,6 +256,10 @@ public class SsoHandlerService
         {
             _log.ErrorWithException(e);
             RedirectToLogin(context, (int)MessageKey.Error);
+        }
+        finally
+        {
+            await context.Response.CompleteAsync();
         }
     }
     private void RedirectToLogin(HttpContext context, int messageKey)
