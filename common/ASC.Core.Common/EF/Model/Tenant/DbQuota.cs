@@ -230,8 +230,7 @@ public static class DbQuotaExtension
                     ServiceName = "admin",
                     ServiceGroup = null,
                     Visible = true,
-                    Wallet = true,
-                    Additional = false
+                    Wallet = true
                 },
                 new DbQuota
                 {
