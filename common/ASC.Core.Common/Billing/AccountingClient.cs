@@ -400,7 +400,6 @@ public class AccountingClient
         }
 
         var httpClient = _httpClientFactory.CreateClient(addPolicy ? HttpClientName : "");
-        httpClient.Timeout = TimeSpan.FromMilliseconds(60000);
 
         if (!string.IsNullOrEmpty(jsonBody))
         {
@@ -409,7 +408,9 @@ public class AccountingClient
 
         try
         {
-            using var response = await httpClient.SendAsync(request);
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(60));
+
+            using var response = await httpClient.SendAsync(request, cts.Token);
 
             var responseString = await response.Content.ReadAsStringAsync();
 
