@@ -44,7 +44,7 @@ public interface IAiProviderDao
         string defaultModel,
         List<AiModelSettings>? modelSettings = null);
 
-    Task<AiProvider?> GetProviderAsync(int tenantId, int id, bool forceSystemProvider = false);
+    Task<AiProvider?> GetProviderAsync(int tenantId, int id, bool forceSystemProvider = false, bool allowLegacyProvider = false);
 
     IAsyncEnumerable<AiProvider> GetProvidersAsync(int tenantId, int offset, int limit);
 

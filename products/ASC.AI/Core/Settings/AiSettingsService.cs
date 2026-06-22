@@ -257,7 +257,9 @@ public class AiSettingsService(
 
     private async Task ThrowIfNotAccess()
     {
-        if (!await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID) || gateway.Configured)
+        // Settings are managed externally when the gateway is configured — nobody can edit them.
+        // Otherwise, only DocSpace admins have access.
+        if (gateway.Configured || !await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))
         {
             throw new SecurityException(ErrorMessages.AiSettingsAccessDenied);
         }
