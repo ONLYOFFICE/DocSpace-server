@@ -266,7 +266,8 @@ public class FolderDtoHelper(
     AiAccessibility accessibility,
     AiModelSettingsResolver modelSettingsResolver,
     AiConfiguration aiConfiguration,
-    AiModelSettingsLoader modelSettingsLoader)
+    AiModelSettingsLoader modelSettingsLoader,
+    AiGateway gateway)
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, fileSharing, urlShortener)
 {
     private readonly EmployeeDtoHelper _employeeWrapperHelper = employeeWrapperHelper;
@@ -470,7 +471,7 @@ public class FolderDtoHelper(
 #pragma warning disable CS0618 // Obsolete
             result.ChatSettings = new ChatSettingsDto
             {
-                ProviderId = folder.SettingsChatProviderId,
+                ProviderId = !gateway.Configured ? folder.SettingsChatProviderId : AiGateway.ProviderId,
                 ModelId = modelId,
                 ModelAlias = model?.Alias,
                 Prompt = folder.SettingsChatParameters.Prompt,

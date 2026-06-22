@@ -345,10 +345,12 @@ public class AccountingClient
 
         var currencies = await GetAllCurrenciesAsync();
 
+        var serviceInfos = await Task.WhenAll(serviceNames.Select(GetServiceInfoAsync));
+
         result = [];
-        foreach (var serviceName in serviceNames)
+        for (var i = 0; i < serviceNames.Count; i++)
         {
-            var serviceInfo = await GetServiceInfoAsync(serviceName);
+            var serviceInfo = serviceInfos[i];
             if (serviceInfo == null)
             {
                 continue;
@@ -357,7 +359,7 @@ public class AccountingClient
             var currency = currencies.FirstOrDefault(c => c.Id == serviceInfo.CurrencyId);
             var currencyCode = currency?.Code ?? "USD";
 
-            result.Add(serviceName, new Dictionary<string, decimal>
+            result.Add(serviceNames[i], new Dictionary<string, decimal>
             {
                 { currencyCode, serviceInfo.PriceValue }
             });
@@ -400,7 +402,6 @@ public class AccountingClient
         }
 
         var httpClient = _httpClientFactory.CreateClient(addPolicy ? HttpClientName : "");
-        httpClient.Timeout = TimeSpan.FromMilliseconds(60000);
 
         if (!string.IsNullOrEmpty(jsonBody))
         {
@@ -409,7 +410,9 @@ public class AccountingClient
 
         try
         {
-            using var response = await httpClient.SendAsync(request);
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(60));
+
+            using var response = await httpClient.SendAsync(request, cts.Token);
 
             var responseString = await response.Content.ReadAsStringAsync();
 

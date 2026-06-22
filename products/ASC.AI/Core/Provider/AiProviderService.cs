@@ -288,9 +288,9 @@ public class AiProviderService(
         return result;
     }
 
-    public async Task<AiProvider> GetProviderAsync(int providerId, bool forceSystemProvider = false)
+    public async Task<AiProvider> GetProviderAsync(int providerId, bool forceSystemProvider = false, bool allowLegacyProvider = false)
     {
-        var provider = await providerDao.GetProviderAsync(tenantManager.GetCurrentTenantId(), providerId, forceSystemProvider);
+        var provider = await providerDao.GetProviderAsync(tenantManager.GetCurrentTenantId(), providerId, forceSystemProvider, allowLegacyProvider);
 
         return provider ?? throw new ItemNotFoundException(ErrorMessages.ProviderNotFound);
     }
@@ -437,7 +437,7 @@ public class AiProviderService(
     public async Task<(AiProvider provider, ModelSettings resolved)> GetProviderContextAsync(int providerId, string modelId)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
-        var provider = await GetProviderAsync(providerId);
+        var provider = await GetProviderAsync(providerId, allowLegacyProvider: true);
 
         modelId = aiConfig.ResolveModelId(provider.Type, modelId);
 

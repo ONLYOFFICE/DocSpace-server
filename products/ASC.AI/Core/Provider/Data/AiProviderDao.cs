@@ -109,7 +109,7 @@ public class AiProviderDao(
         };
     }
 
-    public async Task<AiProvider?> GetProviderAsync(int tenantId, int id, bool forceSystemProvider = false)
+    public async Task<AiProvider?> GetProviderAsync(int tenantId, int id, bool forceSystemProvider = false, bool allowLegacyProvider = false)
     {
         if (gateway.Configured)
         {
@@ -118,7 +118,10 @@ public class AiProviderDao(
                 return await CreateGatewayProviderAsync(includeCredentials: true, allowEmptyKey: forceSystemProvider);
             }
 
-            return null;
+            if (!allowLegacyProvider)
+            {
+                return null;
+            }
         }
 
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
