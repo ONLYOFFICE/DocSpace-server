@@ -1578,7 +1578,7 @@ public class PaymentController(
 
         if (securityContext.CurrentAccount.ID != payer.Id)
         {
-            throw new SecurityException($"payerEmail {customerInfo?.Email}, payerId {payer.Id}, currentId {securityContext.CurrentAccount.ID}");
+            throw new SecurityException("Access denied: insufficient permissions for this payment operation");
         }
     }
 
@@ -1590,7 +1590,7 @@ public class PaymentController(
 
             if (securityContext.CurrentAccount.ID != payer.Id)
             {
-                throw new SecurityException($"payerEmail {customerInfo?.Email}, payerId {payer.Id}, ownerId {tenant.OwnerId}, currentId {securityContext.CurrentAccount.ID}");
+                throw new SecurityException("Access denied: insufficient permissions for this payment operation");
             }
         }
     }
