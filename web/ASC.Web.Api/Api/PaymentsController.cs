@@ -1341,6 +1341,26 @@ public class PaymentController(
         return settings;
     }
 
+    private async Task EnableAiToolsServiceAsync()
+    {
+        var settings = await settingsManager.LoadAsync<TenantWalletServiceSettings>();
+
+        settings.EnabledServices ??= [];
+
+        if (settings.EnabledServices.Contains(TenantWalletService.AITools))
+        {
+            return;
+        }
+
+        settings.EnabledServices.Add(TenantWalletService.AITools);
+
+        await settingsManager.SaveAsync(settings);
+
+        messageService.Send(MessageAction.CustomerWalletServicesSettingsUpdated);
+
+        await quotaSocketManager.ChangeAiConfigAsync();
+    }
+
     /// <summary>
     /// Credit AI balance
     /// </summary>
@@ -1416,11 +1436,7 @@ public class PaymentController(
         {
             var details = $"{aiToolsQuota.ServiceName} {inDto.Amount} {inDto.Currency}";
             messageService.Send(MessageAction.CustomerOperationPerformed, null, details);
-            await ChangeTenantWalletServiceState(new ChangeWalletServiceStateRequestDto
-            {
-                Service = TenantWalletService.AITools,
-                Enabled = true
-            });
+            await EnableAiToolsServiceAsync();
         }
 
         return result;
