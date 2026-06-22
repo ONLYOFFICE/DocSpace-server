@@ -1203,7 +1203,6 @@ public class TariffService(
             {
                 var portalId = await coreSettings.GetKeyAsync(tenantId);
                 balance = await accountingClient.GetCustomerBalanceAsync(portalId, true);
-                await hybridCache.SetAsync(cacheKey, balance, TimeSpan.FromMinutes(10));
             }
             catch (AccountingCustomerNotFoundException exception)
             {
@@ -1225,6 +1224,11 @@ public class TariffService(
         if (!accountingClient.Configured)
         {
             return null;
+        }
+
+        if (!accountingClient.SubAccountsEnabled)
+        {
+            throw new InvalidOperationException("Accounting client does not support sub-accounts");
         }
 
         var cacheKey = GetAccountingAiBalanceCacheKey(tenantId);
@@ -1249,7 +1253,6 @@ public class TariffService(
             {
                 var portalId = await coreSettings.GetKeyAsync(tenantId);
                 balance = await accountingClient.GetCustomerAiBalanceAsync(portalId, true);
-                await hybridCache.SetAsync(cacheKey, balance, TimeSpan.FromMinutes(10));
             }
             catch (AccountingCustomerNotFoundException exception)
             {
@@ -1296,6 +1299,11 @@ public class TariffService(
 
     public async Task<ServicePayment> MakeAiCreditAsync(int tenantId, decimal amount, string currency, string customerParticipantName, Dictionary<string, string> metadata = null)
     {
+        if (!accountingClient.SubAccountsEnabled)
+        {
+            throw new InvalidOperationException("Accounting client does not support sub-accounts");
+        }
+
         var portalId = await coreSettings.GetKeyAsync(tenantId);
         var result = await accountingClient.MakeAiCreditAsync(portalId, amount, currency, customerParticipantName, metadata);
         await hybridCache.RemoveAsync(GetAccountingAiBalanceCacheKey(tenantId));
@@ -1309,14 +1317,16 @@ public class TariffService(
         {
             var portalId = await coreSettings.GetKeyAsync(tenantId);
 
-            var isAiService = false;
-            if (!string.IsNullOrEmpty(filter.ServiceName))
+            if (accountingClient.SubAccountsEnabled && !string.IsNullOrEmpty(filter.ServiceName))
             {
                 var aiQuota = await quotaService.GetTenantQuotaAsync((int)TenantWalletService.AITools);
-                isAiService = aiQuota != null && aiQuota.ServiceName == filter.ServiceName;
+                if (aiQuota != null && aiQuota.ServiceName == filter.ServiceName)
+                {
+                    return await accountingClient.GetCustomerAiOperationsAsync(portalId, filter);
+                }
             }
 
-            return await accountingClient.GetCustomerOperationsAsync(portalId, filter, isAiService);
+            return await accountingClient.GetCustomerOperationsAsync(portalId, filter);
         }
         catch (AccountingCustomerNotFoundException exception)
         {
@@ -1328,6 +1338,36 @@ public class TariffService(
         }
 
         return null;
+    }
+
+    public async Task<List<CustomerMonthlyUsage>> GetCustomerMonthlyUsageAsync(int tenantId, DateTime? utcStartDate, DateTime? utcEndDate)
+    {
+        try
+        {
+            var portalId = await coreSettings.GetKeyAsync(tenantId);
+
+            return await accountingClient.GetCustomerMonthlyUsageAsync(portalId, utcStartDate, utcEndDate);
+        }
+        catch (Exception error)
+        {
+            LogError(error, tenantId.ToString());
+            return null;
+        }
+    }
+
+    public async Task<UsageReport> GetCustomerServiceUsageAsync(int tenantId, UsageFilter filter)
+    {
+        try
+        {
+            var portalId = await coreSettings.GetKeyAsync(tenantId);
+
+            return await accountingClient.GetCustomerServiceUsageAsync(portalId, filter);
+        }
+        catch (Exception error)
+        {
+            LogError(error, tenantId.ToString());
+            return null;
+        }
     }
 
     public async Task<List<Currency>> GetAllAccountingCurrenciesAsync()

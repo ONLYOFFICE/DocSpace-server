@@ -74,14 +74,14 @@ public class AiGateway(
         return settings.EnabledServices != null && settings.EnabledServices.Contains(TenantWalletService.AITools);
     }
 
-    public async Task<string> GetKeyAsync(bool force = false)
+    public async Task<string> GetKeyAsync(bool allowEmpty = false)
     {
-        if (!force && !await IsEnabledAsync())
+        if (!await IsEnabledAsync())
         {
-            throw new InvalidOperationException("AI Gateway is not enabled");
+            return allowEmpty ? string.Empty : throw new InvalidOperationException("AI Gateway is not enabled");
         }
 
-        return await GenerateKeyAsync();
+        return await GenerateKeyAsync(allowEmpty);
     }
 
     public async Task<AiPricesResponse> GetPricesAsync()
@@ -100,11 +100,16 @@ public class AiGateway(
         return await SendAsync<RestrictedModelsResponse>(HttpMethod.Put, "/chat/models/restrictions", content);
     }
 
-    private async Task<string> GenerateKeyAsync()
+    private async Task<string> GenerateKeyAsync(bool allowEmpty = false)
     {
         var customerInfo = await tariffService.GetCustomerInfoAsync(tenantManager.GetCurrentTenantId());
         if (customerInfo == null)
         {
+            if (allowEmpty)
+            {
+                return string.Empty;
+            }
+
             throw new AccountingPaymentRequiredException();
         }
 
@@ -161,18 +166,19 @@ public record CurrencyInfo
 
 public record AiPricesResponse
 {
-    public required List<AiChatModelPricing> Chat { get; init; }
-    public required List<AiEmbeddingModelPricing> Embedding { get; init; }
-    public required AiWebSearchPricing WebSearch { get; init; }
-    public required CurrencyInfo Currency { get; init; } = new() { Code = "USD", Symbol = "$" };
+    public required IEnumerable<AiChatModelPricing> Chat { get; init; }
+    public required IEnumerable<AiEmbeddingModelPricing> Embedding { get; init; }
+    public required IEnumerable<AiWebSearchPricing> Search { get; init; }
+    public required CurrencyInfo Currency { get; init; }
 }
 
 public record AiChatModelPricing
 {
     public required string Id { get; init; }
-    public string Alias { get; init; } = "GPT-5.2";
-    public string OwnedBy { get; init; } = "openai";
-    public string Provider { get; init; } = "OpenRouter";
+    public string Alias { get; init; }
+    public string OwnedBy { get; init; }
+    public string Provider { get; init; }
+    public string Link { get; init; }
     public required AiChatPrice Price { get; init; }
 }
 
@@ -185,9 +191,10 @@ public record AiChatPrice
 public record AiEmbeddingModelPricing
 {
     public required string Id { get; init; }
-    public string Alias { get; init; } = "GPT-5.2";
-    public string OwnedBy { get; init; } = "openai";
-    public string Provider { get; init; } = "OpenRouter";
+    public string Alias { get; init; }
+    public string OwnedBy { get; init; }
+    public string Provider { get; init; }
+    public string Link { get; init; }
     public required AiEmbeddingPrice Price { get; init; }
 }
 
@@ -198,9 +205,10 @@ public record AiEmbeddingPrice
 
 public record AiWebSearchPricing
 {
-    public string Provider { get; init; } = "Exa";
-    public decimal Search { get; init; }
-    public decimal Contents { get; init; }
+    public string Id { get; init; }
+    public string Provider { get; init; }
+    public decimal Price { get; init; }
+    public string Link { get; init; }
 }
 
 public class SetRestrictedModelsRequest

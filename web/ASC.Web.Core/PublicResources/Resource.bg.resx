@@ -144,9 +144,6 @@
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Резервно копие</value>
   </data>
-  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
-    <value>Дисково пространство</value>
-  </data>
   <data name="AccountingCustomerOperationServiceDesc_embedding" xml:space="preserve">
     <value>Векторизация</value>
   </data>
@@ -1155,9 +1152,6 @@
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
     <value>AI функции</value>
   </data>
-  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Активирайте AI функциите, за да повишите производителността.</value>
-  </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Проследяване на влизания и действия</value>
   </data>
@@ -1382,5 +1376,23 @@
   </data>
   <data name="UserAuthenticationFailed" xml:space="preserve">
     <value>Удостоверяването на потребителя е неуспешно</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Допълнително дисково пространство</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_admin" xml:space="preserve">
+    <value>Бизнес план</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_adminyear" xml:space="preserve">
+    <value>Бизнес план</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_admin" xml:space="preserve">
+    <value>Администратори</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_adminyear" xml:space="preserve">
+    <value>Администратори</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Получете достъп до широка гама от AI модели чрез интеграцията с OpenRouter. Плащате само за това, което използвате, таксувано от вашия Портфейл.</value>
   </data>
 </root>

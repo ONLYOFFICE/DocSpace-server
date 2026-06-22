@@ -144,9 +144,6 @@
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Záloha</value>
   </data>
-  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
-    <value>Miesto na disku</value>
-  </data>
   <data name="AccountingCustomerOperationServiceDesc_embedding" xml:space="preserve">
     <value>Vektorizácia</value>
   </data>
@@ -1155,9 +1152,6 @@
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
     <value>Funkcie AI</value>
   </data>
-  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Aktivujte funkcie AI a zvýšte produktivitu.</value>
-  </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Sledovanie prihlásení a akcií</value>
   </data>
@@ -1382,5 +1376,23 @@
   </data>
   <data name="UserAuthenticationFailed" xml:space="preserve">
     <value>Autentifikácia používateľa zlyhala</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Dodatočné úložisko na disku</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_admin" xml:space="preserve">
+    <value>Plán Business</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_adminyear" xml:space="preserve">
+    <value>Plán Business</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_admin" xml:space="preserve">
+    <value>Správcovia</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_adminyear" xml:space="preserve">
+    <value>Správcovia</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Získajte prístup k širokej škále modelov AI prostredníctvom integrácie OpenRouter. Plaťte len za to, čo využijete; suma sa účtuje z vašej Peňaženky.</value>
   </data>
 </root>

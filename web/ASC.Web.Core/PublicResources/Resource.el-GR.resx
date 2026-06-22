@@ -144,9 +144,6 @@
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Αντίγραφο ασφαλείας</value>
   </data>
-  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
-    <value>Χώρος αποθήκευσης στον δίσκο</value>
-  </data>
   <data name="AccountingCustomerOperationServiceDesc_embedding" xml:space="preserve">
     <value>Διανυσματικοποίηση</value>
   </data>
@@ -1155,9 +1152,6 @@
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
     <value>Λειτουργίες AI</value>
   </data>
-  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Ενεργοποιήστε τις λειτουργίες AI για να αυξήσετε την παραγωγικότητα.</value>
-  </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Παρακολούθηση συνδέσεων και ενεργειών</value>
   </data>
@@ -1382,5 +1376,23 @@
   </data>
   <data name="UserAuthenticationFailed" xml:space="preserve">
     <value>Η αυθεντικοποίηση χρήστη απέτυχε</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Πρόσθετος χώρος αποθήκευσης στον δίσκο</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_admin" xml:space="preserve">
+    <value>Επαγγελματικό πρόγραμμα</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_adminyear" xml:space="preserve">
+    <value>Επαγγελματικό πρόγραμμα</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_admin" xml:space="preserve">
+    <value>Διαχειριστές</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_adminyear" xml:space="preserve">
+    <value>Διαχειριστές</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Αποκτήστε πρόσβαση σε ένα ευρύ φάσμα μοντέλων AI μέσω της ενσωμάτωσης OpenRouter. Πληρώνετε μόνο για όσα χρησιμοποιείτε, με χρέωση από το Πορτοφόλι σας.</value>
   </data>
 </root>

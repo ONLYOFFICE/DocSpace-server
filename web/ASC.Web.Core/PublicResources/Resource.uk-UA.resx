@@ -144,9 +144,6 @@
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Резервна копія</value>
   </data>
-  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
-    <value>Дисковий простір</value>
-  </data>
   <data name="AccountingCustomerOperationServiceDesc_embedding" xml:space="preserve">
     <value>Векторизація</value>
   </data>
@@ -1155,9 +1152,6 @@
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
     <value>Функції AІ</value>
   </data>
-  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Увімкніть функції AІ, щоб збільшити продуктивність.</value>
-  </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Відстеження входів та дій</value>
   </data>
@@ -1292,5 +1286,23 @@
   </data>
   <data name="WhatsNewSubscriptionName" xml:space="preserve">
     <value>Новеньке</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Додатковий дисковий простір</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_admin" xml:space="preserve">
+    <value>Тариф Business</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_adminyear" xml:space="preserve">
+    <value>Тариф Business</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_admin" xml:space="preserve">
+    <value>Адміністратори</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_adminyear" xml:space="preserve">
+    <value>Адміністратори</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Отримайте доступ до широкого набору моделей ШІ завдяки інтеграції з OpenRouter. Платіть лише за те, що використовуєте — кошти списуються з вашого Гаманця.</value>
   </data>
 </root>

@@ -144,9 +144,6 @@
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Back-up</value>
   </data>
-  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
-    <value>Schijfruimte</value>
-  </data>
   <data name="AccountingCustomerOperationServiceDesc_embedding" xml:space="preserve">
     <value>Vectorisatie</value>
   </data>
@@ -1155,9 +1152,6 @@
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
     <value>AI-functies</value>
   </data>
-  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Activeer AI-functies om de productiviteit te verhogen.</value>
-  </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Inloggegevens en acties bijhouden</value>
   </data>
@@ -1382,5 +1376,23 @@
   </data>
   <data name="UserAuthenticationFailed" xml:space="preserve">
     <value>Gebruikersauthenticatie mislukt</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Extra schijfopslagruimte</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_admin" xml:space="preserve">
+    <value>Business-abonnement</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_adminyear" xml:space="preserve">
+    <value>Business-abonnement</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_admin" xml:space="preserve">
+    <value>Beheerders</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_adminyear" xml:space="preserve">
+    <value>Beheerders</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Krijg toegang tot een breed scala aan AI-modellen via de OpenRouter-integratie. Betaal alleen voor wat u gebruikt, afgeschreven van uw Portemonnee.</value>
   </data>
 </root>

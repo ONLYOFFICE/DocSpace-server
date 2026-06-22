@@ -148,7 +148,7 @@
     <value>Chat</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
-    <value>Disk space</value>
+    <value>Additional disk storage</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_embedding" xml:space="preserve">
     <value>Vectorization</value>
@@ -1174,7 +1174,7 @@
     <value>AI features</value>
   </data>
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Enable AI features to boost productivity.</value>
+    <value>Get access to a wide range of AI models through OpenRouter integration. Pay only for what you use, billed from your Wallet.</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Tracking logins &amp; actions</value>
@@ -1382,5 +1382,17 @@
   </data>
   <data name="AccountingCustomerOperationAgent" xml:space="preserve">
     <value>Agent</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_admin" xml:space="preserve">
+    <value>Business plan</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_admin" xml:space="preserve">
+    <value>Admins</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_adminyear" xml:space="preserve">
+    <value>Admins</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_adminyear" xml:space="preserve">
+    <value>Business plan</value>
   </data>
 </root>

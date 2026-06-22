@@ -202,6 +202,203 @@ public class OperationDto
 }
 
 /// <summary>
+/// Aggregated customer spending for a single calendar month.
+/// </summary>
+/// <example>
+/// {
+///   "year": 2025,
+///   "month": 1,
+///   "currency": "USD",
+///   "totalAmount": 199.98,
+///   "operationCount": 3
+/// }
+/// </example>
+public class CustomerMonthlyUsageDto
+{
+    /// <summary>
+    /// The calendar year.
+    /// </summary>
+    /// <example>2025</example>
+    public int Year { get; set; }
+
+    /// <summary>
+    /// The calendar month (1-12).
+    /// </summary>
+    /// <example>1</example>
+    public int Month { get; set; }
+
+    /// <summary>
+    /// The three-character ISO 4217 currency symbol of the amounts.
+    /// </summary>
+    /// <example>USD</example>
+    public string Currency { get; set; }
+
+    /// <summary>
+    /// The total amount charged across all services in this month.
+    /// </summary>
+    /// <example>199.98</example>
+    public decimal TotalAmount { get; set; }
+
+    /// <summary>
+    /// The number of individual purchase operations in this month.
+    /// </summary>
+    /// <example>3</example>
+    public int OperationCount { get; set; }
+
+    public CustomerMonthlyUsageDto(CustomerMonthlyUsage usage)
+    {
+        Year = usage.Year;
+        Month = usage.Month;
+        Currency = usage.Currency;
+        TotalAmount = usage.TotalAmount;
+        OperationCount = usage.OperationCount;
+    }
+}
+
+/// <summary>
+/// Aggregated customer usage statistics for a service over a period.
+/// </summary>
+/// <example>
+/// {
+///   "service": "disk-storage",
+///   "title": "Additional disk storage",
+///   "serviceUnit": "GB",
+///   "currency": "USD",
+///   "totalQuantity": 100,
+///   "totalAmount": 49.99,
+///   "operationCount": 2
+/// }
+/// </example>
+public class CustomerServiceUsageDto
+{
+    /// <summary>
+    /// The name of the service.
+    /// </summary>
+    /// <example>disk-storage</example>
+    public string Service { get; set; }
+
+    /// <summary>
+    /// The title of the service.
+    /// </summary>
+    /// <example>Additional disk storage</example>
+    public string Title { get; set; }
+
+    /// <summary>
+    /// The unit of measurement for the service.
+    /// </summary>
+    /// <example>GB</example>
+    public string ServiceUnit { get; set; }
+
+    /// <summary>
+    /// The three-character ISO 4217 currency symbol of the amounts.
+    /// </summary>
+    /// <example>USD</example>
+    public string Currency { get; set; }
+
+    /// <summary>
+    /// The total number of units consumed.
+    /// </summary>
+    /// <example>100</example>
+    public int TotalQuantity { get; set; }
+
+    /// <summary>
+    /// The total amount charged for the service.
+    /// </summary>
+    /// <example>14</example>
+    public decimal TotalAmount { get; set; }
+
+    /// <summary>
+    /// The number of individual purchase operations.
+    /// </summary>
+    /// <example>1</example>
+    public int OperationCount { get; set; }
+
+    public CustomerServiceUsageDto(CustomerServiceUsage usage, Dictionary<string, string> customUom)
+    {
+        var unit = customUom.TryGetValue(usage.Service, out var customUnit) ? customUnit : usage.Service;
+
+        Service = usage.Service;
+        Title = Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceDesc_{usage.Service}");
+        ServiceUnit = Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceUOM_{unit}");
+        Currency = usage.Currency;
+        TotalQuantity = usage.TotalQuantity;
+        TotalAmount = usage.TotalAmount;
+        OperationCount = usage.OperationCount;
+    }
+}
+
+/// <summary>
+/// Represents a paged report of customer service usage statistics.
+/// </summary>
+/// <example>
+/// {
+///   "collection": [{"service": "backup", "totalAmount": 49.99}],
+///   "offset": 0,
+///   "limit": 25,
+///   "totalQuantity": 1,
+///   "totalPage": 1,
+///   "currentPage": 1
+/// }
+/// </example>
+public class CustomerServiceUsageReportDto
+{
+    /// <summary>
+    /// A collection of service usage statistics.
+    /// </summary>
+    /// <example>[{"service": "backup", "totalAmount": 49.99}]</example>
+    public List<CustomerServiceUsageDto> Collection { get; set; }
+
+    /// <summary>
+    /// The report data offset.
+    /// </summary>
+    /// <example>0</example>
+    public int Offset { get; set; }
+
+    /// <summary>
+    /// The report data limit.
+    /// </summary>
+    /// <example>25</example>
+    public int Limit { get; set; }
+
+    /// <summary>
+    /// The total quantity of records in the report.
+    /// </summary>
+    /// <example>1</example>
+    public long TotalQuantity { get; set; }
+
+    /// <summary>
+    /// The total number of pages in the report.
+    /// </summary>
+    /// <example>1</example>
+    public int TotalPage { get; set; }
+
+    /// <summary>
+    /// The current page number of the report.
+    /// </summary>
+    /// <example>1</example>
+    public int CurrentPage { get; set; }
+
+    public CustomerServiceUsageReportDto(UsageReport report, Dictionary<string, string> customUom)
+    {
+        Offset = report.Offset;
+        Limit = report.Limit;
+        TotalQuantity = report.TotalQuantity;
+        TotalPage = report.TotalPage;
+        CurrentPage = report.CurrentPage;
+
+        Collection = [];
+
+        if (report.Collection != null)
+        {
+            foreach (var usage in report.Collection)
+            {
+                Collection.Add(new CustomerServiceUsageDto(usage, customUom));
+            }
+        }
+    }
+}
+
+/// <summary>
 /// The customer information.
 /// </summary>
 public class CustomerInfoDto(CustomerInfo customerInfo, EmployeeDto employeeDto)

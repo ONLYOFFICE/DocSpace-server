@@ -144,9 +144,6 @@
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>バックアップ</value>
   </data>
-  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
-    <value>ディスク容量</value>
-  </data>
   <data name="AccountingCustomerOperationServiceDesc_embedding" xml:space="preserve">
     <value>ベクトル化</value>
   </data>
@@ -1155,9 +1152,6 @@
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
     <value>AI機能</value>
   </data>
-  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>AI機能を有効にして生産性を向上させましょう。</value>
-  </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>ログインとアクションの追跡</value>
   </data>
@@ -1382,5 +1376,23 @@
   </data>
   <data name="TelegramOnSuccessfulLink" xml:space="preserve">
     <value>DocSpaceからの通知を受け取るためにTelegramへの接続が完了しました。</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>追加ディスクストレージ</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_admin" xml:space="preserve">
+    <value>BUSINESSプラン</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_adminyear" xml:space="preserve">
+    <value>BUSINESSプラン</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_admin" xml:space="preserve">
+    <value>管理者</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_adminyear" xml:space="preserve">
+    <value>管理者</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>OpenRouter連携を通じて、幅広いAIモデルにアクセスできます。使用した分だけお支払いいただき、料金はウォレットから請求されます。</value>
   </data>
 </root>
