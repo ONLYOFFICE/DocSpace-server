@@ -38,7 +38,7 @@ public class AiProviderDao(
     IDbContextFactory<AiDbContext> dbContextFactory,
     InstanceCrypto crypto,
     AiGateway gateway,
-    AiConfiguration aiConfiguration) : IAiProviderDao
+    AiConfiguration aiConfiguration)
 {
     public async Task<AiProvider> AddProviderAsync(
         int tenantId,
@@ -301,9 +301,11 @@ public class AiProviderDao(
             return null;
         }
 
-        if (gateway.Configured && queryResult.ProviderId != AiGateway.ProviderId)
+        switch (gateway.Configured)
         {
-            return null;
+            case true when queryResult.ProviderId != AiGateway.ProviderId:
+            case false when queryResult.ProviderId == AiGateway.ProviderId:
+                return null;
         }
 
         var providerType = queryResult.ProviderId == AiGateway.ProviderId
