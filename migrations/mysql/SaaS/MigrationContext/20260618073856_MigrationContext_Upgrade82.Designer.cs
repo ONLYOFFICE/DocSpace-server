@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     [DbContext(typeof(MigrationContext))]
-    [Migration("20260519090444_MigrationContext_Upgrade82")]
+    [Migration("20260618073856_MigrationContext_Upgrade82")]
     partial class MigrationContext_Upgrade82
     {
         /// <inheritdoc />
@@ -1005,7 +1005,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Name = "aitools",
                             Price = 1m,
                             ServiceName = "ai-tools",
-                            Visible = true,
+                            Visible = false,
                             Wallet = true
                         });
                 });
@@ -4672,8 +4672,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Property<bool>("SaveFormAsXLSX")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("tinyint(1)")
-                        .HasColumnName("save_form_as_xlsx")
-                        .HasDefaultValueSql("1");
+                        .HasDefaultValue(true)
+                        .HasColumnName("save_form_as_xlsx");
 
                     b.Property<bool>("SendFormToExternalDB")
                         .ValueGeneratedOnAdd()

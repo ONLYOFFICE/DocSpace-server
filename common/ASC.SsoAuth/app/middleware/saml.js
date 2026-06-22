@@ -45,6 +45,31 @@ module.exports = (app, config) => {
     ? config["core"].machinekey
     : config.get("app").machinekey;
 
+  const fetchWithRetry = async (url, options, maxRetries = 2) => {
+    let lastError;
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        const response = await fetch(url, options);
+        if (response.status !== 200) {
+          return { response, text: null };
+        }
+        const headersObj = {};
+        response.headers.forEach((value, name) => { headersObj[name] = value; });
+        logger.info(`SSO config response: status=${response.status}, headers=${JSON.stringify(headersObj)}`);
+        const text = await response.text();
+        logger.info(`SSO config body size=${text.length}`);
+        return { response, text };
+      } catch (error) {
+        lastError = error;
+        if (attempt < maxRetries) {
+          logger.warn(`SSO config fetch attempt ${attempt + 1} failed: ${error.message}, retrying...`);
+          await new Promise(resolve => setTimeout(resolve, 300));
+        }
+      }
+    }
+    throw lastError;
+  };
+
   const fetchConfig = async (req, res, next) => {
     const foundRoutes =
       req.url && req.url.length > 0
@@ -68,13 +93,24 @@ module.exports = (app, config) => {
       return res.redirect(urlResolver.getPortal404Url(req));
     }
 
-    try 
+    const noConfigRoutes = [
+      config.routes.generatecert,
+      config.routes.validatecerts,
+      config.routes.uploadmetadata,
+      config.routes.loadmetadata,
+    ];
+    if (noConfigRoutes.includes(req.url)) {
+      return next();
+    }
+
+
+    try
     {
         const baseUrl = urlResolver.getBaseUrl(req).originUrl;
         var urls = urlResolver.getPortalSsoConfigUrl(req);
 
         let headers = { Origin: urls.originUrl }
-        const response = await fetch(urls.url, { headers });
+        const { response, text } = await fetchWithRetry(urls.url, { headers });
 
         if (!response || response.status === 404) {
             if (response) {
@@ -84,8 +120,6 @@ module.exports = (app, config) => {
         } else if (response.status !== 200) {
             throw new Error(`Invalid response status ${response.status}`);
         }
-
-        const text = await response.text();
         if (!text) {
             throw new Error("Empty config response");
         }

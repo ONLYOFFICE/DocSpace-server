@@ -313,11 +313,13 @@ public class CustomerServiceUsageDto
     /// <example>1</example>
     public int OperationCount { get; set; }
 
-    public CustomerServiceUsageDto(CustomerServiceUsage usage)
+    public CustomerServiceUsageDto(CustomerServiceUsage usage, Dictionary<string, string> customUom)
     {
+        var unit = customUom.TryGetValue(usage.Service, out var customUnit) ? customUnit : usage.Service;
+
         Service = usage.Service;
         Title = Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceDesc_{usage.Service}");
-        ServiceUnit = Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceUOM_{usage.Service}");
+        ServiceUnit = Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceUOM_{unit}");
         Currency = usage.Currency;
         TotalQuantity = usage.TotalQuantity;
         TotalAmount = usage.TotalAmount;
@@ -376,7 +378,7 @@ public class CustomerServiceUsageReportDto
     /// <example>1</example>
     public int CurrentPage { get; set; }
 
-    public CustomerServiceUsageReportDto(UsageReport report)
+    public CustomerServiceUsageReportDto(UsageReport report, Dictionary<string, string> customUom)
     {
         Offset = report.Offset;
         Limit = report.Limit;
@@ -390,7 +392,7 @@ public class CustomerServiceUsageReportDto
         {
             foreach (var usage in report.Collection)
             {
-                Collection.Add(new CustomerServiceUsageDto(usage));
+                Collection.Add(new CustomerServiceUsageDto(usage, customUom));
             }
         }
     }
