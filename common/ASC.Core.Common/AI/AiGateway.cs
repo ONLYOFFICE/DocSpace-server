@@ -79,14 +79,14 @@ public class AiGateway(
         return settings.EnabledServices != null && settings.EnabledServices.Contains(TenantWalletService.AITools);
     }
 
-    public async Task<string> GetKeyAsync(bool force = false)
+    public async Task<string> GetKeyAsync(bool allowEmpty = false)
     {
-        if (!force && !await IsEnabledAsync())
+        if (!await IsEnabledAsync())
         {
-            throw new InvalidOperationException("AI Gateway is not enabled");
+            return allowEmpty ? string.Empty : throw new InvalidOperationException("AI Gateway is not enabled");
         }
 
-        return await GenerateKeyAsync();
+        return await GenerateKeyAsync(allowEmpty);
     }
 
     public async Task<AiPricesResponse> GetPricesAsync()
@@ -115,11 +115,16 @@ public class AiGateway(
             opt => opt.SetDuration(_modelsCacheDuration).SetFailSafe(true));
     }
 
-    private async Task<string> GenerateKeyAsync()
+    private async Task<string> GenerateKeyAsync(bool allowEmpty = false)
     {
         var customerInfo = await tariffService.GetCustomerInfoAsync(tenantManager.GetCurrentTenantId());
         if (customerInfo == null)
         {
+            if (allowEmpty)
+            {
+                return string.Empty;
+            }
+
             throw new AccountingPaymentRequiredException();
         }
 

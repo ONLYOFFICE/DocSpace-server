@@ -158,10 +158,12 @@ public class AccountingClient(IOptions<AccountingConfiguration> configuration, I
 
         var currencies = await GetAllCurrenciesAsync();
 
+        var serviceInfos = await Task.WhenAll(serviceNames.Select(GetServiceInfoAsync));
+
         result = [];
-        foreach (var serviceName in serviceNames)
+        for (var i = 0; i < serviceNames.Count; i++)
         {
-            var serviceInfo = await GetServiceInfoAsync(serviceName);
+            var serviceInfo = serviceInfos[i];
             if (serviceInfo == null)
             {
                 continue;
@@ -170,7 +172,7 @@ public class AccountingClient(IOptions<AccountingConfiguration> configuration, I
             var currency = currencies.FirstOrDefault(c => c.Id == serviceInfo.CurrencyId);
             var currencyCode = currency?.Code ?? "USD";
 
-            result.Add(serviceName, new Dictionary<string, decimal>
+            result.Add(serviceNames[i], new Dictionary<string, decimal>
             {
                 { currencyCode, serviceInfo.PriceValue }
             });

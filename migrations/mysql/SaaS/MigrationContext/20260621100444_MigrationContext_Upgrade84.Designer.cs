@@ -4700,8 +4700,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Property<bool>("SaveFormAsXLSX")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("tinyint(1)")
-                        .HasColumnName("save_form_as_xlsx")
-                        .HasDefaultValueSql("1");
+                        .HasDefaultValue(true)
+                        .HasColumnName("save_form_as_xlsx");
 
                     b.Property<bool>("SendFormToExternalDB")
                         .ValueGeneratedOnAdd()
