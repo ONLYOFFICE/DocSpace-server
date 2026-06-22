@@ -145,7 +145,7 @@ public class FileMarker(
         else
         {
             var additionalSubjects = Array.Empty<Guid>();
-            if (fileEntry.RootFolderType is FolderType.VirtualRooms or FolderType.AiAgents)
+            if (fileEntry.RootFolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.Forms)
             {
                 var room = parentFolders.Find(f => f.IsRoom);
                 if (room.CreateBy != obj.CurrentAccountId)
@@ -898,7 +898,8 @@ public class FileMarker(
             Equals(folder.Id, await globalFolder.GetFolderCommonAsync(daoFactory)) ||
             Equals(folder.Id, await globalFolder.GetFolderShareAsync(daoFactory)) ||
             Equals(folder.Id, await globalFolder.GetFolderVirtualRoomsAsync(daoFactory)) ||
-            Equals(folder.Id, await globalFolder.GetFolderAiAgentsAsync(daoFactory)))
+            Equals(folder.Id, await globalFolder.GetFolderAiAgentsAsync(daoFactory)) ||
+            Equals(folder.Id, await globalFolder.GetFolderFormsAsync(daoFactory)))
         {
             var folderTags = tags.Where(tag => tag.EntryType == FileEntryType.Folder && tag.EntryId is string);
 
@@ -1067,7 +1068,14 @@ public class FileMarker(
     {
         var tagDao = daoFactory.GetTagDao<T>();
         var folderDao = daoFactory.GetFolderDao<T>();
-        var totalTags = await tagDao.GetNewTagsAsync(authContext.CurrentAccount.ID, parent, false).ToListAsync();
+
+        // Forms is a virtual section: its rooms physically live under VirtualRooms,
+        // so its new-item tags must be read from the VirtualRooms root.
+        var tagsSourceFolder = parent.FolderType == FolderType.Forms
+            ? await folderDao.GetFolderAsync(IdConverter.Convert<T>(await globalFolder.GetFolderVirtualRoomsAsync(daoFactory)))
+            : parent;
+
+        var totalTags = await tagDao.GetNewTagsAsync(authContext.CurrentAccount.ID, tagsSourceFolder, false).ToListAsync();
 
         if (totalTags.Count <= 0)
         {
@@ -1096,10 +1104,37 @@ public class FileMarker(
             }
         }
 
-        if (parent.FolderType is FolderType.VirtualRooms or FolderType.AiAgents)
+        if (parent.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.Forms)
         {
             var disabledRooms = await roomsNotificationSettingsHelper.GetDisabledRoomsForCurrentUserAsync();
             totalTags = totalTags.Where(e => !disabledRooms.Contains(e.EntryId.ToString())).ToList();
+        }
+
+        // FillingFormsRoom rooms physically live under VirtualRooms but are shown in the separate Forms
+        // section, so their new-item counts must be attributed to Forms and excluded from the Rooms badge.
+        if (parent.FolderType is FolderType.VirtualRooms or FolderType.Forms)
+        {
+            var folderTagIds = totalTags
+                .Where(t => t.EntryType == FileEntryType.Folder && int.TryParse(t.EntryId?.ToString(), out _))
+                .Select(t => int.Parse(t.EntryId.ToString()))
+                .Distinct()
+                .ToList();
+
+            var formRoomIds = new HashSet<string>();
+            if (folderTagIds.Count > 0)
+            {
+                await foreach (var formRoom in daoFactory.GetFolderDao<int>().GetFoldersAsync(folderTagIds))
+                {
+                    if (formRoom.FolderType == FolderType.FillingFormsRoom)
+                    {
+                        formRoomIds.Add(formRoom.Id.ToString());
+                    }
+                }
+            }
+
+            totalTags = parent.FolderType == FolderType.Forms
+                ? totalTags.Where(t => t.EntryType == FileEntryType.Folder && formRoomIds.Contains(t.EntryId.ToString())).ToList()
+                : totalTags.Where(t => !(t.EntryType == FileEntryType.Folder && formRoomIds.Contains(t.EntryId.ToString()))).ToList();
         }
 
         var countSubNew = 0;
@@ -1118,6 +1153,13 @@ public class FileMarker(
             ((IFolder)parent).NewForMe = parentFolderTag.Count;
         }
 
+        // The Forms anchor folder holds no physical children, so its own new-tag is never returned by the
+        // VirtualRooms-scoped query above. Surface the computed count directly so the section badge is shown.
+        if (parent.FolderType == FolderType.Forms)
+        {
+            ((IFolder)parent).NewForMe = countSubNew;
+        }
+
         if (parent.FolderType != FolderType.VirtualRooms &&
             parent.RootFolderType == FolderType.VirtualRooms &&
             parent.FolderType != FolderType.AiAgents &&
@@ -1127,7 +1169,7 @@ public class FileMarker(
             countSubNew = parentFolderTag.Count;
         }
 
-        if (parentFolderTag.Count != countSubNew)
+        if (parent.FolderType != FolderType.Forms && parentFolderTag.Count != countSubNew)
         {
             if (parent.FolderType is FolderType.VirtualRooms or FolderType.AiAgents)
             {

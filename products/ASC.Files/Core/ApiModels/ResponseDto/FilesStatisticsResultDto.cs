@@ -67,6 +67,12 @@ public class FilesStatisticsResultDto
     /// </summary>
     /// <example>{"title": "My Documents", "usedSpace": 1024}</example>
     public FilesStatisticsFolder AiAgentsUsedSpace { get; set; }
+
+    /// <summary>
+    /// The used space of files in the \"Forms\" section.
+    /// </summary>
+    /// <example>{"title": "My Documents", "usedSpace": 1024}</example>
+    public FilesStatisticsFolder FormsUsedSpace { get; set; }
 }
 
 /// <summary>

@@ -182,6 +182,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
             SearchArea.Archive => q.Where(a => a.FolderType == FolderType.Archive),
             SearchArea.Templates => q.Where(a => a.FolderType == FolderType.RoomTemplates),
             SearchArea.AiAgents => q.Where(a => a.FolderType == FolderType.AiAgents),
+            SearchArea.Forms => q.Where(a => a.FolderType == FolderType.Forms),
             _ => q
         };
 
@@ -583,6 +584,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
             SearchArea.Archive => q.Where(a => a.FolderType == FolderType.Archive),
             SearchArea.Templates => q.Where(a => a.FolderType == FolderType.RoomTemplates),
             SearchArea.AiAgents => q.Where(a => a.FolderType == FolderType.AiAgents),
+            SearchArea.Forms => q.Where(a => a.FolderType == FolderType.Forms),
             SearchArea.Any => q.Where(a => a.FolderType == FolderType.VirtualRooms || a.FolderType == FolderType.Archive),
             _ => q
         };

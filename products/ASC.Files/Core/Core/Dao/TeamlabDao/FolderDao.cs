@@ -78,6 +78,7 @@ internal class FolderDao(
     private const string RoomTemplates = "roomtemplates";
     private const string Archive = "archive";
     private const string AiAgents = "aiagents";
+    private const string Forms = "forms";
     private const string DefaultTemplates = "defaulttemplates";
 
     public virtual async Task<Folder<int>> GetFolderAsync(int folderId)
@@ -345,7 +346,7 @@ internal class FolderDao(
 
     public async Task<FilesStatisticsResultDto> GetFilesUsedSpace()
     {
-        var fileRootFolders = new List<FolderType> { FolderType.USER, FolderType.Archive, FolderType.TRASH, FolderType.VirtualRooms, FolderType.RoomTemplates, FolderType.DefaultTemplates, FolderType.AiAgents };
+        var fileRootFolders = new List<FolderType> { FolderType.USER, FolderType.Archive, FolderType.TRASH, FolderType.VirtualRooms, FolderType.RoomTemplates, FolderType.DefaultTemplates, FolderType.AiAgents, FolderType.Forms };
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var tenantId = _tenantManager.GetCurrentTenantId();
         var result = new FilesStatisticsResultDto();
@@ -385,6 +386,13 @@ internal class FolderDao(
                     result.AiAgentsUsedSpace = new FilesStatisticsFolder
                     {
                         Title = FilesUCResource.AiAgents,
+                        UsedSpace = rootFolder.UsedSpace
+                    };
+                    break;
+                case FolderType.Forms:
+                    result.FormsUsedSpace = new FilesStatisticsFolder
+                    {
+                        Title = FilesUCResource.Forms,
                         UsedSpace = rootFolder.UsedSpace
                     };
                     break;
@@ -1606,6 +1614,10 @@ internal class FolderDao(
                         folder.FolderType = FolderType.AiAgents;
                         folder.Title = AiAgents;
                         break;
+                    case Forms:
+                        folder.FolderType = FolderType.Forms;
+                        folder.Title = Forms;
+                        break;
                     default:
                         folder.FolderType = FolderType.BUNCH;
                         folder.Title = key;
@@ -1731,6 +1743,10 @@ internal class FolderDao(
                     folder.FolderType = FolderType.AiAgents;
                     folder.Title = AiAgents;
                     break;
+                case Forms:
+                    folder.FolderType = FolderType.Forms;
+                    folder.Title = Forms;
+                    break;
                 default:
                     folder.FolderType = FolderType.BUNCH;
                     folder.Title = key;
@@ -1838,6 +1854,11 @@ internal class FolderDao(
     public async Task<int> GetFolderIDAiAgentsAsync(bool createIfNotExists)
     {
         return await (this as IFolderDao<int>).GetFolderIDAsync(FileConstant.ModuleId, AiAgents, null, createIfNotExists);
+    }
+
+    public async Task<int> GetFolderIDFormsAsync(bool createIfNotExists)
+    {
+        return await (this as IFolderDao<int>).GetFolderIDAsync(FileConstant.ModuleId, Forms, null, createIfNotExists);
     }
 
     public async IAsyncEnumerable<OriginData> GetOriginsDataAsync(IEnumerable<int> entriesIds)

@@ -915,6 +915,7 @@ public class VirtualRoomsCommonController(
         {
             SearchArea.Archive => await globalFolderHelper.GetFolderArchive(),
             SearchArea.Templates => await globalFolderHelper.GetFolderRoomTemplatesAsync(),
+            SearchArea.Forms => await globalFolderHelper.GetFolderFormsAsync(),
             _ => await globalFolderHelper.GetFolderVirtualRooms()
         };
 

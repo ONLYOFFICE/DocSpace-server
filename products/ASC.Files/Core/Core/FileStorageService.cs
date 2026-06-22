@@ -379,8 +379,17 @@ public class FileStorageService //: IFileStorageService
             FolderType.Archive => SearchArea.Archive,
             FolderType.RoomTemplates => SearchArea.Templates,
             FolderType.AiAgents => SearchArea.AiAgents,
+            FolderType.Forms => SearchArea.Forms,
             _ => searchArea
         };
+
+        if (parent.FolderType == FolderType.Forms)
+        {
+            // Forms is a virtual section anchored on an empty folder: its rooms are resolved from the
+            // VirtualRooms tree. Browsing it with subfolders would expand the whole VirtualRooms subtree
+            // (including the container itself and other rooms' content), so it is kept as a flat room list.
+            withSubfolders = false;
+        }
 
         int total;
         IEnumerable<FileEntry> entries;

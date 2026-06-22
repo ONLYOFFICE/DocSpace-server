@@ -68,6 +68,15 @@ namespace ASC.Files.Core.Resources {
                 return ResourceManager.GetString("AiAgents", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Forms.
+        /// </summary>
+        public static string Forms {
+            get {
+                return ResourceManager.GetString("Forms", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to Archive.

@@ -59,7 +59,7 @@ public static class DocSpaceHelper
 
         public bool IsPublicSystemFolder()
         {
-            return folderType == FolderType.AiAgents;
+            return folderType is FolderType.AiAgents or FolderType.Forms;
         }
     }
 
