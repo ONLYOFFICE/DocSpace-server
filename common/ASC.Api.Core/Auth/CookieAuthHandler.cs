@@ -45,28 +45,28 @@ public class CookieAuthHandler(
 {
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
+        var endpoint = Context.GetEndpoint();
+        var allowAnonymous = endpoint?.Metadata.GetMetadata<IAllowAnonymous>() is not null;
+
+        var authorization = Request.Cookies[cookiesManager.GetAscCookiesName()]
+                            ?? Request.Headers.Authorization.ToString();
+
+        if (string.IsNullOrEmpty(authorization))
+        {
+            return allowAnonymous
+                ? AuthenticateResult.NoResult()
+                : AuthenticateResult.Fail(new AuthenticationException(nameof(HttpStatusCode.Unauthorized)));
+        }
+
+        authorization = authorization.Trim();
+
+        if (authorization.StartsWith("Bearer ", StringComparison.Ordinal))
+        {
+            authorization = authorization["Bearer ".Length..];
+        }
+
         try
         {
-            var endpoint = Context.GetEndpoint();
-            var allowAnonymous = endpoint?.Metadata.GetMetadata<IAllowAnonymous>() is not null;
-
-            var authorization = Request.Cookies[cookiesManager.GetAscCookiesName()]
-                                ?? Request.Headers.Authorization.ToString();
-
-            if (string.IsNullOrEmpty(authorization))
-            {
-                return allowAnonymous
-                    ? AuthenticateResult.NoResult()
-                    : AuthenticateResult.Fail(new AuthenticationException(nameof(HttpStatusCode.Unauthorized)));
-            }
-
-            authorization = authorization.Trim();
-
-            if (authorization.StartsWith("Bearer ", StringComparison.Ordinal))
-            {
-                authorization = authorization["Bearer ".Length..];
-            }
-
             if (!await securityContext.AuthenticateMeAsync(authorization))
             {
                 return AuthenticateResult.Fail(new AuthenticationException(nameof(HttpStatusCode.Unauthorized)));
@@ -79,7 +79,7 @@ public class CookieAuthHandler(
         }
         finally
         {
-            if (!securityContext.IsAuthenticated)
+            if (!securityContext.IsAuthenticated && !allowAnonymous)
             {
                 securityContext.Logout();
                 cookiesManager.ClearCookies(CookiesType.AuthKey);
