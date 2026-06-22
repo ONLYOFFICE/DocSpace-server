@@ -1013,7 +1013,15 @@ public class PaymentController(
             return null;
         }
 
-        return new CustomerServiceUsageReportDto(report);
+        var customUom = new Dictionary<string, string>();
+        var aiQuota = await quotaService.GetTenantQuotaAsync((int)TenantWalletService.AITools);
+        if (aiQuota != null)
+        {
+            // For ai-tools, usage is displayed in Tokens instead of AI Credits.
+            customUom.Add(aiQuota.ServiceName, "chat");
+        }
+
+        return new CustomerServiceUsageReportDto(report, customUom);
     }
 
     /// <remarks>
