@@ -31,49 +31,15 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Files.Core.Utils;
+namespace ASC.AI.Core.MdTextToDocx;
 
-public class AiStatus
+[ProtoContract]
+public record MdTextToDocxIntegrationEvent : IntegrationEvent
 {
-    public bool Enabled { get; init; }
-    public bool GatewayEnabled { get; init; }
-}
+    private MdTextToDocxIntegrationEvent() : base() { }
 
-[Scope]
-public class AiAccessibility(
-    TenantManager tenantManager,
-    AiGateway aiGateway,
-    SettingsManager settingsManager)
-{
-    public async Task<AiStatus> GetStatusAsync()
-    {
-        var tenantId = tenantManager.GetCurrentTenantId();
+    public MdTextToDocxIntegrationEvent(Guid createBy, int tenantId) : base(createBy, tenantId) { }
 
-        var aiAccessSettings = await settingsManager.LoadAsync<TenantAiAccessSettings>(tenantId);
-        if (!aiAccessSettings.Enabled)
-        {
-            return new AiStatus { Enabled = false, GatewayEnabled = false };
-        }
-
-        if (await aiGateway.IsEnabledAsync())
-        {
-            return new AiStatus { Enabled = true, GatewayEnabled = true };
-        }
-
-        return new AiStatus { Enabled = false, GatewayEnabled = false };
-    }
-
-    public async Task<bool> IsVectorizationEnabledAsync()
-    {
-        var status = await GetStatusAsync();
-        if (status.GatewayEnabled)
-        {
-            return true;
-        }
-
-        var tenantId = tenantManager.GetCurrentTenantId();
-        var settings = await settingsManager.LoadAsync<EncryptedVectorizationSettings>(tenantId);
-
-        return settings.ProviderType != EmbeddingProviderType.None && settings.IsConfigured;
-    }
+    [ProtoMember(1)]
+    public required MdTextToDocxTaskData Data { get; set; }
 }

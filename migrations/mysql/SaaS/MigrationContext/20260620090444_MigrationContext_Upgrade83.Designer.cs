@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     [DbContext(typeof(MigrationContext))]
-    [Migration("20260520151041_MigrationContext_Upgrade84")]
-    partial class MigrationContext_Upgrade84
+    [Migration("20260620090444_MigrationContext_Upgrade83")]
+    partial class MigrationContext_Upgrade83
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -812,9 +812,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("int")
                         .HasColumnName("tenant");
 
-                    b.Property<bool>("Additional")
-                        .HasColumnType("tinyint(1)");
-
                     b.Property<string>("Description")
                         .HasMaxLength(128)
                         .HasColumnType("varchar")
@@ -883,7 +880,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         new
                         {
                             TenantId = -1,
-                            Additional = false,
                             Features = "trial,audit,ldap,sso,customization,thirdparty,restore,oauth,total_size:107374182400,file_size:100,manager:1,statistic,automationapi",
                             Name = "trial",
                             Price = 0m,
@@ -893,7 +889,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         new
                         {
                             TenantId = -2,
-                            Additional = false,
                             Description = "until 01.04.2024",
                             Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:107374182400,file_size:1024,manager:1,statistic,free_backup:2:fixed,automationapi",
                             Name = "admin",
@@ -905,7 +900,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         new
                         {
                             TenantId = -3,
-                            Additional = false,
                             Features = "free,oauth,total_size:2147483648,manager:3,room:12,automationapi",
                             Name = "startup",
                             Price = 0m,
@@ -915,7 +909,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         new
                         {
                             TenantId = -4,
-                            Additional = true,
                             Features = "total_size:1073741824",
                             Name = "disk",
                             Price = 0m,
@@ -926,7 +919,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         new
                         {
                             TenantId = -5,
-                            Additional = true,
                             Features = "manager:1",
                             Name = "admin1",
                             Price = 0m,
@@ -937,7 +929,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         new
                         {
                             TenantId = -6,
-                            Additional = false,
                             Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,file_size:1024,statistic,free_backup:2:fixed,automationapi",
                             Name = "subscription",
                             Price = 0m,
@@ -948,7 +939,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         new
                         {
                             TenantId = -7,
-                            Additional = false,
                             Features = "non-profit,audit,ldap,sso,thirdparty,restore,oauth,contentsearch,total_size:2147483648,file_size:1024,manager:20,statistic,automationapi",
                             Name = "nonprofit",
                             Price = 0m,
@@ -959,7 +949,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         new
                         {
                             TenantId = -8,
-                            Additional = false,
                             Features = "free,oauth,total_size:107374182400,manager:100,room:100,automationapi",
                             Name = "zoom",
                             Price = 0m,
@@ -969,7 +958,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         new
                         {
                             TenantId = -9,
-                            Additional = false,
                             Description = "since 01.04.2024",
                             Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,free_backup:2:fixed,automationapi",
                             Name = "admin",
@@ -981,7 +969,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         new
                         {
                             TenantId = -10,
-                            Additional = false,
                             Description = "since 10.02.2025",
                             Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,year,free_backup:2:fixed,automationapi",
                             Name = "adminyear",
@@ -993,7 +980,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         new
                         {
                             TenantId = -11,
-                            Additional = true,
                             Features = "total_size:1073741824",
                             Name = "storage",
                             Price = 0.14m,
@@ -1005,7 +991,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         new
                         {
                             TenantId = -12,
-                            Additional = true,
                             Features = "backup",
                             Name = "backup",
                             Price = 10m,
@@ -1016,23 +1001,10 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         new
                         {
                             TenantId = -13,
-                            Additional = true,
                             Features = "aitools",
                             Name = "aitools",
                             Price = 1m,
                             ServiceName = "ai-tools",
-                            Visible = true,
-                            Wallet = true
-                        },
-                        new
-                        {
-                            TenantId = -14,
-                            Additional = false,
-                            Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,free_backup:2:fixed,automationapi",
-                            Name = "adminwallet",
-                            Price = 20m,
-                            ProductId = "1013",
-                            ServiceName = "admin",
                             Visible = true,
                             Wallet = true
                         });
@@ -3783,50 +3755,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasAnnotation("MySql:CharSet", "utf8");
                 });
 
-            modelBuilder.Entity("ASC.Files.Core.EF.DbFileKeys", b =>
-                {
-                    b.Property<int>("TenantId")
-                        .HasColumnType("int")
-                        .HasColumnName("tenant_id");
-
-                    b.Property<int>("FileId")
-                        .HasColumnType("int")
-                        .HasColumnName("file_id");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("char(36)")
-                        .HasColumnName("user_id")
-                        .UseCollation("utf8_general_ci")
-                        .HasAnnotation("MySql:CharSet", "utf8");
-
-                    b.Property<DateTime>("CreateOn")
-                        .HasColumnType("datetime")
-                        .HasColumnName("create_on");
-
-                    b.Property<string>("PrivateKeyEnc")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("private_key_enc")
-                        .UseCollation("utf8_general_ci")
-                        .HasAnnotation("MySql:CharSet", "utf8");
-
-                    b.Property<Guid>("PublicKeyId")
-                        .HasColumnType("char(36)")
-                        .HasColumnName("public_key_id")
-                        .UseCollation("utf8_general_ci")
-                        .HasAnnotation("MySql:CharSet", "utf8");
-
-                    b.HasKey("TenantId", "FileId", "UserId")
-                        .HasName("PRIMARY");
-
-                    b.HasIndex("TenantId", "UserId")
-                        .HasDatabaseName("tenant_id_user_id");
-
-                    b.ToTable("files_file_keys", (string)null);
-
-                    b.HasAnnotation("MySql:CharSet", "utf8");
-                });
-
             modelBuilder.Entity("ASC.Files.Core.EF.DbFileOrder", b =>
                 {
                     b.Property<int>("TenantId")
@@ -4744,8 +4672,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Property<bool>("SaveFormAsXLSX")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("tinyint(1)")
-                        .HasColumnName("save_form_as_xlsx")
-                        .HasDefaultValueSql("1");
+                        .HasDefaultValue(true)
+                        .HasColumnName("save_form_as_xlsx");
 
                     b.Property<bool>("SendFormToExternalDB")
                         .ValueGeneratedOnAdd()
@@ -6133,17 +6061,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .WithMany()
                         .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Tenant");
-                });
-
-            modelBuilder.Entity("ASC.Files.Core.EF.DbFileKeys", b =>
-                {
-                    b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
-                        .WithMany()
-                        .HasForeignKey("TenantId")
-                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Tenant");

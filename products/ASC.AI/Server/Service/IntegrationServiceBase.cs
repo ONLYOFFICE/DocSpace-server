@@ -41,23 +41,34 @@ public abstract class IntegrationServiceBase(
 {
     protected Guid CurrentUserId => authContext.CurrentAccount.ID;
 
-    protected async Task AssertUserHasAccessAsync(IEnumerable<EmployeeType> types)
+    protected async Task<int?> AssertUserHasAccessAsync(IEnumerable<EmployeeType> types, string? entityId = null)
     {
         var type = await userManager.GetUserTypeAsync(CurrentUserId);
         if (!types.Contains(type))
         {
             throw new SecurityException();
         }
-    }
 
-    protected async Task AssertEntryAccessAsync(int entryId)
-    {
-        var folder = await daoFactory.GetFolderDao<int>().GetFolderAsync(entryId)
-            ?? throw new ItemNotFoundException();
+        if (entityId == null)
+        {
+            return null;
+        }
+
+        if (!int.TryParse(entityId, out var parsed))
+        {
+            throw new ArgumentException($"entityId must be a numeric folder id, got '{entityId}'");
+        }
+
+        int? entryId = parsed;
+
+        var folder = await daoFactory.GetFolderDao<int>().GetFolderAsync(entryId.Value)
+                     ?? throw new ItemNotFoundException();
 
         if (!await fileSecurity.CanUseAiAsync(folder))
         {
             throw new SecurityException();
         }
+
+        return entryId;
     }
 }

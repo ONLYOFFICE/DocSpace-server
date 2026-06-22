@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -143,7 +143,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
     }
 
     public IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
-        bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = null, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, bool containingForms = false)
+        bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = null, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, bool containingForms = false, List<FolderType> folderType = null)
     {
         if (dao.CheckInvalidFilter(filterType))
         {
@@ -690,7 +690,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
     }
 
     public Task<int> GetFoldersCountAsync(string parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool withSubfolders = false, bool excludeSubject = false, string roomId = null,
-        FolderType parentType = FolderType.DEFAULT, AdditionalFilterOption additionalFilterOption = AdditionalFilterOption.All)
+        FolderType parentType = FolderType.DEFAULT, AdditionalFilterOption additionalFilterOption = AdditionalFilterOption.All, List<FolderType> folderType = null)
     {
         throw new NotImplementedException();
     }
@@ -761,7 +761,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         throw new NotImplementedException();
     }
 
-    public IAsyncEnumerable<Folder<string>> GetFoldersByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool excludeSubject, Location? location, int trashId, string parentId, OrderBy orderBy, int offset, int count)
+    public IAsyncEnumerable<Folder<string>> GetFoldersByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool excludeSubject, Location? location, int trashId, string parentId, List<FolderType> folderType, OrderBy orderBy, int offset, int count)
     {
         throw new NotImplementedException();
     }

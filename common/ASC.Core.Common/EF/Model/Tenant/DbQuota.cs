@@ -231,7 +231,7 @@ public static class DbQuotaExtension
                     ServiceGroup = null,
                     Visible = true,
                     Wallet = true,
-                    Additional = true
+                    Additional = false
                 },
                 new DbQuota
                 {

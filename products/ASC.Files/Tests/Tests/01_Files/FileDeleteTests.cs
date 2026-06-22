@@ -212,6 +212,170 @@ public class FileDeleteTests(
         await MoveFileToTrash(createdRoom.Id);
     }
 
+    [Fact]
+    public async Task MoveFilesToTrash_WithoutFolderTypeFilter_ReturnsFilesFromMyDocumentsAndRooms()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+
+        var myFile = await CreateFileInMy("trash_my.docx", Initializer.Owner);
+
+        var customRoom = await CreateCustomRoom("trash_custom_room");
+        var customRoomFile = await CreateFile("trash_custom.docx", customRoom.Id);
+
+        var publicRoom = await CreatePublicRoom("trash_public_room");
+        var publicRoomFile = await CreateFile("trash_public.docx", publicRoom.Id);
+
+        var vdrRoom = await CreateVDRRoom("trash_vdr_room");
+        var vdrRoomFile = await CreateFile("trash_vdr.docx", vdrRoom.Id);
+
+        await MoveFilesToTrash(myFile, customRoomFile, publicRoomFile, vdrRoomFile);
+
+        // Act
+        var trash = await GetTrashAsync();
+
+        // Assert - without the filter every trashed file is returned regardless of its original folder type
+        trash.Files.Should().Contain(f => f.Title == myFile.Title);
+        trash.Files.Should().Contain(f => f.Title == customRoomFile.Title);
+        trash.Files.Should().Contain(f => f.Title == publicRoomFile.Title);
+        trash.Files.Should().Contain(f => f.Title == vdrRoomFile.Title);
+    }
+
+    [Fact]
+    public async Task MoveFilesToTrash_FilterByMyDocuments_ReturnsOnlyMyDocumentsFiles()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+
+        var myFile = await CreateFileInMy("trash_my.docx", Initializer.Owner);
+
+        var customRoom = await CreateCustomRoom("trash_custom_room");
+        var customRoomFile = await CreateFile("trash_custom.docx", customRoom.Id);
+
+        await MoveFilesToTrash(myFile, customRoomFile);
+
+        // Act
+        var trash = await GetTrashAsync([FolderType.USER]);
+
+        // Assert - the filter narrows the trash to files originally located in "My documents"
+        trash.Files.Should().Contain(f => f.Title == myFile.Title);
+        trash.Files.Should().NotContain(f => f.Title == customRoomFile.Title);
+    }
+
+    [Fact]
+    public async Task MoveFilesToTrash_FilterByRooms_ReturnsOnlyRoomFiles()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+
+        var myFile = await CreateFileInMy("trash_my.docx", Initializer.Owner);
+
+        var customRoom = await CreateCustomRoom("trash_custom_room");
+        var customRoomFile = await CreateFile("trash_custom.docx", customRoom.Id);
+
+        var publicRoom = await CreatePublicRoom("trash_public_room");
+        var publicRoomFile = await CreateFile("trash_public.docx", publicRoom.Id);
+
+        await MoveFilesToTrash(myFile, customRoomFile, publicRoomFile);
+
+        // Act - VirtualRooms is the common ancestor of every room, so it selects all files originally from rooms
+        var trash = await GetTrashAsync([FolderType.VirtualRooms]);
+
+        // Assert
+        trash.Files.Should().Contain(f => f.Title == customRoomFile.Title);
+        trash.Files.Should().Contain(f => f.Title == publicRoomFile.Title);
+        trash.Files.Should().NotContain(f => f.Title == myFile.Title);
+    }
+
+    [Theory]
+    [MemberData(nameof(RoomTypeFilterCases))]
+    public async Task MoveFilesToTrash_FilterBySpecificRoomType_ReturnsOnlyThatRoomFiles(RoomType roomType, FolderType folderTypeFilter)
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+
+        var myFile = await CreateFileInMy("trash_my.docx", Initializer.Owner);
+
+        var targetRoom = await CreateRoom(roomType, "trash_target_room");
+        var targetRoomFile = await CreateFile("trash_target.docx", targetRoom.Id);
+
+        var otherRoom = await CreateCustomRoom("trash_other_room");
+        var otherRoomFile = await CreateFile("trash_other.docx", otherRoom.Id);
+
+        await MoveFilesToTrash(myFile, targetRoomFile, otherRoomFile);
+
+        // Act
+        var trash = await GetTrashAsync([folderTypeFilter]);
+
+        // Assert
+        trash.Files.Should().Contain(f => f.Title == targetRoomFile.Title);
+        trash.Files.Should().NotContain(f => f.Title == myFile.Title);
+
+        if (roomType != RoomType.CustomRoom)
+        {
+            trash.Files.Should().NotContain(f => f.Title == otherRoomFile.Title);
+        }
+    }
+
+    [Fact]
+    public async Task MoveFilesToTrash_FilterByMultipleFolderTypes_ReturnsFilesFromAllRequestedTypes()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+
+        var myFile = await CreateFileInMy("trash_my.docx", Initializer.Owner);
+
+        var customRoom = await CreateCustomRoom("trash_custom_room");
+        var customRoomFile = await CreateFile("trash_custom.docx", customRoom.Id);
+
+        var publicRoom = await CreatePublicRoom("trash_public_room");
+        var publicRoomFile = await CreateFile("trash_public.docx", publicRoom.Id);
+
+        await MoveFilesToTrash(myFile, customRoomFile, publicRoomFile);
+
+        // Act
+        var trash = await GetTrashAsync([FolderType.USER, FolderType.CustomRoom]);
+
+        // Assert
+        trash.Files.Should().Contain(f => f.Title == myFile.Title);
+        trash.Files.Should().Contain(f => f.Title == customRoomFile.Title);
+        trash.Files.Should().NotContain(f => f.Title == publicRoomFile.Title);
+    }
+
+    public static TheoryData<RoomType, FolderType> RoomTypeFilterCases =>
+        new()
+        {
+            { RoomType.CustomRoom, FolderType.CustomRoom },
+            { RoomType.PublicRoom, FolderType.PublicRoom },
+            { RoomType.EditingRoom, FolderType.EditingRoom },
+            { RoomType.VirtualDataRoom, FolderType.VirtualDataRoom }
+        };
+
+    private async Task<FolderContentDtoInteger> GetTrashAsync(List<FolderType>? folderType = null)
+    {
+        var trashId = await GetTrashFolderIdAsync(Initializer.Owner);
+
+        return (await _foldersApi.GetFolderByFolderIdAsync(trashId, folderType: folderType, cancellationToken: TestContext.Current.CancellationToken)).Response;
+    }
+
+    private async Task MoveFilesToTrash(params FileDtoInteger[] files)
+    {
+        foreach (var file in files)
+        {
+            await DeleteFileAndWaitForCompletion(file);
+        }
+    }
+
+    private async Task<FolderDtoInteger> CreateRoom(RoomType roomType, string title) => roomType switch
+    {
+        RoomType.CustomRoom => await CreateCustomRoom(title),
+        RoomType.PublicRoom => await CreatePublicRoom(title),
+        RoomType.EditingRoom => await CreateCollaborationRoom(title),
+        RoomType.VirtualDataRoom => await CreateVDRRoom(title),
+        RoomType.FillingFormsRoom => await CreateFillingFormsRoom(title),
+        _ => throw new ArgumentOutOfRangeException(nameof(roomType), roomType, "Unsupported room type")
+    };
+
     private async Task MoveFileToTrash(int roomId)
     {
         var trashId = await GetTrashFolderIdAsync(Initializer.Owner);

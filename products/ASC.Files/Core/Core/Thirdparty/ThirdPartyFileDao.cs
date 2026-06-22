@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -199,7 +199,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
     }
 
     public async IAsyncEnumerable<File<string>> GetFilesAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
-        string[] extension, bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = null, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, FormsItemDto formsItemDto = null, bool applyFormStepFilter = false, bool applyFfrStartedFormsFilter = false)
+        string[] extension, bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = null, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, FormsItemDto formsItemDto = null, bool applyFormStepFilter = false, bool applyFfrStartedFormsFilter = false, List<FolderType> folderType = null)
     {
         if (filterType == FilterType.FoldersOnly)
         {
@@ -782,7 +782,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
     }
 
     public Task<int> GetFilesCountAsync(string parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent, bool withSubfolders = false,
-        bool excludeSubject = false, string roomId = null, FormsItemDto formsItemDto = null, FolderType parentType = FolderType.DEFAULT, AdditionalFilterOption additionalFilterOption = AdditionalFilterOption.All, bool applyFormStepFilter = false)
+        bool excludeSubject = false, string roomId = null, FormsItemDto formsItemDto = null, FolderType parentType = FolderType.DEFAULT, AdditionalFilterOption additionalFilterOption = AdditionalFilterOption.All, bool applyFormStepFilter = false, List<FolderType> folderType = null)
     {
         throw new NotImplementedException();
     }
@@ -808,7 +808,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
     }
 
     public IAsyncEnumerable<File<string>> GetFilesByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
-        string searchText, string[] extension, bool searchInContent, bool excludeSubject, Location? location, int trashId, string parentId, OrderBy orderBy, int offset, int count)
+        string searchText, string[] extension, bool searchInContent, bool excludeSubject, Location? location, int trashId, string parentId, List<FolderType> folderType, OrderBy orderBy, int offset, int count)
     {
         return AsyncEnumerable.Empty<File<string>>();
     }

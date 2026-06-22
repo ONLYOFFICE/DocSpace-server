@@ -181,8 +181,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasKey("Id")
                         .HasName("PRIMARY");
 
-                    b.HasIndex("ProfileId");
-
                     b.HasIndex("TenantId", "ActionType", "EntryId")
                         .HasDatabaseName("IX_tenant_id_action_type_entry_id");
 
@@ -5317,8 +5315,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Property<bool>("SaveFormAsXLSX")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("tinyint(1)")
-                        .HasColumnName("save_form_as_xlsx")
-                        .HasDefaultValueSql("1");
+                        .HasDefaultValue(true)
+                        .HasColumnName("save_form_as_xlsx");
 
                     b.Property<bool>("SendFormToExternalDB")
                         .ValueGeneratedOnAdd()
@@ -6331,19 +6329,11 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
             modelBuilder.Entity("ASC.AI.Integration.Database.Models.DbAssignment", b =>
                 {
-                    b.HasOne("ASC.AI.Integration.Database.Models.DbProfile", "Profile")
-                        .WithMany()
-                        .HasForeignKey("ProfileId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
                         .WithMany()
                         .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Profile");
 
                     b.Navigation("Tenant");
                 });

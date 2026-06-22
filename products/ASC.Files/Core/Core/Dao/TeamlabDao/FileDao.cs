@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -275,7 +275,7 @@ internal class FileDao(
     }
 
     public async IAsyncEnumerable<File<int>> GetFilesAsync(int parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension,
-        bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, int roomId = 0, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, FormsItemDto formsItemDto = null, bool applyFormStepFilter = false, bool applyFfrStartedFormsFilter = false)
+        bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, int roomId = 0, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, FormsItemDto formsItemDto = null, bool applyFormStepFilter = false, bool applyFfrStartedFormsFilter = false, List<FolderType> folderType = null)
     {
         if (filterType == FilterType.FoldersOnly || count == 0)
         {
@@ -284,7 +284,7 @@ internal class FileDao(
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        var q = await GetFilesQueryWithFilters(parentId, orderBy, filterType, subjectGroup, subjectID, searchText, searchInContent, withSubfolders, excludeSubject, roomId, extension, filesDbContext, formsItemDto);
+        var q = await GetFilesQueryWithFilters(parentId, orderBy, filterType, subjectGroup, subjectID, searchText, searchInContent, withSubfolders, excludeSubject, roomId, extension, filesDbContext, formsItemDto, folderType);
 
         if (containingMyFiles)
         {
@@ -762,7 +762,7 @@ internal class FileDao(
     }
 
     public async Task<int> GetFilesCountAsync(int parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent,
-        bool withSubfolders = false, bool excludeSubject = false, int roomId = 0, FormsItemDto formsItemDto = null, FolderType parentType = FolderType.DEFAULT, AdditionalFilterOption additionalFilterOption = AdditionalFilterOption.All, bool applyFormStepFilter = false)
+        bool withSubfolders = false, bool excludeSubject = false, int roomId = 0, FormsItemDto formsItemDto = null, FolderType parentType = FolderType.DEFAULT, AdditionalFilterOption additionalFilterOption = AdditionalFilterOption.All, bool applyFormStepFilter = false, List<FolderType> folderType = null)
     {
         if (filterType == FilterType.FoldersOnly)
         {
@@ -771,7 +771,7 @@ internal class FileDao(
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        var q = await GetFilesQueryWithFilters(parentId, null, filterType, subjectGroup, subjectId, searchText, searchInContent, withSubfolders, excludeSubject, roomId, extension, filesDbContext, formsItemDto);
+        var q = await GetFilesQueryWithFilters(parentId, null, filterType, subjectGroup, subjectId, searchText, searchInContent, withSubfolders, excludeSubject, roomId, extension, filesDbContext, formsItemDto, folderType);
         if (additionalFilterOption != AdditionalFilterOption.All)
         {
             q = ApplyAdditionalFileFilters(q, filesDbContext, parentId, parentType, additionalFilterOption);
@@ -2121,6 +2121,7 @@ internal class FileDao(
         Location? location,
         int trashId,
         int parentId,
+        List<FolderType> folderType,
         OrderBy orderBy,
         int offset,
         int count)
@@ -2132,7 +2133,7 @@ internal class FileDao(
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        var q = GetFilesByTagQuery(filesDbContext, tagOwner, tagType, location, trashId, parentId);
+        var q = GetFilesByTagQuery(filesDbContext, tagOwner, tagType, location, trashId, parentId, folderType);
 
         q = await GetFilesQueryWithFilters(q, filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject);
 
@@ -2621,7 +2622,8 @@ internal class FileDao(
         int roomId,
         string[] extension,
         FilesDbContext filesDbContext,
-        FormsItemDto formsItemDto)
+        FormsItemDto formsItemDto,
+        List<FolderType> folderType = null)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
         var currentUserId = _authContext.CurrentAccount.ID;
@@ -2756,6 +2758,19 @@ internal class FileDao(
                 .Select(r => r.file);
         }
 
+        if (folderType is { Count: > 0 })
+        {
+            q = q.Join(filesDbContext.TagLink.Join(filesDbContext.Tag, l => l.TagId, t => t.Id, (l, t) => new
+                {
+                    t.TenantId, t.Type, t.Name, l.EntryId, l.EntryType
+                }), f => f.Id.ToString(), t => t.EntryId, (file, tag) => new { file, tag })
+                .Where(r => r.tag.Type == TagType.Origin && r.tag.EntryType == FileEntryType.File &&
+                            filesDbContext.Tree.Any(t => t.FolderId == Convert.ToInt32(r.tag.Name) &&
+                                                         filesDbContext.Folders.Any(f =>
+                                                             f.Id == t.ParentId && f.TenantId == tenantId && folderType.Contains(f.FolderType))))
+                .Select(r => r.file);
+        }
+
         return q;
     }
 
@@ -2830,7 +2845,7 @@ internal class FileDao(
         return q;
     }
 
-    private IQueryable<FileByTagQuery> GetFilesByTagQuery(FilesDbContext filesDbContext, Guid tagOwner, IEnumerable<TagType> tagType, Location? location, int? trashId, int? parentId)
+    private IQueryable<FileByTagQuery> GetFilesByTagQuery(FilesDbContext filesDbContext, Guid tagOwner, IEnumerable<TagType> tagType, Location? location, int? trashId, int? parentId, List<FolderType> folderType)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
 
@@ -2852,6 +2867,12 @@ internal class FileDao(
         if (parentId != 0)
         {
             initQuery = initQuery.Where(r => filesDbContext.Tree.Any(a => a.FolderId == r.f.ParentId && a.ParentId == parentId));
+        }
+
+        if (folderType is { Count: > 0 })
+        {
+            initQuery = initQuery.Where(r => filesDbContext.Tree.Any(a => a.FolderId == r.f.ParentId &&
+                filesDbContext.Folders.Any(f => f.Id == a.ParentId && f.TenantId == tenantId && folderType.Contains(f.FolderType))));
         }
 
         var query = initQuery.Select(x => new FileByTagQuery

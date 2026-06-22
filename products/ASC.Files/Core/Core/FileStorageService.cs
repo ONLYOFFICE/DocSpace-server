@@ -264,7 +264,8 @@ public class FileStorageService //: IFileStorageService
         Location? location = null,
         int? groupId = null,
         T parentFolderId = default,
-        RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None)
+        RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None,
+        List<FolderType> folderType = null)
     {
         var subjectId = string.IsNullOrEmpty(subject) ? Guid.Empty : new Guid(subject);
         var subjectOwnerIdGuid = string.IsNullOrEmpty(subjectOwnerId) ? Guid.Empty : new Guid(subjectOwnerId);
@@ -415,7 +416,8 @@ public class FileStorageService //: IFileStorageService
                 location,
                 groupId,
                 parentFolderId,
-                privacyFilter);
+                privacyFilter,
+                folderType);
         }
         catch (Exception e)
         {
@@ -987,14 +989,6 @@ public class FileStorageService //: IFileStorageService
 
             if (chatSettings != null)
             {
-                if (chatSettings.ProviderId <= 0 && !(chatSettings.ProviderId == -1 && await gateway.IsEnabledAsync()))
-                {
-                    throw new ArgumentException(nameof(chatSettings.ProviderId));
-                }
-
-                ArgumentException.ThrowIfNullOrEmpty(chatSettings.ModelId);
-
-                newFolder.SettingsChatProviderId = chatSettings.ProviderId;
                 newFolder.SettingsChatParameters = chatSettings.Map();
             }
 
@@ -1229,18 +1223,6 @@ public class FileStorageService //: IFileStorageService
             var oldTitle = folder.Title;
             WatermarkSettings watermark = null;
             RoomDataLifetime lifetime = null;
-
-            if (chatSettingsChanged)
-            {
-                var chatSettings = updateData.ChatSettings;
-
-                if (chatSettings.ProviderId <= 0 && !(chatSettings.ProviderId == -1 && await gateway.IsEnabledAsync()))
-                {
-                    throw new ArgumentException(nameof(updateData.ChatSettings.ProviderId));
-                }
-
-                ArgumentException.ThrowIfNullOrEmpty(updateData.ChatSettings.ModelId);
-            }
 
             if (watermarkChanged)
             {
@@ -5829,7 +5811,7 @@ public class FileStorageService //: IFileStorageService
 
             var (defaultTitle, defaultAccess) = folder.FolderType switch
             {
-                FolderType.PublicRoom => (FilesCommonResource.DefaultExternalLinkTitle, entry is File<T> { IsForm: true } ? FileShare.FillForms : FileShare.Read),
+                FolderType.PublicRoom => (FilesCommonResource.DefaultExternalLinkTitle, entry is File<T> { IsForm: true } ? FileShare.Editing : FileShare.Read),
                 FolderType.FillingFormsRoom => (FilesCommonResource.FillOutExternalLinkTitle, FileShare.FillForms),
                 _ => throw new InvalidOperationException()
             };
