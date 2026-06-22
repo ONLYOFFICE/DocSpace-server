@@ -239,7 +239,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         return this;
     }
 
-    public ConnectionStringManager AddOpensearch(bool withDashboard = true, bool withDataVolume = true)
+    public ConnectionStringManager AddOpensearch(bool withDashboard = true, bool withDataVolume = true, bool? isProxied = null)
     {
         var dockerfileContext = Path.Combine(builder.AppHostDirectory, "Dockerfiles", "opensearch");
 
@@ -248,7 +248,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             .WithImage("onlyoffice-opensearch")
             .WithImageTag(Constants.OpensearchVersion)
             .WithBuildArg("OPENSEARCH_VERSION", Constants.OpensearchVersion)
-            .WithHttpEndpoint(port: Constants.OpensearchPort, targetPort: Constants.OpensearchPort, name: "http", isProxied: false)
+            .WithHttpEndpoint(port: Constants.OpensearchPort, targetPort: Constants.OpensearchPort, name: "http", isProxied: isProxied)
             .WithEnvironment("DISABLE_INSTALL_DEMO_CONFIG", "true")
             .WithEnvironment("plugins.security.disabled", "true")
             .WithEnvironment("discovery.type", "single-node");

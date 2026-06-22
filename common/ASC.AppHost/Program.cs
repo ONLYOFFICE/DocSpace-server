@@ -63,7 +63,7 @@ switch (launchProfile)
             .AddMySql(withDataVolume: false)
             .AddRabbitMq()
             .AddRedis()
-            .AddOpensearch(withDashboard: false)
+            .AddOpensearch(withDashboard: false, isProxied: false)
             .AllowPortalRegistration();
 
         configurator
