@@ -35,7 +35,7 @@ namespace ASC.AI.Core.Provider;
 
 [Scope]
 public class AiProviderService(
-    IAiProviderDao providerDao,
+    AiProviderDao providerDao,
     TenantManager tenantManager,
     AuthContext authContext,
     AiConfiguration aiConfig,
