@@ -35,6 +35,7 @@ extern alias ASCWebApi;
 extern alias ASCFiles;
 extern alias ASCPeople;
 extern alias ASCFilesService;
+global using System.Diagnostics;
 global using System.Net;
 global using System.Net.Http.Headers;
 global using System.Runtime.CompilerServices;

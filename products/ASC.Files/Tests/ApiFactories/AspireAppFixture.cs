@@ -106,7 +106,7 @@ public class AspireAppFixture : IAsyncLifetime
         // Lowercase, starts with a letter, 13 chars (> 6) — a valid portal alias and Origin host.
         var portalName = "t" + Guid.NewGuid().ToString("N")[..12];
 
-        var registration = await RegisterPortalAsync(new RegisterPortalModel
+        var registration = await Timing.Measure("portal.register", () => RegisterPortalAsync(new RegisterPortalModel
         {
             PortalName = portalName,
             FirstName = "Portal",
@@ -116,7 +116,7 @@ public class AspireAppFixture : IAsyncLifetime
             Language = "en-US",
             TimeZoneName = "UTC",
             SkipWelcome = true
-        }, cancellationToken);
+        }, cancellationToken));
 
         // The owner Id is unique to this portal and comes straight from the registration response.
         var owner = new User(Initializer.OwnerEmail, Initializer.OwnerPassword)

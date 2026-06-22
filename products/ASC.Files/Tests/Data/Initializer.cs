@@ -87,13 +87,20 @@ public static class Initializer
                 "The HttpClient is not associated with a portal. Create clients via AspireAppFixture.CreatePortalClients.");
         }
 
-        user.PasswordHash ??= GetClientPassword(user.Password);
+        if (user.PasswordHash == null)
+        {
+            var hashSw = Stopwatch.StartNew();
+            user.PasswordHash = GetClientPassword(user.Password);
+            Timing.Write($"hash({user.Email})", hashSw.ElapsedMilliseconds);
+        }
 
+        var authSw = Stopwatch.StartNew();
         var authMe = await authApi.AuthenticateMeAsync(new AuthRequestsDto
         {
             UserName = user.Email,
             PasswordHash = user.PasswordHash
         }, TestContext.Current.CancellationToken);
+        Timing.Write($"auth({user.Email})", authSw.ElapsedMilliseconds);
 
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authMe.Response.Token);
     }

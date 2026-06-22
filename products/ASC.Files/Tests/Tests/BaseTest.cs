@@ -100,6 +100,8 @@ public class BaseTest(
 
     public async ValueTask InitializeAsync()
     {
+        var setupSw = Stopwatch.StartNew();
+
         // Register a brand-new portal for this test and bind a fresh set of clients to it.
         _clients = await fixture.CreatePortalAsync(TestContext.Current.CancellationToken);
 
@@ -126,7 +128,10 @@ public class BaseTest(
         _authenticationApi = _clients.AuthenticationApi;
 
         await _filesClient.Authenticate(Owner);
-        _ = await _foldersApi.GetRootFoldersAsync(cancellationToken: TestContext.Current.CancellationToken);
+
+        // NOTE: the owner's root folder tree is provisioned lazily on first access. We intentionally
+        // do NOT warm it up here — tests that never touch the owner's folders should not pay for it.
+        Timing.Write("setup.total", setupSw.ElapsedMilliseconds);
     }
 
     public ValueTask DisposeAsync()
@@ -146,6 +151,7 @@ public class BaseTest(
 
         var fakeMember = Initializer.FakerMember.Generate();
 
+        var memberSw = Stopwatch.StartNew();
         var createMemberResponse = await _clients.ProfilesApi.AddMemberWithHttpInfoAsync(new MemberRequestDto
         {
             CultureName = "en-US",
@@ -156,6 +162,7 @@ public class BaseTest(
             LastName = fakeMember.LastName,
             Type = employeeType,
         }, TestContext.Current.CancellationToken);
+        Timing.Write($"invite.addMember({employeeType})", memberSw.ElapsedMilliseconds);
 
         if (createMemberResponse.StatusCode != HttpStatusCode.OK)
         {
@@ -238,7 +245,10 @@ public class BaseTest(
 
     protected async Task<FileDtoInteger> CreateFile(string fileName, int folderId)
     {
-        return (await _filesApi.CreateFileAsync(folderId, new CreateFileJsonElement(fileName))).Response;
+        var sw = Stopwatch.StartNew();
+        var result = (await _filesApi.CreateFileAsync(folderId, new CreateFileJsonElement(fileName))).Response;
+        Timing.Write($"createFile({fileName})", sw.ElapsedMilliseconds);
+        return result;
     }
 
     protected async Task<FolderDtoInteger> CreateFolder(string folderName, FolderType folderType, User user)
@@ -363,11 +373,35 @@ public class BaseTest(
         return openEditResult.File;
     }
 
-    public async Task<int> GetFolderIdAsync(FolderType folderType, User user)
+    protected async Task<int> GetFolderIdAsync(FolderType folderType, User user)
     {
         await _filesClient.Authenticate(user);
 
+        var rootSw = Stopwatch.StartNew();
+        if (folderType == FolderType.USER)
+        {
+            var myFolder = await _foldersApi.GetMyFolderAsync(cancellationToken: TestContext.Current.CancellationToken);
+            Timing.Write($"getMy({user.Email})", rootSw.ElapsedMilliseconds);
+            return myFolder.Response.Current.Id;
+        }
+
+        if (folderType == FolderType.Favorites)
+        {
+            var favoritesFolder = await _foldersApi.GetFavoritesFolderAsync(cancellationToken: TestContext.Current.CancellationToken);
+            Timing.Write($"getFavorites({user.Email})", rootSw.ElapsedMilliseconds);
+            return favoritesFolder.Response.Current.Id;
+        }
+
+        if (folderType == FolderType.Recent)
+        {
+            var recentFolder = await _foldersApi.GetRecentFolderAsync(cancellationToken: TestContext.Current.CancellationToken);
+            Timing.Write($"getRecent({user.Email})", rootSw.ElapsedMilliseconds);
+            return recentFolder.Response.Current.Id;
+        }
+
         var rootFolder = (await _foldersApi.GetRootFoldersAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
+        Timing.Write($"getRoot({user.Email})", rootSw.ElapsedMilliseconds);
+
         var folderId = rootFolder.FirstOrDefault(r => r.Current.RootFolderType.HasValue && r.Current.RootFolderType.Value == folderType)!.Current.Id;
 
         return folderId;
