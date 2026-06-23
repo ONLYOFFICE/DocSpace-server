@@ -61,7 +61,7 @@ public class DocsCloudController(
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(404, "Quota could not be found")]
     [HttpPost("trial")]
-    public async Task<bool> UpdateWalletPayment()
+    public async Task<bool> StartDocsCloudTrial()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
