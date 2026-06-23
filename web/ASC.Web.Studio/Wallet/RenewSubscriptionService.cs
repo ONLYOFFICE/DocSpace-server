@@ -93,7 +93,7 @@ public class RenewSubscriptionService(
             {
                 logger.InfoRenewSubscriptionServiceFound(expiredWalletQuotas.Count);
 
-                foreach (var expiredWalletQuota in expiredWalletQuotas)
+                foreach (var expiredWalletQuota in expiredWalletQuotas.OrderBy(x => _walletQuotas[x.Quota].Additional))
                 {
                     await RenewSubscriptionAsync(expiredWalletQuota);
                 }
