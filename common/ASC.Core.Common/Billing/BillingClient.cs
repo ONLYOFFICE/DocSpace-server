@@ -273,6 +273,12 @@ public class BillingClient
         return JsonSerializer.Deserialize<SubscriptionToWalletResult>(result);
     }
 
+    public async Task<bool> GetDocsCloudTrialAsync(string portalId)
+    {
+        var result = await RequestAsync("getwdocstrial", portalId);
+
+        return result == "\"ok\"";
+    }
 
     private string CreateAuthToken(string pkey, string machinekey)
     {

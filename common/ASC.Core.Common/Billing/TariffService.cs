@@ -447,6 +447,13 @@ public class TariffService(
         }
     }
 
+    public async Task<bool> GetDocsCloudTrialAsync(int tenantId)
+    {
+        var portalId = await coreSettings.GetKeyAsync(tenantId);
+
+        return await billingClient.GetDocsCloudTrialAsync(portalId);
+    }
+
     public async Task SetTariffAsync(int tenantId, Tariff tariff, List<TenantQuota> quotas = null)
     {
         ArgumentNullException.ThrowIfNull(tariff);

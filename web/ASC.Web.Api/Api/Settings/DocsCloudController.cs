@@ -36,7 +36,6 @@ namespace ASC.Web.Api.Controllers.Settings;
 [DefaultRoute("docscloud")]
 public class DocsCloudController(
     PermissionContext permissionContext,
-    SecurityContext securityContext,
     TenantManager tenantManager,
     CoreSettings coreSettings,
     DocsCloudClient docsCloudClient,
@@ -92,11 +91,7 @@ public class DocsCloudController(
             throw new ArgumentException("Quota is already set");
         }
 
-        var quantity = new Dictionary<string, int> { { quota.Name, 1 } };
-        var defaultCurrency = tariffService.GetSupportedAccountingCurrencies().First();
-        var participant = securityContext.CurrentAccount.ID.ToString();
-
-        var result = await tariffService.PaymentChangeAsync(tenant.Id, quantity, ProductQuantityType.Add, defaultCurrency, false, participant);
+        var result = await tariffService.GetDocsCloudTrialAsync(tenant.Id);
 
         if (result)
         {
