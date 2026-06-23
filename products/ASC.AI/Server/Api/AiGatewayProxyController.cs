@@ -69,13 +69,14 @@ public class AiGatewayProxyController(
             return NotFound();
         }
 
-        var cancellationToken = Request.HttpContext.RequestAborted;
-
         var key = await aiGateway.GetKeyAsync();
 
 #pragma warning disable CA2000
         var client = httpClientFactory.CreateClient();
 #pragma warning restore CA2000
+
+        client.Timeout = Timeout.InfiniteTimeSpan;
+
         var baseUrl = aiGateway.Url;
         client.BaseAddress = new Uri(baseUrl.EndsWith('/') ? baseUrl : baseUrl + '/');
 
@@ -94,10 +95,13 @@ public class AiGatewayProxyController(
             request.Content.Headers.ContentType = new MediaTypeHeaderValue(Request.Headers.ContentType.FirstOrDefault() ?? "application/json");
         }
 
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(Request.HttpContext.RequestAborted);
+        cts.CancelAfter(aiGateway.ResponseTimeout);
+
         var upstreamResponse = await client.SendAsync(
             request,
             HttpCompletionOption.ResponseHeadersRead,
-            cancellationToken);
+            cts.Token);
 
         HttpContext.Response.RegisterForDispose(upstreamResponse);
 
@@ -105,9 +109,14 @@ public class AiGatewayProxyController(
         Response.Headers.ContentType = upstreamResponse.Content.Headers.ContentType?.ToString() ?? "application/octet-stream";
         Response.Headers.ContentLength = upstreamResponse.Content.Headers.ContentLength;
 
-        await using var upstream = await upstreamResponse.Content.ReadAsStreamAsync(cancellationToken);
-        await upstream.CopyToAsync(Response.Body, cancellationToken);
-        await Response.Body.FlushAsync(cancellationToken);
+        if (upstreamResponse.Content.Headers.ContentType?.MediaType is "text/event-stream")
+        {
+            cts.CancelAfter(Timeout.InfiniteTimeSpan);
+        }
+
+        await using var upstream = await upstreamResponse.Content.ReadAsStreamAsync(cts.Token);
+        await upstream.CopyToAsync(Response.Body, cts.Token);
+        await Response.Body.FlushAsync(cts.Token);
         await Response.CompleteAsync();
 
         return new EmptyResult();

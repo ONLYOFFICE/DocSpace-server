@@ -66,6 +66,8 @@ public class AiGateway(
 
     public string Url => aiGatewayConfiguration.Settings?.Url;
 
+    public TimeSpan ResponseTimeout => aiGatewayConfiguration.Settings.ResponseTimeout;
+
     public bool Configured => aiGatewayConfiguration.Configured;
 
     public async Task<bool> IsEnabledAsync()
@@ -166,6 +168,7 @@ public class AiGatewaySettings
     public string Url { get; init; }
     public string Secret { get; init; }
     public TimeSpan TokenExpiration { get; init; }
+    public TimeSpan ResponseTimeout { get; init; } = TimeSpan.FromMinutes(10);
 }
 
 public record CurrencyInfo
