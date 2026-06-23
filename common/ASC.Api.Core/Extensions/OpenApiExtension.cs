@@ -1,36 +1,42 @@
-// (c) Copyright Ascensio System SIA 2009-2025
-// 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
-// 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
-// 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// Copyright (C) Ascensio System SIA, 2009-2026
+//
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
+//
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
+//
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
+//
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
+//
+// No trademark rights are granted under this License.
+//
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+//
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
 
+using System.Text.Json.Nodes;
 using System.Xml.XPath;
 
 using Microsoft.OpenApi;
-using Microsoft.OpenApi.Extensions;
-using Microsoft.OpenApi.Interfaces;
-using Microsoft.OpenApi.Models;
-using Microsoft.OpenApi.Writers;
+
+using Scalar.AspNetCore;
 
 using Swashbuckle.AspNetCore.SwaggerGen;
 
@@ -38,11 +44,16 @@ namespace ASC.Api.Core.Extensions;
 
 public static class OpenApiExtension
 {
-    public static IServiceCollection AddOpenApi(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddOpenApi(this IServiceCollection services, IConfiguration configuration, string docVersion = "2.0")
     {
         return services.AddSwaggerGen(c =>
         {
-            var assemblyName = Assembly.GetEntryAssembly().FullName.Split(',').First();
+            var entryAssembly = Assembly.GetEntryAssembly();
+            if (entryAssembly == null)
+            {
+                return;
+            }
+            var assemblyName = entryAssembly.FullName?.Split(',').First();
             c.ResolveConflictingActions(a => a.First());
             c.CustomOperationIds(r =>
             {
@@ -53,25 +64,55 @@ public static class OpenApiExtension
 
             c.CustomSchemaIds(CustomSchemaId);
 
-            c.SwaggerDoc("common", new OpenApiInfo
+            var openApiInfo = new OpenApiInfo
             {
                 Title = "Api",
-                Version = "3.6.0",
+                Version = "3.7.0",
                 Contact = new OpenApiContact
                 {
                     Name = "API Support",
                     Email = "support@onlyoffice.com",
                     Url = new Uri("https://helpdesk.onlyoffice.com/hc/en-us")
                 }
+            };
+
+            openApiInfo.Extensions ??= new Dictionary<string, IOpenApiExtension>();
+            openApiInfo.Extensions["x-scalar-sdk-installation"] = new JsonNodeExtension(new JsonArray
+            {
+                new JsonObject
+                {
+                    ["lang"] = ScalarTarget.Node.ToStringFast(),
+                    ["description"] = "Install our **ONLYOFFICE SDK** for Node.js from npm:",
+                    ["source"] = "npm install @onlyoffice/docspace-api-sdk"
+                },
+                new JsonObject
+                {
+                    ["lang"] = ScalarTarget.Python.ToStringFast(),
+                    ["description"] = "Install our **ONLYOFFICE SDK** for Python app from pip:",
+                    ["source"] = "pip install docspace-api-sdk"
+                },
+                new JsonObject
+                {
+                    ["lang"] = ScalarTarget.CSharp.ToStringFast(),
+                    ["description"] = "Install our **ONLYOFFICE SDK** for .Net from nuget:",
+                    ["source"] = "dotnet add package DocSpace.API.SDK"
+                }
             });
+
+            c.SwaggerDoc(docVersion, openApiInfo);
+
+            c.AddScalarFilters();
             c.SchemaFilter<SwaggerSchemaCustomFilter>();
             c.DocumentFilter<LowercaseDocumentFilter>();
+            c.DocumentFilter<ErrorResponseFilter>();
             c.SchemaFilter<DerivedSchemaFilter>();
             c.DocumentFilter<HideRouteDocumentFilter>("/api/2.0/capabilities.json");
-            c.OperationFilter<SwaggerOperationIdFilter>("api/2.0/files/recent", "getFolderRecent", "Get recent files");
+            c.DocumentFilter<HideRouteDocumentFilter>("/api/2.0/files/@recent");
             c.DocumentFilter<TagDescriptionsDocumentFilter>();
             c.OperationFilter<SwaggerCustomOperationFilter>();
             c.OperationFilter<ContentTypeOperationFilter>();
+            c.OperationFilter<AllowAnonymousFilter>();
+            c.OperationFilter<RateLimitOperationFilter>();
             c.DocumentFilter<SwaggerSuccessApiResponseFilter>();
             c.EnableAnnotations();
             c.SchemaFilter<CustomInheritanceSchemaFilter>();
@@ -87,7 +128,7 @@ public static class OpenApiExtension
                 Description = "Server configuration",
                 Variables = new Dictionary<string, OpenApiServerVariable>
                 {
-                    ["baseUrl"] = new OpenApiServerVariable
+                    ["baseUrl"] = new()
                     {
                         Default = defaultUrl,
                         Description = urlDescription
@@ -167,15 +208,21 @@ public static class OpenApiExtension
                 Description = "OpenID Connect authentication"
             });
 
-            var xmlPath = Path.Combine(AppContext.BaseDirectory, $"{assemblyName}.xml");
-            if (File.Exists(xmlPath))
+            string xmlPath = null;
+            var assemblyLocation = entryAssembly.Location;
+            if (!string.IsNullOrEmpty(assemblyLocation))
             {
-                var doc = new XPathDocument(xmlPath);
+                var assemblyDirectoryLocation = Path.GetDirectoryName(assemblyLocation);
+                if (!string.IsNullOrEmpty(assemblyDirectoryLocation))
+                {
+                    xmlPath = Path.Combine(assemblyDirectoryLocation, $"{assemblyName}.xml");
+                    if (File.Exists(xmlPath))
+                    {
+                        var doc = new XPathDocument(xmlPath);
 
-                c.IncludeXmlComments(() => doc);
-                c.OperationFilter<XmlCustomTagFilter>(doc);
-
-                c.OperationFilter<AllowAnonymousFilter>();
+                        c.IncludeXmlComments(() => doc);
+                    }
+                }
             }
 
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
@@ -192,37 +239,75 @@ public static class OpenApiExtension
         });
     }
 
-    public static IApplicationBuilder UseOpenApi(this IApplicationBuilder app)
+    extension(IApplicationBuilder app)
     {
-        var assemblyName = Assembly.GetEntryAssembly().FullName.Split(',').First();
-
-        app.UseSwagger(c =>
+        public IApplicationBuilder UseOpenApi()
         {
-            c.RouteTemplate = $"openapi/{assemblyName.ToLower()}/{{documentName}}.{{extension:regex(^(json|ya?ml)$)}}";
-        });
-
-        return app;
-    }
-
-    public static IApplicationBuilder UseOpenApiUI(this IApplicationBuilder app, Dictionary<string, string> endpoints)
-    {
-        app.UseSwaggerUI(o =>
-        {
-            o.RoutePrefix = "openapi";
-            o.DocumentTitle = "DocSpace API";
-
-            foreach (var (name, route) in endpoints)
+            var entryAssembly = Assembly.GetEntryAssembly();
+            if (entryAssembly == null)
             {
-                o.SwaggerEndpoint(route, name);
+                throw new InvalidOperationException("Entry assembly is null. Cannot configure OpenAPI.");
             }
-        });
 
-        app.UseEndpoints(endpointRouteBuilder =>
+            var assemblyName = entryAssembly.FullName.Split(',').First();
+
+            app.UseSwagger(options =>
+            {
+                options.OpenApiVersion = OpenApiSpecVersion.OpenApi3_0;
+                options.RouteTemplate = $"openapi/{assemblyName.ToLower()}/{{documentName}}.{{extension:regex(^(json|ya?ml)$)}}";
+            });
+
+            return app;
+        }
+
+        public IApplicationBuilder UseOpenApiUI(Dictionary<string, string> endpoints)
         {
-            endpointRouteBuilder.MapSwagger();
-        });
+            app.UseSwaggerUI(o =>
+            {
+                o.RoutePrefix = "openapi";
+                o.DocumentTitle = "DocSpace API";
 
-        return app;
+                foreach (var (name, route) in endpoints)
+                {
+                    o.SwaggerEndpoint(route, name);
+                }
+            });
+
+            app.UseEndpoints(endpointRouteBuilder =>
+            {
+                endpointRouteBuilder.MapSwagger();
+
+                endpointRouteBuilder.MapScalarApiReference(((options, context) =>
+                {
+                    options.Servers = [];
+                    options.EnabledTargets = [ScalarTarget.Node, ScalarTarget.CSharp, ScalarTarget.Python];
+                    options.EnabledClients = [ScalarClient.Axios, ScalarClient.Fetch, ScalarClient.Python3, ScalarClient.HttpClient];
+                    options.WithDefaultHttpClient(ScalarTarget.Node, ScalarClient.Axios);
+                    options.AddDocuments(endpoints.Select(r=> new ScalarDocument(r.Key)
+                    {
+                        RoutePattern = r.Value.ToLower(),
+                        IsDefault = r.Key == "asc.files"
+                    }));
+
+                    var authCookie = context.Request.Cookies[CookiesManager.AuthCookiesName]?.ToString();
+                    if (!string.IsNullOrEmpty(authCookie))
+                    {
+                        options.Authentication = new ScalarAuthenticationOptions
+                        {
+                            PreferredSecuritySchemes = [CookiesManager.AuthCookiesName]
+                        };
+
+                        options.AddApiKeyAuthentication(CookiesManager.AuthCookiesName, scheme =>
+                        {
+                            scheme.Name = CookiesManager.AuthCookiesName;
+                            scheme.Value = authCookie;
+                        });
+                    }
+                }));
+            });
+
+            return app;
+        }
     }
 
     public static string CustomSchemaId(Type type)
@@ -261,53 +346,41 @@ public static class OpenApiExtension
 
             if (allowAnonymous.Any())
             {
-                operation.Security.Clear();
+                operation.Security?.Clear();
             }
             else
             {
-                operation.Security.Add(new OpenApiSecurityRequirement
-                {
-                    {
-                        new OpenApiSecurityScheme
-                        {
-                            Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = CookiesManager.AuthCookiesName }
-                        },
-                        ["read", "write"]
-                    }
-                });
-                operation.Security.Add(new OpenApiSecurityRequirement
-                {
-                    {
-                        new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" } },
-                        new List<string>()
-                    }
-                });
-                operation.Security.Add(new OpenApiSecurityRequirement
-                {
-                    {
-                        new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "ApiKeyBearer" } }, ["read", "write"]
-                    }
-                });
-                operation.Security.Add(new OpenApiSecurityRequirement
-                {
-                    {
-                        new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Basic" } },
-                        new List<string>()
-                    }
-                });
-                operation.Security.Add(new OpenApiSecurityRequirement
-                {
-                    {
-                        new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "OAuth2" } }, ["read", "write"]
-                    }
-                });
-                operation.Security.Add(new OpenApiSecurityRequirement
-                {
-                    {
-                        new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "OpenId" } }, []
-                    }
-                });
+                operation.Security ??= new List<OpenApiSecurityRequirement>();
 
+                operation.Security =
+                [
+                    new OpenApiSecurityRequirement
+                    {
+                        [ new OpenApiSecuritySchemeReference(CookiesManager.AuthCookiesName, context.Document)] =  ["read", "write"]
+                    },
+                    new OpenApiSecurityRequirement
+                    {
+                        [ new OpenApiSecuritySchemeReference("Bearer", context.Document)] = []
+                    },
+                    new OpenApiSecurityRequirement
+                    {
+                        [ new OpenApiSecuritySchemeReference("ApiKeyBearer", context.Document)] =   ["read", "write"]
+                    },
+                    new OpenApiSecurityRequirement
+                    {
+                        [ new OpenApiSecuritySchemeReference("Basic", context.Document)] = []
+                    },
+                    new OpenApiSecurityRequirement
+                    {
+                        [ new OpenApiSecuritySchemeReference("OAuth2", context.Document)] = ["read", "write"]
+                    },
+                    new OpenApiSecurityRequirement
+                    {
+                        [ new OpenApiSecuritySchemeReference("OpenId", context.Document)] = []
+                    }
+                ];
+
+                operation.Responses ??= new OpenApiResponses();
                 operation.Responses.Add("401", new OpenApiResponse { Description = "Unauthorized" });
             }
 
@@ -339,53 +412,10 @@ public static class OpenApiExtension
         }
     }
 
-    private class XmlCustomTagFilter(XPathDocument xmlDoc) : IOperationFilter
-    {
-        private readonly XPathNavigator _xmlNavigator = xmlDoc.CreateNavigator();
-
-        public void Apply(OpenApiOperation operation, OperationFilterContext context)
-        {
-            if (context.MethodInfo == null || context.MethodInfo.DeclaringType == null)
-            {
-                return;
-            }
-
-            var targetMethod = context.MethodInfo.DeclaringType.IsConstructedGenericType ?
-                context.MethodInfo.GetUnderlyingGenericTypeMethod() :
-                context.MethodInfo;
-
-            if (targetMethod == null)
-            {
-                return;
-            }
-
-            ApplyMethodTags(operation, targetMethod);
-        }
-
-        private void ApplyMethodTags(OpenApiOperation operation, MethodInfo methodInfo)
-        {
-            var methodMemberName = XmlCommentsNodeNameHelper.GetMemberNameForMethod(methodInfo);
-            var methodNode = _xmlNavigator.SelectSingleNode($"/doc/members/member[@name='{methodMemberName}']");
-
-            var shortNode = methodNode?.SelectSingleNode("short");
-            if (shortNode != null)
-            {
-                operation.AddExtension("x-shortName", new XmlShortNameExtension(XmlCommentsTextHelper.Humanize(shortNode.InnerXml)));
-            }
-        }
-    }
-
-    private class XmlShortNameExtension(string shortName) : IOpenApiExtension
-    {
-        public void Write(IOpenApiWriter writer, OpenApiSpecVersion specVersion)
-        {
-            writer.WriteValue(shortName);
-        }
-    }
 
     private class CustomInheritanceSchemaFilter : ISchemaFilter
     {
-        public void Apply(OpenApiSchema schema, SchemaFilterContext context)
+        public void Apply(IOpenApiSchema schema, SchemaFilterContext context)
         {
             var type = context.Type;
 
@@ -406,29 +436,24 @@ public static class OpenApiExtension
                 return;
             }
 
+            var openApiSchema = schema as OpenApiSchema;
+
             var baseTypeSchema = context.SchemaGenerator.GenerateSchema(baseType, context.SchemaRepository);
 
             var schemaId = CustomSchemaId(baseType);
 
-            if (!context.SchemaRepository.Schemas.ContainsKey(schemaId))
-            {
-                context.SchemaRepository.Schemas.Add(schemaId, baseTypeSchema);
-            }
+            context.SchemaRepository.Schemas.TryAdd(schemaId, baseTypeSchema);
 
-            var baseSchemaRef = new OpenApiReference
-            {
-                Type = ReferenceType.Schema,
-                Id = schemaId
-            };
+            var baseSchemaRef = new OpenApiSchemaReference(schemaId);
 
             var originalProperties = schema.Properties;
             var originalRequired = schema.Required;
 
             var derivedPropertiesSchema = new OpenApiSchema
             {
-                Type = "object",
-                Properties = new Dictionary<string, OpenApiSchema>(),
-                Required = new HashSet<string>(),
+                Type = JsonSchemaType.Object,
+                Properties = new Dictionary<string, IOpenApiSchema>(),
+                Required = new HashSet<string>()
             };
 
             foreach (var prop in originalProperties)
@@ -443,15 +468,15 @@ public static class OpenApiExtension
                 }
             }
 
-            schema.AllOf = new List<OpenApiSchema>
+            openApiSchema.AllOf = new List<IOpenApiSchema>
             {
-                new OpenApiSchema { Reference = baseSchemaRef },
+                baseSchemaRef,
                 derivedPropertiesSchema
             };
 
-            schema.Properties = null;
-            schema.Required = null;
-            schema.Type = null;
+            openApiSchema.Properties = null;
+            openApiSchema.Required = null;
+            openApiSchema.Type = null;
         }
 
         private HashSet<string> GetAllBaseTypeProperties(Type type)

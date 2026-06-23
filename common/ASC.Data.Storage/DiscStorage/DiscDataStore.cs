@@ -1,28 +1,35 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Data.Storage.DiscStorage;
 
@@ -33,7 +40,7 @@ public class DiscDataStore(
     PathUtils pathUtils,
     EmailValidationKeyProvider emailValidationKeyProvider,
     IHttpContextAccessor httpContextAccessor,
-    ILoggerProvider options,
+    ILoggerFactory loggerFactory,
     ILogger<DiscDataStore> logger,
     EncryptionSettingsHelper encryptionSettingsHelper,
     EncryptionFactory encryptionFactory,
@@ -44,7 +51,7 @@ public class DiscDataStore(
     IQuotaService quotaService,
     UserManager userManager,
     CustomQuota customQuota)
-    : BaseStorage(tempStream, tenantManager, pathUtils, emailValidationKeyProvider, httpContextAccessor, options, logger, clientFactory, tenantQuotaFeatureStatHelper, quotaSocketManager, settingsManager, quotaService, userManager, customQuota)
+    : BaseStorage(tempStream, tenantManager, pathUtils, emailValidationKeyProvider, httpContextAccessor, loggerFactory, logger, clientFactory, tenantQuotaFeatureStatHelper, quotaSocketManager, settingsManager, quotaService, userManager, customQuota)
 {
     public override bool IsSupportInternalUri => false;
     public override bool IsSupportedPreSignedUri => false;
@@ -103,7 +110,10 @@ public class DiscDataStore(
 
         if (File.Exists(target))
         {
+            // CA2000: Stream ownership transferred to caller who is responsible for disposal
+#pragma warning disable CA2000
             return withDescription ? await _crypt.GetReadStreamAsync(target) : File.OpenRead(target);
+#pragma warning restore CA2000
         }
 
         throw new FileNotFoundException("File not found", Path.GetFullPath(target));
@@ -138,29 +148,32 @@ public class DiscDataStore(
         return GetReadStreamAsync(domain, path, offset);
     }
 
-    public override Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string contentType, string contentDisposition)
+    public override Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string contentType, string contentDisposition, CancellationToken token = default)
     {
-        return SaveAsync(domain, path, stream, ownerId);
-    }
-    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentType, string contentDisposition)
-    {
-        return SaveAsync(domain, path, stream);
+        return SaveAsync(domain, path, stream, ownerId, token);
     }
 
-    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentEncoding, int cacheDays)
+    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentType, string contentDisposition, CancellationToken token = default)
     {
-        return SaveAsync(domain, path, stream);
+        return SaveAsync(domain, path, stream, token);
     }
+
+    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentEncoding, int cacheDays, CancellationToken token = default)
+    {
+        return SaveAsync(domain, path, stream, token);
+    }
+
     private bool EnableQuotaCheck(string domain)
     {
-        return (QuotaController != null) && !domain.EndsWith("_temp");
+        return QuotaController != null && !domain.EndsWith("_temp");
     }
 
-    public override async Task<Uri> SaveAsync(string domain, string path, Stream stream)
+    public override async Task<Uri> SaveAsync(string domain, string path, Stream stream, CancellationToken token = default)
     {
-        return await SaveAsync(domain, path, stream, Guid.Empty);
+        return await SaveAsync(domain, path, stream, Guid.Empty, token);
     }
-    public override async Task<Uri> SaveAsync(string domain, string path, Stream stream, Guid ownerId)
+
+    public override async Task<Uri> SaveAsync(string domain, string path, Stream stream, Guid ownerId, CancellationToken token = default)
     {
         Logger.DebugSavePath(path);
 
@@ -196,9 +209,11 @@ public class DiscDataStore(
             else
             {
                 await using var fs = File.Open(target, FileMode.Create);
-                await buffered.CopyToAsync(fs);
+                await buffered.CopyToAsync(fs, token);
                 fslen = fs.Length;
             }
+
+            token.ThrowIfCancellationRequested();
 
             await QuotaUsedAddAsync(domain, fslen, ownerId);
 
@@ -215,9 +230,9 @@ public class DiscDataStore(
         }
     }
 
-    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, ACL acl)
+    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, ACL acl, CancellationToken token = default)
     {
-        return SaveAsync(domain, path, stream);
+        return SaveAsync(domain, path, stream, token);
     }
 
     #region chunking
@@ -341,8 +356,7 @@ public class DiscDataStore(
         var targetDir = GetTarget(domain, folderPath);
         if (Directory.Exists(targetDir))
         {
-            var entries = Directory.GetFiles(targetDir, pattern, recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
-            foreach (var entry in entries)
+            foreach (var entry in Directory.EnumerateFiles(targetDir, pattern, recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly))
             {
                 var size = await _crypt.GetFileSizeAsync(entry);
                 File.Delete(entry);
@@ -363,8 +377,7 @@ public class DiscDataStore(
         var targetDir = GetTarget(domain, folderPath);
         if (Directory.Exists(targetDir))
         {
-            var entries = Directory.GetFiles(targetDir, "*", SearchOption.AllDirectories);
-            foreach (var entry in entries)
+            foreach (var entry in Directory.EnumerateFiles(targetDir, "*", SearchOption.AllDirectories))
             {
                 var fileInfo = new FileInfo(entry);
                 if (fileInfo.LastWriteTime >= fromDate && fileInfo.LastWriteTime <= toDate)
@@ -477,7 +490,7 @@ public class DiscDataStore(
             return;
         }
 
-        var entries = Directory.GetFiles(targetDir, "*.*", SearchOption.AllDirectories);
+        var entries = Directory.EnumerateFiles(targetDir, "*.*", SearchOption.AllDirectories);
         var size = await entries.Where(r =>
         {
             if (QuotaController == null || string.IsNullOrEmpty(QuotaController.ExcludePattern))
@@ -488,10 +501,6 @@ public class DiscDataStore(
         }
         ).ToAsyncEnumerable()
             .Select(async (string r, CancellationToken _) => await _crypt.GetFileSizeAsync(r)).SumAsync();
-
-        var subDirs = Directory.GetDirectories(targetDir, "*", SearchOption.AllDirectories).ToList();
-        subDirs.Reverse();
-        subDirs.ForEach(subdir => Directory.Delete(subdir, true));
 
         Directory.Delete(targetDir, true);
 
@@ -525,15 +534,15 @@ public class DiscDataStore(
         throw new FileNotFoundException("directory not found " + target);
     }
 
-    public override async Task<(Uri, string)> SaveTempAsync(string domain, Stream stream)
+    public override async Task<(Uri, string)> SaveTempAsync(string domain, Stream stream, CancellationToken token = default)
     {
         var assignedPath = Guid.NewGuid().ToString();
-        return (await SaveAsync(domain, assignedPath, stream), assignedPath);
+        return (await SaveAsync(domain, assignedPath, stream, token), assignedPath);
     }
 
-    public override async Task<string> SavePrivateAsync(string domain, string path, Stream stream, DateTime expires)
+    public override async Task<string> SavePrivateAsync(string domain, string path, Stream stream, DateTime expires, CancellationToken token = default)
     {
-        var result = await SaveAsync(domain, path, stream);
+        var result = await SaveAsync(domain, path, stream, token);
         return result.ToString();
     }
 
@@ -548,11 +557,10 @@ public class DiscDataStore(
             return;
         }
 
-        var entries = Directory.GetFiles(targetDir, "*.*", SearchOption.TopDirectoryOnly);
-        foreach (var entry in entries)
+        foreach (var entry in Directory.EnumerateFiles(targetDir, "*.*", SearchOption.TopDirectoryOnly))
         {
             var finfo = new FileInfo(entry);
-            if ((DateTime.UtcNow - finfo.CreationTimeUtc) > oldThreshold)
+            if (DateTime.UtcNow - finfo.CreationTimeUtc > oldThreshold)
             {
                 var size = await _crypt.GetFileSizeAsync(entry);
                 File.Delete(entry);
@@ -656,8 +664,7 @@ public class DiscDataStore(
 
         if (Directory.Exists(target))
         {
-            var entries = Directory.GetFiles(target, "*.*", SearchOption.AllDirectories);
-            size = await entries
+            size = await Directory.EnumerateFiles(target, "*.*", SearchOption.AllDirectories)
                 .ToAsyncEnumerable()
                 .Select(async (string entry, CancellationToken _) => await _crypt.GetFileSizeAsync(entry))
                 .SumAsync();
@@ -729,13 +736,13 @@ public class DiscDataStore(
             throw new FileNotFoundException("file not found", target);
         }
     }
-    protected override Task<Uri> SaveWithAutoAttachmentAsync(string domain, string path, Guid ownerId, Stream stream, string attachmentFileName)
+    protected override Task<Uri> SaveWithAutoAttachmentAsync(string domain, string path, Guid ownerId, Stream stream, string attachmentFileName, CancellationToken token = default)
     {
-        return SaveAsync(domain, path, stream, ownerId);
+        return SaveAsync(domain, path, stream, ownerId, token);
     }
-    protected override Task<Uri> SaveWithAutoAttachmentAsync(string domain, string path, Stream stream, string attachmentFileName)
+    protected override Task<Uri> SaveWithAutoAttachmentAsync(string domain, string path, Stream stream, string attachmentFileName, CancellationToken token = default)
     {
-        return SaveAsync(domain, path, stream);
+        return SaveAsync(domain, path, stream, token);
     }
 
     private async Task CopyAllAsync(DirectoryInfo source, DirectoryInfo target, string newdomain)

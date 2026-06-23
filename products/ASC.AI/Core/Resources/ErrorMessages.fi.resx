@@ -117,11 +117,11 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="UnavailableServers" xml:space="preserve">
-    <value>MCP-palvelimet eivät ole käytettävissä: {0}. Tarkista yhteysasetukset</value>
-  </data>
   <data name="AiSettingsAccessDenied" xml:space="preserve">
     <value>Sinulla ei ole oikeutta hallita tekoälyasetuksia</value>
+  </data>
+  <data name="AttachmentProcessFailed" xml:space="preserve">
+    <value>Tiedostoja ei voida prosessoida: {0}. Tiedostot voivat olla korruptoituneita tai salattuja</value>
   </data>
   <data name="ChatAccessDenied" xml:space="preserve">
     <value>Sinulla ei ole oikeutta käyttää chattia</value>
@@ -170,5 +170,23 @@
   </data>
   <data name="ServersRoomLimit" xml:space="preserve">
     <value>Palvelimien maksimimäärä huoneessa on {0}</value>
+  </data>
+  <data name="UnavailableServers" xml:space="preserve">
+    <value>MCP-palvelimet eivät ole käytettävissä: {0}. Tarkista yhteysasetukset</value>
+  </data>
+  <data name="MessageNotFound" xml:space="preserve">
+    <value>Viestiä ei löydy</value>
+  </data>
+  <data name="NoModelsAvailable" xml:space="preserve">
+    <value>Tälle palveluntarjoajalle ei ole saatavilla malleja</value>
+  </data>
+  <data name="ProviderNameExists" xml:space="preserve">
+    <value>Palveluntarjoajan nimi on jo olemassa</value>
+  </data>
+  <data name="ModelDisabled" xml:space="preserve">
+    <value>Malli on poistettu käytöstä palveluntarjoajasi asetusten vuoksi.</value>
+  </data>
+  <data name="ServerAlreadyAdded" xml:space="preserve">
+    <value>Palvelin on jo lisätty agentille</value>
   </data>
 </root>

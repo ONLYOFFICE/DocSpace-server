@@ -1,28 +1,35 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Files.Core.Data;
 
@@ -37,7 +44,9 @@ internal abstract class BaseTagDao<T>(
     SettingsManager settingsManager,
     AuthContext authContext,
     IServiceProvider serviceProvider,
-    IDistributedLockProvider distributedLockProvider)
+    IDistributedLockProvider distributedLockProvider,
+    GlobalFolder globalFolder,
+    SocketManager socketManager)
     : AbstractDao(dbContextManager,
         userManager,
         tenantManager,
@@ -127,7 +136,7 @@ internal abstract class BaseTagDao<T>(
     public async IAsyncEnumerable<TagInfo> GetTagsInfoAsync(string searchText, TagType tagType, bool byName, int from = 0, int count = 0)
     {
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        var q = (Query(filesDbContext.Tag)).Where(r => r.Type == tagType);
+        var q = Query(filesDbContext.Tag).Where(r => r.Type == tagType);
 
         if (byName)
         {
@@ -139,12 +148,14 @@ internal abstract class BaseTagDao<T>(
             q = q.Where(r => r.Name.ToLower().Contains(lowerText));
         }
 
+        q = q.OrderByDescending(r => r.Id);
+
+        q = q.Skip(from);
+
         if (count != 0)
         {
             q = q.Take(count);
         }
-
-        q = q.Skip(from);
 
         await foreach (var tag in q.AsAsyncEnumerable())
         {
@@ -175,6 +186,45 @@ internal abstract class BaseTagDao<T>(
         await filesDbContext.SaveChangesAsync();
 
         return tag.Entity.MapToTagInfo();
+    }
+
+    public async Task<TagInfo> UpdateTagInfoAsync(TagInfo tagInfo)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var existingTag = await filesDbContext.Tag
+            .FirstOrDefaultAsync(t => t.Id == tagInfo.Id && t.TenantId == tenantId);
+
+        if (existingTag == null)
+        {
+            throw new ItemNotFoundException($"Tag with id {tagInfo.Id} not found");
+        }
+
+        existingTag.Name = tagInfo.Name;
+        existingTag.Owner = tagInfo.Owner;
+        existingTag.Type = tagInfo.Type;
+
+        filesDbContext.Tag.Update(existingTag);
+        await filesDbContext.SaveChangesAsync();
+
+        var folderDao = daoFactory.GetFolderDao<int>();
+        var folderThirdPartyDao = daoFactory.GetFolderDao<string>();
+
+        var rooms = await folderDao.GetRoomsAsync([await globalFolder.GetFolderVirtualRoomsAsync(daoFactory)], null, new List<string> { tagInfo.Name }, Guid.Empty, null, false, false, false, ProviderFilter.None, null, Guid.Empty, null, QuotaFilter.All).ToListAsync();
+        var thirdPartyRooms = await folderThirdPartyDao.GetProviderBasedRoomsAsync(SearchArea.Active, null, new List<string> { tagInfo.Name }, Guid.Empty, null, false, false, ProviderFilter.None, null, Guid.Empty, null).ToListAsync();
+
+        var tasks = rooms.Select(room => socketManager.UpdateFolderAsync(room))
+             .Concat(thirdPartyRooms.Select(room => socketManager.UpdateFolderAsync(room)));
+        await Task.WhenAll(tasks);
+
+        return existingTag.MapToTagInfo();
+    }
+    public async Task<bool> HasTagLinksAsync(TagInfo tag)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        return await filesDbContext.AnyTagLinkByIdsAsync(tenantId, new List<int> { tag.Id });
     }
 
     public async Task<IEnumerable<Tag>> SaveTagsAsync(IEnumerable<Tag> tags, Guid createdBy = default)
@@ -496,12 +546,6 @@ internal abstract class BaseTagDao<T>(
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         await filesDbContext.DeleteTagLinksAsync(tenantId, tagsIds, entryId, entry.FileEntryType);
-
-        var any = await filesDbContext.AnyTagLinkByIdsAsync(tenantId, tagsIds);
-        if (!any)
-        {
-            await filesDbContext.DeleteTagsByIdsAsync(tenantId, tagsIds);
-        }
     }
 
     public async Task RemoveTagsAsync(IEnumerable<Tag> tags)
@@ -557,15 +601,18 @@ internal abstract class BaseTagDao<T>(
 
         if (id != 0)
         {
-            var entryId = (tag.EntryId is int fid ? fid : await MappingIdAsync(filesDbContext, tenantId, tag.EntryId))?.ToString();
+            var folderDao = daoFactory.GetFolderDao<int>();
+            var folderThirdPartyDao = daoFactory.GetFolderDao<string>();
 
-            await filesDbContext.DeleteTagLinksByTagIdAsync(tenantId, id, entryId, tag.EntryType);
+            var rooms = await folderDao.GetRoomsAsync([await globalFolder.GetFolderVirtualRoomsAsync(daoFactory)], null, new List<string> { tag.Name }, Guid.Empty, null, false, false, false, ProviderFilter.None, null, Guid.Empty, null, QuotaFilter.All).ToListAsync();
+            var thirdPartyRooms = await folderThirdPartyDao.GetProviderBasedRoomsAsync(SearchArea.Active, null, new List<string> { tag.Name }, Guid.Empty, null, false, false, ProviderFilter.None, null, Guid.Empty, null).ToListAsync();
 
-            var any = await filesDbContext.AnyTagLinkByIdAsync(tenantId, id);
-            if (!any)
-            {
-                await filesDbContext.DeleteTagByIdAsync(tenantId, id);
-            }
+            await filesDbContext.DeleteTagLinksByTagIdAsync(tenantId, id);
+            await filesDbContext.DeleteTagByIdAsync(tenantId, id);
+
+            var tasks = rooms.Select(room => socketManager.UpdateFolderAsync(room))
+                 .Concat(thirdPartyRooms.Select(room => socketManager.UpdateFolderAsync(room)));
+            await Task.WhenAll(tasks);
         }
     }
 
@@ -582,7 +629,7 @@ internal abstract class BaseTagDao<T>(
         foreach (var r in fileEntries)
         {
             var (id, _) = await daoFactory.GetMapping<T>().MappingIdAsync(r.Id);
-            var entryType = (r.FileEntryType == FileEntryType.File) ? FileEntryType.File : FileEntryType.Folder;
+            var entryType = r.FileEntryType == FileEntryType.File ? FileEntryType.File : FileEntryType.Folder;
 
             entryIds.Add(id);
             entryTypes.Add((int)entryType);
@@ -702,7 +749,9 @@ internal class TagDao(
     SettingsManager settingsManager,
     AuthContext authContext,
     IServiceProvider serviceProvider,
-    IDistributedLockProvider distributedLockProvider)
+    IDistributedLockProvider distributedLockProvider,
+    GlobalFolder globalFolder,
+    SocketManager socketManager)
     : BaseTagDao<int>(
         daoFactory,
         userManager,
@@ -714,7 +763,9 @@ internal class TagDao(
           settingsManager,
           authContext,
           serviceProvider,
-          distributedLockProvider)
+          distributedLockProvider,
+          globalFolder,
+          socketManager)
 {
     public override IAsyncEnumerable<Tag> GetNewTagsAsync(Guid subject, Folder<int> parentFolder, bool deepSearch)
     {
@@ -834,7 +885,9 @@ internal class ThirdPartyTagDao(
         AuthContext authContext,
         IServiceProvider serviceProvider,
         IThirdPartyTagDao thirdPartyTagDao,
-        IDistributedLockProvider distributedLockProvider)
+        IDistributedLockProvider distributedLockProvider,
+        GlobalFolder globalFolder,
+        SocketManager socketManager)
     : BaseTagDao<string>(
         daoFactory,
         userManager,
@@ -846,7 +899,9 @@ internal class ThirdPartyTagDao(
           settingsManager,
           authContext,
           serviceProvider,
-          distributedLockProvider)
+          distributedLockProvider,
+          globalFolder,
+          socketManager)
 {
     public override IAsyncEnumerable<Tag> GetNewTagsAsync(Guid subject, Folder<string> parentFolder, bool deepSearch)
     {

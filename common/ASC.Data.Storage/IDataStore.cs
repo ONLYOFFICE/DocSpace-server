@@ -1,28 +1,35 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Data.Storage;
 
@@ -127,8 +134,9 @@ public interface IDataStore
     /// <param name="domain"> </param>
     /// <param name="path"> </param>
     /// <param name="stream"> flow. Is read from the current position! Desirable to set to 0 when the transmission MemoryStream instance </param>
+    /// <param name="token"></param>
     /// <returns> </returns>
-    Task<Uri> SaveAsync(string domain, string path, Stream stream);
+    Task<Uri> SaveAsync(string domain, string path, Stream stream, CancellationToken token = default);
 
     /// <summary>
     /// Saves the contents of the stream in the repository.
@@ -137,8 +145,9 @@ public interface IDataStore
     /// <param name="path"></param>
     /// <param name="stream"></param>
     /// <param name="acl"></param>
+    /// <param name="token"></param>
     /// <returns></returns>
-    Task<Uri> SaveAsync(string domain, string path, Stream stream, ACL acl);
+    Task<Uri> SaveAsync(string domain, string path, Stream stream, ACL acl, CancellationToken token = default);
 
     /// <summary>
     /// Saves the contents of the stream in the repository.
@@ -147,8 +156,9 @@ public interface IDataStore
     /// <param name="path"></param>
     /// <param name="stream"></param>
     /// <param name="attachmentFileName"></param>
+    /// <param name="token"></param>
     /// <returns></returns>
-    Task<Uri> SaveAsync(string domain, string path, Stream stream, string attachmentFileName);
+    Task<Uri> SaveAsync(string domain, string path, Stream stream, string attachmentFileName, CancellationToken token = default);
 
     /// <summary>
     /// Saves the contents of the stream in the repository.
@@ -158,8 +168,9 @@ public interface IDataStore
     /// <param name="ownerId"></param>
     /// <param name="stream"></param>
     /// <param name="attachmentFileName"></param>
+    /// <param name="token"></param>
     /// <returns></returns>
-    Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string attachmentFileName);
+    Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string attachmentFileName, CancellationToken token = default);
 
     /// <summary>
     /// Saves the contents of the stream in the repository.
@@ -169,8 +180,9 @@ public interface IDataStore
     /// <param name="stream"></param>
     /// <param name="contentType"></param>
     /// <param name="contentDisposition"></param>
+    /// <param name="token"></param>
     /// <returns></returns>
-    Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentType, string contentDisposition);
+    Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentType, string contentDisposition, CancellationToken token = default);
 
     /// <summary>
     /// Saves the contents of the stream in the repository.
@@ -180,8 +192,9 @@ public interface IDataStore
     /// <param name="stream"></param>
     /// <param name="contentEncoding"></param>
     /// <param name="cacheDays"></param>
+    /// <param name="token"></param>
     /// <returns></returns>
-    Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentEncoding, int cacheDays);
+    Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentEncoding, int cacheDays, CancellationToken token = default);
 
     Task<string> InitiateChunkedUploadAsync(string domain, string path);
 
@@ -267,7 +280,7 @@ public interface IDataStore
     ///<param name="domain"></param>
     ///<param name="stream"></param>
     ///<returns></returns>
-    Task<(Uri, string)> SaveTempAsync(string domain, Stream stream);
+    Task<(Uri, string)> SaveTempAsync(string domain, Stream stream, CancellationToken token = default);
 
     /// <summary>
     ///  Returns a list of links to all subfolders
@@ -332,12 +345,12 @@ public interface IDataStore
 
 #pragma warning disable 1591
     Task<Stream> GetReadStreamAsync(string path);
-    Task<Uri> SaveAsync(string path, Stream stream, string attachmentFileName);
-    Task<Uri> SaveAsync(string path, Stream stream);
+    Task<Uri> SaveAsync(string path, Stream stream, string attachmentFileName, CancellationToken token = default);
+    Task<Uri> SaveAsync(string path, Stream stream, CancellationToken token = default);
     Task DeleteAsync(string path);
     Task DeleteFilesAsync(string folderPath, string pattern, bool recursive);
     Task<Uri> MoveAsync(string srcPath, string newDomain, string newPath);
-    Task<(Uri, string)> SaveTempAsync(Stream stream);
+    Task<(Uri, string)> SaveTempAsync(Stream stream, CancellationToken token = default);
     IAsyncEnumerable<string> ListDirectoriesRelativeAsync(string path, bool recursive);
     IAsyncEnumerable<Uri> ListFilesAsync(string path, string pattern, bool recursive);
     Task<bool> IsFileAsync(string path);
@@ -354,7 +367,7 @@ public interface IDataStore
     Task<IDataStore> ConfigureAsync(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props, IDataStoreValidator validator);
     IDataStore SetQuotaController(IQuotaController controller);
 
-    Task<string> SavePrivateAsync(string domain, string path, Stream stream, DateTime expires);
+    Task<string> SavePrivateAsync(string domain, string path, Stream stream, DateTime expires, CancellationToken token = default);
     Task DeleteExpiredAsync(string domain, string path, TimeSpan oldThreshold);
 
     string GetUploadForm(string domain, string directoryPath, string redirectTo, long maxUploadSize,

@@ -1,28 +1,35 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Files.Api;
 
@@ -37,8 +44,19 @@ public class FilesControllerInternal(
     ApiContext apiContext,
     FileShareDtoHelper fileShareDtoHelper,
     HistoryApiHelper historyApiHelper,
-    IFusionCache hybridCache)
-    : FilesController<int>(filesControllerHelper,
+    IFusionCache hybridCache,
+    EditHistoryMapper editHistoryMapper,
+    IDaoFactory daoFactory,
+    FileSecurity fileSecurity,
+    DocumentServiceHelper documentServiceHelper,
+    DocumentServiceConnector documentServiceConnector,
+    PathProvider pathProvider,
+    UserManager userManager,
+    AuthContext authContext,
+    GlobalStore globalStore,
+    BaseCommonLinkUtility baseCommonLinkUtility)
+    : FilesController<int>(
+        filesControllerHelper,
         fileStorageService,
         fileOperationsManager,
         fileOperationDtoHelper,
@@ -46,14 +64,24 @@ public class FilesControllerInternal(
         fileDtoHelper,
         apiContext,
         fileShareDtoHelper,
-        hybridCache)
+        hybridCache,
+        editHistoryMapper,
+        daoFactory,
+        fileSecurity,
+        documentServiceHelper,
+        documentServiceConnector,
+        pathProvider,
+        userManager,
+        authContext,
+        globalStore,
+        baseCommonLinkUtility)
 {
-    /// <summary>
+    /// <remarks>
     /// Returns the list of actions performed on the file with the specified identifier.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get file history
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/files/file/{fileId}/log</path>
     /// <collection>list</collection>
     [Tags("Files / Files")]
@@ -76,8 +104,19 @@ public class FilesControllerThirdparty(
     FileDtoHelper fileDtoHelper,
     ApiContext apiContext,
     FileShareDtoHelper fileShareDtoHelper,
-    IFusionCache hybridCache)
-    : FilesController<string>(filesControllerHelper,
+    IFusionCache hybridCache,
+    EditHistoryMapper editHistoryMapper,
+    IDaoFactory daoFactory,
+    FileSecurity fileSecurity,
+    DocumentServiceHelper documentServiceHelper,
+    DocumentServiceConnector documentServiceConnector,
+    PathProvider pathProvider,
+    UserManager userManager,
+    AuthContext authContext,
+    GlobalStore globalStore,
+    BaseCommonLinkUtility baseCommonLinkUtility)
+    : FilesController<string>(
+        filesControllerHelper,
         fileStorageService,
         fileOperationsManager,
         fileOperationDtoHelper,
@@ -85,24 +124,44 @@ public class FilesControllerThirdparty(
         fileDtoHelper,
         apiContext,
         fileShareDtoHelper,
-        hybridCache);
+        hybridCache,
+        editHistoryMapper,
+        daoFactory,
+        fileSecurity,
+        documentServiceHelper,
+        documentServiceConnector,
+        pathProvider,
+        userManager,
+        authContext,
+        globalStore,
+        baseCommonLinkUtility);
 
 public abstract class FilesController<T>(
     FilesControllerHelper filesControllerHelper,
-        FileStorageService fileStorageService,
-        FileDeleteOperationsManager fileOperationsManager,
-        FileOperationDtoHelper fileOperationDtoHelper,
-        FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper,
-        ApiContext apiContext,
-        FileShareDtoHelper fileShareDtoHelper,
-        IFusionCache hybridCache)
+    FileStorageService fileStorageService,
+    FileDeleteOperationsManager fileOperationsManager,
+    FileOperationDtoHelper fileOperationDtoHelper,
+    FolderDtoHelper folderDtoHelper,
+    FileDtoHelper fileDtoHelper,
+    ApiContext apiContext,
+    FileShareDtoHelper fileShareDtoHelper,
+    IFusionCache hybridCache,
+    EditHistoryMapper editHistoryMapper,
+    IDaoFactory daoFactory,
+    FileSecurity fileSecurity,
+    DocumentServiceHelper documentServiceHelper,
+    DocumentServiceConnector documentServiceConnector,
+    PathProvider pathProvider,
+    UserManager userManager,
+    AuthContext authContext,
+    GlobalStore globalStore,
+    BaseCommonLinkUtility baseCommonLinkUtility)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
-    /// <summary>
+    /// <remarks>
     /// Changes the version history of a file with the ID specified in the request.
-    /// </summary>
-    /// <short>Change version history</short>
+    /// </remarks>
+    /// <summary>Change version history</summary>
     /// <path>api/2.0/files/file/{fileId}/history</path>
     /// <collection>list</collection>
     [Tags("Files / Files")]
@@ -114,10 +173,10 @@ public abstract class FilesController<T>(
         return filesControllerHelper.ChangeHistoryAsync(inDto.FileId, inDto.File.Version, inDto.File.ContinueVersion);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Checks the conversion status of a file with the ID specified in the request.
-    /// </summary>
-    /// <short>Get conversion status</short>
+    /// </remarks>
+    /// <summary>Get conversion status</summary>
     /// <path>api/2.0/files/file/{fileId}/checkconversion</path>
     /// <collection>list</collection>
     [Tags("Files / Operations")]
@@ -132,11 +191,11 @@ public abstract class FilesController<T>(
         });
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a pre-signed URL to download a file with the specified ID.
     /// This temporary link provides secure access to the file.
-    /// </summary>
-    /// <short>Get file download link</short>
+    /// </remarks>
+    /// <summary>Get file download link</summary>
     /// <path>api/2.0/files/file/{fileId}/presigneduri</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "File download link", typeof(string))]
@@ -146,10 +205,10 @@ public abstract class FilesController<T>(
         return await filesControllerHelper.GetPresignedUri(inDto.FileId);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Checks if the PDF file is a form or not.
-    /// </summary>
-    /// <short>Check the PDF file</short>
+    /// </remarks>
+    /// <summary>Check the PDF file</summary>
     /// <path>api/2.0/files/file/{fileId}/isformpdf</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Boolean value: true - the PDF file is form, false - the PDF file is not a form", typeof(bool))]
@@ -159,10 +218,10 @@ public abstract class FilesController<T>(
         return await filesControllerHelper.isFormPDF(inDto.FileId);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Copies (and converts if possible) an existing file to the specified folder.
-    /// </summary>
-    /// <short>Copy a file</short>
+    /// </remarks>
+    /// <summary>Copy a file</summary>
     /// <path>api/2.0/files/file/{fileId}/copyas</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Copied file entry information", typeof(FileEntryBaseDto))]
@@ -172,23 +231,18 @@ public abstract class FilesController<T>(
     [HttpPost("file/{fileId}/copyas")]
     public async Task<FileEntryBaseDto> CopyFileAs(CopyAsRequestDto<T> inDto)
     {
-        if (inDto.File.DestFolderId.ValueKind == JsonValueKind.Number)
+        return inDto.File.DestFolderId.ValueKind switch
         {
-            return await filesControllerHelper.CopyFileAsAsync(inDto.FileId, inDto.File.DestFolderId.GetInt32(), inDto.File.DestTitle, inDto.File.Password, inDto.File.ToForm);
-        }
-
-        if (inDto.File.DestFolderId.ValueKind == JsonValueKind.String)
-        {
-            return await filesControllerHelper.CopyFileAsAsync(inDto.FileId, inDto.File.DestFolderId.GetString(), inDto.File.DestTitle, inDto.File.Password, inDto.File.ToForm);
-        }
-
-        return null;
+            JsonValueKind.Number => await filesControllerHelper.CopyFileAsAsync(inDto.FileId, inDto.File.DestFolderId.GetInt32(), inDto.File.DestTitle, inDto.File.Password, inDto.File.ToForm),
+            JsonValueKind.String => await filesControllerHelper.CopyFileAsAsync(inDto.FileId, inDto.File.DestFolderId.GetString(), inDto.File.DestTitle, inDto.File.Password, inDto.File.ToForm),
+            _ => null
+        };
     }
 
-    /// <summary>
+    /// <remarks>
     /// Creates a new file in the specified folder with the title specified in the request.
-    /// </summary>
-    /// <short>Create a file</short>
+    /// </remarks>
+    /// <summary>Create a file</summary>
     /// <remarks>If a file extension is different from DOCX/XLSX/PPTX and refers to one of the known text, spreadsheet, or presentation formats, it will be changed to DOCX/XLSX/PPTX accordingly. If the file extension is not specified or is unknown, the DOCX extension will be added to the file title.</remarks>
     /// <path>api/2.0/files/{folderId}/file</path>
     [Tags("Files / Files")]
@@ -199,10 +253,10 @@ public abstract class FilesController<T>(
         return await filesControllerHelper.CreateFileAsync(inDto.FolderId, inDto.File.Title, inDto.File.TemplateId, inDto.File.FormId, inDto.File.EnableExternalExt);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Creates an HTML (.html) file in the selected folder with the title and contents specified in the request.
-    /// </summary>
-    /// <short>Create an HTML file</short>
+    /// </remarks>
+    /// <summary>Create an HTML file</summary>
     /// <path>api/2.0/files/{folderId}/html</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
@@ -213,10 +267,10 @@ public abstract class FilesController<T>(
         return await filesControllerHelper.CreateHtmlFileAsync(inDto.FolderId, inDto.File.Title, inDto.File.Content, !inDto.File.CreateNewIfExist);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Creates a text (.txt) file in the selected folder with the title and contents specified in the request.
-    /// </summary>
-    /// <short>Create a text file</short>
+    /// </remarks>
+    /// <summary>Create a text file</summary>
     /// <path>api/2.0/files/{folderId}/text</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
@@ -226,10 +280,10 @@ public abstract class FilesController<T>(
         return await filesControllerHelper.CreateTextFileAsync(inDto.FolderId, inDto.File.Title, inDto.File.Content, !inDto.File.CreateNewIfExist);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Deletes a file with the ID specified in the request.
-    /// </summary>
-    /// <short>Delete a file</short>
+    /// </remarks>
+    /// <summary>Delete a file</summary>
     /// <path>api/2.0/files/file/{fileId}</path>
     /// <collection>list</collection>
     [Tags("Files / Files")]
@@ -237,20 +291,20 @@ public abstract class FilesController<T>(
     [HttpDelete("file/{fileId}")]
     public async IAsyncEnumerable<FileOperationDto> DeleteFile(DeleteRequestDto<T> inDto)
     {
-        await fileOperationsManager.Publish([], [inDto.FileId], false, !inDto.File.DeleteAfter, inDto.File.Immediately);
+        var taskId = await fileOperationsManager.Publish([], [inDto.FileId], false, !inDto.File.DeleteAfter, inDto.File.Immediately);
 
-        foreach (var e in await fileOperationsManager.GetOperationResults())
+        foreach (var e in await fileOperationsManager.GetOperationResults(inDto.ReturnSingleOperation ? taskId : null))
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Retrieves the result of a form-filling session.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get form-filling result
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/files/file/fillresult</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
@@ -268,10 +322,10 @@ public abstract class FilesController<T>(
         throw new ItemNotFoundException();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a URL to the changes of a file version specified in the request.
-    /// </summary>
-    /// <short>Get changes URL</short>
+    /// </remarks>
+    /// <summary>Get changes URL</summary>
     /// <path>api/2.0/files/file/{fileId}/edit/diff</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
@@ -280,13 +334,81 @@ public abstract class FilesController<T>(
     [HttpGet("file/{fileId}/edit/diff")]
     public async Task<EditHistoryDataDto> GetEditDiffUrl(EditDiffUrlRequestDto<T> inDto)
     {
-        return await filesControllerHelper.GetEditDiffUrlAsync(inDto.FileId, inDto.Version);
+        var version = inDto.Version;
+        var fileId = inDto.FileId;
+
+        var fileDao = daoFactory.GetFileDao<T>();
+
+        var file = version > 0
+            ? await fileDao.GetFileAsync(fileId, version)
+            : await fileDao.GetFileAsync(fileId);
+
+        if (file == null)
+        {
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+
+        if (!await fileSecurity.CanReadHistoryAsync(file))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
+        }
+
+        if (file.ProviderEntry)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_BadRequest);
+        }
+
+        var result = new EditHistoryDataDto
+        {
+            FileType = file.ConvertedExtension.Trim('.'),
+            Key = await documentServiceHelper.GetDocKeyAsync(file),
+            Url = documentServiceConnector.ReplaceCommunityAddress(pathProvider.GetFileStreamUrl(file)),
+            Version = version
+        };
+
+        if (await fileDao.ContainChangesAsync(file.Id, file.Version))
+        {
+            string previousKey;
+            string sourceFileUrl;
+            string sourceExt;
+
+            var history = await fileDao.GetFileHistoryAsync(file.Id).ToListAsync();
+            var previousFileStable = history.OrderByDescending(r => r.Version).FirstOrDefault(r => r.Version < file.Version);
+            if (previousFileStable != null)
+            {
+                sourceFileUrl = pathProvider.GetFileStreamUrl(previousFileStable);
+                sourceExt = previousFileStable.ConvertedExtension;
+
+                previousKey = await documentServiceHelper.GetDocKeyAsync(previousFileStable);
+            }
+            else
+            {
+                var culture = (await userManager.GetUsersAsync(authContext.CurrentAccount.ID)).GetCulture();
+                var storeTemplate = await globalStore.GetStoreTemplateAsync();
+                var fileExt = FileUtility.GetFileExtension(file.Title);
+                var path = await globalStore.GetNewDocTemplatePath(storeTemplate, fileExt, culture);
+                var uri = await storeTemplate.GetUriAsync("", path);
+
+                sourceFileUrl = baseCommonLinkUtility.GetFullAbsolutePath(uri.ToString());
+                sourceExt = fileExt.Trim('.');
+
+                previousKey = DocumentServiceConnector.GenerateRevisionId(Guid.NewGuid().ToString());
+            }
+
+            result.Previous = new EditHistoryUrl { Key = previousKey, Url = documentServiceConnector.ReplaceCommunityAddress(sourceFileUrl), FileType = sourceExt.Trim('.') };
+
+            result.ChangesUrl = documentServiceConnector.ReplaceCommunityAddress(pathProvider.GetFileChangesUrl(file));
+        }
+
+        result.Token = documentServiceHelper.GetSignature(result);
+
+        return result;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the version history of a file with the ID specified in the request.
-    /// </summary>
-    /// <short>Get version history</short>
+    /// </remarks>
+    /// <summary>Get version history</summary>
     /// <path>api/2.0/files/file/{fileId}/edit/history</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     /// <collection>list</collection>
@@ -296,13 +418,13 @@ public abstract class FilesController<T>(
     [HttpGet("file/{fileId}/edit/history")]
     public IAsyncEnumerable<EditHistoryDto> GetEditHistory(FileIdRequestDto<T> inDto)
     {
-        return filesControllerHelper.GetEditHistoryAsync(inDto.FileId);
+        return fileStorageService.GetEditHistoryAsync(inDto.FileId).Select(editHistoryMapper.MapToDto);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the detailed information about a file with the ID specified in the request.
-    /// </summary>
-    /// <short>Get file information</short>
+    /// </remarks>
+    /// <summary>Get file information</summary>
     /// <path>api/2.0/files/file/{fileId}</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
@@ -315,10 +437,10 @@ public abstract class FilesController<T>(
     }
 
 
-    /// <summary>
+    /// <remarks>
     /// Returns the detailed information about all the available file versions with the ID specified in the request.
-    /// </summary>
-    /// <short>Get file versions</short>
+    /// </remarks>
+    /// <summary>Get file versions</summary>
     /// <path>api/2.0/files/file/{fileId}/history</path>
     /// <collection>list</collection>
     /// <requiresAuthorization>false</requiresAuthorization>
@@ -331,10 +453,10 @@ public abstract class FilesController<T>(
         return filesControllerHelper.GetFileVersionInfoAsync(inDto.FileId);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Locks a file with the ID specified in the request.
-    /// </summary>
-    /// <short>Lock a file</short>
+    /// </remarks>
+    /// <summary>Lock a file</summary>
     /// <path>api/2.0/files/file/{fileId}/lock</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Locked file information", typeof(FileDto<int>))]
@@ -344,10 +466,10 @@ public abstract class FilesController<T>(
         return await filesControllerHelper.LockFileAsync(inDto.FileId, inDto.File.LockFile);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Sets the Custom Filter editing mode to a file with the ID specified in the request.
-    /// </summary>
-    /// <short>Set the Custom Filter editing mode</short>
+    /// </remarks>
+    /// <summary>Set the Custom Filter editing mode</summary>
     /// <path>api/2.0/files/file/{fileId}/customfilter</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "File information", typeof(FileDto<int>))]
@@ -359,10 +481,10 @@ public abstract class FilesController<T>(
         return await _fileDtoHelper.GetAsync(result);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Restores a file version specified in the request.
-    /// </summary>
-    /// <short>Restore a file version</short>
+    /// </remarks>
+    /// <summary>Restore a file version</summary>
     /// <path>api/2.0/files/file/{fileId}/restoreversion</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     /// <collection>list</collection>
@@ -374,13 +496,13 @@ public abstract class FilesController<T>(
     [HttpPost("file/{fileId}/restoreversion")]
     public IAsyncEnumerable<EditHistoryDto> RestoreFileVersion(RestoreVersionRequestDto<T> inDto)
     {
-        return filesControllerHelper.RestoreVersionAsync(inDto.FileId, inDto.Version, inDto.Url);
+        return fileStorageService.RestoreVersionAsync(inDto.FileId, inDto.Version, inDto.Url).Select(editHistoryMapper.MapToDto);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Starts a conversion operation of a file with the ID specified in the request.
-    /// </summary>
-    /// <short>Start file conversion</short>
+    /// </remarks>
+    /// <summary>Start file conversion</summary>
     /// <path>api/2.0/files/file/{fileId}/checkconversion</path>
     /// <collection>list</collection>
     [Tags("Files / Operations")]
@@ -394,10 +516,10 @@ public abstract class FilesController<T>(
         return filesControllerHelper.StartConversionAsync(inDto.CheckConversion);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Updates a comment in a file with the ID specified in the request.
-    /// </summary>
-    /// <short>Update a comment</short>
+    /// </remarks>
+    /// <summary>Update a comment</summary>
     /// <path>api/2.0/files/file/{fileId}/comment</path>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "Updated comment", typeof(string))]
@@ -407,10 +529,10 @@ public abstract class FilesController<T>(
         return await filesControllerHelper.UpdateCommentAsync(inDto.FileId, inDto.File.Version, inDto.File.Comment);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Updates the information of the selected file with the parameters specified in the request.
-    /// </summary>
-    /// <short>Update a file</short>
+    /// </remarks>
+    /// <summary>Update a file</summary>
     /// <path>api/2.0/files/file/{fileId}</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
@@ -423,10 +545,10 @@ public abstract class FilesController<T>(
         return await filesControllerHelper.UpdateFileAsync(inDto.FileId, inDto.File.Title, inDto.File.LastVersion);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Updates the contents of a file with the ID specified in the request.
-    /// </summary>
-    /// <short>Update file contents</short>
+    /// </remarks>
+    /// <summary>Update file contents</summary>
     /// <path>api/2.0/files/{fileId}/update</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Files")]
@@ -442,13 +564,14 @@ public abstract class FilesController<T>(
         return await filesControllerHelper.UpdateFileStreamAsync(file.OpenReadStream(), inDto.FileId, inDto.FileExtension, inDto.Encrypted, inDto.Forcesave);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Creates a primary external link by the identifier specified in the request.
-    /// </summary>
-    /// <short>Create primary external link</short>
+    /// </remarks>
+    /// <summary>Create primary external link</summary>
     /// <path>api/2.0/files/file/{id}/link</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "File security information", typeof(FileShareDto))]
+    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [SwaggerResponse(404, "Not Found")]
     [HttpPost("file/{id}/link")]
     public async Task<FileShareDto> CreateFilePrimaryExternalLink(FileLinkRequestDto<T> inDto)
@@ -466,14 +589,15 @@ public abstract class FilesController<T>(
         return await fileShareDtoHelper.Get(linkAce);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the primary external link by the identifier specified in the request.
-    /// </summary>
-    /// <short>Get primary external link</short>
+    /// </remarks>
+    /// <summary>Get primary external link</summary>
     /// <path>api/2.0/files/file/{id}/link</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "File security information", typeof(FileShareDto))]
+    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [SwaggerResponse(404, "Not Found")]
     [AllowAnonymous]
     [HttpGet("file/{id}/link")]
@@ -484,10 +608,10 @@ public abstract class FilesController<T>(
         return await fileShareDtoHelper.Get(linkAce);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the external links of a file with the ID specified in the request.
-    /// </summary>
-    /// <short>Get file external links</short>
+    /// </remarks>
+    /// <summary>Get file external links</summary>
     /// <path>api/2.0/files/file/{id}/links</path>
     /// <collection>list</collection>
     [Tags("Files / Files")]
@@ -508,10 +632,10 @@ public abstract class FilesController<T>(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Sets an external link to a file with the ID specified in the request.
-    /// </summary>
-    /// <short>Set an external link</short>
+    /// </remarks>
+    /// <summary>Set an external link</summary>
     /// <path>api/2.0/files/file/{id}/links</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "File security information", typeof(FileShareDto))]
@@ -533,12 +657,12 @@ public abstract class FilesController<T>(
         return linkAce is not null ? await fileShareDtoHelper.Get(linkAce) : null;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Sets the order of the file with the ID specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Set file order
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/files/{fileId}/order</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Updated file information", typeof(FileDto<int>))]
@@ -552,12 +676,12 @@ public abstract class FilesController<T>(
         return await _fileDtoHelper.GetAsync(file);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Sets the order of the files specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Set order of files
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/files/order</path>
     /// <exception cref="ArgumentOutOfRangeException"></exception>
     [Tags("Files / Files")]
@@ -571,10 +695,10 @@ public abstract class FilesController<T>(
                 await _fileDtoHelper.GetAsync(e as File<T>));
     }
 
-    /// <summary>
+    /// <remarks>
     /// Saves a file with the identifier specified in the request as a PDF document.
-    /// </summary>
-    /// <short>Save a file as PDF</short>
+    /// </remarks>
+    /// <summary>Save a file as PDF</summary>
     /// <path>api/2.0/files/file/{id}/saveaspdf</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
@@ -585,10 +709,10 @@ public abstract class FilesController<T>(
         return await filesControllerHelper.SaveAsPdf(inDto.Id, inDto.File.FolderId, inDto.File.Title);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Saves the form role mapping.
-    /// </summary>
-    /// <short>Save form role mapping</short>
+    /// </remarks>
+    /// <summary>Save form role mapping</summary>
     /// <path>api/2.0/files/file/{fileId}/formrolemapping</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Updated information about form role mappings")]
@@ -599,25 +723,26 @@ public abstract class FilesController<T>(
         await fileStorageService.SaveFormRoleMapping(inDto.FormId, inDto.Roles);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns all roles for the specified form.
-    /// </summary>
-    /// <short>Get form roles</short>
+    /// </remarks>
+    /// <summary>Get form roles</summary>
     /// <path>api/2.0/files/file/{fileId}/formroles</path>
     /// <collection>list</collection>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Successfully retrieved all roles for the form", typeof(IEnumerable<FormRoleDto>))]
     [SwaggerResponse(403, "You do not have enough permissions to view the form roles")]
+    [SwaggerResponse(404, "The required file was not found")]
     [HttpGet("file/{fileId}/formroles")]
     public IAsyncEnumerable<FormRoleDto> GetAllFormRoles(FileIdRequestDto<T> inDto)
     {
         return fileStorageService.GetAllFormRoles(inDto.FileId);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Performs the specified form filling action.
-    /// </summary>
-    /// <short>Perform form filling action</short>
+    /// </remarks>
+    /// <summary>Perform form filling action</summary>
     /// <path>api/2.0/files/file/{fileId}/manageformfilling</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Successfully processed the form filling action")]
@@ -626,6 +751,20 @@ public abstract class FilesController<T>(
     public async Task ManageFormFilling(ManageFormFillingDto<T> inDto)
     {
         await fileStorageService.ManageFormFilling(inDto.FormId, inDto.Action);
+    }
+
+    /// <remarks>
+    /// Returns the results of form submissions.
+    /// </remarks>
+    /// <summary>Get form submission results</summary>
+    /// <path>api/2.0/files/file/{fileId}/submissions</path>
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "Form submission results were successfully retrieved")]
+    [SwaggerResponse(403, "You do not have enough permissions to perform this action")]
+    [HttpGet("file/{fileId}/submissions")]
+    public Task<FormSubmissionsDto> GetFormSubmissions(FileIdRequestDto<int> inDto)
+    {
+        return fileStorageService.GetSubmissionsByFormId(inDto.FileId);
     }
 }
 
@@ -637,10 +776,10 @@ public class FilesControllerCommon(
         FileDtoHelper fileDtoHelper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
-    /// <summary>
+    /// <remarks>
     /// Creates a new file in the "My documents" section with the title specified in the request.
-    /// </summary>
-    /// <short>Create a file in the "My documents" section</short>
+    /// </remarks>
+    /// <summary>Create a file in the "My documents" section</summary>
     /// <remarks>If a file extension is different from DOCX/XLSX/PPTX and refers to one of the known text, spreadsheet, or presentation formats, it will be changed to DOCX/XLSX/PPTX accordingly. If the file extension is not specified or is unknown, the DOCX extension will be added to the file title.</remarks>
     /// <path>api/2.0/files/@my/file</path>
     [Tags("Files / Files")]
@@ -651,10 +790,10 @@ public class FilesControllerCommon(
         return await filesControllerHelperInternal.CreateFileAsync(await globalFolderHelper.FolderMyAsync, inDto.Title, inDto.TemplateId, inDto.FormId, inDto.EnableExternalExt);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Creates an HTML (.html) file in the "Common" section with the title and contents specified in the request.
-    /// </summary>
-    /// <short>Create an HTML file in the "Common" section</short>
+    /// </remarks>
+    /// <summary>Create an HTML file in the "Common" section</summary>
     /// <path>api/2.0/files/@common/html</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Files")]
@@ -666,10 +805,10 @@ public class FilesControllerCommon(
         return await filesControllerHelperInternal.CreateHtmlFileAsync(await globalFolderHelper.FolderCommonAsync, inDto.Title, inDto.Content, !inDto.CreateNewIfExist);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Creates an HTML (.html) file in the "My documents" section with the title and contents specified in the request.
-    /// </summary>
-    /// <short>Create an HTML file in the "My documents" section</short>
+    /// </remarks>
+    /// <summary>Create an HTML file in the "My documents" section</summary>
     /// <path>api/2.0/files/@my/html</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
@@ -680,10 +819,10 @@ public class FilesControllerCommon(
         return await filesControllerHelperInternal.CreateHtmlFileAsync(await globalFolderHelper.FolderMyAsync, inDto.Title, inDto.Content, !inDto.CreateNewIfExist);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Creates a text (.txt) file in the "Common" section with the title and contents specified in the request.
-    /// </summary>
-    /// <short>Create a text file in the "Common" section</short>
+    /// </remarks>
+    /// <summary>Create a text file in the "Common" section</summary>
     /// <path>api/2.0/files/@common/text</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Files")]
@@ -694,10 +833,10 @@ public class FilesControllerCommon(
         return await filesControllerHelperInternal.CreateTextFileAsync(await globalFolderHelper.FolderCommonAsync, inDto.Title, inDto.Content, !inDto.CreateNewIfExist);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Creates a text (.txt) file in the "My documents" section with the title and contents specified in the request.
-    /// </summary>
-    /// <short>Create a text file in the "My documents" section</short>
+    /// </remarks>
+    /// <summary>Create a text file in the "My documents" section</summary>
     /// <path>api/2.0/files/@my/text</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
@@ -707,10 +846,10 @@ public class FilesControllerCommon(
         return await filesControllerHelperInternal.CreateTextFileAsync(await globalFolderHelper.FolderMyAsync, inDto.Title, inDto.Content, !inDto.CreateNewIfExist);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Creates thumbnails for the files with the IDs specified in the request.
-    /// </summary>
-    /// <short>Create file thumbnails</short>
+    /// </remarks>
+    /// <summary>Create file thumbnails</summary>
     /// <path>api/2.0/files/thumbnails</path>
     /// <collection>list</collection>
     /// <requiresAuthorization>false</requiresAuthorization>

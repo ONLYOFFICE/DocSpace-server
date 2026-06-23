@@ -1,0 +1,80 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <ServerGarbageCollection>false</ServerGarbageCollection>
+    <GarbageCollectionAdaptationMode>0</GarbageCollectionAdaptationMode>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Autofac.Extensions.DependencyInjection" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Core -->
+    <ProjectReference Include="../../ASC.Api.Core/ASC.Api.Core.csproj" />
+    <ProjectReference Include="../../ASC.Common/ASC.Common.csproj" />
+    <ProjectReference Include="../../ASC.Core.Common/ASC.Core.Common.csproj" />
+    <ProjectReference Include="../../ASC.Data.Backup.Core/ASC.Data.Backup.Core.csproj" />
+    <ProjectReference Include="../../ASC.Data.Storage/ASC.Data.Storage.csproj" />
+    <ProjectReference Include="../../ASC.Data.Encryption/ASC.Data.Encryption.csproj" />
+    <ProjectReference Include="../../ASC.FederatedLogin/ASC.FederatedLogin.csproj" />
+    <ProjectReference Include="../../ASC.Migration/ASC.Migration.Core.csproj" />
+    <ProjectReference Include="../../ASC.Webhooks.Core/ASC.Webhooks.Core.csproj" />
+    <ProjectReference Include="../../ASC.ActiveDirectory/ASC.ActiveDirectory.csproj" />
+    <ProjectReference Include="../../ASC.Data.Reassigns/ASC.Data.Reassigns.csproj" />
+    <ProjectReference Include="../ASC.AuditTrail/ASC.AuditTrail.csproj" />
+
+    <!-- Web -->
+    <ProjectReference Include="../../../web/ASC.Web.Core/ASC.Web.Core.csproj" />
+    <ProjectReference Include="../../../web/ASC.Web.Api/ASC.Web.Api.csproj" />
+    <ProjectReference Include="../../../web/ASC.Web.Studio/ASC.Web.Studio.csproj" />
+
+    <!-- Products -->
+    <ProjectReference Include="../../../products/ASC.Files/Core/ASC.Files.Core.csproj" />
+    <ProjectReference Include="../../../products/ASC.Files/Server/ASC.Files.csproj" />
+    <ProjectReference Include="../../../products/ASC.Files/Worker/ASC.Files.Worker.csproj" />
+    <ProjectReference Include="../../../products/ASC.People/Server/ASC.People.csproj" />
+    <ProjectReference Include="../../../products/ASC.AI/Core/ASC.AI.Core.csproj" />
+    <ProjectReference Include="../../../products/ASC.AI/Server/ASC.AI.csproj" />
+    <ProjectReference Include="../../../products/ASC.AI/Worker/ASC.AI.Worker.csproj" />
+
+    <!-- Services -->
+    <ProjectReference Include="../ASC.Data.Backup/ASC.Data.Backup.csproj" />
+    <ProjectReference Include="../ASC.Data.Backup.Worker/ASC.Data.Backup.Worker.csproj" />
+    <ProjectReference Include="../ASC.Notify/ASC.Notify.csproj" />
+    <ProjectReference Include="../ASC.Studio.Notify/ASC.Studio.Notify.csproj" />
+    <ProjectReference Include="../ASC.ClearEvents/ASC.ClearEvents.csproj" />
+    <ProjectReference Include="../ASC.TelegramService/ASC.TelegramService.csproj" />
+    <ProjectReference Include="../ASC.ApiSystem/ASC.ApiSystem.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+      <None Remove="DocStore/**/*" />
+      <Content Remove="DocStore/**/*" />
+  </ItemGroup>
+
+  <Target Name="CopyDocStoreToProject" BeforeTargets="BeforeBuild">
+      <ItemGroup>
+          <DocStoreSourceFiles Include="../../resources/DocStore/**/*"
+                               Exclude="../../resources/DocStore/.git/**/*;../../resources/DocStore/**/*.md;../../resources/DocStore/LICENSE" />
+      </ItemGroup>
+
+      <Copy SourceFiles="@(DocStoreSourceFiles)"
+            DestinationFiles="@(DocStoreSourceFiles->'$(ProjectDir)DocStore/%(RecursiveDir)%(FileName)%(Extension)')"
+            SkipUnchangedFiles="true" />
+
+      <ItemGroup>
+          <None Include="$(ProjectDir)DocStore/**/*"
+                Visible="false">
+              <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+          </None>
+      </ItemGroup>
+  </Target>
+
+  <Target Name="CleanDocStore" AfterTargets="Clean">
+      <RemoveDir Directories="$(ProjectDir)DocStore" />
+  </Target>
+
+</Project>

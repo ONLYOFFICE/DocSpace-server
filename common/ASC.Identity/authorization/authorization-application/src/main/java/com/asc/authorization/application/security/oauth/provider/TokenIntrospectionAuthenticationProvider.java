@@ -1,51 +1,62 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 //
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY; without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 //
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 //
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 //
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 //
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical
-// writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+//
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
 
 package com.asc.authorization.application.security.oauth.provider;
 
 import static com.asc.authorization.application.security.RegionUtils.JWT_REGION_EXTRACTOR;
 
 import com.asc.authorization.application.security.RegionUtils;
+import com.asc.common.messaging.configuration.ClientRegistrationMessagingConfiguration;
+import com.asc.common.service.transfer.message.ClientRetrievedEvent;
+import com.asc.common.service.transfer.message.RetrieveClientMessage;
+import com.asc.common.utilities.crypto.EncryptionService;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import lombok.RequiredArgsConstructor;
+import java.util.*;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.Nullable;
+import org.slf4j.MDC;
+import org.springframework.amqp.core.MessageProperties;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.oauth2.core.OAuth2AccessToken;
-import org.springframework.security.oauth2.core.OAuth2Token;
-import org.springframework.security.oauth2.core.OAuth2TokenIntrospectionClaimNames;
+import org.springframework.security.oauth2.core.*;
 import org.springframework.security.oauth2.core.converter.ClaimConversionService;
 import org.springframework.security.oauth2.server.authorization.OAuth2Authorization;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
@@ -65,7 +76,6 @@ import org.springframework.util.CollectionUtils;
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class TokenIntrospectionAuthenticationProvider implements AuthenticationProvider {
   private static final TypeDescriptor OBJECT_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(Object.class);
   private static final TypeDescriptor LIST_STRING_TYPE_DESCRIPTOR =
@@ -75,9 +85,116 @@ public class TokenIntrospectionAuthenticationProvider implements AuthenticationP
   private String region;
 
   private final Environment environment;
+  @Nullable private final RabbitTemplate rpcRabbitTemplate;
+  @Nullable private final MessageConverter messageConverter;
 
+  private final EncryptionService encryptionService;
   private final OAuth2AuthorizationService authorizationService;
   private final RegisteredClientRepository registeredClientRepository;
+
+  @Autowired
+  public TokenIntrospectionAuthenticationProvider(
+      Environment environment,
+      @Autowired(required = false) @Qualifier("rpcRabbitTemplate") RabbitTemplate rpcRabbitTemplate,
+      @Autowired(required = false) MessageConverter messageConverter,
+      EncryptionService encryptionService,
+      OAuth2AuthorizationService authorizationService,
+      RegisteredClientRepository registeredClientRepository) {
+    this.environment = environment;
+    this.rpcRabbitTemplate = rpcRabbitTemplate;
+    this.messageConverter = messageConverter;
+    this.encryptionService = encryptionService;
+    this.authorizationService = authorizationService;
+    this.registeredClientRepository = registeredClientRepository;
+  }
+
+  /**
+   * Maps a {@link ClientRetrievedEvent} to a {@link RegisteredClient}.
+   *
+   * <p>Decrypts the client secret which is transmitted in encrypted form over RabbitMQ.
+   *
+   * @param clientEvent the client event containing client information from the remote region
+   * @return the mapped {@link RegisteredClient}
+   */
+  private RegisteredClient toRegisteredClient(ClientRetrievedEvent clientEvent) {
+    return RegisteredClient.withId(clientEvent.getClientId())
+        .clientId(clientEvent.getClientId())
+        .clientSecret(encryptionService.decrypt(clientEvent.getClientSecret()))
+        .clientName(clientEvent.getName())
+        .clientAuthenticationMethods(
+            authMethods ->
+                clientEvent.getAuthenticationMethods().stream()
+                    .map(
+                        method ->
+                            switch (method) {
+                              case "client_secret_post" ->
+                                  ClientAuthenticationMethod.CLIENT_SECRET_POST;
+                              case "none" -> ClientAuthenticationMethod.NONE;
+                              default -> ClientAuthenticationMethod.CLIENT_SECRET_BASIC;
+                            })
+                    .forEach(authMethods::add))
+        .authorizationGrantTypes(
+            grantTypes -> {
+              grantTypes.add(AuthorizationGrantType.AUTHORIZATION_CODE);
+              grantTypes.add(AuthorizationGrantType.REFRESH_TOKEN);
+            })
+        .redirectUris(uris -> uris.addAll(clientEvent.getRedirectUris()))
+        .scopes(scopes -> scopes.addAll(clientEvent.getScopes()))
+        .build();
+  }
+
+  /**
+   * Fetches a registered client from a remote region via RPC messaging.
+   *
+   * <p>This method sends an RPC request to the specified remote region to retrieve the client
+   * information. It's used during token introspection when a token from a different region needs to
+   * be validated.
+   *
+   * @param clientId the ID of the client to retrieve
+   * @param targetRegion the region to fetch the client from
+   * @return an {@link Optional} containing the {@link RegisteredClient} if found, or empty if the
+   *     remote region returns no result or the request fails
+   */
+  private Optional<RegisteredClient> fetchRemoteClient(String clientId, String targetRegion) {
+    if (rpcRabbitTemplate == null || messageConverter == null) {
+      log.warn("RabbitMQ not available, cannot fetch client from remote region: {}", targetRegion);
+      return Optional.empty();
+    }
+
+    try {
+      MDC.put("client_id", clientId);
+      MDC.put("region", targetRegion);
+      log.info("Retrieving client from remote region");
+
+      var routingKey =
+          ClientRegistrationMessagingConfiguration.CLIENT_RPC_ROUTING_KEY_PREFIX + targetRegion;
+      var message =
+          messageConverter.toMessage(
+              RetrieveClientMessage.builder().clientId(clientId).build(), new MessageProperties());
+
+      var response =
+          rpcRabbitTemplate.sendAndReceive(
+              ClientRegistrationMessagingConfiguration.CLIENT_RPC_EXCHANGE, routingKey, message);
+
+      if (response == null) {
+        log.warn("Received an empty response from remote region");
+        return Optional.empty();
+      }
+
+      var data = messageConverter.fromMessage(response);
+      if (data instanceof ClientRetrievedEvent clientEvent) {
+        var registeredClient = toRegisteredClient(clientEvent);
+        return Optional.of(registeredClient);
+      }
+
+      return Optional.empty();
+    } catch (Exception e) {
+      log.error("Error fetching client from remote region: {}", targetRegion, e);
+      return Optional.empty();
+    } finally {
+      MDC.clear();
+    }
+  }
 
   /**
    * Authenticates the provided token introspection request.
@@ -102,15 +219,15 @@ public class TokenIntrospectionAuthenticationProvider implements AuthenticationP
         Arrays.stream(environment.getActiveProfiles())
             .anyMatch(profile -> profile.equalsIgnoreCase("saas"));
 
+    String tokenRgn = null;
     if (isSaaS) {
       var tokenRegion = RegionUtils.extract(token, JWT_REGION_EXTRACTOR);
       if (tokenRegion.isPresent() && !tokenRegion.get().equalsIgnoreCase(region)) {
+        tokenRgn = tokenRegion.get();
         log.debug(
-            "Token region '{}' does not match current region '{}'. Token is not valid.",
-            tokenRegion.get(),
+            "Token region '{}' does not match current region '{}'. Will attempt cross-region client lookup.",
+            tokenRgn,
             region);
-        return new OAuth2TokenIntrospectionAuthenticationToken(
-            token, authentication, OAuth2TokenIntrospection.builder().build());
       }
     }
 
@@ -130,8 +247,28 @@ public class TokenIntrospectionAuthenticationProvider implements AuthenticationP
           token, authentication, OAuth2TokenIntrospection.builder().build());
     }
 
-    var authorizedClient =
-        registeredClientRepository.findById(authorization.getRegisteredClientId());
+    RegisteredClient authorizedClient;
+    if (isSaaS && tokenRgn != null && !tokenRgn.equalsIgnoreCase(region)) {
+      log.debug(
+          "Fetching client {} from remote region: {}",
+          authorization.getRegisteredClientId(),
+          tokenRgn);
+      var remoteClient = fetchRemoteClient(authorization.getRegisteredClientId(), tokenRgn);
+      if (remoteClient.isPresent()) {
+        authorizedClient = remoteClient.get();
+        log.debug("Successfully retrieved client from remote region: {}", tokenRgn);
+      } else {
+        log.warn(
+            "Failed to retrieve client {} from remote region {}. Token introspection failed.",
+            authorization.getRegisteredClientId(),
+            tokenRgn);
+        return new OAuth2TokenIntrospectionAuthenticationToken(
+            token, authentication, OAuth2TokenIntrospection.builder().build());
+      }
+    } else {
+      authorizedClient = registeredClientRepository.findById(authorization.getRegisteredClientId());
+    }
+
     var tokenClaims = withActiveTokenClaims(authorizedToken, authorizedClient);
 
     log.trace("Authenticated token introspection request");

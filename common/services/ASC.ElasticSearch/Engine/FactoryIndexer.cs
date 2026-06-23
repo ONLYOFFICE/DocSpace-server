@@ -1,28 +1,35 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.ElasticSearch;
 
@@ -54,7 +61,7 @@ public interface IFactoryIndexer
     Task DeleteAsync(int tenantId, bool immediately = true);
 }
 
-public abstract class FactoryIndexer<T>(ILoggerProvider options,
+public abstract class FactoryIndexer<T>(ILoggerFactory loggerFactory,
         TenantManager tenantManager,
         SearchSettingsHelper searchSettingsHelper,
         FactoryIndexer factoryIndexer,
@@ -64,8 +71,8 @@ public abstract class FactoryIndexer<T>(ILoggerProvider options,
     : IFactoryIndexer
     where T : class, ISearchItem
 {
-    protected ILogger Logger { get; } = options.CreateLogger("ASC.Indexer");
-    public string IndexName { get => _indexer.IndexName; }
+    protected ILogger Logger { get; } = loggerFactory.CreateLogger("ASC.Indexer");
+    public string IndexName => _indexer.IndexName;
     public virtual string SettingsTitle => string.Empty;
 
     protected readonly BaseIndexer<T> _indexer = baseIndexer;
@@ -93,6 +100,28 @@ public abstract class FactoryIndexer<T>(ILoggerProvider options,
         }
 
         return (true, result);
+    }
+
+    public async Task<(bool Success, long Count)> TryCountAsync(Expression<Func<Selector<T>, Selector<T>>> expression)
+    {
+        var t = serviceProvider.GetService<T>();
+        if (!await SupportAsync(t) || !_indexer.CheckExist(t))
+        {
+            return (false, 0);
+        }
+
+        try
+        {
+            var count = await _indexer.CountAsync(expression);
+
+            return (true, count);
+        }
+        catch (Exception e)
+        {
+            Logger.ErrorSelect(e);
+
+            return (false, 0);
+        }
     }
 
     public async Task<(bool, List<int>)> TrySelectIdsAsync(Expression<Func<Selector<T>, Selector<T>>> expression)
@@ -361,16 +390,36 @@ public abstract class FactoryIndexer<T>(ILoggerProvider options,
         }
     }
 
-    public Task IndexAsync(T data, bool immediately = true)
+    public Task IndexAsync(T data, bool immediately = true, bool waitForCompletion = false)
     {
         var t = serviceProvider.GetService<T>();
 
-        if (Support(t))
+        if (!Support(t))
         {
-            return QueueAsync(() => _indexer.IndexAsync(data, immediately));
+            return Task.CompletedTask;
         }
 
-        return Task.CompletedTask;
+        if (waitForCompletion)
+        {
+            return Task.Factory.StartNew(
+                async () =>
+                {
+                    try
+                    {
+                        await _indexer.IndexAsync(data, immediately);
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.ErrorIndex(e);
+                    }
+                },
+                CancellationToken.None,
+                TaskCreationOptions.LongRunning,
+                _scheduler
+            ).Unwrap();
+        }
+
+        return QueueAsync(() => _indexer.IndexAsync(data, immediately));
     }
 
     public Task<bool> UpdateAsync(T data, bool immediately = true, params Expression<Func<T, object>>[] fields)
@@ -550,7 +599,7 @@ public class FactoryIndexer
         IServiceProvider serviceProvider,
         FactoryIndexerHelper factoryIndexerHelper,
         Client client,
-        ILoggerProvider options,
+        ILoggerFactory loggerFactory,
         CoreBaseSettings coreBaseSettings,
         ICache cache)
     {
@@ -562,7 +611,7 @@ public class FactoryIndexer
 
         try
         {
-            Log = options.CreateLogger("ASC.Indexer");
+            Log = loggerFactory.CreateLogger("ASC.Indexer");
         }
         catch (Exception e)
         {

@@ -1,36 +1,43 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 using ASC.Web.Files.Utils;
 
 namespace ASC.People.Api;
 
-///<summary>
+///<remarks>
 /// Groups API.
-///</summary>
+///</remarks>
 ///<name>group</name>
 [Scope]
 [DefaultRoute]
@@ -48,12 +55,12 @@ public class GroupController(
     UserWebhookManager webhookManager)
     : ControllerBase
 {
-    /// <summary>
+    /// <remarks>
     /// Returns the general information about all the groups, such as group ID and group manager.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get groups
-    /// </short>
+    /// </summary>
     /// <remarks>
     /// This method returns partial group information.
     /// </remarks>
@@ -88,12 +95,12 @@ public class GroupController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the detailed information about the selected group.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get a group
-    /// </short>
+    /// </summary>
     /// <remarks>
     /// This method returns full group information.
     /// </remarks>
@@ -109,12 +116,12 @@ public class GroupController(
         return await groupFullDtoHelper.Get(await GetGroupInfoAsync(inDto.Id), inDto.IncludeMembers);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a list of groups for the user with the ID specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get user groups
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/group/user/{userid}</path>
     /// <collection>list</collection>
     [Tags("Group")]
@@ -134,12 +141,12 @@ public class GroupController(
         return result;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Adds a new group with the group manager, name, and members specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Add a new group
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/group</path>
     [Tags("Group")]
     [SwaggerResponse(200, "Newly created group with the detailed information", typeof(GroupDto))]
@@ -148,9 +155,28 @@ public class GroupController(
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_EditGroups, Constants.Action_AddRemoveUser);
 
+        ArgumentException.ThrowIfNullOrWhiteSpace(inDto.GroupName);
+
+        var userIds = inDto.Members?.ToHashSet() ?? [];
+        if (inDto.GroupManager != Guid.Empty)
+        {
+            userIds.Add(inDto.GroupManager);
+        }
+
+        foreach (var userId in userIds)
+        {
+            if (!await ValidateUserAsync(userId))
+            {
+                throw new ArgumentException(Resource.ErrorUserNotFound);
+            }
+        }
+
         var group = await userManager.SaveGroupInfoAsync(new GroupInfo { Name = inDto.GroupName });
 
-        await TransferUserToDepartmentAsync(inDto.GroupManager, group, true);
+        if (inDto.GroupManager != Guid.Empty)
+        {
+            await TransferUserToDepartmentAsync(inDto.GroupManager, group, true);
+        }
 
         if (inDto.Members != null)
         {
@@ -171,12 +197,12 @@ public class GroupController(
         return dto;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Updates the existing group changing the group manager, name, and/or members.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Update a group
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/group/{id}</path>
     [Tags("Group")]
     [SwaggerResponse(200, "Updated group with the detailed information", typeof(GroupDto))]
@@ -220,12 +246,12 @@ public class GroupController(
         return dto;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Deletes a group with the ID specified in the request from the list of groups on the portal.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Delete a group
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/group/{id}</path>
     [Tags("Group")]
     [SwaggerResponse(200, "No content", typeof(NoContentResult))]
@@ -249,12 +275,12 @@ public class GroupController(
         return NoContent();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Moves all the members from the selected group to another one specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Move group members
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/group/{fromId}/members/{toId}</path>
     [Tags("Group")]
     [SwaggerResponse(200, "Group with the detailed information", typeof(GroupDto))]
@@ -272,35 +298,45 @@ public class GroupController(
         foreach (var userInfo in users)
         {
             await TransferUserToDepartmentAsync(userInfo.Id, toGroup, false);
+            await RemoveUserFromDepartmentAsync(userInfo.Id, fromGroup);
         }
 
         return await GetGroup(new DetailedInformationRequestDto { Id = inDto.ToId });
     }
 
-    /// <summary>
+    /// <remarks>
     /// Replaces the group members with those specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Replace group members
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/group/{id}/members</path>
     [Tags("Group")]
     [SwaggerResponse(200, "Group with the detailed information", typeof(GroupDto))]
     [HttpPost("{id:guid}/members")]
     public async Task<GroupDto> SetMembersTo(MembersRequestDto inDto)
     {
+        var anyValidMembers = await inDto.Members.Members
+            .ToAsyncEnumerable()
+            .AnyAsync(async (userId, _) => await ValidateUserAsync(userId));
+
+        if (!anyValidMembers)
+        {
+            throw new ArgumentException(nameof(inDto.Members.Members));
+        }
+
         await RemoveMembersFrom(new MembersRequestDto { Id = inDto.Id, Members = new MembersRequest { Members = (await userManager.GetUsersByGroupAsync(inDto.Id)).Select(x => x.Id) } });
         await AddMembersTo(inDto);
 
         return await GetGroup(new DetailedInformationRequestDto { Id = inDto.Id });
     }
 
-    /// <summary>
+    /// <remarks>
     /// Adds new group members to the group with the ID specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Add group members
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/group/{id}/members</path>
     [Tags("Group")]
     [SwaggerResponse(200, "Group with the detailed information", typeof(GroupDto))]
@@ -320,12 +356,12 @@ public class GroupController(
         return await GetGroup(new DetailedInformationRequestDto { Id = group.ID });
     }
 
-    /// <summary>
+    /// <remarks>
     /// Sets a user with the ID specified in the request as a group manager.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Set a group manager
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/group/{id}/manager</path>
     [Tags("Group")]
     [SwaggerResponse(200, "Group with the detailed information", typeof(GroupDto))]
@@ -347,12 +383,12 @@ public class GroupController(
         return await GetGroup(new DetailedInformationRequestDto { Id = inDto.Id });
     }
 
-    /// <summary>
+    /// <remarks>
     /// Removes the group members specified in the request from the selected group.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Remove group members
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/group/{id}/members</path>
     [Tags("Group")]
     [SwaggerResponse(200, "Group with the detailed information", typeof(GroupDto))]
@@ -364,7 +400,7 @@ public class GroupController(
 
         var group = await GetGroupInfoAsync(inDto.Id);
 
-        foreach (var userId in inDto.Members.Members)
+        foreach (var userId in inDto.Members?.Members ?? [])
         {
             await RemoveUserFromDepartmentAsync(userId, group);
         }
@@ -383,10 +419,9 @@ public class GroupController(
         return group;
     }
 
-    private async Task TransferUserToDepartmentAsync(Guid userId, GroupInfo group, bool setAsManager)
+    private async Task TransferUserToDepartmentAsync(Guid userId, GroupInfo group, bool setAsManager, bool validate = true)
     {
-        var user = await userManager.GetUsersAsync(userId);
-        if (userId == Guid.Empty || !userManager.UserExists(user) || user.Status == EmployeeStatus.Terminated || await userManager.IsGuestAsync(userId))
+        if (validate && !await ValidateUserAsync(userId))
         {
             return;
         }
@@ -397,6 +432,15 @@ public class GroupController(
         }
 
         await userManager.AddUserIntoGroupAsync(userId, group.ID, notifyWebSocket: false);
+    }
+
+    private async Task<bool> ValidateUserAsync(Guid userId)
+    {
+        var user = await userManager.GetUsersAsync(userId);
+        return userId != Guid.Empty &&
+               userManager.UserExists(user) &&
+               user.Status != EmployeeStatus.Terminated &&
+               !await userManager.IsGuestAsync(userId);
     }
 
     private async Task RemoveUserFromDepartmentAsync(Guid userId, GroupInfo group)
@@ -440,10 +484,10 @@ public class GroupControllerAdditional<T>(
     FileSecurity fileSecurity,
     GroupFullDtoHelper groupFullDtoHelper) : ControllerBase
 {
-    /// <summary>
+    /// <remarks>
     /// Returns groups with their sharing settings in a room with the ID specified in request.
-    /// </summary>
-    /// <short>Get groups with room sharing settings</short>
+    /// </remarks>
+    /// <summary>Get groups with room sharing settings</summary>
     /// <path>api/2.0/group/room/{id}</path>
     /// <collection>list</collection>
     [Tags("Group / Search")]
@@ -460,10 +504,10 @@ public class GroupControllerAdditional<T>(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns groups with their sharing settings in a folder with the ID specified in request.
-    /// </summary>
-    /// <short>Get groups with folder sharing settings</short>
+    /// </remarks>
+    /// <summary>Get groups with folder sharing settings</summary>
     /// <path>api/2.0/group/folder/{id}</path>
     /// <collection>list</collection>
     [Tags("Group / Search")]
@@ -480,10 +524,10 @@ public class GroupControllerAdditional<T>(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns groups with their sharing settings for a file with the ID specified in request.
-    /// </summary>
-    /// <short>Get groups with file sharing settings</short>
+    /// </remarks>
+    /// <summary>Get groups with file sharing settings</summary>
     /// <path>api/2.0/group/file/{id}</path>
     /// <collection>list</collection>
     [Tags("Group / Search")]
@@ -510,8 +554,8 @@ public class GroupControllerAdditional<T>(
         var offset = inDto.StartIndex;
         var count = inDto.Count;
         var text = inDto.Text;
-        
-        var parentUserIds = await fileSharing.GetPureSharesAsync(fileEntry, ShareFilterType.Group, null, inDto.Text, 0, int.MaxValue).Select(r=> r.Id).ToListAsync();
+
+        var parentUserIds = await fileSharing.GetPureSharesAsync(fileEntry, ShareFilterType.Group, null, inDto.Text, 0, int.MaxValue).Select(r => r.Id).ToListAsync();
         var securityDao = daoFactory.GetSecurityDao<T>();
 
         var totalGroups = await securityDao.GetGroupsWithSharedCountAsync(fileEntry, text, inDto.ExcludeShared ?? false, parentUserIds);

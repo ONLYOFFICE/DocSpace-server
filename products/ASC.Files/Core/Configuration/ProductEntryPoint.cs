@@ -1,28 +1,35 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Web.Files.Configuration;
 
@@ -40,6 +47,7 @@ public class ProductEntryPoint : Product
     private readonly TenantManager _tenantManager;
     private readonly RoomsNotificationSettingsHelper _roomsNotificationSettingsHelper;
     private readonly PathProvider _pathProvider;
+    private readonly FileUtility _fileUtility;
     private readonly FilesLinkUtility _filesLinkUtility;
     private readonly CommonLinkUtility _commonLinkUtility;
     private readonly FileSecurity _fileSecurity;
@@ -60,6 +68,7 @@ public class ProductEntryPoint : Product
         TenantManager tenantManager,
         RoomsNotificationSettingsHelper roomsNotificationSettingsHelper,
         PathProvider pathProvider,
+        FileUtility fileUtility,
         FilesLinkUtility filesLinkUtility,
         FileSecurity fileSecurity,
         GlobalFolder globalFolder,
@@ -77,6 +86,7 @@ public class ProductEntryPoint : Product
         _tenantManager = tenantManager;
         _roomsNotificationSettingsHelper = roomsNotificationSettingsHelper;
         _pathProvider = pathProvider;
+        _fileUtility = fileUtility;
         _filesLinkUtility = filesLinkUtility;
         _fileSecurity = fileSecurity;
         _globalFolder = globalFolder;
@@ -179,7 +189,7 @@ public class ProductEntryPoint : Product
                     continue;
                 case (int)MessageAction.FileCreated or (int)MessageAction.FileUpdatedRevisionComment or (int)MessageAction.FileUploaded or (int)MessageAction.UserFileUpdated:
                     fileId = e.Target.GetItems().FirstOrDefault();
-                    activityInfo.FileUrl = _commonLinkUtility.GetFullAbsolutePath(_filesLinkUtility.GetFileWebEditorUrl(fileId));
+                    activityInfo.FileUrl = _commonLinkUtility.GetFullAbsolutePath(_filesLinkUtility.GetFileWebPreviewUrl(_fileUtility, activityInfo.FileTitle, fileId));
                     break;
             }
 
@@ -197,6 +207,7 @@ public class ProductEntryPoint : Product
 
             activityInfo.TargetUsers = additionalInfo.UserIds;
             activityInfo.IsAgent = additionalInfo.IsAgent.HasValue && additionalInfo.IsAgent.Value;
+            activityInfo.IsKnowledge = additionalInfo.ParentType is (int)FolderType.Knowledge;
 
             switch (e.Action)
             {
@@ -247,10 +258,10 @@ public class ProductEntryPoint : Product
                 }
             }
 
-            activityInfo.RoomUri = activityInfo.IsAgent 
-                ? _pathProvider.GetAgentUrl(roomId.ToString()) 
+            activityInfo.RoomUri = activityInfo.IsAgent
+                ? _pathProvider.GetAgentUrl(roomId.ToString())
                 : _pathProvider.GetRoomsUrl(roomId.ToString(), false);
-            
+
             activityInfo.RoomTitle = additionalInfo.RoomTitle;
             activityInfo.RoomOldTitle = additionalInfo.RoomOldTitle;
 
@@ -283,6 +294,7 @@ public class ProductEntryPoint : Product
 
                 file.Value.RoomUri = sharedFolderUrl;
                 file.Value.RoomTitle = FilesUCResource.SharedForMe;
+                file.Value.IsSharedForMe = true;
                 result.Add(file.Value);
             }
         }
@@ -323,8 +335,9 @@ public class ProductEntryPoint : Product
             }
         }
         var virtualRoomsFolderId = await _globalFolder.GetFolderVirtualRoomsAsync(_daoFactory);
+        var aiAgentsFolderId = await _globalFolder.GetFolderAiAgentsAsync(_daoFactory);
 
-        var myRooms = await folderDao.GetRoomsAsync(null, null, null, userId, null, false, false, false, ProviderFilter.None, SubjectFilter.Owner, null, new List<int> { virtualRoomsFolderId }).ToListAsync();
+        var myRooms = await folderDao.GetRoomsAsync(null, null, null, userId, null, false, false, false, ProviderFilter.None, SubjectFilter.Owner, Guid.Empty, null, new List<int> { virtualRoomsFolderId, aiAgentsFolderId }).ToListAsync();
 
         foreach (var room in myRooms)
         {
@@ -335,7 +348,7 @@ public class ProductEntryPoint : Product
         {
             var archiveFolderId = await _globalFolder.GetFolderArchiveAsync(_daoFactory);
 
-            var rooms = await folderDao.GetRoomsAsync([archiveFolderId], null, null, Guid.Empty, null, false, false, false, ProviderFilter.None, SubjectFilter.Owner, null).ToListAsync();
+            var rooms = await folderDao.GetRoomsAsync([archiveFolderId], null, null, Guid.Empty, null, false, false, false, ProviderFilter.None, null, Guid.Empty, null).ToListAsync();
 
             foreach (var room in rooms)
             {
@@ -369,10 +382,11 @@ public class ProductEntryPoint : Product
 
         bool IsRoomAdminAction()
         {
-            if (action is MessageAction.RoomRenamed or 
-                MessageAction.RoomArchived or 
-                MessageAction.RoomCreateUser or 
-                MessageAction.RoomRemoveUser or 
+            if (action is MessageAction.RoomRenamed or
+                MessageAction.RoomArchived or
+                MessageAction.RoomCreateUser or
+                MessageAction.RoomChangeOwner or
+                MessageAction.RoomRemoveUser or
                 MessageAction.AgentRenamed)
             {
                 return true;
@@ -410,7 +424,7 @@ public class ProductEntryPoint : Product
         {
             return FilesCommonResource.AgentManager;
         }
-        
+
         return userRoomRole switch
         {
             FileShare.Read or

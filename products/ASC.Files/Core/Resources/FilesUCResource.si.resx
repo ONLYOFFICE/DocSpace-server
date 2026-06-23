@@ -117,22 +117,22 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="MyFiles" xml:space="preserve">
-    <value>මාගේ ලේඛන</value>
-  </data>
-  <data name="SharedForMe" xml:space="preserve">
-    <value>මා සමඟ බෙදාගත්</value>
-  </data>
-  <data name="VirtualRooms" xml:space="preserve">
-    <value>කාමර</value>
-  </data>
   <data name="Archive" xml:space="preserve">
     <value>සංරක්‍ෂණය</value>
   </data>
   <data name="CorporateFiles" xml:space="preserve">
     <value>සාමාන්‍ය</value>
   </data>
+  <data name="MyFiles" xml:space="preserve">
+    <value>මාගේ ලේඛන</value>
+  </data>
+  <data name="SharedForMe" xml:space="preserve">
+    <value>මා සමඟ බෙදාගත්</value>
+  </data>
   <data name="Trash" xml:space="preserve">
     <value>කුණුකූඩයට</value>
+  </data>
+  <data name="VirtualRooms" xml:space="preserve">
+    <value>කාමර</value>
   </data>
 </root>

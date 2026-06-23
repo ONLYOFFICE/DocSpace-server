@@ -673,7 +673,7 @@ namespace ASC.Data.Storage.Selectel
 
         public override Uri FinalizeChunkedUpload(string domain, string path, string filePath, Dictionary<int, string> eTags)
         {
-            var stream = new FileStream(filePath, FileMode.Open);
+            using var stream = new FileStream(filePath, FileMode.Open);
 
             var client = GetClient().Result;
 

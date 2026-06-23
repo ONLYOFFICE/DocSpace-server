@@ -10,6 +10,9 @@
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <NoWarn>1701;1702;1591</NoWarn>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <OpenApiGenerateDocuments Condition="'$(OpenApiGenerateDocuments)' == ''">false</OpenApiGenerateDocuments>
+    <OpenApiDocumentsDirectory>$(MSBuildProjectDirectory)\..\..\common\Tools\ASC.Api.Documentation\ASC.Api.Documentation\json\</OpenApiDocumentsDirectory>
+    <OpenApiGenerateDocumentsOptions>--file-name api</OpenApiGenerateDocumentsOptions>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <Optimize>true</Optimize>
@@ -46,8 +49,17 @@
       <EmbeddedResource Include="img\customization.svg" />
       <EmbeddedResource Include="img\statistic.svg" />
       <EmbeddedResource Include="img\websearch_wallet.svg" />
+      <EmbeddedResource Include="img\anthropic.svg" />
+      <EmbeddedResource Include="img\crawling.svg" />
+      <EmbeddedResource Include="img\deepseek.svg" />
+      <EmbeddedResource Include="img\default.svg" />
+      <EmbeddedResource Include="img\embedding.svg" />
+      <EmbeddedResource Include="img\google.svg" />
+      <EmbeddedResource Include="img\openai.svg" />
+      <EmbeddedResource Include="img\search.svg" />
     </ItemGroup>
     <ItemGroup>
+    <ProjectReference Include="..\..\common\ASC.Analyzers\ASC.Analyzers.csproj"  OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\..\common\ASC.Api.Core\ASC.Api.Core.csproj" />
     <ProjectReference Include="..\..\common\ASC.ActiveDirectory\ASC.ActiveDirectory.csproj" />
     <ProjectReference Include="..\..\common\ASC.Core.Common\ASC.Core.Common.csproj" />
@@ -160,5 +172,16 @@
     <Content Include="..\..\.dockerignore">
       <Link>.dockerignore</Link>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Magick.NET-Q8-AnyCPU" />
+    <PackageReference Include="SkiaSharp" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" />
+    <PackageReference Include="Svg.Skia" />
+    <PackageReference Include="Microsoft.Extensions.ApiDescription.Server">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 </Project>

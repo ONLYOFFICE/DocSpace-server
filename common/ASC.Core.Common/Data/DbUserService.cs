@@ -1,28 +1,35 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 using Constants = ASC.Core.Users.Constants;
 
@@ -206,7 +213,7 @@ public class EFUserService(
                 var pwdHash = GetPasswordHash(user.Id, passwordHash);
 
                 var any = await userDbContext.UserSecurity
-                    .AnyAsync(r => r.UserId == user.Id && (r.PwdHash == pwdHash));
+                    .AnyAsync(r => r.UserId == user.Id && r.PwdHash == pwdHash);
 
                 if (any)
                 {
@@ -224,6 +231,17 @@ public class EFUserService(
         var q = userDbContext.Users
             .Where(r => userIds.Contains(r.Id))
             .Where(r => !r.Removed);
+
+        return await q.Project().ToListAsync();
+    }
+
+    public async Task<IEnumerable<UserInfo>> GetUsersAllTenantsAsync(string email, EmployeeActivationStatus? status)
+    {
+        email = email.ToLowerInvariant();
+
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
+        var q = userDbContext.Users
+            .Where(r => r.Email == email && (!status.HasValue || r.ActivationStatus == status.Value));
 
         return await q.Project().ToListAsync();
     }
@@ -344,12 +362,12 @@ public class EFUserService(
                 }
             case UserSortType.Type:
                 {
-                    var q1 = (from user in q
-                              join userGroup in userDbContext.UserGroups.Where(g =>
-                                  !g.Removed && (g.UserGroupId == Constants.GroupAdmin.ID || g.UserGroupId == Constants.GroupGuest.ID ||
-                                                 g.UserGroupId == Constants.GroupUser.ID)) on user.Id equals userGroup.Userid into joinedGroup
-                              from @group in joinedGroup.DefaultIfEmpty()
-                              select new UserWithGroup { User = user, Group = @group });
+                    var q1 = from user in q
+                        join userGroup in userDbContext.UserGroups.Where(g =>
+                            !g.Removed && (g.UserGroupId == Constants.GroupAdmin.ID || g.UserGroupId == Constants.GroupGuest.ID ||
+                                           g.UserGroupId == Constants.GroupUser.ID)) on user.Id equals userGroup.Userid into joinedGroup
+                        from @group in joinedGroup.DefaultIfEmpty()
+                        select new UserWithGroup { User = user, Group = @group };
 
                     Expression<Func<UserWithGroup, int>> orderByUserType = u =>
                         u.User.Id == filter.OwnerId ? 0 :
@@ -398,7 +416,7 @@ public class EFUserService(
                     break;
                 }
             case UserSortType.Email:
-                q = (filter.SortOrderAsc ? q.OrderBy(u => u.Email) : q.OrderByDescending(u => u.Email));
+                q = filter.SortOrderAsc ? q.OrderBy(u => u.Email) : q.OrderByDescending(u => u.Email);
                 break;
             case UserSortType.LastName:
                 q = filter.SortOrderAsc
@@ -822,11 +840,11 @@ public class EFUserService(
         {
             if (filter.QuotaFilter == QuotaFilter.Custom)
             {
-                q = q.Where(r => userDbContext.WebstudioSettings.Any(a => a.TenantId == r.TenantId && a.Id == new UserQuotaSettings().ID && a.UserId == r.Id));
+                q = q.Where(r => userDbContext.WebstudioSettings.Any(a => a.TenantId == r.TenantId && a.Id == UserQuotaSettings.ID && a.UserId == r.Id));
             }
             else if (filter.QuotaFilter == QuotaFilter.Default)
             {
-                q = q.Where(r => !userDbContext.WebstudioSettings.Any(a => a.TenantId == r.TenantId && a.Id == new UserQuotaSettings().ID && a.UserId == r.Id));
+                q = q.Where(r => !userDbContext.WebstudioSettings.Any(a => a.TenantId == r.TenantId && a.Id == UserQuotaSettings.ID && a.UserId == r.Id));
             }
         }
 
@@ -1026,6 +1044,61 @@ public class EFUserService(
     private static IQueryable<DbGroup> BuildBaseGroupQuery(int tenant, UserDbContext userDbContext)
     {
         return userDbContext.Groups.Where(g => g.TenantId == tenant && !g.Removed);
+    }
+
+    public async Task<InvitationLink> CreateInvitationLinkAsync(int tenantId, EmployeeType employeeType, DateTime expiration, int? maxUseCount)
+    {
+        var invitationLink = new InvitationLink
+        {
+            Id = Guid.NewGuid(),
+            TenantId = tenantId,
+            EmployeeType = employeeType,
+            Expiration = expiration,
+            MaxUseCount = maxUseCount,
+            CurrentUseCount = 0
+        };
+
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
+        await userDbContext.AddOrUpdateAsync(q => q.InvitationLinks, invitationLink);
+        await userDbContext.SaveChangesAsync();
+
+        return invitationLink;
+    }
+
+    public async Task<InvitationLink> GetInvitationLinkAsync(int tenantId, Guid id)
+    {
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
+        return await userDbContext.GetInvitationLinkAsync(tenantId, id);
+    }
+
+    public async Task<InvitationLink> GetInvitationLinkAsync(int tenantId, EmployeeType employeeType)
+    {
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
+        return await userDbContext.GetInvitationLinkAsync(tenantId, employeeType);
+    }
+
+    public async Task<List<InvitationLink>> GetInvitationLinksAsync(int tenantId)
+    {
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
+        return await userDbContext.GetInvitationLinksAsync(tenantId).ToListAsync();
+    }
+
+    public async Task UpdateInvitationLinkAsync(int tenantId, Guid id, DateTime expiration, int? maxUseCount)
+    {
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
+        await userDbContext.UpdateInvitationLinkAsync(tenantId, id, expiration, maxUseCount);
+    }
+
+    public async Task IncreaseInvitationLinkUsageAsync(int tenantId, Guid id)
+    {
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
+        await userDbContext.IncreaseInvitationLinkUsageAsync(tenantId, id);
+    }
+
+    public async Task DeleteInvitationLinkAsync(int tenantId, Guid id)
+    {
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
+        await userDbContext.DeleteInvitationLinkAsync(tenantId, id);
     }
 }
 

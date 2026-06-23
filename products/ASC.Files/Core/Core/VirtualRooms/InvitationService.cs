@@ -1,28 +1,35 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 using ASC.MessagingSystem.EF.Context;
 
@@ -98,9 +105,14 @@ public class InvitationService(
 
                 async Task<bool> ResolveAccessAsync<T>(Folder<T> folder)
                 {
+                    var accountId = authContext.CurrentAccount.ID;
+                    if (folder.CreateBy == accountId)
+                    {
+                        return true;
+                    }
+
                     if (await fileSecurity.CanReadAsync(folder))
                     {
-                        var accountId = authContext.CurrentAccount.ID;
                         if (!await userManager.IsDocSpaceAdminAsync(accountId))
                         {
                             return true;
@@ -152,7 +164,7 @@ public class InvitationService(
                     }
 
                     var type = await userManager.GetUserTypeAsync(currentUserId);
-                    
+
                     ProcessForAgent(folder, type, data);
 
                     if (FileSecurity.PaidShares.Contains(data.Share) && type is EmployeeType.Guest or EmployeeType.User)
@@ -166,9 +178,14 @@ public class InvitationService(
                         }
                     }
 
-                    var user = await userManager.GetUsersAsync(currentUserId);
+                    var (success, validationResult) = await ProcessShare(folder, currentUserId, data);
+                    if (!success)
+                    {
+                        validation.Result = validationResult;
+                        return false;
+                    }
 
-                    await fileSecurity.ShareAsync(folder.Id, FileEntryType.Folder, currentUserId, data.Share);
+                    var user = await userManager.GetUsersAsync(currentUserId);
 
                     switch (entry)
                     {
@@ -239,7 +256,8 @@ public class InvitationService(
             LinkType = result.LinkType,
             ConfirmType = result.ConfirmType,
             User = result.User,
-            EmployeeType = employeeType
+            EmployeeType = employeeType,
+            LinkId = result.LinkId
         };
 
         if (result.LinkType is not InvitationLinkType.CommonToRoom)
@@ -265,9 +283,16 @@ public class InvitationService(
             return data;
         }
 
-        data.Result = record.Options.ExpirationDate > DateTime.UtcNow
-            ? EmailValidationKeyProvider.ValidationResult.Ok
-            : EmailValidationKeyProvider.ValidationResult.Expired;
+        data.Result = record.Options.IsExpired
+            ? EmailValidationKeyProvider.ValidationResult.Expired
+            : EmailValidationKeyProvider.ValidationResult.Ok;
+
+        if (data.Result == EmailValidationKeyProvider.ValidationResult.Ok &&
+            record.Options.MaxUseCount.HasValue &&
+            record.Options.MaxUseCount.Value <= record.Options.CurrentUseCount)
+        {
+            data.Result = EmailValidationKeyProvider.ValidationResult.QuotaFailed;
+        }
 
         data.Share = record.Share;
         data.RoomId = record.EntryId;
@@ -317,7 +342,11 @@ public class InvitationService(
                 }
             }
 
-            await fileSecurity.ShareAsync(roomId, FileEntryType.Folder, user.Id, data.Share);
+            var (success, _) = await ProcessShare(room, user.Id, data);
+            if (!success)
+            {
+                return;
+            }
 
             await filesMessageService.SendAsync(MessageAction.RoomCreateUser, room, user.Id, data.Share, null, true,
                 user.DisplayUserName(false, displayUserSettingsHelper));
@@ -353,7 +382,7 @@ public class InvitationService(
 
         async Task<bool> CheckRoomAsync<T>(Folder<T> room)
         {
-            if (room == null || !DocSpaceHelper.IsRoom(room.FolderType))
+            if (room is not { IsRoom: true })
             {
                 return false;
             }
@@ -366,7 +395,7 @@ public class InvitationService(
             return true;
         }
     }
-    
+
     private static void ProcessForAgent<T>(Folder<T> folder, EmployeeType type, InvitationLinkData data)
     {
         if (folder.FolderType == FolderType.AiRoom && 
@@ -375,6 +404,38 @@ public class InvitationService(
         {
             data.Share = FileShare.Read;
         }
+    }
+
+    private async Task<(bool, EmailValidationKeyProvider.ValidationResult)> ProcessShare<T>(Folder<T> folder, Guid userId, InvitationLinkData data)
+    {
+        if (data.LinkId == Guid.Empty)
+        {
+            await fileSecurity.ShareAsync(folder.Id, FileEntryType.Folder, userId, data.Share);
+        }
+        else
+        {
+            await using (await distributedLockProvider.TryAcquireFairLockAsync($"link_use_count_check_{data.LinkId}"))
+            {
+                var link = (await fileSecurity.GetSharesAsync(folder, [data.LinkId])).FirstOrDefault();
+
+                if (link != null &&
+                    link.Options.MaxUseCount.HasValue &&
+                    link.Options.MaxUseCount.Value <= link.Options.CurrentUseCount)
+                {
+                    return (false, EmailValidationKeyProvider.ValidationResult.QuotaFailed);
+                }
+
+                await fileSecurity.ShareAsync(folder.Id, FileEntryType.Folder, userId, data.Share);
+
+                if (link != null)
+                {
+                    link.Options.CurrentUseCount += 1;
+                    await fileSecurity.ShareAsync(link.EntryId, link.EntryType, link.Subject, link.Share, link.SubjectType, link.Options, link.Owner);
+                }
+            }
+        }
+
+        return (true, EmailValidationKeyProvider.ValidationResult.Ok);
     }
 }
 
@@ -396,5 +457,6 @@ public class InvitationLinkData
     public EmployeeType EmployeeType { get; set; }
     public EmailValidationKeyProvider.ValidationResult Result { get; set; }
     public UserInfo User { get; set; }
+    public Guid LinkId { get; set; }
     public bool IsCorrect => Result == EmailValidationKeyProvider.ValidationResult.Ok;
 }

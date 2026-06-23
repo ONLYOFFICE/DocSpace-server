@@ -421,6 +421,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to AI services are disabled for the current portal.
+        /// </summary>
+        public static string ErrorMessage_AiServicesDisabled {
+            get {
+                return ResourceManager.GetString("ErrorMessage_AiServicesDisabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Bad request..
         /// </summary>
         public static string ErrorMessage_BadRequest {
@@ -471,6 +480,24 @@ namespace ASC.Files.Core.Resources {
         public static string ErrorMessage_EmptyFile {
             get {
                 return ResourceManager.GetString("ErrorMessage_EmptyFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The database table will be created after the first form submission. There is no data yet to generate its structure..
+        /// </summary>
+        public static string ErrorMessage_ExternalDbNotIndexed {
+            get {
+                return ResourceManager.GetString("ErrorMessage_ExternalDbNotIndexed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to synchronize form data to external database..
+        /// </summary>
+        public static string ErrorMessage_ExternalDbSyncFailed {
+            get {
+                return ResourceManager.GetString("ErrorMessage_ExternalDbSyncFailed", resourceCulture);
             }
         }
         
@@ -1096,6 +1123,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The form has been changed. This draft is outdated and cannot be submitted..
+        /// </summary>
+        public static string ErrorMessage_FillFormDraftObsolete {
+            get {
+                return ResourceManager.GetString("ErrorMessage_FillFormDraftObsolete", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to The file is no longer a draft to fill in the form..
         /// </summary>
         public static string MessageFillFormDraftDiscard {
@@ -1187,7 +1223,7 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Сommenter.
+        ///   Looks up a localized string similar to Commenter.
         /// </summary>
         public static string RoleEnum_Comment {
             get {

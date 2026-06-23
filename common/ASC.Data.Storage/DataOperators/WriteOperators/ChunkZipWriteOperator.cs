@@ -1,28 +1,35 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Data.Storage.DataOperators;
 
@@ -37,15 +44,11 @@ public class ChunkZipWriteOperator : IDataWriteOperator
     private readonly TempStream _tempStream;
     private int _chunkNumber = 1;
 
+
+    public CancellationToken CancellationToken { get; set; }
     public string Hash { get; private set; }
     public string StoragePath { get; private set; }
-    public bool NeedUpload
-    {
-        get
-        {
-            return false;
-        }
-    }
+    public bool NeedUpload => false;
 
     public ChunkZipWriteOperator(TempStream tempStream,
         CommonChunkedUploadSession chunkedUploadSession,
@@ -66,17 +69,20 @@ public class ChunkZipWriteOperator : IDataWriteOperator
 
     public async Task WriteEntryAsync(string tarKey, string domain, string path, IDataStore store, Func<Task> action)
     {
-        var fileStream = await ActionInvoker.TryAsync(async () => await store.GetReadStreamAsync(domain, path), 5, error => throw error);
+        CancellationToken.ThrowIfCancellationRequested();
+
+        await using var fileStream = await ActionInvoker.TryAsync(async () => await store.GetReadStreamAsync(domain, path), 5, error => throw error);
 
         if (fileStream != null)
         {
             await WriteEntryAsync(tarKey, fileStream, action);
-            await fileStream.DisposeAsync();
         }
     }
 
     public async Task WriteEntryAsync(string tarKey, Stream stream, Func<Task> action)
     {
+        CancellationToken.ThrowIfCancellationRequested();
+
         if (_fileStream == null)
         {
             _fileStream = _tempStream.Create();
@@ -88,11 +94,11 @@ public class ChunkZipWriteOperator : IDataWriteOperator
         {
             var entry = TarEntry.CreateTarEntry(tarKey);
             entry.Size = buffered.Length;
-            await _tarOutputStream.PutNextEntryAsync(entry, CancellationToken.None);
+            await _tarOutputStream.PutNextEntryAsync(entry, CancellationToken);
             buffered.Position = 0;
-            await buffered.CopyToAsync(_tarOutputStream);
-            await _tarOutputStream.FlushAsync();
-            await _tarOutputStream.CloseEntryAsync(CancellationToken.None).ContinueWith(async _ => await action());
+            await buffered.CopyToAsync(_tarOutputStream, CancellationToken);
+            await _tarOutputStream.FlushAsync(CancellationToken);
+            await _tarOutputStream.CloseEntryAsync(CancellationToken).ContinueWith(async _ => await action(), CancellationToken);
         }
         finally
         {
@@ -115,10 +121,16 @@ public class ChunkZipWriteOperator : IDataWriteOperator
         var buffer = new byte[chunkUploadSize];
         int bytesRead;
         _fileStream.Position = 0;
-        while ((bytesRead = await _fileStream.ReadAsync(buffer.AsMemory(0, (int)chunkUploadSize))) > 0)
+        while ((bytesRead = await _fileStream.ReadAsync(buffer.AsMemory(0, (int)chunkUploadSize), CancellationToken)) > 0)
         {
             using var theMemStream = new MemoryStream();
-            await theMemStream.WriteAsync(buffer.AsMemory(0, bytesRead));
+            await theMemStream.WriteAsync(buffer.AsMemory(0, bytesRead), CancellationToken);
+
+            if (CancellationToken.IsCancellationRequested)
+            {
+                break;
+            }
+
             theMemStream.Position = 0;
             if (bytesRead == chunkUploadSize || last)
             {
@@ -139,10 +151,13 @@ public class ChunkZipWriteOperator : IDataWriteOperator
                 _fileStream = _tempStream.Create();
                 _gZipOutputStream.baseOutputStream_ = _fileStream;
 
-                await theMemStream.CopyToAsync(_fileStream);
-                await _fileStream.FlushAsync();
+                await theMemStream.CopyToAsync(_fileStream, CancellationToken);
+                await _fileStream.FlushAsync(CancellationToken);
             }
         }
+
+        CancellationToken.ThrowIfCancellationRequested();
+
         if (last)
         {
             _chunkedUploadSession.BytesTotal++;

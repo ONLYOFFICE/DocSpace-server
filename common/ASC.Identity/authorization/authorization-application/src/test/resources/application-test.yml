@@ -1,0 +1,76 @@
+server:
+  port: 0
+  servlet:
+    session:
+      tracking-modes: cookie
+spring:
+  main:
+    banner-mode: off
+    allow-bean-definition-overriding: true
+  application:
+    name: ASC.Identity.Authorization.Test
+    region: local
+    encryption:
+      type: aes
+      secret: test-encryption-secret-key
+    signature:
+      jwks: ec
+      secret: 1123askdasjklasbnd
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+  cache:
+    type: redis
+  cloud:
+    aws:
+      region:
+        auto: false
+        static: us-east-1
+      dynamodb:
+        enabled: false
+  security:
+    oauth2:
+      registered-client:
+        accessTokenMinutesTTL: 60
+        refreshTokenDaysTTL: 30
+        authorizationCodeMinutesTTL: 1
+  threads:
+    virtual:
+      enabled: true
+grpc:
+  server:
+    port: -1
+  client:
+    registrationService:
+      address: in-process:test
+      negotiation-type: plaintext
+management:
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: always
+  endpoints:
+    web:
+      base-path:
+      exposure:
+        include: health
+      path-mapping:
+        health: /health
+  health:
+    diskspace:
+      enabled: false
+    livenessState:
+      enabled: true
+    readinessState:
+      enabled: true
+logging:
+  level:
+    root: WARN
+    com.asc: DEBUG
+  cloudwatch:
+    enabled: false

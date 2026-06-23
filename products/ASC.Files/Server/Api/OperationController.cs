@@ -1,28 +1,35 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Files.Api;
 
@@ -40,10 +47,10 @@ public class OperationController(
     CommonLinkUtility commonLinkUtility)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
-    /// <summary>
+    /// <remarks>
     /// Starts the download process of files and folders with the IDs specified in the request.
-    /// </summary>
-    /// <short>Bulk download</short>
+    /// </remarks>
+    /// <summary>Bulk download</summary>
     /// <path>api/2.0/files/fileops/bulkdownload</path>
     /// <collection>list</collection>
     /// <requiresAuthorization>false</requiresAuthorization>
@@ -65,10 +72,10 @@ public class OperationController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Copies all the selected files and folders to the folder with the ID specified in the request.
-    /// </summary>
-    /// <short>Copy to the folder</short>
+    /// </remarks>
+    /// <summary>Copy to the folder</summary>
     /// <path>api/2.0/files/fileops/copy</path>
     /// <collection>list</collection>
     [Tags("Files / Operations")]
@@ -86,10 +93,10 @@ public class OperationController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Deletes the files and folders with the IDs specified in the request.
-    /// </summary>
-    /// <short>Delete files and folders</short>
+    /// </remarks>
+    /// <summary>Delete files and folders</summary>
     /// <path>api/2.0/files/fileops/delete</path>
     /// <collection>list</collection>
     [Tags("Files / Operations")]
@@ -106,10 +113,10 @@ public class OperationController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Deletes the file versions with the IDs specified in the request.
-    /// </summary>
-    /// <short>Delete file versions</short>
+    /// </remarks>
+    /// <summary>Delete file versions</summary>
     /// <path>api/2.0/files/fileops/deleteversion</path>
     /// <collection>list</collection>
     [Tags("Files / Operations")]
@@ -125,10 +132,10 @@ public class OperationController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Deletes all the files and folders from the "Trash" folder.
-    /// </summary>
-    /// <short>Empty the "Trash" folder</short>
+    /// </remarks>
+    /// <summary>Empty the "Trash" folder</summary>
     /// <path>api/2.0/files/fileops/emptytrash</path>
     /// <collection>list</collection>
     [Tags("Files / Operations")]
@@ -146,10 +153,10 @@ public class OperationController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     ///  Returns a list of all the active file operations.
-    /// </summary>
-    /// <short>Get active file operations</short>
+    /// </remarks>
+    /// <summary>Get active file operations</summary>
     /// <path>api/2.0/files/fileops</path>
     /// <collection>list</collection>
     /// <requiresAuthorization>false</requiresAuthorization>
@@ -170,10 +177,10 @@ public class OperationController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Retrieves the statuses of operations filtered by the specified operation type.
-    /// </summary>
-    /// <short>Get file operation statuses</short>
+    /// </remarks>
+    /// <summary>Get file operation statuses</summary>
     /// <path>api/2.0/files/fileops/{operationType}</path>
     /// <collection>list</collection>
     /// <requiresAuthorization>false</requiresAuthorization>
@@ -200,10 +207,10 @@ public class OperationController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Marks the files and folders with the IDs specified in the request as read.
-    /// </summary>
-    /// <short>Mark as read</short>
+    /// </remarks>
+    /// <summary>Mark as read</summary>
     /// <path>api/2.0/files/fileops/markasread</path>
     /// <collection>list</collection>
     [Tags("Files / Operations")]
@@ -219,10 +226,10 @@ public class OperationController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Moves or copies all the selected files and folders to the folder with the ID specified in the request.
-    /// </summary>
-    /// <short>Move or copy to a folder</short>
+    /// </remarks>
+    /// <summary>Move or copy to a folder</summary>
     /// <path>api/2.0/files/fileops/move</path>
     /// <collection>list</collection>
     [Tags("Files / Operations")]
@@ -240,10 +247,10 @@ public class OperationController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Duplicates all the selected files and folders.
-    /// </summary>
-    /// <short>Duplicate files and folders</short>
+    /// </remarks>
+    /// <summary>Duplicate files and folders</summary>
     /// <path>api/2.0/files/fileops/duplicate</path>
     /// <collection>list</collection>
     [Tags("Files / Operations")]
@@ -260,10 +267,10 @@ public class OperationController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Checks if files can be moved or copied to the specified folder.
-    /// </summary>
-    /// <short>Check for moving or copying files to a folder</short>
+    /// </remarks>
+    /// <summary>Check for moving or copying files to a folder</summary>
     /// <path>api/2.0/files/fileops/checkdestfolder</path>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "Result", typeof(CheckDestFolderDto))]
@@ -287,8 +294,8 @@ public class OperationController(
 
         var filesTask = GetFilesDto(entries).ToListAsync();
 
-        var result = inDto.FileIds.Count() - entries.Count != 0 ?
-                     (entries.Count != 0 ? CheckDestFolderResult.PartAllowed : CheckDestFolderResult.NoneAllowed) : CheckDestFolderResult.AllAllowed;
+        var result = inDto.FileIds.Count - entries.Count != 0 ?
+                     entries.Count != 0 ? CheckDestFolderResult.PartAllowed : CheckDestFolderResult.NoneAllowed : CheckDestFolderResult.AllAllowed;
 
         return new CheckDestFolderDto
         {
@@ -305,10 +312,10 @@ public class OperationController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Checks if files or folders can be moved or copied to the specified folder, moves or copies them, and returns their information.
-    /// </summary>
-    /// <short>Move or copy files to a folder</short>
+    /// </remarks>
+    /// <summary>Move or copy files to a folder</summary>
     /// <path>api/2.0/files/fileops/move</path>
     /// <collection>list</collection>
     [Tags("Files / Operations")]
@@ -338,10 +345,10 @@ public class OperationController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Finishes an operation with the ID specified in the request or all the active operations.
-    /// </summary>
-    /// <short>Finish active operations</short>
+    /// </remarks>
+    /// <summary>Finish active operations</summary>
     /// <path>api/2.0/files/fileops/terminate/{id}</path>
     /// <collection>list</collection>
     /// <requiresAuthorization>false</requiresAuthorization>

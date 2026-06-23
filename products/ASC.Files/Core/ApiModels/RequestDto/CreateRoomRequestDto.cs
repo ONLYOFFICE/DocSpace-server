@@ -1,53 +1,59 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
-
 
 /// <summary>
 /// The room type.
 /// </summary>
 public enum RoomType
 {
-    [SwaggerEnum(Description = "Form filling room")]
+    [Description("Form filling room")]
     FillingFormsRoom = 1,
 
-    [SwaggerEnum(Description = "Collaboration room")]
+    [Description("Collaboration room")]
     EditingRoom = 2,
 
-    [SwaggerEnum(Description = "Custom room")]
+    [Description("Custom room")]
     CustomRoom = 5,
 
-    [SwaggerEnum(Description = "Public room")]
+    [Description("Public room")]
     PublicRoom = 6,
 
-    [SwaggerEnum(Description = "Virtual data room")]
+    [Description("Virtual data room")]
     VirtualDataRoom = 8,
-    
-    [SwaggerEnum(Description = "AI Room")]
+
+    [Description("AI Room")]
     AiRoom = 9
 }
 
@@ -71,81 +77,4 @@ public static class RoomTypeExtensions
             _ => FilterType.CustomRooms
         }).ToHashSet();
     }
-}
-
-/// <summary>
-/// The request parameters for creating a room.
-/// </summary>
-public class CreateRoomRequestDto
-{
-    /// <summary>
-    /// The room name.
-    /// </summary>
-    [StringLength(170)]
-    public required string Title { get; set; }
-
-    /// <summary>
-    /// The room quota.
-    /// </summary>
-    public long? Quota { get; set; }
-
-    /// <summary>
-    /// Specifies whether to create a room with indexing.
-    /// </summary>
-    public bool? Indexing { get; set; }
-
-    /// <summary>
-    /// Specifies whether to deny downloads from the room.
-    /// </summary>
-    public bool? DenyDownload { get; set; }
-
-    /// <summary>
-    /// The room data lifetime information.
-    /// </summary>
-    public RoomDataLifetimeDto Lifetime { get; set; }
-
-    /// <summary>
-    /// The watermark settings.
-    /// </summary>
-    public WatermarkRequestDto Watermark { get; set; }
-
-    /// <summary>
-    /// The room logo.
-    /// </summary>
-    public LogoRequest Logo { get; set; }
-
-    /// <summary>
-    /// The list of tags.
-    /// </summary>
-    public IEnumerable<string> Tags { get; set; }
-
-    /// <summary>
-    /// The room color.
-    /// </summary>
-    [StringLength(6)]
-    public string Color { get; set; }
-
-    /// <summary>
-    /// The room cover.
-    /// </summary>
-    [StringLength(50)]
-    public string Cover { get; set; }
-
-    /// <summary>
-    /// The room type.
-    /// </summary>
-    [JsonConverter(typeof(JsonStringEnumConverter<RoomType>))]
-    public required RoomType RoomType { get; set; }
-
-    /// <summary>
-    /// Specifies whether the room to be created is private or not.
-    /// </summary>
-    public bool Private { get; set; }
-
-    /// <summary>
-    /// The collection of sharing parameters.
-    /// </summary>
-    public IEnumerable<FileShareParams> Share { get; set; }
-    
-    public ChatSettings ChatSettings { get; set; }
 }

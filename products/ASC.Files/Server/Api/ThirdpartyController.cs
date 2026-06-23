@@ -1,28 +1,35 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 using ASC.Data.Backup.Storage;
 
@@ -45,10 +52,10 @@ public class ThirdpartyController(
         TenantManager tenantManager)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
-    /// <summary>
+    /// <remarks>
     /// Returns the list of the available providers.
-    /// </summary>
-    /// <short>Get providers</short>
+    /// </remarks>
+    /// <summary>Get providers</summary>
     /// <remarks>Available provider keys: DropboxV2, Box, WebDav, Yandex, OneDrive, SharePoint, GoogleDrive, kDrive.</remarks>
     /// <path>api/2.0/files/thirdparty/capabilities</path>
     /// <collection>list</collection>
@@ -65,10 +72,10 @@ public class ThirdpartyController(
         return thirdPartyConfiguration.GetProviders();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Creates a WordPress post with the parameters specified in the request.
-    /// </summary>
-    /// <short>Create a WordPress post</short>
+    /// </remarks>
+    /// <summary>Create a WordPress post</summary>
     /// <path>api/2.0/files/wordpress</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / WordPress")]
@@ -96,10 +103,10 @@ public class ThirdpartyController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Removes the third-party storage service account with the ID specified in the request.
-    /// </summary>
-    /// <short>Remove a third-party account</short>
+    /// </remarks>
+    /// <summary>Remove a third-party account</summary>
     /// <path>api/2.0/files/thirdparty/{providerId}</path>
     /// <exception cref="ArgumentException"></exception>
     [Tags("Files / Third-party integration")]
@@ -117,10 +124,10 @@ public class ThirdpartyController(
         return providerInfo.RootFolderId;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Deletes the WordPress plugin information.
-    /// </summary>
-    /// <short>Delete the WordPress information</short>
+    /// </remarks>
+    /// <summary>Delete the WordPress information</summary>
     /// <path>api/2.0/files/wordpress-delete</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / WordPress")]
@@ -138,10 +145,10 @@ public class ThirdpartyController(
         return DeleteWordpressInfoResponse.Failed();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a list of the third-party services connected to the "Common" section.
-    /// </summary>
-    /// <short>Get the common third-party services</short>
+    /// </remarks>
+    /// <summary>Get the common third-party services</summary>
     /// <path>api/2.0/files/thirdparty/common</path>
     /// <collection>list</collection>
     [Tags("Files / Third-party integration")]
@@ -158,10 +165,10 @@ public class ThirdpartyController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a list of all the connected third-party accounts.
-    /// </summary>
-    /// <short>Get the third-party accounts</short>
+    /// </remarks>
+    /// <summary>Get the third-party accounts</summary>
     /// <path>api/2.0/files/thirdparty</path>
     /// <collection>list</collection>
     [Tags("Files / Third-party integration")]
@@ -172,10 +179,10 @@ public class ThirdpartyController(
         return fileStorageService.GetThirdPartyAsync();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a backup of the connected third-party account.
-    /// </summary>
-    /// <short>Get a third-party account backup</short>
+    /// </remarks>
+    /// <summary>Get a third-party account backup</summary>
     /// <path>api/2.0/files/thirdparty/backup</path>
     [Tags("Files / Third-party integration")]
     [SwaggerResponse(200, "Folder for the third-party account backup", typeof(FolderDto<string>))]
@@ -192,10 +199,10 @@ public class ThirdpartyController(
         return null;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the WordPress plugin information.
-    /// </summary>
-    /// <short>Get the WordPress information</short>
+    /// </remarks>
+    /// <summary>Get the WordPress information</summary>
     /// <path>api/2.0/files/wordpress-info</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / WordPress")]
@@ -220,10 +227,10 @@ public class ThirdpartyController(
         return new WordpressInfoResponse { Success = false, Data = null };
     }
 
-    /// <summary>
+    /// <remarks>
     /// Saves the third-party storage service account. For WebDav, Yandex, kDrive and SharePoint, the login and password are used for authentication. For other providers, the authentication is performed using a token received via OAuth 2.0.
-    /// </summary>
-    /// <short>Save a third-party account</short>
+    /// </remarks>
+    /// <summary>Save a third-party account</summary>
     /// <remarks>List of provider keys: DropboxV2, Box, WebDav, Yandex, OneDrive, SharePoint, GoogleDrive, kDrive.</remarks>
     /// <path>api/2.0/files/thirdparty</path>
     /// <exception cref="ArgumentException"></exception>
@@ -246,10 +253,10 @@ public class ThirdpartyController(
         return await _folderDtoHelper.GetAsync(folder);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Saves a backup of the connected third-party account.
-    /// </summary>
-    /// <short>Save a third-party account backup</short>
+    /// </remarks>
+    /// <summary>Save a third-party account backup</summary>
     /// <remarks>List of provider keys: DropboxV2, Box, WebDav, Yandex, OneDrive, SharePoint, GoogleDrive, kDrive.</remarks>
     /// <path>api/2.0/files/thirdparty/backup</path>
     /// <exception cref="ArgumentException"></exception>
@@ -275,10 +282,10 @@ public class ThirdpartyController(
         return await _folderDtoHelper.GetAsync(folder);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Saves the user WordPress information when logging in.
-    /// </summary>
-    /// <short>Save the user WordPress information</short>
+    /// </remarks>
+    /// <summary>Save the user WordPress information</summary>
     /// <path>api/2.0/files/wordpress-save</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / WordPress")]
@@ -315,10 +322,10 @@ public class ThirdpartyController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a list of all providers.
-    /// </summary>
-    /// <short>Get all providers</short>
+    /// </remarks>
+    /// <summary>Get all providers</summary>
     /// <remarks>Available provider keys: Dropbox, Box, WebDav, OneDrive, GoogleDrive, kDrive, ownCloud, Nextcloud.</remarks>
     /// <path>api/2.0/files/thirdparty/providers</path>
     /// <collection>list</collection>

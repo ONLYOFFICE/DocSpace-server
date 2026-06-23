@@ -136,18 +136,6 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="ProductUserOpportunitiesCustomMode" xml:space="preserve">
-    <value>적절한 액세스 권한으로 문서와 공유 문서를 생성 및 편집|다른 사용자에게 문서 및 폴더에 대한 읽기/편집 권한 부여|'내 문서' 섹션에서 Dropbox, Box 및 기타 계정 연결</value>
-  </data>
-  <data name="ProductAdminOpportunitiesCustomMode" xml:space="preserve">
-    <value>사용자와 동일한 작업|'공통' 섹션에서 Dropbox, Box 및 기타 계정 연결|'공통' 섹션에서 문서 및 폴더에 대한 액세스 권한 설정</value>
-  </data>
-  <data name="subject_remove_user_data_completed_custom_mode" xml:space="preserve">
-    <value>${LetterLogoText}. 사용자 데이터 삭제가 완료되었습니다</value>
-  </data>
-  <data name="subject_saas_custom_mode_reg_data" xml:space="preserve">
-    <value>새로운 포털이 등록되었습니다</value>
-  </data>
   <data name="pattern_remove_user_data_completed_custom_mode" xml:space="preserve">
     <value>$UserName님,
 
@@ -164,5 +152,17 @@ $TrulyYours</value>
 # 이메일: $UserEmail
 # 휴대폰: $Phone
 # 생성일: $Date</value>
+  </data>
+  <data name="ProductAdminOpportunitiesCustomMode" xml:space="preserve">
+    <value>사용자와 동일한 작업|'공통' 섹션에서 Dropbox, Box 및 기타 계정 연결|'공통' 섹션에서 문서 및 폴더에 대한 액세스 권한 설정</value>
+  </data>
+  <data name="ProductUserOpportunitiesCustomMode" xml:space="preserve">
+    <value>적절한 액세스 권한으로 문서와 공유 문서를 생성 및 편집|다른 사용자에게 문서 및 폴더에 대한 읽기/편집 권한 부여|'내 문서' 섹션에서 Dropbox, Box 및 기타 계정 연결</value>
+  </data>
+  <data name="subject_remove_user_data_completed_custom_mode" xml:space="preserve">
+    <value>${LetterLogoText}. 사용자 데이터 삭제가 완료되었습니다</value>
+  </data>
+  <data name="subject_saas_custom_mode_reg_data" xml:space="preserve">
+    <value>새로운 포털이 등록되었습니다</value>
   </data>
 </root>

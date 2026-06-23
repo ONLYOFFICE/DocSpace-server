@@ -1,29 +1,35 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 //
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY; without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 //
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 //
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 //
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 //
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical
-// writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+//
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
 
 package com.asc.registration.application.controller;
 
@@ -38,8 +44,9 @@ import com.asc.common.utilities.HttpUtils;
 import com.asc.registration.application.security.authentication.BasicSignatureTokenPrincipal;
 import com.asc.registration.application.transfer.ChangeClientActivationRequest;
 import com.asc.registration.application.transfer.CreateClientRequest;
-import com.asc.registration.application.transfer.ErrorResponse;
 import com.asc.registration.application.transfer.UpdateClientRequest;
+import com.asc.registration.application.transfer.ValidationErrorCodeResponse;
+import com.asc.registration.application.transfer.ValidationErrorResponse;
 import com.asc.registration.service.ports.input.service.ClientApplicationService;
 import com.asc.registration.service.ports.input.service.ScopeApplicationService;
 import com.asc.registration.service.transfer.request.create.CreateTenantClientCommand;
@@ -59,7 +66,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
+import java.net.URI;
+import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -67,6 +75,7 @@ import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -87,7 +96,10 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(
-    value = "${spring.application.web.api}/clients",
+    value = {
+      "${spring.application.web.api}/oauth2/clients",
+      "${spring.application.web.api}/clients"
+    },
     produces = {MediaType.APPLICATION_JSON_VALUE})
 @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
 public class ClientCommandController {
@@ -181,25 +193,25 @@ public class ClientCommandController {
             content =
                 @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    schema = @Schema(implementation = ErrorResponse.class))),
+                    schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "403",
             description = "Insufficient permissions to create client",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "415",
             description = "Unsupported media type",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "429",
             description = "Too many requests - rate limit exceeded",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "500",
             description = "Internal server error occurred",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
       })
-  public ResponseEntity<ClientResponse> createClient(
+  public ResponseEntity<?> createClient(
       HttpServletRequest request,
       @AuthenticationPrincipal BasicSignatureTokenPrincipal principal,
       @RequestBody
@@ -232,12 +244,32 @@ public class ClientCommandController {
           CreateClientRequest command) {
     try {
       setLoggingParameters(principal);
-      if (!scopeApplicationService.getScopes().stream()
-          .map(ScopeResponse::getName)
-          .collect(Collectors.toSet())
-          .containsAll(command.getScopes())) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+      var validScopes =
+          scopeApplicationService.getScopes().stream()
+              .map(ScopeResponse::getName)
+              .collect(Collectors.toSet());
+
+      var invalidScopes =
+          command.getScopes().stream()
+              .filter(scope -> !validScopes.contains(scope))
+              .collect(Collectors.toSet());
+      if (!invalidScopes.isEmpty()) {
+        var problemDetail =
+            ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Validation failed");
+        problemDetail.setType(
+            URI.create(
+                "https://api.onlyoffice.com/docspace/api-backend/get-started/basic-concepts"));
+        problemDetail.setInstance(URI.create(request.getRequestURI()));
+        problemDetail.setProperty(
+            "errors",
+            List.of(
+                new ValidationErrorResponse.FieldError(
+                    "scopes",
+                    ValidationErrorCodeResponse.ERROR_INVALID_SCOPE,
+                    String.format("Invalid scopes: %s", String.join(", ", invalidScopes)))));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problemDetail);
       }
+
       return ResponseEntity.status(HttpStatus.CREATED)
           .body(
               clientApplicationService.createClient(
@@ -288,27 +320,27 @@ public class ClientCommandController {
         @ApiResponse(
             responseCode = "400",
             description = "Invalid request - missing required fields or validation failed",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "403",
             description = "Insufficient permissions to update client",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "404",
             description = "Client not found",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "415",
             description = "Unsupported media type",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "429",
             description = "Too many requests - rate limit exceeded",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "500",
             description = "Internal server error occurred",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
       })
   public ResponseEntity<?> updateClient(
       HttpServletRequest request,
@@ -401,23 +433,23 @@ public class ClientCommandController {
         @ApiResponse(
             responseCode = "400",
             description = "Invalid client ID format",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "403",
             description = "Insufficient permissions to regenerate client secret",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "404",
             description = "Client not found",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "429",
             description = "Too many requests - rate limit exceeded",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "500",
             description = "Internal server error occurred",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
       })
   public ResponseEntity<ClientSecretResponse> regenerateSecret(
       HttpServletRequest request,
@@ -467,27 +499,27 @@ public class ClientCommandController {
         @ApiResponse(
             responseCode = "400",
             description = "Invalid client ID format",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "403",
             description = "Insufficient permissions to revoke consent",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "404",
             description = "Client not found",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "429",
             description = "Too many requests - rate limit exceeded",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "503",
             description = "Authorization service unavailable",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "500",
             description = "Internal server error occurred",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
       })
   @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'GUEST')")
   public ResponseEntity<?> revokeUserClient(
@@ -556,23 +588,23 @@ public class ClientCommandController {
         @ApiResponse(
             responseCode = "400",
             description = "Invalid client ID format",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "403",
             description = "Insufficient permissions to delete client",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "404",
             description = "Client not found",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "429",
             description = "Too many requests - rate limit exceeded",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "500",
             description = "Internal server error occurred",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
       })
   public ResponseEntity<?> deleteClient(
       HttpServletRequest request,
@@ -582,7 +614,7 @@ public class ClientCommandController {
               required = true,
               example = "6c7cf17b-1bd3-47d5-94c6-be2d3570e168")
           @PathVariable
-          @NotEmpty
+          @NotBlank
           String clientId) {
     try {
       setLoggingParameters(principal);
@@ -625,15 +657,15 @@ public class ClientCommandController {
         @ApiResponse(
             responseCode = "403",
             description = "Insufficient permissions to delete user clients",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "429",
             description = "Too many requests - rate limit exceeded",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "500",
             description = "Internal server error occurred",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
       })
   public ResponseEntity<?> deleteUserClients(
       HttpServletRequest request, @AuthenticationPrincipal BasicSignatureTokenPrincipal principal) {
@@ -672,15 +704,15 @@ public class ClientCommandController {
         @ApiResponse(
             responseCode = "403",
             description = "Insufficient permissions to delete tenant clients",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "429",
             description = "Too many requests - rate limit exceeded",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "500",
             description = "Internal server error occurred",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
       })
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<?> deleteTenantClients(
@@ -723,27 +755,27 @@ public class ClientCommandController {
         @ApiResponse(
             responseCode = "400",
             description = "Invalid client ID format or activation status",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "403",
             description = "Insufficient permissions to change client activation",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "404",
             description = "Client not found",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "415",
             description = "Unsupported media type",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "429",
             description = "Too many requests - rate limit exceeded",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "500",
             description = "Internal server error occurred",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
       })
   public ResponseEntity<?> changeActivation(
       HttpServletRequest request,

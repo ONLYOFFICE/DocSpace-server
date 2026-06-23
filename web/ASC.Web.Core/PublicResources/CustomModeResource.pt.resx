@@ -136,18 +136,6 @@ Se precisar de ajuda, navegue através do nosso "Centro de Ajuda":"${__HelpLink}
 
 $TrulyYours</value>
   </data>
-  <data name="ProductAdminOpportunitiesCustomMode" xml:space="preserve">
-    <value>Faça o mesmo como utilizador|Associe o Dropbox, Box e outras contas na Secção ‘comum’|Configure os direitos de acesso aos documentos e pastas na Secção ‘Comum’</value>
-  </data>
-  <data name="ProductUserOpportunitiesCustomMode" xml:space="preserve">
-    <value>Crie e edite os seus próprios documentos, bem como os documentos partilhados, com os direitos de acesso adequados|Conceder a outros utilizadores acesso de leitura/edição aos documentos e pastas|Ligar o Dropbox, Box e outras contas na secção 'Os meus documentos'</value>
-  </data>
-  <data name="subject_remove_user_data_completed_custom_mode" xml:space="preserve">
-    <value>${LetterLogoText}. A eliminação dos dados do utilizador foi concluída</value>
-  </data>
-  <data name="subject_saas_custom_mode_reg_data" xml:space="preserve">
-    <value>Um novo portal foi registado</value>
-  </data>
   <data name="pattern_remove_user_data_completed_custom_mode" xml:space="preserve">
     <value>Caro $UserName,
 
@@ -164,5 +152,17 @@ A eliminação dos seus dados pessoais libertou $DocsSpace</value>
 # E-mail: $UserEmail
 # Telemóvel: $Phone
 # Data da Criação: $Date</value>
+  </data>
+  <data name="ProductAdminOpportunitiesCustomMode" xml:space="preserve">
+    <value>Faça o mesmo como utilizador|Associe o Dropbox, Box e outras contas na Secção ‘comum’|Configure os direitos de acesso aos documentos e pastas na Secção ‘Comum’</value>
+  </data>
+  <data name="ProductUserOpportunitiesCustomMode" xml:space="preserve">
+    <value>Crie e edite os seus próprios documentos, bem como os documentos partilhados, com os direitos de acesso adequados|Conceder a outros utilizadores acesso de leitura/edição aos documentos e pastas|Ligar o Dropbox, Box e outras contas na secção 'Os meus documentos'</value>
+  </data>
+  <data name="subject_remove_user_data_completed_custom_mode" xml:space="preserve">
+    <value>${LetterLogoText}. A eliminação dos dados do utilizador foi concluída</value>
+  </data>
+  <data name="subject_saas_custom_mode_reg_data" xml:space="preserve">
+    <value>Um novo portal foi registado</value>
   </data>
 </root>

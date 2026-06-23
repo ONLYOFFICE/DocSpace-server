@@ -1,28 +1,37 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
+
+using ASC.Files.Core;
 
 namespace ASC.Web.Api.Controllers.Settings;
 
@@ -42,11 +51,11 @@ public partial class SettingsController(
     CoreBaseSettings coreBaseSettings,
     CommonLinkUtility commonLinkUtility,
     IConfiguration configuration,
+    StorageFactory storageFactory,
     SetupInfo setupInfo,
     ExternalResourceSettings externalResourceSettings,
     ExternalResourceSettingsHelper externalResourceSettingsHelper,
     ConsumerFactory consumerFactory,
-    TimeZoneConverter timeZoneConverter,
     CustomNamingPeople customNamingPeople,
     IFusionCache fusionCache,
     ProviderManager providerManager,
@@ -63,18 +72,19 @@ public partial class SettingsController(
     UsersQuotaSyncOperation usersQuotaSyncOperation,
     CustomQuota customQuota,
     UserSocketManager userSocketManager,
-    QuotaSocketManager quotaSocketManager)
+    QuotaSocketManager quotaSocketManager,
+    ExternalDatabaseClient externalDatabaseClient)
     : BaseSettingsController(fusionCache, webItemManager)
 {
     [GeneratedRegex("^[a-z0-9]([a-z0-9-.]){1,253}[a-z0-9]$")]
     private static partial Regex EmailDomainRegex();
 
-    /// <summary>
+    /// <remarks>
     /// Returns a list of all the available portal settings with the current values for each parameter.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get the portal settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Settings / Common settings")]
@@ -125,8 +135,8 @@ public partial class SettingsController(
         {
             settings.TrustedDomains = tenant.TrustedDomains;
             settings.TrustedDomainsType = tenant.TrustedDomainsType;
-            var timeZone = timeZoneConverter.GetTimeZone(tenant.TimeZone);
-            settings.Timezone = timeZoneConverter.GetIanaTimeZoneId(timeZone);
+            var timeZone = TimeZoneConverter.GetTimeZone(tenant.TimeZone);
+            settings.Timezone = TimeZoneConverter.GetIanaTimeZoneId(timeZone);
             settings.UtcOffset = timeZone.GetUtcOffset(DateTime.UtcNow);
             settings.UtcHoursOffset = settings.UtcOffset.TotalHours;
             settings.OwnerId = tenant.OwnerId;
@@ -138,6 +148,7 @@ public partial class SettingsController(
             settings.LimitedAccessSpace = (await settingsManager.LoadAsync<TenantAccessSpaceSettings>()).LimitedAccessSpace;
             settings.LimitedAccessDevToolsForUsers = (await settingsManager.LoadAsync<TenantDevToolsAccessSettings>()).LimitedAccessForUsers;
             settings.DisplayBanners = coreBaseSettings.Standalone ? !(await settingsManager.LoadAsync<TenantBannerSettings>()).Hidden : true;
+            settings.AiEnabled = (await settingsManager.LoadAsync<TenantAiAccessSettings>()).Enabled;
 
             settings.Firebase = new FirebaseDto
             {
@@ -178,6 +189,8 @@ public partial class SettingsController(
 
             settings.InvitationLimit = await userInvitationLimitHelper.GetLimit();
             settings.MaxImageUploadSize = setupInfo.MaxImageUploadSize;
+            settings.DefaultFolderType = (await settingsManager.LoadForCurrentUserAsync<StudioDefaultPageSettings>()).DefaultFolderType;
+            settings.ExternalDbEnabled = externalDatabaseClient.IsEnabled();
         }
         else
         {
@@ -212,12 +225,12 @@ public partial class SettingsController(
         return settings;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Saves the mail domain settings specified in the request to the portal.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Save the mail domain settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/maildomainsettings</path>
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Message about the result of saving the mail domain settings", typeof(string))]
@@ -260,17 +273,19 @@ public partial class SettingsController(
     }
 
 
-    /// <summary>
+    /// <remarks>
     /// Saves the user quota settings specified in the request to the current portal.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Save the user quota settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/userquotasettings</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Quota")]
     [SwaggerResponse(200, "Message about the result of saving the user quota settings", typeof(TenantUserQuotaSettings))]
+    [SwaggerResponse(400, "The entered quota value is invalid or greater than the total storage size")]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("userquotasettings")]
     public async Task<TenantUserQuotaSettings> SaveUserQuotaSettings(QuotaSettingsRequestsDto inDto)
     {
@@ -278,7 +293,7 @@ public partial class SettingsController(
 
         if (!inDto.DefaultQuota.TryGetInt64(out var quota))
         {
-            throw new Exception(Resource.UserQuotaGreaterPortalError);
+            throw new ArgumentException(Resource.UserQuotaGreaterPortalError);
         }
 
         var tenant = tenantManager.GetCurrentTenant();
@@ -287,17 +302,16 @@ public partial class SettingsController(
 
         if (maxTotalSize < quota)
         {
-            throw new Exception(Resource.UserQuotaGreaterPortalError);
+            throw new ArgumentException(Resource.UserQuotaGreaterPortalError);
         }
-
+        var tenantQuotaSetting = await settingsManager.LoadAsync<TenantQuotaSettings>();
         if (coreBaseSettings.Standalone)
         {
-            var tenantQuotaSetting = await settingsManager.LoadAsync<TenantQuotaSettings>();
             if (tenantQuotaSetting.EnableQuota)
             {
                 if (tenantQuotaSetting.Quota < quota)
                 {
-                    throw new Exception(Resource.UserQuotaGreaterPortalError);
+                    throw new ArgumentException(Resource.UserQuotaGreaterPortalError);
                 }
             }
         }
@@ -306,6 +320,13 @@ public partial class SettingsController(
         quotaSettings.DefaultQuota = quota > 0 ? quota : 0;
 
         await settingsManager.SaveAsync(quotaSettings);
+
+        var usedSize = (await tenantManager.FindTenantQuotaRowsAsync(tenant.Id))
+          .Where(r => !string.IsNullOrEmpty(r.Tag) && new Guid(r.Tag) != Guid.Empty)
+          .Sum(r => r.Counter);
+        var admins = (await userManager.GetUsersByGroupAsync(ASC.Core.Users.Constants.GroupAdmin.ID)).Select(u => u.Id).ToList();
+
+        _ = quotaSocketManager.ChangeCustomQuotaUsedValueAsync(tenant.Id, customQuota.GetFeature<TenantCustomQuotaFeature>().Name, tenantQuotaSetting.EnableQuota, usedSize, tenantQuotaSetting.Quota, admins);
 
         if (inDto.EnableQuota)
         {
@@ -319,12 +340,12 @@ public partial class SettingsController(
         return quotaSettings;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the user quota settings.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get the user quota settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/userquotasettings</path>
     [Tags("Settings / Quota")]
     [SwaggerResponse(200, "Ok", typeof(TenantUserQuotaSettings))]
@@ -338,12 +359,12 @@ public partial class SettingsController(
         return HttpContext.TryGetFromCache(result.LastModified) ? null : result;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Saves the room quota settings specified in the request to the current portal.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Save the room quota settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/roomquotasettings</path>
     [Tags("Settings / Quota")]
     [SwaggerResponse(200, "Tenant room quota settings", typeof(TenantRoomQuotaSettings))]
@@ -396,12 +417,12 @@ public partial class SettingsController(
         return quotaSettings;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Saves the AI Agent quota settings specified in the request to the current portal.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Save the AI Agent quota settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/aiagentquotasettings</path>
     [Tags("Settings / Quota")]
     [SwaggerResponse(200, "Tenant AI Agent quota settings", typeof(TenantAiAgentQuotaSettings))]
@@ -452,12 +473,12 @@ public partial class SettingsController(
         return quotaSettings;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Saves the deep link configuration settings for the portal.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Configure the deep link settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/deeplink</path>
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Deep link configuration updated", typeof(TenantDeepLinkSettings))]
@@ -466,7 +487,7 @@ public partial class SettingsController(
     public async Task<TenantDeepLinkSettings> ConfigureDeepLink(DeepLinkConfigurationRequestsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-        if (!Enum.IsDefined(typeof(DeepLinkHandlingMode), inDto.DeepLinkSettings.HandlingMode))
+        if (!Enum.IsDefined(inDto.DeepLinkSettings.HandlingMode))
         {
             throw new ArgumentException(nameof(inDto.DeepLinkSettings.HandlingMode));
         }
@@ -479,12 +500,12 @@ public partial class SettingsController(
         return tenantDeepLinkSettings;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the deep link settings.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get the deep link settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/deeplink</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Settings / Common settings")]
@@ -498,12 +519,12 @@ public partial class SettingsController(
         return HttpContext.TryGetFromCache(result.LastModified) ? null : result;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Saves the tenant quota settings specified in the request to the current portal.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Save the tenant quota settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/tenantquotasettings</path>
     [Tags("Settings / Quota")]
     [SwaggerResponse(200, "Tenant quota settings", typeof(TenantQuotaSettings))]
@@ -551,10 +572,10 @@ public partial class SettingsController(
         return tenantQuotaSetting;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a list of all the available portal languages in the format of a two-letter or four-letter language code (e.g. "de", "en-US", etc.).
-    /// </summary>
-    /// <short>Get supported languages</short>
+    /// </remarks>
+    /// <summary>Get supported languages</summary>
     /// <path>api/2.0/settings/cultures</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     /// <collection>list</collection>
@@ -569,10 +590,10 @@ public partial class SettingsController(
         return HttpContext.TryGetFromCache(await HttpContextExtension.CalculateEtagAsync(result)) ? null : result;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a list of all the available portal time zones.
-    /// </summary>
-    /// <short>Get time zones</short>
+    /// </remarks>
+    /// <summary>Get time zones</summary>
     /// <path>api/2.0/settings/timezones</path>
     /// <collection>list</collection>
     [Tags("Settings / Common settings")]
@@ -596,18 +617,18 @@ public partial class SettingsController(
         {
             listOfTimezones.Add(new TimezonesRequestsDto
             {
-                Id = timeZoneConverter.GetIanaTimeZoneId(tz),
-                DisplayName = timeZoneConverter.GetTimeZoneDisplayName(tz)
+                Id = TimeZoneConverter.GetIanaTimeZoneId(tz),
+                DisplayName = TimeZoneConverter.GetTimeZoneDisplayName(tz)
             });
         }
 
         return listOfTimezones;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the portal hostname.
-    /// </summary>
-    /// <short>Get hostname</short>
+    /// </remarks>
+    /// <summary>Get hostname</summary>
     /// <path>api/2.0/settings/machine</path>
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Portal hostname", typeof(object))]
@@ -619,10 +640,10 @@ public partial class SettingsController(
         return Request.Host.Value;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Saves the DNS settings specified in the request to the current portal.
-    /// </summary>
-    /// <short>Save the DNS settings</short>
+    /// </remarks>
+    /// <summary>Save the DNS settings</summary>
     /// <path>api/2.0/settings/dns</path>
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Message about changing DNS", typeof(string))]
@@ -635,12 +656,12 @@ public partial class SettingsController(
         return await dnsSettings.SaveDnsSettingsAsync(inDto.DnsName, inDto.Enable);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Starts the process of the quota recalculation.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Recalculate the quota
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/recalculatequota</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Quota")]
@@ -652,12 +673,12 @@ public partial class SettingsController(
         await usersQuotaSyncOperation.RecalculateQuota(tenantManager.GetCurrentTenant());
     }
 
-    /// <summary>
+    /// <remarks>
     /// Checks the process of the quota recalculation.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Check the quota recalculation
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/checkrecalculatequota</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Quota")]
@@ -671,12 +692,12 @@ public partial class SettingsController(
         return !result.IsCompleted;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the portal logo image URL.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get a portal logo
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/logo</path>
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Portal logo image URL", typeof(string))]
@@ -688,10 +709,10 @@ public partial class SettingsController(
         return HttpContext.TryGetFromCache(result.LastModified) ? null : await tenantInfoSettingsHelper.GetAbsoluteCompanyLogoPathAsync(result);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Completes the Wizard settings.
-    /// </summary>
-    /// <short>Complete the Wizard settings</short>
+    /// </remarks>
+    /// <summary>Complete the Wizard settings</summary>
     /// <path>api/2.0/settings/wizard/complete</path>
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Wizard settings", typeof(WizardSettings))]
@@ -709,10 +730,10 @@ public partial class SettingsController(
         return await firstTimeTenantSettings.SaveDataAsync(inDto);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Closes the welcome pop-up notification.
-    /// </summary>
-    /// <short>Close the welcome pop-up notification</short>
+    /// </remarks>
+    /// <summary>Close the welcome pop-up notification</summary>
     /// <path>api/2.0/settings/welcome/close</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Common settings")]
@@ -722,8 +743,8 @@ public partial class SettingsController(
     {
         var collaboratorPopupSettings = await settingsManager.LoadForCurrentUserAsync<CollaboratorSettings>();
 
-        if (!(await userManager.IsGuestAsync(authContext.CurrentAccount.ID) && 
-              collaboratorPopupSettings.FirstVisit && 
+        if (!(await userManager.IsGuestAsync(authContext.CurrentAccount.ID) &&
+              collaboratorPopupSettings.FirstVisit &&
               !await userManager.IsOutsiderAsync(authContext.CurrentAccount.ID)))
         {
             throw new NotSupportedException("Not available.");
@@ -733,10 +754,10 @@ public partial class SettingsController(
         await settingsManager.SaveForCurrentUserAsync(collaboratorPopupSettings);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the portal color theme.
-    /// </summary>
-    /// <short>Get a color theme</short>
+    /// </remarks>
+    /// <summary>Get a color theme</summary>
     /// <path>api/2.0/settings/colortheme</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Settings / Common settings")]
@@ -750,10 +771,10 @@ public partial class SettingsController(
         return HttpContext.TryGetFromCache(settings.LastModified) ? null : new CustomColorThemesSettingsDto(settings, customColorThemesSettingsHelper.Limit);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Saves the portal color theme specified in the request.
-    /// </summary>
-    /// <short>Save a color theme</short>
+    /// </remarks>
+    /// <summary>Save a color theme</summary>
     /// <path>api/2.0/settings/colortheme</path>
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Portal theme settings", typeof(CustomColorThemesSettingsDto))]
@@ -822,10 +843,10 @@ public partial class SettingsController(
         return new CustomColorThemesSettingsDto(settings, customColorThemesSettingsHelper.Limit);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Deletes the portal color theme with the ID specified in the request.
-    /// </summary>
-    /// <short>Delete a color theme</short>
+    /// </remarks>
+    /// <summary>Delete a color theme</summary>
     /// <path>api/2.0/settings/colortheme</path>
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Portal theme settings: custom color theme settings, selected or not, limit", typeof(CustomColorThemesSettingsDto))]
@@ -854,10 +875,10 @@ public partial class SettingsController(
         return new CustomColorThemesSettingsDto(settings, customColorThemesSettingsHelper.Limit);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Closes the administrator helper notification.
-    /// </summary>
-    /// <short>Close the admin helper</short>
+    /// </remarks>
+    /// <summary>Close the admin helper</summary>
     /// <path>api/2.0/settings/closeadminhelper</path>
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Ok")]
@@ -875,16 +896,16 @@ public partial class SettingsController(
         await settingsManager.SaveForCurrentUserAsync(adminHelperSettings);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Sets the portal time zone and language specified in the request.
-    /// </summary>
-    /// <short>Set time zone and language</short>
+    /// </remarks>
+    /// <summary>Set time zone and language</summary>
     /// <path>api/2.0/settings/timeandlanguage</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Message about saving settings successfully", typeof(object))]
     [HttpPut("timeandlanguage")]
-    public async Task<string> SetTimaAndLanguage(TimeZoneRequestDto inDto)
+    public async Task<string> SetTimeAndLanguage(TimeZoneRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -899,23 +920,8 @@ public partial class SettingsController(
         }
 
         var oldTimeZone = tenant.TimeZone;
-        var newTimeZone = TimeZoneInfo.Utc;
 
-        try
-        {
-            newTimeZone = TimeZoneInfo.FindSystemTimeZoneById(inDto.TimeZoneID);
-        }
-        catch
-        {
-            var timeZones = TimeZoneInfo.GetSystemTimeZones().ToList();
-            if (timeZones.All(tz => tz.Id != "UTC"))
-            {
-                timeZones.Add(TimeZoneInfo.Utc);
-            }
-            newTimeZone = timeZones.FirstOrDefault(tz => tz.Id == inDto.TimeZoneID) ?? TimeZoneInfo.Utc;
-        }
-
-        tenant.TimeZone = timeZoneConverter.GetIanaTimeZoneId(newTimeZone);
+        tenant.TimeZone = TimeZoneConverter.GetIanaTimeZoneId(inDto.TimeZoneID);
 
         await tenantManager.SaveTenantAsync(tenant);
 
@@ -934,30 +940,52 @@ public partial class SettingsController(
         return Resource.SuccessfullySaveSettingsMessage;
     }
 
-    /// <summary>
-    /// Sets the default product page.
-    /// </summary>
-    /// <short>Set the default product page</short>
-    /// <path>api/2.0/settings/defaultpage</path>
-    [ApiExplorerSettings(IgnoreApi = true)]
+    /// <remarks>
+    /// Sets the default folder.
+    /// </remarks>
+    /// <summary>Set the default folder</summary>
+    /// <path>api/2.0/settings/defaultFolder</path>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "Message about saving settings successfully", typeof(object))]
-    [HttpPut("defaultpage")]
-    public async Task<string> SaveDefaultPageSetting(DefaultProductRequestDto inDto)
+    [SwaggerResponse(200, "Message about saving settings successfully", typeof(StudioDefaultPageSettings))]
+    [HttpPut("defaultfolder")]
+    public async Task<StudioDefaultPageSettings> SaveDefaultFolder(DefaultProductRequestDto inDto)
     {
-        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        List<FolderType> allowedFolderTypes =
+        [
+            FolderType.AiAgents,
+            FolderType.USER,
+            FolderType.VirtualRooms,
+            FolderType.SHARE,
+            FolderType.Favorites,
+            FolderType.Recent
+        ];
 
-        await settingsManager.SaveAsync(new StudioDefaultPageSettings { DefaultProductID = inDto.DefaultProductID });
+        if (!allowedFolderTypes.Contains(inDto.DefaultFolderType))
+        {
+            throw new ArgumentException(nameof(inDto.DefaultFolderType));
+        }
+
+        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID) && inDto.DefaultFolderType == FolderType.USER)
+        {
+            throw new ArgumentException(nameof(inDto.DefaultFolderType));
+        }
+
+        var defaultPageSettings = new StudioDefaultPageSettings
+        {
+            DefaultFolderType = inDto.DefaultFolderType
+        };
+
+        await settingsManager.SaveForCurrentUserAsync(defaultPageSettings);
 
         messageService.Send(MessageAction.DefaultStartPageSettingsUpdated);
 
-        return Resource.SuccessfullySaveSettingsMessage;
+        return defaultPageSettings;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Updates the email activation settings.
-    /// </summary>
-    /// <short>Update the email activation settings</short>
+    /// </remarks>
+    /// <summary>Update the email activation settings</summary>
     /// <path>api/2.0/settings/emailactivation</path>
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Updated email activation settings", typeof(EmailActivationSettings))]
@@ -968,10 +996,10 @@ public partial class SettingsController(
         return inDto;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the space usage statistics for the module with the ID specified in the request.
-    /// </summary>
-    /// <short>Get the space usage statistics</short>
+    /// </remarks>
+    /// <summary>Get the space usage statistics</summary>
     /// <path>api/2.0/settings/statistics/spaceusage/{id}</path>
     /// <collection>list</collection>
     [Tags("Settings / Statistics")]
@@ -981,7 +1009,7 @@ public partial class SettingsController(
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var webitem = webItemManagerSecurity.GetItems(WebZoneType.All, ItemAvailableState.All)
+        var webitem = (await webItemManagerSecurity.GetItemsAsync(WebZoneType.All, ItemAvailableState.All))
                                    .FirstOrDefault(item =>
                                                    item != null &&
                                                    item.ID == inDto.Id &&
@@ -1004,10 +1032,10 @@ public partial class SettingsController(
         });
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the socket settings.
-    /// </summary>
-    /// <short>Get the socket settings</short>
+    /// </remarks>
+    /// <summary>Get the socket settings</summary>
     /// <path>api/2.0/settings/socket</path>
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Socket settings: hub URL", typeof(object))]
@@ -1026,10 +1054,10 @@ public partial class SettingsController(
         return new { Url = hubUrl };
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the authorization services.
-    /// </summary>
-    /// <short>Get the authorization services</short>
+    /// </remarks>
+    /// <summary>Get the authorization services</summary>
     /// <path>api/2.0/settings/authservice</path>
     /// <collection>list</collection>
     [Tags("Settings / Authorization")]
@@ -1049,10 +1077,10 @@ public partial class SettingsController(
             .ToListAsync();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Saves the authorization keys.
-    /// </summary>
-    /// <short>Save the authorization keys</short>
+    /// </remarks>
+    /// <summary>Save the authorization keys</summary>
     /// <path>api/2.0/settings/authservice</path>
     [Tags("Settings / Authorization")]
     [SwaggerResponse(200, "Boolean value: true if the authorization keys are changed", typeof(bool))]
@@ -1118,15 +1146,40 @@ public partial class SettingsController(
             {
                 await userSocketManager.ConnectTelegram(tenantId, authContext.CurrentAccount.ID);
             }
+
+            if (consumer is ExternalDatabaseProvider externalDbProvider)
+            {
+                await userSocketManager.UpdateExternalDbSettingsAsync(tenantId, externalDbProvider.IsEnabled());
+            }
         }
 
         return changed;
     }
 
-    /// <summary>
+    /// <remarks>
+    /// Tests an external database connection with the provided settings without saving them.
+    /// </remarks>
+    /// <summary>Test external database connection</summary>
+    /// <path>api/2.0/settings/authservice/externaldb/test</path>
+    [Tags("Settings / Authorization")]
+    [SwaggerResponse(200, "Connection test result with Success flag and optional Error message", typeof(ConnectionTestResult))]
+    [HttpPost("authservice/externaldb/test")]
+    public async Task<ConnectionTestResult> TestExternalDatabaseConnection(ExternalDatabaseSettings inDto)
+    {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        if (inDto.DatabaseTypeEnum == ExternalDatabaseType.Sqlite && !coreBaseSettings.Standalone)
+        {
+            return ConnectionTestResult.Failure(Resource.ConsumersExternalDbSqliteStandaloneOnly);
+        }
+
+        return await ExternalDatabaseProvider.TestConnectionAsync(inDto, storageFactory, tenantManager.GetCurrentTenantId());
+    }
+
+    /// <remarks>
     /// Returns the portal payment settings.
-    /// </summary>
-    /// <short>Get the payment settings</short>
+    /// </remarks>
+    /// <summary>Get the payment settings</summary>
     /// <path>api/2.0/settings/payment</path>
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Payment settings: sales email, feedback and support URL, link to pay for a portal, Standalone or not, current license, maximum quota quantity", typeof(PaymentSettingsDto))]
@@ -1153,12 +1206,12 @@ public partial class SettingsController(
         };
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the Developer Tools access settings for the portal.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get the Developer Tools access settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/devtoolsaccess</path>
     [Tags("Settings / Access to DevTools")]
     [SwaggerResponse(200, "Developer Tools access settings", typeof(TenantDevToolsAccessSettings))]
@@ -1168,12 +1221,12 @@ public partial class SettingsController(
         return await settingsManager.LoadAsync<TenantDevToolsAccessSettings>();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Sets the Developer Tools access settings for the portal.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Set the Developer Tools access settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/security/devtoolsaccess</path>
     [Tags("Security / Access to DevTools")]
     [SwaggerResponse(200, "Developer Tools access settings", typeof(TenantDevToolsAccessSettings))]
@@ -1191,12 +1244,12 @@ public partial class SettingsController(
         return settings;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the visibility settings of the promotional banners in the portal.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get the banners visibility
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/banner</path>
     [Tags("Settings / Banners visibility")]
     [SwaggerResponse(200, "Promotional banners visibility settings", typeof(TenantBannerSettings))]
@@ -1206,12 +1259,12 @@ public partial class SettingsController(
         return await settingsManager.LoadAsync<TenantBannerSettings>();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Sets the visibility settings of the promotional banners in the portal.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Set the banners visibility
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/banner</path>
     [Tags("Security / Banners visibility")]
     [SwaggerResponse(200, "Promotional banners visibility settings", typeof(TenantBannerSettings))]
@@ -1234,6 +1287,49 @@ public partial class SettingsController(
         return settings;
     }
 
+    /// <summary>
+    /// Get the AI access settings for the portal
+    /// </summary>
+    /// <remarks>
+    /// Returns the current portal-level AI access settings that control whether all AI functionality
+    /// (chat, agents, vectorization) is available for the portal. AI is enabled by default.
+    /// </remarks>
+    /// <path>api/2.0/settings/ai-access</path>
+    [Tags("Settings / Common settings")]
+    [SwaggerResponse(200, "AI access settings", typeof(TenantAiAccessSettings))]
+    [HttpGet("ai-access")]
+    public async Task<TenantAiAccessSettings> GetTenantAiAccessSettings()
+    {
+        return await settingsManager.LoadAsync<TenantAiAccessSettings>();
+    }
+
+    /// <summary>
+    /// Set the AI access for the portal
+    /// </summary>
+    /// <remarks>
+    /// Updates the portal-level AI access settings. When AI is disabled, all AI features are turned off:
+    /// the AI Agents folder is hidden from root folder listings, AI status checks immediately return disabled,
+    /// and AI chat endpoints become inaccessible. Only users with the DocSpaceAdmin role
+    /// (EditPortalSettings permission) can change this setting.
+    /// </remarks>
+    /// <path>api/2.0/settings/ai-access</path>
+    [Tags("Settings / Common settings")]
+    [SwaggerResponse(200, "Updated AI access settings", typeof(TenantAiAccessSettings))]
+    [SwaggerResponse(403, "You don't have enough permission to change the AI access settings")]
+    [HttpPost("ai-access")]
+    public async Task<TenantAiAccessSettings> SetTenantAiAccessSettings(TenantAiAccessSettingsDto inDto)
+    {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        var settings = new TenantAiAccessSettings { Enabled = inDto.Enabled };
+
+        await settingsManager.SaveAsync(settings);
+
+        messageService.Send(inDto.Enabled ? MessageAction.AIAccessEnabled : MessageAction.AIAccessDisabled);
+
+        return settings;
+    }
+
     private async Task DemandStatisticPermissionAsync()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
@@ -1246,10 +1342,10 @@ public partial class SettingsController(
     }
 
 
-    /// <summary>
+    /// <remarks>
     /// Returns the portal user invitation settings.
-    /// </summary>
-    /// <short>Get the user invitation settings</short>
+    /// </remarks>
+    /// <summary>Get the user invitation settings</summary>
     /// <path>api/2.0/settings/invitationsettings</path>
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "portal user invitation settings", typeof(TenantUserInvitationSettingsDto))]
@@ -1265,10 +1361,10 @@ public partial class SettingsController(
     }
 
 
-    /// <summary>
+    /// <remarks>
     /// Updates the portal user invitation settings.
-    /// </summary>
-    /// <short>Update user invitation settings</short>
+    /// </remarks>
+    /// <summary>Update user invitation settings</summary>
     /// <path>api/2.0/settings/invitationsettings</path>
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Updated user invitation settings", typeof(TenantUserInvitationSettingsDto))]
@@ -1284,6 +1380,8 @@ public partial class SettingsController(
         };
 
         _ = await settingsManager.SaveAsync(settings);
+
+        messageService.Send(MessageAction.InvitationSettingsUpdated);
 
         return settings.Map();
     }

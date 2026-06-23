@@ -1,28 +1,35 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Web.Api.Controllers.Settings;
 
@@ -40,12 +47,12 @@ public class LdapController(
     CoreBaseSettings coreBaseSettings)
     : BaseSettingsController(fusionCache, webItemManager)
 {
-    /// <summary>
+    /// <remarks>
     /// Returns the current portal LDAP settings.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get the LDAP settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/ldap</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / LDAP")]
@@ -83,12 +90,12 @@ public class LdapController(
         return settings.MapToSettingsDto();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the LDAP asynchronous cron expression for the current portal if it exists.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get the LDAP cron expression
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/ldap/cron</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / LDAP")]
@@ -108,12 +115,12 @@ public class LdapController(
         return settings.MapToDto();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Sets the LDAP asynchronous cron expression to the current portal.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Set the LDAP cron expression
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/ldap/cron</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / LDAP")]
@@ -151,12 +158,12 @@ public class LdapController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Synchronizes the portal data with the new information from the LDAP server.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Synchronize with LDAP server
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/ldap/sync</path>
     [Tags("Settings / LDAP")]
     [SwaggerResponse(200, "LDAP operation status", typeof(LdapStatusDto))]
@@ -176,12 +183,12 @@ public class LdapController(
         return result.MapToDto();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Starts the process of collecting preliminary changes on the portal during the synchronization process according to the selected LDAP settings.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Test the LDAP synchronization
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/ldap/sync/test</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / LDAP")]
@@ -200,12 +207,12 @@ public class LdapController(
         return result.MapToDto();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Saves the LDAP settings specified in the request and starts importing/synchronizing users and groups by LDAP.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Save the LDAP settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/ldap</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / LDAP")]
@@ -231,12 +238,12 @@ public class LdapController(
         return result.MapToDto();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Starts the process of saving LDAP settings and collecting preliminary changes on the portal according to them.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Test the LDAP saving process
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/ldap/save/test</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / LDAP")]
@@ -255,12 +262,12 @@ public class LdapController(
         return result.MapToDto();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the LDAP synchronization process status.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get the LDAP synchronization status
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/ldap/status</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / LDAP")]
@@ -277,12 +284,12 @@ public class LdapController(
         return result.MapToDto();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the LDAP default settings.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get the LDAP default settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/ldap/default</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / LDAP")]

@@ -1,28 +1,35 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 using ImageMagick;
 
@@ -36,172 +43,232 @@ public class FileDto<T> : FileEntryDto<T>
     /// <summary>
     /// The folder ID where the file is located.
     /// </summary>
+    /// <example>10</example>
     public T FolderId { get; set; }
 
     /// <summary>
     /// The file version.
     /// </summary>
-    [SwaggerSchemaCustom(Example = 3)]
+    /// <example>3</example>
     public int Version { get; set; }
 
     /// <summary>
     /// The version group of the file.
     /// </summary>
-    [SwaggerSchemaCustom(Example = 1)]
+    /// <example>1</example>
     public int VersionGroup { get; set; }
 
     /// <summary>
     /// The content length of the file.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "12345")]
+    /// <example>12345</example>
     public string ContentLength { get; set; }
 
     /// <summary>
     /// The pure content length of the file.
     /// </summary>
+    /// <example>12345</example>
     public long? PureContentLength { get; set; }
 
     /// <summary>
     /// The current status of the file.
     /// </summary>
+    /// <example>0</example>
     public FileStatus FileStatus { get; set; }
+
+    /// <summary>
+    /// The list of users editing the file.
+    /// </summary>
+    /// <example>{"00000000-0000-0000-0000-000000000000": "John Doe"}</example>
+    public Dictionary<Guid, string> EditingBy { get; set; }
 
     /// <summary>
     /// Specifies if the file is muted or not.
     /// </summary>
-    [SwaggerSchemaCustom(Example = false)]
+    /// <example>false</example>
     public bool Mute { get; set; }
 
     /// <summary>
     /// The URL link to view the file.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "https://www.onlyoffice.com/viewfile?fileid=2221")]
+    /// <example>https://www.onlyoffice.com/viewfile?fileid=2221</example>
     [Url]
     public string ViewUrl { get; set; }
 
     /// <summary>
     /// The Web URL link to the file.
     /// </summary>
+    /// <example>http://localhost/files/document.docx</example>
     [Url]
     public string WebUrl { get; set; }
 
     /// <summary>
     /// The file type.
     /// </summary>
+    /// <example>0</example>
     public FileType FileType { get; set; }
 
     /// <summary>
     /// The file extension.
     /// </summary>
-    [SwaggerSchemaCustom(Example = ".txt")]
+    /// <example>.txt</example>
     public string FileExst { get; set; }
 
     /// <summary>
     /// The comment to the file.
     /// </summary>
+    /// <example>This is a comment</example>
     public string Comment { get; set; }
 
     /// <summary>
     /// Specifies if the file is encrypted or not.
     /// </summary>
-    [SwaggerSchemaCustom(Example = false)]
+    /// <example>false</example>
     public bool? Encrypted { get; set; }
 
     /// <summary>
     /// The thumbnail URL of the file.
     /// </summary>
+    /// <example>http://localhost/thumbnails/file.png</example>
     [Url]
     public string ThumbnailUrl { get; set; }
 
     /// <summary>
     /// The current thumbnail status of the file.
     /// </summary>
+    /// <example>0</example>
     public Thumbnail ThumbnailStatus { get; set; }
 
     /// <summary>
     /// Specifies if the file is locked or not.
     /// </summary>
+    /// <example>false</example>
     public bool? Locked { get; set; }
 
     /// <summary>
     /// The user ID of the person who locked the file.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     public string LockedBy { get; set; }
 
     /// <summary>
     /// Specifies if the file has a draft or not.
     /// </summary>
-    [SwaggerSchemaCustom(Example = false)]
+    /// <example>false</example>
     public bool? HasDraft { get; set; }
 
     /// <summary>
     /// The status of the form filling process.
     /// </summary>
-    [SwaggerSchemaCustom(Example = false)]
+    /// <example>0</example>
     public FormFillingStatus FormFillingStatus { get; set; } = FormFillingStatus.None;
 
     /// <summary>
     /// Specifies if the file is a form or not.
     /// </summary>
-    [SwaggerSchemaCustom(Example = false)]
+    /// <example>false</example>
     public bool? IsForm { get; set; }
 
     /// <summary>
     /// Specifies if the Custom Filter editing mode is enabled for a file or not.
     /// </summary>
+    /// <example>false</example>
     public bool? CustomFilterEnabled { get; set; }
 
     /// <summary>
     /// The name of the user who enabled a Custom Filter editing mode for a file.
     /// </summary>
+    /// <example>John Doe</example>
     public string CustomFilterEnabledBy { get; set; }
 
     /// <summary>
     /// Specifies if the filling has started or not.
     /// </summary>
-    [SwaggerSchemaCustom(Example = false)]
+    /// <example>false</example>
     public bool? StartFilling { get; set; }
+
+    /// <summary>
+    /// Specifies if the form filling has started but the file is still being saved by the document editor. Filling and editing are not allowed.
+    /// </summary>
+    /// <example>false</example>
+    public bool? IsFillingPreparing { get; set; }
 
     /// <summary>
     /// The InProcess folder ID of the file.
     /// </summary>
+    /// <example>10</example>
     public int? InProcessFolderId { get; set; }
 
     /// <summary>
     /// The InProcess folder title of the file.
     /// </summary>
+    /// <example>In Process</example>
     public string InProcessFolderTitle { get; set; }
+
+    /// <summary>
+    /// The ID of the FormFillingFolderDone folder that corresponds to this original form.
+    /// </summary>
+    /// <example>55</example>
+    public int? ResultsFolderId { get; set; }
 
     /// <summary>
     /// The file draft information with its location.
     /// </summary>
+    /// <example>{"folderId": 10, "folderTitle": "In Process", "fileId": 123, "fileTitle": "Draft.pdf"}</example>
     public DraftLocation<T> DraftLocation { get; set; }
 
     /// <summary>
     /// The file accessibility.
     /// </summary>
+    /// <example>{"ImageView": true, "MediaView": true, "WebView": true}</example>
     public IDictionary<Accessibility, bool> ViewAccessibility { get; set; }
 
     /// <summary>
     /// The time when the file was last opened.
     /// </summary>
+    /// <example>2021-01-01T00:00:00Z</example>
     public ApiDateTime LastOpened { get; set; }
 
     /// <summary>
     /// The date when the file will be expired.
     /// </summary>
+    /// <example>2025-12-31T23:59:59Z</example>
     public ApiDateTime Expired { get; set; }
-    
+
     /// <summary>
     /// The file entry type.
     /// </summary>
-    public override FileEntryType FileEntryType { get => FileEntryType.File; }
-    
+    /// <example>1</example>
+    public override FileEntryType FileEntryType => FileEntryType.File;
+
     /// <summary>
     /// The vectorization status of the file.
     /// </summary>
+    /// <example>0</example>
     public VectorizationStatus? VectorizationStatus { get; set; }
-    
+
+    /// <summary>
+    /// The name of the table in the external database that corresponds to this form.
+    /// </summary>
+    /// <example>form_123_v1</example>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string ExternalDbTableName { get; set; }
+
+    /// <summary>
+    /// The dimensions (width and height) of the image file in pixels.
+    /// This property is populated only for image files that can be viewed (supported formats like PNG, JPEG, GIF, BMP, etc.).
+    /// For non-image files, this property remains null.
+    /// </summary>
+    /// <remarks>
+    /// The dimensions are determined using ImageMagick library during file processing.
+    /// If the image cannot be read or processed, the dimensions will not be set.
+    /// </remarks>
+    /// <example>
+    /// {
+    ///     "Width": 1920,
+    ///     "Height": 1080
+    /// }
+    /// </example>
     public Size Dimensions { get; set; }
 }
 
@@ -219,6 +286,7 @@ public class FileDtoHelper(
     FileUtility fileUtility,
     FileSharingHelper fileSharingHelper,
     BadgesSettingsHelper badgesSettingsHelper,
+    FileHelper fileHelper,
     FilesSettingsHelper filesSettingsHelper,
     FileDateTime fileDateTime,
     ExternalShare externalShare,
@@ -227,25 +295,22 @@ public class FileDtoHelper(
     SecurityContext securityContext,
     UserManager userManager,
     IUrlShortener urlShortener,
-    AiAccessibility aiAccessibility)
-    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, urlShortener) 
+    FileSharing fileSharing,
+    AiAccessibility aiAccessibility,
+    FileTrackerHelper fileTracker)
+    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, fileSharing, urlShortener)
 {
     private readonly EmployeeDtoHelper _employeeWrapperHelper = employeeWrapperHelper;
 
-    public async Task<FileDto<T>> GetAsync<T>(File<T> file, string order = null, TimeSpan? expiration = null, IFolder contextFolder = null, bool? aiReady = null)
+    public async Task<FileDto<T>> GetAsync<T>(File<T> file, string order = null, TimeSpan? expiration = null, IFolder contextFolder = null, AiStatus aiStatus = null)
     {
-        Task<bool> aiReadyTask = null;
-        if (aiReady == null)
-        {
-            aiReadyTask = aiAccessibility.IsAiEnabledAsync();
-        }
-        
         var result = await GetFileWrapperAsync(file, order, expiration, contextFolder);
-        
+
         result.ViewAccessibility = await fileUtility.GetAccessibility(file);
         result.AvailableShareRights =  (await _fileSecurity.GetAccesses(file)).ToDictionary(r => r.Key, r => r.Value.Select(v => v.ToStringFast()));
         result.VectorizationStatus = file.VectorizationStatus;
-        
+        aiStatus ??= await aiAccessibility.GetStatusAsync();
+
         if (contextFolder == null)
         {
             var referer = httpContextAccessor.HttpContext?.Request.Headers.Referer.FirstOrDefault();
@@ -302,7 +367,7 @@ public class FileDtoHelper(
 
             foreach (var action in forbiddenActions)
             {
-                result.Security[action] = false;   
+                result.Security[action] = false;
             }
 
             result.Locked = false;
@@ -312,7 +377,7 @@ public class FileDtoHelper(
 
             var myId = await _globalFolderHelper.GetFolderMyAsync<T>();
             result.OriginTitle = Equals(result.OriginId, myId) ? FilesUCResource.MyFiles : result.OriginTitle;
-            
+
             if (Equals(result.OriginRoomId, myId))
             {
                 result.OriginRoomTitle = FilesUCResource.MyFiles;
@@ -322,10 +387,10 @@ public class FileDtoHelper(
                 result.OriginRoomTitle = result.OriginTitle;
             }
         }
-        
+
         var currentUserId = authContext.CurrentAccount.ID;
         if (file.RootFolderType == FolderType.USER && authContext.IsAuthenticated && !Equals(file.RootCreateBy, currentUserId))
-        {                   
+        {
             switch (contextFolder)
             {
                 case { FolderType: FolderType.Favorites }:
@@ -348,7 +413,7 @@ public class FileDtoHelper(
                         canReadParent = await _fileSecurity.CanReadAsync(parent);
                         parent.SecurityByUsers[currentUserId][FileSecurity.FilesSecurityActions.Read] = canReadParent;
                     }
-                    
+
                     if (!canReadParent)
                     {
                         result.FolderId = folderShareAsync;
@@ -358,11 +423,11 @@ public class FileDtoHelper(
                     {
                         result.OriginRoomTitle = FilesUCResource.SharedForMe;
                     }
-                    
+
                     break;
             }
         }
-        
+
         if (fileUtility.CanImageView(file.PureTitle))
         {
             try
@@ -378,16 +443,11 @@ public class FileDtoHelper(
             }
             catch (Exception)
             {
+                // ignored
             }
+        }
 
-        }
-        
-        if (aiReadyTask != null)
-        {
-            aiReady = await aiReadyTask;
-        }
-        
-        if (aiReady is false)
+        if (aiStatus is { Enabled: false})
         {
             if (result.Security.ContainsKey(FileSecurity.FilesSecurityActions.AskAi))
             {
@@ -405,22 +465,27 @@ public class FileDtoHelper(
 
         var getFileTask = GetAsync<FileDto<T>, T>(file);
         var badgesTask = badgesSettingsHelper.GetEnabledForCurrentUserAsync();
-        var fileStatusTask = file.GetFileStatus();
+        var fileStateTask = fileHelper.GetFileState(file);
 
         var extension = FileUtility.GetFileExtension(file.Title);
         var fileType = FileUtility.GetFileTypeByExtention(extension);
 
-        await Task.WhenAll(getFileTask, badgesTask, fileStatusTask);
+        await Task.WhenAll(getFileTask, badgesTask, fileStateTask);
 
-        var result = getFileTask.Result;
-        var isEnabledBadges = badgesTask.Result;
+        var result = await getFileTask;
+        var isEnabledBadges = await badgesTask;
+        var fileState = await fileStateTask;
+
+        file.SetFileState(fileState);
+
         result.FolderId = file.ParentId;
         result.FileExst = extension;
         result.FileType = fileType;
         result.Version = file.Version;
         result.VersionGroup = file.VersionGroup;
         result.ContentLength = file.ContentLengthString;
-        result.FileStatus = fileStatusTask.Result;
+        result.FileStatus = file.FileStatus;
+        result.EditingBy = file.EditingBy;
         result.Mute = !isEnabledBadges;
         result.PureContentLength = file.ContentLength.NullIfDefault();
         result.Comment = file.Comment;
@@ -437,7 +502,7 @@ public class FileDtoHelper(
         {
             Task<T> linkedIdTask;
             Task<EntryProperties<T>> propertiesTask;
-            
+
             if (file.FormInfo != null)
             {
                 linkedIdTask = Task.FromResult(file.FormInfo.LinkedId);
@@ -448,16 +513,16 @@ public class FileDtoHelper(
                 linkedIdTask = _daoFactory.GetLinkDao<T>().GetLinkedAsync(file.Id);
                 propertiesTask = fileDao.GetProperties(file.Id);
             }
-            
+
             var currentFolderTask = folderDao.GetFolderAsync(file.ParentId);
             await Task.WhenAll(linkedIdTask, propertiesTask, currentFolderTask);
 
-            var linkedId = linkedIdTask.Result;
-            var properties = propertiesTask.Result;
-            var currentFolder = currentFolderTask.Result;
+            var linkedId = await linkedIdTask;
+            var properties = await propertiesTask;
+            var currentFolder = await currentFolderTask;
 
             Folder<T> currentRoom;
-            if (!DocSpaceHelper.IsRoom(currentFolder.FolderType) && file.RootFolderType is FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates)
+            if (!currentFolder.IsRoom && file.RootFolderType is FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates or FolderType.DefaultTemplates)
             {
                 currentRoom = await DocSpaceHelper.GetParentRoom(file, folderDao) ?? currentFolder;
             }
@@ -466,9 +531,30 @@ public class FileDtoHelper(
                 currentRoom = currentFolder;
             }
 
-            if (currentRoom is { FolderType: FolderType.FillingFormsRoom } && properties != null && properties.FormFilling.StartFilling)
+            if (currentRoom is { FolderType: FolderType.FillingFormsRoom }
+                && properties is { FormFilling: not null }
+                && currentFolder.FolderType is not (FolderType.FormFillingFolderInProgress or FolderType.FormFillingFolderDone))
             {
-                result.Security[FileSecurity.FilesSecurityActions.Lock] = false;
+                if (properties.FormFilling.StartFilling)
+                {
+                    var isPreparing = await fileTracker.IsEditingAsync(file.Id);
+                    result.IsFillingPreparing = isPreparing;
+
+                    result.Security[FileSecurity.FilesSecurityActions.StartFilling] = false;
+                    result.Security[FileSecurity.FilesSecurityActions.Lock] = false;
+
+                    if (isPreparing)
+                    {
+                        result.Security[FileSecurity.FilesSecurityActions.FillForms] = false;
+                        result.Security[FileSecurity.FilesSecurityActions.Edit] = false;
+                        result.Security[FileSecurity.FilesSecurityActions.StopFilling] = false;
+                    }
+                }
+                else
+                {
+                    result.Security[FileSecurity.FilesSecurityActions.FillForms] = false;
+                    result.Security[FileSecurity.FilesSecurityActions.StopFilling] = false;
+                }
             }
 
             if (currentRoom.Security == null)
@@ -482,7 +568,7 @@ public class FileDtoHelper(
                 result.IsForm = await fileChecker.IsFormPDFFile(file);
             }
 
-            if (DocSpaceHelper.IsFormsFillingSystemFolder(currentFolder.FolderType) || currentFolder.FolderType == FolderType.FillingFormsRoom)
+            if (DocSpaceHelper.IsFormsFillingSystemFolder(currentFolder.FolderType))
             {
                 result.Security[FileSecurity.FilesSecurityActions.Edit] = false;
             }
@@ -493,6 +579,7 @@ public class FileDtoHelper(
             if (formFilling != null)
             {
                 result.StartFilling = formFilling.StartFilling;
+                result.ExternalDbTableName = formFilling.ExternalDbTableName;
                 if (!Equals(linkedId, default(T)))
                 {
                     var draftLocation = new DraftLocation<T> { FolderId = formFilling.ToFolderId, FolderTitle = formFilling.Title, FileId = linkedId };
@@ -504,6 +591,18 @@ public class FileDtoHelper(
 
                     result.DraftLocation = draftLocation;
                 }
+            }
+
+            var isOriginalForm = currentRoom is { FolderType: FolderType.FillingFormsRoom }
+                && formFilling is { StartFilling: true }
+                && Equals(file.Id, formFilling.OriginalFormId);
+
+            result.Security[FileSecurity.FilesSecurityActions.UpdateXlsx] = isOriginalForm
+                && (result.Security[FileSecurity.FilesSecurityActions.Edit] || file.Access == FileShare.ContentCreator);
+
+            if (isOriginalForm && formFilling.ResultsFolderId is int resultsFolderId)
+            {
+                result.ResultsFolderId = resultsFolderId;
             }
 
             if (currentRoom is { FolderType: FolderType.VirtualDataRoom })
@@ -552,6 +651,24 @@ public class FileDtoHelper(
                 }
             }
         }
+        else if (extension is ".xlsx" or ".csv" && file.RootFolderType == FolderType.VirtualRooms)
+        {
+            var xlsxProperties = await fileDao.GetProperties(file.Id);
+            var xlsxFormFilling = xlsxProperties?.FormFilling;
+
+            var canUpdateXlsx = false;
+            if (xlsxFormFilling != null && !Equals(xlsxFormFilling.OriginalFormId, default(T)))
+            {
+                var xlsxFolder = await folderDao.GetFolderAsync(file.ParentId);
+                if (xlsxFolder.FolderType == FolderType.FormFillingFolderDone)
+                {
+                    var originalForm = await fileDao.GetFileAsync(xlsxFormFilling.OriginalFormId);
+                    canUpdateXlsx = originalForm != null && (await _fileSecurity.CanEditAsync(originalForm) || file.Access == FileShare.ContentCreator);
+                }
+            }
+
+            result.Security[FileSecurity.FilesSecurityActions.UpdateXlsx] = canUpdateXlsx;
+        }
 
         if (!file.ProviderEntry && file.RootFolderType == FolderType.VirtualRooms && !expiration.HasValue)
         {
@@ -577,49 +694,49 @@ public class FileDtoHelper(
 
         if (file.Order != 0)
         {
-            if (string.IsNullOrEmpty(order) && (contextFolder == null || !DocSpaceHelper.IsRoom(contextFolder.FolderType)))
+            if (string.IsNullOrEmpty(order) && contextFolder is not { IsRoom: true })
             {
                 order = await breadCrumbsManager.GetBreadCrumbsOrderAsync(file.ParentId);
             }
-            
+
             result.Order = !string.IsNullOrEmpty(order) ? string.Join('.', order, file.Order) : file.Order.ToString();
         }
-        
+
         try
         {
             var externalMediaAccess = file.ShareRecord is { SubjectType: SubjectType.PrimaryExternalLink or SubjectType.ExternalLink };
-            
+
             if (externalMediaAccess)
             {
                 result.IsLinkExpired = file.ShareRecord.Options?.IsExpired;
                 result.RequestToken = await _externalShare.CreateShareKeyAsync(file.ShareRecord.Subject);
                 result.External = Equals(file.ShareRecord.EntryId, file.Id);
-                
+
                 var expirationDate = file.ShareRecord?.Options?.ExpirationDate;
                 if (expirationDate != null && expirationDate != DateTime.MinValue)
                 {
                     result.ExpirationDate = _apiDateTimeHelper.Get(expirationDate);
                 }
-                
+
                 var parents = await folderDao.GetParentFoldersAsync(result.FolderId).ToListAsync();
-                var parent = parents.Count >= 2 ? parents[^2] : null;
+                var parent = parents.LastOrDefault();
                 if (!await _fileSecurity.CanReadAsync(parent))
                 {
                     result.FolderId = await _globalFolderHelper.GetFolderShareAsync<T>();
                     result.RootFolderType = FolderType.SHARE;
                 }
-            
-                var room = parents.FirstOrDefault(f => DocSpaceHelper.IsRoom(f.FolderType));
+
+                var room = parents.FirstOrDefault(f => f.IsRoom);
                 if (room != null)
                 {
-                    result.OwnedBy = await _employeeWrapperHelper.GetAsync(room.CreateBy);
+                    result.OwnedBy = authContext.IsAuthenticated ? await _employeeWrapperHelper.GetAsync(room.CreateBy) : null;
                 }
             }
-            
-            result.ViewUrl = _externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(file.DownloadUrl), result.RequestToken);
+
+            result.ViewUrl = _externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileDownloadUrl(file.Id)), result.RequestToken);
             result.WebUrl = _externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id, file.Version, externalMediaAccess)), result.RequestToken);
             result.ThumbnailStatus = file.ThumbnailStatus;
-            
+
             var cacheKey = Math.Abs(result.Updated.GetHashCode());
 
             if (file.ThumbnailStatus == Thumbnail.Created)
@@ -643,21 +760,25 @@ public class DraftLocation<T>
 {
     /// <summary>
     /// The InProcess folder ID of the draft.
-    /// </summary> 
+    /// </summary>
+    /// <example>10</example>
     public T FolderId { get; set; }
 
     /// <summary>
     /// The InProcess folder title of the draft.
     /// </summary>
+    /// <example>Draft Folder</example>
     public string FolderTitle { get; set; }
 
     /// <summary>
     /// The draft ID.
     /// </summary>
+    /// <example>123</example>
     public T FileId { get; set; }
 
     /// <summary>
     /// The draft title.
     /// </summary>
+    /// <example>Draft Document</example>
     public string FileTitle { get; set; }
 }

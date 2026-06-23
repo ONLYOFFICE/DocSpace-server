@@ -1,28 +1,35 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Notify.Engine;
 
@@ -34,12 +41,12 @@ public interface INotifyEngineAction
 
 [Singleton]
 public class NotifyEngine(Context context,
-    ILoggerProvider options)
+    ILoggerFactory loggerFactory)
 {
-    private readonly ILogger _logger = options.CreateLogger("ASC.Notify");
+    private readonly ILogger _logger = loggerFactory.CreateLogger("ASC.Notify");
     private readonly Context _context = context ?? throw new ArgumentNullException(nameof(context));
     internal readonly List<SendMethodWrapper> SendMethods = [];
-    private readonly Dictionary<string, IPatternStyler> _stylers = new();
+    private readonly Dictionary<Type, IPatternStyler> _stylers = new();
     private readonly ReplacePatternFormatter _sysTagFormatter = new(@"_#(?<tagName>[A-Z0-9_\-.]+)#_", true);
     internal readonly ICollection<Type> Actions = new List<Type>();
 
@@ -67,7 +74,8 @@ public class NotifyEngine(Context context,
 
         lock (SendMethods)
         {
-            SendMethods.Remove(new SendMethodWrapper(method, null, _logger));
+            using var wrapper = new SendMethodWrapper(method, null, _logger);
+            SendMethods.Remove(wrapper);
         }
     }
 
@@ -200,8 +208,8 @@ public class NotifyEngine(Context context,
             }
 
             await PrepareRequestFillSendersAsync(request, serviceScope);
-            await PrepareRequestFillPatterns(request, serviceScope);
-            await PrepareRequestFillTags(request, serviceScope);
+            PrepareRequestFillPatterns(request);
+            PrepareRequestFillTags(request);
         }
         catch (Exception ex)
         {
@@ -293,6 +301,13 @@ public class NotifyEngine(Context context,
             return (new SendResponse(request.NotifyAction, sender, recipient, new NotifyException($"For recipient {recipient} by sender {sender} no one addresses getted.")), noticeMessage);
         }
 
+        var tenantManager = serviceScope.ServiceProvider.GetService<TenantManager>();
+        var userManager = serviceScope.ServiceProvider.GetService<UserManager>();
+
+        var culture = await request.GetCulture(tenantManager, userManager);
+        CultureInfo.CurrentCulture = culture;
+        CultureInfo.CurrentUICulture = culture;
+        
         var pattern = request.GetSenderPattern(sender);
         if (pattern == null)
         {
@@ -302,29 +317,22 @@ public class NotifyEngine(Context context,
         noticeMessage.Pattern = pattern;
         noticeMessage.ContentType = pattern.ContentType;
         noticeMessage.AddArgument(request.Arguments.ToArray());
-        var patternProvider = await request.GetPatternProvider(serviceScope);
 
-        var formatter = patternProvider.GetFormatter(pattern);
+        var formatter = new NVelocityPatternFormatter();
         try
         {
-            formatter?.FormatMessage(noticeMessage, noticeMessage.Arguments);
+            formatter.FormatMessage(noticeMessage, noticeMessage.Arguments);
             _sysTagFormatter.FormatMessage(
                 noticeMessage,
                 [
                     new TagValue(Context.SysRecipientId, request.Recipient.ID),
-                       new TagValue(Context.SysRecipientName, request.Recipient.Name),
-                       new TagValue(Context.SysRecipientAddress, addresses is { Length: > 0 } ? addresses[0] : null)
+                    new TagValue(Context.SysRecipientName, request.Recipient.Name),
+                    new TagValue(Context.SysRecipientAddress, addresses is { Length: > 0 } ? addresses[0] : null)
                 ]
             );
             //Do styling here
-            if (!string.IsNullOrEmpty(pattern.Styler))
+            if (pattern.Styler != null)
             {
-                var tenantManager = serviceScope.ServiceProvider.GetService<TenantManager>();
-                var userManager = serviceScope.ServiceProvider.GetService<UserManager>();
-
-                var culture = await request.GetCulture(tenantManager, userManager);
-                CultureInfo.CurrentCulture = culture;
-                CultureInfo.CurrentUICulture = culture;
                 //We need to run through styler before templating
                 await StyleMessageAsync(serviceScope, noticeMessage);
             }
@@ -343,7 +351,7 @@ public class NotifyEngine(Context context,
         {
             if (!_stylers.ContainsKey(message.Pattern.Styler))
             {
-                if (scope.ServiceProvider.GetService(Type.GetType(message.Pattern.Styler, true)) is IPatternStyler styler)
+                if (scope.ServiceProvider.GetService(message.Pattern.Styler) is IPatternStyler styler)
                 {
                     _stylers.Add(message.Pattern.Styler, styler);
                 }
@@ -371,7 +379,7 @@ public class NotifyEngine(Context context,
         }
     }
 
-    private async Task PrepareRequestFillPatterns(NotifyRequest request, IServiceScope serviceScope)
+    private void PrepareRequestFillPatterns(NotifyRequest request)
     {
         if (request._patterns == null)
         {
@@ -380,49 +388,50 @@ public class NotifyEngine(Context context,
             {
                 return;
             }
-
-            var apProvider = await request.GetPatternProvider(serviceScope);
-            for (var i = 0; i < request._senderNames.Length; i++)
+            
+            var senders = new List<string>(request._senderNames.Length);
+            var patterns = new List<IPattern>(request._patterns.Length);
+            foreach (var senderName in request._senderNames)
             {
-                var senderName = request._senderNames[i];
-                IPattern pattern = null;
-                if (apProvider.GetPatternMethod != null)
+                try
                 {
-                    pattern = apProvider.GetPatternMethod(request.NotifyAction, senderName, request);
+                    var pattern = request.NotifyAction.Patterns.Find(r => r.SenderName == senderName);
+                    patterns.Add(pattern ?? throw new NotifyException($"For action \"{request.NotifyAction.ID}\" by sender \"{senderName}\" no one patterns getted."));
+                    senders.Add(senderName);
                 }
-
-                pattern ??= apProvider.GetPattern(request.NotifyAction, senderName);
-
-                request._patterns[i] = pattern ?? throw new NotifyException($"For action \"{request.NotifyAction.ID}\" by sender \"{senderName}\" no one patterns getted.");
+                catch (Exception e)
+                {
+                    _logger.ErrorWithException(e);
+                }
             }
+            request._senderNames = senders.ToArray();
+            request._patterns = patterns.ToArray();
         }
     }
 
-    private async Task PrepareRequestFillTags(NotifyRequest request, IServiceScope serviceScope)
+    private void PrepareRequestFillTags(NotifyRequest request)
     {
-        var patternProvider = await request.GetPatternProvider(serviceScope);
         foreach (var pattern in request._patterns)
         {
             IPatternFormatter formatter;
             try
             {
-                formatter = patternProvider.GetFormatter(pattern);
+                formatter = new NVelocityPatternFormatter();
             }
             catch (Exception exc)
             {
-                throw new NotifyException(string.Format("For pattern \"{0}\" formatter not instanced.", pattern), exc);
+                throw new NotifyException($"For pattern \"{pattern}\" formatter not instanced.", exc);
             }
-            var tags = Array.Empty<string>();
+
+            List<string> tags;
+            
             try
             {
-                if (formatter != null)
-                {
-                    tags = formatter.GetTags(pattern) ?? [];
-                }
+                tags = formatter.GetTags(pattern) ?? [];
             }
             catch (Exception exc)
             {
-                throw new NotifyException(string.Format("Get tags from formatter of pattern \"{0}\" failed.", pattern), exc);
+                throw new NotifyException($"Get tags from formatter of pattern \"{pattern}\" failed.", exc);
             }
 
             foreach (var tag in tags.Where(tag => !request.Arguments.Exists(tagValue => Equals(tagValue.Tag, tag)) && !request._requaredTags.Exists(rtag => Equals(rtag, tag))))

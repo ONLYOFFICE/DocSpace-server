@@ -1,39 +1,47 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 using ASC.AuditTrail;
 using ASC.AuditTrail.Models;
 using ASC.AuditTrail.Models.Mappings;
-using ASC.Core.Common;
 using ASC.Files.Core.Utils;
 
 namespace ASC.Files.Api;
 
 [ConstraintRoute("int")]
 public class FoldersControllerInternal(
+    IDaoFactory daoFactory,
+    FileSecurity fileSecurity,
     BreadCrumbsManager breadCrumbsManager,
     FolderContentDtoHelper folderContentDtoHelper,
     FileStorageService fileStorageService,
@@ -52,6 +60,8 @@ public class FoldersControllerInternal(
     CoreBaseSettings coreBaseSettings
     )
     : FoldersController<int>(
+        daoFactory,
+        fileSecurity,
         breadCrumbsManager,
         folderContentDtoHelper,
         fileStorageService,
@@ -63,12 +73,13 @@ public class FoldersControllerInternal(
         fileShareDtoHelper,
         apiContext)
 {
-    /// <summary>
+    private readonly FileStorageService _fileStorageServiceInternal = fileStorageService;
+    /// <remarks>
     /// Returns the activity history of a folder with a specified identifier.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get folder history
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/files/folder/{folderId}/log</path>
     /// <collection>list</collection>
     [Tags("Files / Folders")]
@@ -81,12 +92,12 @@ public class FoldersControllerInternal(
         return historyApiHelper.GetFolderHistoryAsync(inDto.FolderId, inDto.FromDate, inDto.ToDate, inDto.StartIndex, inDto.Count);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Generates the activity history of a folder.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Generates folder history
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/files/folder/{folderId}/log/report</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "URL to the report file", typeof(string))]
@@ -111,10 +122,10 @@ public class FoldersControllerInternal(
         return result;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the form filter of a folder with the ID specified in the request.
-    /// </summary>
-    /// <short>Get folder form filter</short>
+    /// </remarks>
+    /// <summary>Get folder form filter</summary>
     /// <path>api/2.0/files/{folderId}/formfilter</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     /// <collection>list</collection>
@@ -126,9 +137,33 @@ public class FoldersControllerInternal(
     {
         return (await formFillingReportCreator.GetFormsFields(inDto.FolderId)).Select(r => new FormsItemDto(r.Key, r.Type));
     }
+
+    /// <remarks>
+    /// Triggers asynchronous XLSX report generation for the specified form results folder.
+    /// </remarks>
+    /// <summary>Generate XLSX report by folder</summary>
+    /// <path>api/2.0/files/folder/{folderId}/xlsx</path>
+    [Tags("Files / Folders")]
+    [SwaggerResponse(200, "Ok", typeof(XlsxReportResponseDto))]
+    [SwaggerResponse(403, "You do not have enough permissions to perform this action")]
+    [SwaggerResponse(404, "The required folder was not found")]
+    [HttpPost("folder/{folderId:int}/xlsx")]
+    public async Task<XlsxReportResponseDto> GenerateXlsxByFolder(FolderIdRequestDto<int> inDto)
+    {
+        var (task, form, isNewFile) = await _fileStorageServiceInternal.GenerateXlsxByFolderAsync(inDto.FolderId);
+
+        return new XlsxReportResponseDto
+        {
+            Form = await _fileDtoHelper.GetAsync(form),
+            Task = DocumentBuilderTaskDto.Get(task),
+            IsNewFile = isNewFile
+        };
+    }
 }
 
 public class FoldersControllerThirdparty(
+    IDaoFactory daoFactory,
+    FileSecurity fileSecurity,
     BreadCrumbsManager breadCrumbsManager,
     FolderContentDtoHelper folderContentDtoHelper,
     FileStorageService fileStorageService,
@@ -139,7 +174,10 @@ public class FoldersControllerThirdparty(
     PermissionContext permissionContext,
     FileShareDtoHelper fileShareDtoHelper,
     ApiContext apiContext)
-    : FoldersController<string>(breadCrumbsManager,
+    : FoldersController<string>(
+        daoFactory,
+        fileSecurity,
+        breadCrumbsManager,
         folderContentDtoHelper,
         fileStorageService,
         fileOperationsManager,
@@ -151,6 +189,8 @@ public class FoldersControllerThirdparty(
         apiContext);
 
 public abstract class FoldersController<T>(
+    IDaoFactory daoFactory,
+    FileSecurity fileSecurity,
     BreadCrumbsManager breadCrumbsManager,
     FolderContentDtoHelper folderContentDtoHelper,
     FileStorageService fileStorageService,
@@ -163,10 +203,10 @@ public abstract class FoldersController<T>(
     ApiContext apiContext)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
-    /// <summary>
+    /// <remarks>
     /// Creates a new folder with the title specified in the request. The parent folder ID can be also specified.
-    /// </summary>
-    /// <short>Create a folder</short>
+    /// </remarks>
+    /// <summary>Create a folder</summary>
     /// <path>api/2.0/files/folder/{folderId}</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "New folder parameters", typeof(FolderDto<int>))]
@@ -178,10 +218,10 @@ public abstract class FoldersController<T>(
         return await _folderDtoHelper.GetAsync(folder);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Deletes a folder with the ID specified in the request.
-    /// </summary>
-    /// <short>Delete a folder</short>
+    /// </remarks>
+    /// <summary>Delete a folder</summary>
     /// <path>api/2.0/files/folder/{folderId}</path>
     /// <collection>list</collection>
     [Tags("Files / Folders")]
@@ -197,12 +237,12 @@ public abstract class FoldersController<T>(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Sets the order of a folder with ID specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Set folder order
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/files/folder/{folderId}/order</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "List of file operations", typeof(FolderDto<int>))]
@@ -214,12 +254,12 @@ public abstract class FoldersController<T>(
         return await _folderDtoHelper.GetAsync(folder);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the detailed list of files and folders located in the folder with the ID specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get a folder by ID
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/files/{folderId}</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Folders")]
@@ -237,14 +277,14 @@ public abstract class FoldersController<T>(
             formsItemDto = new FormsItemDto(inDto.FormsItemKey, inDto.FormsItemType);
         }
 
-        var folder = await folderContentDtoHelper.GetAsync(inDto.FolderId, inDto.UserIdOrGroupId, inDto.SharedBy, inDto.FilterType, inDto.RoomId, true, true, inDto.ExcludeSubject, inDto.ApplyFilterOption, inDto.SearchArea, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text, split, formsItemDto, inDto.Location);
+        var folder = await folderContentDtoHelper.GetAsync(inDto.FolderId, inDto.UserIdOrGroupId, inDto.SharedBy, inDto.FilterType, inDto.RoomId, true, inDto.WithSubFolders ?? true, inDto.ExcludeSubject, inDto.ApplyFilterOption, inDto.SearchArea, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text, split, formsItemDto, inDto.Location);
         return folder.NotFoundIfNull();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the detailed information about a folder with the ID specified in the request.
-    /// </summary>
-    /// <short>Get folder information</short>
+    /// </remarks>
+    /// <summary>Get folder information</summary>
     /// <path>api/2.0/files/folder/{folderId}</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Folders")]
@@ -258,10 +298,10 @@ public abstract class FoldersController<T>(
         return await _folderDtoHelper.GetAsync(folder, contextFolder: folder);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a path to the folder with the ID specified in the request.
-    /// </summary>
-    /// <short>Get the folder path</short>
+    /// </remarks>
+    /// <summary>Get the folder path</summary>
     /// <path>api/2.0/files/folder/{folderId}/path</path>
     /// <collection>list</collection>
     [Tags("Files / Folders")]
@@ -270,6 +310,19 @@ public abstract class FoldersController<T>(
     [HttpGet("folder/{folderId}/path")]
     public async IAsyncEnumerable<FileEntryBaseDto> GetFolderPath(FolderIdRequestDto<T> inDto)
     {
+        var folderDao = daoFactory.GetFolderDao<T>();
+        var folder = await folderDao.GetFolderAsync(inDto.FolderId);
+
+        if (folder == null)
+        {
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
+
+        if (!await fileSecurity.CanReadAsync(folder))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ReadFolder);
+        }
+
         var breadCrumbs = await breadCrumbsManager.GetBreadCrumbsAsync(inDto.FolderId);
 
         foreach (var e in breadCrumbs)
@@ -278,10 +331,10 @@ public abstract class FoldersController<T>(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a list of all the subfolders from a folder with the ID specified in the request.
-    /// </summary>
-    /// <short>Get subfolders</short>
+    /// </remarks>
+    /// <summary>Get subfolders</summary>
     /// <path>api/2.0/files/{folderId}/subfolders</path>
     /// <collection>list</collection>
     [Tags("Files / Folders")]
@@ -297,10 +350,10 @@ public abstract class FoldersController<T>(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a list of all the new items from a folder with the ID specified in the request.
-    /// </summary>
-    /// <short>Get new folder items</short>
+    /// </remarks>
+    /// <summary>Get new folder items</summary>
     /// <path>api/2.0/files/{folderId}/news</path>
     /// <collection>list</collection>
     [Tags("Files / Folders")]
@@ -317,10 +370,10 @@ public abstract class FoldersController<T>(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Renames the selected folder with a new title specified in the request.
-    /// </summary>
-    /// <short>Rename a folder</short>
+    /// </remarks>
+    /// <summary>Rename a folder</summary>
     /// <path>api/2.0/files/folder/{folderId}</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "Folder parameters", typeof(FolderDto<int>))]
@@ -333,10 +386,10 @@ public abstract class FoldersController<T>(
         return await _folderDtoHelper.GetAsync(folder);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the used space of files in the root folders.
-    /// </summary>
-    /// <short>Get used space of files</short>
+    /// </remarks>
+    /// <summary>Get used space of files</summary>
     /// <path>api/2.0/files/filesusedspace</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "Used space of files in the root folders", typeof(FilesStatisticsResultDto))]
@@ -348,13 +401,14 @@ public abstract class FoldersController<T>(
         return await fileStorageService.GetFilesUsedSpace();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Creates a primary external link by the identifier specified in the request.
-    /// </summary>
-    /// <short>Create primary external link</short>
+    /// </remarks>
+    /// <summary>Create primary external link</summary>
     /// <path>api/2.0/files/folder/{id}/link</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "Folders security information", typeof(FileShareDto))]
+    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [SwaggerResponse(404, "Not Found")]
     [HttpPost("folder/{id}/link")]
     public async Task<FileShareDto> CreateFolderPrimaryExternalLink(FolderLinkRequestDto<T> inDto)
@@ -363,6 +417,7 @@ public abstract class FoldersController<T>(
             inDto.Id,
             FileEntryType.Folder,
             inDto.FolderLink.Access,
+            string.IsNullOrWhiteSpace(inDto.FolderLink.Title) ? null : inDto.FolderLink.Title.Trim(),
             expirationDate: inDto.FolderLink.ExpirationDate,
             requiredAuth: inDto.FolderLink.Internal,
             allowUnlimitedDate: true,
@@ -372,14 +427,15 @@ public abstract class FoldersController<T>(
         return await fileShareDtoHelper.Get(linkAce);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the primary external link by the identifier specified in the request.
-    /// </summary>
-    /// <short>Get primary external link</short>
+    /// </remarks>
+    /// <summary>Get primary external link</summary>
     /// <path>api/2.0/files/folder/{id}/link</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "Folder security information", typeof(FileShareDto))]
+    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [SwaggerResponse(404, "Not Found")]
     [AllowAnonymous]
     [HttpGet("folder/{id}/link")]
@@ -390,10 +446,10 @@ public abstract class FoldersController<T>(
         return await fileShareDtoHelper.Get(linkAce);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Sets the folder external link with the ID specified in the request.
-    /// </summary>
-    /// <short>Set the folder external link</short>
+    /// </remarks>
+    /// <summary>Set the folder external link</summary>
     /// <path>api/2.0/files/folder/{id}/links</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "Folder information", typeof(FileShareDto))]
@@ -427,10 +483,10 @@ public abstract class FoldersController<T>(
         return result;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the links of the folder with the ID specified in the request.
-    /// </summary>
-    /// <short>Get the folder links</short>
+    /// </remarks>
+    /// <summary>Get the folder links</summary>
     /// <path>api/2.0/files/folder/{id}/links</path>
     /// <collection>list</collection>
     [Tags("Files / Folders")]
@@ -458,13 +514,14 @@ public class FoldersControllerCommon(
     FileDtoHelper fileDtoHelper,
     UserManager userManager,
     SecurityContext securityContext,
-    FilesSettingsHelper filesSettingsHelper)
+    FilesSettingsHelper filesSettingsHelper,
+    SettingsManager settingsManager)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
-    /// <summary>
+    /// <remarks>
     /// Returns the detailed list of files and folders located in the "Common" section.
-    /// </summary>
-    /// <short>Get the "Common" section</short>
+    /// </remarks>
+    /// <summary>Get the "Common" section</summary>
     /// <path>api/2.0/files/@common</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Folders")]
@@ -477,10 +534,10 @@ public class FoldersControllerCommon(
         return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderCommonAsync, inDto.UserIdOrGroupId, null, inDto.FilterType, 0, true, true, false, ApplyFilterOption.All, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the detailed list of files and folders located in the "Favorites" section.
-    /// </summary>
-    /// <short>Get the "Favorites" section</short>
+    /// </remarks>
+    /// <summary>Get the "Favorites" section</summary>
     /// <path>api/2.0/files/@favorites</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The \"Favorites\" section contents", typeof(FolderContentDto<int>))]
@@ -492,10 +549,10 @@ public class FoldersControllerCommon(
         return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderFavoritesAsync, inDto.UserIdOrGroupId, null, inDto.FilterType, 0, true, true, false, ApplyFilterOption.All, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the detailed list of files and folders located in the "My documents" section.
-    /// </summary>
-    /// <short>Get the "My documents" section</short>
+    /// </remarks>
+    /// <summary>Get the "My documents" section</summary>
     /// <path>api/2.0/files/@my</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The \"My documents\" section contents", typeof(FolderContentDto<int>))]
@@ -507,10 +564,10 @@ public class FoldersControllerCommon(
         return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderMyAsync, inDto.UserIdOrGroupId, null, inDto.FilterType, 0, true, true, false, inDto.ApplyFilterOption, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the detailed list of files and folders located in the "Private Room" section.
-    /// </summary>
-    /// <short>Get the "Private Room" section</short>
+    /// </remarks>
+    /// <summary>Get the "Private Room" section</summary>
     /// <path>api/2.0/files/@privacy</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The \"Private Room\" section contents", typeof(FolderContentDto<int>))]
@@ -527,10 +584,10 @@ public class FoldersControllerCommon(
         return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderPrivacyAsync, inDto.UserIdOrGroupId, null, inDto.FilterType, 0, true, true, false, ApplyFilterOption.All, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the detailed list of files and folders located in the "In projects" section.
-    /// </summary>
-    /// <short>Get the "In projects" section</short>
+    /// </remarks>
+    /// <summary>Get the "In projects" section</summary>
     /// <path>api/2.0/files/@projects</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Folders")]
@@ -543,10 +600,10 @@ public class FoldersControllerCommon(
         return await folderContentDtoHelper.GetAsync(await globalFolderHelper.GetFolderProjectsAsync<string>(), inDto.UserIdOrGroupId, null, inDto.FilterType, null, true, true, false, ApplyFilterOption.All, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the detailed list of files located in the "Recent" section.
-    /// </summary>
-    /// <short>Get the "Recent" section</short>
+    /// </remarks>
+    /// <summary>Get the "Recent" section</summary>
     /// <path>api/2.0/files/@recent</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The \"Recent\" section contents", typeof(FolderContentDto<int>))]
@@ -559,10 +616,10 @@ public class FoldersControllerCommon(
         return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderRecentAsync, inDto.UserIdOrGroupId, null, inDto.FilterType, 0, true, true, inDto.ExcludeSubject, inDto.ApplyFilterOption, inDto.SearchArea, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text, inDto.Extension);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns all the sections matching the parameters specified in the request.
-    /// </summary>
-    /// <short>Get filtered sections</short>
+    /// </remarks>
+    /// <summary>Get filtered sections</summary>
     /// <path>api/2.0/files/@root</path>
     /// <collection>list</collection>
     [Tags("Files / Folders")]
@@ -580,10 +637,10 @@ public class FoldersControllerCommon(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the detailed list of files and folders located in the "Shared with me" section.
-    /// </summary>
-    /// <short>Get the "Shared with me" section</short>
+    /// </remarks>
+    /// <summary>Get the "Shared with me" section</summary>
     /// <path>api/2.0/files/@share</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Folders")]
@@ -596,10 +653,10 @@ public class FoldersControllerCommon(
         return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderShareAsync, inDto.UserIdOrGroupId, null, inDto.FilterType, 0, true, true, false, ApplyFilterOption.All, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the detailed list of files located in the "Templates" section.
-    /// </summary>
-    /// <short>Get the "Templates" section</short>
+    /// </remarks>
+    /// <summary>Get the "Templates" section</summary>
     /// <path>api/2.0/files/@templates</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Folders")]
@@ -612,10 +669,10 @@ public class FoldersControllerCommon(
         return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderTemplatesAsync, inDto.UserIdOrGroupId, null, inDto.FilterType, 0, true, true, false, ApplyFilterOption.All, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the detailed list of files and folders located in the "Trash" section.
-    /// </summary>
-    /// <short>Get the "Trash" section</short>
+    /// </remarks>
+    /// <summary>Get the "Trash" section</summary>
     /// <path>api/2.0/files/@trash</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The \"Trash\" section contents", typeof(FolderContentDto<int>))]
@@ -629,6 +686,7 @@ public class FoldersControllerCommon(
 
     private async IAsyncEnumerable<int> GetRootFoldersIdsAsync(bool withoutTrash)
     {
+        var aiAccessSettingsTask = settingsManager.LoadAsync<TenantAiAccessSettings>();
         var isOutsider = await userManager.IsOutsiderAsync(securityContext.CurrentAccount.ID);
 
         if (isOutsider)
@@ -657,6 +715,11 @@ public class FoldersControllerCommon(
 
         yield return await globalFolderHelper.FolderVirtualRoomsAsync;
         yield return await globalFolderHelper.FolderArchiveAsync;
-        yield return await globalFolderHelper.FolderAiAgentsAsync;
+
+        var aiAccessSettings = await aiAccessSettingsTask;
+        if (aiAccessSettings.Enabled)
+        {
+            yield return await globalFolderHelper.FolderAiAgentsAsync;
+        }
     }
 }

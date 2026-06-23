@@ -1,28 +1,35 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Data.Storage;
 
@@ -31,7 +38,7 @@ public abstract class BaseStorage(TempStream tempStream,
         PathUtils pathUtils,
         EmailValidationKeyProvider emailValidationKeyProvider,
         IHttpContextAccessor httpContextAccessor,
-        ILoggerProvider options,
+        ILoggerFactory loggerFactory,
         ILogger logger,
         IHttpClientFactory clientFactory,
         TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
@@ -59,7 +66,7 @@ public abstract class BaseStorage(TempStream tempStream,
     protected readonly TempStream _tempStream = tempStream;
     protected readonly PathUtils _pathUtils = pathUtils;
     protected readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
-    protected readonly ILoggerProvider _options = options;
+    protected readonly ILoggerFactory _loggerFactory = loggerFactory;
     protected readonly IHttpClientFactory _clientFactory = clientFactory;
 
     public TimeSpan GetExpire(string domain)
@@ -163,42 +170,45 @@ public abstract class BaseStorage(TempStream tempStream,
 
     public abstract Task<Stream> GetReadStreamAsync(string domain, string path, long offset, long length);
 
-    public abstract Task<Uri> SaveAsync(string domain, string path, Stream stream);
-    public abstract Task<Uri> SaveAsync(string domain, string path, Stream stream, Guid ownerId);
-    public abstract Task<Uri> SaveAsync(string domain, string path, Stream stream, ACL acl);
+    public abstract Task<Uri> SaveAsync(string domain, string path, Stream stream, CancellationToken token = default);
+    public abstract Task<Uri> SaveAsync(string domain, string path, Stream stream, Guid ownerId, CancellationToken token = default);
+    public abstract Task<Uri> SaveAsync(string domain, string path, Stream stream, ACL acl, CancellationToken token = default);
 
-    public async Task<Uri> SaveAsync(string domain, string path, Stream stream, string attachmentFileName)
+    public async Task<Uri> SaveAsync(string domain, string path, Stream stream, string attachmentFileName, CancellationToken token = default)
     {
-        return await SaveAsync(domain, path, Guid.Empty, stream, attachmentFileName);
+        return await SaveAsync(domain, path, Guid.Empty, stream, attachmentFileName, token);
     }
-    public async Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string attachmentFileName)
+
+    public async Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string attachmentFileName, CancellationToken token = default)
     {
         if (!string.IsNullOrEmpty(attachmentFileName))
         {
-            return await SaveWithAutoAttachmentAsync(domain, path, ownerId, stream, attachmentFileName);
+            return await SaveWithAutoAttachmentAsync(domain, path, ownerId, stream, attachmentFileName, token);
         }
-        return await SaveAsync(domain, path, stream, ownerId);
+        return await SaveAsync(domain, path, stream, ownerId, token);
     }
 
-    protected abstract Task<Uri> SaveWithAutoAttachmentAsync(string domain, string path, Guid ownerId, Stream stream, string attachmentFileName);
+    protected abstract Task<Uri> SaveWithAutoAttachmentAsync(string domain, string path, Guid ownerId, Stream stream, string attachmentFileName, CancellationToken token = default);
+
     public abstract Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentType,
-                            string contentDisposition);
+                            string contentDisposition, CancellationToken token = default);
 
-    public abstract Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string contentType,
-                            string contentDisposition);
-    public abstract Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentEncoding, int cacheDays);
+    public abstract Task<Uri> SaveAsync(string domain, string path,Guid ownerId, Stream stream, string contentType,
+                            string contentDisposition, CancellationToken token = default);
 
-    public async Task<Uri> SaveAsync(string path, Stream stream, string attachmentFileName)
+    public abstract Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentEncoding, int cacheDays, CancellationToken token = default);
+
+    public async Task<Uri> SaveAsync(string path, Stream stream, string attachmentFileName, CancellationToken token = default)
     {
-        return await SaveAsync(string.Empty, path, stream, attachmentFileName);
+        return await SaveAsync(string.Empty, path, stream, attachmentFileName, token);
     }
 
-    public async Task<Uri> SaveAsync(string path, Stream stream)
+    public async Task<Uri> SaveAsync(string path, Stream stream, CancellationToken token = default)
     {
-        return await SaveAsync(string.Empty, path, stream);
+        return await SaveAsync(string.Empty, path, stream, token);
     }
-
-    protected abstract Task<Uri> SaveWithAutoAttachmentAsync(string domain, string path, Stream stream, string attachmentFileName);
+    
+    protected abstract Task<Uri> SaveWithAutoAttachmentAsync(string domain, string path, Stream stream, string attachmentFileName, CancellationToken token = default);
 
     #region chunking
 
@@ -244,7 +254,7 @@ public abstract class BaseStorage(TempStream tempStream,
     public abstract Task MoveDirectoryAsync(string srcDomain, string srcDir, string newDomain, string newDir);
     public abstract Task<Uri> MoveAsync(string srcDomain, string srcPath, string newDomain, string newPath, bool quotaCheckFileSize = true);
     public abstract Task<Uri> MoveAsync(string srcdomain, string srcpath, string newdomain, string newpath, Guid ownerId, bool quotaCheckFileSize = true);
-    public abstract Task<(Uri, string)> SaveTempAsync(string domain, Stream stream);
+    public abstract Task<(Uri, string)> SaveTempAsync(string domain, Stream stream, CancellationToken token = default);
     public virtual string GetRootDirectory(string domain)
     {
         return domain;
@@ -283,9 +293,9 @@ public abstract class BaseStorage(TempStream tempStream,
         return await MoveAsync(string.Empty, srcPath, newDomain, newPath);
     }
 
-    public async Task<(Uri, string)> SaveTempAsync(Stream stream)
+    public async Task<(Uri, string)> SaveTempAsync(Stream stream, CancellationToken token = default)
     {
-        return await SaveTempAsync(string.Empty, stream);
+        return await SaveTempAsync(string.Empty, stream, token);
     }
 
     public IAsyncEnumerable<string> ListDirectoriesRelativeAsync(string path, bool recursive)
@@ -359,7 +369,7 @@ public abstract class BaseStorage(TempStream tempStream,
         return this;
     }
 
-    public abstract Task<string> SavePrivateAsync(string domain, string path, Stream stream, DateTime expires);
+    public abstract Task<string> SavePrivateAsync(string domain, string path, Stream stream, DateTime expires, CancellationToken token = default);
     public abstract Task DeleteExpiredAsync(string domain, string path, TimeSpan oldThreshold);
 
     public abstract string GetUploadForm(string domain, string directoryPath, string redirectTo, long maxUploadSize,
@@ -389,7 +399,7 @@ public abstract class BaseStorage(TempStream tempStream,
 
     internal async Task QuotaUsedDeleteAsync(string domain, long size)
     {
-        await QuotaUsedDeleteAsync(domain, size, Guid.Empty);
+       await QuotaUsedDeleteAsync(domain, size, Guid.Empty);
     }
     internal async Task QuotaUsedDeleteAsync(string domain, long size, Guid ownerId)
     {

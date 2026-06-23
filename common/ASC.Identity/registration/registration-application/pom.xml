@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.asc</groupId>
         <artifactId>registration</artifactId>
-        <version>1.0.3</version>
+        <version>1.1.1</version>
     </parent>
 
     <artifactId>registration-application</artifactId>
@@ -35,20 +35,47 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.tomcat.embed</groupId>
+                    <artifactId>tomcat-embed-websocket</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.tomcat.embed</groupId>
+                    <artifactId>tomcat-embed-el</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.micrometer</groupId>
+                    <artifactId>micrometer-observation</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- Spring Caching Dependencies -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-cache</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+            <version>${caffeine.caching.version}</version>
         </dependency>
 
         <!-- Spring Security Dependencies -->
@@ -61,11 +88,50 @@
             <artifactId>spring-security-oauth2-jose</artifactId>
         </dependency>
 
-        <!-- Resilience4j -->
+        <!-- Serialization Dependencies -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-json</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>tools.jackson.module</groupId>
+            <artifactId>jackson-module-blackbird</artifactId>
+            <version>${blackbird.version}</version>
+        </dependency>
+
+        <!-- Resilience4j Dependency -->
         <dependency>
             <groupId>io.github.resilience4j</groupId>
             <artifactId>resilience4j-spring-boot3</artifactId>
             <version>${resilience4j.version}</version>
+        </dependency>
+
+        <!-- OpenAPI Documentation -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-api</artifactId>
+            <version>${springdoc.version}</version>
+        </dependency>
+
+        <!-- Testing Dependencies -->
+        <dependency>
+          <groupId>com.asc</groupId>
+          <artifactId>common-messaging</artifactId>
+          <scope>test</scope>
+        </dependency>
+        <dependency>
+          <groupId>com.asc</groupId>
+          <artifactId>registration-data</artifactId>
+          <scope>test</scope>
+        </dependency>
+        <dependency>
+          <groupId>com.asc</groupId>
+          <artifactId>registration-messaging</artifactId>
+          <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

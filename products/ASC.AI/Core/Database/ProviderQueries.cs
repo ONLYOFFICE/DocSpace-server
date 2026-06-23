@@ -1,30 +1,47 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.AI.Core.Database;
+
+public class DefaultProviderQueryResult
+{
+    public int ProviderId { get; set; }
+    public required string DefaultModel { get; set; }
+    public string? ProviderTitle { get; set; }
+    public ProviderType? ProviderType { get; set; }
+    public bool HasModelSettings { get; set; }
+    public DbAiModelSettings? DbModelSettings { get; set; }
+}
 
 public partial class AiDbContext
 {
@@ -33,23 +50,41 @@ public partial class AiDbContext
     {
         return Queries.GetProviderAsync(this, tenantId, id);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public IAsyncEnumerable<DbAiProvider> GetProvidersAsync(int tenantId, int offset, int limit)
     {
         return Queries.GetProvidersAsync(this, tenantId, offset, limit);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt])]
     public Task<int> GetProvidersTotalCountAsync(int tenantId)
     {
         return Queries.GetProvidersTotalCountAsync(this, tenantId);
     }
-    
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null, null, null, PreCompileQuery.DefaultDateTime])]
-    public Task UpdateProviderAsync(int id, string title, string? url, string key, DateTime modifiedOn)
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null, PreCompileQuery.DefaultInt])]
+    public Task<bool> IsProviderNameExistsAsync(int tenantId, string title, int excludedProviderId)
     {
-        return Queries.UpdateProviderAsync(this, id, title, url, key, modifiedOn);
+        return Queries.IsProviderNameExistsAsync(this, tenantId, title, excludedProviderId);
+    }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt])]
+    public Task<bool> HasProvidersAsync(int tenantId)
+    {
+        return Queries.HasProvidersAsync(this, tenantId);
+    }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt])]
+    public Task<int?> GetFirstProviderIdAsync(int tenantId)
+    {
+        return Queries.GetFirstProviderIdAsync(this, tenantId);
+    }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, null, null, null, PreCompileQuery.DefaultDateTime])]
+    public Task UpdateProviderAsync(int tenantId, int id, string title, string? url, string key, DateTime modifiedOn)
+    {
+        return Queries.UpdateProviderAsync(this, tenantId, id, title, url, key, modifiedOn);
     }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
@@ -63,20 +98,33 @@ public partial class AiDbContext
     {
         return Queries.GetProviderKeysAsync(this, tenantId);
     }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt])]
+    public Task<DefaultProviderQueryResult?> GetDefaultProviderAsync(int tenantId)
+    {
+        return Queries.GetDefaultProviderAsync(this, tenantId);
+    }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    public Task DeleteDefaultProvidersByProviderIdsAsync(int tenantId, IEnumerable<int> providerIds)
+    {
+        return Queries.DeleteDefaultProvidersByProviderIdsAsync(this, tenantId, providerIds);
+    }
 }
 
 static file class Queries
 {
     public static readonly Func<AiDbContext, int, int, Task<DbAiProvider?>> GetProviderAsync =
         EF.CompileAsyncQuery(
-            (AiDbContext ctx, int tenantId, int id) => 
+            (AiDbContext ctx, int tenantId, int id) =>
                 ctx.Providers.FirstOrDefault(x => x.TenantId == tenantId && x.Id == id));
-    
+
     public static readonly Func<AiDbContext, int, int, int, IAsyncEnumerable<DbAiProvider>> GetProvidersAsync =
         EF.CompileAsyncQuery(
-            (AiDbContext ctx, int tenantId, int offset, int limit) => 
+            (AiDbContext ctx, int tenantId, int offset, int limit) =>
             ctx.Providers
                 .Where(x => x.TenantId == tenantId)
+                .OrderBy(x => x.Id)
                 .Skip(offset)
                 .Take(limit));
 
@@ -84,18 +132,35 @@ static file class Queries
         EF.CompileAsyncQuery((AiDbContext ctx, int tenantId) =>
             ctx.Providers.Count(x => x.TenantId == tenantId));
 
-    public static readonly Func<AiDbContext, int, string, string?, string, DateTime, Task> UpdateProviderAsync =
+    public static readonly Func<AiDbContext, int, string, int, Task<bool>> IsProviderNameExistsAsync =
+        EF.CompileAsyncQuery((AiDbContext ctx, int tenantId, string title, int excludedProviderId) =>
+            ctx.Providers.Any(x => x.TenantId == tenantId && x.Title == title && x.Id != excludedProviderId));
+
+    public static readonly Func<AiDbContext, int, Task<bool>> HasProvidersAsync =
+        EF.CompileAsyncQuery((AiDbContext ctx, int tenantId) =>
+            ctx.Providers.Any(x => x.TenantId == tenantId));
+
+    public static readonly Func<AiDbContext, int, Task<int?>> GetFirstProviderIdAsync =
+        EF.CompileAsyncQuery((AiDbContext ctx, int tenantId) =>
+            ctx.Providers
+                .Where(x => x.TenantId == tenantId)
+                .OrderBy(x => x.Id)
+                .Select(x => (int?)x.Id)
+                .FirstOrDefault());
+
+    public static readonly Func<AiDbContext, int, int, string, string?, string, DateTime, Task> UpdateProviderAsync =
         EF.CompileAsyncQuery(
-            (AiDbContext ctx, int id, string title, string? url, string key, DateTime modifiedOn) => 
-                ctx.Providers.Where(x => x.Id == id).ExecuteUpdate(x => 
-                    x.SetProperty(y => y.Title, title)
-                        .SetProperty(y => y.Url, url)
-                        .SetProperty(y => y.Key, key)
-                        .SetProperty(y => y.ModifiedOn, modifiedOn)));
-    
+            (AiDbContext ctx, int tenantId, int id, string title, string? url, string key, DateTime modifiedOn) =>
+                ctx.Providers.Where(x => x.TenantId == tenantId && x.Id == id)
+                    .ExecuteUpdate(x =>
+                        x.SetProperty(y => y.Title, title)
+                            .SetProperty(y => y.Url, url)
+                            .SetProperty(y => y.Key, key)
+                            .SetProperty(y => y.ModifiedOn, modifiedOn)));
+
     public static readonly Func<AiDbContext, int, IEnumerable<int>, Task> DeleteProvidersAsync =
         EF.CompileAsyncQuery(
-            (AiDbContext ctx, int tenantId, IEnumerable<int> ids) => 
+            (AiDbContext ctx, int tenantId, IEnumerable<int> ids) =>
                 ctx.Providers
                     .Where(x => x.TenantId == tenantId)
                     .Where(x => ids.Contains(x.Id)).ExecuteDelete());
@@ -106,4 +171,42 @@ static file class Queries
                 ctx.Providers
                     .Where(x => x.TenantId == tenantId)
                     .Select(x => x.Key));
+
+    public static readonly Func<AiDbContext, int, Task<DefaultProviderQueryResult?>> GetDefaultProviderAsync =
+        EF.CompileAsyncQuery(
+            (AiDbContext ctx, int tenantId) =>
+                ctx.DefaultProviders
+                    .Where(dp => dp.TenantId == tenantId)
+                    .GroupJoin(
+                        ctx.Providers,
+                        dp => new { dp.TenantId, Id = dp.ProviderId },
+                        p => new { p.TenantId, p.Id },
+                        (dp, providers) => new { dp, providers })
+                    .SelectMany(
+                        x => x.providers.DefaultIfEmpty(),
+                        (x, provider) => new { x.dp, provider })
+                    .GroupJoin(
+                        ctx.ModelSettings,
+                        x => new { x.dp.TenantId, x.dp.ProviderId, ModelId = x.dp.DefaultModel },
+                        ms => new { ms.TenantId, ms.ProviderId, ms.ModelId },
+                        (x, settings) => new { x.dp, x.provider, settings })
+                    .SelectMany(
+                        x => x.settings.DefaultIfEmpty(),
+                        (x, ms) => new DefaultProviderQueryResult
+                        {
+                            ProviderId = x.dp.ProviderId,
+                            DefaultModel = x.dp.DefaultModel,
+                            ProviderTitle = x.provider != null ? x.provider.Title : null,
+                            ProviderType = x.provider != null ? x.provider.Type : null,
+                            HasModelSettings = x.provider != null && x.provider.HasModelSettings,
+                            DbModelSettings = ms
+                        })
+                    .FirstOrDefault());
+
+    public static readonly Func<AiDbContext, int, IEnumerable<int>, Task> DeleteDefaultProvidersByProviderIdsAsync =
+        EF.CompileAsyncQuery(
+            (AiDbContext ctx, int tenantId, IEnumerable<int> providerIds) =>
+                ctx.DefaultProviders
+                    .Where(x => x.TenantId == tenantId && providerIds.Contains(x.ProviderId))
+                    .ExecuteDelete());
 }

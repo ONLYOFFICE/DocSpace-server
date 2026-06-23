@@ -21,6 +21,7 @@
   <ItemGroup>
     <PackageReference Include="Amazon.Extensions.S3.Encryption" />
     <PackageReference Include="AWSSDK.CloudFront" />
+    <PackageReference Include="AWSSDK.Extensions.CloudFront.Signers" />
     <PackageReference Include="AWSSDK.S3" />
     <PackageReference Include="Google.Api.Gax" />
     <PackageReference Include="Google.Api.Gax.Rest" />

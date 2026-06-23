@@ -1,34 +1,59 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Core.Billing;
 
 /// <summary>
 /// The tariff parameters.
 /// </summary>
+/// <example>
+/// {
+///   "id": 1,
+///   "state": "Trial",
+///   "dueDate": "2026-03-31T00:00:00Z",
+///   "delayDueDate": "2026-04-07T00:00:00Z",
+///   "licenseDate": "2026-03-01T00:00:00Z",
+///   "customerId": "cus_123",
+///   "quotas": [
+///     {
+///       "id": 1,
+///       "quantity": 50,
+///       "wallet": false
+///     }
+///   ],
+///   "overdueQuotas": []
+/// }
+/// </example>
 [DebuggerDisplay("{State} before {DueDate}")]
 [ProtoContract]
 public class Tariff
@@ -36,49 +61,67 @@ public class Tariff
     /// <summary>
     /// The tariff ID.
     /// </summary>
+    /// <example>1</example>
     [ProtoMember(1)]
     public int Id { get; set; }
 
     /// <summary>
     /// The tariff state.
     /// </summary>
+    /// <example>Trial</example>
     [ProtoMember(2)]
     public TariffState State { get; set; }
 
     /// <summary>
     /// The tariff due date.
     /// </summary>
+    /// <example>2026-03-31T00:00:00Z</example>
     [ProtoMember(3)]
     public required DateTime DueDate { get; set; }
 
     /// <summary>
     /// The tariff delay due date.
     /// </summary>
+    /// <example>2026-04-07T00:00:00Z</example>
     [ProtoMember(4)]
     public DateTime DelayDueDate { get; set; }
 
     /// <summary>
     /// The tariff license date.
     /// </summary>
+    /// <example>2026-03-01T00:00:00Z</example>
     [ProtoMember(5)]
     public DateTime LicenseDate { get; set; }
 
     /// <summary>
     /// The tariff customer ID.
     /// </summary>
+    /// <example>cus_123</example>
     [ProtoMember(6)]
     public string CustomerId { get; set; }
 
     /// <summary>
     /// The list of tariff quotas.
     /// </summary>
+    /// <example>
+    /// {
+    ///   "quotas": [
+    ///     {
+    ///       "id": 1,
+    ///       "quantity": 50,
+    ///       "wallet": false
+    ///     }
+    ///   ]
+    /// }
+    /// </example>
     [ProtoMember(7)]
     public required List<Quota> Quotas { get; set; }
 
     /// <summary>
     /// The list of overdue tariff quotas.
     /// </summary>
-    [ProtoMember(7)]
+    /// <example>[]</example>
+    [ProtoMember(8)]
     public List<Quota> OverdueQuotas { get; set; }
 
     public override int GetHashCode()
@@ -103,6 +146,16 @@ public class Tariff
 
 /// <summary>
 /// The quota parameters.
+/// <example>
+/// {
+///   "id": 1,
+///   "quantity": 50,
+///   "wallet": false,
+///   "dueDate": "2026-03-31T00:00:00Z",
+///   "nextQuantity": 100,
+///   "state": "Active"
+/// }
+/// </example>
 /// </summary>
 [ProtoContract]
 public class Quota : IEquatable<Quota>
@@ -110,44 +163,43 @@ public class Quota : IEquatable<Quota>
     /// <summary>
     /// The quota ID.
     /// </summary>
+    /// <example></example>
     [ProtoMember(1)]
     public int Id { get; set; }
 
     /// <summary>
     /// The quota quantity.
     /// </summary>
+    /// <example>50</example>
     [ProtoMember(2)]
     public int Quantity { get; set; }
 
     /// <summary>
     /// The quota applies to the wallet or not
     /// </summary>
+    /// <example>false</example>
     [ProtoMember(3)]
     public bool Wallet { get; set; }
 
     /// <summary>
     /// The quota due date.
     /// </summary>
+    /// <example>2026-03-31T00:00:00Z</example>
     [ProtoMember(4)]
     public DateTime? DueDate { get; set; }
 
     /// <summary>
     /// The quota next quantity.
     /// </summary>
+    /// <example>100</example>
     [ProtoMember(5)]
     public int? NextQuantity { get; set; }
 
     /// <summary>
     /// The quota state.
     /// </summary>
-    [ProtoMember(6)]
-    public QuotaState? State
-    {
-        get
-        {
-            return DueDate.HasValue ? DueDate.Value < DateTime.UtcNow ? QuotaState.Overdue : QuotaState.Active : null;
-        }
-    }
+    /// <example>Active</example>
+    public QuotaState? State => DueDate.HasValue ? DueDate.Value < DateTime.UtcNow ? QuotaState.Overdue : QuotaState.Active : null;
 
     public Quota()
     {
@@ -179,9 +231,9 @@ public class Quota : IEquatable<Quota>
 /// </summary>
 public enum QuotaState
 {
-    [SwaggerEnum("Active")]
+    [Description("Active")]
     Active,
 
-    [SwaggerEnum("Overdue")]
+    [Description("Overdue")]
     Overdue
 }

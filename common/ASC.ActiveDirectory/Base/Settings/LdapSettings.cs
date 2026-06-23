@@ -1,28 +1,35 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 using System.Runtime.InteropServices;
 
@@ -37,11 +44,7 @@ public class LdapSettings : ISettings<LdapSettings>, ICloneable
     /// <summary>
     /// The LDAP settings ID.
     /// </summary>
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{197149b3-fbc9-44c2-b42a-232f7e729c16}"); }
-    }
+    public static Guid ID => new("{197149b3-fbc9-44c2-b42a-232f7e729c16}");
 
     ///<summary>
     /// The mapping fields of LDAP settings.
@@ -180,33 +183,33 @@ public class LdapSettings : ISettings<LdapSettings>, ICloneable
     public override int GetHashCode()
     {
         var hash = 3;
-        hash = (hash * 2) + EnableLdapAuthentication.GetHashCode();
-        hash = (hash * 2) + StartTls.GetHashCode();
-        hash = (hash * 2) + Ssl.GetHashCode();
-        hash = (hash * 2) + SendWelcomeEmail.GetHashCode();
-        hash = (hash * 2) + DisableEmailVerification.GetHashCode();
-        hash = (hash * 2) + Server.GetHashCode();
-        hash = (hash * 2) + UserDN.GetHashCode();
-        hash = (hash * 2) + PortNumber.GetHashCode();
-        hash = (hash * 2) + UserFilter.GetHashCode();
-        hash = (hash * 2) + LoginAttribute.GetHashCode();
-        hash = (hash * 2) + GroupMembership.GetHashCode();
-        hash = (hash * 2) + GroupDN.GetHashCode();
-        hash = (hash * 2) + GroupNameAttribute.GetHashCode();
-        hash = (hash * 2) + GroupFilter.GetHashCode();
-        hash = (hash * 2) + UserAttribute.GetHashCode();
-        hash = (hash * 2) + GroupAttribute.GetHashCode();
-        hash = (hash * 2) + Authentication.GetHashCode();
-        hash = (hash * 2) + Login.GetHashCode();
+        hash = hash * 2 + EnableLdapAuthentication.GetHashCode();
+        hash = hash * 2 + StartTls.GetHashCode();
+        hash = hash * 2 + Ssl.GetHashCode();
+        hash = hash * 2 + SendWelcomeEmail.GetHashCode();
+        hash = hash * 2 + DisableEmailVerification.GetHashCode();
+        hash = hash * 2 + Server.GetHashCode();
+        hash = hash * 2 + UserDN.GetHashCode();
+        hash = hash * 2 + PortNumber.GetHashCode();
+        hash = hash * 2 + UserFilter.GetHashCode();
+        hash = hash * 2 + LoginAttribute.GetHashCode();
+        hash = hash * 2 + GroupMembership.GetHashCode();
+        hash = hash * 2 + GroupDN.GetHashCode();
+        hash = hash * 2 + GroupNameAttribute.GetHashCode();
+        hash = hash * 2 + GroupFilter.GetHashCode();
+        hash = hash * 2 + UserAttribute.GetHashCode();
+        hash = hash * 2 + GroupAttribute.GetHashCode();
+        hash = hash * 2 + Authentication.GetHashCode();
+        hash = hash * 2 + Login.GetHashCode();
 
         foreach (var pair in LdapMapping)
         {
-            hash = (hash * 2) + pair.Value.GetHashCode();
+            hash = hash * 2 + pair.Value.GetHashCode();
         }
 
         foreach (var pair in AccessRights)
         {
-            hash = (hash * 2) + pair.Value.GetHashCode();
+            hash = hash * 2 + pair.Value.GetHashCode();
         }
 
         return hash;
@@ -285,15 +288,9 @@ public class LdapSettings : ISettings<LdapSettings>, ICloneable
     /// </summary>
     public string FirstNameAttribute
     {
-        get
-        {
-            return GetOldSetting(MappingFields.FirstNameAttribute);
-        }
+        get => GetOldSetting(MappingFields.FirstNameAttribute);
 
-        set
-        {
-            SetOldSetting(MappingFields.FirstNameAttribute, value);
-        }
+        set => SetOldSetting(MappingFields.FirstNameAttribute, value);
     }
 
     /// <summary>
@@ -301,15 +298,9 @@ public class LdapSettings : ISettings<LdapSettings>, ICloneable
     /// </summary>
     public string SecondNameAttribute
     {
-        get
-        {
-            return GetOldSetting(MappingFields.SecondNameAttribute);
-        }
+        get => GetOldSetting(MappingFields.SecondNameAttribute);
 
-        set
-        {
-            SetOldSetting(MappingFields.SecondNameAttribute, value);
-        }
+        set => SetOldSetting(MappingFields.SecondNameAttribute, value);
     }
 
     /// <summary>
@@ -317,15 +308,9 @@ public class LdapSettings : ISettings<LdapSettings>, ICloneable
     /// </summary>
     public string MailAttribute
     {
-        get
-        {
-            return GetOldSetting(MappingFields.MailAttribute);
-        }
+        get => GetOldSetting(MappingFields.MailAttribute);
 
-        set
-        {
-            SetOldSetting(MappingFields.MailAttribute, value);
-        }
+        set => SetOldSetting(MappingFields.MailAttribute, value);
     }
 
     /// <summary>
@@ -333,15 +318,9 @@ public class LdapSettings : ISettings<LdapSettings>, ICloneable
     /// </summary>
     public string TitleAttribute
     {
-        get
-        {
-            return GetOldSetting(MappingFields.TitleAttribute);
-        }
+        get => GetOldSetting(MappingFields.TitleAttribute);
 
-        set
-        {
-            SetOldSetting(MappingFields.TitleAttribute, value);
-        }
+        set => SetOldSetting(MappingFields.TitleAttribute, value);
     }
 
     /// <summary>
@@ -349,15 +328,9 @@ public class LdapSettings : ISettings<LdapSettings>, ICloneable
     /// </summary>
     public string MobilePhoneAttribute
     {
-        get
-        {
-            return GetOldSetting(MappingFields.MobilePhoneAttribute);
-        }
+        get => GetOldSetting(MappingFields.MobilePhoneAttribute);
 
-        set
-        {
-            SetOldSetting(MappingFields.MobilePhoneAttribute, value);
-        }
+        set => SetOldSetting(MappingFields.MobilePhoneAttribute, value);
     }
 
     /// <summary>
@@ -365,15 +338,9 @@ public class LdapSettings : ISettings<LdapSettings>, ICloneable
     /// </summary>
     public string LocationAttribute
     {
-        get
-        {
-            return GetOldSetting(MappingFields.LocationAttribute);
-        }
+        get => GetOldSetting(MappingFields.LocationAttribute);
 
-        set
-        {
-            SetOldSetting(MappingFields.LocationAttribute, value);
-        }
+        set => SetOldSetting(MappingFields.LocationAttribute, value);
     }
 
     /// <summary>
@@ -473,11 +440,7 @@ public class LdapSettings : ISettings<LdapSettings>, ICloneable
 [Scope]
 public class LdapCronSettings : ISettings<LdapCronSettings>
 {
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{58C42C54-56CD-4BEF-A3ED-C60ACCF6E975}"); }
-    }
+    public static Guid ID => new("{58C42C54-56CD-4BEF-A3ED-C60ACCF6E975}");
 
     public LdapCronSettings GetDefault()
     {
@@ -494,11 +457,7 @@ public class LdapCronSettings : ISettings<LdapCronSettings>
 
 public class LdapCurrentAcccessSettings : ISettings<LdapCurrentAcccessSettings>
 {
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{134B5EAA-F612-4834-AEAB-34C90515EA4E}"); }
-    }
+    public static Guid ID => new("{134B5EAA-F612-4834-AEAB-34C90515EA4E}");
 
     public LdapCurrentAcccessSettings GetDefault()
     {
@@ -512,11 +471,7 @@ public class LdapCurrentAcccessSettings : ISettings<LdapCurrentAcccessSettings>
 
 public class LdapCurrentUserPhotos : ISettings<LdapCurrentUserPhotos>
 {
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{50AE3C2B-0783-480F-AF30-679D0F0A2D3E}"); }
-    }
+    public static Guid ID => new("{50AE3C2B-0783-480F-AF30-679D0F0A2D3E}");
 
     public LdapCurrentUserPhotos GetDefault()
     {
@@ -530,11 +485,7 @@ public class LdapCurrentUserPhotos : ISettings<LdapCurrentUserPhotos>
 
 public class LdapCurrentDomain : ISettings<LdapCurrentDomain>
 {
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{75A5F745-F697-4418-B38D-0FE0D277E258}"); }
-    }
+    public static Guid ID => new("{75A5F745-F697-4418-B38D-0FE0D277E258}");
 
     public LdapCurrentDomain GetDefault()
     {

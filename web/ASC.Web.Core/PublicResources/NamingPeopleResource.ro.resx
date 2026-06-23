@@ -117,32 +117,62 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="DefaultAddUsers" xml:space="preserve">
-    <value>Adăugare angajați</value>
-  </data>
-  <data name="EducationAddUsers" xml:space="preserve">
-    <value>Adăugare Profesori/Studenți</value>
-  </data>
   <data name="CommonAddUsers" xml:space="preserve">
     <value>Adăugare utilizatori</value>
+  </data>
+  <data name="CommonGroup" xml:space="preserve">
+    <value>Grup</value>
+  </data>
+  <data name="CommonGroupHead" xml:space="preserve">
+    <value>Șef</value>
+  </data>
+  <data name="CommonGroups" xml:space="preserve">
+    <value>Grupuri</value>
+  </data>
+  <data name="CommonGuest" xml:space="preserve">
+    <value>Invitat</value>
+  </data>
+  <data name="CommonGuests" xml:space="preserve">
+    <value>Invitaţi</value>
+  </data>
+  <data name="CommonRegDate" xml:space="preserve">
+    <value>Înregistrat în data de</value>
   </data>
   <data name="CommonSchemaName" xml:space="preserve">
     <value>Comun</value>
   </data>
-  <data name="DefaultSchemaName" xml:space="preserve">
-    <value>Corporativ</value>
+  <data name="CommonUser" xml:space="preserve">
+    <value>Utilizator</value>
+  </data>
+  <data name="CommonUsers" xml:space="preserve">
+    <value>Utilizatori</value>
+  </data>
+  <data name="CommonUserTitle" xml:space="preserve">
+    <value>Titlu</value>
+  </data>
+  <data name="DefaultAddUsers" xml:space="preserve">
+    <value>Adăugare angajați</value>
   </data>
   <data name="DefaultGroup" xml:space="preserve">
     <value>Departament</value>
   </data>
+  <data name="DefaultGroupHead" xml:space="preserve">
+    <value>Șef</value>
+  </data>
   <data name="DefaultGroups" xml:space="preserve">
     <value>Departamente</value>
   </data>
-  <data name="EducationSchemaName" xml:space="preserve">
-    <value>Instituția de învățământ</value>
+  <data name="DefaultGuest" xml:space="preserve">
+    <value>Invitat</value>
+  </data>
+  <data name="DefaultGuests" xml:space="preserve">
+    <value>Invitaţi</value>
   </data>
   <data name="DefaultRegDate" xml:space="preserve">
     <value>Angajat de la</value>
+  </data>
+  <data name="DefaultSchemaName" xml:space="preserve">
+    <value>Corporativ</value>
   </data>
   <data name="DefaultUser" xml:space="preserve">
     <value>Angajat</value>
@@ -150,10 +180,13 @@
   <data name="DefaultUsers" xml:space="preserve">
     <value>Angajați</value>
   </data>
-  <data name="EducationGroup" xml:space="preserve">
-    <value>Grup</value>
+  <data name="DefaultUserTitle" xml:space="preserve">
+    <value>Funcția</value>
   </data>
-  <data name="CommonGroup" xml:space="preserve">
+  <data name="EducationAddUsers" xml:space="preserve">
+    <value>Adăugare Profesori/Studenți</value>
+  </data>
+  <data name="EducationGroup" xml:space="preserve">
     <value>Grup</value>
   </data>
   <data name="EducationGroupHead" xml:space="preserve">
@@ -162,41 +195,17 @@
   <data name="EducationGroups" xml:space="preserve">
     <value>Grupuri</value>
   </data>
-  <data name="CommonGroups" xml:space="preserve">
-    <value>Grupuri</value>
-  </data>
   <data name="EducationGuest" xml:space="preserve">
-    <value>Invitat</value>
-  </data>
-  <data name="DefaultGuest" xml:space="preserve">
-    <value>Invitat</value>
-  </data>
-  <data name="CommonGuest" xml:space="preserve">
     <value>Invitat</value>
   </data>
   <data name="EducationGuests" xml:space="preserve">
     <value>Invitaţi</value>
   </data>
-  <data name="DefaultGuests" xml:space="preserve">
-    <value>Invitaţi</value>
-  </data>
-  <data name="CommonGuests" xml:space="preserve">
-    <value>Invitaţi</value>
-  </data>
-  <data name="DefaultGroupHead" xml:space="preserve">
-    <value>Șef</value>
-  </data>
-  <data name="CommonGroupHead" xml:space="preserve">
-    <value>Șef</value>
-  </data>
-  <data name="DefaultUserTitle" xml:space="preserve">
-    <value>Funcția</value>
-  </data>
   <data name="EducationRegDate" xml:space="preserve">
     <value>Înregistrat în data de</value>
   </data>
-  <data name="CommonRegDate" xml:space="preserve">
-    <value>Înregistrat în data de</value>
+  <data name="EducationSchemaName" xml:space="preserve">
+    <value>Instituția de învățământ</value>
   </data>
   <data name="EducationUser" xml:space="preserve">
     <value>Profesor/Student</value>
@@ -206,14 +215,5 @@
   </data>
   <data name="EducationUserTitle" xml:space="preserve">
     <value>Titlu</value>
-  </data>
-  <data name="CommonUserTitle" xml:space="preserve">
-    <value>Titlu</value>
-  </data>
-  <data name="CommonUser" xml:space="preserve">
-    <value>Utilizator</value>
-  </data>
-  <data name="CommonUsers" xml:space="preserve">
-    <value>Utilizatori</value>
   </data>
 </root>

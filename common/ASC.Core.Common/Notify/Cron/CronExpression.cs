@@ -1,28 +1,35 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Notify.Cron;
 
@@ -58,7 +65,6 @@ public class CronExpression : ICloneable, IDeserializationCallback
     [NonSerialized] private bool _nearestWeekday;
     [NonSerialized] private int _nthdayOfWeek;
     [NonSerialized] private TreeSet _seconds;
-    private TimeZoneInfo _timeZone;
     [NonSerialized] private TreeSet _years;
 
     static CronExpression()
@@ -96,10 +102,10 @@ public class CronExpression : ICloneable, IDeserializationCallback
 
     protected virtual TimeZoneInfo TimeZone
     {
-        init { _timeZone = value; }
+        init;
         get
         {
-            return _timeZone ??= TimeZoneInfo.Utc;
+            return field ??= TimeZoneInfo.Utc;
         }
     }
 
@@ -280,7 +286,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
             return i;
         }
         var c = s[i];
-        if (c is >= 'A' and <= 'Z' && (!s.Equals("L")) && (!s.Equals("LW")))
+        if (c is >= 'A' and <= 'Z' && !s.Equals("L") && !s.Equals("LW"))
         {
             var sub = s.Substring(i, 3);
             int sval;
@@ -366,7 +372,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
         if (c == '?')
         {
             i++;
-            if ((i + 1) < s.Length
+            if (i + 1 < s.Length
                 && s[i] != ' ' && s[i + 1] != '\t')
             {
                 throw new FormatException("Illegal character after '?': "
@@ -392,7 +398,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
         }
         if (c is '*' or '/')
         {
-            if (c == '*' && (i + 1) >= s.Length)
+            if (c == '*' && i + 1 >= s.Length)
             {
                 AddToSet(AllSpecInt, -1, incr, type);
 
@@ -400,7 +406,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
             }
 
             if (c == '/'
-                && ((i + 1) >= s.Length || s[i + 1] == ' ' || s[i + 1] == '\t'))
+                && (i + 1 >= s.Length || s[i + 1] == ' ' || s[i + 1] == '\t'))
             {
                 throw new FormatException("'/' must be followed by an integer.");
             }
@@ -429,25 +435,25 @@ public class CronExpression : ICloneable, IDeserializationCallback
                         string.Format(CultureInfo.InvariantCulture, "Increment > 60 : {0}", incr));
                 }
 
-                if (incr > 23 && (type == Hour))
+                if (incr > 23 && type == Hour)
                 {
                     throw new FormatException(
                         string.Format(CultureInfo.InvariantCulture, "Increment > 24 : {0}", incr));
                 }
 
-                if (incr > 31 && (type == DayOfMonth))
+                if (incr > 31 && type == DayOfMonth)
                 {
                     throw new FormatException(
                         string.Format(CultureInfo.InvariantCulture, "Increment > 31 : {0}", incr));
                 }
 
-                if (incr > 7 && (type == DayOfWeek))
+                if (incr > 7 && type == DayOfWeek)
                 {
                     throw new FormatException(
                         string.Format(CultureInfo.InvariantCulture, "Increment > 7 : {0}", incr));
                 }
 
-                if (incr > 12 && (type == Month))
+                if (incr > 12 && type == Month)
                 {
                     throw new FormatException(string.Format(CultureInfo.InvariantCulture, "Increment > 12 : {0}",
                         incr));
@@ -630,7 +636,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
                 end = v1;
                 i = vs.Pos;
             }
-            if (i < s.Length && (s[i] == '/'))
+            if (i < s.Length && s[i] == '/')
             {
                 i++;
                 c = s[i];
@@ -792,7 +798,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
         var data = GetSet(type);
         if (type is Second or Minute)
         {
-            if ((val < 0 || val > 59 || end > 59) && (val != AllSpecInt))
+            if ((val < 0 || val > 59 || end > 59) && val != AllSpecInt)
             {
                 throw new FormatException(
                     "Minute and Second values must be between 0 and 59");
@@ -800,7 +806,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
         }
         else if (type == Hour)
         {
-            if ((val < 0 || val > 23 || end > 23) && (val != AllSpecInt))
+            if ((val < 0 || val > 23 || end > 23) && val != AllSpecInt)
             {
                 throw new FormatException(
                     "Hour values must be between 0 and 23");
@@ -808,8 +814,8 @@ public class CronExpression : ICloneable, IDeserializationCallback
         }
         else if (type == DayOfMonth)
         {
-            if ((val < 1 || val > 31 || end > 31) && (val != AllSpecInt)
-                && (val != NoSpecInt))
+            if ((val < 1 || val > 31 || end > 31) && val != AllSpecInt
+                && val != NoSpecInt)
             {
                 throw new FormatException(
                     "Day of month values must be between 1 and 31");
@@ -817,7 +823,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
         }
         else if (type == Month)
         {
-            if ((val < 1 || val > 12 || end > 12) && (val != AllSpecInt))
+            if ((val < 1 || val > 12 || end > 12) && val != AllSpecInt)
             {
                 throw new FormatException(
                     "Month values must be between 1 and 12");
@@ -825,8 +831,8 @@ public class CronExpression : ICloneable, IDeserializationCallback
         }
         else if (type == DayOfWeek)
         {
-            if ((val == 0 || val > 7 || end > 7) && (val != AllSpecInt)
-                && (val != NoSpecInt))
+            if ((val == 0 || val > 7 || end > 7) && val != AllSpecInt
+                && val != NoSpecInt)
             {
                 throw new FormatException(
                     "Day-of-Week values must be between 1 and 7");
@@ -1195,7 +1201,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
     private DateTime ProcessDayOfWeek(DateTime d, int day, int mon)
     {
         var dow = (int)_daysOfWeek.First();
-        var cDow = ((int)d.DayOfWeek) == 7 ? 1 : (int)d.DayOfWeek + 1;
+        var cDow = (int)d.DayOfWeek == 7 ? 1 : (int)d.DayOfWeek + 1;
         var daysToAdd = cDow < dow ? dow - cDow : dow + (7 - cDow);
         var lDay = GetLastDayOfMonth(mon, d.Year);
 

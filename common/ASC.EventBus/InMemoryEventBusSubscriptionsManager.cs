@@ -1,39 +1,46 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.EventBus;
 
 public partial class InMemoryEventBusSubscriptionsManager : IEventBusSubscriptionsManager
 {
-    private readonly Dictionary<string, List<SubscriptionInfo>> _handlers = new();
-    private readonly List<Type> _eventTypes = [];
+    private readonly ConcurrentDictionary<string, List<SubscriptionInfo>> _handlers = new();
+    private readonly ConcurrentDictionary<string, Type> _eventTypes = new();
 
     public event EventHandler<string> OnEventRemoved;
 
-    public bool IsEmpty => _handlers is { Count: 0 };
+    public bool IsEmpty => _handlers.IsEmpty;
     public void Clear() => _handlers.Clear();
 
     public void AddDynamicSubscription<TH>(string eventName)
@@ -50,26 +57,20 @@ public partial class InMemoryEventBusSubscriptionsManager : IEventBusSubscriptio
 
         DoAddSubscription(typeof(TH), eventName, isDynamic: false);
 
-        if (!_eventTypes.Contains(typeof(T)))
-        {
-            _eventTypes.Add(typeof(T));
-        }
+        _eventTypes.TryAdd(typeof(T).Name, typeof(T));
     }
 
     private void DoAddSubscription(Type handlerType, string eventName, bool isDynamic)
     {
-        if (!HasSubscriptionsForEvent(eventName))
-        {
-            _handlers.Add(eventName, []);
-        }
+        var handlers = _handlers.GetOrAdd(eventName, _ => []);
 
-        if (_handlers[eventName].Any(s => s.HandlerType == handlerType))
+        if (handlers.Any(s => s.HandlerType == handlerType))
         {
             throw new ArgumentException(
                 $"Handler Type {handlerType.Name} already registered for '{eventName}'", nameof(handlerType));
         }
 
-        _handlers[eventName].Add(isDynamic ? SubscriptionInfo.Dynamic(handlerType) : SubscriptionInfo.Typed(handlerType));
+        handlers.Add(isDynamic ? SubscriptionInfo.Dynamic(handlerType) : SubscriptionInfo.Typed(handlerType));
     }
 
 
@@ -95,18 +96,16 @@ public partial class InMemoryEventBusSubscriptionsManager : IEventBusSubscriptio
     {
         if (subsToRemove != null)
         {
-            _handlers[eventName].Remove(subsToRemove);
-            if (_handlers[eventName].Count == 0)
+            if (_handlers.TryGetValue(eventName, out var handlers))
             {
-                _handlers.Remove(eventName);
-                var eventType = _eventTypes.SingleOrDefault(e => e.Name == eventName);
-                if (eventType != null)
+                handlers.Remove(subsToRemove);
+                if (handlers.Count == 0)
                 {
-                    _eventTypes.Remove(eventType);
+                    _handlers.TryRemove(eventName, out _);
+                    _eventTypes.TryRemove(eventName, out _);
+                    RaiseOnEventRemoved(eventName);
                 }
-                RaiseOnEventRemoved(eventName);
             }
-
         }
     }
 
@@ -151,7 +150,7 @@ public partial class InMemoryEventBusSubscriptionsManager : IEventBusSubscriptio
     }
     public bool HasSubscriptionsForEvent(string eventName) => _handlers.ContainsKey(eventName);
 
-    public Type GetEventTypeByName(string eventName) => _eventTypes.SingleOrDefault(t => t.Name == eventName);
+    public Type GetEventTypeByName(string eventName) => _eventTypes.GetValueOrDefault(eventName);
 
     public string GetEventKey<T>()
     {

@@ -1,28 +1,35 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 using ASC.Common.Log;
 using ASC.Web.Studio.UserControls.Management;
@@ -31,14 +38,15 @@ using Constants = ASC.Core.Configuration.Constants;
 
 namespace ASC.People.Api;
 
-///<summary>
+///<remarks>
 /// Third-party API.
-///</summary>
+///</remarks>
 [DefaultRoute("thirdparty")]
 public class ThirdpartyController(
     ILogger<ThirdpartyController> logger,
     AccountLinker accountLinker,
     CoreBaseSettings coreBaseSettings,
+    CustomNamingPeople customNamingPeople,
     DisplayUserSettingsHelper displayUserSettingsHelper,
     IHttpClientFactory httpClientFactory,
     MobileDetector mobileDetector,
@@ -63,10 +71,10 @@ public class ThirdpartyController(
 {
 
 
-    /// <summary>
+    /// <remarks>
     /// Returns a list of the available third-party accounts.
-    /// </summary>
-    /// <short>Get third-party accounts</short>
+    /// </remarks>
+    /// <summary>Get third-party accounts</summary>
     /// <path>api/2.0/people/thirdparty/providers</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     /// <collection>list</collection>
@@ -115,12 +123,12 @@ public class ThirdpartyController(
         return infos;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Links a third-party account specified in the request to the user profile.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Link a third-pary account
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/people/thirdparty/linkaccount</path>
     [Tags("People / Third-party accounts")]
     [SwaggerResponse(200, "Ok")]
@@ -150,12 +158,12 @@ public class ThirdpartyController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Creates a third-party account with the parameters specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Create a third-pary account
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/people/thirdparty/signup</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("People / Third-party accounts")]
@@ -166,14 +174,6 @@ public class ThirdpartyController(
     [HttpPost("signup")]
     public async Task<EmployeeDto> SignupThirdPartyAccount(SignupAccountRequestDto inDto)
     {
-        var passwordHash = inDto.PasswordHash;
-        var mustChangePassword = false;
-        if (string.IsNullOrEmpty(passwordHash))
-        {
-            passwordHash = UserManagerWrapper.GeneratePassword();
-            mustChangePassword = true;
-        }
-
         var thirdPartyProfile = await loginProfileTransport.FromTransport(inDto.SerializedProfile);
         if (!string.IsNullOrEmpty(thirdPartyProfile.AuthorizationError))
         {
@@ -186,19 +186,31 @@ public class ThirdpartyController(
             return null;
         }
 
-        if (string.IsNullOrEmpty(thirdPartyProfile.EMail))
+        var email = thirdPartyProfile.EMail;
+        var autoGeneratedEmail = false;
+
+        if (string.IsNullOrWhiteSpace(email) &&
+            ProviderManager.DummyEmailProviders.Contains(thirdPartyProfile.Provider)&&
+            providerManager.GetLoginProvider(thirdPartyProfile.Provider) is IDummyEmailProvider provider)
+        {
+            email = provider.GenerateEmail(thirdPartyProfile);
+            autoGeneratedEmail = true;
+        }
+
+        if (string.IsNullOrWhiteSpace(email))
         {
             throw new Exception(Resource.ErrorNotCorrectEmail);
         }
 
         var model = emailValidationKeyModelHelper.GetModel();
-        var linkData = await invitationService.GetLinkDataAsync(inDto.Key, inDto.Email, null, inDto.EmployeeType ?? EmployeeType.RoomAdmin, model?.UiD);
+        var linkData = await invitationService.GetLinkDataAsync(inDto.Key, null, null, inDto.EmployeeType ?? EmployeeType.RoomAdmin, model?.UiD);
 
         if (!linkData.IsCorrect)
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_InvintationLink);
         }
 
+        var passwordHash = UserManagerWrapper.GeneratePassword();
         var employeeType = linkData.EmployeeType;
         var quotaLimit = false;
 
@@ -212,15 +224,17 @@ public class ThirdpartyController(
                 var invitedByEmail = linkData.LinkType == InvitationLinkType.Individual;
 
                 (user, quotaLimit) = await CreateNewUser(
-                    GetFirstName(inDto, thirdPartyProfile),
-                    GetLastName(inDto, thirdPartyProfile),
-                    GetEmailAddress(inDto, thirdPartyProfile),
+                    thirdPartyProfile.FirstName,
+                    thirdPartyProfile.LastName,
+                    thirdPartyProfile.DisplayName,
+                    email,
                     passwordHash,
                     employeeType,
                     false,
                     invitedByEmail,
                     inDto.Culture,
-                    model?.UiD);
+                    model?.UiD,
+                    autoGeneratedEmail);
 
                 var messageAction = employeeType == EmployeeType.RoomAdmin ? MessageAction.UserCreatedViaInvite : MessageAction.GuestCreatedViaInvite;
                 messageService.Send(MessageInitiator.System, messageAction, MessageTarget.Create(user.Id), description: user.DisplayUserName(false, displayUserSettingsHelper));
@@ -234,7 +248,7 @@ public class ThirdpartyController(
 
                 await webhookManager.PublishAsync(WebhookTrigger.UserCreated, user);
 
-                if (mustChangePassword)
+                if (!autoGeneratedEmail)
                 {
                     await studioNotifyService.UserPasswordChangeAsync(user, true);
                 }
@@ -289,8 +303,14 @@ public class ThirdpartyController(
         if (!string.IsNullOrEmpty(profile.EMail))
         {
             var user = await userManager.GetUserByEmailAsync(profile.EMail);
-            if (user.Id != Core.Users.Constants.LostUser.Id)
+            if (user.Id != Core.Users.Constants.LostUser.Id && user.Status != EmployeeStatus.Terminated)
             {
+                if (user.ActivationStatus != EmployeeActivationStatus.Activated)
+                {
+                    var msg = await customNamingPeople.Substitute<Resource>("ErrorEmailAlreadyExists");
+                    throw new InvalidOperationException(msg);
+                }
+
                 var linkedProfiles = await accountLinker.GetLinkedProfilesAsync(user.Id.ToString(), profile.Provider);
                 if (!linkedProfiles.Any())
                 {
@@ -304,12 +324,12 @@ public class ThirdpartyController(
         return ASC.Core.Users.Constants.LostUser;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Unlinks a third-party account specified in the request from the user profile.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Unlink a third-pary account
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/people/thirdparty/unlinkaccount</path>
     [Tags("People / Third-party accounts")]
     [HttpDelete("unlinkaccount")]
@@ -320,8 +340,8 @@ public class ThirdpartyController(
         messageService.Send(MessageAction.UserUnlinkedSocialAccount, GetMeaningfulProviderName(inDto.Provider));
     }
 
-    private async Task<(UserInfo, bool)> CreateNewUser(string firstName, string lastName, string email, string passwordHash, EmployeeType employeeType, bool fromInviteLink,
-        bool inviteByEmail, string cultureName, Guid? invitedBy)
+    private async Task<(UserInfo, bool)> CreateNewUser(string firstName, string lastName, string displayName, string email, string passwordHash, EmployeeType employeeType, bool fromInviteLink,
+        bool inviteByEmail, string cultureName, Guid? invitedBy, bool autoGeneratedEmail)
     {
         if (SetupInfo.IsSecretEmail(email))
         {
@@ -345,9 +365,19 @@ public class ThirdpartyController(
             user.CreatedBy = invitedBy;
         }
 
-        user.FirstName = string.IsNullOrEmpty(firstName) ? UserControlsCommonResource.UnknownFirstName : firstName;
-        user.LastName = string.IsNullOrEmpty(lastName) ? UserControlsCommonResource.UnknownLastName : lastName;
+        if (string.IsNullOrWhiteSpace(firstName) && string.IsNullOrWhiteSpace(lastName) && !string.IsNullOrWhiteSpace(displayName))
+        {
+            firstName = displayName;
+        }
+
+        user.FirstName = string.IsNullOrWhiteSpace(firstName) ? UserControlsCommonResource.UnknownFirstName : firstName;
+        user.LastName = string.IsNullOrWhiteSpace(lastName) ? string.Empty : lastName;
         user.Email = email;
+
+        if (autoGeneratedEmail)
+        {
+            user.ActivationStatus = EmployeeActivationStatus.AutoGenerated;
+        }
 
         if (coreBaseSettings.EnabledCultures.Find(c => string.Equals(c.Name, cultureName, StringComparison.InvariantCultureIgnoreCase)) != null)
         {
@@ -355,10 +385,10 @@ public class ThirdpartyController(
         }
 
         var quotaLimit = false;
-
+        var notify = !autoGeneratedEmail;
         try
         {
-            user = await userManagerWrapper.AddUserAsync(user, passwordHash, true, true, employeeType, fromInviteLink, updateExising: inviteByEmail);
+            user = await userManagerWrapper.AddUserAsync(user, passwordHash, true, notify, employeeType, fromInviteLink, updateExising: inviteByEmail);
             if (employeeType is EmployeeType.Guest)
             {
                 await socketManager.AddGuestAsync(user);
@@ -371,7 +401,7 @@ public class ThirdpartyController(
         catch (TenantQuotaException)
         {
             quotaLimit = true;
-            user = await userManagerWrapper.AddUserAsync(user, passwordHash, true, true, EmployeeType.User, fromInviteLink, updateExising: inviteByEmail);
+            user = await userManagerWrapper.AddUserAsync(user, passwordHash, true, notify, EmployeeType.User, fromInviteLink, updateExising: inviteByEmail);
             await socketManager.AddUserAsync(user);
         }
 
@@ -380,67 +410,16 @@ public class ThirdpartyController(
 
     private async Task SaveContactImage(Guid userID, string url)
     {
-        var request = new HttpRequestMessage
-        {
-            RequestUri = new Uri(url)
-        };
+        using var request = new HttpRequestMessage(HttpMethod.Get, url);
 
+        #pragma warning disable CA2000
         var httpClient = httpClientFactory.CreateClient();
+        #pragma warning restore CA2000
+
         using var response = await httpClient.SendAsync(request);
         var bytes = await response.Content.ReadAsByteArrayAsync();
 
         await userPhotoManager.SaveOrUpdatePhoto(userID, bytes);
-    }
-
-    private string GetEmailAddress(SignupAccountRequestDto inDto)
-    {
-        if (!string.IsNullOrEmpty(inDto.Email))
-        {
-            return inDto.Email.Trim();
-        }
-
-        return string.Empty;
-    }
-
-    private string GetEmailAddress(SignupAccountRequestDto inDto, LoginProfile account)
-    {
-        return string.IsNullOrEmpty(account.EMail) ? GetEmailAddress(inDto) : account.EMail;
-    }
-
-    private string GetFirstName(SignupAccountRequestDto inDto)
-    {
-        var value = string.Empty;
-        if (!string.IsNullOrEmpty(inDto.FirstName))
-        {
-            value = inDto.FirstName.Trim();
-        }
-
-        return HtmlUtil.GetText(value);
-    }
-
-    private string GetFirstName(SignupAccountRequestDto inDto, LoginProfile account)
-    {
-        var value = GetFirstName(inDto);
-
-        return string.IsNullOrEmpty(value) ? account.FirstName : value;
-    }
-
-    private string GetLastName(SignupAccountRequestDto inDto)
-    {
-        var value = string.Empty;
-        if (!string.IsNullOrEmpty(inDto.LastName))
-        {
-            value = inDto.LastName.Trim();
-        }
-
-        return HtmlUtil.GetText(value);
-    }
-
-    private string GetLastName(SignupAccountRequestDto inDto, LoginProfile account)
-    {
-        var value = GetLastName(inDto);
-
-        return string.IsNullOrEmpty(value) ? account.LastName : value;
     }
 
     private static string GetMeaningfulProviderName(string providerName)

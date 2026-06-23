@@ -136,12 +136,6 @@ Dacă aveți nevoie de ajutor, navigați la "Centru de ajutor":"${__HelpLink}" s
 
 $TrulyYours</value>
   </data>
-  <data name="subject_remove_user_data_completed_custom_mode" xml:space="preserve">
-    <value>&gt;${LetterLogoText}. Eliminarea datelor de utilizator finalizată</value>
-  </data>
-  <data name="ProductUserOpportunitiesCustomMode" xml:space="preserve">
-    <value>Creați și editați documentele dumneavoastră sau cele partajate cu drepturi de acces corespunzătoare|Acordați altor utilizatori permisiuni de citire/editare a documentelor și dosarelor|Conectați Dropbox, Box și alte conturi în secțiunea "Documentele mele"</value>
-  </data>
   <data name="pattern_remove_user_data_completed_custom_mode" xml:space="preserve">
     <value>Stimată/Stimate $UserName!
  
@@ -153,9 +147,6 @@ După eliminarea datelor personale s-a eliberat:
 # Mail - $MailSpace
 # Talk - $TalkSpace</value>
   </data>
-  <data name="ProductAdminOpportunitiesCustomMode" xml:space="preserve">
-    <value>Faceţi aceleaşi lucruri în calitate de utilizator|Conectați Dropbox, Box și alte conturi în secțiunea Comun |Configurați drepturi de acces la documente și dosare în secțiunea Comun</value>
-  </data>
   <data name="pattern_saas_custom_mode_reg_data" xml:space="preserve">
     <value>h3.A fost înregistrat un portal nou
 
@@ -165,6 +156,15 @@ După eliminarea datelor personale s-a eliberat:
 # E-mail: $UserEmail
 # Telefon: $Phone
 # Data creării: $Date</value>
+  </data>
+  <data name="ProductAdminOpportunitiesCustomMode" xml:space="preserve">
+    <value>Faceţi aceleaşi lucruri în calitate de utilizator|Conectați Dropbox, Box și alte conturi în secțiunea Comun |Configurați drepturi de acces la documente și dosare în secțiunea Comun</value>
+  </data>
+  <data name="ProductUserOpportunitiesCustomMode" xml:space="preserve">
+    <value>Creați și editați documentele dumneavoastră sau cele partajate cu drepturi de acces corespunzătoare|Acordați altor utilizatori permisiuni de citire/editare a documentelor și dosarelor|Conectați Dropbox, Box și alte conturi în secțiunea "Documentele mele"</value>
+  </data>
+  <data name="subject_remove_user_data_completed_custom_mode" xml:space="preserve">
+    <value>&gt;${LetterLogoText}. Eliminarea datelor de utilizator finalizată</value>
   </data>
   <data name="subject_saas_custom_mode_reg_data" xml:space="preserve">
     <value>A fost înregistrat un portal nou</value>

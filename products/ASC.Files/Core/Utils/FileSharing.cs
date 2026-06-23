@@ -1,28 +1,35 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Web.Files.Utils;
 
@@ -67,7 +74,24 @@ public class FileSharingAceHelper(
             throw new ArgumentNullException(FilesCommonResource.ErrorMessage_BadRequest);
         }
 
+        var cachedFolderDao = daoFactory.GetCacheFolderDao<T>();
+        var folder = entry as Folder<T>;
+        var file = entry as File<T>;
+        var room = folder is { IsRoom: true } ? folder : null;
+
         if (!aceWrappers.TrueForAll(r => r.Id == authContext.CurrentAccount.ID && r.Access == FileShare.None) &&
+            !await aceWrappers.ToAsyncEnumerable().AnyAsync(async (r,_) =>
+            {
+                var roomType = room?.FolderType;
+
+                if (roomType == null)
+                {
+                    var entryRoom = await cachedFolderDao.GetParentFoldersAsync(folder != null ? folder.Id : entry.ParentId).FirstOrDefaultAsync(f => f.IsRoom, cancellationToken: _);
+                    roomType = entryRoom?.FolderType;
+                }
+
+                return roomType == FolderType.PublicRoom && r.SubjectType == SubjectType.PrimaryExternalLink && r.Access == FileShare.Read;
+            }) &&
             !beforeOwnerChange &&
             !await fileSharingHelper.CanSetAccessAsync(entry))
         {
@@ -75,9 +99,7 @@ public class FileSharingAceHelper(
         }
 
         var handledAces = new List<ProcessedItem<T>>(aceWrappers.Count);
-        var folder = entry as Folder<T>;
-        var file = entry as File<T>;
-        var room = folder != null && DocSpaceHelper.IsRoom(folder.FolderType) ? folder : null;
+
 
         var roomUrl = room != null
             ? room.FolderType == FolderType.AiRoom
@@ -93,20 +115,20 @@ public class FileSharingAceHelper(
 
         foreach (var w in aceWrappers.OrderByDescending(ace => ace.SubjectGroup))
         {
-            if ((w.IsLink && entry.CreateBy == w.Id) && (!beforeOwnerChange || w.Access != FileShare.RoomManager && w.Access != FileShare.ContentCreator))
+            if (w.IsLink && entry.CreateBy == w.Id && (!beforeOwnerChange || w.Access != FileShare.RoomManager && w.Access != FileShare.ContentCreator))
             {
                 continue;
             }
 
             var emailInvite = !string.IsNullOrEmpty(w.Email);
             var currentUser = await userManager.GetUsersAsync(w.Id, false);
-            if ((currentUser.Status == EmployeeStatus.Terminated || currentUser.Removed) && w.Access != FileShare.None)
+            var existedShare = shares.Get(w.Id);
+            if ((currentUser.Status == EmployeeStatus.Terminated || currentUser.Removed) && (w.Access != FileShare.None || existedShare == null))
             {
                 continue;
             }
 
             var currentUserType = await userManager.GetUserTypeAsync(currentUser);
-            var existedShare = shares.Get(w.Id);
             var eventType = existedShare != null ? w.Access == FileShare.None ? EventType.Remove : EventType.Update : EventType.Create;
 
             if (existedShare != null)
@@ -206,7 +228,7 @@ public class FileSharingAceHelper(
 
                 if (roomType == null)
                 {
-                    var entryRoom = await daoFactory.GetCacheFolderDao<T>().GetParentFoldersAsync(folder != null ? folder.Id : entry.ParentId).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
+                    var entryRoom = await cachedFolderDao.GetParentFoldersAsync(folder != null ? folder.Id : entry.ParentId).FirstOrDefaultAsync(f => f.IsRoom);
                     roomType = entryRoom?.FolderType;
                 }
 
@@ -237,16 +259,16 @@ public class FileSharingAceHelper(
                 {
                     throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
                 }
-                
-                if (room.RootId is int root && 
-                    root != await globalFolderHelper.FolderRoomTemplatesAsync && 
-                    (!FileSecurity.AvailableUserAccesses.TryGetValue(currentUserType, out var userAccesses) || 
+
+                if (room.RootId is int root &&
+                    root != await globalFolderHelper.FolderRoomTemplatesAsync &&
+                    (!FileSecurity.AvailableUserAccesses.TryGetValue(currentUserType, out var userAccesses) ||
                      !userAccesses.Contains(w.Access)))
                 {
                     throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
                 }
 
-                if (emailInvite)
+                if (emailInvite && w.Access != FileShare.None)
                 {
                     var user = await userManager.GetUserByEmailAsync(w.Email);
                     if (!user.Equals(Constants.LostUser))
@@ -288,8 +310,8 @@ public class FileSharingAceHelper(
                     {
                         var user = await userManager.GetUserByEmailAsync(w.Email);
                         if (await userManager.IsGuestAsync(user)
-                            && !(await userManager.IsUserInGroupAsync(user.Id, currentUser.Id))
-                            && !(await userManager.IsDocSpaceAdminAsync(user)))
+                            && !await userManager.IsUserInGroupAsync(user.Id, currentUser.Id)
+                            && !await userManager.IsDocSpaceAdminAsync(user))
                         {
                             await usersocketManager.AddGuestAsync(user, false);
                         }
@@ -387,17 +409,17 @@ public class FileSharingAceHelper(
             changed = true;
             handledAces.Add(new ProcessedItem<T>(eventType, existedShare, w, file != null ? file : folder));
 
-            if (emailInvite)
+            if (emailInvite && share != FileShare.None)
             {
                 var link = invitationService.GetInvitationLink(w.Email, share, authContext.CurrentAccount.ID, entry.Id.ToString(), culture);
                 var shortenLink = await urlShortener.GetShortenLinkAsync(link);
 
                 await studioNotifyService.SendEmailRoomInviteAsync(
-                    w.Email, 
-                    entry.Title, 
-                    shortenLink, 
-                    entry is IFolder { FolderType: FolderType.AiRoom }, 
-                    culture, 
+                    w.Email,
+                    entry.Title,
+                    shortenLink,
+                    entry is IFolder { FolderType: FolderType.AiRoom },
+                    culture,
                     true);
             }
             else
@@ -423,7 +445,11 @@ public class FileSharingAceHelper(
                 listUsersId.Add(w.Id);
             }
 
-            listUsersId.Remove(authContext.CurrentAccount.ID);
+            //if not leaving the room
+            if (!(entryType == FileEntryType.Folder && share == FileShare.None && w.SubjectType is SubjectType.User && folder is { IsRoom: true }))
+            {
+                listUsersId.Remove(authContext.CurrentAccount.ID);
+            }
 
             if (entryType == FileEntryType.File)
             {
@@ -473,7 +499,7 @@ public class FileSharingAceHelper(
                     {
                         await socketManager.AddToSharedAsync(entry, users: tags);
                     }
-                    
+
                     var usersShares = await fileSecurity.GetPureSharesAsync(entry, ShareFilterType.User, null, null).Select(r => r.Subject).ToListAsync();
                     usersWithoutRight = usersWithoutRight.Except(usersShares).ToList();
                 }
@@ -533,13 +559,13 @@ public class FileSharingAceHelper(
         var currentId = authContext.CurrentAccount.ID;
         var entryType = entry.FileEntryType;
         var tagDao = daoFactory.GetTagDao<T>();
-        
+
         var tagRecent = await tagDao.GetTagsAsync(entry.Id, entry.FileEntryType, TagType.RecentByLink).ToListAsync();
         List<Tag> tags = [Tag.Favorite(currentId, entry), Tag.Recent(currentId, entry), ..tagRecent];
 
         var currentShare = await fileSecurity.GetSharesAsync(entry, [currentId]);
         var currentShareIsNullOrEmpty = currentShare == null || !currentShare.Any();
-        
+
         if (!currentShareIsNullOrEmpty || entry is Folder<T>)
         {
             var defaultShare = entry.RootFolderType == FolderType.USER
@@ -548,7 +574,7 @@ public class FileSharingAceHelper(
 
             if (entry is Folder<T> folder)
             {
-                if (DocSpaceHelper.IsRoom(folder.FolderType) || currentShareIsNullOrEmpty && tagRecent.Count != 0)
+                if (folder.IsRoom || currentShareIsNullOrEmpty && tagRecent.Count != 0)
                 {
                     defaultShare = FileShare.None;
                 }
@@ -564,7 +590,7 @@ public class FileSharingAceHelper(
         }
 
         await fileMarker.RemoveMarkAsNewAsync(entry);
-        await tagDao.RemoveTagsAsync(tags);
+        await tagDao.RemoveTagsAsync(entry, tags.Select(t => t.Id).ToList());
         await socketManager.RemoveFromFavoritesAsync(entry, [currentId]);
         await socketManager.RemoveFromRecentAsync(entry, [currentId]);
 
@@ -588,8 +614,8 @@ public class FileSharingHelper(
         if (entry == null)
         {
             return false;
-        }        
-        
+        }
+
         if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
         {
             return false;
@@ -600,8 +626,8 @@ public class FileSharingHelper(
             return true;
         }
 
-        if ((entry.RootFolderType is FolderType.Archive)
-            && (entry is not IFolder folder || !DocSpaceHelper.IsRoom(folder.FolderType)))
+        if (entry.RootFolderType is FolderType.Archive
+            && entry is not IFolder { IsRoom: true })
         {
             return false;
         }
@@ -610,7 +636,7 @@ public class FileSharingHelper(
         {
             return true;
         }
-        
+
 
         return entry.RootFolderType == FolderType.Privacy
                && entry is File<T>
@@ -690,7 +716,7 @@ public class FileSharing(
             fileSecurity.CanEditExpirationAsync(entry)
         ).ContinueWith(t => (t.Result[0], t.Result[1], t.Result[2]));
 
-        var canAccess = entry is Folder<T> folder && DocSpaceHelper.IsRoom(folder.FolderType)
+        var canAccess = entry is Folder<T> { IsRoom: true } || entry.ParentRoomType is FolderType.PublicRoom
             ? await CheckAccessAsync(entry, filterType)
             : canEditAccess;
 
@@ -941,7 +967,7 @@ public class FileSharing(
         var meAce = result.Find(ace => ace.Id == authContext.CurrentAccount.ID);
         result.Remove(meAce);
 
-        result.Sort((x, y) => String.CompareOrdinal(x.SubjectName, y.SubjectName));
+        result.Sort((x, y) => string.CompareOrdinal(x.SubjectName, y.SubjectName));
 
         if (ownerAce != null)
         {
@@ -1154,7 +1180,7 @@ public class FileSharing(
         w.CanEditAccess = false;
         w.FileShareOptions.Password = await externalShare.GetPasswordAsync(w.FileShareOptions.Password);
         w.SubjectType = record.SubjectType;
-        var room = await daoFactory.GetCacheFolderDao<T>().GetParentFoldersAsync(entry is Folder<T> folder ? folder.Id : entry.ParentId).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
+        var room = await daoFactory.GetCacheFolderDao<T>().GetParentFoldersAsync(entry is Folder<T> folder ? folder.Id : entry.ParentId).FirstOrDefaultAsync(f => f.IsRoom);
         if (room is { FolderType: FolderType.VirtualDataRoom })
         {
             w.CanEditDenyDownload = !room.SettingsDenyDownload;

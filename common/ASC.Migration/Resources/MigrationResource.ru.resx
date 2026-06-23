@@ -117,61 +117,16 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="GroupMigration" xml:space="preserve">
-    <value>Миграция группы {0} ({1}/{2})</value>
-  </data>
-  <data name="MigrationCompleted" xml:space="preserve">
-    <value>Миграция завершена</value>
-  </data>
-  <data name="PreparingForMigration" xml:space="preserve">
-    <value>Подготовка к миграции</value>
-  </data>
-  <data name="Unzipping" xml:space="preserve">
-    <value>Разархивирование...</value>
-  </data>
-  <data name="UserMigration" xml:space="preserve">
-    <value>Миграция пользователя {0} ({1}/{2})</value>
-  </data>
-  <data name="UnzippingFinished" xml:space="preserve">
-    <value>Разархивирование завершено...</value>
-  </data>
-  <data name="StartOfDataProcessing" xml:space="preserve">
-    <value>Запуск обработки данных...</value>
-  </data>
-  <data name="MigratingUserFiles" xml:space="preserve">
-    <value>Миграция файлов пользователя {0} ({1}/{2})</value>
-  </data>
-  <data name="DataProcessing" xml:space="preserve">
-    <value>Обработка данных...</value>
-  </data>
-  <data name="DataProcessingCompleted" xml:space="preserve">
-    <value>Обработка данных завершена</value>
-  </data>
-  <data name="DumpParse" xml:space="preserve">
-    <value>Парсинг базы данных</value>
-  </data>
-  <data name="MigrationCommonFiles" xml:space="preserve">
-    <value>Миграция общих документов</value>
-  </data>
-  <data name="MigrationNotFoundException" xml:space="preserve">
-    <value>Нет такого провайдера миграции</value>
-  </data>
-  <data name="MigrationProgressException" xml:space="preserve">
-    <value>Миграция не выполняется</value>
-  </data>
-  <data name="MigrationProjectFiles" xml:space="preserve">
-    <value>Миграция документов из проектов</value>
-  </data>
   <data name="CanNotAddUserInGroup" xml:space="preserve">
     <value>Не удалось добавить пользователя {0} в группу {1}</value>
   </data>
   <data name="CanNotCreateFile" xml:space="preserve">
     <value>Не удалось создать файл {0}</value>
   </data>
-  <data name="СanNotImportCommonFiles" xml:space="preserve">
+  <data name="CanNotImportCommonFiles" xml:space="preserve">
     <value>Не удалось импортировать общие файлы</value>
   </data>
-  <data name="СanNotImportProjectFiles" xml:space="preserve">
+  <data name="CanNotImportProjectFiles" xml:space="preserve">
     <value>Не удалось импортировать файлы проекта</value>
   </data>
   <data name="CanNotImportUser" xml:space="preserve">
@@ -192,6 +147,9 @@
   <data name="CanNotReadInfoFile" xml:space="preserve">
     <value>Не удалось прочитать информационный файл из {0}</value>
   </data>
+  <data name="CanNotShare" xml:space="preserve">
+    <value>Не удалось предоставить права доступа к {0} для {1}</value>
+  </data>
   <data name="CanNotToUnzip" xml:space="preserve">
     <value>Не удалось разархивировать {0}</value>
   </data>
@@ -201,16 +159,58 @@
   <data name="CreateFolder" xml:space="preserve">
     <value>Создать папку {0}</value>
   </data>
-  <data name="СreateRootFolder" xml:space="preserve">
+  <data name="CreateRootFolder" xml:space="preserve">
     <value>Создать корневую папку</value>
   </data>
   <data name="CreateShareRoom" xml:space="preserve">
     <value>создать общую комнату {0}</value>
   </data>
-  <data name="CanNotShare" xml:space="preserve">
-    <value>Не удалось предоставить права доступа к {0} для {1}</value>
+  <data name="DataProcessing" xml:space="preserve">
+    <value>Обработка данных...</value>
+  </data>
+  <data name="DataProcessingCompleted" xml:space="preserve">
+    <value>Обработка данных завершена</value>
+  </data>
+  <data name="DumpParse" xml:space="preserve">
+    <value>Парсинг базы данных</value>
+  </data>
+  <data name="GroupMigration" xml:space="preserve">
+    <value>Миграция группы {0} ({1}/{2})</value>
   </data>
   <data name="LargeBackup" xml:space="preserve">
     <value>Размер резервной копии превышает общий размер портала</value>
+  </data>
+  <data name="MigratingUserFiles" xml:space="preserve">
+    <value>Миграция файлов пользователя {0} ({1}/{2})</value>
+  </data>
+  <data name="MigrationCommonFiles" xml:space="preserve">
+    <value>Миграция общих документов</value>
+  </data>
+  <data name="MigrationCompleted" xml:space="preserve">
+    <value>Миграция завершена</value>
+  </data>
+  <data name="MigrationNotFoundException" xml:space="preserve">
+    <value>Нет такого провайдера миграции</value>
+  </data>
+  <data name="MigrationProgressException" xml:space="preserve">
+    <value>Миграция не выполняется</value>
+  </data>
+  <data name="MigrationProjectFiles" xml:space="preserve">
+    <value>Миграция документов из проектов</value>
+  </data>
+  <data name="PreparingForMigration" xml:space="preserve">
+    <value>Подготовка к миграции</value>
+  </data>
+  <data name="StartOfDataProcessing" xml:space="preserve">
+    <value>Запуск обработки данных...</value>
+  </data>
+  <data name="Unzipping" xml:space="preserve">
+    <value>Разархивирование...</value>
+  </data>
+  <data name="UnzippingFinished" xml:space="preserve">
+    <value>Разархивирование завершено...</value>
+  </data>
+  <data name="UserMigration" xml:space="preserve">
+    <value>Миграция пользователя {0} ({1}/{2})</value>
   </data>
 </root>

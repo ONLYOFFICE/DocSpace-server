@@ -1,28 +1,35 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
@@ -34,45 +41,49 @@ public class FolderContentDto<T>
     /// <summary>
     /// The list of files in the folder.
     /// </summary>
+    /// <example>[{"id": 10, "title": "document.docx"}]</example>
     public List<FileEntryBaseDto> Files { get; set; }
 
     /// <summary>
-    /// The list of folders in the folder. 
+    /// The list of folders in the folder.
     /// </summary>
+    /// <example>[{"id": 20, "title": "My Folder"}]</example>
     public List<FileEntryBaseDto> Folders { get; set; }
 
     /// <summary>
     /// The current folder information.
     /// </summary>
+    /// <example>{"id": 10, "title": "My Documents"}</example>
     public FolderDto<T> Current { get; set; }
 
     /// <summary>
     /// The folder path.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "{key = \"Key\", path = \"//path//to//folder\"}")]
+    /// <example>{key = "Key", path = "//path//to//folder"}</example>
     public required object PathParts { get; set; }
 
     /// <summary>
     /// The folder start index.
     /// </summary>
-    [SwaggerSchemaCustom(Example = 0)]
+    /// <example>0</example>
     public int StartIndex { get; set; }
 
     /// <summary>
     /// The number of folder elements.
     /// </summary>
-    [SwaggerSchemaCustom(Example = 4)]
+    /// <example>4</example>
     public int Count { get; set; }
 
     /// <summary>
     /// The total number of elements in the folder.
     /// </summary>
-    [SwaggerSchemaCustom(Example = 4)]
+    /// <example>4</example>
     public required int Total { get; set; }
 
     /// <summary>
     /// The new element index in the folder.
     /// </summary>
+    /// <example>0</example>
     public int New { get; set; }
 }
 
@@ -86,7 +97,8 @@ public class FolderContentDtoHelper(
     FileSecurityCommon fileSecurityCommon,
     AuthContext authContext,
     BreadCrumbsManager breadCrumbsManager,
-    AiAccessibility accessibility)
+    AiAccessibility accessibility,
+    AiModelSettingsLoader modelSettingsLoader)
 {
     public async Task<FolderContentDto<T>> GetAsync<T>(T folderId, Guid? userIdOrGroupId, Guid? sharedBy, FilterType? filterType, T roomId, bool? searchInContent, bool? withSubFolders, bool? excludeSubject, ApplyFilterOption? applyFilterOption, SearchArea? searchArea, string sortByFilter, SortOrder sortOrder, int startIndex, int limit, string text, string[] extension = null, FormsItemDto formsItemDto = null, Location? location = null)
     {
@@ -101,25 +113,31 @@ public class FolderContentDtoHelper(
     {
         var result = new FolderContentDto<T>
         {
-            PathParts = folderItems.FolderPathParts, 
-            StartIndex = startIndex, 
-            Total = folderItems.Total, 
+            PathParts = folderItems.FolderPathParts,
+            StartIndex = startIndex,
+            Total = folderItems.Total,
             Count = folderItems.Entries.Count
         };
-        
+
         var expiration = TimeSpan.MaxValue;
         if (folderItems.ParentRoom is { SettingsLifetime: not null })
         {
             expiration = DateTime.UtcNow - folderItems.ParentRoom.SettingsLifetime.GetExpirationUtc();
         }
-        
+
         List<FileShareRecord<string>> currentUsersRecords = null;
-        if (folderItems.FolderInfo is { FolderType: FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates })
+        if (folderItems.FolderInfo is { FolderType: FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates or FolderType.DefaultTemplates })
         {
             currentUsersRecords = await fileSecurity.GetUserRecordsAsync().ToListAsync();
         }
-        
-        var aiReady = await accessibility.IsAiEnabledAsync();
+
+        var aiStatusTask = accessibility.GetStatusAsync();
+        var modelSettingsResultTask = modelSettingsLoader.LoadForEntriesAsync(folderItems.Entries, folderItems.FolderInfo);
+
+        await Task.WhenAll(aiStatusTask, modelSettingsResultTask);
+
+        var aiStatus = await aiStatusTask;
+        var modelSettingsResult = await modelSettingsResultTask;
 
         if (folderItems.ParentRoom is { FolderType: FolderType.VirtualDataRoom, SettingsIndexing: true })
         {
@@ -155,8 +173,8 @@ public class FolderContentDtoHelper(
             result.Files = filesTask.Result;
             result.Folders = foldersTask.Result;
         }
-        
-        
+
+
         var currentTask = GetFolderDto(folderItems.FolderInfo, contextFolder: folderItems.FolderInfo);
         var isEnableBadges = badgesSettingsHelper.GetEnabledForCurrentUserAsync();
 
@@ -165,8 +183,8 @@ public class FolderContentDtoHelper(
         result.PathParts = folderItems.FolderPathParts;
         result.StartIndex = startIndex;
         result.Total = folderItems.Total;
-        result.New = (isEnableBadges.Result) ? folderItems.New : 0;
-        result.Current = (FolderDto<T>)(currentTask.Result);
+        result.New = isEnableBadges.Result ? folderItems.New : 0;
+        result.Current = (FolderDto<T>)currentTask.Result;
 
         if (folderItems.ParentRoom is { FolderType: FolderType.AiRoom })
         {
@@ -202,8 +220,8 @@ public class FolderContentDtoHelper(
         {
             return fileEntry switch
             {
-                File<int> fol1 => await fileWrapperHelper.GetAsync(fol1, entriesOrder, expiration, contextFolder, aiReady),
-                File<string> fol2 => await fileWrapperHelper.GetAsync(fol2, entriesOrder, expiration, contextFolder),
+                File<int> fol1 => await fileWrapperHelper.GetAsync(fol1, entriesOrder, expiration, contextFolder, aiStatus),
+                File<string> fol2 => await fileWrapperHelper.GetAsync(fol2, entriesOrder, expiration, contextFolder, aiStatus),
                 _ => null
             };
         }
@@ -215,46 +233,46 @@ public class FolderContentDtoHelper(
                 yield return await GetFolderDto(r, entriesOrder, contextFolder);
             }
         }
-        
+
         async Task<FileEntryBaseDto> GetFolderDto(FileEntry folderEntry, string entriesOrder = null, IFolder contextFolder = null)
         {
             switch (folderEntry)
             {
                 case Folder<int> fol1:
                     if (currentUsersRecords == null &&
-                        DocSpaceHelper.IsRoom(fol1.FolderType) &&
+                        fol1.IsRoom &&
                         await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID))
                     {
                         currentUsersRecords = await fileSecurity.GetUserRecordsAsync().ToListAsync();
                     }
-                    return await folderWrapperHelper.GetAsync(fol1, currentUsersRecords, entriesOrder, contextFolder, aiReady);
+                    return await folderWrapperHelper.GetAsync(fol1, currentUsersRecords, entriesOrder, contextFolder, aiStatus, modelSettingsResult);
                 case Folder<string> fol2:
                     if (currentUsersRecords == null &&
-                        DocSpaceHelper.IsRoom(fol2.FolderType) &&
+                        fol2.IsRoom &&
                         await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID))
                     {
                         currentUsersRecords = await fileSecurity.GetUserRecordsAsync().ToListAsync();
                     }
-                    return await folderWrapperHelper.GetAsync(fol2, currentUsersRecords, entriesOrder, contextFolder);
+                    return await folderWrapperHelper.GetAsync(fol2, currentUsersRecords, entriesOrder, contextFolder, aiStatus, modelSettingsResult);
             }
 
             return null;
         }
     }
-    
+
     private async Task<FolderContentDto<T>> ToFolderContentWrapperAsync<T>(
-        T folderId, 
-        Guid userIdOrGroupId, 
-        Guid sharedBy, 
-        IEnumerable<FilterType> filterTypes, 
-        T roomId, 
-        bool searchInContent, 
-        bool withSubFolders, 
-        bool excludeSubject, 
-        ApplyFilterOption applyFilterOption, 
+        T folderId,
+        Guid userIdOrGroupId,
+        Guid sharedBy,
+        IEnumerable<FilterType> filterTypes,
+        T roomId,
+        bool searchInContent,
+        bool withSubFolders,
+        bool excludeSubject,
+        ApplyFilterOption applyFilterOption,
         string text,
-        string[] extension, 
-        SearchArea searchArea, 
+        string[] extension,
+        SearchArea searchArea,
         FormsItemDto formsItemDto,
         Location? location,
         string sortByFilter,
@@ -269,25 +287,26 @@ public class FolderContentDtoHelper(
         }
 
         var items = await fileStorageService.GetFolderItemsAsync(
-            folderId, 
-            startIndex, 
-            count, 
-            filterTypes, 
-            filterTypes?.FirstOrDefault() == FilterType.ByUser, 
+            folderId,
+            startIndex,
+            count,
+            filterTypes,
+            filterTypes?.FirstOrDefault() == FilterType.ByUser,
             userIdOrGroupId.ToString(),
             sharedBy,
             text,
-            extension, 
-            searchInContent, 
-            withSubFolders, 
-            orderBy, 
+            extension,
+            searchInContent,
+            withSubFolders,
+            orderBy,
             excludeSubject: excludeSubject,
-            roomId: roomId, 
-            applyFilterOption: applyFilterOption, 
-            searchArea: searchArea, 
+            roomId: roomId,
+            applyFilterOption: applyFilterOption,
+            searchArea: searchArea,
             formsItemDto: formsItemDto,
             location: location);
 
         return await GetAsync(folderId, items, startIndex);
     }
+
 }

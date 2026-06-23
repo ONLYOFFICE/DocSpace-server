@@ -1,28 +1,35 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 using Constants = ASC.Core.Users.Constants;
 
@@ -52,10 +59,10 @@ public class TfaappController(
     UserSocketManager userSocketManager)
     : BaseSettingsController(fusionCache, webItemManager)
 {
-    /// <summary>
+    /// <remarks>
     /// Returns the current two-factor authentication settings.
-    /// </summary>
-    /// <short>Get the TFA settings</short>
+    /// </remarks>
+    /// <summary>Get the TFA settings</summary>
     ///<path>api/2.0/settings/tfaapp</path>
     ///<collection>list</collection>
     [Tags("Settings / TFA settings")]
@@ -79,7 +86,7 @@ public class TfaappController(
                 Enabled = tfaSmsSettings.EnableSetting && smsProviderManager.Enabled(),
                 Id = "sms",
                 Title = Resource.ButtonSmsEnable,
-                Avaliable = SmsEnable,
+                Available = SmsEnable,
                 MandatoryUsers = tfaSmsSettings.MandatoryUsers,
                 MandatoryGroups = tfaSmsSettings.MandatoryGroups,
                 TrustedIps = tfaSmsSettings.TrustedIps
@@ -93,7 +100,7 @@ public class TfaappController(
                 Enabled = tfaAppSettings.EnableSetting,
                 Id = "app",
                 Title = Resource.ButtonTfaAppEnable,
-                Avaliable = true,
+                Available = true,
                 MandatoryUsers = tfaAppSettings.MandatoryUsers,
                 MandatoryGroups = tfaAppSettings.MandatoryGroups,
                 TrustedIps = tfaAppSettings.TrustedIps
@@ -103,23 +110,23 @@ public class TfaappController(
         return result;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Validates the two-factor authentication code specified in the request.
-    /// </summary>
-    /// <short>Validate the TFA code</short>
+    /// </remarks>
+    /// <summary>Validate the TFA code</summary>
     ///<path>api/2.0/settings/tfaapp/validate</path>
     [Tags("Settings / TFA settings")]
     [SwaggerResponse(200, "True if the code is valid", typeof(bool))]
     [HttpPost("tfaapp/validate")]
     [AllowNotPayment]
-    [Authorize(AuthenticationSchemes = "confirm", Roles = "TfaActivation,TfaAuth,Everyone")]
+    [Authorize(AuthenticationSchemes = "confirm", Roles = "TfaActivation,TfaAuth")]
     public async Task<bool> TfaValidateAuthCode(TfaValidateRequestsDto inDto)
     {
         await securityContext.AuthByClaimAsync();
         var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
         securityContext.Logout();
 
-        var (result, _) = await tfaManager.ValidateAuthCodeAsync(user, inDto.Code);
+        var (result, _) = await tfaManager.ValidateAuthCodeAsync(user, inDto.Code, session: inDto.Session);
         await userSocketManager.UpdateUserAsync(userManager.GetUsers(authContext.CurrentAccount.ID));
 
         var request = QueryHelpers.ParseQuery(Request.Headers["confirm"]);
@@ -129,26 +136,26 @@ public class TfaappController(
         return result;
     }
 
-    /// <summary>
-    /// Returns the confirmation email URL for authorization via SMS or TFA application.
-    /// </summary>
-    /// <short>Get confirmation email</short>
+    /// <remarks>
+    /// Returns the confirmation data for authorization via SMS or TFA application.
+    /// </remarks>
+    /// <summary>Get TFA confirmation data</summary>
     ///<path>api/2.0/settings/tfaapp/confirm</path>
     [Tags("Settings / TFA settings")]
-    [SwaggerResponse(200, "Confirmation email URL", typeof(string))]
+    [SwaggerResponse(200, "TFA confirmation data", typeof(TfaConfirmDataDto))]
     [HttpGet("tfaapp/confirm")]
-    public async Task<string> GetTfaConfirmUrl()
+    public async Task<TfaConfirmDataDto> GetTfaConfirmData()
     {
         var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
 
-        if (studioSmsNotificationSettingsHelper.IsVisibleSettings && await studioSmsNotificationSettingsHelper.TfaEnabledForUserAsync(user.Id))// && smsConfirm.ToLower() != "true")
+        if (studioSmsNotificationSettingsHelper.IsVisibleSettings && await studioSmsNotificationSettingsHelper.TfaEnabledForUserAsync(user.Id))
         {
             var confirmType = string.IsNullOrEmpty(user.MobilePhone) ||
                             user.MobilePhoneActivationStatus == MobilePhoneActivationStatus.NotActivated
                                 ? ConfirmType.PhoneActivation
                                 : ConfirmType.PhoneAuth;
 
-            return commonLinkUtility.GetConfirmationEmailUrl(user.Email, confirmType);
+            return new TfaConfirmDataDto { Url = commonLinkUtility.GetConfirmationEmailUrl(user.Email, confirmType) };
         }
 
         if (tfaAppAuthSettingsHelper.IsVisibleSettings && await tfaAppAuthSettingsHelper.TfaEnabledForUserAsync(user.Id))
@@ -158,18 +165,25 @@ public class TfaappController(
                 ? ConfirmType.TfaActivation
                 : ConfirmType.TfaAuth;
 
+            var itemId = $"_{confirmType}";
             var (url, key) = commonLinkUtility.GetConfirmationUrlAndKey(user.Id, confirmType);
-            await cookiesManager.SetCookiesAsync(CookiesType.ConfirmKey, key, true, $"_{confirmType}");
-            return url;
+            await cookiesManager.SetCookiesAsync(CookiesType.ConfirmKey, key, true, itemId);
+
+            return new TfaConfirmDataDto
+            {
+                Url = url,
+                CookieName = cookiesManager.GetConfirmCookiesName(itemId),
+                CookieValue = key
+            };
         }
 
-        return string.Empty;
+        return null;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Updates the two-factor authentication settings with the parameters specified in the request.
-    /// </summary>
-    /// <short>Update the TFA settings</short>
+    /// </remarks>
+    /// <summary>Update the TFA settings</summary>
     ///<path>api/2.0/settings/tfaapp</path>
     [Tags("Settings / TFA settings")]
     [SwaggerResponse(200, "True if the operation is successful", typeof(bool))]
@@ -178,6 +192,13 @@ public class TfaappController(
     public async Task<bool> UpdateTfaSettings(TfaRequestsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        var ownerId = tenantManager.GetCurrentTenant().OwnerId;
+        if ((inDto.Id == ownerId || (inDto.MandatoryUsers != null && inDto.MandatoryUsers.Contains(ownerId)))
+            && inDto.Id != authContext.CurrentAccount.ID)
+        {
+            throw new InvalidOperationException(Resource.ErrorAccessDenied);
+        }
 
         var result = false;
 
@@ -266,35 +287,31 @@ public class TfaappController(
         }
     }
 
-    /// <summary>
-    /// Returns the confirmation email URL for updating TFA settings.
-    /// </summary>
-    /// <short>Get a confirmation email for updating TFA settings</short>
+    /// <remarks>
+    /// Updates TFA settings and returns the confirmation URL for authorization via SMS or TFA application.
+    /// </remarks>
+    /// <summary>Updates TFA settings</summary>
     /// <path>api/2.0/settings/tfaappwithlink</path>
     [Tags("Settings / TFA settings")]
-    [SwaggerResponse(200, "Confirmation email URL", typeof(string))]
+    [SwaggerResponse(200, "TFA confirmation URL", typeof(string))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(405, "SMS settings are not available/TFA application settings are not available")]
     [HttpPut("tfaappwithlink")]
     public async Task<string> UpdateTfaSettingsLink(TfaRequestsDto inDto)
     {
-        if (inDto.Id == tenantManager.GetCurrentTenant().OwnerId && inDto.Id != authContext.CurrentAccount.ID)
-        {
-            throw new InvalidOperationException(Resource.ErrorAccessDenied);
-        }
-
         if (await UpdateTfaSettings(inDto))
         {
-            return await GetTfaConfirmUrl();
+            var data = await GetTfaConfirmData();
+            return data.Url;
         }
 
         return string.Empty;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Generates the setup TFA code for the current user.
-    /// </summary>
-    /// <short>Generate setup code</short>
+    /// </remarks>
+    /// <summary>Generate setup code</summary>
     /// <path>api/2.0/settings/tfaapp/setup</path>
     [Tags("Settings / TFA settings")]
     [SwaggerResponse(200, "Setup code", typeof(SetupCode))]
@@ -322,17 +339,17 @@ public class TfaappController(
         return await tfaManager.GenerateSetupCodeAsync(currentUser);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the two-factor authentication application codes.
-    /// </summary>
-    /// <short>Get the TFA codes</short>
+    /// </remarks>
+    /// <summary>Get the TFA codes</summary>
     /// <path>api/2.0/settings/tfaappcodes</path>
     /// <collection>list</collection>
     [Tags("Settings / TFA settings")]
-    [SwaggerResponse(200, "List of TFA application codes", typeof(IEnumerable<object>))]
+    [SwaggerResponse(200, "List of TFA application codes", typeof(IEnumerable<TfaAppCodeDto>))]
     [SwaggerResponse(405, "TFA application settings are not available")]
     [HttpGet("tfaappcodes")]
-    public async Task<IEnumerable<object>> GetTfaAppCodes()
+    public async Task<IEnumerable<TfaAppCodeDto>> GetTfaAppCodes()
     {
         var currentUserId = authContext.CurrentAccount.ID;
 
@@ -348,20 +365,25 @@ public class TfaappController(
             throw new InvalidOperationException("Not available.");
         }
 
-        return (await settingsManager.LoadForCurrentUserAsync<TfaAppUserSettings>()).CodesSetting.Select(r => new { r.IsUsed, Code = r.GetEncryptedCode(instanceCrypto, signature) }).ToList();
+        return (await settingsManager.LoadForCurrentUserAsync<TfaAppUserSettings>())
+            .CodesSetting.Select(r => new TfaAppCodeDto
+            {
+                IsUsed =r.IsUsed,
+                Code = r.GetEncryptedCode(instanceCrypto, signature)
+            }).ToList();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Requests the new backup codes for the two-factor authentication application.
-    /// </summary>
-    /// <short>Update the TFA codes</short>
+    /// </remarks>
+    /// <summary>Update the TFA codes</summary>
     /// <path>api/2.0/settings/tfaappnewcodes</path>
     /// <collection>list</collection>
     [Tags("Settings / TFA settings")]
-    [SwaggerResponse(200, "New backup codes", typeof(IEnumerable<object>))]
+    [SwaggerResponse(200, "New backup codes", typeof(IEnumerable<TfaAppCodeDto>))]
     [SwaggerResponse(405, "TFA application settings are not available")]
     [HttpPut("tfaappnewcodes")]
-    public async Task<IEnumerable<object>> UpdateTfaAppCodes()
+    public async Task<IEnumerable<TfaAppCodeDto>> UpdateTfaAppCodes()
     {
         var currentUserId = authContext.CurrentAccount.ID;
         var currentUser = await userManager.GetUsersAsync(currentUserId);
@@ -376,15 +398,21 @@ public class TfaappController(
             throw new InvalidOperationException("Not available.");
         }
 
-        var codes = (await tfaManager.GenerateBackupCodesAsync()).Select(r => new { r.IsUsed, Code = r.GetEncryptedCode(instanceCrypto, signature) }).ToList();
+        var codes = (await tfaManager.GenerateBackupCodesAsync())
+            .Select(r => new TfaAppCodeDto
+            {
+                IsUsed =r.IsUsed,
+                Code = r.GetEncryptedCode(instanceCrypto, signature)
+            }).ToList();
+
         messageService.Send(MessageAction.UserConnectedTfaApp, MessageTarget.Create(currentUserId), currentUser.DisplayUserName(false, displayUserSettingsHelper));
         return codes;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Unlinks the current two-factor authentication application from the user account specified in the request.
-    /// </summary>
-    /// <short>Unlink the TFA application</short>
+    /// </remarks>
+    /// <summary>Unlink the TFA application</summary>
     /// <path>api/2.0/settings/tfaappnewapp</path>
     [Tags("Settings / TFA settings")]
     [SwaggerResponse(200, "Login URL", typeof(string))]

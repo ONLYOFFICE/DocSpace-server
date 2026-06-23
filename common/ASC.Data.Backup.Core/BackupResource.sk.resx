@@ -117,26 +117,20 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ButtonSetPassword" xml:space="preserve">
-    <value>Nastaviť heslo</value>
-  </data>
-  <data name="BackupNotFound" xml:space="preserve">
-    <value>Záložný súbor je neplatný. Použite súbor vytvorený na rovnakom portáli.</value>
-  </data>
-  <data name="LargeBackup" xml:space="preserve">
-    <value>Záloha je väčšia ako celková veľkosť portálu</value>
+  <data name="AutoBackup" xml:space="preserve">
+    <value>Automatická záloha</value>
   </data>
   <data name="BackupException" xml:space="preserve">
     <value>Pri zálohovaní sa niečo pokazilo. Skúste to prosím zopakovať alebo sa obráťte na zákaznícku podporu.</value>
   </data>
-  <data name="RestoreException" xml:space="preserve">
-    <value>Pri obnovovaní zálohy sa niečo pokazilo. Skúste ju obnoviť znova alebo sa obráťte na zákaznícku podporu.</value>
-  </data>
   <data name="BackupInvalid" xml:space="preserve">
     <value>Záložný súbor je neplatný.</value>
   </data>
-  <data name="AutoBackup" xml:space="preserve">
-    <value>Automatická záloha</value>
+  <data name="BackupMissingFilesWarning" xml:space="preserve">
+    <value>Niektoré súbory neboli zálohované. Viac informácií nájdete tu: {0}</value>
+  </data>
+  <data name="BackupNotFound" xml:space="preserve">
+    <value>Záložný súbor je neplatný. Použite súbor vytvorený na rovnakom portáli.</value>
   </data>
   <data name="BackupStorageTypeCustomCloud" xml:space="preserve">
     <value>Custom cloud</value>
@@ -156,7 +150,13 @@
   <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
     <value>Zdroj tretej strany</value>
   </data>
-  <data name="BackupMissingFilesWarning" xml:space="preserve">
-    <value>Niektoré súbory neboli zálohované. Viac informácií nájdete tu: {0}</value>
+  <data name="ButtonSetPassword" xml:space="preserve">
+    <value>Nastaviť heslo</value>
+  </data>
+  <data name="LargeBackup" xml:space="preserve">
+    <value>Záloha je väčšia ako celková veľkosť portálu</value>
+  </data>
+  <data name="RestoreException" xml:space="preserve">
+    <value>Pri obnovovaní zálohy sa niečo pokazilo. Skúste ju obnoviť znova alebo sa obráťte na zákaznícku podporu.</value>
   </data>
 </root>

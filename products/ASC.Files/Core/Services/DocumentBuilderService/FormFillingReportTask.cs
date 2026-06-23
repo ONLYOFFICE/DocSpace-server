@@ -1,28 +1,35 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Files.Core.Services.DocumentBuilderService;
 
@@ -45,7 +52,7 @@ public class FormFillingReportTask : DocumentBuilderTask<int, FormFillingReportT
         var script = await DocumentBuilderScriptHelper.ReadTemplateFromEmbeddedResource(ScriptName) ?? throw new Exception("Template not found");
         var tempFileName = DocumentBuilderScriptHelper.GetTempFileName(".xlsx");
 
-        var data = await GetFormFillingReportData(serviceProvider, _userId, _data.RoomId, _data.OriginalFormId);
+        var data = await GetFormFillingReportData(serviceProvider, _userId, _data.RoomId, _data.OriginalFormId, _data.OriginalFormVersion);
 
         script = script
             .Replace("${tempFileName}", tempFileName)
@@ -66,15 +73,31 @@ public class FormFillingReportTask : DocumentBuilderTask<int, FormFillingReportT
 
         using var request = new HttpRequestMessage();
         request.RequestUri = fileUri;
-
-        using var httpClient = clientFactory.CreateClient();
+        
+#pragma warning disable CA2000
+        var httpClient = clientFactory.CreateClient();
+#pragma warning restore CA2000
+        
         using var response = await httpClient.SendAsync(request);
         await using var stream = await response.Content.ReadAsStreamAsync();
 
-        resultFile.CreateOn = tenantUtil.DateTimeNow();
-        resultFile.ContentLength = stream.Length;
+        if (origProperties.FormFilling.IsVersionChanged)
+        {
+            resultFile.Version++;
+            resultFile.VersionGroup++;
+            resultFile.ContentLength = stream.Length;
 
-        resultFile = await fileDao.ReplaceFileVersionAsync(resultFile, stream);
+            resultFile = await fileDao.SaveFileAsync(resultFile, stream, false);
+            origProperties.FormFilling.IsVersionChanged = false;
+            await fileDao.SaveProperties(_data.OriginalFormId, origProperties);
+        }
+        else
+        {
+            resultFile.CreateOn = tenantUtil.DateTimeNow();
+            resultFile.ContentLength = stream.Length;
+
+            resultFile = await fileDao.ReplaceFileVersionAsync(resultFile, stream);
+        }
 
         if (resultFile.Id != origProperties.FormFilling.ResultsFileID)
         {
@@ -82,10 +105,40 @@ public class FormFillingReportTask : DocumentBuilderTask<int, FormFillingReportT
             await fileDao.SaveProperties(_data.OriginalFormId, origProperties);
         }
 
+        var xlsxProperties = new EntryProperties<int>
+        {
+            FormFilling = new FormFillingProperties<int>
+            {
+                StartFilling = false,
+                OriginalFormId = origProperties.FormFilling.OriginalFormId,
+                OriginalFormVersion = origProperties.FormFilling.OriginalFormVersion,
+                RoomId = origProperties.FormFilling.RoomId,
+                ResultsFolderId = origProperties.FormFilling.ResultsFolderId,
+                ResultsFileID = resultFile.Id
+            }
+        };
+        await fileDao.SaveProperties(resultFile.Id, xlsxProperties);
+
+        var socketManager = serviceProvider.GetService<SocketManager>();
+        if (_data.IsNewFile)
+        {
+            await socketManager.CreateFileAsync(resultFile);
+        }
+        else
+        {
+            await socketManager.UpdateFileAsync(resultFile);
+        }
+
+        var filesMessageService = serviceProvider.GetService<FilesMessageService>();
+        var headers = _data.Headers != null
+            ? _data.Headers.ToDictionary(x => x.Key, x => new StringValues(x.Value))
+            : [];
+        await filesMessageService.SendAsync(_data.IsNewFile ? MessageAction.FileCreated : MessageAction.FileUpdated, resultFile, headers, resultFile.Title);
+
         return resultFile;
     }
 
-    private static async Task<object> GetFormFillingReportData(IServiceProvider serviceProvider, Guid userId, int roomId, int originalFormId)
+    private static async Task<object> GetFormFillingReportData(IServiceProvider serviceProvider, Guid userId, int roomId, int originalFormId, int originalFormVersion)
     {
         var userManager = serviceProvider.GetService<UserManager>();
         var daoFactory = serviceProvider.GetService<IDaoFactory>();
@@ -104,7 +157,7 @@ public class FormFillingReportTask : DocumentBuilderTask<int, FormFillingReportT
         CultureInfo.CurrentCulture = userCulture;
         CultureInfo.CurrentUICulture = userCulture;
 
-        var formFillingResults = await formFillingReportCreator.GetFormFillingResults(roomId, originalFormId);
+        var formFillingResults = await formFillingReportCreator.GetFormFillingResults(roomId, originalFormId, originalFormVersion);
         var tenantCulture = tenantManager.GetCurrentTenant().GetCulture();
 
         var keys = new List<string>();
@@ -124,7 +177,7 @@ public class FormFillingReportTask : DocumentBuilderTask<int, FormFillingReportT
                     var t = new List<object>();
                     foreach (var field in formFillingRes.FormsData)
                     {
-                        if (field.Type == "picture" || field.Type == "signature")
+                        if (field.Type is "picture" or "signature")
                         {
                             continue;
                         }
@@ -161,11 +214,18 @@ public class FormFillingReportTask : DocumentBuilderTask<int, FormFillingReportT
         var customColorThemesSettings = await settingsManager.LoadAsync<CustomColorThemesSettings>();
         var selectedColorTheme = customColorThemesSettings.Themes.First(x => x.Id == customColorThemesSettings.Selected);
 
+        var sheetName = properties?.FormFilling?.Title;
+        if (string.IsNullOrEmpty(sheetName))
+        {
+            var form = await daoFactory.GetFileDao<int>().GetFileAsync(originalFormId);
+            sheetName = Path.GetFileNameWithoutExtension(form?.Title ?? string.Empty);
+        }
+
         var data = new
         {
             resources = new
             {
-                sheetName = properties.FormFilling.Title
+                sheetName
             },
 
             themeColors = new
@@ -186,4 +246,4 @@ public class FormFillingReportTask : DocumentBuilderTask<int, FormFillingReportT
     }
 }
 
-public record FormFillingReportTaskData(int RoomId, int OriginalFormId, IDictionary<string, string> Headers);
+public record FormFillingReportTaskData(int RoomId, int OriginalFormId, int OriginalFormVersion, bool IsNewFile, IDictionary<string, string> Headers);

@@ -1,28 +1,35 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
-// 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
-// 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
-// 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
+//
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
+//
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
+//
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
+//
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
+//
+// No trademark rights are granted under this License.
+//
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+//
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
 
 using ASC.Core.Common.Notify.Model;
 
@@ -64,7 +71,7 @@ public class NotifySenderService(
 
     private static string FormatMethodSignature(MethodInfo method)
     {
-        var parameters = method.GetParameters() ?? [];
+        var parameters = method.GetParameters();
         var paramList = string.Join(", ", parameters.Select(p => $"{p.ParameterType.Name} {p.Name}"));
 
         return $"{method.DeclaringType?.FullName}.{method.Name}({paramList})";
@@ -72,31 +79,34 @@ public class NotifySenderService(
 
     private async Task ThreadManagerWorkAsync(CancellationToken stoppingToken)
     {
-        var tasks = new List<Task>(_notifyServiceCfg.Process.MaxThreads);
-
         try
         {
-            if (tasks.Count < _notifyServiceCfg.Process.MaxThreads)
+            var messages = await dbWorker.GetMessagesAsync(_notifyServiceCfg.Process.BufferSize);
+            if (messages.Count == 0)
             {
-                var messages = await dbWorker.GetMessagesAsync(_notifyServiceCfg.Process.BufferSize);
-                if (messages.Count > 0)
-                {
-                    var t = new Task(async () => await SendMessagesAsync(messages, stoppingToken), stoppingToken, TaskCreationOptions.LongRunning);
-                    tasks.Add(t);
-                    t.Start(TaskScheduler.Default);
-                }
-                else
-                {
-                    await Task.Delay(5000, stoppingToken);
-                }
+                await Task.Delay(5000, stoppingToken);
+                return;
             }
-            else
+
+            var tasks = new List<Task>(_notifyServiceCfg.Process.MaxThreads);
+
+            foreach (var notifyMessage in messages)
             {
-                await Task.WhenAny(tasks.ToArray()).ContinueWith(_ => tasks.RemoveAll(a => a.IsCompleted), stoppingToken);
+                if (stoppingToken.IsCancellationRequested)
+                {
+                    return;
+                }
+
+                if (tasks.Count >= _notifyServiceCfg.Process.MaxThreads)
+                {
+                    await Task.WhenAny(tasks);
+                    tasks.RemoveAll(a => a.IsCompleted);
+                }
+
+                tasks.Add(SendOneAsync(notifyMessage, stoppingToken));
             }
-        }
-        catch (ThreadAbortException)
-        {
+
+            await Task.WhenAll(tasks);
         }
         catch (Exception e)
         {
@@ -104,43 +114,37 @@ public class NotifySenderService(
         }
     }
 
-    private async Task SendMessagesAsync(IDictionary<int, NotifyMessage> messages, CancellationToken stoppingToken)
+    private async Task SendOneAsync(KeyValuePair<int, NotifyMessage> m, CancellationToken stoppingToken)
     {
         try
         {
-            foreach (var m in messages)
+            if (stoppingToken.IsCancellationRequested)
             {
-                if (stoppingToken.IsCancellationRequested)
-                {
-                    return;
-                }
+                return;
+            }
 
-                var result = MailSendingState.Sended;
-                try
+            var result = MailSendingState.Sended;
+            try
+            {
+                var sender = _notifyServiceCfg.Senders.FirstOrDefault(r => r.Name == m.Value.SenderType);
+                if (sender != null)
                 {
-                    var sender = _notifyServiceCfg.Senders.FirstOrDefault(r => r.Name == m.Value.SenderType);
-                    if (sender != null)
-                    {
-                        await sender.NotifySender.SendAsync(m.Value);
-                    }
-                    else
-                    {
-                        result = MailSendingState.FatalError;
-                    }
-
-                    logger.DebugNotify(m.Key);
+                    await sender.NotifySender.SendAsync(m.Value);
                 }
-                catch (Exception e)
+                else
                 {
                     result = MailSendingState.FatalError;
-                    logger.ErrorWithException(e);
                 }
 
-                await dbWorker.SetStateAsync(m.Key, result);
+                logger.DebugNotify(m.Key);
             }
-        }
-        catch (ThreadAbortException)
-        {
+            catch (Exception e)
+            {
+                result = MailSendingState.FatalError;
+                logger.ErrorWithException(e);
+            }
+
+            await dbWorker.SetStateAsync(m.Key, result);
         }
         catch (Exception e)
         {

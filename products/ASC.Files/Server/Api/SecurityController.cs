@@ -1,55 +1,72 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
+
+using HtmlAgilityPack;
 
 namespace ASC.Files.Api;
 
 [ConstraintRoute("int")]
-public class SecurityControllerInternal(FileStorageService fileStorageService,
-        SecurityControllerHelper securityControllerHelper,
-        FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper,
-        ApiContext apiContext,
-        IDaoFactory daoFactory,
-        FileSharing fileSharing,
-        EmployeeFullDtoHelper employeeFullDtoHelper,
-        FileShareDtoHelper fileShareDtoHelper)
-    : SecurityController<int>(fileStorageService, securityControllerHelper, folderDtoHelper, fileDtoHelper, apiContext, daoFactory, fileSharing, employeeFullDtoHelper, fileShareDtoHelper);
+public class SecurityControllerInternal(
+    UserManager userManager,
+    AuthContext authContext,
+    FileStorageService fileStorageService,
+    SecurityControllerHelper securityControllerHelper,
+    FolderDtoHelper folderDtoHelper,
+    FileDtoHelper fileDtoHelper,
+    ApiContext apiContext,
+    IDaoFactory daoFactory,
+    FileSharing fileSharing,
+    EmployeeFullDtoHelper employeeFullDtoHelper,
+    FileShareDtoHelper fileShareDtoHelper)
+    : SecurityController<int>(userManager, authContext, fileStorageService, securityControllerHelper, folderDtoHelper, fileDtoHelper, apiContext, daoFactory, fileSharing, employeeFullDtoHelper, fileShareDtoHelper);
 
-public class SecurityControllerThirdparty(FileStorageService fileStorageService,
-        SecurityControllerHelper securityControllerHelper,
-        FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper,
-        ApiContext apiContext,
-        IDaoFactory daoFactory,
-        FileSharing fileSharing,
-        EmployeeFullDtoHelper employeeFullDtoHelper,
-        FileShareDtoHelper fileShareDtoHelper)
-    : SecurityController<string>(fileStorageService, securityControllerHelper, folderDtoHelper, fileDtoHelper, apiContext, daoFactory, fileSharing, employeeFullDtoHelper, fileShareDtoHelper);
+public class SecurityControllerThirdparty(
+    UserManager userManager,
+    AuthContext authContext,
+    FileStorageService fileStorageService,
+    SecurityControllerHelper securityControllerHelper,
+    FolderDtoHelper folderDtoHelper,
+    FileDtoHelper fileDtoHelper,
+    ApiContext apiContext,
+    IDaoFactory daoFactory,
+    FileSharing fileSharing,
+    EmployeeFullDtoHelper employeeFullDtoHelper,
+    FileShareDtoHelper fileShareDtoHelper)
+    : SecurityController<string>(userManager, authContext, fileStorageService, securityControllerHelper, folderDtoHelper, fileDtoHelper, apiContext, daoFactory, fileSharing, employeeFullDtoHelper, fileShareDtoHelper);
 
 public abstract class SecurityController<T>(
+    UserManager userManager,
+    AuthContext authContext,
     FileStorageService fileStorageService,
     SecurityControllerHelper securityControllerHelper,
     FolderDtoHelper folderDtoHelper,
@@ -61,10 +78,10 @@ public abstract class SecurityController<T>(
     FileShareDtoHelper fileShareDtoHelper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
-    /// <summary>
+    /// <remarks>
     /// Returns the detailed information about the shared file with the ID specified in the request.
-    /// </summary>
-    /// <short>Get the shared file information</short>
+    /// </remarks>
+    /// <summary>Get the shared file information</summary>
     /// <path>api/2.0/files/file/{fileId}/share</path>
     /// <collection>list</collection>
     [Tags("Files / Sharing")]
@@ -72,6 +89,11 @@ public abstract class SecurityController<T>(
     [HttpGet("file/{id}/share")]
     public async IAsyncEnumerable<FileShareDto> GetFileSecurityInfo(FilePrimaryIdRequestDto<T> inDto)
     {
+        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
         var counter = 0;
 
         await foreach (var ace in fileStorageService.GetPureSharesAsync(inDto.Id, FileEntryType.File, ShareFilterType.UserOrGroup, null, inDto.StartIndex, inDto.Count))
@@ -85,10 +107,10 @@ public abstract class SecurityController<T>(
         apiContext.SetTotalCount(await fileStorageService.GetPureSharesCountAsync(inDto.Id, FileEntryType.File, ShareFilterType.UserOrGroup, null));
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the detailed information about the shared folder with the ID specified in the request.
-    /// </summary>
-    /// <short>Get the shared folder information</short>
+    /// </remarks>
+    /// <summary>Get the shared folder information</summary>
     /// <path>api/2.0/files/folder/{folderId}/share</path>
     /// <collection>list</collection>
     [Tags("Files / Sharing")]
@@ -96,6 +118,11 @@ public abstract class SecurityController<T>(
     [HttpGet("folder/{id}/share")]
     public async IAsyncEnumerable<FileShareDto> GetFolderSecurityInfo(FolderPrimaryIdRequestDto<T> inDto)
     {
+        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
         var counter = 0;
 
         await foreach (var ace in fileStorageService.GetPureSharesAsync(inDto.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, null, inDto.StartIndex, inDto.Count))
@@ -109,10 +136,10 @@ public abstract class SecurityController<T>(
         apiContext.SetTotalCount(await fileStorageService.GetPureSharesCountAsync(inDto.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, null));
     }
 
-    /// <summary>
+    /// <remarks>
     /// Sets the sharing settings to a file with the ID specified in the request.
-    /// </summary>
-    /// <short>Share a file</short>
+    /// </remarks>
+    /// <summary>Share a file</summary>
     /// <path>api/2.0/files/file/{fileId}/share</path>
     /// <collection>list</collection>
     [Tags("Files / Sharing")]
@@ -120,13 +147,22 @@ public abstract class SecurityController<T>(
     [HttpPut("file/{fileId}/share")]
     public IAsyncEnumerable<FileShareDto> SetFileSecurityInfo(FileSecurityInfoSimpleRequestDto<T> inDto)
     {
-        return securityControllerHelper.SetSecurityInfoAsync([inDto.FileId], [], inDto.SecurityInfoSimple.Share, inDto.SecurityInfoSimple.Notify, inDto.SecurityInfoSimple.SharingMessage);
+        string text = null;
+
+        if (inDto.SecurityInfoSimple.SharingMessage != null)
+        {
+            var htmlDoc = new HtmlDocument();
+            htmlDoc.LoadHtml(inDto.SecurityInfoSimple.SharingMessage);
+            text = htmlDoc.DocumentNode.InnerText;
+        }
+
+        return securityControllerHelper.SetSecurityInfoAsync([inDto.FileId], [], inDto.SecurityInfoSimple.Share, inDto.SecurityInfoSimple.Notify, text);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Sets the sharing settings to a folder with the ID specified in the request.
-    /// </summary>
-    /// <short>Share a folder</short>
+    /// </remarks>
+    /// <summary>Share a folder</summary>
     /// <path>api/2.0/files/folder/{folderId}/share</path>
     /// <collection>list</collection>
     [Tags("Files / Sharing")]
@@ -134,13 +170,22 @@ public abstract class SecurityController<T>(
     [HttpPut("folder/{folderId}/share")]
     public IAsyncEnumerable<FileShareDto> SetFolderSecurityInfo(FolderSecurityInfoSimpleRequestDto<T> inDto)
     {
-        return securityControllerHelper.SetSecurityInfoAsync([], [inDto.FolderId], inDto.SecurityInfoSimple.Share, inDto.SecurityInfoSimple.Notify, inDto.SecurityInfoSimple.SharingMessage);
+        string text = null;
+
+        if (inDto.SecurityInfoSimple.SharingMessage != null)
+        {
+            var htmlDoc = new HtmlDocument();
+            htmlDoc.LoadHtml(inDto.SecurityInfoSimple.SharingMessage);
+            text = htmlDoc.DocumentNode.InnerText;
+        }
+
+        return securityControllerHelper.SetSecurityInfoAsync([], [inDto.FolderId], inDto.SecurityInfoSimple.Share, inDto.SecurityInfoSimple.Notify, text);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the encryption keys to access a file with the ID specified in the request.
-    /// </summary>
-    /// <short>Get file encryption keys</short>
+    /// </remarks>
+    /// <summary>Get file encryption keys</summary>
     /// <path>api/2.0/files/file/{fileId}/publickeys</path>
     /// <collection>list</collection>
     [ApiExplorerSettings(IgnoreApi = true)]
@@ -153,25 +198,30 @@ public abstract class SecurityController<T>(
         return await fileStorageService.GetEncryptionAccessAsync(inDto.FileId);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Sends a message to the users who are mentioned in the file with the ID specified in the request.
-    /// </summary>
-    /// <short>Send the mention message</short>
+    /// </remarks>
+    /// <summary>Send the mention message</summary>
     /// <path>api/2.0/files/file/{fileId}/sendeditornotify</path>
     /// <collection>list</collection>
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "List of access rights information", typeof(List<AceShortWrapper>))]
+    [SwaggerResponse(400, "The list of email addresses is empty")]
+    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
+    [SwaggerResponse(404, "The required file was not found")]
     [HttpPost("file/{fileId}/sendeditornotify")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async Task<List<AceShortWrapper>> SendEditorNotify(MentionMessageWrapperRequestDto<T> inDto)
     {
+        ArgumentNullException.ThrowIfNull(inDto);
+
         return await fileStorageService.SendEditorNotifyAsync(inDto.FileId, inDto.MentionMessage);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the group members with their folder security information.
-    /// </summary>
-    /// <short>Get folder group members with security information</short>
+    /// </remarks>
+    /// <summary>Get folder group members with security information</summary>
     /// <path>api/2.0/files/folder/{folderId}/group/{groupId}/share</path>
     /// <collection>list</collection>
     [Tags("Files / Sharing")]
@@ -179,6 +229,12 @@ public abstract class SecurityController<T>(
     [HttpGet("folder/{folderId}/group/{groupId:guid}/share")]
     public async IAsyncEnumerable<GroupMemberSecurityRequestDto> GetGroupsMembersWithFolderSecurity(GroupMemberSecurityFolderRequestDto<T> inDto)
     {
+
+        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+
         var offset = inDto.StartIndex;
         var count = inDto.Count;
         var text = inDto.Text;
@@ -202,16 +258,21 @@ public abstract class SecurityController<T>(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the group members with their file security information.
-    /// </summary>
-    /// <short>Get file group members with security information</short>
+    /// </remarks>
+    /// <summary>Get file group members with security information</summary>
     /// <path>api/2.0/files/file/{fileId}/group/{groupId}/share</path>
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "Ok", typeof(IAsyncEnumerable<GroupMemberSecurityRequestDto>))]
     [HttpGet("file/{fileId}/group/{groupId:guid}/share")]
     public async IAsyncEnumerable<GroupMemberSecurityRequestDto> GetGroupsMembersWithFileSecurity(GroupMemberSecurityFileRequestDto<T> inDto)
     {
+        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+
         var offset = inDto.StartIndex;
         var count = inDto.Count;
         var text = inDto.Text;
@@ -244,10 +305,10 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
         ExternalLinkHelper externalLinkHelper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
-    /// <summary>
+    /// <remarks>
     /// Changes the owner of the file with the ID specified in the request.
-    /// </summary>
-    /// <short>Change the file owner</short>
+    /// </remarks>
+    /// <summary>Change the file owner</summary>
     /// <path>api/2.0/files/owner</path>
     /// <collection>list</collection>
     [Tags("Files / Sharing")]
@@ -268,10 +329,10 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the sharing rights for all the files and folders specified in the request.
-    /// </summary>
-    /// <short>Get the sharing rights</short>
+    /// </remarks>
+    /// <summary>Get the sharing rights</summary>
     /// <path>api/2.0/files/share</path>
     /// <collection>list</collection>
     [Tags("Files / Sharing")]
@@ -291,10 +352,10 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Removes the sharing rights from all the files and folders specified in the request.
-    /// </summary>
-    /// <short>Remove the sharing rights</short>
+    /// </remarks>
+    /// <summary>Remove the sharing rights</summary>
     /// <path>api/2.0/files/share</path>
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
@@ -311,10 +372,10 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     }
 
 
-    /// <summary>
+    /// <remarks>
     /// Sets the sharing rights to all the files and folders specified in the request.
-    /// </summary>
-    /// <short>Set the sharing rights</short>
+    /// </remarks>
+    /// <summary>Set the sharing rights</summary>
     /// <path>api/2.0/files/share</path>
     /// <collection>list</collection>
     [Tags("Files / Sharing")]
@@ -322,11 +383,20 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     [HttpPut("share")]
     public async IAsyncEnumerable<FileShareDto> SetSecurityInfo(SecurityInfoRequestDto inDto)
     {
+        string text = null;
+
+        if (inDto.SharingMessage != null)
+        {
+            var htmlDoc = new HtmlDocument();
+            htmlDoc.LoadHtml(inDto.SharingMessage);
+            text = htmlDoc.DocumentNode.InnerText;
+        }
+
         var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(inDto.FolderIds);
         var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(inDto.FileIds);
 
-        var internalIds = securityControllerHelper.SetSecurityInfoAsync(fileIntIds, folderIntIds, inDto.Share, inDto.Notify, inDto.SharingMessage);
-        var thirdpartyIds = securityControllerHelper.SetSecurityInfoAsync(fileStringIds, folderStringIds, inDto.Share, inDto.Notify, inDto.SharingMessage);
+        var internalIds = securityControllerHelper.SetSecurityInfoAsync(fileIntIds, folderIntIds, inDto.Share, inDto.Notify, text);
+        var thirdpartyIds = securityControllerHelper.SetSecurityInfoAsync(fileStringIds, folderStringIds, inDto.Share, inDto.Notify, text);
 
         await foreach (var s in internalIds.Concat(thirdpartyIds))
         {
@@ -334,10 +404,10 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the external data by the key specified in the request.
-    /// </summary>
-    /// <short>Get the external data</short>
+    /// </remarks>
+    /// <summary>Get the external data</summary>
     /// <path>api/2.0/files/share/{key}</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Sharing")]
@@ -351,10 +421,10 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
         return validationInfo.Map();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Applies a password specified in the request to get the external data.
-    /// </summary>
-    /// <short>Apply external data password</short>
+    /// </remarks>
+    /// <summary>Apply external data password</summary>
     /// <path>api/2.0/files/share/{key}/password</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Sharing")]

@@ -1,0 +1,167 @@
+// Copyright (C) Ascensio System SIA, 2009-2026
+// 
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
+// 
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
+// 
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
+// 
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
+// 
+// No trademark rights are granted under this License.
+// 
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
+
+using Microsoft.EntityFrameworkCore.Migrations;
+
+#nullable disable
+
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
+namespace ASC.Migrations.MySql.SaaS.Migrations
+{
+    /// <inheritdoc />
+    public partial class MigrationContext_Upgrade69 : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.AddColumn<string>(
+                name: "service_group",
+                table: "tenants_quota",
+                type: "varchar(128)",
+                maxLength: 128,
+                nullable: true,
+                collation: "utf8_general_ci")
+                .Annotation("MySql:CharSet", "utf8");
+
+            migrationBuilder.UpdateData(
+                table: "tenants_quota",
+                keyColumn: "tenant",
+                keyValue: -12,
+                columns: new[] { "product_id", "service_group", "visible" },
+                values: new object[] { null, null, true });
+
+            migrationBuilder.UpdateData(
+                table: "tenants_quota",
+                keyColumn: "tenant",
+                keyValue: -11,
+                column: "service_group",
+                value: null);
+
+            migrationBuilder.UpdateData(
+                table: "tenants_quota",
+                keyColumn: "tenant",
+                keyValue: -10,
+                column: "service_group",
+                value: null);
+
+            migrationBuilder.UpdateData(
+                table: "tenants_quota",
+                keyColumn: "tenant",
+                keyValue: -9,
+                column: "service_group",
+                value: null);
+
+            migrationBuilder.UpdateData(
+                table: "tenants_quota",
+                keyColumn: "tenant",
+                keyValue: -8,
+                column: "service_group",
+                value: null);
+
+            migrationBuilder.UpdateData(
+                table: "tenants_quota",
+                keyColumn: "tenant",
+                keyValue: -7,
+                column: "service_group",
+                value: null);
+
+            migrationBuilder.UpdateData(
+                table: "tenants_quota",
+                keyColumn: "tenant",
+                keyValue: -6,
+                column: "service_group",
+                value: null);
+
+            migrationBuilder.UpdateData(
+                table: "tenants_quota",
+                keyColumn: "tenant",
+                keyValue: -5,
+                column: "service_group",
+                value: null);
+
+            migrationBuilder.UpdateData(
+                table: "tenants_quota",
+                keyColumn: "tenant",
+                keyValue: -4,
+                column: "service_group",
+                value: null);
+
+            migrationBuilder.UpdateData(
+                table: "tenants_quota",
+                keyColumn: "tenant",
+                keyValue: -3,
+                column: "service_group",
+                value: null);
+
+            migrationBuilder.UpdateData(
+                table: "tenants_quota",
+                keyColumn: "tenant",
+                keyValue: -2,
+                column: "service_group",
+                value: null);
+
+            migrationBuilder.UpdateData(
+                table: "tenants_quota",
+                keyColumn: "tenant",
+                keyValue: -1,
+                column: "service_group",
+                value: null);
+
+            migrationBuilder.InsertData(
+                table: "tenants_quota",
+                columns: new[] { "tenant", "description", "features", "name", "price", "product_id", "service_group", "service_name", "visible", "wallet" },
+                values: new object[] { -13, null, "aitools", "aitools", 1m, null, null, "ai-tools", true, true });
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DeleteData(
+                table: "tenants_quota",
+                keyColumn: "tenant",
+                keyValue: -13);
+
+            migrationBuilder.DropColumn(
+                name: "service_group",
+                table: "tenants_quota");
+
+            migrationBuilder.UpdateData(
+                table: "tenants_quota",
+                keyColumn: "tenant",
+                keyValue: -12,
+                columns: new[] { "product_id", "visible" },
+                values: new object[] { "10006", false });
+        }
+    }
+}

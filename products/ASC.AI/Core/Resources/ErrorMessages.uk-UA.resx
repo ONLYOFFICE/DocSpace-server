@@ -118,7 +118,10 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AiSettingsAccessDenied" xml:space="preserve">
-    <value>У вас немає дозволу на керування параметрами ШІ</value>
+    <value>У вас немає дозволу на керування параметрами AІ</value>
+  </data>
+  <data name="AttachmentProcessFailed" xml:space="preserve">
+    <value>Неможливо обробити файли: {0}. Файли можуть бути пошкоджені або зашифровані</value>
   </data>
   <data name="ChatAccessDenied" xml:space="preserve">
     <value>У вас немає дозволу на використання чату</value>
@@ -170,5 +173,20 @@
   </data>
   <data name="UnavailableServers" xml:space="preserve">
     <value>Сервери MCP недоступні: {0}. Перевірте налаштування з'єднання</value>
+  </data>
+  <data name="MessageNotFound" xml:space="preserve">
+    <value>Повідомлення не знайдено</value>
+  </data>
+  <data name="NoModelsAvailable" xml:space="preserve">
+    <value>Для цього постачальника немає доступних моделей</value>
+  </data>
+  <data name="ProviderNameExists" xml:space="preserve">
+    <value>Назва постачальника вже існує</value>
+  </data>
+  <data name="ModelDisabled" xml:space="preserve">
+    <value>Модель вимкнено налаштуваннями вашого постачальника.</value>
+  </data>
+  <data name="ServerAlreadyAdded" xml:space="preserve">
+    <value>Сервер вже додано до агента</value>
   </data>
 </root>

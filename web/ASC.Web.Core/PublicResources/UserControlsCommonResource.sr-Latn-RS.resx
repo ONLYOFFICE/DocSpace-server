@@ -126,6 +126,9 @@
   <data name="LicenseKeyNotFound" xml:space="preserve">
     <value>Morate uneti ključ licence</value>
   </data>
+  <data name="LicenseTypeNotCorrect" xml:space="preserve">
+    <value>Sukob licenci. Uverite se da ste instalirali ispravno izdanje {0} DocSpace-a (Enterprise ili Developer). Ako imate pitanja, slobodno kontaktirajte svog menadžera prodaje.</value>
+  </data>
   <data name="NewDocument" xml:space="preserve">
     <value>Novi dokument</value>
   </data>
@@ -140,8 +143,5 @@
   </data>
   <data name="UnknownLastName" xml:space="preserve">
     <value>Prezime</value>
-  </data>
-  <data name="LicenseTypeNotCorrect" xml:space="preserve">
-    <value>Sukob licenci. Uverite se da ste instalirali ispravno izdanje {0} DocSpace-a (Enterprise ili Developer). Ako imate pitanja, slobodno kontaktirajte svog menadžera prodaje.</value>
   </data>
 </root>

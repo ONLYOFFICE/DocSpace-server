@@ -1,29 +1,35 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 //
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY; without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 //
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 //
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 //
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 //
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical
-// writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+//
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
 
 package com.asc.authorization.application.security.oauth.jwks;
 
@@ -52,16 +58,18 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.MDC;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.cache.caffeine.CaffeineCacheManager;
+import org.springframework.cache.CacheManager;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -79,7 +87,6 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class KeyPairRepositoryJWKSource
     implements JWKSource<SecurityContext>, OAuth2TokenCustomizer<JwtEncodingContext> {
   private static final ThreadLocal<KeyPair> remoteKeyPairHolder = new ThreadLocal<>();
@@ -87,13 +94,13 @@ public class KeyPairRepositoryJWKSource
   @Value("${spring.application.region}")
   private String region;
 
-  private final CaffeineCacheManager cacheManager;
+  private final CacheManager cacheManager;
 
   private final Environment environment;
   private final RegisteredClientConfigurationProperties registeredClientConfiguration;
 
-  private final RabbitTemplate rpcRabbitTemplate;
-  private final MessageConverter messageConverter;
+  @Nullable private final RabbitTemplate rpcRabbitTemplate;
+  @Nullable private final MessageConverter messageConverter;
 
   private final KeyPairMapper keyPairMapper;
 
@@ -106,6 +113,26 @@ public class KeyPairRepositoryJWKSource
   private static Duration rotationPeriod;
   private static Duration deprecationPeriod;
 
+  @Autowired
+  public KeyPairRepositoryJWKSource(
+      CacheManager cacheManager,
+      Environment environment,
+      RegisteredClientConfigurationProperties registeredClientConfiguration,
+      @Autowired(required = false) @Qualifier("rpcRabbitTemplate") RabbitTemplate rpcRabbitTemplate,
+      @Autowired(required = false) MessageConverter messageConverter,
+      KeyPairMapper keyPairMapper,
+      KeyPairService keyPairService,
+      EncryptionService encryptionService) {
+    this.cacheManager = cacheManager;
+    this.environment = environment;
+    this.registeredClientConfiguration = registeredClientConfiguration;
+    this.rpcRabbitTemplate = rpcRabbitTemplate;
+    this.messageConverter = messageConverter;
+    this.keyPairMapper = keyPairMapper;
+    this.keyPairService = keyPairService;
+    this.encryptionService = encryptionService;
+  }
+
   /**
    * Initializes key rotation and deprecation periods based on the registered client configuration.
    */
@@ -115,6 +142,18 @@ public class KeyPairRepositoryJWKSource
         Duration.ofMinutes(registeredClientConfiguration.getAccessTokenMinutesTTL() * 4L);
     deprecationPeriod =
         Duration.ofMinutes(registeredClientConfiguration.getAccessTokenMinutesTTL());
+  }
+
+  /**
+   * Indicates whether RabbitMQ-based remote key retrieval is available.
+   *
+   * <p>RabbitMQ is optional in the minified profile, so both the {@link RabbitTemplate} and {@link
+   * MessageConverter} may be {@code null}. This helper keeps the null-check logic in one place.
+   *
+   * @return {@code true} if both messaging collaborators are available; otherwise {@code false}.
+   */
+  private boolean isRemoteMessagingAvailable() {
+    return rpcRabbitTemplate != null && messageConverter != null;
   }
 
   /**
@@ -205,6 +244,11 @@ public class KeyPairRepositoryJWKSource
    * @return the key pair from the remote region, or null if not available
    */
   private KeyPair fetchFromRemoteRegion(String region) {
+    if (!isRemoteMessagingAvailable()) {
+      log.warn("RabbitMQ not available, cannot fetch key pair from remote region: {}", region);
+      return null;
+    }
+
     try {
       log.debug("Fetching key pair from remote region: {}", region);
 
@@ -239,6 +283,10 @@ public class KeyPairRepositoryJWKSource
           .publicKey(keyPairRetrievedEvent.getPublicKey())
           .privateKey(encryptionService.decrypt(keyPairRetrievedEvent.getPrivateKey()))
           .pairType(KeyPairType.valueOf(keyPairRetrievedEvent.getPairType()))
+          .createdAt(
+              keyPairRetrievedEvent.getCreatedAt() != null
+                  ? ZonedDateTime.parse(keyPairRetrievedEvent.getCreatedAt())
+                  : null)
           .build();
     } catch (Exception e) {
       log.error("Error fetching key pair from remote region: {}", region, e);
@@ -269,16 +317,18 @@ public class KeyPairRepositoryJWKSource
           region,
           tokenRegion);
 
-      var cache = cacheManager.getCache("key_pair");
-      var cached = cache.get(tokenRegion, KeyPair.class);
+      var cache = cacheManager.getCache("remote_keypairs");
+      var cacheKey = "key_pair_" + tokenRegion;
+      var cached = cache != null ? cache.get(cacheKey, KeyPair.class) : null;
 
       if (cached != null) {
         log.debug("Found a key pair in cache");
         activeKeyPair = cached;
       } else {
         activeKeyPair = fetchFromRemoteRegion(tokenRegion);
-        if (activeKeyPair != null) cache.put(tokenRegion, activeKeyPair);
-        else throw new UnsupportedOperationException("Could not find any suitable keypair");
+        if (activeKeyPair != null && cache != null) cache.put(cacheKey, activeKeyPair);
+        else if (activeKeyPair == null)
+          throw new UnsupportedOperationException("Could not find any suitable keypair");
       }
 
       remoteKeyPairHolder.set(activeKeyPair);

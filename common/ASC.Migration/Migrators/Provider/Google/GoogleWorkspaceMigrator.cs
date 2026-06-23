@@ -1,28 +1,35 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 using ASCShare = ASC.Files.Core.Security.FileShare;
 
@@ -45,20 +52,22 @@ public class GoogleWorkspaceMigrator : Migrator
     private readonly Regex _infoVersionFile = new(@"-info(\([\d]+\))\.json");
     private readonly Regex _versionRegex = new(@"(\([\d]+\))");
 
+    private readonly Dictionary<string, string> _folderNameMappings = new();
+
     public GoogleWorkspaceMigrator(SecurityContext securityContext,
         UserManager userManager,
+        UserPhotoManager userPhotoManager,
         TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
         QuotaSocketManager quotaSocketManager,
         FileStorageService fileStorageService,
         GlobalFolderHelper globalFolderHelper,
         IServiceProvider serviceProvider,
         IDaoFactory daoFactory,
-        EntryManager entryManager,
         MigrationLogger migrationLogger,
         AuthContext authContext,
         DisplayUserSettingsHelper displayUserSettingsHelper,
         UserManagerWrapper userManagerWrapper,
-        UserSocketManager socketManager) : base(securityContext, userManager, tenantQuotaFeatureStatHelper, quotaSocketManager, fileStorageService, globalFolderHelper, serviceProvider, daoFactory, entryManager, migrationLogger, authContext, displayUserSettingsHelper, userManagerWrapper, socketManager)
+        UserSocketManager socketManager) : base(securityContext, userManager, userPhotoManager, tenantQuotaFeatureStatHelper, quotaSocketManager, fileStorageService, globalFolderHelper, serviceProvider, daoFactory, migrationLogger, authContext, displayUserSettingsHelper, userManagerWrapper, socketManager)
     {
         MigrationInfo = new MigrationInfo { Name = "GoogleWorkspace" };
     }
@@ -78,7 +87,7 @@ public class GoogleWorkspaceMigrator : Migrator
             throw new Exception("Archives must be .zip");
         }
 
-        _takeouts = files.Where(item => item.EndsWith(".zip")).ToArray();
+        _takeouts = files.Where(item => item.EndsWith(".zip")).Order().ToArray();
         MigrationInfo.Files = _takeouts.Select(Path.GetFileName).ToList();
         await ReportProgressAsync(1, "start");
     }
@@ -92,6 +101,7 @@ public class GoogleWorkspaceMigrator : Migrator
 
         var progressStep = 90 / _takeouts.Length;
         var i = 1;
+        MigrationUser lastUser = null;
         foreach (var takeout in _takeouts)
         {
             if (_cancellationToken.IsCancellationRequested && reportProgress)
@@ -108,7 +118,7 @@ public class GoogleWorkspaceMigrator : Migrator
             var key = Path.GetFileName(takeout);
             try
             {
-                using (var archive = ZipFile.OpenRead(takeout))
+                await using (var archive = await ZipFile.OpenReadAsync(takeout, _cancellationToken))
                 {
                     foreach (var entry in archive.Entries)
                     {
@@ -123,7 +133,7 @@ public class GoogleWorkspaceMigrator : Migrator
                             {
                                 Directory.CreateDirectory(dir);
                             }
-                            entry.ExtractToFile(Path.Combine(tmpFolder, entry.FullName));
+                            await entry.ExtractToFileAsync(Path.Combine(tmpFolder, entry.FullName), _cancellationToken);
                         }
                         if (_cancellationToken.IsCancellationRequested && reportProgress)
                         {
@@ -138,16 +148,32 @@ public class GoogleWorkspaceMigrator : Migrator
                     throw new Exception("Takeout zip does not contain root 'Takeout' folder.");
                 }
                 var directories = Directory.GetDirectories(rootFolder);
-                if (directories.Length == 1 && directories[0].Split(Path.DirectorySeparatorChar).Last() == "Groups")
+                var groupsPath = GetLocalizedFolderPath(rootFolder, "Groups");
+                if (directories.Length == 1 && !string.IsNullOrEmpty(groupsPath))
                 {
-                    ParseGroup(rootFolder);
+                    ParseGroup(groupsPath);
                 }
                 else
                 {
-                    var user = ParseUser(rootFolder);
+                    MigrationUser user;
+                    try
+                    {
+                        user = ParseUser(rootFolder);
+                    }
+                    catch (ParseRootHtmlException)
+                    {
+                        if (lastUser == null)
+                        {
+                            throw;
+                        }
+                        user = lastUser;
+                        ParseStorage(rootFolder, user);
+                        continue;
+                    }
+
                     if (string.IsNullOrEmpty(user.Info.Email))
                     {
-                        MigrationInfo.WithoutEmailUsers.Add(key, user);
+                        MigrationInfo.WithoutEmailUsers[key] = user;
                     }
                     else
                     {
@@ -171,6 +197,8 @@ public class GoogleWorkspaceMigrator : Migrator
                             }
                         }
                     }
+
+                    lastUser = user;
                 }
             }
             catch (Exception ex)
@@ -205,10 +233,9 @@ public class GoogleWorkspaceMigrator : Migrator
         user1.Storage.Folders.AddRange(user2.Storage.Folders);
         user1.Storage.Securities.AddRange(user2.Storage.Securities);
     }
-    private void ParseGroup(string tmpFolder)
+    private void ParseGroup(string groupsFolder)
     {
         var group = new MigrationGroup { Info = new GroupInfo(), UserKeys = [] };
-        var groupsFolder = Path.Combine(tmpFolder, "Groups");
         var groupInfo = Path.Combine(groupsFolder, "info.csv");
         using (var sr = new StreamReader(groupInfo))
         {
@@ -255,12 +282,27 @@ public class GoogleWorkspaceMigrator : Migrator
         return user;
     }
 
+    private string GetLocalizedFolderPath(string parentFolder, string folderName)
+    {
+        if (_folderNameMappings.TryGetValue(folderName.ToLowerInvariant(), out var localizedFolderName))
+        {
+            var localizedPath = Path.Combine(parentFolder, localizedFolderName);
+            if (Directory.Exists(localizedPath))
+            {
+                return localizedPath;
+            }
+        }
+
+        var defaultPath = Path.Combine(parentFolder, folderName);
+        return Directory.Exists(defaultPath) ? defaultPath : null;
+    }
+
     private void ParseStorage(string tmpFolder, MigrationUser user)
     {
         user.Storage = new MigrationStorage();
 
-        var drivePath = Path.Combine(tmpFolder, "Drive");
-        if (!Directory.Exists(drivePath))
+        var drivePath = GetLocalizedFolderPath(tmpFolder, "Drive");
+        if (string.IsNullOrEmpty(drivePath))
         {
             return;
         }
@@ -286,7 +328,7 @@ public class GoogleWorkspaceMigrator : Migrator
             var attr = File.GetAttributes(entry);
             if (attr.HasFlag(FileAttributes.Directory))
             {
-                ParseFolders(entry.Substring(drivePath.Length + 1), foldersdictionary, i);
+                i = ParseFolders(entry.Substring(drivePath.Length + 1), foldersdictionary, i);
             }
             else
             {
@@ -294,11 +336,11 @@ public class GoogleWorkspaceMigrator : Migrator
                 user.Storage.BytesTotal += fi.Length;
 
                 var substring = entry.Substring(drivePath.Length + 1);
-                var split = substring.Split('\\');
+                var split = substring.Split(Path.DirectorySeparatorChar);
                 var path = Path.GetDirectoryName(substring);
                 if (split.Length != 1)
                 {
-                    ParseFolders(path, foldersdictionary, i);
+                    i = ParseFolders(path, foldersdictionary, i);
                 }
                 var file = new MigrationFile
                 {
@@ -372,22 +414,33 @@ public class GoogleWorkspaceMigrator : Migrator
         }
     }
 
-    private void ParseFolders(string entry, Dictionary<string, MigrationFolder> foldersdictionary, int i)
+    private int ParseFolders(string entry, Dictionary<string, MigrationFolder> foldersdictionary, int i)
     {
-        var split = entry.Split('\\');
+        var split = entry.Split(Path.DirectorySeparatorChar);
         var j = 1;
         foreach (var f in split)
         {
-            var folder = new MigrationFolder
+            var key = string.Join(Path.DirectorySeparatorChar, split[..(j)]);
+            if (!foldersdictionary.ContainsKey(key))
             {
-                Id = i++,
-                ParentId = j == 1 ? 0 : i - 1,
-                Title = f,
-                Level = j++
-            };
-            var key = string.Join(',', split[..(j - 1)]);
-            foldersdictionary.TryAdd(key, folder);
+                var parentId = 0;
+                if (j > 1)
+                {
+                    var parentKey = string.Join(Path.DirectorySeparatorChar, split[..(j - 1)]);
+                    parentId = foldersdictionary[parentKey].Id;
+                }
+                var folder = new MigrationFolder
+                {
+                    Id = i++,
+                    ParentId = parentId,
+                    Title = f,
+                    Level = j
+                };
+                foldersdictionary.Add(key, folder);
+            }
+            j++;
         }
+        return i;
     }
 
     private bool ShouldIgnoreFile(string entry, string[] entries)
@@ -472,12 +525,23 @@ public class GoogleWorkspaceMigrator : Migrator
         return false;
     }
 
+    public class ParseRootHtmlException : Exception
+    {
+        public ParseRootHtmlException(string message) : base(message)
+        {
+        }
+
+        public ParseRootHtmlException(string message, Exception inner) : base(message, inner)
+        {
+        }
+    }
+
     private void ParseRootHtml(string tmpFolder, MigrationUser user)
     {
         var htmlFiles = Directory.GetFiles(tmpFolder, "*.html");
         if (htmlFiles.Length != 1)
         {
-            throw new Exception("Incorrect Takeout format.");
+            throw new ParseRootHtmlException("Incorrect Takeout format.");
         }
 
         var htmlPath = htmlFiles[0];
@@ -489,15 +553,38 @@ public class GoogleWorkspaceMigrator : Migrator
         var matches = _emailRegex.Match(emailNode.InnerText);
         if (!matches.Success)
         {
-            throw new Exception("Couldn't parse root html.");
+            throw new ParseRootHtmlException("Couldn't parse root html.");
         }
 
         user.Info.Email = matches.Groups[1].Value;
+
+        var folderNameNodes = doc.DocumentNode.SelectNodes("//h1[@class='data-folder-name'][@data-english-name][@data-folder-name]");
+        if (folderNameNodes == null)
+        {
+            return;
+        }
+
+        foreach (var node in folderNameNodes)
+        {
+            var englishName = node.GetAttributeValue("data-english-name", string.Empty);
+            var localizedName = node.GetAttributeValue("data-folder-name", string.Empty);
+
+            if (!string.IsNullOrEmpty(englishName) && !string.IsNullOrEmpty(localizedName))
+            {
+                _folderNameMappings[englishName.ToLowerInvariant()] = localizedName;
+            }
+        }
     }
 
     private void ParseProfile(string tmpFolder, MigrationUser user)
     {
-        var profilePath = Path.Combine(tmpFolder, "Profile", "Profile.json");
+        var profileFolderPath = GetLocalizedFolderPath(tmpFolder, "Profile");
+        if (string.IsNullOrEmpty(profileFolderPath))
+        {
+            return;
+        }
+
+        var profilePath = Path.Combine(profileFolderPath, "Profile.json");
         if (!File.Exists(profilePath))
         {
             return;
@@ -531,14 +618,14 @@ public class GoogleWorkspaceMigrator : Migrator
             }
         }
 
-        user.PathToPhoto = Path.Combine(tmpFolder, "Profile", "ProfilePhoto.jpg");
+        user.PathToPhoto = Path.Combine(profileFolderPath, "ProfilePhoto.jpg");
         user.HasPhoto = File.Exists(user.PathToPhoto);
     }
 
     private void ParseAccount(string tmpFolder, MigrationUser user)
     {
-        var accountPath = Path.Combine(tmpFolder, "Google Account");
-        if (!Directory.Exists(accountPath))
+        var accountPath = GetLocalizedFolderPath(tmpFolder, "Google Account");
+        if (string.IsNullOrEmpty(accountPath))
         {
             return;
         }

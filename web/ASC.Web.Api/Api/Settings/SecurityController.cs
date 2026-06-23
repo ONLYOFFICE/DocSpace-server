@@ -1,28 +1,35 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Web.Api.Controllers.Settings;
 
@@ -47,12 +54,12 @@ public class SecurityController(
     PasswordSettingsManager passwordSettingsManager)
     : BaseSettingsController(fusionCache, webItemManager)
 {
-    /// <summary>
+    /// <remarks>
     /// Returns the security settings for the modules specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get the security settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/security</path>
     /// <collection>list</collection>
     [Tags("Settings / Security")]
@@ -94,12 +101,12 @@ public class SecurityController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the availability of the module with the ID specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get the module availability
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/security/{id}</path>
     [Tags("Settings / Security")]
     [SwaggerResponse(200, "Boolean value: true - module is enabled, false - module is disabled", typeof(bool))]
@@ -111,37 +118,37 @@ public class SecurityController(
         return module != null && !await module.IsDisabledAsync(webItemSecurity, authContext);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a list of all the enabled modules.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get the enabled modules
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/security/modules</path>
     [Tags("Settings / Security")]
     [SwaggerResponse(200, "List of enabled modules", typeof(object))]
     [HttpGet("modules")]
-    public object GetEnabledModules()
+    public async Task<object> GetEnabledModules()
     {
-        var enabledModules = webItemManagerSecurity.GetItems(WebZoneType.All)
+        var enabledModules = (await webItemManagerSecurity.GetItemsAsync(WebZoneType.All))
                                     .Where(item => !item.IsSubItem() && item.Visible)
             .Select(item => new { id = item.ProductClassName.HtmlEncode(), title = item.Name.HtmlEncode() });
 
         return enabledModules;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the portal password settings.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get the password settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/security/password</path>
     [Tags("Settings / Security")]
     [SwaggerResponse(200, "Password settings", typeof(PasswordSettingsDto))]
     [HttpGet("password")]
     [AllowNotPayment]
-    [Authorize(AuthenticationSchemes = "confirm", Roles = "Everyone")]
+    [Authorize(AuthenticationSchemes = "confirm", Roles = "Authenticated")]
     public async Task<PasswordSettingsDto> GetPasswordSettings()
     {
         var settings = await settingsManager.LoadAsync<PasswordSettings>(HttpContext.GetIfModifiedSince());
@@ -149,12 +156,12 @@ public class SecurityController(
         return HttpContext.TryGetFromCache(settings.LastModified) ? null : passwordSettingsConverter.Convert(settings);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Sets the portal password settings.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Set the password settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/security/password</path>
     [Tags("Settings / Security")]
     [SwaggerResponse(200, "Password settings", typeof(PasswordSettingsDto))]
@@ -183,12 +190,12 @@ public class SecurityController(
         return passwordSettingsConverter.Convert(userPasswordSettings);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Sets the security settings to the module with the ID specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Set the module security settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/security</path>
     /// <collection>list</collection>
     [Tags("Settings / Security")]
@@ -234,12 +241,12 @@ public class SecurityController(
         return securityInfo;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Sets the security settings to the modules with the IDs specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Set the security settings to modules
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/security/access</path>
     /// <collection>list</collection>
     [Tags("Settings / Security")]
@@ -256,8 +263,6 @@ public class SecurityController(
         {
             itemList.TryAdd(item.Key, item.Value);
         }
-
-        var defaultPageSettings = await settingsManager.LoadAsync<StudioDefaultPageSettings>();
 
         foreach (var item in itemList)
         {
@@ -278,10 +283,6 @@ public class SecurityController(
                     }
                 }
             }
-            else if (productId == defaultPageSettings.DefaultProductID)
-            {
-                await settingsManager.SaveAsync(settingsManager.GetDefault<StudioDefaultPageSettings>());
-            }
 
             await webItemSecurity.SetSecurityAsync(item.Key, item.Value, subjects);
         }
@@ -291,12 +292,12 @@ public class SecurityController(
         return await GetWebItemSettingsSecurityInfo(new SecuritySettingsRequestDto { Ids = itemList.Keys.ToList() }).ToListAsync();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a list of all the administrators of a product with the ID specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get the product administrators
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/security/administrator/{productid}</path>
     /// <collection>list</collection>
     [Tags("Settings / Security")]
@@ -313,12 +314,12 @@ public class SecurityController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Checks if the selected user is an administrator of a product with the ID specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Check a product administrator
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/security/administrator</path>
     [Tags("Settings / Security")]
     [SwaggerResponse(200, "Object with the user security information: product ID, user ID, administrator or not", typeof(ProductAdministratorDto))]
@@ -330,12 +331,12 @@ public class SecurityController(
         return new ProductAdministratorDto { ProductId = inDto.ProductId, UserId = inDto.UserId, Administrator = result };
     }
 
-    /// <summary>
+    /// <remarks>
     /// Sets the selected user as an administrator of a product with the ID specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Set a product administrator
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/security/administrator</path>
     [Tags("Settings / Security")]
     [SwaggerResponse(200, "Object with the user security information: product ID, user ID, administrator or not", typeof(ProductAdministratorDto))]
@@ -377,12 +378,12 @@ public class SecurityController(
         return new ProductAdministratorDto { ProductId = inDto.ProductId, UserId = inDto.UserId, Administrator = inDto.Administrator };
     }
 
-    /// <summary>
+    /// <remarks>
     /// Updates the login settings with the parameters specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Update the login settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/security/loginsettings</path>
     [Tags("Settings / Login settings")]
     [SwaggerResponse(200, "Updated login settings", typeof(LoginSettingsDto))]
@@ -400,15 +401,17 @@ public class SecurityController(
 
         await settingsManager.SaveAsync(settings);
 
+        messageService.Send(MessageAction.LoginSettingsUpdated);
+
         return settings.Map();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the portal login settings.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get the login settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/security/loginsettings</path>
     [Tags("Settings / Login settings")]
     [SwaggerResponse(200, "Login settings", typeof(LoginSettingsDto))]
@@ -422,12 +425,12 @@ public class SecurityController(
         return HttpContext.TryGetFromCache(settings.LastModified) ? null : settings.Map();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Resets the portal login settings to default.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Reset the login settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/security/loginsettings</path>
     [Tags("Settings / Login settings")]
     [SwaggerResponse(200, "Login settings", typeof(LoginSettingsDto))]
@@ -439,6 +442,8 @@ public class SecurityController(
         var defaultSettings = new LoginSettings().GetDefault();
 
         await settingsManager.SaveAsync(defaultSettings);
+
+        messageService.Send(MessageAction.LoginSettingsUpdated);
 
         return defaultSettings.Map();
     }

@@ -1,28 +1,35 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 using ASC.Files.Core.Mapping;
 
@@ -33,89 +40,92 @@ namespace ASC.Files.Core;
 /// </summary>
 public enum FolderType
 {
-    [SwaggerEnum(Description = "Default")]
+    [Description("Default")]
     DEFAULT = 0,
 
-    [SwaggerEnum(Description = "Coomon")]
+    [Description("Coomon")]
     COMMON = 1,
 
-    [SwaggerEnum(Description = "Bunch")]
+    [Description("Bunch")]
     BUNCH = 2,
 
-    [SwaggerEnum(Description = "Trash")]
+    [Description("Trash")]
     TRASH = 3,
 
-    [SwaggerEnum(Description = "User")]
+    [Description("User")]
     USER = 5,
 
-    [SwaggerEnum(Description = "Share")]
+    [Description("Share")]
     SHARE = 6,
 
-    [SwaggerEnum(Description = "Projects")]
+    [Description("Projects")]
     Projects = 8,
 
-    [SwaggerEnum(Description = "Favourites")]
+    [Description("Favourites")]
     Favorites = 10,
 
-    [SwaggerEnum(Description = "Recent")]
+    [Description("Recent")]
     Recent = 11,
 
-    [SwaggerEnum(Description = "Templates")]
+    [Description("Templates")]
     Templates = 12,
 
-    [SwaggerEnum(Description = "Privacy")]
+    [Description("Privacy")]
     Privacy = 13,
 
-    [SwaggerEnum(Description = "Virtual rooms")]
+    [Description("Virtual rooms")]
     VirtualRooms = 14,
 
-    [SwaggerEnum(Description = "Filling forms room")]
+    [Description("Filling forms room")]
     FillingFormsRoom = 15,
 
-    [SwaggerEnum(Description = "Editing room")]
+    [Description("Editing room")]
     EditingRoom = 16,
 
-    [SwaggerEnum(Description = "Custom room")]
+    [Description("Custom room")]
     CustomRoom = 19,
 
-    [SwaggerEnum(Description = "Archive")]
+    [Description("Archive")]
     Archive = 20,
 
-    [SwaggerEnum(Description = "Thirdparty backup")]
+    [Description("Thirdparty backup")]
     ThirdpartyBackup = 21,
 
-    [SwaggerEnum(Description = "Public room")]
+    [Description("Public room")]
     PublicRoom = 22,
 
-    [SwaggerEnum(Description = "Ready form folder")]
+    [Description("Ready form folder")]
     ReadyFormFolder = 25,
 
-    [SwaggerEnum(Description = "In process form folder")]
+    [Description("In process form folder")]
     InProcessFormFolder = 26,
 
-    [SwaggerEnum(Description = "Form filling folder done")]
+    [Description("Form filling folder done")]
     FormFillingFolderDone = 27,
 
-    [SwaggerEnum(Description = "Form filling folder in progress")]
+    [Description("Form filling folder in progress")]
     FormFillingFolderInProgress = 28,
 
-    [SwaggerEnum(Description = "Virtual Data Room")]
+    [Description("Virtual Data Room")]
     VirtualDataRoom = 29,
 
-    [SwaggerEnum(Description = "Room templates folder")]
+    [Description("Room templates folder")]
     RoomTemplates = 30,
-    
-    [SwaggerEnum(Description = "AI Room")]
+
+    [Description("AI Room")]
     AiRoom = 31,
-    
-    [SwaggerEnum(Description = "Knowledge")]
+
+    [Description("Knowledge")]
     Knowledge = 32,
-    
-    [SwaggerEnum(Description = "Result storage")]
+
+    [Description("Result storage")]
     ResultStorage = 33,
 
-    [SwaggerEnum(Description = "AI Agents")]
+    [Description("AI Agents")]
     AiAgents = 34,
+
+    [Description("Default Templates")]
+    DefaultTemplates = 35
 }
 
 /// <summary>
@@ -126,52 +136,62 @@ public interface IFolder
     /// <summary>
     /// The folder type.
     /// </summary>
-    public FolderType FolderType { get; set; }
+    FolderType FolderType { get; set; }
 
     /// <summary>
     /// The root folder type of the folder.
     /// </summary>
-    public FolderType RootFolderType { get; set; }
+    FolderType RootFolderType { get; set; }
 
     /// <summary>
     /// The ID of the user who created the root folder of the folder.
     /// </summary>
-    public Guid RootCreateBy { get; set; }
+    Guid RootCreateBy { get; set; }
 
     /// <summary>
     /// The number of files in the folder.
     /// </summary>
-    public int FilesCount { get; set; }
+    int FilesCount { get; set; }
 
     /// <summary>
     /// The number of folders in the folder.
     /// </summary>
-    public int FoldersCount { get; set; }
+    int FoldersCount { get; set; }
 
     /// <summary>
     /// Specifies if the folder can be shared or not.
     /// </summary>
-    public bool Shareable { get; set; }
+    bool Shareable { get; set; }
 
     /// <summary>
     /// The number of files in the folder that the user has not seen yet.
     /// </summary>
-    public int NewForMe { get; set; }
+    int NewForMe { get; set; }
 
     /// <summary>
     /// The URL to the folder.
     /// </summary>
-    public string FolderUrl { get; set; }
+    string FolderUrl { get; set; }
 
     /// <summary>
     /// Specifies if the folder is pinned to the top of the list or not.
     /// </summary>
-    public bool Pinned { get; set; }
+    bool Pinned { get; set; }
 
     /// <summary>
     /// The collection of folder tags.
     /// </summary>
-    public IEnumerable<Tag> Tags { get; set; }
+    IEnumerable<Tag> Tags { get; set; }
+
+    /// <summary>
+    /// Indicates whether the folder represents a room.
+    /// </summary>
+    bool IsRoom { get; }
+
+    /// <summary>
+    /// Indicates whether the folder represents an AI agent.
+    /// </summary>
+    bool IsAgent { get; }
 }
 
 /// <summary>
@@ -257,13 +277,30 @@ public class Folder<T> : FileEntry<T>, IFolder
     /// </summary>
     public RoomDataLifetime SettingsLifetime { get; set; }
     
+    /// <summary>
+    /// The chat provider ID configured for the folder.
+    /// </summary>
     public int SettingsChatProviderId { get; set; }
+
+    /// <summary>
+    /// The chat parameters configured for the folder.
+    /// </summary>
     public ChatParameters SettingsChatParameters { get; set; }
-    
+
     /// <summary>
     /// Specifies if the files can be downloaded from this folder or not.
     /// </summary>
     public bool SettingsDenyDownload { get; set; }
+
+    /// <summary>
+    /// Specifies if form data should be sent to external database.
+    /// </summary>
+    public bool SettingsSendFormToExternalDB { get; set; }
+
+    /// <summary>
+    /// Specifies if form data should be saved as XLSX file.
+    /// </summary>
+    public bool SettingsSaveFormAsXLSX { get; set; }
 
     /// <summary>
     /// The folder used space.
@@ -304,6 +341,10 @@ public class Folder<T> : FileEntry<T>, IFolder
     /// Specifies if the folder is root or not.
     /// </summary>
     public bool IsRoot => FolderType == RootFolderType;
+
+    public bool IsRoom => this.FolderType.IsRoom();
+
+    public bool IsAgent => this.FolderType.IsAgent();
 }
 
 [Scope]
@@ -331,8 +372,9 @@ public partial class FolderMapper(IServiceProvider serviceProvider, TenantDateTi
 
         if (dbFolderQuery.UserShared != null)
         {
-            result.Shared = dbFolderQuery.UserShared.Any(r => r is SubjectType.ExternalLink or SubjectType.PrimaryExternalLink);
-            result.SharedForUser = dbFolderQuery.UserShared.Any(r => r is SubjectType.Group or SubjectType.User);
+            result.Shared = dbFolderQuery.UserShared.Any(r => r.SubjectType is SubjectType.ExternalLink or SubjectType.PrimaryExternalLink);
+            result.SharedForUser = dbFolderQuery.UserShared.Any(r => r.SubjectType is SubjectType.Group or SubjectType.User);
+            result.SharedExternal = dbFolderQuery.UserShared.Any(r => (r.SubjectType is SubjectType.ExternalLink or SubjectType.PrimaryExternalLink) && r.Internal is false);
         }
 
         return result;

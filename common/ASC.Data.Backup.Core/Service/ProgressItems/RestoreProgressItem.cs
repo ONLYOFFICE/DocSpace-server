@@ -1,28 +1,40 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
+
+using ASC.Core.Common.Settings;
+using ASC.EventBus.Abstractions;
+using ASC.Files.Core.Configuration;
+using ASC.Web.Core.RemovePortal;
 
 namespace ASC.Data.Backup.Services;
 
@@ -32,6 +44,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
     private readonly IConfiguration _configuration;
     private readonly ILogger<RestoreProgressItem> _logger;
     private readonly ICache _cache;
+    private readonly IEventBus _eventBus;
     private TenantManager _tenantManager;
     private BackupStorageFactory _backupStorageFactory;
     private readonly NotifyHelper _notifyHelper;
@@ -52,6 +65,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
         IConfiguration configuration,
         ILogger<RestoreProgressItem> logger,
         ICache cache,
+        IEventBus eventBus,
         IServiceScopeFactory serviceScopeFactory,
         NotifyHelper notifyHelper,
         CoreBaseSettings coreBaseSettings)
@@ -60,6 +74,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
         _configuration = configuration;
         _logger = logger;
         _cache = cache;
+        _eventBus = eventBus;
         _notifyHelper = notifyHelper;
         _coreBaseSettings = coreBaseSettings;
     }
@@ -95,38 +110,19 @@ public class RestoreProgressItem : BaseBackupProgressItem
         await using var scope = _serviceScopeProvider.CreateAsyncScope();
         _socketManager = scope.ServiceProvider.GetService<SocketManager>();
 
+        var columnMapper = new ColumnMapper();
+
         try
         {
             _tenantManager = scope.ServiceProvider.GetService<TenantManager>();
             _backupStorageFactory = scope.ServiceProvider.GetService<BackupStorageFactory>();
             _backupRepository = scope.ServiceProvider.GetService<BackupRepository>();
 
-
             tenant = await _tenantManager.GetTenantAsync(TenantId);
             _tenantManager.SetCurrentTenant(tenant);
             await _socketManager.RestoreProgressAsync(socketTenant, Dump, 0);
 
-            _notifyHelper.SetServerBaseUri(_serverBaseUri);
-
-            if (Dump)
-            {
-                var tenants = await _tenantManager.GetTenantsAsync();
-
-                foreach (var t in tenants)
-                {
-                    await _notifyHelper.SendAboutRestoreStartedAsync(t, Notify);
-                    t.SetStatus(TenantStatus.Restoring);
-                    await _tenantManager.SaveTenantAsync(t);
-                }
-            }
-            else
-            {
-                await _notifyHelper.SendAboutRestoreStartedAsync(tenant, Notify);
-                tenant.SetStatus(TenantStatus.Restoring);
-                await _tenantManager.SaveTenantAsync(tenant);
-            }
-
-            var restoreTask = scope.ServiceProvider.GetService<RestorePortalTask>();
+            using var restoreTask = scope.ServiceProvider.GetService<RestorePortalTask>();
 
             var storage = await _backupStorageFactory.GetBackupStorageAsync(StorageType, TenantId, StorageParams);
 
@@ -148,20 +144,45 @@ public class RestoreProgressItem : BaseBackupProgressItem
                 }
             }
 
+            _notifyHelper.SetServerBaseUri(_serverBaseUri);
+
+            if (Dump)
+            {
+                var tenants = await _tenantManager.GetTenantsAsync();
+
+                foreach (var t in tenants)
+                {
+                    await _notifyHelper.SendAboutRestoreStartedAsync(t, Notify);
+                    t.SetStatus(TenantStatus.Restoring);
+                    await _tenantManager.SaveTenantAsync(t);
+                }
+            }
+            else
+            {
+                await _notifyHelper.SendAboutRestoreStartedAsync(tenant, Notify);
+                tenant.SetStatus(TenantStatus.Restoring);
+                await _tenantManager.SaveTenantAsync(tenant);
+            }
+
             Percentage = 10;
 
-            var columnMapper = new ColumnMapper();
             columnMapper.SetMapping("tenants_tenants", "alias", tenant.Alias, Guid.Parse(Id).ToString("N"));
             columnMapper.Commit();
 
-            restoreTask.Init(_region, tempFile, Dump, TenantId, columnMapper, _upgradesPath);
+            restoreTask.Init(_region, tempFile, Dump, TenantId, columnMapper, _upgradesPath, CancellationToken);
             restoreTask.ProgressChanged = async args =>
             {
-                Percentage = Percentage = 10d + 0.65 * args.Progress;
+                if (CancellationToken.IsCancellationRequested)
+                {
+                    return;
+                }
+                Percentage = 10d + 0.65 * args.Progress;
                 await _socketManager.RestoreProgressAsync(socketTenant, Dump, (int)Percentage);
                 await PublishChanges();
             };
+
             await restoreTask.RunJob();
+
             NewTenantId = columnMapper.GetTenantMapping();
 
             await _socketManager.RestoreProgressAsync(socketTenant, Dump, (int)Percentage);
@@ -203,6 +224,42 @@ public class RestoreProgressItem : BaseBackupProgressItem
             }
 
             Percentage = 75;
+
+            try
+            {
+                var webstudioDbContextFactory = scope.ServiceProvider.GetService<IDbContextFactory<WebstudioDbContext>>();
+
+                var tfaSettings = new[] { TfaAppAuthSettings.ID, TfaAppUserSettings.ID, StudioSmsNotificationSettings.ID };
+
+                await using var webstudioContext = await webstudioDbContextFactory.CreateDbContextAsync();
+
+                await webstudioContext.WebstudioSettings
+                    .Where(s => (restoreTask.Dump || s.TenantId == TenantId) && tfaSettings.Contains(s.Id))
+                    .ExecuteDeleteAsync();
+
+                await webstudioContext.SaveChangesAsync();
+            }
+            catch (Exception error)
+            {
+                _logger.ErrorClear2faSettings(error);
+            }
+
+            try
+            {
+                var settingsManager = scope.ServiceProvider.GetRequiredService<SettingsManager>();
+                var defaultTemplateSettings = await settingsManager.LoadAsync<DefaultTemplateSettings>();
+                if (defaultTemplateSettings.Items.Any(i => i.SelectedFile != null))
+                {
+                    var helper = scope.ServiceProvider.GetRequiredService<DefaultTemplateSettingsHelper>();
+                    var settings = await helper.RestoreSettingsAsync();
+                    _ = await settingsManager.SaveAsync(settings);
+                }
+            }
+            catch (Exception error)
+            {
+                _logger.ErrorUpdateDefaultTemplateSettings(error);
+            }
+
             try
             {
                 await _socketManager.RestoreProgressAsync(socketTenant, Dump, (int)Percentage);
@@ -232,9 +289,27 @@ public class RestoreProgressItem : BaseBackupProgressItem
         }
         catch (Exception error)
         {
-            _logger.ErrorRestoreProgressItem(error);
-            Exception = error;
             IsCompleted = true;
+
+            if (CancellationToken.IsCancellationRequested)
+            {
+                Status = DistributedTaskStatus.Canceled;
+                Warning = ASC.AuditTrail.AuditReportResource.RestoreCancelled;
+                _logger.InfoRestoreCancelled();
+
+                if (!Dump)
+                {
+                    var restoredTenantId = columnMapper.GetTenantMapping();
+                    var restoredTenant = await _tenantManager.GetTenantAsync(restoredTenantId);
+                    await _tenantManager.RemoveTenantAsync(restoredTenant);
+                    await _eventBus.PublishAsync(new RemovePortalIntegrationEvent(restoredTenant.OwnerId, restoredTenant.Id));
+                }
+            }
+            else
+            {
+                Exception = error;
+                _logger.ErrorRestoreProgressItem(error);
+            }
 
             if (tenant != null)
             {

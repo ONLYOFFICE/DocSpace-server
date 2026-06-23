@@ -1,28 +1,35 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Web.Files.Services.DocumentService;
 
@@ -94,30 +101,30 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         return await GetParamsAsync(file, lastVersion, true, editPossible, tryEdit, tryCoAuthoring, fillFormsPossible);
     }
 
-    public async Task<bool> CheckCustomQuota<T>(Folder<T> rootFolder)
+    public async Task<QuotaScope?> CheckCustomQuotaAsync<T>(Folder<T> rootFolder)
     {
         var tenantQuotaSetting = await settingsManager.LoadAsync<TenantQuotaSettings>();
         if (tenantQuotaSetting.EnableQuota)
         {
             var usedSize = (await tenantManager.FindTenantQuotaRowsAsync(tenantManager.GetCurrentTenant().Id))
-               .Where(r => !string.IsNullOrEmpty(r.Tag) && new Guid(r.Tag) != Guid.Empty)
-               .Sum(r => r.Counter);
+                .Where(r => !string.IsNullOrEmpty(r.Tag) && new Guid(r.Tag) != Guid.Empty)
+                .Sum(r => r.Counter);
             if (tenantQuotaSetting.Quota < usedSize)
             {
-                return false;
+                return QuotaScope.Tenant;
             }
         }
-        if (DocSpaceHelper.IsRoom(rootFolder.FolderType) && !rootFolder.ProviderEntry)
+        if (rootFolder.IsRoom && !rootFolder.ProviderEntry)
         {
             TenantEntityQuotaSettings quotaSettings = rootFolder.FolderType is FolderType.AiRoom
-                   ? await settingsManager.LoadAsync<TenantAiAgentQuotaSettings>()
-                   : await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
+                    ? await settingsManager.LoadAsync<TenantAiAgentQuotaSettings>()
+                    : await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
             if (quotaSettings.EnableQuota)
             {
                 var roomQuotaLimit = rootFolder.SettingsQuota == TenantEntityQuotaSettings.DefaultQuotaValue ? quotaSettings.DefaultQuota : rootFolder.SettingsQuota;
                 if (roomQuotaLimit != TenantEntityQuotaSettings.NoQuota && roomQuotaLimit <= rootFolder.Counter)
                 {
-                    return false;
+                    return QuotaScope.Room;
                 }
             }
         }
@@ -134,12 +141,13 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
                     var userUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(user.TenantId, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
                     if (userQuotaLimit <= userUsedSpace)
                     {
-                        return false;
+                        return QuotaScope.User;
                     }
                 }
             }
         }
-        return true;
+
+        return null;
     }
 
     private async Task<(File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom)> GetParamsAsync<T>(File<T> file, bool lastVersion,
@@ -267,7 +275,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         {
             if ((editPossible || reviewPossible || fillFormsPossible || commentPossible)
                 && tryCoAuthoring
-                && (await fileTracker.IsEditingAloneAsync(file.Id)))
+                && await fileTracker.IsEditingAloneAsync(file.Id))
             {
                 if (tryEdit)
                 {
@@ -309,7 +317,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             Print = rightToDownload,
             Download = rightToDownload && noWatermark,
             Copy = rightToDownload,
-            Protect = authContext.IsAuthenticated,
+            Protect = authContext.IsAuthenticated && !await userManager.IsGuestAsync(authContext.CurrentAccount.ID),
             Chat = file.Access != FileShare.Read
         };
 
@@ -319,7 +327,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
         if (!lastVersion)
         {
-            configuration.Document.Title = $"{file.Title} ({file.CreateOnString})";
+            configuration.Document.Title =  $"{file.Title} ({file.CreateOnString})";
         }
 
         if (fileUtility.CanWebRestrictedEditing(file.Title))
@@ -502,10 +510,10 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
         var docKey = await GetDocKeyAsync(fileStable);
 
-        await DropUserAsync(docKey, usersDrop.ToArray(), file.Id);
+        await DropUserAsync(docKey, usersDrop, file.Id);
     }
 
-    public async Task<bool> DropUserAsync(string docKeyForTrack, string[] users, object fileId = null)
+    public async Task<bool> DropUserAsync(string docKeyForTrack, List<string> users, object fileId = null)
     {
         return await documentServiceConnector.CommandAsync(CommandMethod.Drop, docKeyForTrack, fileId, null, users);
     }
@@ -534,8 +542,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
     {
         var folderDao = daoFactory.GetFolderDao<T>();
         var folder = await folderDao.GetFolderAsync(fileEntry.ParentId);
-        if (DocSpaceHelper.IsRoom(folder.FolderType) ||
-            (folder.FolderType is FolderType.FormFillingFolderInProgress or FolderType.FormFillingFolderDone))
+        if (folder.IsRoom || folder.FolderType is FolderType.FormFillingFolderInProgress or FolderType.FormFillingFolderDone)
         {
             return folder;
         }
@@ -569,6 +576,11 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
         if (securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))
         {
+            if (properties?.FormFilling?.StartFilling != true)
+            {
+                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
+            }
+
             result.CanFill = true;
             result.IsSubmitOnly = true;
             result.FillingSessionId = FileConstant.AnonFillingSession + Guid.NewGuid();
@@ -579,11 +591,9 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
         if (edit)
         {
-            await linkDao.DeleteAllLinkAsync(file.Id);
-            await fileDao.SaveProperties(file.Id, null);
-
             result.CanEdit = true;
             result.EditorType = editorType;
+            result.CanStartFilling = true;
             return result;
         }
 
@@ -594,10 +604,23 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
         if (properties?.FormFilling?.StartFilling != true)
         {
+            if (!await fileSecurity.CanStartFillingAsync(file, securityContext.CurrentAccount.ID))
+            {
+                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
+            }
+
             result.CanEdit = true;
+            result.CanStartFilling = true;
             return result;
         }
-        var linkedId = await linkDao.GetLinkedAsync(file.Id);
+
+        var originalFormId = !Equals(properties.FormFilling.OriginalFormId, default(T)) ? properties.FormFilling.OriginalFormId : file.Id;
+        var linkedId = await linkDao.GetLinkedAsync(originalFormId);
+        if (Equals(linkedId, default(T)) && await fileTracker.IsEditingAsync(originalFormId))
+        {
+            return result;
+        }
+
         var formDraft = !Equals(linkedId, default(T)) ? await fileDao.GetFileAsync(linkedId) : (await entryManager.GetFillFormDraftAsync(file, rootFolder.Id)).file;
 
         result.CanFill = true;
@@ -687,6 +710,21 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
                         : editorType;
         }
         return result;
+    }
+
+    public async Task<FormOpenSetup<T>> GetFormOpenSetupForPublicRoomAsync<T>(File<T> file, EditorType editorType)
+    {
+        var canEdit = await fileSecurity.CanEditAsync(file);
+        var canFill = await fileSecurity.CanFillFormsAsync(file);
+
+        return new FormOpenSetup<T>
+        {
+            CanEdit = canEdit,
+            CanFill = canFill,
+            EditorType = !canEdit && canFill && editorType != EditorType.Mobile
+                        ? EditorType.Embedded
+                        : editorType
+        };
     }
 
     public async Task<FormOpenSetup<T>> GetFormOpenSetupForUserFolderAsync<T>(File<T> file, EditorType editorType, bool edit, bool fill)

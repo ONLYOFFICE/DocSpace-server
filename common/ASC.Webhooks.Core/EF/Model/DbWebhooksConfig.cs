@@ -1,28 +1,35 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Webhooks.Core.EF.Model;
 
@@ -38,7 +45,7 @@ public class DbWebhooksConfig : BaseEntity
     public bool Enabled { get; set; }
     public bool SSL { get; set; }
     public WebhookTrigger Triggers { get; set; }
-    [MaxLength(36)]
+    [MaxLength(255)]
     public string TargetId { get; set; }
 
     public Guid? CreatedBy { get; set; }
@@ -68,191 +75,196 @@ public static class WebhooksConfigExtension
 
         return modelBuilder;
     }
-    public static void MySqlAddWebhooksConfig(this ModelBuilder modelBuilder)
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<DbWebhooksConfig>(entity =>
+        public void MySqlAddWebhooksConfig()
         {
-            entity.HasKey(e => new { e.Id })
-                .HasName("PRIMARY");
+            modelBuilder.Entity<DbWebhooksConfig>(entity =>
+            {
+                entity.HasKey(e => new { e.Id })
+                    .HasName("PRIMARY");
 
-            entity.HasIndex(e => e.TenantId)
-                .HasDatabaseName("tenant_id");
+                entity.HasIndex(e => e.TenantId)
+                    .HasDatabaseName("tenant_id");
 
-            entity.ToTable("webhooks_config")
-                .HasCharSet("utf8");
+                entity.ToTable("webhooks_config")
+                    .HasCharSet("utf8");
 
-            entity.Property(e => e.Id)
-                .HasColumnType("int")
-                .HasColumnName("id");
+                entity.Property(e => e.Id)
+                    .HasColumnType("int")
+                    .HasColumnName("id");
 
-            entity.Property(e => e.TenantId)
-                .HasColumnName("tenant_id");
+                entity.Property(e => e.TenantId)
+                    .HasColumnName("tenant_id");
 
-            entity.Property(e => e.Name)
-                .HasColumnName("name")
-                .IsRequired();
+                entity.Property(e => e.Name)
+                    .HasColumnName("name")
+                    .IsRequired();
 
-            entity.Property(e => e.SecretKey)
-                .HasColumnName("secret_key")
-                .HasDefaultValueSql("''");
+                entity.Property(e => e.SecretKey)
+                    .HasColumnName("secret_key")
+                    .HasDefaultValueSql("''");
 
-            entity.Property(e => e.Uri)
-                .HasColumnName("uri")
-                .HasDefaultValueSql("''")
-                .HasColumnType("text")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Uri)
+                    .HasColumnName("uri")
+                    .HasDefaultValueSql("''")
+                    .HasColumnType("text")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.Enabled)
-                .HasColumnName("enabled")
-                .HasDefaultValueSql("'1'")
-                .HasColumnType("tinyint(1)");
+                entity.Property(e => e.Enabled)
+                    .HasColumnName("enabled")
+                    .HasDefaultValueSql("'1'")
+                    .HasColumnType("tinyint(1)");
 
-            entity.Property(e => e.SSL)
-                .HasColumnName("ssl")
-                .HasDefaultValueSql("'1'")
-                .HasColumnType("tinyint(1)");
+                entity.Property(e => e.SSL)
+                    .HasColumnName("ssl")
+                    .HasDefaultValueSql("'1'")
+                    .HasColumnType("tinyint(1)");
 
-            entity.Property(e => e.Triggers)
-                .HasColumnName("triggers")
-                .IsRequired();
+                entity.Property(e => e.Triggers)
+                    .HasColumnName("triggers")
+                    .HasColumnType("bigint")
+                    .IsRequired();
 
-            entity.Property(e => e.TargetId)
-                .IsRequired(false)
-                .HasColumnName("target_id")
-                .HasColumnType("varchar(36)")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.TargetId)
+                    .IsRequired(false)
+                    .HasColumnName("target_id")
+                    .HasColumnType("varchar(255)")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.CreatedBy)
-                .IsRequired(false)
-                .HasColumnName("created_by")
-                .HasColumnType("varchar(36)")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.CreatedBy)
+                    .IsRequired(false)
+                    .HasColumnName("created_by")
+                    .HasColumnType("varchar(36)")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.CreatedOn)
-                .IsRequired(false)
-                .HasColumnName("created_on")
-                .HasColumnType("datetime");
+                entity.Property(e => e.CreatedOn)
+                    .IsRequired(false)
+                    .HasColumnName("created_on")
+                    .HasColumnType("datetime");
 
-            entity.Property(e => e.ModifiedBy)
-                .IsRequired(false)
-                .HasColumnName("modified_by")
-                .HasColumnType("varchar(36)")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.ModifiedBy)
+                    .IsRequired(false)
+                    .HasColumnName("modified_by")
+                    .HasColumnType("varchar(36)")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.ModifiedOn)
-                .IsRequired(false)
-                .HasColumnName("modified_on")
-                .HasColumnType("datetime");
+                entity.Property(e => e.ModifiedOn)
+                    .IsRequired(false)
+                    .HasColumnName("modified_on")
+                    .HasColumnType("datetime");
 
-            entity.Property(e => e.LastFailureOn)
-                .IsRequired(false)
-                .HasColumnName("last_failure_on")
-                .HasColumnType("datetime");
+                entity.Property(e => e.LastFailureOn)
+                    .IsRequired(false)
+                    .HasColumnName("last_failure_on")
+                    .HasColumnType("datetime");
 
-            entity.Property(e => e.LastFailureContent)
-                .IsRequired(false)
-                .HasColumnName("last_failure_content")
-                .HasColumnType("varchar(200)")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.LastFailureContent)
+                    .IsRequired(false)
+                    .HasColumnName("last_failure_content")
+                    .HasColumnType("varchar(200)")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.LastSuccessOn)
-                .IsRequired(false)
-                .HasColumnName("last_success_on")
-                .HasColumnType("datetime");
-        });
-    }
+                entity.Property(e => e.LastSuccessOn)
+                    .IsRequired(false)
+                    .HasColumnName("last_success_on")
+                    .HasColumnType("datetime");
+            });
+        }
 
-    public static void PgSqlAddWebhooksConfig(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<DbWebhooksConfig>(entity =>
+        public void PgSqlAddWebhooksConfig()
         {
-            entity.HasKey(e => e.Id)
-                .HasName("webhooks_config_pkey");
+            modelBuilder.Entity<DbWebhooksConfig>(entity =>
+            {
+                entity.HasKey(e => e.Id)
+                    .HasName("webhooks_config_pkey");
 
-            entity.HasIndex(e => e.TenantId)
-                .HasDatabaseName("idx_webhooks_config_tenant_id");
+                entity.HasIndex(e => e.TenantId)
+                    .HasDatabaseName("idx_webhooks_config_tenant_id");
 
-            entity.ToTable("webhooks_config");
+                entity.ToTable("webhooks_config");
 
-            entity.Property(e => e.Id)
-                .HasColumnName("id")
-                .HasColumnType("integer");
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasColumnType("integer");
 
-            entity.Property(e => e.TenantId)
-                .HasColumnName("tenant_id")
-                .HasColumnType("integer");
+                entity.Property(e => e.TenantId)
+                    .HasColumnName("tenant_id")
+                    .HasColumnType("integer");
 
-            entity.Property(e => e.Name)
-                .HasColumnName("name")
-                .IsRequired()
-                .HasMaxLength(50)
-                .HasColumnType("character varying");
+                entity.Property(e => e.Name)
+                    .HasColumnName("name")
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .HasColumnType("character varying");
 
-            entity.Property(e => e.SecretKey)
-                .HasColumnName("secret_key")
-                .HasDefaultValueSql("''")
-                .HasColumnType("text");
+                entity.Property(e => e.SecretKey)
+                    .HasColumnName("secret_key")
+                    .HasDefaultValueSql("''")
+                    .HasColumnType("text");
 
-            entity.Property(e => e.Uri)
-                .HasColumnName("uri")
-                .IsRequired(false)
-                .HasColumnType("text");
+                entity.Property(e => e.Uri)
+                    .HasColumnName("uri")
+                    .IsRequired(false)
+                    .HasColumnType("text");
 
-            entity.Property(e => e.Enabled)
-                .HasColumnName("enabled")
-                .HasDefaultValueSql("true")
-                .HasColumnType("boolean");
+                entity.Property(e => e.Enabled)
+                    .HasColumnName("enabled")
+                    .HasDefaultValueSql("true")
+                    .HasColumnType("boolean");
 
-            entity.Property(e => e.SSL)
-                .HasColumnName("ssl")
-                .HasDefaultValueSql("true")
-                .HasColumnType("boolean");
+                entity.Property(e => e.SSL)
+                    .HasColumnName("ssl")
+                    .HasDefaultValueSql("true")
+                    .HasColumnType("boolean");
 
-            entity.Property(e => e.Triggers)
-                .HasColumnName("triggers")
-                .IsRequired();
+                entity.Property(e => e.Triggers)
+                    .HasColumnName("triggers")
+                    .HasColumnType("bigint")
+                    .IsRequired();
 
-            entity.Property(e => e.TargetId)
-                .IsRequired(false)
-                .HasColumnName("target_id")
-                .HasMaxLength(36)
-                .HasColumnType("character varying");
+                entity.Property(e => e.TargetId)
+                    .IsRequired(false)
+                    .HasColumnName("target_id")
+                    .HasMaxLength(255)
+                    .HasColumnType("character varying");
 
-            entity.Property(e => e.CreatedBy)
-                .IsRequired(false)
-                .HasColumnName("created_by")
-                .HasColumnType("uuid");
+                entity.Property(e => e.CreatedBy)
+                    .IsRequired(false)
+                    .HasColumnName("created_by")
+                    .HasColumnType("uuid");
 
-            entity.Property(e => e.CreatedOn)
-                .IsRequired(false)
-                .HasColumnName("created_on");
+                entity.Property(e => e.CreatedOn)
+                    .IsRequired(false)
+                    .HasColumnName("created_on");
 
-            entity.Property(e => e.ModifiedBy)
-                .IsRequired(false)
-                .HasColumnName("modified_by")
-                .HasColumnType("uuid");
+                entity.Property(e => e.ModifiedBy)
+                    .IsRequired(false)
+                    .HasColumnName("modified_by")
+                    .HasColumnType("uuid");
 
-            entity.Property(e => e.ModifiedOn)
-                .IsRequired(false)
-                .HasColumnName("modified_on");
+                entity.Property(e => e.ModifiedOn)
+                    .IsRequired(false)
+                    .HasColumnName("modified_on");
 
-            entity.Property(e => e.LastFailureOn)
-                .IsRequired(false)
-                .HasColumnName("last_failure_on");
+                entity.Property(e => e.LastFailureOn)
+                    .IsRequired(false)
+                    .HasColumnName("last_failure_on");
 
-            entity.Property(e => e.LastFailureContent)
-                .IsRequired(false)
-                .HasColumnName("last_failure_content");
+                entity.Property(e => e.LastFailureContent)
+                    .IsRequired(false)
+                    .HasColumnName("last_failure_content");
 
-            entity.Property(e => e.LastSuccessOn)
-                .IsRequired(false)
-                .HasColumnName("last_success_on");
-        });
+                entity.Property(e => e.LastSuccessOn)
+                    .IsRequired(false)
+                    .HasColumnName("last_success_on");
+            });
+        }
     }
 }
 

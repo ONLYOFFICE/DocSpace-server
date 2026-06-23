@@ -1,28 +1,35 @@
-// (c) Copyright Ascensio System SIA 2009-2025
-// 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
-// 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
-// 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// Copyright (C) Ascensio System SIA, 2009-2026
+//
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
+//
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
+//
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
+//
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
+//
+// No trademark rights are granted under this License.
+//
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+//
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
 
 using System.Security;
 using System.Text.Json;
@@ -174,7 +181,7 @@ public class BackupService(
 
         if (file == null)
         {
-            throw new DirectoryNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+            throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
         var folderDao = daoFactory.GetFolderDao<T>();
@@ -305,10 +312,8 @@ public class BackupService(
         {
             return await GetDumpBackupProgress();
         }
-        else
-        {
-            return await GetBackupProgressAsync(tenantManager.GetCurrentTenantId());
-        }
+
+        return await GetBackupProgressAsync(tenantManager.GetCurrentTenantId());
     }
 
     public async Task<BackupProgress> GetBackupProgressAsync(int tenantId)
@@ -316,6 +321,20 @@ public class BackupService(
         await DemandPermissionsBackupAsync();
 
         return await backupWorker.GetBackupProgressAsync(tenantId);
+    }
+
+    public async Task<bool> CancelBackupAsync(int tenantId)
+    {
+        await DemandPermissionsBackupAsync();
+
+        return await backupWorker.CancelBackupAsync(tenantId);
+    }
+
+    public async Task<bool> CancelRestoreAsync(int tenantId)
+    {
+        await DemandPermissionsBackupAsync();
+
+        return await backupWorker.CancelRestoreAsync(tenantId);
     }
 
     public async Task<BackupProgress> GetDumpBackupProgress()
@@ -341,17 +360,11 @@ public class BackupService(
             {
                 return await backupWorker.GetDumpRestoreProgressAsync();
             }
-            else
-            {
-                var tenantId = tenantManager.GetCurrentTenantId();
-                return await backupWorker.GetRestoreProgressAsync(tenantId);
-            }
+
+            return await backupWorker.GetRestoreProgressAsync(tenantManager.GetCurrentTenantId());
         }
-        else
-        {
-            var tenantId = tenantManager.GetCurrentTenantId();
-            return await backupWorker.GetAnyRestoreProgressAsync(tenantId);
-        }
+
+        return await backupWorker.GetAnyRestoreProgressAsync(tenantManager.GetCurrentTenantId());
     }
 
     public string GetTmpFolder()
@@ -413,14 +426,6 @@ public class BackupService(
                 StorageParams = JsonSerializer.Serialize(scheduleRequest.StorageParams),
                 Dump = scheduleRequest.Dump
             });
-    }
-
-    public async Task DeleteScheduleAsync(bool dump)
-    {
-        await DemandPermissionsBackupAsync();
-
-        var tenantId = dump ? -1 : tenantManager.GetCurrentTenantId();
-        await backupRepository.DeleteBackupScheduleAsync(tenantId);
     }
 
     public async Task DeleteScheduleAsync(int tenantId)
@@ -595,13 +600,13 @@ public class BackupService(
         new CronExpression(cronParams.ToString());
     }
 
-    private async Task DemandPermissionsBackupAsync()
+    public async Task DemandPermissionsBackupAsync()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         if (!coreBaseSettings.Standalone && !SetupInfo.IsVisibleSettings(nameof(ManagementType.Backup)))
         {
-            throw new BillingException(Resource.ErrorNotAllowedOption);
+            throw new SecurityException(Resource.ErrorAccessDenied);
         }
     }
 
@@ -611,7 +616,7 @@ public class BackupService(
 
         if (!SetupInfo.IsVisibleSettings("AutoBackup"))
         {
-            throw new BillingException(Resource.ErrorNotAllowedOption);
+            throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
         if (coreBaseSettings.Standalone)
@@ -632,8 +637,13 @@ public class BackupService(
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
+        if (!SetupInfo.IsVisibleSettings("Restore"))
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+
         var quota = await tenantManager.GetTenantQuotaAsync(tenantManager.GetCurrentTenantId());
-        if (!SetupInfo.IsVisibleSettings("Restore") || (!coreBaseSettings.Standalone && !quota.Restore))
+        if (!coreBaseSettings.Standalone && !quota.Restore)
         {
             throw new BillingException(Resource.ErrorNotAllowedOption);
         }
@@ -641,7 +651,7 @@ public class BackupService(
 
     private async Task<string> GetBackupServiceName()
     {
-        var quotaList = await tenantManager.GetTenantQuotasAsync(true, true);
+        var quotaList = await tenantManager.GetTenantQuotasAsync(false, true);
 
         var backupQuota = quotaList.FirstOrDefault(x => x.TenantId == (int)TenantWalletService.Backup);
 
@@ -657,32 +667,37 @@ public class ScheduleDto
     /// <summary>
     /// The backup storage type.
     /// </summary>
+    /// <example>0</example>
     public required BackupStorageType StorageType { get; set; }
 
     /// <summary>
     /// The backup storage parameters.
     /// </summary>
+    /// <example>{}</example>
     public required Dictionary<string, string> StorageParams { get; set; }
 
     /// <summary>
     /// The backup cron parameters.
     /// </summary>
+    /// <example>{ "period": 0, "hour": 0, "day": 0}</example>
     public required CronParams CronParams { get; init; }
 
     /// <summary>
     /// The maximum number of the stored backup copies.
     /// </summary>
+    /// <example>5</example>
     public int? BackupsStored { get; init; }
 
     /// <summary>
     /// The date and time when the last backup was reated.
     /// </summary>
+    /// <example>2026-01-01T00:00:00Z</example>
     public required DateTime LastBackupTime { get; set; }
 
     /// <summary>
     /// Specifies if a dump will be created or not.
     /// </summary>
-    [SwaggerSchemaCustom(Example = false)]
+    /// <example>false</example>
     public required bool Dump { get; set; }
 }
 
@@ -694,16 +709,19 @@ public class CronParams
     /// <summary>
     /// The backup period type.
     /// </summary>
+    /// <example>0</example>
     public BackupPeriod Period { get; init; }
 
     /// <summary>
     /// The time of the day to start the backup process.
     /// </summary>
+    /// <example>0</example>
     public int Hour { get; init; }
 
     /// <summary>
     /// The day of the week to start the backup process.
     /// </summary>
+    /// <example>0</example>
     public int Day { get; init; }
 
     public CronParams() { }
@@ -745,12 +763,12 @@ public class CronParams
 /// </summary>
 public enum BackupPeriod
 {
-    [SwaggerEnum(Description = "Every day")]
+    [Description("Every day")]
     EveryDay = 0,
 
-    [SwaggerEnum(Description = "Every week")]
+    [Description("Every week")]
     EveryWeek = 1,
 
-    [SwaggerEnum(Description = "Every month")]
+    [Description("Every month")]
     EveryMonth = 2
 }

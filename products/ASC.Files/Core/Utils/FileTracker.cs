@@ -1,28 +1,35 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 using ZiggyCreatures.Caching.Fusion.Events;
 
@@ -47,7 +54,7 @@ public class FileTrackerHelper(IFusionCache cache, IServiceProvider serviceProvi
             if (tracker.EditingBy.TryGetValue(tabId, out var trackInfo))
             {
                 trackInfo.TrackTime = DateTime.UtcNow;
-                checkRight = DateTime.UtcNow - tracker.EditingBy[tabId].CheckRightTime > _checkRightTimeout;
+                checkRight = DateTime.UtcNow - trackInfo.CheckRightTime > _checkRightTimeout;
             }
             else
             {
@@ -76,22 +83,22 @@ public class FileTrackerHelper(IFusionCache cache, IServiceProvider serviceProvi
         cache.Events.Memory.Eviction += MemoryOnEviction;
     }
 
-    public async Task RemoveAsync<T>(T fileId, Guid tabId = default, Guid userId = default)
+    public async Task RemoveAsync<T>(T fileId, Guid? tabId = null, Guid? userId = null)
     {
         var tracker = await GetTrackerAsync(fileId);
         if (tracker != null)
         {
-            if (tabId != Guid.Empty)
+            if (tabId.HasValue)
             {
-                tracker.EditingBy.TryRemove(tabId, out _);
+                tracker.EditingBy.TryRemove(tabId.Value, out _);
                 await SetTrackerAsync(fileId, tracker);
 
                 return;
             }
 
-            if (userId != Guid.Empty)
+            if (userId.HasValue)
             {
-                var listForRemove = tracker.EditingBy.Where(b => tracker.EditingBy[b.Key].UserId == userId);
+                var listForRemove = tracker.EditingBy.Where(b => tracker.EditingBy[b.Key].UserId == userId.Value);
 
                 foreach (var editTab in listForRemove)
                 {
@@ -105,6 +112,28 @@ public class FileTrackerHelper(IFusionCache cache, IServiceProvider serviceProvi
         }
 
         await RemoveTrackerAsync(fileId);
+    }
+
+    public async Task SetAnonymousSessionsAsync<T>(T fileId, List<string> anonymousSessions)
+    {
+        var tracker = await GetTrackerAsync(fileId);
+
+        if (tracker == null)
+        {
+            return;
+        }
+
+        tracker.AnonymousSessions.Clear();
+
+        if (anonymousSessions != null)
+        {
+            foreach (var session in anonymousSessions)
+            {
+                tracker.AnonymousSessions.TryAdd(session, 0);
+            }
+        }
+
+        await SetTrackerAsync(fileId, tracker);
     }
 
     public record EditingStatus(bool IsEditing, bool IsEditingAlone);
@@ -207,6 +236,47 @@ public class FileTrackerHelper(IFusionCache cache, IServiceProvider serviceProvi
         return tracker != null && await IsEditingAsync(fileId)
             ? tracker.EditingBy.Values.Select(i => i.UserId).Distinct().ToList()
             : [];
+    }
+
+    public async Task<List<string>> GetAnonymousEditingSessionsAsync<T>(T fileId)
+    {
+        var tracker = await GetTrackerAsync(fileId);
+
+        return tracker != null && await IsEditingAsync(fileId)
+            ? tracker.AnonymousSessions.Keys.ToList()
+            : [];
+    }
+
+    public async Task<Dictionary<Guid, string>> GetEditingSessionsAsync<T>(T fileId, Global global)
+    {
+        var result = new Dictionary<Guid, string>();
+
+        var tracker = await GetTrackerAsync(fileId);
+        if (tracker == null || !await IsEditingAsync(fileId))
+        {
+            return result;
+        }
+
+        foreach (var trackInfo in tracker.EditingBy.Values)
+        {
+            if (result.ContainsKey(trackInfo.UserId))
+            {
+                continue;
+            }
+
+            var userName = await global.GetUserNameAsync(trackInfo.UserId, true);
+            if (trackInfo.UserId == Guid.Empty)
+            {
+                var count = tracker.AnonymousSessions.Count;
+                result.Add(trackInfo.UserId, count > 1 ? $"{userName} ({count})" : userName);
+            }
+            else
+            {
+                result.Add(trackInfo.UserId, userName);
+            }
+        }
+
+        return result;
     }
 
     public async Task<string> GetTrackerDocKey<T>(T fileId)
@@ -349,9 +419,12 @@ public record FileTracker
     [ProtoMember(5)]
     public string FillingSessionId { get; set; }
 
+    [ProtoMember(6)]
+    public ConcurrentDictionary<string, byte> AnonymousSessions { get; set; }
+
     public FileTracker() { }
 
-    internal FileTracker(Guid tabId, Guid userId, bool newScheme, bool editingAlone, Tenant tenant, string baseUri, string docKey, string token = null, string fillingSessionId = null)
+    internal FileTracker(Guid tabId, Guid userId, bool newScheme, bool editingAlone, Tenant tenant, string baseUri, string docKey, string token = null, string fillingSessionId = null, string anonymousSessionId = null)
     {
         DocKey = docKey;
         Tenant = tenant;
@@ -365,6 +438,7 @@ public record FileTracker
             EditingAlone = editingAlone,
             Token = token
         });
+        AnonymousSessions = new ConcurrentDictionary<string, byte>();
     }
 
     [ProtoContract]

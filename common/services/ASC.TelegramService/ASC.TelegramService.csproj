@@ -11,12 +11,18 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\products\ASC.Files\Core\ASC.Files.Core.csproj" />
     <ProjectReference Include="..\..\ASC.Api.Core\ASC.Api.Core.csproj" />
     <ProjectReference Include="..\..\ASC.FederatedLogin\ASC.FederatedLogin.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Properties\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="..\..\..\.dockerignore">
+      <Link>.dockerignore</Link>
+      <DependentUpon>Dockerfile</DependentUpon>
+    </Content>
   </ItemGroup>
 </Project>

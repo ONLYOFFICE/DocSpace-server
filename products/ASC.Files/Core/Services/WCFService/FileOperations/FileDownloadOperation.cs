@@ -1,28 +1,37 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
+
+using ASC.Files.Core.Services.WCFService.FileOperations;
 
 namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
@@ -99,7 +108,7 @@ public class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationD
 
         var thirdPartyFileOnly = thirdPartyOperation?.Files.Count == 1 && thirdPartyOperation.Folders.Count == 0;
         var daoFileOnly = daoOperation?.Files.Count == 1 && daoOperation.Folders.Count == 0;
-        var compress = !((thirdPartyFileOnly || daoFileOnly) && (thirdPartyFileOnly != daoFileOnly));
+        var compress = !((thirdPartyFileOnly || daoFileOnly) && thirdPartyFileOnly != daoFileOnly);
 
         string archiveExtension;
 
@@ -132,7 +141,7 @@ public class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationD
 
             var thirdPartyFolderOnly = thirdPartyOperation?.Folders.Count == 1 && thirdPartyOperation.Files.Count == 0;
             var daoFolderOnly = daoOperation?.Folders.Count == 1 && daoOperation.Files.Count == 0;
-            if ((thirdPartyFolderOnly || daoFolderOnly) && (thirdPartyFolderOnly != daoFolderOnly))
+            if ((thirdPartyFolderOnly || daoFolderOnly) && thirdPartyFolderOnly != daoFolderOnly)
             {
                 fileName = $@"{(thirdPartyFolderOnly ?
                     (await daoFactory.GetFolderDao<string>().GetFolderAsync(thirdPartyOperation.Folders[0])).Title :
@@ -144,7 +153,7 @@ public class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationD
             }
             else
             {
-                fileName = $@"{(tenantManager.GetCurrentTenant()).Alias.ToLower()}-{FileConstant.DownloadTitle}-{DateTime.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}{archiveExtension}";
+                fileName = $@"{tenantManager.GetCurrentTenant().Alias.ToLower()}-{FileConstant.DownloadTitle}-{DateTime.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}{archiveExtension}";
             }
 
             var store = await globalStore.GetStoreAsync();
@@ -181,7 +190,8 @@ public class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationD
                 path,
                 stream,
                 MimeMapping.GetMimeMapping(path),
-                "attachment; filename=\"" + Uri.EscapeDataString(fileName) + "\"");
+                "attachment; filename=\"" + Uri.EscapeDataString(fileName) + "\"",
+                cancellationToken);
 
             Result = $"{filesLinkUtility.FileHandlerPath}?{FilesLinkUtility.Action}=bulk&filename={Uri.EscapeDataString(await instanceCrypto.EncryptAsync(fileName))}";
 
@@ -223,7 +233,7 @@ public class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationD
     }
 }
 
-class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
+internal class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
 {
     private readonly Dictionary<T, (string, string)> _files;
     private readonly IDictionary<string, StringValues> _headers;
@@ -246,15 +256,8 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
 
         (_entriesPathId, var filesForSend, var folderForSend) = await GetEntriesPathIdAsync(serviceScope);
 
-        if (_entriesPathId == null || _entriesPathId.Count == 0)
-        {
-            if (Files.Count > 0)
-            {
-                throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
-            }
-
-            throw new DirectoryNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
-        }
+        var permissionsManager = serviceScope.ServiceProvider.GetRequiredService<DownloadPermissionsCheck<T>>();
+        await permissionsManager.CheckPermissionsAsync(_entriesPathId, Files);
 
         Total = _entriesPathId.Count + 1;
 
@@ -265,6 +268,8 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
         await PublishChanges();
 
         var filesMessageService = serviceScope.ServiceProvider.GetRequiredService<FilesMessageService>();
+        var webhookManager = serviceScope.ServiceProvider.GetRequiredService<WebhookManager>();
+
         foreach (var file in filesForSend)
         {
             var key = file.Id;
@@ -276,11 +281,13 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
             {
                 await filesMessageService.SendAsync(MessageAction.FileDownloaded, file, _headers, file.Title);
             }
+            await webhookManager.PublishAsync(WebhookTrigger.FileDownloaded, file);
         }
 
         foreach (var folder in folderForSend)
         {
             await filesMessageService.SendAsync(MessageAction.FolderDownloaded, folder, _headers, folder.Title);
+            await webhookManager.PublishAsync(WebhookTrigger.FolderDownloaded, folder);
         }
     }
 
@@ -313,7 +320,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
         return entriesPathId;
     }
 
-    private async Task<(ItemNameValueCollection<T>, IEnumerable<FileEntry<T>>, IEnumerable<FileEntry<T>>)> GetEntriesPathIdAsync(AsyncServiceScope scope)
+    public async Task<(ItemNameValueCollection<T>, IEnumerable<FileEntry<T>>, IEnumerable<FileEntry<T>>)> GetEntriesPathIdAsync(AsyncServiceScope scope)
     {
         var fileMarker = scope.ServiceProvider.GetService<FileMarker>();
         var entriesPathId = new ItemNameValueCollection<T>();

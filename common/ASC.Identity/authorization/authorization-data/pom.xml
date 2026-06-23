@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.asc</groupId>
         <artifactId>authorization</artifactId>
-        <version>1.0.3</version>
+        <version>1.1.1</version>
     </parent>
 
     <artifactId>authorization-data</artifactId>
@@ -23,6 +23,16 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>jakarta.xml.bind</groupId>
+                    <artifactId>jakarta.xml.bind-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.glassfish.jaxb</groupId>
+                    <artifactId>jaxb-runtime</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- MySQL Connector -->

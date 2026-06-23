@@ -117,56 +117,17 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="DataProcessingCompleted" xml:space="preserve">
-    <value>Gegevensverwerking voltooid</value>
-  </data>
-  <data name="DataProcessing" xml:space="preserve">
-    <value>Verwerking van gegevens...</value>
-  </data>
-  <data name="DumpParse" xml:space="preserve">
-    <value>Database parsing</value>
-  </data>
-  <data name="GroupMigration" xml:space="preserve">
-    <value>Groepsmigratie {0} ({1}/{2})</value>
-  </data>
-  <data name="MigratingUserFiles" xml:space="preserve">
-    <value>Migratie van gebruikersbestanden {0} ({1}/{2})</value>
-  </data>
-  <data name="MigrationCompleted" xml:space="preserve">
-    <value>Migratie voltooid</value>
-  </data>
-  <data name="PreparingForMigration" xml:space="preserve">
-    <value>Voorbereiding van de migratie</value>
-  </data>
-  <data name="StartOfDataProcessing" xml:space="preserve">
-    <value>Gegevensverwerking starten...</value>
-  </data>
-  <data name="Unzipping" xml:space="preserve">
-    <value>Uitpakken...</value>
-  </data>
-  <data name="UnzippingFinished" xml:space="preserve">
-    <value>Uitpakken voltooid...</value>
-  </data>
-  <data name="UserMigration" xml:space="preserve">
-    <value>Gebruikersmigratie {0} ({1}/{2})</value>
-  </data>
-  <data name="MigrationCommonFiles" xml:space="preserve">
-    <value>Algemene bestanden voor migratie</value>
-  </data>
-  <data name="MigrationNotFoundException" xml:space="preserve">
-    <value>Geen dergelijke migratieprovider</value>
-  </data>
-  <data name="MigrationProgressException" xml:space="preserve">
-    <value>Er wordt geen migratie uitgevoerd</value>
-  </data>
-  <data name="MigrationProjectFiles" xml:space="preserve">
-    <value>Migratie projectbestanden</value>
-  </data>
   <data name="CanNotAddUserInGroup" xml:space="preserve">
     <value>Kan gebruiker {0} niet toevoegen aan groep {1}</value>
   </data>
   <data name="CanNotCreateFile" xml:space="preserve">
     <value>Kon bestand {0} niet aanmaken</value>
+  </data>
+  <data name="CanNotImportCommonFiles" xml:space="preserve">
+    <value>Kon algemene bestanden niet importeren</value>
+  </data>
+  <data name="CanNotImportProjectFiles" xml:space="preserve">
+    <value>Kan projectbestanden niet importeren</value>
   </data>
   <data name="CanNotImportUser" xml:space="preserve">
     <value>Kon gebruiker niet importeren</value>
@@ -198,19 +159,58 @@
   <data name="CreateFolder" xml:space="preserve">
     <value>Maak map {0} aan</value>
   </data>
+  <data name="CreateRootFolder" xml:space="preserve">
+    <value>Hoofdmap aanmaken</value>
+  </data>
   <data name="CreateShareRoom" xml:space="preserve">
     <value>maak gedeelde kamer {0}</value>
   </data>
-  <data name="СanNotImportCommonFiles" xml:space="preserve">
-    <value>Kon algemene bestanden niet importeren</value>
+  <data name="DataProcessing" xml:space="preserve">
+    <value>Verwerking van gegevens...</value>
   </data>
-  <data name="СanNotImportProjectFiles" xml:space="preserve">
-    <value>Kan projectbestanden niet importeren</value>
+  <data name="DataProcessingCompleted" xml:space="preserve">
+    <value>Gegevensverwerking voltooid</value>
   </data>
-  <data name="СreateRootFolder" xml:space="preserve">
-    <value>Hoofdmap aanmaken</value>
+  <data name="DumpParse" xml:space="preserve">
+    <value>Database parsing</value>
+  </data>
+  <data name="GroupMigration" xml:space="preserve">
+    <value>Groepsmigratie {0} ({1}/{2})</value>
   </data>
   <data name="LargeBackup" xml:space="preserve">
     <value>Back-up is groter dan de totale grootte van het portaal</value>
+  </data>
+  <data name="MigratingUserFiles" xml:space="preserve">
+    <value>Migratie van gebruikersbestanden {0} ({1}/{2})</value>
+  </data>
+  <data name="MigrationCommonFiles" xml:space="preserve">
+    <value>Algemene bestanden voor migratie</value>
+  </data>
+  <data name="MigrationCompleted" xml:space="preserve">
+    <value>Migratie voltooid</value>
+  </data>
+  <data name="MigrationNotFoundException" xml:space="preserve">
+    <value>Geen dergelijke migratieprovider</value>
+  </data>
+  <data name="MigrationProgressException" xml:space="preserve">
+    <value>Er wordt geen migratie uitgevoerd</value>
+  </data>
+  <data name="MigrationProjectFiles" xml:space="preserve">
+    <value>Migratie projectbestanden</value>
+  </data>
+  <data name="PreparingForMigration" xml:space="preserve">
+    <value>Voorbereiding van de migratie</value>
+  </data>
+  <data name="StartOfDataProcessing" xml:space="preserve">
+    <value>Gegevensverwerking starten...</value>
+  </data>
+  <data name="Unzipping" xml:space="preserve">
+    <value>Uitpakken...</value>
+  </data>
+  <data name="UnzippingFinished" xml:space="preserve">
+    <value>Uitpakken voltooid...</value>
+  </data>
+  <data name="UserMigration" xml:space="preserve">
+    <value>Gebruikersmigratie {0} ({1}/{2})</value>
   </data>
 </root>

@@ -3,7 +3,8 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <OutputType>Library</OutputType>
-    <NoWarn>NU1701</NoWarn>
+    <NoWarn>1701;1702;1591</NoWarn>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Grpc">

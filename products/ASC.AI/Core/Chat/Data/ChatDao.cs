@@ -1,28 +1,35 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.AI.Core.Chat.Data;
 
@@ -35,23 +42,23 @@ public class ChatDao(IDbContextFactory<AiDbContext> dbContextFactory)
         AllowOutOfOrderMetadataProperties = true
     };
     
-    public async Task<ChatSession> AddChatAsync(int tenantId, int roomId, Guid userId, string title, Message message)
+    public async Task<ChatSession> AddChatAsync(int tenantId, int roomId, Guid userId, Guid chatId, string title, Message message)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var strategy = dbContext.Database.CreateExecutionStrategy();
-        
+
         DbChat chat = null!;
 
         await strategy.ExecuteAsync(async () =>
         {
             await using var context = await dbContextFactory.CreateDbContextAsync();
-            
+            await using var transaction = await context.Database.BeginTransactionAsync();
+
             var now = DateTime.UtcNow;
-            var id = Guid.NewGuid();
 
             var dbMessage = new DbChatMessage
             {
-                ChatId = id,
+                ChatId = chatId,
                 Role = message.Role,
                 Content = JsonSerializer.Serialize(message.Contents, _serializerOptions),
                 CreatedOn = now
@@ -59,18 +66,22 @@ public class ChatDao(IDbContextFactory<AiDbContext> dbContextFactory)
 
             chat = new DbChat
             {
-                Id = id,
+                Id = chatId,
                 TenantId = tenantId,
-                RoomId = roomId, 
+                RoomId = roomId,
                 UserId = userId,
                 Title = title,
                 CreatedOn = now,
                 ModifiedOn = now,
                 Messages = [dbMessage]
             };
-            
+
             await context.Chats.AddAsync(chat);
             await context.SaveChangesAsync();
+
+            await LinkAttachmentsToMessageAsync(tenantId, chatId, message, context, dbMessage);
+
+            await transaction.CommitAsync();
         });
 
         return chat.Map();
@@ -82,23 +93,25 @@ public class ChatDao(IDbContextFactory<AiDbContext> dbContextFactory)
         var strategy = dbContext.Database.CreateExecutionStrategy();
 
         await strategy.ExecuteAsync(async () =>
-        { 
+        {
             await using var context = await dbContextFactory.CreateDbContextAsync();
             await using var transaction = await context.Database.BeginTransactionAsync();
 
             await context.UpdateChatAsync(tenantId, chatId, DateTime.UtcNow);
-            
+
             var dbMessage = new DbChatMessage
             {
-                ChatId = chatId, 
-                Role = message.Role, 
+                ChatId = chatId,
+                Role = message.Role,
                 Content = JsonSerializer.Serialize(message.Contents, _serializerOptions),
                 CreatedOn = DateTime.UtcNow
             };
-            
+
             await context.Messages.AddAsync(dbMessage);
-            
             await context.SaveChangesAsync();
+
+            await LinkAttachmentsToMessageAsync(tenantId, chatId, message, context, dbMessage);
+
             await transaction.CommitAsync();
         });
     }
@@ -149,17 +162,40 @@ public class ChatDao(IDbContextFactory<AiDbContext> dbContextFactory)
         return await dbContext.GetChatsTotalCountAsync(tenantId, roomId, userId);
     }
 
-    public async Task DeleteChatsAsync(int tenantId, IEnumerable<Guid> chatIds)
+    public async Task SoftDeleteChatAsync(int tenantId, Guid chatId, Guid userId, Func<Task>? onDeleted = null)
     {
-        await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
-        var strategy = filesDbContext.Database.CreateExecutionStrategy();
-
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        var strategy = dbContext.Database.CreateExecutionStrategy();
+        
         await strategy.ExecuteAsync(async () =>
         {
             await using var context = await dbContextFactory.CreateDbContextAsync();
-            await context.DeleteChatsAsync(tenantId, chatIds);
-            await context.SaveChangesAsync();
+            await using var transaction = await context.Database.BeginTransactionAsync();
+
+            var deleted = await context.MarkChatAsDeletedAsync(tenantId, chatId, userId, DateTime.UtcNow);
+            if (deleted && onDeleted != null)
+            {
+                await onDeleted();
+            }
+
+            await transaction.CommitAsync();
         });
+    }
+
+    public async Task HardDeleteChatAsync(int tenantId, Guid chatId, Guid userId)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        await dbContext.HardDeleteChatAsync(tenantId, chatId, userId);
+    }
+
+    public async IAsyncEnumerable<int> GetAttachmentFileIdsAsync(int tenantId, Guid chatId)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+
+        await foreach (var fileId in dbContext.GetChatAttachmentFileIdsAsync(tenantId, chatId))
+        {
+            yield return fileId;
+        }
     }
 
     public async Task<long> AddMessageAsync(Guid chatId, Message message)
@@ -277,12 +313,12 @@ public class ChatDao(IDbContextFactory<AiDbContext> dbContextFactory)
         return await dbContext.GetMessagesTotalCountAsync(chatId);
     }
 
-    public async Task<Guid?> GetChatIdByMessageAsync(int messageId, Guid userId)
+    public async Task<ChatSession?> GetChatByMessageIdAsync(int messageId)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-        var message = await dbContext.GetMessageAsync(messageId, userId);
+        var chat = await dbContext.GetChatByMessageIdAsync(messageId);
 
-        return message?.ChatId;
+        return chat?.Map();
     }
 
     public async Task<UserChatSettings> SetUserChatSettingsAsync(
@@ -302,7 +338,10 @@ public class ChatDao(IDbContextFactory<AiDbContext> dbContextFactory)
                 TenantId = tenantId,
                 RoomId = roomId,
                 UserId = userId,
-                WebSearchEnabled = settings.WebSearchEnabled
+                WebSearchEnabled = settings.WebSearchEnabled,
+                ReasoningEffort = settings.ReasoningEffort is ChatReasoningEffort.None
+                    ? null
+                    : (int)settings.ReasoningEffort
             };
 
             await context.UserChatSettings.AddOrUpdateAsync(dbSettings);
@@ -320,5 +359,49 @@ public class ChatDao(IDbContextFactory<AiDbContext> dbContextFactory)
         return settings == null
             ? new UserChatSettings()
             : settings.Map();
+    }
+    
+    public async IAsyncEnumerable<(int TenantId, Guid UserId, Guid ChatId)> GetDeletedChatsAsync(DateTime cutoffDate, int limit)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+
+        await foreach (var chat in dbContext.GetDeletedChatsAsync(cutoffDate, limit))
+        {
+            yield return chat;
+        }
+    }
+
+    public async Task UpdateDeletedChatsDeletedOnAsync(IEnumerable<Guid> chatIds, DateTime deletedOn)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        await dbContext.UpdateDeletedChatsDeletedOnAsync(chatIds, deletedOn);
+    }
+
+    public async IAsyncEnumerable<(int TenantId, int FileId)> GetOrphanedAttachmentsAsync(DateTime cutoffDate)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+
+        await foreach (var attachment in dbContext.GetOrphanedAttachmentsAsync(cutoffDate))
+        {
+            yield return attachment;
+        }
+    }
+
+    private static async Task LinkAttachmentsToMessageAsync(
+        int tenantId, 
+        Guid chatId, 
+        Message message, 
+        AiDbContext context,
+        DbChatMessage dbMessage)
+    {
+        var fileIds = message.Contents
+            .OfType<DataMessageContent>()
+            .Select(d => d.Id)
+            .ToList();
+
+        if (fileIds.Count > 0)
+        {
+            await context.LinkAttachmentsToMessageAsync(tenantId, chatId, dbMessage.Id, fileIds, DateTime.UtcNow);
+        }
     }
 }

@@ -1,28 +1,35 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 using Microsoft.AspNetCore.RateLimiting;
 
@@ -49,12 +56,12 @@ public class MessageSettingsController(
     CountPaidUserChecker countPaidUserChecker)
     : BaseSettingsController(fusionCache, webItemManager)
 {
-    /// <summary>
+    /// <remarks>
     /// Displays the contact form on the "Sign In" page, allowing users to send a message to the DocSpace administrator in case they encounter any issues while accessing DocSpace.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Enable the administrator message settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/messagesettings</path>
     [Tags("Settings / Messages")]
     [SwaggerResponse(200, "Message about the result of saving new settings", typeof(string))]
@@ -70,12 +77,12 @@ public class MessageSettingsController(
         return Resource.SuccessfullySaveSettingsMessage;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the cookies lifetime value in minutes.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get cookies lifetime
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/cookiesettings</path>
     [Tags("Settings / Cookies")]
     [SwaggerResponse(200, "Lifetime value in minutes", typeof(CookieSettingsDto))]
@@ -91,12 +98,12 @@ public class MessageSettingsController(
         };
     }
 
-    /// <summary>
+    /// <remarks>
     /// Updates the cookies lifetime value in minutes.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Update cookies lifetime
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/cookiesettings</path>
     [Tags("Settings / Cookies")]
     [SwaggerResponse(200, "Message about the result of saving new settings", typeof(string))]
@@ -118,12 +125,12 @@ public class MessageSettingsController(
         return Resource.SuccessfullySaveSettingsMessage;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Sends a message to the administrator email when unauthorized users encounter issues accessing DocSpace.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Send a message to the administrator
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/sendadmmail</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Settings / Messages")]
@@ -136,7 +143,7 @@ public class MessageSettingsController(
     public async Task<string> SendAdminMail(AdminMessageSettingsRequestsDto inDto)
     {
         var studioAdminMessageSettings = await settingsManager.LoadAsync<StudioAdminMessageSettings>();
-        var enableAdmMess = studioAdminMessageSettings.Enable || (await tenantExtra.IsNotPaidAsync());
+        var enableAdmMess = studioAdminMessageSettings.Enable || await tenantExtra.IsNotPaidAsync();
 
         if (!enableAdmMess)
         {
@@ -174,12 +181,12 @@ public class MessageSettingsController(
         return Resource.AdminMessageSent;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Sends an invitation email with a link to the DocSpace.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Sends an invitation email
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/sendjoininvite</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Settings / Messages")]
@@ -205,7 +212,7 @@ public class MessageSettingsController(
 
             if (!email.TestEmailRegex() || email.TestEmailPunyCode())
             {
-                throw new Exception(Resource.ErrorNotCorrectEmail);
+                throw new ArgumentException(Resource.ErrorNotCorrectEmail);
             }
 
             await CheckCache("sendjoininvite");
@@ -213,7 +220,7 @@ public class MessageSettingsController(
             var user = await userManager.GetUserByEmailAsync(email);
             if (!user.Id.Equals(Constants.LostUser.Id))
             {
-                throw new Exception(await customNamingPeople.Substitute<Resource>("ErrorEmailAlreadyExists"));
+                throw new ArgumentException(await customNamingPeople.Substitute<Resource>("ErrorEmailAlreadyExists"));
             }
 
             var trustedDomainSettings = await settingsManager.LoadAsync<StudioTrustedDomainSettings>();
@@ -245,7 +252,7 @@ public class MessageSettingsController(
                             return Resource.FinishInviteJoinEmailMessage;
                         }
 
-                        throw new Exception(Resource.ErrorEmailDomainNotAllowed);
+                        throw new ArgumentException(Resource.ErrorEmailDomainNotAllowed);
                     }
                 case TenantTrustedDomainsType.All:
                     {
@@ -254,12 +261,12 @@ public class MessageSettingsController(
                         return Resource.FinishInviteJoinEmailMessage;
                     }
                 default:
-                    throw new Exception(Resource.ErrorNotCorrectEmail);
+                    throw new ArgumentException(Resource.ErrorNotCorrectEmail);
             }
         }
         catch (FormatException)
         {
-            throw new Exception(Resource.ErrorNotCorrectEmail);
+            throw new ArgumentException(Resource.ErrorNotCorrectEmail);
         }
     }
 }

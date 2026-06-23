@@ -14,9 +14,11 @@
 
     <ItemGroup>
       <PackageReference Include="Anthropic.SDK" />
+      <PackageReference Include="Magick.NET-Q8-AnyCPU" />
       <PackageReference Include="Microsoft.Extensions.AI" />
       <PackageReference Include="Microsoft.SemanticKernel.Core" />
       <PackageReference Include="ModelContextProtocol" />
+      <PackageReference Include="Mscc.GenerativeAI.Microsoft" />
     </ItemGroup>
 
     <ItemGroup>

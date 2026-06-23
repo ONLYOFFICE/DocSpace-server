@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
+    <ItemGroup>
+      <PackageReference Include="Bogus" />
+      <PackageReference Include="DocSpace.API.SDK" />
+      <PackageReference Include="Spectre.Console" />
+      <PackageReference Include="Spectre.Console.Cli" />
+    </ItemGroup>
+
+
+</Project>

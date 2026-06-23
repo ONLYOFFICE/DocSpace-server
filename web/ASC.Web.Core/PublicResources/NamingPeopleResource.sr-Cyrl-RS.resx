@@ -132,20 +132,8 @@
   <data name="CommonGuest" xml:space="preserve">
     <value>Гост</value>
   </data>
-  <data name="EducationGuest" xml:space="preserve">
-    <value>Гост</value>
-  </data>
   <data name="CommonGuests" xml:space="preserve">
     <value>Гости</value>
-  </data>
-  <data name="EducationGuests" xml:space="preserve">
-    <value>Гости</value>
-  </data>
-  <data name="EducationGroups" xml:space="preserve">
-    <value>Групе</value>
-  </data>
-  <data name="EducationGroup" xml:space="preserve">
-    <value>Група</value>
   </data>
   <data name="CommonRegDate" xml:space="preserve">
     <value>Датум регистрације</value>
@@ -180,21 +168,6 @@
   <data name="DefaultGuests" xml:space="preserve">
     <value>Гости</value>
   </data>
-  <data name="EducationGroupHead" xml:space="preserve">
-    <value>Лидер групе</value>
-  </data>
-  <data name="EducationRegDate" xml:space="preserve">
-    <value>Датум регистрације</value>
-  </data>
-  <data name="EducationSchemaName" xml:space="preserve">
-    <value>Образовна институција</value>
-  </data>
-  <data name="EducationUser" xml:space="preserve">
-    <value>Учитељ/Студент</value>
-  </data>
-  <data name="EducationUsers" xml:space="preserve">
-    <value>Учитељи/Студенти</value>
-  </data>
   <data name="DefaultRegDate" xml:space="preserve">
     <value>Запослен дана</value>
   </data>
@@ -212,6 +185,33 @@
   </data>
   <data name="EducationAddUsers" xml:space="preserve">
     <value>Додај учитеље/студенте</value>
+  </data>
+  <data name="EducationGroup" xml:space="preserve">
+    <value>Група</value>
+  </data>
+  <data name="EducationGroupHead" xml:space="preserve">
+    <value>Лидер групе</value>
+  </data>
+  <data name="EducationGroups" xml:space="preserve">
+    <value>Групе</value>
+  </data>
+  <data name="EducationGuest" xml:space="preserve">
+    <value>Гост</value>
+  </data>
+  <data name="EducationGuests" xml:space="preserve">
+    <value>Гости</value>
+  </data>
+  <data name="EducationRegDate" xml:space="preserve">
+    <value>Датум регистрације</value>
+  </data>
+  <data name="EducationSchemaName" xml:space="preserve">
+    <value>Образовна институција</value>
+  </data>
+  <data name="EducationUser" xml:space="preserve">
+    <value>Учитељ/Студент</value>
+  </data>
+  <data name="EducationUsers" xml:space="preserve">
+    <value>Учитељи/Студенти</value>
   </data>
   <data name="EducationUserTitle" xml:space="preserve">
     <value>Звање</value>

@@ -1,28 +1,35 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 using Newtonsoft.Json;
 
@@ -526,7 +533,7 @@ public partial class BackupPortalTask(
         var files = GetFilesToProcess(tenantId).Distinct();
 
         await using var backupRecordContext = await dbContextFactory.CreateDbContextAsync();
-        var exclude = await Queries.BackupRecordsAsync(backupRecordContext, tenantId).ToListAsync();
+        var exclude = await Queries.BackupRecordsIncludingDumpAsync(backupRecordContext, tenantId).ToListAsync();
 
         files = files.Where(f => !exclude.Exists(e => f.Path.Replace('\\', '/').Contains($"/file_{e.StoragePath}/")));
         files = files.Where(f => !f.Path.Contains("/thumb."));
@@ -718,9 +725,8 @@ public partial class BackupPortalTask(
             if (!correction.QuotaRowTable.TryGetValue(Guid.Empty, out var fullSize))
             {
                 var tenantQuotaRow = (await quotaService.FindUserQuotaRowsAsync(TenantId, Guid.Empty))
-                    .Where(r => string.Equals(r.Path, correction.QuotaRowTableDocumentsPath) &&
-                                string.Equals(r.Tag, correction.QuotaRowTableDocumentsTag))
-                    .FirstOrDefault();
+                    .FirstOrDefault(r => string.Equals(r.Path, correction.QuotaRowTableDocumentsPath) &&
+                                         string.Equals(r.Tag, correction.QuotaRowTableDocumentsTag));
 
                 fullSize = tenantQuotaRow?.Counter ?? 0;
                 correction.QuotaRowTable.Add(Guid.Empty, fullSize);
@@ -733,9 +739,8 @@ public partial class BackupPortalTask(
                 if (!correction.QuotaRowTable.TryGetValue(backupFile.RootCreateBy, out var userSize))
                 {
                     var userQuotaRow = (await quotaService.FindUserQuotaRowsAsync(TenantId, backupFile.RootCreateBy))
-                        .Where(r => string.Equals(r.Path, correction.QuotaRowTableDocumentsPath) &&
-                                    string.Equals(r.Tag, correction.QuotaRowTableDocumentsTag))
-                        .FirstOrDefault();
+                        .FirstOrDefault(r => string.Equals(r.Path, correction.QuotaRowTableDocumentsPath) &&
+                                             string.Equals(r.Tag, correction.QuotaRowTableDocumentsTag));
 
                     userSize = userQuotaRow?.Counter ?? 0;
                     correction.QuotaRowTable.Add(backupFile.RootCreateBy, userSize);
@@ -754,6 +759,12 @@ static file class Queries
     public static readonly Func<BackupsContext, int, IAsyncEnumerable<BackupRecord>> BackupRecordsAsync = Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
         (BackupsContext ctx, int tenantId) =>
             ctx.Backups.Where(b => b.TenantId == tenantId
+                                   && b.StorageType == 0
+                                   && b.StoragePath != null));
+
+    public static readonly Func<BackupsContext, int, IAsyncEnumerable<BackupRecord>> BackupRecordsIncludingDumpAsync = Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+        (BackupsContext ctx, int tenantId) =>
+            ctx.Backups.Where(b => (b.TenantId == tenantId || b.TenantId == -1)
                                    && b.StorageType == 0
                                    && b.StoragePath != null));
 

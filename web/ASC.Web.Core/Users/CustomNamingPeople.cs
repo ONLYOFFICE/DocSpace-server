@@ -1,38 +1,41 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Web.Core.Users;
 
 public class PeopleNamesSettings : ISettings<PeopleNamesSettings>
 {
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("47F34957-6A70-4236-9681-C8281FB762FA"); }
-    }
+    public static Guid ID => new("47F34957-6A70-4236-9681-C8281FB762FA");
 
     public PeopleNamesItem Item { get; set; }
 
@@ -50,97 +53,71 @@ public class PeopleNamesItem
 {
     private static readonly StringComparison _cmp = StringComparison.InvariantCultureIgnoreCase;
 
-    private string _schemaName;
 
-    private readonly string _userCaption;
+    public static string DefaultID => "common";
 
-    private readonly string _usersCaption;
-
-    private readonly string _groupCaption;
-
-    private readonly string _groupsCaption;
-
-    private readonly string _userPostCaption;
-
-    private readonly string _groupHeadCaption;
-
-    private readonly string _regDateCaption;
-
-    private readonly string _guestCaption;
-
-    private readonly string _guestsCaption;
-
-
-    public static string DefaultID
-    {
-        get { return "common"; }
-    }
-
-    public static string CustomID
-    {
-        get { return "custom"; }
-    }
+    public static string CustomID => "custom";
 
     public string Id { get; set; }
 
     public string SchemaName
     {
-        get { return Id.Equals(CustomID, _cmp) ? _schemaName ?? string.Empty : GetResourceValue(_schemaName); }
-        set { _schemaName = value; }
+        get => Id.Equals(CustomID, _cmp) ? field ?? string.Empty : GetResourceValue(field);
+        set;
     }
 
     public string UserCaption
     {
-        get { return Id.Equals(CustomID, _cmp) ? _userCaption ?? string.Empty : GetResourceValue(_userCaption); }
-        init { _userCaption = value; }
+        get => Id.Equals(CustomID, _cmp) ? field ?? string.Empty : GetResourceValue(field);
+        init;
     }
 
     public string UsersCaption
     {
-        get { return Id.Equals(CustomID, _cmp) ? _usersCaption ?? string.Empty : GetResourceValue(_usersCaption); }
-        init { _usersCaption = value; }
+        get => Id.Equals(CustomID, _cmp) ? field ?? string.Empty : GetResourceValue(field);
+        init;
     }
 
     public string GroupCaption
     {
-        get { return Id.Equals(CustomID, _cmp) ? _groupCaption ?? string.Empty : GetResourceValue(_groupCaption); }
-        init { _groupCaption = value; }
+        get => Id.Equals(CustomID, _cmp) ? field ?? string.Empty : GetResourceValue(field);
+        init;
     }
 
     public string GroupsCaption
     {
-        get { return Id.Equals(CustomID, _cmp) ? _groupsCaption ?? string.Empty : GetResourceValue(_groupsCaption); }
-        init { _groupsCaption = value; }
+        get => Id.Equals(CustomID, _cmp) ? field ?? string.Empty : GetResourceValue(field);
+        init;
     }
 
     public string UserPostCaption
     {
-        get { return Id.Equals(CustomID, _cmp) ? _userPostCaption ?? string.Empty : GetResourceValue(_userPostCaption); }
-        init { _userPostCaption = value; }
+        get => Id.Equals(CustomID, _cmp) ? field ?? string.Empty : GetResourceValue(field);
+        init;
     }
 
     public string GroupHeadCaption
     {
-        get { return Id.Equals(CustomID, _cmp) ? _groupHeadCaption ?? string.Empty : GetResourceValue(_groupHeadCaption); }
-        init { _groupHeadCaption = value; }
+        get => Id.Equals(CustomID, _cmp) ? field ?? string.Empty : GetResourceValue(field);
+        init;
     }
 
     public string RegDateCaption
     {
-        get { return Id.Equals(CustomID, _cmp) ? _regDateCaption ?? string.Empty : GetResourceValue(_regDateCaption); }
-        init { _regDateCaption = value; }
+        get => Id.Equals(CustomID, _cmp) ? field ?? string.Empty : GetResourceValue(field);
+        init;
     }
 
     public string GuestCaption
     {
-        get { return Id.Equals(CustomID, _cmp) ? _guestCaption ?? NamingPeopleResource.CommonGuest : GetResourceValue(_guestCaption); }
-        init { _guestCaption = value; }
+        get => Id.Equals(CustomID, _cmp) ? field ?? NamingPeopleResource.CommonGuest : GetResourceValue(field);
+        init;
     }
 
     public string GuestsCaption
     {
-        get { return Id.Equals(CustomID, _cmp) ? _guestsCaption ?? NamingPeopleResource.CommonGuests : GetResourceValue(_guestsCaption); }
-        init { _guestsCaption = value; }
+        get => Id.Equals(CustomID, _cmp) ? field ?? NamingPeopleResource.CommonGuests : GetResourceValue(field);
+        init;
     }
 
     private static string GetResourceValue(string resourceKey)

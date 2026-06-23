@@ -1,28 +1,35 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 using Object = Google.Apis.Storage.v1.Data.Object;
 
@@ -34,7 +41,7 @@ public class GoogleCloudStorage(TempStream tempStream,
         PathUtils pathUtils,
         EmailValidationKeyProvider emailValidationKeyProvider,
         IHttpContextAccessor httpContextAccessor,
-        ILoggerProvider factory,
+        ILoggerFactory loggerFactory,
         ILogger<GoogleCloudStorage> options,
         IHttpClientFactory clientFactory,
         TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
@@ -43,7 +50,7 @@ public class GoogleCloudStorage(TempStream tempStream,
         IQuotaService quotaService,
         UserManager userManager,
         CustomQuota customQuota)
-    : BaseStorage(tempStream, tenantManager, pathUtils, emailValidationKeyProvider, httpContextAccessor, factory, options, clientFactory, tenantQuotaFeatureStatHelper, quotaSocketManager, settingsManager, quotaService, userManager, customQuota)
+    : BaseStorage(tempStream, tenantManager, pathUtils, emailValidationKeyProvider, httpContextAccessor, loggerFactory, options, clientFactory, tenantQuotaFeatureStatHelper, quotaSocketManager, settingsManager, quotaService, userManager, customQuota)
 {
     public override bool IsSupportChunking => true;
 
@@ -137,14 +144,14 @@ public class GoogleCloudStorage(TempStream tempStream,
         using var storage = await GetStorageAsync();
 
         using var stream = new MemoryStream(Encoding.UTF8.GetBytes(_json ?? ""));
-        var preSignedURL = await (await FromCredentialStreamAsync(stream)).SignAsync(_bucket, MakePath(domain, path), expire, HttpMethod.Get);
+        var preSignedUrl = await FromCredential(CredentialFactory.FromStream<GoogleCredential>(stream)).SignAsync(_bucket, MakePath(domain, path), expire, HttpMethod.Get);
 
-        return MakeUri(preSignedURL);
+        return MakeUri(preSignedUrl);
     }
 
     public Uri GetUriShared(string domain, string path)
     {
-        return new Uri(SecureHelper.IsSecure(_httpContextAccessor.HttpContext, _options) ? _bucketSSlRoot : _bucketRoot, MakePath(domain, path));
+        return new Uri(SecureHelper.IsSecure(_httpContextAccessor.HttpContext, _loggerFactory) ? _bucketSSlRoot : _bucketRoot, MakePath(domain, path));
     }
     public override Task<Stream> GetReadStreamAsync(string domain, string path)
     {
@@ -183,48 +190,50 @@ public class GoogleCloudStorage(TempStream tempStream,
         return tempStream;
     }
 
-    public override Task<Uri> SaveAsync(string domain, string path, Stream stream)
+    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, CancellationToken token = default)
     {
-        return SaveAsync(domain, path, stream, string.Empty, string.Empty);
+        return SaveAsync(domain, path, stream, string.Empty, string.Empty, token);
     }
 
-    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, Guid ownerId)
+    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, Guid ownerId, CancellationToken token = default)
     {
-        return SaveAsync(domain, path, ownerId, stream, string.Empty, string.Empty);
+        return SaveAsync(domain, path, ownerId, stream, string.Empty, string.Empty, token);
     }
 
-    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, ACL acl)
+    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, ACL acl, CancellationToken token = default)
     {
-        return SaveAsync(domain, path, stream, null, null, acl);
+        return SaveAsync(domain, path, stream, null, null, acl, token: token);
     }
 
-    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentType, string contentDisposition)
+    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentType, string contentDisposition, CancellationToken token = default)
     {
-        return SaveAsync(domain, path, Guid.Empty, stream, contentType, contentDisposition);
-    }
-    public override Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string contentType, string contentDisposition)
-    {
-        return SaveAsync(domain, path, ownerId, stream, contentType, contentDisposition, ACL.Auto);
+        return SaveAsync(domain, path, Guid.Empty, stream, contentType, contentDisposition, token);
     }
 
-    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentEncoding, int cacheDays)
+    public override Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string contentType, string contentDisposition, CancellationToken token = default)
     {
-        return SaveAsync(domain, path, stream, string.Empty, string.Empty, ACL.Auto, contentEncoding, cacheDays);
+        return SaveAsync(domain, path, ownerId, stream, contentType, contentDisposition, ACL.Auto, token: token);
+    }
+
+    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentEncoding, int cacheDays, CancellationToken token = default)
+    {
+        return SaveAsync(domain, path, stream, string.Empty, string.Empty, ACL.Auto, contentEncoding, cacheDays, token);
     }
 
     private bool EnableQuotaCheck(string domain)
     {
-        return (QuotaController != null) && !domain.EndsWith("_temp");
+        return QuotaController != null && !domain.EndsWith("_temp");
     }
 
     public async Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentType,
-                 string contentDisposition, ACL acl, string contentEncoding = null, int cacheDays = 5)
+                 string contentDisposition, ACL acl, string contentEncoding = null, int cacheDays = 5, CancellationToken token = default)
     {
         return await SaveAsync(domain, path, Guid.Empty, stream, contentType,
-                  contentDisposition, acl, contentEncoding, cacheDays);
+                  contentDisposition, acl, contentEncoding, cacheDays, token);
     }
+
     public async Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string contentType,
-                  string contentDisposition, ACL acl, string contentEncoding = null, int cacheDays = 5)
+                  string contentDisposition, ACL acl, string contentEncoding = null, int cacheDays = 5, CancellationToken token = default)
     {
 
         var (buffered, isNew) = await _tempStream.TryGetBufferedAsync(stream);
@@ -248,7 +257,9 @@ public class GoogleCloudStorage(TempStream tempStream,
 
             buffered.Position = 0;
 
-            var uploaded = await storage.UploadObjectAsync(_bucket, MakePath(domain, path), mime, buffered, uploadObjectOptions);
+            var uploaded = await storage.UploadObjectAsync(_bucket, MakePath(domain, path), mime, buffered, uploadObjectOptions, token);
+
+            token.ThrowIfCancellationRequested();
 
             uploaded.ContentEncoding = contentEncoding;
             uploaded.CacheControl = $"public, maxage={(int)TimeSpan.FromDays(cacheDays).TotalSeconds}";
@@ -266,7 +277,9 @@ public class GoogleCloudStorage(TempStream tempStream,
                 uploaded.ContentDisposition = "attachment";
             }
 
-            await storage.UpdateObjectAsync(uploaded);
+            await storage.UpdateObjectAsync(uploaded, cancellationToken: token);
+
+            token.ThrowIfCancellationRequested();
 
             //           InvalidateCloudFront(MakePath(domain, path));
 
@@ -432,11 +445,11 @@ public class GoogleCloudStorage(TempStream tempStream,
         return await GetUriAsync(newDomain, newPath);
     }
 
-    public override async Task<(Uri, string)> SaveTempAsync(string domain, Stream stream)
+    public override async Task<(Uri, string)> SaveTempAsync(string domain, Stream stream, CancellationToken token = default)
     {
         var assignedPath = Guid.NewGuid().ToString();
 
-        return (await SaveAsync(domain, assignedPath, stream), assignedPath);
+        return (await SaveAsync(domain, assignedPath, stream, token), assignedPath);
     }
 
     public override IAsyncEnumerable<string> ListDirectoriesRelativeAsync(string domain, string path, bool recursive)
@@ -521,7 +534,7 @@ public class GoogleCloudStorage(TempStream tempStream,
         var objToDel = storage
                           .ListObjectsAsync(_bucket, MakePath(domain, path));
 
-        return await objToDel.Where(obj => obj.Size.HasValue).Select(((obj, _) => Convert.ToInt64(obj.Size))).SumAsync();
+        return await objToDel.Where(obj => obj.Size.HasValue).Select((obj, _) => Convert.ToInt64(obj.Size)).SumAsync();
     }
 
     public override async Task<long> ResetQuotaAsync(string domain)
@@ -533,7 +546,7 @@ public class GoogleCloudStorage(TempStream tempStream,
 
         if (QuotaController != null)
         {
-            var size = await objects.Where(obj => obj.Size.HasValue).Select(((obj, _) => Convert.ToInt64(obj.Size))).SumAsync();
+            var size = await objects.Where(obj => obj.Size.HasValue).Select((obj, _) => Convert.ToInt64(obj.Size)).SumAsync();
 
             await QuotaController.QuotaUsedSetAsync(Modulename, domain, DataList.GetData(domain), size);
 
@@ -551,7 +564,7 @@ public class GoogleCloudStorage(TempStream tempStream,
         var objects = storage
                           .ListObjectsAsync(_bucket, MakePath(domain, string.Empty));
 
-        return await objects.Where(obj => obj.Size.HasValue).Select(((obj, _) => Convert.ToInt64(obj.Size))).SumAsync();
+        return await objects.Where(obj => obj.Size.HasValue).Select((obj, _) => Convert.ToInt64(obj.Size)).SumAsync();
     }
 
     public override async Task<Uri> CopyAsync(string srcDomain, string srcpath, string newDomain, string newPath)
@@ -593,7 +606,7 @@ public class GoogleCloudStorage(TempStream tempStream,
         }
     }
 
-    public override async Task<string> SavePrivateAsync(string domain, string path, Stream stream, DateTime expires)
+    public override async Task<string> SavePrivateAsync(string domain, string path, Stream stream, DateTime expires, CancellationToken token = default)
     {
         using var storage = await GetStorageAsync();
 
@@ -608,7 +621,9 @@ public class GoogleCloudStorage(TempStream tempStream,
 
             buffered.Position = 0;
 
-            var uploaded = await storage.UploadObjectAsync(_bucket, MakePath(domain, path), "application/octet-stream", buffered, uploadObjectOptions);
+            var uploaded = await storage.UploadObjectAsync(_bucket, MakePath(domain, path), "application/octet-stream", buffered, uploadObjectOptions, token);
+
+            token.ThrowIfCancellationRequested();
 
             uploaded.CacheControl = $"public, maxage={(int)TimeSpan.FromDays(5).TotalSeconds}";
             uploaded.ContentDisposition = "attachment";
@@ -616,7 +631,9 @@ public class GoogleCloudStorage(TempStream tempStream,
             uploaded.Metadata["Expires"] = DateTime.UtcNow.Add(TimeSpan.FromDays(5)).ToString("R", CultureInfo.InvariantCulture);
             uploaded.Metadata.Add("private-expire", expires.ToFileTimeUtc().ToString(CultureInfo.InvariantCulture));
 
-            await storage.UpdateObjectAsync(uploaded);
+            await storage.UpdateObjectAsync(uploaded, cancellationToken: token);
+
+            token.ThrowIfCancellationRequested();
         }
         finally
         {
@@ -628,11 +645,11 @@ public class GoogleCloudStorage(TempStream tempStream,
 
         using var mStream = new MemoryStream(Encoding.UTF8.GetBytes(_json ?? ""));
         var signDuration = expires.Date == DateTime.MinValue ? expires.TimeOfDay : expires.Subtract(DateTime.UtcNow);
-        var preSignedURL = await (await FromCredentialStreamAsync(mStream))
-            .SignAsync(RequestTemplate.FromBucket(_bucket).WithObjectName(MakePath(domain, path)), Options.FromDuration(signDuration));
+        var preSignedUrl = await FromCredential(CredentialFactory.FromStream<GoogleCredential>(stream))
+            .SignAsync(RequestTemplate.FromBucket(_bucket).WithObjectName(MakePath(domain, path)), Options.FromDuration(signDuration), token);
 
         //TODO: CNAME!
-        return preSignedURL;
+        return preSignedUrl;
     }
 
     public override async Task DeleteExpiredAsync(string domain, string path, TimeSpan oldThreshold)
@@ -701,11 +718,7 @@ public class GoogleCloudStorage(TempStream tempStream,
             totalBytes = Convert.ToString((chunkNumber - 1) * defaultChunkSize + chunkLength);
         }
 
-        var request = new HttpRequestMessage
-        {
-            RequestUri = new Uri(uploadUri),
-            Method = HttpMethod.Put
-        };
+        using var request = new HttpRequestMessage(HttpMethod.Put, uploadUri);
         request.Content = new StreamContent(stream);
         request.Content.Headers.ContentRange = new ContentRangeHeaderValue(Convert.ToInt64(bytesRangeStart),
                                                                Convert.ToInt64(bytesRangeEnd),
@@ -719,7 +732,9 @@ public class GoogleCloudStorage(TempStream tempStream,
 
             try
             {
+#pragma warning disable CA2000 
                 var httpClient = _clientFactory.CreateClient();
+#pragma warning restore CA2000
                 using var response = await httpClient.SendAsync(request);
 
                 break;
@@ -784,18 +799,18 @@ public class GoogleCloudStorage(TempStream tempStream,
         throw new NotImplementedException();
     }
 
-    protected override Task<Uri> SaveWithAutoAttachmentAsync(string domain, string path, Stream stream, string attachmentFileName)
+    protected override Task<Uri> SaveWithAutoAttachmentAsync(string domain, string path, Stream stream, string attachmentFileName, CancellationToken token = default)
     {
-        return SaveWithAutoAttachmentAsync(domain, path, Guid.Empty, stream, attachmentFileName);
+        return SaveWithAutoAttachmentAsync(domain, path, Guid.Empty, stream, attachmentFileName, token);
     }
-    protected override Task<Uri> SaveWithAutoAttachmentAsync(string domain, string path, Guid ownerId, Stream stream, string attachmentFileName)
+    protected override Task<Uri> SaveWithAutoAttachmentAsync(string domain, string path, Guid ownerId, Stream stream, string attachmentFileName, CancellationToken token = default)
     {
         var contentDisposition = $"attachment; filename={HttpUtility.UrlPathEncode(attachmentFileName)};";
         if (attachmentFileName.Any(c => c >= 0 && c <= 127))
         {
             contentDisposition = $"attachment; filename*=utf-8''{HttpUtility.UrlPathEncode(attachmentFileName)};";
         }
-        return SaveAsync(domain, path, ownerId, stream, null, contentDisposition);
+        return SaveAsync(domain, path, ownerId, stream, null, contentDisposition, token);
     }
 
     private StorageClient GetStorage()

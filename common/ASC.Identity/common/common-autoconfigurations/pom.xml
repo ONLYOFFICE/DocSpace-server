@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.asc</groupId>
         <artifactId>common</artifactId>
-        <version>1.0.3</version>
+        <version>1.1.1</version>
     </parent>
 
     <artifactId>common-autoconfigurations</artifactId>
@@ -56,7 +56,20 @@
                     <groupId>commons-logging</groupId>
                     <artifactId>commons-logging</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>software.amazon.awssdk</groupId>
+                    <artifactId>apache-client</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>software.amazon.awssdk</groupId>
+                    <artifactId>netty-nio-client</artifactId>
+                </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>url-connection-client</artifactId>
+            <version>${aws.cloudwatch.version}</version>
         </dependency>
     </dependencies>
 </project>

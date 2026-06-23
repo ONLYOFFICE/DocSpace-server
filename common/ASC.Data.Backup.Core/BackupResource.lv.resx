@@ -117,26 +117,20 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ButtonSetPassword" xml:space="preserve">
-    <value>Uzstādīt paroli</value>
-  </data>
-  <data name="BackupNotFound" xml:space="preserve">
-    <value>Dublējuma fails ir nederīgs. Lūdzu, izmantojiet tajā pašā portālā izveidoto failu.</value>
-  </data>
-  <data name="LargeBackup" xml:space="preserve">
-    <value>Dublējums ir lielāks par kopējo portāla izmēru</value>
+  <data name="AutoBackup" xml:space="preserve">
+    <value>Automātiskā rezerves kopēšana</value>
   </data>
   <data name="BackupException" xml:space="preserve">
     <value>Veidojot rezerves kopiju, radās problēma. Lūdzu, mēģiniet to izveidot vēlreiz vai sazinieties ar atbalsta centru.</value>
   </data>
-  <data name="RestoreException" xml:space="preserve">
-    <value>Atjaunojot rezerves kopiju, radās problēma. Lūdzu, mēģiniet to atjaunot vēlreiz vai sazinieties ar atbalsta centru.</value>
-  </data>
   <data name="BackupInvalid" xml:space="preserve">
     <value>Rezerves kopijas fails ir nederīgs.</value>
   </data>
-  <data name="AutoBackup" xml:space="preserve">
-    <value>Automātiskā rezerves kopēšana</value>
+  <data name="BackupMissingFilesWarning" xml:space="preserve">
+    <value>Daži faili netika iekļauti dublējumkopijā. Lai uzzinātu vairāk, lūdzu, skatiet {0}</value>
+  </data>
+  <data name="BackupNotFound" xml:space="preserve">
+    <value>Dublējuma fails ir nederīgs. Lūdzu, izmantojiet tajā pašā portālā izveidoto failu.</value>
   </data>
   <data name="BackupStorageTypeCustomCloud" xml:space="preserve">
     <value>Custom cloud</value>
@@ -156,7 +150,13 @@
   <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
     <value>Trešās puses resurss</value>
   </data>
-  <data name="BackupMissingFilesWarning" xml:space="preserve">
-    <value>Daži faili netika iekļauti dublējumkopijā. Lai uzzinātu vairāk, lūdzu, skatiet {0}</value>
+  <data name="ButtonSetPassword" xml:space="preserve">
+    <value>Uzstādīt paroli</value>
+  </data>
+  <data name="LargeBackup" xml:space="preserve">
+    <value>Dublējums ir lielāks par kopējo portāla izmēru</value>
+  </data>
+  <data name="RestoreException" xml:space="preserve">
+    <value>Atjaunojot rezerves kopiju, radās problēma. Lūdzu, mēģiniet to atjaunot vēlreiz vai sazinieties ar atbalsta centru.</value>
   </data>
 </root>

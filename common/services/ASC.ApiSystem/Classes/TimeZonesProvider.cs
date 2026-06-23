@@ -1,59 +1,65 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.ApiSystem.Classes;
 
 [Singleton]
-public class TimeZonesProvider(ILogger<TimeZonesProvider> logger, CommonConstants commonConstants)
+public class TimeZonesProvider(CommonConstants commonConstants)
 {
     #region Private
 
-    private static readonly Dictionary<string, KeyValuePair<string, string>> _timeZones = new()
+    private static readonly Dictionary<string, string> _timeZoneMap = new()
     {
-        { "", new KeyValuePair<string, string>("Europe/London", "GMT Standard Time") },
-        { "fr", new KeyValuePair<string, string>("Europe/Paris", "Romance Standard Time") },
-        { "es", new KeyValuePair<string, string>("Europe/Madrid", "Romance Standard Time")},
-        { "de", new KeyValuePair<string, string>("Europe/Berlin", "W. Europe Standard Time") },
-        { "ru", new KeyValuePair<string, string>("Europe/Moscow", "Russian Standard Time") },
-        { "lv", new KeyValuePair<string, string>("Europe/Riga", "FLE Standard Time") },
-        { "pt", new KeyValuePair<string, string>("America/Cuiaba", "Central Brazilian Standard Time") },
-        { "it", new KeyValuePair<string, string>("Europe/Rome", "Central European Standard Time") },
-        { "tr", new KeyValuePair<string, string>("Europe/Istanbul", "GTB Standard Time") },
-
-        { "id", new KeyValuePair<string, string>("Europe/London", "GMT Standard Time") },
-        { "zh", new KeyValuePair<string, string>("Asia/Shanghai", "China Standard Time") },
-        { "ja", new KeyValuePair<string, string>("Asia/Tokyo", "Tokyo Standard Time") },
-        { "ko", new KeyValuePair<string, string>("Asia/Seoul", "Korea Standard Time") },
-        { "az", new KeyValuePair<string, string>("Asia/Baku", "Azerbaijan Standard Time") },
-        { "cs", new KeyValuePair<string, string>("Europe/Warsaw", "Central European Standard Time") },
-        { "el", new KeyValuePair<string, string>("Europe/Warsaw", "Central European Standard Time") },
-        { "fi", new KeyValuePair<string, string>("Europe/Warsaw", "Central European Standard Time") },
-        { "pl", new KeyValuePair<string, string>("Europe/Warsaw", "Central European Standard Time") },
-        { "uk", new KeyValuePair<string, string>("Europe/Kiev", "FLE Standard Time") },
-        { "vi", new KeyValuePair<string, string>("Asia/Shanghai", "China Standard Time") }
+        { "", "Europe/London" },
+        { "fr", "Europe/Paris" },
+        { "es", "Europe/Madrid" },
+        { "de", "Europe/Berlin" },
+        { "ru", "Europe/Moscow" },
+        { "lv", "Europe/Riga" },
+        { "pt", "America/Cuiaba" },
+        { "it", "Europe/Rome" },
+        { "tr", "Europe/Istanbul" },
+        { "id", "Europe/London" },
+        { "zh", "Asia/Shanghai" },
+        { "ja", "Asia/Tokyo" },
+        { "ko", "Asia/Seoul" },
+        { "az", "Asia/Baku" },
+        { "cs", "Europe/Warsaw" },
+        { "el", "Europe/Warsaw" },
+        { "fi", "Europe/Warsaw" },
+        { "pl", "Europe/Warsaw" },
+        { "uk", "Europe/Kiev" },
+        { "vi", "Asia/Shanghai" }
     };
 
     private static readonly Dictionary<string, CultureInfo> _cultureUiMap = new()
@@ -97,24 +103,9 @@ public class TimeZonesProvider(ILogger<TimeZonesProvider> logger, CommonConstant
 
     public TimeZoneInfo GetCurrentTimeZoneInfo(string languageKey)
     {
-        var time = _timeZones.TryGetValue(languageKey, out var zone) ? zone : _timeZones[""];
-        try
-        {
-            try
-            {
-                return TimeZoneInfo.FindSystemTimeZoneById(time.Value);
-            }
-            catch (TimeZoneNotFoundException)
-            {
-                return TimeZoneInfo.FindSystemTimeZoneById(time.Key);
-            }
-        }
-        catch (Exception e)
-        {
-            logger.LogError(e, "GetCurrentTimeZoneInfo");
+        var timeZoneId = _timeZoneMap.TryGetValue(languageKey, out var id) ? id : _timeZoneMap[""];
 
-            return TimeZoneInfo.Utc;
-        }
+        return TimeZoneConverter.GetTimeZone(timeZoneId);
     }
 
     public CultureInfo GetCurrentCulture(string languageKey)

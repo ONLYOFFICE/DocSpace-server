@@ -840,6 +840,13 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
+                    b.Property<string>("ServiceGroup")
+                        .HasMaxLength(128)
+                        .HasColumnType("varchar")
+                        .HasColumnName("service_group")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
                     b.Property<string>("ServiceName")
                         .HasMaxLength(128)
                         .HasColumnType("varchar")
@@ -870,7 +877,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         new
                         {
                             TenantId = -1,
-                            Features = "trial,audit,ldap,sso,customization,thirdparty,restore,oauth,total_size:107374182400,file_size:100,manager:1,statistic",
+                            Features = "trial,audit,ldap,sso,customization,thirdparty,restore,oauth,total_size:107374182400,file_size:100,manager:1,statistic,automationapi",
                             Name = "trial",
                             Price = 0m,
                             Visible = false,
@@ -880,7 +887,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         {
                             TenantId = -2,
                             Description = "until 01.04.2024",
-                            Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:107374182400,file_size:1024,manager:1,statistic,free_backup:2:fixed",
+                            Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:107374182400,file_size:1024,manager:1,statistic,free_backup:2:fixed,automationapi",
                             Name = "admin",
                             Price = 15m,
                             ProductId = "1002",
@@ -890,7 +897,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         new
                         {
                             TenantId = -3,
-                            Features = "free,oauth,total_size:2147483648,manager:3,room:12",
+                            Features = "free,oauth,total_size:2147483648,manager:3,room:12,automationapi",
                             Name = "startup",
                             Price = 0m,
                             Visible = false,
@@ -919,7 +926,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         new
                         {
                             TenantId = -6,
-                            Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,file_size:1024,statistic,free_backup:2:fixed",
+                            Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,file_size:1024,statistic,free_backup:2:fixed,automationapi",
                             Name = "subscription",
                             Price = 0m,
                             ProductId = "1001",
@@ -929,7 +936,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         new
                         {
                             TenantId = -7,
-                            Features = "non-profit,audit,ldap,sso,thirdparty,restore,oauth,contentsearch,total_size:2147483648,file_size:1024,manager:20,statistic",
+                            Features = "non-profit,audit,ldap,sso,thirdparty,restore,oauth,contentsearch,total_size:2147483648,file_size:1024,manager:20,statistic,automationapi",
                             Name = "nonprofit",
                             Price = 0m,
                             ProductId = "1007",
@@ -939,7 +946,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         new
                         {
                             TenantId = -8,
-                            Features = "free,oauth,total_size:107374182400,manager:100,room:100",
+                            Features = "free,oauth,total_size:107374182400,manager:100,room:100,automationapi",
                             Name = "zoom",
                             Price = 0m,
                             Visible = false,
@@ -949,7 +956,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         {
                             TenantId = -9,
                             Description = "since 01.04.2024",
-                            Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,free_backup:2:fixed",
+                            Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,free_backup:2:fixed,automationapi",
                             Name = "admin",
                             Price = 20m,
                             ProductId = "1006",
@@ -960,7 +967,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         {
                             TenantId = -10,
                             Description = "since 10.02.2025",
-                            Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,year,free_backup:2:fixed",
+                            Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,year,free_backup:2:fixed,automationapi",
                             Name = "adminyear",
                             Price = 220m,
                             ProductId = "1009",
@@ -974,6 +981,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Name = "storage",
                             Price = 0.14m,
                             ProductId = "1011",
+                            ServiceName = "disk-storage",
                             Visible = true,
                             Wallet = true
                         },
@@ -983,8 +991,17 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Features = "backup",
                             Name = "backup",
                             Price = 10m,
-                            ProductId = "10006",
                             ServiceName = "backup",
+                            Visible = true,
+                            Wallet = true
+                        },
+                        new
+                        {
+                            TenantId = -13,
+                            Features = "aitools",
+                            Name = "aitools",
+                            Price = 1m,
+                            ServiceName = "ai-tools",
                             Visible = false,
                             Wallet = true
                         });
@@ -1534,6 +1551,55 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasAnnotation("MySql:CharSet", "utf8");
                 });
 
+            modelBuilder.Entity("ASC.Core.Common.EF.Model.Ai.DbAiModelSettings", b =>
+                {
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<int>("ProviderId")
+                        .HasColumnType("int")
+                        .HasColumnName("provider_id");
+
+                    b.Property<string>("ModelId")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("model_id")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<string>("Alias")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("alias")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<string>("Capabilities")
+                        .HasColumnType("json")
+                        .HasColumnName("capabilities")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<bool>("IsEnabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("is_enabled")
+                        .HasDefaultValueSql("'0'");
+
+                    b.HasKey("TenantId", "ProviderId", "ModelId")
+                        .HasName("PRIMARY");
+
+                    b.HasIndex("ProviderId");
+
+                    b.HasIndex("TenantId", "ProviderId")
+                        .HasDatabaseName("IX_tenant_id_provider_id");
+
+                    b.ToTable("ai_model_settings", (string)null);
+
+                    b.HasAnnotation("MySql:CharSet", "utf8");
+                });
+
             modelBuilder.Entity("ASC.Core.Common.EF.Model.Ai.DbAiProvider", b =>
                 {
                     b.Property<int>("Id")
@@ -1545,6 +1611,12 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Property<DateTime>("CreatedOn")
                         .HasColumnType("datetime")
                         .HasColumnName("created_on");
+
+                    b.Property<bool>("HasModelSettings")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("has_model_settings")
+                        .HasDefaultValueSql("'0'");
 
                     b.Property<string>("Key")
                         .IsRequired()
@@ -1604,6 +1676,10 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("datetime")
                         .HasColumnName("created_on");
 
+                    b.Property<DateTime?>("DeletedOn")
+                        .HasColumnType("datetime")
+                        .HasColumnName("deleted_on");
+
                     b.Property<DateTime>("ModifiedOn")
                         .HasColumnType("datetime")
                         .HasColumnName("modified_on");
@@ -1631,6 +1707,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.HasKey("Id")
                         .HasName("PRIMARY");
+
+                    b.HasIndex("DeletedOn")
+                        .HasDatabaseName("IX_deleted_on");
 
                     b.HasIndex("TenantId", "Id")
                         .HasDatabaseName("IX_tenant_id_id");
@@ -1677,6 +1756,32 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasIndex("ChatId");
 
                     b.ToTable("ai_chats_messages", (string)null);
+
+                    b.HasAnnotation("MySql:CharSet", "utf8");
+                });
+
+            modelBuilder.Entity("ASC.Core.Common.EF.Model.Ai.DbDefaultAiProvider", b =>
+                {
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("DefaultModel")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("default_model")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<int>("ProviderId")
+                        .HasColumnType("int")
+                        .HasColumnName("provider_id");
+
+                    b.HasKey("TenantId")
+                        .HasName("PRIMARY");
+
+                    b.ToTable("ai_providers_default", (string)null);
 
                     b.HasAnnotation("MySql:CharSet", "utf8");
                 });
@@ -2283,6 +2388,50 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Data = "{\"Completed\":false}",
                             LastModified = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         });
+                });
+
+            modelBuilder.Entity("ASC.Core.Common.EF.Model.InvitationLink", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)")
+                        .HasColumnName("id")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<int>("CurrentUseCount")
+                        .HasColumnType("int(10)")
+                        .HasColumnName("current_use_count");
+
+                    b.Property<int>("EmployeeType")
+                        .HasColumnType("int(10)")
+                        .HasColumnName("employee_type");
+
+                    b.Property<DateTime>("Expiration")
+                        .HasColumnType("datetime")
+                        .HasColumnName("expiration");
+
+                    b.Property<int?>("MaxUseCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int(10)")
+                        .HasColumnName("max_use_count")
+                        .HasDefaultValueSql("NULL");
+
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int(10)")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id")
+                        .HasName("PRIMARY");
+
+                    b.HasIndex("TenantId")
+                        .HasDatabaseName("tenant_id");
+
+                    b.ToTable("invitation_link", (string)null);
+
+                    b
+                        .HasAnnotation("MySql:CharSet", "utf8")
+                        .HasAnnotation("Relational:Collation", "utf8_general_ci");
                 });
 
             modelBuilder.Entity("ASC.Core.Common.EF.Model.MobileAppInstall", b =>
@@ -3419,6 +3568,46 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasAnnotation("MySql:CharSet", "utf8");
                 });
 
+            modelBuilder.Entity("ASC.Files.Core.EF.DbChatMessageAttachment", b =>
+                {
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<Guid>("ChatId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("chat_id")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<int>("FileId")
+                        .HasColumnType("int")
+                        .HasColumnName("file_id");
+
+                    b.Property<long?>("MessageId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("message_id");
+
+                    b.Property<DateTime>("ModifiedOn")
+                        .HasColumnType("datetime")
+                        .HasColumnName("modified_on");
+
+                    b.HasKey("TenantId", "ChatId", "FileId")
+                        .HasName("PRIMARY");
+
+                    b.HasIndex("ChatId")
+                        .HasDatabaseName("IX_chat_id");
+
+                    b.HasIndex("FileId")
+                        .HasDatabaseName("IX_file_id");
+
+                    b.ToTable("files_chat_message_attachment", (string)null);
+
+                    b
+                        .HasAnnotation("MySql:CharSet", "utf8")
+                        .HasAnnotation("Relational:Collation", "utf8_general_ci");
+                });
+
             modelBuilder.Entity("ASC.Files.Core.EF.DbFile", b =>
                 {
                     b.Property<int>("TenantId")
@@ -3723,6 +3912,46 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasAnnotation("MySql:CharSet", "utf8");
                 });
 
+            modelBuilder.Entity("ASC.Files.Core.EF.DbFilesGroup", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id")
+                        .HasAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Icon")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar")
+                        .HasColumnName("icon")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("varchar")
+                        .HasColumnName("name")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId");
+
+                    b.ToTable("files_group", (string)null);
+
+                    b.HasAnnotation("MySql:CharSet", "utf8");
+                });
+
             modelBuilder.Entity("ASC.Files.Core.EF.DbFilesLink", b =>
                 {
                     b.Property<int>("TenantId")
@@ -3780,10 +4009,70 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
+                    b.Property<bool?>("StartFilling")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("start_filling")
+                        .HasComputedColumnSql("IF(JSON_EXTRACT(`data`, '$.FormFilling.StartFilling') IS NULL, NULL, JSON_EXTRACT(`data`, '$.FormFilling.StartFilling'))", true);
+
                     b.HasKey("TenantId", "EntryId")
                         .HasName("PRIMARY");
 
+                    b.HasIndex("TenantId", "StartFilling", "EntryId")
+                        .HasDatabaseName("idx_tenant_start_entry");
+
                     b.ToTable("files_properties", (string)null);
+                });
+
+            modelBuilder.Entity("ASC.Files.Core.EF.DbFilesRoomGroup", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id")
+                        .HasAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("GroupId")
+                        .HasColumnType("int")
+                        .HasColumnName("group_id");
+
+                    b.Property<int?>("InternalRoomId")
+                        .HasColumnType("int")
+                        .HasColumnName("internal_room_id");
+
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("ThirdpartyRoomId")
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar")
+                        .HasColumnName("thirdparty_room_id")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GroupId")
+                        .HasDatabaseName("idx_group");
+
+                    b.HasIndex("InternalRoomId")
+                        .HasDatabaseName("idx_internal_room");
+
+                    b.HasIndex("ThirdpartyRoomId")
+                        .HasDatabaseName("idx_thirdparty_room");
+
+                    b.HasIndex("TenantId", "GroupId", "InternalRoomId")
+                        .IsUnique()
+                        .HasDatabaseName("uq_roomgroup_internal");
+
+                    b.HasIndex("TenantId", "GroupId", "ThirdpartyRoomId")
+                        .IsUnique()
+                        .HasDatabaseName("uq_roomgroup_thirdparty");
+
+                    b.ToTable("files_roomgroup", (string)null);
+
+                    b.HasAnnotation("MySql:CharSet", "utf8");
                 });
 
             modelBuilder.Entity("ASC.Files.Core.EF.DbFilesSecurity", b =>
@@ -4377,6 +4666,18 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("quota")
                         .HasDefaultValueSql("'-2'");
 
+                    b.Property<bool>("SaveFormAsXLSX")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(true)
+                        .HasColumnName("save_form_as_xlsx");
+
+                    b.Property<bool>("SendFormToExternalDB")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("send_form_to_external_db")
+                        .HasDefaultValueSql("0");
+
                     b.Property<string>("Watermark")
                         .HasColumnType("json")
                         .HasColumnName("watermark")
@@ -4412,6 +4713,10 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("user_id")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<sbyte?>("ReasoningEffort")
+                        .HasColumnType("tinyint")
+                        .HasColumnName("reasoning_effort");
 
                     b.Property<bool>("WebSearchEnabled")
                         .ValueGeneratedOnAdd()
@@ -5225,8 +5530,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasDefaultValueSql("''");
 
                     b.Property<string>("TargetId")
-                        .HasMaxLength(36)
-                        .HasColumnType("varchar(36)")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("target_id")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -5235,8 +5540,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("int")
                         .HasColumnName("tenant_id");
 
-                    b.Property<int>("Triggers")
-                        .HasColumnType("int")
+                    b.Property<long>("Triggers")
+                        .HasColumnType("bigint")
                         .HasColumnName("triggers");
 
                     b.Property<string>("Uri")
@@ -5307,8 +5612,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("int")
                         .HasColumnName("tenant_id");
 
-                    b.Property<int>("Trigger")
-                        .HasColumnType("int")
+                    b.Property<long>("Trigger")
+                        .HasColumnType("bigint")
                         .HasColumnName("trigger");
 
                     b.Property<string>("Uid")
@@ -5464,6 +5769,25 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Navigation("Tenant");
                 });
 
+            modelBuilder.Entity("ASC.Core.Common.EF.Model.Ai.DbAiModelSettings", b =>
+                {
+                    b.HasOne("ASC.Core.Common.EF.Model.Ai.DbAiProvider", "Provider")
+                        .WithMany()
+                        .HasForeignKey("ProviderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Provider");
+
+                    b.Navigation("Tenant");
+                });
+
             modelBuilder.Entity("ASC.Core.Common.EF.Model.Ai.DbAiProvider", b =>
                 {
                     b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
@@ -5495,6 +5819,17 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .IsRequired();
 
                     b.Navigation("Chat");
+                });
+
+            modelBuilder.Entity("ASC.Core.Common.EF.Model.Ai.DbDefaultAiProvider", b =>
+                {
+                    b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tenant");
                 });
 
             modelBuilder.Entity("ASC.Core.Common.EF.Model.ApiKey", b =>
@@ -5542,6 +5877,17 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 });
 
             modelBuilder.Entity("ASC.Core.Common.EF.Model.DbWebstudioSettings", b =>
+                {
+                    b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tenant");
+                });
+
+            modelBuilder.Entity("ASC.Core.Common.EF.Model.InvitationLink", b =>
                 {
                     b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
                         .WithMany()
@@ -5695,6 +6041,17 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Navigation("Tenant");
                 });
 
+            modelBuilder.Entity("ASC.Files.Core.EF.DbChatMessageAttachment", b =>
+                {
+                    b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tenant");
+                });
+
             modelBuilder.Entity("ASC.Files.Core.EF.DbFile", b =>
                 {
                     b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
@@ -5750,6 +6107,17 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Navigation("Tenant");
                 });
 
+            modelBuilder.Entity("ASC.Files.Core.EF.DbFilesGroup", b =>
+                {
+                    b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tenant");
+                });
+
             modelBuilder.Entity("ASC.Files.Core.EF.DbFilesLink", b =>
                 {
                     b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
@@ -5768,6 +6136,31 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Tenant");
+                });
+
+            modelBuilder.Entity("ASC.Files.Core.EF.DbFilesRoomGroup", b =>
+                {
+                    b.HasOne("ASC.Files.Core.EF.DbFilesGroup", "Group")
+                        .WithMany()
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ASC.Files.Core.EF.DbFolder", "InternalRoom")
+                        .WithMany()
+                        .HasForeignKey("InternalRoomId");
+
+                    b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Group");
+
+                    b.Navigation("InternalRoom");
 
                     b.Navigation("Tenant");
                 });

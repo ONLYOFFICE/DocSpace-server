@@ -120,6 +120,9 @@
   <data name="AiSettingsAccessDenied" xml:space="preserve">
     <value>No tiene permiso para gestionar los ajustes de la IA</value>
   </data>
+  <data name="AttachmentProcessFailed" xml:space="preserve">
+    <value>No se pueden procesar los archivos: {0}. Es posible que los archivos estén dañados o cifrados</value>
+  </data>
   <data name="ChatAccessDenied" xml:space="preserve">
     <value>No tiene permiso para utilizar el chat</value>
   </data>
@@ -171,7 +174,19 @@
   <data name="UnavailableServers" xml:space="preserve">
     <value>Los servidores MCP no están disponibles: {0}. Compruebe la configuración de la conexión</value>
   </data>
-  <data name="AttachmentProcessFailed" xml:space="preserve">
-    <value>No se pueden procesar los archivos: {0}. Es posible que los archivos estén dañados o cifrados</value>
+  <data name="MessageNotFound" xml:space="preserve">
+    <value>Mensaje no encontrado</value>
+  </data>
+  <data name="NoModelsAvailable" xml:space="preserve">
+    <value>No hay modelos disponibles para este proveedor</value>
+  </data>
+  <data name="ProviderNameExists" xml:space="preserve">
+    <value>El nombre del proveedor ya existe</value>
+  </data>
+  <data name="ModelDisabled" xml:space="preserve">
+    <value>El modelo ha sido desactivado por la configuración de su proveedor.</value>
+  </data>
+  <data name="ServerAlreadyAdded" xml:space="preserve">
+    <value>El servidor ya ha sido añadido al agente</value>
   </data>
 </root>

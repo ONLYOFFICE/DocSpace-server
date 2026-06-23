@@ -120,6 +120,9 @@
   <data name="AiSettingsAccessDenied" xml:space="preserve">
     <value>Немате дозволу да управљате AI подешавањима</value>
   </data>
+  <data name="AttachmentProcessFailed" xml:space="preserve">
+    <value>Није могуће обрадити датотеке: {0}. Датотеке су можда оштећене или шифроване</value>
+  </data>
   <data name="ChatAccessDenied" xml:space="preserve">
     <value>Немате дозволу да користите чет</value>
   </data>
@@ -171,7 +174,19 @@
   <data name="UnavailableServers" xml:space="preserve">
     <value>MCP сервери нису доступни: {0}. Проверите подешавања везе</value>
   </data>
-  <data name="AttachmentProcessFailed" xml:space="preserve">
-    <value>Није могуће обрадити датотеке: {0}. Датотеке су можда оштећене или шифроване</value>
+  <data name="MessageNotFound" xml:space="preserve">
+    <value>Порука није пронађена</value>
+  </data>
+  <data name="NoModelsAvailable" xml:space="preserve">
+    <value>Нема доступних модела за овог провајдера</value>
+  </data>
+  <data name="ProviderNameExists" xml:space="preserve">
+    <value>Назив провајдера већ постоји</value>
+  </data>
+  <data name="ModelDisabled" xml:space="preserve">
+    <value>Модел је онемогућен подешавањима вашег провајдера.</value>
+  </data>
+  <data name="ServerAlreadyAdded" xml:space="preserve">
+    <value>Сервер је већ додат агенту</value>
   </data>
 </root>

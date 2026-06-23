@@ -1,28 +1,35 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 using ASC.Files.Core.Security;
 
@@ -31,13 +38,13 @@ namespace ASC.Migration.Core.Migrators;
 public abstract class Migrator(
     SecurityContext securityContext,
     UserManager userManager,
+    UserPhotoManager userPhotoManager,
     TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
     QuotaSocketManager quotaSocketManager,
     FileStorageService fileStorageService,
     GlobalFolderHelper globalFolderHelper,
     IServiceProvider serviceProvider,
     IDaoFactory daoFactory,
-    EntryManager entryManager,
     MigrationLogger migrationLogger,
     AuthContext authContext,
     DisplayUserSettingsHelper displayUserSettingsHelper,
@@ -48,13 +55,13 @@ public abstract class Migrator(
     protected SecurityContext SecurityContext { get; } = securityContext;
     protected UserSocketManager SocketManager { get; } = socketManager;
     protected UserManager UserManager { get; } = userManager;
+    protected UserPhotoManager UserPhotoManager { get; } = userPhotoManager;
     private TenantQuotaFeatureStatHelper TenantQuotaFeatureStatHelper { get; } = tenantQuotaFeatureStatHelper;
     private QuotaSocketManager QuotaSocketManager { get; } = quotaSocketManager;
     private FileStorageService FileStorageService { get; } = fileStorageService;
     private GlobalFolderHelper GlobalFolderHelper { get; } = globalFolderHelper;
     private IServiceProvider ServiceProvider { get; } = serviceProvider;
     private IDaoFactory DaoFactory { get; } = daoFactory;
-    private EntryManager EntryManager { get; } = entryManager;
     protected MigrationLogger MigrationLogger { get; } = migrationLogger;
     private AuthContext AuthContext { get; } = authContext;
     protected DisplayUserSettingsHelper DisplayUserSettingsHelper { get; } = displayUserSettingsHelper;
@@ -144,8 +151,8 @@ public abstract class Migrator(
             }
             catch (Exception e)
             {
-                Log(MigrationResource.СanNotImportCommonFiles, e);
-                MigrationInfo.Errors.Add(MigrationResource.СanNotImportCommonFiles);
+                Log(MigrationResource.CanNotImportCommonFiles, e);
+                MigrationInfo.Errors.Add(MigrationResource.CanNotImportCommonFiles);
             }
         }
 
@@ -158,8 +165,8 @@ public abstract class Migrator(
             }
             catch (Exception e)
             {
-                Log(MigrationResource.СanNotImportProjectFiles, e);
-                MigrationInfo.Errors.Add(MigrationResource.СanNotImportProjectFiles);
+                Log(MigrationResource.CanNotImportProjectFiles, e);
+                MigrationInfo.Errors.Add(MigrationResource.CanNotImportProjectFiles);
             }
         }
 
@@ -189,7 +196,7 @@ public abstract class Migrator(
 
                 if (user.ShouldImport && (saved.Equals(Constants.LostUser) || saved.Removed))
                 {
-                    DataСhange(user);
+                    DataChange(user);
                     user.Info.UserName = await UserManagerWrapper.MakeUniqueNameAsync(user.Info);
                     user.Info.ActivationStatus = EmployeeActivationStatus.Pending;
                     saved = await UserManager.SaveUserInfo(user.Info, user.UserType);
@@ -219,7 +226,7 @@ public abstract class Migrator(
                         {
                             await fs.CopyToAsync(ms);
                         }
-                        await UserManager.SaveUserPhotoAsync(user.Info.Id, ms.ToArray());
+                        await UserPhotoManager.SaveOrUpdatePhoto(user.Info.Id, ms.ToArray());
                     }
                 }
                 if (saved.Equals(Constants.LostUser))
@@ -246,7 +253,7 @@ public abstract class Migrator(
         }
     }
 
-    private static void DataСhange(MigrationUser user)
+    private static void DataChange(MigrationUser user)
     {
         user.Info.UserName ??= user.Info.Email.Split('@').First();
         user.Info.LastName ??= user.Info.FirstName;
@@ -327,7 +334,7 @@ public abstract class Migrator(
             newFolder = storage.Type == FolderType.USER
             ? await FileStorageService.CreateFolderAsync(await GlobalFolderHelper.FolderMyAsync, $"ASC migration files {DateTime.Now:dd.MM.yyyy}")
                     : await FileStorageService.CreateRoomAsync($"ASC migration common files {DateTime.Now:dd.MM.yyyy}", RoomType.PublicRoom, false, false, new List<FileShareParams>(), 0, null, false, null, null, null, null, null);
-            Log(MigrationResource.СreateRootFolder);
+            Log(MigrationResource.CreateRootFolder);
         }
         else
         {
@@ -346,10 +353,12 @@ public abstract class Migrator(
                 {
                     newFolder = await FileStorageService.CreateRoomAsync(folder.Title, folder.Private ? RoomType.EditingRoom : RoomType.CustomRoom, false, false, null, 0, null, false, null, null, null, null, null);
 
-                    var owner = MigrationInfo.Users[folder.Owner];
-                    if (owner.UserType is EmployeeType.DocSpaceAdmin or EmployeeType.RoomAdmin && newFolder.CreateBy != owner.Info.Id)
+                    if (MigrationInfo.Users.TryGetValue(folder.Owner, out var owner))
                     {
-                        await FileStorageService.ChangeOwnerAsync([newFolder.Id], [], owner.Info.Id).ToListAsync();
+                        if (owner.UserType is EmployeeType.DocSpaceAdmin or EmployeeType.RoomAdmin && newFolder.CreateBy != owner.Info.Id)
+                        {
+                            await FileStorageService.ChangeOwnerAsync([newFolder.Id], [], owner.Info.Id).ToListAsync();
+                        }
                     }
 
                     Log(string.Format(MigrationResource.CreateShareRoom, newFolder.Title));
@@ -450,7 +459,7 @@ public abstract class Migrator(
                     {
                         migrationGroup = new MigrationGroup
                         {
-                            Info = new GroupInfo()
+                            Info = new GroupInfo
                             {
                                 ID = Constants.GroupEveryone.ID,
                                 Name = Constants.GroupEveryone.Name
@@ -461,7 +470,7 @@ public abstract class Migrator(
                     {
                         migrationGroup = new MigrationGroup
                         {
-                            Info = new GroupInfo()
+                            Info = new GroupInfo
                             {
                                 ID = Constants.GroupAdmin.ID,
                                 Name = Constants.GroupAdmin.Name
@@ -479,7 +488,7 @@ public abstract class Migrator(
                     continue;
                 }
 
-                var ace = new AceWrapper()
+                var ace = new AceWrapper
                 {
                     Access = (Files.Core.Security.FileShare)security.Security,
                     Id = migrationUser != null ? migrationUser.Info.Id : migrationGroup.Info.ID
@@ -540,6 +549,14 @@ public abstract class Migrator(
         }
         var folder = storage.Folders.FirstOrDefault(f => f.Id == security.EntryId);
         return folder?.Level ?? 0;
+    }
+
+    public async Task SaveLogAsync()
+    {
+        if (MigrationLogger != null)
+        {
+            await MigrationLogger.SaveLogAsync();
+        }
     }
 
     public async ValueTask DisposeAsync()

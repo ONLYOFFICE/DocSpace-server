@@ -1,32 +1,39 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 //
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY; without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 //
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 //
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 //
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 //
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical
-// writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+//
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
 
 package com.asc.authorization.application.configuration.authorization;
 
+import com.asc.authorization.application.configuration.properties.SecurityConfigurationProperties;
 import com.asc.authorization.application.security.filter.BasicSignatureAuthenticationFilter;
 import com.asc.authorization.application.security.filter.RateLimiterFilter;
 import com.asc.authorization.application.security.oauth.converter.FallbackScopeAuthorizationCodeRequestConverter;
@@ -35,9 +42,11 @@ import com.asc.authorization.application.security.oauth.generator.PrefixedAuthor
 import com.asc.authorization.application.security.oauth.provider.PersonalAccessTokenAuthenticationProvider;
 import com.asc.authorization.application.security.oauth.provider.TokenIntrospectionAuthenticationProvider;
 import com.asc.authorization.application.security.provider.SignatureAuthenticationProvider;
+import com.asc.authorization.application.security.service.SignatureService;
 import jakarta.servlet.RequestDispatcher;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,20 +59,21 @@ import org.springframework.core.env.Environment;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AuthorizationCodeRequestAuthenticationProvider;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AuthorizationConsentAuthenticationProvider;
-import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.access.channel.ChannelProcessingFilter;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
+import org.springframework.security.web.csrf.CsrfFilter;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -92,13 +102,8 @@ public class AuthorizationServerConfiguration {
 
   private final AuthorizationFormConfiguration formConfiguration;
 
-  private final RateLimiterFilter rateLimiterFilter;
+  private final Optional<RateLimiterFilter> rateLimiterFilter;
   private final BasicSignatureAuthenticationFilter authenticationFilter;
-
-  private final FallbackScopeAuthorizationCodeRequestConverter
-      fallbackScopeAuthorizationCodeRequestConverter;
-  private final PersonalAccessTokenAuthenticationConverter
-      personalAccessTokenAuthenticationConverter;
 
   private final PersonalAccessTokenAuthenticationProvider personalAccessTokenAuthenticationProvider;
   private final SignatureAuthenticationProvider codeAuthenticationProvider;
@@ -119,7 +124,16 @@ public class AuthorizationServerConfiguration {
   @Bean
   @Order(Ordered.HIGHEST_PRECEDENCE)
   @SneakyThrows
-  public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) {
+  public SecurityFilterChain authorizationServerSecurityFilterChain(
+      HttpSecurity http,
+      SecurityConfigurationProperties securityConfigurationProperties,
+      RegisteredClientRepository registeredClientRepository,
+      SignatureService signatureService) {
+    var fallbackScopeAuthorizationCodeRequestConverter =
+        new FallbackScopeAuthorizationCodeRequestConverter(registeredClientRepository);
+    var personalAccessTokenAuthenticationConverter =
+        new PersonalAccessTokenAuthenticationConverter(
+            securityConfigurationProperties, signatureService);
     var prefixedCodeGenerator = new PrefixedAuthorizationCodeGenerator(environment, region);
     var authorizationServerConfigurer = new OAuth2AuthorizationServerConfigurer();
     var endpointsMatcher = authorizationServerConfigurer.getEndpointsMatcher();
@@ -247,7 +261,7 @@ public class AuthorizationServerConfiguration {
                   dispatcher.forward(request, response);
                 },
                 PathPatternRequestMatcher.withDefaults().matcher(formConfiguration.getLogin())));
-    http.addFilterBefore(rateLimiterFilter, ChannelProcessingFilter.class);
+    rateLimiterFilter.ifPresent(filter -> http.addFilterBefore(filter, CsrfFilter.class));
     http.addFilterBefore(authenticationFilter, LogoutFilter.class);
 
     http.cors(c -> c.configurationSource(corsConfigurationSource()));

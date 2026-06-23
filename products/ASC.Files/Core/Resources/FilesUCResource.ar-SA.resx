@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AiAgents" xml:space="preserve">
+    <value>وكلاء الذكاء الاصطناعي</value>
+  </data>
   <data name="Archive" xml:space="preserve">
     <value>أرشفة</value>
   </data>
@@ -132,6 +135,9 @@
   <data name="FilesWillBeCompressedZip" xml:space="preserve">
     <value>الملفات سيتم ضغطها في {0}.zip ملف{1}</value>
   </data>
+  <data name="InProcessFormFolder" xml:space="preserve">
+    <value>قيد التنفيذ</value>
+  </data>
   <data name="MyFiles" xml:space="preserve">
     <value>ملفاتي</value>
   </data>
@@ -144,8 +150,14 @@
   <data name="ProjectFiles" xml:space="preserve">
     <value>في المشاريع</value>
   </data>
+  <data name="ReadyFormFolder" xml:space="preserve">
+    <value>أكمل</value>
+  </data>
   <data name="Recent" xml:space="preserve">
     <value>مؤخراً</value>
+  </data>
+  <data name="RoomTemplates" xml:space="preserve">
+    <value>قوالب</value>
   </data>
   <data name="SharedForMe" xml:space="preserve">
     <value>تمت مشاركتها معي</value>
@@ -155,17 +167,5 @@
   </data>
   <data name="VirtualRooms" xml:space="preserve">
     <value>غرف</value>
-  </data>
-  <data name="InProcessFormFolder" xml:space="preserve">
-    <value>قيد التنفيذ</value>
-  </data>
-  <data name="ReadyFormFolder" xml:space="preserve">
-    <value>أكمل</value>
-  </data>
-  <data name="RoomTemplates" xml:space="preserve">
-    <value>قوالب</value>
-  </data>
-  <data name="AiAgents" xml:space="preserve">
-    <value>وكلاء الذكاء الاصطناعي</value>
   </data>
 </root>

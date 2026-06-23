@@ -1,28 +1,35 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 using DriveFile = Google.Apis.Drive.v3.Data.File;
 using IHttpClientFactory = System.Net.Http.IHttpClientFactory;
@@ -32,7 +39,7 @@ namespace ASC.Files.Thirdparty.GoogleDrive;
 [Transient(typeof(IThirdPartyStorage<DriveFile, DriveFile, DriveFile>))]
 internal class GoogleDriveStorage(
         FileUtility fileUtility,
-        ILoggerProvider monitor,
+        ILoggerFactory loggerFactory,
         TempStream tempStream,
         OAuth20TokenHelper oAuth20TokenHelper,
         IHttpClientFactory clientFactory)
@@ -59,7 +66,7 @@ internal class GoogleDriveStorage(
     }
 
     private const long MaxChunkedUploadFileSize = 2L * 1024L * 1024L * 1024L;
-    private readonly ILogger _logger = monitor.CreateLogger("ASC.Files");
+    private readonly ILogger _logger = loggerFactory.CreateLogger("ASC.Files");
     private DriveService _driveService;
     private OAuth20Token _token;
 
@@ -83,6 +90,7 @@ internal class GoogleDriveStorage(
             TokenType = "Bearer"
         };
 
+#pragma warning disable CA2000 // GoogleAuthorizationCodeFlow is owned by UserCredential
         var apiCodeFlow = new GoogleAuthorizationCodeFlow(new GoogleAuthorizationCodeFlow.Initializer
         {
             ClientSecrets = new ClientSecrets
@@ -92,6 +100,7 @@ internal class GoogleDriveStorage(
             },
             Scopes = [DriveService.Scope.Drive]
         });
+#pragma warning restore CA2000
 
         _driveService = new DriveService(new BaseClientService.Initializer
         {
@@ -192,15 +201,13 @@ internal class GoogleDriveStorage(
             downloadArg = $"{file.Id}/export?mimeType={HttpUtility.UrlEncode(requiredMimeType)}";
         }
 
-        var request = new HttpRequestMessage
-        {
-            RequestUri = new Uri(GoogleLoginProvider.GoogleUrlFile + downloadArg),
-            Method = HttpMethod.Get
-        };
+        using var request = new HttpRequestMessage(HttpMethod.Get, GoogleLoginProvider.GoogleUrlFile + downloadArg);
 
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AccessToken);
 
+#pragma warning disable CA2000 // HttpClient is short-lived and disposed by runtime
         var httpClient = clientFactory.CreateClient();
+#pragma warning restore CA2000
         var response = await httpClient.SendAsync(request, completionOption);
         return response;
     }
@@ -325,18 +332,16 @@ internal class GoogleDriveStorage(
             body = !string.IsNullOrEmpty(titleData + parentData) ? "{" + titleData + parentData + "}" : "";
         }
 
-        var request = new HttpRequestMessage
-        {
-            RequestUri = new Uri(GoogleLoginProvider.GoogleUrlFileUpload + fileId + "?uploadType=resumable"),
-            Method = new HttpMethod(method)
-        };
+        using var request = new HttpRequestMessage(new HttpMethod(method), GoogleLoginProvider.GoogleUrlFileUpload + fileId + "?uploadType=resumable");
 
         request.Headers.Add("X-Upload-Content-Type", MimeMapping.GetMimeMapping(driveFile.Name));
         request.Headers.Add("X-Upload-Content-Length", contentLength.ToString(CultureInfo.InvariantCulture));
         request.Headers.Add("Authorization", "Bearer " + AccessToken);
         request.Content = new StringContent(body, Encoding.UTF8, "application/json");
 
+#pragma warning disable CA2000 // HttpClient is short-lived and disposed by runtime
         var httpClient = clientFactory.CreateClient();
+#pragma warning restore CA2000
         using var response = await httpClient.SendAsync(request);
 
         if (!response.IsSuccessStatusCode)
@@ -362,11 +367,7 @@ internal class GoogleDriveStorage(
             throw new InvalidOperationException("Can't upload chunk for given upload session.");
         }
 
-        var request = new HttpRequestMessage
-        {
-            RequestUri = new Uri(googleDriveSession.Location),
-            Method = HttpMethod.Put
-        };
+        using var request = new HttpRequestMessage(HttpMethod.Put, new Uri(googleDriveSession.Location));
         request.Headers.Add("Authorization", "Bearer " + AccessToken);
         request.Content = new StreamContent(stream);
         if (googleDriveSession.BytesToTransfer > 0)
@@ -395,7 +396,9 @@ internal class GoogleDriveStorage(
                                                bytesToTransfer - 1);
             }
         }
+#pragma warning disable CA2000 // HttpClient is short-lived and disposed by runtime
         var httpClient = clientFactory.CreateClient();
+#pragma warning restore CA2000
         HttpResponseMessage response;
 
         try
@@ -408,27 +411,29 @@ internal class GoogleDriveStorage(
             throw;
         }
 
-        if (response.StatusCode != HttpStatusCode.Created && response.StatusCode != HttpStatusCode.OK)
+        using (response)
         {
-            googleDriveSession.BytesTransferred += chunkLength;
-
-            var locationHeader = response.Headers.Location;
-
-            if (locationHeader != null)
+            if (response.StatusCode != HttpStatusCode.Created && response.StatusCode != HttpStatusCode.OK)
             {
-                googleDriveSession.Location = locationHeader.ToString();
+                googleDriveSession.BytesTransferred += chunkLength;
+
+                var locationHeader = response.Headers.Location;
+
+                if (locationHeader != null)
+                {
+                    googleDriveSession.Location = locationHeader.ToString();
+                }
             }
+            else
+            {
+                googleDriveSession.BytesTransferred += chunkLength;
+                googleDriveSession.Status = RenewableUploadSessionStatus.Completed;
 
-        }
-        else
-        {
-            googleDriveSession.BytesTransferred += chunkLength;
-            googleDriveSession.Status = RenewableUploadSessionStatus.Completed;
+                var responseString = await response.Content.ReadAsStringAsync();
+                var responseJson = JObject.Parse(responseString);
 
-            var responseString = await response.Content.ReadAsStringAsync();
-            var responseJson = JObject.Parse(responseString);
-
-            googleDriveSession.FileId = responseJson.Value<string>("id");
+                googleDriveSession.FileId = responseJson.Value<string>("id");
+            }
         }
     }
 

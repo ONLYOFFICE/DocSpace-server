@@ -1,0 +1,17 @@
+{{>licenseInfo}}
+
+package {{invokerPackage}}.auth;
+
+import org.openapitools.client.Pair;
+import java.util.List;
+import java.util.Map;
+
+public class OpenIdAuth implements Authentication {
+
+    @Override
+    public void applyToParams(List<Pair> queryParams,
+                              Map<String, String> headerParams,
+                              Map<String, String> cookieParams) {
+        return;
+    }
+}

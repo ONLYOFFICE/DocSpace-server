@@ -1,29 +1,35 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 //
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY; without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 //
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 //
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 //
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 //
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical
-// writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+//
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
 
 package com.asc.registration.service;
 
@@ -38,6 +44,7 @@ import com.asc.registration.core.domain.entity.Client;
 import com.asc.registration.core.domain.exception.ClientNotFoundException;
 import com.asc.registration.service.mapper.ClientDataMapper;
 import com.asc.registration.service.ports.output.repository.ClientQueryRepository;
+import com.asc.registration.service.ports.output.resilience.ClientCacheService;
 import com.asc.registration.service.transfer.request.fetch.ClientInfoPaginationQuery;
 import com.asc.registration.service.transfer.request.fetch.ClientInfoQuery;
 import com.asc.registration.service.transfer.request.fetch.TenantClientQuery;
@@ -52,7 +59,6 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
 /**
  * Handles queries related to client information retrieval.
@@ -62,12 +68,14 @@ import org.springframework.stereotype.Component;
  * limited to clients they have created or that are publicly visible.
  */
 @Slf4j
-@Component
 @RequiredArgsConstructor
 public class ClientQueryHandler {
-  private final ClientDataMapper clientDataMapper;
   private final ClientQueryRepository clientQueryRepository;
+
+  private final ClientCacheService clientCacheService;
   private final EncryptionService encryptionService;
+
+  private final ClientDataMapper clientDataMapper;
 
   /**
    * Helper method to convert a String client id into a {@link ClientId} by wrapping
@@ -114,28 +122,38 @@ public class ClientQueryHandler {
               "Client with ID %s for tenant %s was not found",
               query.getClientId(), query.getTenantId()));
 
-    var client =
-        role.equals(Role.ROLE_ADMIN)
-            ? (clientQueryRepository
-                .findByClientIdAndTenantId(
-                    toClientId(query.getClientId()), new TenantId(query.getTenantId()))
-                .orElseThrow(
-                    () ->
-                        new ClientNotFoundException(
-                            String.format(
-                                "Client with ID %s for tenant %s was not found",
-                                query.getClientId(), query.getTenantId()))))
-            : (clientQueryRepository
-                .findByClientIdAndTenantIdAndCreatorId(
-                    toClientId(query.getClientId()),
-                    new TenantId(query.getTenantId()),
-                    new UserId(query.getUserId()))
-                .orElseThrow(
-                    () ->
-                        new ClientNotFoundException(
-                            String.format(
-                                "Client with ID %s for tenant %s and user %s was not found",
-                                query.getClientId(), query.getTenantId(), query.getUserId()))));
+    var clientId = toClientId(query.getClientId());
+    var tenantId = new TenantId(query.getTenantId());
+    var client = clientCacheService.get(clientId, tenantId).orElse(null);
+    if (client != null && !role.equals(Role.ROLE_ADMIN)) {
+      var userId = new UserId(query.getUserId());
+      if (client.getClientCreationInfo() == null
+          || !client.getClientCreationInfo().getCreatedBy().equals(userId)) client = null;
+    }
+
+    if (client == null) {
+      client =
+          role.equals(Role.ROLE_ADMIN)
+              ? (clientQueryRepository
+                  .findByClientIdAndTenantId(clientId, tenantId)
+                  .orElseThrow(
+                      () ->
+                          new ClientNotFoundException(
+                              String.format(
+                                  "Client with ID %s for tenant %s was not found",
+                                  query.getClientId(), query.getTenantId()))))
+              : (clientQueryRepository
+                  .findByClientIdAndTenantIdAndCreatorId(
+                      clientId, tenantId, new UserId(query.getUserId()))
+                  .orElseThrow(
+                      () ->
+                          new ClientNotFoundException(
+                              String.format(
+                                  "Client with ID %s for tenant %s and user %s was not found",
+                                  query.getClientId(), query.getTenantId(), query.getUserId()))));
+
+      clientCacheService.put(client);
+    }
 
     return decryptAndMapClientResponse(client);
   }
@@ -144,7 +162,8 @@ public class ClientQueryHandler {
    * Retrieves detailed client information based solely on the client identifier.
    *
    * <p>This method bypasses tenant and creator checks, assuming that the client ID is sufficient to
-   * uniquely identify the client.
+   * uniquely identify the client. It attempts cache lookup across all tenants before querying the
+   * database.
    *
    * @param clientId the unique client identifier as a string
    * @return a {@link ClientResponse} containing the detailed client information, including a
@@ -154,13 +173,19 @@ public class ClientQueryHandler {
   public ClientResponse getClient(String clientId) {
     log.info("Retrieving client details for client ID: {}", clientId);
 
-    var client =
-        clientQueryRepository
-            .findById(toClientId(clientId))
-            .orElseThrow(
-                () ->
-                    new ClientNotFoundException(
-                        String.format("Client with ID %s was not found", clientId)));
+    var cid = toClientId(clientId);
+    var client = clientCacheService.getAnyTenant(cid).orElse(null);
+    if (client == null) {
+      client =
+          clientQueryRepository
+              .findById(cid)
+              .orElseThrow(
+                  () ->
+                      new ClientNotFoundException(
+                          String.format("Client with ID %s was not found", clientId)));
+
+      clientCacheService.put(client);
+    }
 
     return decryptAndMapClientResponse(client);
   }
@@ -207,28 +232,38 @@ public class ClientQueryHandler {
               "Client with ID %s for tenant %s was not found",
               query.getClientId(), query.getTenantId()));
 
-    var client =
-        role.equals(Role.ROLE_ADMIN)
-            ? (clientQueryRepository
-                .findByClientIdAndTenantId(
-                    toClientId(query.getClientId()), new TenantId(query.getTenantId()))
-                .orElseThrow(
-                    () ->
-                        new ClientNotFoundException(
-                            String.format(
-                                "Client with ID %s for tenant %s was not found",
-                                query.getClientId(), query.getTenantId()))))
-            : (clientQueryRepository
-                .findByClientIdAndTenantIdAndCreatorId(
-                    toClientId(query.getClientId()),
-                    new TenantId(query.getTenantId()),
-                    new UserId(query.getUserId()))
-                .orElseThrow(
-                    () ->
-                        new ClientNotFoundException(
-                            String.format(
-                                "Client with ID %s for tenant %s and user %s was not found",
-                                query.getClientId(), query.getTenantId(), query.getUserId()))));
+    var clientId = toClientId(query.getClientId());
+    var tenantId = new TenantId(query.getTenantId());
+    var client = clientCacheService.get(clientId, tenantId).orElse(null);
+    if (client != null && !role.equals(Role.ROLE_ADMIN)) {
+      var userId = new UserId(query.getUserId());
+      if (client.getClientCreationInfo() == null
+          || !client.getClientCreationInfo().getCreatedBy().equals(userId)) client = null;
+    }
+
+    if (client == null) {
+      client =
+          role.equals(Role.ROLE_ADMIN)
+              ? (clientQueryRepository
+                  .findByClientIdAndTenantId(clientId, tenantId)
+                  .orElseThrow(
+                      () ->
+                          new ClientNotFoundException(
+                              String.format(
+                                  "Client with ID %s for tenant %s was not found",
+                                  query.getClientId(), query.getTenantId()))))
+              : (clientQueryRepository
+                  .findByClientIdAndTenantIdAndCreatorId(
+                      clientId, tenantId, new UserId(query.getUserId()))
+                  .orElseThrow(
+                      () ->
+                          new ClientNotFoundException(
+                              String.format(
+                                  "Client with ID %s for tenant %s and user %s was not found",
+                                  query.getClientId(), query.getTenantId(), query.getUserId()))));
+
+      clientCacheService.put(client);
+    }
 
     var clientTenant = client.getClientTenantInfo().tenantId().getValue();
     var clientVisibility = client.getVisibility();
@@ -303,7 +338,7 @@ public class ClientQueryHandler {
    * Retrieves basic client information based solely on the client identifier.
    *
    * <p>This method provides a lightweight version of client details without tenant or creator
-   * verification.
+   * verification. It attempts cache lookup across all tenants before querying the database.
    *
    * @param clientId the unique client identifier as a string
    * @return a {@link ClientInfoResponse} containing basic client details
@@ -312,13 +347,19 @@ public class ClientQueryHandler {
   public ClientInfoResponse getClientInfo(String clientId) {
     log.info("Retrieving client basic information by client id: {}", clientId);
 
-    var client =
-        clientQueryRepository
-            .findById(toClientId(clientId))
-            .orElseThrow(
-                () ->
-                    new ClientNotFoundException(
-                        String.format("Client with id %s was not found", clientId)));
+    var cid = toClientId(clientId);
+    var client = clientCacheService.getAnyTenant(cid).orElse(null);
+    if (client == null) {
+      client =
+          clientQueryRepository
+              .findById(cid)
+              .orElseThrow(
+                  () ->
+                      new ClientNotFoundException(
+                          String.format("Client with id %s was not found", clientId)));
+
+      clientCacheService.put(client);
+    }
 
     return clientDataMapper.toClientInfoResponse(client);
   }

@@ -1,28 +1,35 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 using ASC.Core.Common.Identity;
 
@@ -32,9 +39,9 @@ using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Web.Api.Controllers;
 
-///<summary>
+///<remarks>
 /// Portal information access.
-///</summary>
+///</remarks>
 ///<name>portal</name>
 [Scope]
 [DefaultRoute]
@@ -44,6 +51,7 @@ public class PortalController(
     ILogger<PortalController> logger,
     UserManager userManager,
     TenantManager tenantManager,
+    TenantUtil tenantUtil,
     ITariffService tariffService,
     CommonLinkUtility commonLinkUtility,
     IUrlShortener urlShortener,
@@ -51,6 +59,7 @@ public class PortalController(
     CookiesManager cookiesManager,
     SecurityContext securityContext,
     SettingsManager settingsManager,
+    IDistributedLockProvider distributedLockProvider,
     IMobileAppInstallRegistrator mobileAppInstallRegistrator,
     TenantExtra tenantExtra,
     IConfiguration configuration,
@@ -74,15 +83,17 @@ public class PortalController(
     ApiDateTimeHelper apiDateTimeHelper,
     IEventBus eventBus,
     CspSettingsHelper cspSettingsHelper,
-    IdentityClient client)
+    IdentityClient client,
+    InvitationLinkDtoHelper invitationLinkDtoHelper,
+    CountPaidUserChecker countPaidUserChecker)
     : ControllerBase
 {
-    /// <summary>
+    /// <remarks>
     /// Returns the current portal information.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get a portal
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/portal</path>
     [Tags("Portal / Settings")]
     [SwaggerResponse(200, "Current portal information", typeof(TenantDto))]
@@ -106,15 +117,16 @@ public class PortalController(
         return dto;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a user with the ID specified in the request from the current portal.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get a user by ID
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/portal/users/{userID}</path>
     [Tags("Portal / Users")]
     [SwaggerResponse(200, "User information", typeof(UserInfo))]
+    [SwaggerResponse(404, "The user could not be found")]
     [HttpGet("users/{userID:guid}")]
     public async Task<UserInfo> GetUserById(UserIDRequestDto inDto)
     {
@@ -123,19 +135,27 @@ public class PortalController(
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
-        return await userManager.GetUsersAsync(inDto.Id);
+        var user = await userManager.GetUsersAsync(inDto.Id);
+
+        if (userManager.IsSystemUser(user.Id))
+        {
+            throw new ItemNotFoundException(Resource.ErrorUserNotFound);
+        }
+
+        return user;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns an invitation link for joining the portal.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get an invitation link
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/portal/users/invite/{employeeType}</path>
     [Tags("Portal / Users")]
     [SwaggerResponse(200, "Invitation link", typeof(string))]
     [HttpGet("users/invite/{employeeType}")]
+    [Obsolete("Use CRUD /api/2.0/portal/users/invitationlink instead")]
     public async Task<string> GetInvitationLink(InvitationLinkRequestDto inDto)
     {
         var invitationSettings = await settingsManager.LoadAsync<TenantUserInvitationSettings>();
@@ -162,12 +182,220 @@ public class PortalController(
         return await urlShortener.GetShortenLinkAsync(link);
     }
 
+    /// <remarks>
+    /// Returns an invitation link for joining the portal.
+    /// </remarks>
     /// <summary>
-    /// Returns an extra tenant license for the portal.
+    /// Create an invitation link
     /// </summary>
-    /// <short>
+    /// <path>api/2.0/portal/users/invitationlink</path>
+    [Tags("Portal / Users")]
+    [SwaggerResponse(200, "Invitation link", typeof(InvitationLinkDto))]
+    [HttpPost("users/invitationlink")]
+    public async Task<InvitationLinkDto> CreateInvitationLink(InvitationLinkCreateRequestDto inDto)
+    {
+        var invitationSettings = await settingsManager.LoadAsync<TenantUserInvitationSettings>();
+        if (!invitationSettings.AllowInvitingMembers)
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+
+        if (inDto.EmployeeType is not (EmployeeType.DocSpaceAdmin or EmployeeType.RoomAdmin or EmployeeType.User))
+        {
+            throw new ArgumentException(nameof(inDto.EmployeeType));
+        }
+
+        var expiration = DateTime.MinValue;
+        if (inDto.Expiration.HasValue)
+        {
+            expiration = tenantUtil.DateTimeToUtc(inDto.Expiration.Value);
+            if (expiration != DateTime.MinValue && expiration < DateTime.UtcNow)
+            {
+                throw new ArgumentException(nameof(inDto.Expiration));
+            }
+        }
+
+        var tenant = tenantManager.GetCurrentTenant();
+        var currentUserId = authContext.CurrentAccount.ID;
+
+        if ((inDto.EmployeeType == EmployeeType.DocSpaceAdmin && !currentUserId.IsOwner(tenant)) ||
+            !await permissionContext.CheckPermissionsAsync(new UserSecurityProvider(Guid.Empty, inDto.EmployeeType), Constants.Action_AddRemoveUser))
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+
+        if (inDto.EmployeeType is EmployeeType.RoomAdmin or EmployeeType.DocSpaceAdmin)
+        {
+            await countPaidUserChecker.CheckAppend();
+        }
+
+        await using (await distributedLockProvider.TryAcquireFairLockAsync($"invitationlink_{tenant.Id}"))
+        {
+            var existedInvitationLink = await userManager.GetInvitationLinkAsync(inDto.EmployeeType);
+            if (existedInvitationLink != null)
+            {
+                throw new ArgumentException("link with the same EmployeeType already exists");
+            }
+
+            var invitationLink = await userManager.CreateInvitationLinkAsync(inDto.EmployeeType, expiration, inDto.MaxUseCount);
+
+            var result = await invitationLinkDtoHelper.GetAsync(invitationLink, tenant.Alias, currentUserId);
+
+            return result;
+        }
+    }
+
+    /// <remarks>
+    /// Returns an invitation link for joining the portal.
+    /// </remarks>
+    /// <summary>
+    /// Get an invitation link
+    /// </summary>
+    /// <path>api/2.0/portal/users/invitationlink/{employeeType}</path>
+    [Tags("Portal / Users")]
+    [SwaggerResponse(200, "Invitation link", typeof(InvitationLinkDto))]
+    [HttpGet("users/invitationlink/{employeeType}")]
+    public async Task<InvitationLinkDto> GetInvitationLinkByEmployeeType(InvitationLinkRequestDto inDto)
+    {
+        if (inDto.EmployeeType is not (EmployeeType.DocSpaceAdmin or EmployeeType.RoomAdmin or EmployeeType.User))
+        {
+            throw new ArgumentException(nameof(inDto.EmployeeType));
+        }
+
+        var invitationSettings = await settingsManager.LoadAsync<TenantUserInvitationSettings>();
+        if (!invitationSettings.AllowInvitingMembers)
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+
+        var tenant = tenantManager.GetCurrentTenant();
+        var currentUserId = authContext.CurrentAccount.ID;
+
+        if ((inDto.EmployeeType == EmployeeType.DocSpaceAdmin && !currentUserId.IsOwner(tenant)) ||
+            !await permissionContext.CheckPermissionsAsync(new UserSecurityProvider(Guid.Empty, inDto.EmployeeType), Constants.Action_AddRemoveUser))
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+
+        if (inDto.EmployeeType is EmployeeType.RoomAdmin or EmployeeType.DocSpaceAdmin)
+        {
+            await countPaidUserChecker.CheckAppend();
+        }
+
+        var invitationLink = await userManager.GetInvitationLinkAsync(inDto.EmployeeType);
+        if (invitationLink == null)
+        {
+            return null;
+        }
+
+        var result = await invitationLinkDtoHelper.GetAsync(invitationLink, tenant.Alias, currentUserId);
+
+        return result;
+    }
+
+    /// <remarks>
+    /// Returns an invitation link for joining the portal.
+    /// </remarks>
+    /// <summary>
+    /// Update an invitation link
+    /// </summary>
+    /// <path>api/2.0/portal/users/invitationlink</path>
+    [Tags("Portal / Users")]
+    [SwaggerResponse(200, "Invitation link", typeof(InvitationLinkDto))]
+    [HttpPut("users/invitationlink")]
+    public async Task<InvitationLinkDto> UpdateInvitationLink(InvitationLinkUpdateRequestDto inDto)
+    {
+        var invitationSettings = await settingsManager.LoadAsync<TenantUserInvitationSettings>();
+        if (!invitationSettings.AllowInvitingMembers)
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+
+        var invitationLink = await userManager.GetInvitationLinkAsync(inDto.Id);
+        if (invitationLink == null)
+        {
+            throw new ItemNotFoundException();
+        }
+
+        if (inDto.MaxUseCount.HasValue && inDto.MaxUseCount.Value < invitationLink.CurrentUseCount)
+        {
+            throw new ArgumentException(nameof(inDto.MaxUseCount));
+        }
+
+        var expiration = DateTime.MinValue;
+        if (inDto.Expiration.HasValue)
+        {
+            expiration = tenantUtil.DateTimeToUtc(inDto.Expiration.Value);
+            if (expiration != DateTime.MinValue && expiration < DateTime.UtcNow)
+            {
+                throw new ArgumentException(nameof(inDto.Expiration));
+            }
+        }
+
+        var tenant = tenantManager.GetCurrentTenant();
+        var currentUserId = authContext.CurrentAccount.ID;
+
+        if ((invitationLink.EmployeeType == EmployeeType.DocSpaceAdmin && !currentUserId.IsOwner(tenant)) ||
+            !await permissionContext.CheckPermissionsAsync(new UserSecurityProvider(Guid.Empty, invitationLink.EmployeeType), Constants.Action_AddRemoveUser))
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+
+        invitationLink.Expiration = expiration;
+        invitationLink.MaxUseCount = inDto.MaxUseCount;
+
+        await userManager.UpdateInvitationLinkAsync(invitationLink.Id, invitationLink.Expiration, invitationLink.MaxUseCount);
+
+        var result = await invitationLinkDtoHelper.GetAsync(invitationLink, tenant.Alias, currentUserId);
+
+        return result;
+    }
+
+    /// <summary>
+    /// Deletes an invitation link.
+    /// </summary>
+    /// <remarks>
+    /// Ensures that the current user has permission to delete the specified invitation link.
+    /// Throws security or not-found exceptions if required conditions are not met.
+    /// </remarks>
+    /// <path>api/2.0/portal/users/invitationlink</path>
+    /// <param name="inDto">The data transfer object containing the details of the invitation link to be deleted.</param>
+    /// <returns>A task that represents the asynchronous delete operation.</returns>
+    [Tags("Portal / Users")]
+    [SwaggerResponse(200, "Invitation link", typeof(string))]
+    [HttpDelete("users/invitationlink")]
+    public async Task DeleteInvitationLink(InvitationLinkDeleteRequestDto inDto)
+    {
+        var invitationSettings = await settingsManager.LoadAsync<TenantUserInvitationSettings>();
+        if (!invitationSettings.AllowInvitingMembers)
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+
+        var invitationLink = await userManager.GetInvitationLinkAsync(inDto.Id);
+        if (invitationLink == null)
+        {
+            throw new ItemNotFoundException();
+        }
+
+        var tenant = tenantManager.GetCurrentTenant();
+        var currentUserId = authContext.CurrentAccount.ID;
+
+        if ((invitationLink.EmployeeType == EmployeeType.DocSpaceAdmin && !currentUserId.IsOwner(tenant)) ||
+            !await permissionContext.CheckPermissionsAsync(new UserSecurityProvider(Guid.Empty, invitationLink.EmployeeType), Constants.Action_AddRemoveUser))
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+
+        await userManager.DeleteInvitationLinkAsync(invitationLink.Id);
+    }
+
+    /// <remarks>
+    /// Returns an extra tenant license for the portal.
+    /// </remarks>
+    /// <summary>
     /// Get an extra tenant license
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/portal/tenantextra</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Portal / Quota")]
@@ -202,12 +430,12 @@ public class PortalController(
     }
 
 
-    /// <summary>
+    /// <remarks>
     /// Returns the used space of the current portal.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get the portal used space
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/portal/usedspace</path>
     [Tags("Portal / Quota")]
     [SwaggerResponse(200, "Used portal space", typeof(double))]
@@ -223,12 +451,12 @@ public class PortalController(
     }
 
 
-    /// <summary>
+    /// <remarks>
     /// Returns a number of portal users.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get a number of portal users
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/portal/userscount</path>
     [Tags("Portal / Users")]
     [SwaggerResponse(200, "Number of portal users", typeof(long))]
@@ -239,12 +467,12 @@ public class PortalController(
         return (await userManager.GetUserNamesAsync(EmployeeStatus.Active)).Length;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the current portal tariff.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get a portal tariff
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/portal/tariff</path>
     [Tags("Portal / Quota")]
     [SwaggerResponse(200, "Current portal tariff", typeof(Tariff))]
@@ -257,7 +485,7 @@ public class PortalController(
 
         var result = new TariffDto
         {
-            State = source.State,
+            State = source.State
         };
 
         var currentUserType = await userManager.GetUserTypeAsync(securityContext.CurrentAccount.ID);
@@ -282,12 +510,12 @@ public class PortalController(
         return result;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the current portal quota.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get a portal quota
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/portal/quota</path>
     [Tags("Portal / Quota")]
     [SwaggerResponse(200, "Current portal quota", typeof(TenantQuota))]
@@ -296,10 +524,7 @@ public class PortalController(
     [HttpGet("quota")]
     public async Task<TenantQuota> GetPortalQuota()
     {
-        if (await userManager.IsGuestAsync(securityContext.CurrentAccount.ID))
-        {
-            throw new SecurityException();
-        }
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var tenant = tenantManager.GetCurrentTenant();
         var result = await tenantManager.GetTenantQuotaAsync(tenant.Id);
@@ -312,18 +537,21 @@ public class PortalController(
         return result;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the recommended quota for the current portal.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get the recommended quota
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/portal/quota/right</path>
     [Tags("Portal / Quota")]
     [SwaggerResponse(200, "Recommended portal quota", typeof(TenantQuota))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("quota/right")]
     public async Task<TenantQuota> GetRightQuota()
     {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
         var usedSpace = await GetPortalUsedSpace();
         var needUsersCount = await GetPortalUsersCount();
 
@@ -335,12 +563,12 @@ public class PortalController(
     }
 
 
-    /// <summary>
+    /// <remarks>
     /// Returns the full absolute path to the current portal.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get a path to the portal
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/portal/path</path>
     [Tags("Portal / Settings")]
     [SwaggerResponse(200, "Portal path", typeof(object))]
@@ -350,12 +578,12 @@ public class PortalController(
         return commonLinkUtility.GetFullAbsolutePath(inDto.VirtualPath);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a thumbnail for the URL specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get a portal thumbnail
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/portal/thumb</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Portal / Settings")]
@@ -371,12 +599,10 @@ public class PortalController(
         inDto.Url = inDto.Url.Replace("&amp;", "&");
         inDto.Url = WebUtility.UrlEncode(inDto.Url);
 
-        var request = new HttpRequestMessage
-        {
-            RequestUri = new Uri(string.Format(configuration["bookmarking:thumbnail-url"], inDto.Url))
-        };
-
+        using var request = new HttpRequestMessage(HttpMethod.Get, string.Format(configuration["bookmarking:thumbnail-url"], inDto.Url));
+#pragma warning disable CA2000
         var httpClient = clientFactory.CreateClient();
+#pragma warning restore CA2000
         using var response = await httpClient.SendAsync(request);
         var bytes = await response.Content.ReadAsByteArrayAsync();
 
@@ -384,12 +610,12 @@ public class PortalController(
         return File(bytes, type);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Marks a gift message as read.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Mark a gift message as read
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/portal/present/mark</path>
     [Tags("Portal / Users")]
     [HttpPost("present/mark")]
@@ -407,12 +633,12 @@ public class PortalController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Registers the mobile application installation by its type.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Register the mobile app installation by its type
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/portal/mobile/registration</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Portal / Settings")]
@@ -423,10 +649,10 @@ public class PortalController(
         await mobileAppInstallRegistrator.RegisterInstallAsync(currentUser.Email, inDto.Type);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Updates a portal name with a new one specified in the request.
-    /// </summary>
-    /// <short>Update a portal name</short>
+    /// </remarks>
+    /// <summary>Update a portal name</summary>
     /// <path>api/2.0/portal/portalrename</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Portal / Settings")]
@@ -449,7 +675,7 @@ public class PortalController(
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var alias = inDto.Alias;
-        if (string.IsNullOrEmpty(alias) || alias.Any(Char.IsWhiteSpace))
+        if (string.IsNullOrEmpty(alias) || alias.Any(char.IsWhiteSpace))
         {
             throw new ArgumentException(nameof(alias));
         }
@@ -489,7 +715,7 @@ public class PortalController(
             tenantManager.SetCurrentTenant(tenant);
 
             messageService.Send(MessageAction.PortalRenamed, MessageTarget.Create(tenant.Id), oldAlias, newAlias, dateTime: messageDate);
-            await cspSettingsHelper.RenameDomain(oldDomain, tenant.GetTenantDomain(coreSettings));
+            await cspSettingsHelper.RenameDomainAsync(oldDomain, tenant.GetTenantDomain(coreSettings));
 
             if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
             {
@@ -533,10 +759,10 @@ public class PortalController(
         return confirmUrl;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Deletes the current portal immediately.
-    /// </summary>
-    /// <short>Delete a portal immediately</short>
+    /// </remarks>
+    /// <summary>Delete a portal immediately</summary>
     /// <path>api/2.0/portal/deleteportalimmediately</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Portal / Settings")]
@@ -557,10 +783,10 @@ public class PortalController(
         return await DeletePortal();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Sends the instructions to suspend the current portal.
-    /// </summary>
-    /// <short>Send suspension instructions</short>
+    /// </remarks>
+    /// <summary>Send suspension instructions</summary>
     /// <path>api/2.0/portal/suspend</path>
     [Tags("Portal / Settings")]
     [AllowNotPayment]
@@ -583,10 +809,10 @@ public class PortalController(
         messageService.Send(MessageAction.OwnerSentPortalDeactivationInstructions, MessageTarget.Create(owner.Id), owner.DisplayUserName(false, displayUserSettingsHelper));
     }
 
-    /// <summary>
+    /// <remarks>
     /// Sends the instructions to remove the current portal.
-    /// </summary>
-    /// <short>Send removal instructions</short>
+    /// </remarks>
+    /// <summary>Send removal instructions</summary>
     /// <path>api/2.0/portal/delete</path>
     [Tags("Portal / Settings")]
     [AllowNotPayment]
@@ -611,10 +837,10 @@ public class PortalController(
         await studioNotifyService.SendMsgPortalDeletionAsync(tenant, await urlShortener.GetShortenLinkAsync(confirmLink), showAutoRenewText);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Restores the current portal.
-    /// </summary>
-    /// <short>Restore a portal</short>
+    /// </remarks>
+    /// <summary>Restore a portal</summary>
     /// <path>api/2.0/portal/continue</path>
     [Tags("Portal / Settings")]
     [AllowSuspended]
@@ -626,13 +852,15 @@ public class PortalController(
         tenant.SetStatus(TenantStatus.Active);
         await tenantManager.SaveTenantAsync(tenant);
 
-        await cspSettingsHelper.UpdateBaseDomain();
+        var current = await settingsManager.LoadAsync<CspSettings>();
+        await cspSettingsHelper.SaveAsync(current.Domains, false);
+        await cspSettingsHelper.UpdateBaseDomainAsync();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Deactivates the current portal.
-    /// </summary>
-    /// <short>Deactivate a portal</short>
+    /// </remarks>
+    /// <summary>Deactivate a portal</summary>
     /// <path>api/2.0/portal/suspend</path>
     [Tags("Portal / Settings")]
     [HttpPut("suspend")]
@@ -647,13 +875,13 @@ public class PortalController(
         await tenantManager.SaveTenantAsync(tenant);
         messageService.Send(MessageAction.PortalDeactivated);
 
-        await cspSettingsHelper.UpdateBaseDomain();
+        await cspSettingsHelper.UpdateBaseDomainAsync();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Deletes the current portal.
-    /// </summary>
-    /// <short>Delete a portal</short>
+    /// </remarks>
+    /// <summary>Delete a portal</summary>
     /// <path>api/2.0/portal/delete</path>
     [Tags("Portal / Settings")]
     [SwaggerResponse(200, "URL to the feedback form about removing a portal", typeof(string))]
@@ -687,7 +915,8 @@ public class PortalController(
 
         messageService.Send(MessageAction.PortalDeleted);
 
-        await cspSettingsHelper.UpdateBaseDomain();
+        await cspSettingsHelper.RemoveFromCacheAsync(tenantDomain);
+        await cspSettingsHelper.UpdateBaseDomainAsync();
 
         if (!coreBaseSettings.Standalone && !quota.Free && tariff.State >= TariffState.Paid)
         {
@@ -700,10 +929,10 @@ public class PortalController(
         return redirectLink;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Sends congratulations to the user after registering a portal.
-    /// </summary>
-    /// <short>Send congratulations</short>
+    /// </remarks>
+    /// <summary>Send congratulations</summary>
     /// <path>api/2.0/portal/sendcongratulations</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Portal / Users")]
@@ -741,10 +970,10 @@ public class PortalController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Sends the instructions to remove a portal of a user with the ID specified in the request.
-    /// </summary>
-    /// <short>Send removal instructions to the user</short>
+    /// </remarks>
+    /// <summary>Send removal instructions to the user</summary>
     /// <path>api/2.0/portal/sendremoveinstructions</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Portal / Users")]
@@ -778,7 +1007,7 @@ public class PortalController(
     {
         if (securityContext.CurrentAccount.ID != tenant.OwnerId)
         {
-            throw new Exception(Resource.ErrorAccessDenied);
+            throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
         if (!coreBaseSettings.Standalone)

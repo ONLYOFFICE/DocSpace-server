@@ -1,28 +1,35 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.ElasticSearch;
 
@@ -148,6 +155,26 @@ public class Selector<T>(IServiceProvider serviceProvider)
         return this;
     }
 
+    public Selector<T> MatchAny(Expression<Func<T, object>> selector, string[] values)
+    {
+        QueryContainer orQuery = null;
+
+        foreach (var value in values)
+        {
+            var prepared = value.PrepareToSearch();
+            var wrapped = prepared.WrapAsterisk();
+            var condition = Wrap(selector, (a, w) => w.Wildcard(r => r.Field(a).Value(wrapped)));
+            orQuery = orQuery == null ? condition : orQuery | condition;
+        }
+
+        if (orQuery != null)
+        {
+            _queryContainer &= orQuery;
+        }
+
+        return this;
+    }
+
     public Selector<T> Match(Expression<Func<T, object[]>> selector, string value)
     {
         Match(() => ((NewArrayExpression)selector.Body).Expressions.ToArray(), value);
@@ -211,6 +238,13 @@ public class Selector<T>(IServiceProvider serviceProvider)
         };
     }
 
+    public Selector<T> NotExists<TProperty>(Expression<Func<T, TProperty>> selector)
+    {
+        _queryContainer = _queryContainer && !_queryContainerDescriptor.Exists(e => e.Field(new Field(selector)));
+
+        return this;
+    }
+
     public Selector<T> Not(Expression<Func<Selector<T>, Selector<T>>> selector)
     {
         return new Selector<T>(_serviceProvider)
@@ -263,6 +297,13 @@ public class Selector<T>(IServiceProvider serviceProvider)
 
             return result;
         };
+    }
+
+    internal Func<CountDescriptor<T>, ICountRequest> GetCountDescriptor(BaseIndexer<T> indexer)
+    {
+        return s => s
+            .Query(_ => _queryContainer)
+            .Index(indexer.IndexName);
     }
 
     internal Func<DeleteByQueryDescriptor<T>, IDeleteByQueryRequest> GetDescriptorForDelete(BaseIndexer<T> indexer, bool immediately = true)
@@ -330,7 +371,7 @@ public class Selector<T>(IServiceProvider serviceProvider)
             }
             else
             {
-                if (value.Any(c => (uint)c >= 0x4E00 && (uint)c <= 0x2FA1F))
+                if (ContainsCjk(value))
                 {
                     _queryContainer = _queryContainer && (MultiMatch(props, value.TrimQuotes()) || MultiWildCard(props, value.WrapAsterisk()));
                 }
@@ -421,12 +462,53 @@ public class Selector<T>(IServiceProvider serviceProvider)
     {
         var qcWildCard = new QueryContainer();
 
+        // CJK text is not word-segmented by the whitespace-based analyzers, so a whole phrase ends up
+        // as a single (or very large) token. Substring matching there only works with a leading
+        // wildcard, so we must NOT strip it for CJK queries — otherwise content search breaks.
+        var keepLeadingWildcard = ContainsCjk(value);
+
         foreach (var field in fields)
         {
-            qcWildCard = qcWildCard || Wrap(field, (a, w) => w.Wildcard(r => r.Field(a).Value(value)));
+            // For the document content field a leading-wildcard ("*term*") forces a full term-dictionary
+            // scan, which is extremely slow on large content indexes. Drop the leading asterisk so the
+            // query becomes a prefix match ("term*") that can use the inverted index.
+            // Short fields (title/comment/changes) keep the substring behaviour.
+            var fieldValue = !keepLeadingWildcard && IsDocumentContentField(field) ? value.TrimStart('*') : value;
+
+            qcWildCard = qcWildCard || Wrap(field, (a, w) => w.Wildcard(r => r.Field(a).Value(fieldValue)));
         }
 
         return qcWildCard;
+    }
+
+    private static bool ContainsCjk(string value)
+    {
+        return value.Any(c => (uint)c >= 0x4E00 && (uint)c <= 0x2FA1F);
+    }
+
+    private static bool IsDocumentContentField(Field field)
+    {
+        if (!string.IsNullOrEmpty(field.Name))
+        {
+            return field.Name.EndsWith("content", StringComparison.OrdinalIgnoreCase);
+        }
+
+        var expression = field.Expression;
+
+        // The field can be passed either as a lambda (x => x.Document.Attachment.Content)
+        // or, when it comes from a "new object[] { ... }" array, as the raw element expression
+        // wrapped in a Convert (boxing to object). Unwrap both forms down to the member access.
+        if (expression is LambdaExpression lambda)
+        {
+            expression = lambda.Body;
+        }
+
+        if (expression is UnaryExpression unary)
+        {
+            expression = unary.Operand;
+        }
+
+        return expression is MemberExpression { Member.Name: "Content" };
     }
 
     private QueryContainer MultiPhrase(Fields fields, string value)
@@ -444,30 +526,33 @@ public class Selector<T>(IServiceProvider serviceProvider)
 
 internal static class StringExtension
 {
-    public static string WrapAsterisk(this string value)
+    extension(string value)
     {
-        var result = value;
-
-        if (!value.Contains('*') && !value.Contains('?'))
+        public string WrapAsterisk()
         {
-            result = "*" + result + "*";
+            var result = value;
+
+            if (!value.Contains('*') && !value.Contains('?'))
+            {
+                result = "*" + result + "*";
+            }
+
+            return result;
         }
 
-        return result;
-    }
+        public string ReplaceBackslash()
+        {
+            return value.Replace("\\", "\\\\");
+        }
 
-    public static string ReplaceBackslash(this string value)
-    {
-        return value.Replace("\\", "\\\\");
-    }
+        public string TrimQuotes()
+        {
+            return value.Trim('\"');
+        }
 
-    public static string TrimQuotes(this string value)
-    {
-        return value.Trim('\"');
-    }
-
-    public static string PrepareToSearch(this string value)
-    {
-        return value.ReplaceBackslash().ToLowerInvariant().Replace('ё', 'е').Replace('Ё', 'Е');
+        public string PrepareToSearch()
+        {
+            return value.ReplaceBackslash().ToLowerInvariant().Replace('ё', 'е').Replace('Ё', 'Е');
+        }
     }
 }

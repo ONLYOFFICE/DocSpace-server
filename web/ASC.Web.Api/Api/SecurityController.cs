@@ -1,28 +1,35 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
-// 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
-// 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
-// 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
+//
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
+//
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
+//
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
+//
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
+//
+// No trademark rights are granted under this License.
+//
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+//
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
 
 using ASC.Api.Core.Cors.Enums;
 using ASC.Core.Common.Identity;
@@ -32,9 +39,9 @@ using Microsoft.AspNetCore.Cors;
 
 namespace ASC.Web.Api.Controllers;
 
-/// <summary>
+/// <remarks>
 /// Security API.
-/// </summary>
+/// </remarks>
 /// <name>security</name>
 [Scope]
 [DefaultRoute]
@@ -56,17 +63,18 @@ public class SecurityController(
         IdentityClient identityClient)
     : ControllerBase
 {
-    /// <summary>
+    /// <remarks>
     /// Returns all the latest user login activity, including successful logins and error logs.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get login history
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/security/audit/login/last</path>
     /// <collection>list</collection>
     [Tags("Security / Login history")]
     [SwaggerResponse(200, "List of login events", typeof(IEnumerable<LoginEventDto>))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("audit/login/last")]
     public async Task<IEnumerable<LoginEventDto>> GetLastLoginEvents()
     {
@@ -78,17 +86,18 @@ public class SecurityController(
             .Select(x => new LoginEventDto(x, apiDateTimeHelper));
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a list of the latest changes (creation, modification, deletion, etc.) made by users to the entities on the portal.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get audit trail data
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/security/audit/events/last</path>
     /// <collection>list</collection>
     [Tags("Security / Audit trail data")]
     [SwaggerResponse(200, "List of audit trail data", typeof(IEnumerable<AuditEventDto>))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("audit/events/last")]
     public async Task<IEnumerable<AuditEventDto>> GetLastAuditEvents()
     {
@@ -105,17 +114,18 @@ public class SecurityController(
             .Select(x => new AuditEventDto(x, auditActionMapper, apiDateTimeHelper));
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a list of the login events by the parameters specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get filtered login events
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/security/audit/login/filter</path>
     /// <collection>list</collection>
     [Tags("Security / Login history")]
     [SwaggerResponse(200, "List of filtered login events", typeof(IEnumerable<LoginEventDto>))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("audit/login/filter")]
     public async Task<IEnumerable<LoginEventDto>> GetLoginEventsByFilter(LoginEventRequestDto inDto)
     {
@@ -133,17 +143,18 @@ public class SecurityController(
         return (await loginEventsRepository.GetByFilterAsync(inDto.UserId, inDto.Action, inDto.From, inDto.To, inDto.StartIndex, inDto.Count)).Select(x => new LoginEventDto(x, apiDateTimeHelper));
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a list of the audit events by the parameters specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get filtered audit trail data
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/security/audit/events/filter</path>
     /// <collection>list</collection>
     [Tags("Security / Audit trail data")]
     [SwaggerResponse(200, "List of filtered audit trail data", typeof(IEnumerable<AuditEventDto>))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("audit/events/filter")]
     public async Task<IEnumerable<AuditEventDto>> GetAuditEventsByFilter(AuditEventRequestDto inDto)
     {
@@ -161,20 +172,21 @@ public class SecurityController(
         return (await auditEventsRepository.GetByFilterAsync(inDto.UserId, inDto.LocationType, inDto.ActionType, inDto.Action, inDto.EntryType, inDto.Target, inDto.From, inDto.To, inDto.StartIndex, inDto.Count)).Select(x => new AuditEventDto(x, auditActionMapper, apiDateTimeHelper));
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns all the available audit trail types.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get audit trail types
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/security/audit/types</path>
-    /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Security / Audit trail data")]
     [SwaggerResponse(200, "Audit trail types", typeof(object))]
-    [AllowAnonymous]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("audit/types")]
-    public object GetAuditTrailTypes()
+    public async Task<object> GetAuditTrailTypes()
     {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
         return new
         {
             Actions = MessageActionExtensions.GetNames(),
@@ -185,20 +197,21 @@ public class SecurityController(
         };
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the mappers for the audit trail types.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get audit trail mappers
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/security/audit/mappers</path>
-    /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Security / Audit trail data")]
     [SwaggerResponse(200, "Audit trail mappers", typeof(object))]
-    [AllowAnonymous]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("audit/mappers")]
-    public object GetAuditTrailMappers(AuditTrailTypesRequestDto inDto)
+    public async Task<object> GetAuditTrailMappers(AuditTrailTypesRequestDto inDto)
     {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
         return auditActionMapper.Mappers
             .Where(r => !inDto.ProductType.HasValue || r.Product == inDto.ProductType.Value)
             .Select(r => new
@@ -219,16 +232,17 @@ public class SecurityController(
             });
     }
 
-    /// <summary>
+    /// <remarks>
     /// Generates the login history report.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Generate the login history report
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/security/audit/login/report</path>
     [Tags("Security / Login history")]
     [SwaggerResponse(200, "URL to the xlsx report file", typeof(string))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("audit/login/report")]
     public async Task<string> CreateLoginHistoryReport()
     {
@@ -251,12 +265,12 @@ public class SecurityController(
         return result;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Generates the audit trail report.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Generate the audit trail report
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/security/audit/events/report</path>
     [Tags("Security / Audit trail data")]
     [SwaggerResponse(200, "URL to the xlsx report file", typeof(string))]
@@ -287,16 +301,17 @@ public class SecurityController(
         return result;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the audit trail settings.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get the audit trail settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/security/audit/settings/lifetime</path>
     [Tags("Security / Audit trail data")]
     [SwaggerResponse(200, "Audit settings", typeof(TenantAuditSettings))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("audit/settings/lifetime")]
     public async Task<TenantAuditSettings> GetAuditSettings()
     {
@@ -307,17 +322,18 @@ public class SecurityController(
         return await settingsManager.LoadAsync<TenantAuditSettings>(tenantManager.GetCurrentTenantId());
     }
 
-    /// <summary>
+    /// <remarks>
     /// Sets the audit trail settings for the current portal.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Set the audit trail settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/security/audit/settings/lifetime</path>
     [Tags("Security / Audit trail data")]
     [SwaggerResponse(200, "Audit trail settings", typeof(TenantAuditSettings))]
     [SwaggerResponse(400, "Exception in LoginHistoryLifeTime or AuditTrailLifeTime")]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("audit/settings/lifetime")]
     public async Task<TenantAuditSettings> SetAuditSettings(TenantAuditSettingsWrapper inDto)
     {
@@ -341,16 +357,17 @@ public class SecurityController(
         return inDto.Settings;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Configures the CSP (Content Security Policy) settings for the current portal.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Configure CSP settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/security/csp</path>
     [Tags("Security / CSP")]
     [SwaggerResponse(200, "Ok", typeof(CspDto))]
     [SwaggerResponse(400, "Exception in Domains")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [EnableCors(PolicyName = CorsPoliciesEnums.AllowAllCorsPolicyName)]
     [HttpPost("csp")]
     public async Task<CspDto> ConfigureCsp(CspRequestsDto request)
@@ -375,7 +392,7 @@ public class SecurityController(
                     uriString = string.Concat(Uri.UriSchemeHttp, Uri.SchemeDelimiter, uriString);
                 }
 
-                if (!Uri.TryCreate(uriString, UriKind.Absolute, out _) || (Encoding.UTF8.GetByteCount(domain) != domain.Length))
+                if (!Uri.TryCreate(uriString, UriKind.Absolute, out _) || Encoding.UTF8.GetByteCount(domain) != domain.Length)
                 {
                     throw new ArgumentException(domain, nameof(request.Domains));
                 }
@@ -387,12 +404,12 @@ public class SecurityController(
         return new CspDto { Domains = request.Domains, Header = header };
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the CSP (Content Security Policy) settings for the current portal.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get CSP settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/security/csp</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Security / CSP")]
@@ -411,6 +428,11 @@ public class SecurityController(
             return null;
         }
 
+        if (!await cspSettingsHelper.ExistsInCacheAsync())
+        {
+            await cspSettingsHelper.SaveAsync(settings.Domains, false);
+        }
+
         return new CspDto
         {
             Domains = settings.Domains ?? [],
@@ -418,12 +440,12 @@ public class SecurityController(
         };
     }
 
-    /// <summary>
+    /// <remarks>
     /// Generates a JWT token for communication between login (client) and identity services.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Generate JWT token
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/security/oauth2/token</path>
     [Tags("Security / OAuth2")]
     [HttpGet("oauth2/token")]

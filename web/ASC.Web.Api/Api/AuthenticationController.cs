@@ -1,37 +1,44 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 using AuthenticationException = System.Security.Authentication.AuthenticationException;
 using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Web.Api.Controllers;
 
-/// <summary>
+/// <remarks>
 /// Authorization API.
-/// </summary>
+/// </remarks>
 /// <name>authentication</name>
 [Scope]
 [DefaultRoute]
@@ -52,14 +59,13 @@ public class AuthenticationController(
     ProviderManager providerManager,
     AccountLinker accountLinker,
     CoreBaseSettings coreBaseSettings,
-    UserManagerWrapper userManagerWrapper,
     Signature signature,
+    CustomNamingPeople customNamingPeople,
     DisplayUserSettingsHelper displayUserSettingsHelper,
     StudioSmsNotificationSettingsHelper studioSmsNotificationSettingsHelper,
     SettingsManager settingsManager,
     SmsManager smsManager,
     TfaManager tfaManager,
-    TimeZoneConverter timeZoneConverter,
     SmsKeyStorage smsKeyStorage,
     CommonLinkUtility commonLinkUtility,
     AuthContext authContext,
@@ -74,10 +80,10 @@ public class AuthenticationController(
     AuditEventsRepository auditEventsRepository)
     : ControllerBase
 {
-    /// <summary>
+    /// <remarks>
     /// Checks if the current user is authenticated or not.
-    /// </summary>
-    /// <short>Check authentication</short>
+    /// </remarks>
+    /// <summary>Check authentication</summary>
     /// <path>api/2.0/authentication</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Authentication")]
@@ -89,12 +95,12 @@ public class AuthenticationController(
         return securityContext.IsAuthenticated;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Authenticates the current user by SMS or two-factor authentication code.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Authenticate a user by code
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/authentication/{code}</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Authentication")]
@@ -105,10 +111,11 @@ public class AuthenticationController(
     [SwaggerResponse(429, "Too many login attempts. Please try again later")]
     [AllowNotPayment, AllowAnonymous]
     [HttpPost("{code}", Order = 1)]
-    public async Task<AuthenticationTokenDto> AuthenticateMeFromBodyWithCode(AuthRequestsDto inDto)
+    public async Task<AuthenticationTokenDto> AuthenticateMeFromBodyWithCode(AuthWithCodeRequestsDto inDto)
     {
         var tenantId = tenantManager.GetCurrentTenant().Id;
         var user = (await GetUserAsync(inDto)).UserInfo;
+        var session = inDto.Session;
 
         if (user == null || Equals(user, Constants.LostUser))
         {
@@ -128,7 +135,7 @@ public class AuthenticationController(
             if (await studioSmsNotificationSettingsHelper.IsVisibleAndAvailableSettingsAsync() && await studioSmsNotificationSettingsHelper.TfaEnabledForUserAsync(user.Id))
             {
                 sms = true;
-                var (smsValidationResult, smsAuthToken) = await smsManager.ValidateSmsCodeAsync(user, inDto.Code, true);
+                var (smsValidationResult, smsAuthToken) = await smsManager.ValidateSmsCodeAsync(user, inDto.Code, true, session);
                 if (smsValidationResult)
                 {
                     token = smsAuthToken;
@@ -136,7 +143,7 @@ public class AuthenticationController(
             }
             else if (tfaAppAuthSettingsHelper.IsVisibleSettings && await tfaAppAuthSettingsHelper.TfaEnabledForUserAsync(user.Id))
             {
-                var (tfaValidationResult, tfaAuthToken) = await tfaManager.ValidateAuthCodeAsync(user, inDto.Code, true, true);
+                var (tfaValidationResult, tfaAuthToken) = await tfaManager.ValidateAuthCodeAsync(user, inDto.Code, true, true, session);
                 if (tfaValidationResult)
                 {
                     token = tfaAuthToken;
@@ -150,13 +157,23 @@ public class AuthenticationController(
             }
 
             token = string.IsNullOrEmpty(token) ? await cookiesManager.AuthenticateMeAndSetCookiesAsync(user.Id) : token;
-            var expires = await tenantCookieSettingsHelper.GetExpiresTimeAsync(tenantId);
+
+            if (!string.IsNullOrEmpty(inDto.Culture) && user.CultureName != inDto.Culture)
+            {
+                await userManager.ChangeUserCulture(user, inDto.Culture);
+                messageService.Send(MessageAction.UserUpdatedLanguage, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
+            }
 
             var result = new AuthenticationTokenDto
             {
-                Token = token,
-                Expires = new ApiDateTime(tenantManager, timeZoneConverter, expires)
+                Token = token
             };
+
+            if (!session)
+            {
+                var expires = await tenantCookieSettingsHelper.GetExpiresTimeAsync(tenantId);
+                result.Expires = new ApiDateTime(tenantManager, expires);
+            }
 
             if (sms)
             {
@@ -175,7 +192,7 @@ public class AuthenticationController(
             messageService.SendLoginMessage(sms ? MessageAction.LoginFailViaApiSms : MessageAction.LoginFailViaApiTfa,
                                     user.DisplayUserName(false, displayUserSettingsHelper),
                                     MessageTarget.Create(user.Id));
-            throw new AuthenticationException("User authentication failed", ex);
+            throw new AuthenticationException(Resource.UserAuthenticationFailed, ex);
         }
         finally
         {
@@ -183,12 +200,12 @@ public class AuthenticationController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Authenticates the current user by SMS, authenticator app, or without two-factor authentication.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Authenticate a user
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/authentication</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Authentication")]
@@ -232,7 +249,7 @@ public class AuthenticationController(
             {
                 Sms = true,
                 PhoneNoise = SmsSender.BuildPhoneNoise(user.MobilePhone),
-                Expires = new ApiDateTime(tenantManager, timeZoneConverter, DateTime.UtcNow.Add(smsKeyStorage.StoreInterval)),
+                Expires = new ApiDateTime(tenantManager, DateTime.UtcNow.Add(smsKeyStorage.StoreInterval)),
                 ConfirmUrl = commonLinkUtility.GetConfirmationEmailUrl(user.Email, ConfirmType.PhoneAuth)
             };
         }
@@ -308,7 +325,7 @@ public class AuthenticationController(
                 var tenant = tenantManager.GetCurrentTenantId();
                 var expires = await tenantCookieSettingsHelper.GetExpiresTimeAsync(tenant);
 
-                outDto.Expires = new ApiDateTime(tenantManager, timeZoneConverter, expires);
+                outDto.Expires = new ApiDateTime(tenantManager, expires);
             }
 
             return outDto;
@@ -342,12 +359,12 @@ public class AuthenticationController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Logs out of the current user account.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Log out
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/authentication/logout</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Authentication")]
@@ -391,12 +408,12 @@ public class AuthenticationController(
         return null;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Opens a confirmation email URL to validate a certain action (employee invitation, portal removal, phone activation, etc.).
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Open confirmation email URL
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/authentication/confirm</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Authentication")]
@@ -425,12 +442,12 @@ public class AuthenticationController(
         return result.Map();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Sets a mobile phone for the current user.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Set a mobile phone
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/authentication/setphone</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Authentication")]
@@ -449,16 +466,16 @@ public class AuthenticationController(
         {
             Sms = true,
             PhoneNoise = SmsSender.BuildPhoneNoise(inDto.MobilePhone),
-            Expires = new ApiDateTime(tenantManager, timeZoneConverter, DateTime.UtcNow.Add(smsKeyStorage.StoreInterval))
+            Expires = new ApiDateTime(tenantManager, DateTime.UtcNow.Add(smsKeyStorage.StoreInterval))
         };
     }
 
-    /// <summary>
+    /// <remarks>
     /// Sends SMS with an authentication code.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Send SMS code
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/authentication/sendsms</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Authentication")]
@@ -487,7 +504,7 @@ public class AuthenticationController(
         {
             Sms = true,
             PhoneNoise = SmsSender.BuildPhoneNoise(user.MobilePhone),
-            Expires = new ApiDateTime(tenantManager, timeZoneConverter, DateTime.UtcNow.Add(smsKeyStorage.StoreInterval))
+            Expires = new ApiDateTime(tenantManager, DateTime.UtcNow.Add(smsKeyStorage.StoreInterval))
         };
     }
 
@@ -597,6 +614,11 @@ public class AuthenticationController(
             messageService.SendLoginMessage(MessageAction.LoginFailRecaptcha, !string.IsNullOrEmpty(inDto.UserName) ? inDto.UserName : AuditResource.EmailNotSpecified);
             throw new RecaptchaException(Resource.RecaptchaInvalid);
         }
+        catch (AuthenticationException ex)
+        {
+            messageService.SendLoginMessage(action, !string.IsNullOrEmpty(inDto.UserName) ? inDto.UserName : AuditResource.EmailNotSpecified);
+            throw new AuthenticationException(ex.Message, ex);
+        }
         catch (Exception ex)
         {
             messageService.SendLoginMessage(action, !string.IsNullOrEmpty(inDto.UserName) ? inDto.UserName : AuditResource.EmailNotSpecified);
@@ -630,8 +652,14 @@ public class AuthenticationController(
             else if (!string.IsNullOrEmpty(loginProfile.EMail) && !string.IsNullOrEmpty(loginProfile.HashId))
             {
                 userInfo = await userManager.GetUserByEmailAsync(loginProfile.EMail);
-                if (userInfo.Id != Constants.LostUser.Id)
+                if (userInfo.Id != Constants.LostUser.Id && userInfo.Status != EmployeeStatus.Terminated)
                 {
+                    if (userInfo.ActivationStatus != EmployeeActivationStatus.Activated)
+                    {
+                        var msg = await customNamingPeople.Substitute<Resource>("ErrorEmailAlreadyExists");
+                        throw new AuthenticationException(msg);
+                    }
+
                     await accountLinker.AddLinkAsync(userInfo.Id, loginProfile);
                 }
             }
@@ -663,7 +691,7 @@ public class AuthenticationController(
             //     //}
             //
             //     await studioNotifyService.UserHasJoinAsync();
-            //     await userHelpTourHelper.SetIsNewUser(true); 
+            //     await userHelpTourHelper.SetIsNewUser(true);
             // }
 
             return userInfo;
@@ -677,67 +705,6 @@ public class AuthenticationController(
         }
     }
 
-    private async Task<UserInfo> JoinByThirdPartyAccount(LoginProfile loginProfile)
-    {
-        if (string.IsNullOrEmpty(loginProfile.EMail))
-        {
-            throw new Exception(Resource.ErrorNotCorrectEmail);
-        }
-
-        var userInfo = await userManager.GetUserByEmailAsync(loginProfile.EMail);
-        if (!await userManager.UserExistsAsync(userInfo.Id))
-        {
-            var newUserInfo = ProfileToUserInfo(loginProfile);
-
-            try
-            {
-                await securityContext.AuthenticateMeWithoutCookieAsync(ASC.Core.Configuration.Constants.CoreSystem);
-                userInfo = await userManagerWrapper.AddUserAsync(newUserInfo, UserManagerWrapper.GeneratePassword());
-                await socketManager.AddGuestAsync(userInfo);
-            }
-            finally
-            {
-                securityContext.Logout();
-            }
-        }
-
-        await accountLinker.AddLinkAsync(userInfo.Id, loginProfile);
-
-        return userInfo;
-    }
-
-    private UserInfo ProfileToUserInfo(LoginProfile loginProfile)
-    {
-        if (string.IsNullOrEmpty(loginProfile.EMail))
-        {
-            throw new Exception(Resource.ErrorNotCorrectEmail);
-        }
-
-        var firstName = loginProfile.FirstName;
-        if (string.IsNullOrEmpty(firstName))
-        {
-            firstName = loginProfile.DisplayName;
-        }
-
-        var userInfo = new UserInfo
-        {
-            FirstName = string.IsNullOrEmpty(firstName) ? UserControlsCommonResource.UnknownFirstName : firstName,
-            LastName = string.IsNullOrEmpty(loginProfile.LastName) ? UserControlsCommonResource.UnknownLastName : loginProfile.LastName,
-            Email = loginProfile.EMail,
-            Title = string.Empty,
-            Location = string.Empty,
-            CultureName = coreBaseSettings.CustomMode ? "ru-RU" : Thread.CurrentThread.CurrentUICulture.Name,
-            ActivationStatus = EmployeeActivationStatus.Activated
-        };
-
-        var gender = loginProfile.Gender;
-        if (!string.IsNullOrEmpty(gender))
-        {
-            userInfo.Sex = gender == "male";
-        }
-
-        return userInfo;
-    }
 
     private async Task<(bool, Guid)> TryGetUserByHashAsync(string hashId)
     {
@@ -761,14 +728,14 @@ public class AuthenticationController(
     }
 }
 
-class UserInfoWrapper
+internal class UserInfoWrapper
 {
     public UserInfo UserInfo { get; set; }
     public LoginType LoginType { get; set; }
     public string Provider { get; set; }
 }
 
-enum LoginType
+internal enum LoginType
 {
     EmailAndPassword,
     EmailAndPasswordHash,

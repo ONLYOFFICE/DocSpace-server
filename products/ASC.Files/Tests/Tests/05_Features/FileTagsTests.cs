@@ -1,41 +1,43 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
-
-using ASC.Files.Tests.ApiFactories;
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Files.Tests.Tests._05_Features;
 
 [Collection("Test Collection")]
 [Trait("Category", "Features")]
 public class FileTagsTests(
-    FilesApiFactory filesFactory, 
-    WepApiFactory apiFactory, 
-    PeopleFactory peopleFactory,
-    FilesServiceFactory filesServiceProgram) 
-    : BaseTest(filesFactory, apiFactory, peopleFactory, filesServiceProgram)
+    AspireAppFixture fixture)
+    : BaseTest(fixture)
 {
     [Fact]
     public async Task CreateTag_ValidData_TagCreated()
@@ -92,10 +94,7 @@ public class FileTagsTests(
         var tag = (await _roomsApi.CreateRoomTagAsync(createTagRequest, TestContext.Current.CancellationToken)).Response;
         
         // Act
-        var deleteRequest = new BatchTagsRequestDto
-        {
-            Names = [tag.ToString()!]
-        };
+        var deleteRequest = new BatchTagsRequestDto([tag]);
         
         await _roomsApi.DeleteCustomTagsAsync(deleteRequest, TestContext.Current.CancellationToken);
         
@@ -127,28 +126,19 @@ public class FileTagsTests(
         tagsAfterCreate.Should().Contain(t => t.ToString() == tagName);
         
         // 2. Add tag to a room
-        var addTagsRequest = new BatchTagsRequestDto
-        {
-            Names = [tag.ToString()!]
-        };
+        var addTagsRequest = new BatchTagsRequestDto([tag]);
         
         var roomWithTag = (await _roomsApi.AddRoomTagsAsync(room.Id, addTagsRequest, TestContext.Current.CancellationToken)).Response;
         roomWithTag.Should().NotBeNull();
         
         // 3. Delete tag from the room
-        var deleteFromRoomRequest = new BatchTagsRequestDto
-        {
-            Names = [tag.ToString()!]
-        };
+        var deleteFromRoomRequest =  new BatchTagsRequestDto([tag]);
         
         var roomWithoutTag = (await _roomsApi.DeleteRoomTagsAsync(room.Id, deleteFromRoomRequest, TestContext.Current.CancellationToken)).Response;
         roomWithoutTag.Should().NotBeNull();
         
         // 4. Delete tag completely
-        var deleteTagRequest = new BatchTagsRequestDto
-        {
-            Names = [tag.ToString()!]
-        };
+        var deleteTagRequest = new BatchTagsRequestDto([tag]);
         
         await _roomsApi.DeleteCustomTagsAsync(deleteTagRequest, TestContext.Current.CancellationToken);
         
@@ -181,10 +171,7 @@ public class FileTagsTests(
         
         // Part 1: Test adding a single tag to a room
         // Act
-        var addSingleTagRequest = new BatchTagsRequestDto
-        {
-            Names = [tag1.ToString()!]
-        };
+        var addSingleTagRequest = new BatchTagsRequestDto([tag1]);
         
         var roomWithSingleTag = (await _roomsApi.AddRoomTagsAsync(room.Id, addSingleTagRequest, TestContext.Current.CancellationToken)).Response;
         
@@ -195,10 +182,7 @@ public class FileTagsTests(
         
         // Part 2: Test adding multiple tags to a room
         // Act
-        var addMultipleTagsRequest = new BatchTagsRequestDto
-        {
-            Names = [tag2.ToString()!]
-        };
+        var addMultipleTagsRequest = new BatchTagsRequestDto([tag2]);
         
         var roomWithMultipleTags = (await _roomsApi.AddRoomTagsAsync(room.Id, addMultipleTagsRequest, TestContext.Current.CancellationToken)).Response;
         
@@ -220,10 +204,7 @@ public class FileTagsTests(
         var tag4 = (await _roomsApi.CreateRoomTagAsync(createTagRequest4, TestContext.Current.CancellationToken)).Response;
         
         // Act - add two tags at once
-        var addBatchTagsRequest = new BatchTagsRequestDto
-        {
-            Names = [tag3.ToString()!, tag4.ToString()!]
-        };
+        var addBatchTagsRequest = new BatchTagsRequestDto([tag3, tag4]);
         
         var roomWithBatchTags = (await _roomsApi.AddRoomTagsAsync(room.Id, addBatchTagsRequest, TestContext.Current.CancellationToken)).Response;
         

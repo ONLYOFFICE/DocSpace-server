@@ -1,28 +1,35 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 using System.Runtime.InteropServices;
 
@@ -37,7 +44,7 @@ public class FFmpegService
     {
         get
         {
-            if (string.IsNullOrEmpty(_fFmpegPath))
+            if (string.IsNullOrEmpty(ResolveFfmpegPath()))
             {
                 return [];
             }
@@ -48,12 +55,13 @@ public class FFmpegService
 
     private readonly List<string> _convertableMedia;
     private readonly List<string> _fFmpegExecutables = ["ffmpeg", "avconv"];
-    private readonly string _fFmpegPath;
     private readonly string _fFmpegArgs;
     private readonly string _fFmpegThumbnailsArgs;
     private readonly ImmutableList<string> _fFmpegFormats;
 
     private readonly ILogger<FFmpegService> _logger;
+    private string _fFmpegPath;
+    private bool _fFmpegPathResolved;
 
     public bool IsConvertable(string extension)
     {
@@ -82,54 +90,73 @@ public class FFmpegService
         using var process = Process.Start(startInfo);
 
         await inputStream.CopyToAsync(process.StandardInput.BaseStream);
+        await process.StandardInput.BaseStream.FlushAsync();
+        process.StandardInput.Close();
 
-        await ProcessLog(process.StandardError.BaseStream);
+        var outputStream = new MemoryStream();
+        var copyTask = process.StandardOutput.BaseStream.CopyToAsync(outputStream);
+        var logTask = ProcessLog(process.StandardError.BaseStream);
 
-        return process.StandardOutput.BaseStream;
+        await Task.WhenAll(copyTask, logTask);
+        await process.WaitForExitAsync();
+
+        outputStream.Position = 0;
+
+        return outputStream;
     }
 
     public FFmpegService(ILogger<FFmpegService> logger, IConfiguration configuration)
     {
         _logger = logger;
         _fFmpegPath = configuration["files:ffmpeg:value"];
+        _fFmpegPathResolved = !string.IsNullOrEmpty(_fFmpegPath);
         _fFmpegArgs = configuration["files:ffmpeg:args"] ?? "-i - -preset ultrafast -movflags frag_keyframe+empty_moov -f {0} -";
         _fFmpegThumbnailsArgs = configuration["files:ffmpeg:thumbnails:args"] ?? "-i \"{0}\" -frames:v 1 \"{1}\" -y";
         var ffMpegFormats = configuration.GetSection("files:ffmpeg:thumbnails:formats").Get<List<string>>();
         _fFmpegFormats = ffMpegFormats != null ? ffMpegFormats.ToImmutableList() : FileUtility.ExtsVideo;
 
         _convertableMedia = (configuration.GetSection("files:ffmpeg:exts").Get<string[]>() ?? []).ToList();
+    }
 
-        if (string.IsNullOrEmpty(_fFmpegPath))
+    private string ResolveFfmpegPath()
+    {
+        if (_fFmpegPathResolved)
         {
-            var pathvar = Environment.GetEnvironmentVariable("PATH");
-            var folders = pathvar.Split(Path.PathSeparator).Distinct();
+            return _fFmpegPath;
+        }
 
-            foreach (var folder in folders)
+        _fFmpegPathResolved = true;
+
+        var pathvar = Environment.GetEnvironmentVariable("PATH");
+        if (string.IsNullOrEmpty(pathvar))
+        {
+            return _fFmpegPath;
+        }
+
+        var folders = pathvar.Split(Path.PathSeparator).Distinct();
+
+        foreach (var folder in folders)
+        {
+            if (!Directory.Exists(folder))
             {
-                if (!Directory.Exists(folder))
+                continue;
+            }
+
+            foreach (var name in _fFmpegExecutables)
+            {
+                var path = CrossPlatform.PathCombine(folder, RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? name + ".exe" : name);
+
+                if (File.Exists(path))
                 {
-                    continue;
-                }
+                    _fFmpegPath = path;
+                    _logger.InformationFFmpegFoundIn(path);
 
-                foreach (var name in _fFmpegExecutables)
-                {
-                    var path = CrossPlatform.PathCombine(folder, RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? name + ".exe" : name);
-
-                    if (File.Exists(path))
-                    {
-                        _fFmpegPath = path;
-                        _logger.InformationFFmpegFoundIn(path);
-
-                        break;
-                    }
-                }
-
-                if (!string.IsNullOrEmpty(_fFmpegPath))
-                {
-                    break;
+                    return _fFmpegPath;
                 }
             }
         }
+
+        return _fFmpegPath;
     }
 
     private ProcessStartInfo PrepareFFmpeg(string inputFormat)
@@ -150,13 +177,14 @@ public class FFmpegService
     {
         var startInfo = new ProcessStartInfo();
 
-        if (string.IsNullOrEmpty(_fFmpegPath))
+        var ffmpegPath = ResolveFfmpegPath();
+        if (string.IsNullOrEmpty(ffmpegPath))
         {
             _logger.ErrorFFmpeg();
             throw new Exception("no ffmpeg");
         }
 
-        startInfo.FileName = _fFmpegPath;
+        startInfo.FileName = ffmpegPath;
         startInfo.UseShellExecute = false;
         startInfo.RedirectStandardOutput = true;
         startInfo.RedirectStandardInput = true;
@@ -176,7 +204,7 @@ public class FFmpegService
         }
     }
 
-    public async Task CreateThumbnail(string sourcePath, string destPath)
+    public async Task CreateThumbnail(string sourcePath, string destPath, CancellationToken cancellationToken = default)
     {
         var startInfo = PrepareCommonFFmpeg();
 
@@ -186,6 +214,25 @@ public class FFmpegService
 
         await ProcessLog(process.StandardError.BaseStream);
 
-        await process.WaitForExitAsync();
+        using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        timeoutCts.CancelAfter(TimeSpan.FromMinutes(5));
+
+        try
+        {
+            await process.WaitForExitAsync(timeoutCts.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            try
+            {
+                process.Kill(entireProcessTree: true);
+            }
+            catch
+            {
+                // process may have already exited
+            }
+
+            throw;
+        }
     }
 }

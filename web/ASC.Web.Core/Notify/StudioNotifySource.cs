@@ -1,186 +1,48 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Web.Studio.Core.Notify;
 
 [Scope]
-public class StudioNotifySource(UserManager userManager, IRecipientProvider recipientsProvider,
-        SubscriptionManager subscriptionManager, TenantManager tenantManager)
-    : NotifySource("asc.web.studio", userManager, recipientsProvider, subscriptionManager, tenantManager)
+public class StudioNotifySource(UserManager userManager, IRecipientProvider recipientsProvider, SubscriptionManager subscriptionManager, IServiceProvider serviceProvider)
+    : NotifySource("asc.web.studio", userManager, recipientsProvider, subscriptionManager)
 {
-    protected override IActionProvider CreateActionProvider()
-    {
-        return new ConstActionProvider(
-                Actions.SelfProfileUpdated,
-                Actions.UserHasJoin,
-                Actions.UserMessageToAdmin,
-                Actions.UserMessageToSales,
-                Actions.RequestTariff,
-                Actions.RequestLicense,
-
-                Actions.YourProfileUpdated,
-                Actions.JoinUsers,
-                Actions.SendWhatsNew,
-                Actions.BackupCreated,
-                Actions.BackupFailed,
-                Actions.ScheduledBackupFailed,
-                Actions.RestoreStarted,
-                Actions.RestoreCompletedV115,
-                Actions.PortalDeactivate,
-                Actions.PortalDelete,
-
-                Actions.ProfileDelete,
-                Actions.ProfileHasDeletedItself,
-                Actions.ReassignsCompleted,
-                Actions.ReassignsFailed,
-                Actions.RemoveUserDataCompleted,
-                Actions.RemoveUserDataCompletedCustomMode,
-                Actions.RemoveUserDataFailed,
-
-                Actions.ConfirmOwnerChange,
-                Actions.ActivateEmail,
-                Actions.EmailChangeV115,
-                Actions.PasswordChangeV115,
-                Actions.PasswordSet,
-                Actions.PasswordChanged,
-                Actions.PhoneChange,
-                Actions.TfaChange,
-                Actions.MigrationPortalStart,
-                Actions.MigrationPortalSuccessV115,
-                Actions.MigrationPortalError,
-                Actions.MigrationPortalServerFailure,
-                Actions.PortalRename,
-
-                Actions.MailboxCreated,
-                Actions.MailboxWithoutSettingsCreated,
-                Actions.MailboxPasswordChanged,
-
-                Actions.SaasGuestActivationV115,
-                Actions.EnterpriseGuestActivationV10,
-                Actions.EnterpriseWhitelabelGuestActivationV10,
-                Actions.OpensourceGuestActivationV11,
-
-                Actions.SaasGuestWelcomeV1,
-                Actions.EnterpriseGuestWelcomeV1,
-                Actions.EnterpriseWhitelabelGuestWelcomeV1,
-                Actions.OpensourceGuestWelcomeV1,
-
-                Actions.SaasCustomModeRegData,
-
-                Actions.StorageEncryptionStart,
-                Actions.StorageEncryptionSuccess,
-                Actions.StorageEncryptionError,
-                Actions.StorageDecryptionStart,
-                Actions.StorageDecryptionSuccess,
-                Actions.StorageDecryptionError,
-
-                Actions.SaasRoomInvite,
-                Actions.SaasRoomInviteExistingUser,
-                Actions.SaasDocSpaceInvite,
-                Actions.SaasDocSpaceRegistration,
-
-                Actions.SaasAdminActivationV1,
-                Actions.EnterpriseAdminActivationV1,
-                Actions.EnterpriseWhitelabelAdminActivationV1,
-                Actions.OpensourceAdminActivationV1,
-
-                Actions.SaasAdminWelcomeV1,
-                Actions.EnterpriseAdminWelcomeV1,
-                Actions.EnterpriseWhitelabelAdminWelcomeV1,
-                Actions.OpensourceAdminWelcomeV1,
-
-                Actions.DocsTips,
-
-                Actions.SaasAdminTrialWarningAfterHalfYearV1,
-                Actions.SaasAdminStartupWarningAfterYearV1,
-
-                Actions.PortalDeleteSuccessV1,
-                Actions.PortalDeletedToSupport,
-
-                Actions.SaasUserWelcomeV1,
-                Actions.EnterpriseUserWelcomeV1,
-                Actions.EnterpriseWhitelabelUserWelcomeV1,
-                Actions.EnterpriseWhitelabelUserWelcomeCustomModeV1,
-                Actions.OpensourceUserWelcomeV1,
-
-                Actions.SaasUserActivationV1,
-                Actions.EnterpriseUserActivationV1,
-                Actions.EnterpriseWhitelabelUserActivationV1,
-                Actions.OpensourceUserActivationV1,
-
-                Actions.SaasAdminModulesV1,
-
-                Actions.SaasAdminUserAppsTipsV1,
-                Actions.EnterpriseAdminUserAppsTipsV1,
-
-                Actions.RoomsActivity,
-
-                Actions.SaasOwnerPaymentWarningGracePeriodBeforeActivation,
-                Actions.SaasOwnerPaymentWarningGracePeriodActivation,
-                Actions.SaasOwnerPaymentWarningGracePeriodLastDay,
-                Actions.SaasOwnerPaymentWarningGracePeriodExpired,
-
-                Actions.SaasAdminVideoGuides,
-                Actions.SaasAdminIntegrations,
-
-                Actions.ZoomWelcome,
-
-                Actions.MigrationPersonalToDocspace,
-
-                Actions.EnterpriseAdminPaymentWarningGracePeriodBeforeActivation,
-                Actions.EnterpriseAdminPaymentWarningGracePeriodActivation,
-                Actions.EnterpriseAdminPaymentWarningGracePeriodBeforeExpiration,
-                Actions.EnterpriseAdminPaymentWarningGracePeriodExpiration,
-                Actions.EnterpriseAdminPaymentWarningLifetimeBeforeExpiration,
-                Actions.EnterpriseAdminPaymentWarningLifetimeExpiration,
-                Actions.DeveloperAdminPaymentWarningGracePeriodBeforeActivation,
-                Actions.DeveloperAdminPaymentWarningGracePeriodActivation,
-                Actions.DeveloperAdminPaymentWarningGracePeriodBeforeExpiration,
-                Actions.DeveloperAdminPaymentWarningGracePeriodExpiration,
-
-                Actions.UserTypeChanged,
-                Actions.UserRoleChanged,
-
-                Actions.TopUpWalletError,
-                Actions.RenewSubscriptionError
-            );
-    }
-
-    protected override IPatternProvider CreatePatternsProvider()
-    {
-        return new XmlPatternProvider2(WebPatternResource.webstudio_patterns);
-    }
-
     protected override ISubscriptionProvider CreateSubscriptionProvider()
     {
-        return new AdminNotifySubscriptionProvider(base.CreateSubscriptionProvider());
+        return new AdminNotifySubscriptionProvider(base.CreateSubscriptionProvider(), serviceProvider);
     }
 
-
-    private sealed class AdminNotifySubscriptionProvider(ISubscriptionProvider provider) : ISubscriptionProvider
+    private sealed class AdminNotifySubscriptionProvider(ISubscriptionProvider provider, IServiceProvider serviceProvider) : ISubscriptionProvider
     {
         public async Task<object> GetSubscriptionRecordAsync(INotifyAction action, IRecipient recipient, string objectID)
         {
@@ -239,13 +101,12 @@ public class StudioNotifySource(UserManager userManager, IRecipientProvider reci
 
         private INotifyAction GetAdminAction(INotifyAction action)
         {
-            if (Actions.SelfProfileUpdated.ID == action.ID ||
-                Actions.UserHasJoin.ID == action.ID ||
-                Actions.UserMessageToAdmin.ID == action.ID ||
-                Actions.ProfileHasDeletedItself.ID == action.ID
-               )
+            if (serviceProvider.GetService<SelfProfileUpdatedNotifyAction>().ID == action.ID ||
+                serviceProvider.GetService<UserHasJoinNotifyAction>().ID == action.ID ||
+                serviceProvider.GetService<UserMessageToAdminNotifyAction>().ID == action.ID ||
+                serviceProvider.GetService<ProfileHasDeletedItselfNotifyAction>().ID == action.ID)
             {
-                return Actions.AdminNotify;
+                return serviceProvider.GetService<AdminNotifyAction>();
             }
 
             return action;

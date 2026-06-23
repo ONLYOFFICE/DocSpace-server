@@ -1,28 +1,35 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 namespace System.Web;
 
@@ -30,105 +37,111 @@ public static class HttpRequestExtensions
 {
     public const string RequestTokenHeader = "Request-Token";
 
-    public static Uri Url(this HttpRequest request)
+    extension(HttpContext context)
     {
-        var url = request != null ? new Uri(request.GetDisplayUrl()) : null;
-
-        if (!string.IsNullOrEmpty(url?.Query))
+        public Uri PushRewritenUri()
         {
-            var queryParams = HttpUtility.ParseQueryString(url.Query);
-            var origin = queryParams[HeaderNames.Origin.ToLower()];
-            if (Uri.TryCreate(origin, UriKind.Absolute, out var urlOrigin))
-            {
-                var result = new UriBuilder(url)
-                {
-                    Scheme = urlOrigin.Scheme,
-                    Host = urlOrigin.Host,
-                    Port = urlOrigin.Port
-                };
-                return result.Uri;
-            }
+            return context != null ? PushRewritenUri(context, context.Request.Url()) : null;
         }
 
-        return url;
-    }
-
-    public static Uri PushRewritenUri(this HttpContext context)
-    {
-        return context != null ? PushRewritenUri(context, context.Request.Url()) : null;
-    }
-
-    private static Uri PushRewritenUri(this HttpContext context, Uri rewrittenUri)
-    {
-        Uri oldUri = null;
-
-        if (context != null)
+        private Uri PushRewritenUri(Uri rewrittenUri)
         {
-            var request = context.Request;
+            Uri oldUri = null;
 
-            var url = new Uri(request.GetDisplayUrl());
-
-            if (url != rewrittenUri)
+            if (context != null)
             {
-                try
+                var request = context.Request;
+
+                var url = new Uri(request.GetDisplayUrl());
+
+                if (url != rewrittenUri)
                 {
-                    //Push it
-                    request.Headers.SetCommaSeparatedValues("HTTPS", rewrittenUri.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase) ? "on" : "off");
-                    request.Headers.SetCommaSeparatedValues("SERVER_NAME", rewrittenUri.Host);
-                    request.Headers.SetCommaSeparatedValues("SERVER_PORT",
-                                                rewrittenUri.Port.ToString(CultureInfo.InvariantCulture));
-
-                    if (rewrittenUri.IsDefaultPort)
+                    try
                     {
-                        request.Headers.SetCommaSeparatedValues("HTTP_HOST",
-                                                    rewrittenUri.Host);
-                    }
-                    else
-                    {
-                        request.Headers.SetCommaSeparatedValues("HTTP_HOST",
-                                                    rewrittenUri.Host + ":" + url.Port);
-                    }
-                    //Hack:
-                    typeof(HttpRequest).InvokeMember("_url",
-                                                      BindingFlags.NonPublic | BindingFlags.SetField |
-                                                      BindingFlags.Instance,
-                                                      null, request,
-                                                      [null]);
-                    oldUri = url;
-                    context.Items["oldUri"] = oldUri;
+                        //Push it
+                        request.Headers.SetCommaSeparatedValues("HTTPS", rewrittenUri.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase) ? "on" : "off");
+                        request.Headers.SetCommaSeparatedValues("SERVER_NAME", rewrittenUri.Host);
+                        request.Headers.SetCommaSeparatedValues("SERVER_PORT",
+                            rewrittenUri.Port.ToString(CultureInfo.InvariantCulture));
 
+                        if (rewrittenUri.IsDefaultPort)
+                        {
+                            request.Headers.SetCommaSeparatedValues("HTTP_HOST",
+                                rewrittenUri.Host);
+                        }
+                        else
+                        {
+                            request.Headers.SetCommaSeparatedValues("HTTP_HOST",
+                                rewrittenUri.Host + ":" + url.Port);
+                        }
+                        //Hack:
+                        typeof(HttpRequest).InvokeMember("_url",
+                            BindingFlags.NonPublic | BindingFlags.SetField |
+                            BindingFlags.Instance,
+                            null, request,
+                            [null]);
+                        oldUri = url;
+                        context.Items["oldUri"] = oldUri;
+
+                    }
+                    catch (Exception) { }
                 }
-                catch (Exception) { }
             }
+
+            return oldUri;
         }
 
-        return oldUri;
-    }
-
-    public static Uri PopRewritenUri(this HttpContext context)
-    {
-        if (context?.Items["oldUri"] != null)
+        public Uri PopRewritenUri()
         {
-            var rewriteTo = context.Items["oldUri"] as Uri;
-
-            if (rewriteTo != null)
+            if (context?.Items["oldUri"] != null)
             {
-                return PushRewritenUri(context, rewriteTo);
+                var rewriteTo = context.Items["oldUri"] as Uri;
+
+                if (rewriteTo != null)
+                {
+                    return PushRewritenUri(context, rewriteTo);
+                }
             }
+
+            return null;
+        }
+    }
+
+    extension(HttpRequest request)
+    {
+        public bool DesktopApp()
+        {
+            return request != null
+                   && (!string.IsNullOrEmpty(request.Query["desktop"])
+                       || !string.IsNullOrEmpty(request.Headers[HeaderNames.UserAgent]) && request.Headers[HeaderNames.UserAgent].ToString().Contains("AscDesktopEditor"));
         }
 
-        return null;
-    }
+        public bool MobileApp()
+        {
+            return !string.IsNullOrEmpty(request.Headers[HeaderNames.UserAgent]) && (request.Headers[HeaderNames.UserAgent].ToString().Contains("iPhone") || request.Headers[HeaderNames.UserAgent].ToString().Contains("iOS") || request.Headers[HeaderNames.UserAgent].ToString().Contains("Android"));
+        }
 
-    public static bool DesktopApp(this HttpRequest request)
-    {
-        return request != null
-            && (!string.IsNullOrEmpty(request.Query["desktop"])
-                || !string.IsNullOrEmpty(request.Headers[HeaderNames.UserAgent]) && request.Headers[HeaderNames.UserAgent].ToString().Contains("AscDesktopEditor"));
-    }
+        public Uri Url()
+        {
+            var url = request != null ? new Uri(request.GetDisplayUrl()) : null;
 
-    public static bool MobileApp(this HttpRequest request)
-    {
-        return !string.IsNullOrEmpty(request.Headers[HeaderNames.UserAgent]) && (request.Headers[HeaderNames.UserAgent].ToString().Contains("iPhone") || request.Headers[HeaderNames.UserAgent].ToString().Contains("iOS") || request.Headers[HeaderNames.UserAgent].ToString().Contains("Android"));
+            if (!string.IsNullOrEmpty(url?.Query))
+            {
+                var queryParams = HttpUtility.ParseQueryString(url.Query);
+                var origin = queryParams[HeaderNames.Origin.ToLower()];
+                if (Uri.TryCreate(origin, UriKind.Absolute, out var urlOrigin))
+                {
+                    var result = new UriBuilder(url)
+                    {
+                        Scheme = urlOrigin.Scheme,
+                        Host = urlOrigin.Host,
+                        Port = urlOrigin.Port
+                    };
+                    return result.Uri;
+                }
+            }
+
+            return url;
+        }
     }
 }

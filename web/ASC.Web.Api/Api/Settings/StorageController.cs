@@ -1,28 +1,35 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 using Amazon;
 
@@ -32,7 +39,7 @@ using ASC.Data.Storage.Encryption.IntegrationEvents.Events;
 namespace ASC.Web.Api.Controllers.Settings;
 
 public class StorageController(
-    ILoggerProvider option,
+    ILoggerFactory loggerFactory,
         ServiceClient serviceClient,
         MessageService messageService,
         SecurityContext securityContext,
@@ -56,12 +63,12 @@ public class StorageController(
         TenantExtra tenantExtra)
     : BaseSettingsController(fusionCache, webItemManager)
 {
-    private readonly ILogger _log = option.CreateLogger("ASC.Api");
+    private readonly ILogger _log = loggerFactory.CreateLogger("ASC.Api");
 
-    /// <summary>
+    /// <remarks>
     /// Returns a list of all the portal storages.
-    /// </summary>
-    /// <short>Get storages</short>
+    /// </remarks>
+    /// <summary>Get storages</summary>
     /// <path>api/2.0/settings/storage</path>
     /// <collection>list</collection>
     [Tags("Settings / Storage")]
@@ -84,10 +91,10 @@ public class StorageController(
         return result;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the storage progress.
-    /// </summary>
-    /// <short>Get the storage progress</short>
+    /// </remarks>
+    /// <summary>Get the storage progress</summary>
     /// <path>api/2.0/settings/storage/progress</path>
     [Tags("Settings / Storage")]
     [SwaggerResponse(200, "Storage progress", typeof(double))]
@@ -106,10 +113,10 @@ public class StorageController(
         return serviceClient.GetProgress(tenant.Id);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Starts the storage encryption process.
-    /// </summary>
-    /// <short>Start the storage encryption process</short>
+    /// </remarks>
+    /// <summary>Start the storage encryption process</summary>
     /// <path>api/2.0/settings/encryption/start</path>
     [Tags("Settings / Encryption")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
@@ -238,10 +245,10 @@ public class StorageController(
         ));
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the storage encryption settings.
-    /// </summary>
-    /// <short>Get the storage encryption settings</short>
+    /// </remarks>
+    /// <summary>Get the storage encryption settings</summary>
     /// <path>api/2.0/settings/encryption/settings</path>
     [Tags("Settings / Encryption")]
     [SwaggerResponse(200, "Storage encryption settings", typeof(EncryptionSettings))]
@@ -279,10 +286,10 @@ public class StorageController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the storage encryption progress.
-    /// </summary>
-    /// <short>Get the storage encryption progress</short>
+    /// </remarks>
+    /// <summary>Get the storage encryption progress</summary>
     /// <path>api/2.0/settings/encryption/progress</path>
     [Tags("Settings / Encryption")]
     [SwaggerResponse(200, "Storage encryption progress", typeof(double?))]
@@ -308,10 +315,10 @@ public class StorageController(
         return await encryptionWorker.GetEncryptionProgress();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Updates a storage with the parameters specified in the request.
-    /// </summary>
-    /// <short>Update a storage</short>
+    /// </remarks>
+    /// <summary>Update a storage</summary>
     /// <path>api/2.0/settings/storage</path>
     [Tags("Settings / Storage")]
     [SwaggerResponse(200, "Updated storage settings", typeof(StorageSettings))]
@@ -351,10 +358,10 @@ public class StorageController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Resets the storage settings to the default parameters.
-    /// </summary>
-    /// <short>Reset the storage settings</short>
+    /// </remarks>
+    /// <summary>Reset the storage settings</summary>
     /// <path>api/2.0/settings/storage</path>
     [Tags("Settings / Storage")]
     [SwaggerResponse(200, "Ok")]
@@ -383,10 +390,10 @@ public class StorageController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a list of all the CDN storages.
-    /// </summary>
-    /// <short>Get the CDN storages</short>
+    /// </remarks>
+    /// <summary>Get the CDN storages</summary>
     /// <path>api/2.0/settings/storage/cdn</path>
     /// <collection>list</collection>
     [Tags("Settings / Storage")]
@@ -409,10 +416,10 @@ public class StorageController(
         return result;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Updates the CDN storage with the parameters specified in the request.
-    /// </summary>
-    /// <short>Update the CDN storage</short>
+    /// </remarks>
+    /// <summary>Update the CDN storage</summary>
     /// <path>api/2.0/settings/storage/cdn</path>
     [Tags("Settings / Storage")]
     [SwaggerResponse(200, "Updated CDN storage", typeof(CdnStorageSettings))]
@@ -454,10 +461,10 @@ public class StorageController(
         return settings;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Resets the CDN storage settings to the default parameters.
-    /// </summary>
-    /// <short>Reset the CDN storage settings</short>
+    /// </remarks>
+    /// <summary>Reset the CDN storage settings</summary>
     /// <path>api/2.0/settings/storage/cdn</path>
     [Tags("Settings / Storage")]
     [SwaggerResponse(200, "Ok")]
@@ -472,15 +479,15 @@ public class StorageController(
         await storageSettingsHelper.ClearAsync(await settingsManager.LoadAsync<CdnStorageSettings>());
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a list of all the backup storages.
-    /// </summary>
-    /// <short>Get the backup storages</short>
+    /// </remarks>
+    /// <summary>Get the backup storages</summary>
     /// <path>api/2.0/settings/storage/backup</path>
     /// <collection>list</collection>
     [Tags("Settings / Storage")]
     [SwaggerResponse(200, "List of the backup storages with the following parameters", typeof(List<StorageDto>))]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [SwaggerResponse(403, "Access denied")]
     [HttpGet("storage/backup")]
     public async Task<List<StorageDto>> GetAllBackupStorages(AllBackupStoragesDto dto)
     {
@@ -516,10 +523,10 @@ public class StorageController(
         await tenantManager.SaveTenantAsync(tenant);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a list of all Amazon regions.
-    /// </summary>
-    /// <short>Get Amazon regions</short>
+    /// </remarks>
+    /// <summary>Get Amazon regions</summary>
     /// <path>api/2.0/settings/storage/s3/regions</path>
     [Tags("Settings / Storage")]
     [SwaggerResponse(200, "List of the Amazon regions", typeof(object))]

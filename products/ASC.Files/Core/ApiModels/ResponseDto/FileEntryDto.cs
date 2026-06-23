@@ -1,28 +1,35 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 using static ASC.Files.Core.Security.FileSecurity;
 
@@ -47,116 +54,138 @@ public abstract class FileEntryBaseDto
     /// <summary>
     /// The file entry title.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "Some titile.txt/ Some title")]
+    /// <example>Some title.txt</example>
     public string Title { get; set; }
 
     /// <summary>
     /// The access rights to the file entry.
     /// </summary>
+    /// <example>1</example>
     public FileShare Access { get; set; }
 
     /// <summary>
     /// Provides information about the employee who shared the file or folder.
     /// </summary>
+    /// <example>{"displayName": "John Doe"}</example>
     public EmployeeDto SharedBy { get; set; }
 
     /// <summary>
     /// The information about the employee who owns the file entry.
     /// </summary>
+    /// <example>{"displayName": "John Doe"}</example>
     public EmployeeDto OwnedBy { get; set; }
 
     /// <summary>
     /// Specifies if the file entry is shared via link or not.
     /// </summary>
-    [SwaggerSchemaCustom(Example = false)]
+    /// <example>false</example>
     public bool Shared { get; set; }
 
     /// <summary>
     /// Specifies if the file entry is shared for user or not.
     /// </summary>
-    [SwaggerSchemaCustom(Example = false)]
+    /// <example>false</example>
     public bool SharedForUser { get; set; }
+
+    /// <summary>
+    /// Specifies if the file entry is shared via a public (non-internal) external link.
+    /// </summary>
+    /// <example>false</example>
+    public bool SharedExternal { get; set; }
 
     /// <summary>
     /// Indicates whether the parent entity is shared.
     /// </summary>
+    /// <example>false</example>
     public bool ParentShared { get; set; }
 
     /// <summary>
     /// The short Web URL.
     /// </summary>
+    /// <example>http://localhost/s/abc123</example>
     [Url]
     public string ShortWebUrl { get; set; }
 
     /// <summary>
     /// The creation date and time of the file entry.
     /// </summary>
+    /// <example>2021-01-01T00:00:00Z</example>
     public ApiDateTime Created { get; set; }
 
     /// <summary>
     /// The file entry author.
     /// </summary>
+    /// <example>{"displayName": "John Doe"}</example>
     public EmployeeDto CreatedBy { get; set; }
-
-    private ApiDateTime _updated;
 
     /// <summary>
     /// The last date and time when the file entry was updated.
     /// </summary>
+    /// <example>2021-01-01T00:00:00Z</example>
     public ApiDateTime Updated
     {
-        get => _updated < Created ? Created : _updated;
-        set => _updated = value;
+        get => field < Created ? Created : field;
+        set;
     }
 
     /// <summary>
     /// The date and time when the file entry will be automatically deleted.
     /// </summary>
+    /// <example>2021-01-01T00:00:00Z</example>
     public ApiDateTime AutoDelete { get; set; }
 
     /// <summary>
     /// The root folder type of the file entry.
     /// </summary>
+    /// <example>0</example>
     public FolderType RootFolderType { get; set; }
 
     /// <summary>
     /// The parent room type of the file entry.
     /// </summary>
+    /// <example>0</example>
     public FolderType? ParentRoomType { get; set; }
 
     /// <summary>
     /// The user who updated the file entry.
     /// </summary>
+    /// <example>{"displayName": "John Doe"}</example>
     public EmployeeDto UpdatedBy { get; set; }
 
     /// <summary>
     /// Specifies if the file entry provider is specified or not.
     /// </summary>
+    /// <example>false</example>
     public bool? ProviderItem { get; set; }
 
     /// <summary>
     /// The provider key of the file entry.
     /// </summary>
+    /// <example>google-drive</example>
     public string ProviderKey { get; set; }
 
     /// <summary>
     /// The provider ID of the file entry.
     /// </summary>
+    /// <example>1</example>
     public int? ProviderId { get; set; }
 
     /// <summary>
     /// The order of the file entry.
     /// </summary>
+    /// <example>1</example>
     public string Order { get; set; }
 
     /// <summary>
     /// Specifies if the file is a favorite or not.
     /// </summary>
+    /// <example>false</example>
     public bool? IsFavorite { get; set; }
 
     /// <summary>
     /// The file entry type.
     /// </summary>
+    /// <example>0</example>
     public abstract FileEntryType FileEntryType { get; }
 
     protected FileEntryBaseDto(FileEntry entry)
@@ -165,6 +194,7 @@ public abstract class FileEntryBaseDto
         Access = entry.Access;
         Shared = entry.Shared;
         SharedForUser = entry.SharedForUser;
+        SharedExternal = entry.SharedExternal;
         ParentShared = entry.ParentShared;
         RootFolderType = entry.RootFolderType;
         ParentRoomType = entry.ParentRoomType;
@@ -185,74 +215,87 @@ public abstract class FileEntryDto<T> : FileEntryBaseDto
     /// <summary>
     /// The file entry ID.
     /// </summary>
-    [SwaggerSchemaCustom(Example = 10)]
+    /// <example>10</example>
     public T Id { get; set; }
 
     /// <summary>
     /// The root folder ID of the file entry.
     /// </summary>
+    /// <example>1</example>
     public T RootFolderId { get; set; }
 
     /// <summary>
     /// The origin ID of the file entry.
     /// </summary>
+    /// <example>12</example>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public T OriginId { get; set; }
 
     /// <summary>
     /// The origin room ID of the file entry.
     /// </summary>
+    /// <example>22</example>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public T OriginRoomId { get; set; }
 
     /// <summary>
     /// The origin title of the file entry.
     /// </summary>
+    /// <example>Original Title</example>
     public string OriginTitle { get; set; }
 
     /// <summary>
     /// The origin room title of the file entry.
     /// </summary>
+    /// <example>Original Room</example>
     public string OriginRoomTitle { get; set; }
 
     /// <summary>
     /// Specifies if the file entry can be shared or not.
     /// </summary>
+    /// <example>true</example>
     public bool CanShare { get; set; }
 
     /// <summary>
     /// A dictionary representing the sharing settings for the file entry.
     /// </summary>
+    /// <example>{"ExternalLink": 1, "InvitationLink": 2}</example>
     public IDictionary<SubjectType, int> ShareSettings { get; set; }
 
     /// <summary>
     /// The actions that can be performed with the file entry.
     /// </summary>
+    /// <example>{"Read": true, "Edit": false, "Delete": false}</example>
     public IDictionary<FilesSecurityActions, bool> Security { get; set; }
 
     /// <summary>
     /// The available external rights of the file entry.
     /// </summary>
+    /// <example>{"ExternalLink": ["Read", "Edit"]}</example>
     public IDictionary<SubjectType, IEnumerable<string>> AvailableShareRights { get; set; }
 
     /// <summary>
     /// The request token of the file entry.
     /// </summary>
+    /// <example>token-abc-123</example>
     public string RequestToken { get; set; }
 
     /// <summary>
     /// Specifies if the folder can be accessed via an external link or not.
     /// </summary>
+    /// <example>false</example>
     public bool? External { get; set; }
 
     /// <summary>
     /// Represents the expiration date of the file entry.
     /// </summary>
+    /// <example>2021-01-01T00:00:00Z</example>
     public ApiDateTime ExpirationDate { get; set; }
 
     /// <summary>
     /// Indicates whether the shareable link associated with the file or folder has expired.
     /// </summary>
+    /// <example>false</example>
     public bool? IsLinkExpired { get; set; }
 
     protected FileEntryDto(FileEntry<T> entry)
@@ -278,6 +321,7 @@ public class FileEntryDtoHelper(
     UserManager userManager,
     IDaoFactory daoFactory,
     ExternalShare externalShare,
+    FileSharing fileSharing,
     IUrlShortener urlShortener)
 {
     protected readonly FileSecurity _fileSecurity = fileSecurity;
@@ -294,6 +338,16 @@ public class FileEntryDtoHelper(
             entry = await _fileSecurity.SetSecurity(new[] { entry }.ToAsyncEnumerable()).FirstAsync();
         }
 
+        if (entry.RootFolderType == FolderType.VirtualRooms && entry.ParentRoomType == null && entry is not Folder<TId> { IsRoom: true })
+        {
+            var room = await _daoFactory.GetCacheFolderDao<TId>().GetParentFoldersAsync(entry.ParentId).FirstOrDefaultAsync(r => r.IsRoom);
+            if (room != null)
+            {
+                entry.ParentRoomType = room.FolderType;
+                entry.ParentRoomCreatedBy = room.CreateBy;
+            }
+        }
+
         CorrectSecurityByLockedStatus(entry);
 
         var permanentlyDeletedOn = await GetDeletedPermanentlyOn(entry);
@@ -305,6 +359,7 @@ public class FileEntryDtoHelper(
                 FolderType.VirtualRooms => IdConverter.Convert<TId>(await _globalFolderHelper.GetFolderVirtualRooms()),
                 FolderType.Archive => IdConverter.Convert<TId>(await _globalFolderHelper.GetFolderArchive()),
                 FolderType.RoomTemplates => IdConverter.Convert<TId>(await _globalFolderHelper.GetFolderRoomTemplatesAsync()),
+                FolderType.DefaultTemplates => IdConverter.Convert<TId>(await _globalFolderHelper.GetFolderDefaultTemplatesAsync()),
                 _ => entry.RootId
             };
         }
@@ -322,6 +377,14 @@ public class FileEntryDtoHelper(
                 {
                     var linkData = await _externalShare.GetLinkDataAsync(entry, record.Subject);
                     shortWebUrl = await _urlShortener.GetShortenLinkAsync(linkData.Url);
+                }
+            }
+            else if(entry.ParentRoomType == FolderType.PublicRoom)
+            {
+                var link = await fileSharing.GetPureSharesAsync(entry, ShareFilterType.PrimaryExternalLink, null, null, 0, 1).FirstOrDefaultAsync();
+                if (link != null)
+                {
+                    shortWebUrl = link.Link;
                 }
             }
         }
@@ -376,15 +439,16 @@ public class FileEntryDtoHelper(
             Title = entry.Title,
             Access = entry.Access,
             Shared = entry.Shared,
-            SharedBy = sharedBy.HasValue ? await employeeWrapperHelper.GetAsync(sharedBy.Value) : null,
-            OwnedBy = ownedBy.HasValue ? await employeeWrapperHelper.GetAsync(ownedBy.Value) : null,
+            SharedBy = securityContext.IsAuthenticated && sharedBy.HasValue ? await employeeWrapperHelper.GetAsync(sharedBy.Value) : null,
+            OwnedBy = securityContext.IsAuthenticated && ownedBy.HasValue ? await employeeWrapperHelper.GetAsync(ownedBy.Value) : null,
             SharedForUser = entry.SharedForUser,
+            SharedExternal = entry.SharedExternal,
             ParentShared = entry.ParentShared,
             ShortWebUrl = shortWebUrl,
             Created = _apiDateTimeHelper.Get(entry.CreateOn),
-            CreatedBy = await employeeWrapperHelper.GetAsync(entry.CreateBy),
+            CreatedBy = securityContext.IsAuthenticated ? await employeeWrapperHelper.GetAsync(entry.CreateBy) : null,
             Updated = _apiDateTimeHelper.Get(entry.ModifiedOn),
-            UpdatedBy = await employeeWrapperHelper.GetAsync(entry.ModifiedBy),
+            UpdatedBy = securityContext.IsAuthenticated ? await employeeWrapperHelper.GetAsync(entry.ModifiedBy) : null,
             RootFolderType = entry.RootFolderType,
             ParentRoomType = entry.ParentRoomType,
             RootFolderId = entry.RootId,

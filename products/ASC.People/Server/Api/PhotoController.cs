@@ -1,28 +1,35 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// Copyright (C) Ascensio System SIA, 2009-2026
+//
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
+//
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
+//
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
+//
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
+//
+// No trademark rights are granted under this License.
+//
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
-// 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// SPDX-License-Identifier: AGPL-3.0-only
 
 using ImageMagick;
 
@@ -30,9 +37,9 @@ using UnknownImageFormatException = ASC.Web.Core.Users.UnknownImageFormatExcepti
 
 namespace ASC.People.Api;
 
-///<summary>
+///<remarks>
 /// Photo API.
-///</summary>
+///</remarks>
 public class PhotoController(
     UserManager userManager,
     PermissionContext permissionContext,
@@ -44,17 +51,18 @@ public class PhotoController(
     SettingsManager settingsManager,
     FileSizeComment fileSizeComment,
     SetupInfo setupInfo,
-    IHttpClientFactory httpClientFactory,
     IHttpContextAccessor httpContextAccessor,
-    UserWebhookManager webhookManager)
-    : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
+    UserWebhookManager webhookManager,
+    IUrlValidator urlValidator,
+    IHttpClientFactory httpClientFactory)
+    : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpContextAccessor, urlValidator, setupInfo, httpClientFactory)
 {
-    /// <summary>
+    /// <remarks>
     /// Creates the user photo thumbnails by coordinates of the original image specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Create photo thumbnails
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/people/{userid}/photo/thumbnails</path>
     [Tags("People / Photos")]
     [SwaggerResponse(200, "Thumbnail parameters", typeof(ThumbnailsDataDto))]
@@ -105,12 +113,12 @@ public class PhotoController(
         return await ThumbnailsDataDto.Create(user, _userPhotoManager);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Deletes a photo of the user with the ID specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Delete a user photo
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/people/{userid}/photo</path>
     [Tags("People / Photos")]
     [SwaggerResponse(200, "Thumbnail parameters: original photo, retina, maximum size photo, big, medium, small", typeof(ThumbnailsDataDto))]
@@ -136,12 +144,12 @@ public class PhotoController(
         return await ThumbnailsDataDto.Create(user, _userPhotoManager);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a photo of the user with the ID specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get a user photo
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/people/{userid}/photo</path>
     [Tags("People / Photos")]
     [SwaggerResponse(200, "Thumbnail parameters: original photo, retina, maximum size photo, big, medium, small", typeof(ThumbnailsDataDto))]
@@ -152,7 +160,7 @@ public class PhotoController(
     {
         var user = await GetUserInfoAsync(inDto.UserId);
 
-        if (_userManager.IsSystemUser(user.Id))
+        if (_userManager.IsSystemUser(user.Id) || !await _userManager.CanUserViewAnotherUserAsync(securityContext.CurrentAccount.ID, user.Id))
         {
             throw new SecurityException();
         }
@@ -160,12 +168,12 @@ public class PhotoController(
         return await ThumbnailsDataDto.Create(user, _userPhotoManager);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Updates a photo of the user with the ID specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Update a user photo
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/people/{userid}/photo</path>
     [Tags("People / Photos")]
     [SwaggerResponse(200, "Updated thumbnail parameters: original photo, retina, maximum size photo, big, medium, small", typeof(ThumbnailsDataDto))]
@@ -183,9 +191,15 @@ public class PhotoController(
 
         await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(user.Id), Constants.Action_EditUser);
 
+        if (string.IsNullOrEmpty(inDto.UpdatePhoto.Files))
+        {
+            throw new ArgumentException(PeopleResource.ErrorEmptyUploadFileSelected);
+        }
+
         if (inDto.UpdatePhoto.Files != await _userPhotoManager.GetPhotoAbsoluteWebPath(user.Id))
         {
-            await UpdatePhotoUrlAsync(inDto.UpdatePhoto.Files, user);
+            var photoValidation = await ValidatePhotoUrlAsync(inDto.UpdatePhoto.Files);
+            await DownloadAndSavePhotoAsync(photoValidation, user);
         }
 
         await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
@@ -195,12 +209,12 @@ public class PhotoController(
         return await ThumbnailsDataDto.Create(user, _userPhotoManager);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Uploads a photo of the user with the ID specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Upload a user photo
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/people/{userid}/photo</path>
     [Tags("People / Photos")]
     [SwaggerResponse(200, "Result of file uploading", typeof(FileUploadResultDto))]
@@ -212,11 +226,11 @@ public class PhotoController(
     public async Task<FileUploadResultDto> UploadMemberPhoto(UploadMemberPhotoRequestDto inDto)
     {
         var result = new FileUploadResultDto();
-        var autosave = bool.Parse(inDto.FormCollection["Autosave"]);
+        var autosave = inDto.Autosave;
 
         try
         {
-            if (inDto.FormCollection.Files.Count != 0)
+            if (inDto.File != null)
             {
                 var user = await GetUserInfoAsync(inDto.UserId);
 
@@ -227,9 +241,9 @@ public class PhotoController(
 
                 await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(user.Id), Constants.Action_EditUser);
 
-                var userPhoto = inDto.FormCollection.Files[0];
+                var userPhoto = inDto.File;
 
-                if (userPhoto.Length > setupInfo.MaxImageUploadSize)
+                if (userPhoto.Length > _setupInfo.MaxImageUploadSize)
                 {
                     result.Success = false;
                     result.Message = fileSizeComment.FileImageSizeExceptionString;
@@ -248,7 +262,7 @@ public class PhotoController(
 
                 if (autosave)
                 {
-                    if (data.Length > setupInfo.MaxImageUploadSize)
+                    if (data.Length > _setupInfo.MaxImageUploadSize)
                     {
                         throw new ImageSizeLimitException();
                     }
@@ -273,7 +287,7 @@ public class PhotoController(
                 }
                 else
                 {
-                    result.Data = await _userPhotoManager.SaveTempPhoto(data, setupInfo.MaxImageUploadSize, UserPhotoManager.OriginalFotoSize.Width, UserPhotoManager.OriginalFotoSize.Height);
+                    result.Data = await _userPhotoManager.SaveTempPhoto(data, _setupInfo.MaxImageUploadSize, UserPhotoManager.OriginalFotoSize.Width, UserPhotoManager.OriginalFotoSize.Height);
                 }
 
                 result.Success = true;

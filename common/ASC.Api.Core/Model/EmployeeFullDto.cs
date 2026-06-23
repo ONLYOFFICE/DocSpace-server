@@ -1,28 +1,35 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 using ASC.Web.Studio.Core.TFA;
 
@@ -36,201 +43,224 @@ public class EmployeeFullDto : EmployeeDto
     /// <summary>
     /// The user first name.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "Mike")]
+    /// <example>Mike</example>
     public string FirstName { get; set; }
 
     /// <summary>
     /// The user last name.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "Zanyatski")]
+    /// <example>Zanyatski</example>
     public string LastName { get; set; }
 
     /// <summary>
     /// The user username.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "Mike.Zanyatski")]
+    /// <example>Mike.Zanyatski</example>
     public string UserName { get; set; }
 
     /// <summary>
     /// The user email.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "my@gmail.com")]
+    /// <example>my@gmail.com</example>
     [EmailAddress]
     public string Email { get; set; }
 
     /// <summary>
     /// The list of user contacts.
     /// </summary>
+    /// <example>[{"type": "email", "value": "user@example.com"}]</example>
     public List<Contact> Contacts { get; set; }
 
-    /// <summary>
-    /// The user birthday.
-    /// </summary>
-    public ApiDateTime Birthday { get; set; }
+    // /// <summary>
+    // /// The user birthday.
+    // /// </summary>
+    // /// <example>1990-06-07T00:00:00.0000000Z</example>
+    // public ApiDateTime Birthday { get; set; }
 
-    /// <summary>
-    /// The user sex.
-    /// </summary>
-    [SwaggerSchemaCustom(Example = "male")]
-    public string Sex { get; set; }
+    // /// <summary>
+    // /// The user sex.
+    // /// </summary>
+    // /// <example>male</example>
+    // public string Sex { get; set; }
 
     /// <summary>
     /// The user status.
     /// </summary>
+    /// <example>Active</example>
     public EmployeeStatus Status { get; set; }
 
     /// <summary>
     /// The user activation status.
     /// </summary>
+    /// <example>Activated</example>
     public EmployeeActivationStatus ActivationStatus { get; set; }
 
     /// <summary>
     /// The date when the user account was terminated.
     /// </summary>
+    /// <example>2025-06-01T00:00:00.0000000Z</example>
     public ApiDateTime Terminated { get; set; }
 
     /// <summary>
     /// The user department.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "Marketing")]
+    /// <example>Marketing</example>
     public string Department { get; set; }
 
-    /// <summary>
-    /// The user registration date.
-    /// </summary>
-    public ApiDateTime WorkFrom { get; set; }
+    // /// <summary>
+    // /// The user registration date.
+    // /// </summary>
+    // /// <example>2020-01-01T00:00:00.0000000Z</example>
+    // public ApiDateTime WorkFrom { get; set; }
 
     /// <summary>
     /// The list of user groups.
     /// </summary>
+    /// <example>[{"id": "00000000-0000-0000-0000-000000000000", "name": "Marketing"}]</example>
     public List<GroupSummaryDto> Groups { get; set; }
 
     /// <summary>
     /// The user location.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "Palo Alto")]
+    /// <example>Palo Alto</example>
     public string Location { get; set; }
 
     /// <summary>
     /// The user notes.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "Notes to worker")]
+    /// <example>Notes to worker</example>
     public string Notes { get; set; }
 
     /// <summary>
     /// Specifies if the user is an administrator or not.
     /// </summary>
-    [SwaggerSchemaCustom(Example = false)]
+    /// <example>false</example>
     public bool IsAdmin { get; set; }
 
     /// <summary>
     /// Specifies if the user is a room administrator or not.
     /// </summary>
+    /// <example>false</example>
     public bool IsRoomAdmin { get; set; }
 
     /// <summary>
     /// Specifies if the LDAP settings are enabled for the user or not.
     /// </summary>
-    [SwaggerSchemaCustom(Example = false)]
+    /// <example>false</example>
     public bool IsLDAP { get; set; }
 
     /// <summary>
     /// The list of the administrator modules.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "[\"projects\", \"crm\"]")]
+    /// <example>["projects", "crm"]</example>
     public List<string> ListAdminModules { get; set; }
 
     /// <summary>
     /// Specifies if the user is a portal owner or not.
     /// </summary>
+    /// <example>false</example>
     public bool IsOwner { get; set; }
 
     /// <summary>
     /// Specifies if the user is a portal visitor or not.
     /// </summary>
+    /// <example>false</example>
     public bool IsVisitor { get; set; }
 
     /// <summary>
     /// Specifies if the user is a portal collaborator or not.
     /// </summary>
+    /// <example>false</example>
     public bool IsCollaborator { get; set; }
 
     /// <summary>
     /// The user culture code.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "en-EN")]
+    /// <example>en-EN</example>
     public string CultureName { get; set; }
 
     /// <summary>
     /// The user mobile phone number.
     /// </summary>
+    /// <example>+1 (555) 123-4567</example>
     public string MobilePhone { get; set; }
 
     /// <summary>
     /// The mobile phone activation status.
     /// </summary>
+    /// <example>NotActivated</example>
     public MobilePhoneActivationStatus MobilePhoneActivationStatus { get; set; }
 
     /// <summary>
     /// Specifies if the SSO settings are enabled for the user or not.
     /// </summary>
-    [SwaggerSchemaCustom(Example = false)]
+    /// <example>false</example>
     public bool IsSSO { get; set; }
 
     /// <summary>
     /// The user theme settings.
     /// </summary>
+    /// <example>Base</example>
     public DarkThemeSettingsType? Theme { get; set; }
 
     /// <summary>
     /// The user quota limit.
     /// </summary>
+    /// <example>1073741824</example>
     public long? QuotaLimit { get; set; }
 
     /// <summary>
     /// The portal used space of the user.
     /// </summary>
-    [SwaggerSchemaCustom(Example = 12345)]
+    /// <example>12345</example>
     public double? UsedSpace { get; set; }
 
     /// <summary>
     /// Specifies if the user has access rights.
     /// </summary>
+    /// <example>false</example>
     public bool? Shared { get; set; }
 
     /// <summary>
     /// Specifies if the user has a custom quota or not.
     /// </summary>
+    /// <example>false</example>
     public bool? IsCustomQuota { get; set; }
 
     /// <summary>
     /// The current login event ID.
     /// </summary>
+    /// <example>123</example>
     public int? LoginEventId { get; set; }
 
     /// <summary>
     /// The auth cookie lifetime in seconds.
     /// </summary>
+    /// <example>3600</example>
     public double? AuthCookieLifetime { get; set; }
 
     /// <summary>
     /// The user who created the current user.
     /// </summary>
+    /// <example>{"displayName": "John Doe"}</example>
     public EmployeeDto CreatedBy { get; set; }
 
     /// <summary>
     /// The user registration date.
     /// </summary>
+    /// <example>2020-01-01T00:00:00.0000000Z</example>
     public ApiDateTime RegistrationDate { get; set; }
 
     /// <summary>
     /// Specifies if the user has a personal folder or not.
     /// </summary>
-    public bool HasPersonalFolder { get; set; }
+    /// <example>true</example>
+    public bool? HasPersonalFolder { get; set; }
 
     /// <summary>
     /// Indicates whether the user has enabled two-factor authentication (TFA) using an authentication app.
     /// </summary>
+    /// <example>false</example>
     public bool? TfaAppEnabled { get; set; }
 }
 [Scope]
@@ -261,7 +291,7 @@ public class EmployeeFullDtoHelper(
     //
     //     var newExpr = Expression.New(typeof(UserInfo));
     //
-    //     //i => new UserInfo { ID = i.id } 
+    //     //i => new UserInfo { ID = i.id }
     //     var parameter = Expression.Parameter(typeof(User), "i");
     //     var bindExprs = new List<MemberAssignment>();
     //
@@ -330,14 +360,14 @@ public class EmployeeFullDtoHelper(
             UserName = userInfo.UserName,
             FirstName = userInfo.FirstName,
             LastName = userInfo.LastName,
-            Birthday = apiDateTimeHelper.Get(userInfo.BirthDate),
+            //Birthday = apiDateTimeHelper.Get(userInfo.BirthDate),
             Status = userInfo.Status,
             ActivationStatus = userInfo.ActivationStatus & ~EmployeeActivationStatus.AutoGenerated,
             Terminated = apiDateTimeHelper.Get(userInfo.TerminatedDate),
-            WorkFrom = apiDateTimeHelper.Get(userInfo.WorkFromDate),
+            //WorkFrom = apiDateTimeHelper.Get(userInfo.WorkFromDate),
             Email = userInfo.Email,
             IsVisitor = await _userManager.IsGuestAsync(userInfo),
-            IsAdmin = currentType is EmployeeType.DocSpaceAdmin,
+            IsAdmin = currentType is EmployeeType.DocSpaceAdmin && !userInfo.IsOwner(tenant),
             IsRoomAdmin = currentType is EmployeeType.RoomAdmin,
             IsOwner = userInfo.IsOwner(tenant),
             IsCollaborator = currentType is EmployeeType.User,
@@ -366,10 +396,10 @@ public class EmployeeFullDtoHelper(
             }
         }
 
-        if (userInfo.Sex.HasValue)
-        {
-            result.Sex = userInfo.Sex.Value ? "male" : "female";
-        }
+        // if (userInfo.Sex.HasValue)
+        // {
+        //     result.Sex = userInfo.Sex.Value ? "male" : "female";
+        // }
 
         if (!string.IsNullOrEmpty(userInfo.Location))
         {
@@ -434,8 +464,8 @@ public class EmployeeFullDtoHelper(
         {
             return;
         }
-        
-        var groupsFromDb = (await _userManager.GetUserGroupsAsync(userInfo.Id));
+
+        var groupsFromDb = await _userManager.GetUserGroupsAsync(userInfo.Id);
         List<GroupSummaryDto> groups = [];
 
         foreach (var g in groupsFromDb)

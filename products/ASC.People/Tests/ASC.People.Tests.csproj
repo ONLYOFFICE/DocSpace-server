@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <Nullable>enable</Nullable>
@@ -16,15 +16,11 @@
         </PackageReference>
         <PackageReference Include="DocSpace.API.SDK" />
         <PackageReference Include="FluentAssertions" />
-        <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" />
+        <PackageReference Include="Aspire.Hosting.Testing" />
+        <PackageReference Include="MySql.Data" />
         <PackageReference Include="Respawn" />
-        <PackageReference Include="Testcontainers" />
-        <PackageReference Include="Testcontainers.MySql" />
-        <PackageReference Include="Testcontainers.OpenSearch" />
-        <PackageReference Include="Testcontainers.PostgreSql" />
-        <PackageReference Include="Testcontainers.RabbitMq" />
-        <PackageReference Include="Testcontainers.Redis" />
+        <PackageReference Include="StackExchange.Redis" />
         <PackageReference Include="xunit.runner.visualstudio">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -37,10 +33,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\..\common\Tools\ASC.Migrations.Core\ASC.Migrations.Core.csproj" />
-        <ProjectReference Include="..\..\..\migrations\mysql\SaaS\ASC.Migrations.MySql.SaaS.csproj" />
-        <ProjectReference Include="..\..\..\migrations\postgre\SaaS\ASC.Migrations.PostgreSql.SaaS.csproj" />
-        <ProjectReference Include="..\..\..\web\ASC.Web.Api\ASC.Web.Api.csproj" Aliases="ASCWebApi"/>
+        <ProjectReference Include="..\..\..\common\ASC.AppHost\ASC.AppHost.csproj" IsAspireProjectResource="false" />
         <ProjectReference Include="..\..\ASC.People\Server\ASC.People.csproj" Aliases="ASCPeople" />
     </ItemGroup>
 

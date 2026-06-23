@@ -1,30 +1,35 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
-
-using ASC.MessagingSystem.Core;
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.AI.Core.Settings;
 
@@ -34,12 +39,12 @@ public class AiSettingsService(
     AuthContext authContext,
     AiSettingsStore aiSettingsStore,
     AiAccessibility accessibility,
-    AiGateway aiGateway,
     AiProviderService providerService,
     VectorizationGlobalSettings vectorizationGlobalSettings,
     SystemMcpConfig systemMcpConfig,
     ModelClientFactory modelClientFactory,
-    MessageService messageService)
+    MessageService messageService,
+    SettingsManager settingsManager)
 {
     public async Task<WebSearchSettings> SetWebSearchSettingsAsync(bool enabled, EngineType type, string? key)
     {
@@ -67,7 +72,10 @@ public class AiSettingsService(
                     set = true;
                 }
                 break;
-            
+            case EngineType.PortalAi:
+                settings.Config = null;
+                set = true;
+                break;
             case EngineType.None:
                 settings.Config = null;
                 break;
@@ -105,42 +113,50 @@ public class AiSettingsService(
         var set = false;
         var settings = await aiSettingsStore.GetVectorizationSettingsAsync();
         
-        if (type == EmbeddingProviderType.None)
+        switch (type)
         {
-            settings.Type = type;
-            settings.Key = null;
-        }
-        else
-        {
-            ArgumentException.ThrowIfNullOrEmpty(key);
-            
-            var url = type switch
-            {
-                EmbeddingProviderType.OpenAi => VectorizationGlobalSettings.OpenAiBaseUrl,
-                EmbeddingProviderType.OpenRouter => VectorizationGlobalSettings.OpenRouterBaseUrl,
-                _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
-            };
-            
-            var client = modelClientFactory.Create(type, url, key);
-
-            try
-            {
-                await client.PingAsync();
-            }
-            catch (HttpRequestException httpException)
-            {
-                if (httpException.StatusCode is HttpStatusCode.Unauthorized)
+            case EmbeddingProviderType.None:
+                settings.Type = type;
+                settings.Key = null;
+                break;
+            case EmbeddingProviderType.PortalAi:
+                settings.Type = type;
+                settings.Key = null;
+                set = true;
+                break;
+            default:
                 {
-                    throw new ArgumentException(ErrorMessages.InvalidKey);
-                }
+                    ArgumentException.ThrowIfNullOrEmpty(key);
 
-                throw;
-            }
-            
-            settings.Type = type;
-            settings.Key = key;
-            
-            set = true;
+                    var url = type switch
+                    {
+                        EmbeddingProviderType.OpenAi => VectorizationGlobalSettings.OpenAiBaseUrl,
+                        EmbeddingProviderType.OpenRouter => VectorizationGlobalSettings.OpenRouterBaseUrl,
+                        _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+                    };
+
+                    var client = modelClientFactory.Create(type, url, key);
+
+                    try
+                    {
+                        await client.PingAsync();
+                    }
+                    catch (HttpRequestException httpException)
+                    {
+                        if (httpException.StatusCode is HttpStatusCode.Unauthorized)
+                        {
+                            throw new ArgumentException(ErrorMessages.InvalidKey);
+                        }
+
+                        throw;
+                    }
+
+                    settings.Type = type;
+                    settings.Key = key;
+
+                    set = true;
+                    break;
+                }
         }
 
         await aiSettingsStore.SetVectorizationSettingsAsync(settings);
@@ -175,12 +191,19 @@ public class AiSettingsService(
         var vectorizationEnabledTask = aiSettingsStore.IsVectorizationEnabledAsync();
 
         var needResetProvidersTask = providerService.NeedResetProvidersAsync();
-        var aiReadyTask = accessibility.IsAiEnabledAsync();
+        var aiStatusTask = accessibility.GetStatusAsync();
 
         var docSpaceMcpServer = systemMcpConfig.Servers.Values.FirstOrDefault(
             x => x.Type == ServerType.DocSpace);
 
-        await Task.WhenAll(webSearchSettingsTask, webSearchEnabledTask, vectorizationSettingsTask, vectorizationEnabledTask, needResetProvidersTask, aiReadyTask);
+        await Task.WhenAll(
+            webSearchSettingsTask,
+            webSearchEnabledTask,
+            vectorizationSettingsTask,
+            vectorizationEnabledTask,
+            needResetProvidersTask,
+            aiStatusTask
+            );
 
         var webSearchNeedReset = (await webSearchSettingsTask).NeedReset;
         var webSearchEnabled = !webSearchNeedReset && (await webSearchEnabledTask);
@@ -188,8 +211,9 @@ public class AiSettingsService(
         var vectorizationNeedReset = (await vectorizationSettingsTask).NeedReset;
         var vectorizationEnabled = !vectorizationNeedReset && (await vectorizationEnabledTask);
 
+        var aiStatus = await aiStatusTask;
         var needResetProviders = await needResetProvidersTask;
-        var aiReady = !needResetProviders && (await aiReadyTask);
+        var aiReady = (aiStatus.GatewayEnabled || !needResetProviders) && aiStatus.Enabled;
 
         return new AiSettings
         {
@@ -200,13 +224,35 @@ public class AiSettingsService(
             AiReady = aiReady,
             AiReadyNeedReset = needResetProviders,
             EmbeddingModel = vectorizationGlobalSettings.Model.Id,
-            PortalMcpServerId = docSpaceMcpServer?.Id
+            ModelAliases = aiSettingsStore.GetModelAliases(),
+            PortalMcpServerId = docSpaceMcpServer?.Id,
+            SystemAiEnabled = aiStatus.GatewayEnabled,
+            RecommendedModelForForms = aiSettingsStore.GetRecommendedModelForForms(),
         };
     }
-    
+
+    public async Task<AiUserSettings> GetAiUserSettingsAsync()
+    {
+        return await settingsManager.LoadForCurrentUserAsync<AiUserSettings>();
+    }
+
+    public async Task<AiUserSettings> SetAiUserSettingsAsync(bool chatRecommendedModelVisible)
+    {
+        var settings = new AiUserSettings
+        {
+            ChatRecommendedModelVisible = chatRecommendedModelVisible,
+        };
+
+        await settingsManager.SaveForCurrentUserAsync(settings);
+
+        messageService.Send(MessageAction.UserUpdatedAiSettings);
+
+        return settings;
+    }
+
     private async Task ThrowIfNotAccess()
     {
-        if (!await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID) || aiGateway.Configured)
+        if (!await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))
         {
             throw new SecurityException(ErrorMessages.AiSettingsAccessDenied);
         }

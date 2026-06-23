@@ -1,28 +1,35 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 using DriveFile = Google.Apis.Drive.v3.Data.File;
 
@@ -37,11 +44,11 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
     IDaoSelector<TFile, TFolder, TItem> daoSelector,
     IDaoBase<TFile, TFolder, TItem> dao,
     IDbContextFactory<FilesDbContext> dbContextFactory,
-        UserManager userManager,
-        CrossDao crossDao,
-        IFileDao<int> fileDao,
-        IFolderDao<int> folderDao,
-        SetupInfo setupInfo,
+    UserManager userManager,
+    CrossDao crossDao,
+    IFileDao<int> fileDao,
+    IFolderDao<int> folderDao,
+    SetupInfo setupInfo,
     TenantManager tenantManager,
     Global global)
     : BaseFolderDao, IFolderDao<string>
@@ -97,7 +104,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
     }
 
     public async IAsyncEnumerable<Folder<string>> GetRoomsAsync(IEnumerable<string> roomsIds, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText, bool withSubfolders, bool withoutTags, bool excludeSubject, ProviderFilter provider,
-        SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds, IEnumerable<int> parentsIds = null)
+        SubjectFilter? subjectFilter, Guid subjectOwnerId, IEnumerable<string> subjectEntriesIds, IEnumerable<int> parentsIds = null, int? groupId = null)
     {
         if (dao.CheckInvalidFilters(filterTypes) || (provider != ProviderFilter.None && provider != _providerInfo.ProviderFilter))
         {
@@ -107,7 +114,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         var rooms = roomsIds.ToAsyncEnumerable().Select(async (string e, CancellationToken _) => await GetFolderAsync(e).ConfigureAwait(false));
 
         rooms = FilterByRoomType(rooms, filterTypes);
-        rooms = FilterBySubject(rooms, subjectId, excludeSubject, subjectFilter, subjectEntriesIds);
+        rooms = FilterBySubject(rooms, subjectId, excludeSubject, subjectFilter, subjectOwnerId, subjectEntriesIds);
 
         if (!string.IsNullOrEmpty(searchText))
         {
@@ -242,7 +249,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
             return null;
         }
 
-        folder.Title = await global.GetAvailableTitleAsync(folder.Title, dao.MakeThirdId(folder.ParentId), IsExistAsync, FileEntryType.Folder);
+        folder.Title = await GetAvailableTitleAsync(folder.Title, dao.MakeThirdId(folder.ParentId));
 
         var thirdFolder = await dao.CreateFolderAsync(folder.Title, folder.ParentId);
 
@@ -306,7 +313,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
 
         var fromFolderId = dao.GetParentFolderId(folder);
 
-        var newTitle = await global.GetAvailableTitleAsync(dao.GetName(folder), dao.GetId(toFolder), IsExistAsync, FileEntryType.Folder);
+        var newTitle = await GetAvailableTitleAsync(dao.GetName(folder), dao.GetId(toFolder));
         var storage = await _providerInfo.StorageAsync;
         var movedFolder = await storage.MoveFolderAsync(dao.GetId(folder), newTitle, dao.GetId(toFolder));
 
@@ -378,7 +385,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
             throw new Exception(errorFolder1.Error);
         }
 
-        var newTitle = await global.GetAvailableTitleAsync(dao.GetName(folder), dao.GetId(toFolder), IsExistAsync, FileEntryType.Folder);
+        var newTitle = await GetAvailableTitleAsync(dao.GetName(folder), dao.GetId(toFolder));
         var storage = await _providerInfo.StorageAsync;
         var newFolder = await storage.CopyFolderAsync(dao.GetId(folder), newTitle, dao.GetId(toFolder));
 
@@ -419,7 +426,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         return Task.FromResult<IDictionary<string, string>>(new Dictionary<string, string>());
     }
 
-    public async Task<string> UpdateFolderAsync(Folder<string> folder, string newTitle, long newQuota, bool indexing, bool denyDownload, RoomDataLifetime lifeTime, WatermarkSettings watermark, string color, string cover, ChatSettings chatSettings = null)
+    public async Task<string> UpdateFolderAsync(Folder<string> folder, string newTitle, long newQuota, bool indexing, bool denyDownload, RoomDataLifetime lifeTime, WatermarkSettings watermark, string color, string cover, ChatSettings chatSettings = null, bool? sendFormToExternalDB = null, bool? saveFormAsXLSX = null)
     {
         return await RenameFolderAsync(folder, newTitle);
     }
@@ -435,13 +442,13 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         var parentFolderId = dao.GetParentFolderId(thirdFolder);
         var renamedThirdFolder = thirdFolder;
 
-        if (dao.IsRoot(thirdFolder) || DocSpaceHelper.IsRoom(folder.FolderType))
+        if (dao.IsRoot(thirdFolder) || folder.IsRoom)
         {
             await daoSelector.RenameProviderAsync(_providerInfo, newTitle);
         }
         else
         {
-            newTitle = await global.GetAvailableTitleAsync(newTitle, parentFolderId, IsExistAsync, FileEntryType.Folder);
+            newTitle = await GetAvailableTitleAsync(newTitle, parentFolderId);
 
             //rename folder
             var storage = await _providerInfo.StorageAsync;
@@ -577,6 +584,11 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         return Task.FromResult<string>(null);
     }
 
+    public Task<string> GetFolderIDDefaultTemplatesAsync(bool createIfNotExists)
+    {
+        return Task.FromResult<string>(null);
+    }
+
     public Task<string> GetFolderIDPrivacyAsync(bool createIfNotExists, Guid? userId)
     {
         return Task.FromResult<string>(null);
@@ -623,19 +635,19 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
     }
 
     public IAsyncEnumerable<Folder<string>> GetRoomsAsync(IEnumerable<string> parentsIds, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText,
-        bool withSubfolders, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds, QuotaFilter quotaFilter)
+        bool withSubfolders, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter? subjectFilter, Guid subjectOwnerId, IEnumerable<string> subjectEntriesIds, QuotaFilter quotaFilter, int? groupId)
     {
         return AsyncEnumerable.Empty<Folder<string>>();
     }
 
     public IAsyncEnumerable<Folder<string>> GetProviderBasedRoomsAsync(SearchArea searchArea, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText,
-        bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds)
+        bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter? subjectFilter, Guid subjectOwnerId, IEnumerable<string> subjectEntriesIds, int? groupId = null)
     {
         return AsyncEnumerable.Empty<Folder<string>>();
     }
 
     public IAsyncEnumerable<Folder<string>> GetProviderBasedRoomsAsync(SearchArea searchArea, IEnumerable<string> roomsIds, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags,
-        Guid subjectId, string searchText, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds)
+        Guid subjectId, string searchText, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter? subjectFilter, Guid subjectOwnerId, IEnumerable<string> subjectEntriesIds, int? groupId = null)
     {
         return AsyncEnumerable.Empty<Folder<string>>();
     }
@@ -734,6 +746,11 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         return items.Exists(item => dao.GetName(item).Equals(title, StringComparison.InvariantCultureIgnoreCase));
     }
 
+    public async Task<string> GetAvailableTitleAsync(string requestTitle, string parentFolderId)
+    {
+        return await global.GetAvailableTitleAsync(requestTitle, parentFolderId, IsExistAsync, FileEntryType.Folder);
+    }
+
     public Task<Folder<string>> DeleteWatermarkSettings(Folder<string> room)
     {
         throw new NotImplementedException();
@@ -796,22 +813,36 @@ internal abstract class BaseFolderDao
         return rooms.Where(f => typeFilter.Contains(f.FolderType));
     }
 
-    protected IAsyncEnumerable<Folder<string>> FilterBySubject(IAsyncEnumerable<Folder<string>> rooms, Guid subjectId, bool excludeSubject, SubjectFilter subjectFilter,
+    protected IAsyncEnumerable<Folder<string>> FilterBySubject(IAsyncEnumerable<Folder<string>> rooms, Guid subjectId, bool excludeSubject, SubjectFilter? subjectFilter, Guid subjectOwnerId,
         IEnumerable<string> subjectEntriesIds)
     {
-        if (subjectId == Guid.Empty)
+        if (subjectFilter != null)
         {
-            return rooms;
+            if (subjectId != Guid.Empty)
+            {
+                if (subjectFilter is SubjectFilter.Owner)
+                {
+                    rooms = excludeSubject ? rooms.Where(f => f.CreateBy != subjectId) : rooms.Where(f => f.CreateBy == subjectId);
+                }
+                else if (subjectFilter is SubjectFilter.Member)
+                {
+                    rooms = excludeSubject ? rooms.Where(f => f.CreateBy != subjectId && !subjectEntriesIds.Contains(f.Id.ToString()))
+                        : rooms.Where(f => f.CreateBy == subjectId || subjectEntriesIds.Contains(f.Id.ToString()));
+                }
+            }
         }
+        else
+        {
+            if (subjectId != Guid.Empty)
+            {
+                rooms = excludeSubject ? rooms.Where(f => f.CreateBy != subjectId && !subjectEntriesIds.Contains(f.Id.ToString()))
+                        : rooms.Where(f => f.CreateBy == subjectId || subjectEntriesIds.Contains(f.Id.ToString()));
+            }
 
-        if (subjectFilter == SubjectFilter.Owner)
-        {
-            return excludeSubject ? rooms.Where(f => f != null && f.CreateBy != subjectId) : rooms.Where(f => f != null && f.CreateBy == subjectId);
-        }
-        if (subjectFilter == SubjectFilter.Member)
-        {
-            return excludeSubject ? rooms.Where(f => f != null && f.CreateBy != subjectId && !subjectEntriesIds.Contains(f.Id))
-                : rooms.Where(f => f != null && (f.CreateBy == subjectId || subjectEntriesIds.Contains(f.Id)));
+            if (subjectOwnerId != Guid.Empty)
+            {
+                rooms = excludeSubject ? rooms.Where(f => f.CreateBy != subjectOwnerId) : rooms.Where(f => f.CreateBy == subjectOwnerId);
+            }
         }
 
         return rooms;

@@ -1,0 +1,644 @@
+// Copyright (C) Ascensio System SIA, 2009-2026
+//
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
+//
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
+//
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
+//
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
+//
+// No trademark rights are granted under this License.
+//
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+//
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
+
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Logging;
+
+using StackExchange.Redis;
+
+#pragma warning disable ASPIREINTERACTION001
+
+namespace ASC.AppHost.Configuration;
+
+public record RedisConfig(string Host, string Port, string? Password = null);
+
+public class ConnectionStringManager(IDistributedApplicationBuilder builder, string basePath)
+{
+    private MySqlConnectionStringBuilder? MySqlConnectionStringBuilder { get; set; }
+    public Uri? RabbitMqUri { get; private set; }
+    public RedisConfig? Redis { get; private set; }
+
+    private IResourceBuilder<MySqlDatabaseResource>? MySqlDatabaseResource { get; set; }
+    private IResourceBuilder<RabbitMQServerResource>? RabbitMqResource { get; set; }
+    private IResourceBuilder<RedisResource>? RedisResource { get; set; }
+    private IResourceBuilder<ProjectResource>? MigrateResource { get; set; }
+    private IResourceBuilder<ContainerResource>? EditorResource { get; set; }
+    private IResourceBuilder<MailPitContainerResource>? MailResource { get; set; }
+    private IResourceBuilder<ContainerResource>? OpensearchResource { get; set; }
+
+    private IResourceBuilder<ContainerResource>? McpResource { get; set; }
+    private IResourceBuilder<ContainerResource>? OtelCollectorResource { get; set; }
+    private IResourceBuilder<JavaScriptAppResource>? ApiTestResource { get; set; }
+    private IResourceBuilder<JavaScriptAppResource>? E2ETestResource { get; set; }
+    private Dictionary<string, string>? _parameters;
+
+    public bool HasOtelCollector => OtelCollectorResource != null;
+
+
+    public ConnectionStringManager AddMySql(bool withDbGate = false, bool withDataVolume = true)
+    {
+        var mysqlRootPassword = builder.AddParameter("mysql-root-password", "root", secret: true);
+
+        var mysqlResourceBuilder = builder.AddMySql("mysql", password: mysqlRootPassword)
+            .WithEndpoint("tcp", endpoint => endpoint.Port = 33306);
+
+        if (withDataVolume)
+        {
+            mysqlResourceBuilder = mysqlResourceBuilder.WithDataVolume("docspace-mysql-data");
+        }
+
+        if (withDbGate)
+        {
+            mysqlResourceBuilder = mysqlResourceBuilder.WithDbGate();
+        }
+
+        MySqlDatabaseResource = mysqlResourceBuilder.AddDatabase("docspace");
+
+        builder.Eventing.Subscribe(MySqlDatabaseResource.Resource, async (ConnectionStringAvailableEvent _, CancellationToken ct) =>
+        {
+            var connectionString = await MySqlDatabaseResource.Resource.ConnectionStringExpression.GetValueAsync(ct).ConfigureAwait(false);
+            if (connectionString != null && MySqlConnectionStringBuilder == null)
+            {
+                MySqlConnectionStringBuilder = new MySqlConnectionStringBuilder(connectionString);
+            }
+        });
+
+        MigrateResource = builder
+            .AddProject<ASC_Migration_Runner>("migrate")
+            .WithReference(MySqlDatabaseResource)
+            .WaitFor(MySqlDatabaseResource);
+
+        var isStandalone = string.Compare(builder.Configuration["APP_HOSTING_STANDALONE"], "true", StringComparison.OrdinalIgnoreCase) == 0;
+
+        MigrateResource.WithEnvironment("standalone", isStandalone ? "true" : "");
+
+
+        return this;
+    }
+
+    public ConnectionStringManager AddRabbitMq()
+    {
+        RabbitMqResource = builder
+            .AddRabbitMQ("messaging")
+            .WithManagementPlugin();
+
+        builder.Eventing.Subscribe(RabbitMqResource.Resource, async (ConnectionStringAvailableEvent _, CancellationToken ct) =>
+        {
+            var connectionString = await RabbitMqResource.Resource.ConnectionStringExpression.GetValueAsync(ct).ConfigureAwait(false);
+            if (connectionString != null && RabbitMqUri == null && Uri.IsWellFormedUriString(connectionString, UriKind.Absolute))
+            {
+                RabbitMqUri = new Uri(connectionString);
+            }
+        });
+
+        return this;
+    }
+
+    public ConnectionStringManager AddRedis(bool withRedisInsight = false)
+    {
+#pragma warning disable ASPIRECERTIFICATES001
+        RedisResource = builder
+            .AddRedis("cache")
+            .WithClearCommand()
+            .WithPassword(null)
+            .WithoutHttpsCertificate();
+#pragma warning restore ASPIRECERTIFICATES001
+
+        if (withRedisInsight)
+        {
+            RedisResource = RedisResource.WithRedisInsight();
+        }
+
+        builder.Eventing.Subscribe(RedisResource.Resource, async (ConnectionStringAvailableEvent _, CancellationToken ct) =>
+        {
+            var connectionString = await RedisResource.Resource.ConnectionStringExpression.GetValueAsync(ct).ConfigureAwait(false);
+            if (connectionString != null && Redis == null)
+            {
+                var hostAndPassword = connectionString.Split(',');
+                var splitted = hostAndPassword[0].Split(':');
+                if (splitted.Length == 2)
+                {
+                    string? password = null;
+                    if (hostAndPassword.Length > 1)
+                    {
+                        var splittedHostAndPassword = hostAndPassword[1].Split('=');
+                        if (splittedHostAndPassword.Length == 2)
+                        {
+                            password = splittedHostAndPassword[1];
+                        }
+                    }
+                    Redis = new RedisConfig(splitted[0], splitted[1], password);
+                }
+            }
+        });
+
+        return this;
+    }
+
+    public ConnectionStringManager AddOpenTelemetryCollector()
+    {
+        var configPath = Path.Combine(basePath, "server", "common", "ASC.AppHost", "Configuration", "otel-collector-config.yaml");
+        var logsPath = Path.Combine(basePath, "Logs");
+
+        Directory.CreateDirectory(Path.Combine(logsPath, "otel"));
+
+        OtelCollectorResource = builder
+            .AddContainer(Constants.OtelCollectorContainer, "otel/opentelemetry-collector-contrib")
+            .WithImageTag("latest")
+            .WithBindMount(configPath, "/etc/otelcol-contrib/config.yaml")
+            .WithBindMount(logsPath, "/logs")
+            .WithArgs("--config=/etc/otelcol-contrib/config.yaml")
+            .WithHttpEndpoint(port: Constants.OtelCollectorGrpcPort, targetPort: Constants.OtelCollectorGrpcPort, name: "otlp-grpc", isProxied: false)
+            .WithHttpEndpoint(port: Constants.OtelCollectorHttpPort, targetPort: Constants.OtelCollectorHttpPort, name: "otlp-http", isProxied: false);
+
+        return this;
+    }
+
+    public ConnectionStringManager AddMcpServer(bool withMcpInspector = false)
+    {
+        McpResource = builder
+            .AddContainer(Constants.DocSpaceMcpContainer, "onlyoffice/docspace-mcp")
+            .WithEnvironment("DOCSPACE_INTERNAL", "true")
+            .WithEnvironment("DOCSPACE_TRANSPORT", "http")
+            .WithEnvironment("DOCSPACE_HOST", "0.0.0.0")
+            .WithEnvironment("DOCSPACE_PORT", Constants.DocSpaceMcpPort.ToString())
+            .WithHttpEndpoint(Constants.DocSpaceMcpPort, Constants.DocSpaceMcpPort);
+
+        if (withMcpInspector)
+        {
+            WithMcpInspector(McpResource);
+        }
+
+        AddWaitFor(McpResource);
+
+        return this;
+    }
+
+    private IResourceBuilder<McpInspectorResource> WithMcpInspector(IResourceBuilder<ContainerResource> mcp) => mcp
+        .ApplicationBuilder.AddMcpInspector("mcp-inspector")
+        .WithMcpServer(mcp)
+        .WithParentRelationship(mcp)
+        .WaitFor(mcp)
+        .WithUrls(x =>
+        {
+            x.Urls[0].DisplayText = "Inspector";
+        });
+
+
+    public ConnectionStringManager AddEditors()
+    {
+        var forTesting = builder.Configuration["APP_EDITOR_TEST"] == "true";
+        var image = builder.Configuration["APP_EDITION"] switch
+        {
+            "enterprise" => forTesting ? "onlyoffice/4testing-documentserver-ee" : "onlyoffice/documentserver-ee",
+            "developer" => forTesting ? "onlyoffice/4testing-documentserver-de" : "onlyoffice/documentserver-de",
+            _ => forTesting ? "onlyoffice/4testing-documentserver" : "onlyoffice/documentserver"
+        };
+
+        var tag = builder.Configuration["APP_EDITOR_VERSION"] ?? "latest";
+
+        EditorResource = builder
+            .AddContainer(Constants.EditorsContainer, image, tag)
+            //TODO:get from config or set for the rest projects
+            .WithEnvironment("JWT_ENABLED", "true")
+            .WithEnvironment("JWT_SECRET", "secret")
+            .WithEnvironment("JWT_HEADER", "AuthorizationJwt")
+            .WithBindMount(Path.Combine(basePath, "Data"), "/var/www/onlyoffice/Data");
+
+
+        return this;
+    }
+
+    public ConnectionStringManager AddOpensearch(bool withDashboard = true, bool fixedPort = true, bool withDataVolume = true)
+    {
+        OpensearchResource = builder
+            .AddContainer(Constants.OpensearchContainer, "opensearchproject/opensearch", "2")
+            .WithEnvironment("DISABLE_INSTALL_DEMO_CONFIG", "true")
+            .WithEnvironment("plugins.security.disabled", "true")
+            .WithEnvironment("discovery.type", "single-node")
+            .WithEntrypoint("/bin/bash")
+            .WithArgs("-c", "opensearch-plugin install ingest-attachment --batch && /usr/share/opensearch/opensearch-docker-entrypoint.sh");
+
+        if (fixedPort)
+        {
+            OpensearchResource = OpensearchResource
+                .WithHttpEndpoint(port: Constants.OpensearchPort, targetPort: Constants.OpensearchPort, name: "http");
+        }
+        else
+        {
+            OpensearchResource = OpensearchResource
+                .WithHttpEndpoint(targetPort: Constants.OpensearchPort, name: "http");
+        }
+
+        if (withDataVolume)
+        {
+            OpensearchResource = OpensearchResource
+                .WithVolume("docspace-opensearch-data", "/usr/share/opensearch/data");
+        }
+
+        if (withDashboard)
+        {
+            builder.AddContainer("opensearch-dashboard", "opensearchproject/opensearch-dashboards", "2")
+                .WithHttpEndpoint(targetPort: 5601)
+                .WithEnvironment("OPENSEARCH_HOSTS", $"http://{Constants.OpensearchContainer}:{Constants.OpensearchPort.ToString()}")
+                .WithEnvironment("DISABLE_SECURITY_DASHBOARDS_PLUGIN", "true");
+        }
+
+        return this;
+    }
+
+    public ConnectionStringManager AddMailPit()
+    {
+        MailResource = builder.AddMailPit("mailpit")
+            .WithArgs("--smtp-disable-rdns");
+
+        return this;
+    }
+
+    public ConnectionStringManager AddApiTest()
+    {
+        var docspaceOwnerEmail = builder.Configuration["OWNER_EMAIL"] ?? "test@example.com";
+        var coreMachineKey = builder.Configuration["core:machinekey"] ?? "test-machine-key";
+
+        var playwrightTestsPath = Path.Combine(basePath, "tests", "api-tests");
+
+        var currentBugId = builder.Configuration["BUG_ID"];
+
+        ApiTestResource = builder
+            .AddJavaScriptApp("tests-api", playwrightTestsPath, "test")
+            .WithNpm()
+            .WithEnvironment("MACHINEKEY", coreMachineKey)
+            .WithEnvironment("PKEY", "PKEY")
+            .WithEnvironment("LOCAL_PORTAL_DOMAIN", $"localhost:{Constants.AppHostPort.ToString()}")
+            .WithEnvironment("DOCSPACE_OWNER_EMAIL", docspaceOwnerEmail)
+            .WithExplicitStart();
+
+        if (!string.IsNullOrEmpty(currentBugId))
+        {
+            ApiTestResource.WithArgs("--", "--grep", $"BUG {currentBugId}");
+        }
+
+        ApiTestResource.WithCommand(
+            name: "run-ui",
+            displayName: "Run UI",
+            executeCommand: async context =>
+            {
+                var commandService = context.ServiceProvider
+                    .GetRequiredService<ResourceCommandService>();
+
+                ApiTestResource
+                    .WithHttpEndpoint(Constants.PlaywrightUiPort, Constants.PlaywrightUiPort, "playwright-ui", isProxied: false)
+                    .WithArgs("--", "--ui", "--ui-host", "0.0.0.0", "--ui-port", Constants.PlaywrightUiPort.ToString());
+
+                await commandService.ExecuteCommandAsync(
+                    resourceId: context.ResourceName,
+                    commandName: "resource-start",
+                    cancellationToken: context.CancellationToken);
+
+                return CommandResults.Success();
+            },
+            commandOptions: new CommandOptions
+            {
+                IconName = "TestBeaker",
+                IconVariant = IconVariant.Filled,
+                Description = "Restart tests with a specific BUG ID filter"
+            }
+        );
+
+        ApiTestResource.WithCommand(
+            name: "run-with-bug-id",
+            displayName: "Run with BUG ID",
+            executeCommand: async context =>
+            {
+                var interactionService = context.ServiceProvider
+                    .GetRequiredService<IInteractionService>();
+                var commandService = context.ServiceProvider
+                    .GetRequiredService<ResourceCommandService>();
+
+                var result = await interactionService.PromptInputAsync(
+                    title: "Enter BUG ID",
+                    message : "Provide the BUG ID to run specific tests (e.g., 12345)",
+                    input: new InteractionInput
+                    {
+                        InputType = InputType.Text,
+                        Name = "BUG ID",
+                        Placeholder = "Enter BUG ID number",
+                        Value = currentBugId ?? ""
+                    },
+                    cancellationToken: context.CancellationToken);
+
+                if (result.Canceled)
+                {
+                    return CommandResults.Success();
+                }
+
+                var bugId = result.Data.Value?.Trim();
+
+                await commandService.ExecuteCommandAsync(
+                    resourceId: context.ResourceName,
+                    commandName: "stop",
+                    cancellationToken: context.CancellationToken);
+
+                await Task.Delay(500, context.CancellationToken);
+
+                ApiTestResource
+                    .WithArgs(c=> c.Args.Clear());
+
+                if (!string.IsNullOrEmpty(bugId))
+                {
+                    ApiTestResource.WithArgs("run", "test", "--", "--grep", $"BUG {bugId}");
+                }
+                else
+                {
+                    ApiTestResource.WithArgs("run", "test");
+                }
+
+                await commandService.ExecuteCommandAsync(
+                    resourceId: context.ResourceName,
+                    commandName: "resource-start",
+                    cancellationToken: context.CancellationToken);
+
+                return CommandResults.Success();
+            },
+            commandOptions: new CommandOptions
+            {
+                IconName = "TestBeaker",
+                IconVariant = IconVariant.Filled,
+                Description = "Restart tests with a specific BUG ID filter"
+            });
+
+        _parameters = new Dictionary<string, string>
+        {
+            { "web:autotest:secret-email", docspaceOwnerEmail },
+            { "core:machinekey", coreMachineKey },
+            { "auth:allowskip:default", true.ToString() },
+            { "auth:allowskip:registerportal", true.ToString() }
+        };
+
+        return this;
+    }
+
+    public ConnectionStringManager AddE2ETest()
+    {
+        var docspaceOwnerEmail = builder.Configuration["OWNER_EMAIL"] ?? "test@example.com";
+        var coreMachineKey = builder.Configuration["core:machinekey"] ?? "test-machine-key";
+
+        var playwrightTestsPath = Path.Combine(basePath, "tests", "e2e-tests");
+
+        E2ETestResource = builder
+            .AddJavaScriptApp("tests-e2e", playwrightTestsPath, "testUI")
+            .WithNpm()
+            .WithEnvironment("MACHINEKEY", coreMachineKey)
+            .WithEnvironment("PKEY", "PKEY")
+            .WithEnvironment("LOCAL_PORTAL_DOMAIN", $"localhost:{Constants.AppHostPort.ToString()}")
+            .WithEnvironment("DOCSPACE_OWNER_EMAIL", docspaceOwnerEmail)
+            .WithArgs("--", "--ui", "--ui-host", "0.0.0.0", "--ui-port", Constants.E2ETestsUiPort.ToString())
+            .WithExplicitStart();
+
+        _parameters = new Dictionary<string, string>
+        {
+            { "web:autotest:secret-email", docspaceOwnerEmail },
+            { "core:machinekey", coreMachineKey },
+            { "auth:allowskip:default", true.ToString() },
+            { "auth:allowskip:registerportal", true.ToString() }
+        };
+
+        return this;
+    }
+
+    public string GetOtelCollectorEndpoint(bool isDocker) => isDocker
+        ? $"http://{Constants.OtelCollectorContainer}:{Constants.OtelCollectorGrpcPort}"
+        : $"http://localhost:{Constants.OtelCollectorGrpcPort}";
+
+    public void AddWaitFor<T>(
+        IResourceBuilder<T> resourceBuilder,
+        bool includeMigrate = true,
+        bool includeRabbitMq = true,
+        bool includeRedis = true,
+        bool includeEditors = true,
+        bool includeOpensearch = true,
+        bool includeMailPit = true
+        )  where T : IResourceWithWaitSupport
+    {
+        if (includeMigrate && MigrateResource != null)
+        {
+            resourceBuilder.WaitForCompletion(MigrateResource);
+        }
+
+        if (includeRabbitMq && RabbitMqResource != null)
+        {
+            resourceBuilder.WaitFor(RabbitMqResource);
+        }
+
+        if (includeRedis && RedisResource != null)
+        {
+            resourceBuilder.WaitFor(RedisResource);
+        }
+
+        if (includeEditors && EditorResource != null)
+        {
+            resourceBuilder.WaitFor(EditorResource);
+        }
+
+        if (includeOpensearch && OpensearchResource != null)
+        {
+            resourceBuilder.WaitFor(OpensearchResource);
+        }
+
+        if (includeMailPit && MailResource != null)
+        {
+            resourceBuilder.WaitFor(MailResource);
+        }
+
+        if (OtelCollectorResource != null)
+        {
+            resourceBuilder.WaitFor(OtelCollectorResource);
+        }
+
+        ApiTestResource?.WaitFor((IResourceBuilder<IResource>)resourceBuilder);
+    }
+
+    public void AddBaseConfig<T>(IResourceBuilder<T> resourceBuilder, bool isDocker) where T : IResourceWithEnvironment, IResourceWithWaitSupport, IResourceWithEndpoints
+    {
+        resourceBuilder.WithHttpHealthCheck("/health");
+
+        resourceBuilder
+            .WithEnvironment("openTelemetry:enable", "true")
+            .WithEnvironment("files:docservice:url:portal", SubstituteLocalhost("http://localhost") + ":" + Constants.AppHostPort)
+            .WithEnvironment("files:docservice:url:public", $"http://localhost:{Constants.AppHostPort.ToString()}/ds-vpath");
+
+        if (MySqlDatabaseResource != null)
+        {
+            resourceBuilder
+                .WithReference(MySqlDatabaseResource, "default:connectionString");
+        }
+
+        if (MailResource != null)
+        {
+            resourceBuilder
+                .WithReference(MailResource)
+                .WithEnvironment("core:notify:postman", "mailpit");
+        }
+
+        if (isDocker)
+        {
+            resourceBuilder.WithEnvironment("files:docservice:url:internal", $"http://{Constants.EditorsContainer}");
+        }
+
+        if (RabbitMqResource != null)
+        {
+            resourceBuilder
+                .WithEnvironment("RabbitMQ:Hostname", () => RabbitMqUri != null ? isDocker ? $"{SubstituteLocalhost(RabbitMqUri.Host)}" : RabbitMqUri.Host : "")
+                .WithEnvironment("RabbitMQ:Port", () => RabbitMqUri != null ? $"{RabbitMqUri.Port}" : "")
+                .WithEnvironment("RabbitMQ:UserName", () => RabbitMqUri != null ? $"{RabbitMqUri.UserInfo.Split(':')[0]}" : "")
+                .WithEnvironment("RabbitMQ:Password", () => RabbitMqUri != null ? $"{RabbitMqUri.UserInfo.Split(':')[1]}" : "")
+                .WithEnvironment("RabbitMQ:VirtualHost", () => RabbitMqUri != null ? $"{RabbitMqUri.PathAndQuery}" : "");
+        }
+        else
+        {
+            resourceBuilder.WithEnvironment("RabbitMQ:Enabled", "false");
+        }
+
+        if (RedisResource != null)
+        {
+            resourceBuilder
+                .WithEnvironment("Redis:Hosts:0:Host", () => (isDocker ? SubstituteLocalhost(Redis?.Host) : Redis?.Host) ?? string.Empty)
+                .WithEnvironment("Redis:Hosts:0:Port", () => Redis?.Port ?? string.Empty);
+
+            if (!string.IsNullOrEmpty(Redis?.Password))
+            {
+                resourceBuilder.WithEnvironment("Redis:Password", () => Redis?.Password ?? string.Empty);
+            }
+        }
+        else
+        {
+            resourceBuilder.WithEnvironment("Redis:Enabled", "false");
+        }
+
+        if (OpensearchResource != null)
+        {
+            resourceBuilder
+                .WithEnvironment("elastic:Scheme", () => "http")
+                .WithEnvironment("elastic:Host", () => (isDocker ? Constants.OpensearchContainer : "localhost"))
+                .WithEnvironment("elastic:Port", () => Constants.OpensearchPort.ToString())
+                .WithEnvironment("elastic:Threads", () => "1");
+        }
+
+        if (_parameters != null)
+        {
+            foreach (var parameter in _parameters)
+            {
+                resourceBuilder.WithEnvironment(parameter.Key, parameter.Value);
+            }
+        }
+    }
+
+    public void AddIdentityEnv(IResourceBuilder<ContainerResource>  resourceBuilder)
+    {
+        resourceBuilder
+            .WithEnvironment("JDBC_URL", () => MySqlConnectionStringBuilder != null ? $"{SubstituteLocalhost(MySqlConnectionStringBuilder.Server)}:{MySqlConnectionStringBuilder.Port}" : string.Empty)
+            .WithEnvironment("JDBC_DATABASE", () => MySqlConnectionStringBuilder?.Database ?? string.Empty)
+            .WithEnvironment("JDBC_USER_NAME", () => MySqlConnectionStringBuilder?.UserID ?? string.Empty)
+            .WithEnvironment("JDBC_PASSWORD", () => MySqlConnectionStringBuilder?.Password ?? string.Empty);
+
+        resourceBuilder
+            .WithEnvironment("RABBIT_HOST", () => RabbitMqUri != null ? $"{SubstituteLocalhost(RabbitMqUri.Host)}" : string.Empty)
+            .WithEnvironment("RABBIT_URI", () => RabbitMqUri != null ? $"{SubstituteLocalhost(RabbitMqUri.ToString())}" : string.Empty);
+
+        resourceBuilder
+            .WithEnvironment("REDIS_HOST", () => SubstituteLocalhost(Redis?.Host) ?? string.Empty)
+            .WithEnvironment("REDIS_PORT", () => Redis?.Port ?? string.Empty);
+
+        if (!string.IsNullOrEmpty(Redis?.Password))
+        {
+            resourceBuilder.WithEnvironment("REDIS_PASSWORD", () => Redis?.Password ?? string.Empty);
+        }
+
+        AddWaitFor(resourceBuilder, includeEditors: false);
+    }
+
+    public static string? SubstituteLocalhost(string? host) => host?.Replace(KnownHostNames.Localhost, KnownHostNames.DockerDesktopHostBridge);
+}
+
+internal static class RedisResourceBuilderExtensions
+{
+    public static IResourceBuilder<RedisResource> WithClearCommand(
+        this IResourceBuilder<RedisResource> builder)
+    {
+        var commandOptions = new CommandOptions
+        {
+            UpdateState = OnUpdateResourceState,
+            IconName = "AnimalRabbitOff",
+            IconVariant = IconVariant.Filled
+        };
+
+        builder.WithCommand(
+            name: "clear-cache",
+            displayName: "Clear Cache",
+            executeCommand: context => OnRunClearCacheCommandAsync(builder, context),
+            commandOptions: commandOptions);
+
+        return builder;
+    }
+
+    private static async Task<ExecuteCommandResult> OnRunClearCacheCommandAsync(
+        IResourceBuilder<RedisResource> builder,
+        ExecuteCommandContext context)
+    {
+        var connectionString = await builder.Resource.GetConnectionStringAsync() ??
+                               throw new InvalidOperationException(
+                                   $"Unable to get the '{context.ResourceName}' connection string.");
+
+        await using var connection = await ConnectionMultiplexer.ConnectAsync(connectionString);
+        var database = connection.GetDatabase();
+        await database.ExecuteAsync("FLUSHALL");
+
+        return CommandResults.Success();
+    }
+
+    private static ResourceCommandState OnUpdateResourceState(
+        UpdateCommandStateContext context)
+    {
+        var logger = context.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Updating resource state: {ResourceSnapshot}",
+                context.ResourceSnapshot);
+        }
+
+        return context.ResourceSnapshot.HealthStatus is HealthStatus.Healthy
+            ? ResourceCommandState.Enabled
+            : ResourceCommandState.Disabled;
+    }
+}

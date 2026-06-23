@@ -1,28 +1,35 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 using ZiggyCreatures.Caching.Fusion;
 
@@ -120,7 +127,7 @@ public class DbWorker(
     {
         var tenantId = tenantManager.GetCurrentTenantId();
 
-        var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
+        await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
 
         var q = webhooksDbContext.WebhooksConfigsAsync(tenantId, enabled);
 
@@ -195,7 +202,7 @@ public class DbWorker(
         WebhookTrigger? trigger)
     {
         await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
-        var q = await GetQueryForJournal(deliveryFrom, deliveryTo, hookUri, configId, eventId, webhookGroupStatus, userId, trigger);
+        var q = await GetQueryForJournal(webhooksDbContext, deliveryFrom, deliveryTo, hookUri, configId, eventId, webhookGroupStatus, userId, trigger);
 
         if (startIndex != 0)
         {
@@ -222,7 +229,8 @@ public class DbWorker(
         Guid? userId,
         WebhookTrigger? trigger)
     {
-        return await (await GetQueryForJournal(deliveryFrom, deliveryTo, hookUri, configId, eventId, webhookGroupStatus, userId, trigger)).CountAsync();
+        await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
+        return await (await GetQueryForJournal(webhooksDbContext, deliveryFrom, deliveryTo, hookUri, configId, eventId, webhookGroupStatus, userId, trigger)).CountAsync();
     }
 
     public async Task<DbWebhooksLog> ReadJournal(int tenantId, int id)
@@ -231,10 +239,7 @@ public class DbWorker(
 
         var fromDb = await webhooksDbContext.WebhooksLogAsync(tenantId, id);
 
-        if (fromDb != null)
-        {
-            fromDb.Log.Config = fromDb.Config;
-        }
+        fromDb?.Log.Config = fromDb.Config;
 
         return fromDb?.Log;
     }
@@ -280,6 +285,7 @@ public class DbWorker(
     }
 
     private async Task<IQueryable<DbWebhooks>> GetQueryForJournal(
+        WebhooksDbContext webhooksDbContext,
         DateTime? deliveryFrom,
         DateTime? deliveryTo,
         string hookUri,
@@ -290,8 +296,6 @@ public class DbWorker(
         WebhookTrigger? trigger)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
-
-        var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
 
         var q = webhooksDbContext.WebhooksLogs
             .OrderByDescending(t => t.Id)
@@ -374,22 +378,22 @@ public class DbWebhooks
 [Flags]
 public enum WebhookGroupStatus
 {
-    [SwaggerEnum("None")]
+    [Description("None")]
     None = 0,
 
-    [SwaggerEnum("Not sent")]
+    [Description("Not sent")]
     NotSent = 1,
 
-    [SwaggerEnum("Status2xx")]
+    [Description("Status2xx")]
     Status2xx = 2,
 
-    [SwaggerEnum("Status3xx")]
+    [Description("Status3xx")]
     Status3xx = 4,
 
-    [SwaggerEnum("Status4xx")]
+    [Description("Status4xx")]
     Status4xx = 8,
 
-    [SwaggerEnum("Status5xx")]
+    [Description("Status5xx")]
     Status5xx = 16
 }
 

@@ -1,28 +1,35 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
-// 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
-// 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
-// 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
+//
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
+//
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
+//
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
+//
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
+//
+// No trademark rights are granted under this License.
+//
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+//
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Files.Core.VirtualRooms;
 
@@ -33,7 +40,8 @@ public class CustomTagsService(
     AuthContext authContext,
     FilesMessageService filesMessageService,
     UserManager userManager,
-    FileSecurityCommon fileSecurityCommon)
+    FileSecurityCommon fileSecurityCommon,
+    SocketManager socketManager)
 {
     public async Task<TagInfo> CreateTagAsync(string name)
     {
@@ -67,14 +75,45 @@ public class CustomTagsService(
         return savedTag;
     }
 
-    public async Task DeleteTagsAsync<T>(List<string> names)
+    public async Task<TagInfo> UpdateTagAsync(string oldName, string newName)
     {
-        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
+        var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
+        if (userType is not EmployeeType.DocSpaceAdmin)
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
-        if (names.Count == 0)
+        ArgumentException.ThrowIfNullOrEmpty(oldName);
+        ArgumentException.ThrowIfNullOrEmpty(newName);
+
+        var tagDao = daoFactory.GetTagDao<int>();
+        var existedTag = await tagDao.GetTagsInfoAsync(oldName, TagType.Custom, true).FirstOrDefaultAsync();
+
+        if (existedTag == null)
+        {
+            throw new ItemNotFoundException();
+        }
+        var tag = await tagDao.GetTagsInfoAsync(newName, TagType.Custom, true).FirstOrDefaultAsync();
+        if (tag != null)
+        {
+            throw new ArgumentException($"Tag with name '{newName}' already exists");
+        }
+        existedTag.Name = newName;
+
+        var savedTag = await tagDao.UpdateTagInfoAsync(existedTag);
+
+        return savedTag;
+    }
+
+    public async Task DeleteTagsAsync<T>(List<string> names)
+    {
+        var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
+        if (userType is not EmployeeType.DocSpaceAdmin)
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
+        if (names == null || names.Count == 0)
         {
             return;
         }
@@ -91,14 +130,16 @@ public class CustomTagsService(
 
     public async Task<Folder<T>> AddRoomTagsAsync<T>(T folderId, List<string> names)
     {
-        var folder = await daoFactory.GetFolderDao<T>().GetFolderAsync(folderId);
+        var folder = await daoFactory.GetFolderDao<T>().GetFolderAsync(folderId) ?? throw new ItemNotFoundException();
 
-        if (folder.RootFolderType == FolderType.Archive || !await fileSecurity.CanEditRoomAsync(folder))
+        var isDocSpaceAdmin = await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID);
+
+        if (folder.RootFolderType == FolderType.Archive || (!isDocSpaceAdmin && !await fileSecurity.CanEditRoomAsync(folder)))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);
         }
 
-        if (names.Count == 0)
+        if (names == null || names.Count == 0)
         {
             return folder;
         }
@@ -106,6 +147,12 @@ public class CustomTagsService(
         var tagDao = daoFactory.GetTagDao<T>();
 
         var tagsInfos = await tagDao.GetTagsInfoAsync(names, TagType.Custom).ToListAsync();
+        var notFoundTags = names.Where(x => tagsInfos.All(r => r.Name != x)).Distinct().ToList();
+
+        foreach (var tagInfo in notFoundTags)
+        {
+            tagsInfos.Add(await CreateTagAsync(tagInfo));
+        }
 
         if (tagsInfos.Count == 0)
         {
@@ -117,15 +164,23 @@ public class CustomTagsService(
         await tagDao.SaveTagsAsync(tags);
 
         await filesMessageService.SendAsync(MessageAction.AddedRoomTags, folder, folder.Title, string.Join(',', tagsInfos.Select(t => t.Name)));
+        await socketManager.UpdateFolderAsync(folder);
 
         return folder;
     }
 
     public async Task<Folder<T>> DeleteRoomTagsAsync<T>(T folderId, List<string> names)
     {
-        var folder = await daoFactory.GetFolderDao<T>().GetFolderAsync(folderId);
+        var folder = await daoFactory.GetFolderDao<T>().GetFolderAsync(folderId) ?? throw new ItemNotFoundException();
 
-        if (folder.RootFolderType == FolderType.Archive || !await fileSecurity.CanEditRoomAsync(folder))
+        if (folder == null)
+        {
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
+
+        var isDocSpaceAdmin = await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID);
+
+        if (folder.RootFolderType == FolderType.Archive || (!isDocSpaceAdmin && !await fileSecurity.CanEditRoomAsync(folder)))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);
         }
@@ -142,6 +197,7 @@ public class CustomTagsService(
         await tagDao.RemoveTagsAsync(folder, tagsInfos.Select(t => t.Id).ToList());
 
         await filesMessageService.SendAsync(MessageAction.DeletedRoomTags, folder, folder.Title, string.Join(',', tagsInfos.Select(t => t.Name)));
+        await socketManager.UpdateFolderAsync(folder);
 
         return folder;
     }
@@ -150,7 +206,7 @@ public class CustomTagsService(
     {
         if (!await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID))
         {
-            var rooms = await fileSecurity.GetVirtualRoomsAsync(null, Guid.Empty, string.Empty, false, false, SearchArea.Active, false, [], false, ProviderFilter.None, SubjectFilter.Member, QuotaFilter.All, StorageFilter.None);
+            var rooms = await fileSecurity.GetVirtualRoomsAsync(null, Guid.Empty, string.Empty, false, false, SearchArea.Active, false, [], false, ProviderFilter.None, null, Guid.Empty, QuotaFilter.All, StorageFilter.None);
             var tags = rooms.SelectMany(r => r.Tags)
                 .Where(r => r.Type == tagType).Select(r => r.Name).Distinct();
 
@@ -173,5 +229,25 @@ public class CustomTagsService(
         {
             yield return tagInfo.Name;
         }
+    }
+
+    public async Task<bool> HasTagLinks(string name)
+    {
+        var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
+        if (userType is not EmployeeType.DocSpaceAdmin)
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+        var tagDao = daoFactory.GetTagDao<int>();
+        var existedTag = await tagDao.GetTagsInfoAsync(name, TagType.Custom, true).FirstOrDefaultAsync();
+
+        if (existedTag == null)
+        {
+            throw new ItemNotFoundException();
+        }
+
+        var hasTagLiks = await tagDao.HasTagLinksAsync(existedTag);
+
+        return hasTagLiks;
     }
 }

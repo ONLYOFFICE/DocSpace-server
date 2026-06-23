@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <ApplicationIcon />
+    <OutputType>Exe</OutputType>
+    <DisableImplicitComponentsAnalyzers>true</DisableImplicitComponentsAnalyzers>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+  </PropertyGroup>
+	<Target Name="ChangeAliasesOfStrongNameAssemblies" BeforeTargets="FindReferenceAssembliesForReferences;ResolveReferences">
+		<ItemGroup>
+			<ReferencePath Condition="'%(FileName)' == 'MySqlConnector'">
+				<Aliases>MySqlConnectorAlias</Aliases>
+			</ReferencePath>
+		</ItemGroup>
+
+	</Target>
+	<ItemGroup>
+	  <PackageReference Include="Autofac.Extensions.DependencyInjection" />
+	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\..\ASC.Data.Backup.Core\ASC.Data.Backup.Core.csproj" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Content Include="..\..\..\.dockerignore">
+	    <Link>.dockerignore</Link>
+	  </Content>
+	</ItemGroup>
+
+</Project>

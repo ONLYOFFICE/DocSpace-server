@@ -1,28 +1,35 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Files.Core.Helpers;
 
@@ -34,7 +41,6 @@ public class FilesLinkUtility
     public TimeSpan DefaultLinkLifeTime { get; }
     public const int MaxLinkLifeTimeInYears = 10;
 
-    private readonly string _filesUploaderUrl;
     private readonly CommonLinkUtility _commonLinkUtility;
     private readonly BaseCommonLinkUtility _baseCommonLinkUtility;
     private readonly CoreBaseSettings _coreBaseSettings;
@@ -56,14 +62,10 @@ public class FilesLinkUtility
         _coreSettings = coreSettings;
         _configuration = configuration;
         _instanceCrypto = instanceCrypto;
-        _filesUploaderUrl = _configuration["files:uploader:url"] ?? "~";
         DefaultLinkLifeTime = !TimeSpan.TryParse(configuration["externalLink:defaultLifetime"], out var defaultLifetime) ? TimeSpan.FromDays(7) : defaultLifetime;
     }
 
-    public string FilesBaseAbsolutePath
-    {
-        get { return _baseCommonLinkUtility.ToAbsolute(FilesBaseVirtualPath); }
-    }
+    public string FilesBaseAbsolutePath => _baseCommonLinkUtility.ToAbsolute(FilesBaseVirtualPath);
 
     public const string FileId = "fileid";
     public const string FolderId = "folderid";
@@ -82,12 +84,9 @@ public class FilesLinkUtility
     public const string ShardKey = "shardkey";
     public const string FillingSessionId = "fillingSessionId";
 
-    public string FileHandlerPath
-    {
-        get { return FilesBaseAbsolutePath + "filehandler.ashx"; }
-    }
+    public string FileHandlerPath => FilesBaseAbsolutePath + "filehandler.ashx";
 
-    
+
     public string GetDocServiceUrl()
     {
         var url = GetUrlSetting(FilesUrlKeys.Public);
@@ -115,7 +114,7 @@ public class FilesLinkUtility
 
         await SetUrlSettingAsync(FilesUrlKeys.Public, value);
     }
-    
+
     public string GetDocServiceUrlInternal()
     {
         var url = GetUrlSetting(FilesUrlKeys.Internal);
@@ -171,7 +170,7 @@ public class FilesLinkUtility
             return url;
         }
     }
-    
+
     public string DocServicePreloadUrl
     {
         get
@@ -199,7 +198,7 @@ public class FilesLinkUtility
                 url = GetDocServiceUrlInternal();
                 if (!string.IsNullOrEmpty(url))
                 {
-                    url += "ConvertService.ashx";
+                    url += "converter";
                 }
             }
             return url;
@@ -216,7 +215,7 @@ public class FilesLinkUtility
                 url = GetDocServiceUrlInternal();
                 if (!string.IsNullOrEmpty(url))
                 {
-                    url += "coauthoring/CommandService.ashx";
+                    url += "command";
                 }
             }
             return url;
@@ -286,7 +285,7 @@ public class FilesLinkUtility
             return result;
         }
     }
-    
+
     public string GetDocServicePortalUrl()
     {
         return GetUrlSetting(FilesUrlKeys.Portal);
@@ -378,10 +377,7 @@ public class FilesLinkUtility
         return true;
     }
 
-    public string FileDownloadUrlString
-    {
-        get { return FileHandlerPath + "?" + Action + "=download&" + FileId + "={0}"; }
-    }
+    public string FileDownloadUrlString => FileHandlerPath + "?" + Action + "=download&" + FileId + "={0}";
 
     public string GetFileDownloadUrl(object fileId)
     {
@@ -395,20 +391,11 @@ public class FilesLinkUtility
                + (string.IsNullOrEmpty(convertToExtension) ? string.Empty : "&" + OutType + "=" + convertToExtension);
     }
 
-    public string FileWebViewerUrlString
-    {
-        get { return $"{FileWebEditorUrlString}&{Action}=view"; }
-    }
+    public string FileWebViewerUrlString => $"{FileWebEditorUrlString}&{Action}=view";
 
-    public string FileWebViewerExternalUrlString
-    {
-        get { return FilesBaseAbsolutePath + EditorPage + "?" + FileUri + "={0}&" + FileTitle + "={1}&" + FolderUrl + "={2}"; }
-    }
+    public string FileWebViewerExternalUrlString => FilesBaseAbsolutePath + EditorPage + "?" + FileUri + "={0}&" + FileTitle + "={1}&" + FolderUrl + "={2}";
 
-    public string FileWebEditorUrlString
-    {
-        get { return $"/{EditorPage}?{FileId}={{0}}"; }
-    }
+    public string FileWebEditorUrlString => $"/{EditorPage}?{FileId}={{0}}";
 
     public string GetFileWebEditorUrl<T>(T fileId, int fileVersion = 0)
     {
@@ -416,10 +403,7 @@ public class FilesLinkUtility
             + (fileVersion > 0 ? "&" + Version + "=" + fileVersion : string.Empty);
     }
 
-    public string FileWebEditorExternalUrlString
-    {
-        get { return FileHandlerPath + "?" + Action + "=create&" + FileUri + "={0}&" + FileTitle + "={1}"; }
-    }
+    public string FileWebEditorExternalUrlString => FileHandlerPath + "?" + Action + "=create&" + FileUri + "={0}&" + FileTitle + "={1}";
 
     public string GetFileWebPreviewUrl(FileUtility fileUtility, string fileTitle, object fileId, int fileVersion = 0, bool external = false)
     {
@@ -441,15 +425,9 @@ public class FilesLinkUtility
         return GetFileDownloadUrl(fileId);
     }
 
-    public string FileRedirectPreviewUrlString
-    {
-        get { return FileHandlerPath + "?" + Action + "=redirect"; }
-    }
+    public string FileRedirectPreviewUrlString => FileHandlerPath + "?" + Action + "=redirect";
 
-    public string FileThumbnailUrlString
-    {
-        get { return FileHandlerPath + "?" + Action + "=thumb&" + FileId + "={0}"; }
-    }
+    public string FileThumbnailUrlString => FileHandlerPath + "?" + Action + "=thumb&" + FileId + "={0}";
 
     public string GetFileThumbnailUrl(object fileId, int fileVersion)
     {
@@ -479,24 +457,17 @@ public class FilesLinkUtility
             queryString = queryString + "&" + FolderId + "=" + HttpUtility.UrlEncode(folderId.ToString());
         }
 
-        return _commonLinkUtility.GetFullAbsolutePath(GetFileUploaderHandlerVirtualPath() + queryString);
+        return _commonLinkUtility.GetFullAbsolutePath(FileUploaderHandlerVirtualPath + queryString);
     }
 
     public string GetUploadChunkLocationUrl(string uploadId)
     {
         var queryString = "?uid=" + uploadId;
-        return _commonLinkUtility.GetFullAbsolutePath(GetFileUploaderHandlerVirtualPath() + queryString);
+        return _commonLinkUtility.GetFullAbsolutePath(FileUploaderHandlerVirtualPath + queryString);
     }
 
-    public bool IsLocalFileUploader
-    {
-        get { return !Regex.IsMatch(_filesUploaderUrl, "^http(s)?://\\.*"); }
-    }
+    private string FileUploaderHandlerVirtualPath => "/ChunkedUploader.ashx";
 
-    private string GetFileUploaderHandlerVirtualPath()
-    {
-        return _filesUploaderUrl.EndsWith(".ashx") ? _filesUploaderUrl : _filesUploaderUrl.TrimEnd('/') + "/ChunkedUploader.ashx";
-    }
 
     private string GetUrlSetting(FilesUrlKeys key)
     {
@@ -545,11 +516,11 @@ public class FilesLinkUtility
     }
 
     private readonly ConcurrentDictionary<string, string> _urlSettings = new();
-    
+
     private string GetDefaultUrlSetting(FilesUrlKeys key)
     {
         var confKey = $"files:docservice:url:{key.ToStringLowerFast()}";
-        var value = _urlSettings.GetOrAdd(confKey, (c) => _configuration[c]);
+        var value = _urlSettings.GetOrAdd(confKey, c => _configuration[c]);
         if (!string.IsNullOrEmpty(value))
         {
             value = value.TrimEnd('/') + "/";
@@ -563,7 +534,7 @@ public class FilesLinkUtility
         {
             throw new NotSupportedException("Method for server edition only.");
         }
-        
+
         value = (value ?? "").Trim();
         if (string.IsNullOrEmpty(value))
         {

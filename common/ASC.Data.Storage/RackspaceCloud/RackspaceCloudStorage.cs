@@ -1,28 +1,35 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 using HttpMethod = JSIStudios.SimpleRESTServices.Client.HttpMethod;
 
@@ -35,7 +42,7 @@ public class RackspaceCloudStorage(TempPath tempPath,
         PathUtils pathUtils,
         EmailValidationKeyProvider emailValidationKeyProvider,
         IHttpContextAccessor httpContextAccessor,
-        ILoggerProvider options,
+        ILoggerFactory loggerFactory,
         ILogger<RackspaceCloudStorage> logger,
         IHttpClientFactory httpClient,
         TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
@@ -44,7 +51,7 @@ public class RackspaceCloudStorage(TempPath tempPath,
         IQuotaService quotaService,
         UserManager userManager,
         CustomQuota customQuota)
-    : BaseStorage(tempStream, tenantManager, pathUtils, emailValidationKeyProvider, httpContextAccessor, options, logger, httpClient, tenantQuotaFeatureStatHelper, quotaSocketManager, settingsManager, quotaService, userManager, customQuota)
+    : BaseStorage(tempStream, tenantManager, pathUtils, emailValidationKeyProvider, httpContextAccessor, loggerFactory, logger, httpClient, tenantQuotaFeatureStatHelper, quotaSocketManager, settingsManager, quotaService, userManager, customQuota)
 {
     public override bool IsSupportChunking => true;
     public TempPath TempPath { get; } = tempPath;
@@ -182,49 +189,51 @@ public class RackspaceCloudStorage(TempPath tempPath,
         return GetReadStreamAsync(domain, path, offset);
     }
 
-    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, Guid ownerId)
+    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, Guid ownerId, CancellationToken token = default)
     {
-        return SaveAsync(domain, path, ownerId, stream, string.Empty, string.Empty);
-    }
-    public override Task<Uri> SaveAsync(string domain, string path, Stream stream)
-    {
-        return SaveAsync(domain, path, Guid.Empty, stream, string.Empty, string.Empty);
+        return SaveAsync(domain, path, ownerId, stream, string.Empty, string.Empty, token);
     }
 
-    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, ACL acl)
+    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, CancellationToken token = default)
     {
-        return SaveAsync(domain, path, stream, null, null, acl);
+        return SaveAsync(domain, path, Guid.Empty, stream, string.Empty, string.Empty, token);
     }
 
-    public override Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string contentType, string contentDisposition)
+    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, ACL acl, CancellationToken token = default)
     {
-        return SaveAsync(domain, path, ownerId, stream, contentType, contentDisposition, ACL.Auto);
-    }
-    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentType, string contentDisposition)
-    {
-        return SaveAsync(domain, path, stream, contentType, contentDisposition, ACL.Auto);
+        return SaveAsync(domain, path, stream, null, null, acl, token: token);
     }
 
-    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentEncoding, int cacheDays)
+    public override Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string contentType, string contentDisposition, CancellationToken token = default)
     {
-        return SaveAsync(domain, path, stream, string.Empty, string.Empty, ACL.Auto, contentEncoding, cacheDays);
+        return SaveAsync(domain, path, ownerId, stream, contentType, contentDisposition, ACL.Auto, token: token);
+    }
+
+    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentType, string contentDisposition, CancellationToken token = default)
+    {
+        return SaveAsync(domain, path, stream, contentType, contentDisposition, ACL.Auto, token: token);
+    }
+
+    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentEncoding, int cacheDays, CancellationToken token = default)
+    {
+        return SaveAsync(domain, path, stream, string.Empty, string.Empty, ACL.Auto, contentEncoding, cacheDays, token: token);
     }
 
     private bool EnableQuotaCheck(string domain)
     {
-        return (QuotaController != null) && !domain.EndsWith("_temp");
+        return QuotaController != null && !domain.EndsWith("_temp");
     }
 
     public async Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentType,
                      string contentDisposition, ACL acl, string contentEncoding = null, int cacheDays = 5,
-     DateTime? deleteAt = null, long? deleteAfter = null)
+     DateTime? deleteAt = null, long? deleteAfter = null, CancellationToken token = default)
     {
-        return await SaveAsync(domain, path, Guid.Empty, stream, contentType, contentDisposition, acl, contentEncoding, cacheDays, deleteAt, deleteAfter);
+        return await SaveAsync(domain, path, Guid.Empty, stream, contentType, contentDisposition, acl, contentEncoding, cacheDays, deleteAt, deleteAfter, token);
     }
 
     public async Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string contentType,
                       string contentDisposition, ACL acl, string contentEncoding = null, int cacheDays = 5,
-    DateTime? deleteAt = null, long? deleteAfter = null)
+    DateTime? deleteAt = null, long? deleteAfter = null, CancellationToken token = default)
     {
         var (buffered, isNew) = await _tempStream.TryGetBufferedAsync(stream);
 
@@ -303,6 +312,8 @@ public class RackspaceCloudStorage(TempPath tempPath,
             }
 
             stream.Position = 0;
+
+            token.ThrowIfCancellationRequested();
 
             client.CreateObject(_private_container,
                                 stream,
@@ -472,11 +483,11 @@ public class RackspaceCloudStorage(TempPath tempPath,
         return await GetUriAsync(newDomain, newPath);
     }
 
-    public override async Task<(Uri, string)> SaveTempAsync(string domain, Stream stream)
+    public override async Task<(Uri, string)> SaveTempAsync(string domain, Stream stream, CancellationToken token = default)
     {
         var assignedPath = Guid.NewGuid().ToString();
 
-        return (await SaveAsync(domain, assignedPath, stream), assignedPath);
+        return (await SaveAsync(domain, assignedPath, stream, token), assignedPath);
     }
 
     public override IAsyncEnumerable<string> ListDirectoriesRelativeAsync(string domain, string path, bool recursive)
@@ -625,9 +636,9 @@ public class RackspaceCloudStorage(TempPath tempPath,
         }
     }
 
-    public override async Task<string> SavePrivateAsync(string domain, string path, Stream stream, DateTime expires)
+    public override async Task<string> SavePrivateAsync(string domain, string path, Stream stream, DateTime expires, CancellationToken token = default)
     {
-        var uri = await SaveAsync(domain, path, stream, "application/octet-stream", "attachment", ACL.Auto, null, 5, expires);
+        var uri = await SaveAsync(domain, path, stream, "application/octet-stream", "attachment", ACL.Auto, null, 5, expires, token: token);
 
         return uri.ToString();
     }
@@ -711,11 +722,11 @@ public class RackspaceCloudStorage(TempPath tempPath,
 
     #endregion
 
-    protected override Task<Uri> SaveWithAutoAttachmentAsync(string domain, string path, Stream stream, string attachmentFileName)
+    protected override Task<Uri> SaveWithAutoAttachmentAsync(string domain, string path, Stream stream, string attachmentFileName, CancellationToken token = default)
     {
-        return SaveWithAutoAttachmentAsync(domain, path, Guid.Empty, stream, attachmentFileName);
+        return SaveWithAutoAttachmentAsync(domain, path, Guid.Empty, stream, attachmentFileName, token);
     }
-    protected override Task<Uri> SaveWithAutoAttachmentAsync(string domain, string path, Guid ownerId, Stream stream, string attachmentFileName)
+    protected override Task<Uri> SaveWithAutoAttachmentAsync(string domain, string path, Guid ownerId, Stream stream, string attachmentFileName, CancellationToken token = default)
     {
         var contentDisposition = $"attachment; filename={HttpUtility.UrlPathEncode(attachmentFileName)};";
         if (attachmentFileName.Any(c => c >= 0 && c <= 127))
@@ -723,7 +734,7 @@ public class RackspaceCloudStorage(TempPath tempPath,
             contentDisposition = $"attachment; filename*=utf-8''{HttpUtility.UrlPathEncode(attachmentFileName)};";
         }
 
-        return SaveAsync(domain, path, ownerId, stream, null, contentDisposition);
+        return SaveAsync(domain, path, ownerId, stream, null, contentDisposition, token);
     }
 
     private string MakePath(string domain, string path)
@@ -771,7 +782,7 @@ public class RackspaceCloudStorage(TempPath tempPath,
 
     private Uri GetUriShared(string domain, string path)
     {
-        return new Uri(string.Format("{0}{1}", SecureHelper.IsSecure(_httpContextAccessor?.HttpContext, _options) ? _cnameSSL : _cname, MakePath(domain, path)));
+        return new Uri(string.Format("{0}{1}", SecureHelper.IsSecure(_httpContextAccessor?.HttpContext, _loggerFactory) ? _cnameSSL : _cname, MakePath(domain, path)));
     }
 
     private ACL GetDomainACL(string domain)

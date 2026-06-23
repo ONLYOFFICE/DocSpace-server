@@ -1,28 +1,35 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Web.Files.Services.DocumentService;
 
@@ -99,15 +106,10 @@ public class DocumentServiceTracker
 
     public class TrackResponse
     {
-        public int Error
-        {
-            get
-            {
-                return string.IsNullOrEmpty(Message)
-                           ? 0 //error:0 - sended
-                           : 1; //error:1 - some error
-            }
-        }
+        public int Error =>
+            string.IsNullOrEmpty(Message)
+                ? 0 //error:0 - sended
+                : 1; //error:1 - some error
 
         public string Message { get; init; }
 
@@ -152,6 +154,7 @@ public class DocumentServiceTrackerHelper(
     EmailValidationKeyProvider emailValidationKeyProvider,
     BaseCommonLinkUtility baseCommonLinkUtility,
     SocketManager socketManager,
+    Global global,
     GlobalStore globalStore,
     DisplayUserSettingsHelper displayUserSettingsHelper,
     IDaoFactory daoFactory,
@@ -169,7 +172,7 @@ public class DocumentServiceTrackerHelper(
 {
     public string GetCallbackUrl<T>(T fileId, int? tenantId = null)
     {
-        var queryParams = HttpUtility.ParseQueryString(String.Empty);
+        var queryParams = HttpUtility.ParseQueryString(string.Empty);
 
         queryParams[FilesLinkUtility.Action] = "track";
         queryParams[FilesLinkUtility.FileId] = fileId.ToString();
@@ -242,7 +245,7 @@ public class DocumentServiceTrackerHelper(
                         await socketManager.StopEditAsync(fileForDeletion.Id);
                         await fileDao.SaveProperties(fileForDeletion.Id, null);
                         await socketManager.DeleteFileAsync(fileForDeletion);
-                        await folderDao.ChangeTreeFolderSizeAsync(fileForDeletion.ParentId, (-1) * fileForDeletion.ContentLength);
+                        await folderDao.ChangeTreeFolderSizeAsync(fileForDeletion.ParentId, -1 * fileForDeletion.ContentLength);
                         await fileDao.DeleteFileAsync(fileForDeletion.Id, ASC.Core.Configuration.Constants.CoreSystem.ID);
                     }
                     else if (fileData.Status == TrackerStatus.MustSave)
@@ -290,6 +293,8 @@ public class DocumentServiceTrackerHelper(
         }
         else
         {
+            var anonymousSessions = new List<string>();
+
             foreach (var user in fileData.Users)
             {
                 if (!Guid.TryParse(user, out var userId))
@@ -297,6 +302,7 @@ public class DocumentServiceTrackerHelper(
                     if (!string.IsNullOrEmpty(user) && user.StartsWith("uid-"))
                     {
                         userId = Guid.Empty;
+                        anonymousSessions.Add(user);
                     }
                     else
                     {
@@ -316,9 +322,11 @@ public class DocumentServiceTrackerHelper(
                     usersDrop.Add(userId.ToString());
                 }
             }
+
+            await fileTracker.SetAnonymousSessionsAsync(fileId, anonymousSessions);
         }
 
-        if (usersDrop.Count > 0 && !await documentServiceHelper.DropUserAsync(fileData.Key, usersDrop.ToArray(), fileId))
+        if (usersDrop.Count > 0 && !await documentServiceHelper.DropUserAsync(fileData.Key, usersDrop, fileId))
         {
             logger.ErrorDocServiceDropFailed(usersDrop);
         }
@@ -328,7 +336,9 @@ public class DocumentServiceTrackerHelper(
             await fileTracker.RemoveAsync(fileId, userId: removeUserId);
         }
 
-        await socketManager.StartEditAsync(fileId);
+        var editingBy = await fileTracker.GetEditingSessionsAsync(fileId, global);
+
+        await socketManager.StartEditAsync(fileId, editingBy);
 
         if (file != null && fileData.Actions != null && fileData.Actions.Any(r => r.Type == 1))
         {
@@ -374,7 +384,8 @@ public class DocumentServiceTrackerHelper(
             userId = Guid.Empty;
         }
 
-        var fileStable = await daoFactory.GetFileDao<T>().GetFileStableAsync(fileId);
+        var fileDao = daoFactory.GetFileDao<T>();
+        var fileStable = await fileDao.GetFileStableAsync(fileId);
 
         var docKey = await documentServiceHelper.GetDocKeyAsync(fileStable);
         if (!fileData.Key.Equals(docKey))
@@ -401,7 +412,7 @@ public class DocumentServiceTrackerHelper(
             await securityContext.AuthenticateMeWithoutCookieAsync(userId);
 
             user = await userManager.GetUsersAsync(userId);
-            var culture = string.IsNullOrEmpty(user.CultureName) ? (tenantManager.GetCurrentTenant()).GetCulture() : CultureInfo.GetCultureInfo(user.CultureName);
+            var culture = string.IsNullOrEmpty(user.CultureName) ? tenantManager.GetCurrentTenant().GetCulture() : CultureInfo.GetCultureInfo(user.CultureName);
             CultureInfo.CurrentCulture = culture;
             CultureInfo.CurrentUICulture = culture;
         }
@@ -526,9 +537,30 @@ public class DocumentServiceTrackerHelper(
             }
         }
 
-        await filesMessageService.SendAsync(forceSave && fileData.ForceSaveType == TrackerData.ForceSaveInitiator.UserSubmit ? MessageAction.FormSubmit : MessageAction.UserFileUpdated, file, MessageInitiator.DocsService, userName, file.Title);
+        var isUserSubmit = forceSave && fileData.ForceSaveType == TrackerData.ForceSaveInitiator.UserSubmit;
+        var isFormSubmit = false;
+        if (isUserSubmit)
+        {
+            var fileProperties = await fileDao.GetProperties(fileId);
+            isFormSubmit = fileProperties?.FormFilling is { } ff
+                && !Equals(ff.OriginalFormId, default(T));
+        }
 
-        await webhookManager.PublishAsync(WebhookTrigger.FileUpdated, file);
+        if (!isUserSubmit || isFormSubmit)
+        {
+            await filesMessageService.SendAsync(
+                isFormSubmit ? MessageAction.FormSubmit : MessageAction.UserFileUpdated,
+                file,
+                MessageInitiator.DocsService,
+                userName,
+                file.Title
+            );
+        }
+
+        await webhookManager.PublishAsync(
+            isUserSubmit ? WebhookTrigger.FormSubmit : WebhookTrigger.FileUpdated,
+            file
+        );
 
         if (!forceSave)
         {
@@ -568,7 +600,7 @@ public class DocumentServiceTrackerHelper(
             await securityContext.AuthenticateMeWithoutCookieAsync(userId);
 
             var user = await userManager.GetUsersAsync(userId);
-            var culture = string.IsNullOrEmpty(user.CultureName) ? (tenantManager.GetCurrentTenant()).GetCulture() : CultureInfo.GetCultureInfo(user.CultureName);
+            var culture = string.IsNullOrEmpty(user.CultureName) ? tenantManager.GetCurrentTenant().GetCulture() : CultureInfo.GetCultureInfo(user.CultureName);
             CultureInfo.CurrentCulture = culture;
             CultureInfo.CurrentUICulture = culture;
 
@@ -589,69 +621,65 @@ public class DocumentServiceTrackerHelper(
             {
                 case MailMergeType.AttachDocx:
                 case MailMergeType.AttachPdf:
-                    var requestDownload = new HttpRequestMessage
                     {
-                        RequestUri = new Uri(documentServiceConnector.ReplaceDocumentAddress(fileData.Url))
-                    };
+                        using var requestDownload = new HttpRequestMessage();
+                        requestDownload.RequestUri = new Uri(documentServiceConnector.ReplaceDocumentAddress(fileData.Url));
 
-                    using (var responseDownload = await httpClient.SendAsync(requestDownload))
-                    {
-                        if (!responseDownload.IsSuccessStatusCode)
+                        using (var responseDownload = await httpClient.SendAsync(requestDownload))
                         {
-                            throw new Exception($"{FilesCommonResource.ErrorMessage_DocServiceException} {responseDownload.StatusCode}");
-                        }
-
-                        await using (var streamDownload = await responseDownload.Content.ReadAsStreamAsync())
-                        await using (var downloadStream = new ResponseStream(streamDownload, streamDownload.Length))
-                        {
-                            const int bufferSize = 2048;
-                            var buffer = new byte[bufferSize];
-                            int readed;
-                            attach = new MemoryStream();
-                            while ((readed = await downloadStream.ReadAsync(buffer.AsMemory(0, bufferSize))) > 0)
+                            if (!responseDownload.IsSuccessStatusCode)
                             {
-                                await attach.WriteAsync(buffer.AsMemory(0, readed));
+                                throw new Exception($"{FilesCommonResource.ErrorMessage_DocServiceException} {responseDownload.StatusCode}");
                             }
 
-                            attach.Position = 0;
+                            await using (var streamDownload = await responseDownload.Content.ReadAsStreamAsync())
+                            await using (var downloadStream = new ResponseStream(streamDownload, streamDownload.Length))
+                            {
+                                const int bufferSize = 2048;
+                                var buffer = new byte[bufferSize];
+                                int readed;
+                                attach = new MemoryStream();
+                                while ((readed = await downloadStream.ReadAsync(buffer.AsMemory(0, bufferSize))) > 0)
+                                {
+                                    await attach.WriteAsync(buffer.AsMemory(0, readed));
+                                }
+
+                                attach.Position = 0;
+                            }
                         }
-                    }
 
-                    if (string.IsNullOrEmpty(fileData.MailMerge.Title))
-                    {
-                        fileData.MailMerge.Title = "Attach";
-                    }
+                        if (string.IsNullOrEmpty(fileData.MailMerge.Title))
+                        {
+                            fileData.MailMerge.Title = "Attach";
+                        }
 
-                    var attachExt = fileData.MailMerge.Type == MailMergeType.AttachDocx ? ".docx" : ".pdf";
-                    var curExt = FileUtility.GetFileExtension(fileData.MailMerge.Title);
-                    if (curExt != attachExt)
-                    {
-                        fileData.MailMerge.Title += attachExt;
-                    }
+                        var attachExt = fileData.MailMerge.Type == MailMergeType.AttachDocx ? ".docx" : ".pdf";
+                        var curExt = FileUtility.GetFileExtension(fileData.MailMerge.Title);
+                        if (curExt != attachExt)
+                        {
+                            fileData.MailMerge.Title += attachExt;
+                        }
 
-                    break;
+                        break;
+                    }
 
                 case MailMergeType.Html:
-                    var httpRequest = new HttpRequestMessage
                     {
-                        RequestUri = new Uri(documentServiceConnector.ReplaceDocumentAddress(fileData.Url))
-                    };
+                        using var httpRequest = new HttpRequestMessage();
+                        httpRequest.RequestUri = new Uri(documentServiceConnector.ReplaceDocumentAddress(fileData.Url));
 
-                    using (var httpResponse = await httpClient.SendAsync(httpRequest))
-                    {
+                        using var httpResponse = await httpClient.SendAsync(httpRequest);
                         if (!httpResponse.IsSuccessStatusCode)
                         {
                             throw new Exception($"{FilesCommonResource.ErrorMessage_DocServiceException} {httpResponse.StatusCode}");
                         }
 
-                        await using (var stream = await httpResponse.Content.ReadAsStreamAsync())
-                        {
-                            using var reader = new StreamReader(stream, Encoding.GetEncoding(Encoding.UTF8.WebName));
-                            message = await reader.ReadToEndAsync();
-                        }
-                    }
+                        await using var stream = await httpResponse.Content.ReadAsStreamAsync();
+                        using var reader = new StreamReader(stream, Encoding.GetEncoding(Encoding.UTF8.WebName));
+                        message = await reader.ReadToEndAsync();
 
-                    break;
+                        break;
+                    }
             }
 
             using (var mailMergeTask =
@@ -711,10 +739,8 @@ public class DocumentServiceTrackerHelper(
             var path = $@"save_crash\{DateTime.UtcNow:yyyy_MM_dd}\{userId}_{fileName}";
 
             var store = await globalStore.GetStoreAsync();
-            var request = new HttpRequestMessage
-            {
-                RequestUri = new Uri(downloadUri)
-            };
+            using var request = new HttpRequestMessage();
+            request.RequestUri = new Uri(downloadUri);
 
             var httpClient = clientFactory.CreateClient(nameof(ASC.Files.Core.Helpers.DocumentService));
             using var response = await httpClient.SendAsync(request);
@@ -757,10 +783,8 @@ public class DocumentServiceTrackerHelper(
         try
         {
             var fileDao = daoFactory.GetFileDao<T>();
-            var request = new HttpRequestMessage
-            {
-                RequestUri = new Uri(differenceUrl)
-            };
+            using var request = new HttpRequestMessage();
+            request.RequestUri = new Uri(differenceUrl);
 
             var httpClient = clientFactory.CreateClient(nameof(ASC.Files.Core.Helpers.DocumentService));
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);

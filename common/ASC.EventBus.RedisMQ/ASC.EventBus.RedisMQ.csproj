@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="StackExchange.Redis" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\ASC.Common\ASC.Common.csproj" />
+      <ProjectReference Include="..\ASC.EventBus\ASC.EventBus.csproj" />
+    </ItemGroup>
+
+</Project>

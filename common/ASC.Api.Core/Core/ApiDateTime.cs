@@ -1,28 +1,35 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 using System.ComponentModel;
 
@@ -38,12 +45,13 @@ public sealed class ApiDateTime : IComparable<ApiDateTime>, IComparable
     /// <summary>
     /// The time in UTC format.
     /// </summary>
+    /// <example>2018-01-01T00:00:00.0000000Z</example>
     public DateTime UtcTime { get; private set; }
 
     /// <summary>
     /// The time zone offset.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "00:00:00")]
+    /// <example>00:00:00</example>
     public TimeSpan TimeZoneOffset { get; private set; }
 
     internal static readonly string[] Formats =
@@ -58,26 +66,17 @@ public sealed class ApiDateTime : IComparable<ApiDateTime>, IComparable
     ];
 
     private readonly TenantManager _tenantManager;
-    private readonly TimeZoneConverter _timeZoneConverter;
 
-    public ApiDateTime() : this(null, null, null) { }
+    public ApiDateTime() : this(null, null) { }
 
-    public ApiDateTime(
-        TenantManager tenantManager,
-        TimeZoneConverter timeZoneConverter,
-        DateTime? dateTime)
-        : this(tenantManager, dateTime, null, timeZoneConverter) { }
+    public ApiDateTime(TenantManager tenantManager, DateTime? dateTime)
+        : this(tenantManager, dateTime, null) { }
 
-    public ApiDateTime(
-        TenantManager tenantManager,
-        DateTime? dateTime,
-        TimeZoneInfo timeZone,
-        TimeZoneConverter timeZoneConverter)
+    public ApiDateTime(TenantManager tenantManager, DateTime? dateTime, TimeZoneInfo timeZone)
     {
         if (dateTime.HasValue && dateTime.Value > DateTime.MinValue && dateTime.Value < DateTime.MaxValue)
         {
             _tenantManager = tenantManager;
-            _timeZoneConverter = timeZoneConverter;
             SetDate(dateTime.Value, timeZone);
         }
         else
@@ -93,12 +92,12 @@ public sealed class ApiDateTime : IComparable<ApiDateTime>, IComparable
         TimeZoneOffset = offset;
     }
 
-    public static ApiDateTime Parse(string data, TenantManager tenantManager, TimeZoneConverter timeZoneConverter)
+    public static ApiDateTime Parse(string data, TenantManager tenantManager)
     {
-        return Parse(data, null, tenantManager, timeZoneConverter);
+        return Parse(data, null, tenantManager);
     }
 
-    public static ApiDateTime Parse(string data, TimeZoneInfo tz, TenantManager tenantManager, TimeZoneConverter timeZoneConverter)
+    public static ApiDateTime Parse(string data, TimeZoneInfo tz, TenantManager tenantManager)
     {
         ArgumentException.ThrowIfNullOrEmpty(data);
 
@@ -114,7 +113,7 @@ public sealed class ApiDateTime : IComparable<ApiDateTime>, IComparable
 
             if (!data.EndsWith('Z'))
             {
-                tz ??= GetTimeZoneInfo(tenantManager, timeZoneConverter);
+                tz ??= GetTimeZoneInfo(tenantManager);
 
                 tzOffset = tz.GetUtcOffset(dateTime);
                 dateTime = dateTime.Subtract(tzOffset);
@@ -132,7 +131,7 @@ public sealed class ApiDateTime : IComparable<ApiDateTime>, IComparable
         TimeZoneOffset = TimeSpan.Zero;
         UtcTime = DateTime.MinValue;
 
-        timeZone ??= GetTimeZoneInfo(_tenantManager, _timeZoneConverter);
+        timeZone ??= GetTimeZoneInfo(_tenantManager);
 
         //Hack
         if (timeZone.IsInvalidTime(new DateTime(value.Ticks, DateTimeKind.Unspecified)))
@@ -157,43 +156,33 @@ public sealed class ApiDateTime : IComparable<ApiDateTime>, IComparable
         }
     }
 
-    private static TimeZoneInfo GetTimeZoneInfo(TenantManager tenantManager, TimeZoneConverter timeZoneConverter)
+    private static TimeZoneInfo GetTimeZoneInfo(TenantManager tenantManager)
     {
-        var timeZone = TimeZoneInfo.Local;
-        try
-        {
-            timeZone = timeZoneConverter.GetTimeZone(tenantManager.GetCurrentTenant().TimeZone);
-        }
-        catch (Exception)
-        {
-            //Tenant failed
-        }
-
-        return timeZone;
+        return TimeZoneConverter.GetTimeZone(tenantManager.GetCurrentTenant().TimeZone);
     }
 
     private string ToRoundTripString(DateTime date, TimeSpan offset)
     {
         var dateString = date.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fffffff", CultureInfo.InvariantCulture);
         var offsetString = offset.Ticks == 0
-            ? "Z" : ((offset < TimeSpan.Zero)
+            ? "Z" : (offset < TimeSpan.Zero
             ? "-" : "+") + offset.ToString("hh\\:mm", CultureInfo.InvariantCulture);
 
         return dateString + offsetString;
     }
 
-    public static ApiDateTime FromDate(TenantManager tenantManager, TimeZoneConverter timeZoneConverter, DateTime d)
+    public static ApiDateTime FromDate(TenantManager tenantManager, DateTime d)
     {
-        var date = new ApiDateTime(tenantManager, timeZoneConverter, d);
+        var date = new ApiDateTime(tenantManager, d);
 
         return date;
     }
 
-    public static ApiDateTime FromDate(TenantManager tenantManager, TimeZoneConverter timeZoneConverter, DateTime? d)
+    public static ApiDateTime FromDate(TenantManager tenantManager, DateTime? d)
     {
         if (d.HasValue)
         {
-            var date = new ApiDateTime(tenantManager, timeZoneConverter, d);
+            var date = new ApiDateTime(tenantManager, d);
 
             return date;
         }
@@ -271,7 +260,7 @@ public sealed class ApiDateTime : IComparable<ApiDateTime>, IComparable
 
     public int CompareTo(DateTime other)
     {
-        return CompareTo(new ApiDateTime(_tenantManager, _timeZoneConverter, other));
+        return CompareTo(new ApiDateTime(_tenantManager, other));
     }
 
     public int CompareTo(ApiDateTime other)
@@ -369,11 +358,11 @@ public class ApiDateTimeTypeConverter : DateTimeConverter
     {
         if (value is string @string)
         {
-            return ApiDateTime.Parse(@string, null, null);
+            return ApiDateTime.Parse(@string, null);
         }
         if (value is DateTime time)
         {
-            return new ApiDateTime(null, null, time);
+            return new ApiDateTime(null, time);
         }
 
         return base.ConvertFrom(context, culture, value);
@@ -410,10 +399,10 @@ public class ApiDateTimeConverter : JsonConverter<ApiDateTime>
 }
 
 [Scope]
-public class ApiDateTimeHelper(TenantManager tenantManager, TimeZoneConverter timeZoneConverter)
+public class ApiDateTimeHelper(TenantManager tenantManager)
 {
     public ApiDateTime Get(DateTime? from)
     {
-        return ApiDateTime.FromDate(tenantManager, timeZoneConverter, from);
+        return ApiDateTime.FromDate(tenantManager, from);
     }
 }

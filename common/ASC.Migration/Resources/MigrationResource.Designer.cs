@@ -19,7 +19,7 @@ namespace ASC.Migration.Core.Resources {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "18.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class MigrationResource {
@@ -75,6 +75,24 @@ namespace ASC.Migration.Core.Resources {
         public static string CanNotCreateFile {
             get {
                 return ResourceManager.GetString("CanNotCreateFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Couldn&apos;t import common files.
+        /// </summary>
+        public static string CanNotImportCommonFiles {
+            get {
+                return ResourceManager.GetString("CanNotImportCommonFiles", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Couldn&apos;t import project files.
+        /// </summary>
+        public static string CanNotImportProjectFiles {
+            get {
+                return ResourceManager.GetString("CanNotImportProjectFiles", resourceCulture);
             }
         }
         
@@ -165,6 +183,15 @@ namespace ASC.Migration.Core.Resources {
         public static string CreateFolder {
             get {
                 return ResourceManager.GetString("CreateFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Create root folder.
+        /// </summary>
+        public static string CreateRootFolder {
+            get {
+                return ResourceManager.GetString("CreateRootFolder", resourceCulture);
             }
         }
         
@@ -318,33 +345,6 @@ namespace ASC.Migration.Core.Resources {
         public static string UserMigration {
             get {
                 return ResourceManager.GetString("UserMigration", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Couldn&apos;t import common files.
-        /// </summary>
-        public static string СanNotImportCommonFiles {
-            get {
-                return ResourceManager.GetString("СanNotImportCommonFiles", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Couldn&apos;t import project files.
-        /// </summary>
-        public static string СanNotImportProjectFiles {
-            get {
-                return ResourceManager.GetString("СanNotImportProjectFiles", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Create root folder.
-        /// </summary>
-        public static string СreateRootFolder {
-            get {
-                return ResourceManager.GetString("СreateRootFolder", resourceCulture);
             }
         }
     }

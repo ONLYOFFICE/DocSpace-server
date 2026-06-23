@@ -169,6 +169,42 @@ namespace ASC.AI.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Message not found.
+        /// </summary>
+        internal static string MessageNotFound {
+            get {
+                return ResourceManager.GetString("MessageNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The model has been disabled by your provider&apos;s settings..
+        /// </summary>
+        internal static string ModelDisabled {
+            get {
+                return ResourceManager.GetString("ModelDisabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No models available for this provider.
+        /// </summary>
+        internal static string NoModelsAvailable {
+            get {
+                return ResourceManager.GetString("NoModelsAvailable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Provider name already exists.
+        /// </summary>
+        internal static string ProviderNameExists {
+            get {
+                return ResourceManager.GetString("ProviderNameExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Provider not found.
         /// </summary>
         internal static string ProviderNotFound {
@@ -183,6 +219,15 @@ namespace ASC.AI.Core.Resources {
         internal static string ReservedServerName {
             get {
                 return ResourceManager.GetString("ReservedServerName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The server has already been added to the agent.
+        /// </summary>
+        internal static string ServerAlreadyAdded {
+            get {
+                return ResourceManager.GetString("ServerAlreadyAdded", resourceCulture);
             }
         }
         

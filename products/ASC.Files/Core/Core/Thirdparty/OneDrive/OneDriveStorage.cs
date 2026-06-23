@@ -1,28 +1,35 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 using Folder = Microsoft.OneDrive.Sdk.Folder;
 
@@ -233,11 +240,7 @@ internal class OneDriveStorage(IHttpClientFactory clientFactory, OAuth20TokenHel
             Path = "/" + ApiVersion + "/drive/items/" + folderId + ":/" + fileName + ":/oneDrive.createUploadSession"
         };
 
-        var request = new HttpRequestMessage
-        {
-            RequestUri = uploadUriBuilder.Uri,
-            Method = HttpMethod.Post
-        };
+        using var request = new HttpRequestMessage(HttpMethod.Post, uploadUriBuilder.Uri);
         request.Headers.Add("Authorization", "Bearer " + AccessToken);
         //request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json")
         //{
@@ -246,7 +249,9 @@ internal class OneDriveStorage(IHttpClientFactory clientFactory, OAuth20TokenHel
 
         var uploadSession = new RenewableUploadSession(onedriveFile.Id, folderId, contentLength);
 
+#pragma warning disable CA2000 // HttpClient is short-lived and disposed by runtime
         var httpClient = clientFactory.CreateClient();
+#pragma warning restore CA2000
 
         using (var response = await httpClient.SendAsync(request))
         {
@@ -269,11 +274,7 @@ internal class OneDriveStorage(IHttpClientFactory clientFactory, OAuth20TokenHel
             throw new InvalidOperationException("Can't upload chunk for given upload session.");
         }
 
-        var request = new HttpRequestMessage
-        {
-            RequestUri = new Uri(oneDriveSession.Location),
-            Method = HttpMethod.Put
-        };
+        using var request = new HttpRequestMessage(HttpMethod.Put, new Uri(oneDriveSession.Location));
 
         request.Content = new StreamContent(stream);
 
@@ -281,7 +282,9 @@ internal class OneDriveStorage(IHttpClientFactory clientFactory, OAuth20TokenHel
                                                                oneDriveSession.BytesTransferred + chunkLength - 1,
                                                                oneDriveSession.BytesToTransfer);
 
+#pragma warning disable CA2000 // HttpClient is short-lived and disposed by runtime
         var httpClient = clientFactory.CreateClient();
+#pragma warning restore CA2000
 
         using var response = await httpClient.SendAsync(request);
         if (response.StatusCode != HttpStatusCode.Created && response.StatusCode != HttpStatusCode.OK)
@@ -303,13 +306,11 @@ internal class OneDriveStorage(IHttpClientFactory clientFactory, OAuth20TokenHel
 
     public async Task CancelTransferAsync(RenewableUploadSession oneDriveSession)
     {
-        var request = new HttpRequestMessage
-        {
-            RequestUri = new Uri(oneDriveSession.Location),
-            Method = HttpMethod.Delete
-        };
+        using var request = new HttpRequestMessage(HttpMethod.Delete, oneDriveSession.Location);
 
+#pragma warning disable CA2000 // HttpClient is short-lived and disposed by runtime
         var httpClient = clientFactory.CreateClient();
+#pragma warning restore CA2000
 
         using var response = await httpClient.SendAsync(request);
     }
@@ -326,13 +327,11 @@ internal class OneDriveStorage(IHttpClientFactory clientFactory, OAuth20TokenHel
         url = url[..url.IndexOf("?width", StringComparison.Ordinal)];
         url += $"?width={width}&height={height}&cropmode=none";
 
-        var request = new HttpRequestMessage
-        {
-            RequestUri = new Uri(url),
-            Method = HttpMethod.Get
-        };
+        using var request = new HttpRequestMessage(HttpMethod.Get, url);
 
+#pragma warning disable CA2000 // HttpClient is short-lived and disposed by runtime
         var httpClient = clientFactory.CreateClient();
+#pragma warning restore CA2000
 
         using var response = await httpClient.SendAsync(request);
         var bytes = await response.Content.ReadAsByteArrayAsync();

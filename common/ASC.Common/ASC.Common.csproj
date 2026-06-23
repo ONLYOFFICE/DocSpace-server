@@ -17,15 +17,10 @@
     <DebugType>none</DebugType>
   </PropertyGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Utils\TimeZoneConverter\windowsZones.xml" />
-    <EmbeddedResource Include="Utils\TimeZoneConverter\timeZoneNames.xml" />
-  </ItemGroup>
-  <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="ARSoft.Tools.NetStandard.DXSdata" />
     <PackageReference Include="Autofac.Configuration" />
     <PackageReference Include="AWS.Logger.NLog" />
-    <PackageReference Include="Bogus" />
     <PackageReference Include="Confluent.Kafka" />
     <PackageReference Include="DistributedLock.Redis" />
     <PackageReference Include="DistributedLock.ZooKeeper" />
@@ -45,6 +40,7 @@
     </PackageReference> -->
     <PackageReference Include="NLog" />
     <PackageReference Include="NLog.DiagnosticSource" />
+    <PackageReference Include="NLog.Targets.OpenTelemetryProtocol" />
     <PackageReference Include="NLog.Targets.Syslog" />
     <PackageReference Include="NVelocity" />
     <PackageReference Include="protobuf-net" />

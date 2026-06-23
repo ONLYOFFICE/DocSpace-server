@@ -1,0 +1,50 @@
+ARG REGISTRATION_JAR
+ARG AUTHORIZATION_JAR
+
+# Stage 1: Create custom JRE with jlink
+FROM eclipse-temurin:21-jdk-alpine AS jre-builder
+
+RUN $JAVA_HOME/bin/jlink \
+    --add-modules java.base,java.logging,java.sql,java.naming,java.management,jdk.management,java.instrument,java.security.jgss,java.desktop,jdk.unsupported,java.compiler,jdk.crypto.ec,java.net.http,jdk.httpserver \
+    --strip-debug \
+    --no-man-pages \
+    --no-header-files \
+    --compress=zip-6 \
+    --output /custom-jre
+
+# Stage 2: Extract from registration JAR
+FROM eclipse-temurin:21-jdk-alpine AS extractor-reg
+ARG REGISTRATION_JAR
+WORKDIR /extract
+COPY ${REGISTRATION_JAR} app.jar
+RUN java -Djarmode=tools -jar app.jar extract --launcher --destination extracted
+
+# Stage 3: Extract from authorization JAR
+FROM eclipse-temurin:21-jdk-alpine AS extractor-auth
+ARG AUTHORIZATION_JAR
+WORKDIR /extract
+COPY ${AUTHORIZATION_JAR} app.jar
+RUN java -Djarmode=tools -jar app.jar extract --launcher --destination extracted
+
+# Stage 4: Create the shared base image with JRE + merged dependencies
+FROM alpine:latest
+
+# Install required runtime dependencies
+RUN apk add --no-cache ca-certificates tzdata
+
+# Copy custom JRE
+COPY --from=jre-builder /custom-jre /opt/java
+
+# Set environment variables
+ENV JAVA_HOME=/opt/java
+ENV PATH="${JAVA_HOME}/bin:${PATH}"
+
+# Set the working directory
+WORKDIR /app
+
+# Copy the Spring Boot loader classes (same for both)
+COPY --from=extractor-reg /extract/extracted/org/ ./org/
+
+# Merge libs from both services
+COPY --from=extractor-reg /extract/extracted/BOOT-INF/lib/ ./BOOT-INF/lib/
+COPY --from=extractor-auth /extract/extracted/BOOT-INF/lib/ ./BOOT-INF/lib/

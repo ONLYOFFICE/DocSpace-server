@@ -136,8 +136,12 @@ Ak potrebujete pomoc, prezrite si naše "Centrum pomoci":"${__HelpLink}" alebo s
 
 $TrulyYours</value>
   </data>
-  <data name="subject_saas_custom_mode_reg_data" xml:space="preserve">
-    <value>Bol zaregistrovaný nový portál</value>
+  <data name="pattern_remove_user_data_completed_custom_mode" xml:space="preserve">
+    <value>Vážený/Vážená $UserName,
+
+Proces vymazania údajov používateľa "$FromUserName":"$FromUserLink" bol úspešne dokončený.
+
+Vymazanie osobných údajov umožnilo uvoľniť $DocsSpace</value>
   </data>
   <data name="pattern_saas_custom_mode_reg_data" xml:space="preserve">
     <value>h3.Bol zaregistrovaný nový portál
@@ -149,13 +153,6 @@ $TrulyYours</value>
 # Telefón: $Phone
 # Dátum vytvorenia: $Date</value>
   </data>
-  <data name="pattern_remove_user_data_completed_custom_mode" xml:space="preserve">
-    <value>Vážený/Vážená $UserName,
-
-Proces vymazania údajov používateľa "$FromUserName":"$FromUserLink" bol úspešne dokončený.
-
-Vymazanie osobných údajov umožnilo uvoľniť $DocsSpace</value>
-  </data>
   <data name="ProductAdminOpportunitiesCustomMode" xml:space="preserve">
     <value>Urobte to isté ako používateľ|Pripojte Dropbox, Box a ďalšie účty v časti "Spoločné"|Nastavte prístupové práva k dokumentom a priečinkom v časti "Spoločné"</value>
   </data>
@@ -164,5 +161,8 @@ Vymazanie osobných údajov umožnilo uvoľniť $DocsSpace</value>
   </data>
   <data name="subject_remove_user_data_completed_custom_mode" xml:space="preserve">
     <value>${LetterLogoText}. Odstránenie údajov používateľa ukončené</value>
+  </data>
+  <data name="subject_saas_custom_mode_reg_data" xml:space="preserve">
+    <value>Bol zaregistrovaný nový portál</value>
   </data>
 </root>

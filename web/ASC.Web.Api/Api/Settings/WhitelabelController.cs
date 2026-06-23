@@ -1,28 +1,35 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
-// 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
-// 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
-// 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
+//
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
+//
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
+//
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
+//
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
+//
+// No trademark rights are granted under this License.
+//
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+//
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Web.Api.Controllers.Settings;
 
@@ -32,12 +39,14 @@ public class WhitelabelController(
     WebItemManager webItemManager,
     TenantInfoSettingsHelper tenantInfoSettingsHelper,
     TenantWhiteLabelSettingsHelper tenantWhiteLabelSettingsHelper,
+    IWhiteLabelLogoConverter logoConverter,
     TenantLogoManager tenantLogoManager,
     CoreBaseSettings coreBaseSettings,
     CommonLinkUtility commonLinkUtility,
     IFusionCache fusionCache,
     CompanyWhiteLabelSettingsHelper companyWhiteLabelSettingsHelper,
     TenantManager tenantManager,
+    MessageService messageService,
     TenantExtra tenantExtra,
     StorageFactory storageFactory,
     AdditionalWhiteLabelSettingsMapper additionalWhiteLabelSettingsMapper,
@@ -46,12 +55,12 @@ public class WhitelabelController(
 {
     #region Logos
 
-    /// <summary>
+    /// <remarks>
     /// Saves the white label logos specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Save the white label logos
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/whitelabel/logos/save</path>
     [Tags("Settings / Rebranding")]
     [SwaggerResponse(200, "Boolean value: true if the operation is sucessful", typeof(bool))]
@@ -103,25 +112,27 @@ public class WhitelabelController(
 
             foreach (var l in inDto.Logo)
             {
-                var key = Int32.Parse(l.Key);
+                var key = int.Parse(l.Key);
 
                 logoDict.Add(key, new KeyValuePair<string, string>(l.Value.Light, l.Value.Dark));
             }
 
-            await tenantWhiteLabelSettingsHelper.SetLogo(settings, logoDict, storage);
+            await tenantWhiteLabelSettingsHelper.SetLogo(settings, logoConverter, logoDict, storage);
         }
 
         await settingsManager.SaveAsync(settings, tenantId);
 
         await tenantLogoManager.RemoveMailLogoDataFromCacheAsync();
+
+        messageService.Send(MessageAction.WhiteLabelSettingsLogosUpdated);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Saves the white label logos from files.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Save the white label logos from files
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/whitelabel/logos/savefromfiles</path>
     [Tags("Settings / Rebranding")]
     [SwaggerResponse(200, "Boolean value: true if the operation is sucessful", typeof(bool))]
@@ -192,6 +203,8 @@ public class WhitelabelController(
         await settingsManager.SaveAsync(settings, tenantId);
 
         await tenantLogoManager.RemoveMailLogoDataFromCacheAsync();
+
+        messageService.Send(MessageAction.WhiteLabelSettingsLogosUpdated);
     }
 
     private void GetParts(string fileName, out WhiteLabelLogoType logoType, out string fileExt)
@@ -201,12 +214,12 @@ public class WhitelabelController(
         fileExt = parts[^1];
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the white label logos.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get the white label logos
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/whitelabel/logos</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     /// <collection>list</collection>
@@ -281,12 +294,12 @@ public class WhitelabelController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Specifies if the white label logos are default or not.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Check the default white label logos
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/whitelabel/logos/isdefault</path>
     /// <collection>list</collection>
     [Tags("Settings / Rebranding")]
@@ -312,12 +325,12 @@ public class WhitelabelController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Restores the white label logos.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Restore the white label logos
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/whitelabel/logos/restore</path>
     [Tags("Settings / Rebranding")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
@@ -364,18 +377,20 @@ public class WhitelabelController(
     private async Task RestoreWhiteLabelLogosForTenantAsync(TenantWhiteLabelSettings settings, IDataStore storage, int tenantId)
     {
         await tenantWhiteLabelSettingsHelper.RestoreDefaultLogos(settings, tenantLogoManager, tenantId, storage);
+
+        messageService.Send(MessageAction.WhiteLabelSettingsLogosUpdated);
     }
 
     #endregion
 
     #region Logo Text
 
-    /// <summary>
+    /// <remarks>
     /// Saves the white label logo text specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Save the white label logo text settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/whitelabel/logotext/save</path>
     [Tags("Settings / Rebranding")]
     [SwaggerResponse(200, "Boolean value: true if the operation is sucessful", typeof(bool))]
@@ -406,15 +421,17 @@ public class WhitelabelController(
 
         await settingsManager.SaveAsync(settings, tenantId);
 
+        messageService.Send(MessageAction.WhiteLabelSettingsLogoTextUpdated);
+
         return true;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the white label logo text.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get the white label logo text
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/whitelabel/logotext</path>
     [Tags("Settings / Rebranding")]
     [SwaggerResponse(200, "Logo text", typeof(string))]
@@ -431,12 +448,12 @@ public class WhitelabelController(
         return settings.LogoText ?? TenantWhiteLabelSettings.DefaultLogoText;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Specifies if the white label logo text is default or not.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Check the default white label logo text
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/whitelabel/logotext/isdefault</path>
     [Tags("Settings / Rebranding")]
     [SwaggerResponse(200, "Request properties of white label logos", typeof(IsDefaultWhiteLabelLogosDto))]
@@ -456,12 +473,12 @@ public class WhitelabelController(
         };
     }
 
-    /// <summary>
+    /// <remarks>
     /// Restores the white label logo text.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Restore the white label logo text
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/whitelabel/logotext/restore</path>
     [Tags("Settings / Rebranding")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
@@ -488,6 +505,8 @@ public class WhitelabelController(
 
         await tenantWhiteLabelSettingsHelper.RestoreDefaultLogoText(settings, tenantId);
 
+        messageService.Send(MessageAction.WhiteLabelSettingsLogoTextUpdated);
+
         return true;
     }
 
@@ -495,10 +514,10 @@ public class WhitelabelController(
 
     #region Company
 
-    /// <summary>
+    /// <remarks>
     /// Returns the licensor data.
-    /// </summary>
-    /// <short>Get the licensor data</short>
+    /// </remarks>
+    /// <summary>Get the licensor data</summary>
     /// <path>api/2.0/settings/companywhitelabel</path>
     /// <collection>list</collection>
     [Tags("Settings / Rebranding")]
@@ -520,10 +539,10 @@ public class WhitelabelController(
         return result;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Saves the company white label settings specified in the request.
-    /// </summary>
-    /// <short>Save the company white label settings</short>
+    /// </remarks>
+    /// <summary>Save the company white label settings</summary>
     /// <path>api/2.0/settings/rebranding/company</path>
     [Tags("Settings / Rebranding")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
@@ -560,13 +579,15 @@ public class WhitelabelController(
 
         await settingsManager.SaveForDefaultTenantAsync(wrapper.Settings);
 
+        messageService.Send(MessageAction.WhiteLabelCompanySettingsUpdated);
+
         return true;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the company white label settings.
-    /// </summary>
-    /// <short>Get the company white label settings</short>
+    /// </remarks>
+    /// <summary>Get the company white label settings</summary>
     /// <path>api/2.0/settings/rebranding/company</path>
     [Tags("Settings / Rebranding")]
     [SwaggerResponse(200, "Company white label settings", typeof(CompanyWhiteLabelSettingsDto))]
@@ -579,10 +600,10 @@ public class WhitelabelController(
         return HttpContext.TryGetFromCache(settings.LastModified) ? null : companyWhiteLabelSettingsDtoMapper.Map(settings);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Deletes the company white label settings.
-    /// </summary>
-    /// <short>Delete the company white label settings</short>
+    /// </remarks>
+    /// <summary>Delete the company white label settings</summary>
     /// <path>api/2.0/settings/rebranding/company</path>
     [Tags("Settings / Rebranding")]
     [SwaggerResponse(200, "Default company white label settings", typeof(CompanyWhiteLabelSettings))]
@@ -598,6 +619,8 @@ public class WhitelabelController(
 
         await settingsManager.SaveForDefaultTenantAsync(defaultSettings);
 
+        messageService.Send(MessageAction.WhiteLabelCompanySettingsUpdated);
+
         return defaultSettings;
     }
 
@@ -605,10 +628,10 @@ public class WhitelabelController(
 
     #region Additional
 
-    /// <summary>
+    /// <remarks>
     /// Saves the additional white label settings specified in the request.
-    /// </summary>
-    /// <short>Save the additional white label settings</short>
+    /// </remarks>
+    /// <summary>Save the additional white label settings</summary>
     /// <path>api/2.0/settings/rebranding/additional</path>
     [Tags("Settings / Rebranding")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
@@ -625,13 +648,15 @@ public class WhitelabelController(
 
         await settingsManager.SaveForDefaultTenantAsync(wrapper.Settings);
 
+        messageService.Send(MessageAction.WhiteLabelAdditionalSettingsUpdated);
+
         return true;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the additional white label settings.
-    /// </summary>
-    /// <short>Get the additional white label settings</short>
+    /// </remarks>
+    /// <summary>Get the additional white label settings</summary>
     /// <path>api/2.0/settings/rebranding/additional</path>
     [Tags("Settings / Rebranding")]
     [SwaggerResponse(200, "Additional white label settings", typeof(AdditionalWhiteLabelSettingsDto))]
@@ -644,10 +669,10 @@ public class WhitelabelController(
         return additionalWhiteLabelSettingsMapper.Map(settings);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Deletes the additional white label settings.
-    /// </summary>
-    /// <short>Delete the additional white label settings</short>
+    /// </remarks>
+    /// <summary>Delete the additional white label settings</summary>
     /// <path>api/2.0/settings/rebranding/additional</path>
     [Tags("Settings / Rebranding")]
     [SwaggerResponse(200, "Default additional white label settings", typeof(AdditionalWhiteLabelSettings))]
@@ -663,6 +688,8 @@ public class WhitelabelController(
 
         await settingsManager.SaveForDefaultTenantAsync(defaultSettings);
 
+        messageService.Send(MessageAction.WhiteLabelAdditionalSettingsUpdated);
+
         return defaultSettings;
     }
 
@@ -670,10 +697,10 @@ public class WhitelabelController(
 
     #region Mail
 
-    /// <summary>
+    /// <remarks>
     /// Saves the mail white label settings specified in the request.
-    /// </summary>
-    /// <short>Save the mail white label settings</short>
+    /// </remarks>
+    /// <summary>Save the mail white label settings</summary>
     /// <path>api/2.0/settings/rebranding/mail</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
@@ -691,13 +718,15 @@ public class WhitelabelController(
 
         await settingsManager.SaveForDefaultTenantAsync(wrapper.Settings);
 
+        messageService.Send(MessageAction.WhiteLabelMailSettingsUpdated);
+
         return true;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the mail white label settings.
-    /// </summary>
-    /// <short>Get the mail white label settings</short>
+    /// </remarks>
+    /// <summary>Get the mail white label settings</summary>
     /// <path>api/2.0/settings/rebranding/mail</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Rebranding")]
@@ -710,10 +739,10 @@ public class WhitelabelController(
         return settings.MapToDto();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Deletes the mail white label settings.
-    /// </summary>
-    /// <short>Delete the mail white label settings</short>
+    /// </remarks>
+    /// <summary>Delete the mail white label settings</summary>
     /// <path>api/2.0/settings/rebranding/mail</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Rebranding")]
@@ -730,15 +759,17 @@ public class WhitelabelController(
 
         await settingsManager.SaveForDefaultTenantAsync(defaultSettings);
 
+        messageService.Send(MessageAction.WhiteLabelMailSettingsUpdated);
+
         return defaultSettings;
     }
 
     #endregion
 
-    /// <summary>
+    /// <remarks>
     /// Checks if the white label is enabled or not.
-    /// </summary>
-    /// <short>Check the white label availability</short>
+    /// </remarks>
+    /// <summary>Check the white label availability</summary>
     /// <path>api/2.0/settings/enablewhitelabel</path>
     [Tags("Settings / Rebranding")]
     [SwaggerResponse(200, "Boolean value: true if the white label is enabled", typeof(bool))]

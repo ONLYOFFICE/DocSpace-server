@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.asc</groupId>
         <artifactId>common</artifactId>
-        <version>1.0.3</version>
+        <version>1.1.1</version>
     </parent>
 
     <artifactId>common-messaging</artifactId>
@@ -27,12 +27,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-amqp</artifactId>
-        </dependency>
-
-        <!-- Spring IoC Dependency -->
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
         </dependency>
 
         <!-- Spring JSON Dependency -->

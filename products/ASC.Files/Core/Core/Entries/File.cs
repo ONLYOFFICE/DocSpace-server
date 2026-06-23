@@ -1,32 +1,45 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 using ASC.Files.Core.Mapping;
 
 namespace ASC.Files.Core;
+
+
+/// <summary>
+/// The file state.
+/// </summary>
+public record FileState(FileStatus FileStatus, Dictionary<Guid, string> EditingBy);
 
 /// <summary>
 /// The file status.
@@ -34,34 +47,34 @@ namespace ASC.Files.Core;
 [Flags]
 public enum FileStatus
 {
-    [SwaggerEnum(Description = "None")]
+    [Description("None")]
     None = 0x0,
 
-    [SwaggerEnum(Description = "Is editing")]
+    [Description("Is editing")]
     IsEditing = 0x1,
 
-    [SwaggerEnum(Description = "Is new")]
+    [Description("Is new")]
     IsNew = 0x2,
 
-    [SwaggerEnum(Description = "Is converting")]
+    [Description("Is converting")]
     IsConverting = 0x4,
 
-    [SwaggerEnum(Description = "Is original")]
+    [Description("Is original")]
     IsOriginal = 0x8,
 
-    [SwaggerEnum(Description = "Is editing alone")]
+    [Description("Is editing alone")]
     IsEditingAlone = 0x10,
 
-    [SwaggerEnum(Description = "Is favorite")]
+    [Description("Is favorite")]
     IsFavorite = 0x20,
 
-    [SwaggerEnum(Description = "Is template")]
+    [Description("Is template")]
     IsTemplate = 0x40,
 
-    [SwaggerEnum(Description = "Is fill form draft")]
+    [Description("Is fill form draft")]
     IsFillFormDraft = 0x80,
 
-    [SwaggerEnum(Description = "Is completed form")]
+    [Description("Is completed form")]
     IsCompletedForm = 0x100
 }
 
@@ -74,6 +87,7 @@ public enum FileStatus
 public class File<T> : FileEntry<T>
 {
     private FileStatus _status;
+    private Dictionary<Guid, string> _editingBy;
 
     [JsonConstructor]
     protected File()
@@ -92,9 +106,16 @@ public class File<T> : FileEntry<T>
 
     public FileStatus FileStatus
     {
-        get { return _status; }
-        set { _status = value; }
+        get => _status;
+        set => _status = value;
     }
+
+    public Dictionary<Guid, string> EditingBy
+    {
+        get => _editingBy;
+        set => _editingBy = value;
+    }
+
     /// <summary>
     /// The file version.
     /// </summary>
@@ -139,43 +160,28 @@ public class File<T> : FileEntry<T>
     {
         get
         {
-            switch (FileUtility.GetFileTypeByFileName(Title))
+            return FileUtility.GetFileTypeByFileName(Title) switch
             {
-                case FileType.Image:
-                    return FilterType.ImagesOnly;
-                case FileType.Document:
-                    return FilterType.DocumentsOnly;
-                case FileType.Presentation:
-                    return FilterType.PresentationsOnly;
-                case FileType.Spreadsheet:
-                    return FilterType.SpreadsheetsOnly;
-                case FileType.Archive:
-                    return FilterType.ArchiveOnly;
-                case FileType.Audio:
-                case FileType.Video:
-                    return FilterType.MediaOnly;
-                case FileType.Pdf:
-                    return this.IsForm ? FilterType.PdfForm : FilterType.Pdf;
-                case FileType.Diagram:
-                    return FilterType.DiagramsOnly;
-            }
-
-            return FilterType.None;
+                FileType.Image => FilterType.ImagesOnly,
+                FileType.Document => FilterType.DocumentsOnly,
+                FileType.Presentation => FilterType.PresentationsOnly,
+                FileType.Spreadsheet => FilterType.SpreadsheetsOnly,
+                FileType.Archive => FilterType.ArchiveOnly,
+                FileType.Audio or FileType.Video => FilterType.MediaOnly,
+                FileType.Pdf => IsForm ? FilterType.PdfForm : FilterType.Pdf,
+                FileType.Diagram => FilterType.DiagramsOnly,
+                _ => FilterType.None
+            };
         }
     }
     /// <summary>
-    /// Returns the file status.
+    /// Set the file state.
     /// </summary>
-    public async Task<FileStatus> GetFileStatus()
+    public void SetFileState(FileState fileState)
     {
-        _status = await ServiceProvider.GetService<FileHelper>().GetFileStatus(this, _status);
-        return _status;
+        _status = fileState.FileStatus;
+        _editingBy = fileState.EditingBy;
     }
-
-    /// <summary>
-    /// Sets the file status.
-    /// </summary>
-    public void SetFileStatus(FileStatus value) => _status = value;
 
     /// <summary>
     /// Sets the file unique ID.
@@ -186,21 +192,10 @@ public class File<T> : FileEntry<T>
     /// The file title.
     /// </summary>
     [JsonIgnore]
-    public override string Title
-    {
-        get
-        {
-            return string.IsNullOrEmpty(ConvertedType)
-                ? PureTitle
-                : FileUtility.ReplaceFileExtension(PureTitle, ServiceProvider.GetService<FileUtility>().GetInternalExtension(PureTitle));
-        }
-    }
-
-    /// <summary>
-    /// The file download URL.
-    /// </summary>
-    [JsonIgnore]
-    public string DownloadUrl => ServiceProvider.GetService<FileHelper>().GetDownloadUrl(this);
+    public override string Title =>
+        string.IsNullOrEmpty(ConvertedType)
+            ? PureTitle
+            : FileUtility.ReplaceFileExtension(PureTitle, ServiceProvider.GetService<FileUtility>().GetInternalExtension(PureTitle));
 
     /// <summary>
     /// Specifies whether the file is locked or not.
@@ -215,13 +210,7 @@ public class File<T> : FileEntry<T>
     /// <summary>
     /// Specifies if the file is a form or not.
     /// </summary>
-    public bool IsForm
-    {
-        get
-        {
-            return (FilterType)Category == FilterType.PdfForm;
-        }
-    }
+    public bool IsForm => (FilterType)Category == FilterType.PdfForm;
 
     /// <summary>
     /// Specifies if a Custom Filter editing mode is enabled for a file or not.
@@ -428,8 +417,9 @@ public partial class FileMapper(IServiceProvider serviceProvider, TenantDateTime
 
         if (dbFileQuery.UserShared != null)
         {
-            result.Shared = dbFileQuery.UserShared.Any(r => r is SubjectType.ExternalLink or SubjectType.PrimaryExternalLink);
-            result.SharedForUser = dbFileQuery.UserShared.Any(r => r is SubjectType.Group or SubjectType.User);
+            result.Shared = dbFileQuery.UserShared.Any(r => r.SubjectType is SubjectType.ExternalLink or SubjectType.PrimaryExternalLink);
+            result.SharedForUser = dbFileQuery.UserShared.Any(r => r.SubjectType is SubjectType.Group or SubjectType.User);
+            result.SharedExternal = dbFileQuery.UserShared.Any(r => (r.SubjectType is SubjectType.ExternalLink or SubjectType.PrimaryExternalLink) && r.Internal is false);
         }
 
         return result;

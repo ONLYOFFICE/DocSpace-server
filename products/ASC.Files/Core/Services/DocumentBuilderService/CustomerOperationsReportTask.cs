@@ -1,28 +1,35 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
-// 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
-// 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
-// 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// Copyright (C) Ascensio System SIA, 2009-2026
+//
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
+//
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
+//
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
+//
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
+//
+// No trademark rights are granted under this License.
+//
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+//
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Files.Core.Services.DocumentBuilderService;
 
@@ -62,7 +69,10 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
         using var request = new HttpRequestMessage();
         request.RequestUri = fileUri;
 
-        using var httpClient = clientFactory.CreateClient();
+#pragma warning disable CA2000
+        var httpClient = clientFactory.CreateClient();
+#pragma warning restore CA2000
+
         using var response = await httpClient.SendAsync(request);
         await using var stream = await response.Content.ReadAsStreamAsync();
 
@@ -89,6 +99,26 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
         return file;
     }
 
+    private static async Task<TenantWalletService?> GetTenantWalletService(TenantManager tenantManager, string serviceName)
+    {
+        if (string.IsNullOrEmpty(serviceName))
+        {
+            return null;
+        }
+
+        var quotaList = await tenantManager.GetTenantQuotasAsync(false, true);
+
+        var selectedQuota = quotaList.FirstOrDefault(x =>
+            x.ServiceName.Equals(serviceName, StringComparison.InvariantCultureIgnoreCase));
+
+        if (selectedQuota != null && Enum.IsDefined(typeof(TenantWalletService), selectedQuota.TenantId))
+        {
+            return (TenantWalletService)selectedQuota.TenantId;
+        }
+
+        return null;
+    }
+
     private static async Task<(string scriptFilePath, string tempFileName, string outputFileName)> GetCustomerOperationsReportData(IServiceProvider serviceProvider, Guid userId, CustomerOperationsReportTaskData taskData)
     {
         var tenantManager = serviceProvider.GetService<TenantManager>();
@@ -106,8 +136,8 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
         CultureInfo.CurrentCulture = usertCulture;
         CultureInfo.CurrentUICulture = usertCulture;
 
-        var utcStartDate = taskData.StartDate != null ? tenantUtil.DateTimeToUtc(taskData.StartDate.Value) : tenant.CreationDateTime;
-        var utcEndDate = taskData.EndDate != null ? tenantUtil.DateTimeToUtc(taskData.EndDate.Value) : DateTime.UtcNow;
+        var utcStartDate = tenantUtil.DateTimeToUtc(taskData.StartDate ?? tenant.CreationDateTime);
+        var utcEndDate = tenantUtil.DateTimeToUtc(taskData.EndDate ?? DateTime.UtcNow);
 
         var script = await DocumentBuilderScriptHelper.ReadTemplateFromEmbeddedResource(ScriptName) ?? throw new Exception("Template not found");
 
@@ -115,7 +145,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
         var tempFileName = DocumentBuilderScriptHelper.GetTempFileName(".xlsx");
         var outputFileName = string.Format(Resource.AccountingCustomerOperationsReportName + ".xlsx", utcStartDate.ToShortDateString(), utcEndDate.ToShortDateString());
 
-        var keys = new[] {
+        var keys = new List<string> {
             Resource.AccountingCustomerOperationDate,
             Resource.AccountingCustomerOperationType,
             Resource.AccountingCustomerOperationDetails,
@@ -126,6 +156,13 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
             Resource.AccountingCustomerOperationDebit,
             Resource.AccountingCustomerOperationCurrency
         };
+
+        var tenantWalletService = await GetTenantWalletService(tenantManager, taskData.ServiceName);
+        var addAgentColumn = tenantWalletService is TenantWalletService.AITools;
+        if (addAgentColumn)
+        {
+            keys.Add(Resource.AccountingCustomerOperationAgent);
+        }
 
         var options = new JsonSerializerOptions
         {
@@ -146,13 +183,37 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
         {
             await writer.WriteAsync(scriptParts[0]);
 
-            var partialRecords = GetCustomerOperationsReportDataAsync(tariffService, tenantUtil, displayUserSettingsHelper, tenant.Id, utcStartDate, utcEndDate, taskData.ParticipantName, taskData.Credit, taskData.Debit);
+            var filter = new OperationFilter
+            {
+                ServiceName = taskData.ServiceName,
+                UtcStartDate = utcStartDate,
+                UtcEndDate = utcEndDate,
+                ParticipantName = taskData.ParticipantName,
+                Credit = taskData.Credit,
+                Debit = taskData.Debit,
+                Type = taskData.Type,
+                Status = taskData.Status,
+                OrderBy = taskData.OrderBy,
+                OrderType = taskData.OrderType
+            };
+
+            var partialRecords = GetCustomerOperationsReportDataAsync(
+                tariffService,
+                tenantUtil,
+                displayUserSettingsHelper,
+                tenant.Id,
+                filter);
 
             if (partialRecords != null)
             {
                 await foreach (var records in partialRecords)
                 {
-                    var text = Serialize(records, dateFormat, options);
+                    if (records is not { Count: > 0 })
+                    {
+                        continue;
+                    }
+
+                    var text = Serialize(records, dateFormat, options, addAgentColumn);
                     await writer.WriteAsync(text);
                 }
             }
@@ -163,14 +224,22 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
         return (scriptFilePath, tempFileName, outputFileName);
     }
 
-    private static async IAsyncEnumerable<List<Operation>> GetCustomerOperationsReportDataAsync(TariffService tariffService, TenantUtil tenantUtil, DisplayUserSettingsHelper displayUserSettingsHelper, int tenantId, DateTime utcStartDate, DateTime utcEndDate, string participantName, bool? credit, bool? debit)
+    private static async IAsyncEnumerable<List<Operation>> GetCustomerOperationsReportDataAsync(
+        TariffService tariffService,
+        TenantUtil tenantUtil,
+        DisplayUserSettingsHelper displayUserSettingsHelper,
+        int tenantId,
+        OperationFilter filter)
     {
         var offset = 0;
         var limit = 1000;
 
         while (true)
         {
-            var report = await tariffService.GetCustomerOperationsAsync(tenantId, utcStartDate, utcEndDate, participantName, credit, debit, offset, limit);
+            filter.Offset = offset;
+            filter.Limit = limit;
+
+            var report = await tariffService.GetCustomerOperationsAsync(tenantId, filter);
 
             if (report?.Collection == null)
             {
@@ -178,29 +247,28 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
                 break;
             }
 
-            var participantDisplayNames = await report.GetParticipantDisplayNamesAsync(displayUserSettingsHelper);
+            var participantDisplayNames = await report.GetParticipantDisplayNamesAsync(displayUserSettingsHelper, false);
 
             foreach (var operation in report.Collection)
             {
-                var (description, unitOfMeasurement) = GetServiceDescAndUOM(operation.Service);
+                var (description, unitOfMeasurement, quantity) = WalletServiceDescriptionManager.GetServiceDescriptionAndUom(operation, filter.ServiceName, operation.Metadata);
+                var (agentId, agentTitle) = WalletServiceDescriptionManager.GetAgentInfo(operation.Metadata);
 
                 operation.Description = description;
-                operation.Details = operation.Metadata != null && operation.Metadata.TryGetValue(BillingClient.MetadataDetails, out var details) ? details : string.Empty;
+                operation.Details = WalletServiceDescriptionManager.GetServiceDetails(operation.Metadata);
                 operation.ServiceUnit = unitOfMeasurement;
+                operation.Quantity = quantity;
                 operation.Date = tenantUtil.DateTimeFromUtc(operation.Date);
                 operation.ParticipantDisplayName = operation.ParticipantName != null && participantDisplayNames.TryGetValue(operation.ParticipantName, out var value)
                     ? value
                     : operation.ParticipantName;
-
-                if (string.IsNullOrEmpty(operation.Service))
-                {
-                    operation.Quantity = 0;
-                }
+                operation.AgentId = agentId;
+                operation.AgentTitle = agentTitle;
             }
 
             yield return report.Collection;
 
-            if (report.CurrentPage == report.TotalPage)
+            if (report.CurrentPage >= report.TotalPage)
             {
                 break;
             }
@@ -209,7 +277,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
         }
     }
 
-    private static string Serialize(List<Operation> records, string dateFormat, JsonSerializerOptions jsonSerializerOptions)
+    private static string Serialize(List<Operation> records, string dateFormat, JsonSerializerOptions jsonSerializerOptions, bool addAgentColumn)
     {
         var sb = new StringBuilder();
 
@@ -228,30 +296,30 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
                 new(record.Currency, "@")
             };
 
+            if (addAgentColumn)
+            {
+                properties.Add(new PropertyValue(record.AgentTitle, "@"));
+            }
+
             _ = sb.AppendLine(JsonSerializer.Serialize(properties, jsonSerializerOptions) + ",");
         }
 
         return sb.ToString();
     }
 
-    private static (string, string) GetServiceDescAndUOM(string serviceName)
-    {
-        // for testing purposes
-        if (serviceName != null && serviceName.StartsWith("disk-storage"))
-        {
-            serviceName = "disk-storage";
-        }
-
-        if (string.IsNullOrEmpty(serviceName))
-        {
-            serviceName = "top-up";
-        }
-
-        return (Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceDesc_{serviceName}"),
-            Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceUOM_{serviceName}"));
-    }
-
-    record PropertyValue(string Value, string Format, string Halign = null);
+    private record PropertyValue(string Value, string Format, string Halign = null);
 }
 
-public record CustomerOperationsReportTaskData(IDictionary<string, string> Headers, DateTime? StartDate, DateTime? EndDate, string ParticipantName, bool? Credit, bool? Debit);
+public record CustomerOperationsReportTaskData(
+    IDictionary<string, string> Headers,
+    string ServiceName,
+    DateTime? StartDate,
+    DateTime? EndDate,
+    string ParticipantName,
+    bool? Credit,
+    bool? Debit,
+    OperationType? Type,
+    OperationStatus? Status,
+    string OrderBy,
+    OperationOrderType? OrderType
+);

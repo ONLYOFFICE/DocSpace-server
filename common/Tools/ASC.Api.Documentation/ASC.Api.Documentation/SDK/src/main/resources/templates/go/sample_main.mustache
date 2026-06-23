@@ -1,0 +1,62 @@
+{{>partial_header}}
+
+package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+
+	docspace_api_sdk "{{goModulePath}}{{^goModulePath}}{{packageImportPath}}{{/goModulePath}}{{#isGoSubmodule}}/{{packageName}}{{/isGoSubmodule}}"
+)
+
+func main() {
+	cfg := docspace_api_sdk.NewConfiguration()
+	cfg.Servers = docspace_api_sdk.ServerConfigurations{
+		{
+			URL:         "http://localhost:8092",
+			Description: "Local DocSpace",
+		},
+	}
+
+	client := docspace_api_sdk.NewAPIClient(cfg)
+	ctx := context.Background()
+
+	authRequest := docspace_api_sdk.NewAuthRequestsDtoWithDefaults()
+	authRequest.SetUserName("example@onlyoffice.com")
+	authRequest.SetPassword("11111111")
+
+	authResponse, _, err := client.AuthenticationAPI.
+		AuthenticateMe(ctx).
+		AuthRequestsDto(*authRequest).
+		Execute()
+	if err != nil {
+		log.Fatalf("authentication failed: %v", err)
+	}
+
+	authPayload := authResponse.GetResponse()
+	token := authPayload.GetToken()
+	ctx = context.WithValue(ctx, docspace_api_sdk.ContextAccessToken, token)
+
+	myFolder, _, err := client.FilesFoldersAPI.GetMyFolder(ctx).Execute()
+	if err != nil {
+		log.Fatalf("failed to get my folder: %v", err)
+	}
+
+	myFolderPayload := myFolder.GetResponse()
+	currentFolder := myFolderPayload.GetCurrent()
+	parentFolderID := currentFolder.GetId()
+	folderPayload := docspace_api_sdk.NewCreateFolderWithDefaults()
+	folderPayload.SetTitle("SDK Sample Folder")
+
+	createdFolder, _, err := client.FilesFoldersAPI.
+		CreateFolder(ctx, parentFolderID).
+		CreateFolder(*folderPayload).
+		Execute()
+	if err != nil {
+		log.Fatalf("failed to create folder: %v", err)
+	}
+
+	createdFolderPayload := createdFolder.GetResponse()
+	fmt.Printf("Created folder ID: %d\n", createdFolderPayload.GetId())
+}

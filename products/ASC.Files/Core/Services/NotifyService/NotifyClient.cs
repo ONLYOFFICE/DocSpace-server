@@ -1,38 +1,44 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 // 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
 // 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
 // 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
+// No trademark rights are granted under this License.
 // 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 using HtmlAgilityPack;
-
-using Actions = ASC.Web.Studio.Core.Notify.Actions;
 using ConfigurationConstants = ASC.Core.Configuration.Constants;
 
 namespace ASC.Files.Core.Services.NotifyService;
 
 [Scope]
-public class NotifyClient(WorkContext notifyContext,
+public class NotifyClient(
+    WorkContext notifyContext,
     NotifySource notifySource,
     SecurityContext securityContext,
     FilesLinkUtility filesLinkUtility,
@@ -54,16 +60,10 @@ public class NotifyClient(WorkContext notifyContext,
     {
         var client = notifyContext.RegisterClient(serviceProvider, notifySource);
         var recipient = await notifySource.GetRecipientsProvider().GetRecipientAsync(securityContext.CurrentAccount.ID.ToString());
-
-        await client.SendNoticeAsync(
-            NotifyConstants.EventDocuSignComplete,
-            file.UniqID,
-            recipient,
-            true,
-            new TagValue(NotifyConstants.TagDocumentUrl, baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id))),
-            new TagValue(NotifyConstants.TagDocumentTitle, file.Title),
-            new TagValue(NotifyConstants.TagMessage, sourceTitle)
-            );
+        var action = serviceProvider.GetService<DocuSignCompleteNotifyAction>();
+        action.Init(file, sourceTitle);
+            
+        await client.SendNoticeAsync(action, file.UniqID, recipient, true);
     }
 
     public async Task SendDocuSignStatusAsync(string subject, string status)
@@ -71,15 +71,11 @@ public class NotifyClient(WorkContext notifyContext,
         var client = notifyContext.RegisterClient(serviceProvider, notifySource);
 
         var recipient = await notifySource.GetRecipientsProvider().GetRecipientAsync(securityContext.CurrentAccount.ID.ToString());
-
-        await client.SendNoticeAsync(
-            NotifyConstants.EventDocuSignStatus,
-            null,
-            recipient,
-            true,
-            new TagValue(NotifyConstants.TagDocumentTitle, subject),
-            new TagValue(NotifyConstants.TagMessage, status)
-            );
+        
+        var action = serviceProvider.GetService<DocuSignStatusNotifyAction>();
+        action.Init(subject, status);
+        
+        await client.SendNoticeAsync(action, null, recipient, true);
     }
 
     public async Task SendMailMergeEndAsync(Guid userId, int countMails, int countError)
@@ -87,15 +83,11 @@ public class NotifyClient(WorkContext notifyContext,
         var client = notifyContext.RegisterClient(serviceProvider, notifySource);
 
         var recipient = await notifySource.GetRecipientsProvider().GetRecipientAsync(userId.ToString());
-
-        await client.SendNoticeAsync(
-            NotifyConstants.EventMailMergeEnd,
-            null,
-            recipient,
-            true,
-            new TagValue(NotifyConstants.TagMailsCount, countMails),
-            new TagValue(NotifyConstants.TagMessage, countError > 0 ? string.Format(FilesCommonResource.ErrorMessage_MailMergeCount, countError) : string.Empty)
-            );
+        
+        var action = serviceProvider.GetService<MailMergeEndNotifyAction>();
+        action.Init(countMails, countError);
+        
+        await client.SendNoticeAsync(action, null, recipient, true);
     }
 
     public async Task SendShareNoticeAsync<T>(FileEntry<T> fileEntry, Dictionary<Guid, FileShare> recipients, string message, string culture = null)
@@ -133,17 +125,17 @@ public class NotifyClient(WorkContext notifyContext,
         }
 
         var recipientsProvider = notifySource.GetRecipientsProvider();
-
+        
         var action = fileEntry.FileEntryType == FileEntryType.File
         ? ((File<T>)fileEntry).Encrypted
-            ? NotifyConstants.EventShareEncryptedDocument
-            : NotifyConstants.EventShareDocument
-        : NotifyConstants.EventShareFolder;
+            ? serviceProvider.GetService<ShareEncryptedDocumentNotifyAction>()
+            : serviceProvider.GetService<ShareDocumentNotifyAction>() 
+        :  serviceProvider.GetService<ShareFolderNotifyAction>();
 
 
         foreach (var recipientPair in recipients)
         {
-            if (!await studioNotifyHelper.IsSubscribedToNotifyAsync(recipientPair.Key, Actions.RoomsActivity))
+            if (!await studioNotifyHelper.IsSubscribedToNotifyAsync(recipientPair.Key, serviceProvider.GetService<RoomsActivityNotifyAction>()))
             {
                 continue;
             }
@@ -158,39 +150,21 @@ public class NotifyClient(WorkContext notifyContext,
             else
             {
                 userCulture = string.IsNullOrEmpty(u.CultureName)
-                    ? (tenantManager.GetCurrentTenant()).GetCulture()
+                    ? tenantManager.GetCurrentTenant().GetCulture()
                     : CultureInfo.GetCultureInfo(u.CultureName);
             }
 
 
             var aceString = GetAccessString(recipientPair.Value, userCulture);
             var recipient = await recipientsProvider.GetRecipientAsync(u.Id.ToString());
-
-            var tags = new List<ITagValue>
-            {
-                new TagValue(NotifyConstants.TagDocumentTitle, fileEntry.Title),
-                new TagValue(NotifyConstants.TagDocumentUrl, baseCommonLinkUtility.GetFullAbsolutePath(url)),
-                new TagValue(NotifyConstants.TagDocumentExtension, fileExtension),
-                new TagValue(NotifyConstants.TagAccessRights, aceString),
-                new TagValue(NotifyConstants.TagMessage, message == null ? string.Empty : message.HtmlEncode()),
-                new TagValue(NotifyConstants.TagFolderID, folder.Id),
-                new TagValue(NotifyConstants.TagFolderParentId, folder.RootId),
-                new TagValue(NotifyConstants.TagFolderRootFolderType, folder.RootFolderType),
-                TagValues.Image(studioNotifyHelper, 0, "privacy.png"),
-                new AdditionalSenderTag("push.sender")
-            };
-
-            if (!string.IsNullOrEmpty(culture))
-            {
-                tags.Add(new TagValue(CommonTags.Culture, culture));
-            }
+            
+            action.Init(fileEntry, folder, url, fileExtension, aceString, message, culture);
 
             await client.SendNoticeAsync(
                 action,
                 fileEntry.UniqID,
                 recipient,
-                true,
-                tags.ToArray()
+                true
                 );
         }
     }
@@ -209,8 +183,8 @@ public class NotifyClient(WorkContext notifyContext,
         var folderDao = daoFactory.GetFolderDao<T>();
 
         T roomId = default;
-        string folderTitle = null;
-        string folderUrl = null;
+        string folderTitle;
+        string folderUrl;
 
         switch (file.RootFolderType)
         {
@@ -243,7 +217,7 @@ public class NotifyClient(WorkContext notifyContext,
 
             var recipient = await recipientsProvider.GetRecipientAsync(recipientId.ToString());
 
-            if (!await studioNotifyHelper.IsSubscribedToNotifyAsync(recipientId, Actions.RoomsActivity))
+            if (!await studioNotifyHelper.IsSubscribedToNotifyAsync(recipientId, serviceProvider.GetService<RoomsActivityNotifyAction>()))
             {
                 continue;
             }
@@ -257,24 +231,16 @@ public class NotifyClient(WorkContext notifyContext,
             htmlDoc.LoadHtml(message);
             var plainText = htmlDoc.DocumentNode.InnerText;
 
-            await client.SendNoticeAsync(
-                NotifyConstants.EventEditorMentions,
-                file.UniqID,
-                recipient,
-                new TagValue(NotifyConstants.TagDocumentTitle, file.Title),
-                new TagValue(NotifyConstants.TagDocumentUrl, baseCommonLinkUtility.GetFullAbsolutePath(documentUrl)),
-                new TagValue(NotifyConstants.TagMessage, plainText),
-                new TagValue(Tags.ToUserName, currentUser.DisplayUserName(displayUserSettingsHelper)),
-                new TagValue(NotifyConstants.RoomTitle, folderTitle),
-                new TagValue(NotifyConstants.RoomUrl, folderUrl),
-                new AdditionalSenderTag("push.sender")
-                );
+            var action = serviceProvider.GetService<EditorMentionsNotifyAction>();
+            action.Init(file, plainText, currentUser, documentUrl, folderTitle, folderUrl);
+            
+            await client.SendNoticeAsync(action, file.UniqID, recipient);
         }
     }
 
     public async Task SendFormSubmittedAsync<T>(Folder<T> room, FileEntry<T> originalForm, FileEntry<T> filledForm)
     {
-        if (filledForm.CreateBy.Equals(originalForm.CreateBy))
+        if (originalForm == null || filledForm.CreateBy.Equals(originalForm.CreateBy))
         {
             return;
         }
@@ -308,57 +274,42 @@ public class NotifyClient(WorkContext notifyContext,
         var userButtonText = FilesPatternResource.ResourceManager.GetString("button_CheckReadyForms", userCulture);
 
         var managerButtonText = FilesPatternResource.ResourceManager.GetString("button_CheckReadyForms", managerCulture);
-
+        
+        var formSubmittedNotifyAction = serviceProvider.GetService<FormSubmittedNotifyAction>();
+        formSubmittedNotifyAction.Init(room, originalForm, filledForm, documentUrl, documentParentUrl, roomUrl, manager, managerUrl, userCulture, userButtonText);
+        
         await client.SendNoticeToAsync(
-            NotifyConstants.EventFormSubmitted,
+            formSubmittedNotifyAction,
             filledForm.UniqID,
             [user],
             [ConfigurationConstants.NotifyEMailSenderSysName, ConfigurationConstants.NotifyTelegramSenderSysName],
-            true,
-            new TagValue(NotifyConstants.TagMessage, originalForm.Title),
-            new TagValue(NotifyConstants.TagDocumentTitle, filledForm.Title),
-            new TagValue(NotifyConstants.TagDocumentUrl, documentUrl),
-            new TagValue(NotifyConstants.RoomTitle, room.Title),
-            new TagValue(NotifyConstants.RoomUrl, roomUrl),
-            new TagValue(Tags.ToUserName, manager.DisplayUserName(displayUserSettingsHelper)),
-            new TagValue(Tags.ToUserLink, managerUrl),
-            new TagValue(CommonTags.Culture, userCulture.Name),
-            TagValues.OrangeButton(userButtonText, documentParentUrl)
+            true
             );
+        
+        var formReceivedNotifyAction = serviceProvider.GetService<FormReceivedNotifyAction>();
+        formReceivedNotifyAction.Init(room, originalForm, filledForm, documentUrl, documentParentUrl, roomUrl,  userName, userUrl, managerCulture, managerButtonText);
+        
         await client.SendNoticeToAsync(
-            NotifyConstants.EventFormReceived,
+            formReceivedNotifyAction,
             filledForm.UniqID,
             [manager],
             [ConfigurationConstants.NotifyEMailSenderSysName, ConfigurationConstants.NotifyTelegramSenderSysName],
-            true,
-            new TagValue(NotifyConstants.TagMessage, originalForm.Title),
-            new TagValue(NotifyConstants.TagDocumentTitle, filledForm.Title),
-            new TagValue(NotifyConstants.TagDocumentUrl, documentUrl),
-            new TagValue(NotifyConstants.RoomTitle, room.Title),
-            new TagValue(NotifyConstants.RoomUrl, roomUrl),
-            new TagValue(Tags.FromUserName, userName),
-            new TagValue(Tags.FromUserLink, userUrl),
-            new TagValue(CommonTags.Culture, managerCulture.Name),
-            TagValues.OrangeButton(managerButtonText, documentParentUrl)
+            true
             );
 
+        var userFormSubmittedNotifyAction = serviceProvider.GetService<FormSubmittedNotifyAction>();
+        userFormSubmittedNotifyAction.Init(room, filledForm, userCulture);
+        
         await client.SendNoticeAsync(
-            NotifyConstants.EventFormSubmitted,
+            userFormSubmittedNotifyAction,
             filledForm.UniqID,
             [new DirectRecipient(manager.Id.ToString(), manager.ToString()), new DirectRecipient(user.Id.ToString(), user.ToString())],
-            ConfigurationConstants.NotifyPushSenderSysName,
-            new TagValue(NotifyConstants.TagDocumentTitle, filledForm.Title),
-            new TagValue(NotifyConstants.RoomTitle, room.Title),
-            new TagValue(NotifyConstants.TagFolderID, room.Id),
-            new TagValue(NotifyConstants.TagFolderParentId, room.ParentId),
-            new TagValue(NotifyConstants.TagFolderRootFolderType, room.RootFolderType),
-            new TagValue(CommonTags.Culture, userCulture.Name)
-            );
+            ConfigurationConstants.NotifyPushSenderSysName);
     }
 
-    public async Task SendRoomRemovedAsync<T>(FileEntry<T> folder, List<AceWrapper> aces, Guid userId)
+    public async Task SendRoomRemovedAsync<T>(Folder<T> folder, List<AceWrapper> aces, Guid userId)
     {
-        if (folder is not { FileEntryType: FileEntryType.Folder } || aces.Count == 0)
+        if (aces.Count == 0)
         {
             return;
         }
@@ -375,12 +326,12 @@ public class NotifyClient(WorkContext notifyContext,
 
             if (ace.SubjectGroup
                 || recepientId == userId
-                || ace.Access != FileShare.RoomManager && ace.Owner != true)
+                || ace.Access != FileShare.RoomManager && !ace.Owner)
             {
                 continue;
             }
 
-            if (!await studioNotifyHelper.IsSubscribedToNotifyAsync(userId, Actions.RoomsActivity))
+            if (!await studioNotifyHelper.IsSubscribedToNotifyAsync(userId, serviceProvider.GetService<RoomsActivityNotifyAction>()))
             {
                 continue;
             }
@@ -396,15 +347,16 @@ public class NotifyClient(WorkContext notifyContext,
             {
                 continue;
             }
-
+            
+            var action = folder.FolderType == FolderType.AiRoom ? serviceProvider.GetService<AgentRemovedNotifyAction>()  : serviceProvider.GetService<RoomRemovedNotifyAction>();
+            action.Init(folder.Title, roomUrl);
+            
             await client.SendNoticeToAsync(
-                NotifyConstants.EventRoomRemoved,
+                action,
                 folder.UniqID,
                 [recipient],
                 [ConfigurationConstants.NotifyEMailSenderSysName, ConfigurationConstants.NotifyTelegramSenderSysName],
-                true,
-                new TagValue(NotifyConstants.RoomTitle, folder.Title),
-                new TagValue(NotifyConstants.RoomUrl, roomUrl)
+                true
                 );
 
         }
@@ -424,20 +376,13 @@ public class NotifyClient(WorkContext notifyContext,
 
         var client = notifyContext.RegisterClient(serviceProvider, notifySource);
         var user = await userManager.GetUsersAsync(userId);
-
-        await client.SendNoticeAsync(
-                NotifyConstants.EventRoomMovedArchive,
-                room.UniqID,
-                recipients,
-                ConfigurationConstants.NotifyPushSenderSysName,
-                new TagValue(NotifyConstants.RoomTitle, room.Title),
-                new TagValue(Tags.FromUserName, user.DisplayUserName(displayUserSettingsHelper)),
-                new TagValue(NotifyConstants.TagFolderID, room.Id),
-                new TagValue(NotifyConstants.TagFolderParentId, room.ParentId),
-                new TagValue(NotifyConstants.TagFolderRootFolderType, room.RootFolderType)
-                );
+        
+        var action = serviceProvider.GetService<RoomMovedArchiveNotifyAction>();
+        action.Init(room, user);
+        
+        await client.SendNoticeAsync(action, room.UniqID, recipients, ConfigurationConstants.NotifyPushSenderSysName);
     }
-    public async Task SendInvitedToRoom<T>(FileEntry<T> room, UserInfo user)
+    public async Task SendInvitedToRoom<T>(Folder<T> room, UserInfo user)
     {
         if (!await CanNotifyRoom(room, user))
         {
@@ -445,19 +390,13 @@ public class NotifyClient(WorkContext notifyContext,
         }
 
         var client = notifyContext.RegisterClient(serviceProvider, notifySource);
-
-        await client.SendNoticeAsync(
-            NotifyConstants.EventInvitedToRoom,
-            room.UniqID,
-            new DirectRecipient(user.Id.ToString(), user.ToString()),
-            ConfigurationConstants.NotifyPushSenderSysName,
-            new TagValue(NotifyConstants.TagFolderID, room.Id),
-            new TagValue(NotifyConstants.TagFolderParentId, room.ParentId),
-            new TagValue(NotifyConstants.TagFolderRootFolderType, room.RootFolderType),
-            new TagValue(NotifyConstants.RoomTitle, room.Title)
-            );
+        
+        var action = room.FolderType == FolderType.AiRoom ? serviceProvider.GetService<InvitedToAgentNotifyAction>() : serviceProvider.GetService<InvitedToRoomNotifyAction>();
+        action.Init(room);
+        
+        await client.SendNoticeAsync(action, room.UniqID, new DirectRecipient(user.Id.ToString(), user.ToString()), ConfigurationConstants.NotifyPushSenderSysName);
     }
-    public async Task SendRoomUpdateAccessForUser<T>(FileEntry<T> room, UserInfo user, FileShare currentRole)
+    public async Task SendRoomUpdateAccessForUser<T>(Folder<T> room, UserInfo user, FileShare currentRole)
     {
         if (!await CanNotifyRoom(room, user))
         {
@@ -465,18 +404,17 @@ public class NotifyClient(WorkContext notifyContext,
         }
 
         var client = notifyContext.RegisterClient(serviceProvider, notifySource);
-        var accessString = FileShareExtensions.GetAccessString(currentRole);
+        var isAgent = room.FolderType == FolderType.AiRoom;
+        var accessString = FileShareExtensions.GetAccessString(currentRole, isAgent: isAgent);
 
+        var action = isAgent ? serviceProvider.GetService<AgentUpdateAccessForUserNotifyAction>() : serviceProvider.GetService<RoomUpdateAccessForUserNotifyAction>();
+        action.Init(room, accessString);
+        
         await client.SendNoticeAsync(
-            NotifyConstants.EventRoomUpdateAccessForUser,
+            action,
             room.UniqID,
             new DirectRecipient(user.Id.ToString(), user.ToString()),
-            ConfigurationConstants.NotifyPushSenderSysName,
-            new TagValue(NotifyConstants.RoomTitle, room.Title),
-            new TagValue(NotifyConstants.TagFolderID, room.Id),
-            new TagValue(NotifyConstants.TagFolderParentId, room.ParentId),
-            new TagValue(NotifyConstants.TagFolderRootFolderType, room.RootFolderType),
-            new TagValue(Tags.RoomRole, accessString)
+            ConfigurationConstants.NotifyPushSenderSysName
             );
     }
     public async Task SendDocumentCreatedInRoom<T>(Folder<T> room, IEnumerable<Guid> aces, FileEntry<T> file, Guid userId)
@@ -487,19 +425,16 @@ public class NotifyClient(WorkContext notifyContext,
         {
             return;
         }
+        
         var client = notifyContext.RegisterClient(serviceProvider, notifySource);
-
+        var action = serviceProvider.GetService<DocumentCreatedInRoomNotifyAction>();
+        action.Init(room, file);
+        
         await client.SendNoticeAsync(
-                NotifyConstants.EventDocumentCreatedInRoom,
+            action,
                 file.UniqID,
                 recipients,
-                ConfigurationConstants.NotifyPushSenderSysName,
-                new TagValue(NotifyConstants.RoomTitle, room.Title),
-                new TagValue(NotifyConstants.TagDocumentTitle, file.Title),
-                new TagValue(NotifyConstants.TagDocumentExtension, Path.GetExtension(file.Title)),
-                new TagValue(NotifyConstants.TagFolderID, room.Id),
-                new TagValue(NotifyConstants.TagFolderParentId, room.ParentId),
-                new TagValue(NotifyConstants.TagFolderRootFolderType, room.RootFolderType)
+                ConfigurationConstants.NotifyPushSenderSysName
             );
 
     }
@@ -513,20 +448,12 @@ public class NotifyClient(WorkContext notifyContext,
         }
 
         var client = notifyContext.RegisterClient(serviceProvider, notifySource);
-
-        await client.SendNoticeAsync(
-                   NotifyConstants.EventDocumentUploadedToRoom,
-                   file.UniqID,
-                   recipients,
-                   ConfigurationConstants.NotifyPushSenderSysName,
-                   new TagValue(NotifyConstants.TagDocumentTitle, file.Title),
-                   new TagValue(NotifyConstants.TagDocumentExtension, Path.GetExtension(file.Title)),
-                   new TagValue(NotifyConstants.TagFolderID, room.Id),
-                   new TagValue(NotifyConstants.RoomTitle, room.Title),
-                   new TagValue(NotifyConstants.TagFolderParentId, room.ParentId),
-                   new TagValue(NotifyConstants.TagFolderRootFolderType, room.RootFolderType)
-           );
+        var action = serviceProvider.GetService<DocumentUploadedToRoomNotifyAction>();
+        action.Init(room, file);
+        
+        await client.SendNoticeAsync(action, file.UniqID, recipients, ConfigurationConstants.NotifyPushSenderSysName);
     }
+    
     public async Task SendDocumentsUploadedToRoom<T>(IEnumerable<Guid> aces, int count, Folder<T> room, Guid userId)
     {
         var recipients = await GetNotifiableUsersAsync(aces, room, userId);
@@ -537,19 +464,12 @@ public class NotifyClient(WorkContext notifyContext,
         }
 
         var client = notifyContext.RegisterClient(serviceProvider, notifySource);
-
-        await client.SendNoticeAsync(
-                    NotifyConstants.EventDocumentsUploadedToRoom,
-                    room.UniqID,
-                    recipients,
-                    ConfigurationConstants.NotifyPushSenderSysName,
-                    new TagValue(NotifyConstants.TagFolderID, room.Id),
-                    new TagValue(NotifyConstants.TagFolderParentId, room.ParentId),
-                    new TagValue(NotifyConstants.TagFolderRootFolderType, room.RootFolderType),
-                    new TagValue(NotifyConstants.RoomTitle, room.Title),
-                    new TagValue(Tags.Count, count)
-            );
+        var action = serviceProvider.GetService<DocumentsUploadedToRoomNotifyAction>();
+        action.Init(room, count);
+        
+        await client.SendNoticeAsync(action, room.UniqID, recipients, ConfigurationConstants.NotifyPushSenderSysName);
     }
+    
     public async Task SendFolderCreatedInRoom<T>(Folder<T> room, IEnumerable<Guid> aces, Folder<T> folder, Guid userId)
     {
         var recipients = await GetNotifiableUsersAsync(aces, room, userId);
@@ -560,18 +480,10 @@ public class NotifyClient(WorkContext notifyContext,
         }
 
         var client = notifyContext.RegisterClient(serviceProvider, notifySource);
-
-        await client.SendNoticeAsync(
-                    NotifyConstants.EventFolderCreatedInRoom,
-                    folder.UniqID,
-                    recipients,
-                    ConfigurationConstants.NotifyPushSenderSysName,
-                    new TagValue(NotifyConstants.RoomTitle, room.Title),
-                    new TagValue(NotifyConstants.FolderTitle, folder.Title),
-                    new TagValue(NotifyConstants.TagFolderID, folder.Id),
-                    new TagValue(NotifyConstants.TagFolderParentId, folder.ParentId),
-                    new TagValue(NotifyConstants.TagFolderRootFolderType, folder.RootFolderType)
-                );
+        var action = serviceProvider.GetService<FolderCreatedInRoomNotifyAction>();
+        action.Init(room, folder);
+        
+        await client.SendNoticeAsync(action, folder.UniqID, recipients, ConfigurationConstants.NotifyPushSenderSysName);
     }
 
     public async Task<IRecipient[]> GetNotifiableUsersAsync<T>(IEnumerable<Guid> aces, FileEntry<T> room, Guid userId)
@@ -598,7 +510,7 @@ public class NotifyClient(WorkContext notifyContext,
         }
         return notifiableUsers.ToArray();
     }
-    public async Task SendFormFillingEvent<T>(FileEntry<T> room, File<T> file, List<Guid> aces, INotifyAction action, Guid? userId = null)
+    public async Task SendFormFillingEvent<T>(FileEntry<T> room, File<T> file, List<Guid> aces, Type actionType, Guid? userId = null)
     {
         if (aces.Count == 0)
         {
@@ -624,19 +536,15 @@ public class NotifyClient(WorkContext notifyContext,
         {
             var recipient = await recipientsProvider.GetRecipientAsync(ace.ToString());
 
+            var action = (FormStartedFillingNotifyAction)serviceProvider.GetService(actionType);
+            action?.Init(room, file, userName, userUrl, roomUrl);
+
             await client.SendNoticeToAsync(
                 action,
                 room.UniqID,
                 [recipient],
                 [ConfigurationConstants.NotifyEMailSenderSysName, ConfigurationConstants.NotifyTelegramSenderSysName],
-                true,
-                new TagValue(NotifyConstants.TagDocumentUrl, baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id))),
-                new TagValue(NotifyConstants.TagDocumentTitle, file.Title),
-                new TagValue(NotifyConstants.RoomTitle, room.Title),
-                new TagValue(NotifyConstants.RoomUrl, roomUrl),
-                new TagValue(Tags.FromUserName, userName),
-                new TagValue(Tags.FromUserLink, userUrl)
-                );
+                true);
         }
     }
     private async Task<bool> CanNotifyRoom<T>(FileEntry<T> room, UserInfo user)
@@ -646,7 +554,7 @@ public class NotifyClient(WorkContext notifyContext,
             return false;
         }
 
-        if (!await studioNotifyHelper.IsSubscribedToNotifyAsync(user, Actions.RoomsActivity))
+        if (!await studioNotifyHelper.IsSubscribedToNotifyAsync(user, serviceProvider.GetService<RoomsActivityNotifyAction>()))
         {
             return false;
         }

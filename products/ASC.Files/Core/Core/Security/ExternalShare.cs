@@ -1,28 +1,37 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
+//
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
+//
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
+//
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
+//
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
+//
+// No trademark rights are granted under this License.
+//
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
 // 
-// This program is a free software product.
-// You can redistribute it and/or modify it under the terms
-// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
-// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
-// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
-// any third-party rights.
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
 // 
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
-// The  interactive user interfaces in modified source and object code versions of the Program must
-// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
-// Pursuant to Section 7(b) of the License you must retain the original Product logo when
-// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
-// trademark law for use of our trademarks.
-// 
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
-// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
-// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+// SPDX-License-Identifier: AGPL-3.0-only
+
+using HttpRequestExtensions = System.Web.HttpRequestExtensions;
 
 namespace ASC.Files.Core.Security;
 
@@ -34,12 +43,12 @@ public class ExternalShare(
     BaseCommonLinkUtility commonLinkUtility,
     FilesLinkUtility filesLinkUtility,
     FileUtility fileUtility,
-    CoreSettings coreSettings)
+    CoreSettings coreSettings,
+    FilesSettingsHelper filesSettingsHelper)
 {
     private ExternalSessionSnapshot _snapshot;
     private string _dbKey;
     private const string RoomLinkPattern = "rooms/share?key={0}";
-    private const string PersonalFolderLinkPattern = "rooms/personal/filter?key={0}";
 
     public async Task<LinkData> GetLinkDataAsync<T>(FileEntry<T> entry, Guid linkId)
     {
@@ -59,12 +68,12 @@ public class ExternalShare(
                 }
                 else
                 {
-                    url = file.DownloadUrl;
+                    url = filesLinkUtility.GetFileDownloadUrl(file.Id);
                 }
 
                 url = QueryHelpers.AddQueryString(url, FilesLinkUtility.ShareKey, key);
                 break;
-            case Folder<T> folder when DocSpaceHelper.IsRoom(folder.FolderType):
+            case Folder<T> { IsRoom: true }:
                 url = string.Format(RoomLinkPattern, key);
                 break;
             case Folder<T> { RootFolderType: FolderType.VirtualRooms or FolderType.USER } folder:
@@ -102,6 +111,14 @@ public class ExternalShare(
         if (record.Options.Internal && !isAuthenticated)
         {
             return Status.ExternalAccessDenied;
+        }
+
+        if (!record.Options.Internal && !isAuthenticated && entry != null)
+        {
+            if (await IsGloballyRestrictedAsync(entry))
+            {
+                return Status.ExternalAccessDenied;
+            }
         }
 
         if (entry is { RootFolderType: FolderType.Archive or FolderType.TRASH })
@@ -333,6 +350,61 @@ public class ExternalShare(
     {
         return _dbKey ??= await coreSettings.GetDocDbKeyAsync();
     }
+
+    /// <summary>
+    /// Returns <c>true</c> when an existing public link should be blocked because the admin
+    /// has both disabled external sharing for the entry's section and enabled the
+    /// "block existing links" option. Used only for access-validation paths.
+    /// </summary>
+    public async Task<bool> IsGloballyRestrictedAsync(FileEntry entry)
+    {
+        var settings = await filesSettingsHelper.GetTenantFilesSettingsAsync();
+        return IsGlobalRestrictionApplies(entry, settings);
+    }
+
+    /// <summary>
+    /// Returns <c>true</c> when creating a new public link should be prevented because the
+    /// admin has disabled external sharing for the entry's section.
+    /// Unlike <see cref="IsGloballyRestrictedAsync"/>, this does <b>not</b> consult
+    /// <c>BlockExistingLinksOnRestrict</c> — that flag controls only existing-link access,
+    /// not whether new links may be created as public.
+    /// </summary>
+    public async Task<bool> IsCreationRestrictedAsync(FileEntry entry)
+    {
+        var settings = await filesSettingsHelper.GetTenantFilesSettingsAsync();
+
+        if (!settings.DisableShareLinkSetting)
+        {
+            return false;
+        }
+
+        return entry.RootFolderType switch
+        {
+            FolderType.USER => settings.ExternalShareApplyToDocumentsSetting,
+            FolderType.VirtualRooms => settings.ExternalShareApplyToRoomsSetting,
+            _ => false
+        };
+    }
+
+    private static bool IsGlobalRestrictionApplies(FileEntry entry, FilesSettings settings)
+    {
+        if (!settings.DisableShareLinkSetting)
+        {
+            return false;
+        }
+
+        if (!settings.BlockExistingLinksOnRestrictSetting)
+        {
+            return false;
+        }
+
+        return entry.RootFolderType switch
+        {
+            FolderType.USER => settings.ExternalShareApplyToDocumentsSetting,
+            FolderType.VirtualRooms => settings.ExternalShareApplyToRoomsSetting,
+            _ => false
+        };
+    }
 }
 
 /// <summary>
@@ -443,9 +515,9 @@ public class ExternalSessionSnapshot
 
     public ExternalSessionSnapshot(Guid linkId, Guid sessionId, string passwordKey)
     {
-        this.LinkId = linkId;
-        this.SessionId = sessionId;
-        this.PasswordKey = passwordKey;
+        LinkId = linkId;
+        SessionId = sessionId;
+        PasswordKey = passwordKey;
     }
 
     [ProtoMember(1)]
@@ -463,22 +535,22 @@ public class ExternalSessionSnapshot
 /// </summary>
 public enum Status
 {
-    [SwaggerEnum(Description = "Ok")]
+    [Description("Ok")]
     Ok,
 
-    [SwaggerEnum(Description = "Invalid")]
+    [Description("Invalid")]
     Invalid,
 
-    [SwaggerEnum(Description = "Expired")]
+    [Description("Expired")]
     Expired,
 
-    [SwaggerEnum(Description = "Required password")]
+    [Description("Required password")]
     RequiredPassword,
 
-    [SwaggerEnum(Description = "Invalid password")]
+    [Description("Invalid password")]
     InvalidPassword,
 
-    [SwaggerEnum(Description = "External access denied")]
+    [Description("External access denied")]
     ExternalAccessDenied
 }
 
