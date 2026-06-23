@@ -44,9 +44,9 @@ public class QuotaHelper(
     UserManager userManager,
     AuthContext authContext)
 {
-    public async IAsyncEnumerable<QuotaDto> GetQuotasAsync(bool all = false, bool wallet = false)
+    public async IAsyncEnumerable<QuotaDto> GetQuotasAsync(bool all = false, bool? additional = null, bool? wallet = null)
     {
-        var quotaList = await tenantManager.GetTenantQuotasAsync(all, wallet);
+        var quotaList = await tenantManager.GetTenantQuotasAsync(all, additional, wallet);
         var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
         var enabledWalletServices = coreBaseSettings.Standalone ? null : (await settingsManager.LoadAsync<TenantWalletServiceSettings>()).EnabledServices;
         var currentQuota = await tenantManager.GetCurrentTenantQuotaAsync();
@@ -77,7 +77,7 @@ public class QuotaHelper(
 
     public async Task<IEnumerable<WalletServiceDto>> GetWalletServicesAsync()
     {
-        var quotas = await tenantManager.GetTenantQuotasAsync(all: true, wallet: true);
+        var quotas = await tenantManager.GetTenantQuotasAsync(all: true, additional: true, wallet: true);
 
         var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
         var enabledWalletServices = coreBaseSettings.Standalone ? null : (await settingsManager.LoadAsync<TenantWalletServiceSettings>()).EnabledServices;

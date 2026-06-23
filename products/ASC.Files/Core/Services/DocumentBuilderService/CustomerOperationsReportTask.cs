@@ -106,7 +106,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
             return null;
         }
 
-        var quotaList = await tenantManager.GetTenantQuotasAsync(false, true);
+        var quotaList = await tenantManager.GetTenantQuotasAsync(all: false, wallet: true);
 
         var selectedQuota = quotaList.FirstOrDefault(x =>
             x.ServiceName.Equals(serviceName, StringComparison.InvariantCultureIgnoreCase));
