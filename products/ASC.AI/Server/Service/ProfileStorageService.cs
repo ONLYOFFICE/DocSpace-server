@@ -134,7 +134,7 @@ public class ProfileStorageService(
             {
                 Id = m.RevisionId,
                 Name = m.Alias,
-                ProviderType = "openaicompatible",
+                ProviderType = "onlyoffice",
                 BaseUrl = linkUtility.GetFullAbsolutePath("api/2.0/ai/gateway"),
                 ModelId = m.Id,
                 Reasoning = HasCapability(m, "reasoning"),

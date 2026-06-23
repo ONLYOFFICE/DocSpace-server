@@ -36,7 +36,7 @@ export type ForwardedHeaders = Record<string, string>;
 export interface RequestContext {
   headers: ForwardedHeaders;
   // When set, the forwarded client headers are merged into the resolved
-  // provider profile's `headers` (openaicompatible only) so they reach the
+  // provider profile's `headers` (onlyoffice provider only) so they reach the
   // upstream provider with each chat-stream request.
   forwardHeadersToProvider?: boolean;
 }
