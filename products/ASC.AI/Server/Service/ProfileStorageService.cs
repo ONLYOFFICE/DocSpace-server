@@ -135,7 +135,7 @@ public class ProfileStorageService(
                 Id = m.RevisionId,
                 Name = m.Alias,
                 ProviderType = "onlyoffice",
-                BaseUrl = linkUtility.GetFullAbsolutePath("api/2.0/ai/gateway"),
+                BaseUrl = linkUtility.GetFullAbsolutePath(string.Empty),
                 ModelId = m.Id,
                 Reasoning = HasCapability(m, "reasoning"),
                 CanUseTool = HasCapability(m, ToolsCapability),

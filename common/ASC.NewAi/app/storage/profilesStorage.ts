@@ -1,37 +1,37 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { aiService, AiServiceHttpError } from "./httpClient.js";
+import { aiService, AiServiceHttpError, aiServiceBaseUrl } from "./httpClient.js";
 import { isObject, getString, getNumber, getBoolean } from "../narrow.js";
 import {
   getForwardedHeaders,
@@ -40,26 +40,22 @@ import {
 import type { ProfilesStorage, Profile } from "@onlyoffice/ai-chat/core";
 
 const PATH = "/integration/profiles";
+const ONLYOFFICE_GATEWAY_PATH = "/api/2.0/ai/gateway";
 
-// When the current request opted in (chat-stream handlers) and the profile
-// is the host-configured ONLYOFFICE AI provider, merge the forwarded client
-// headers into the profile's own headers so they reach the upstream provider
-// with each request. The profile's configured headers win over the forwarded
-// ones, so an explicit gateway token / Authorization is never clobbered.
-function withForwardedProviderHeaders(
+function withOnlyofficeProviderOverrides(
   profile: Profile | undefined,
 ): Profile | undefined {
-  if (
-    !profile ||
-    profile.providerType !== "onlyoffice" ||
-    !shouldForwardHeadersToProvider()
-  ) {
+  if (!profile || profile.providerType !== "onlyoffice") {
     return profile;
   }
-  return {
+  const resolved: Profile = {
     ...profile,
-    headers: { ...getForwardedHeaders(), ...(profile.headers ?? {}) },
+    baseUrl: `${aiServiceBaseUrl}${ONLYOFFICE_GATEWAY_PATH}`,
   };
+  if (shouldForwardHeadersToProvider()) {
+    resolved.headers = { ...getForwardedHeaders(), ...(profile.headers ?? {}) };
+  }
+  return resolved;
 }
 
 function dtoToProfile(raw: unknown): Profile | undefined {
@@ -167,7 +163,7 @@ export class HttpProfilesStorage implements ProfilesStorage {
   async readById(id: string): Promise<Profile | undefined> {
     try {
       const raw = await aiService.get(`${PATH}/${encodeURIComponent(id)}`);
-      return withForwardedProviderHeaders(dtoToProfile(raw));
+      return withOnlyofficeProviderOverrides(dtoToProfile(raw));
     } catch (err) {
       if (err instanceof AiServiceHttpError && err.status === 404) {
         return undefined;
