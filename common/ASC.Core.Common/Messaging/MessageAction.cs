@@ -997,8 +997,11 @@ public enum MessageAction
     [Description("User AI settings updated")]
     UserUpdatedAiSettings = 6099,
 
+    [Description("Subscription balance moved to wallet")]
+    SubscriptionBalanceMovedToWallet = 6100,
+
     [Description("Docs Cloud config updated")]
-    DocsCloudConfigUpdated = 6100,
+    DocsCloudConfigUpdated = 6101,
 
     #endregion
 
