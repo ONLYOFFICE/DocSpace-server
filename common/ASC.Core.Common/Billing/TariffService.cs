@@ -385,6 +385,48 @@ public class TariffService(
         }
     }
 
+    public async Task<SubscriptionBalanceInfo> GetSubscriptionBalanceInfoAsync(int tenantId, string productId)
+    {
+        if (!billingClient.Configured)
+        {
+            return null;
+        }
+
+        try
+        {
+            return await billingClient.GetSubscriptionBalanceInfoAsync(await coreSettings.GetKeyAsync(tenantId), productId);
+        }
+        catch (Exception error)
+        {
+            LogError(error, tenantId.ToString());
+
+            return null;
+        }
+    }
+
+    public async Task<SubscriptionToWalletResult> SubscriptionBalanceToWalletAsync(int tenantId, string productId)
+    {
+        if (!billingClient.Configured)
+        {
+            return null;
+        }
+
+        try
+        {
+            var result = await billingClient.SubscriptionBalanceToWalletAsync(await coreSettings.GetKeyAsync(tenantId), productId);
+
+            await ClearCacheAsync(tenantId);
+
+            return result;
+        }
+        catch (Exception error)
+        {
+            LogError(error, tenantId.ToString());
+
+            return null;
+        }
+    }
+
     public async Task SetTariffAsync(int tenantId, Tariff tariff, List<TenantQuota> quotas = null)
     {
         ArgumentNullException.ThrowIfNull(tariff);

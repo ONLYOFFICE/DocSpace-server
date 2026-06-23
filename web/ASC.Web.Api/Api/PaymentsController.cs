@@ -278,7 +278,7 @@ public class PaymentController(
 
         var tariff = await tariffService.GetTariffAsync(tenant.Id);
 
-        if (tariff.State > TariffState.Paid)
+        if (tariff.State > TariffState.Paid && quota.Additional)
         {
             throw new BillingException("Tariff is not paid");
         }
@@ -423,6 +423,88 @@ public class PaymentController(
         var quantity = new Dictionary<string, int> { { productName, productQty.Value } };
 
         var result = await tariffService.PaymentCalculateAsync(tenant.Id, quantity, inDto.ProductQuantityType, defaultCurrency);
+
+        return result;
+    }
+
+    /// <remarks>
+    /// Returns the information about the current subscription and its unused (prorated) balance.
+    /// </remarks>
+    /// <summary>
+    /// Get the subscription balance information
+    /// </summary>
+    /// <path>api/2.0/portal/payment/subscription/balance</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The subscription balance information", typeof(SubscriptionBalanceInfo))]
+    [SwaggerResponse(400, "Invalid request parameters")]
+    [SwaggerResponse(402, "Tariff is not paid")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(404, "Customer or subscription could not be found")]
+    [HttpGet("subscription/balance")]
+    public async Task<SubscriptionBalanceInfo> GetSubscriptionBalanceInfo()
+    {
+        if (!tariffService.IsConfigured())
+        {
+            throw new InvalidOperationException("Tariff service is not configured");
+        }
+
+        var tenant = tenantManager.GetCurrentTenant();
+
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+        if (customerInfo == null)
+        {
+            throw new ItemNotFoundException("Customer could not be found");
+        }
+
+        await DemandPayerAsync(customerInfo);
+
+        var productId = await GetCurrentSubscriptionProductIdAsync(tenant.Id);
+
+        return await tariffService.GetSubscriptionBalanceInfoAsync(tenant.Id, productId);
+    }
+
+    /// <remarks>
+    /// Cancels the current subscription and moves its unused balance to the wallet.
+    /// </remarks>
+    /// <summary>
+    /// Move the subscription balance to the wallet
+    /// </summary>
+    /// <path>api/2.0/portal/payment/subscription/balancetowallet</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The result of moving the subscription balance to the wallet", typeof(SubscriptionToWalletResult))]
+    [SwaggerResponse(400, "Invalid request parameters")]
+    [SwaggerResponse(402, "Tariff is not paid")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(404, "Customer or subscription could not be found")]
+    [HttpPost("subscription/balancetowallet")]
+    [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
+    public async Task<SubscriptionToWalletResult> MoveSubscriptionBalanceToWallet()
+    {
+        if (!tariffService.IsConfigured())
+        {
+            throw new InvalidOperationException("Tariff service is not configured");
+        }
+
+        var tenant = tenantManager.GetCurrentTenant();
+
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+        if (customerInfo == null)
+        {
+            throw new ItemNotFoundException("Customer could not be found");
+        }
+
+        await DemandPayerAsync(customerInfo);
+
+        var productId = await GetCurrentSubscriptionProductIdAsync(tenant.Id);
+
+        var result = await tariffService.SubscriptionBalanceToWalletAsync(tenant.Id, productId);
+
+        if (result != null)
+        {
+            messageService.Send(MessageAction.SubscriptionBalanceMovedToWallet, $"{result.Amount} {result.Currency}");
+
+            await quotaSocketManager.TopUpWallet(false);
+        }
 
         return result;
     }
@@ -1603,6 +1685,31 @@ public class PaymentController(
         {
             throw new SecurityException("Access denied: insufficient permissions for this payment operation");
         }
+    }
+
+    private async Task<string> GetCurrentSubscriptionProductIdAsync(int tenantId)
+    {
+        var tariff = await tariffService.GetTariffAsync(tenantId);
+
+        if (tariff.State != TariffState.Paid)
+        {
+            throw new BillingException("Tariff is not paid");
+        }
+
+        var mainQuotaRow = tariff.Quotas.FirstOrDefault(q => !q.Additional);
+        if (mainQuotaRow == null)
+        {
+            throw new ItemNotFoundException("Subscription could not be found");
+        }
+
+        // Resolve the TenantQuota for the authoritative Wallet flag and ProductId
+        var quota = await quotaService.GetTenantQuotaAsync(mainQuotaRow.Id);
+        if (quota == null || quota.Wallet || string.IsNullOrEmpty(quota.ProductId))
+        {
+            throw new ArgumentException("Invalid product");
+        }
+
+        return quota.ProductId;
     }
 
     private async Task DemandPayerOrOwnerAsync(Tenant tenant, CustomerInfo customerInfo)
