@@ -1142,6 +1142,7 @@ public class TariffService(
             oldBalanceAmount = oldBalance?.SubAccounts?.FirstOrDefault(x => x.Currency == currency)?.Amount;
         }
 
+        var cacheKey = GetAccountingBalanceCacheKey(tenantId);
         var result = false;
 
         try
@@ -1155,6 +1156,7 @@ public class TariffService(
 
         if (!result || !waitForChanges)
         {
+            await hybridCache.RemoveAsync(cacheKey);
             return result;
         }
 
@@ -1171,7 +1173,7 @@ public class TariffService(
         if (!updated)
         {
             logger.ErrorBilling(tenantId.ToString(), "Balance value is not updated after replenishment");
-            await hybridCache.RemoveAsync(GetAccountingBalanceCacheKey(tenantId));
+            await hybridCache.RemoveAsync(cacheKey);
         }
 
         return result;
@@ -1187,6 +1189,11 @@ public class TariffService(
         }
 
         var cacheKey = GetAccountingBalanceCacheKey(tenantId);
+
+        if (refresh)
+        {
+            await hybridCache.RemoveAsync(cacheKey);
+        }
 
         var balance = refresh ? null : await GetFromCache<Balance>(cacheKey);
 
@@ -1237,6 +1244,11 @@ public class TariffService(
         }
 
         var cacheKey = GetAccountingAiBalanceCacheKey(tenantId);
+
+        if (refresh)
+        {
+            await hybridCache.RemoveAsync(cacheKey);
+        }
 
         var balance = refresh ? null : await GetFromCache<Balance>(cacheKey);
 
