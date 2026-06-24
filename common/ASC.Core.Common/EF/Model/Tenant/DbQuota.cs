@@ -256,7 +256,7 @@ public static class DbQuotaExtension
                     ProductId = "1015",
                     ServiceName = "docscloud-devpack",
                     ServiceGroup = null,
-                    Visible = false,
+                    Visible = true,
                     Wallet = true,
                     Additional = true
                 },

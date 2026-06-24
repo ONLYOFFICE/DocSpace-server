@@ -17,8 +17,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
             migrationBuilder.InsertData(
                 table: "tenants_quota",
-                columns: new[] { "tenant", "Additional", "description", "features", "name", "price", "product_id", "service_group", "service_name", "wallet" },
-                values: new object[] { -16, true, null, "docscloud:1,docsclouddevpack", "docsclouddevpack", 12m, "1015", null, "docscloud-devpack", true });
+                columns: new[] { "tenant", "Additional", "description", "features", "name", "price", "product_id", "service_group", "service_name", "visible", "wallet" },
+                values: new object[] { -16, true, null, "docscloud:1,docsclouddevpack", "docsclouddevpack", 12m, "1015", null, "docscloud-devpack", true, true });
 
             migrationBuilder.InsertData(
                 table: "tenants_quota",

@@ -1596,7 +1596,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Price = 12m,
                             ProductId = "1015",
                             ServiceName = "docscloud-devpack",
-                            Visible = false,
+                            Visible = true,
                             Wallet = true
                         },
                         new
