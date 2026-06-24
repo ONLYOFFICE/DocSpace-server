@@ -43,8 +43,10 @@ public class ProfileStorageService(
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
     AiGateway aiGateway,
-    BaseCommonLinkUtility linkUtility) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity)
+    BaseCommonLinkUtility linkUtility) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity, aiGateway)
 {
+    private readonly AiGateway _aiGateway = aiGateway;
+
     private static readonly IEnumerable<EmployeeType> _writeTypes = [EmployeeType.DocSpaceAdmin];
     private static readonly IEnumerable<EmployeeType> _readTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin];
 
@@ -71,7 +73,7 @@ public class ProfileStorageService(
     {
         await AssertUserHasAccessAsync(_readTypes);
 
-        if (aiGateway.Configured)
+        if (_aiGateway.Configured)
         {
             var profiles = await GetGatewayProfilesAsync();
             return profiles.FirstOrDefault(p => p.Id == id) ?? throw new ItemNotFoundException();
@@ -86,7 +88,7 @@ public class ProfileStorageService(
     {
         await AssertUserHasAccessAsync(_readTypes);
 
-        if (!aiGateway.Configured)
+        if (!_aiGateway.Configured)
         {
             return await storage.ReadAllAsync(tenantManager.GetCurrentTenantId());
         }
@@ -116,17 +118,9 @@ public class ProfileStorageService(
         }
     }
 
-    private void AssertGatewayNotConfigured()
-    {
-        if (aiGateway.Configured)
-        {
-            throw new SecurityException("Profile modification is not allowed when the AI Gateway is configured");
-        }
-    }
-
     private async Task<IEnumerable<Profile>> GetGatewayProfilesAsync()
     {
-        var response = await aiGateway.GetModelsAsync();
+        var response = await _aiGateway.GetModelsAsync();
 
         return response.Data
             .Where(m => !string.Equals(m.Type, "embedding", StringComparison.OrdinalIgnoreCase))

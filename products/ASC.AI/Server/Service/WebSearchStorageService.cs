@@ -42,8 +42,12 @@ public class WebSearchStorageService(
     TenantManager tenantManager,
     WebSearchStorage storage,
     IDaoFactory daoFactory,
-    FileSecurity fileSecurity) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity)
+    FileSecurity fileSecurity,
+    AiGateway gateway,
+    BaseCommonLinkUtility linkUtility) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity, gateway)
 {
+    private readonly AiGateway _gateway = gateway;
+
     private static readonly EmployeeType[] _writeTypes = [EmployeeType.DocSpaceAdmin];
     private static readonly EmployeeType[] _readTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin];
 
@@ -51,12 +55,23 @@ public class WebSearchStorageService(
     {
         await AssertUserHasAccessAsync(_readTypes);
 
+        if (_gateway.Configured)
+        {
+            return new WebSearchConfig
+            {
+                Provider = "onlyoffice",
+                BaseUrl = linkUtility.GetFullAbsolutePath(string.Empty),
+                Key = "onlyoffice"
+            };
+        }
+
         return await storage.ReadAsync(tenantManager.GetCurrentTenantId());
     }
 
     public async Task UpsertAsync(WebSearchConfig config)
     {
         await AssertUserHasAccessAsync(_writeTypes);
+        AssertGatewayNotConfigured();
 
         await storage.UpsertAsync(tenantManager.GetCurrentTenantId(), config);
     }
@@ -64,6 +79,7 @@ public class WebSearchStorageService(
     public async Task DeleteAsync()
     {
         await AssertUserHasAccessAsync(_writeTypes);
+        AssertGatewayNotConfigured();
 
         await storage.DeleteAsync(tenantManager.GetCurrentTenantId());
     }

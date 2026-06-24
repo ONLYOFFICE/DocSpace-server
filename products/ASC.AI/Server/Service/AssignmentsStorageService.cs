@@ -40,7 +40,8 @@ public class AssignmentsStorageService(
     TenantManager tenantManager,
     AssignmentsStorage storage,
     IDaoFactory daoFactory,
-    FileSecurity fileSecurity) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity)
+    FileSecurity fileSecurity,
+    AiGateway gateway) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity, gateway)
 {
     private static readonly EmployeeType[] _writeGlobalTypes = [EmployeeType.DocSpaceAdmin];
     private static readonly EmployeeType[] _writeLocalTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin];

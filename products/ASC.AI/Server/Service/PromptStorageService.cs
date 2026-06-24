@@ -41,7 +41,8 @@ public class PromptStorageService(
     PromptStorage storage,
     PromptFolderStorage folderStorage,
     IDaoFactory daoFactory,
-    FileSecurity fileSecurity) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity)
+    FileSecurity fileSecurity,
+    AiGateway gateway) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity, gateway)
 {
     private static readonly EmployeeType[] _allowedTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin];
 

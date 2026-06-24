@@ -37,7 +37,8 @@ public abstract class IntegrationServiceBase(
     UserManager userManager,
     AuthContext authContext,
     IDaoFactory daoFactory,
-    FileSecurity fileSecurity)
+    FileSecurity fileSecurity,
+    AiGateway aiGateway)
 {
     protected Guid CurrentUserId => authContext.CurrentAccount.ID;
 
@@ -70,5 +71,13 @@ public abstract class IntegrationServiceBase(
         }
 
         return entryId;
+    }
+
+    protected void AssertGatewayNotConfigured()
+    {
+        if (aiGateway.Configured)
+        {
+            throw new SecurityException("Profile modification is not allowed when the AI Gateway is configured");
+        }
     }
 }
