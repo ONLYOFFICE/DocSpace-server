@@ -240,6 +240,7 @@ public record SelfJoinCondition(string LeftColumn, string Operator, string Right
 
 [Scope]
 public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<ExternalDatabaseClient> logger)
+    : IFormsDatabaseClient
 {
     private static readonly Regex _tableNameRegex = new(@"^[a-zA-Z0-9_]+$", RegexOptions.Compiled);
 

@@ -142,7 +142,7 @@ public static class DbRoomSettingsExtension
 
                 entity.Property(e => e.SendFormToExternalDB)
                     .HasColumnName("send_form_to_external_db")
-                    .HasDefaultValueSql("0");
+                    .HasDefaultValue(true);
 
                 entity.Property(e => e.SaveFormAsXLSX)
                     .HasColumnName("save_form_as_xlsx")
@@ -203,7 +203,7 @@ public static class DbRoomSettingsExtension
 
                 entity.Property(e => e.SendFormToExternalDB)
                     .HasColumnName("send_form_to_external_db")
-                    .HasDefaultValueSql("false");
+                    .HasDefaultValue(true);
 
                 entity.Property(e => e.SaveFormAsXLSX)
                     .HasColumnName("save_form_as_xlsx")

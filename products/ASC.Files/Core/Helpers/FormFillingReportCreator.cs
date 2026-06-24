@@ -38,6 +38,7 @@ public class FormFillingReportCreator(
     ILogger<FormFillingReportCreator> logger,
     ExportToXLSX exportToXLSX,
     ExternalDatabaseClient externalDatabaseClient,
+    BuiltinFormsDatabaseClient builtinFormsDatabaseClient,
     IDaoFactory daoFactory,
     IHttpClientFactory clientFactory,
     TenantManager tenantManager,
@@ -53,15 +54,24 @@ public class FormFillingReportCreator(
 
         await MigrateFormVersionAsync(roomId, originalFormId, originalFormVersion);
 
-        if (sendFormToExternalDB && externalDatabaseClient.IsEnabled())
+        if (sendFormToExternalDB)
         {
             var fileId = formsDataFile.Id is int id ? id : 0;
             var userId = authContext.CurrentAccount.ID;
             var tenantId = tenantManager.GetCurrentTenantId();
 
-            await eventBus.PublishAsync(new ExternalDbFormSubmissionIntegrationEvent(
-                userId, tenantId, originalFormId, originalFormVersion,
-                roomId, fileId, resultFormNumber, formsDataUrl));
+            if (externalDatabaseClient.IsEnabled())
+            {
+                await eventBus.PublishAsync(new ExternalDbFormSubmissionIntegrationEvent(
+                    userId, tenantId, originalFormId, originalFormVersion,
+                    roomId, fileId, resultFormNumber, formsDataUrl));
+            }
+            else if (builtinFormsDatabaseClient.IsEnabled())
+            {
+                await eventBus.PublishAsync(new BuiltinDbFormSubmissionIntegrationEvent(
+                    userId, tenantId, originalFormId, originalFormVersion,
+                    roomId, fileId, resultFormNumber, formsDataUrl));
+            }
         }
 
         if (settingsSaveFormAsXLSX)
@@ -70,7 +80,13 @@ public class FormFillingReportCreator(
         }
     }
 
-    public async Task ExportToExternalDbAsync(int fileId, int originalFormId, int originalFormVersion, int roomId, int resultFormNumber, string formsDataUrl)
+    public Task ExportToExternalDbAsync(int fileId, int originalFormId, int originalFormVersion, int roomId, int resultFormNumber, string formsDataUrl)
+        => ExportToDbAsync(externalDatabaseClient, fileId, originalFormId, originalFormVersion, formsDataUrl);
+
+    public Task ExportToBuiltinDbAsync(int fileId, int originalFormId, int originalFormVersion, int roomId, int resultFormNumber, string formsDataUrl)
+        => ExportToDbAsync(builtinFormsDatabaseClient, fileId, originalFormId, originalFormVersion, formsDataUrl);
+
+    private async Task ExportToDbAsync(IFormsDatabaseClient client, int fileId, int originalFormId, int originalFormVersion, string formsDataUrl)
     {
 #pragma warning disable CA2000 // HttpClient is short-lived and disposed by runtime
         var httpClient = clientFactory.CreateClient();
@@ -96,7 +112,7 @@ public class FormFillingReportCreator(
         var culture = tenantManager.GetCurrentTenant().GetCulture();
         var rowData = BuildRowData(parsed.Data, normalizedMeta, fileId, culture);
 
-        await externalDatabaseClient.CreateTableAndUpsertAsync(tableName, columnDefinitions, rowData, keyColumn: "form_id");
+        await client.CreateTableAndUpsertAsync(tableName, columnDefinitions, rowData, keyColumn: "form_id");
 
         var fileDao = daoFactory.GetFileDao<int>();
         var properties = await fileDao.GetProperties(originalFormId);
@@ -107,11 +123,17 @@ public class FormFillingReportCreator(
         }
     }
 
-    public async Task<bool> ExportMissingFromOpenSearchAsync(int originalFormId, int originalFormVersion, int roomId)
+    public Task<bool> ExportMissingFromOpenSearchAsync(int originalFormId, int originalFormVersion, int roomId)
+        => ExportMissingFromOpenSearchCoreAsync(externalDatabaseClient, originalFormId, originalFormVersion, roomId);
+
+    public Task<bool> ExportMissingFromOpenSearchBuiltinAsync(int originalFormId, int originalFormVersion, int roomId)
+        => ExportMissingFromOpenSearchCoreAsync(builtinFormsDatabaseClient, originalFormId, originalFormVersion, roomId);
+
+    private async Task<bool> ExportMissingFromOpenSearchCoreAsync(IFormsDatabaseClient client, int originalFormId, int originalFormVersion, int roomId)
     {
         var tableName = GetTableName(originalFormId, originalFormVersion);
 
-        var dbCount = await externalDatabaseClient.GetTableCountAsync(tableName);
+        var dbCount = await client.GetTableCountAsync(tableName);
 
         factoryIndexerForm.Refresh();
         var (osCountSuccess, osCount) = await factoryIndexerForm.TryCountAsync(r =>
@@ -129,7 +151,7 @@ public class FormFillingReportCreator(
             return true;
         }
 
-        var existingIds = await externalDatabaseClient.GetExistingFormIdsAsync(tableName);
+        var existingIds = await client.GetExistingFormIdsAsync(tableName);
 
         var (success, allSubmissions) = await factoryIndexerForm.TrySelectAsync(r =>
             r.Where(s => s.RoomId, roomId)
@@ -204,7 +226,7 @@ public class FormFillingReportCreator(
 
             try
             {
-                await externalDatabaseClient.CreateTableAndUpsertAsync(
+                await client.CreateTableAndUpsertAsync(
                     tableName, columnDefinitions, rowData, keyColumn: "form_id");
             }
             catch (Exception ex)
