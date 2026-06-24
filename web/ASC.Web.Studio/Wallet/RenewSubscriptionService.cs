@@ -188,7 +188,7 @@ public class RenewSubscriptionService(
                 {
                     var usedCount = (await userManager.GetUsersByGroupAsync(ASC.Core.Users.Constants.GroupRoomAdmin.ID)).Length;
 
-                    var walletQuotaCount = walletQuota.GetFeature<long>(feature.Name).Value; // wallet quota count by database
+                    var walletQuotaCount = walletQuota.GetFeature<int>(feature.Name).Value; // wallet quota count by database
 
                     if (walletQuotaCount > 0 && usedCount > walletQuotaCount * nextQuantity)
                     {
