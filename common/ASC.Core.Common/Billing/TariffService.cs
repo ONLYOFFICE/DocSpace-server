@@ -179,19 +179,9 @@ public class TariffService(
                             await AddInitialQuotaAsync(asynctariff, tenantId);
                         }
 
-                        // preserve previously remembered overdue quotas (e.g. an expired docscloudtrial)
-                        // even when a new purchase changes the tariff Id; skip those that became active again
-                        if (tariff.OverdueQuotas is { Count: > 0 })
+                        if (asynctariff.Id == tariff.Id)
                         {
-                            asynctariff.OverdueQuotas ??= [];
-                            foreach (var overdue in tariff.OverdueQuotas)
-                            {
-                                if (asynctariff.Quotas.All(a => a.Id != overdue.Id) &&
-                                    asynctariff.OverdueQuotas.All(o => o.Id != overdue.Id))
-                                {
-                                    asynctariff.OverdueQuotas.Add(overdue);
-                                }
-                            }
+                            asynctariff.OverdueQuotas = tariff.OverdueQuotas;
                         }
 
                         TenantQuota updatedQuota = null;
@@ -820,24 +810,6 @@ public class TariffService(
                         NextQuantity = q.NextQuantity,
                         TenantId = tenant
                     });
-                }
-
-                // persist remembered overdue quotas (e.g. an expired docscloudtrial) under the current tariff Id
-                // so they survive subsequent tariff Id changes and are re-read as Overdue
-                if (tariffInfo.OverdueQuotas != null)
-                {
-                    foreach (var q in tariffInfo.OverdueQuotas)
-                    {
-                        await dbContext.AddOrUpdateAsync(quota => quota.TariffRows, new DbTariffRow
-                        {
-                            TariffId = efTariff.Id,
-                            Quota = q.Id,
-                            Quantity = q.Quantity,
-                            DueDate = q.DueDate,
-                            NextQuantity = q.NextQuantity,
-                            TenantId = tenant
-                        });
-                    }
                 }
 
                 await dbContext.SaveChangesAsync();
