@@ -66,6 +66,10 @@ public class RenewSubscriptionService(
 
     protected override TimeSpan ExecuteTaskPeriod { get; set; } = TimeSpan.Parse(configuration["core:accounting:renewperiod"] ?? "0:1:0", CultureInfo.InvariantCulture);
 
+    // How far before DueDate to renew, so the subscription is extended before it expires (no downtime).
+    // Defaults to one tick period (the same key as renewperiod) when not configured.
+    private readonly TimeSpan _renewAdvance = TimeSpan.Parse(configuration["core:accounting:renewadvance"] ?? configuration["core:accounting:renewperiod"] ?? "0:1:0", CultureInfo.InvariantCulture);
+
 
     protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {
@@ -81,21 +85,22 @@ public class RenewSubscriptionService(
                 _walletQuotas = tenantQuotas.Where(x => x.Wallet).ToDictionary(x => x.TenantId, x => x);
             }
 
-            var now = DateTime.UtcNow;
+            // Look ahead by _renewAdvance so quotas are renewed before their DueDate passes (no downtime).
+            var to = DateTime.UtcNow + _renewAdvance;
 
-            var from = await hybridCache.GetOrDefaultAsync(CacheKey, now, token: stoppingToken);
+            var from = await hybridCache.GetOrDefaultAsync(CacheKey, to, token: stoppingToken);
 
-            var expiredWalletQuotas = await Queries.GetWalletQuotasByDueDateAsync(coreDbContext, _walletQuotas.Keys.ToArray(), from, now).ToListAsync(stoppingToken);
+            var walletQuotasToRenew = await Queries.GetWalletQuotasByDueDateAsync(coreDbContext, _walletQuotas.Keys.ToArray(), from, to).ToListAsync(stoppingToken);
 
-            await hybridCache.SetAsync(CacheKey, now, token: stoppingToken);
+            await hybridCache.SetAsync(CacheKey, to, token: stoppingToken);
 
-            if (expiredWalletQuotas.Count > 0)
+            if (walletQuotasToRenew.Count > 0)
             {
-                logger.InfoRenewSubscriptionServiceFound(expiredWalletQuotas.Count);
+                logger.InfoRenewSubscriptionServiceFound(walletQuotasToRenew.Count);
 
-                foreach (var expiredWalletQuota in expiredWalletQuotas.OrderBy(x => _walletQuotas[x.Quota].Additional))
+                foreach (var walletQuotaToRenew in walletQuotasToRenew.OrderBy(x => _walletQuotas[x.Quota].Additional))
                 {
-                    await RenewSubscriptionAsync(expiredWalletQuota);
+                    await RenewSubscriptionAsync(walletQuotaToRenew);
                 }
             }
         }
