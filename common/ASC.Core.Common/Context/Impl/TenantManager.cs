@@ -315,17 +315,17 @@ public class TenantManager(
 
     public async Task<List<TenantQuota>> GetTenantQuotasAsync()
     {
-        return await GetTenantQuotasAsync(false, false);
+        return await GetTenantQuotasAsync(all: false, wallet: false);
     }
 
-    public async Task<List<TenantQuota>> GetTenantQuotasAsync(bool all, bool wallet)
+    public async Task<List<TenantQuota>> GetTenantQuotasAsync(bool all, bool? additional = null, bool? wallet = null)
     {
         return (await quotaService.GetTenantQuotasAsync())
-            .Where(q => IsTenantQuotaVisible(q, all, wallet))
+            .Where(q => IsTenantQuotaVisible(q, all, additional, wallet))
             .OrderByDescending(q => q.TenantId)
             .ToList();
 
-        static bool IsTenantQuotaVisible(TenantQuota q, bool all, bool wallet)
+        static bool IsTenantQuotaVisible(TenantQuota q, bool all, bool? additional, bool? wallet)
         {
             if (q.TenantId >= 0)
             {
@@ -337,12 +337,17 @@ public class TenantManager(
                 return false;
             }
 
-            if (wallet)
+            if (additional.HasValue && additional.Value != q.Additional)
             {
-                return q.Wallet && q.Additional;
+                return false;
             }
 
-            return !q.Wallet || (q.Wallet && !q.Additional);
+            if (wallet.HasValue && wallet.Value != q.Wallet)
+            {
+                return false;
+            }
+
+            return true;
         }
     }
 
@@ -378,7 +383,7 @@ public class TenantManager(
 
     public async Task<Dictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync(bool all = false, bool wallet = false)
     {
-        var quotas = (await GetTenantQuotasAsync(all, wallet))
+        var quotas = (await GetTenantQuotasAsync(all: all, wallet: wallet))
             .Where(q => !string.IsNullOrEmpty(q.ProductId + q.ServiceName))
             .ToDictionary(q => q.GetPaymentId(), q => q.Name);
 

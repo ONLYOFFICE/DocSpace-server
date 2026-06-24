@@ -623,7 +623,7 @@ public class PaymentController(
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        if (!inDto.Wallet)
+        if (inDto.Additional.HasValue && !inDto.Additional.Value)
         {
             var currentQuota = await tariffHelper.GetCurrentQuotaAsync(false, false);
             if (currentQuota.NonProfit)
@@ -632,7 +632,7 @@ public class PaymentController(
             }
         }
 
-        return await tariffHelper.GetQuotasAsync(false, inDto.Wallet).ToListAsync();
+        return await tariffHelper.GetQuotasAsync(false, inDto.Additional, inDto.Wallet).ToListAsync();
     }
 
     /// <remarks>
@@ -1528,7 +1528,7 @@ public class PaymentController(
         }
 
         // The method must throw an exception if the AiTools quota is hidden or not found in the database!
-        var quotaList = await tenantManager.GetTenantQuotasAsync(false, true);
+        var quotaList = await tenantManager.GetTenantQuotasAsync(all: false, wallet: true);
         var aiToolsQuota = quotaList.FirstOrDefault(x => x.TenantId == (int)TenantWalletService.AITools);
         if (aiToolsQuota == null)
         {
@@ -1773,7 +1773,7 @@ public class PaymentController(
     /// <exception cref="ItemNotFoundException">Thrown when the quota with the corresponding service name is hidden or not found in the database.</exception>
     private async Task<TenantWalletService> CheckWalletServiceName(string serviceName)
     {
-        var quotaList = await tenantManager.GetTenantQuotasAsync(false, true);
+        var quotaList = await tenantManager.GetTenantQuotasAsync(all: false, wallet: true);
 
         var selectedQuota = quotaList.FirstOrDefault(x =>
             x.ServiceName.Equals(serviceName, StringComparison.InvariantCultureIgnoreCase));

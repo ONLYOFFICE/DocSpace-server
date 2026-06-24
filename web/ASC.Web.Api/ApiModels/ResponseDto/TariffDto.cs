@@ -147,6 +147,12 @@ public class TariffQuotaDto(Quota quota, DateTime tariffDueDate, ApiDateTimeHelp
     public bool Wallet { get; set; } = quota.Wallet;
 
     /// <summary>
+    /// Indicates whether the quota is primary or additional.
+    /// </summary>
+    /// <example>true</example>
+    public bool Additional { get; set; } = quota.Additional;
+
+    /// <summary>
     /// The quota due date in the portal time zone. Falls back to the tariff due date when the quota has none.
     /// </summary>
     /// <example>2024-01-15T10:30:00Z</example>
