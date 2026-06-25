@@ -71,10 +71,10 @@ public class DocsCloudController(
 
         var tenant = tenantManager.GetCurrentTenant();
 
-        var quota = (await quotaService.GetTenantQuotasAsync())
+        var docsCloudTrialQuota = (await quotaService.GetTenantQuotasAsync())
             .FirstOrDefault(q => q.Name == "docscloudtrial");
 
-        if (quota == null)
+        if (docsCloudTrialQuota == null)
         {
             throw new ItemNotFoundException("Quota could not be found");
         }
@@ -86,7 +86,10 @@ public class DocsCloudController(
             throw new BillingException("Tariff is not paid");
         }
 
-        if (tariff.Quotas.Concat(tariff.OverdueQuotas ?? []).Any(q => q.Id == quota.TenantId))
+        if (tariff.Quotas.Concat(tariff.OverdueQuotas ?? []).Any(q =>
+                q.Id == docsCloudTrialQuota.TenantId ||
+                q.Id == (int)TenantWalletService.DocsCloud ||
+                q.Id == (int)TenantWalletService.DocsCloudDevPack))
         {
             throw new ArgumentException("Quota is already set");
         }
@@ -95,7 +98,7 @@ public class DocsCloudController(
 
         if (result)
         {
-            messageService.Send(MessageAction.CustomerSubscriptionUpdated, $"{quota.Name}");
+            messageService.Send(MessageAction.CustomerSubscriptionUpdated, $"{docsCloudTrialQuota.Name}");
         }
 
         return result;
