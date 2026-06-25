@@ -428,9 +428,12 @@ public class BackupService(
             });
     }
 
-    public async Task DeleteScheduleAsync(int tenantId)
+    public async Task DeleteScheduleAsync(int tenantId, bool demandPermissions = true)
     {
-        await DemandPermissionsBackupAsync();
+        if (demandPermissions)
+        {
+            await DemandPermissionsBackupAsync();
+        }
 
         await backupRepository.DeleteBackupScheduleAsync(tenantId);
     }
