@@ -60,7 +60,7 @@ public class CookieAuthHandler(
 
         authorization = authorization.Trim();
 
-        if (authorization.IndexOf("Bearer", 0, StringComparison.Ordinal) >= 0)
+        if (authorization.StartsWith("Bearer ", StringComparison.Ordinal))
         {
             authorization = authorization["Bearer ".Length..];
         }
