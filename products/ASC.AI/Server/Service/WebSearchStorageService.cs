@@ -61,7 +61,6 @@ public class WebSearchStorageService(
             {
                 Provider = "onlyoffice",
                 BaseUrl = linkUtility.GetFullAbsolutePath(string.Empty),
-                Key = "onlyoffice"
             };
         }
 
