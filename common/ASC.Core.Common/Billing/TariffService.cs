@@ -449,9 +449,27 @@ public class TariffService(
 
     public async Task<bool> GetDocsCloudTrialAsync(int tenantId)
     {
-        var portalId = await coreSettings.GetKeyAsync(tenantId);
+        if (!billingClient.Configured)
+        {
+            return false;
+        }
 
-        return await billingClient.GetDocsCloudTrialAsync(portalId);
+        try
+        {
+            var portalId = await coreSettings.GetKeyAsync(tenantId);
+
+            var result = await billingClient.GetDocsCloudTrialAsync(portalId);
+
+            await ClearCacheAsync(tenantId);
+
+            return result;
+        }
+        catch (Exception error)
+        {
+            LogError(error, tenantId.ToString());
+
+            return false;
+        }
     }
 
     public async Task SetTariffAsync(int tenantId, Tariff tariff, List<TenantQuota> quotas = null)
