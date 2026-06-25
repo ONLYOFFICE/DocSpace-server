@@ -78,6 +78,7 @@ public class PaymentController(
 {
     private readonly int _maxCount = 10;
     private readonly int _expirationMinutes = 2;
+    private readonly int _maxTopUpAttempts = 5;
 
     /// <remarks>
     /// Returns the URL to the payment page.
@@ -481,25 +482,34 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Cancels the current subscription and moves its unused balance to the wallet.
+    /// Cancels the current subscription, moves its unused balance to the wallet, and purchases the requested number of
+    /// admins from the wallet. If the wallet balance is not enough, it is topped up for the missing amount first
+    /// (with several attempts, as the balance may be consumed concurrently).
     /// </remarks>
     /// <summary>
-    /// Move the subscription balance to the wallet
+    /// Move the subscription balance to the wallet and purchase admins
     /// </summary>
-    /// <path>api/2.0/portal/payment/subscription/balancetowallet</path>
+    /// <path>api/2.0/portal/payment/subscription/movetowallet</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The result of moving the subscription balance to the wallet", typeof(SubscriptionToWalletResult))]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [SwaggerResponse(400, "Invalid request parameters")]
     [SwaggerResponse(402, "Tariff is not paid")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(404, "Customer or subscription could not be found")]
-    [HttpPost("subscription/balancetowallet")]
+    [HttpPost("subscription/movetowallet")]
     [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
-    public async Task<SubscriptionToWalletResult> MoveSubscriptionBalanceToWallet()
+    public async Task<bool> MoveSubscriptionToWallet(QuantityRequestDto inDto)
     {
         if (!tariffService.IsConfigured())
         {
             throw new InvalidOperationException("Tariff service is not configured");
+        }
+
+        // TODO: Temporary restriction.
+        // Possibility to buy only one product per transaction.
+        if (inDto.Quantity is not { Count: 1 })
+        {
+            throw new ArgumentException();
         }
 
         var tenant = tenantManager.GetCurrentTenant();
@@ -510,17 +520,97 @@ public class PaymentController(
             throw new ItemNotFoundException("Customer could not be found");
         }
 
+        if (customerInfo.PaymentMethodStatus != PaymentMethodStatus.Set)
+        {
+            throw new InvalidOperationException("Customer payment method is not set");
+        }
+
         await DemandPayerAsync(customerInfo);
 
+        var product = inDto.Quantity.First();
+        var productName = product.Key;
+        var productQty = product.Value;
+
+        var quota = (await quotaService.GetTenantQuotasAsync())
+            .FirstOrDefault(q => !string.IsNullOrEmpty(q.ProductId) && q.Name == productName);
+
+        if (quota is not { Wallet: true } || quota.TenantId != (int)TenantWalletService.Admin)
+        {
+            throw new ArgumentException("Invalid product");
+        }
+
+        if (productQty <= 0)
+        {
+            throw new ArgumentException("Invalid quantity");
+        }
+
+        // The requested number of admins must not be less than the current number of portal admins.
+        var currentAdminCount = (await userManager.GetUsersByGroupAsync(ASC.Core.Users.Constants.GroupRoomAdmin.ID)).Length;
+        if (productQty < currentAdminCount)
+        {
+            throw new ArgumentException("Invalid quantity");
+        }
+
+        // Resolve the current Stripe subscription product before it is cancelled.
         var productId = await GetCurrentSubscriptionProductIdAsync(tenant.Id);
 
-        var result = await tariffService.SubscriptionBalanceToWalletAsync(tenant.Id, productId);
+        // TODO: support other currencies
+        var defaultCurrency = tariffService.GetSupportedAccountingCurrencies().First();
+        var participant = securityContext.CurrentAccount.ID.ToString();
 
-        if (result != null)
+        // 1. Calculate the cost of the requested admins from the known quota price (price * quantity).
+        var quantity = new Dictionary<string, int> { { productName, productQty } };
+
+        var walletQuotas = await tariffHelper.GetQuotasAsync(wallet: true).ToListAsync();
+        var quotaDto = walletQuotas.FirstOrDefault(q => q.Id == quota.TenantId);
+        if (quotaDto?.Price?.Value is not { } unitPrice)
         {
-            messageService.Send(MessageAction.SubscriptionBalanceMovedToWallet, $"{result.Amount} {result.Currency}");
+            throw new ItemNotFoundException("Quota price could not be found");
+        }
 
-            await quotaSocketManager.TopUpWallet(false);
+        // 2. Move the unused subscription balance to the wallet.
+        var transfer = await tariffService.SubscriptionBalanceToWalletAsync(tenant.Id, productId);
+        if (transfer == null)
+        {
+            throw new BillingException("Failed to move the subscription balance to the wallet");
+        }
+
+        messageService.Send(MessageAction.SubscriptionBalanceMovedToWallet, $"{transfer.Amount} {transfer.Currency}");
+
+        await quotaSocketManager.TopUpWallet(false);
+
+        var requiredAmount = unitPrice * productQty;
+
+        // 3. Make sure the wallet balance covers the cost, topping it up for the missing amount if necessary.
+        //    The balance may be consumed concurrently, so the top up is retried several times.
+        var balanceAmount = await GetWalletBalanceAmountAsync(tenant.Id, defaultCurrency);
+
+        var siteName = tenant.GetTenantDomain(coreSettings);
+
+        for (var attempt = 0; attempt < _maxTopUpAttempts && balanceAmount < requiredAmount; attempt++)
+        {
+            var topUpAmount = Math.Ceiling(requiredAmount - balanceAmount);
+
+            var toppedUp = await tariffService.TopUpDepositAsync(tenant.Id, topUpAmount, defaultCurrency, participant, siteName, null, true);
+            if (toppedUp)
+            {
+                await quotaSocketManager.TopUpWallet(false);
+            }
+
+            balanceAmount = await GetWalletBalanceAmountAsync(tenant.Id, defaultCurrency);
+        }
+
+        if (balanceAmount < requiredAmount)
+        {
+            throw new BillingException("Insufficient balance");
+        }
+
+        // 4. Purchase the requested admins from the wallet.
+        var result = await tariffService.PaymentChangeAsync(tenant.Id, quantity, ProductQuantityType.Add, defaultCurrency, false, participant);
+
+        if (result)
+        {
+            messageService.Send(MessageAction.CustomerSubscriptionUpdated, $"{productName} {productQty}");
         }
 
         return result;
@@ -1726,6 +1816,23 @@ public class PaymentController(
         }
 
         return quota.ProductId;
+    }
+
+    private async Task<decimal> GetWalletBalanceAmountAsync(int tenantId, string currency)
+    {
+        var balance = await tariffService.GetCustomerBalanceAsync(tenantId, true);
+        if (balance == null)
+        {
+            throw new ItemNotFoundException("Balance could not be found");
+        }
+
+        var subAccount = balance.SubAccounts?.FirstOrDefault(x => x.Currency == currency);
+        if (subAccount == null)
+        {
+            throw new ItemNotFoundException("Subaccount could not be found");
+        }
+
+        return subAccount.Amount;
     }
 
     private async Task DemandPayerOrOwnerAsync(Tenant tenant, CustomerInfo customerInfo)
