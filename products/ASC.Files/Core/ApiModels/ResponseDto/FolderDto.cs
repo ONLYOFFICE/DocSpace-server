@@ -437,11 +437,11 @@ public class FolderDtoHelper(
             result.Order = "";
 
             var myId = await _globalFolderHelper.GetFolderMyAsync<T>();
-            result.OriginTitle = Equals(result.OriginId, myId) ? FilesUCResource.MyFiles : result.OriginTitle;
+            result.OriginTitle = Equals(result.OriginId, myId) ? FilesUCResource.Files : result.OriginTitle;
 
             if (Equals(result.OriginRoomId, myId))
             {
-                result.OriginRoomTitle = FilesUCResource.MyFiles;
+                result.OriginRoomTitle = FilesUCResource.Files;
             }
             else if (Equals(result.OriginRoomId, await _globalFolderHelper.FolderArchiveAsync))
             {

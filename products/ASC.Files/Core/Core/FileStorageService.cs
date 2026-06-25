@@ -480,7 +480,7 @@ public class FileStorageService //: IFileStorageService
 
         if (parent.FolderType == FolderType.Recent && searchArea == SearchArea.RecentByLinks)
         {
-            parent.Title = FilesUCResource.MyFiles;
+            parent.Title = FilesUCResource.Files;
         }
 
         var result = new DataWrapper<T>
@@ -503,7 +503,7 @@ public class FileStorageService //: IFileStorageService
                         case Folder<int> f2:
                             {
                                 var title = f2.FolderType is FolderType.Recent && searchArea == SearchArea.RecentByLinks
-                                    ? FilesUCResource.MyFiles
+                                    ? FilesUCResource.Files
                                     : f2.Title;
 
                                 return new { f2.Id, title, RoomType = DocSpaceHelper.MapToRoomType(f2.FolderType), f2.FolderType };
