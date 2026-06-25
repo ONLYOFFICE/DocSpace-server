@@ -31,7 +31,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-package com.asc.authorization.container.service;
+package com.asc.authorization.application.service;
 
 import com.asc.authorization.application.security.oauth.service.AuthorizationCleanupService;
 import com.asc.authorization.data.authorization.repository.JpaAuthorizationRepository;
@@ -53,15 +53,18 @@ import net.devh.boot.grpc.server.service.GrpcService;
 import org.apache.logging.log4j.util.Strings;
 
 /**
- * gRPC service implementation for managing authorization consents.
+ * gRPC server implementation for the {@code AuthorizationService} proto.
  *
- * <p>This service provides gRPC endpoints to revoke and retrieve consent data associated with a
- * particular principal and client.
+ * <p>Provides endpoints to revoke and retrieve consent data associated with a particular principal
+ * and client. Lives in {@code authorization-application} so both the standalone authorization
+ * container and the combined minified deployment register this bean automatically via component
+ * scan. The simple name intentionally differs from the registration-side client wrapper ({@code
+ * com.asc.registration.application.service.GrpcAuthorizationService}) to avoid a Spring bean name
+ * collision when both are scanned in the same context.
  */
 @GrpcService
 @RequiredArgsConstructor
-public class GrpcAuthorizationService
-    extends AuthorizationServiceGrpc.AuthorizationServiceImplBase {
+public class AuthorizationGrpcServer extends AuthorizationServiceGrpc.AuthorizationServiceImplBase {
   private final JpaAuthorizationRepository jpaAuthorizationRepository;
   private final AuthorizationCleanupService cleanupService;
 
