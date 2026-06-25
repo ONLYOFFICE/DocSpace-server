@@ -31,7 +31,7 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.ApiSystem;
+namespace ASC.ApiSystem.Extensions;
 
 public static class ConfigurationManagerExtension
 {
