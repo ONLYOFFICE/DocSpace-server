@@ -631,6 +631,7 @@ public class TariffService(
 
                         foreach (var productId in productIds)
                         {
+                            // numeric → billing, non-numeric → accounting
                             if (!int.TryParse(productId, out _))
                             {
                                 accountingServices.Add(productId);
