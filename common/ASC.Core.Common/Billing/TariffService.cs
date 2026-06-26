@@ -404,6 +404,7 @@ public class TariffService(
 
         var result = await billingClient.SubscriptionBalanceToWalletAsync(await coreSettings.GetKeyAsync(tenantId), productId);
 
+        // Clear the cache to get up-to-date tariff and balance information.
         await ClearCacheAsync(tenantId);
 
         return result;
