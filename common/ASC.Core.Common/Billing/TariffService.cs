@@ -619,7 +619,7 @@ public class TariffService(
         {
             try
             {
-                var key = $"billing-prices-{partnerId}-{string.Join(",", productIds)}";
+                var key = $"billing-prices-{partnerId}-{wallet}-{string.Join(",", productIds)}";
                 var result = cache.Get<Dictionary<string, Dictionary<string, decimal>>>(key);
                 if (result == null)
                 {
