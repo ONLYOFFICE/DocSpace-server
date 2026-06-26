@@ -873,6 +873,9 @@
   <data name="StartTransferSetting" xml:space="preserve">
     <value>ポータル地域移行は開始です</value>
   </data>
+  <data name="SubscriptionBalanceMovedToWallet" xml:space="preserve">
+    <value>サブスクリプション残高をウォレットに移動しました: {0}</value>
+  </data>
   <data name="SystemAccount" xml:space="preserve">
     <value>システムアカウント</value>
   </data>

@@ -957,6 +957,9 @@
   <data name="StartTransferSetting" xml:space="preserve">
     <value>Pornire migrație portal în altă regiune</value>
   </data>
+  <data name="SubscriptionBalanceMovedToWallet" xml:space="preserve">
+    <value>Soldul abonamentului a fost mutat în portofel: {0}</value>
+  </data>
   <data name="SystemAccount" xml:space="preserve">
     <value>Cont de sistem</value>
   </data>

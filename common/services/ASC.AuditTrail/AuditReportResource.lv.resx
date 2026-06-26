@@ -966,6 +966,9 @@
   <data name="StartTransferSetting" xml:space="preserve">
     <value>Uzsākt portāla apgabala pārnesi</value>
   </data>
+  <data name="SubscriptionBalanceMovedToWallet" xml:space="preserve">
+    <value>Abonēšanas atlikums pārvietots uz maku: {0}</value>
+  </data>
   <data name="SystemAccount" xml:space="preserve">
     <value>Sistēmas konts</value>
   </data>
