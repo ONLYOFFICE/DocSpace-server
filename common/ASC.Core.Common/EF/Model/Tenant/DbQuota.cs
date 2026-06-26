@@ -230,7 +230,8 @@ public static class DbQuotaExtension
                     ServiceName = "admin",
                     ServiceGroup = null,
                     Visible = true,
-                    Wallet = true
+                    Wallet = true,
+                    Additional = false // primary quota, not additive
                 }
                 );
         return modelBuilder;
