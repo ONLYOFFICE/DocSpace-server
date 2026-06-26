@@ -558,9 +558,7 @@ public class PaymentController(
         var defaultCurrency = tariffService.GetSupportedAccountingCurrencies().First();
         var participant = securityContext.CurrentAccount.ID.ToString();
 
-        // 1. Calculate the cost of the requested admins from the known quota price (price * quantity).
-        var quantity = new Dictionary<string, int> { { productName, productQty } };
-
+        // Calculate the cost of the requested admins from the known quota price (price * quantity).
         var walletQuotas = await tariffHelper.GetQuotasAsync(wallet: true).ToListAsync();
         var quotaDto = walletQuotas.FirstOrDefault(q => q.Id == quota.TenantId);
         if (quotaDto?.Price?.Value is not { } unitPrice)
@@ -568,7 +566,9 @@ public class PaymentController(
             throw new ItemNotFoundException("Quota price could not be found");
         }
 
-        // 2. Move the unused subscription balance to the wallet.
+        var requiredAmount = unitPrice * productQty;
+
+        // Move the unused subscription balance to the wallet.
         var transfer = await tariffService.SubscriptionBalanceToWalletAsync(tenant.Id, productId);
         if (transfer == null)
         {
@@ -579,17 +579,15 @@ public class PaymentController(
 
         await quotaSocketManager.TopUpWallet(false);
 
-        var requiredAmount = unitPrice * productQty;
-
-        // 3. Make sure the wallet balance covers the cost, topping it up for the missing amount if necessary.
-        //    The balance may be consumed concurrently, so the top up is retried several times.
+        // Make sure the wallet balance covers the cost, topping it up for the missing amount if necessary.
+        // The balance may be consumed concurrently, so the top-up is retried several times.
         var balanceAmount = await GetWalletBalanceAmountAsync(tenant.Id, defaultCurrency);
 
         var siteName = tenant.GetTenantDomain(coreSettings);
 
         for (var attempt = 0; attempt < _maxTopUpAttempts && balanceAmount < requiredAmount; attempt++)
         {
-            var topUpAmount = Math.Ceiling(requiredAmount - balanceAmount);
+            var topUpAmount = requiredAmount - balanceAmount;
 
             var toppedUp = await tariffService.TopUpDepositAsync(tenant.Id, topUpAmount, defaultCurrency, participant, siteName, null, true);
             if (toppedUp)
@@ -605,9 +603,8 @@ public class PaymentController(
             throw new BillingException("Insufficient balance");
         }
 
-        // 4. Purchase the requested admins from the wallet.
-        var result = await tariffService.PaymentChangeAsync(tenant.Id, quantity, ProductQuantityType.Add, defaultCurrency, false, participant);
-
+        // Purchase the requested admins from the wallet.
+        var result = await tariffService.PaymentChangeAsync(tenant.Id, inDto.Quantity, ProductQuantityType.Add, defaultCurrency, false, participant);
         if (result)
         {
             messageService.Send(MessageAction.CustomerSubscriptionUpdated, $"{productName} {productQty}");
