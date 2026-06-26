@@ -166,8 +166,8 @@ public class TariffService(
                             email = currentPayment.PaymentEmail;
                         }
 
-                        // need sort by additional
-                        asynctariff.Quotas = asynctariff.Quotas.OrderBy(q => q.Additional).ToList();
+                        // need sort by additional, then by wallet so the non-wallet base plan is the aggregation base
+                        asynctariff.Quotas = asynctariff.Quotas.OrderBy(q => q.Additional).ThenBy(q => q.Wallet).ToList();
 
                         if (asynctariff.Quotas.All(q => q.Additional))
                         {
@@ -412,16 +412,7 @@ public class TariffService(
             return null;
         }
 
-        try
-        {
-            return await billingClient.GetSubscriptionBalanceInfoAsync(await coreSettings.GetKeyAsync(tenantId), productId);
-        }
-        catch (Exception error)
-        {
-            LogError(error, tenantId.ToString());
-
-            return null;
-        }
+        return await billingClient.GetSubscriptionBalanceInfoAsync(await coreSettings.GetKeyAsync(tenantId), productId);
     }
 
     public async Task<SubscriptionToWalletResult> SubscriptionBalanceToWalletAsync(int tenantId, string productId)
@@ -431,20 +422,12 @@ public class TariffService(
             return null;
         }
 
-        try
-        {
-            var result = await billingClient.SubscriptionBalanceToWalletAsync(await coreSettings.GetKeyAsync(tenantId), productId);
+        var result = await billingClient.SubscriptionBalanceToWalletAsync(await coreSettings.GetKeyAsync(tenantId), productId);
 
-            await ClearCacheAsync(tenantId);
+        // Clear the cache to get up-to-date tariff and balance information.
+        await ClearCacheAsync(tenantId);
 
-            return result;
-        }
-        catch (Exception error)
-        {
-            LogError(error, tenantId.ToString());
-
-            return null;
-        }
+        return result;
     }
 
     public async Task<bool> GetDocsCloudTrialAsync(int tenantId)
@@ -682,7 +665,7 @@ public class TariffService(
         {
             try
             {
-                var key = $"billing-prices-{partnerId}-{string.Join(",", productIds)}";
+                var key = $"billing-prices-{partnerId}-{wallet}-{string.Join(",", productIds)}";
                 var result = cache.Get<Dictionary<string, Dictionary<string, decimal>>>(key);
                 if (result == null)
                 {
@@ -693,6 +676,7 @@ public class TariffService(
 
                         foreach (var productId in productIds)
                         {
+                            // numeric → billing, non-numeric → accounting
                             if (!int.TryParse(productId, out _))
                             {
                                 accountingServices.Add(productId);
