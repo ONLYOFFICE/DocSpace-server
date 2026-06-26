@@ -392,16 +392,7 @@ public class TariffService(
             return null;
         }
 
-        try
-        {
-            return await billingClient.GetSubscriptionBalanceInfoAsync(await coreSettings.GetKeyAsync(tenantId), productId);
-        }
-        catch (Exception error)
-        {
-            LogError(error, tenantId.ToString());
-
-            return null;
-        }
+        return await billingClient.GetSubscriptionBalanceInfoAsync(await coreSettings.GetKeyAsync(tenantId), productId);
     }
 
     public async Task<SubscriptionToWalletResult> SubscriptionBalanceToWalletAsync(int tenantId, string productId)
@@ -411,20 +402,11 @@ public class TariffService(
             return null;
         }
 
-        try
-        {
-            var result = await billingClient.SubscriptionBalanceToWalletAsync(await coreSettings.GetKeyAsync(tenantId), productId);
+        var result = await billingClient.SubscriptionBalanceToWalletAsync(await coreSettings.GetKeyAsync(tenantId), productId);
 
-            await ClearCacheAsync(tenantId);
+        await ClearCacheAsync(tenantId);
 
-            return result;
-        }
-        catch (Exception error)
-        {
-            LogError(error, tenantId.ToString());
-
-            return null;
-        }
+        return result;
     }
 
     public async Task SetTariffAsync(int tenantId, Tariff tariff, List<TenantQuota> quotas = null)
