@@ -273,7 +273,6 @@ public class BillingClient
         return JsonSerializer.Deserialize<SubscriptionToWalletResult>(result);
     }
 
-
     private string CreateAuthToken(string pkey, string machinekey)
     {
         using var hasher = new HMACSHA1(Encoding.UTF8.GetBytes(machinekey));
