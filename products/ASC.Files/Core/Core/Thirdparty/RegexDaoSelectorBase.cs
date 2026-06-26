@@ -51,7 +51,7 @@ internal class RegexDaoSelectorBase<TFile, TFolder, TItem>(IServiceProvider serv
     protected internal string Id => _serviceProvider.GetService<IProviderInfo<TFile, TFolder, TItem>>().Selector.Id;
     public Regex Selector => field ??= new Regex(@"^" + Id + @"-(?'id'\d+)(-(?'path'.*)){0,1}$", RegexOptions.Singleline | RegexOptions.Compiled);
 
-    private Dictionary<string, BaseProviderInfo<TFile, TFolder, TItem>> Providers { get; set; } = new();
+    private ConcurrentDictionary<string, BaseProviderInfo<TFile, TFolder, TItem>> Providers { get; } = new();
 
     public virtual string ConvertId(string id)
     {
@@ -148,8 +148,7 @@ internal class RegexDaoSelectorBase<TFile, TFolder, TItem>(IServiceProvider serv
             PathPrefix = Id + "-" + match.Groups["id"].Value
         };
 
-        Providers.TryAdd(objectId, info);
-        return info;
+        return Providers.GetOrAdd(objectId, info);
     }
 
     public async Task RenameProviderAsync(IProviderInfo<TFile, TFolder, TItem> provider, string newTitle)

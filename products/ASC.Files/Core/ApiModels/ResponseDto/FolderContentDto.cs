@@ -101,6 +101,8 @@ public class FolderContentDtoHelper(
     AiModelSettingsLoader modelSettingsLoader,
     IDaoFactory daoFactory)
 {
+    private const int FoldersDtoParallelism = 5;
+
     public async Task<FolderContentDto<T>> GetAsync<T>(T folderId, Guid? userIdOrGroupId, Guid? sharedBy, FilterType? filterType, T roomId, bool? searchInContent, bool? withSubFolders, bool? excludeSubject, ApplyFilterOption? applyFilterOption, SearchArea? searchArea, string sortByFilter, SortOrder sortOrder, int startIndex, int limit, string text, string[] extension = null, FormsItemDto formsItemDto = null, Location? location = null, T parentId = default, List<FolderType> folderType = null)
     {
         var types = filterType.HasValue ? new[] { filterType.Value } : null;
@@ -171,13 +173,20 @@ public class FolderContentDtoHelper(
                 }
             }
 
-            var foldersTask = GetFoldersDto(folders, contextFolder: folderItems.FolderInfo).ToListAsync().AsTask();
+            if (currentUsersRecords == null &&
+                folders.Exists(f => f is IFolder { IsRoom: true }) &&
+                await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID))
+            {
+                currentUsersRecords = await fileSecurity.GetUserRecordsAsync().ToListAsync();
+            }
+
+            var foldersTask = GetFoldersDto(folders, contextFolder: folderItems.FolderInfo);
             var filesTask = GetFilesDto(files, contextFolder: folderItems.FolderInfo).ToListAsync().AsTask();
 
             await Task.WhenAll(foldersTask, filesTask);
 
             result.Files = filesTask.Result;
-            result.Folders = foldersTask.Result;
+            result.Folders = [.. foldersTask.Result];
         }
 
 
@@ -232,12 +241,14 @@ public class FolderContentDtoHelper(
             };
         }
 
-        async IAsyncEnumerable<FileEntryBaseDto> GetFoldersDto(IEnumerable<FileEntry> folderEntries, string entriesOrder = null, IFolder contextFolder = null)
+        async Task<IEnumerable<FileEntryBaseDto>> GetFoldersDto(IEnumerable<FileEntry> folderEntries, string entriesOrder = null, IFolder contextFolder = null)
         {
-            foreach (var r in folderEntries)
-            {
-                yield return await GetFolderDto(r, entriesOrder, contextFolder);
-            }
+            var count = folderEntries.Count();
+            var folderDtos = new FileEntryBaseDto[count];
+            await Parallel.ForEachAsync(Enumerable.Range(0, count),
+                new ParallelOptions { MaxDegreeOfParallelism = FoldersDtoParallelism },
+                async (i, _) => folderDtos[i] = await GetFolderDto(folderEntries.ElementAt(i), contextFolder: folderItems.FolderInfo));
+            return folderDtos;
         }
 
         async Task<FileEntryBaseDto> GetFolderDto(FileEntry folderEntry, string entriesOrder = null, IFolder contextFolder = null)
