@@ -34,7 +34,7 @@
 namespace ASC.Files.Core.Core.Thirdparty.WebDav;
 
 [Transient(typeof(IThirdPartyStorage<WebDavEntry, WebDavEntry, WebDavEntry>))]
-public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientFactory, SetupInfo setupInfo)
+public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientFactory, SetupInfo setupInfo, ThirdpartyConfigurationData thirdpartyConfiguration)
     : IThirdPartyStorage<WebDavEntry, WebDavEntry, WebDavEntry>, IDisposable
 {
     public bool IsOpened => _client != null;
@@ -62,6 +62,7 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
 #pragma warning disable CA2000 // HttpClient is owned by WebDavClient
         var httpClient = httpClientFactory.CreateClient();
 #pragma warning restore CA2000
+        httpClient.Timeout = thirdpartyConfiguration.ThirdPartyRequestTimeout;
 
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic",
             Convert.ToBase64String(Encoding.ASCII.GetBytes($"{authData.Login}:{authData.Password}")));
