@@ -35,6 +35,7 @@ global using System.Collections.Concurrent;
 global using System.Net;
 
 global using ASC.Core.Common.Security;
+global using ASC.Core.Tenants;
 global using ASC.Notify.Cron;
 
 global using FluentAssertions;

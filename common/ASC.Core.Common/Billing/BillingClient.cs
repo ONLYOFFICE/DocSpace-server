@@ -255,6 +255,23 @@ public class BillingClient
         return [];
     }
 
+    public async Task<SubscriptionBalanceInfo> GetSubscriptionBalanceInfoAsync(string portalId, string productId)
+    {
+        var parameters = new List<Tuple<string, string>> { Tuple.Create("ProductId", productId) };
+
+        var result = await RequestAsync("GetSubscriptionBalanceInfo", portalId, parameters);
+
+        return JsonSerializer.Deserialize<SubscriptionBalanceInfo>(result);
+    }
+
+    public async Task<SubscriptionToWalletResult> SubscriptionBalanceToWalletAsync(string portalId, string productId)
+    {
+        var parameters = new List<Tuple<string, string>> { Tuple.Create("ProductId", productId) };
+
+        var result = await RequestAsync("SubscriptionBalanceToWallet", portalId, parameters);
+
+        return JsonSerializer.Deserialize<SubscriptionToWalletResult>(result);
+    }
 
     private string CreateAuthToken(string pkey, string machinekey)
     {

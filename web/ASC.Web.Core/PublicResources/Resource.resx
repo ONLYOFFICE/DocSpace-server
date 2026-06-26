@@ -1395,4 +1395,7 @@
   <data name="AccountingCustomerOperationServiceDesc_adminyear" xml:space="preserve">
     <value>Business plan</value>
   </data>
+  <data name="Tariffs_adminwallet" xml:space="preserve">
+    <value>Business</value>
+  </data>
 </root>

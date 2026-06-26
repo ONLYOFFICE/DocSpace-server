@@ -661,7 +661,7 @@ public class BackupService(
 
     private async Task<string> GetBackupServiceName()
     {
-        var quotaList = await tenantManager.GetTenantQuotasAsync(false, true);
+        var quotaList = await tenantManager.GetTenantQuotasAsync(all: false, wallet: true);
 
         var backupQuota = quotaList.FirstOrDefault(x => x.TenantId == (int)TenantWalletService.Backup);
 

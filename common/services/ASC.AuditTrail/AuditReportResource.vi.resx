@@ -966,6 +966,9 @@
   <data name="StartTransferSetting" xml:space="preserve">
     <value>Bắt đầu di chuyển vùng cổng thông tin</value>
   </data>
+  <data name="SubscriptionBalanceMovedToWallet" xml:space="preserve">
+    <value>Số dư đăng ký đã được chuyển vào ví: {0}</value>
+  </data>
   <data name="SystemAccount" xml:space="preserve">
     <value>Tài khoản Hệ thống</value>
   </data>

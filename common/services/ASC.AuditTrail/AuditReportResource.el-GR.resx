@@ -957,6 +957,9 @@
   <data name="StartTransferSetting" xml:space="preserve">
     <value>Έναρξη μετεγκατάστασης περιοχής πύλης</value>
   </data>
+  <data name="SubscriptionBalanceMovedToWallet" xml:space="preserve">
+    <value>Το υπόλοιπο συνδρομής μεταφέρθηκε στο πορτοφόλι: {0}</value>
+  </data>
   <data name="SystemAccount" xml:space="preserve">
     <value>Λογαριασμός συστήματος</value>
   </data>

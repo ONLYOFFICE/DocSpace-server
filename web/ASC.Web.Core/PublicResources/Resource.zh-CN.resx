@@ -1395,4 +1395,7 @@
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
     <value>通过 OpenRouter 集成访问广泛的 AI 模型。仅按实际使用量付费，费用从您的钱包中扣除。</value>
   </data>
+  <data name="Tariffs_adminwallet" xml:space="preserve">
+    <value>专业</value>
+  </data>
 </root>

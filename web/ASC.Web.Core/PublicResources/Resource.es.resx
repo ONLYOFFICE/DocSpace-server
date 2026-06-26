@@ -1395,4 +1395,7 @@
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
     <value>Obtén acceso a una amplia gama de modelos de IA a través de la integración con OpenRouter. Paga solo por lo que usas, con cargo a tu Monedero.</value>
   </data>
+  <data name="Tariffs_adminwallet" xml:space="preserve">
+    <value>Business</value>
+  </data>
 </root>

@@ -942,6 +942,9 @@
   <data name="StartTransferSetting" xml:space="preserve">
     <value>Filloni migrimin e rajonit të portalit</value>
   </data>
+  <data name="SubscriptionBalanceMovedToWallet" xml:space="preserve">
+    <value>Bilanci i abonimit u transferua në portofol: {0}</value>
+  </data>
   <data name="SystemAccount" xml:space="preserve">
     <value>Llogaria e sistemit</value>
   </data>

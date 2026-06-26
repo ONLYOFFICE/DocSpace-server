@@ -966,6 +966,9 @@
   <data name="StartTransferSetting" xml:space="preserve">
     <value>Aloita portaalin alueen migraatio</value>
   </data>
+  <data name="SubscriptionBalanceMovedToWallet" xml:space="preserve">
+    <value>Tilauksen saldo siirretty lompakkoon: {0}</value>
+  </data>
   <data name="SystemAccount" xml:space="preserve">
     <value>Järjestelmän tili</value>
   </data>

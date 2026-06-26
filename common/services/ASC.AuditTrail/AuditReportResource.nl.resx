@@ -957,6 +957,9 @@
   <data name="StartTransferSetting" xml:space="preserve">
     <value>Start portaalregio migratie</value>
   </data>
+  <data name="SubscriptionBalanceMovedToWallet" xml:space="preserve">
+    <value>Abonnementssaldo verplaatst naar portemonnee: {0}</value>
+  </data>
   <data name="SystemAccount" xml:space="preserve">
     <value>Systeemaccount</value>
   </data>

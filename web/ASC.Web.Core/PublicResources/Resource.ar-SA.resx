@@ -1395,4 +1395,7 @@
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
     <value>احصل على إمكانية الوصول إلى مجموعة واسعة من نماذج الذكاء الاصطناعي عبر تكامل OpenRouter. ادفع فقط مقابل ما تستخدمه، ويُحتسب من محفظتك.</value>
   </data>
+  <data name="Tariffs_adminwallet" xml:space="preserve">
+    <value>تجاري</value>
+  </data>
 </root>

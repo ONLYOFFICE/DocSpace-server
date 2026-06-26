@@ -1395,4 +1395,7 @@
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
     <value>Αποκτήστε πρόσβαση σε ένα ευρύ φάσμα μοντέλων AI μέσω της ενσωμάτωσης OpenRouter. Πληρώνετε μόνο για όσα χρησιμοποιείτε, με χρέωση από το Πορτοφόλι σας.</value>
   </data>
+  <data name="Tariffs_adminwallet" xml:space="preserve">
+    <value>Επαγγελματικό</value>
+  </data>
 </root>
