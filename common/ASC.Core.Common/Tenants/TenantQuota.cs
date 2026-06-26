@@ -612,7 +612,7 @@ public class TenantQuota
             return quota;
         }
 
-        if (quota.Wallet && quota.DueDate.HasValue && quota.DueDate.Value < DateTime.UtcNow)
+        if (quota.Wallet && quota.Additional && quota.DueDate.HasValue && quota.DueDate.Value < DateTime.UtcNow)
         {
             return old;
         }
@@ -629,6 +629,13 @@ public class TenantQuota
                 newQuota.DueDate = newQuota.DueDate.HasValue
                     ? DateTime.Compare(newQuota.DueDate.Value, quota.DueDate.Value) < 0 ? newQuota.DueDate.Value : quota.DueDate.Value
                     : quota.DueDate.Value;
+            }
+
+            if (!quota.Additional)
+            {
+                // the primary wallet plan (adminwallet) contributes its price; additional wallet add-ons do not
+                newQuota.Price += quota.Price;
+                newQuota.Visible &= quota.Visible;
             }
         }
         else

@@ -156,8 +156,8 @@ public class TariffService(
                             email = currentPayment.PaymentEmail;
                         }
 
-                        // need sort by additional
-                        asynctariff.Quotas = asynctariff.Quotas.OrderBy(q => q.Additional).ToList();
+                        // need sort by additional, then by wallet so the non-wallet base plan is the aggregation base
+                        asynctariff.Quotas = asynctariff.Quotas.OrderBy(q => q.Additional).ThenBy(q => q.Wallet).ToList();
 
                         if (asynctariff.Quotas.All(q => q.Additional))
                         {
