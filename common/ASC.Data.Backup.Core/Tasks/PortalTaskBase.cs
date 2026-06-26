@@ -340,7 +340,6 @@ public abstract class PortalTaskBase(
                 }
 
                 var attempt = 0;
-                var rewrittenForGeneratedCol = false;
                 while (true)
                 {
                     try
@@ -348,19 +347,6 @@ public abstract class PortalTaskBase(
                         command = connection.CreateCommand();
                         command.CommandText = commandText;
                         await command.ExecuteNonQueryAsync();
-                        break;
-                    }
-                    catch (MySqlException ex) when (!rewrittenForGeneratedCol && ex.Number == 3105)
-                    {
-                        rewrittenForGeneratedCol = true;
-                        var colMatch = Regex.Match(ex.Message, @"generated column '(\w+)'", RegexOptions.IgnoreCase);
-                        var rewritten = colMatch.Success ? RemoveColumnFromInsert(commandText, colMatch.Groups[1].Value) : null;
-                        if (rewritten != null)
-                        {
-                            commandText = rewritten;
-                            continue;
-                        }
-                        Logger.ErrorRestore(ex);
                         break;
                     }
                     catch (Exception ex)
@@ -393,133 +379,6 @@ public abstract class PortalTaskBase(
         }
     }
 
-    private static string RemoveColumnFromInsert(string sql, string column)
-    {
-        var tableMatch = Regex.Match(sql, @"(?:REPLACE|INSERT)\s+INTO\s+`?\w+`?\s*\(", RegexOptions.IgnoreCase);
-        if (!tableMatch.Success)
-        {
-            return null;
-        }
-
-        var colListStart = tableMatch.Index + tableMatch.Length;
-        var colListEnd = sql.IndexOf(')', colListStart);
-        if (colListEnd < 0)
-        {
-            return null;
-        }
-
-        var cols = sql.Substring(colListStart, colListEnd - colListStart)
-            .Split(',')
-            .Select(c => c.Trim().Trim('`'))
-            .ToList();
-
-        var removeIdx = cols.FindIndex(c => c.Equals(column, StringComparison.OrdinalIgnoreCase));
-        if (removeIdx < 0)
-        {
-            return null;
-        }
-
-        var newColSection = string.Join(",", cols.Where((_, i) => i != removeIdx).Select(c => $"`{c}`"));
-
-        var valuesKeyword = sql.IndexOf("VALUES", colListEnd, StringComparison.OrdinalIgnoreCase);
-        if (valuesKeyword < 0)
-        {
-            return null;
-        }
-
-        var pos = sql.IndexOf('(', valuesKeyword);
-        if (pos < 0)
-        {
-            return null;
-        }
-
-        var sb = new StringBuilder();
-        sb.Append(sql, 0, colListStart);
-        sb.Append(newColSection);
-        sb.Append(") VALUES ");
-
-        var firstTuple = true;
-        while (pos < sql.Length)
-        {
-            if (sql[pos] != '(')
-            {
-                pos++;
-                continue;
-            }
-
-            pos++; // skip '('
-            var values = new List<string>();
-            while (pos < sql.Length && sql[pos] != ')')
-            {
-                values.Add(ReadSqlValue(sql, ref pos));
-                if (pos < sql.Length && sql[pos] == ',')
-                {
-                    pos++;
-                }
-            }
-
-            if (pos < sql.Length)
-            {
-                pos++; // skip ')'
-            }
-
-            if (!firstTuple)
-            {
-                sb.Append(',');
-            }
-            sb.Append('(');
-            sb.Append(string.Join(",", values.Where((_, i) => i != removeIdx)));
-            sb.Append(')');
-            firstTuple = false;
-
-            while (pos < sql.Length && sql[pos] != '(' && sql[pos] != ';')
-            {
-                pos++;
-            }
-
-            if (pos >= sql.Length || sql[pos] == ';')
-            {
-                sb.Append(';');
-                break;
-            }
-        }
-
-        return sb.ToString();
-    }
-
-    private static string ReadSqlValue(string text, ref int pos)
-    {
-        var start = pos;
-        if (pos < text.Length && text[pos] == '\'')
-        {
-            pos++; // skip opening quote
-            while (pos < text.Length)
-            {
-                if (text[pos] == '\\')
-                {
-                    pos += 2; // skip escaped character
-                }
-                else if (text[pos] == '\'')
-                {
-                    pos++; // skip closing quote
-                    break;
-                }
-                else
-                {
-                    pos++;
-                }
-            }
-        }
-        else
-        {
-            while (pos < text.Length && text[pos] != ',' && text[pos] != ')')
-            {
-                pos++;
-            }
-        }
-
-        return text.Substring(start, pos - start);
-    }
 
     public void Dispose()
     {
