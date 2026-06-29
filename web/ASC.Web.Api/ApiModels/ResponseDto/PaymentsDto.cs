@@ -318,9 +318,9 @@ public class CustomerServiceUsageDto
         var serviceName = usage.Service;
 
         // for testing purposes
-        if (serviceName.StartsWith("disk-storage"))
+        if (serviceName != null && serviceName.EndsWith("-1-hour"))
         {
-            serviceName = "disk-storage";
+            serviceName = serviceName.Replace("-1-hour", "");
         }
 
         var unit = customUom.GetValueOrDefault(serviceName, serviceName);
