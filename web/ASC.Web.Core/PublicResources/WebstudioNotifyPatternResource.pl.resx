@@ -1679,7 +1679,7 @@ $TrulyYours</value>
 
 Nie udało się utworzyć zaplanowanej kopii zapasowej DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}”.
 
-Zalecamy sprawdzenie ustawień "Kopia zapasowa":"${__VirtualRootPath}/portal-settings/backup/data-backup" i "Usługi":"${__VirtualRootPath}/portal-settings/services".
+Zalecamy sprawdzenie ustawień "Kopia zapasowa":"${__VirtualRootPath}/portal-settings/backup/data-backup" i "Usługi":"${__VirtualRootPath}/portal-settings/payments/services".
 
 Jeśli masz pytania lub potrzebujesz pomocy, zachęcamy do kontaktu za pośrednictwem tego linku "${__SupportLink}":"${__SupportLink}"
 
@@ -1690,7 +1690,7 @@ $TrulyYours</value>
 
 Nie udało się utworzyć zaplanowanej kopii zapasowej DocSpace [${__VirtualRootPath}](${__VirtualRootPath}).
 
-Zalecamy sprawdzenie ustawień [Kopia zapasowa]:(${__VirtualRootPath}/portal-settings/backup/data-backup) i [Usługi]:(${__VirtualRootPath}/portal-settings/services).
+Zalecamy sprawdzenie ustawień [Kopia zapasowa]:(${__VirtualRootPath}/portal-settings/backup/data-backup) i [Usługi]:(${__VirtualRootPath}/portal-settings/payments/services).
 
 Jeśli masz pytania lub potrzebujesz pomocy, zachęcamy do kontaktu za pośrednictwem tego linku [${__SupportLink}](${__SupportLink})
 

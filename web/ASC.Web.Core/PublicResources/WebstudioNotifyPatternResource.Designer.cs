@@ -2187,7 +2187,7 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///The scheduled backup process for your DocSpace &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; has failed.
         ///
-        ///We recommend checking the &quot;Backup&quot;:&quot;${__VirtualRootPath}/portal-settings/backup/data-backup&quot; and &quot;Services&quot;:&quot;${__VirtualRootPath}/portal-settings/services&quot; settings.
+        ///We recommend checking the &quot;Backup&quot;:&quot;${__VirtualRootPath}/portal-settings/backup/data-backup&quot; and &quot;Services&quot;:&quot;${__VirtualRootPath}/portal-settings/payments/services&quot; settings.
         ///
         ///If you have any questions or need assistance, please don’t hesitate to contact us via &quot;${__SupportLink}&quot;:&quot;${__SupportLink}&quot;
         ///
@@ -2204,7 +2204,7 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///The scheduled backup process for your DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) has failed.
         ///
-        ///We recommend checking the [Backup](${__VirtualRootPath}/portal-settings/backup/data-backup) and [Services](${__VirtualRootPath}/portal-settings/services) settings.
+        ///We recommend checking the [Backup](${__VirtualRootPath}/portal-settings/backup/data-backup) and [Services](${__VirtualRootPath}/portal-settings/payments/services) settings.
         ///
         ///If you have any questions or need assistance, please don’t hesitate to contact us via [${__SupportLink}](${__SupportLink})
         ///

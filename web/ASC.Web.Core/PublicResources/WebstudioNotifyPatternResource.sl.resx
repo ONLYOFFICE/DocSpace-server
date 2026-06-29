@@ -1701,7 +1701,7 @@ $TrulyYours</value>
  
 Načrtovani postopek varnostnega kopiranja za vaš DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" ni uspelo.
 
-Priporočamo, da preverite nastavitve "Varnostna kopija":"${__VirtualRootPath}/portal-settings/backup/data-backup" in "Storitve":"${__VirtualRootPath}/portal-settings/services".
+Priporočamo, da preverite nastavitve "Varnostna kopija":"${__VirtualRootPath}/portal-settings/backup/data-backup" in "Storitve":"${__VirtualRootPath}/portal-settings/payments/services".
 
 Če imate kakršna koli vprašanja ali potrebujete pomoč, nas kontaktirajte preko "${__SupportLink}":"${__SupportLink}"
  
@@ -1712,7 +1712,7 @@ $TrulyYours</value>
 
 Načrtovani postopek varnostnega kopiranja za vaš DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) ni uspelo.
 
-Priporočamo, da preverite nastavitve [Varnostna kopija](${__VirtualRootPath}/portal-settings/backup/data-backup) in [Storitve](${__VirtualRootPath}/portal-settings/services).
+Priporočamo, da preverite nastavitve [Varnostna kopija](${__VirtualRootPath}/portal-settings/backup/data-backup) in [Storitve](${__VirtualRootPath}/portal-settings/payments/services).
 
 Če imate kakršna koli vprašanja ali potrebujete pomoč, nas kontaktirajte preko [${__SupportLink}](${__SupportLink})
  

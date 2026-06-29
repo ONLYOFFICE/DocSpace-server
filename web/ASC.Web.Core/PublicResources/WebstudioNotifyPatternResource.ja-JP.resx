@@ -2197,7 +2197,7 @@ $TrulyYours</value>
 
 DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" のスケジュールされたバックアッププロセスに失敗しました。
 
-"バックアップ":"${__VirtualRootPath}/portal-settings/backup/data-backup" および "サービス":"{__VirtualRootPath}/portal-settings/services" の設定を確認することをお勧めします。
+"バックアップ":"${__VirtualRootPath}/portal-settings/backup/data-backup" および "サービス":"{__VirtualRootPath}/portal-settings/payments/services" の設定を確認することをお勧めします。
 
 ご質問やサポートが必要な場合は、"${__SupportLink}":"${__SupportLink}" よりお気軽にお問い合わせください。
 
@@ -2208,7 +2208,7 @@ $TrulyYours</value>
 
 DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) のスケジュールされたバックアッププロセスに失敗しました。
 
-[バックアップ](${__VirtualRootPath}/portal-settings/backup/data-backup) および [サービス](${__VirtualRootPath}/portal-settings/services) の設定を確認することをお勧めします。
+[バックアップ](${__VirtualRootPath}/portal-settings/backup/data-backup) および [サービス](${__VirtualRootPath}/portal-settings/payments/services) の設定を確認することをお勧めします。
 
 ご質問やサポートが必要な場合は、[${__SupportLink}](${__SupportLink}) よりお気軽にお問い合わせください。
 
