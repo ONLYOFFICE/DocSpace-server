@@ -61,7 +61,7 @@ public class ChatClientFactory(
             case ProviderType.OpenAi:
                 {
                     var openAiClient = CreateOpenAiClient(options);
-                    var chatClient = openAiClient.GetResponsesClient(options.ModelId);
+                    var chatClient = openAiClient.GetResponsesClient();
                     // CA2000: OpenAiResponsesClient wraps a chat client, ownership transferred
 #pragma warning disable CA2000
                     builder = new OpenAiResponsesClient(chatClient.AsIChatClient()).AsBuilder();
