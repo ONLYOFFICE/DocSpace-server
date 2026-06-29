@@ -1689,7 +1689,7 @@ $TrulyYours</value>
 
 Copierea de rezervă programată a spațiului DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" a eșuat.
 
-Vă recomandăm să verificați setările pentru "Copiere de rezervă":"${__VirtualRootPath}/portal-settings/backup/data-backup" și "Servicii":"${__VirtualRootPath}/portal-settings/services".
+Vă recomandăm să verificați setările pentru "Copiere de rezervă":"${__VirtualRootPath}/portal-settings/backup/data-backup" și "Servicii":"${__VirtualRootPath}/portal-settings/payments/services".
 
 Dacă aveți întrebări sau aveți nevoie de asistență, nu ezitați să ne contactați la "${__SupportLink}":"${__SupportLink}"
 
@@ -1700,7 +1700,7 @@ $TrulyYours</value>
 
 Copierea de rezervă programată a spațiului DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) a eșuat.
 
-Vă recomandăm să verificați setările pentru [Copiere de rezervă](${__VirtualRootPath}/portal-settings/backup/data-backup) și [Servicii](${__VirtualRootPath}/portal-settings/services).
+Vă recomandăm să verificați setările pentru [Copiere de rezervă](${__VirtualRootPath}/portal-settings/backup/data-backup) și [Servicii](${__VirtualRootPath}/portal-settings/payments/services).
 
 Dacă aveți întrebări sau aveți nevoie de asistență, nu ezitați să ne contactați la [${__SupportLink}](${__SupportLink})
 
