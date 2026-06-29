@@ -321,14 +321,13 @@ public class FolderDtoHelper(
                                 !currentUserRecords.Exists(c => c.EntryId.Equals(folder.Id.ToString()) && c.SubjectType == SubjectType.Group);
             }
 
+            result.UsedSpace = folder.Counter;
+
             if ((await tenantManager.GetCurrentTenantQuotaAsync()).Statistic &&
                     ((result.Security.TryGetValue(FileSecurity.FilesSecurityActions.EditRoom, out var canEdit) && canEdit) ||
                      (result.RootFolderType is FolderType.Archive or FolderType.TRASH && result.Security.TryGetValue(FileSecurity.FilesSecurityActions.Delete, out var canDelete) && canDelete) ||
                      (result.Security.TryGetValue(FileSecurity.FilesSecurityActions.Create, out var canCreate) && canCreate)))
             {
-
-                result.UsedSpace = folder.Counter;
-
                 TenantEntityQuotaSettings quotaSettings = folder.FolderType is FolderType.AiRoom
                 ? await settingsManager.LoadAsync<TenantAiAgentQuotaSettings>()
                 : await settingsManager.LoadAsync<TenantRoomQuotaSettings>();

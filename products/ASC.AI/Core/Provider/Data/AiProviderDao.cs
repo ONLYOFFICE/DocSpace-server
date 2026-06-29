@@ -38,7 +38,7 @@ public class AiProviderDao(
     IDbContextFactory<AiDbContext> dbContextFactory,
     InstanceCrypto crypto,
     AiGateway gateway,
-    AiConfiguration aiConfiguration) : IAiProviderDao
+    AiConfiguration aiConfiguration)
 {
     public async Task<AiProvider> AddProviderAsync(
         int tenantId,
@@ -109,11 +109,19 @@ public class AiProviderDao(
         };
     }
 
-    public async Task<AiProvider?> GetProviderAsync(int tenantId, int id, bool forceSystemProvider = false)
+    public async Task<AiProvider?> GetProviderAsync(int tenantId, int id, bool forceSystemProvider = false, bool allowLegacyProvider = false)
     {
-        if (gateway.Configured && id == AiGateway.ProviderId)
+        if (gateway.Configured)
         {
-            return await CreateGatewayProviderAsync(includeCredentials: true, force: forceSystemProvider);
+            if (id == AiGateway.ProviderId)
+            {
+                return await CreateGatewayProviderAsync(includeCredentials: true, allowEmptyKey: forceSystemProvider);
+            }
+
+            if (!allowLegacyProvider)
+            {
+                return null;
+            }
         }
 
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
@@ -137,12 +145,17 @@ public class AiProviderDao(
     {
         var defaultProviderId = (await GetDefaultProviderAsync(tenantId))?.ProviderId;
 
-        if (gateway.Configured && offset == 0)
+        if (gateway.Configured)
         {
+            if (offset > 0)
+            {
+                yield break;
+            }
+
             var gatewayProvider = await CreateGatewayProviderAsync();
-            gatewayProvider.IsDefault = defaultProviderId == gatewayProvider.Id;
+            gatewayProvider.IsDefault = true;
             yield return gatewayProvider;
-            limit--;
+            yield break;
         }
 
         if (limit <= 0)
@@ -186,13 +199,13 @@ public class AiProviderDao(
 
     public async Task<int> GetProvidersTotalCountAsync(int tenantId)
     {
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-        var count = await dbContext.GetProvidersTotalCountAsync(tenantId);
-
         if (gateway.Configured)
         {
-            count++;
+            return 1;
         }
+
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        var count = await dbContext.GetProvidersTotalCountAsync(tenantId);
 
         return count;
     }
@@ -286,6 +299,13 @@ public class AiProviderDao(
         if (queryResult == null)
         {
             return null;
+        }
+
+        switch (gateway.Configured)
+        {
+            case true when queryResult.ProviderId != AiGateway.ProviderId:
+            case false when queryResult.ProviderId == AiGateway.ProviderId:
+                return null;
         }
 
         var providerType = queryResult.ProviderId == AiGateway.ProviderId
@@ -387,14 +407,14 @@ public class AiProviderDao(
         await context.SaveChangesAsync();
     }
 
-    private async Task<AiProvider> CreateGatewayProviderAsync(bool includeCredentials = false, bool force = false)
+    private async Task<AiProvider> CreateGatewayProviderAsync(bool includeCredentials = false, bool allowEmptyKey = false)
     {
         return new AiProvider
         {
             Id = AiGateway.ProviderId,
             Title = AiGateway.ProviderTitle,
             Url = includeCredentials ? gateway.Url : string.Empty,
-            Key = includeCredentials ? await gateway.GetKeyAsync(force) : string.Empty,
+            Key = includeCredentials ? await gateway.GetKeyAsync(allowEmpty: allowEmptyKey) : string.Empty,
             Type = ProviderType.PortalAi
         };
     }
