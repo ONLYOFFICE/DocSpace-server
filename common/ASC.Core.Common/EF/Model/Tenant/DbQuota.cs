@@ -232,6 +232,20 @@ public static class DbQuotaExtension
                     Visible = true,
                     Wallet = true,
                     Additional = false // primary quota, not additive
+                },
+                new DbQuota
+                {
+                    TenantId = -18,
+                    Name = "search",
+                    Description = null,
+                    Features = "search",
+                    Price = 0,
+                    ProductId = null,
+                    ServiceName = "search",
+                    ServiceGroup = null,
+                    Visible = true,
+                    Wallet = true,
+                    Additional = true
                 }
                 );
         return modelBuilder;

@@ -1636,12 +1636,22 @@ public class PaymentController(
 
         if (inDto.Enabled && !settings.EnabledServices.Contains(inDto.Service))
         {
+            if (inDto.Service == TenantWalletService.Search && !settings.EnabledServices.Contains(TenantWalletService.AITools))
+            {
+                throw new InvalidOperationException("AI Tools service must be enabled before Search");
+            }
+
             settings.EnabledServices.Add(inDto.Service);
         }
 
         if (!inDto.Enabled && settings.EnabledServices.Contains(inDto.Service))
         {
             settings.EnabledServices.Remove(inDto.Service);
+
+            if (inDto.Service == TenantWalletService.AITools && settings.EnabledServices.Contains(TenantWalletService.Search))
+            {
+                settings.EnabledServices.Remove(TenantWalletService.Search);
+            }
         }
 
         if (settings.EnabledServices.Count == 0)
@@ -1650,6 +1660,11 @@ public class PaymentController(
         }
 
         var result = await settingsManager.SaveAsync(settings);
+
+        if (!result)
+        {
+            throw new InvalidOperationException("Failed to save tenant wallet service settings");
+        }
 
         messageService.Send(MessageAction.CustomerWalletServicesSettingsUpdated);
 

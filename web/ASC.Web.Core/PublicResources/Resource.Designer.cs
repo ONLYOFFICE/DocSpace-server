@@ -337,7 +337,7 @@ namespace ASC.Web.Core.PublicResources {
                 return ResourceManager.GetString("AccountingCustomerOperationType", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Month.
         /// </summary>
@@ -346,7 +346,7 @@ namespace ASC.Web.Core.PublicResources {
                 return ResourceManager.GetString("AccountingCustomerOperationMonth", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Service.
         /// </summary>
@@ -355,7 +355,7 @@ namespace ASC.Web.Core.PublicResources {
                 return ResourceManager.GetString("AccountingCustomerOperationService", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Monthly usage report ({0}-{1}).
         /// </summary>
@@ -364,7 +364,7 @@ namespace ASC.Web.Core.PublicResources {
                 return ResourceManager.GetString("AccountingMonthlyUsageReportName", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Monthly usage.
         /// </summary>
@@ -373,7 +373,7 @@ namespace ASC.Web.Core.PublicResources {
                 return ResourceManager.GetString("AccountingMonthlyUsageReportSheetName", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Service usage report ({0}-{1}).
         /// </summary>
@@ -382,7 +382,7 @@ namespace ASC.Web.Core.PublicResources {
                 return ResourceManager.GetString("AccountingServiceUsageReportName", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Service usage.
         /// </summary>
@@ -391,7 +391,7 @@ namespace ASC.Web.Core.PublicResources {
                 return ResourceManager.GetString("AccountingServiceUsageReportSheetName", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Validation code field cannot be empty.
         /// </summary>
@@ -3701,6 +3701,24 @@ namespace ASC.Web.Core.PublicResources {
         public static string TariffsFeature_room_exception {
             get {
                 return ResourceManager.GetString("TariffsFeature_room_exception", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to AI search.
+        /// </summary>
+        public static string TariffsFeature_search_wallet {
+            get {
+                return ResourceManager.GetString("TariffsFeature_search_wallet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Use an AI search engine to enhance AI chats with real-time information from the internet.
+        /// </summary>
+        public static string TariffsFeature_search_wallet_price_count {
+            get {
+                return ResourceManager.GetString("TariffsFeature_search_wallet_price_count", resourceCulture);
             }
         }
         

@@ -49,5 +49,8 @@ public enum TenantWalletService
     AITools = -13,
 
     [Description("Admin")]
-    Admin = -14
+    Admin = -14,
+
+    [Description("Search")]
+    Search = -18
 }
