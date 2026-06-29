@@ -80,7 +80,6 @@ public class PortalController(
     ExternalResourceSettingsHelper externalResourceSettingsHelper,
     QuotaHelper quotaHelper,
     QuotaSocketManager quotaSocketManager,
-    RegionHelper regionHelper,
     ApiDateTimeHelper apiDateTimeHelper,
     IEventBus eventBus,
     CspSettingsHelper cspSettingsHelper,
@@ -532,8 +531,6 @@ public class PortalController(
         var tenant = tenantManager.GetCurrentTenant();
         var source = await tariffService.GetTariffAsync(tenant.Id, refresh: inDto.Refresh);
 
-        var defaultRegion = regionHelper.GetDefaultRegionInfo();
-
         var result = new List<UpcomingPaymentDto>();
 
         foreach (var quota in source.Quotas)
@@ -546,38 +543,6 @@ public class PortalController(
 
             var quantity = quota.NextQuantity ?? quota.Quantity;
 
-            // The cached quota service skips price/currency resolution, so resolve it here for the
-            // current region the same way TenantQuotaMapper.Resolve does (falling back to the default region).
-            var productPaymentId = definition.GetPaymentId();
-            var priceInfo = string.IsNullOrEmpty(productPaymentId)
-                ? null
-                : await tenantManager.GetProductPriceInfoAsync(productPaymentId, quota.Wallet);
-
-            decimal unitPrice;
-            string currency;
-
-            if (priceInfo != null)
-            {
-                var currentRegion = await regionHelper.GetCurrentRegionInfoAsync(
-                    new Dictionary<string, Dictionary<string, decimal>> { { productPaymentId, priceInfo } });
-
-                if (priceInfo.TryGetValue(currentRegion.ISOCurrencySymbol, out var resolved))
-                {
-                    unitPrice = resolved;
-                    currency = currentRegion.ISOCurrencySymbol;
-                }
-                else
-                {
-                    unitPrice = definition.Price;
-                    currency = defaultRegion.ISOCurrencySymbol;
-                }
-            }
-            else
-            {
-                unitPrice = definition.Price;
-                currency = defaultRegion.ISOCurrencySymbol;
-            }
-
             var serviceName = definition.ServiceName ?? definition.Name;
 
             result.Add(new UpcomingPaymentDto
@@ -589,8 +554,8 @@ public class PortalController(
                 Quantity = quantity,
                 Wallet = quota.Wallet,
                 DueDate = apiDateTimeHelper.Get(quota.DueDate ?? source.DueDate),
-                Amount = unitPrice * quantity,
-                Currency = currency
+                Amount = definition.Price * quantity,
+                Currency = definition.PriceISOCurrencySymbol
             });
         }
 

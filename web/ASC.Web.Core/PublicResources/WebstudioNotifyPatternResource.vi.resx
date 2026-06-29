@@ -1702,7 +1702,7 @@ $TrulyYours</value>
 
 Quá trình sao lưu theo lịch cho DocSpace của bạn "${__VirtualRootPath}":"${__VirtualRootPath}" đã thất bại.
 
-Chúng tôi khuyên bạn nên kiểm tra cài đặt "Sao lưu":"${__VirtualRootPath}/portal-settings/backup/data-backup" và "Dịch vụ":"${__VirtualRootPath}/portal-settings/services".
+Chúng tôi khuyên bạn nên kiểm tra cài đặt "Sao lưu":"${__VirtualRootPath}/portal-settings/backup/data-backup" và "Dịch vụ":"${__VirtualRootPath}/portal-settings/payments/services".
 
 Nếu bạn có bất kỳ câu hỏi nào hoặc cần hỗ trợ, xin vui lòng liên lạc với chúng tôi qua "${__SupportLink}":"${__SupportLink}"
 
@@ -1713,7 +1713,7 @@ $TrulyYours</value>
 
 Quá trình sao lưu theo lịch cho DocSpace của bạn [${__VirtualRootPath}](${__VirtualRootPath}) đã thất bạig.
 
-Chúng tôi khuyên bạn nên kiểm tra cài đặt [Sao lưu](${__VirtualRootPath}/portal-settings/backup/data-backup) và [Dịch vụ](${__VirtualRootPath}/portal-settings/services).
+Chúng tôi khuyên bạn nên kiểm tra cài đặt [Sao lưu](${__VirtualRootPath}/portal-settings/backup/data-backup) và [Dịch vụ](${__VirtualRootPath}/portal-settings/payments/services).
 
 Nếu bạn có bất kỳ câu hỏi nào hoặc cần hỗ trợ, xin vui lòng liên hệ với chúng tôi qua [${__SupportLink}](${__SupportLink})
 

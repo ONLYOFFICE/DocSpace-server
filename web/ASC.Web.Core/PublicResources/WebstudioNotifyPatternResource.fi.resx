@@ -1700,7 +1700,7 @@ $TrulyYours</value>
 
 DocSpacesi "${__VirtualRootPath}":"${__VirtualRootPath}" ajoitettu varmuuskopiointi on epäonnistunut.
 
-Suosittelemme tarkistamaan asetukset "Varmuuskopio":"${__VirtualRootPath}/portal-settings/backup/data-backup" ja "Palvelut":"${__VirtualRootPath}/portal-settings/services".
+Suosittelemme tarkistamaan asetukset "Varmuuskopio":"${__VirtualRootPath}/portal-settings/backup/data-backup" ja "Palvelut":"${__VirtualRootPath}/portal-settings/payments/services".
 
 Jos sinulla on kysyttävää tai tarvitset apua, älä epäröi ottaa meihin yhteyttä "${__SupportLink}":"${__SupportLink}" kautta.
 
@@ -1711,7 +1711,7 @@ $TrulyYours</value>
 
 DocSpacesi [${__VirtualRootPath}](${__VirtualRootPath}) ajoitettu varmuuskopiointi on epäonnistunut.
 
-Suosittelemme tarkistamaan asetukset [Varmuuskopio](${__VirtualRootPath}/portal-settings/backup/data-backup) ja [Palvelut](${__VirtualRootPath}/portal-settings/services).
+Suosittelemme tarkistamaan asetukset [Varmuuskopio](${__VirtualRootPath}/portal-settings/backup/data-backup) ja [Palvelut](${__VirtualRootPath}/portal-settings/payments/services).
 
 Jos sinulla on kysyttävää tai tarvitset apua, älä epäröi ottaa meihin yheyttä [${__SupportLink}](${__SupportLink}) kautta.
 Ystävällisin terveisin,

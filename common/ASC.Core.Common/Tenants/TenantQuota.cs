@@ -562,6 +562,8 @@ public class TenantQuota
         TenantId = quota.TenantId;
         Name = quota.Name;
         Price = quota.Price;
+        PriceCurrencySymbol = quota.PriceCurrencySymbol;
+        PriceISOCurrencySymbol = quota.PriceISOCurrencySymbol;
         ProductId = quota.ProductId;
         ServiceName = quota.ServiceName;
         ServiceGroup = quota.ServiceGroup;
@@ -746,7 +748,6 @@ public class TenantQuota
 public partial class TenantQuotaMapper(IServiceProvider provider)
 {
     private partial TenantQuota Map(DbQuota source);
-    public partial List<TenantQuota> Map(List<DbQuota> source);
     public partial DbQuota Map(TenantQuota source);
 
     [UserMapping(Default = true)]
@@ -755,6 +756,18 @@ public partial class TenantQuotaMapper(IServiceProvider provider)
         var dto = Map(quota);
         (dto.Price, dto.PriceCurrencySymbol, dto.PriceISOCurrencySymbol) = await Resolve(quota);
         return dto;
+    }
+
+    public async Task<List<TenantQuota>> MapDbQuotaToTenantQuota(List<DbQuota> source)
+    {
+        var result = new List<TenantQuota>(source.Count);
+
+        foreach (var quota in source)
+        {
+            result.Add(await MapDbQuotaToTenantQuota(quota));
+        }
+
+        return result;
     }
 
     private async Task<(decimal, string, string)> Resolve(DbQuota source)

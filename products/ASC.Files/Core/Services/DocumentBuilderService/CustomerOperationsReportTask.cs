@@ -289,10 +289,10 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
                 new(record.Description, "@"),
                 new(record.Details, "@"),
                 new(record.ParticipantDisplayName, "@"),
-                new(record.Quantity.ToString(), "General", "right"),
+                new(record.Quantity.ToString(CultureInfo.InvariantCulture), "General", "right"),
                 new(record.ServiceUnit, "@"),
-                new(record.Credit.ToString(), "0.0000000000", "right"),
-                new(record.Debit.ToString(), "0.0000000000", "right"),
+                new(record.Credit.ToString(CultureInfo.InvariantCulture), "0.0000000000", "right"),
+                new(record.Debit.ToString(CultureInfo.InvariantCulture), "0.0000000000", "right"),
                 new(record.Currency, "@")
             };
 

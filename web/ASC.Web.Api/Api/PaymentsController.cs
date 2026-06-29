@@ -881,7 +881,8 @@ public class PaymentController(
     {
         if (!tariffService.IsConfigured())
         {
-            throw new InvalidOperationException("Tariff service is not configured");
+            // do not throw an exception, just return null
+            return null;
         }
 
         await DemandAdminAsync();
