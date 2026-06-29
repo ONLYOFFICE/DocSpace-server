@@ -242,7 +242,7 @@ public class FileStorageService //: IFileStorageService
         int count,
         IEnumerable<FilterType> filterTypes,
         bool subjectGroup,
-        string subject,
+        Guid? subject,
         Guid sharedBy,
         string searchText,
         string[] extension,
@@ -255,8 +255,7 @@ public class FileStorageService //: IFileStorageService
         IEnumerable<string> tagNames = null,
         bool excludeSubject = false,
         ProviderFilter provider = ProviderFilter.None,
-        SubjectFilter? subjectFilter = null,
-        string subjectOwnerId = null,
+        Guid? subjectOwnerId = null,
         ApplyFilterOption applyFilterOption = ApplyFilterOption.All,
         QuotaFilter quotaFilter = QuotaFilter.All,
         StorageFilter storageFilter = StorageFilter.None,
@@ -267,12 +266,8 @@ public class FileStorageService //: IFileStorageService
         RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None,
         List<FolderType> folderType = null)
     {
-        var subjectId = string.IsNullOrEmpty(subject) ? Guid.Empty : new Guid(subject);
-        var subjectOwnerIdGuid = string.IsNullOrEmpty(subjectOwnerId) ? Guid.Empty : new Guid(subjectOwnerId);
-        if (subjectFilter != null)
-        {
-            subjectOwnerIdGuid = Guid.Empty;
-        }
+        var subjectId = subject ?? Guid.Empty;
+        var subjectOwnerIdGuid = subjectOwnerId ?? Guid.Empty;
 
         var folderDao = daoFactory.GetCacheFolderDao<T>();
 
@@ -407,7 +402,6 @@ public class FileStorageService //: IFileStorageService
                 tagNames,
                 excludeSubject,
                 provider,
-                subjectFilter,
                 subjectOwnerIdGuid,
                 applyFilterOption,
                 quotaFilter,
@@ -3272,7 +3266,7 @@ public class FileStorageService //: IFileStorageService
                     -1,
                     new List<FilterType> { FilterType.FoldersOnly },
                     false,
-                    user.ToString(),
+                    user,
                     Guid.Empty,
                     "",
                     [],
@@ -3304,7 +3298,7 @@ public class FileStorageService //: IFileStorageService
                 -1,
                 [FilterType.FoldersOnly],
                 false,
-                user.ToString(),
+                user,
                 Guid.Empty,
                 "",
                 [],
