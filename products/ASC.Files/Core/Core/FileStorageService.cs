@@ -474,7 +474,7 @@ public class FileStorageService //: IFileStorageService
 
         if (parent.FolderType == FolderType.Recent && searchArea == SearchArea.RecentByLinks)
         {
-            parent.Title = FilesUCResource.MyFiles;
+            parent.Title = FilesUCResource.Files;
         }
 
         var result = new DataWrapper<T>
@@ -497,7 +497,7 @@ public class FileStorageService //: IFileStorageService
                         case Folder<int> f2:
                             {
                                 var title = f2.FolderType is FolderType.Recent && searchArea == SearchArea.RecentByLinks
-                                    ? FilesUCResource.MyFiles
+                                    ? FilesUCResource.Files
                                     : f2.Title;
 
                                 return new { f2.Id, title, RoomType = DocSpaceHelper.MapToRoomType(f2.FolderType), f2.FolderType };
@@ -983,14 +983,6 @@ public class FileStorageService //: IFileStorageService
 
             if (chatSettings != null)
             {
-                if (chatSettings.ProviderId <= 0 && !(chatSettings.ProviderId == -1 && await gateway.IsEnabledAsync()))
-                {
-                    throw new ArgumentException(nameof(chatSettings.ProviderId));
-                }
-
-                ArgumentException.ThrowIfNullOrEmpty(chatSettings.ModelId);
-
-                newFolder.SettingsChatProviderId = chatSettings.ProviderId;
                 newFolder.SettingsChatParameters = chatSettings.Map();
             }
 
@@ -1225,18 +1217,6 @@ public class FileStorageService //: IFileStorageService
             var oldTitle = folder.Title;
             WatermarkSettings watermark = null;
             RoomDataLifetime lifetime = null;
-
-            if (chatSettingsChanged)
-            {
-                var chatSettings = updateData.ChatSettings;
-
-                if (chatSettings.ProviderId <= 0 && !(chatSettings.ProviderId == -1 && await gateway.IsEnabledAsync()))
-                {
-                    throw new ArgumentException(nameof(updateData.ChatSettings.ProviderId));
-                }
-
-                ArgumentException.ThrowIfNullOrEmpty(updateData.ChatSettings.ModelId);
-            }
 
             if (watermarkChanged)
             {

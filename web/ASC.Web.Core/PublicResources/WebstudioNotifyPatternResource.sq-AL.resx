@@ -1684,7 +1684,7 @@ $TrulyYours</value>
 
 Procesi i planifikuar i kopjes rezervë për DocSpace-in tuaj "${__VirtualRootPath}":"${__VirtualRootPath}" ka dështuar.
 
-Ju rekomandojmë të kontrolloni cilësimet e "Ruajtjes automatike të të dhënave":"${__VirtualRootPath}/portal-settings/backup/data-backup" dhe "Shërbimeve":"${__VirtualRootPath}/portal-settings/services" settings.
+Ju rekomandojmë të kontrolloni cilësimet e "Ruajtjes automatike të të dhënave":"${__VirtualRootPath}/portal-settings/backup/data-backup" dhe "Shërbimeve":"${__VirtualRootPath}/portal-settings/payments/services" settings.
 
 Në qoftë se keni ndonjë pyetje ose keni nevojë për ndihmë, ju lutem mos hezitoni të na kontaktoni "${__SupportLink}":"${__SupportLink}"
 
@@ -1695,7 +1695,7 @@ $TrulyYours</value>
 
 Procesi i planifikuar i kopjes rezervë për DocSpace-in tuaj [${__VirtualRootPath}](${__VirtualRootPath}) ka dështuar.
 
-Ju rekomandojmë të kontrolloni cilësimet e [Ruajtjes automatike të të dhënave](${__VirtualRootPath}/portal-settings/backup/data-backup) dhe [Shërbimeve](${__VirtualRootPath}/portal-settings/services) settings.
+Ju rekomandojmë të kontrolloni cilësimet e [Ruajtjes automatike të të dhënave](${__VirtualRootPath}/portal-settings/backup/data-backup) dhe [Shërbimeve](${__VirtualRootPath}/portal-settings/payments/services) settings.
 
 Nëse keni ndonjë pyetje ose keni nevojë për ndihmë, ju lutem mos hezitoni të na kontaktoni përmes [${__SupportLink}](${__SupportLink})
 

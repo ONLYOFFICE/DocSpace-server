@@ -1686,7 +1686,7 @@ $TrulyYours</value>
   <data name="pattern_scheduled_backup_failed" xml:space="preserve">
     <value>Ողջուն, $UserName,
 
-Ձեր DocSpace-ի "${__VirtualRootPath}":"${__VirtualRootPath}" պլանավորված պահուստավորման գործընթացը ձախողվել է։ Խորհուրդ ենք տալիս ստուգել "Պահուստավորում":"${__VirtualRootPath}/portal-settings/backup/data-backup" և "Services":"${__VirtualRootPath}/portal-settings/services" կարգավորումները։ 
+Ձեր DocSpace-ի "${__VirtualRootPath}":"${__VirtualRootPath}" պլանավորված պահուստավորման գործընթացը ձախողվել է։ Խորհուրդ ենք տալիս ստուգել "Պահուստավորում":"${__VirtualRootPath}/portal-settings/backup/data-backup" և "Services":"${__VirtualRootPath}/portal-settings/payments/services" կարգավորումները։ 
 
 Եթե ունեք որևէ հարց կամ օգնության կարիք ունեք, խնդրում ենք կապվել մեզ հետ "${__SupportLink}":"${__SupportLink}" միջոցով։
 
@@ -1697,7 +1697,7 @@ $TrulyYours</value>
 
 Ձեր DocSpace [${__VirtualRootPath}](${__VirtualRootPath})-ի համար նախատեսված պահուստավորման գործընթացը ձախողվել է։
 
-Խորհուրդ ենք տալիս ստուգել [Պահուստավորում](${__VirtualRootPath}/portal-settings/backup/data-backup) և [Services](${__VirtualRootPath}/portal-settings/services) կարգավորումները։
+Խորհուրդ ենք տալիս ստուգել [Պահուստավորում](${__VirtualRootPath}/portal-settings/backup/data-backup) և [Services](${__VirtualRootPath}/portal-settings/payments/services) կարգավորումները։
 
 Եթե ունեք որևէ հարց կամ օգնության կարիք ունեք, խնդրում ենք կապվել մեզ հետ [${__SupportLink}](${__SupportLink}) միջոցով։
 

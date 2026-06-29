@@ -45,7 +45,6 @@ public class DbAssignment : BaseEntity
     public DateTime CreatedAt { get; init; }
 
     public DbTenant Tenant { get; init; } = null!;
-    public DbProfile Profile { get; init; } = null!;
 
     public override object[] GetKeys()
     {
@@ -58,7 +57,6 @@ public static class DbAssignmentExtension
     public static ModelBuilderWrapper AddDbAssignments(this ModelBuilderWrapper modelBuilder)
     {
         modelBuilder.Entity<DbAssignment>().Navigation(e => e.Tenant).AutoInclude(false);
-        modelBuilder.Entity<DbAssignment>().Navigation(e => e.Profile).AutoInclude(false);
 
         modelBuilder
             .Add(MySqlAddDbAssignments, Provider.MySql)

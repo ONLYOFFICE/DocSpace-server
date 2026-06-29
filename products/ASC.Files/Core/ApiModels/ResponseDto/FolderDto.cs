@@ -262,11 +262,7 @@ public class FolderDtoHelper(
     UserManager userManager,
     IUrlShortener urlShortener,
     FileSharing fileSharing,
-    EntryStatusManager entryStatusManager,
-    AiAccessibility accessibility,
-    AiModelSettingsResolver modelSettingsResolver,
-    AiConfiguration aiConfiguration,
-    AiModelSettingsLoader modelSettingsLoader)
+    EntryStatusManager entryStatusManager)
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, fileSharing, urlShortener)
 {
     private readonly EmployeeDtoHelper _employeeWrapperHelper = employeeWrapperHelper;
@@ -275,17 +271,10 @@ public class FolderDtoHelper(
         Folder<T> folder,
         List<FileShareRecord<string>> currentUserRecords = null,
         string order = null,
-        IFolder contextFolder = null,
-        AiStatus aiStatus = null,
-        AiModelSettingsResult modelSettingsResult = null)
+        IFolder contextFolder = null)
     {
         var result = await GetFolderWrapperAsync(folder);
         result.ParentId = folder.ParentId;
-
-        if (folder.RootFolderType == FolderType.AiAgents && aiStatus == null)
-        {
-            aiStatus = await accessibility.GetStatusAsync();
-        }
 
         if (folder.IsRoom)
         {
@@ -332,14 +321,13 @@ public class FolderDtoHelper(
                                 !currentUserRecords.Exists(c => c.EntryId.Equals(folder.Id.ToString()) && c.SubjectType == SubjectType.Group);
             }
 
+            result.UsedSpace = folder.Counter;
+
             if ((await tenantManager.GetCurrentTenantQuotaAsync()).Statistic &&
                     ((result.Security.TryGetValue(FileSecurity.FilesSecurityActions.EditRoom, out var canEdit) && canEdit) ||
                      (result.RootFolderType is FolderType.Archive or FolderType.TRASH && result.Security.TryGetValue(FileSecurity.FilesSecurityActions.Delete, out var canDelete) && canDelete) ||
                      (result.Security.TryGetValue(FileSecurity.FilesSecurityActions.Create, out var canCreate) && canCreate)))
             {
-
-                result.UsedSpace = folder.Counter;
-
                 TenantEntityQuotaSettings quotaSettings = folder.FolderType is FolderType.AiRoom
                 ? await settingsManager.LoadAsync<TenantAiAgentQuotaSettings>()
                 : await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
@@ -412,73 +400,10 @@ public class FolderDtoHelper(
 
         if (folder.SettingsChatParameters != null)
         {
-            ProviderType? providerType = null;
-            var hasModelSettings = true;
-
-            if (folder.SettingsChatProviderId == AiGateway.ProviderId)
-            {
-                providerType = ProviderType.PortalAi;
-
-                if (!aiStatus.GatewayEnabled)
-                {
-                    folder.SettingsChatProviderId = 0;
-                }
-            }
-            else
-            {
-                modelSettingsResult ??= await modelSettingsLoader.LoadForEntriesAsync([], folder);
-                if (modelSettingsResult?.Providers?.TryGetValue(folder.SettingsChatProviderId, out var meta) == true)
-                {
-                    providerType = meta.Type;
-                    hasModelSettings = meta.HasModelSettings;
-                }
-            }
-
-            var modelId = folder.SettingsChatProviderId == 0 ? null : folder.SettingsChatParameters.ModelId;
-            if (modelId != null && providerType.HasValue)
-            {
-                var resolvedModelId = aiConfiguration.ResolveModelId(providerType.Value, modelId);
-                if (resolvedModelId != modelId)
-                {
-                    modelId = resolvedModelId;
-                    folder.SettingsChatParameters = folder.SettingsChatParameters with { ModelId = modelId };
-                }
-            }
-
-            ModelSettings resolved = null;
-            if (modelId != null && providerType.HasValue)
-            {
-                AiModelSettings dbSettings = null;
-                modelSettingsResult?.Settings?.TryGetValue((folder.SettingsChatProviderId, modelId), out dbSettings);
-                resolved = modelSettingsResolver.Resolve(providerType.Value, modelId, dbSettings, hasModelSettings);
-            }
-
-            var model = resolved is { IsEnabled: true } ? resolved : null;
-
-            ChatMultimodalSettingsDto multimodal = null;
-            if (model?.Capabilities is { Vision: true })
-            {
-                multimodal = new ChatMultimodalSettingsDto
-                {
-                    Image = new ChatImageMultimodalSettingsDto
-                    {
-                        Formats = AiConfiguration.SupportedImageFormats
-                    }
-                };
-            }
-
-#pragma warning disable CS0618 // Obsolete
             result.ChatSettings = new ChatSettingsDto
             {
-                ProviderId = folder.SettingsChatProviderId,
-                ModelId = modelId,
-                ModelAlias = model?.Alias,
                 Prompt = folder.SettingsChatParameters.Prompt,
-                Multimodal = multimodal,
-                Thinking = model?.Capabilities?.Thinking ?? false,
-                Capabilities = model?.Capabilities
             };
-#pragma warning restore CS0618
         }
 
         if (contextFolder is { FolderType: FolderType.Recent } or { FolderType: FolderType.Favorites })
@@ -511,11 +436,11 @@ public class FolderDtoHelper(
             result.Order = "";
 
             var myId = await _globalFolderHelper.GetFolderMyAsync<T>();
-            result.OriginTitle = Equals(result.OriginId, myId) ? FilesUCResource.MyFiles : result.OriginTitle;
+            result.OriginTitle = Equals(result.OriginId, myId) ? FilesUCResource.Files : result.OriginTitle;
 
             if (Equals(result.OriginRoomId, myId))
             {
-                result.OriginRoomTitle = FilesUCResource.MyFiles;
+                result.OriginRoomTitle = FilesUCResource.Files;
             }
             else if (Equals(result.OriginRoomId, await _globalFolderHelper.FolderArchiveAsync))
             {
@@ -551,21 +476,6 @@ public class FolderDtoHelper(
         if (folder.FolderType == FolderType.AiRoom)
         {
             result.FoldersCount -= 2;
-        }
-
-        if (aiStatus is { Enabled: false})
-        {
-            switch (folder.FolderType)
-            {
-                case FolderType.AiAgents:
-                    result.Security[FileSecurity.FilesSecurityActions.Create] = false;
-                    break;
-                case FolderType.AiRoom:
-                    result.Security[FileSecurity.FilesSecurityActions.EditRoom] = false;
-                    result.Security[FileSecurity.FilesSecurityActions.ChangeOwner] = false;
-                    result.Security[FileSecurity.FilesSecurityActions.EditAccess] = false;
-                    break;
-            }
         }
 
         if (folder.FolderType == FolderType.FormFillingFolderDone && folder.Id is int doneFolderId)

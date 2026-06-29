@@ -53,9 +53,9 @@ public class WalletServiceDescriptionManager
         var quantity = operation.Quantity;
 
         // for testing purposes
-        if (serviceName != null && serviceName.StartsWith("disk-storage"))
+        if (serviceName != null && serviceName.EndsWith("-1-hour"))
         {
-            serviceName = "disk-storage";
+            serviceName = serviceName.Replace("-1-hour", "");
         }
 
         if (operation.Type == OperationType.AiCredit && operation.Credit > 0)
@@ -64,9 +64,9 @@ public class WalletServiceDescriptionManager
             operation.Type = OperationType.Deposit;
         }
 
-        if (operation.Type == OperationType.AiServicePayment)
+        if (serviceName == "ai-tools")
         {
-            if (string.IsNullOrEmpty(serviceName) && !string.IsNullOrEmpty(filterServiceName))
+            if (!string.IsNullOrEmpty(filterServiceName))
             {
                 serviceName = filterServiceName;
             }

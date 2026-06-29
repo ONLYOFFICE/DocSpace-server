@@ -1701,7 +1701,7 @@ $TrulyYours</value>
 
 Запланований процес резервного копіювання вашого простору DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" не вдався.
 
-Рекомендуємо перевірити налаштування "Резервне копіювання":"${__VirtualRootPath}/portal-settings/backup/data-backup" та "Служби":"${__VirtualRootPath}/portal-settings/services".
+Рекомендуємо перевірити налаштування "Резервне копіювання":"${__VirtualRootPath}/portal-settings/backup/data-backup" та "Служби":"${__VirtualRootPath}/portal-settings/payments/services".
 
 Якщо у вас виникли запитання або потрібна допомога, зв'яжіться з нами на сторінці "${__SupportLink}":"${__SupportLink}"
 
@@ -1712,7 +1712,7 @@ $TrulyYours</value>
 
 Запланований процес резервного копіювання вашого простору DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) не вдався.
 
-Рекомендуємо перевірити налаштування [Резервне копіювання](${__VirtualRootPath}/portal-settings/backup/data-backup) та [Служби](${__VirtualRootPath}/portal-settings/services).
+Рекомендуємо перевірити налаштування [Резервне копіювання](${__VirtualRootPath}/portal-settings/backup/data-backup) та [Служби](${__VirtualRootPath}/portal-settings/payments/services).
 
 Якщо у вас виникли запитання або потрібна допомога, зв'яжіться з нами на сторінці [${__SupportLink}](${__SupportLink})
 

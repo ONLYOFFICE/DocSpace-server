@@ -43,7 +43,7 @@ public class ThreadStorageService(
     AuthContext authContext,
     TenantManager tenantManager,
     ThreadsStorage storage,
-    ProfileStorage profileStorage,
+    ProfileStorageService profileStorageService,
     IDistributedLockProvider distributedLockProvider,
     IDaoFactory daoFactory,
     FileSecurity fileSecurity) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity)
@@ -52,14 +52,7 @@ public class ThreadStorageService(
 
     public async Task<Thread> CreateAsync(string title, Guid? profileId = null, string? entityId = null)
     {
-        await AssertUserHasAccessAsync(_allowedTypes);
-
-        int? entryId = entityId == null ? null : int.Parse(entityId);
-
-        if (entryId.HasValue)
-        {
-            await AssertEntryAccessAsync(entryId.Value);
-        }
+        var entryId = await AssertUserHasAccessAsync(_allowedTypes, entityId);
 
         var tenantId = tenantManager.GetCurrentTenantId();
 
@@ -72,7 +65,7 @@ public class ThreadStorageService(
 
         await using (await distributedLockProvider.TryAcquireFairLockAsync(ProfileStorage.GetLockKey(tenantId, id)))
         {
-            await AssertProfileExistsAsync(tenantId, id);
+            _ = await profileStorageService.ReadByIdAsync(id);
             return await storage.CreateAsync(tenantId, CurrentUserId, title, id, entryId);
         }
     }
@@ -90,9 +83,7 @@ public class ThreadStorageService(
 
     public async Task<IEnumerable<Thread>> ReadAllAsync(string? entityId = null)
     {
-        await AssertUserHasAccessAsync(_allowedTypes);
-
-        int? entryId = entityId == null ? null : int.Parse(entityId);
+        var entryId = await AssertUserHasAccessAsync(_allowedTypes, entityId);
 
         return await storage.ReadAllAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, entryId);
     }
@@ -130,7 +121,7 @@ public class ThreadStorageService(
 
         await using (await distributedLockProvider.TryAcquireFairLockAsync(ProfileStorage.GetLockKey(tenantId, parsedProfileId)))
         {
-            await AssertProfileExistsAsync(tenantId, parsedProfileId);
+            _ = await profileStorageService.ReadByIdAsync(parsedProfileId);
             await storage.TouchAsync(tenantId, id, lastEditDateUtc, parsedProfileId);
         }
     }
@@ -159,11 +150,5 @@ public class ThreadStorageService(
         {
             throw new SecurityException();
         }
-    }
-
-    private async Task AssertProfileExistsAsync(int tenantId, Guid profileId)
-    {
-        _ = await profileStorage.ReadByIdAsync(tenantId, profileId)
-            ?? throw new ItemNotFoundException($"Profile with id '{profileId}' was not found");
     }
 }

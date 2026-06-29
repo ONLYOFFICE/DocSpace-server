@@ -42,19 +42,15 @@ public class AssignmentsStorageService(
     IDaoFactory daoFactory,
     FileSecurity fileSecurity) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity)
 {
-    private static readonly EmployeeType[] _writeTypes = [EmployeeType.DocSpaceAdmin];
+    private static readonly EmployeeType[] _writeGlobalTypes = [EmployeeType.DocSpaceAdmin];
+    private static readonly EmployeeType[] _writeLocalTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin];
     private static readonly EmployeeType[] _readTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin];
 
     public async Task CreateAsync(ActionType actionType, Guid profileId, string? entityId = null)
     {
-        await AssertUserHasAccessAsync(_writeTypes);
+        var userTypes = !string.IsNullOrEmpty(entityId) ? _writeLocalTypes : _writeGlobalTypes;
 
-        int? entryId = entityId == null ? null : int.Parse(entityId);
-
-        if (entryId.HasValue)
-        {
-            await AssertEntryAccessAsync(entryId.Value);
-        }
+        var entryId = await AssertUserHasAccessAsync(userTypes, entityId);
 
         if (!await storage.CreateAsync(tenantManager.GetCurrentTenantId(), actionType, profileId, entryId))
         {
@@ -64,42 +60,23 @@ public class AssignmentsStorageService(
 
     public async Task<Guid?> ReadByTypeAsync(ActionType actionType, string? entityId = null)
     {
-        await AssertUserHasAccessAsync(_readTypes);
-
-        int? entryId = entityId == null ? null : int.Parse(entityId);
-
-        if (entryId.HasValue)
-        {
-            await AssertEntryAccessAsync(entryId.Value);
-        }
+        var entryId = await AssertUserHasAccessAsync(_readTypes, entityId);
 
         return await storage.ReadByTypeAsync(tenantManager.GetCurrentTenantId(), actionType, entryId);
     }
 
     public async Task<Dictionary<ActionType, Guid>> ReadAllAsync(string? entityId = null)
     {
-        await AssertUserHasAccessAsync(_readTypes);
-
-        int? entryId = entityId == null ? null : int.Parse(entityId);
-
-        if (entryId.HasValue)
-        {
-            await AssertEntryAccessAsync(entryId.Value);
-        }
+        var entryId = await AssertUserHasAccessAsync(_readTypes, entityId);
 
         return await storage.ReadAllAsync(tenantManager.GetCurrentTenantId(), entryId);
     }
 
     public async Task UpdateAsync(ActionType actionType, Guid profileId, string? entityId = null)
     {
-        await AssertUserHasAccessAsync(_writeTypes);
+        var userTypes = !string.IsNullOrEmpty(entityId) ? _writeLocalTypes : _writeGlobalTypes;
 
-        int? entryId = entityId == null ? null : int.Parse(entityId);
-
-        if (entryId.HasValue)
-        {
-            await AssertEntryAccessAsync(entryId.Value);
-        }
+        var entryId = await AssertUserHasAccessAsync(userTypes, entityId);
 
         if (!await storage.UpdateAsync(tenantManager.GetCurrentTenantId(), actionType, profileId, entryId))
         {
@@ -109,28 +86,23 @@ public class AssignmentsStorageService(
 
     public async Task UpsertManyAsync(IReadOnlyDictionary<ActionType, Guid> assignments, string? entityId = null)
     {
-        await AssertUserHasAccessAsync(_writeTypes);
+        var userTypes = !string.IsNullOrEmpty(entityId) ? _writeLocalTypes : _writeGlobalTypes;
 
-        int? entryId = entityId == null ? null : int.Parse(entityId);
-
-        if (entryId.HasValue)
-        {
-            await AssertEntryAccessAsync(entryId.Value);
-        }
+        var entryId = await AssertUserHasAccessAsync(userTypes, entityId);
 
         await storage.UpsertManyAsync(tenantManager.GetCurrentTenantId(), assignments, entryId);
     }
 
     public async Task DeleteAsync(ActionType actionType)
     {
-        await AssertUserHasAccessAsync(_writeTypes);
+        await AssertUserHasAccessAsync(_writeGlobalTypes);
 
         await storage.DeleteAsync(tenantManager.GetCurrentTenantId(), actionType);
     }
 
     public async Task DeleteManyAsync(IReadOnlyCollection<ActionType> actionTypes)
     {
-        await AssertUserHasAccessAsync(_writeTypes);
+        await AssertUserHasAccessAsync(_writeGlobalTypes);
 
         await storage.DeleteManyAsync(tenantManager.GetCurrentTenantId(), actionTypes);
     }

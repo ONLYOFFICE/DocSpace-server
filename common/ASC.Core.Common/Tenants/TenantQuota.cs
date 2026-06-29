@@ -1,34 +1,34 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Core.Tenants;
@@ -108,6 +108,12 @@ public class TenantQuota
     /// </summary>
     /// <example>true</example>
     public bool Wallet { get; set; }
+
+    /// <summary>
+    /// Specifies if the tenant quota is primary or additional.
+    /// </summary>
+    /// <example>false</example>
+    public bool Additional { get; set; }
 
     /// <summary>
     /// The quota due date.
@@ -556,6 +562,8 @@ public class TenantQuota
         TenantId = quota.TenantId;
         Name = quota.Name;
         Price = quota.Price;
+        PriceCurrencySymbol = quota.PriceCurrencySymbol;
+        PriceISOCurrencySymbol = quota.PriceISOCurrencySymbol;
         ProductId = quota.ProductId;
         ServiceName = quota.ServiceName;
         ServiceGroup = quota.ServiceGroup;
@@ -563,6 +571,7 @@ public class TenantQuota
         MaxFileSize = quota.MaxFileSize;
         Features = quota.Features;
         Wallet = quota.Wallet;
+        Additional = quota.Additional;
         DueDate = quota.DueDate;
     }
 
@@ -605,7 +614,7 @@ public class TenantQuota
             return quota;
         }
 
-        if (quota.Wallet && quota.DueDate.HasValue && quota.DueDate.Value < DateTime.UtcNow)
+        if (quota.Wallet && quota.Additional && quota.DueDate.HasValue && quota.DueDate.Value < DateTime.UtcNow)
         {
             return old;
         }
@@ -622,6 +631,13 @@ public class TenantQuota
                 newQuota.DueDate = newQuota.DueDate.HasValue
                     ? DateTime.Compare(newQuota.DueDate.Value, quota.DueDate.Value) < 0 ? newQuota.DueDate.Value : quota.DueDate.Value
                     : quota.DueDate.Value;
+            }
+
+            if (!quota.Additional)
+            {
+                // the primary wallet plan (adminwallet) contributes its price; additional wallet add-ons do not
+                newQuota.Price += quota.Price;
+                newQuota.Visible &= quota.Visible;
             }
         }
         else
@@ -732,7 +748,6 @@ public class TenantQuota
 public partial class TenantQuotaMapper(IServiceProvider provider)
 {
     private partial TenantQuota Map(DbQuota source);
-    public partial List<TenantQuota> Map(List<DbQuota> source);
     public partial DbQuota Map(TenantQuota source);
 
     [UserMapping(Default = true)]
@@ -741,6 +756,18 @@ public partial class TenantQuotaMapper(IServiceProvider provider)
         var dto = Map(quota);
         (dto.Price, dto.PriceCurrencySymbol, dto.PriceISOCurrencySymbol) = await Resolve(quota);
         return dto;
+    }
+
+    public async Task<List<TenantQuota>> MapDbQuotaToTenantQuota(List<DbQuota> source)
+    {
+        var result = new List<TenantQuota>(source.Count);
+
+        foreach (var quota in source)
+        {
+            result.Add(await MapDbQuotaToTenantQuota(quota));
+        }
+
+        return result;
     }
 
     private async Task<(decimal, string, string)> Resolve(DbQuota source)

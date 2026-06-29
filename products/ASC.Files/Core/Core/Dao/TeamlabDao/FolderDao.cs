@@ -354,7 +354,7 @@ internal class FolderDao(
                 case FolderType.USER:
                     result.MyDocumentsUsedSpace = new FilesStatisticsFolder
                     {
-                        Title = FilesUCResource.MyFiles,
+                        Title = FilesUCResource.Files,
                         UsedSpace = rootFolder.UsedSpace
                     };
                     break;
