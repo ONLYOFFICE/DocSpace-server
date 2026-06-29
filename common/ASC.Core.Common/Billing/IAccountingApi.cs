@@ -67,6 +67,12 @@ public interface IAccountingApi
     [Get("/customer/{portalId}/operations/ai")]
     Task<Report> GetCustomerAiOperationsAsync(string portalId, [Query] OperationFilter filter);
 
+    [Get("/customer/{portalId}/usage/monthly")]
+    Task<List<CustomerMonthlyUsage>> GetCustomerMonthlyUsageAsync(string portalId, [Query] DateTime? utcStartDate, [Query]DateTime? utcEndDate);
+
+    [Get("/customer/{portalId}/usage")]
+    Task<UsageReport> GetCustomerServiceUsageAsync(string portalId, UsageFilter filter);
+
     [Get("/currency/all")]
     Task<List<Currency>> GetAllCurrenciesAsync();
 

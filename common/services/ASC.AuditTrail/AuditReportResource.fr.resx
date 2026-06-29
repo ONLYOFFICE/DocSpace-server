@@ -951,6 +951,9 @@
   <data name="StartTransferSetting" xml:space="preserve">
     <value>Migration de la région du portail est lancée</value>
   </data>
+  <data name="SubscriptionBalanceMovedToWallet" xml:space="preserve">
+    <value>Solde d'abonnement transféré dans le portefeuille : {0}</value>
+  </data>
   <data name="SystemAccount" xml:space="preserve">
     <value>Compte système</value>
   </data>

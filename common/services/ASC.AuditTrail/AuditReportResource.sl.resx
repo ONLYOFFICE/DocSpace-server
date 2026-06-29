@@ -957,6 +957,9 @@
   <data name="StartTransferSetting" xml:space="preserve">
     <value>Začni selitev regije portala</value>
   </data>
+  <data name="SubscriptionBalanceMovedToWallet" xml:space="preserve">
+    <value>Stanje naročnine je bilo premaknjeno v denarnico: {0}</value>
+  </data>
   <data name="SystemAccount" xml:space="preserve">
     <value>Sistemski račun</value>
   </data>

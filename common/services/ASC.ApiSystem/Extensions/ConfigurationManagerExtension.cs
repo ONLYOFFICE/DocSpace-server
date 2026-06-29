@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -31,39 +31,18 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.AI.Core.Provider.Data;
+namespace ASC.ApiSystem.Extensions;
 
-public interface IAiProviderDao
+public static class ConfigurationManagerExtension
 {
-    Task<AiProvider> AddProviderAsync(
-        int tenantId,
-        string title,
-        string url,
-        string key,
-        ProviderType type,
-        string defaultModel,
-        List<AiModelSettings>? modelSettings = null);
+    public static ConfigurationManager AddApiSystemConfiguration(this ConfigurationManager config, IHostEnvironment env)
+    {
+        config
+          .AddJsonFile("apisystem.json")
+          .AddJsonFile($"apisystem.{env.EnvironmentName}.json", true)
+          .AddJsonFile("notify.json")
+          .AddJsonFile($"notify.{env.EnvironmentName}.json", true);
 
-    Task<AiProvider?> GetProviderAsync(int tenantId, int id, bool forceSystemProvider = false);
-
-    IAsyncEnumerable<AiProvider> GetProvidersAsync(int tenantId, int offset, int limit);
-
-    Task<bool> CanDecryptSomeKeyAsync(int tenantId);
-
-    Task<int> GetProvidersTotalCountAsync(int tenantId);
-
-    Task<bool> IsProviderNameExistsAsync(int tenantId, string title, int excludedProviderId = 0);
-
-    Task<AiProvider> UpdateProviderAsync(int tenantId, AiProvider provider, List<AiModelSettings>? modelSettings = null);
-
-    Task DeleteProviders(int tenantId, HashSet<int> ids);
-
-    Task<DefaultAiProviderSettings> SetDefaultProviderAsync(int tenantId, AiProvider provider, string defaultModel);
-
-    Task<DefaultAiProviderSettings?> GetDefaultProviderAsync(int tenantId);
-
-    Task<int?> GetFirstProviderIdAsync(int tenantId);
-
-    Task<Dictionary<string, AiModelSettings>> GetModelSettingsAsync(int tenantId, int providerId, ProviderType type);
-    Task<AiModelSettings?> GetModelSettingAsync(int tenantId, int providerId, string modelId);
+        return config;
+    }
 }

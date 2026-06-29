@@ -45,6 +45,8 @@ public interface ITariffService
     Task<Uri> GetAccountLinkAsync(int tenant, string backUrl);
     Task<bool> PaymentChangeAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType, string currency, bool checkQuota, string customerParticipantName, Dictionary<string, string> metadata = null);
     Task<PaymentCalculation> PaymentCalculateAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType, string currency);
+    Task<SubscriptionBalanceInfo> GetSubscriptionBalanceInfoAsync(int tenantId, string productId);
+    Task<SubscriptionToWalletResult> SubscriptionBalanceToWalletAsync(int tenantId, string productId);
     int GetPaymentDelay();
     Task<Tariff> GetBillingInfoAsync(int? tenant = null, int? id = null);
     bool IsConfigured();
@@ -59,6 +61,8 @@ public interface ITariffService
     Task<bool> CompleteCustomerSessionAsync(int tenantId, string serviceName, int sessionId, int quantity, string customerParticipantName, Dictionary<string, string> metadata = null);
     Task<ServicePayment> MakeAiCreditAsync(int tenantId, decimal amount, string currency, string customerParticipantName, Dictionary<string, string> metadata = null);
     Task<Report> GetCustomerOperationsAsync(int tenantId, OperationFilter filter);
+    Task<List<CustomerMonthlyUsage>> GetCustomerMonthlyUsageAsync(int tenantId, DateTime? utcStartDate, DateTime? utcEndDate);
+    Task<UsageReport> GetCustomerServiceUsageAsync(int tenantId, UsageFilter filter);
     Task<List<Currency>> GetAllAccountingCurrenciesAsync();
     List<string> GetSupportedAccountingCurrencies();
 

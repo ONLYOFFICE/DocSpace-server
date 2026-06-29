@@ -64,9 +64,9 @@ public class WalletServiceDescriptionManager
             operation.Type = OperationType.Deposit;
         }
 
-        if (operation.Type == OperationType.AiServicePayment)
+        if (serviceName == "ai-tools")
         {
-            if (string.IsNullOrEmpty(serviceName) && !string.IsNullOrEmpty(filterServiceName))
+            if (!string.IsNullOrEmpty(filterServiceName))
             {
                 serviceName = filterServiceName;
             }

@@ -2523,7 +2523,7 @@ public class EntryManager(IDaoFactory daoFactory,
             }
 
             fileEntry.OriginId = data.OriginFolder.Id;
-            fileEntry.OriginTitle = data.OriginFolder.FolderType == FolderType.USER ? FilesUCResource.MyFiles : data.OriginFolder.Title;
+            fileEntry.OriginTitle = data.OriginFolder.FolderType == FolderType.USER ? FilesUCResource.Files : data.OriginFolder.Title;
         }
     }
 }
