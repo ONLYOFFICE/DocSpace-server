@@ -6,11 +6,36 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     /// <inheritdoc />
-    public partial class MigrationContext_Upgrade85 : Migration
+    public partial class MigrationContext_Upgrade84 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "ai_integration_assignments",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "utf8_general_ci")
+                        .Annotation("MySql:CharSet", "utf8"),
+                    tenant_id = table.Column<int>(type: "int", nullable: false),
+                    action_type = table.Column<int>(type: "int", nullable: false),
+                    profile_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "utf8_general_ci")
+                        .Annotation("MySql:CharSet", "utf8"),
+                    entry_id = table.Column<int>(type: "int", nullable: true),
+                    created_at = table.Column<DateTime>(type: "datetime", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PRIMARY", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_ai_integration_assignments_tenants_tenants_tenant_id",
+                        column: x => x.tenant_id,
+                        principalTable: "tenants_tenants",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8");
+
             migrationBuilder.CreateTable(
                 name: "ai_integration_mcp_servers",
                 columns: table => new
@@ -182,33 +207,52 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 .Annotation("MySql:CharSet", "utf8");
 
             migrationBuilder.CreateTable(
-                name: "ai_integration_assignments",
+                name: "app_settings",
                 columns: table => new
                 {
-                    id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "utf8_general_ci")
-                        .Annotation("MySql:CharSet", "utf8"),
                     tenant_id = table.Column<int>(type: "int", nullable: false),
-                    action_type = table.Column<int>(type: "int", nullable: false),
-                    profile_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "utf8_general_ci")
+                    id = table.Column<string>(type: "varchar(64)", maxLength: 64, nullable: false, collation: "utf8_general_ci")
                         .Annotation("MySql:CharSet", "utf8"),
-                    entry_id = table.Column<int>(type: "int", nullable: true),
-                    created_at = table.Column<DateTime>(type: "datetime", nullable: false)
+                    enabled = table.Column<bool>(type: "tinyint(1)", nullable: false, defaultValueSql: "'0'"),
+                    settings = table.Column<string>(type: "json", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8"),
+                    last_modified = table.Column<DateTime>(type: "datetime", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PRIMARY", x => x.id);
+                    table.PrimaryKey("PRIMARY", x => new { x.tenant_id, x.id });
                     table.ForeignKey(
-                        name: "FK_ai_integration_assignments_ai_integration_profiles_profile_id",
-                        column: x => x.profile_id,
-                        principalTable: "ai_integration_profiles",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_ai_integration_assignments_tenants_tenants_tenant_id",
+                        name: "FK_app_settings_tenants_tenants_tenant_id",
                         column: x => x.tenant_id,
                         principalTable: "tenants_tenants",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8");
+
+            migrationBuilder.CreateTable(
+                name: "files_file_keys",
+                columns: table => new
+                {
+                    user_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "utf8_general_ci")
+                        .Annotation("MySql:CharSet", "utf8"),
+                    tenant_id = table.Column<int>(type: "int", nullable: false),
+                    file_id = table.Column<int>(type: "int", nullable: false),
+                    public_key_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "utf8_general_ci")
+                        .Annotation("MySql:CharSet", "utf8"),
+                    private_key_enc = table.Column<string>(type: "text", nullable: false, collation: "utf8_general_ci")
+                        .Annotation("MySql:CharSet", "utf8"),
+                    create_on = table.Column<DateTime>(type: "datetime", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PRIMARY", x => new { x.tenant_id, x.file_id, x.user_id });
+                    table.ForeignKey(
+                        name: "FK_files_file_keys_tenants_tenants_tenant_id",
+                        column: x => x.tenant_id,
+                        principalTable: "tenants_tenants",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
                 })
                 .Annotation("MySql:CharSet", "utf8");
 
@@ -311,11 +355,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 .Annotation("MySql:CharSet", "utf8");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ai_integration_assignments_profile_id",
-                table: "ai_integration_assignments",
-                column: "profile_id");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_tenant_id_action_type_entry_id",
                 table: "ai_integration_assignments",
                 columns: new[] { "tenant_id", "action_type", "entry_id" });
@@ -394,6 +433,11 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 name: "IX_tenant_id_created_by_server_type_entry_id",
                 table: "ai_integration_tool_preferences",
                 columns: new[] { "tenant_id", "created_by", "server_type", "entry_id" });
+
+            migrationBuilder.CreateIndex(
+                name: "tenant_id_user_id",
+                table: "files_file_keys",
+                columns: new[] { "tenant_id", "user_id" });
         }
 
         /// <inheritdoc />
@@ -412,13 +456,19 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 name: "ai_integration_preferences");
 
             migrationBuilder.DropTable(
+                name: "ai_integration_profiles");
+
+            migrationBuilder.DropTable(
                 name: "ai_integration_prompts");
 
             migrationBuilder.DropTable(
                 name: "ai_integration_tool_preferences");
 
             migrationBuilder.DropTable(
-                name: "ai_integration_profiles");
+                name: "app_settings");
+
+            migrationBuilder.DropTable(
+                name: "files_file_keys");
 
             migrationBuilder.DropTable(
                 name: "ai_integration_messages");
