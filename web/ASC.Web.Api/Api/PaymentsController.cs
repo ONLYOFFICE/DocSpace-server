@@ -250,7 +250,7 @@ public class PaymentController(
 
         var tenant = tenantManager.GetCurrentTenant();
 
-        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id, refresh: true);
         if (customerInfo == null)
         {
             throw new ItemNotFoundException("Customer could not be found");
@@ -339,7 +339,7 @@ public class PaymentController(
             throw new ArgumentException("Invalid quantity");
         }
 
-        var balance = await tariffService.GetCustomerBalanceAsync(tenant.Id);
+        var balance = await tariffService.GetCustomerBalanceAsync(tenant.Id, refresh: true);
         if (balance == null)
         {
             throw new ItemNotFoundException("Balance could not be found");
