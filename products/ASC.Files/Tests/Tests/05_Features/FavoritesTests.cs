@@ -349,7 +349,7 @@ public class FavoritesTests(
     {
         var favoritesId = await GetFolderIdAsync(FolderType.Favorites, user);
 
-        return (await _foldersApi.GetFolderByFolderIdAsync(favoritesId, folderType: folderType, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        return (await _foldersApi.GetFolderByFolderIdAsync(favoritesId, folderType: folderType?.Select(r=> (int)r).ToList(), cancellationToken: TestContext.Current.CancellationToken)).Response;
     }
 
     private async Task AddToFavorites(params int[] fileIds)
