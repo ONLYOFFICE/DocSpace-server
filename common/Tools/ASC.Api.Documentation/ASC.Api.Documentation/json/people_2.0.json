@@ -5609,8 +5609,6 @@
             "name": "employeeTypes",
             "in": "query",
             "description": "The list of the user types.",
-            "style": "deepObject",
-            "explode": true,
             "schema": {
               "type": "array",
               "items": {
@@ -5841,8 +5839,6 @@
             "name": "employeeTypes",
             "in": "query",
             "description": "The list of the user types.",
-            "style": "deepObject",
-            "explode": true,
             "schema": {
               "type": "array",
               "items": {
@@ -6073,8 +6069,6 @@
             "name": "employeeTypes",
             "in": "query",
             "description": "The list of the user types.",
-            "style": "deepObject",
-            "explode": true,
             "schema": {
               "type": "array",
               "items": {
@@ -6404,8 +6398,6 @@
             "name": "employeeTypes",
             "in": "query",
             "description": "The list of user types.",
-            "style": "deepObject",
-            "explode": true,
             "schema": {
               "type": "array",
               "items": {
@@ -6964,8 +6956,6 @@
             "name": "employeeTypes",
             "in": "query",
             "description": "The list of user types.",
-            "style": "deepObject",
-            "explode": true,
             "schema": {
               "type": "array",
               "items": {
@@ -7328,8 +7318,6 @@
             "name": "employeeTypes",
             "in": "query",
             "description": "The list of user types.",
-            "style": "deepObject",
-            "explode": true,
             "schema": {
               "type": "array",
               "items": {
@@ -7560,8 +7548,6 @@
             "name": "employeeTypes",
             "in": "query",
             "description": "The list of user types.",
-            "style": "deepObject",
-            "explode": true,
             "schema": {
               "type": "array",
               "items": {
@@ -7792,8 +7778,6 @@
             "name": "employeeTypes",
             "in": "query",
             "description": "The list of user types.",
-            "style": "deepObject",
-            "explode": true,
             "schema": {
               "type": "array",
               "items": {

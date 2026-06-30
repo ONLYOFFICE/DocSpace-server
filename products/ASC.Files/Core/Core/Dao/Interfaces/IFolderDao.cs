@@ -107,6 +107,7 @@ public interface IFolderDao<T>
     /// <param name="containingMyFiles"></param>
     /// <param name="parentType"></param>
     /// <param name="containingForms"></param>
+    /// <param name="folderType"></param>
     /// <returns></returns>
     IAsyncEnumerable<Folder<T>> GetFoldersAsync(T parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
         bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, T roomId = default, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, bool containingForms = false, List<FolderType> folderType = null);

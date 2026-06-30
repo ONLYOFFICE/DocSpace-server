@@ -71,8 +71,6 @@ public class PaymentController(
     IEventBus eventBus,
     CommonLinkUtility commonLinkUtility,
     DocumentBuilderTaskManager<CustomerOperationsReportTask, int, CustomerOperationsReportTaskData> documentBuilderTaskManager,
-    DocumentBuilderTaskManager<CustomerServiceUsageReportTask, int, CustomerServiceUsageReportTaskData> serviceUsageReportTaskManager,
-    DocumentBuilderTaskManager<CustomerMonthlyUsageReportTask, int, CustomerMonthlyUsageReportTaskData> monthlyUsageReportTaskManager,
     IServiceProvider serviceProvider,
     WalletStaticProvider walletStaticProvider,
     QuotaSocketManager quotaSocketManager)
@@ -1219,20 +1217,7 @@ public class PaymentController(
     [HttpPost("customer/operationsreport")]
     public async Task<DocumentBuilderTaskDto> CreateCustomerOperationsReport(CustomerOperationsReportRequestDto inDto)
     {
-        if (!tariffService.IsConfigured())
-        {
-            throw new InvalidOperationException("Tariff service is not configured");
-        }
-
-        await DemandAdminAsync();
-
-        var tenantId = tenantManager.GetCurrentTenantId();
-
-        var customerInfo = await tariffService.GetCustomerInfoAsync(tenantId);
-        if (customerInfo == null)
-        {
-            throw new ItemNotFoundException("Customer could not be found");
-        }
+        var tenantId = await EnsureCustomerAndAdminRightsAsync();
 
         inDto ??= new CustomerOperationsReportRequestDto();
 
@@ -1244,11 +1229,11 @@ public class PaymentController(
 
         var userId = securityContext.CurrentAccount.ID;
 
-        var task = serviceProvider.GetService<CustomerOperationsReportTask>();
+        var task = serviceProvider.GetRequiredService<CustomerOperationsReportTask>();
 
         var baseUri = commonLinkUtility.ServerRootPath;
 
-        task.Init(baseUri, tenantId, userId, null);
+        task.Init(baseUri, tenantId, userId, null, DocumentBuilderTaskManager.GetTaskId(tenantId, userId, (int)ReportType.Operations));
 
         var taskProgress = await documentBuilderTaskManager.StartTask(task, false);
 
@@ -1259,6 +1244,7 @@ public class PaymentController(
             userId,
             tenantId,
             baseUri,
+            ReportType.Operations,
             inDto.ServiceName,
             inDto.StartDate,
             inDto.EndDate,
@@ -1267,9 +1253,9 @@ public class PaymentController(
             inDto.Debit,
             inDto.Type,
             inDto.Status,
-            inDto.OrderBy,
-            inDto.OrderType,
-            headers);
+            orderBy: inDto.OrderBy,
+            orderType: inDto.OrderType,
+            headers: headers);
 
         await eventBus.PublishAsync(evt);
 
@@ -1288,22 +1274,9 @@ public class PaymentController(
     [HttpGet("customer/operationsreport")]
     public async Task<DocumentBuilderTaskDto> GetCustomerOperationsReport()
     {
-        if (!tariffService.IsConfigured())
-        {
-            throw new InvalidOperationException("Tariff service is not configured");
-        }
+        var tenantId = await EnsureCustomerAndAdminRightsAsync();
 
-        await DemandAdminAsync();
-
-        var tenantId = tenantManager.GetCurrentTenantId();
-
-        var customerInfo = await tariffService.GetCustomerInfoAsync(tenantId);
-        if (customerInfo == null)
-        {
-            throw new ItemNotFoundException("Customer could not be found");
-        }
-
-        var task = await documentBuilderTaskManager.GetTask(tenantId, securityContext.CurrentAccount.ID);
+        var task = await documentBuilderTaskManager.GetTask(tenantId, securityContext.CurrentAccount.ID, (int)ReportType.Operations);
 
         return DocumentBuilderTaskDto.Get(task);
     }
@@ -1320,22 +1293,9 @@ public class PaymentController(
     [HttpDelete("customer/operationsreport")]
     public async Task TerminateCustomerOperationsReport()
     {
-        if (!tariffService.IsConfigured())
-        {
-            throw new InvalidOperationException("Tariff service is not configured");
-        }
+        var tenantId = await EnsureCustomerAndAdminRightsAsync();
 
-        await DemandAdminAsync();
-
-        var tenantId = tenantManager.GetCurrentTenantId();
-
-        var customerInfo = await tariffService.GetCustomerInfoAsync(tenantId);
-        if (customerInfo == null)
-        {
-            throw new ItemNotFoundException("Customer could not be found");
-        }
-
-        var evt = new CustomerOperationsReportIntegrationEvent(securityContext.CurrentAccount.ID, tenantId, null, null, terminate: true);
+        var evt = new CustomerOperationsReportIntegrationEvent(securityContext.CurrentAccount.ID, tenantId, null, ReportType.Operations, terminate: true);
 
         await eventBus.PublishAsync(evt);
     }
@@ -1366,30 +1326,31 @@ public class PaymentController(
 
         var userId = securityContext.CurrentAccount.ID;
 
-        var task = serviceProvider.GetRequiredService<CustomerServiceUsageReportTask>();
+        var task = serviceProvider.GetRequiredService<CustomerOperationsReportTask>();
 
         var baseUri = commonLinkUtility.ServerRootPath;
 
-        task.Init(baseUri, tenantId, userId, null);
+        task.Init(baseUri, tenantId, userId, null, DocumentBuilderTaskManager.GetTaskId(tenantId, userId, (int)ReportType.ServiceUsage));
 
-        var taskProgress = await serviceUsageReportTaskManager.StartTask(task, false);
+        var taskProgress = await documentBuilderTaskManager.StartTask(task, false);
 
         var headers = MessageSettings.GetHttpHeaders(Request)?
             .ToDictionary(x => x.Key, x => x.Value.ToString()) ?? [];
 
-        var evt = new CustomerServiceUsageReportIntegrationEvent(
+        var evt = new CustomerOperationsReportIntegrationEvent(
             userId,
             tenantId,
             baseUri,
+            ReportType.ServiceUsage,
             inDto.ServiceName,
             inDto.StartDate,
             inDto.EndDate,
             inDto.ParticipantName,
-            inDto.Status,
-            inDto.Metadata,
-            inDto.OrderBy,
-            inDto.OrderType,
-            headers);
+            status: inDto.Status,
+            metadata: inDto.Metadata,
+            orderBy: inDto.OrderBy,
+            orderType: inDto.OrderType,
+            headers: headers);
 
         await eventBus.PublishAsync(evt);
 
@@ -1410,7 +1371,7 @@ public class PaymentController(
     {
         var tenantId = await EnsureCustomerAndAdminRightsAsync();
 
-        var task = await serviceUsageReportTaskManager.GetTask(tenantId, securityContext.CurrentAccount.ID);
+        var task = await documentBuilderTaskManager.GetTask(tenantId, securityContext.CurrentAccount.ID, (int)ReportType.ServiceUsage);
 
         return DocumentBuilderTaskDto.Get(task);
     }
@@ -1429,7 +1390,7 @@ public class PaymentController(
     {
         var tenantId = await EnsureCustomerAndAdminRightsAsync();
 
-        var evt = new CustomerServiceUsageReportIntegrationEvent(securityContext.CurrentAccount.ID, tenantId, null, null, terminate: true);
+        var evt = new CustomerOperationsReportIntegrationEvent(securityContext.CurrentAccount.ID, tenantId, null, ReportType.ServiceUsage, terminate: true);
 
         await eventBus.PublishAsync(evt);
     }
@@ -1454,24 +1415,25 @@ public class PaymentController(
 
         var userId = securityContext.CurrentAccount.ID;
 
-        var task = serviceProvider.GetRequiredService<CustomerMonthlyUsageReportTask>();
+        var task = serviceProvider.GetRequiredService<CustomerOperationsReportTask>();
 
         var baseUri = commonLinkUtility.ServerRootPath;
 
-        task.Init(baseUri, tenantId, userId, null);
+        task.Init(baseUri, tenantId, userId, null, DocumentBuilderTaskManager.GetTaskId(tenantId, userId, (int)ReportType.MonthlyUsage));
 
-        var taskProgress = await monthlyUsageReportTaskManager.StartTask(task, false);
+        var taskProgress = await documentBuilderTaskManager.StartTask(task, false);
 
         var headers = MessageSettings.GetHttpHeaders(Request)?
             .ToDictionary(x => x.Key, x => x.Value.ToString()) ?? [];
 
-        var evt = new CustomerMonthlyUsageReportIntegrationEvent(
+        var evt = new CustomerOperationsReportIntegrationEvent(
             userId,
             tenantId,
             baseUri,
-            inDto.StartDate,
-            inDto.EndDate,
-            headers);
+            ReportType.MonthlyUsage,
+            startDate: inDto.StartDate,
+            endDate: inDto.EndDate,
+            headers: headers);
 
         await eventBus.PublishAsync(evt);
 
@@ -1492,7 +1454,7 @@ public class PaymentController(
     {
         var tenantId = await EnsureCustomerAndAdminRightsAsync();
 
-        var task = await monthlyUsageReportTaskManager.GetTask(tenantId, securityContext.CurrentAccount.ID);
+        var task = await documentBuilderTaskManager.GetTask(tenantId, securityContext.CurrentAccount.ID, (int)ReportType.MonthlyUsage);
 
         return DocumentBuilderTaskDto.Get(task);
     }
@@ -1511,7 +1473,7 @@ public class PaymentController(
     {
         var tenantId = await EnsureCustomerAndAdminRightsAsync();
 
-        var evt = new CustomerMonthlyUsageReportIntegrationEvent(securityContext.CurrentAccount.ID, tenantId, null, terminate: true);
+        var evt = new CustomerOperationsReportIntegrationEvent(securityContext.CurrentAccount.ID, tenantId, null, ReportType.MonthlyUsage, terminate: true);
 
         await eventBus.PublishAsync(evt);
     }

@@ -55,7 +55,7 @@ public class CustomerOperationsReportIntegrationEventHandler(
             {
                 if (@event.Terminate)
                 {
-                    await documentBuilderTaskManager.TerminateTask(@event.TenantId, @event.CreateBy);
+                    await documentBuilderTaskManager.TerminateTask(@event.TenantId, @event.CreateBy, (int)@event.ReportType);
                     return;
                 }
 
@@ -70,6 +70,7 @@ public class CustomerOperationsReportIntegrationEventHandler(
 
                 var data = new CustomerOperationsReportTaskData(
                     @event.Headers,
+                    @event.ReportType,
                     @event.ServiceName,
                     @event.StartDate,
                     @event.EndDate,
@@ -78,10 +79,13 @@ public class CustomerOperationsReportIntegrationEventHandler(
                     @event.Debit,
                     @event.Type,
                     @event.Status,
+                    @event.Metadata,
                     @event.OrderBy,
                     @event.OrderType);
 
-                task.Init(@event.BaseUri, @event.TenantId, @event.CreateBy, data);
+                var taskId = DocumentBuilderTaskManager.GetTaskId(@event.TenantId, @event.CreateBy, (int)@event.ReportType);
+
+                task.Init(@event.BaseUri, @event.TenantId, @event.CreateBy, data, taskId);
 
                 await documentBuilderTaskManager.StartTask(task);
             }
