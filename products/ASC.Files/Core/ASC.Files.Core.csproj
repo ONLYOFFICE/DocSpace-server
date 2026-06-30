@@ -165,8 +165,6 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Services\DocumentBuilderService\ScriptTemplates\CustomerOperationsReport.docbuilder" />
-    <EmbeddedResource Include="Services\DocumentBuilderService\ScriptTemplates\ServiceUsageReport.docbuilder" />
-    <EmbeddedResource Include="Services\DocumentBuilderService\ScriptTemplates\MonthlyUsageReport.docbuilder" />
     <EmbeddedResource Include="Services\DocumentBuilderService\ScriptTemplates\FormFillingReport.docbuilder" />
     <EmbeddedResource Include="Services\DocumentBuilderService\ScriptTemplates\RoomIndexExport.docbuilder" />
   </ItemGroup>

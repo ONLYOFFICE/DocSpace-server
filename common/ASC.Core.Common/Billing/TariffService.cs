@@ -139,7 +139,7 @@ public class TariffService(
                                 {
                                     nextQuantity = existingQuota.NextQuantity;
                                 }
-                                if (existingQuota is { Additional: false })
+                                if (quota is { Additional: false })
                                 {
                                     var paymentEndDate = 9999 <= currentPayment.EndDate.Year ? DateTime.MaxValue : currentPayment.EndDate;
                                     asynctariff.DueDate = DateTime.Compare(asynctariff.DueDate, paymentEndDate) < 0 ? asynctariff.DueDate : paymentEndDate;

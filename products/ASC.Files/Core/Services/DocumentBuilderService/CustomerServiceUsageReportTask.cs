@@ -44,7 +44,7 @@ public class CustomerServiceUsageReportTask : DocumentBuilderTask<int, CustomerS
     {
     }
 
-    private const string ScriptName = "ServiceUsageReport.docbuilder";
+    private const string ScriptName = "CustomerOperationsReport.docbuilder";
 
     protected override async Task<DocumentBuilderInputData> GetDocumentBuilderInputDataAsync(IServiceProvider serviceProvider)
     {
@@ -112,9 +112,9 @@ public class CustomerServiceUsageReportTask : DocumentBuilderTask<int, CustomerS
 
         var user = await userManager.GetUsersAsync(userId);
 
-        var usertCulture = user.GetCulture();
-        CultureInfo.CurrentCulture = usertCulture;
-        CultureInfo.CurrentUICulture = usertCulture;
+        var userCulture = user.GetCulture();
+        CultureInfo.CurrentCulture = userCulture;
+        CultureInfo.CurrentUICulture = userCulture;
 
         var utcStartDate = tenantUtil.DateTimeToUtc(taskData.StartDate ?? tenant.CreationDateTime);
         var utcEndDate = tenantUtil.DateTimeToUtc(taskData.EndDate ?? DateTime.UtcNow);

@@ -1354,20 +1354,7 @@ public class PaymentController(
     [HttpPost("customer/usage/report")]
     public async Task<DocumentBuilderTaskDto> CreateCustomerServiceUsageReport(CustomerServiceUsageReportRequestDto inDto)
     {
-        if (!tariffService.IsConfigured())
-        {
-            throw new InvalidOperationException("Tariff service is not configured");
-        }
-
-        await DemandAdminAsync();
-
-        var tenantId = tenantManager.GetCurrentTenantId();
-
-        var customerInfo = await tariffService.GetCustomerInfoAsync(tenantId);
-        if (customerInfo == null)
-        {
-            throw new ItemNotFoundException("Customer could not be found");
-        }
+        var tenantId = await EnsureCustomerAndAdminRightsAsync();
 
         inDto ??= new CustomerServiceUsageReportRequestDto();
 
@@ -1379,7 +1366,7 @@ public class PaymentController(
 
         var userId = securityContext.CurrentAccount.ID;
 
-        var task = serviceProvider.GetService<CustomerServiceUsageReportTask>();
+        var task = serviceProvider.GetRequiredService<CustomerServiceUsageReportTask>();
 
         var baseUri = commonLinkUtility.ServerRootPath;
 
@@ -1421,20 +1408,7 @@ public class PaymentController(
     [HttpGet("customer/usage/report")]
     public async Task<DocumentBuilderTaskDto> GetCustomerServiceUsageReport()
     {
-        if (!tariffService.IsConfigured())
-        {
-            throw new InvalidOperationException("Tariff service is not configured");
-        }
-
-        await DemandAdminAsync();
-
-        var tenantId = tenantManager.GetCurrentTenantId();
-
-        var customerInfo = await tariffService.GetCustomerInfoAsync(tenantId);
-        if (customerInfo == null)
-        {
-            throw new ItemNotFoundException("Customer could not be found");
-        }
+        var tenantId = await EnsureCustomerAndAdminRightsAsync();
 
         var task = await serviceUsageReportTaskManager.GetTask(tenantId, securityContext.CurrentAccount.ID);
 
@@ -1453,20 +1427,7 @@ public class PaymentController(
     [HttpDelete("customer/usage/report")]
     public async Task TerminateCustomerServiceUsageReport()
     {
-        if (!tariffService.IsConfigured())
-        {
-            throw new InvalidOperationException("Tariff service is not configured");
-        }
-
-        await DemandAdminAsync();
-
-        var tenantId = tenantManager.GetCurrentTenantId();
-
-        var customerInfo = await tariffService.GetCustomerInfoAsync(tenantId);
-        if (customerInfo == null)
-        {
-            throw new ItemNotFoundException("Customer could not be found");
-        }
+        var tenantId = await EnsureCustomerAndAdminRightsAsync();
 
         var evt = new CustomerServiceUsageReportIntegrationEvent(securityContext.CurrentAccount.ID, tenantId, null, null, terminate: true);
 
@@ -1487,26 +1448,13 @@ public class PaymentController(
     [HttpPost("customer/usage/monthly/report")]
     public async Task<DocumentBuilderTaskDto> CreateCustomerMonthlyUsageReport(CustomerMonthlyUsageReportRequestDto inDto)
     {
-        if (!tariffService.IsConfigured())
-        {
-            throw new InvalidOperationException("Tariff service is not configured");
-        }
-
-        await DemandAdminAsync();
-
-        var tenantId = tenantManager.GetCurrentTenantId();
-
-        var customerInfo = await tariffService.GetCustomerInfoAsync(tenantId);
-        if (customerInfo == null)
-        {
-            throw new ItemNotFoundException("Customer could not be found");
-        }
+        var tenantId = await EnsureCustomerAndAdminRightsAsync();
 
         inDto ??= new CustomerMonthlyUsageReportRequestDto();
 
         var userId = securityContext.CurrentAccount.ID;
 
-        var task = serviceProvider.GetService<CustomerMonthlyUsageReportTask>();
+        var task = serviceProvider.GetRequiredService<CustomerMonthlyUsageReportTask>();
 
         var baseUri = commonLinkUtility.ServerRootPath;
 
@@ -1542,20 +1490,7 @@ public class PaymentController(
     [HttpGet("customer/usage/monthly/report")]
     public async Task<DocumentBuilderTaskDto> GetCustomerMonthlyUsageReport()
     {
-        if (!tariffService.IsConfigured())
-        {
-            throw new InvalidOperationException("Tariff service is not configured");
-        }
-
-        await DemandAdminAsync();
-
-        var tenantId = tenantManager.GetCurrentTenantId();
-
-        var customerInfo = await tariffService.GetCustomerInfoAsync(tenantId);
-        if (customerInfo == null)
-        {
-            throw new ItemNotFoundException("Customer could not be found");
-        }
+        var tenantId = await EnsureCustomerAndAdminRightsAsync();
 
         var task = await monthlyUsageReportTaskManager.GetTask(tenantId, securityContext.CurrentAccount.ID);
 
@@ -1574,20 +1509,7 @@ public class PaymentController(
     [HttpDelete("customer/usage/monthly/report")]
     public async Task TerminateCustomerMonthlyUsageReport()
     {
-        if (!tariffService.IsConfigured())
-        {
-            throw new InvalidOperationException("Tariff service is not configured");
-        }
-
-        await DemandAdminAsync();
-
-        var tenantId = tenantManager.GetCurrentTenantId();
-
-        var customerInfo = await tariffService.GetCustomerInfoAsync(tenantId);
-        if (customerInfo == null)
-        {
-            throw new ItemNotFoundException("Customer could not be found");
-        }
+        var tenantId = await EnsureCustomerAndAdminRightsAsync();
 
         var evt = new CustomerMonthlyUsageReportIntegrationEvent(securityContext.CurrentAccount.ID, tenantId, null, terminate: true);
 
@@ -2108,6 +2030,36 @@ public class PaymentController(
         }
 
         await fusionCache.SetAsync(key, count + 1, TimeSpan.FromMinutes(_expirationMinutes));
+    }
+
+    /// <summary>
+    /// Ensures that the current tenant has a customer and the current user has administrator rights.
+    /// </summary>
+    /// <remarks>
+    /// This method verifies that the tariff service is configured, validates that the current user has administrator permissions,
+    /// retrieves the current tenant ID, and confirms that customer information exists for the tenant.
+    /// </remarks>
+    /// <exception cref="InvalidOperationException">Thrown when the tariff service is not configured.</exception>
+    /// <exception cref="SecurityException">Thrown when the current user does not have administrator rights.</exception>
+    /// <returns>The tenant ID of the validated customer.</returns>
+    private async Task<int> EnsureCustomerAndAdminRightsAsync()
+    {
+        if (!tariffService.IsConfigured())
+        {
+            throw new InvalidOperationException("Tariff service is not configured");
+        }
+
+        await DemandAdminAsync();
+
+        var tenantId = tenantManager.GetCurrentTenantId();
+
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenantId);
+        if (customerInfo == null)
+        {
+            throw new ItemNotFoundException("Customer could not be found");
+        }
+
+        return tenantId;
     }
 
     /// <summary>
