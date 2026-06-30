@@ -1059,7 +1059,8 @@ public class PaymentController(
 
         if (!string.IsNullOrEmpty(inDto.ServiceName))
         {
-            await CheckWalletServiceName(inDto.ServiceName);
+            var (_, correctServiceName)= await CheckWalletServiceName(inDto.ServiceName);
+            inDto.ServiceName = correctServiceName;
         }
 
         var utcStartDate = tenantUtil.DateTimeToUtc(inDto.StartDate ?? tenant.CreationDateTime);
@@ -1164,7 +1165,8 @@ public class PaymentController(
 
         if (!string.IsNullOrEmpty(inDto.ServiceName))
         {
-            await CheckWalletServiceName(inDto.ServiceName);
+            var (_, correctServiceName)= await CheckWalletServiceName(inDto.ServiceName);
+            inDto.ServiceName = correctServiceName;
         }
 
         var utcStartDate = tenantUtil.DateTimeToUtc(inDto.StartDate ?? tenant.CreationDateTime);
@@ -1234,7 +1236,8 @@ public class PaymentController(
 
         if (!string.IsNullOrEmpty(inDto.ServiceName))
         {
-            await CheckWalletServiceName(inDto.ServiceName);
+            var (_, correctServiceName)= await CheckWalletServiceName(inDto.ServiceName);
+            inDto.ServiceName = correctServiceName;
         }
 
         var userId = securityContext.CurrentAccount.ID;
@@ -1852,24 +1855,32 @@ public class PaymentController(
     }
 
     /// <summary>
-    /// Validates the service name and returns the corresponding tenant wallet service
+    /// Validates the service name and returns the corresponding tenant wallet service with the correct service name
     /// </summary>
     /// <remarks>
     /// Checks if the provided service name matches any tenant quota service name and verifies that the corresponding tenant ID is a valid TenantWalletService enum value.
     /// </remarks>
     /// <param name="serviceName">The service name to validate</param>
-    /// <return>The corresponding TenantWalletService enum value</return>
+    /// <return>The corresponding TenantWalletService enum value and correct service name</return>
     /// <exception cref="ItemNotFoundException">Thrown when the quota with the corresponding service name is hidden or not found in the database.</exception>
-    private async Task<TenantWalletService> CheckWalletServiceName(string serviceName)
+    private async Task<(TenantWalletService, string)> CheckWalletServiceName(string serviceName)
     {
         var quotaList = await tenantManager.GetTenantQuotasAsync(all: false, wallet: true);
 
         var selectedQuota = quotaList.FirstOrDefault(x =>
             x.ServiceName.Equals(serviceName, StringComparison.InvariantCultureIgnoreCase));
 
+        // for testing purposes
+        if (selectedQuota == null)
+        {
+            serviceName += "-1-hour";
+            selectedQuota = quotaList.FirstOrDefault(x =>
+                x.ServiceName.Equals(serviceName, StringComparison.InvariantCultureIgnoreCase));
+        }
+
         if (selectedQuota != null && Enum.IsDefined(typeof(TenantWalletService), selectedQuota.TenantId))
         {
-            return (TenantWalletService)selectedQuota.TenantId;
+            return ((TenantWalletService)selectedQuota.TenantId, serviceName);
         }
 
         throw new ItemNotFoundException("Service could not be found");
