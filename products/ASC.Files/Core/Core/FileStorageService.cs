@@ -108,7 +108,6 @@ public class FileStorageService //: IFileStorageService
     FormRoleDtoHelper formRoleDtoHelper,
     WebhookManager webhookManager,
     FileSharingHelper fileSharingHelper,
-    AiGateway gateway,
     FormFillingReportCreator formFillingReportCreator,
     ExportToXLSX exportToXLSX,
     ExternalDbSyncService externalDbSyncService,
