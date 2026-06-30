@@ -69,7 +69,13 @@ public class AiGatewayProxyController(
             return NotFound();
         }
 
-        var key = await aiGateway.GetKeyAsync();
+        var isModelsPath = path == "models";
+
+        var key = await aiGateway.GetKeyAsync(isModelsPath);
+        if (isModelsPath && !string.IsNullOrEmpty(key))
+        {
+            path = "customer/models";
+        }
 
 #pragma warning disable CA2000
         var client = httpClientFactory.CreateClient();
