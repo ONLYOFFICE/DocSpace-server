@@ -1688,7 +1688,7 @@ $TrulyYours</value>
 
 El proceso de copia de seguridad programado para su DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" ha fallado.
 
-Le recomendamos que compruebe los ajustes "Copia de seguridad":"${__VirtualRootPath}/portal-settings/backup/data-backup" y "Servicios":"${__VirtualRootPath}/portal-settings/services".
+Le recomendamos que compruebe los ajustes "Copia de seguridad":"${__VirtualRootPath}/portal-settings/backup/data-backup" y "Servicios":"${__VirtualRootPath}/portal-settings/payments/services".
 
 Si tiene alguna pregunta o necesita ayuda, no dude en ponerse en contacto con nosotros a través de "${__SupportLink}":"${__SupportLink}"
 
@@ -1699,7 +1699,7 @@ $TrulyYours</value>
 
 El proceso de copia de seguridad programado para su DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) ha fallado.
 
-Le recomendamos que compruebe los ajustes [Copia de seguridad](${__VirtualRootPath}/portal-settings/backup/data-backup) y [Servicios](${__VirtualRootPath}/portal-settings/services).
+Le recomendamos que compruebe los ajustes [Copia de seguridad](${__VirtualRootPath}/portal-settings/backup/data-backup) y [Servicios](${__VirtualRootPath}/portal-settings/payments/services).
 
 Si tiene alguna pregunta o necesita ayuda, no dude en ponerse en contacto con nosotros a través de [${__SupportLink}](${__SupportLink})
 

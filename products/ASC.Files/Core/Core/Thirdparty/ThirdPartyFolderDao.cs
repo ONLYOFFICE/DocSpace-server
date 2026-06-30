@@ -104,7 +104,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
     }
 
     public async IAsyncEnumerable<Folder<string>> GetRoomsAsync(IEnumerable<string> roomsIds, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText, bool withSubfolders, bool withoutTags, bool excludeSubject, ProviderFilter provider,
-        SubjectFilter? subjectFilter, Guid subjectOwnerId, IEnumerable<string> subjectEntriesIds, IEnumerable<int> parentsIds = null, int? groupId = null, RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None)
+        Guid subjectOwnerId, IEnumerable<string> subjectEntriesIds, IEnumerable<int> parentsIds = null, int? groupId = null, RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None)
     {
         if (dao.CheckInvalidFilters(filterTypes) || (provider != ProviderFilter.None && provider != _providerInfo.ProviderFilter))
         {
@@ -114,7 +114,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         var rooms = roomsIds.ToAsyncEnumerable().Select(async (string e, CancellationToken _) => await GetFolderAsync(e).ConfigureAwait(false));
 
         rooms = FilterByRoomType(rooms, filterTypes);
-        rooms = FilterBySubject(rooms, subjectId, excludeSubject, subjectFilter, subjectOwnerId, subjectEntriesIds);
+        rooms = FilterBySubject(rooms, subjectId, excludeSubject, subjectOwnerId, subjectEntriesIds);
 
         if (!string.IsNullOrEmpty(searchText))
         {
@@ -640,19 +640,19 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
     }
 
     public IAsyncEnumerable<Folder<string>> GetRoomsAsync(IEnumerable<string> parentsIds, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText,
-        bool withSubfolders, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter? subjectFilter, Guid subjectOwnerId, IEnumerable<string> subjectEntriesIds, QuotaFilter quotaFilter, int? groupId = null, RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None)
+        bool withSubfolders, bool withoutTags, bool excludeSubject, ProviderFilter provider, Guid subjectOwnerId, IEnumerable<string> subjectEntriesIds, QuotaFilter quotaFilter, int? groupId = null, RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None)
     {
         return AsyncEnumerable.Empty<Folder<string>>();
     }
 
     public IAsyncEnumerable<Folder<string>> GetProviderBasedRoomsAsync(SearchArea searchArea, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText,
-        bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter? subjectFilter, Guid subjectOwnerId, IEnumerable<string> subjectEntriesIds, int? groupId = null)
+        bool withoutTags, bool excludeSubject, ProviderFilter provider, Guid subjectOwnerId, IEnumerable<string> subjectEntriesIds, int? groupId = null)
     {
         return AsyncEnumerable.Empty<Folder<string>>();
     }
 
     public IAsyncEnumerable<Folder<string>> GetProviderBasedRoomsAsync(SearchArea searchArea, IEnumerable<string> roomsIds, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags,
-        Guid subjectId, string searchText, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter? subjectFilter, Guid subjectOwnerId, IEnumerable<string> subjectEntriesIds, int? groupId = null)
+        Guid subjectId, string searchText, bool withoutTags, bool excludeSubject, ProviderFilter provider, Guid subjectOwnerId, IEnumerable<string> subjectEntriesIds, int? groupId = null)
     {
         return AsyncEnumerable.Empty<Folder<string>>();
     }
@@ -812,36 +812,18 @@ internal abstract class BaseFolderDao
         return rooms.Where(f => typeFilter.Contains(f.FolderType));
     }
 
-    protected IAsyncEnumerable<Folder<string>> FilterBySubject(IAsyncEnumerable<Folder<string>> rooms, Guid subjectId, bool excludeSubject, SubjectFilter? subjectFilter, Guid subjectOwnerId,
+    protected IAsyncEnumerable<Folder<string>> FilterBySubject(IAsyncEnumerable<Folder<string>> rooms, Guid subjectId, bool excludeSubject, Guid subjectOwnerId,
         IEnumerable<string> subjectEntriesIds)
     {
-        if (subjectFilter != null)
+        if (subjectId != Guid.Empty)
         {
-            if (subjectId != Guid.Empty)
-            {
-                if (subjectFilter is SubjectFilter.Owner)
-                {
-                    rooms = excludeSubject ? rooms.Where(f => f.CreateBy != subjectId) : rooms.Where(f => f.CreateBy == subjectId);
-                }
-                else if (subjectFilter is SubjectFilter.Member)
-                {
-                    rooms = excludeSubject ? rooms.Where(f => f.CreateBy != subjectId && !subjectEntriesIds.Contains(f.Id.ToString()))
-                        : rooms.Where(f => f.CreateBy == subjectId || subjectEntriesIds.Contains(f.Id.ToString()));
-                }
-            }
+            rooms = excludeSubject ? rooms.Where(f => f.CreateBy != subjectId && !subjectEntriesIds.Contains(f.Id.ToString()))
+                    : rooms.Where(f => f.CreateBy == subjectId || subjectEntriesIds.Contains(f.Id.ToString()));
         }
-        else
-        {
-            if (subjectId != Guid.Empty)
-            {
-                rooms = excludeSubject ? rooms.Where(f => f.CreateBy != subjectId && !subjectEntriesIds.Contains(f.Id.ToString()))
-                        : rooms.Where(f => f.CreateBy == subjectId || subjectEntriesIds.Contains(f.Id.ToString()));
-            }
 
-            if (subjectOwnerId != Guid.Empty)
-            {
-                rooms = excludeSubject ? rooms.Where(f => f.CreateBy != subjectOwnerId) : rooms.Where(f => f.CreateBy == subjectOwnerId);
-            }
+        if (subjectOwnerId != Guid.Empty)
+        {
+            rooms = excludeSubject ? rooms.Where(f => f.CreateBy != subjectOwnerId) : rooms.Where(f => f.CreateBy == subjectOwnerId);
         }
 
         return rooms;

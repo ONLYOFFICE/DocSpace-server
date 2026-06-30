@@ -936,6 +936,9 @@
   <data name="StartTransferSetting" xml:space="preserve">
     <value>Začít migraci portálu do jiného regionu</value>
   </data>
+  <data name="SubscriptionBalanceMovedToWallet" xml:space="preserve">
+    <value>Zůstatek předplatného byl převeden do peněženky: {0}</value>
+  </data>
   <data name="SystemAccount" xml:space="preserve">
     <value>Systémový účet</value>
   </data>

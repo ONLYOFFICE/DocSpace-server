@@ -294,7 +294,7 @@ public class FolderContentDtoHelper(
             count,
             filterTypes,
             filterTypes?.FirstOrDefault() == FilterType.ByUser,
-            userIdOrGroupId.ToString(),
+            userIdOrGroupId,
             sharedBy,
             text,
             extension,

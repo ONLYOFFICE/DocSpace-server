@@ -1694,7 +1694,7 @@ $TrulyYours</value>
 
 O processo de backup agendado para o seu DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" falhou.
 
-Recomendamos verificar as configurações de "Backup":"${__VirtualRootPath}/portal-settings/backup/data-backup" e "Serviços":"${__VirtualRootPath}/portal-settings/services".
+Recomendamos verificar as configurações de "Backup":"${__VirtualRootPath}/portal-settings/backup/data-backup" e "Serviços":"${__VirtualRootPath}/portal-settings/payments/services".
 
 Se tiver alguma dúvida ou precisar de ajuda, entre em contato conosco pelo "${__SupportLink}":"${__SupportLink}"
 
@@ -1705,7 +1705,7 @@ $TrulyYours</value>
 
 O processo de backup agendado para o seu DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) falhou.
 
-Recomendamos verificar as configurações de [Backup](${__VirtualRootPath}/portal-settings/backup/data-backup) e [Serviços](${__VirtualRootPath}/portal-settings/services).
+Recomendamos verificar as configurações de [Backup](${__VirtualRootPath}/portal-settings/backup/data-backup) e [Serviços](${__VirtualRootPath}/portal-settings/payments/services).
 
 Caso tenha alguma dúvida ou precise de ajuda, entre em contato conosco pelo [${__SupportLink}](${__SupportLink})
 

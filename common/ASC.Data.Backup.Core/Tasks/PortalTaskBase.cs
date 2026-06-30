@@ -351,14 +351,12 @@ public abstract class PortalTaskBase(
                     }
                     catch (Exception ex)
                     {
-                        if (attempt == 5)
+                        if (attempt >= 5)
                         {
                             Logger.ErrorRestore(ex);
+                            break;
                         }
-                        else
-                        {
-                            attempt++;
-                        }
+                        attempt++;
                     }
                     Thread.Sleep(1000);//avoiding deadlock
                 }
@@ -380,6 +378,7 @@ public abstract class PortalTaskBase(
             }
         }
     }
+
 
     public void Dispose()
     {

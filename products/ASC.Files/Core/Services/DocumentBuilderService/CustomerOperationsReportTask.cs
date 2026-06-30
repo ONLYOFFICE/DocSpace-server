@@ -106,7 +106,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
             return null;
         }
 
-        var quotaList = await tenantManager.GetTenantQuotasAsync(false, true);
+        var quotaList = await tenantManager.GetTenantQuotasAsync(all: false, wallet: true);
 
         var selectedQuota = quotaList.FirstOrDefault(x =>
             x.ServiceName.Equals(serviceName, StringComparison.InvariantCultureIgnoreCase));
@@ -132,9 +132,9 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
 
         var user = await userManager.GetUsersAsync(userId);
 
-        var usertCulture = user.GetCulture();
-        CultureInfo.CurrentCulture = usertCulture;
-        CultureInfo.CurrentUICulture = usertCulture;
+        var userCulture = user.GetCulture();
+        CultureInfo.CurrentCulture = userCulture;
+        CultureInfo.CurrentUICulture = userCulture;
 
         var utcStartDate = tenantUtil.DateTimeToUtc(taskData.StartDate ?? tenant.CreationDateTime);
         var utcEndDate = tenantUtil.DateTimeToUtc(taskData.EndDate ?? DateTime.UtcNow);
@@ -177,7 +177,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
 
         var scriptParts = script.Split("${dataValues}");
 
-        var dateFormat = $"{usertCulture.DateTimeFormat.ShortDatePattern} {usertCulture.DateTimeFormat.ShortTimePattern.Replace("tt", "AM/PM")}";
+        var dateFormat = $"{userCulture.DateTimeFormat.ShortDatePattern} {userCulture.DateTimeFormat.ShortTimePattern.Replace("tt", "AM/PM")}";
 
         await using (var writer = new StreamWriter(scriptFilePath))
         {
@@ -289,10 +289,10 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
                 new(record.Description, "@"),
                 new(record.Details, "@"),
                 new(record.ParticipantDisplayName, "@"),
-                new(record.Quantity.ToString(), "General", "right"),
+                new(record.Quantity.ToString(CultureInfo.InvariantCulture), "General", "right"),
                 new(record.ServiceUnit, "@"),
-                new(record.Credit.ToString(), "0.0000000000", "right"),
-                new(record.Debit.ToString(), "0.0000000000", "right"),
+                new(record.Credit.ToString(CultureInfo.InvariantCulture), "0.0000000000", "right"),
+                new(record.Debit.ToString(CultureInfo.InvariantCulture), "0.0000000000", "right"),
                 new(record.Currency, "@")
             };
 

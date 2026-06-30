@@ -43,7 +43,10 @@ public sealed class BackupListenerService(ICacheNotify<DeleteSchedule> cacheDele
         using var scope = scopeFactory.CreateScope();
         var backupService = scope.ServiceProvider.GetService<BackupService>();
 
-        await backupService.DeleteScheduleAsync(deleteSchedule.TenantId);
+        // Triggered internally via cache notify after the caller (e.g. StartEncryptionAsync) has already
+        // demanded permissions. This handler runs in a fresh scope with no tenant/user context, so the
+        // permission demand is both redundant and impossible here — skip it.
+        await backupService.DeleteScheduleAsync(deleteSchedule.TenantId, demandPermissions: false);
     }
 
     public Task StartAsync(CancellationToken cancellationToken)

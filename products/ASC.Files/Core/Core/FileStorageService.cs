@@ -242,7 +242,7 @@ public class FileStorageService //: IFileStorageService
         int count,
         IEnumerable<FilterType> filterTypes,
         bool subjectGroup,
-        string subject,
+        Guid? subject,
         Guid sharedBy,
         string searchText,
         string[] extension,
@@ -255,8 +255,7 @@ public class FileStorageService //: IFileStorageService
         IEnumerable<string> tagNames = null,
         bool excludeSubject = false,
         ProviderFilter provider = ProviderFilter.None,
-        SubjectFilter? subjectFilter = null,
-        string subjectOwnerId = null,
+        Guid? subjectOwnerId = null,
         ApplyFilterOption applyFilterOption = ApplyFilterOption.All,
         QuotaFilter quotaFilter = QuotaFilter.All,
         StorageFilter storageFilter = StorageFilter.None,
@@ -267,12 +266,8 @@ public class FileStorageService //: IFileStorageService
         RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None,
         List<FolderType> folderType = null)
     {
-        var subjectId = string.IsNullOrEmpty(subject) ? Guid.Empty : new Guid(subject);
-        var subjectOwnerIdGuid = string.IsNullOrEmpty(subjectOwnerId) ? Guid.Empty : new Guid(subjectOwnerId);
-        if (subjectFilter != null)
-        {
-            subjectOwnerIdGuid = Guid.Empty;
-        }
+        var subjectId = subject ?? Guid.Empty;
+        var subjectOwnerIdGuid = subjectOwnerId ?? Guid.Empty;
 
         var folderDao = daoFactory.GetCacheFolderDao<T>();
 
@@ -416,7 +411,6 @@ public class FileStorageService //: IFileStorageService
                 tagNames,
                 excludeSubject,
                 provider,
-                subjectFilter,
                 subjectOwnerIdGuid,
                 applyFilterOption,
                 quotaFilter,
@@ -489,7 +483,7 @@ public class FileStorageService //: IFileStorageService
 
         if (parent.FolderType == FolderType.Recent && searchArea == SearchArea.RecentByLinks)
         {
-            parent.Title = FilesUCResource.MyFiles;
+            parent.Title = FilesUCResource.Files;
         }
 
         var result = new DataWrapper<T>
@@ -512,7 +506,7 @@ public class FileStorageService //: IFileStorageService
                         case Folder<int> f2:
                             {
                                 var title = f2.FolderType is FolderType.Recent && searchArea == SearchArea.RecentByLinks
-                                    ? FilesUCResource.MyFiles
+                                    ? FilesUCResource.Files
                                     : f2.Title;
 
                                 return new { f2.Id, title, RoomType = DocSpaceHelper.MapToRoomType(f2.FolderType), f2.FolderType };
@@ -2241,7 +2235,7 @@ public class FileStorageService //: IFileStorageService
         {
             if (tagLocked != null)
             {
-                await tagDao.RemoveTagsAsync(tagLocked);
+                await tagDao.RemoveTagsAsync(file, [tagLocked.Id]);
 
                 await filesMessageService.SendAsync(MessageAction.FileUnlocked, file, file.Title);
             }
@@ -2328,7 +2322,7 @@ public class FileStorageService //: IFileStorageService
         {
             if (tagCustomFilter != null)
             {
-                await tagDao.RemoveTagsAsync(tagCustomFilter);
+                await tagDao.RemoveTagsAsync(file, [ tagCustomFilter.Id ]);
             }
 
             await filesMessageService.SendAsync(MessageAction.FileCustomFilterDisabled, file, file.Title);
@@ -3281,7 +3275,7 @@ public class FileStorageService //: IFileStorageService
                     -1,
                     new List<FilterType> { FilterType.FoldersOnly },
                     false,
-                    user.ToString(),
+                    user,
                     Guid.Empty,
                     "",
                     [],
@@ -3313,7 +3307,7 @@ public class FileStorageService //: IFileStorageService
                 -1,
                 [FilterType.FoldersOnly],
                 false,
-                user.ToString(),
+                user,
                 Guid.Empty,
                 "",
                 [],

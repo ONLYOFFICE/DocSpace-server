@@ -954,7 +954,6 @@ public class VirtualRoomsCommonController(
             tagNames,
             inDto.ExcludeSubject ?? false,
             inDto.Provider ?? ProviderFilter.None,
-            inDto.SubjectFilter,
             inDto.SubjectOwnerId,
             quotaFilter: inDto.QuotaFilter ?? QuotaFilter.All,
             storageFilter: inDto.StorageFilter ?? StorageFilter.None,

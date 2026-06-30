@@ -520,6 +520,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Subscription balance moved to wallet: {0}.
+        /// </summary>
+        public static string SubscriptionBalanceMovedToWallet {
+            get {
+                return ResourceManager.GetString("SubscriptionBalanceMovedToWallet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Custom Navigation Settings Updated.
         /// </summary>
         public static string CustomNavigationSettingsUpdated {

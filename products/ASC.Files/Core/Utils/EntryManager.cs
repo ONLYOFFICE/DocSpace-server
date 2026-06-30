@@ -355,7 +355,6 @@ public class EntryManager(IDaoFactory daoFactory,
         IEnumerable<string> tagNames = null,
         bool excludeSubject = false,
         ProviderFilter provider = ProviderFilter.None,
-        SubjectFilter? subjectFilter = null,
         Guid subjectOwnerId = default,
         ApplyFilterOption applyFilterOption = ApplyFilterOption.All,
         QuotaFilter quotaFilter = QuotaFilter.All,
@@ -518,7 +517,7 @@ public class EntryManager(IDaoFactory daoFactory,
         else if (parent.FolderType is FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates or FolderType.AiAgents or FolderType.Forms && !parent.ProviderEntry)
         {
             entries = await fileSecurity.GetVirtualRoomsAsync(filterTypes, subjectId, searchText, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject,
-                provider, subjectFilter, subjectOwnerId, quotaFilter, storageFilter, groupId, privacyFilter);
+                provider, subjectOwnerId, quotaFilter, storageFilter, groupId, privacyFilter);
 
             CalculateTotal();
         }
@@ -2523,7 +2522,7 @@ public class EntryManager(IDaoFactory daoFactory,
             }
 
             fileEntry.OriginId = data.OriginFolder.Id;
-            fileEntry.OriginTitle = data.OriginFolder.FolderType == FolderType.USER ? FilesUCResource.MyFiles : data.OriginFolder.Title;
+            fileEntry.OriginTitle = data.OriginFolder.FolderType == FolderType.USER ? FilesUCResource.Files : data.OriginFolder.Title;
         }
     }
 }
