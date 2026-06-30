@@ -543,14 +543,14 @@ public class PortalController(
 
             var quantity = quota.NextQuantity ?? quota.Quantity;
 
-            var serviceName = definition.ServiceName ?? definition.Name;
+            var (_, title, unitOfMeasure) = WalletServiceDescriptionManager.GetServiceTitleAndUom(definition.ServiceName ?? definition.Name, []);
 
             result.Add(new UpcomingPaymentDto
             {
                 Id = quota.Id,
                 Name = definition.Name,
-                Title = Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceDesc_{serviceName}"),
-                UnitOfMeasure = Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceUOM_{serviceName}"),
+                Title = title,
+                UnitOfMeasure = unitOfMeasure,
                 Quantity = quantity,
                 Wallet = quota.Wallet,
                 DueDate = apiDateTimeHelper.Get(quota.DueDate ?? source.DueDate),
