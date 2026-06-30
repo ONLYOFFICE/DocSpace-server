@@ -105,6 +105,22 @@ public class WalletServiceDescriptionManager
         return (description, uom, quantity);
     }
 
+    public static (string serviceName, string title, string serviceUnit) GetServiceTitleAndUom(string serviceName, Dictionary<string, string> customUom)
+    {
+        // for testing purposes
+        if (serviceName != null && serviceName.EndsWith("-1-hour"))
+        {
+            serviceName = serviceName.Replace("-1-hour", "");
+        }
+
+        var unit = customUom?.GetValueOrDefault(serviceName, serviceName) ?? serviceName;
+
+        var title = Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceDesc_{serviceName}");
+        var serviceUnit = Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceUOM_{unit}");
+
+        return (serviceName, title, serviceUnit);
+    }
+
     public static string GetServiceDetails(Dictionary<string, string> metadata)
     {
         if (metadata == null)
