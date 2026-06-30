@@ -337,7 +337,61 @@ namespace ASC.Web.Core.PublicResources {
                 return ResourceManager.GetString("AccountingCustomerOperationType", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to Month.
+        /// </summary>
+        public static string AccountingCustomerOperationMonth {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationMonth", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Service.
+        /// </summary>
+        public static string AccountingCustomerOperationService {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationService", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Monthly usage report ({0}-{1}).
+        /// </summary>
+        public static string AccountingMonthlyUsageReportName {
+            get {
+                return ResourceManager.GetString("AccountingMonthlyUsageReportName", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Monthly usage.
+        /// </summary>
+        public static string AccountingMonthlyUsageReportSheetName {
+            get {
+                return ResourceManager.GetString("AccountingMonthlyUsageReportSheetName", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Service usage report ({0}-{1}).
+        /// </summary>
+        public static string AccountingServiceUsageReportName {
+            get {
+                return ResourceManager.GetString("AccountingServiceUsageReportName", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Service usage.
+        /// </summary>
+        public static string AccountingServiceUsageReportSheetName {
+            get {
+                return ResourceManager.GetString("AccountingServiceUsageReportSheetName", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Validation code field cannot be empty.
         /// </summary>
