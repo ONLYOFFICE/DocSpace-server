@@ -1,34 +1,34 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
@@ -98,7 +98,8 @@ public class FolderContentDtoHelper(
     AuthContext authContext,
     BreadCrumbsManager breadCrumbsManager,
     AiAccessibility accessibility,
-    AiModelSettingsLoader modelSettingsLoader)
+    AiModelSettingsLoader modelSettingsLoader,
+    IDaoFactory daoFactory)
 {
     public async Task<FolderContentDto<T>> GetAsync<T>(T folderId, Guid? userIdOrGroupId, Guid? sharedBy, FilterType? filterType, T roomId, bool? searchInContent, bool? withSubFolders, bool? excludeSubject, ApplyFilterOption? applyFilterOption, SearchArea? searchArea, string sortByFilter, SortOrder sortOrder, int startIndex, int limit, string text, string[] extension = null, FormsItemDto formsItemDto = null, Location? location = null)
     {
@@ -129,6 +130,11 @@ public class FolderContentDtoHelper(
         if (folderItems.FolderInfo is { FolderType: FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates or FolderType.DefaultTemplates })
         {
             currentUsersRecords = await fileSecurity.GetUserRecordsAsync().ToListAsync();
+        }
+
+        if (folderItems.FolderInfo is { FolderType: FolderType.AiAgents })
+        {
+            await SetAgentsChatSettingsAsync(folderItems);
         }
 
         var aiStatusTask = accessibility.GetStatusAsync();
@@ -257,6 +263,26 @@ public class FolderContentDtoHelper(
             }
 
             return null;
+        }
+    }
+
+    private async Task SetAgentsChatSettingsAsync<T>(DataWrapper<T> folderItems)
+    {
+        var agentFolders = folderItems.Entries.OfType<Folder<int>>().Where(f => f.IsAgent).ToList();
+
+        var ids = agentFolders.Where(f => f.ChatSettings == null).Select(f => f.Id).Distinct().ToList();
+        if (ids.Count == 0)
+        {
+            return;
+        }
+
+        var chatSettings = await daoFactory.GetFolderDao<int>().GetChatSettingsAsync(ids);
+        foreach (var folder in agentFolders)
+        {
+            if (folder.ChatSettings == null && chatSettings.TryGetValue(folder.Id, out var settings))
+            {
+                folder.ChatSettings = settings;
+            }
         }
     }
 

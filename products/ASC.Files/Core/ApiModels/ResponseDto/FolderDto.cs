@@ -410,38 +410,43 @@ public class FolderDtoHelper(
             result.Type = folder.FolderType;
         }
 
-        if (folder.SettingsChatParameters != null)
+        if (folder.IsAgent && folder.ChatSettings == null)
+        {
+            folder.ChatSettings = await _daoFactory.GetFolderDao<T>().GetChatSettingsAsync(folder.Id);
+        }
+
+        if (folder.ChatSettings != null)
         {
             ProviderType? providerType = null;
             var hasModelSettings = true;
 
-            if (folder.SettingsChatProviderId == AiGateway.ProviderId)
+            if (folder.ChatSettings.ProviderId == AiGateway.ProviderId)
             {
                 providerType = ProviderType.PortalAi;
 
                 if (!aiStatus.GatewayEnabled)
                 {
-                    folder.SettingsChatProviderId = 0;
+                    folder.ChatSettings.ProviderId = 0;
                 }
             }
             else
             {
                 modelSettingsResult ??= await modelSettingsLoader.LoadForEntriesAsync([], folder);
-                if (modelSettingsResult?.Providers?.TryGetValue(folder.SettingsChatProviderId, out var meta) == true)
+                if (modelSettingsResult?.Providers?.TryGetValue(folder.ChatSettings.ProviderId, out var meta) == true)
                 {
                     providerType = meta.Type;
                     hasModelSettings = meta.HasModelSettings;
                 }
             }
 
-            var modelId = folder.SettingsChatProviderId == 0 ? null : folder.SettingsChatParameters.ModelId;
+            var modelId = folder.ChatSettings.ProviderId == 0 ? null : folder.ChatSettings.ModelId;
             if (modelId != null && providerType.HasValue)
             {
                 var resolvedModelId = aiConfiguration.ResolveModelId(providerType.Value, modelId);
                 if (resolvedModelId != modelId)
                 {
                     modelId = resolvedModelId;
-                    folder.SettingsChatParameters = folder.SettingsChatParameters with { ModelId = modelId };
+                    folder.ChatSettings = folder.ChatSettings with { ModelId = modelId };
                 }
             }
 
@@ -449,7 +454,7 @@ public class FolderDtoHelper(
             if (modelId != null && providerType.HasValue)
             {
                 AiModelSettings dbSettings = null;
-                modelSettingsResult?.Settings?.TryGetValue((folder.SettingsChatProviderId, modelId), out dbSettings);
+                modelSettingsResult?.Settings?.TryGetValue((folder.ChatSettings.ProviderId, modelId), out dbSettings);
                 resolved = modelSettingsResolver.Resolve(providerType.Value, modelId, dbSettings, hasModelSettings);
             }
 
@@ -470,10 +475,10 @@ public class FolderDtoHelper(
 #pragma warning disable CS0618 // Obsolete
             result.ChatSettings = new ChatSettingsDto
             {
-                ProviderId = !gateway.Configured ? folder.SettingsChatProviderId : AiGateway.ProviderId,
+                ProviderId = !gateway.Configured ? folder.ChatSettings.ProviderId : AiGateway.ProviderId,
                 ModelId = modelId,
                 ModelAlias = model?.Alias,
-                Prompt = folder.SettingsChatParameters.Prompt,
+                Prompt = folder.ChatSettings.Prompt,
                 Multimodal = multimodal,
                 Thinking = model?.Capabilities?.Thinking ?? false,
                 Capabilities = model?.Capabilities

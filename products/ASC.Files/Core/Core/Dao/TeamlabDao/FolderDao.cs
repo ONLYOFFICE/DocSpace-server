@@ -1,34 +1,34 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Files.Core.Data;
@@ -99,6 +99,33 @@ internal class FolderDao(
         var roomSettings = await filesDbContext.RoomSettingsAsync(tenantId, room.Id);
 
         return roomSettings.Watermark.Map();
+    }
+
+    public async Task<ChatSettings> GetChatSettingsAsync(int agentId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var chatSettings = await filesDbContext.RoomChatSettingsAsync(tenantId, agentId);
+
+        return chatSettings?.Map();
+    }
+
+    public async Task<Dictionary<int, ChatSettings>> GetChatSettingsAsync(IEnumerable<int> agentIds)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var result = new Dictionary<int, ChatSettings>();
+
+        await foreach (var settings in filesDbContext.RoomChatSettingsAsync(tenantId, agentIds))
+        {
+            result[settings.RoomId] = settings.Map();
+        }
+
+        return result;
     }
     public async Task<Folder<int>> GetFolderAsync(string title, int parentId)
     {
@@ -565,11 +592,24 @@ internal class FolderDao(
                     Watermark = folder.SettingsWatermark.Map(),
                     Quota = folder.SettingsQuota,
                     Lifetime = folder.SettingsLifetime.Map(),
-                    ChatProviderId = folder.SettingsChatProviderId,
-                    ChatParameters = folder.SettingsChatParameters,
                     SaveFormAsXLSX = folder.SettingsSaveFormAsXLSX,
                     SendFormToExternalDB = folder.SettingsSendFormToExternalDB
                 };
+
+                if (folder.IsAgent && folder.ChatSettings != null)
+                {
+                    toUpdate.Settings.ChatSettings = new DbRoomChatSettings
+                    {
+                        RoomId = toUpdate.Id,
+                        TenantId = tenantId,
+                        ChatProviderId = folder.ChatSettings.ProviderId,
+                        ChatParameters = new ChatParameters
+                        {
+                            ModelId = folder.ChatSettings.ModelId,
+                            Prompt = folder.ChatSettings.Prompt
+                        }
+                    };
+                }
             }
 
             filesDbContext.Update(toUpdate);
@@ -612,11 +652,24 @@ internal class FolderDao(
                     Watermark = folder.SettingsWatermark.Map(),
                     Quota = folder.SettingsQuota,
                     Lifetime = folder.SettingsLifetime.Map(),
-                    ChatProviderId = folder.SettingsChatProviderId,
-                    ChatParameters = folder.SettingsChatParameters,
                     SaveFormAsXLSX = folder.SettingsSaveFormAsXLSX,
-                    SendFormToExternalDB = folder.SettingsSendFormToExternalDB
+                    SendFormToExternalDB = folder.SettingsSendFormToExternalDB,
                 };
+
+                if (folder.IsAgent && folder.ChatSettings != null)
+                {
+                    newFolder.Settings.ChatSettings = new DbRoomChatSettings
+                    {
+                        RoomId = newFolder.Id,
+                        TenantId = tenantId,
+                        ChatProviderId = folder.ChatSettings.ProviderId,
+                        ChatParameters = new ChatParameters
+                        {
+                            ModelId = folder.ChatSettings.ModelId,
+                            Prompt = folder.ChatSettings.Prompt
+                        }
+                    };
+                }
             }
 
             var entityEntry = await filesDbContext.Folders.AddAsync(newFolder);
@@ -1227,8 +1280,6 @@ internal class FolderDao(
                 Watermark = folder.SettingsWatermark.Map(),
                 Quota = quota >= TenantEntityQuotaSettings.NoQuota ? quota : TenantEntityQuotaSettings.DefaultQuotaValue,
                 Lifetime = folder.SettingsLifetime.Map(),
-                ChatProviderId = folder.SettingsChatProviderId,
-                ChatParameters = folder.SettingsChatParameters
             };
         }
 
@@ -1259,8 +1310,15 @@ internal class FolderDao(
 
         if (chatSettings != null)
         {
-            toUpdate.Settings.ChatProviderId = chatSettings.ProviderId;
-            toUpdate.Settings.ChatParameters = chatSettings.Map();
+            toUpdate.Settings.ChatSettings = new DbRoomChatSettings
+            {
+                ChatProviderId = chatSettings.ProviderId,
+                ChatParameters = new ChatParameters
+                {
+                    ModelId = chatSettings.ModelId,
+                    Prompt = chatSettings.Prompt
+                }
+            };
         }
 
         if (lifeTime != null)

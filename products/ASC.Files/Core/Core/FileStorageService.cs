@@ -1002,9 +1002,9 @@ public class FileStorageService //: IFileStorageService
                 }
 
                 ArgumentException.ThrowIfNullOrEmpty(chatSettings.ModelId);
+                CheckPrompt(chatSettings);
 
-                newFolder.SettingsChatProviderId = chatSettings.ProviderId;
-                newFolder.SettingsChatParameters = chatSettings.Map();
+                newFolder.ChatSettings = chatSettings;
             }
 
             newFolder.SettingsLifetime = lifetime;
@@ -1249,6 +1249,8 @@ public class FileStorageService //: IFileStorageService
                 }
 
                 ArgumentException.ThrowIfNullOrEmpty(updateData.ChatSettings.ModelId);
+
+                CheckPrompt(updateData.ChatSettings);
             }
 
             if (watermarkChanged)
@@ -6028,6 +6030,21 @@ public class FileStorageService //: IFileStorageService
             {
                 throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
             }
+        }
+    }
+
+    private static void CheckPrompt(ChatSettings chatSettings)
+    {
+        const int limit = 8192;
+
+        if (string.IsNullOrEmpty(chatSettings.Prompt))
+        {
+            return;
+        }
+
+        if (chatSettings.Prompt.Length > limit)
+        {
+            throw new ArgumentException(string.Format(FilesCommonResource.ErrorMessage_PromptTooLong, limit));
         }
     }
 }

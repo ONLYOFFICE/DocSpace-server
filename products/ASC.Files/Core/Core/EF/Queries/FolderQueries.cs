@@ -342,6 +342,18 @@ public partial class FilesDbContext
     }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    public Task<DbRoomChatSettings> RoomChatSettingsAsync(int tenantId, int roomId)
+    {
+        return FolderQueries.RoomChatSettingsAsync(this, tenantId, roomId);
+    }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    public IAsyncEnumerable<DbRoomChatSettings> RoomChatSettingsAsync(int tenantId, IEnumerable<int> roomIds)
+    {
+        return FolderQueries.RoomChatSettingsByIdsAsync(this, tenantId, roomIds);
+    }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task<bool> ContainsFormsInFolder(int tenantId, int folderId)
     {
         return FolderQueries.ContainsFormsInFolder(this, tenantId, folderId);
@@ -970,6 +982,18 @@ static file class FolderQueries
             (FilesDbContext ctx, int tenantId, int roomId) =>
                 ctx.RoomSettings
                     .FirstOrDefault(r => r.TenantId == tenantId && r.RoomId == roomId));
+
+    public static readonly Func<FilesDbContext, int, int, Task<DbRoomChatSettings>> RoomChatSettingsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int roomId) =>
+                ctx.Set<DbRoomChatSettings>()
+                    .FirstOrDefault(r => r.TenantId == tenantId && r.RoomId == roomId));
+
+    public static readonly Func<FilesDbContext, int, IEnumerable<int>, IAsyncEnumerable<DbRoomChatSettings>> RoomChatSettingsByIdsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, IEnumerable<int> roomIds) =>
+                ctx.Set<DbRoomChatSettings>()
+                    .Where(r => r.TenantId == tenantId && roomIds.Contains(r.RoomId)));
 
     public static readonly Func<FilesDbContext, int, int, Task<bool>> ContainsFormsInFolder =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
