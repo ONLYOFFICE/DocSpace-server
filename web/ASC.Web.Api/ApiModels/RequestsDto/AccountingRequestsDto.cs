@@ -129,6 +129,92 @@ public class CustomerOperationsReportRequestDto
 }
 
 /// <summary>
+/// The request parameters for generating a customer service usage report.
+/// </summary>
+/// <example>
+/// {
+///   "serviceName": "backup",
+///   "startDate": "2024-01-01T00:00:00Z",
+///   "endDate": "2024-01-31T23:59:59Z",
+///   "participantName": "My Own Corporation"
+/// }
+/// </example>
+public class CustomerServiceUsageReportRequestDto
+{
+    /// <summary>
+    /// The service name.
+    /// </summary>
+    /// <example>backup</example>
+    public string ServiceName { get; set; }
+
+    /// <summary>
+    /// The report start date.
+    /// </summary>
+    /// <example>2024-01-01T00:00:00Z</example>
+    public DateTime? StartDate { get; set; }
+
+    /// <summary>
+    /// The report end date.
+    /// </summary>
+    /// <example>2024-01-31T23:59:59Z</example>
+    public DateTime? EndDate { get; set; }
+
+    /// <summary>
+    /// The participant name.
+    /// </summary>
+    /// <example>My Own Corporation</example>
+    public string ParticipantName { get; set; }
+
+    /// <summary>
+    /// The operation status to filter by.
+    /// </summary>
+    /// <example>Any</example>
+    public OperationStatus? Status { get; init; }
+
+    /// <summary>
+    /// Metadata key-value pairs to filter by.
+    /// </summary>
+    /// <example>{"key1": "value1", "key2": "value2"}</example>
+    public Dictionary<string, string> Metadata { get; set; }
+
+    /// <summary>
+    /// The field to order by.
+    /// </summary>
+    /// <example>ServiceName</example>
+    public string OrderBy { get; init; }
+
+    /// <summary>
+    /// Order direction: Ascending or Descending.
+    /// </summary>
+    /// <example>Descending</example>
+    public OperationOrderType? OrderType { get; init; }
+}
+
+/// <summary>
+/// The request parameters for generating a customer monthly usage report.
+/// </summary>
+/// <example>
+/// {
+///   "startDate": "2025-01-01T00:00:00Z",
+///   "endDate": "2025-12-31T23:59:59Z"
+/// }
+/// </example>
+public class CustomerMonthlyUsageReportRequestDto
+{
+    /// <summary>
+    /// The report start date.
+    /// </summary>
+    /// <example>2025-01-01T00:00:00Z</example>
+    public DateTime? StartDate { get; set; }
+
+    /// <summary>
+    /// The report end date.
+    /// </summary>
+    /// <example>2025-12-31T23:59:59Z</example>
+    public DateTime? EndDate { get; set; }
+}
+
+/// <summary>
 /// The request parameters for receiving customer monthly usage statistics.
 /// </summary>
 /// <example>

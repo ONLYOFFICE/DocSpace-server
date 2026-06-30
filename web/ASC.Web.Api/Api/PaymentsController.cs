@@ -71,6 +71,8 @@ public class PaymentController(
     IEventBus eventBus,
     CommonLinkUtility commonLinkUtility,
     DocumentBuilderTaskManager<CustomerOperationsReportTask, int, CustomerOperationsReportTaskData> documentBuilderTaskManager,
+    DocumentBuilderTaskManager<CustomerServiceUsageReportTask, int, CustomerServiceUsageReportTaskData> serviceUsageReportTaskManager,
+    DocumentBuilderTaskManager<CustomerMonthlyUsageReportTask, int, CustomerMonthlyUsageReportTaskData> monthlyUsageReportTaskManager,
     IServiceProvider serviceProvider,
     WalletStaticProvider walletStaticProvider,
     QuotaSocketManager quotaSocketManager)
@@ -1059,7 +1061,8 @@ public class PaymentController(
 
         if (!string.IsNullOrEmpty(inDto.ServiceName))
         {
-            await CheckWalletServiceName(inDto.ServiceName);
+            var (_, correctServiceName)= await CheckWalletServiceName(inDto.ServiceName);
+            inDto.ServiceName = correctServiceName;
         }
 
         var utcStartDate = tenantUtil.DateTimeToUtc(inDto.StartDate ?? tenant.CreationDateTime);
@@ -1164,7 +1167,8 @@ public class PaymentController(
 
         if (!string.IsNullOrEmpty(inDto.ServiceName))
         {
-            await CheckWalletServiceName(inDto.ServiceName);
+            var (_, correctServiceName)= await CheckWalletServiceName(inDto.ServiceName);
+            inDto.ServiceName = correctServiceName;
         }
 
         var utcStartDate = tenantUtil.DateTimeToUtc(inDto.StartDate ?? tenant.CreationDateTime);
@@ -1234,7 +1238,8 @@ public class PaymentController(
 
         if (!string.IsNullOrEmpty(inDto.ServiceName))
         {
-            await CheckWalletServiceName(inDto.ServiceName);
+            var (_, correctServiceName)= await CheckWalletServiceName(inDto.ServiceName);
+            inDto.ServiceName = correctServiceName;
         }
 
         var userId = securityContext.CurrentAccount.ID;
@@ -1331,6 +1336,260 @@ public class PaymentController(
         }
 
         var evt = new CustomerOperationsReportIntegrationEvent(securityContext.CurrentAccount.ID, tenantId, null, null, terminate: true);
+
+        await eventBus.PublishAsync(evt);
+    }
+
+    /// <remarks>
+    /// Starts generating a customer service usage report as an "xlsx" file and saves it in Documents.
+    /// </remarks>
+    /// <summary>
+    /// Start the customer service usage report generation
+    /// </summary>
+    /// <path>api/2.0/portal/payment/customer/usage/report</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "Operation execution status", typeof(DocumentBuilderTaskDto))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(404, "Customer or service could not be found")]
+    [HttpPost("customer/usage/report")]
+    public async Task<DocumentBuilderTaskDto> CreateCustomerServiceUsageReport(CustomerServiceUsageReportRequestDto inDto)
+    {
+        if (!tariffService.IsConfigured())
+        {
+            throw new InvalidOperationException("Tariff service is not configured");
+        }
+
+        await DemandAdminAsync();
+
+        var tenantId = tenantManager.GetCurrentTenantId();
+
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenantId);
+        if (customerInfo == null)
+        {
+            throw new ItemNotFoundException("Customer could not be found");
+        }
+
+        inDto ??= new CustomerServiceUsageReportRequestDto();
+
+        if (!string.IsNullOrEmpty(inDto.ServiceName))
+        {
+            var (_, correctServiceName)= await CheckWalletServiceName(inDto.ServiceName);
+            inDto.ServiceName = correctServiceName;
+        }
+
+        var userId = securityContext.CurrentAccount.ID;
+
+        var task = serviceProvider.GetService<CustomerServiceUsageReportTask>();
+
+        var baseUri = commonLinkUtility.ServerRootPath;
+
+        task.Init(baseUri, tenantId, userId, null);
+
+        var taskProgress = await serviceUsageReportTaskManager.StartTask(task, false);
+
+        var headers = MessageSettings.GetHttpHeaders(Request)?
+            .ToDictionary(x => x.Key, x => x.Value.ToString()) ?? [];
+
+        var evt = new CustomerServiceUsageReportIntegrationEvent(
+            userId,
+            tenantId,
+            baseUri,
+            inDto.ServiceName,
+            inDto.StartDate,
+            inDto.EndDate,
+            inDto.ParticipantName,
+            inDto.Status,
+            inDto.Metadata,
+            inDto.OrderBy,
+            inDto.OrderType,
+            headers);
+
+        await eventBus.PublishAsync(evt);
+
+        return DocumentBuilderTaskDto.Get(taskProgress);
+    }
+
+    /// <remarks>
+    /// Returns the status of generating a customer service usage report.
+    /// </remarks>
+    /// <summary>Get the status of the customer service usage report generation</summary>
+    /// <path>api/2.0/portal/payment/customer/usage/report</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "Operation execution status", typeof(DocumentBuilderTaskDto))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(404, "Customer could not be found")]
+    [HttpGet("customer/usage/report")]
+    public async Task<DocumentBuilderTaskDto> GetCustomerServiceUsageReport()
+    {
+        if (!tariffService.IsConfigured())
+        {
+            throw new InvalidOperationException("Tariff service is not configured");
+        }
+
+        await DemandAdminAsync();
+
+        var tenantId = tenantManager.GetCurrentTenantId();
+
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenantId);
+        if (customerInfo == null)
+        {
+            throw new ItemNotFoundException("Customer could not be found");
+        }
+
+        var task = await serviceUsageReportTaskManager.GetTask(tenantId, securityContext.CurrentAccount.ID);
+
+        return DocumentBuilderTaskDto.Get(task);
+    }
+
+    /// <remarks>
+    /// Terminates generating a customer service usage report.
+    /// </remarks>
+    /// <summary>Terminate the customer service usage report generation</summary>
+    /// <path>api/2.0/portal/payment/customer/usage/report</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(404, "Customer could not be found")]
+    [HttpDelete("customer/usage/report")]
+    public async Task TerminateCustomerServiceUsageReport()
+    {
+        if (!tariffService.IsConfigured())
+        {
+            throw new InvalidOperationException("Tariff service is not configured");
+        }
+
+        await DemandAdminAsync();
+
+        var tenantId = tenantManager.GetCurrentTenantId();
+
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenantId);
+        if (customerInfo == null)
+        {
+            throw new ItemNotFoundException("Customer could not be found");
+        }
+
+        var evt = new CustomerServiceUsageReportIntegrationEvent(securityContext.CurrentAccount.ID, tenantId, null, null, terminate: true);
+
+        await eventBus.PublishAsync(evt);
+    }
+
+    /// <remarks>
+    /// Starts generating a customer monthly usage report as an "xlsx" file and saves it in Documents.
+    /// </remarks>
+    /// <summary>
+    /// Start the customer monthly usage report generation
+    /// </summary>
+    /// <path>api/2.0/portal/payment/customer/usage/monthly/report</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "Operation execution status", typeof(DocumentBuilderTaskDto))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(404, "Customer could not be found")]
+    [HttpPost("customer/usage/monthly/report")]
+    public async Task<DocumentBuilderTaskDto> CreateCustomerMonthlyUsageReport(CustomerMonthlyUsageReportRequestDto inDto)
+    {
+        if (!tariffService.IsConfigured())
+        {
+            throw new InvalidOperationException("Tariff service is not configured");
+        }
+
+        await DemandAdminAsync();
+
+        var tenantId = tenantManager.GetCurrentTenantId();
+
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenantId);
+        if (customerInfo == null)
+        {
+            throw new ItemNotFoundException("Customer could not be found");
+        }
+
+        inDto ??= new CustomerMonthlyUsageReportRequestDto();
+
+        var userId = securityContext.CurrentAccount.ID;
+
+        var task = serviceProvider.GetService<CustomerMonthlyUsageReportTask>();
+
+        var baseUri = commonLinkUtility.ServerRootPath;
+
+        task.Init(baseUri, tenantId, userId, null);
+
+        var taskProgress = await monthlyUsageReportTaskManager.StartTask(task, false);
+
+        var headers = MessageSettings.GetHttpHeaders(Request)?
+            .ToDictionary(x => x.Key, x => x.Value.ToString()) ?? [];
+
+        var evt = new CustomerMonthlyUsageReportIntegrationEvent(
+            userId,
+            tenantId,
+            baseUri,
+            inDto.StartDate,
+            inDto.EndDate,
+            headers);
+
+        await eventBus.PublishAsync(evt);
+
+        return DocumentBuilderTaskDto.Get(taskProgress);
+    }
+
+    /// <remarks>
+    /// Returns the status of generating a customer monthly usage report.
+    /// </remarks>
+    /// <summary>Get the status of the customer monthly usage report generation</summary>
+    /// <path>api/2.0/portal/payment/customer/usage/monthly/report</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "Operation execution status", typeof(DocumentBuilderTaskDto))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(404, "Customer could not be found")]
+    [HttpGet("customer/usage/monthly/report")]
+    public async Task<DocumentBuilderTaskDto> GetCustomerMonthlyUsageReport()
+    {
+        if (!tariffService.IsConfigured())
+        {
+            throw new InvalidOperationException("Tariff service is not configured");
+        }
+
+        await DemandAdminAsync();
+
+        var tenantId = tenantManager.GetCurrentTenantId();
+
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenantId);
+        if (customerInfo == null)
+        {
+            throw new ItemNotFoundException("Customer could not be found");
+        }
+
+        var task = await monthlyUsageReportTaskManager.GetTask(tenantId, securityContext.CurrentAccount.ID);
+
+        return DocumentBuilderTaskDto.Get(task);
+    }
+
+    /// <remarks>
+    /// Terminates generating a customer monthly usage report.
+    /// </remarks>
+    /// <summary>Terminate the customer monthly usage report generation</summary>
+    /// <path>api/2.0/portal/payment/customer/usage/monthly/report</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(404, "Customer could not be found")]
+    [HttpDelete("customer/usage/monthly/report")]
+    public async Task TerminateCustomerMonthlyUsageReport()
+    {
+        if (!tariffService.IsConfigured())
+        {
+            throw new InvalidOperationException("Tariff service is not configured");
+        }
+
+        await DemandAdminAsync();
+
+        var tenantId = tenantManager.GetCurrentTenantId();
+
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenantId);
+        if (customerInfo == null)
+        {
+            throw new ItemNotFoundException("Customer could not be found");
+        }
+
+        var evt = new CustomerMonthlyUsageReportIntegrationEvent(securityContext.CurrentAccount.ID, tenantId, null, terminate: true);
 
         await eventBus.PublishAsync(evt);
     }
@@ -1852,24 +2111,32 @@ public class PaymentController(
     }
 
     /// <summary>
-    /// Validates the service name and returns the corresponding tenant wallet service
+    /// Validates the service name and returns the corresponding tenant wallet service with the correct service name
     /// </summary>
     /// <remarks>
     /// Checks if the provided service name matches any tenant quota service name and verifies that the corresponding tenant ID is a valid TenantWalletService enum value.
     /// </remarks>
     /// <param name="serviceName">The service name to validate</param>
-    /// <return>The corresponding TenantWalletService enum value</return>
+    /// <return>The corresponding TenantWalletService enum value and correct service name</return>
     /// <exception cref="ItemNotFoundException">Thrown when the quota with the corresponding service name is hidden or not found in the database.</exception>
-    private async Task<TenantWalletService> CheckWalletServiceName(string serviceName)
+    private async Task<(TenantWalletService, string)> CheckWalletServiceName(string serviceName)
     {
         var quotaList = await tenantManager.GetTenantQuotasAsync(all: false, wallet: true);
 
         var selectedQuota = quotaList.FirstOrDefault(x =>
             x.ServiceName.Equals(serviceName, StringComparison.InvariantCultureIgnoreCase));
 
+        // for testing purposes
+        if (selectedQuota == null)
+        {
+            serviceName += "-1-hour";
+            selectedQuota = quotaList.FirstOrDefault(x =>
+                x.ServiceName.Equals(serviceName, StringComparison.InvariantCultureIgnoreCase));
+        }
+
         if (selectedQuota != null && Enum.IsDefined(typeof(TenantWalletService), selectedQuota.TenantId))
         {
-            return (TenantWalletService)selectedQuota.TenantId;
+            return ((TenantWalletService)selectedQuota.TenantId, serviceName);
         }
 
         throw new ItemNotFoundException("Service could not be found");

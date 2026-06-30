@@ -34,6 +34,8 @@
 namespace ASC.Files.Core.Services.DocumentBuilderService;
 
 [Singleton(GenericArguments = [typeof(CustomerOperationsReportTask), typeof(int), typeof(CustomerOperationsReportTaskData)])]
+[Singleton(GenericArguments = [typeof(CustomerServiceUsageReportTask), typeof(int), typeof(CustomerServiceUsageReportTaskData)])]
+[Singleton(GenericArguments = [typeof(CustomerMonthlyUsageReportTask), typeof(int), typeof(CustomerMonthlyUsageReportTaskData)])]
 [Singleton(GenericArguments = [typeof(FormFillingReportTask), typeof(int), typeof(FormFillingReportTaskData)])]
 [Singleton(GenericArguments = [typeof(RoomIndexExportTask), typeof(int), typeof(RoomIndexExportTaskData)])]
 public class DocumentBuilderTaskManager<T, TId, TData> where T : DocumentBuilderTask<TId, TData>
