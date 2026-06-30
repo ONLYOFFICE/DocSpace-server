@@ -44,7 +44,7 @@ public class CustomerMonthlyUsageReportTask : DocumentBuilderTask<int, CustomerM
     {
     }
 
-    private const string ScriptName = "MonthlyUsageReport.docbuilder";
+    private const string ScriptName = "CustomerOperationsReport.docbuilder";
 
     protected override async Task<DocumentBuilderInputData> GetDocumentBuilderInputDataAsync(IServiceProvider serviceProvider)
     {
@@ -111,9 +111,9 @@ public class CustomerMonthlyUsageReportTask : DocumentBuilderTask<int, CustomerM
 
         var user = await userManager.GetUsersAsync(userId);
 
-        var usertCulture = user.GetCulture();
-        CultureInfo.CurrentCulture = usertCulture;
-        CultureInfo.CurrentUICulture = usertCulture;
+        var userCulture = user.GetCulture();
+        CultureInfo.CurrentCulture = userCulture;
+        CultureInfo.CurrentUICulture = userCulture;
 
         var utcStartDate = tenantUtil.DateTimeToUtc(taskData.StartDate ?? tenant.CreationDateTime);
         var utcEndDate = tenantUtil.DateTimeToUtc(taskData.EndDate ?? DateTime.UtcNow);
@@ -151,7 +151,7 @@ public class CustomerMonthlyUsageReportTask : DocumentBuilderTask<int, CustomerM
 
             if (records is { Count: > 0 })
             {
-                var text = Serialize(records, usertCulture, options);
+                var text = Serialize(records, userCulture, options);
                 await writer.WriteAsync(text);
             }
 

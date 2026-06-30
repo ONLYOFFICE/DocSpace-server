@@ -132,9 +132,9 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
 
         var user = await userManager.GetUsersAsync(userId);
 
-        var usertCulture = user.GetCulture();
-        CultureInfo.CurrentCulture = usertCulture;
-        CultureInfo.CurrentUICulture = usertCulture;
+        var userCulture = user.GetCulture();
+        CultureInfo.CurrentCulture = userCulture;
+        CultureInfo.CurrentUICulture = userCulture;
 
         var utcStartDate = tenantUtil.DateTimeToUtc(taskData.StartDate ?? tenant.CreationDateTime);
         var utcEndDate = tenantUtil.DateTimeToUtc(taskData.EndDate ?? DateTime.UtcNow);
@@ -177,7 +177,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
 
         var scriptParts = script.Split("${dataValues}");
 
-        var dateFormat = $"{usertCulture.DateTimeFormat.ShortDatePattern} {usertCulture.DateTimeFormat.ShortTimePattern.Replace("tt", "AM/PM")}";
+        var dateFormat = $"{userCulture.DateTimeFormat.ShortDatePattern} {userCulture.DateTimeFormat.ShortTimePattern.Replace("tt", "AM/PM")}";
 
         await using (var writer = new StreamWriter(scriptFilePath))
         {

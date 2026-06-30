@@ -66,7 +66,7 @@ public class CustomerServiceUsageReportIntegrationEventHandler(
 
                 await tenantManager.SetCurrentTenantAsync(@event.TenantId);
 
-                var task = serviceProvider.GetService<CustomerServiceUsageReportTask>();
+                var task = serviceProvider.GetRequiredService<CustomerServiceUsageReportTask>();
 
                 var data = new CustomerServiceUsageReportTaskData(
                     @event.Headers,
