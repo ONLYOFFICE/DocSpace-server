@@ -135,8 +135,14 @@
   <data name="AccountingCustomerOperationDetails" xml:space="preserve">
     <value>تفاصيل</value>
   </data>
+  <data name="AccountingCustomerOperationMonth" xml:space="preserve">
+    <value>الشهر</value>
+  </data>
   <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
     <value>كمية</value>
+  </data>
+  <data name="AccountingCustomerOperationService" xml:space="preserve">
+    <value>الخدمة</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
     <value>ميزات الذكاء الاصطناعي</value>
@@ -173,6 +179,18 @@
   </data>
   <data name="AccountingCustomerOperationType" xml:space="preserve">
     <value>نوع</value>
+  </data>
+  <data name="AccountingMonthlyUsageReportName" xml:space="preserve">
+    <value>تقرير الاستخدام الشهري ({0}-{1})</value>
+  </data>
+  <data name="AccountingMonthlyUsageReportSheetName" xml:space="preserve">
+    <value>الاستخدام الشهري</value>
+  </data>
+  <data name="AccountingServiceUsageReportName" xml:space="preserve">
+    <value>تقرير استخدام الخدمات ({0}-{1})</value>
+  </data>
+  <data name="AccountingServiceUsageReportSheetName" xml:space="preserve">
+    <value>استخدام الخدمات</value>
   </data>
   <data name="ActivateMobilePhoneEmptyCode" xml:space="preserve">
     <value>لا يمكن ترك حقل رمز التحقق فارغ</value>

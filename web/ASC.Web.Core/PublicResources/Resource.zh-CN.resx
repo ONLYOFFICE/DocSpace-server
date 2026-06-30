@@ -135,8 +135,14 @@
   <data name="AccountingCustomerOperationDetails" xml:space="preserve">
     <value>详情</value>
   </data>
+  <data name="AccountingCustomerOperationMonth" xml:space="preserve">
+    <value>月份</value>
+  </data>
   <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
     <value>数量</value>
+  </data>
+  <data name="AccountingCustomerOperationService" xml:space="preserve">
+    <value>服务</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
     <value>AI 功能</value>
@@ -167,6 +173,18 @@
   </data>
   <data name="AccountingCustomerOperationType" xml:space="preserve">
     <value>类型</value>
+  </data>
+  <data name="AccountingMonthlyUsageReportName" xml:space="preserve">
+    <value>每月使用报告 ({0}-{1})</value>
+  </data>
+  <data name="AccountingMonthlyUsageReportSheetName" xml:space="preserve">
+    <value>每月使用</value>
+  </data>
+  <data name="AccountingServiceUsageReportName" xml:space="preserve">
+    <value>服务使用报告 ({0}-{1})</value>
+  </data>
+  <data name="AccountingServiceUsageReportSheetName" xml:space="preserve">
+    <value>服务使用</value>
   </data>
   <data name="ActivateMobilePhoneEmptyCode" xml:space="preserve">
     <value>请输入验证码</value>

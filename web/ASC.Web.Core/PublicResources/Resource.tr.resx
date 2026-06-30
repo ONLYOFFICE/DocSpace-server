@@ -135,8 +135,14 @@
   <data name="AccountingCustomerOperationDetails" xml:space="preserve">
     <value>Detaylar</value>
   </data>
+  <data name="AccountingCustomerOperationMonth" xml:space="preserve">
+    <value>Ay</value>
+  </data>
   <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
     <value>Miktar</value>
+  </data>
+  <data name="AccountingCustomerOperationService" xml:space="preserve">
+    <value>Hizmet</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
     <value>Yapay Zeka özellikleri</value>
@@ -173,6 +179,18 @@
   </data>
   <data name="AccountingCustomerOperationType" xml:space="preserve">
     <value>Tip</value>
+  </data>
+  <data name="AccountingMonthlyUsageReportName" xml:space="preserve">
+    <value>Aylık kullanım raporu ({0}-{1})</value>
+  </data>
+  <data name="AccountingMonthlyUsageReportSheetName" xml:space="preserve">
+    <value>Aylık kullanım</value>
+  </data>
+  <data name="AccountingServiceUsageReportName" xml:space="preserve">
+    <value>Hizmet kullanım raporu ({0}-{1})</value>
+  </data>
+  <data name="AccountingServiceUsageReportSheetName" xml:space="preserve">
+    <value>Hizmet kullanımı</value>
   </data>
   <data name="ActivateMobilePhoneEmptyCode" xml:space="preserve">
     <value>Doğrulama alanı boş olamaz</value>

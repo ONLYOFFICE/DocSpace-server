@@ -135,8 +135,14 @@
   <data name="AccountingCustomerOperationDetails" xml:space="preserve">
     <value>Подробности</value>
   </data>
+  <data name="AccountingCustomerOperationMonth" xml:space="preserve">
+    <value>Месец</value>
+  </data>
   <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
     <value>Количество</value>
+  </data>
+  <data name="AccountingCustomerOperationService" xml:space="preserve">
+    <value>Услуга</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
     <value>AI функции</value>
@@ -173,6 +179,18 @@
   </data>
   <data name="AccountingCustomerOperationType" xml:space="preserve">
     <value>Тип</value>
+  </data>
+  <data name="AccountingMonthlyUsageReportName" xml:space="preserve">
+    <value>Отчет за месечно потребление ({0}-{1})</value>
+  </data>
+  <data name="AccountingMonthlyUsageReportSheetName" xml:space="preserve">
+    <value>Месечно потребление</value>
+  </data>
+  <data name="AccountingServiceUsageReportName" xml:space="preserve">
+    <value>Отчет за използване на услугите ({0}-{1})</value>
+  </data>
+  <data name="AccountingServiceUsageReportSheetName" xml:space="preserve">
+    <value>Използване на услугите</value>
   </data>
   <data name="ActivateMobilePhoneEmptyCode" xml:space="preserve">
     <value>Полето за валидиране не може да бъде празно</value>
