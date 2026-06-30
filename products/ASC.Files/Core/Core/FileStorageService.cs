@@ -2259,7 +2259,7 @@ public class FileStorageService //: IFileStorageService
         {
             if (tagLocked != null)
             {
-                await tagDao.RemoveTagsAsync(tagLocked);
+                await tagDao.RemoveTagsAsync(file, [tagLocked.Id]);
 
                 await filesMessageService.SendAsync(MessageAction.FileUnlocked, file, file.Title);
             }
@@ -2346,7 +2346,7 @@ public class FileStorageService //: IFileStorageService
         {
             if (tagCustomFilter != null)
             {
-                await tagDao.RemoveTagsAsync(tagCustomFilter);
+                await tagDao.RemoveTagsAsync(file, [ tagCustomFilter.Id ]);
             }
 
             await filesMessageService.SendAsync(MessageAction.FileCustomFilterDisabled, file, file.Title);

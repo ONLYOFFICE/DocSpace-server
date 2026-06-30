@@ -31,6 +31,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
+using ASC.Core.Common.Notify.Engine;
+
 namespace ASC.ApiSystem;
 
 public class Startup
@@ -149,6 +151,8 @@ public class Startup
         services.AddAccountingHttpClient();
 
         services.AddApiSystemAuthServices();
+
+        services.ConfigureNotificationServices();
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
