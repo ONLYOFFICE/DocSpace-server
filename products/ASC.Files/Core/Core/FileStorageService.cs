@@ -2259,7 +2259,7 @@ public class FileStorageService //: IFileStorageService
         {
             if (tagLocked != null)
             {
-                await tagDao.RemoveTagsAsync(tagLocked);
+                await tagDao.RemoveTagsAsync(file, [tagLocked.Id]);
 
                 await filesMessageService.SendAsync(MessageAction.FileUnlocked, file, file.Title);
             }
