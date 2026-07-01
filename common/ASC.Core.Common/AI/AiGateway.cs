@@ -93,27 +93,38 @@ public class AiGateway(
 
     public async Task<AiPricesResponse> GetPricesAsync()
     {
-        return await SendAsync<AiPricesResponse>(HttpMethod.Get, "/prices", authorize: false);
+        var key = await GetKeyAsync(allowEmpty: true);
+        return await SendAsync<AiPricesResponse>(HttpMethod.Get, "/prices", key: key);
     }
 
     public async Task<RestrictedModelsResponse> GetRestrictedModelsAsync()
     {
-        return await SendAsync<RestrictedModelsResponse>(HttpMethod.Get, "/chat/models/restrictions");
+        var key = await GenerateKeyAsync();
+        return await SendAsync<RestrictedModelsResponse>(HttpMethod.Get, "/chat/models/restrictions", key: key);
     }
 
     public async Task<RestrictedModelsResponse> SetRestrictedModelsAsync(HashSet<string> models)
     {
         var content = JsonContent.Create(new SetRestrictedModelsRequest { Models = models });
-        return await SendAsync<RestrictedModelsResponse>(HttpMethod.Put, "/chat/models/restrictions", content);
+        var key = await GenerateKeyAsync();
+
+        await fusionCache.RemoveAsync(GetCustomerModelsCacheKey());
+
+        return await SendAsync<RestrictedModelsResponse>(HttpMethod.Put, "/chat/models/restrictions", content, key);
     }
 
     public async Task<ModelsResponse> GetModelsAsync()
     {
-        // The model list is gateway-wide (not tenant-specific) and changes rarely, so cache it
-        // with a short TTL to avoid hitting the gateway once per ReadAllAsync/ReadByIdAsync call.
+        var key = await GetKeyAsync(allowEmpty: true);
+        var path = string.IsNullOrEmpty(key) ? "/models" : "/customer/models";
+
+        var cacheKey = string.IsNullOrEmpty(key)
+            ? ModelsCacheKey
+            : GetCustomerModelsCacheKey();
+
         return await fusionCache.GetOrSetAsync<ModelsResponse>(
-            ModelsCacheKey,
-            async (_, _) => await SendAsync<ModelsResponse>(HttpMethod.Get, "/models"),
+            cacheKey,
+            async (_, _) => await SendAsync<ModelsResponse>(HttpMethod.Get, path, key: key),
             opt => opt.SetDuration(_modelsCacheDuration).SetFailSafe(true));
     }
 
@@ -122,16 +133,11 @@ public class AiGateway(
         var customerInfo = await tariffService.GetCustomerInfoAsync(tenantManager.GetCurrentTenantId());
         if (customerInfo == null)
         {
-            if (allowEmpty)
-            {
-                return string.Empty;
-            }
-
-            throw new AccountingPaymentRequiredException();
+            return allowEmpty ? string.Empty : throw new AccountingPaymentRequiredException();
         }
 
         var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
-        if (user == null || user.Removed ||  user.Status == EmployeeStatus.Terminated || user.Id == Constants.LostUser.Id)
+        if (user == null || user.Removed || user.Status == EmployeeStatus.Terminated || user.Id == Constants.LostUser.Id)
         {
             throw new SecurityException();
         }
@@ -147,13 +153,12 @@ public class AiGateway(
         return JsonWebToken.Encode(payload, aiGatewayConfiguration.Settings.Secret);
     }
 
-    private async Task<T> SendAsync<T>(HttpMethod method, string path, HttpContent content = null, bool authorize = true)
+    private async Task<T> SendAsync<T>(HttpMethod method, string path, HttpContent content = null, string key = null)
     {
         using var request = new HttpRequestMessage(method, $"{Url}{path}");
 
-        if (authorize)
+        if (!string.IsNullOrEmpty(key))
         {
-            var key = await GenerateKeyAsync();
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", key);
         }
 
@@ -165,6 +170,11 @@ public class AiGateway(
         response.EnsureSuccessStatusCode();
 
         return await response.Content.ReadFromJsonAsync<T>();
+    }
+
+    private string GetCustomerModelsCacheKey()
+    {
+        return $"{ModelsCacheKey}:{tenantManager.GetCurrentTenantId()}";
     }
 }
 
