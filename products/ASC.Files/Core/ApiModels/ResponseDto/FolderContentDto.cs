@@ -98,7 +98,8 @@ public class FolderContentDtoHelper(
     AuthContext authContext,
     BreadCrumbsManager breadCrumbsManager,
     AiAccessibility accessibility,
-    AiModelSettingsLoader modelSettingsLoader)
+    AiModelSettingsLoader modelSettingsLoader,
+    IDaoFactory daoFactory)
 {
     public async Task<FolderContentDto<T>> GetAsync<T>(T folderId, Guid? userIdOrGroupId, Guid? sharedBy, FilterType? filterType, T roomId, bool? searchInContent, bool? withSubFolders, bool? excludeSubject, ApplyFilterOption? applyFilterOption, SearchArea? searchArea, string sortByFilter, SortOrder sortOrder, int startIndex, int limit, string text, string[] extension = null, FormsItemDto formsItemDto = null, Location? location = null, T parentId = default, List<FolderType> folderType = null)
     {
@@ -129,6 +130,11 @@ public class FolderContentDtoHelper(
         if (folderItems.FolderInfo is { FolderType: FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates or FolderType.DefaultTemplates })
         {
             currentUsersRecords = await fileSecurity.GetUserRecordsAsync().ToListAsync();
+        }
+
+        if (folderItems.FolderInfo is { FolderType: FolderType.AiAgents })
+        {
+            await SetAgentsChatSettingsAsync(folderItems);
         }
 
         var aiStatusTask = accessibility.GetStatusAsync();
@@ -257,6 +263,26 @@ public class FolderContentDtoHelper(
             }
 
             return null;
+        }
+    }
+
+    private async Task SetAgentsChatSettingsAsync<T>(DataWrapper<T> folderItems)
+    {
+        var agentFolders = folderItems.Entries.OfType<Folder<int>>().Where(f => f.IsAgent).ToList();
+
+        var ids = agentFolders.Where(f => f.ChatSettings == null).Select(f => f.Id).Distinct().ToList();
+        if (ids.Count == 0)
+        {
+            return;
+        }
+
+        var chatSettings = await daoFactory.GetFolderDao<int>().GetChatSettingsAsync(ids);
+        foreach (var folder in agentFolders)
+        {
+            if (folder.ChatSettings == null && chatSettings.TryGetValue(folder.Id, out var settings))
+            {
+                folder.ChatSettings = settings;
+            }
         }
     }
 

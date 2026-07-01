@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -757,6 +757,16 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
     }
 
     public Task<Folder<string>> DeleteLifetimeSettings(Folder<string> room)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<ChatSettings> GetChatSettingsAsync(string agentId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<Dictionary<string, ChatSettings>> GetChatSettingsAsync(IEnumerable<string> agentIds)
     {
         throw new NotImplementedException();
     }
