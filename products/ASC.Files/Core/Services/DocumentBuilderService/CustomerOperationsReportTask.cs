@@ -320,7 +320,13 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
             {
                 var tariffService = ctx.ServiceProvider.GetService<TariffService>();
 
-                var records = await tariffService.GetCustomerMonthlyUsageAsync(ctx.Tenant.Id, ctx.UtcStartDate, ctx.UtcEndDate);
+                var filter = new MonthlyUsageFilter
+                {
+                    UtcStartDate = ctx.UtcStartDate,
+                    UtcEndDate = ctx.UtcEndDate
+                };
+
+                var records = await tariffService.GetCustomerMonthlyUsageAsync(ctx.Tenant.Id, filter);
 
                 if (records is { Count: > 0 })
                 {
