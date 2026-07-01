@@ -315,19 +315,11 @@ public class CustomerServiceUsageDto
 
     public CustomerServiceUsageDto(CustomerServiceUsage usage, Dictionary<string, string> customUom)
     {
-        var serviceName = usage.Service;
-
-        // for testing purposes
-        if (serviceName.StartsWith("disk-storage"))
-        {
-            serviceName = "disk-storage";
-        }
-
-        var unit = customUom.GetValueOrDefault(serviceName, serviceName);
+        var (serviceName, title, serviceUnit) = WalletServiceDescriptionManager.GetServiceTitleAndUom(usage.Service, customUom);
 
         Service = serviceName;
-        Title = Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceDesc_{serviceName}");
-        ServiceUnit = Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceUOM_{unit}");
+        Title = title;
+        ServiceUnit = serviceUnit;
         Currency = usage.Currency;
         TotalQuantity = usage.TotalQuantity;
         TotalAmount = usage.TotalAmount;

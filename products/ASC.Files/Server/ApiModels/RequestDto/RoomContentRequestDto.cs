@@ -50,14 +50,14 @@ public class RoomContentRequestDto
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromQuery(Name = "subjectId")]
-    public string SubjectId { get; set; }
+    public Guid? SubjectId { get; set; }
 
     /// <summary>
     /// The filter by room owner ID.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromQuery(Name = "subjectOwnerId")]
-    public string SubjectOwnerId { get; set; }
+    public Guid? SubjectOwnerId { get; set; }
 
     /// <summary>
     /// The room search area (Active, Archive, Any, Recent by links).
@@ -93,14 +93,6 @@ public class RoomContentRequestDto
     /// <example>1</example>
     [FromQuery(Name = "provider")]
     public ProviderFilter? Provider { get; set; }
-
-    /// <summary>
-    /// The filter by user (Owner - 0, Member - 1).
-    /// </summary>
-    /// <example>1</example>
-    [FromQuery(Name = "subjectFilter")]
-    [Obsolete("Use SubjectOwnerId instead")]
-    public SubjectFilter? SubjectFilter { get; set; }
 
     /// <summary>
     /// The filter by quota (All - 0, Default - 1, Custom - 2).

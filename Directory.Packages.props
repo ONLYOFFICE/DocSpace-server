@@ -32,11 +32,11 @@
     <PackageVersion Include="Asp.Versioning.Http" Version="8.1.1" />
     <PackageVersion Include="Asp.Versioning.Mvc" Version="8.1.1" />
     <PackageVersion Include="Asp.Versioning.Mvc.ApiExplorer" Version="8.1.1" />
-    <PackageVersion Include="Aspire.Hosting.AppHost" Version="13.4.5" />
-    <PackageVersion Include="Aspire.Hosting.JavaScript" Version="13.4.5" />
-    <PackageVersion Include="Aspire.Hosting.MySql" Version="13.4.5" />
-    <PackageVersion Include="Aspire.Hosting.RabbitMQ" Version="13.4.5" />
-    <PackageVersion Include="Aspire.Hosting.Redis" Version="13.4.5" />
+    <PackageVersion Include="Aspire.Hosting.AppHost" Version="13.4.6" />
+    <PackageVersion Include="Aspire.Hosting.JavaScript" Version="13.4.6" />
+    <PackageVersion Include="Aspire.Hosting.MySql" Version="13.4.6" />
+    <PackageVersion Include="Aspire.Hosting.RabbitMQ" Version="13.4.6" />
+    <PackageVersion Include="Aspire.Hosting.Redis" Version="13.4.6" />
     <PackageVersion Include="AspNetCore.HealthChecks.Kafka" Version="9.0.0" />
     <PackageVersion Include="AspNetCore.HealthChecks.MySql" Version="9.0.0" />
     <PackageVersion Include="AspNetCore.HealthChecks.NpgSql" Version="9.0.0" />
@@ -87,7 +87,7 @@
     <PackageVersion Include="Joonasw.AspNetCore.SecurityHeaders" Version="6.0.0" />
     <PackageVersion Include="JWT" Version="11.0.0" />
     <PackageVersion Include="log4net" Version="3.0.3" />
-    <PackageVersion Include="Magick.NET-Q8-AnyCPU" Version="14.13.1" />
+    <PackageVersion Include="Magick.NET-Q8-AnyCPU" Version="14.14.0" />
     <PackageVersion Include="MailKit" Version="4.16.0" />
     <PackageVersion Include="Microsoft.AspNet.WebApi.Core" Version="5.3.0" />
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.8" />
@@ -181,6 +181,8 @@
     <PackageVersion Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="3.119.4" />
     <PackageVersion Include="Spectre.Console" Version="0.54.0" />
     <PackageVersion Include="Spectre.Console.Cli" Version="0.53.1" />
+    <!-- Transitive pin: Microsoft.Data.Sqlite pulls SQLitePCLRaw.lib.e_sqlite3 2.1.11, which has a known high-severity vulnerability (GHSA-2m69-gcr7-jv3q). Pin the patched native lib until EF/Microsoft.Data.Sqlite 10.0.11 ships the fix. -->
+    <PackageVersion Include="SQLitePCLRaw.lib.e_sqlite3" Version="3.50.3" />
     <PackageVersion Include="StackExchange.Redis" Version="2.13.17" />
     <PackageVersion Include="StackExchange.Redis.Extensions.AspNetCore" Version="11.0.0" />
     <PackageVersion Include="StackExchange.Redis.Extensions.Core" Version="11.0.0" />
@@ -190,8 +192,8 @@
     <PackageVersion Include="Swashbuckle.AspNetCore.Annotations" Version="10.2.1" />
     <PackageVersion Include="Swashbuckle.AspNetCore.SwaggerGen" Version="10.2.1" />
     <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="8.15.0" />
-    <PackageVersion Include="Aspire.Hosting.PostgreSQL" Version="13.2.0" />
-    <PackageVersion Include="Aspire.Hosting.Testing" Version="13.4.5" />
+    <PackageVersion Include="Aspire.Hosting.PostgreSQL" Version="13.4.6" />
+    <PackageVersion Include="Aspire.Hosting.Testing" Version="13.4.6" />
     <PackageVersion Include="Telegram.Bot" Version="22.7.6" />
     <PackageVersion Include="TweetinviAPI" Version="5.0.4" />
     <PackageVersion Include="Twilio" Version="7.13.5" />

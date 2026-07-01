@@ -46,7 +46,7 @@ public class SubscriptionBalanceInfo
     public decimal TotalCost { get; set; }
 
     /// <summary>
-    /// The three-character ISO 4217 currency symbol.
+    /// The three-character ISO 4217 currency symbol of the subscription.
     /// </summary>
     /// <example>USD</example>
     [JsonPropertyName("currency")]
@@ -81,9 +81,23 @@ public class SubscriptionBalanceInfo
     public int DaysElapsed { get; set; }
 
     /// <summary>
-    /// The unused balance of the subscription.
+    /// The unused balance of the subscription, in the subscription currency.
     /// </summary>
     /// <example>87.74</example>
     [JsonPropertyName("remainingBalance")]
     public decimal RemainingBalance { get; set; }
+
+    /// <summary>
+    /// The unused balance of the subscription, converted to the wallet currency.
+    /// </summary>
+    /// <example>87.74</example>
+    [JsonPropertyName("remainingBalanceInWalletCurrency")]
+    public decimal RemainingBalanceInWalletCurrency { get; set; }
+
+    /// <summary>
+    /// The three-character ISO 4217 currency symbol of the wallet.
+    /// </summary>
+    /// <example>USD</example>
+    [JsonPropertyName("walletCurrency")]
+    public string WalletCurrency { get; set; }
 }

@@ -1694,7 +1694,7 @@ $TrulyYours</value>
 
 DocSpace’iniz "${__VirtualRootPath}":"${__VirtualRootPath}" için planlanan yapılan yedekleme işlemi başarısız oldu.
 
-"Yedekleme":"${__VirtualRootPath}/portal-settings/backup/data-backup" ve "Hizmetler":"${__VirtualRootPath}/portal-settings/services" ayarlarını kontrol etmenizi öneririz.
+"Yedekleme":"${__VirtualRootPath}/portal-settings/backup/data-backup" ve "Hizmetler":"${__VirtualRootPath}/portal-settings/payments/services" ayarlarını kontrol etmenizi öneririz.
 
 Herhangi bir sorunuz varsa veya yardıma ihtiyaç duyarsanız, lütfen "${__SupportLink}":"${__SupportLink}" adresi üzerinden bizimle iletişime geçmekten çekinmeyin.
 
@@ -1705,7 +1705,7 @@ $TrulyYours</value>
 
 DocSpace’iniz [${__VirtualRootPath}](${__VirtualRootPath}) için planlanan yapılan yedekleme işlemi başarısız oldu.
 
-[Yedekleme](${__VirtualRootPath}/portal-settings/backup/data-backup) ve [Hizmetler](${__VirtualRootPath}/portal-settings/services) ayarlarını kontrol etmenizi öneririz.
+[Yedekleme](${__VirtualRootPath}/portal-settings/backup/data-backup) ve [Hizmetler](${__VirtualRootPath}/portal-settings/payments/services) ayarlarını kontrol etmenizi öneririz.
 
 Herhangi bir sorunuz varsa veya yardıma ihtiyaç duyarsanız, lütfen [${__SupportLink}](${__SupportLink}) üzerinden bizimle iletişime geçmekten çekinmeyin.
 

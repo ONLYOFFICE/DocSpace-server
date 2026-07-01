@@ -1688,7 +1688,7 @@ $TrulyYours</value>
 
 La sauvegarde planifiée de votre espace de travail DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" a échoué.
 
-Nous vous recommandons de vérifier les paramètres "Sauvegarde":"${__VirtualRootPath}/portal-settings/backup/data-backup" et "Services":"${__VirtualRootPath}/portal-settings/services".
+Nous vous recommandons de vérifier les paramètres "Sauvegarde":"${__VirtualRootPath}/portal-settings/backup/data-backup" et "Services":"${__VirtualRootPath}/portal-settings/payments/services".
 
 Pour toute question ou assistance, n'hésitez pas à nous contacter via "${__SupportLink}":"${__SupportLink}".
 
@@ -1699,7 +1699,7 @@ $TrulyYours</value>
 
 La sauvegarde planifiée de votre espace de travail DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) a échoué.
 
-Nous vous recommandons de vérifier les paramètres [Sauvegarde](${__VirtualRootPath}/portal-settings/backup/data-backup) et [Services](${__VirtualRootPath}/portal-settings/services).
+Nous vous recommandons de vérifier les paramètres [Sauvegarde](${__VirtualRootPath}/portal-settings/backup/data-backup) et [Services](${__VirtualRootPath}/portal-settings/payments/services).
 
 Pour toute question ou assistance, n'hésitez pas à nous contacter via [${__SupportLink}](${__SupportLink}).
 

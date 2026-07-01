@@ -48,9 +48,13 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
 
     protected override async Task<DocumentBuilderInputData> GetDocumentBuilderInputDataAsync(IServiceProvider serviceProvider)
     {
-        var (scriptFilePath, tempFileName, outputFileName) = await GetCustomerOperationsReportData(serviceProvider, _userId, _data);
-
-        return new DocumentBuilderInputData(scriptFilePath, tempFileName, outputFileName);
+        return _data.ReportType switch
+        {
+            ReportType.Operations => await BuildOperationsReportAsync(serviceProvider, _userId, _data),
+            ReportType.ServiceUsage => await BuildServiceUsageReportAsync(serviceProvider, _userId, _data),
+            ReportType.MonthlyUsage => await BuildMonthlyUsageReportAsync(serviceProvider, _userId, _data),
+            _ => throw new ArgumentOutOfRangeException(nameof(serviceProvider), _data.ReportType, "Unknown report type")
+        };
     }
 
     protected override async Task<File<int>> ProcessSourceFileAsync(IServiceProvider serviceProvider, Uri fileUri, DocumentBuilderInputData inputData)
@@ -119,22 +123,38 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
         return null;
     }
 
-    private static async Task<(string scriptFilePath, string tempFileName, string outputFileName)> GetCustomerOperationsReportData(IServiceProvider serviceProvider, Guid userId, CustomerOperationsReportTaskData taskData)
+    // Carries the data shared by every report flavour, computed once in RenderAsync.
+    private sealed record RenderContext(
+        IServiceProvider ServiceProvider,
+        Tenant Tenant,
+        CultureInfo Culture,
+        DateTime UtcStartDate,
+        DateTime UtcEndDate,
+        JsonSerializerOptions Options);
+
+    // Common scaffolding for all report types: resolve tenant/user, read the template,
+    // substitute the header placeholders, then let the report-specific delegate stream the rows.
+    private static async Task<DocumentBuilderInputData> RenderAsync(
+        IServiceProvider serviceProvider,
+        Guid userId,
+        CustomerOperationsReportTaskData taskData,
+        string sheetName,
+        string outputFileNameFormat,
+        List<string> keys,
+        Func<StreamWriter, RenderContext, Task> writeValues)
     {
         var tenantManager = serviceProvider.GetService<TenantManager>();
-        var tariffService = serviceProvider.GetService<TariffService>();
         var userManager = serviceProvider.GetService<UserManager>();
         var tenantUtil = serviceProvider.GetService<TenantUtil>();
-        var displayUserSettingsHelper = serviceProvider.GetService<DisplayUserSettingsHelper>();
         var tempPath = serviceProvider.GetService<TempPath>();
 
         var tenant = tenantManager.GetCurrentTenant();
 
         var user = await userManager.GetUsersAsync(userId);
 
-        var usertCulture = user.GetCulture();
-        CultureInfo.CurrentCulture = usertCulture;
-        CultureInfo.CurrentUICulture = usertCulture;
+        var userCulture = user.GetCulture();
+        CultureInfo.CurrentCulture = userCulture;
+        CultureInfo.CurrentUICulture = userCulture;
 
         var utcStartDate = tenantUtil.DateTimeToUtc(taskData.StartDate ?? tenant.CreationDateTime);
         var utcEndDate = tenantUtil.DateTimeToUtc(taskData.EndDate ?? DateTime.UtcNow);
@@ -143,7 +163,38 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
 
         var scriptFilePath = tempPath.GetTempFileName(".docbuilder");
         var tempFileName = DocumentBuilderScriptHelper.GetTempFileName(".xlsx");
-        var outputFileName = string.Format(Resource.AccountingCustomerOperationsReportName + ".xlsx", utcStartDate.ToShortDateString(), utcEndDate.ToShortDateString());
+        var outputFileName = string.Format(outputFileNameFormat + ".xlsx", utcStartDate.ToShortDateString(), utcEndDate.ToShortDateString());
+
+        var options = new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+        };
+
+        script = script
+            .Replace("${sheetName}", sheetName)
+            .Replace("${tempFileName}", tempFileName)
+            .Replace("${dataKeys}", JsonSerializer.Serialize(keys));
+
+        var scriptParts = script.Split("${dataValues}");
+
+        await using (var writer = new StreamWriter(scriptFilePath))
+        {
+            await writer.WriteAsync(scriptParts[0]);
+
+            var context = new RenderContext(serviceProvider, tenant, userCulture, utcStartDate, utcEndDate, options);
+
+            await writeValues(writer, context);
+
+            await writer.WriteAsync(scriptParts[1]);
+        }
+
+        return new DocumentBuilderInputData(scriptFilePath, tempFileName, outputFileName);
+    }
+
+    private static async Task<DocumentBuilderInputData> BuildOperationsReportAsync(IServiceProvider serviceProvider, Guid userId, CustomerOperationsReportTaskData taskData)
+    {
+        var tenantManager = serviceProvider.GetService<TenantManager>();
 
         var keys = new List<string> {
             Resource.AccountingCustomerOperationDate,
@@ -164,64 +215,118 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
             keys.Add(Resource.AccountingCustomerOperationAgent);
         }
 
-        var options = new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-        };
-
-        script = script
-            .Replace("${sheetName}", Resource.AccountingCustomerOperationsReportSheetName)
-            .Replace("${tempFileName}", tempFileName)
-            .Replace("${dataKeys}", JsonSerializer.Serialize(keys));
-
-        var scriptParts = script.Split("${dataValues}");
-
-        var dateFormat = $"{usertCulture.DateTimeFormat.ShortDatePattern} {usertCulture.DateTimeFormat.ShortTimePattern.Replace("tt", "AM/PM")}";
-
-        await using (var writer = new StreamWriter(scriptFilePath))
-        {
-            await writer.WriteAsync(scriptParts[0]);
-
-            var filter = new OperationFilter
+        return await RenderAsync(serviceProvider, userId, taskData,
+            Resource.AccountingCustomerOperationsReportSheetName,
+            Resource.AccountingCustomerOperationsReportName,
+            keys,
+            async (writer, ctx) =>
             {
-                ServiceName = taskData.ServiceName,
-                UtcStartDate = utcStartDate,
-                UtcEndDate = utcEndDate,
-                ParticipantName = taskData.ParticipantName,
-                Credit = taskData.Credit,
-                Debit = taskData.Debit,
-                Type = taskData.Type,
-                Status = taskData.Status,
-                OrderBy = taskData.OrderBy,
-                OrderType = taskData.OrderType
-            };
+                var tariffService = ctx.ServiceProvider.GetService<TariffService>();
+                var tenantUtil = ctx.ServiceProvider.GetService<TenantUtil>();
+                var displayUserSettingsHelper = ctx.ServiceProvider.GetService<DisplayUserSettingsHelper>();
 
-            var partialRecords = GetCustomerOperationsReportDataAsync(
-                tariffService,
-                tenantUtil,
-                displayUserSettingsHelper,
-                tenant.Id,
-                filter);
+                var dateFormat = $"{ctx.Culture.DateTimeFormat.ShortDatePattern} {ctx.Culture.DateTimeFormat.ShortTimePattern.Replace("tt", "AM/PM")}";
 
-            if (partialRecords != null)
-            {
-                await foreach (var records in partialRecords)
+                var filter = new OperationFilter
+                {
+                    ServiceName = taskData.ServiceName,
+                    UtcStartDate = ctx.UtcStartDate,
+                    UtcEndDate = ctx.UtcEndDate,
+                    ParticipantName = taskData.ParticipantName,
+                    Credit = taskData.Credit,
+                    Debit = taskData.Debit,
+                    Type = taskData.Type,
+                    Status = taskData.Status,
+                    OrderBy = taskData.OrderBy,
+                    OrderType = taskData.OrderType
+                };
+
+                await foreach (var records in GetCustomerOperationsReportDataAsync(tariffService, tenantUtil, displayUserSettingsHelper, ctx.Tenant.Id, filter))
                 {
                     if (records is not { Count: > 0 })
                     {
                         continue;
                     }
 
-                    var text = Serialize(records, dateFormat, options, addAgentColumn);
-                    await writer.WriteAsync(text);
+                    await writer.WriteAsync(SerializeOperations(records, dateFormat, ctx.Options, addAgentColumn));
                 }
-            }
+            });
+    }
 
-            await writer.WriteAsync(scriptParts[1]);
-        }
+    private static async Task<DocumentBuilderInputData> BuildServiceUsageReportAsync(IServiceProvider serviceProvider, Guid userId, CustomerOperationsReportTaskData taskData)
+    {
+        var keys = new List<string> {
+            Resource.AccountingCustomerOperationService,
+            Resource.AccountingCustomerOperationQuantity,
+            Resource.AccountingCustomerOperationServiceUnit,
+            Resource.AccountingCustomerOperationDebit,
+            Resource.AccountingCustomerOperationCurrency
+        };
 
-        return (scriptFilePath, tempFileName, outputFileName);
+        return await RenderAsync(serviceProvider, userId, taskData,
+            Resource.AccountingServiceUsageReportSheetName,
+            Resource.AccountingServiceUsageReportName,
+            keys,
+            async (writer, ctx) =>
+            {
+                var tariffService = ctx.ServiceProvider.GetService<TariffService>();
+                var quotaService = ctx.ServiceProvider.GetService<IQuotaService>();
+
+                // For ai-tools, usage is displayed in Tokens instead of AI Credits.
+                var customUom = new Dictionary<string, string>();
+                var aiQuota = await quotaService.GetTenantQuotaAsync((int)TenantWalletService.AITools);
+                if (aiQuota != null)
+                {
+                    customUom.Add(aiQuota.ServiceName, "chat");
+                }
+
+                var filter = new UsageFilter
+                {
+                    ServiceName = taskData.ServiceName,
+                    ParticipantName = taskData.ParticipantName,
+                    Status = taskData.Status,
+                    UtcStartDate = ctx.UtcStartDate,
+                    UtcEndDate = ctx.UtcEndDate,
+                    Metadata = taskData.Metadata,
+                    OrderBy = taskData.OrderBy,
+                    OrderType = taskData.OrderType
+                };
+
+                await foreach (var records in GetCustomerServiceUsageReportDataAsync(tariffService, ctx.Tenant.Id, filter))
+                {
+                    if (records is not { Count: > 0 })
+                    {
+                        continue;
+                    }
+
+                    await writer.WriteAsync(SerializeServiceUsage(records, customUom, ctx.Options));
+                }
+            });
+    }
+
+    private static async Task<DocumentBuilderInputData> BuildMonthlyUsageReportAsync(IServiceProvider serviceProvider, Guid userId, CustomerOperationsReportTaskData taskData)
+    {
+        var keys = new List<string> {
+            Resource.AccountingCustomerOperationMonth,
+            Resource.AccountingCustomerOperationDebit,
+            Resource.AccountingCustomerOperationCurrency
+        };
+
+        return await RenderAsync(serviceProvider, userId, taskData,
+            Resource.AccountingMonthlyUsageReportSheetName,
+            Resource.AccountingMonthlyUsageReportName,
+            keys,
+            async (writer, ctx) =>
+            {
+                var tariffService = ctx.ServiceProvider.GetService<TariffService>();
+
+                var records = await tariffService.GetCustomerMonthlyUsageAsync(ctx.Tenant.Id, ctx.UtcStartDate, ctx.UtcEndDate);
+
+                if (records is { Count: > 0 })
+                {
+                    await writer.WriteAsync(SerializeMonthly(records, ctx.Culture, ctx.Options));
+                }
+            });
     }
 
     private static async IAsyncEnumerable<List<Operation>> GetCustomerOperationsReportDataAsync(
@@ -277,7 +382,39 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
         }
     }
 
-    private static string Serialize(List<Operation> records, string dateFormat, JsonSerializerOptions jsonSerializerOptions, bool addAgentColumn)
+    private static async IAsyncEnumerable<List<CustomerServiceUsage>> GetCustomerServiceUsageReportDataAsync(
+        TariffService tariffService,
+        int tenantId,
+        UsageFilter filter)
+    {
+        var offset = 0;
+        var limit = 1000;
+
+        while (true)
+        {
+            filter.Offset = offset;
+            filter.Limit = limit;
+
+            var report = await tariffService.GetCustomerServiceUsageAsync(tenantId, filter);
+
+            if (report?.Collection == null)
+            {
+                yield return null;
+                break;
+            }
+
+            yield return report.Collection;
+
+            if (report.CurrentPage >= report.TotalPage)
+            {
+                break;
+            }
+
+            offset += limit;
+        }
+    }
+
+    private static string SerializeOperations(List<Operation> records, string dateFormat, JsonSerializerOptions jsonSerializerOptions, bool addAgentColumn)
     {
         var sb = new StringBuilder();
 
@@ -289,10 +426,10 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
                 new(record.Description, "@"),
                 new(record.Details, "@"),
                 new(record.ParticipantDisplayName, "@"),
-                new(record.Quantity.ToString(), "General", "right"),
+                new(record.Quantity.ToString(CultureInfo.InvariantCulture), "General", "right"),
                 new(record.ServiceUnit, "@"),
-                new(record.Credit.ToString(), "0.0000000000", "right"),
-                new(record.Debit.ToString(), "0.0000000000", "right"),
+                new(record.Credit.ToString(CultureInfo.InvariantCulture), "0.0000000000", "right"),
+                new(record.Debit.ToString(CultureInfo.InvariantCulture), "0.0000000000", "right"),
                 new(record.Currency, "@")
             };
 
@@ -307,11 +444,56 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
         return sb.ToString();
     }
 
+    private static string SerializeServiceUsage(List<CustomerServiceUsage> records, Dictionary<string, string> customUom, JsonSerializerOptions jsonSerializerOptions)
+    {
+        var sb = new StringBuilder();
+
+        foreach (var record in records)
+        {
+            var (_, title, serviceUnit) = WalletServiceDescriptionManager.GetServiceTitleAndUom(record.Service, customUom);
+
+            var properties = new List<PropertyValue>
+            {
+                new(title, "@"),
+                new(record.TotalQuantity.ToString(CultureInfo.InvariantCulture), "General", "right"),
+                new(serviceUnit, "@"),
+                new(record.TotalAmount.ToString(CultureInfo.InvariantCulture), "0.0000000000", "right"),
+                new(record.Currency, "@")
+            };
+
+            _ = sb.AppendLine(JsonSerializer.Serialize(properties, jsonSerializerOptions) + ",");
+        }
+
+        return sb.ToString();
+    }
+
+    private static string SerializeMonthly(List<CustomerMonthlyUsage> records, CultureInfo culture, JsonSerializerOptions jsonSerializerOptions)
+    {
+        var sb = new StringBuilder();
+
+        foreach (var record in records)
+        {
+            var month = new DateTime(record.Year, record.Month, 1).ToString("MMMM yyyy", culture);
+
+            var properties = new List<PropertyValue>
+            {
+                new(month, "@"),
+                new(record.TotalAmount.ToString(CultureInfo.InvariantCulture), "0.0000000000", "right"),
+                new(record.Currency, "@")
+            };
+
+            _ = sb.AppendLine(JsonSerializer.Serialize(properties, jsonSerializerOptions) + ",");
+        }
+
+        return sb.ToString();
+    }
+
     private record PropertyValue(string Value, string Format, string Halign = null);
 }
 
 public record CustomerOperationsReportTaskData(
     IDictionary<string, string> Headers,
+    ReportType ReportType,
     string ServiceName,
     DateTime? StartDate,
     DateTime? EndDate,
@@ -320,6 +502,7 @@ public record CustomerOperationsReportTaskData(
     bool? Debit,
     OperationType? Type,
     OperationStatus? Status,
+    Dictionary<string, string> Metadata,
     string OrderBy,
     OperationOrderType? OrderType
 );

@@ -76,6 +76,16 @@ public class DocumentBuilderTaskManager<T, TId, TData> where T : DocumentBuilder
         }
     }
 
+    public async Task TerminateTask(int tenantId, Guid userId, int formId)
+    {
+        var task = await GetTask(tenantId, userId, formId);
+
+        if (task != null)
+        {
+            await _queue.DequeueTask(task.Id);
+        }
+    }
+
     public async Task<T> StartTask(T newTask, bool enqueueTask = true)
     {
         try

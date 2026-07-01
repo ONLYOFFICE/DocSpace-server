@@ -64,16 +64,16 @@ public interface IFolderDao<T>
     Task<Folder<T>> GetRootFolderByFileAsync(T fileId);
 
     IAsyncEnumerable<Folder<T>> GetRoomsAsync(IEnumerable<T> parentsIds, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText, bool withSubfolders,
-        bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter? subjectFilter, Guid subjectOwnerId, IEnumerable<string> subjectEntriesIds, QuotaFilter quotaFilter, int? groupId = null, RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None);
+        bool withoutTags, bool excludeSubject, ProviderFilter provider, Guid subjectOwnerId, IEnumerable<string> subjectEntriesIds, QuotaFilter quotaFilter, int? groupId = null, RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None);
 
     IAsyncEnumerable<Folder<T>> GetRoomsAsync(IEnumerable<T> roomsIds, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText, bool withSubfolders,
-        bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter? subjectFilter, Guid subjectOwnerId, IEnumerable<string> subjectEntriesIds, IEnumerable<int> parentsIds = null, int? groupId = null, RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None);
+        bool withoutTags, bool excludeSubject, ProviderFilter provider, Guid subjectOwnerId, IEnumerable<string> subjectEntriesIds, IEnumerable<int> parentsIds = null, int? groupId = null, RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None);
 
     IAsyncEnumerable<Folder<T>> GetProviderBasedRoomsAsync(SearchArea searchArea, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText, bool withoutTags,
-        bool excludeSubject, ProviderFilter provider, SubjectFilter? subjectFilter, Guid subjectOwnerId, IEnumerable<string> subjectEntriesIds, int? groupId = null);
+        bool excludeSubject, ProviderFilter provider, Guid subjectOwnerId, IEnumerable<string> subjectEntriesIds, int? groupId = null);
 
     IAsyncEnumerable<Folder<T>> GetProviderBasedRoomsAsync(SearchArea searchArea, IEnumerable<T> roomsIds, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags,
-        Guid subjectId, string searchText, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter? subjectFilter, Guid subjectOwnerId, IEnumerable<string> subjectEntriesIds, int? groupId = null);
+        Guid subjectId, string searchText, bool withoutTags, bool excludeSubject, ProviderFilter provider, Guid subjectOwnerId, IEnumerable<string> subjectEntriesIds, int? groupId = null);
 
     Task<int> GetProviderBasedRoomsCountAsync(SearchArea searchArea);
 
@@ -107,6 +107,7 @@ public interface IFolderDao<T>
     /// <param name="containingMyFiles"></param>
     /// <param name="parentType"></param>
     /// <param name="containingForms"></param>
+    /// <param name="folderType"></param>
     /// <returns></returns>
     IAsyncEnumerable<Folder<T>> GetFoldersAsync(T parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
         bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, T roomId = default, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, bool containingForms = false, List<FolderType> folderType = null);
