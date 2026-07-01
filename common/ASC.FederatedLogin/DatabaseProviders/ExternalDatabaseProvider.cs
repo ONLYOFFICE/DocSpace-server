@@ -1,34 +1,34 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
-// 
+// Copyright (C) Ascensio System SIA, 2009-2026
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 using System.Data;
@@ -37,6 +37,8 @@ using System.Data.Common;
 using Microsoft.Data.Sqlite;
 
 using MySqlConnector;
+
+using Npgsql;
 
 #nullable enable
 namespace ASC.FederatedLogin.DatabaseProviders;
@@ -73,6 +75,9 @@ public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IVa
                                           !string.IsNullOrWhiteSpace(Database) &&
                                           !string.IsNullOrWhiteSpace(User),
             ExternalDatabaseType.Sqlite => IsSqliteAllowed && !string.IsNullOrWhiteSpace(SqliteFilePath),
+            ExternalDatabaseType.PostgreSql => !string.IsNullOrWhiteSpace(Host) &&
+                                               !string.IsNullOrWhiteSpace(Database) &&
+                                               !string.IsNullOrWhiteSpace(User),
             _ => false
         };
     }
@@ -81,13 +86,13 @@ public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IVa
 
     public AuthKeyMetadata GetKeyMetadata(string key) => key switch
     {
-        "databaseType"   => new() { Order = 0, Type = "select",   Options = IsSqliteAllowed ? ["mysql", "sqlite"] : ["mysql"] },
-        "dbHost"         => new() { Order = 1, DependsOn = "databaseType", DependsOnValue = "mysql" },
-        "dbPort"         => new() { Order = 2, Type = "number", DependsOn = "databaseType", DependsOnValue = "mysql" },
-        "dbName"         => new() { Order = 3, DependsOn = "databaseType", DependsOnValue = "mysql" },
-        "dbUser"         => new() { Order = 4, DependsOn = "databaseType", DependsOnValue = "mysql" },
-        "dbPassword"     => new() { Order = 5, Type = "password", DependsOn = "databaseType", DependsOnValue = "mysql" },
-        "dbSsl"          => new() { Order = 6, Type = "toggle",   DependsOn = "databaseType", DependsOnValue = "mysql" },
+        "databaseType"   => new() { Order = 0, Type = "select", Options = IsSqliteAllowed ? ["mysql", "postgresql", "sqlite"] : ["mysql", "postgresql"] },
+        "dbHost"         => new() { Order = 1 },
+        "dbPort"         => new() { Order = 2, Type = "number" },
+        "dbName"         => new() { Order = 3 },
+        "dbUser"         => new() { Order = 4 },
+        "dbPassword"     => new() { Order = 5, Type = "password" },
+        "dbSsl"          => new() { Order = 6, Type = "toggle" },
         "sqliteFilePath" => new() { Order = 7, DependsOn = "databaseType", DependsOnValue = "sqlite" },
         _                => new()
     };
@@ -135,6 +140,10 @@ public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IVa
             }
 
             connection = CreateSqliteConnection(path);
+        }
+        else if (dbType == ExternalDatabaseType.PostgreSql)
+        {
+            connection = CreatePgConnection();
         }
         else
         {
@@ -217,6 +226,7 @@ public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IVa
         {
             ExternalDatabaseType.MySql => CreateMySqlConnection(),
             ExternalDatabaseType.Sqlite => CreateSqliteConnection(ValidateSqlitePath(SqliteFilePath, await GetSqliteBasePathAsync())),
+            ExternalDatabaseType.PostgreSql => CreatePgConnection(),
             _ => throw new NotSupportedException($"Database type '{DatabaseType}' is not supported yet.")
         };
     }
@@ -296,5 +306,22 @@ public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IVa
         }.ToString();
 
         return new SqliteConnection(connectionString);
+    }
+
+    private DbConnection CreatePgConnection()
+    {
+        var builder = new NpgsqlConnectionStringBuilder
+        {
+            Host = Host,
+            Database = Database,
+            Username = User,
+            Password = Password,
+            Port = int.TryParse(Port, out var port) ? port : 5432,
+            SslMode = bool.TryParse(UseSsl, out var useSsl) && useSsl
+                ? SslMode.Require
+                : SslMode.Prefer
+        };
+
+        return new NpgsqlConnection(builder.ConnectionString);
     }
 }

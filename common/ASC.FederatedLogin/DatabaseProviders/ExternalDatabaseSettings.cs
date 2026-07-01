@@ -35,7 +35,7 @@
 namespace ASC.FederatedLogin.DatabaseProviders;
 
 [EnumExtensions]
-public enum ExternalDatabaseType { MySql, Sqlite }
+public enum ExternalDatabaseType { MySql, Sqlite, PostgreSql }
 
 public record ConnectionTestResult(bool Success, string? Error = null)
 {

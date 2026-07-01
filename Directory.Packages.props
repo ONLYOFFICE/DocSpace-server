@@ -142,6 +142,7 @@
     <PackageVersion Include="NLog.Targets.Syslog" Version="7.0.0" />
     <PackageVersion Include="NLog.Web.AspNetCore" Version="5.5.0" />
     <PackageVersion Include="Novell.Directory.Ldap.NETStandard" Version="3.6.0" />
+    <PackageVersion Include="Npgsql" Version="9.0.4" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
     <PackageVersion Include="NUnit" Version="4.2.2" />
     <PackageVersion Include="NUnit.Analyzers" Version="3.3.0" />

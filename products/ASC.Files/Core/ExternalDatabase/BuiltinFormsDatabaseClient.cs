@@ -31,22 +31,21 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using MySqlConnector;
+using Npgsql;
 
 #nullable enable
 namespace ASC.Files.Core.ExternalDatabase;
 
 [Scope]
 public class BuiltinFormsDatabaseClient(
-    IConfiguration configuration,
+    FormsDbProvisioningService provisioner,
+    TenantManager tenantManager,
     ILogger<BuiltinFormsDatabaseClient> logger)
     : IFormsDatabaseClient
 {
     private static readonly Regex _tableNameRegex = new(@"^[a-zA-Z0-9_]+$", RegexOptions.Compiled);
 
-    private string? ConnectionString => configuration["ConnectionStrings:forms:connectionString"];
-
-    public bool IsEnabled() => !string.IsNullOrWhiteSpace(ConnectionString);
+    public bool IsEnabled() => provisioner.IsEnabled();
 
     private static void ValidateTableName(string tableName)
     {
@@ -56,7 +55,14 @@ public class BuiltinFormsDatabaseClient(
         }
     }
 
-    private DbConnection CreateConnection() => new MySqlConnection(ConnectionString);
+    private async Task<(NpgsqlConnection connection, string schemaName)> OpenConnectionAsync()
+    {
+        var tenantId = tenantManager.GetCurrentTenantId();
+        var credentials = await provisioner.GetOrProvisionAsync(tenantId);
+        var connection = new NpgsqlConnection(credentials.RwConnectionString);
+        await connection.OpenAsync();
+        return (connection, credentials.SchemaName);
+    }
 
     public async Task CreateTableAndUpsertAsync(string tableName, IEnumerable<DbColumnDefinition> columns,
         Dictionary<string, object> data, string keyColumn)
@@ -69,23 +75,24 @@ public class BuiltinFormsDatabaseClient(
 
         try
         {
-            await using var connection = CreateConnection();
-            await connection.OpenAsync();
-
-            await using var createCmd = connection.CreateCommand();
-            createCmd.CommandText = BuildMySqlCreateTable(tableName, columns);
-            await createCmd.ExecuteNonQueryAsync();
-
-            await using var insertCmd = connection.CreateCommand();
-            insertCmd.CommandText = BuildMySqlInsert(tableName, data.Keys.ToList(), keyColumn);
-            foreach (var kvp in data)
+            var (connection, schemaName) = await OpenConnectionAsync();
+            await using (connection)
             {
-                var param = insertCmd.CreateParameter();
-                param.ParameterName = "@" + kvp.Key;
-                param.Value = kvp.Value ?? DBNull.Value;
-                insertCmd.Parameters.Add(param);
+                await using var createCmd = connection.CreateCommand();
+                createCmd.CommandText = BuildPgCreateTable(schemaName, tableName, columns);
+                await createCmd.ExecuteNonQueryAsync();
+
+                await using var insertCmd = connection.CreateCommand();
+                insertCmd.CommandText = BuildPgUpsert(schemaName, tableName, data.Keys.ToList(), keyColumn);
+                foreach (var kvp in data)
+                {
+                    var param = insertCmd.CreateParameter();
+                    param.ParameterName = "@" + kvp.Key;
+                    param.Value = kvp.Value ?? DBNull.Value;
+                    insertCmd.Parameters.Add(param);
+                }
+                await insertCmd.ExecuteNonQueryAsync();
             }
-            await insertCmd.ExecuteNonQueryAsync();
         }
         catch (Exception ex)
         {
@@ -105,87 +112,97 @@ public class BuiltinFormsDatabaseClient(
         }
 
         ValidateTableName(tableName);
-        await using var connection = CreateConnection();
-        await connection.OpenAsync();
-
-        await using var cmd = connection.CreateCommand();
-        cmd.CommandText = $"SELECT `form_id` FROM `{tableName}`;";
-
-        await using var reader = await cmd.ExecuteReaderAsync();
-        var ids = new HashSet<int>();
-        while (await reader.ReadAsync())
+        var (connection, schemaName) = await OpenConnectionAsync();
+        await using (connection)
         {
-            if (!reader.IsDBNull(0))
-            {
-                ids.Add(reader.GetInt32(0));
-            }
-        }
+            await using var cmd = connection.CreateCommand();
+            cmd.CommandText = $"SELECT \"form_id\" FROM \"{schemaName}\".\"{tableName}\"";
 
-        return ids;
+            await using var reader = await cmd.ExecuteReaderAsync();
+            var ids = new HashSet<int>();
+            while (await reader.ReadAsync())
+            {
+                if (!reader.IsDBNull(0))
+                {
+                    ids.Add(reader.GetInt32(0));
+                }
+            }
+
+            return ids;
+        }
     }
 
     private async Task<bool> TableExistsAsync(string tableName)
     {
         ValidateTableName(tableName);
-        await using var connection = CreateConnection();
-        await connection.OpenAsync();
+        var (connection, schemaName) = await OpenConnectionAsync();
+        await using (connection)
+        {
+            await using var cmd = connection.CreateCommand();
+            cmd.CommandText = "SELECT COUNT(*) FROM information_schema.tables " +
+                              "WHERE table_schema = @schema AND table_name = @tableName";
+            var schemaParam = cmd.CreateParameter();
+            schemaParam.ParameterName = "@schema";
+            schemaParam.Value = schemaName;
+            cmd.Parameters.Add(schemaParam);
 
-        await using var cmd = connection.CreateCommand();
-        cmd.CommandText = "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME=@tableName";
-        var param = cmd.CreateParameter();
-        param.ParameterName = "@tableName";
-        param.Value = tableName;
-        cmd.Parameters.Add(param);
+            var tableParam = cmd.CreateParameter();
+            tableParam.ParameterName = "@tableName";
+            tableParam.Value = tableName;
+            cmd.Parameters.Add(tableParam);
 
-        var result = await cmd.ExecuteScalarAsync();
-        return Convert.ToInt64(result) > 0;
+            var result = await cmd.ExecuteScalarAsync();
+            return Convert.ToInt64(result) > 0;
+        }
     }
 
     private async Task<long> CountAsync(string tableName)
     {
         ValidateTableName(tableName);
-        await using var connection = CreateConnection();
-        await connection.OpenAsync();
-
-        await using var cmd = connection.CreateCommand();
-        cmd.CommandText = $"SELECT COUNT(*) FROM `{tableName}`";
-        var result = await cmd.ExecuteScalarAsync();
-        return Convert.ToInt64(result);
+        var (connection, schemaName) = await OpenConnectionAsync();
+        await using (connection)
+        {
+            await using var cmd = connection.CreateCommand();
+            cmd.CommandText = $"SELECT COUNT(*) FROM \"{schemaName}\".\"{tableName}\"";
+            var result = await cmd.ExecuteScalarAsync();
+            return Convert.ToInt64(result);
+        }
     }
 
-    private static string BuildMySqlCreateTable(string tableName, IEnumerable<DbColumnDefinition> columns)
+    private static string BuildPgCreateTable(string schemaName, string tableName, IEnumerable<DbColumnDefinition> columns)
     {
         var colDefs = columns.Select(c =>
         {
-            var type = MapMySqlType(c);
-            return c.IsPrimaryKey ? $"`{c.Name}` {type} PRIMARY KEY" : $"`{c.Name}` {type}";
+            var type = MapPgType(c);
+            return c.IsPrimaryKey
+                ? $"\"{c.Name}\" {type} PRIMARY KEY"
+                : $"\"{c.Name}\" {type}";
         });
-        return $"CREATE TABLE IF NOT EXISTS `{tableName}` ({string.Join(", ", colDefs)});";
+        return $"CREATE TABLE IF NOT EXISTS \"{schemaName}\".\"{tableName}\" ({string.Join(", ", colDefs)});";
     }
 
-    private static string MapMySqlType(DbColumnDefinition col) => col.Type switch
+    private static string MapPgType(DbColumnDefinition col) => col.Type switch
     {
-        DbColumnType.Integer => "INT",
+        DbColumnType.Integer => "INTEGER",
         DbColumnType.Boolean => "BOOLEAN",
         DbColumnType.Date => "DATE",
-        DbColumnType.DateTime => "DATETIME",
+        DbColumnType.DateTime => "TIMESTAMP",
         DbColumnType.Enum when col.EnumValues?.Count > 0 =>
-            $"ENUM({string.Join(", ", col.EnumValues.Select(v => $"'{v.Replace("'", "\\'")}'"))})",
-        DbColumnType.Enum => "VARCHAR(255)",
+            $"TEXT CHECK (\"{col.Name}\" IN ({string.Join(", ", col.EnumValues.Select(v => $"'{v.Replace("'", "''")}'"))}))",
+        DbColumnType.Enum => "TEXT",
         _ => "TEXT"
     };
 
-    private static string BuildMySqlInsert(string tableName, List<string> keys, string keyColumn)
+    private static string BuildPgUpsert(string schemaName, string tableName, List<string> keys, string keyColumn)
     {
+        var columns = string.Join(", ", keys.Select(k => $"\"{k}\""));
         var parameters = string.Join(", ", keys.Select(k => $"@{k}"));
-        var columns = string.Join(", ", keys.Select(k => $"`{k}`"));
-        var sql = new StringBuilder($"INSERT INTO `{tableName}` ({columns}) VALUES ({parameters})");
         var updateParts = string.Join(", ", keys
             .Where(k => k != keyColumn)
-            .Select(k => $"`{k}` = VALUES(`{k}`)"));
-        sql.Append($" ON DUPLICATE KEY UPDATE {updateParts}");
-        sql.Append(';');
-        return sql.ToString();
+            .Select(k => $"\"{k}\" = EXCLUDED.\"{k}\""));
+
+        return $"INSERT INTO \"{schemaName}\".\"{tableName}\" ({columns}) VALUES ({parameters}) " +
+               $"ON CONFLICT (\"{keyColumn}\") DO UPDATE SET {updateParts};";
     }
 }
 

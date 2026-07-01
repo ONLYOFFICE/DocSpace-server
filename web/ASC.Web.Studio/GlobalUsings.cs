@@ -49,6 +49,7 @@ global using ASC.EventBus.Log;
 global using ASC.FederatedLogin;
 global using ASC.Files.Core.Core;
 global using ASC.Files.Core.EF;
+global using ASC.Files.Core.ExternalDatabase;
 global using ASC.Migration.Core;
 global using ASC.Migration.Core.Core;
 global using ASC.Web.Core.HttpHandlers;

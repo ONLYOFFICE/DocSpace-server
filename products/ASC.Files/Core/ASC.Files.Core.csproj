@@ -14,6 +14,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AnyAscii" />
+    <PackageReference Include="Npgsql" />
     <PackageReference Include="Box.V2.Core" />
     <PackageReference Include="CsvHelper" />
     <PackageReference Include="DocuSign.eSign.dll" />
