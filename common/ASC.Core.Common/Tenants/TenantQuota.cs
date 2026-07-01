@@ -604,6 +604,8 @@ public class TenantQuota
         TenantId = quota.TenantId;
         Name = quota.Name;
         Price = quota.Price;
+        PriceCurrencySymbol = quota.PriceCurrencySymbol;
+        PriceISOCurrencySymbol = quota.PriceISOCurrencySymbol;
         ProductId = quota.ProductId;
         ServiceName = quota.ServiceName;
         ServiceGroup = quota.ServiceGroup;

@@ -65,7 +65,7 @@ public class AccountingClientTests
             OrderType = OperationOrderType.Ascending
         };
 
-        await client.GetCustomerOperationsAsync("portal-1", filter, isAiService: false);
+        await client.GetCustomerOperationsAsync("portal-1", filter);
 
         handler.LastMethod.Should().Be(HttpMethod.Get);
         handler.LastUri!.AbsolutePath.Should().Be("/api/customer/portal-1/operations");
@@ -92,11 +92,12 @@ public class AccountingClientTests
 
         var filter = new OperationFilter
         {
+
             Limit = 10,
             OrderType = OperationOrderType.Descending // default direction → must be omitted
         };
 
-        await client.GetCustomerOperationsAsync("portal-9", filter, isAiService: true);
+        await client.GetCustomerAiOperationsAsync("portal-9", filter);
 
         handler.LastUri!.AbsolutePath.Should().Be("/api/customer/portal-9/operations/ai");
 

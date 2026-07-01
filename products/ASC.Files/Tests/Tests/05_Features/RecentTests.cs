@@ -230,7 +230,7 @@ public class RecentTests(
     {
         var recentId = await GetFolderIdAsync(FolderType.Recent, user);
 
-        return (await _foldersApi.GetFolderByFolderIdAsync(recentId, folderType: folderType, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        return (await _foldersApi.GetFolderByFolderIdAsync(recentId, folderType: folderType?.Select(r=> (int)r).ToList(), cancellationToken: TestContext.Current.CancellationToken)).Response;
     }
 
     private async Task AddToRecent(params int[] fileIds)

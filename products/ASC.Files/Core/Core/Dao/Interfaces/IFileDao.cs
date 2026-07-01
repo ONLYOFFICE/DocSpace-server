@@ -127,6 +127,7 @@ public interface IFileDao<T>
     /// <param name="formsItemDto"></param>
     /// <param name="applyFormStepFilter"></param>
     /// <param name="applyFfrStartedFormsFilter"></param>
+    /// <param name="folderType"></param>
     /// <returns>list of files</returns>
     /// <remarks>
     ///    Return only the latest versions of files of a folder
