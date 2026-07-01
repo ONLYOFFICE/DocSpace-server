@@ -197,4 +197,74 @@ public class FormFillingRoomSectionTests(
             r => r.Current.RootFolderType.HasValue && r.Current.RootFolderType.Value == FolderType.Forms,
             "the Forms section is exposed as a dedicated root folder");
     }
+
+    [Fact]
+    public async Task FormsRootFolderId_IsConsistentAcrossEndpoints()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+
+        // Act - the Forms root id can be obtained both from the @forms endpoint and the root folders list
+        var formsFolder = (await _foldersApi.GetFormsFolderAsync(
+            cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        var rootFolders = (await _foldersApi.GetRootFoldersAsync(
+            cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        var formsRootFromList = rootFolders.SingleOrDefault(
+            r => r.Current.RootFolderType.HasValue && r.Current.RootFolderType.Value == FolderType.Forms);
+
+        // Assert
+        formsRootFromList.Should().NotBeNull("the Forms root folder must be present in the root folders list");
+        formsFolder.Current.Id.Should().Be(formsRootFromList!.Current.Id,
+            "both endpoints must resolve the same Forms root folder id");
+    }
+
+    [Fact]
+    public async Task BrowseFormsRootFolder_ById_ListsFormRoomsOnly()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+
+        var formRoom = await CreateFillingFormsRoom("Form Room " + Guid.NewGuid().ToString()[..8]);
+        var customRoom = await CreateCustomRoom("Custom Room " + Guid.NewGuid().ToString()[..8]);
+
+        var formsRootId = await GetFolderIdAsync(FolderType.Forms, Initializer.Owner);
+
+        // Act - browse the Forms root folder directly by its id
+        var formsContent = (await _foldersApi.GetFolderByFolderIdAsync(
+            formsRootId,
+            cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        formsContent.Should().NotBeNull();
+        formsContent.Folders.Should().Contain(r => r.Title == formRoom.Title,
+            "browsing the Forms root folder must list form filling rooms");
+        formsContent.Folders.Should().NotContain(r => r.Title == customRoom.Title,
+            "browsing the Forms root folder must not list non-form rooms");
+    }
+
+    [Fact]
+    public async Task BrowseVirtualRoomsRootFolder_ById_ExcludesFormRooms()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+
+        var formRoom = await CreateFillingFormsRoom("Form Room " + Guid.NewGuid().ToString()[..8]);
+        var customRoom = await CreateCustomRoom("Custom Room " + Guid.NewGuid().ToString()[..8]);
+
+        var virtualRoomsRootId = await GetFolderIdAsync(FolderType.VirtualRooms, Initializer.Owner);
+
+        // Act - browse the Virtual Rooms root folder directly by its id
+        var roomsContent = (await _foldersApi.GetFolderByFolderIdAsync(
+            virtualRoomsRootId,
+            cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        roomsContent.Should().NotBeNull();
+        roomsContent.Folders.Should().Contain(r => r.Title == customRoom.Title,
+            "browsing the Virtual Rooms root folder must list regular rooms");
+        roomsContent.Folders.Should().NotContain(r => r.Title == formRoom.Title,
+            "browsing the Virtual Rooms root folder must not list form filling rooms");
+    }
 }
