@@ -1037,6 +1037,27 @@ internal class FolderDao(
                 throw new ArgumentException("It is forbidden to move the System folder.", nameof(folderId));
             }
 
+            var toCounterFolderId = toFolderId;
+            var fromCounterFolderId = folder.ParentId;
+
+            if (folder.FolderType == FolderType.FillingFormsRoom)
+            {
+                // the counter of a form filling room is kept on the Forms root folder, not on the VirtualRooms root;
+                // the Forms root is resolved before the move so that the counter transfer performed on its lazy creation
+                // still sees the room at its old place
+                var virtualRoomsFolderId = await GetFolderIDVirtualRooms(false);
+
+                if (toCounterFolderId == virtualRoomsFolderId)
+                {
+                    toCounterFolderId = await GetFolderIDFormsAsync(true);
+                }
+
+                if (fromCounterFolderId == virtualRoomsFolderId)
+                {
+                    fromCounterFolderId = await GetFolderIDFormsAsync(true);
+                }
+            }
+
             await filesDbContext.UpdateFoldersAsync(tenantId, folderId, toFolderId, currentAccount);
             var subfolders = await filesDbContext.SubfolderAsync(folderId).ToDictionaryAsync(r => r.FolderId, r => r.Level);
 
@@ -1114,8 +1135,8 @@ internal class FolderDao(
 
             await context.SaveChangesAsync();
             await tx.CommitAsync();
-            await ChangeTreeFolderSizeAsync(toFolderId, folder.Counter);
-            await ChangeTreeFolderSizeAsync(folder.ParentId, -1 * folder.Counter);
+            await ChangeTreeFolderSizeAsync(toCounterFolderId, folder.Counter);
+            await ChangeTreeFolderSizeAsync(fromCounterFolderId, -1 * folder.Counter);
             var recalculateFolders = new HashSet<int> { toFolderId, folderId, folder.ParentId };
             await filesDbContext.UpdateFoldersCountsAsync(tenantId, recalculateFolders);
 
@@ -1263,7 +1284,24 @@ internal class FolderDao(
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var insideFillingFormsRoom = size != 0 && await filesDbContext.IsInsideFillingFormsRoomAsync(tenantId, folderId);
+        // the Forms root is resolved before the counters are updated so that the counter transfer
+        // performed on its lazy creation does not include this change
+        var formsFolderId = insideFillingFormsRoom ? await GetFolderIDFormsAsync(true) : 0;
+
         await filesDbContext.UpdateTreeFolderCounterAsync(tenantId, folderId, size);
+
+        if (insideFillingFormsRoom)
+        {
+            // form filling rooms physically live under the VirtualRooms root but belong to the Forms section,
+            // so the root part of the counter change is reattributed to the Forms root folder
+            var virtualRoomsFolderId = await GetFolderIDVirtualRooms(false);
+
+            await filesDbContext.UpdateFolderCounterAsync(tenantId, virtualRoomsFolderId, -size);
+            await filesDbContext.UpdateFolderCounterAsync(tenantId, formsFolderId, size);
+        }
+
         return folderId;
     }
     public async Task<int> ChangeFolderQuotaAsync(Folder<int> folder, long quota)
@@ -1914,7 +1952,44 @@ internal class FolderDao(
 
     public async Task<int> GetFolderIDFormsAsync(bool createIfNotExists)
     {
-        return await (this as IFolderDao<int>).GetFolderIDAsync(FileConstant.ModuleId, Forms, null, createIfNotExists);
+        var folderId = await (this as IFolderDao<int>).GetFolderIDAsync(FileConstant.ModuleId, Forms, null, false);
+
+        if (folderId != 0 || !createIfNotExists)
+        {
+            return folderId;
+        }
+
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using (await _distributedLockProvider.TryAcquireFairLockAsync($"forms_root_counter_{tenantId}"))
+        {
+            folderId = await (this as IFolderDao<int>).GetFolderIDAsync(FileConstant.ModuleId, Forms, null, false);
+
+            if (folderId != 0)
+            {
+                return folderId;
+            }
+
+            folderId = await (this as IFolderDao<int>).GetFolderIDAsync(FileConstant.ModuleId, Forms, null, true);
+
+            // form filling rooms created before the Forms root existed had been counted in the VirtualRooms root,
+            // so their accumulated counter is moved to the newly created Forms root
+            var virtualRoomsFolderId = await GetFolderIDVirtualRooms(false);
+
+            if (virtualRoomsFolderId != 0)
+            {
+                await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+                var formRoomsCounter = await filesDbContext.FillingFormsRoomsCounterSumAsync(tenantId, virtualRoomsFolderId);
+
+                if (formRoomsCounter != 0)
+                {
+                    await filesDbContext.UpdateFolderCounterAsync(tenantId, virtualRoomsFolderId, -formRoomsCounter);
+                    await filesDbContext.UpdateFolderCounterAsync(tenantId, folderId, formRoomsCounter);
+                }
+            }
+        }
+
+        return folderId;
     }
 
     public async IAsyncEnumerable<OriginData> GetOriginsDataAsync(IEnumerable<int> entriesIds)

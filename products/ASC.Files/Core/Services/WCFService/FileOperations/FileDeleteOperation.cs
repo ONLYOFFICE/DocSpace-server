@@ -307,11 +307,18 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
                                 webhookConfigs = await webhookManager.GetWebhookConfigsAsync(webhookTrigger, folder);
                             }
 
+                            // the counter of a form filling room is kept on the Forms root folder, not on the VirtualRooms root;
+                            // the Forms root is resolved before the room is deleted so that the counter transfer
+                            // performed on its lazy creation still sees the room
+                            var counterFolderId = isRoom && folder.RootFolderType == FolderType.VirtualRooms && folder.FolderType == FolderType.FillingFormsRoom
+                                ? await FolderDao.GetFolderIDFormsAsync(true)
+                                : folder.ParentId;
+
                             await socketManager.DeleteFolder(folder, action: async () => await FolderDao.DeleteFolderAsync(folder.Id));
 
                             if (isRoom && folder.RootFolderType == FolderType.VirtualRooms)
                             {
-                                await FolderDao.ChangeTreeFolderSizeAsync(folder.ParentId, -folder.Counter);
+                                await FolderDao.ChangeTreeFolderSizeAsync(counterFolderId, -folder.Counter);
                             }
 
                             if (isNeedSendActions)
@@ -397,11 +404,18 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
                                     webhookConfigs = await webhookManager.GetWebhookConfigsAsync(webhookTrigger, folder);
                                 }
 
+                                // the counter of a form filling room is kept on the Forms root folder, not on the VirtualRooms root;
+                                // the Forms root is resolved before the room is deleted so that the counter transfer
+                                // performed on its lazy creation still sees the room
+                                var counterFolderId = isRoom && folder.RootFolderType == FolderType.VirtualRooms && folder.FolderType == FolderType.FillingFormsRoom
+                                    ? await FolderDao.GetFolderIDFormsAsync(true)
+                                    : folder.ParentId;
+
                                 await socketManager.DeleteFolder(folder, action: async () => await FolderDao.DeleteFolderAsync(folder.Id));
 
                                 if (isRoom && folder.RootFolderType == FolderType.VirtualRooms)
                                 {
-                                    await FolderDao.ChangeTreeFolderSizeAsync(folder.ParentId, -folder.Counter);
+                                    await FolderDao.ChangeTreeFolderSizeAsync(counterFolderId, -folder.Counter);
                                 }
 
                                 if (isNeedSendActions)
