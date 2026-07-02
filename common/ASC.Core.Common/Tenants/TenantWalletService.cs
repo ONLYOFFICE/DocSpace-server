@@ -51,6 +51,6 @@ public enum TenantWalletService
     [Description("Admin")]
     Admin = -14,
 
-    [Description("Search")]
-    Search = -18
+    [Description("AISearch")]
+    AISearch = -18
 }

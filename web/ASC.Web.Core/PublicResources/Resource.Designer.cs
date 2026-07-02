@@ -123,11 +123,29 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Month.
+        /// </summary>
+        public static string AccountingCustomerOperationMonth {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationMonth", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Quantity.
         /// </summary>
         public static string AccountingCustomerOperationQuantity {
             get {
                 return ResourceManager.GetString("AccountingCustomerOperationQuantity", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Service.
+        /// </summary>
+        public static string AccountingCustomerOperationService {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationService", resourceCulture);
             }
         }
         
@@ -146,6 +164,15 @@ namespace ASC.Web.Core.PublicResources {
         public static string AccountingCustomerOperationServiceDesc_adminyear {
             get {
                 return ResourceManager.GetString("AccountingCustomerOperationServiceDesc_adminyear", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Web search.
+        /// </summary>
+        public static string AccountingCustomerOperationServiceDesc_ai_search {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationServiceDesc_ai-search", resourceCulture);
             }
         }
         
@@ -249,6 +276,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Results.
+        /// </summary>
+        public static string AccountingCustomerOperationServiceUOM_ai_search {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationServiceUOM_ai-search", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to AI Credits.
         /// </summary>
         public static string AccountingCustomerOperationServiceUOM_ai_tools {
@@ -335,24 +371,6 @@ namespace ASC.Web.Core.PublicResources {
         public static string AccountingCustomerOperationType {
             get {
                 return ResourceManager.GetString("AccountingCustomerOperationType", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Month.
-        /// </summary>
-        public static string AccountingCustomerOperationMonth {
-            get {
-                return ResourceManager.GetString("AccountingCustomerOperationMonth", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Service.
-        /// </summary>
-        public static string AccountingCustomerOperationService {
-            get {
-                return ResourceManager.GetString("AccountingCustomerOperationService", resourceCulture);
             }
         }
         
@@ -3543,6 +3561,24 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to AI search.
+        /// </summary>
+        public static string TariffsFeature_aisearch_wallet {
+            get {
+                return ResourceManager.GetString("TariffsFeature_aisearch_wallet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Use an AI search engine to enhance AI chats with real-time information from the internet.
+        /// </summary>
+        public static string TariffsFeature_aisearch_wallet_price_count {
+            get {
+                return ResourceManager.GetString("TariffsFeature_aisearch_wallet_price_count", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to AI features.
         /// </summary>
         public static string TariffsFeature_aitools_wallet {
@@ -3701,24 +3737,6 @@ namespace ASC.Web.Core.PublicResources {
         public static string TariffsFeature_room_exception {
             get {
                 return ResourceManager.GetString("TariffsFeature_room_exception", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to AI search.
-        /// </summary>
-        public static string TariffsFeature_search_wallet {
-            get {
-                return ResourceManager.GetString("TariffsFeature_search_wallet", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Use an AI search engine to enhance AI chats with real-time information from the internet.
-        /// </summary>
-        public static string TariffsFeature_search_wallet_price_count {
-            get {
-                return ResourceManager.GetString("TariffsFeature_search_wallet_price_count", resourceCulture);
             }
         }
         

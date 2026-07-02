@@ -484,16 +484,16 @@ public class TenantQuota
         set => _aiTools.Value = value;
     }
 
-    private readonly WalletFeatureFlag _search;
+    private readonly WalletFeatureFlag _aiSearch;
 
     /// <summary>
     /// Specifies if the AI search enabled as a wallet service or not.
     /// </summary>
     /// <example>true</example>
-    public bool Search
+    public bool AISearch
     {
-        get => _search.Value;
-        set => _search.Value = value;
+        get => _aiSearch.Value;
+        set => _aiSearch.Value = value;
     }
 
     public TenantQuota()
@@ -529,7 +529,7 @@ public class TenantQuota
         _backup = new WalletFeatureFlag(this, "backup") { EmployeeType = EmployeeType.DocSpaceAdmin };
         _countAIAgentFeature = new CountAIAgentFeature(this) { Order = 11 };
         _aiTools = new WalletFeatureFlag(this, "aitools") { EmployeeType = EmployeeType.DocSpaceAdmin };
-        _search = new WalletFeatureFlag(this, "search") { EmployeeType = EmployeeType.DocSpaceAdmin };
+        _aiSearch = new WalletFeatureFlag(this, "aisearch") { EmployeeType = EmployeeType.DocSpaceAdmin };
 
         TenantQuotaFeatures = new List<TenantQuotaFeature>
         {
@@ -562,7 +562,7 @@ public class TenantQuota
             _backup,
             _countAIAgentFeature,
             _aiTools,
-            _search
+            _aiSearch
         };
     }
 
