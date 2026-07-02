@@ -219,13 +219,14 @@ public class FolderContentDtoHelper(
 
         async Task<IEnumerable<FileEntryBaseDto>> GetEntriesDto(IEnumerable<FileEntry> fileEntries, string entriesOrder = null, IFolder contextFolder = null)
         {
-            var count = fileEntries.Count();
+            var entries = fileEntries.ToArray();
+            var count = entries.Length;
             var entryDtos = new FileEntryBaseDto[count];
             await Parallel.ForEachAsync(Enumerable.Range(0, count),
                 new ParallelOptions { MaxDegreeOfParallelism = _foldersDtoParallelism },
                 async (i, _) =>
                 {
-                    var e = fileEntries.ElementAt(i);
+                    var e = entries[i];
                     entryDtos[i] = e.FileEntryType == FileEntryType.File
                         ? await GetFileDto(e, entriesOrder, contextFolder)
                         : await GetFolderDto(e, entriesOrder, contextFolder);
@@ -235,11 +236,12 @@ public class FolderContentDtoHelper(
 
         async Task<IEnumerable<FileEntryBaseDto>> GetFilesDto(IEnumerable<FileEntry> fileEntries, string entriesOrder = null, IFolder contextFolder = null)
         {
-            var count = fileEntries.Count();
+            var entries = fileEntries.ToArray();
+            var count = entries.Length;
             var fileDtos = new FileEntryBaseDto[count];
             await Parallel.ForEachAsync(Enumerable.Range(0, count),
                 new ParallelOptions { MaxDegreeOfParallelism = _foldersDtoParallelism },
-                async (i, _) => fileDtos[i] = await GetFileDto(fileEntries.ElementAt(i), entriesOrder, contextFolder));
+                async (i, _) => fileDtos[i] = await GetFileDto(entries[i], entriesOrder, contextFolder));
             return fileDtos;
         }
 
@@ -255,37 +257,23 @@ public class FolderContentDtoHelper(
 
         async Task<IEnumerable<FileEntryBaseDto>> GetFoldersDto(IEnumerable<FileEntry> folderEntries, string entriesOrder = null, IFolder contextFolder = null)
         {
-            var count = folderEntries.Count();
+            var entries = folderEntries.ToArray();
+            var count = entries.Length;
             var folderDtos = new FileEntryBaseDto[count];
             await Parallel.ForEachAsync(Enumerable.Range(0, count),
                 new ParallelOptions { MaxDegreeOfParallelism = _foldersDtoParallelism },
-                async (i, _) => folderDtos[i] = await GetFolderDto(folderEntries.ElementAt(i), contextFolder: folderItems.FolderInfo));
+                async (i, _) => folderDtos[i] = await GetFolderDto(entries[i], entriesOrder, contextFolder: folderItems.FolderInfo));
             return folderDtos;
         }
 
         async Task<FileEntryBaseDto> GetFolderDto(FileEntry folderEntry, string entriesOrder = null, IFolder contextFolder = null)
         {
-            switch (folderEntry)
+            return folderEntry switch
             {
-                case Folder<int> fol1:
-                    if (currentUsersRecords == null &&
-                        fol1.IsRoom &&
-                        await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID))
-                    {
-                        currentUsersRecords = await fileSecurity.GetUserRecordsAsync().ToListAsync();
-                    }
-                    return await folderWrapperHelper.GetAsync(fol1, currentUsersRecords, entriesOrder, contextFolder);
-                case Folder<string> fol2:
-                    if (currentUsersRecords == null &&
-                        fol2.IsRoom &&
-                        await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID))
-                    {
-                        currentUsersRecords = await fileSecurity.GetUserRecordsAsync().ToListAsync();
-                    }
-                    return await folderWrapperHelper.GetAsync(fol2, currentUsersRecords, entriesOrder, contextFolder);
-            }
-
-            return null;
+                Folder<int> fol1 => await folderWrapperHelper.GetAsync(fol1, currentUsersRecords, entriesOrder, contextFolder),
+                Folder<string> fol2 => await folderWrapperHelper.GetAsync(fol2, currentUsersRecords, entriesOrder, contextFolder),
+                _ => null,
+            };
         }
     }
 
