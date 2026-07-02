@@ -405,7 +405,7 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
             Credentials = new NetworkCredential(_authData.Login, _authData.Password)
         };
         var client = new HttpClient(handler);
-
+        client.Timeout = thirdpartyConfiguration.ThirdPartyRequestTimeout;
         _client = new WebDavClient(client);
 #pragma warning restore CA2000
 
