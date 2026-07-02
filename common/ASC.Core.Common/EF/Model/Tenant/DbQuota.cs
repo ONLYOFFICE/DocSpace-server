@@ -211,7 +211,7 @@ public static class DbQuotaExtension
                     Name = "aitools",
                     Description = null,
                     Features = "aitools",
-                    Price = 1,
+                    Price = 0,
                     ProductId = null,
                     ServiceName = "ai-tools",
                     ServiceGroup = null,
@@ -273,6 +273,20 @@ public static class DbQuotaExtension
                     ServiceGroup = null,
                     Visible = false,
                     Wallet = false,
+                    Additional = true
+                },
+                new DbQuota
+                {
+                    TenantId = -18,
+                    Name = "aisearch",
+                    Description = null,
+                    Features = "aisearch",
+                    Price = 0,
+                    ProductId = null,
+                    ServiceName = "ai-search",
+                    ServiceGroup = null,
+                    Visible = true,
+                    Wallet = true,
                     Additional = true
                 }
                 );
